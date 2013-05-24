@@ -1,5 +1,4 @@
 package domain
 
-class StudyId(anId: String) extends Identity {
-  def id = anId
+class StudyId(anId: String) extends { val id = anId } with Identity {
 }
