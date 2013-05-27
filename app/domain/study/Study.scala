@@ -1,7 +1,13 @@
-package domain
+package domain.study
 
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
+import domain.AmatomicalSourceId
+import domain.Entity
+import domain.Identity
+import domain.PreservationId
+import domain.DomainValidation
+import domain.DomainError
 
 sealed abstract class Study extends Entity {
   def name: String
@@ -35,6 +41,18 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
   specimenGroups: List[SpecimenGroup] = Nil)
   extends Study {
 
+  def addSpecimenGroup(name: String, description: String, unit: String,
+    amatomicalSourceId: AmatomicalSourceId, preservationId: PreservationId,
+    specimenTypeId: SpecimenTypeId): DomainValidation[DisabledStudy] = {
+    val specimenGroup = new SpecimenGroup(SpecimenGroup.nextIdentity, name, description, unit,
+      amatomicalSourceId, preservationId, specimenTypeId)
+    copy(version = version + 1, specimenGroups = specimenGroups :+ specimenGroup).success
+  }
+
+  def addCollectionEventType(name: String, description: String, recurring: Boolean) = {
+
+  }
+
 }
 
 case class EnabledStudy(id: StudyId, version: Long = -1, name: String, description: String,
@@ -54,8 +72,8 @@ case class AddSpecimenGroup(studyId: StudyId, name: String, description: String,
   amatomicalSourceId: AmatomicalSourceId, preservationId: PreservationId,
   specimenTypeId: SpecimenTypeId)
 case class UpdateSpecimenGroup(studyId: StudyId, specimenGroupId: SpecimenGroupId, name: String,
-  description: String, amatomicalSourceId: AmatomicalSourceId, preservationId: PreservationId,
-  specimenTypeId: SpecimenTypeId)
+  description: String, unit: String, amatomicalSourceId: AmatomicalSourceId,
+  preservationId: PreservationId, specimenTypeId: SpecimenTypeId)
 case class RemoveSpecimenGroup(studyId: StudyId, specimenGroupId: SpecimenGroupId)
 
 // collection event commands
