@@ -32,6 +32,10 @@ object Study {
     }
   }
 
+  // TODO: not sure yet if this is the right place for this method
+  def nextIdentity: StudyId =
+    new StudyId(java.util.UUID.randomUUID.toString.toUpperCase)
+
   def add(id: StudyId, name: String, description: String): DomainValidation[DisabledStudy] =
     DisabledStudy(id, version = 0L, name, description, specimenGroups = Nil).success
 
