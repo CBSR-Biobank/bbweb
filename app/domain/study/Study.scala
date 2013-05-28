@@ -85,3 +85,7 @@ case class AddCollectionEventType(studyId: StudyId, name: String, description: S
   recurring: Boolean);
 case class UpdateCollectionEventType(studyId: StudyId, collectionEventId: CollectionEventId,
   name: String, description: String, recurring: Boolean);
+
+// study events
+case class StudyAdded(name: String, description: String)
+

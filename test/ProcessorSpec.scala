@@ -22,7 +22,7 @@ import akka.actor.actorRef2Scala
 import akka.pattern.ask
 import akka.util.Timeout
 
-class ProcessorSpec extends EventsourcingSpec[ProcessorSpec.Fixture] {
+class ProcessorSpec extends EventsourcedSpec[ProcessorSpec.Fixture] {
 
   "receive a timestamp message" in {
     fixture.result[Long](fixture.processor(1))(Message("foo")) must be > (0L)
