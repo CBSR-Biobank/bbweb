@@ -22,16 +22,21 @@ import Scalaz._
 class StudyServiceSpec extends EventsourcedSpec[StudyProcessorSpec.Fixture] {
 
   "add a study" in {
+    import fixture._
     val name = "studySpecName"
     val description = "studySpecDescription"
-    implicit val timeout = Timeout(5000)
-    val study = Await.result(fixture.studyService.addStudy(name, description), timeout.duration)
+    val study = Await.result(studyService.addStudy(name, description), timeout.duration)
 
     study must beSuccessful
   }
 
-  "add a study with duplicate id" in {
+  "add a study with duplicate name" in {
+    import fixture._
+    val name = "studySpecName"
+    val description = "studySpecDescription"
+    val study = Await.result(studyService.addStudy(name, description), timeout.duration)
 
+    study must beFailing
   }
 
 }
