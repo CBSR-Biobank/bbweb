@@ -4,7 +4,6 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.reflect.ClassTag
 import scala.language.postfixOps
-import scala.concurrent.stm.Ref
 
 import org.eligosource.eventsourced.core._
 import org.eligosource.eventsourced.journal.mongodb.casbah.MongodbCasbahJournalProps
@@ -58,17 +57,15 @@ trait EventsourcingFixtureOps[A] { self: EventsourcingFixture[A] =>
   }
 }
 
+// TODO: this may need a better implementation
+//
+//  
 class EventsourcingFixture[A] extends EventsourcingFixtureOps[A] {
   implicit val timeout = Timeout(10 seconds)
   implicit val system = ActorSystem("test")
 
   val journal = Journal(journalProps)
   val extension = EventsourcingExtension(system, journal)
-
-  val studiesRef = Ref(Map.empty[String, Study])
-
-  val studyProcessor = extension.processorOf(Props(
-    new StudyProcessor(studiesRef) with Emitter with Eventsourced { val id = 1 }))
 
   def shutdown() {
     system.shutdown()
@@ -80,6 +77,4 @@ class EventsourcingFixture[A] extends EventsourcingFixtureOps[A] {
   // (ensures that recovery of externally visible state maintained by
   //  studiesRef is completed when awaitProcessing returns)
   extension.awaitProcessing(Set(1))
-
-  val studyService = new StudyService(studiesRef, studyProcessor)
 }

@@ -2,6 +2,7 @@ package test
 
 import scala.concurrent._
 import scala.concurrent.duration._
+import scala.concurrent.stm.Ref
 
 import org.specs2.scalaz.ValidationMatchers._
 import org.specs2.mutable._
@@ -14,35 +15,45 @@ import org.eligosource.eventsourced.core._
 
 import domain._
 import domain.study._
+import service._
 
 import scalaz._
 import Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class StudyServiceSpec extends EventsourcedSpec[StudyProcessorSpec.Fixture] {
+class StudyServiceSpec extends EventsourcedSpec[StudyServiceSpec.Fixture] {
 
   "add a study" in {
     import fixture._
     val name = "studySpecName"
     val description = "studySpecDescription"
-    val study = Await.result(studyService.addStudy(name, description), timeout.duration)
-
-    study must beSuccessful
+    result(studyService.addStudy(name, description)) must beSuccessful
   }
 
   "add a study with duplicate name" in {
     import fixture._
     val name = "studySpecName"
     val description = "studySpecDescription"
-    val study = Await.result(studyService.addStudy(name, description), timeout.duration)
+    val study = result(studyService.addStudy(name, description))
 
     study must beFailing
   }
 
 }
 
-object StudyProcessorSpec {
+object StudyServiceSpec {
 
-  class Fixture extends EventsourcingFixture[Long] {
+  class Fixture extends EventsourcingFixture[DomainValidation[Study]] {
+
+    val studiesRef = Ref(Map.empty[String, Study])
+
+    val studyProcessor = extension.processorOf(Props(
+      new StudyProcessor(studiesRef) with Emitter with Eventsourced { val id = 1 }))
+
+    val studyService = new StudyService(studiesRef, studyProcessor)
+
+    def result[T <: Study](f: Future[DomainValidation[T]]) = {
+      Await.result(f, timeout.duration)
+    }
   }
 }
