@@ -2,6 +2,6 @@ package domain.study
 
 import domain.Identity
 
-class SpecimenGroupId(anId: String) extends { val id = anId } with Identity {
+case class SpecimenGroupId(identity: String) extends { val id = identity } with Identity {
 
 }

@@ -2,17 +2,20 @@ package domain.study
 
 import scalaz._
 import scalaz.Scalaz._
-import domain.AmatomicalSourceId
+import domain.AnatomicalSourceId
 import domain.Entity
 import domain.Identity
 import domain.PreservationId
 import domain.DomainValidation
 import domain.DomainError
 
-sealed abstract class Study extends Entity {
+sealed abstract class Study extends Entity[StudyId] {
   def name: String
   def description: String
-  def specimenGroups: List[SpecimenGroup]
+  def specimenGroups: Set[SpecimenGroup]
+
+  override def toString =
+    "{ id:%s, name:%s, description:%s }" format (id.toString, name, description)
 }
 
 object Study {
@@ -37,37 +40,31 @@ object Study {
     new StudyId(java.util.UUID.randomUUID.toString.toUpperCase)
 
   def add(id: StudyId, name: String, description: String): DomainValidation[DisabledStudy] =
-    DisabledStudy(id, version = 0L, name, description, specimenGroups = Nil).success
+    DisabledStudy(id, version = 0L, name, description, specimenGroups = Set.empty).success
 
 }
 
 case class DisabledStudy(id: StudyId, version: Long = -1, name: String, description: String,
-  specimenGroups: List[SpecimenGroup] = Nil)
+  specimenGroups: Set[SpecimenGroup] = Set.empty)
   extends Study {
 
   def addSpecimenGroup(name: String, description: String, unit: String,
-    amatomicalSourceId: AmatomicalSourceId, preservationId: PreservationId,
+    amatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
     specimenTypeId: SpecimenTypeId): DomainValidation[DisabledStudy] = {
     val specimenGroup = new SpecimenGroup(SpecimenGroup.nextIdentity, name, description, unit,
       amatomicalSourceId, preservationId, specimenTypeId)
-    copy(version = version + 1, specimenGroups = specimenGroups :+ specimenGroup).success
+    copy(version = version + 1, specimenGroups = specimenGroups + specimenGroup).success
   }
 
   def addCollectionEventType(name: String, description: String, recurring: Boolean) = {
 
   }
 
-  override def toString =
-    "{ id:%s, name:%s, description:%s }" format (id.toString, name, description)
-
 }
 
 case class EnabledStudy(id: StudyId, version: Long = -1, name: String, description: String,
-  specimenGroups: List[SpecimenGroup] = Nil)
+  specimenGroups: Set[SpecimenGroup] = Set.empty)
   extends Study {
-
-  override def toString =
-    "{ id:%s, name:%s, description:%s }" format (id.toString, name, description)
 
 }
 
@@ -79,10 +76,11 @@ case class DisableStudy(id: StudyId, expectedVersion: Option[Long])
 
 // specimen group commands
 case class AddSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long],
-  name: String, description: String, units: String, amatomicalSourceId: AmatomicalSourceId,
+  name: String, description: String, units: String, amatomicalSourceId: AnatomicalSourceId,
   preservationId: PreservationId, specimenTypeId: SpecimenTypeId)
 case class UpdateSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long],
-  specimenGroupId: SpecimenGroupId, name: String, description: String, units: String, amatomicalSourceId: AmatomicalSourceId, preservationId: PreservationId,
+  specimenGroupId: SpecimenGroupId, name: String, description: String, units: String,
+  amatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
   specimenTypeId: SpecimenTypeId)
 case class RemoveSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long],
   specimenGroupId: SpecimenGroupId)

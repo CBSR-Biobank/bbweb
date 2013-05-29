@@ -1,5 +1,5 @@
 package domain
 
-class PreservationId(anId: String) extends { val id = anId } with Identity {
+case class PreservationId(identity: String) extends { val id = identity } with Identity {
 
 }

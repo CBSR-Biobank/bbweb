@@ -1,6 +1,6 @@
 package domain
 
-abstract class Identity {
+trait Identity {
   def id: String
 
   override def toString = id

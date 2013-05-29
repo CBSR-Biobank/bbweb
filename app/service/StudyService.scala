@@ -18,7 +18,7 @@ import Scalaz._
 
 import scala.language.postfixOps
 
-class StudyService(studiesRef: Ref[Map[domain.Identity, Study]],
+class StudyService(studiesRef: Ref[Map[StudyId, Study]],
   studyProcessor: ActorRef)(implicit system: ActorSystem) {
   import system.dispatcher
 
@@ -38,7 +38,7 @@ class StudyService(studiesRef: Ref[Map[domain.Identity, Study]],
     studyProcessor ? Message(AddStudy(name, description)) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 
   def addSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long], name: String,
-    description: String, units: String, amatomicalSourceId: AmatomicalSourceId,
+    description: String, units: String, amatomicalSourceId: AnatomicalSourceId,
     preservationId: PreservationId, specimenTypeId: SpecimenTypeId): Future[DomainValidation[DisabledStudy]] =
     studyProcessor ? Message(AddSpecimenGroup(studyId, expectedVersion, name, description, units,
       amatomicalSourceId, preservationId, specimenTypeId)) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
@@ -47,7 +47,7 @@ class StudyService(studiesRef: Ref[Map[domain.Identity, Study]],
 // -------------------------------------------------------------------------------------------------------------
 //  InvoiceProcessor is single writer to studiesRef, so we can have reads and writes in separate transactions
 // -------------------------------------------------------------------------------------------------------------
-class StudyProcessor(studiesRef: Ref[Map[domain.Identity, Study]]) extends Actor { this: Emitter =>
+class StudyProcessor(studiesRef: Ref[Map[StudyId, Study]]) extends Actor { this: Emitter =>
 
   def receive = {
     case AddStudy(name, description) =>
@@ -78,7 +78,7 @@ class StudyProcessor(studiesRef: Ref[Map[domain.Identity, Study]]) extends Actor
   }
 
   def addSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long], name: String,
-    description: String, units: String, amatomicalSourceId: AmatomicalSourceId, preservationId: PreservationId,
+    description: String, units: String, amatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
     specimenTypeId: SpecimenTypeId): DomainValidation[DisabledStudy] = {
     updateStudy(studyId, expectedVersion) { study =>
       study match {

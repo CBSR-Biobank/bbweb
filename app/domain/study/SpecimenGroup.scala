@@ -1,14 +1,14 @@
 package domain.study
 
-import domain.AmatomicalSourceId
+import domain.AnatomicalSourceId
 import domain.PreservationId
 
-class SpecimenGroup private[study] (
+case class SpecimenGroup(
   specimenGroupId: SpecimenGroupId,
   name: String,
   description: String,
   unit: String,
-  anatomicalSourceId: AmatomicalSourceId,
+  anatomicalSourceId: AnatomicalSourceId,
   preservationId: PreservationId,
   specimenTypeId: SpecimenTypeId) {
 }

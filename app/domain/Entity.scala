@@ -1,8 +1,7 @@
 package domain
 
-abstract class Entity {
-  def id: Identity
-
+abstract class Entity[T <: Identity] {
+  def id: T
   def version: Long
   def versionOption = if (version == -1L) None else Some(version)
 
