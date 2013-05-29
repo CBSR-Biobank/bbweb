@@ -73,24 +73,25 @@ case class EnabledStudy(id: StudyId, version: Long = -1, name: String, descripti
 
 // study commands
 case class AddStudy(name: String, description: String)
-case class UpdateStudy(id: StudyId, name: String, description: String)
-case class EnableStudy(id: StudyId)
-case class DisableStudy(id: StudyId)
+case class UpdateStudy(id: StudyId, expectedVersion: Option[Long], name: String, description: String)
+case class EnableStudy(id: StudyId, expectedVersion: Option[Long])
+case class DisableStudy(id: StudyId, expectedVersion: Option[Long])
 
 // specimen group commands
-case class AddSpecimenGroup(studyId: StudyId, name: String, description: String,
-  amatomicalSourceId: AmatomicalSourceId, preservationId: PreservationId,
-  specimenTypeId: SpecimenTypeId)
-case class UpdateSpecimenGroup(studyId: StudyId, specimenGroupId: SpecimenGroupId, name: String,
-  description: String, unit: String, amatomicalSourceId: AmatomicalSourceId,
+case class AddSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long],
+  name: String, description: String, units: String, amatomicalSourceId: AmatomicalSourceId,
   preservationId: PreservationId, specimenTypeId: SpecimenTypeId)
-case class RemoveSpecimenGroup(studyId: StudyId, specimenGroupId: SpecimenGroupId)
+case class UpdateSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long],
+  specimenGroupId: SpecimenGroupId, name: String, description: String, units: String, amatomicalSourceId: AmatomicalSourceId, preservationId: PreservationId,
+  specimenTypeId: SpecimenTypeId)
+case class RemoveSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long],
+  specimenGroupId: SpecimenGroupId)
 
 // collection event commands
-case class AddCollectionEventType(studyId: StudyId, name: String, description: String,
-  recurring: Boolean);
-case class UpdateCollectionEventType(studyId: StudyId, collectionEventId: CollectionEventId,
-  name: String, description: String, recurring: Boolean);
+case class AddCollectionEventType(studyId: StudyId, expectedVersion: Option[Long], name: String,
+  description: String, recurring: Boolean);
+case class UpdateCollectionEventType(studyId: StudyId, expectedVersion: Option[Long],
+  collectionEventId: CollectionEventId, name: String, description: String, recurring: Boolean);
 
 // study events
 case class StudyAdded(name: String, description: String)

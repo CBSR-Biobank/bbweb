@@ -18,7 +18,7 @@ import Scalaz._
 
 import scala.language.postfixOps
 
-class StudyService(studiesRef: Ref[Map[String, Study]],
+class StudyService(studiesRef: Ref[Map[domain.Identity, Study]],
   studyProcessor: ActorRef)(implicit system: ActorSystem) {
   import system.dispatcher
 
@@ -36,16 +36,28 @@ class StudyService(studiesRef: Ref[Map[String, Study]],
 
   def addStudy(name: String, description: String): Future[DomainValidation[DisabledStudy]] =
     studyProcessor ? Message(AddStudy(name, description)) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
+
+  def addSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long], name: String,
+    description: String, units: String, amatomicalSourceId: AmatomicalSourceId,
+    preservationId: PreservationId, specimenTypeId: SpecimenTypeId): Future[DomainValidation[DisabledStudy]] =
+    studyProcessor ? Message(AddSpecimenGroup(studyId, expectedVersion, name, description, units,
+      amatomicalSourceId, preservationId, specimenTypeId)) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 }
 
 // -------------------------------------------------------------------------------------------------------------
 //  InvoiceProcessor is single writer to studiesRef, so we can have reads and writes in separate transactions
 // -------------------------------------------------------------------------------------------------------------
-class StudyProcessor(studiesRef: Ref[Map[String, Study]]) extends Actor { this: Emitter =>
+class StudyProcessor(studiesRef: Ref[Map[domain.Identity, Study]]) extends Actor { this: Emitter =>
 
   def receive = {
     case AddStudy(name, description) =>
       process(addStudy(name, description)) { study =>
+        emitter("listeners") sendEvent StudyAdded(name, description)
+      }
+    case AddSpecimenGroup(studyId, expectedVersion, name, description, units, amatomicalSourceId,
+      preservationId, specimenTypeId) =>
+      process(addSpecimenGroup(studyId, expectedVersion, name, description, units,
+        amatomicalSourceId, preservationId, specimenTypeId)) { study =>
         emitter("listeners") sendEvent StudyAdded(name, description)
       }
   }
@@ -65,14 +77,38 @@ class StudyProcessor(studiesRef: Ref[Map[String, Study]]) extends Actor { this: 
     }
   }
 
+  def addSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long], name: String,
+    description: String, units: String, amatomicalSourceId: AmatomicalSourceId, preservationId: PreservationId,
+    specimenTypeId: SpecimenTypeId): DomainValidation[DisabledStudy] = {
+    updateStudy(studyId, expectedVersion) { study =>
+      study match {
+        case study: DisabledStudy => study.addSpecimenGroup(name, description, units,
+          amatomicalSourceId, preservationId, specimenTypeId)
+        case study: EnabledStudy => StudyProcessor.notDisabledError(study.name).fail
+      }
+    }
+  }
+
+  def updateStudy[B <: Study](studyId: StudyId, expectedVersion: Option[Long])(f: Study => DomainValidation[B]): DomainValidation[B] =
+    readStudies.get(studyId) match {
+      case None => StudyProcessor.noSuchStudy(studyId).fail
+      case Some(invoice) => for {
+        current <- Study.requireVersion(invoice, expectedVersion)
+        updated <- f(invoice)
+      } yield updated
+    }
+
   private def updateStudies(study: Study) =
-    studiesRef.single.transform(studies => studies + (study.id.toString -> study))
+    studiesRef.single.transform(studies => studies + (study.id -> study))
 
   private def readStudies =
     studiesRef.single.get
 }
 
 object StudyProcessor {
+  private[service] def noSuchStudy(studyId: StudyId) =
+    DomainError("no study with id: %s" format studyId)
+
   private[service] def notDisabledError(name: String) =
     DomainError("study is not disabled: %s" format name)
 
