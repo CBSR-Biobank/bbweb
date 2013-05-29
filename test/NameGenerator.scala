@@ -5,6 +5,8 @@ import scala.collection.mutable.ConcurrentMap
 import scala.reflect.ClassTag
 import java.util.concurrent.atomic.AtomicInteger
 
+import scala.reflect._
+
 trait NameGeneratorBase {
   def root: String
 }
@@ -14,9 +16,10 @@ class NameGenerator(aRoot: String) extends {
 } with NameGeneratorBase {
   private val Delimiter = "_"
 
-  val suffixesRef = Ref(Map.empty[Class[_], Int])
+  val suffixesRef = Ref(Map.empty[ClassTag[_], Int])
 
-  def next(tag: Class[_]) = {
+  def next[T: ClassTag] = {
+    val tag = classTag[T]
     suffixesRef.single.get.keys.find(_.equals(tag)) match {
       case Some(k) => {
         val count = suffixesRef.single.get(k)

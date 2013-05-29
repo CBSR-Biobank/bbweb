@@ -2,6 +2,7 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
 
+import org.specs2.specification.BeforeExample
 import org.specs2.scalaz.ValidationMatchers._
 import org.specs2.mutable._
 import org.junit.runner.RunWith
@@ -23,17 +24,27 @@ import Scalaz._
 class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
 
   "add a study" in {
-    import fixture._
-    val name = nameGenerator.next(classOf[Study])
-    result(studyService.addStudy(name, name)) must beSuccessful
+    fragmentName: String =>
+      val nameGenerator = new NameGenerator(fragmentName)
+      import fixture._
+      val name = nameGenerator.next[Study]
+      val study = result(studyService.addStudy(name, name))
+      study must beSuccessful
+
+    //study match {
+    //  case Success(s) => s.name must be name
+    //}
   }
 
   "add a study with duplicate name" in {
-    import fixture._
-    val name = nameGenerator.next(classOf[String])
-    result(studyService.addStudy(name, name)) must beSuccessful
+    fragmentName: String =>
+      val nameGenerator = new NameGenerator(fragmentName)
+      import fixture._
+      //val name = nameGenerator.next(Study.getClass)
+      val name = nameGenerator.next[String]
+      result(studyService.addStudy(name, name)) must beSuccessful
 
-    result(studyService.addStudy(name, name)) must beFailing
+      result(studyService.addStudy(name, name)) must beFailing
   }
 
 }

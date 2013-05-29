@@ -30,7 +30,6 @@ import domain.study._
 import service._
 
 abstract class EventsourcedSpec[T <: EventsourcingFixture[_]: ClassTag] extends Specification {
-  val nameGenerator = new NameGenerator(this.getClass.getName)
 
   type FixtureParam = T
 
@@ -45,10 +44,11 @@ trait EventsourcingFixtureOps[A] { self: EventsourcingFixture[A] =>
   val MongoDbName = "biobank-test"
   val MongoCollName = "bbweb"
 
-  // delete the journal contents
   val mongoClient = MongoClient()
   val mongoDB = mongoClient(MongoDbName)
   val mongoColl = mongoClient(MongoDbName)(MongoCollName)
+
+  // delete the journal contents
   mongoColl.remove(MongoDBObject.empty)
 
   def journalProps: JournalProps =

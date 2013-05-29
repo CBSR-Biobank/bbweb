@@ -1,12 +1,17 @@
 package test
 
 import domain._
+import scala.reflect._
 
 object test {
-   val ng = new NameGenerator("abcde12345abcde12345ab")
-                                                  //> ng  : test.NameGenerator = abcde12345abcde12345ab...
-   ng.next(classOf[String])                       //> res0: String = abcde12345abcde12345ab..._1
-   ng.next(classOf[String])                       //> res1: String = abcde12345abcde12345ab..._2
-   ng.next(classOf[domain.study.Study])           //> res2: String = abcde12345abcde12345ab..._1
-   ng.next(classOf[domain.study.Study])           //> res3: String = abcde12345abcde12345ab..._2
+   classTag[String]                               //> res0: scala.reflect.ClassTag[String] = java.lang.String
+   val ng = new NameGenerator("123456789012345678901234567890")
+                                                  //> ng  : test.NameGenerator = 1234567890123456789012...
+   ng.next[String]                                //> res1: String = 1234567890123456789012..._1
+   ng.next[String]                                //> res2: String = 1234567890123456789012..._2
+   ng.next[domain.study.Study]                    //> res3: String = 1234567890123456789012..._1
+   ng.next[domain.study.Study]                    //> res4: String = 1234567890123456789012..._2
+   ng.next[domain.study.Study]                    //> res5: String = 1234567890123456789012..._3
+   ng.next[domain.study.Study]                    //> res6: String = 1234567890123456789012..._4
+   ng.next[String]                                //> res7: String = 1234567890123456789012..._3
 }
