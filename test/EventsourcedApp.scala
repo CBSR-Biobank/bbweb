@@ -23,12 +23,15 @@ import java.util.concurrent.TimeUnit
 
 import org.specs2.matcher.MustMatchers
 import org.specs2.mutable.Specification
+//import org.specs2.mutable.SpecificationWithJUnit
 
 import domain._
 import domain.study._
 import service._
 
 abstract class EventsourcedSpec[T <: EventsourcingFixture[_]: ClassTag] extends Specification {
+  val nameGenerator = new NameGenerator(this.getClass.getName)
+
   type FixtureParam = T
 
   def createFixture =
@@ -38,7 +41,6 @@ abstract class EventsourcedSpec[T <: EventsourcingFixture[_]: ClassTag] extends 
 }
 
 trait EventsourcingFixtureOps[A] { self: EventsourcingFixture[A] =>
-  val queue = new LinkedBlockingQueue[A]
 
   val MongoDbName = "biobank-test"
   val MongoCollName = "bbweb"

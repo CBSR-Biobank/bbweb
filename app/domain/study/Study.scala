@@ -57,11 +57,17 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
 
   }
 
+  override def toString =
+    "{ id:%s, name:%s, description:%s }" format (id.toString, name, description)
+
 }
 
 case class EnabledStudy(id: StudyId, version: Long = -1, name: String, description: String,
   specimenGroups: List[SpecimenGroup] = Nil)
   extends Study {
+
+  override def toString =
+    "{ id:%s, name:%s, description:%s }" format (id.toString, name, description)
 
 }
 

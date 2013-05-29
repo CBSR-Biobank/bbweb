@@ -1,5 +1,3 @@
-package test
-
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
@@ -14,34 +12,33 @@ import akka.util.Timeout
 import org.eligosource.eventsourced.core._
 
 import domain._
-import domain.study._
+import domain.study.Study
 import service._
+import test._
 
 import scalaz._
 import Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class StudyServiceSpec extends EventsourcedSpec[StudyServiceSpec.Fixture] {
+class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
 
   "add a study" in {
     import fixture._
-    val name = "studySpecName"
-    val description = "studySpecDescription"
-    result(studyService.addStudy(name, description)) must beSuccessful
+    val name = nameGenerator.next(classOf[Study])
+    result(studyService.addStudy(name, name)) must beSuccessful
   }
 
   "add a study with duplicate name" in {
     import fixture._
-    val name = "studySpecName"
-    val description = "studySpecDescription"
-    val study = result(studyService.addStudy(name, description))
+    val name = nameGenerator.next(classOf[String])
+    result(studyService.addStudy(name, name)) must beSuccessful
 
-    study must beFailing
+    result(studyService.addStudy(name, name)) must beFailing
   }
 
 }
 
-object StudyServiceSpec {
+object StudyServiceFixture {
 
   class Fixture extends EventsourcingFixture[DomainValidation[Study]] {
 
