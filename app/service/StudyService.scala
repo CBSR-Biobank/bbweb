@@ -34,8 +34,8 @@ class StudyService(studiesRef: Ref[Map[StudyId, Study]],
 
   implicit val timeout = Timeout(5 seconds)
 
-  def addStudy(name: String, description: String): Future[DomainValidation[DisabledStudy]] =
-    studyProcessor ? Message(AddStudy(name, description)) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
+  def addStudy(cmd: AddStudyCmd): Future[DomainValidation[DisabledStudy]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 
   def addSpecimenGroup(cmd: AddSpecimenGroupCmd): Future[DomainValidation[DisabledStudy]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
@@ -50,14 +50,13 @@ class StudyService(studiesRef: Ref[Map[StudyId, Study]],
 class StudyProcessor(studiesRef: Ref[Map[StudyId, Study]]) extends Actor { this: Emitter =>
 
   def receive = {
-    case AddStudy(name, description) =>
-      process(addStudy(name, description)) { study =>
+    case addStudyCmd: AddStudyCmd =>
+      process(addStudy(addStudyCmd)) { study =>
         emitter("listeners") sendEvent StudyAddedEvent(study.id, study.name, study.description)
       }
     case addSpcgCmd: AddSpecimenGroupCmd =>
       val specimenGroupId = SpecimenGroup.nextIdentity
       process(addSpecimenGroup(addSpcgCmd, specimenGroupId)) { study =>
-        // FIXME: need the correct SpecimenGroupId here
         emitter("listeners") sendEvent StudySpecimenGroupAddedEvent(study.id, specimenGroupId,
           addSpcgCmd.name, addSpcgCmd.description, addSpcgCmd.units, addSpcgCmd.amatomicalSourceId,
           addSpcgCmd.preservationId, addSpcgCmd.specimenTypeId)
@@ -79,10 +78,10 @@ class StudyProcessor(studiesRef: Ref[Map[StudyId, Study]]) extends Actor { this:
     sender ! validation
   }
 
-  def addStudy(name: String, description: String): DomainValidation[DisabledStudy] = {
-    readStudies.find(s => s._2.name.equals(name)) match {
-      case Some(study) => DomainError("study with name already exists: %s" format name).fail
-      case None => Study.add(Study.nextIdentity, name, description)
+  def addStudy(cmd: AddStudyCmd): DomainValidation[DisabledStudy] = {
+    readStudies.find(s => s._2.name.equals(cmd.name)) match {
+      case Some(study) => DomainError("study with name already exists: %s" format cmd.name).fail
+      case None => Study.add(Study.nextIdentity, cmd.name, cmd.description)
     }
   }
 

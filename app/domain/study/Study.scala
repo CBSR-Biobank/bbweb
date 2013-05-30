@@ -74,7 +74,7 @@ case class EnabledStudy(id: StudyId, version: Long = -1, name: String, descripti
 }
 
 // study commands
-case class AddStudy(name: String, description: String)
+case class AddStudyCmd(name: String, description: String)
 case class UpdateStudy(id: String, expectedVersion: Option[Long], name: String, description: String)
 case class EnableStudy(id: String, expectedVersion: Option[Long])
 case class DisableStudy(id: String, expectedVersion: Option[Long])

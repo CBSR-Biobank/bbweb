@@ -35,7 +35,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
   "add a study" in {
     fragmentName: String =>
       val name = new NameGenerator(fragmentName).next[Study]
-      val study = studyResult(studyService.addStudy(name, name))
+      val study = studyResult(studyService.addStudy(new AddStudyCmd(name, name)))
       study.id.id must not be empty
       study.name must be(name)
       study.description must be(name)
@@ -44,9 +44,9 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
   "add a study with duplicate name" in {
     fragmentName: String =>
       val name = new NameGenerator(fragmentName).next[Study]
-      result(studyService.addStudy(name, name)) must beSuccessful
+      result(studyService.addStudy(new AddStudyCmd(name, name))) must beSuccessful
 
-      val r = result(studyService.addStudy(name, name))
+      val r = result(studyService.addStudy(new AddStudyCmd(name, name)))
       (r match {
         case Failure(msglist) => msglist.head must contain("name already exists")
         case _ => failure
@@ -62,7 +62,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val preservationId = new PreservationId(ng.next[String])
       val specimenTypeId = new SpecimenTypeId(ng.next[String])
 
-      val study1 = studyResult(studyService.addStudy(name, name))
+      val study1 = studyResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
       val study2 = studyResult(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study1.id.toString, study1.versionOption, name,
@@ -87,7 +87,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val preservationId = new PreservationId(ng.next[String])
       val specimenTypeId = new SpecimenTypeId(ng.next[String])
 
-      val study1 = studyResult(studyService.addStudy(name, name))
+      val study1 = studyResult(studyService.addStudy(new AddStudyCmd(name, name)))
       val study2 = studyResult(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study1.id.toString, study1.versionOption, name,
           name, units, anatomicalSourceId, preservationId, specimenTypeId)))
@@ -104,7 +104,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
         new UpdateSpecimenGroupCmd(study2.id.toString, study2.versionOption, sg.id.toString, name2,
           name2, units2, anatomicalSourceId2, preservationId2, specimenTypeId2)))
 
-      val sg2 = study3.specimenGroups.values.head
+      val sg2 = study3.specimenGroups(sg.id)
       sg2.name must be(name2)
       sg2.description must be(name2)
       sg2.units must be(units2)
