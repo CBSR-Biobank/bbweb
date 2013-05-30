@@ -5,7 +5,7 @@ abstract class Entity[T <: Identity] {
   def version: Long
   def versionOption = if (version == -1L) None else Some(version)
 
-  def creationTime
-  def updateTime
+  //def creationTime
+  //def updateTime
 
 }

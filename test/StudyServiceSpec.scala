@@ -64,14 +64,16 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
 
       val study1 = studyResult(studyService.addStudy(name, name))
 
-      val study2 = studyResult(studyService.addSpecimenGroup(study1.id, study1.versionOption, name,
-        name, units, anatomicalSourceId, preservationId, specimenTypeId))
+      val study2 = studyResult(studyService.addSpecimenGroup(
+        new AddSpecimenGroupCmd(study1.id.toString, study1.versionOption, name,
+          name, units, anatomicalSourceId, preservationId, specimenTypeId)))
       study2.specimenGroups must have size (1)
       study2.specimenGroups.filter(_._2.name.equals(name)) must have size (1)
 
       val name2 = ng.next[Study]
-      val study3 = studyResult(studyService.addSpecimenGroup(study2.id, study2.versionOption, name2, name2,
-        units, anatomicalSourceId, preservationId, specimenTypeId))
+      val study3 = studyResult(studyService.addSpecimenGroup(
+        new AddSpecimenGroupCmd(study2.id.toString, study2.versionOption, name2, name2,
+          units, anatomicalSourceId, preservationId, specimenTypeId)))
       study3.specimenGroups must have size (2)
       study3.specimenGroups.filter(_._2.name.equals(name2)) must have size (1)
   }
@@ -86,8 +88,9 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val specimenTypeId = new SpecimenTypeId(ng.next[String])
 
       val study1 = studyResult(studyService.addStudy(name, name))
-      val study2 = studyResult(studyService.addSpecimenGroup(study1.id, study1.versionOption, name,
-        name, units, anatomicalSourceId, preservationId, specimenTypeId))
+      val study2 = studyResult(studyService.addSpecimenGroup(
+        new AddSpecimenGroupCmd(study1.id.toString, study1.versionOption, name,
+          name, units, anatomicalSourceId, preservationId, specimenTypeId)))
 
       val sg = study2.specimenGroups.values.head
 
@@ -97,10 +100,11 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val preservationId2 = new PreservationId(ng.next[String])
       val specimenTypeId2 = new SpecimenTypeId(ng.next[String])
 
-      val study3 = studyResult(studyService.updateSpecimenGroup(study2.id, study2.versionOption,
-        sg.id, name2, name2, units2, anatomicalSourceId2, preservationId2, specimenTypeId2))
+      val study3 = studyResult(studyService.updateSpecimenGroup(
+        new UpdateSpecimenGroupCmd(study2.id.toString, study2.versionOption, sg.id.toString, name2,
+          name2, units2, anatomicalSourceId2, preservationId2, specimenTypeId2)))
 
-      val sg2 = study2.specimenGroups.values.head
+      val sg2 = study3.specimenGroups.values.head
       sg2.name must be(name2)
       sg2.description must be(name2)
       sg2.units must be(units2)

@@ -37,18 +37,11 @@ class StudyService(studiesRef: Ref[Map[StudyId, Study]],
   def addStudy(name: String, description: String): Future[DomainValidation[DisabledStudy]] =
     studyProcessor ? Message(AddStudy(name, description)) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 
-  def addSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long], name: String,
-    description: String, units: String, amatomicalSourceId: AnatomicalSourceId,
-    preservationId: PreservationId, specimenTypeId: SpecimenTypeId): Future[DomainValidation[DisabledStudy]] =
-    studyProcessor ? Message(AddSpecimenGroup(studyId, expectedVersion, name, description, units,
-      amatomicalSourceId, preservationId, specimenTypeId)) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
+  def addSpecimenGroup(cmd: AddSpecimenGroupCmd): Future[DomainValidation[DisabledStudy]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 
-  def updateSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long],
-    specimenGroupId: SpecimenGroupId, name: String, description: String, units: String,
-    amatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
-    specimenTypeId: SpecimenTypeId): Future[DomainValidation[DisabledStudy]] =
-    studyProcessor ? Message(UpdateSpecimenGroup(studyId, expectedVersion, specimenGroupId, name,
-      description, units, amatomicalSourceId, preservationId, specimenTypeId)) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
+  def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd): Future[DomainValidation[DisabledStudy]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 }
 
 // -------------------------------------------------------------------------------------------------------------
@@ -59,22 +52,22 @@ class StudyProcessor(studiesRef: Ref[Map[StudyId, Study]]) extends Actor { this:
   def receive = {
     case AddStudy(name, description) =>
       process(addStudy(name, description)) { study =>
-        emitter("listeners") sendEvent StudyAdded(study.id, study.name, study.description)
+        emitter("listeners") sendEvent StudyAddedEvent(study.id, study.name, study.description)
       }
-    case AddSpecimenGroup(studyId, expectedVersion, name, description, units, amatomicalSourceId,
-      preservationId, specimenTypeId) =>
-      process(addSpecimenGroup(studyId, expectedVersion, name, description, units,
-        amatomicalSourceId, preservationId, specimenTypeId)) { study =>
+    case addSpcgCmd: AddSpecimenGroupCmd =>
+      val specimenGroupId = SpecimenGroup.nextIdentity
+      process(addSpecimenGroup(addSpcgCmd, specimenGroupId)) { study =>
         // FIXME: need the correct SpecimenGroupId here
-        emitter("listeners") sendEvent StudySpecimenGroupAdded(study.id, new SpecimenGroupId("0"),
-          name, description, units, amatomicalSourceId, preservationId, specimenTypeId)
+        emitter("listeners") sendEvent StudySpecimenGroupAddedEvent(study.id, specimenGroupId,
+          addSpcgCmd.name, addSpcgCmd.description, addSpcgCmd.units, addSpcgCmd.amatomicalSourceId,
+          addSpcgCmd.preservationId, addSpcgCmd.specimenTypeId)
       }
-    case UpdateSpecimenGroup(studyId, expectedVersion, specimenGroupId, name, description, units,
-      amatomicalSourceId, preservationId, specimenTypeId) =>
-      process(updateSpecimenGroup(studyId, expectedVersion, specimenGroupId, name, description,
-        units, amatomicalSourceId, preservationId, specimenTypeId)) { study =>
-        emitter("listeners") sendEvent StudySpecimenGroupUpdated(studyId, specimenGroupId,
-          name, description, units, amatomicalSourceId, preservationId, specimenTypeId)
+    case updateSpcgCmd: UpdateSpecimenGroupCmd =>
+      val specimenGroupId = new SpecimenGroupId(updateSpcgCmd.specimenGroupId)
+      process(updateSpecimenGroup(updateSpcgCmd)) { study =>
+        emitter("listeners") sendEvent StudySpecimenGroupUpdatedEvent(study.id,
+          specimenGroupId, updateSpcgCmd.name, updateSpcgCmd.description, updateSpcgCmd.units,
+          updateSpcgCmd.amatomicalSourceId, updateSpcgCmd.preservationId, updateSpcgCmd.specimenTypeId)
       }
   }
 
@@ -93,26 +86,28 @@ class StudyProcessor(studiesRef: Ref[Map[StudyId, Study]]) extends Actor { this:
     }
   }
 
-  def addSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long], name: String,
-    description: String, units: String, amatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
-    specimenTypeId: SpecimenTypeId): DomainValidation[DisabledStudy] = {
-    updateStudy(studyId, expectedVersion) { study =>
+  def addSpecimenGroup(cmd: AddSpecimenGroupCmd, specimenGroupId: SpecimenGroupId): DomainValidation[DisabledStudy] = {
+    val studyId = new StudyId(cmd.studyId)
+    updateStudy(studyId, cmd.expectedVersion) { study =>
       study match {
-        case study: DisabledStudy => study.addSpecimenGroup(name, description, units,
-          amatomicalSourceId, preservationId, specimenTypeId)
+        case study: DisabledStudy =>
+          val specimenGroup = new SpecimenGroup(specimenGroupId, cmd.name, cmd.description,
+            cmd.units, cmd.amatomicalSourceId, cmd.preservationId, cmd.specimenTypeId)
+          study.addSpecimenGroup(specimenGroup)
         case study: EnabledStudy => StudyProcessor.notDisabledError(study.name).fail
       }
     }
   }
 
-  def updateSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long],
-    specimenGroupId: SpecimenGroupId, name: String, description: String, units: String,
-    amatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
-    specimenTypeId: SpecimenTypeId): DomainValidation[DisabledStudy] = {
-    updateStudy(studyId, expectedVersion) { study =>
+  def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd): DomainValidation[DisabledStudy] = {
+    val studyId = new StudyId(cmd.studyId)
+    updateStudy(studyId, cmd.expectedVersion) { study =>
       study match {
-        case study: DisabledStudy => study.updateSpecimenGroup(specimenGroupId, name, description,
-          units, amatomicalSourceId, preservationId, specimenTypeId)
+        case study: DisabledStudy =>
+          val specimenGroupId = new SpecimenGroupId(cmd.specimenGroupId)
+          val specimenGroup = new SpecimenGroup(specimenGroupId, cmd.name, cmd.description,
+            cmd.units, cmd.amatomicalSourceId, cmd.preservationId, cmd.specimenTypeId)
+          study.updateSpecimenGroup(specimenGroup)
         case study: EnabledStudy => StudyProcessor.notDisabledError(study.name).fail
       }
     }

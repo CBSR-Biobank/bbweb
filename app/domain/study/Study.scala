@@ -48,28 +48,18 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
   specimenGroups: Map[SpecimenGroupId, SpecimenGroup] = Map.empty)
   extends Study {
 
-  def addSpecimenGroup(name: String, description: String, units: String,
-    amatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
-    specimenTypeId: SpecimenTypeId): DomainValidation[DisabledStudy] = {
-    val specimenGroup = new SpecimenGroup(SpecimenGroup.nextIdentity, name, description, units,
-      amatomicalSourceId, preservationId, specimenTypeId)
+  def addSpecimenGroup(specimenGroup: SpecimenGroup): DomainValidation[DisabledStudy] = {
     copy(version = version + 1,
       specimenGroups = specimenGroups + (specimenGroup.id -> specimenGroup)).success
   }
 
-  def updateSpecimenGroup(specimenGroupId: SpecimenGroupId, name: String,
-    description: String, units: String, amatomicalSourceId: AnatomicalSourceId,
-    preservationId: PreservationId, specimenTypeId: SpecimenTypeId): DomainValidation[DisabledStudy] = {
-    specimenGroups.get(specimenGroupId) match {
+  def updateSpecimenGroup(specimenGroup: SpecimenGroup): DomainValidation[DisabledStudy] =
+    specimenGroups.get(specimenGroup.id) match {
       case Some(sg) =>
-        val specimenGroup = new SpecimenGroup(specimenGroupId, name, description, units,
-          amatomicalSourceId, preservationId, specimenTypeId)
         copy(version = version + 1,
-          specimenGroups = specimenGroups + (specimenGroupId -> specimenGroup)).success
-      case None => DomainError("specimen group with ID not found: %s" format specimenGroupId).fail
+          specimenGroups = specimenGroups + (specimenGroup.id -> specimenGroup)).success
+      case None => DomainError("specimen group with ID not found: %s" format specimenGroup.id).fail
     }
-
-  }
 
   def addCollectionEventType(name: String, description: String, recurring: Boolean) = {
 
@@ -85,35 +75,35 @@ case class EnabledStudy(id: StudyId, version: Long = -1, name: String, descripti
 
 // study commands
 case class AddStudy(name: String, description: String)
-case class UpdateStudy(id: StudyId, expectedVersion: Option[Long], name: String, description: String)
-case class EnableStudy(id: StudyId, expectedVersion: Option[Long])
-case class DisableStudy(id: StudyId, expectedVersion: Option[Long])
+case class UpdateStudy(id: String, expectedVersion: Option[Long], name: String, description: String)
+case class EnableStudy(id: String, expectedVersion: Option[Long])
+case class DisableStudy(id: String, expectedVersion: Option[Long])
 
 // specimen group commands
-case class AddSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long],
+case class AddSpecimenGroupCmd(studyId: String, expectedVersion: Option[Long],
   name: String, description: String, units: String, amatomicalSourceId: AnatomicalSourceId,
   preservationId: PreservationId, specimenTypeId: SpecimenTypeId)
-case class UpdateSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long],
-  specimenGroupId: SpecimenGroupId, name: String, description: String, units: String,
+case class UpdateSpecimenGroupCmd(studyId: String, expectedVersion: Option[Long],
+  specimenGroupId: String, name: String, description: String, units: String,
   amatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
   specimenTypeId: SpecimenTypeId)
-case class RemoveSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long],
-  specimenGroupId: SpecimenGroupId)
+case class RemoveSpecimenGroupCmd(studyId: String, expectedVersion: Option[Long],
+  specimenGroupId: String)
 
 // collection event commands
-case class AddCollectionEventType(studyId: StudyId, expectedVersion: Option[Long], name: String,
+case class AddCollectionEventType(studyId: String, expectedVersion: Option[Long], name: String,
   description: String, recurring: Boolean);
-case class UpdateCollectionEventType(studyId: StudyId, expectedVersion: Option[Long],
+case class UpdateCollectionEventType(studyId: String, expectedVersion: Option[Long],
   collectionEventId: CollectionEventId, name: String, description: String, recurring: Boolean);
 
 // study events
 //
 // FIXME: need a base class here
-case class StudyAdded(id: StudyId, name: String, description: String)
-case class StudySpecimenGroupAdded(studyId: StudyId, specimenGroupId: SpecimenGroupId,
+case class StudyAddedEvent(id: StudyId, name: String, description: String)
+case class StudySpecimenGroupAddedEvent(studyId: StudyId, specimenGroupId: SpecimenGroupId,
   name: String, description: String, units: String, amatomicalSourceId: AnatomicalSourceId,
   preservationId: PreservationId, specimenTypeId: SpecimenTypeId)
-case class StudySpecimenGroupUpdated(studyId: StudyId, specimenGroupId: SpecimenGroupId,
+case class StudySpecimenGroupUpdatedEvent(studyId: StudyId, specimenGroupId: SpecimenGroupId,
   name: String, description: String, units: String, amatomicalSourceId: AnatomicalSourceId,
   preservationId: PreservationId, specimenTypeId: SpecimenTypeId)
 
