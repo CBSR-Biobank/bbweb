@@ -4,10 +4,10 @@ import domain.AnatomicalSourceId
 import domain.PreservationId
 
 case class SpecimenGroup(
-  specimenGroupId: SpecimenGroupId,
+  id: SpecimenGroupId,
   name: String,
   description: String,
-  unit: String,
+  units: String,
   anatomicalSourceId: AnatomicalSourceId,
   preservationId: PreservationId,
   specimenTypeId: SpecimenTypeId) {

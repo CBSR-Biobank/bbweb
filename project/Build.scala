@@ -20,7 +20,6 @@ object ApplicationBuild extends Build {
 
     libraryDependencies ++= Seq(
       "org.eligosource" %% "eventsourced-core" % "0.5.0",
-      //"org.eligosource" %% "eventsourced-journal-leveldb" % "0.5.0",
       "org.eligosource" %% "eventsourced-journal-mongodb-casbah" % "0.5.0",
       "org.scala-stm" %% "scala-stm" % "0.7" % "compile",
       "org.scalaz" %% "scalaz-core" % "6.0.4" % "compile",

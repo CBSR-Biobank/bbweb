@@ -42,6 +42,13 @@ class StudyService(studiesRef: Ref[Map[StudyId, Study]],
     preservationId: PreservationId, specimenTypeId: SpecimenTypeId): Future[DomainValidation[DisabledStudy]] =
     studyProcessor ? Message(AddSpecimenGroup(studyId, expectedVersion, name, description, units,
       amatomicalSourceId, preservationId, specimenTypeId)) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
+
+  def updateSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long],
+    specimenGroupId: SpecimenGroupId, name: String, description: String, units: String,
+    amatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
+    specimenTypeId: SpecimenTypeId): Future[DomainValidation[DisabledStudy]] =
+    studyProcessor ? Message(UpdateSpecimenGroup(studyId, expectedVersion, specimenGroupId, name,
+      description, units, amatomicalSourceId, preservationId, specimenTypeId)) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 }
 
 // -------------------------------------------------------------------------------------------------------------
@@ -52,13 +59,22 @@ class StudyProcessor(studiesRef: Ref[Map[StudyId, Study]]) extends Actor { this:
   def receive = {
     case AddStudy(name, description) =>
       process(addStudy(name, description)) { study =>
-        emitter("listeners") sendEvent StudyAdded(name, description)
+        emitter("listeners") sendEvent StudyAdded(study.id, study.name, study.description)
       }
     case AddSpecimenGroup(studyId, expectedVersion, name, description, units, amatomicalSourceId,
       preservationId, specimenTypeId) =>
       process(addSpecimenGroup(studyId, expectedVersion, name, description, units,
         amatomicalSourceId, preservationId, specimenTypeId)) { study =>
-        emitter("listeners") sendEvent StudyAdded(name, description)
+        // FIXME: need the correct SpecimenGroupId here
+        emitter("listeners") sendEvent StudySpecimenGroupAdded(study.id, new SpecimenGroupId("0"),
+          name, description, units, amatomicalSourceId, preservationId, specimenTypeId)
+      }
+    case UpdateSpecimenGroup(studyId, expectedVersion, specimenGroupId, name, description, units,
+      amatomicalSourceId, preservationId, specimenTypeId) =>
+      process(updateSpecimenGroup(studyId, expectedVersion, specimenGroupId, name, description,
+        units, amatomicalSourceId, preservationId, specimenTypeId)) { study =>
+        emitter("listeners") sendEvent StudySpecimenGroupUpdated(studyId, specimenGroupId,
+          name, description, units, amatomicalSourceId, preservationId, specimenTypeId)
       }
   }
 
@@ -84,6 +100,19 @@ class StudyProcessor(studiesRef: Ref[Map[StudyId, Study]]) extends Actor { this:
       study match {
         case study: DisabledStudy => study.addSpecimenGroup(name, description, units,
           amatomicalSourceId, preservationId, specimenTypeId)
+        case study: EnabledStudy => StudyProcessor.notDisabledError(study.name).fail
+      }
+    }
+  }
+
+  def updateSpecimenGroup(studyId: StudyId, expectedVersion: Option[Long],
+    specimenGroupId: SpecimenGroupId, name: String, description: String, units: String,
+    amatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
+    specimenTypeId: SpecimenTypeId): DomainValidation[DisabledStudy] = {
+    updateStudy(studyId, expectedVersion) { study =>
+      study match {
+        case study: DisabledStudy => study.updateSpecimenGroup(specimenGroupId, name, description,
+          units, amatomicalSourceId, preservationId, specimenTypeId)
         case study: EnabledStudy => StudyProcessor.notDisabledError(study.name).fail
       }
     }

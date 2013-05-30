@@ -35,13 +35,10 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
   "add a study" in {
     fragmentName: String =>
       val name = new NameGenerator(fragmentName).next[Study]
-      val r = result(studyService.addStudy(name, name))
-      r must beSuccessful
-
-      val s = getStudy(r)
-      s.id.id must not be empty
-      s.name must be(name)
-      s.description must be(name)
+      val study = studyResult(studyService.addStudy(name, name))
+      study.id.id must not be empty
+      study.name must be(name)
+      study.description must be(name)
   }
 
   "add a study with duplicate name" in {
@@ -65,28 +62,51 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val preservationId = new PreservationId(ng.next[String])
       val specimenTypeId = new SpecimenTypeId(ng.next[String])
 
-      val r = result(studyService.addStudy(name, name))
-      r must beSuccessful
-      val study = getStudy(r)
+      val study1 = studyResult(studyService.addStudy(name, name))
 
-      val r2 = result(studyService.addSpecimenGroup(study.id, study.versionOption, name, name,
-        units, anatomicalSourceId, preservationId, specimenTypeId))
-      r2 must beSuccessful
-
-      val study2 = getStudy(r2)
+      val study2 = studyResult(studyService.addSpecimenGroup(study1.id, study1.versionOption, name,
+        name, units, anatomicalSourceId, preservationId, specimenTypeId))
       study2.specimenGroups must have size (1)
-      val sg = study2.specimenGroups.filter(_.name.equals(name))
-      sg must have size (1)
+      study2.specimenGroups.filter(_._2.name.equals(name)) must have size (1)
 
       val name2 = ng.next[Study]
-      val r3 = result(studyService.addSpecimenGroup(study2.id, study2.versionOption, name2, name2,
+      val study3 = studyResult(studyService.addSpecimenGroup(study2.id, study2.versionOption, name2, name2,
         units, anatomicalSourceId, preservationId, specimenTypeId))
-      r3 must beSuccessful
-
-      val study3 = getStudy(r3)
       study3.specimenGroups must have size (2)
-      val sg2 = study2.specimenGroups.filter(_.name.equals(name2))
-      sg2 must have size (1)
+      study3.specimenGroups.filter(_._2.name.equals(name2)) must have size (1)
+  }
+
+  "update specimen groups" in {
+    fragmentName: String =>
+      val ng = new NameGenerator(fragmentName)
+      val name = ng.next[Study]
+      val units = ng.next[String]
+      val anatomicalSourceId = new AnatomicalSourceId(ng.next[String])
+      val preservationId = new PreservationId(ng.next[String])
+      val specimenTypeId = new SpecimenTypeId(ng.next[String])
+
+      val study1 = studyResult(studyService.addStudy(name, name))
+      val study2 = studyResult(studyService.addSpecimenGroup(study1.id, study1.versionOption, name,
+        name, units, anatomicalSourceId, preservationId, specimenTypeId))
+
+      val sg = study2.specimenGroups.values.head
+
+      val name2 = ng.next[Study]
+      val units2 = ng.next[String]
+      val anatomicalSourceId2 = new AnatomicalSourceId(ng.next[String])
+      val preservationId2 = new PreservationId(ng.next[String])
+      val specimenTypeId2 = new SpecimenTypeId(ng.next[String])
+
+      val study3 = studyResult(studyService.updateSpecimenGroup(study2.id, study2.versionOption,
+        sg.id, name2, name2, units2, anatomicalSourceId2, preservationId2, specimenTypeId2))
+
+      val sg2 = study2.specimenGroups.values.head
+      sg2.name must be(name2)
+      sg2.description must be(name2)
+      sg2.units must be(units2)
+      sg2.anatomicalSourceId must be(anatomicalSourceId2)
+      sg2.preservationId must be(preservationId2)
+      sg2.specimenTypeId must be(specimenTypeId2)
   }
 }
 
@@ -103,6 +123,13 @@ object StudyServiceFixture {
 
     def result[T <: Study](f: Future[DomainValidation[T]]) = {
       Await.result(f, timeout.duration)
+    }
+
+    def studyResult[T <: Study](f: Future[DomainValidation[T]]): Study = {
+      result(f) match {
+        case Success(s) => s
+        case _ => throw new Error("null study, validation failed")
+      }
     }
   }
 }

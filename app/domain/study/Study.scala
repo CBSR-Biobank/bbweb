@@ -12,7 +12,7 @@ import domain.DomainError
 sealed abstract class Study extends Entity[StudyId] {
   def name: String
   def description: String
-  def specimenGroups: Set[SpecimenGroup]
+  def specimenGroups: Map[SpecimenGroupId, SpecimenGroup]
 
   override def toString =
     "{ id:%s, name:%s, description:%s }" format (id.toString, name, description)
@@ -40,20 +40,35 @@ object Study {
     new StudyId(java.util.UUID.randomUUID.toString.toUpperCase)
 
   def add(id: StudyId, name: String, description: String): DomainValidation[DisabledStudy] =
-    DisabledStudy(id, version = 0L, name, description, specimenGroups = Set.empty).success
+    DisabledStudy(id, version = 0L, name, description, specimenGroups = Map.empty).success
 
 }
 
 case class DisabledStudy(id: StudyId, version: Long = -1, name: String, description: String,
-  specimenGroups: Set[SpecimenGroup] = Set.empty)
+  specimenGroups: Map[SpecimenGroupId, SpecimenGroup] = Map.empty)
   extends Study {
 
-  def addSpecimenGroup(name: String, description: String, unit: String,
+  def addSpecimenGroup(name: String, description: String, units: String,
     amatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
     specimenTypeId: SpecimenTypeId): DomainValidation[DisabledStudy] = {
-    val specimenGroup = new SpecimenGroup(SpecimenGroup.nextIdentity, name, description, unit,
+    val specimenGroup = new SpecimenGroup(SpecimenGroup.nextIdentity, name, description, units,
       amatomicalSourceId, preservationId, specimenTypeId)
-    copy(version = version + 1, specimenGroups = specimenGroups + specimenGroup).success
+    copy(version = version + 1,
+      specimenGroups = specimenGroups + (specimenGroup.id -> specimenGroup)).success
+  }
+
+  def updateSpecimenGroup(specimenGroupId: SpecimenGroupId, name: String,
+    description: String, units: String, amatomicalSourceId: AnatomicalSourceId,
+    preservationId: PreservationId, specimenTypeId: SpecimenTypeId): DomainValidation[DisabledStudy] = {
+    specimenGroups.get(specimenGroupId) match {
+      case Some(sg) =>
+        val specimenGroup = new SpecimenGroup(specimenGroupId, name, description, units,
+          amatomicalSourceId, preservationId, specimenTypeId)
+        copy(version = version + 1,
+          specimenGroups = specimenGroups + (specimenGroupId -> specimenGroup)).success
+      case None => DomainError("specimen group with ID not found: %s" format specimenGroupId).fail
+    }
+
   }
 
   def addCollectionEventType(name: String, description: String, recurring: Boolean) = {
@@ -63,7 +78,7 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
 }
 
 case class EnabledStudy(id: StudyId, version: Long = -1, name: String, description: String,
-  specimenGroups: Set[SpecimenGroup] = Set.empty)
+  specimenGroups: Map[SpecimenGroupId, SpecimenGroup] = Map.empty)
   extends Study {
 
 }
@@ -92,5 +107,13 @@ case class UpdateCollectionEventType(studyId: StudyId, expectedVersion: Option[L
   collectionEventId: CollectionEventId, name: String, description: String, recurring: Boolean);
 
 // study events
-case class StudyAdded(name: String, description: String)
+//
+// FIXME: need a base class here
+case class StudyAdded(id: StudyId, name: String, description: String)
+case class StudySpecimenGroupAdded(studyId: StudyId, specimenGroupId: SpecimenGroupId,
+  name: String, description: String, units: String, amatomicalSourceId: AnatomicalSourceId,
+  preservationId: PreservationId, specimenTypeId: SpecimenTypeId)
+case class StudySpecimenGroupUpdated(studyId: StudyId, specimenGroupId: SpecimenGroupId,
+  name: String, description: String, units: String, amatomicalSourceId: AnatomicalSourceId,
+  preservationId: PreservationId, specimenTypeId: SpecimenTypeId)
 
