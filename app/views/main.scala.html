@@ -1,22 +1,44 @@
-@(title: String)(content: Html)
+@(title: String, user: User)(body: Html)
 
 <!DOCTYPE html>
 
 <html>
     <head>
         <title>@title</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-        <script src="@routes.Assets.at("javascripts/jquery-1.6.4.min.js")" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <script type="text/javascript" src="@routes.Assets.at("javascripts/jquery-1.7.1.js")"></script>
+        <script type="text/javascript" src="@routes.Assets.at("javascripts/jquery-play-1.7.1.js")"></script>
+        <script type="text/javascript" src="@routes.Assets.at("javascripts/underscore-min.js")"></script>
+        <script type="text/javascript" src="@routes.Assets.at("javascripts/backbone-min.js")"></script>
+        <script type="text/javascript" src="@routes.Assets.at("javascripts/main.js")"></script>
+        <script type="text/javascript" src="@routes.Application.javascriptRoutes"></script>
     </head>
     <body>
 
         <header>
-            <a href="@routes.Application.index">@title</a>
+            <a href="@routes.Projects.index" id="logo"><span>Zen</span>tasks</a>
+            <dl id="user">
+                <dt>@user.name <span>(@user.email)</span></dt>
+                <dd>
+                    <a href="@routes.Application.logout()">Logout</a>
+                </dd>
+            </dl>
         </header>
 
-        <section>
-            @content
+        <nav>
+            <h4 class="dashboard"><a href="#/">Dashboard</a></h4>
+            <ul id="projects">
+                @projects.groupBy(_.folder).map {
+                    case (group, projects) => {
+                        @views.html.projects.group(group, projects)
+                    }
+                }
+            </ul>
+            <button id="newGroup">New group</button>
+        </nav>
+        <section id="main">
+            @body
         </section>
 
     </body>
