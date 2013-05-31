@@ -15,9 +15,8 @@
         <script type="text/javascript" src="@routes.Application.javascriptRoutes"></script>
     </head>
     <body>
-
         <header>
-            <a href="@routes.StudyController.index" id="logo"><span>Biobank</span>XXXX</a>
+            <a href="@routes.StudyController.index" id="logo">Biobank</a>
             <dl id="user">
                 <dt>@user.name <span>(@user.email)</span></dt>
                 <dd>
@@ -25,14 +24,8 @@
                 </dd>
             </dl>
         </header>
-
-        <nav>
-            <h4 class="dashboard"><a href="#/">Dashboard</a></h4>
-            <button id="newGroup">New group</button>
-        </nav>
         <section id="main">
             @body
         </section>
-
     </body>
 </html>
