@@ -3,23 +3,28 @@ package service
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
-
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-
-import domain._
-import domain.study._
-
 import org.eligosource.eventsourced.core._
-
 import scalaz._
 import Scalaz._
-
 import scala.language.postfixOps
+import service.events.StudyAddedEvent
+import service.events.StudySpecimenGroupUpdatedEvent
+import service.events.StudySpecimenGroupAddedEvent
+import domain.study.StudyId
+import domain.study._
+import domain.study.SpecimenGroupId
+import domain.study.SpecimenGroup
+import service.commands.AddStudyCmd
+import domain.DomainError
+import service.commands.UpdateSpecimenGroupCmd
+import domain.DomainValidation
+import service.commands.AddSpecimenGroupCmd
 
-class StudyService(studiesRef: Ref[Map[StudyId, Study]],
-  studyProcessor: ActorRef)(implicit system: ActorSystem) {
+class StudyService(
+  studiesRef: Ref[Map[StudyId, Study]], studyProcessor: ActorRef)(implicit system: ActorSystem) {
   import system.dispatcher
 
   //

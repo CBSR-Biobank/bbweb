@@ -1,23 +1,41 @@
 package controllers
 
+import scala.concurrent._
+import scala.concurrent.duration._
+import scala.language.postfixOps
 import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
-
+import akka._
+import akka.util.Timeout
 import domain._
+import service._
 import views._
+import scalaz._
+import Scalaz._
+import play.api.libs.concurrent.Akka
+import play.api.Play.current
+import java.util.concurrent.TimeUnit
 
 object Application extends Controller {
+
+  lazy val userService = Global.services.userService
+  lazy val studyService = Global.services.studyService
 
   // -- Authentication
 
   val loginForm = Form(
     tuple(
       "email" -> text,
-      "password" -> text) verifying ("Invalid email or password", result => result match {
-        case (email, password) => User.authenticate(email, password).isDefined
-      }))
+      "password" -> text) verifying (
+        "Invalid email or password", result => result match {
+          case (email, password) =>
+            Await.result(userService.authenticate(email, password), 5.seconds) match {
+              case Success(user) => true
+              case _ => false
+            }
+        }))
 
   /**
    * Login page.
@@ -32,7 +50,7 @@ object Application extends Controller {
   def authenticate = Action { implicit request =>
     loginForm.bindFromRequest.fold(
       formWithErrors => BadRequest(html.login(formWithErrors)),
-      user => Redirect(routes.Projects.index).withSession("email" -> user._1))
+      user => Redirect(routes.StudyController.index).withSession("email" -> user._1))
   }
 
   /**
@@ -48,12 +66,7 @@ object Application extends Controller {
   def javascriptRoutes = Action { implicit request =>
     import routes.javascript._
     Ok(
-      Routes.javascriptRouter("jsRoutes")(
-        Projects.add, Projects.delete, Projects.rename,
-        Projects.addGroup, Projects.deleteGroup, Projects.renameGroup,
-        Projects.addUser, Projects.removeUser, Tasks.addFolder,
-        Tasks.renameFolder, Tasks.deleteFolder, Tasks.index,
-        Tasks.add, Tasks.update, Tasks.delete)).as("text/javascript")
+      Routes.javascriptRouter("jsRoutes")(StudyController.add)).as("text/javascript")
   }
 
 }
@@ -87,23 +100,13 @@ trait Secured {
    */
   def IsMemberOf(project: Long)(f: => String => Request[AnyContent] => Result) = IsAuthenticated { user =>
     request =>
-      if (Project.isMember(project, user)) {
-        f(user)(request)
-      } else {
-        Results.Forbidden
-      }
-  }
+      //      if (Study.isMember(project, user)) {
+      //        f(user)(request)
+      //      } else {
+      //        Results.Forbidden
+      //      }
+      f(user)(request)
 
-  /**
-   * Check if the connected user is a owner of this task.
-   */
-  def IsOwnerOf(task: Long)(f: => String => Request[AnyContent] => Result) = IsAuthenticated { user =>
-    request =>
-      if (Task.isOwner(task, user)) {
-        f(user)(request)
-      } else {
-        Results.Forbidden
-      }
   }
 
 }

@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit
 
 import org.specs2.matcher.MustMatchers
 import org.specs2.mutable.Specification
-//import org.specs2.mutable.SpecificationWithJUnit
 
 import domain._
 import domain.study._

@@ -1,48 +1,60 @@
 package domain
 
-import play.api.Play.current
+import scalaz._
+import scalaz.Scalaz._
 
-case class User(email: String, name: String, password: String)
-
-object User {
-
-  // -- Parsers
-
-  /**
-   * Parse a User from a ResultSet
-   */
-  val simple = {
-    get[String]("user.email") ~
-      get[String]("user.name") ~
-      get[String]("user.password") map {
-        case email ~ name ~ password => User(email, name, password)
-      }
-  }
-
-  // -- Queries
-
-  /**
-   * Retrieve a User from email.
-   */
-  def findByEmail(email: String): Option[User] = {
-  }
-
-  /**
-   * Retrieve all users.
-   */
-  def findAll: Seq[User] = {
-  }
+sealed abstract class User extends Entity[UserId] {
+  def name: String
+  def email: String
+  def password: String
 
   /**
    * Authenticate a User.
    */
-  def authenticate(email: String, password: String): Option[User] = {
+  def authenticate(email: String, password: String): DomainValidation[User] =
+    if (this.password.equals(password)) this.success
+    else DomainError("authentication failure").fail
+}
+
+object User {
+  val invalidVersionMessage = "user %s: expected version %s doesn't match current version %s"
+
+  def invalidVersion(userId: Identity, expected: Long, current: Long) =
+    DomainError(invalidVersionMessage format (userId, expected, current))
+
+  def requireVersion[T <: User](user: T, expectedVersion: Option[Long]): DomainValidation[T] = {
+    val id = user.id
+    val version = user.version
+
+    expectedVersion match {
+      case Some(expected) if (version != expected) => invalidVersion(id, expected, version).fail
+      case Some(expected) if (version == expected) => user.success
+      case None => user.success
+    }
   }
 
-  /**
-   * Create a User.
-   */
-  def create(user: User): User = {
-  }
+  // TODO: not sure yet if this is the right place for this method
+  def nextIdentity: UserId =
+    new UserId(java.util.UUID.randomUUID.toString.toUpperCase)
+
+  def add(id: UserId, name: String, email: String, password: String): DomainValidation[UnauthenticatedUser] =
+    UnauthenticatedUser(id, version = 0L, name, email, password).success
+}
+
+case class UnauthenticatedUser(
+  id: UserId,
+  version: Long = -1,
+  name: String,
+  email: String,
+  password: String) extends User {
+
+}
+
+case class AuthenticatedUser(
+  id: UserId,
+  version: Long = -1,
+  name: String,
+  email: String,
+  password: String) extends User {
 
 }

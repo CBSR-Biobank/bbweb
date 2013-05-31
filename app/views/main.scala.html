@@ -1,4 +1,4 @@
-@(title: String, user: User)(body: Html)
+@(title: String, user: domain.User)(body: Html)
 
 <!DOCTYPE html>
 
@@ -17,7 +17,7 @@
     <body>
 
         <header>
-            <a href="@routes.Projects.index" id="logo"><span>Zen</span>tasks</a>
+            <a href="@routes.StudyController.index" id="logo"><span>Biobank</span>XXXX</a>
             <dl id="user">
                 <dt>@user.name <span>(@user.email)</span></dt>
                 <dd>
@@ -28,13 +28,6 @@
 
         <nav>
             <h4 class="dashboard"><a href="#/">Dashboard</a></h4>
-            <ul id="projects">
-                @projects.groupBy(_.folder).map {
-                    case (group, projects) => {
-                        @views.html.projects.group(group, projects)
-                    }
-                }
-            </ul>
             <button id="newGroup">New group</button>
         </nav>
         <section id="main">

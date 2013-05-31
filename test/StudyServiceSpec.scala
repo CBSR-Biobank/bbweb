@@ -15,6 +15,7 @@ import org.eligosource.eventsourced.core._
 
 import domain._
 import domain.study._
+import service.commands._
 import service._
 import test._
 
