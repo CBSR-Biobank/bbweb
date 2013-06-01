@@ -17,6 +17,7 @@ import domain.study.StudyId
 import domain.study._
 import domain.study.SpecimenGroupId
 import domain.study.SpecimenGroup
+import domain.Entity
 import service.commands.AddStudyCmd
 import domain.DomainError
 import service.commands.UpdateSpecimenGroupCmd
@@ -24,7 +25,9 @@ import domain.DomainValidation
 import service.commands.AddSpecimenGroupCmd
 
 class StudyService(
-  studiesRef: Ref[Map[StudyId, Study]], studyProcessor: ActorRef)(implicit system: ActorSystem) {
+  studiesRef: Ref[Map[StudyId, Study]],
+  specimenGroupsRef: Ref[Map[SpecimenGroupId, SpecimenGroup]],
+  studyProcessor: ActorRef)(implicit system: ActorSystem) {
   import system.dispatcher
 
   //
@@ -32,6 +35,7 @@ class StudyService(
   //
 
   def getStudiesMap = studiesRef.single.get
+  def getSpecimenGroupsMap = specimenGroupsRef.single.get
 
   //
   // Updates
@@ -42,17 +46,19 @@ class StudyService(
   def addStudy(cmd: AddStudyCmd): Future[DomainValidation[DisabledStudy]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 
-  def addSpecimenGroup(cmd: AddSpecimenGroupCmd): Future[DomainValidation[DisabledStudy]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
+  def addSpecimenGroup(cmd: AddSpecimenGroupCmd): Future[DomainValidation[SpecimenGroup]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroup]])
 
-  def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd): Future[DomainValidation[DisabledStudy]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
+  def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd): Future[DomainValidation[SpecimenGroup]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroup]])
 }
 
 // -------------------------------------------------------------------------------------------------------------
 //  InvoiceProcessor is single writer to studiesRef, so we can have reads and writes in separate transactions
 // -------------------------------------------------------------------------------------------------------------
-class StudyProcessor(studiesRef: Ref[Map[StudyId, Study]]) extends Actor { this: Emitter =>
+class StudyProcessor(
+  studiesRef: Ref[Map[StudyId, Study]],
+  specimenGroupsRef: Ref[Map[SpecimenGroupId, SpecimenGroup]]) extends Actor { this: Emitter =>
 
   def receive = {
     case addStudyCmd: AddStudyCmd =>
@@ -60,25 +66,23 @@ class StudyProcessor(studiesRef: Ref[Map[StudyId, Study]]) extends Actor { this:
         emitter("listeners") sendEvent StudyAddedEvent(study.id, study.name, study.description)
       }
     case addSpcgCmd: AddSpecimenGroupCmd =>
-      val specimenGroupId = SpecimenGroup.nextIdentity
-      process(addSpecimenGroup(addSpcgCmd, specimenGroupId)) { study =>
-        emitter("listeners") sendEvent StudySpecimenGroupAddedEvent(study.id, specimenGroupId,
-          addSpcgCmd.name, addSpcgCmd.description, addSpcgCmd.units, addSpcgCmd.amatomicalSourceId,
+      process(addSpecimenGroup(addSpcgCmd)) { sg =>
+        emitter("listeners") sendEvent StudySpecimenGroupAddedEvent(sg.studyId, sg.id,
+          addSpcgCmd.name, addSpcgCmd.description, addSpcgCmd.units, addSpcgCmd.anatomicalSourceId,
           addSpcgCmd.preservationId, addSpcgCmd.specimenTypeId)
       }
     case updateSpcgCmd: UpdateSpecimenGroupCmd =>
-      val specimenGroupId = new SpecimenGroupId(updateSpcgCmd.specimenGroupId)
-      process(updateSpecimenGroup(updateSpcgCmd)) { study =>
-        emitter("listeners") sendEvent StudySpecimenGroupUpdatedEvent(study.id,
-          specimenGroupId, updateSpcgCmd.name, updateSpcgCmd.description, updateSpcgCmd.units,
-          updateSpcgCmd.amatomicalSourceId, updateSpcgCmd.preservationId, updateSpcgCmd.specimenTypeId)
+      process(updateSpecimenGroup(updateSpcgCmd)) { sg =>
+        emitter("listeners") sendEvent StudySpecimenGroupUpdatedEvent(sg.studyId,
+          sg.id, updateSpcgCmd.name, updateSpcgCmd.description, updateSpcgCmd.units,
+          updateSpcgCmd.anatomicalSourceId, updateSpcgCmd.preservationId, updateSpcgCmd.specimenTypeId)
       }
   }
 
-  def process(validation: DomainValidation[Study])(onSuccess: Study => Unit) = {
-    validation.foreach { study =>
-      updateStudies(study)
-      onSuccess(study)
+  def process[T <: Entity[_]](validation: DomainValidation[T])(onSuccess: T => Unit) = {
+    validation.foreach { entity =>
+      updateRepository(entity)
+      onSuccess(entity)
     }
     sender ! validation
   }
@@ -90,29 +94,37 @@ class StudyProcessor(studiesRef: Ref[Map[StudyId, Study]]) extends Actor { this:
     }
   }
 
-  def addSpecimenGroup(cmd: AddSpecimenGroupCmd, specimenGroupId: SpecimenGroupId): DomainValidation[DisabledStudy] = {
+  def addSpecimenGroup(cmd: AddSpecimenGroupCmd): DomainValidation[SpecimenGroup] = {
     val studyId = new StudyId(cmd.studyId)
-    updateStudy(studyId, cmd.expectedVersion) { study =>
-      study match {
-        case study: DisabledStudy =>
-          val specimenGroup = new SpecimenGroup(specimenGroupId, cmd.name, cmd.description,
-            cmd.units, cmd.amatomicalSourceId, cmd.preservationId, cmd.specimenTypeId)
-          study.addSpecimenGroup(specimenGroup)
+    readStudies.get(studyId) match {
+      case None => StudyProcessor.noSuchStudy(studyId).fail
+      case Some(study) => study match {
         case study: EnabledStudy => StudyProcessor.notDisabledError(study.name).fail
+        case study: DisabledStudy =>
+          specimenGroupsRef.single.get.find(
+            sg => sg._2.name.equals(cmd.name) && sg._2.studyId.equals(study.id)) match {
+              case Some(sg) => DomainError("specimen group with name already exists: %s" format cmd.name).fail
+              case None => SpecimenGroup.add(cmd)
+            }
       }
     }
   }
 
-  def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd): DomainValidation[DisabledStudy] = {
+  def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd): DomainValidation[SpecimenGroup] = {
     val studyId = new StudyId(cmd.studyId)
-    updateStudy(studyId, cmd.expectedVersion) { study =>
-      study match {
+    readStudies.get(studyId) match {
+      case None => StudyProcessor.noSuchStudy(studyId).fail
+      case Some(study) => study match {
+        case study: EnabledStudy => StudyProcessor.notDisabledError(study.name).fail
         case study: DisabledStudy =>
           val specimenGroupId = new SpecimenGroupId(cmd.specimenGroupId)
-          val specimenGroup = new SpecimenGroup(specimenGroupId, cmd.name, cmd.description,
-            cmd.units, cmd.amatomicalSourceId, cmd.preservationId, cmd.specimenTypeId)
-          study.updateSpecimenGroup(specimenGroup)
-        case study: EnabledStudy => StudyProcessor.notDisabledError(study.name).fail
+          specimenGroupsRef.single.get.find(
+            sg => sg._2.name.equals(cmd.name) && sg._2.studyId.equals(study.id)) match {
+              case None => DomainError("specimen group with name already exists for this study: %s" format cmd.name).fail
+              case Some(sg) =>
+                new SpecimenGroup(specimenGroupId, studyId, cmd.expectedVersion, cmd.name, cmd.description,
+                  cmd.units, cmd.anatomicalSourceId, cmd.preservationId, cmd.specimenTypeId).success
+            }
       }
     }
   }
@@ -120,14 +132,17 @@ class StudyProcessor(studiesRef: Ref[Map[StudyId, Study]]) extends Actor { this:
   def updateStudy[B <: Study](studyId: StudyId, expectedVersion: Option[Long])(f: Study => DomainValidation[B]): DomainValidation[B] =
     readStudies.get(studyId) match {
       case None => StudyProcessor.noSuchStudy(studyId).fail
-      case Some(invoice) => for {
-        current <- Study.requireVersion(invoice, expectedVersion)
-        updated <- f(invoice)
+      case Some(study) => for {
+        current <- study.requireVersion(expectedVersion)
+        updated <- f(study)
       } yield updated
     }
 
-  private def updateStudies(study: Study) =
-    studiesRef.single.transform(studies => studies + (study.id -> study))
+  private def updateRepository[T <: Entity[_]](entity: T) = entity match {
+    case study: Study => studiesRef.single.transform(studies => studies + (study.id -> study))
+    case sg: SpecimenGroup => specimenGroupsRef.single.transform(groups => groups + (sg.id -> sg))
+    case _ => throw new Error("update on invalid entity")
+  }
 
   private def readStudies =
     studiesRef.single.get

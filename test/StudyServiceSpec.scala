@@ -36,10 +36,11 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
   "add a study" in {
     fragmentName: String =>
       val name = new NameGenerator(fragmentName).next[Study]
-      val study = studyResult(studyService.addStudy(new AddStudyCmd(name, name)))
-      study.id.id must not be empty
-      study.name must be(name)
-      study.description must be(name)
+      val study = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+      studiesRef.single.get must not be empty
+      studiesRef.single.get.get(study.id) must beSome.like {
+        case s => s.description must be(name)
+      }
   }
 
   "add a study with duplicate name" in {
@@ -63,20 +64,35 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val preservationId = new PreservationId(ng.next[String])
       val specimenTypeId = new SpecimenTypeId(ng.next[String])
 
-      val study1 = studyResult(studyService.addStudy(new AddStudyCmd(name, name)))
+      val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
-      val study2 = studyResult(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study1.id.toString, study1.versionOption, name,
-          name, units, anatomicalSourceId, preservationId, specimenTypeId)))
-      study2.specimenGroups must have size (1)
-      study2.specimenGroups.filter(_._2.name.equals(name)) must have size (1)
+      val sg1 = entityResult(studyService.addSpecimenGroup(
+        new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceId,
+          preservationId, specimenTypeId)))
+
+      specimenGroupsRef.single.get.get(sg1.id) must beSome.like {
+        case x =>
+          x.description must be(name)
+          x.units must be(units)
+          x.anatomicalSourceId must be(anatomicalSourceId)
+          x.preservationId must be(preservationId)
+          x.specimenTypeId must be(specimenTypeId)
+      }
 
       val name2 = ng.next[Study]
-      val study3 = studyResult(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study2.id.toString, study2.versionOption, name2, name2,
-          units, anatomicalSourceId, preservationId, specimenTypeId)))
-      study3.specimenGroups must have size (2)
-      study3.specimenGroups.filter(_._2.name.equals(name2)) must have size (1)
+      val sg2 = entityResult(studyService.addSpecimenGroup(
+        new AddSpecimenGroupCmd(study1.id.toString, name2, name2, units, anatomicalSourceId,
+          preservationId, specimenTypeId)))
+
+      specimenGroupsRef.single.get.get(sg2.id) must beSome.like {
+        case x =>
+          x.description must be(name2)
+          x.description must be(name2)
+          x.units must be(units)
+          x.anatomicalSourceId must be(anatomicalSourceId)
+          x.preservationId must be(preservationId)
+          x.specimenTypeId must be(specimenTypeId)
+      }
   }
 
   "update specimen groups" in {
@@ -88,12 +104,10 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val preservationId = new PreservationId(ng.next[String])
       val specimenTypeId = new SpecimenTypeId(ng.next[String])
 
-      val study1 = studyResult(studyService.addStudy(new AddStudyCmd(name, name)))
-      val study2 = studyResult(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study1.id.toString, study1.versionOption, name,
-          name, units, anatomicalSourceId, preservationId, specimenTypeId)))
-
-      val sg = study2.specimenGroups.values.head
+      val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+      val sg1 = entityResult(studyService.addSpecimenGroup(
+        new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceId,
+          preservationId, specimenTypeId)))
 
       val name2 = ng.next[Study]
       val units2 = ng.next[String]
@@ -101,39 +115,42 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val preservationId2 = new PreservationId(ng.next[String])
       val specimenTypeId2 = new SpecimenTypeId(ng.next[String])
 
-      val study3 = studyResult(studyService.updateSpecimenGroup(
-        new UpdateSpecimenGroupCmd(study2.id.toString, study2.versionOption, sg.id.toString, name2,
+      val sg2 = entityResult(studyService.updateSpecimenGroup(
+        new UpdateSpecimenGroupCmd(sg1.id.toString, study1.id.toString, sg1.version, name2,
           name2, units2, anatomicalSourceId2, preservationId2, specimenTypeId2)))
 
-      val sg2 = study3.specimenGroups(sg.id)
-      sg2.name must be(name2)
-      sg2.description must be(name2)
-      sg2.units must be(units2)
-      sg2.anatomicalSourceId must be(anatomicalSourceId2)
-      sg2.preservationId must be(preservationId2)
-      sg2.specimenTypeId must be(specimenTypeId2)
+      specimenGroupsRef.single.get.get(sg2.id) must beSome.like {
+        case x =>
+          x.name must be(name2)
+          x.description must be(name2)
+          x.units must be(units2)
+          x.anatomicalSourceId must be(anatomicalSourceId2)
+          x.preservationId must be(preservationId2)
+          x.specimenTypeId must be(specimenTypeId2)
+      }
   }
 }
 
 object StudyServiceFixture {
 
-  class Fixture extends EventsourcingFixture[DomainValidation[Study]] {
+  class Fixture extends EventsourcingFixture[DomainValidation[Entity[_]]] {
 
-    val studiesRef = Ref(Map.empty[domain.study.StudyId, Study])
+    val studiesRef = Ref(Map.empty[StudyId, Study])
+    val specimenGroupsRef = Ref(Map.empty[SpecimenGroupId, SpecimenGroup])
 
     val studyProcessor = extension.processorOf(Props(
-      new StudyProcessor(studiesRef) with Emitter with Eventsourced { val id = 1 }))
+      new StudyProcessor(studiesRef, specimenGroupsRef) with Emitter with Eventsourced { val id = 1 }))
 
-    val studyService = new StudyService(studiesRef, studyProcessor)
+    val studyService = new StudyService(studiesRef, specimenGroupsRef, studyProcessor)
 
-    def result[T <: Study](f: Future[DomainValidation[T]]) = {
+    def result[T <: Entity[_]](f: Future[DomainValidation[T]]) = {
       Await.result(f, timeout.duration)
     }
 
-    def studyResult[T <: Study](f: Future[DomainValidation[T]]): Study = {
+    def entityResult[T <: Entity[_]](f: Future[DomainValidation[T]]): T = {
       result(f) match {
-        case Success(s) => s
-        case _ => throw new Error("null study, validation failed")
+        case Success(e) => e
+        case _ => throw new Error("null entity, validation failed")
       }
     }
   }

@@ -13,28 +13,12 @@ import domain.UserId
 sealed abstract class Study extends Entity[StudyId] {
   def name: String
   def description: String
-  def specimenGroups: Map[SpecimenGroupId, SpecimenGroup]
 
   override def toString =
     "{ id:%s, name:%s, description:%s }" format (id.toString, name, description)
 }
 
 object Study {
-  val invalidVersionMessage = "study %s: expected version %s doesn't match current version %s"
-
-  def invalidVersion(studyId: Identity, expected: Long, current: Long) =
-    DomainError(invalidVersionMessage format (studyId, expected, current))
-
-  def requireVersion[T <: Study](study: T, expectedVersion: Option[Long]): DomainValidation[T] = {
-    val id = study.id
-    val version = study.version
-
-    expectedVersion match {
-      case Some(expected) if (version != expected) => invalidVersion(id, expected, version).fail
-      case Some(expected) if (version == expected) => study.success
-      case None => study.success
-    }
-  }
 
   // TODO: not sure yet if this is the right place for this method
   def nextIdentity: StudyId =

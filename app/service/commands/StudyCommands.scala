@@ -7,19 +7,18 @@ import domain.PreservationId
 
 // study commands
 case class AddStudyCmd(name: String, description: String)
-case class UpdateStudy(id: String, expectedVersion: Option[Long], name: String, description: String)
-case class EnableStudy(id: String, expectedVersion: Option[Long])
-case class DisableStudy(id: String, expectedVersion: Option[Long])
+case class UpdateStudy(id: String, expectedVersion: Long, name: String, description: String)
+case class EnableStudy(id: String, expectedVersion: Long)
+case class DisableStudy(id: String, expectedVersion: Long)
 
 // specimen group commands
-case class AddSpecimenGroupCmd(studyId: String, expectedVersion: Option[Long],
-  name: String, description: String, units: String, amatomicalSourceId: AnatomicalSourceId,
-  preservationId: PreservationId, specimenTypeId: SpecimenTypeId)
-case class UpdateSpecimenGroupCmd(studyId: String, expectedVersion: Option[Long],
-  specimenGroupId: String, name: String, description: String, units: String,
-  amatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
+case class AddSpecimenGroupCmd(studyId: String, name: String, description: String, units: String,
+  anatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId, specimenTypeId: SpecimenTypeId)
+case class UpdateSpecimenGroupCmd(studyId: String, specimenGroupId: String,
+  expectedVersion: Long, name: String, description: String, units: String,
+  anatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
   specimenTypeId: SpecimenTypeId)
-case class RemoveSpecimenGroupCmd(studyId: String, expectedVersion: Option[Long],
+case class RemoveSpecimenGroupCmd(studyId: String, expectedVersion: Long,
   specimenGroupId: String)
 
 // collection event commands
