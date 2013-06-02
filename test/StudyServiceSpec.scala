@@ -38,8 +38,31 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val name = new NameGenerator(fragmentName).next[Study]
       val study = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
       studiesRef.single.get must not be empty
+      studiesRef.single.get must haveKey(study.id)
       studiesRef.single.get.get(study.id) must beSome.like {
         case s => s.description must be(name)
+      }
+  }
+
+  "enable a study" in {
+    fragmentName: String =>
+      val ng = new NameGenerator(fragmentName)
+      val name = ng.next[Study]
+      val units = ng.next[String]
+      val anatomicalSourceId = new AnatomicalSourceId(ng.next[String])
+      val preservationId = new PreservationId(ng.next[String])
+      val specimenTypeId = new SpecimenTypeId(ng.next[String])
+
+      val study = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+
+      val sg = entityResult(studyService.addSpecimenGroup(
+        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceId,
+          preservationId, specimenTypeId)))
+
+      entityResult(studyService.enableStudy(new EnableStudyCmd(study.id.toString, study.versionOption)))
+
+      studiesRef.single.get.get(study.id) must beSome.like {
+        case s => s must beAnInstanceOf[EnabledStudy]
       }
   }
 
@@ -70,6 +93,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
         new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceId,
           preservationId, specimenTypeId)))
 
+      specimenGroupsRef.single.get must haveKey(sg1.id)
       specimenGroupsRef.single.get.get(sg1.id) must beSome.like {
         case x =>
           x.description must be(name)
@@ -84,6 +108,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
         new AddSpecimenGroupCmd(study1.id.toString, name2, name2, units, anatomicalSourceId,
           preservationId, specimenTypeId)))
 
+      specimenGroupsRef.single.get must haveKey(sg2.id)
       specimenGroupsRef.single.get.get(sg2.id) must beSome.like {
         case x =>
           x.description must be(name2)
@@ -116,7 +141,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val specimenTypeId2 = new SpecimenTypeId(ng.next[String])
 
       val sg2 = entityResult(studyService.updateSpecimenGroup(
-        new UpdateSpecimenGroupCmd(sg1.id.toString, study1.id.toString, sg1.version, name2,
+        new UpdateSpecimenGroupCmd(study1.id.toString, sg1.id.toString, sg1.versionOption, name2,
           name2, units2, anatomicalSourceId2, preservationId2, specimenTypeId2)))
 
       specimenGroupsRef.single.get.get(sg2.id) must beSome.like {
@@ -150,7 +175,7 @@ object StudyServiceFixture {
     def entityResult[T <: Entity[_]](f: Future[DomainValidation[T]]): T = {
       result(f) match {
         case Success(e) => e
-        case _ => throw new Error("null entity, validation failed")
+        case Failure(msg) => throw new Error("null entity, validation failed: " + msg)
       }
     }
   }

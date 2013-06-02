@@ -1,28 +1,22 @@
 package service
 
-import scala.concurrent._
-import scala.concurrent.duration._
-import scala.concurrent.stm.Ref
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 import org.eligosource.eventsourced.core._
+import scala.concurrent._
+import scala.concurrent.duration._
+import scala.concurrent.stm.Ref
+import scala.language.postfixOps
+
+import domain._
+import domain.study._
+
+import service.commands._
+import service.events._
+
 import scalaz._
 import Scalaz._
-import scala.language.postfixOps
-import service.events.StudyAddedEvent
-import service.events.StudySpecimenGroupUpdatedEvent
-import service.events.StudySpecimenGroupAddedEvent
-import domain.study.StudyId
-import domain.study._
-import domain.study.SpecimenGroupId
-import domain.study.SpecimenGroup
-import domain.Entity
-import service.commands.AddStudyCmd
-import domain.DomainError
-import service.commands.UpdateSpecimenGroupCmd
-import domain.DomainValidation
-import service.commands.AddSpecimenGroupCmd
 
 class StudyService(
   studiesRef: Ref[Map[StudyId, Study]],
@@ -46,6 +40,9 @@ class StudyService(
   def addStudy(cmd: AddStudyCmd): Future[DomainValidation[DisabledStudy]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 
+  def enableStudy(cmd: EnableStudyCmd): Future[DomainValidation[EnabledStudy]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[EnabledStudy]])
+
   def addSpecimenGroup(cmd: AddSpecimenGroupCmd): Future[DomainValidation[SpecimenGroup]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroup]])
 
@@ -61,9 +58,13 @@ class StudyProcessor(
   specimenGroupsRef: Ref[Map[SpecimenGroupId, SpecimenGroup]]) extends Actor { this: Emitter =>
 
   def receive = {
-    case addStudyCmd: AddStudyCmd =>
-      process(addStudy(addStudyCmd)) { study =>
+    case cmd: AddStudyCmd =>
+      process(addStudy(cmd)) { study =>
         emitter("listeners") sendEvent StudyAddedEvent(study.id, study.name, study.description)
+      }
+    case cmd: EnableStudyCmd =>
+      process(enableStudy(cmd)) { study =>
+        emitter("listeners") sendEvent StudyEnabledEvent(study.id)
       }
     case addSpcgCmd: AddSpecimenGroupCmd =>
       process(addSpecimenGroup(addSpcgCmd)) { sg =>
@@ -94,6 +95,15 @@ class StudyProcessor(
     }
   }
 
+  def enableStudy(cmd: EnableStudyCmd): DomainValidation[EnabledStudy] = {
+    val studyId = new StudyId(cmd.id)
+    updateDisabledStudy(studyId, cmd.expectedVersion) { study =>
+      val specimenGroupCount = specimenGroupsRef.single.get.filter(
+        sg => sg._2.studyId.equals(studyId)).size
+      study.enable(specimenGroupCount, 0)
+    }
+  }
+
   def addSpecimenGroup(cmd: AddSpecimenGroupCmd): DomainValidation[SpecimenGroup] = {
     val studyId = new StudyId(cmd.studyId)
     readStudies.get(studyId) match {
@@ -112,30 +122,45 @@ class StudyProcessor(
 
   def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd): DomainValidation[SpecimenGroup] = {
     val studyId = new StudyId(cmd.studyId)
-    readStudies.get(studyId) match {
-      case None => StudyProcessor.noSuchStudy(studyId).fail
-      case Some(study) => study match {
-        case study: EnabledStudy => StudyProcessor.notDisabledError(study.name).fail
-        case study: DisabledStudy =>
-          val specimenGroupId = new SpecimenGroupId(cmd.specimenGroupId)
-          specimenGroupsRef.single.get.find(
-            sg => sg._2.name.equals(cmd.name) && sg._2.studyId.equals(study.id)) match {
-              case None => DomainError("specimen group with name already exists for this study: %s" format cmd.name).fail
-              case Some(sg) =>
-                new SpecimenGroup(specimenGroupId, studyId, cmd.expectedVersion, cmd.name, cmd.description,
-                  cmd.units, cmd.anatomicalSourceId, cmd.preservationId, cmd.specimenTypeId).success
-            }
-      }
+    val specimenGroupId = new SpecimenGroupId(cmd.specimenGroupId)
+    updateSpecimenGroup(studyId, specimenGroupId, cmd.expectedVersion) { sg =>
+      SpecimenGroup(specimenGroupId, studyId, sg.version + 1, cmd.name, cmd.description, cmd.units,
+        cmd.anatomicalSourceId, cmd.preservationId, cmd.specimenTypeId).success
     }
   }
 
-  def updateStudy[B <: Study](studyId: StudyId, expectedVersion: Option[Long])(f: Study => DomainValidation[B]): DomainValidation[B] =
+  def updateSpecimenGroup(studyId: StudyId, specimenGroupId: SpecimenGroupId,
+    expectedVersion: Option[Long])(f: SpecimenGroup => DomainValidation[SpecimenGroup]): DomainValidation[SpecimenGroup] = {
     readStudies.get(studyId) match {
       case None => StudyProcessor.noSuchStudy(studyId).fail
+      case Some(study) =>
+        specimenGroupsRef.single.get.get(specimenGroupId) match {
+          case None => DomainError("no specimen gpoup with id: %s" format specimenGroupId).fail
+          case Some(sg) => for {
+            current <- sg.requireVersion(expectedVersion)
+            updated <- f(sg)
+          } yield updated
+        }
+    }
+  }
+
+  def updateStudy[T <: Study](id: StudyId,
+    expectedVersion: Option[Long])(f: Study => DomainValidation[T]): DomainValidation[T] =
+    readStudies.get(id) match {
+      case None => StudyProcessor.noSuchStudy(id).fail
       case Some(study) => for {
         current <- study.requireVersion(expectedVersion)
         updated <- f(study)
       } yield updated
+    }
+
+  def updateDisabledStudy[T <: Study](id: StudyId,
+    expectedVersion: Option[Long])(f: DisabledStudy => DomainValidation[T]): DomainValidation[T] =
+    updateStudy(id, expectedVersion) { study =>
+      study match {
+        case study: DisabledStudy => f(study)
+        case study: Study => StudyProcessor.notDisabledError(study.name).fail
+      }
     }
 
   private def updateRepository[T <: Entity[_]](entity: T) = entity match {

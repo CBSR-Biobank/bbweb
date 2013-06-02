@@ -33,22 +33,11 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
   specimenGroups: Map[SpecimenGroupId, SpecimenGroup] = Map.empty)
   extends Study {
 
-  def addSpecimenGroup(specimenGroup: SpecimenGroup): DomainValidation[DisabledStudy] = {
-    copy(version = version + 1,
-      specimenGroups = specimenGroups + (specimenGroup.id -> specimenGroup)).success
-  }
-
-  def updateSpecimenGroup(specimenGroup: SpecimenGroup): DomainValidation[DisabledStudy] =
-    specimenGroups.get(specimenGroup.id) match {
-      case Some(sg) =>
-        copy(version = version + 1,
-          specimenGroups = specimenGroups + (specimenGroup.id -> specimenGroup)).success
-      case None => DomainError("specimen group with ID not found: %s" format specimenGroup.id).fail
-    }
-
-  def addCollectionEventType(name: String, description: String, recurring: Boolean) = {
-
-  }
+  def enable(specimenGroupCount: Int, collectionEventTypecount: Int): DomainValidation[EnabledStudy] =
+    if ((specimenGroupCount == 0) || (collectionEventTypecount == 0))
+      DomainError("study has no specimen groups and / or no collection event types").fail
+    else
+      EnabledStudy(id, version + 1, name, description).success
 
 }
 
