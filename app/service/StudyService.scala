@@ -55,7 +55,7 @@ class StudyService(
 // -------------------------------------------------------------------------------------------------------------
 class StudyProcessor(
   studiesRef: Ref[Map[StudyId, Study]],
-  specimenGroupsRef: Ref[Map[SpecimenGroupId, SpecimenGroup]]) extends Actor { this: Emitter =>
+  specimenGroupsRef: Ref[Map[SpecimenGroupId, SpecimenGroup]]) extends Processor { this: Emitter =>
 
   def receive = {
     case cmd: AddStudyCmd =>
@@ -80,18 +80,10 @@ class StudyProcessor(
       }
   }
 
-  def process[T <: Entity[_]](validation: DomainValidation[T])(onSuccess: T => Unit) = {
-    validation.foreach { entity =>
-      updateRepository(entity)
-      onSuccess(entity)
-    }
-    sender ! validation
-  }
-
   def addStudy(cmd: AddStudyCmd): DomainValidation[DisabledStudy] = {
     readStudies.find(s => s._2.name.equals(cmd.name)) match {
       case Some(study) => DomainError("study with name already exists: %s" format cmd.name).fail
-      case None => Study.add(Study.nextIdentity, cmd.name, cmd.description)
+      case None => Study.add(cmd.name, cmd.description)
     }
   }
 
@@ -111,11 +103,11 @@ class StudyProcessor(
       case Some(study) => study match {
         case study: EnabledStudy => StudyProcessor.notDisabledError(study.name).fail
         case study: DisabledStudy =>
-          specimenGroupsRef.single.get.find(
-            sg => sg._2.name.equals(cmd.name) && sg._2.studyId.equals(study.id)) match {
-              case Some(sg) => DomainError("specimen group with name already exists: %s" format cmd.name).fail
-              case None => SpecimenGroup.add(cmd)
-            }
+          // FIXME: lookup other IDs and verify them
+          val studySpecimenGroups = specimenGroupsRef.single.get.filter(
+            sg => sg._2.studyId.equals(study.id))
+          study.addSpecimenGroup(studySpecimenGroups, studyId, cmd.name, cmd.description, cmd.units,
+            cmd.anatomicalSourceId, cmd.preservationId, cmd.specimenTypeId)
       }
     }
   }
@@ -134,28 +126,17 @@ class StudyProcessor(
     readStudies.get(studyId) match {
       case None => StudyProcessor.noSuchStudy(studyId).fail
       case Some(study) =>
-        specimenGroupsRef.single.get.get(specimenGroupId) match {
-          case None => DomainError("no specimen gpoup with id: %s" format specimenGroupId).fail
-          case Some(sg) => for {
-            current <- sg.requireVersion(expectedVersion)
-            updated <- f(sg)
-          } yield updated
-        }
+        updateEntity(specimenGroupsRef.single.get.get(specimenGroupId), specimenGroupId,
+          expectedVersion)(f)
     }
   }
 
   def updateStudy[T <: Study](id: StudyId,
-    expectedVersion: Option[Long])(f: Study => DomainValidation[T]): DomainValidation[T] =
-    readStudies.get(id) match {
-      case None => StudyProcessor.noSuchStudy(id).fail
-      case Some(study) => for {
-        current <- study.requireVersion(expectedVersion)
-        updated <- f(study)
-      } yield updated
-    }
+    expectedVersion: Option[Long])(f: Study => DomainValidation[Study]): DomainValidation[Study] =
+    updateEntity(readStudies.get(id), id, expectedVersion)(f)
 
   def updateDisabledStudy[T <: Study](id: StudyId,
-    expectedVersion: Option[Long])(f: DisabledStudy => DomainValidation[T]): DomainValidation[T] =
+    expectedVersion: Option[Long])(f: T => DomainValidation[Study]): DomainValidation[Study] =
     updateStudy(id, expectedVersion) { study =>
       study match {
         case study: DisabledStudy => f(study)
@@ -163,7 +144,7 @@ class StudyProcessor(
       }
     }
 
-  private def updateRepository[T <: Entity[_]](entity: T) = entity match {
+  override def updateRepository[T <: ConcurrencySafeEntity[_]](entity: T) = entity match {
     case study: Study => studiesRef.single.transform(studies => studies + (study.id -> study))
     case sg: SpecimenGroup => specimenGroupsRef.single.transform(groups => groups + (sg.id -> sg))
     case _ => throw new Error("update on invalid entity")

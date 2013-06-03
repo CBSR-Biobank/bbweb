@@ -3,7 +3,7 @@ package domain
 import scalaz._
 import scalaz.Scalaz._
 
-abstract class Entity[T <: Identity] {
+abstract class ConcurrencySafeEntity[T <: Identity] {
   def id: T
   def version: Long
   def versionOption = if (version == -1L) None else Some(version)
@@ -17,7 +17,7 @@ abstract class Entity[T <: Identity] {
   def invalidVersion(expected: Long) =
     DomainError(invalidVersionMessage format (id, expected, version))
 
-  def requireVersion(expectedVersion: Option[Long]): DomainValidation[Entity[T]] = {
+  def requireVersion(expectedVersion: Option[Long]): DomainValidation[ConcurrencySafeEntity[T]] = {
     expectedVersion match {
       case Some(expected) if (version != expected) => invalidVersion(expected).fail
       case Some(expected) if (version == expected) => this.success

@@ -1,16 +1,15 @@
 package domain.study
 
-import scalaz._
-import scalaz.Scalaz._
 import domain.AnatomicalSourceId
-import domain.Entity
+import domain.DomainError
+import domain.DomainValidation
+import domain.ConcurrencySafeEntity
 import domain.Identity
 import domain.PreservationId
-import domain.DomainValidation
-import domain.DomainError
-import domain.UserId
+import scalaz._
+import scalaz.Scalaz._
 
-sealed abstract class Study extends Entity[StudyId] {
+sealed abstract class Study extends ConcurrencySafeEntity[StudyId] {
   def name: String
   def description: String
 
@@ -20,18 +19,24 @@ sealed abstract class Study extends Entity[StudyId] {
 
 object Study {
 
-  // TODO: not sure yet if this is the right place for this method
-  def nextIdentity: StudyId =
-    new StudyId(java.util.UUID.randomUUID.toString.toUpperCase)
-
-  def add(id: StudyId, name: String, description: String): DomainValidation[DisabledStudy] =
-    DisabledStudy(id, version = 0L, name, description, specimenGroups = Map.empty).success
-
+  def add(name: String, description: String): DomainValidation[DisabledStudy] =
+    DisabledStudy(StudyIdentityService.nextIdentity, version = 0L, name, description,
+      specimenGroups = Map.empty).success
 }
 
 case class DisabledStudy(id: StudyId, version: Long = -1, name: String, description: String,
   specimenGroups: Map[SpecimenGroupId, SpecimenGroup] = Map.empty)
   extends Study {
+
+  def addSpecimenGroup(specimenGroups: Map[SpecimenGroupId, SpecimenGroup], studyId: StudyId,
+    name: String, description: String, units: String, anatomicalSourceId: AnatomicalSourceId,
+    preservationId: PreservationId, specimenTypeId: SpecimenTypeId): DomainValidation[SpecimenGroup] =
+    specimenGroups.find(sg => sg._2.name.equals(name)) match {
+      case Some(sg) => DomainError("specimen group with name already exists: %s" format name).fail
+      case None =>
+        SpecimenGroup.add(studyId, name, description, units, anatomicalSourceId, preservationId,
+          specimenTypeId)
+    }
 
   def enable(specimenGroupCount: Int, collectionEventTypecount: Int): DomainValidation[EnabledStudy] =
     if ((specimenGroupCount == 0) || (collectionEventTypecount == 0))

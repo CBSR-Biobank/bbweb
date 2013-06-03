@@ -15,17 +15,15 @@ case class SpecimenGroup(
   units: String,
   anatomicalSourceId: AnatomicalSourceId,
   preservationId: PreservationId,
-  specimenTypeId: SpecimenTypeId) extends Entity[SpecimenGroupId] {
+  specimenTypeId: SpecimenTypeId) extends ConcurrencySafeEntity[SpecimenGroupId] {
 }
 
 object SpecimenGroup {
 
-  // TODO: not sure yet if this is the right place for this method
-  def nextIdentity: SpecimenGroupId =
-    new SpecimenGroupId(java.util.UUID.randomUUID.toString.toUpperCase)
-
-  def add(cmd: AddSpecimenGroupCmd): DomainValidation[SpecimenGroup] =
-    SpecimenGroup(nextIdentity, new StudyId(cmd.studyId), version = 0L, cmd.name, cmd.description,
-      cmd.units, cmd.anatomicalSourceId, cmd.preservationId, cmd.specimenTypeId).success
+  def add(studyId: StudyId, name: String, description: String, units: String,
+    anatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
+    specimenTypeId: SpecimenTypeId): DomainValidation[SpecimenGroup] =
+    SpecimenGroup(SpecimenGroupIdentityService.nextIdentity, studyId, version = 0L, name,
+      description, units, anatomicalSourceId, preservationId, specimenTypeId).success
 
 }

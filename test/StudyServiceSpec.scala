@@ -158,7 +158,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
 
 object StudyServiceFixture {
 
-  class Fixture extends EventsourcingFixture[DomainValidation[Entity[_]]] {
+  class Fixture extends EventsourcingFixture[DomainValidation[ConcurrencySafeEntity[_]]] {
 
     val studiesRef = Ref(Map.empty[StudyId, Study])
     val specimenGroupsRef = Ref(Map.empty[SpecimenGroupId, SpecimenGroup])
@@ -168,11 +168,11 @@ object StudyServiceFixture {
 
     val studyService = new StudyService(studiesRef, specimenGroupsRef, studyProcessor)
 
-    def result[T <: Entity[_]](f: Future[DomainValidation[T]]) = {
+    def result[T <: ConcurrencySafeEntity[_]](f: Future[DomainValidation[T]]) = {
       Await.result(f, timeout.duration)
     }
 
-    def entityResult[T <: Entity[_]](f: Future[DomainValidation[T]]): T = {
+    def entityResult[T <: ConcurrencySafeEntity[_]](f: Future[DomainValidation[T]]): T = {
       result(f) match {
         case Success(e) => e
         case Failure(msg) => throw new Error("null entity, validation failed: " + msg)

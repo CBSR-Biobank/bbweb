@@ -68,13 +68,13 @@ class UserProcessor(usersRef: Ref[Map[UserId, User]]) extends Actor { this: Emit
   def addUser(cmd: AddUserCmd): DomainValidation[User] = {
     readUsers.find(u => u._2.email.equals(cmd.email)) match {
       case Some(user) => DomainError("user with email already exists: %s" format cmd.email).fail
-      case None => User.add(User.nextIdentity, cmd.name, cmd.email, cmd.password)
+      case None => User.add(cmd.name, cmd.email, cmd.password)
     }
   }
 
   def authenticateUser(cmd: AuthenticateUserCmd): DomainValidation[User] = {
     if (cmd.email.equals("admin@admin.com")) {
-      new AuthenticatedUser(User.nextIdentity, 0, "admin", "admin@admin.com", "admin").success
+      User.add("admin", "admin@admin.com", "admin")
     } else {
       readUsers.find(u => u._2.email.equals(cmd.email)) match {
         case Some(entry) => entry._2.authenticate(cmd.email, cmd.password)
