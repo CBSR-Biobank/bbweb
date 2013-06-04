@@ -93,8 +93,8 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
         new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceId,
           preservationId, specimenTypeId)))
 
-      specimenGroupsRef.single.get must haveKey(sg1.id)
-      specimenGroupsRef.single.get.get(sg1.id) must beSome.like {
+      specimenGroupRepository.getMap must haveKey(sg1.id)
+      specimenGroupRepository.getByKey(sg1.id) must beSome.like {
         case x =>
           x.description must be(name)
           x.units must be(units)
@@ -108,8 +108,8 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
         new AddSpecimenGroupCmd(study1.id.toString, name2, name2, units, anatomicalSourceId,
           preservationId, specimenTypeId)))
 
-      specimenGroupsRef.single.get must haveKey(sg2.id)
-      specimenGroupsRef.single.get.get(sg2.id) must beSome.like {
+      specimenGroupRepository.getMap must haveKey(sg2.id)
+      specimenGroupRepository.getByKey(sg2.id) must beSome.like {
         case x =>
           x.description must be(name2)
           x.description must be(name2)
@@ -144,7 +144,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
         new UpdateSpecimenGroupCmd(study1.id.toString, sg1.id.toString, sg1.versionOption, name2,
           name2, units2, anatomicalSourceId2, preservationId2, specimenTypeId2)))
 
-      specimenGroupsRef.single.get.get(sg2.id) must beSome.like {
+      specimenGroupRepository.getByKey(sg2.id) must beSome.like {
         case x =>
           x.name must be(name2)
           x.description must be(name2)
@@ -161,12 +161,12 @@ object StudyServiceFixture {
   class Fixture extends EventsourcingFixture[DomainValidation[ConcurrencySafeEntity[_]]] {
 
     val studyRepository = new Repository[StudyId, Study](v => v.id)
-    val specimenGroupsRef = Ref(Map.empty[SpecimenGroupId, SpecimenGroup])
+    val specimenGroupRepository = new Repository[SpecimenGroupId, SpecimenGroup](v => v.id)
 
     val studyProcessor = extension.processorOf(Props(
-      new StudyProcessor(studyRepository, specimenGroupsRef) with Emitter with Eventsourced { val id = 1 }))
+      new StudyProcessor(studyRepository, specimenGroupRepository) with Emitter with Eventsourced { val id = 1 }))
 
-    val studyService = new StudyService(studyRepository, specimenGroupsRef, studyProcessor)
+    val studyService = new StudyService(studyRepository, specimenGroupRepository, studyProcessor)
 
     def result[T <: ConcurrencySafeEntity[_]](f: Future[DomainValidation[T]]) = {
       Await.result(f, timeout.duration)

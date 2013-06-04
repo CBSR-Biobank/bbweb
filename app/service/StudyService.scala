@@ -20,20 +20,10 @@ import Scalaz._
 
 class StudyService(
   studyRepository: Repository[StudyId, Study],
-  specimenGroupsRef: Ref[Map[SpecimenGroupId, SpecimenGroup]],
-  studyProcessor: ActorRef)(implicit system: ActorSystem) {
+  specimenGroupRepository: Repository[SpecimenGroupId, SpecimenGroup],
+  studyProcessor: ActorRef)(implicit system: ActorSystem)
+  extends ApplicationService {
   import system.dispatcher
-
-  //
-  // Consistent reads
-  //
-  def getSpecimenGroupsMap = specimenGroupsRef.single.get
-
-  //
-  // Updates
-  //
-
-  implicit val timeout = Timeout(5 seconds)
 
   def addStudy(cmd: AddStudyCmd): Future[DomainValidation[DisabledStudy]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
@@ -53,7 +43,8 @@ class StudyService(
 // -------------------------------------------------------------------------------------------------------------
 class StudyProcessor(
   studyRepository: Repository[StudyId, Study],
-  specimenGroupsRef: Ref[Map[SpecimenGroupId, SpecimenGroup]]) extends Processor { this: Emitter =>
+  specimenGroupRepository: Repository[SpecimenGroupId, SpecimenGroup])
+  extends Processor { this: Emitter =>
 
   def receive = {
     case cmd: AddStudyCmd =>
@@ -88,8 +79,8 @@ class StudyProcessor(
   def enableStudy(cmd: EnableStudyCmd): DomainValidation[EnabledStudy] = {
     val studyId = new StudyId(cmd.id)
     updateDisabledStudy(studyId, cmd.expectedVersion) { study =>
-      val specimenGroupCount = specimenGroupsRef.single.get.filter(
-        sg => sg._2.studyId.equals(studyId)).size
+      val specimenGroupCount = specimenGroupRepository.getValues.filter(
+        sg => sg.studyId.equals(studyId)).size
       study.enable(specimenGroupCount, 0)
     }
   }
@@ -102,7 +93,7 @@ class StudyProcessor(
         case study: EnabledStudy => StudyProcessor.notDisabledError(study.name).fail
         case study: DisabledStudy =>
           // FIXME: lookup other IDs and verify them
-          val studySpecimenGroups = specimenGroupsRef.single.get.filter(
+          val studySpecimenGroups = specimenGroupRepository.getMap.filter(
             sg => sg._2.studyId.equals(study.id))
           study.addSpecimenGroup(studySpecimenGroups, studyId, cmd.name, cmd.description, cmd.units,
             cmd.anatomicalSourceId, cmd.preservationId, cmd.specimenTypeId)
@@ -124,7 +115,7 @@ class StudyProcessor(
     studyRepository.getByKey(studyId) match {
       case None => StudyProcessor.noSuchStudy(studyId).fail
       case Some(study) =>
-        updateEntity(specimenGroupsRef.single.get.get(specimenGroupId), specimenGroupId,
+        updateEntity(specimenGroupRepository.getByKey(specimenGroupId), specimenGroupId,
           expectedVersion)(f)
     }
   }
@@ -144,7 +135,7 @@ class StudyProcessor(
 
   override def updateRepository[T <: ConcurrencySafeEntity[_]](entity: T) = entity match {
     case study: Study => studyRepository.updateMap(study)
-    case sg: SpecimenGroup => specimenGroupsRef.single.transform(groups => groups + (sg.id -> sg))
+    case sg: SpecimenGroup => specimenGroupRepository.updateMap(sg)
     case _ => throw new Error("update on invalid entity")
   }
 }
