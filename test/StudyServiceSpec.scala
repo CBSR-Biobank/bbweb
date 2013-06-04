@@ -37,9 +37,9 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
     fragmentName: String =>
       val name = new NameGenerator(fragmentName).next[Study]
       val study = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
-      studiesRef.single.get must not be empty
-      studiesRef.single.get must haveKey(study.id)
-      studiesRef.single.get.get(study.id) must beSome.like {
+      studyRepository.getMap must not be empty
+      studyRepository.getMap must haveKey(study.id)
+      studyRepository.getByKey(study.id) must beSome.like {
         case s => s.description must be(name)
       }
   }
@@ -61,7 +61,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
 
       entityResult(studyService.enableStudy(new EnableStudyCmd(study.id.toString, study.versionOption)))
 
-      studiesRef.single.get.get(study.id) must beSome.like {
+      studyRepository.getByKey(study.id) must beSome.like {
         case s => s must beAnInstanceOf[EnabledStudy]
       }
   }
@@ -160,13 +160,13 @@ object StudyServiceFixture {
 
   class Fixture extends EventsourcingFixture[DomainValidation[ConcurrencySafeEntity[_]]] {
 
-    val studiesRef = Ref(Map.empty[StudyId, Study])
+    val studyRepository = new Repository[StudyId, Study](v => v.id)
     val specimenGroupsRef = Ref(Map.empty[SpecimenGroupId, SpecimenGroup])
 
     val studyProcessor = extension.processorOf(Props(
-      new StudyProcessor(studiesRef, specimenGroupsRef) with Emitter with Eventsourced { val id = 1 }))
+      new StudyProcessor(studyRepository, specimenGroupsRef) with Emitter with Eventsourced { val id = 1 }))
 
-    val studyService = new StudyService(studiesRef, specimenGroupsRef, studyProcessor)
+    val studyService = new StudyService(studyRepository, specimenGroupsRef, studyProcessor)
 
     def result[T <: ConcurrencySafeEntity[_]](f: Future[DomainValidation[T]]) = {
       Await.result(f, timeout.duration)

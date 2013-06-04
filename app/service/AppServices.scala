@@ -42,17 +42,17 @@ object AppServices {
     val journal = Journal(journalProps)
     val extension = EventsourcingExtension(system, journal)
 
-    val studiesRef = Ref(Map.empty[domain.study.StudyId, Study])
+    val studyRepository = new Repository[StudyId, Study](v => v.id)
     val specimenGroupsRef = Ref(Map.empty[domain.study.SpecimenGroupId, SpecimenGroup])
     val usersRef = Ref(Map.empty[domain.UserId, User])
 
     val studyProcessor = extension.processorOf(Props(
-      new StudyProcessor(studiesRef, specimenGroupsRef) with Emitter with Eventsourced { val id = 1 }))
+      new StudyProcessor(studyRepository, specimenGroupsRef) with Emitter with Eventsourced { val id = 1 }))
 
     val userProcessor = extension.processorOf(Props(
       new UserProcessor(usersRef) with Emitter with Eventsourced { val id = 1 }))
 
-    val studyService = new StudyService(studiesRef, specimenGroupsRef, studyProcessor)
+    val studyService = new StudyService(studyRepository, specimenGroupsRef, studyProcessor)
     val userService = new UserService(usersRef, userProcessor)
 
     extension.recover()

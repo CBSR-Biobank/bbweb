@@ -19,7 +19,7 @@ import scalaz._
 import Scalaz._
 
 class StudyService(
-  studiesRef: Ref[Map[StudyId, Study]],
+  studyRepository: Repository[StudyId, Study],
   specimenGroupsRef: Ref[Map[SpecimenGroupId, SpecimenGroup]],
   studyProcessor: ActorRef)(implicit system: ActorSystem) {
   import system.dispatcher
@@ -27,8 +27,6 @@ class StudyService(
   //
   // Consistent reads
   //
-
-  def getStudiesMap = studiesRef.single.get
   def getSpecimenGroupsMap = specimenGroupsRef.single.get
 
   //
@@ -54,7 +52,7 @@ class StudyService(
 //  InvoiceProcessor is single writer to studiesRef, so we can have reads and writes in separate transactions
 // -------------------------------------------------------------------------------------------------------------
 class StudyProcessor(
-  studiesRef: Ref[Map[StudyId, Study]],
+  studyRepository: Repository[StudyId, Study],
   specimenGroupsRef: Ref[Map[SpecimenGroupId, SpecimenGroup]]) extends Processor { this: Emitter =>
 
   def receive = {
@@ -81,7 +79,7 @@ class StudyProcessor(
   }
 
   def addStudy(cmd: AddStudyCmd): DomainValidation[DisabledStudy] = {
-    readStudies.find(s => s._2.name.equals(cmd.name)) match {
+    studyRepository.getValues.find(s => s.name.equals(cmd.name)) match {
       case Some(study) => DomainError("study with name already exists: %s" format cmd.name).fail
       case None => Study.add(cmd.name, cmd.description)
     }
@@ -98,7 +96,7 @@ class StudyProcessor(
 
   def addSpecimenGroup(cmd: AddSpecimenGroupCmd): DomainValidation[SpecimenGroup] = {
     val studyId = new StudyId(cmd.studyId)
-    readStudies.get(studyId) match {
+    studyRepository.getByKey(studyId) match {
       case None => StudyProcessor.noSuchStudy(studyId).fail
       case Some(study) => study match {
         case study: EnabledStudy => StudyProcessor.notDisabledError(study.name).fail
@@ -123,7 +121,7 @@ class StudyProcessor(
 
   def updateSpecimenGroup(studyId: StudyId, specimenGroupId: SpecimenGroupId,
     expectedVersion: Option[Long])(f: SpecimenGroup => DomainValidation[SpecimenGroup]): DomainValidation[SpecimenGroup] = {
-    readStudies.get(studyId) match {
+    studyRepository.getByKey(studyId) match {
       case None => StudyProcessor.noSuchStudy(studyId).fail
       case Some(study) =>
         updateEntity(specimenGroupsRef.single.get.get(specimenGroupId), specimenGroupId,
@@ -133,7 +131,7 @@ class StudyProcessor(
 
   def updateStudy[T <: Study](id: StudyId,
     expectedVersion: Option[Long])(f: Study => DomainValidation[T]): DomainValidation[T] =
-    updateEntity(readStudies.get(id), id, expectedVersion)(f)
+    updateEntity(studyRepository.getByKey(id), id, expectedVersion)(f)
 
   def updateDisabledStudy[T <: Study](id: StudyId,
     expectedVersion: Option[Long])(f: DisabledStudy => DomainValidation[T]): DomainValidation[T] =
@@ -145,13 +143,10 @@ class StudyProcessor(
     }
 
   override def updateRepository[T <: ConcurrencySafeEntity[_]](entity: T) = entity match {
-    case study: Study => studiesRef.single.transform(studies => studies + (study.id -> study))
+    case study: Study => studyRepository.updateMap(study)
     case sg: SpecimenGroup => specimenGroupsRef.single.transform(groups => groups + (sg.id -> sg))
     case _ => throw new Error("update on invalid entity")
   }
-
-  private def readStudies =
-    studiesRef.single.get
 }
 
 object StudyProcessor {
