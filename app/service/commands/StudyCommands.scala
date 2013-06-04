@@ -18,8 +18,8 @@ case class UpdateSpecimenGroupCmd(studyId: String, specimenGroupId: String,
   expectedVersion: Option[Long], name: String, description: String, units: String,
   anatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
   specimenTypeId: SpecimenTypeId)
-case class RemoveSpecimenGroupCmd(studyId: String, expectedVersion: Option[Long],
-  specimenGroupId: String)
+case class RemoveSpecimenGroupCmd(studyId: String, specimenGroupId: String,
+  expectedVersion: Option[Long])
 
 // collection event commands
 case class AddCollectionEventType(studyId: String, expectedVersion: Option[Long], name: String,

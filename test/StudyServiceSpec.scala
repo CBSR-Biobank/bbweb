@@ -154,6 +154,28 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
           x.specimenTypeId must be(specimenTypeId2)
       }
   }
+
+  "remove specimen group" in {
+    fragmentName: String =>
+      val ng = new NameGenerator(fragmentName)
+      val name = ng.next[Study]
+      val units = ng.next[String]
+      val anatomicalSourceId = new AnatomicalSourceId(ng.next[String])
+      val preservationId = new PreservationId(ng.next[String])
+      val specimenTypeId = new SpecimenTypeId(ng.next[String])
+
+      val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+
+      val sg1 = entityResult(studyService.addSpecimenGroup(
+        new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceId,
+          preservationId, specimenTypeId)))
+
+      specimenGroupRepository.getMap must haveKey(sg1.id)
+      entityResult(studyService.removeSpecimenGroup(
+        new RemoveSpecimenGroupCmd(study1.id.toString, sg1.id.toString, sg1.versionOption)))
+
+      specimenGroupRepository.getMap must not haveKey (sg1.id)
+  }
 }
 
 object StudyServiceFixture {

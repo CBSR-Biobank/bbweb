@@ -20,12 +20,10 @@ sealed abstract class Study extends ConcurrencySafeEntity[StudyId] {
 object Study {
 
   def add(name: String, description: String): DomainValidation[DisabledStudy] =
-    DisabledStudy(StudyIdentityService.nextIdentity, version = 0L, name, description,
-      specimenGroups = Map.empty).success
+    DisabledStudy(StudyIdentityService.nextIdentity, version = 0L, name, description).success
 }
 
-case class DisabledStudy(id: StudyId, version: Long = -1, name: String, description: String,
-  specimenGroups: Map[SpecimenGroupId, SpecimenGroup] = Map.empty)
+case class DisabledStudy(id: StudyId, version: Long = -1, name: String, description: String)
   extends Study {
 
   def addSpecimenGroup(specimenGroups: Map[SpecimenGroupId, SpecimenGroup], studyId: StudyId,
@@ -46,9 +44,10 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
 
 }
 
-case class EnabledStudy(id: StudyId, version: Long = -1, name: String, description: String,
-  specimenGroups: Map[SpecimenGroupId, SpecimenGroup] = Map.empty)
+case class EnabledStudy(id: StudyId, version: Long = -1, name: String, description: String)
   extends Study {
 
+  def disable: DomainValidation[DisabledStudy] =
+    DisabledStudy(id, version + 1, name, description).success
 }
 

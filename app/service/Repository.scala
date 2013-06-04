@@ -18,4 +18,7 @@ class Repository[K, A](keyGetter: (A) => K) {
   protected[service] def updateMap(value: A) =
     internalMap.single.transform(map => map + (keyGetter(value) -> value))
 
+  protected[service] def remove(value: A) =
+    internalMap.single.transform(map => map - keyGetter(value))
+
 }

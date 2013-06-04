@@ -12,6 +12,7 @@ import domain.UserId
 // FIXME: need a base class here
 case class StudyAddedEvent(id: StudyId, name: String, description: String)
 case class StudyEnabledEvent(id: StudyId)
+case class StudyDisabledEvent(id: StudyId)
 
 case class StudySpecimenGroupAddedEvent(studyId: StudyId, specimenGroupId: SpecimenGroupId,
   name: String, description: String, units: String, amatomicalSourceId: AnatomicalSourceId,
@@ -19,3 +20,4 @@ case class StudySpecimenGroupAddedEvent(studyId: StudyId, specimenGroupId: Speci
 case class StudySpecimenGroupUpdatedEvent(studyId: StudyId, specimenGroupId: SpecimenGroupId,
   name: String, description: String, units: String, amatomicalSourceId: AnatomicalSourceId,
   preservationId: PreservationId, specimenTypeId: SpecimenTypeId)
+case class StudySpecimenGroupRemovedEvent(studyId: StudyId, specimenGroupId: SpecimenGroupId)
