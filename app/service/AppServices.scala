@@ -3,20 +3,15 @@ package service
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
 import scala.language.postfixOps
-
 import org.eligosource.eventsourced.core._
 import org.eligosource.eventsourced.journal.mongodb.casbah.MongodbCasbahJournalProps
-
 import com.mongodb.casbah.Imports._
-
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.pattern.ask
 import akka.util.Timeout
-
 import java.util.concurrent.TimeUnit
-
 import domain._
 import domain.study._
 

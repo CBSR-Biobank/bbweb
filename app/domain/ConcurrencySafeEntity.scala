@@ -24,5 +24,18 @@ abstract class ConcurrencySafeEntity[T <: Identity] {
       case None => this.success
     }
   }
+}
+
+object Entity {
+
+  def update[S <: ConcurrencySafeEntity[_], T <: ConcurrencySafeEntity[_]](entity: Option[S],
+    id: domain.Identity, expectedVersion: Option[Long])(f: S => DomainValidation[T]): DomainValidation[T] =
+    entity match {
+      case None => DomainError("no entity with id: %s" format id).fail
+      case Some(entity) => for {
+        current <- entity.requireVersion(expectedVersion)
+        updated <- f(entity)
+      } yield updated
+    }
 
 }

@@ -7,9 +7,9 @@ import domain.PreservationId
 
 // study commands
 case class AddStudyCmd(name: String, description: String)
-case class UpdateStudyCmd(id: String, expectedVersion: Option[Long], name: String, description: String)
-case class EnableStudyCmd(id: String, expectedVersion: Option[Long])
-case class DisableStudyCmd(id: String, expectedVersion: Option[Long])
+case class UpdateStudyCmd(studyId: String, expectedVersion: Option[Long], name: String, description: String)
+case class EnableStudyCmd(studyId: String, expectedVersion: Option[Long])
+case class DisableStudyCmd(studyId: String, expectedVersion: Option[Long])
 
 // specimen group commands
 case class AddSpecimenGroupCmd(studyId: String, name: String, description: String, units: String,

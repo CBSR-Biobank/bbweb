@@ -1,26 +1,23 @@
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
-
 import org.specs2.specification.BeforeExample
 import org.specs2.scalaz.ValidationMatchers._
 import org.specs2.mutable._
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.execute.Result
-
 import akka.actor._
 import akka.util.Timeout
 import org.eligosource.eventsourced.core._
-
 import domain._
 import domain.study._
 import service.commands._
 import service._
 import test._
-
 import scalaz._
 import Scalaz._
+import service.Repository
 
 @RunWith(classOf[JUnitRunner])
 class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
@@ -146,6 +143,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
 
       specimenGroupRepository.getByKey(sg2.id) must beSome.like {
         case x =>
+          x.version must be(sg1.version)
           x.name must be(name2)
           x.description must be(name2)
           x.units must be(units2)
