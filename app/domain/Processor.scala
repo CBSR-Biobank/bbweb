@@ -17,8 +17,8 @@ abstract class Processor extends Actor {
 
   def updateRepository[T <: ConcurrencySafeEntity[_]](entity: T)
 
-  def updateEntity[T <: ConcurrencySafeEntity[_]](entity: Option[T], id: Identity,
-    expectedVersion: Option[Long])(f: T => DomainValidation[T]): DomainValidation[T] =
+  def updateEntity[S <: ConcurrencySafeEntity[_], T <: ConcurrencySafeEntity[_]](entity: Option[S], id: Identity,
+    expectedVersion: Option[Long])(f: S => DomainValidation[T]): DomainValidation[T] =
     entity match {
       case None => DomainError("no entity with id: %s" format id).fail
       case Some(entity) => for {

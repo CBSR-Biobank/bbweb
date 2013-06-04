@@ -132,11 +132,11 @@ class StudyProcessor(
   }
 
   def updateStudy[T <: Study](id: StudyId,
-    expectedVersion: Option[Long])(f: Study => DomainValidation[Study]): DomainValidation[Study] =
+    expectedVersion: Option[Long])(f: Study => DomainValidation[T]): DomainValidation[T] =
     updateEntity(readStudies.get(id), id, expectedVersion)(f)
 
   def updateDisabledStudy[T <: Study](id: StudyId,
-    expectedVersion: Option[Long])(f: T => DomainValidation[Study]): DomainValidation[Study] =
+    expectedVersion: Option[Long])(f: DisabledStudy => DomainValidation[T]): DomainValidation[T] =
     updateStudy(id, expectedVersion) { study =>
       study match {
         case study: DisabledStudy => f(study)
