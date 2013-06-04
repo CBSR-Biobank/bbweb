@@ -26,6 +26,9 @@ class StudyService(
   def addStudy(cmd: AddStudyCmd): Future[DomainValidation[DisabledStudy]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 
+  def updateStudy(cmd: UpdateStudyCmd): Future[DomainValidation[DisabledStudy]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
+
   def enableStudy(cmd: EnableStudyCmd): Future[DomainValidation[EnabledStudy]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[EnabledStudy]])
 
@@ -58,6 +61,13 @@ class StudyProcessor(
       processUpdate(studyDomainService.addStudy(cmd.name, cmd.description), studyRepository) {
         study =>
           emitter("listeners") sendEvent StudyAddedEvent(study.id, study.name, study.description)
+      }
+
+    case cmd: UpdateStudyCmd =>
+      processUpdate(studyDomainService.updateStudy(new StudyId(cmd.studyId), cmd.expectedVersion,
+        cmd.name, cmd.description), studyRepository) {
+        study =>
+          emitter("listeners") sendEvent StudyUpdatedEvent(study.id, study.name, study.description)
       }
 
     case cmd: EnableStudyCmd =>

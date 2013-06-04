@@ -17,6 +17,13 @@ class StudyDomainService(studyRepository: Repository[StudyId, Study],
     }
   }
 
+  def updateStudy(studyId: StudyId, expectedVersion: Option[Long], name: String,
+    description: String): DomainValidation[DisabledStudy] = {
+    updateDisabledStudy(studyId, expectedVersion) {
+      study => DisabledStudy(studyId, study.version + 1, name, description).success
+    }
+  }
+
   def enableStudy(studyId: StudyId, expectedVersion: Option[Long]): DomainValidation[EnabledStudy] = {
     updateDisabledStudy(studyId, expectedVersion) { study =>
       val specimenGroupCount = specimenGroupRepository.getValues.filter(

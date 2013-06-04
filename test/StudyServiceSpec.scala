@@ -37,7 +37,29 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       studyRepository.getMap must not be empty
       studyRepository.getMap must haveKey(study.id)
       studyRepository.getByKey(study.id) must beSome.like {
-        case s => s.description must be(name)
+        case s =>
+          s.name must be(name)
+          s.description must be(name)
+      }
+  }
+
+  "update a study" in {
+    fragmentName: String =>
+      val ng = new NameGenerator(fragmentName)
+      val name = ng.next[Study]
+      val study = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+
+      val name2 = ng.next[Study]
+      val study2 = entityResult(studyService.updateStudy(new UpdateStudyCmd(study.id.toString,
+        study.versionOption, name2, name2)))
+
+      studyRepository.getMap must not be empty
+      studyRepository.getMap must haveKey(study2.id)
+      studyRepository.getByKey(study2.id) must beSome.like {
+        case s =>
+          s.version must beEqualTo(study.version + 1)
+          s.name must be(name2)
+          s.description must be(name2)
       }
   }
 
@@ -143,7 +165,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
 
       specimenGroupRepository.getByKey(sg2.id) must beSome.like {
         case x =>
-          x.version must be(sg1.version)
+          x.version must beEqualTo(sg1.version + 1)
           x.name must be(name2)
           x.description must be(name2)
           x.units must be(units2)

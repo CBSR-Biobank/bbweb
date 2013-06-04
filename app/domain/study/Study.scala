@@ -14,7 +14,7 @@ sealed abstract class Study extends ConcurrencySafeEntity[StudyId] {
   def description: String
 
   override def toString =
-    "{ id:%s, name:%s, description:%s }" format (id.toString, name, description)
+    "{ id:%s, version: %d, name:%s, description:%s }" format (id, version, name, description)
 }
 
 object Study {

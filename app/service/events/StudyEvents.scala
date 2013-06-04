@@ -11,6 +11,7 @@ import domain.UserId
 //
 // FIXME: need a base class here
 case class StudyAddedEvent(id: StudyId, name: String, description: String)
+case class StudyUpdatedEvent(id: StudyId, name: String, description: String)
 case class StudyEnabledEvent(id: StudyId)
 case class StudyDisabledEvent(id: StudyId)
 
