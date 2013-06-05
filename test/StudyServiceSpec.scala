@@ -10,14 +10,15 @@ import org.specs2.execute.Result
 import akka.actor._
 import akka.util.Timeout
 import org.eligosource.eventsourced.core._
+
 import domain._
 import domain.study._
 import service.commands._
 import service._
 import test._
+
 import scalaz._
 import Scalaz._
-import service.Repository
 
 @RunWith(classOf[JUnitRunner])
 class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
@@ -68,15 +69,16 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val ng = new NameGenerator(fragmentName)
       val name = ng.next[Study]
       val units = ng.next[String]
-      val anatomicalSourceId = new AnatomicalSourceId(ng.next[String])
-      val preservationId = new PreservationId(ng.next[String])
-      val specimenTypeId = new SpecimenTypeId(ng.next[String])
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
 
       val study = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
       val sg = entityResult(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceId,
-          preservationId, specimenTypeId)))
+        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType)))
 
       entityResult(studyService.enableStudy(new EnableStudyCmd(study.id.toString, study.versionOption)))
 
@@ -90,15 +92,16 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val ng = new NameGenerator(fragmentName)
       val name = ng.next[Study]
       val units = ng.next[String]
-      val anatomicalSourceId = new AnatomicalSourceId(ng.next[String])
-      val preservationId = new PreservationId(ng.next[String])
-      val specimenTypeId = new SpecimenTypeId(ng.next[String])
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
 
       val study = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
       val sg = entityResult(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceId,
-          preservationId, specimenTypeId)))
+        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType)))
 
       val study2 = entityResult(studyService.enableStudy(
         new EnableStudyCmd(study.id.toString, study.versionOption)))
@@ -132,30 +135,32 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val ng = new NameGenerator(fragmentName)
       val name = ng.next[Study]
       val units = ng.next[String]
-      val anatomicalSourceId = new AnatomicalSourceId(ng.next[String])
-      val preservationId = new PreservationId(ng.next[String])
-      val specimenTypeId = new SpecimenTypeId(ng.next[String])
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
 
       val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
       val sg1 = entityResult(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceId,
-          preservationId, specimenTypeId)))
+        new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType)))
 
       specimenGroupRepository.getMap must haveKey(sg1.id)
       specimenGroupRepository.getByKey(sg1.id) must beSome.like {
         case x =>
           x.description must be(name)
           x.units must be(units)
-          x.anatomicalSourceId must be(anatomicalSourceId)
-          x.preservationId must be(preservationId)
-          x.specimenTypeId must be(specimenTypeId)
+          x.anatomicalSourceType must be(anatomicalSourceType)
+          x.preservationType must be(preservationType)
+          x.preservationTemperatureType must be(preservationTempType)
+          x.specimenType must be(specimenType)
       }
 
       val name2 = ng.next[Study]
       val sg2 = entityResult(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study1.id.toString, name2, name2, units, anatomicalSourceId,
-          preservationId, specimenTypeId)))
+        new AddSpecimenGroupCmd(study1.id.toString, name2, name2, units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType)))
 
       specimenGroupRepository.getMap must haveKey(sg2.id)
       specimenGroupRepository.getByKey(sg2.id) must beSome.like {
@@ -163,9 +168,10 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
           x.description must be(name2)
           x.description must be(name2)
           x.units must be(units)
-          x.anatomicalSourceId must be(anatomicalSourceId)
-          x.preservationId must be(preservationId)
-          x.specimenTypeId must be(specimenTypeId)
+          x.anatomicalSourceType must be(anatomicalSourceType)
+          x.preservationType must be(preservationType)
+          x.preservationTemperatureType must be(preservationTempType)
+          x.specimenType must be(specimenType)
       }
   }
 
@@ -174,24 +180,26 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val ng = new NameGenerator(fragmentName)
       val name = ng.next[Study]
       val units = ng.next[String]
-      val anatomicalSourceId = new AnatomicalSourceId(ng.next[String])
-      val preservationId = new PreservationId(ng.next[String])
-      val specimenTypeId = new SpecimenTypeId(ng.next[String])
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
 
       val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
       val sg1 = entityResult(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceId,
-          preservationId, specimenTypeId)))
+        new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType)))
 
       val name2 = ng.next[Study]
       val units2 = ng.next[String]
-      val anatomicalSourceId2 = new AnatomicalSourceId(ng.next[String])
-      val preservationId2 = new PreservationId(ng.next[String])
-      val specimenTypeId2 = new SpecimenTypeId(ng.next[String])
+      val anatomicalSourceType2 = AnatomicalSourceType.Brain
+      val preservationType2 = PreservationType.FrozenSpecimen
+      val preservationTempType2 = PreservationTemperatureType.Minus180celcius
+      val specimenType2 = SpecimenType.DnaBlood
 
       val sg2 = entityResult(studyService.updateSpecimenGroup(
         new UpdateSpecimenGroupCmd(study1.id.toString, sg1.id.toString, sg1.versionOption, name2,
-          name2, units2, anatomicalSourceId2, preservationId2, specimenTypeId2)))
+          name2, units2, anatomicalSourceType2, preservationType2, preservationTempType2, specimenType2)))
 
       specimenGroupRepository.getByKey(sg2.id) must beSome.like {
         case x =>
@@ -199,9 +207,10 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
           x.name must be(name2)
           x.description must be(name2)
           x.units must be(units2)
-          x.anatomicalSourceId must be(anatomicalSourceId2)
-          x.preservationId must be(preservationId2)
-          x.specimenTypeId must be(specimenTypeId2)
+          x.anatomicalSourceType must be(anatomicalSourceType2)
+          x.preservationType must be(preservationType2)
+          x.preservationTemperatureType must be(preservationTempType2)
+          x.specimenType must be(specimenType2)
       }
   }
 
@@ -210,15 +219,16 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val ng = new NameGenerator(fragmentName)
       val name = ng.next[Study]
       val units = ng.next[String]
-      val anatomicalSourceId = new AnatomicalSourceId(ng.next[String])
-      val preservationId = new PreservationId(ng.next[String])
-      val specimenTypeId = new SpecimenTypeId(ng.next[String])
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
 
       val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
       val sg1 = entityResult(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceId,
-          preservationId, specimenTypeId)))
+        new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType)))
 
       specimenGroupRepository.getMap must haveKey(sg1.id)
       entityResult(studyService.removeSpecimenGroup(

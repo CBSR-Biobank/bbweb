@@ -5,7 +5,10 @@ import domain.DomainError
 import domain.DomainValidation
 import domain.ConcurrencySafeEntity
 import domain.Identity
-import domain.PreservationId
+import domain.AnatomicalSourceType._
+import domain.PreservationType._
+import domain.PreservationTemperatureType._
+import domain.SpecimenType._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -27,13 +30,14 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
   extends Study {
 
   def addSpecimenGroup(specimenGroups: Map[SpecimenGroupId, SpecimenGroup], studyId: StudyId,
-    name: String, description: String, units: String, anatomicalSourceId: AnatomicalSourceId,
-    preservationId: PreservationId, specimenTypeId: SpecimenTypeId): DomainValidation[SpecimenGroup] =
+    name: String, description: String, units: String, anatomicalSourceType: AnatomicalSourceType,
+    preservationType: PreservationType, preservationTemperatureType: PreservationTemperatureType,
+    specimenType: SpecimenType): DomainValidation[SpecimenGroup] =
     specimenGroups.find(sg => sg._2.name.equals(name)) match {
       case Some(sg) => DomainError("specimen group with name already exists: %s" format name).fail
       case None =>
-        SpecimenGroup.add(studyId, name, description, units, anatomicalSourceId, preservationId,
-          specimenTypeId)
+        SpecimenGroup.add(studyId, name, description, units, anatomicalSourceType, preservationType,
+          preservationTemperatureType, specimenType)
     }
 
   def enable(specimenGroupCount: Int, collectionEventTypecount: Int): DomainValidation[EnabledStudy] =

@@ -1,6 +1,10 @@
 package domain.study
 
 import domain._
+import domain.AnatomicalSourceType._
+import domain.PreservationType._
+import domain.PreservationTemperatureType._
+import domain.SpecimenType._
 import service.commands._
 
 import scalaz._
@@ -13,17 +17,19 @@ case class SpecimenGroup(
   name: String,
   description: String,
   units: String,
-  anatomicalSourceId: AnatomicalSourceId,
-  preservationId: PreservationId,
-  specimenTypeId: SpecimenTypeId) extends ConcurrencySafeEntity[SpecimenGroupId] {
+  anatomicalSourceType: AnatomicalSourceType,
+  preservationType: PreservationType,
+  preservationTemperatureType: PreservationTemperatureType,
+  specimenType: SpecimenType) extends ConcurrencySafeEntity[SpecimenGroupId] {
 }
 
 object SpecimenGroup {
 
   def add(studyId: StudyId, name: String, description: String, units: String,
-    anatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
-    specimenTypeId: SpecimenTypeId): DomainValidation[SpecimenGroup] =
+    anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
+    preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType): DomainValidation[SpecimenGroup] =
     SpecimenGroup(SpecimenGroupIdentityService.nextIdentity, studyId, version = 0L, name,
-      description, units, anatomicalSourceId, preservationId, specimenTypeId).success
+      description, units, anatomicalSourceType, preservationType, preservationTemperatureType,
+      specimenType).success
 
 }

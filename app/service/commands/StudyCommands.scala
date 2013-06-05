@@ -1,9 +1,10 @@
 package service.commands
 
-import domain.AnatomicalSourceId
 import domain.study.CollectionEventId
-import domain.study.SpecimenTypeId
-import domain.PreservationId
+import domain.AnatomicalSourceType._
+import domain.PreservationType._
+import domain.PreservationTemperatureType._
+import domain.SpecimenType._
 
 // study commands
 case class AddStudyCmd(name: String, description: String)
@@ -13,11 +14,12 @@ case class DisableStudyCmd(studyId: String, expectedVersion: Option[Long])
 
 // specimen group commands
 case class AddSpecimenGroupCmd(studyId: String, name: String, description: String, units: String,
-  anatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId, specimenTypeId: SpecimenTypeId)
+  anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
+  preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
 case class UpdateSpecimenGroupCmd(studyId: String, specimenGroupId: String,
   expectedVersion: Option[Long], name: String, description: String, units: String,
-  anatomicalSourceId: AnatomicalSourceId, preservationId: PreservationId,
-  specimenTypeId: SpecimenTypeId)
+  anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
+  preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
 case class RemoveSpecimenGroupCmd(studyId: String, specimenGroupId: String,
   expectedVersion: Option[Long])
 

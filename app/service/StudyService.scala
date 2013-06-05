@@ -3,11 +3,13 @@ package service
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import org.eligosource.eventsourced.core._
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
 import scala.language.postfixOps
+
+import org.eligosource.eventsourced.core._
+
 import domain._
 import domain.study._
 import service.commands._
@@ -83,21 +85,22 @@ class StudyProcessor(
 
     case cmd: AddSpecimenGroupCmd =>
       processUpdate(specimenGroupDomainService.addSpecimenGroup(
-        new StudyId(cmd.studyId), cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceId,
-        cmd.preservationId, cmd.specimenTypeId), specimenGroupRepository) { sg =>
-        emitter("listeners") sendEvent StudySpecimenGroupAddedEvent(sg.studyId, sg.id,
-          cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceId,
-          cmd.preservationId, cmd.specimenTypeId)
+        new StudyId(cmd.studyId), cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType,
+        cmd.preservationType, cmd.preservationTemperatureType, cmd.specimenType), specimenGroupRepository) {
+        sg =>
+          emitter("listeners") sendEvent StudySpecimenGroupAddedEvent(sg.studyId, sg.id,
+            sg.name, sg.description, sg.units, sg.anatomicalSourceType, sg.preservationType,
+            sg.preservationTemperatureType, sg.specimenType)
       }
 
     case cmd: UpdateSpecimenGroupCmd =>
       processUpdate(specimenGroupDomainService.updateSpecimenGroup(
         new StudyId(cmd.studyId), new SpecimenGroupId(cmd.specimenGroupId), cmd.expectedVersion,
-        cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceId, cmd.preservationId,
-        cmd.specimenTypeId), specimenGroupRepository) { sg =>
+        cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
+        cmd.preservationTemperatureType, cmd.specimenType), specimenGroupRepository) { sg =>
         emitter("listeners") sendEvent StudySpecimenGroupUpdatedEvent(sg.studyId,
-          sg.id, cmd.name, cmd.description, cmd.units,
-          cmd.anatomicalSourceId, cmd.preservationId, cmd.specimenTypeId)
+          sg.id, sg.name, sg.description, sg.units, sg.anatomicalSourceType, sg.preservationType,
+          sg.preservationTemperatureType, sg.specimenType)
       }
 
     case cmd: RemoveSpecimenGroupCmd =>
