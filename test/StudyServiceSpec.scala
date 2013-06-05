@@ -85,6 +85,36 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       }
   }
 
+  "disable a study" in {
+    fragmentName: String =>
+      val ng = new NameGenerator(fragmentName)
+      val name = ng.next[Study]
+      val units = ng.next[String]
+      val anatomicalSourceId = new AnatomicalSourceId(ng.next[String])
+      val preservationId = new PreservationId(ng.next[String])
+      val specimenTypeId = new SpecimenTypeId(ng.next[String])
+
+      val study = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+
+      val sg = entityResult(studyService.addSpecimenGroup(
+        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceId,
+          preservationId, specimenTypeId)))
+
+      val study2 = entityResult(studyService.enableStudy(
+        new EnableStudyCmd(study.id.toString, study.versionOption)))
+
+      studyRepository.getByKey(study2.id) must beSome.like {
+        case s => s must beAnInstanceOf[EnabledStudy]
+      }
+
+      entityResult(studyService.disableStudy(
+        new DisableStudyCmd(study2.id.toString, study2.versionOption)))
+
+      studyRepository.getByKey(study.id) must beSome.like {
+        case s => s must beAnInstanceOf[DisabledStudy]
+      }
+  }
+
   "add a study with duplicate name" in {
     fragmentName: String =>
       val name = new NameGenerator(fragmentName).next[Study]
