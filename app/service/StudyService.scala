@@ -138,37 +138,37 @@ class StudyProcessor(
       }
 
     case cmd: UpdateCollectionEventTypeCmd =>
-      processUpdate(collectionEventTypeRepository)(collectionEventTypeDomainService.updateCollectionEventType(cmd)) { cet =>
+      processUpdate(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd)) { cet =>
         emitter("listeners") sendEvent CollectionEventTypeUpdatedEvent(
           cmd.studyId, cmd.collectionEventTypeId, cet.name, cet.description, cet.recurring)
       }
 
     case cmd: RemoveCollectionEventTypeCmd =>
-      processRemove(collectionEventTypeRepository)(collectionEventTypeDomainService.removeCollectionEventType(cmd)) { cet =>
+      processRemove(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd)) { cet =>
         emitter("listeners") sendEvent CollectionEventTypeRemovedEvent(
           cmd.studyId, cmd.collectionEventTypeId)
       }
 
     case cmd: AddSpecimenGroupToCollectionEventTypeCmd =>
-      processUpdate(collectionEventTypeRepository)(collectionEventTypeDomainService.addSpecimenGroupToCollectionEventType(cmd)) { cet =>
+      processUpdate(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd)) { cet =>
         emitter("listeners") sendEvent SpecimenGroupAddedToCollectionEventTypeEvent(
           cmd.studyId, cmd.collectionEventTypeId, cmd.specimenGroupId)
       }
 
     case cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd =>
-      processRemove(collectionEventTypeRepository)(collectionEventTypeDomainService.removeSpecimenGroupFromCollectionEventType(cmd)) { cet =>
+      processRemove(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd)) { cet =>
         emitter("listeners") sendEvent SpecimenGroupRemovedFromCollectionEventTypeEvent(
           cmd.studyId, cmd.collectionEventTypeId, cmd.specimenGroupId)
       }
 
     case cmd: AddAnnotationToCollectionEventTypeCmd =>
-      processUpdate(collectionEventTypeRepository)(collectionEventTypeDomainService.addAnnotationToCollectionEventType(cmd)) { cet =>
+      processUpdate(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd)) { cet =>
         emitter("listeners") sendEvent AnnotationAddedToCollectionEventTypeEvent(
           cmd.studyId, cmd.collectionEventTypeId, cmd.collectionEventAnnotationTypeId)
       }
 
     case cmd: RemoveAnnotationFromCollectionEventTypeCmd =>
-      processRemove(collectionEventTypeRepository)(collectionEventTypeDomainService.removeAnnotationFromCollectionEventType(cmd)) { cet =>
+      processRemove(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd)) { cet =>
         emitter("listeners") sendEvent AnnotationRemovedFromCollectionEventTypeEvent(
           cmd.studyId, cmd.collectionEventTypeId, cmd.collectionEventAnnotationTypeId)
       }
