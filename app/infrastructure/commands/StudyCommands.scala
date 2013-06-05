@@ -1,4 +1,4 @@
-package service.commands
+package infrastructure.commands
 
 import domain.study.CollectionEventId
 import domain.AnatomicalSourceType._
@@ -24,7 +24,17 @@ case class RemoveSpecimenGroupCmd(studyId: String, specimenGroupId: String,
   expectedVersion: Option[Long])
 
 // collection event commands
-case class AddCollectionEventType(studyId: String, expectedVersion: Option[Long], name: String,
-  description: String, recurring: Boolean);
-case class UpdateCollectionEventType(studyId: String, expectedVersion: Option[Long],
-  collectionEventId: CollectionEventId, name: String, description: String, recurring: Boolean);
+case class AddCollectionEventTypeCmd(studyId: String, expectedVersion: Option[Long], name: String,
+  description: String, recurring: Boolean)
+case class UpdateCollectionEventTypeCmd(studyId: String, collectionEventTypeId: String,
+  expectedVersion: Option[Long], name: String, description: String, recurring: Boolean)
+case class RemoveCollectionEventTypeCmd(studyId: String, collectionEventTypeId: String,
+  expectedVersion: Option[Long])
+case class AddSpecimenGroupToCollectionEventTypeCmd(studyId: String, collectionEventTypeId: String,
+  expectedVersion: Option[Long], specimenGroupId: String)
+case class RemoveSpecimenGroupFromCollectionEventTypeCmd(studyId: String, collectionEventTypeId: String,
+  expectedVersion: Option[Long], specimenGroupId: String)
+case class AddAnnotationToCollectionEventTypeCmd(studyId: String, collectionEventTypeId: String,
+  expectedVersion: Option[Long], collectionEventAnnotationTypeId: String)
+case class RemoveAnnotationFromCollectionEventTypeCmd(studyId: String, collectionEventTypeId: String,
+  expectedVersion: Option[Long], collectionEventAnnotationTypeId: String)

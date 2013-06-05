@@ -9,6 +9,9 @@ import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
+
+import infrastructure.commands._
+
 import scalaz._
 import scalaz.Scalaz._
 
@@ -29,22 +32,30 @@ object Study {
 case class DisabledStudy(id: StudyId, version: Long = -1, name: String, description: String)
   extends Study {
 
-  def addSpecimenGroup(specimenGroups: Map[SpecimenGroupId, SpecimenGroup], studyId: StudyId,
-    name: String, description: String, units: String, anatomicalSourceType: AnatomicalSourceType,
-    preservationType: PreservationType, preservationTemperatureType: PreservationTemperatureType,
-    specimenType: SpecimenType): DomainValidation[SpecimenGroup] =
-    specimenGroups.find(sg => sg._2.name.equals(name)) match {
-      case Some(sg) => DomainError("specimen group with name already exists: %s" format name).fail
-      case None =>
-        SpecimenGroup.add(studyId, name, description, units, anatomicalSourceType, preservationType,
-          preservationTemperatureType, specimenType)
-    }
-
   def enable(specimenGroupCount: Int, collectionEventTypecount: Int): DomainValidation[EnabledStudy] =
     if ((specimenGroupCount == 0) || (collectionEventTypecount == 0))
       DomainError("study has no specimen groups and / or no collection event types").fail
     else
       EnabledStudy(id, version + 1, name, description).success
+
+  def addSpecimenGroup(specimenGroups: Map[SpecimenGroupId, SpecimenGroup],
+    cmd: AddSpecimenGroupCmd): DomainValidation[SpecimenGroup] =
+    specimenGroups.find(sg => sg._2.name.equals(name)) match {
+      case Some(sg) => DomainError("specimen group with name already exists: %s" format name).fail
+      case None =>
+        SpecimenGroup.add(this.id, cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType,
+          cmd.preservationType, cmd.preservationTemperatureType, cmd.specimenType)
+    }
+
+  def addCollectionEventType(
+    collectionEventTypes: Map[CollectionEventTypeId, CollectionEventType],
+    name: String, description: String,
+    recurring: Boolean): DomainValidation[CollectionEventType] =
+    collectionEventTypes.find(cet => cet._2.name.equals(name)) match {
+      case Some(sg) => DomainError("collection event type with name already exists: %s" format name).fail
+      case None =>
+        CollectionEventType.add(this.id, name, description, recurring)
+    }
 
 }
 

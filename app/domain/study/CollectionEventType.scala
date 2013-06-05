@@ -1,17 +1,27 @@
 package domain.study
 
-class CollectionEventType private[study] (
-  collectionEventTypeId: CollectionEventTypeId,
+import domain._
+
+import scalaz._
+import Scalaz._
+
+case class CollectionEventType private[study] (
+  id: CollectionEventTypeId,
+  studyId: StudyId,
+  version: Long = -1,
   name: String,
   description: String,
-  recurring: Boolean) {
+  recurring: Boolean) extends ConcurrencySafeEntity[CollectionEventTypeId] {
 
 }
 
 object CollectionEventType {
 
-  // TODO: not sure yet if this is the right place for this method
-  def nextIdentity: CollectionEventTypeId =
-    new CollectionEventTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
-
+  def add(
+    studyId: StudyId,
+    name: String,
+    description: String,
+    recurring: Boolean): DomainValidation[CollectionEventType] =
+    CollectionEventType(CollectionEventTypeIdentityService.nextIdentity, studyId, version = 0L,
+      name, description, recurring).success
 }

@@ -12,6 +12,7 @@ import akka.actor.Props
 import akka.pattern.ask
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
+
 import domain._
 import domain.study._
 
@@ -39,15 +40,17 @@ object AppServices {
 
     val studyRepository = new Repository[StudyId, Study](v => v.id)
     val specimenGroupRepository = new Repository[SpecimenGroupId, SpecimenGroup](v => v.id)
+    val collectionEventTypeRepository = new Repository[CollectionEventTypeId, CollectionEventType](v => v.id)
     val usersRef = Ref(Map.empty[domain.UserId, User])
 
     val studyProcessor = extension.processorOf(Props(
-      new StudyProcessor(studyRepository, specimenGroupRepository) with Emitter with Eventsourced { val id = 1 }))
+      new StudyProcessor(studyRepository, specimenGroupRepository, collectionEventTypeRepository) with Emitter with Eventsourced { val id = 1 }))
 
     val userProcessor = extension.processorOf(Props(
       new UserProcessor(usersRef) with Emitter with Eventsourced { val id = 1 }))
 
-    val studyService = new StudyService(studyRepository, specimenGroupRepository, studyProcessor)
+    val studyService = new StudyService(studyRepository, specimenGroupRepository,
+      collectionEventTypeRepository, studyProcessor)
     val userService = new UserService(usersRef, userProcessor)
 
     extension.recover()

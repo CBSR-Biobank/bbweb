@@ -11,8 +11,8 @@ import akka.util.Timeout
 import org.eligosource.eventsourced.core._
 
 import domain._
-import service.commands._
-import service.events._
+import infrastructure.commands._
+import infrastructure.events._
 
 import scalaz._
 import Scalaz._

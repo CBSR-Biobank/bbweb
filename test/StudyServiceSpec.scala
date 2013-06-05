@@ -13,7 +13,7 @@ import org.eligosource.eventsourced.core._
 
 import domain._
 import domain.study._
-import service.commands._
+import infrastructure.commands._
 import service._
 import test._
 
@@ -243,12 +243,14 @@ object StudyServiceFixture {
   class Fixture extends EventsourcingFixture[DomainValidation[ConcurrencySafeEntity[_]]] {
 
     val studyRepository = new Repository[StudyId, Study](v => v.id)
+    val collectionEventTypeRepository = new Repository[CollectionEventTypeId, CollectionEventType](v => v.id)
     val specimenGroupRepository = new Repository[SpecimenGroupId, SpecimenGroup](v => v.id)
 
     val studyProcessor = extension.processorOf(Props(
-      new StudyProcessor(studyRepository, specimenGroupRepository) with Emitter with Eventsourced { val id = 1 }))
+      new StudyProcessor(studyRepository, specimenGroupRepository, collectionEventTypeRepository) with Emitter with Eventsourced { val id = 1 }))
 
-    val studyService = new StudyService(studyRepository, specimenGroupRepository, studyProcessor)
+    val studyService = new StudyService(studyRepository, specimenGroupRepository,
+      collectionEventTypeRepository, studyProcessor)
 
     def result[T <: ConcurrencySafeEntity[_]](f: Future[DomainValidation[T]]) = {
       Await.result(f, timeout.duration)

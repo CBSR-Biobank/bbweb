@@ -5,10 +5,9 @@ import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
-import service.commands._
 
 import scalaz._
-import scalaz.Scalaz._
+import Scalaz._
 
 case class SpecimenGroup(
   id: SpecimenGroupId,
