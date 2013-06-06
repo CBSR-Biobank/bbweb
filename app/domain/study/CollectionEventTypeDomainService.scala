@@ -17,8 +17,8 @@ class CollectionEventTypeDomainService(
   specimenGroupRepository: Repository[SpecimenGroupId, SpecimenGroup]) {
 
   def process = PartialFunction[Any, DomainValidation[CollectionEventType]] {
-    case cmd: AddCollectionEventTypeCmd =>
-      validateStudy(cmd.studyId) { study => addCollectionEventType(study, cmd) }
+    case _@ (cmd: AddCollectionEventTypeCmd, emitter: Emitter) =>
+      validateStudy(cmd.studyId, emitter) { study => addCollectionEventType(study, cmd, emitter) }
     case cmd: UpdateCollectionEventTypeCmd =>
       validateStudy(cmd.studyId) { study => updateCollectionEventType(study, cmd) }
     case cmd: RemoveCollectionEventTypeCmd =>
@@ -35,7 +35,7 @@ class CollectionEventTypeDomainService(
       throw new Error("invalid command received")
   }
 
-  private def validateStudy(studyIdAsString: String)(f: DisabledStudy => DomainValidation[CollectionEventType]) = {
+  private def validateStudy(studyIdAsString: String, emitter: Emitter)(f: DisabledStudy => DomainValidation[CollectionEventType]) = {
     val studyId = new StudyId(studyIdAsString)
     studyRepository.getByKey(studyId) match {
       case None => StudyDomainService.noSuchStudy(studyId).fail
@@ -47,7 +47,7 @@ class CollectionEventTypeDomainService(
   }
 
   private def addCollectionEventType(study: DisabledStudy,
-    cmd: AddCollectionEventTypeCmd): DomainValidation[CollectionEventType] = {
+    cmd: AddCollectionEventTypeCmd, emitter: Emitter): DomainValidation[CollectionEventType] = {
     val collectionEventTypes = collectionEventTypeRepository.getMap.filter(
       cet => cet._2.studyId.equals(study.id))
     study.addCollectionEventType(collectionEventTypes, cmd.name, cmd.description, cmd.recurring)

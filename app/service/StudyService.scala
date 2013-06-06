@@ -131,7 +131,7 @@ class StudyProcessor(
       }
 
     case cmd: AddCollectionEventTypeCmd =>
-      processUpdate(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd)) {
+      processUpdate(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd, emitter)) {
         cet =>
           emitter("listeners") sendEvent CollectionEventTypeAddedEvent(
             cmd.studyId, cet.name, cet.description, cet.recurring)
