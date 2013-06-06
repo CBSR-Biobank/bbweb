@@ -172,5 +172,7 @@ class StudyProcessor(
         emitter("listeners") sendEvent AnnotationRemovedFromCollectionEventTypeEvent(
           cmd.studyId, cmd.collectionEventTypeId, cmd.collectionEventAnnotationTypeId)
       }
+    case _ =>
+      throw new Error("invalid command received")
   }
 }

@@ -4,6 +4,9 @@ import domain._
 import domain.study._
 import service.Repository
 import infrastructure.commands._
+import infrastructure.events._
+
+import org.eligosource.eventsourced.core.Emitter
 
 import scalaz._
 import Scalaz._
@@ -28,6 +31,8 @@ class CollectionEventTypeDomainService(
       validateStudy(cmd.studyId) { study => addAnnotationToCollectionEventType(study, cmd) }
     case cmd: RemoveAnnotationFromCollectionEventTypeCmd =>
       validateStudy(cmd.studyId) { study => removeAnnotationFromCollectionEventType(study, cmd) }
+    case _ =>
+      throw new Error("invalid command received")
   }
 
   private def validateStudy(studyIdAsString: String)(f: DisabledStudy => DomainValidation[CollectionEventType]) = {
@@ -41,42 +46,27 @@ class CollectionEventTypeDomainService(
     }
   }
 
-  private def addCollectionEventType(study: DisabledStudy, cmd: AddCollectionEventTypeCmd): DomainValidation[CollectionEventType] = {
+  private def addCollectionEventType(study: DisabledStudy,
+    cmd: AddCollectionEventTypeCmd): DomainValidation[CollectionEventType] = {
     val collectionEventTypes = collectionEventTypeRepository.getMap.filter(
       cet => cet._2.studyId.equals(study.id))
     study.addCollectionEventType(collectionEventTypes, cmd.name, cmd.description, cmd.recurring)
   }
 
   private def updateCollectionEventType(study: DisabledStudy, cmd: UpdateCollectionEventTypeCmd): DomainValidation[CollectionEventType] = {
-    val studyId = new StudyId(cmd.studyId)
-    studyRepository.getByKey(studyId) match {
-      case None => StudyDomainService.noSuchStudy(studyId).fail
-      case Some(study) => study match {
-        case study: EnabledStudy => StudyDomainService.notDisabledError(study.name).fail
-        case study: DisabledStudy =>
-          val collectionEventTypeId = new CollectionEventTypeId(cmd.collectionEventTypeId)
-          Entity.update(collectionEventTypeRepository.getByKey(collectionEventTypeId),
-            collectionEventTypeId, cmd.expectedVersion) { sg =>
-              CollectionEventType(collectionEventTypeId, studyId, sg.version + 1,
-                cmd.name, cmd.description, cmd.recurring).success
-            }
+    val collectionEventTypeId = new CollectionEventTypeId(cmd.collectionEventTypeId)
+    Entity.update(collectionEventTypeRepository.getByKey(collectionEventTypeId),
+      collectionEventTypeId, cmd.expectedVersion) { sg =>
+        CollectionEventType(collectionEventTypeId, study.id, sg.version + 1,
+          cmd.name, cmd.description, cmd.recurring).success
       }
-    }
   }
 
   private def removeCollectionEventType(study: DisabledStudy, cmd: RemoveCollectionEventTypeCmd): DomainValidation[CollectionEventType] = {
-    val studyId = new StudyId(cmd.studyId)
-    studyRepository.getByKey(studyId) match {
-      case None => StudyDomainService.noSuchStudy(studyId).fail
-      case Some(study) => study match {
-        case study: EnabledStudy => StudyDomainService.notDisabledError(study.name).fail
-        case study: DisabledStudy =>
-          val collectionEventTypeId = new CollectionEventTypeId(cmd.collectionEventTypeId)
-          collectionEventTypeRepository.getByKey(collectionEventTypeId) match {
-            case None => StudyDomainService.noSuchStudy(studyId).fail
-            case Some(cet) => cet.success
-          }
-      }
+    val collectionEventTypeId = new CollectionEventTypeId(cmd.collectionEventTypeId)
+    collectionEventTypeRepository.getByKey(collectionEventTypeId) match {
+      case None => StudyDomainService.noSuchStudy(study.id).fail
+      case Some(cet) => cet.success
     }
   }
 
