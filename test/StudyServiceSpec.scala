@@ -11,11 +11,20 @@ import akka.actor._
 import akka.util.Timeout
 import org.eligosource.eventsourced.core._
 
-import domain._
-import domain.study._
-import infrastructure.commands._
-import service._
 import test._
+import service.{ StudyService, StudyProcessor }
+import domain.{
+  AnatomicalSourceType,
+  ConcurrencySafeEntity,
+  DomainValidation,
+  DomainError,
+  PreservationType,
+  PreservationTemperatureType,
+  SpecimenType
+}
+import domain.study._
+import infrastructure._
+import infrastructure.commands._
 
 import scalaz._
 import Scalaz._
@@ -242,12 +251,15 @@ object StudyServiceFixture {
 
   class Fixture extends EventsourcingFixture[DomainValidation[ConcurrencySafeEntity[_]]] {
 
-    val studyRepository = new Repository[StudyId, Study](v => v.id)
-    val collectionEventTypeRepository = new Repository[CollectionEventTypeId, CollectionEventType](v => v.id)
-    val specimenGroupRepository = new Repository[SpecimenGroupId, SpecimenGroup](v => v.id)
+    val studyRepository = new ReadWriteRepository[StudyId, Study](v => v.id)
+    val specimenGroupRepository = new ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id)
+    val collectionEventTypeRepository = new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
 
     val studyProcessor = extension.processorOf(Props(
-      new StudyProcessor(studyRepository, specimenGroupRepository, collectionEventTypeRepository) with Emitter with Eventsourced { val id = 1 }))
+      new StudyProcessor(
+        studyRepository,
+        specimenGroupRepository,
+        collectionEventTypeRepository) with Emitter with Eventsourced { val id = 1 }))
 
     val studyService = new StudyService(studyRepository, specimenGroupRepository,
       collectionEventTypeRepository, studyProcessor)

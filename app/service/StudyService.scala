@@ -7,21 +7,26 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
 import scala.language.postfixOps
-
 import org.eligosource.eventsourced.core._
-
-import domain._
+import domain.{
+  ConcurrencySafeEntity,
+  DomainValidation,
+  DomainError,
+  Entity
+}
 import domain.study._
 import infrastructure.commands._
 import infrastructure.events._
+import infrastructure._
+import domain.service.{ CollectionEventTypeDomainService, SpecimenGroupDomainService }
 
 import scalaz._
 import Scalaz._
 
 class StudyService(
-  studyRepository: Repository[StudyId, Study],
-  specimenGroupRepository: Repository[SpecimenGroupId, SpecimenGroup],
-  collectionEventTypeRepository: Repository[CollectionEventTypeId, CollectionEventType],
+  studyRepository: ReadRepository[StudyId, Study],
+  specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
+  collectionEventTypeRepository: ReadRepository[CollectionEventTypeId, CollectionEventType],
   studyProcessor: ActorRef)(implicit system: ActorSystem)
   extends ApplicationService {
   import system.dispatcher
@@ -74,105 +79,109 @@ class StudyService(
 //  InvoiceProcessor is single writer to studiesRef, so we can have reads and writes in separate transactions
 // -------------------------------------------------------------------------------------------------------------
 class StudyProcessor(
-  studyRepository: Repository[StudyId, Study],
-  specimenGroupRepository: Repository[SpecimenGroupId, SpecimenGroup],
-  collectionEventTypeRepository: Repository[CollectionEventTypeId, CollectionEventType])
+  studyRepository: ReadWriteRepository[StudyId, Study],
+  specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup],
+  collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType])
   extends Processor { this: Emitter =>
 
-  val studyDomainService = new StudyDomainService(studyRepository, specimenGroupRepository)
-  val specimenGroupDomainService = new SpecimenGroupDomainService(studyRepository, specimenGroupRepository)
+  val specimenGroupDomainService = new SpecimenGroupDomainService(
+    studyRepository, specimenGroupRepository)
   val collectionEventTypeDomainService = new CollectionEventTypeDomainService(
     studyRepository, collectionEventTypeRepository, specimenGroupRepository)
 
   def receive = {
     case cmd: AddStudyCmd =>
-      processUpdate(studyRepository)(studyDomainService.addStudy(cmd)) {
-        study =>
-          emitter("listeners") sendEvent StudyAddedEvent(study.id, study.name, study.description)
-      }
+      process(addStudy(cmd, emitter("listeners")))
 
     case cmd: UpdateStudyCmd =>
-      processUpdate(studyRepository)(studyDomainService.updateStudy(cmd)) {
-        study =>
-          emitter("listeners") sendEvent StudyUpdatedEvent(study.id, study.name, study.description)
-      }
+      process(updateStudy(cmd, emitter("listeners")))
 
     case cmd: EnableStudyCmd =>
-      processUpdate(studyRepository)(studyDomainService.enableStudy(cmd)) {
-        study =>
-          emitter("listeners") sendEvent StudyEnabledEvent(study.id)
-      }
+      process(enableStudy(cmd, emitter("listeners")))
 
     case cmd: DisableStudyCmd =>
-      processUpdate(studyRepository)(studyDomainService.disableStudy(cmd)) { study =>
-        emitter("listeners") sendEvent StudyDisabledEvent(study.id)
-      }
+      process(disableStudy(cmd, emitter("listeners")))
 
-    case cmd: AddSpecimenGroupCmd =>
-      processUpdate(specimenGroupRepository)(specimenGroupDomainService.addSpecimenGroup(cmd)) {
-        sg =>
-          emitter("listeners") sendEvent StudySpecimenGroupAddedEvent(sg.studyId, sg.id,
-            sg.name, sg.description, sg.units, sg.anatomicalSourceType, sg.preservationType,
-            sg.preservationTemperatureType, sg.specimenType)
-      }
+    case cmd: SpecimenGroupCommand =>
+      process(validateStudy(cmd.studyId) { study =>
+        specimenGroupDomainService.process(study, cmd, emitter("listeners"))
+      })
 
-    case cmd: UpdateSpecimenGroupCmd =>
-      processUpdate(specimenGroupRepository)(specimenGroupDomainService.updateSpecimenGroup(cmd)) {
-        sg =>
-          emitter("listeners") sendEvent StudySpecimenGroupUpdatedEvent(sg.studyId,
-            sg.id, sg.name, sg.description, sg.units, sg.anatomicalSourceType, sg.preservationType,
-            sg.preservationTemperatureType, sg.specimenType)
-      }
+    case cmd: CollectionEventTypeCommand =>
+      process(validateStudy(cmd.studyId) { study =>
+        collectionEventTypeDomainService.process(study, cmd, emitter("listeners"))
+      })
 
-    case cmd: RemoveSpecimenGroupCmd =>
-      processRemove(specimenGroupRepository)(specimenGroupDomainService.removeSpecimenGroup(cmd)) {
-        sg =>
-          emitter("listeners") sendEvent StudySpecimenGroupRemovedEvent(sg.studyId, sg.id)
-      }
-
-    case cmd: AddCollectionEventTypeCmd =>
-      processUpdate(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd, emitter)) {
-        cet =>
-          emitter("listeners") sendEvent CollectionEventTypeAddedEvent(
-            cmd.studyId, cet.name, cet.description, cet.recurring)
-      }
-
-    case cmd: UpdateCollectionEventTypeCmd =>
-      processUpdate(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd)) { cet =>
-        emitter("listeners") sendEvent CollectionEventTypeUpdatedEvent(
-          cmd.studyId, cmd.collectionEventTypeId, cet.name, cet.description, cet.recurring)
-      }
-
-    case cmd: RemoveCollectionEventTypeCmd =>
-      processRemove(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd)) { cet =>
-        emitter("listeners") sendEvent CollectionEventTypeRemovedEvent(
-          cmd.studyId, cmd.collectionEventTypeId)
-      }
-
-    case cmd: AddSpecimenGroupToCollectionEventTypeCmd =>
-      processUpdate(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd)) { cet =>
-        emitter("listeners") sendEvent SpecimenGroupAddedToCollectionEventTypeEvent(
-          cmd.studyId, cmd.collectionEventTypeId, cmd.specimenGroupId)
-      }
-
-    case cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd =>
-      processRemove(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd)) { cet =>
-        emitter("listeners") sendEvent SpecimenGroupRemovedFromCollectionEventTypeEvent(
-          cmd.studyId, cmd.collectionEventTypeId, cmd.specimenGroupId)
-      }
-
-    case cmd: AddAnnotationToCollectionEventTypeCmd =>
-      processUpdate(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd)) { cet =>
-        emitter("listeners") sendEvent AnnotationAddedToCollectionEventTypeEvent(
-          cmd.studyId, cmd.collectionEventTypeId, cmd.collectionEventAnnotationTypeId)
-      }
-
-    case cmd: RemoveAnnotationFromCollectionEventTypeCmd =>
-      processRemove(collectionEventTypeRepository)(collectionEventTypeDomainService.process(cmd)) { cet =>
-        emitter("listeners") sendEvent AnnotationRemovedFromCollectionEventTypeEvent(
-          cmd.studyId, cmd.collectionEventTypeId, cmd.collectionEventAnnotationTypeId)
-      }
     case _ =>
       throw new Error("invalid command received")
   }
+
+  private def addStudy(cmd: AddStudyCmd, listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
+    studyRepository.getValues.find(s => s.name.equals(cmd.name)) match {
+      case Some(study) =>
+        DomainError("study with name already exists: %s" format cmd.name).fail
+      case None =>
+        val study = Study.add(cmd.name, cmd.description)
+        study match {
+          case Success(study) =>
+            studyRepository.updateMap(study)
+            listeners sendEvent StudyAddedEvent(study.id, study.name, study.description)
+          case _ => // nothing to do in this case
+        }
+        study
+    }
+  }
+
+  private def updateStudy(cmd: UpdateStudyCmd, listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
+    val studyId = new StudyId(cmd.studyId)
+    Entity.update(studyRepository.getByKey(studyId), studyId, cmd.expectedVersion) { prevStudy =>
+      val study = DisabledStudy(studyId, prevStudy.version + 1, cmd.name, cmd.description)
+      studyRepository.updateMap(study)
+      listeners sendEvent StudyUpdatedEvent(study.id, study.name, study.description)
+      study.success
+    }
+  }
+
+  private def enableStudy(cmd: EnableStudyCmd, listeners: MessageEmitter): DomainValidation[EnabledStudy] = {
+    val studyId = new StudyId(cmd.studyId)
+    Entity.update(studyRepository.getByKey(studyId), studyId, cmd.expectedVersion) { prevStudy =>
+      val study = EnabledStudy(studyId, prevStudy.version + 1, prevStudy.name, prevStudy.description)
+      studyRepository.updateMap(study)
+      listeners sendEvent StudyEnabledEvent(study.id)
+      study.success
+    }
+  }
+
+  private def disableStudy(cmd: DisableStudyCmd, listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
+    val studyId = new StudyId(cmd.studyId)
+    Entity.update(studyRepository.getByKey(studyId), studyId, cmd.expectedVersion) { prevStudy =>
+      val study = DisabledStudy(studyId, prevStudy.version + 1, prevStudy.name, prevStudy.description)
+      studyRepository.updateMap(study)
+      listeners sendEvent StudyDisabledEvent(study.id)
+      study.success
+    }
+  }
+
+  private def validateStudy[T <: ConcurrencySafeEntity[_]](studyIdAsString: String)(f: DisabledStudy => DomainValidation[T]) = {
+    val studyId = new StudyId(studyIdAsString)
+    studyRepository.getByKey(studyId) match {
+      case None => StudyService.noSuchStudy(studyId).fail
+      case Some(study) => study match {
+        case study: EnabledStudy => StudyService.notDisabledError(study.name).fail
+        case study: DisabledStudy => f(study)
+      }
+    }
+  }
+}
+
+object StudyService {
+
+  def noSuchStudy(studyId: StudyId) =
+    DomainError("no study with id: %s" format studyId)
+
+  def notDisabledError(name: String) =
+    DomainError("study is not disabled: %s" format name)
+
+  def notEnabledError(name: String) =
+    DomainError("study is not enabled: %s" format name)
 }

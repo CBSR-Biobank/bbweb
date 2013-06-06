@@ -12,9 +12,9 @@ import akka.actor.Props
 import akka.pattern.ask
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
-
 import domain._
 import domain.study._
+import infrastructure._
 
 trait AppServices {
   def studyService: StudyService
@@ -38,9 +38,9 @@ object AppServices {
     val journal = Journal(journalProps)
     val extension = EventsourcingExtension(system, journal)
 
-    val studyRepository = new Repository[StudyId, Study](v => v.id)
-    val specimenGroupRepository = new Repository[SpecimenGroupId, SpecimenGroup](v => v.id)
-    val collectionEventTypeRepository = new Repository[CollectionEventTypeId, CollectionEventType](v => v.id)
+    val studyRepository = new ReadWriteRepository[StudyId, Study](v => v.id)
+    val specimenGroupRepository = new ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id)
+    val collectionEventTypeRepository = new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
     val usersRef = Ref(Map.empty[domain.UserId, User])
 
     val studyProcessor = extension.processorOf(Props(

@@ -24,9 +24,14 @@ case class SpecimenGroup(
 
 object SpecimenGroup {
 
-  def add(studyId: StudyId, name: String, description: String, units: String,
-    anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
-    preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType): DomainValidation[SpecimenGroup] =
+  def add(studyId: StudyId,
+    name: String,
+    description: String,
+    units: String,
+    anatomicalSourceType: AnatomicalSourceType,
+    preservationType: PreservationType,
+    preservationTemperatureType: PreservationTemperatureType,
+    specimenType: SpecimenType): DomainValidation[SpecimenGroup] =
     SpecimenGroup(SpecimenGroupIdentityService.nextIdentity, studyId, version = 0L, name,
       description, units, anatomicalSourceType, preservationType, preservationTemperatureType,
       specimenType).success

@@ -5,7 +5,7 @@ import domain._
 import scalaz._
 import Scalaz._
 
-case class CollectionEventType private[study] (
+case class CollectionEventType(
   id: CollectionEventTypeId,
   studyId: StudyId,
   version: Long = -1,

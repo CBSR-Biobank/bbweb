@@ -40,8 +40,8 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
 
   def addSpecimenGroup(specimenGroups: Map[SpecimenGroupId, SpecimenGroup],
     cmd: AddSpecimenGroupCmd): DomainValidation[SpecimenGroup] =
-    specimenGroups.find(sg => sg._2.name.equals(name)) match {
-      case Some(sg) => DomainError("specimen group with name already exists: %s" format name).fail
+    specimenGroups.find(sg => sg._2.name.equals(cmd.name)) match {
+      case Some(sg) => DomainError("specimen group with name already exists: %s" format cmd.name).fail
       case None =>
         SpecimenGroup.add(this.id, cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType,
           cmd.preservationType, cmd.preservationTemperatureType, cmd.specimenType)
@@ -49,12 +49,12 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
 
   def addCollectionEventType(
     collectionEventTypes: Map[CollectionEventTypeId, CollectionEventType],
-    name: String, description: String,
-    recurring: Boolean): DomainValidation[CollectionEventType] =
-    collectionEventTypes.find(cet => cet._2.name.equals(name)) match {
-      case Some(sg) => DomainError("collection event type with name already exists: %s" format name).fail
+    cmd: AddCollectionEventTypeCmd): DomainValidation[CollectionEventType] =
+    collectionEventTypes.find(cet => cet._2.name.equals(cmd.name)) match {
+      case Some(sg) =>
+        DomainError("collection event type with name already exists: %s" format cmd.name).fail
       case None =>
-        CollectionEventType.add(this.id, name, description, recurring)
+        CollectionEventType.add(this.id, cmd.name, cmd.description, cmd.recurring)
     }
 
 }
