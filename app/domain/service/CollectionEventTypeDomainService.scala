@@ -29,20 +29,42 @@ class CollectionEventTypeDomainService(
   cet2atRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType]) {
 
   def process = PartialFunction[Any, DomainValidation[_]] {
+    // collection event types
     case _@ (study: DisabledStudy, cmd: AddCollectionEventTypeCmd, listeners: MessageEmitter) =>
       addCollectionEventType(study, cmd, listeners)
     case _@ (study: DisabledStudy, cmd: UpdateCollectionEventTypeCmd, listeners: MessageEmitter) =>
       updateCollectionEventType(study, cmd, listeners)
     case _@ (study: DisabledStudy, cmd: RemoveCollectionEventTypeCmd, listeners: MessageEmitter) =>
       removeCollectionEventType(study, cmd, listeners)
+
+    // specimen group -> collection event types
     case _@ (study: DisabledStudy, cmd: AddSpecimenGroupToCollectionEventTypeCmd, listeners: MessageEmitter) =>
       addSpecimenGroupToCollectionEventType(study, cmd, listeners)
     case _@ (study: DisabledStudy, cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd, listeners: MessageEmitter) =>
       removeSpecimenGroupFromCollectionEventType(study, cmd, listeners)
+
+    // collection event  annotations
+    case _@ (study: DisabledStudy, cmd: AddCollectionEventAnnotationTypeCmd, listeners: MessageEmitter) =>
+      addCollectionEventAnnotationTypeCmd(study, cmd, listeners)
+    case _@ (study: DisabledStudy, cmd: UpdateCollectionEventAnnotationTypeCmd, listeners: MessageEmitter) =>
+      updateCollectionEventAnnotationTypeCmd(study, cmd, listeners)
+    case _@ (study: DisabledStudy, cmd: RemoveCollectionEventAnnotationTypeCmd, listeners: MessageEmitter) =>
+      removeCollectionEventAnnotationTypeCmd(study, cmd, listeners)
+
+    // collection event annotation options
+    case _@ (study: DisabledStudy, cmd: AddCollectionEventAnnotationOptionsCmd, listeners: MessageEmitter) =>
+      addCollectionEventAnnotationOptionsCmd(study, cmd, listeners)
+    case _@ (study: DisabledStudy, cmd: UpdateCollectionEventAnnotationOptionsCmd, listeners: MessageEmitter) =>
+      updateCollectionEventAnnotationOptionsCmd(study, cmd, listeners)
+    case _@ (study: DisabledStudy, cmd: RemoveCollectionEventAnnotationOptionsCmd, listeners: MessageEmitter) =>
+      removeCollectionEventAnnotationOptionsCmd(study, cmd, listeners)
+
+    // annotation types -> collection event types
     case _@ (study: DisabledStudy, cmd: AddAnnotationTypeToCollectionEventTypeCmd, listeners: MessageEmitter) =>
       addAnnotationTypeToCollectionEventType(study, cmd, listeners)
     case _@ (study: DisabledStudy, cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd, listeners: MessageEmitter) =>
       removeAnnotationTypeFromCollectionEventType(study, cmd, listeners)
+
     case _ =>
       throw new Error("invalid command received")
   }
@@ -156,6 +178,43 @@ class CollectionEventTypeDomainService(
         DomainError("annotation type -> collection event type does not exist: %s" format
           cmd.cetAtId).fail
     }
+  }
+
+  private def addCollectionEventAnnotationTypeCmd(
+    study: DisabledStudy,
+    cmd: AddCollectionEventAnnotationTypeCmd,
+    listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
+    ???
+  }
+  private def updateCollectionEventAnnotationTypeCmd(
+    study: DisabledStudy,
+    cmd: UpdateCollectionEventAnnotationTypeCmd,
+    listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
+    ???
+  }
+  private def removeCollectionEventAnnotationTypeCmd(
+    study: DisabledStudy,
+    cmd: RemoveCollectionEventAnnotationTypeCmd,
+    listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
+    ???
+  }
+  private def addCollectionEventAnnotationOptionsCmd(
+    study: DisabledStudy,
+    cmd: AddCollectionEventAnnotationOptionsCmd,
+    listeners: MessageEmitter): DomainValidation[AnnotationOption] = {
+    ???
+  }
+  private def updateCollectionEventAnnotationOptionsCmd(
+    study: DisabledStudy,
+    cmd: UpdateCollectionEventAnnotationOptionsCmd,
+    listeners: MessageEmitter): DomainValidation[AnnotationOption] = {
+    ???
+  }
+  private def removeCollectionEventAnnotationOptionsCmd(
+    study: DisabledStudy,
+    cmd: RemoveCollectionEventAnnotationOptionsCmd,
+    listeners: MessageEmitter): DomainValidation[AnnotationOption] = {
+    ???
   }
 
   private def validateSpecimenGroupId(study: DisabledStudy,

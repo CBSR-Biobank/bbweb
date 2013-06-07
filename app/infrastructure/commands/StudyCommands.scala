@@ -5,6 +5,7 @@ import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
+import domain.AnnotationValueType._
 
 // study commands
 case class AddStudyCmd(name: String, description: String)
@@ -60,5 +61,31 @@ case class AddAnnotationTypeToCollectionEventTypeCmd(studyIdentity: String,
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
 case class RemoveAnnotationTypeFromCollectionEventTypeCmd(cetAtId: String, studyIdentity: String)
+  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+
+// collection event commands
+case class AddCollectionEventAnnotationTypeCmd(studyIdentity: String, name: String,
+  description: String, valueType: AnnotationValueType, maxValueCount: Int)
+  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+
+case class UpdateCollectionEventAnnotationTypeCmd(studyIdentity: String,
+  collectionEventAnnotationTypeId: String, expectedVersion: Option[Long], name: String,
+  description: String, valueType: AnnotationValueType, maxValueCount: Int)
+  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+
+case class RemoveCollectionEventAnnotationTypeCmd(studyIdentity: String,
+  collectionEventAnnotationTypeId: String, expectedVersion: Option[Long])
+  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+
+case class AddCollectionEventAnnotationOptionsCmd(studyIdentity: String,
+  collectionEventAnnotationTypeId: String, options: Set[String])
+  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+
+case class UpdateCollectionEventAnnotationOptionsCmd(studyIdentity: String,
+  collectionEventAnnotationOptionId: String, expectedVersion: Option[Long], options: Set[String])
+  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+
+case class RemoveCollectionEventAnnotationOptionsCmd(studyIdentity: String,
+  collectionEventAnnotationOptionId: String, expectedVersion: Option[Long])
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 

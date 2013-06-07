@@ -28,7 +28,7 @@ abstract class ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
 object Entity {
 
   def update[S <: ConcurrencySafeEntity[_], T <: ConcurrencySafeEntity[_]](entity: Option[S],
-    id: Identity[_], expectedVersion: Option[Long])(f: S => DomainValidation[T]): DomainValidation[T] =
+    id: IdentifiedDomainObject[_], expectedVersion: Option[Long])(f: S => DomainValidation[T]): DomainValidation[T] =
     entity match {
       case None => DomainError("no entity with id: %s" format id).fail
       case Some(entity) => for {
