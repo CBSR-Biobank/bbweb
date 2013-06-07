@@ -49,6 +49,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       studyRepository.getMap must haveKey(study.id)
       studyRepository.getByKey(study.id) must beSome.like {
         case s =>
+          s.version must beEqualTo(0)
           s.name must be(name)
           s.description must be(name)
       }
@@ -159,6 +160,8 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       specimenGroupRepository.getMap must haveKey(sg1.id)
       specimenGroupRepository.getByKey(sg1.id) must beSome.like {
         case x =>
+          x.version must beEqualTo(0)
+          x.name must be(name)
           x.description must be(name)
           x.units must be(units)
           x.anatomicalSourceType must be(anatomicalSourceType)
@@ -175,7 +178,8 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       specimenGroupRepository.getMap must haveKey(sg2.id)
       specimenGroupRepository.getByKey(sg2.id) must beSome.like {
         case x =>
-          x.description must be(name2)
+          x.version must beEqualTo(0)
+          x.name must be(name2)
           x.description must be(name2)
           x.units must be(units)
           x.anatomicalSourceType must be(anatomicalSourceType)
@@ -245,6 +249,97 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
         new RemoveSpecimenGroupCmd(study1.id.toString, sg1.id.toString, sg1.versionOption)))
 
       specimenGroupRepository.getMap must not haveKey (sg1.id)
+  }
+
+  "add collection event types" in {
+    fragmentName: String =>
+      val ng = new NameGenerator(fragmentName)
+      val name = ng.next[Study]
+      val recurring = true
+
+      val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+
+      val cet1 = entityResult(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring)))
+
+      collectionEventTypeRepository.getMap must haveKey(cet1.id)
+      collectionEventTypeRepository.getByKey(cet1.id) must beSome.like {
+        case x =>
+          x.version must beEqualTo(0)
+          x.name must be(name)
+          x.description must be(name)
+          x.recurring must beEqualTo(recurring)
+      }
+
+      val name2 = ng.next[Study]
+      val recurring2 = false
+
+      val cet2 = entityResult(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study1.id.toString, name2, name2, recurring2)))
+
+      collectionEventTypeRepository.getMap must haveKey(cet2.id)
+      collectionEventTypeRepository.getByKey(cet2.id) must beSome.like {
+        case x =>
+          x.version must beEqualTo(0)
+          x.name must be(name2)
+          x.description must be(name2)
+          x.recurring must beEqualTo(recurring2)
+      }
+  }
+
+  "update collection event types" in {
+    fragmentName: String =>
+      val ng = new NameGenerator(fragmentName)
+      val name = ng.next[Study]
+      val recurring = true
+
+      val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+
+      val cet1 = entityResult(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring)))
+
+      collectionEventTypeRepository.getMap must haveKey(cet1.id)
+      collectionEventTypeRepository.getByKey(cet1.id) must beSome.like {
+        case x =>
+          x.version must beEqualTo(0)
+          x.name must be(name)
+          x.description must be(name)
+          x.recurring must beEqualTo(recurring)
+      }
+
+      val name2 = ng.next[Study]
+      val recurring2 = false
+
+      val cet2 = entityResult(studyService.updateCollectionEventType(
+        new UpdateCollectionEventTypeCmd(study1.id.toString, cet1.id.toString, cet1.versionOption,
+          name2, name2, recurring2)))
+
+      collectionEventTypeRepository.getMap must haveKey(cet2.id)
+      collectionEventTypeRepository.getByKey(cet2.id) must beSome.like {
+        case x =>
+          x.version must beEqualTo(cet1.version + 1)
+          x.name must be(name2)
+          x.description must be(name2)
+          x.recurring must beEqualTo(recurring2)
+      }
+  }
+
+  "remove collection event type" in {
+    fragmentName: String =>
+      val ng = new NameGenerator(fragmentName)
+      val name = ng.next[Study]
+      val recurring = true
+
+      val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+
+      val cet1 = entityResult(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring)))
+      collectionEventTypeRepository.getMap must haveKey(cet1.id)
+
+      entityResult(studyService.removeCollectionEventType(
+        new RemoveCollectionEventTypeCmd(study1.id.toString, cet1.id.toString, cet1.versionOption)))
+
+      collectionEventTypeRepository.getMap must not haveKey (cet1.id)
   }
 }
 

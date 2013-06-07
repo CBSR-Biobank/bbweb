@@ -36,8 +36,7 @@ case class RemoveSpecimenGroupCmd(studyIdentity: String, specimenGroupId: String
 sealed trait CollectionEventTypeCommand {
   val studyId: String
 }
-case class AddCollectionEventTypeCmd(studyIdentity: String, expectedVersion: Option[Long],
-  name: String, description: String,
+case class AddCollectionEventTypeCmd(studyIdentity: String, name: String, description: String,
   recurring: Boolean)
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
