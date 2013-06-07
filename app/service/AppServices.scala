@@ -43,22 +43,29 @@ object AppServices {
       new ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id)
     val collectionEventTypeRepository =
       new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
+    val cetAnnotationTypeRepo =
+      new ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType](v => v.id)
     val sg2cetRepo =
       new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
-    val cetAnnotationTypeRepo =
+    val cet2atRepo =
       new ReadWriteRepository[String, CollectionEventTypeAnnotationType](v => v.id)
-    val usersRef = Ref(Map.empty[domain.UserId, User])
+    val userRepo = new ReadWriteRepository[UserId, User](v => v.id)
 
     val studyProcessor = extension.processorOf(Props(
-      new StudyProcessor(studyRepository, specimenGroupRepository, collectionEventTypeRepository,
-        sg2cetRepo, cetAnnotationTypeRepo) with Emitter with Eventsourced { val id = 1 }))
+      new StudyProcessor(
+        studyRepository,
+        specimenGroupRepository,
+        collectionEventTypeRepository,
+        cetAnnotationTypeRepo,
+        sg2cetRepo,
+        cet2atRepo) with Emitter with Eventsourced { val id = 1 }))
 
     val userProcessor = extension.processorOf(Props(
-      new UserProcessor(usersRef) with Emitter with Eventsourced { val id = 1 }))
+      new UserProcessor(userRepo) with Emitter with Eventsourced { val id = 1 }))
 
     val studyService = new StudyService(studyRepository, specimenGroupRepository,
       collectionEventTypeRepository, studyProcessor)
-    val userService = new UserService(usersRef, userProcessor)
+    val userService = new UserService(userRepo, userProcessor)
 
     extension.recover()
     // wait for processor 1 to complete processing of replayed event messages

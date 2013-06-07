@@ -11,6 +11,7 @@ import akka.util.Timeout
 import org.eligosource.eventsourced.core._
 
 import domain._
+import infrastructure.{ ReadWriteRepository }
 import infrastructure.commands._
 import infrastructure.events._
 
@@ -18,23 +19,12 @@ import scalaz._
 import Scalaz._
 
 class UserService(
-  usersRef: Ref[Map[UserId, User]], userProcessor: ActorRef)(implicit system: ActorSystem) {
+  userRepo: ReadWriteRepository[UserId, User],
+  userProcessor: ActorRef)(implicit system: ActorSystem) {
   import system.dispatcher
 
-  //
-  // Consistent reads
-  //
-
-  def getUsersMap = usersRef.single.get
   def getByEmail(email: String): Option[User] =
-    getUsersMap.find(u => u._2.email.equals(email)) match {
-      case Some(v) => Some(v._2)
-      case None => None
-    }
-
-  //
-  // Updates  
-  //
+    userRepo.getMap.values.find(u => u.email.equals(email))
 
   implicit val timeout = Timeout(5.seconds)
 
@@ -43,49 +33,41 @@ class UserService(
 
 }
 
-class UserProcessor(usersRef: Ref[Map[UserId, User]]) extends Actor { this: Emitter =>
+class UserProcessor(userRepo: ReadWriteRepository[UserId, User]) extends Processor { this: Emitter =>
 
   def receive = {
-    case addUserCmd: AddUserCmd =>
-      process(addUser(addUserCmd)) { user =>
-        emitter("listenter") sendEvent UserAddedEvent(user.id, user.name, user.email)
-      }
-    case authenticateUserCmd: AuthenticateUserCmd =>
-      process(authenticateUser(authenticateUserCmd)) { user =>
-        emitter("listenter") sendEvent UserAddedEvent(user.id, user.name, user.email)
-      }
+    case cmd: AddUserCmd =>
+      process(addUser(cmd, emitter("listenter")))
+    case cmd: AuthenticateUserCmd =>
+      process(authenticateUser(cmd, emitter("listenter")))
   }
 
-  //def process(validation: DomainValidation[User])(onSuccess: User => Unit) = {
-  def process(validation: DomainValidation[User])(onSuccess: User => Unit) = {
-    validation.foreach { user =>
-      updateUsers(user)
-      onSuccess(user)
-    }
-    sender ! validation
-  }
-
-  def addUser(cmd: AddUserCmd): DomainValidation[User] = {
-    readUsers.find(u => u._2.email.equals(cmd.email)) match {
-      case Some(user) => DomainError("user with email already exists: %s" format cmd.email).fail
-      case None => User.add(cmd.name, cmd.email, cmd.password)
+  def addUser(cmd: AddUserCmd, listeners: MessageEmitter): DomainValidation[User] = {
+    userRepo.getMap.values.find(u => u.email.equals(cmd.email)) match {
+      case Some(user) =>
+        DomainError("user with email already exists: %s" format cmd.email).fail
+      case None =>
+        val newUser = User.add(cmd.name, cmd.email, cmd.password)
+        userRepo.updateMap(newUser)
+        listeners sendEvent UserAddedEvent(newUser.id, newUser.name, newUser.email)
+        newUser.success
     }
   }
 
-  def authenticateUser(cmd: AuthenticateUserCmd): DomainValidation[User] = {
+  def authenticateUser(cmd: AuthenticateUserCmd, listeners: MessageEmitter): DomainValidation[User] = {
     if (cmd.email.equals("admin@admin.com")) {
-      User.add("admin", "admin@admin.com", "admin")
+      User.add("admin", "admin@admin.com", "admin").success
     } else {
-      readUsers.find(u => u._2.email.equals(cmd.email)) match {
-        case Some(entry) => entry._2.authenticate(cmd.email, cmd.password)
+      userRepo.getMap.values.find(u => u.email.equals(cmd.email)) match {
+        case Some(user) =>
+          val v = user.authenticate(cmd.email, cmd.password)
+          v match {
+            case Success(u) => listeners sendEvent UserAuthenticatedEvent(u.id, u.name, u.email)
+            case Failure(_) => // do nothing
+          }
+          v
         case None => DomainError("authentication failure").fail
       }
     }
   }
-
-  private def readUsers =
-    usersRef.single.get
-
-  private def updateUsers(user: User) =
-    usersRef.single.transform(users => users + (user.id -> user))
 }

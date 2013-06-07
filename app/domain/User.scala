@@ -18,8 +18,8 @@ sealed abstract class User extends ConcurrencySafeEntity[UserId] {
 
 object User {
 
-  def add(name: String, email: String, password: String): DomainValidation[UnauthenticatedUser] =
-    UnauthenticatedUser(UserIdentityService.nextIdentity, version = 0L, name, email, password).success
+  def add(name: String, email: String, password: String): UnauthenticatedUser =
+    UnauthenticatedUser(UserIdentityService.nextIdentity, version = 0L, name, email, password)
 
 }
 

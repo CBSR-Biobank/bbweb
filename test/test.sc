@@ -1,7 +1,7 @@
+import domain._
+
 import scalaz._
 import scalaz.Scalaz._
-
-import domain._
 
 object test {
   def even(x: Int) =

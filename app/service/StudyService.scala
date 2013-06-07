@@ -9,6 +9,7 @@ import scala.concurrent.stm.Ref
 import scala.language.postfixOps
 import org.eligosource.eventsourced.core._
 import domain.{
+  AnnotationTypeId,
   ConcurrencySafeEntity,
   DomainValidation,
   DomainError,
@@ -82,16 +83,17 @@ class StudyProcessor(
   studyRepository: ReadWriteRepository[StudyId, Study],
   specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup],
   collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
+  annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType],
   sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType],
-  cetAnnotationTypeRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType])
+  cet2atRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType])
   extends Processor { this: Emitter =>
 
   val specimenGroupDomainService = new SpecimenGroupDomainService(
     studyRepository, specimenGroupRepository)
 
   val collectionEventTypeDomainService = new CollectionEventTypeDomainService(
-    studyRepository, collectionEventTypeRepository, specimenGroupRepository,
-    sg2cetRepo, cetAnnotationTypeRepo)
+    studyRepository, collectionEventTypeRepository, specimenGroupRepository, annotationTypeRepo,
+    sg2cetRepo, cet2atRepo)
 
   def receive = {
     case cmd: AddStudyCmd =>

@@ -15,6 +15,7 @@ import test._
 import service.{ StudyService, StudyProcessor }
 import domain.{
   AnatomicalSourceType,
+  AnnotationTypeId,
   ConcurrencySafeEntity,
   DomainValidation,
   DomainError,
@@ -255,10 +256,13 @@ object StudyServiceFixture {
     val specimenGroupRepository = new ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id)
     val collectionEventTypeRepository = new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
 
+    val cetAnnotationTypeRepo =
+      new ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType](v => v.id)
+
     val sg2cetRepo =
       new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
 
-    val cetAnnotationTypeRepo =
+    val cet2atRepo =
       new ReadWriteRepository[String, CollectionEventTypeAnnotationType](v => v.id)
 
     val studyProcessor = extension.processorOf(Props(
@@ -266,8 +270,9 @@ object StudyServiceFixture {
         studyRepository,
         specimenGroupRepository,
         collectionEventTypeRepository,
+        cetAnnotationTypeRepo,
         sg2cetRepo,
-        cetAnnotationTypeRepo) with Emitter with Eventsourced { val id = 1 }))
+        cet2atRepo) with Emitter with Eventsourced { val id = 1 }))
 
     val studyService = new StudyService(studyRepository, specimenGroupRepository,
       collectionEventTypeRepository, studyProcessor)

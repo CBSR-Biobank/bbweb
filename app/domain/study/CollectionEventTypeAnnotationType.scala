@@ -3,7 +3,7 @@ package domain.study
 import domain._
 
 case class CollectionEventTypeAnnotationType(
-  identity: String,
+  id: String,
   collectionEventTypeId: CollectionEventTypeId,
   collectionEventAnnotationTypeId: AnnotationTypeId,
   required: Boolean) extends IdentifiedValueObject[String] {

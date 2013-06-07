@@ -42,5 +42,4 @@ case class SpecimenGroupRemovedFromCollectionEventTypeEvent(sg2cetId: String)
 case class AnnotationTypeAddedToCollectionEventTypeEvent(
   studyId: String, collectionEventId: String, annotationTypeId: String)
 
-case class AnnotationTypeRemovedFromCollectionEventTypeEvent(
-  studyId: String, collectionEventId: String, annotationTypeId: String)
+case class AnnotationTypeRemovedFromCollectionEventTypeEvent(studyId: String, cet2AtId: String)

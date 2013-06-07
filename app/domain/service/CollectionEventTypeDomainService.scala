@@ -146,11 +146,16 @@ class CollectionEventTypeDomainService(
 
   private def removeAnnotationTypeFromCollectionEventType(study: DisabledStudy,
     cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd,
-    listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
-    cet2atRepo.getByKey(cmd.cetAtId)
-    listeners sendEvent AnnotationRemovedFromCollectionEventTypeEvent(
-      cmd.studyId, cmd.collectionEventTypeId, cmd.collectionEventAnnotationTypeId)
-    ???
+    listeners: MessageEmitter): DomainValidation[CollectionEventTypeAnnotationType] = {
+    cet2atRepo.getByKey(cmd.cetAtId) match {
+      case Some(cet2at) =>
+        cet2atRepo.remove(cet2at)
+        listeners sendEvent AnnotationTypeRemovedFromCollectionEventTypeEvent(cmd.studyId, cmd.cetAtId)
+        cet2at.success
+      case None =>
+        DomainError("annotation type -> collection event type does not exist: %s" format
+          cmd.cetAtId).fail
+    }
   }
 
   private def validateSpecimenGroupId(study: DisabledStudy,
