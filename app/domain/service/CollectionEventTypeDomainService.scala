@@ -23,9 +23,10 @@ import scalaz.Scalaz._
 class CollectionEventTypeDomainService(
   studyRepository: ReadRepository[StudyId, Study],
   collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
-  specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup]) {
+  specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
+  specimenGroupCollectionEventTypes: ValueObjectList[SpecimenGroupCollectionEventType]) {
 
-  def process = PartialFunction[Any, DomainValidation[CollectionEventType]] {
+  def process = PartialFunction[Any, DomainValidation[_]] {
     case _@ (study: DisabledStudy, cmd: AddCollectionEventTypeCmd, listeners: MessageEmitter) =>
       addCollectionEventType(study, cmd, listeners)
     case _@ (study: DisabledStudy, cmd: UpdateCollectionEventTypeCmd, listeners: MessageEmitter) =>
@@ -87,12 +88,46 @@ class CollectionEventTypeDomainService(
     }
   }
 
+  private def validateSpecimenGroupId(study: DisabledStudy,
+    specimenGroupId: String): DomainValidation[SpecimenGroup] = {
+    specimenGroupRepository.getByKey(new SpecimenGroupId(specimenGroupId)) match {
+      case Some(sg) =>
+        if (study.id.equals(sg.studyId)) sg.success
+        else DomainError("specimen group does not belong to study: %s" format specimenGroupId).fail
+      case None =>
+        DomainError("specimen group does not exist: %s" format specimenGroupId).fail
+    }
+  }
+
+  private def validateCollectionEventTypeId(study: DisabledStudy,
+    collectionEventTypeId: String): DomainValidation[CollectionEventType] = {
+    collectionEventTypeRepository.getByKey(new CollectionEventTypeId(collectionEventTypeId)) match {
+      case Some(cet) =>
+        if (study.id.equals(cet.studyId)) cet.success
+        else DomainError("collection event type does not belong to study: %s" format collectionEventTypeId).fail
+      case None =>
+        DomainError("collection event type does not exist: %s" format collectionEventTypeId).fail
+    }
+  }
+
   private def addSpecimenGroupToCollectionEventType(study: DisabledStudy,
     cmd: AddSpecimenGroupToCollectionEventTypeCmd,
-    listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
-    listeners sendEvent SpecimenGroupAddedToCollectionEventTypeEvent(
-      cmd.studyId, cmd.collectionEventTypeId, cmd.specimenGroupId)
-    ???
+    listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
+    val v1 = validateSpecimenGroupId(study, cmd.specimenGroupId)
+    v1 match {
+      case Success(sg) =>
+        val v2 = validateCollectionEventTypeId(study, cmd.collectionEventTypeId)
+        v2 match {
+          case Success(cet) => {
+            val sg2cet = new SpecimenGroupCollectionEventType(sg.id, cet.id, cmd.count, cmd.amount)
+            listeners sendEvent SpecimenGroupAddedToCollectionEventTypeEvent(
+              cmd.studyId, cmd.collectionEventTypeId, cmd.specimenGroupId, cmd.count, cmd.amount)
+            sg2cet.success
+          }
+          case Failure(err) => v2
+        }
+      case Failure(_) => v1
+    }
   }
 
   private def removeSpecimenGroupFromCollectionEventType(study: DisabledStudy,

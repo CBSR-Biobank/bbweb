@@ -33,7 +33,7 @@ case class CollectionEventTypeUpdatedEvent(
   studyId: String, collectionEventId: String, name: String, description: String, recurring: Boolean)
 case class CollectionEventTypeRemovedEvent(studyId: String, collectionEventId: String)
 case class SpecimenGroupAddedToCollectionEventTypeEvent(
-  studyId: String, collectionEventId: String, specimenGroupId: String)
+  studyId: String, collectionEventId: String, specimenGroupId: String, count: Int, amount: BigDecimal)
 case class SpecimenGroupRemovedFromCollectionEventTypeEvent(
   studyId: String, collectionEventId: String, specimenGroupId: String)
 case class AnnotationAddedToCollectionEventTypeEvent(

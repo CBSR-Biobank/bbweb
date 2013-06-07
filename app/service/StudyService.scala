@@ -81,13 +81,15 @@ class StudyService(
 class StudyProcessor(
   studyRepository: ReadWriteRepository[StudyId, Study],
   specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup],
-  collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType])
+  collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
+  specimenGroupCollectionEventTypes: ValueObjectList[SpecimenGroupCollectionEventType])
   extends Processor { this: Emitter =>
 
   val specimenGroupDomainService = new SpecimenGroupDomainService(
     studyRepository, specimenGroupRepository)
   val collectionEventTypeDomainService = new CollectionEventTypeDomainService(
-    studyRepository, collectionEventTypeRepository, specimenGroupRepository)
+    studyRepository, collectionEventTypeRepository, specimenGroupRepository,
+    specimenGroupCollectionEventTypes)
 
   def receive = {
     case cmd: AddStudyCmd =>

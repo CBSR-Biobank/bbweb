@@ -41,8 +41,10 @@ case class UpdateCollectionEventTypeCmd(studyIdentity: String, collectionEventTy
   recurring: Boolean) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 case class RemoveCollectionEventTypeCmd(studyIdentity: String, collectionEventTypeId: String,
   expectedVersion: Option[Long]) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
-case class AddSpecimenGroupToCollectionEventTypeCmd(studyIdentity: String, collectionEventTypeId: String,
-  expectedVersion: Option[Long], specimenGroupId: String) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+case class AddSpecimenGroupToCollectionEventTypeCmd(studyIdentity: String,
+  collectionEventTypeId: String, specimenGroupId: String,
+  count: Int, amount: BigDecimal) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+
 case class RemoveSpecimenGroupFromCollectionEventTypeCmd(studyIdentity: String, collectionEventTypeId: String,
   expectedVersion: Option[Long], specimenGroupId: String) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 case class AddAnnotationToCollectionEventTypeCmd(studyIdentity: String, collectionEventTypeId: String,

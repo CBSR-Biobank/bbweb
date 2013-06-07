@@ -1,5 +1,5 @@
 package domain
 
-class IdentifiedValueObject {
+abstract class IdentifiedValueObject {
 
 }
