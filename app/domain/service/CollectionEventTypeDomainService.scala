@@ -24,7 +24,9 @@ class CollectionEventTypeDomainService(
   studyRepository: ReadRepository[StudyId, Study],
   collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
   specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
-  sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType]) {
+  annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType],
+  sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType],
+  cet2atRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType]) {
 
   def process = PartialFunction[Any, DomainValidation[_]] {
     case _@ (study: DisabledStudy, cmd: AddCollectionEventTypeCmd, listeners: MessageEmitter) =>
@@ -37,10 +39,10 @@ class CollectionEventTypeDomainService(
       addSpecimenGroupToCollectionEventType(study, cmd, listeners)
     case _@ (study: DisabledStudy, cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd, listeners: MessageEmitter) =>
       removeSpecimenGroupFromCollectionEventType(study, cmd, listeners)
-    case _@ (study: DisabledStudy, cmd: AddAnnotationToCollectionEventTypeCmd, listeners: MessageEmitter) =>
-      addAnnotationToCollectionEventType(study, cmd, listeners)
-    case _@ (study: DisabledStudy, cmd: RemoveAnnotationFromCollectionEventTypeCmd, listeners: MessageEmitter) =>
-      removeAnnotationFromCollectionEventType(study, cmd, listeners)
+    case _@ (study: DisabledStudy, cmd: AddAnnotationTypeToCollectionEventTypeCmd, listeners: MessageEmitter) =>
+      addAnnotationTypeToCollectionEventType(study, cmd, listeners)
+    case _@ (study: DisabledStudy, cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd, listeners: MessageEmitter) =>
+      removeAnnotationTypeFromCollectionEventType(study, cmd, listeners)
     case _ =>
       throw new Error("invalid command received")
   }
@@ -88,6 +90,68 @@ class CollectionEventTypeDomainService(
     }
   }
 
+  private def addSpecimenGroupToCollectionEventType(study: DisabledStudy,
+    cmd: AddSpecimenGroupToCollectionEventTypeCmd,
+    listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
+    def createItem(sg: SpecimenGroup, cet: CollectionEventType) = {
+      val sg2cet = SpecimenGroupCollectionEventType(
+        SpecimenGroupCollectionEventTypeIdentityService.nextIdentity,
+        sg.id, cet.id, cmd.count, cmd.amount)
+      sg2cetRepo.updateMap(sg2cet)
+      listeners sendEvent SpecimenGroupAddedToCollectionEventTypeEvent(
+        cmd.studyId, cmd.collectionEventTypeId, cmd.specimenGroupId, cmd.count, cmd.amount)
+      sg2cet.success
+    }
+
+    for {
+      v1 <- validateSpecimenGroupId(study, cmd.specimenGroupId)
+      v2 <- validateCollectionEventTypeId(study, cmd.collectionEventTypeId)
+      v3 <- createItem(v1, v2)
+    } yield v3
+  }
+
+  private def removeSpecimenGroupFromCollectionEventType(study: DisabledStudy,
+    cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd,
+    listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
+    sg2cetRepo.getByKey(cmd.sg2cetId) match {
+      case Some(cg2cet) =>
+        sg2cetRepo.remove(cg2cet)
+        listeners sendEvent SpecimenGroupRemovedFromCollectionEventTypeEvent(cmd.sg2cetId)
+        cg2cet.success
+      case None =>
+        DomainError("specimen group -> collection event type does not exist: %s" format cmd.sg2cetId).fail
+    }
+  }
+
+  private def addAnnotationTypeToCollectionEventType(study: DisabledStudy,
+    cmd: AddAnnotationTypeToCollectionEventTypeCmd,
+    listeners: MessageEmitter): DomainValidation[CollectionEventTypeAnnotationType] = {
+
+    def createItem(cet: CollectionEventType, cetAt: CollectionEventAnnotationType) = {
+      val cetAnnotationType = CollectionEventTypeAnnotationType(
+        CollectionEventTypeAnnotationTypeIdentityService.nextIdentity,
+        cet.id, cetAt.id, cmd.required)
+      cet2atRepo.updateMap(cetAnnotationType)
+      listeners sendEvent AnnotationTypeAddedToCollectionEventTypeEvent(
+        cmd.studyId, cmd.collectionEventTypeId, cmd.annotationTypeId)
+      cetAnnotationType.success
+    }
+
+    for {
+      v1 <- validateCollectionEventTypeId(study, cmd.collectionEventTypeId)
+      v2 <- validateAnnotationTypeId(study, cmd.annotationTypeId)
+      v3 <- createItem(v1, v2)
+    } yield v3
+  }
+
+  private def removeAnnotationTypeFromCollectionEventType(study: DisabledStudy,
+    cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd,
+    listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
+    listeners sendEvent AnnotationRemovedFromCollectionEventTypeEvent(
+      cmd.studyId, cmd.collectionEventTypeId, cmd.collectionEventAnnotationTypeId)
+    ???
+  }
+
   private def validateSpecimenGroupId(study: DisabledStudy,
     specimenGroupId: String): DomainValidation[SpecimenGroup] = {
     specimenGroupRepository.getByKey(new SpecimenGroupId(specimenGroupId)) match {
@@ -110,49 +174,19 @@ class CollectionEventTypeDomainService(
     }
   }
 
-  private def addSpecimenGroupToCollectionEventType(study: DisabledStudy,
-    cmd: AddSpecimenGroupToCollectionEventTypeCmd,
-    listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
-    def createItem(sg: SpecimenGroup, cet: CollectionEventType) = {
-      val sg2cet = new SpecimenGroupCollectionEventType(
-        SpecimenGroupCollectionEventTypeIdentityService.nextIdentity,
-        sg.id, cet.id, cmd.count, cmd.amount)
-      sg2cetRepo.updateMap(sg2cet)
-      listeners sendEvent SpecimenGroupAddedToCollectionEventTypeEvent(
-        cmd.studyId, cmd.collectionEventTypeId, cmd.specimenGroupId, cmd.count, cmd.amount)
-      sg2cet.success
+  /**
+   * Validates that the CollectionEventAnnotationType with id {@link annotationTypeId} exists
+   * and that it belongs to {@link study}.
+   */
+  private def validateAnnotationTypeId(study: DisabledStudy,
+    annotationTypeId: String): DomainValidation[CollectionEventAnnotationType] = {
+    annotationTypeRepo.getByKey(new AnnotationTypeId(annotationTypeId)) match {
+      case Some(annot) =>
+        if (study.id.equals(annot.studyId)) annot.success
+        else DomainError("CE annotation type does not belong to study: %s" format annotationTypeId).fail
+      case None =>
+        DomainError("CE annotation type does not exist: %s" format annotationTypeId).fail
     }
-
-    for {
-      v1 <- validateSpecimenGroupId(study, cmd.specimenGroupId)
-      v2 <- validateCollectionEventTypeId(study, cmd.collectionEventTypeId)
-      v3 <- createItem(v1, v2)
-    } yield v3
-
-  }
-
-  private def removeSpecimenGroupFromCollectionEventType(study: DisabledStudy,
-    cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd,
-    listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
-    listeners sendEvent SpecimenGroupRemovedFromCollectionEventTypeEvent(
-      cmd.studyId, cmd.collectionEventTypeId, cmd.specimenGroupId)
-    ???
-  }
-
-  private def addAnnotationToCollectionEventType(study: DisabledStudy,
-    cmd: AddAnnotationToCollectionEventTypeCmd,
-    listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
-    listeners sendEvent AnnotationAddedToCollectionEventTypeEvent(
-      cmd.studyId, cmd.collectionEventTypeId, cmd.collectionEventAnnotationTypeId)
-    ???
-  }
-
-  private def removeAnnotationFromCollectionEventType(study: DisabledStudy,
-    cmd: RemoveAnnotationFromCollectionEventTypeCmd,
-    listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
-    listeners sendEvent AnnotationRemovedFromCollectionEventTypeEvent(
-      cmd.studyId, cmd.collectionEventTypeId, cmd.collectionEventAnnotationTypeId)
-    ???
   }
 
 }

@@ -12,7 +12,6 @@ case class CollectionEventType(
   name: String,
   description: String,
   recurring: Boolean) extends ConcurrencySafeEntity[CollectionEventTypeId] {
-
 }
 
 object CollectionEventType {

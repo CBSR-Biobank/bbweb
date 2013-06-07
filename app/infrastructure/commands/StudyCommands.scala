@@ -19,15 +19,18 @@ sealed trait SpecimenGroupCommand {
 }
 case class AddSpecimenGroupCmd(studyIdentity: String, name: String, description: String, units: String,
   anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
-  preservationTemperatureType: PreservationTemperatureType,
-  specimenType: SpecimenType) extends { val studyId = studyIdentity } with SpecimenGroupCommand
+  preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
+  extends { val studyId = studyIdentity } with SpecimenGroupCommand
+
 case class UpdateSpecimenGroupCmd(studyIdentity: String, specimenGroupId: String,
   expectedVersion: Option[Long], name: String, description: String, units: String,
   anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
-  preservationTemperatureType: PreservationTemperatureType,
-  specimenType: SpecimenType) extends { val studyId = studyIdentity } with SpecimenGroupCommand
+  preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
+  extends { val studyId = studyIdentity } with SpecimenGroupCommand
+
 case class RemoveSpecimenGroupCmd(studyIdentity: String, specimenGroupId: String,
-  expectedVersion: Option[Long]) extends { val studyId = studyIdentity } with SpecimenGroupCommand
+  expectedVersion: Option[Long])
+  extends { val studyId = studyIdentity } with SpecimenGroupCommand
 
 // collection event commands
 sealed trait CollectionEventTypeCommand {
@@ -35,20 +38,28 @@ sealed trait CollectionEventTypeCommand {
 }
 case class AddCollectionEventTypeCmd(studyIdentity: String, expectedVersion: Option[Long],
   name: String, description: String,
-  recurring: Boolean) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+  recurring: Boolean)
+  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+
 case class UpdateCollectionEventTypeCmd(studyIdentity: String, collectionEventTypeId: String,
   expectedVersion: Option[Long], name: String, description: String,
   recurring: Boolean) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
-case class RemoveCollectionEventTypeCmd(studyIdentity: String, collectionEventTypeId: String,
-  expectedVersion: Option[Long]) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
-case class AddSpecimenGroupToCollectionEventTypeCmd(studyIdentity: String,
-  collectionEventTypeId: String, specimenGroupId: String,
-  count: Int, amount: BigDecimal) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
-case class RemoveSpecimenGroupFromCollectionEventTypeCmd(studyIdentity: String, collectionEventTypeId: String,
-  expectedVersion: Option[Long], specimenGroupId: String) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
-case class AddAnnotationToCollectionEventTypeCmd(studyIdentity: String, collectionEventTypeId: String,
-  expectedVersion: Option[Long], collectionEventAnnotationTypeId: String) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
-case class RemoveAnnotationFromCollectionEventTypeCmd(studyIdentity: String, collectionEventTypeId: String,
-  expectedVersion: Option[Long], collectionEventAnnotationTypeId: String) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+case class RemoveCollectionEventTypeCmd(studyIdentity: String, collectionEventTypeId: String,
+  expectedVersion: Option[Long])
+  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+
+case class AddSpecimenGroupToCollectionEventTypeCmd(studyIdentity: String,
+  collectionEventTypeId: String, specimenGroupId: String, count: Int, amount: BigDecimal)
+  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+
+case class RemoveSpecimenGroupFromCollectionEventTypeCmd(sg2cetId: String, studyIdentity: String)
+  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+
+case class AddAnnotationTypeToCollectionEventTypeCmd(studyIdentity: String,
+  collectionEventTypeId: String, annotationTypeId: String, required: Boolean)
+  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+
+case class RemoveAnnotationTypeFromCollectionEventTypeCmd(cetAtId: String, studyIdentity: String)
+  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 

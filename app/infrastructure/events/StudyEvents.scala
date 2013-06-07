@@ -28,14 +28,19 @@ case class StudySpecimenGroupRemovedEvent(studyId: StudyId, specimenGroupId: Spe
 // collection event events
 case class CollectionEventTypeAddedEvent(
   studyId: String, name: String, description: String, recurring: Boolean)
+
 case class CollectionEventTypeUpdatedEvent(
   studyId: String, collectionEventId: String, name: String, description: String, recurring: Boolean)
+
 case class CollectionEventTypeRemovedEvent(studyId: String, collectionEventId: String)
+
 case class SpecimenGroupAddedToCollectionEventTypeEvent(
   studyId: String, collectionEventId: String, specimenGroupId: String, count: Int, amount: BigDecimal)
-case class SpecimenGroupRemovedFromCollectionEventTypeEvent(
-  studyId: String, collectionEventId: String, specimenGroupId: String)
-case class AnnotationAddedToCollectionEventTypeEvent(
-  studyId: String, collectionEventId: String, collectionEventAnnotationTypeId: String)
-case class AnnotationRemovedFromCollectionEventTypeEvent(
-  studyId: String, collectionEventId: String, collectionEventAnnotationTypeId: String)
+
+case class SpecimenGroupRemovedFromCollectionEventTypeEvent(sg2cetId: String)
+
+case class AnnotationTypeAddedToCollectionEventTypeEvent(
+  studyId: String, collectionEventId: String, annotationTypeId: String)
+
+case class AnnotationTypeRemovedFromCollectionEventTypeEvent(
+  studyId: String, collectionEventId: String, annotationTypeId: String)

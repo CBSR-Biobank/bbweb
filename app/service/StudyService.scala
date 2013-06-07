@@ -61,17 +61,17 @@ class StudyService(
   def removeCollectionEventType(cmd: RemoveCollectionEventTypeCmd): Future[DomainValidation[CollectionEventType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventType]])
 
-  def addSpecimenGroupToCollectionEventType(cmd: AddSpecimenGroupToCollectionEventTypeCmd): Future[DomainValidation[CollectionEventType]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventType]])
+  def addSpecimenGroupToCollectionEventType(cmd: AddSpecimenGroupToCollectionEventTypeCmd): Future[DomainValidation[SpecimenGroupCollectionEventType]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroupCollectionEventType]])
 
-  def removeSpecimenGroupFromCollectionEventType(cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd): Future[DomainValidation[CollectionEventType]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventType]])
+  def removeSpecimenGroupFromCollectionEventType(cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd): Future[DomainValidation[SpecimenGroupCollectionEventType]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroupCollectionEventType]])
 
-  def addAnnotationToCollectionEventType(cmd: AddAnnotationToCollectionEventTypeCmd): Future[DomainValidation[CollectionEventType]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventType]])
+  def addAnnotationToCollectionEventType(cmd: AddAnnotationTypeToCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
 
-  def removeAnnotationFromCollectionEventType(cmd: RemoveAnnotationFromCollectionEventTypeCmd): Future[DomainValidation[CollectionEventType]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventType]])
+  def removeAnnotationFromCollectionEventType(cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
 
 }
 
@@ -82,14 +82,16 @@ class StudyProcessor(
   studyRepository: ReadWriteRepository[StudyId, Study],
   specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup],
   collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
-  sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType])
+  sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType],
+  cetAnnotationTypeRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType])
   extends Processor { this: Emitter =>
 
   val specimenGroupDomainService = new SpecimenGroupDomainService(
     studyRepository, specimenGroupRepository)
+
   val collectionEventTypeDomainService = new CollectionEventTypeDomainService(
     studyRepository, collectionEventTypeRepository, specimenGroupRepository,
-    sg2cetRepo)
+    sg2cetRepo, cetAnnotationTypeRepo)
 
   def receive = {
     case cmd: AddStudyCmd =>

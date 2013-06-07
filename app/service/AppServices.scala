@@ -45,11 +45,13 @@ object AppServices {
       new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
     val sg2cetRepo =
       new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
+    val cetAnnotationTypeRepo =
+      new ReadWriteRepository[String, CollectionEventTypeAnnotationType](v => v.id)
     val usersRef = Ref(Map.empty[domain.UserId, User])
 
     val studyProcessor = extension.processorOf(Props(
       new StudyProcessor(studyRepository, specimenGroupRepository, collectionEventTypeRepository,
-        sg2cetRepo) with Emitter with Eventsourced { val id = 1 }))
+        sg2cetRepo, cetAnnotationTypeRepo) with Emitter with Eventsourced { val id = 1 }))
 
     val userProcessor = extension.processorOf(Props(
       new UserProcessor(usersRef) with Emitter with Eventsourced { val id = 1 }))

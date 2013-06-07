@@ -1,8 +1,6 @@
 package domain.study
 
-import domain.DomainError
-import domain.DomainValidation
-import domain.ConcurrencySafeEntity
+import domain.{ ConcurrencySafeEntity, DomainError, DomainValidation }
 import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
