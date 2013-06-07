@@ -1,7 +1,7 @@
 package domain.study
 
-import domain.Identity
+import domain.IdentifiedValueObject
 
-class CollectionEventAnnotationTypeId(identity: String) extends { val id = identity } with Identity {
+class CollectionEventAnnotationTypeId(identity: String) extends { val id = identity } with IdentifiedValueObject[String] {
 
 }

@@ -7,7 +7,7 @@ import scalaz.Scalaz._
 
 trait Processor extends Actor {
 
-  protected def process[T <: ConcurrencySafeEntity[_]](validation: DomainValidation[T]) =
+  protected def process(validation: DomainValidation[_]) =
     sender ! validation
 
 }

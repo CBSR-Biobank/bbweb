@@ -254,14 +254,16 @@ object StudyServiceFixture {
     val studyRepository = new ReadWriteRepository[StudyId, Study](v => v.id)
     val specimenGroupRepository = new ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id)
     val collectionEventTypeRepository = new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
-    val specimenGroupCollectionEventTypes = new ValueObjectList[SpecimenGroupCollectionEventType]
+
+    val sg2cetRepo =
+      new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
 
     val studyProcessor = extension.processorOf(Props(
       new StudyProcessor(
         studyRepository,
         specimenGroupRepository,
         collectionEventTypeRepository,
-        specimenGroupCollectionEventTypes) with Emitter with Eventsourced { val id = 1 }))
+        sg2cetRepo) with Emitter with Eventsourced { val id = 1 }))
 
     val studyService = new StudyService(studyRepository, specimenGroupRepository,
       collectionEventTypeRepository, studyProcessor)

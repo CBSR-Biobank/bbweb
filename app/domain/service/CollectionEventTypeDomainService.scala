@@ -18,13 +18,13 @@ import domain.study.{
   StudyId
 }
 import scalaz._
-import scalaz.Scalaz._
+import Scalaz._
 
 class CollectionEventTypeDomainService(
   studyRepository: ReadRepository[StudyId, Study],
   collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
   specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
-  specimenGroupCollectionEventTypes: ValueObjectList[SpecimenGroupCollectionEventType]) {
+  sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType]) {
 
   def process = PartialFunction[Any, DomainValidation[_]] {
     case _@ (study: DisabledStudy, cmd: AddCollectionEventTypeCmd, listeners: MessageEmitter) =>
@@ -113,21 +113,22 @@ class CollectionEventTypeDomainService(
   private def addSpecimenGroupToCollectionEventType(study: DisabledStudy,
     cmd: AddSpecimenGroupToCollectionEventTypeCmd,
     listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
-    val v1 = validateSpecimenGroupId(study, cmd.specimenGroupId)
-    v1 match {
-      case Success(sg) =>
-        val v2 = validateCollectionEventTypeId(study, cmd.collectionEventTypeId)
-        v2 match {
-          case Success(cet) => {
-            val sg2cet = new SpecimenGroupCollectionEventType(sg.id, cet.id, cmd.count, cmd.amount)
-            listeners sendEvent SpecimenGroupAddedToCollectionEventTypeEvent(
-              cmd.studyId, cmd.collectionEventTypeId, cmd.specimenGroupId, cmd.count, cmd.amount)
-            sg2cet.success
-          }
-          case Failure(err) => v2
-        }
-      case Failure(_) => v1
+    def createItem(sg: SpecimenGroup, cet: CollectionEventType) = {
+      val sg2cet = new SpecimenGroupCollectionEventType(
+        SpecimenGroupCollectionEventTypeIdentityService.nextIdentity,
+        sg.id, cet.id, cmd.count, cmd.amount)
+      sg2cetRepo.updateMap(sg2cet)
+      listeners sendEvent SpecimenGroupAddedToCollectionEventTypeEvent(
+        cmd.studyId, cmd.collectionEventTypeId, cmd.specimenGroupId, cmd.count, cmd.amount)
+      sg2cet.success
     }
+
+    for {
+      v1 <- validateSpecimenGroupId(study, cmd.specimenGroupId)
+      v2 <- validateCollectionEventTypeId(study, cmd.collectionEventTypeId)
+      v3 <- createItem(v1, v2)
+    } yield v3
+
   }
 
   private def removeSpecimenGroupFromCollectionEventType(study: DisabledStudy,

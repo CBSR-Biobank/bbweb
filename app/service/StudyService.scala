@@ -82,14 +82,14 @@ class StudyProcessor(
   studyRepository: ReadWriteRepository[StudyId, Study],
   specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup],
   collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
-  specimenGroupCollectionEventTypes: ValueObjectList[SpecimenGroupCollectionEventType])
+  sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType])
   extends Processor { this: Emitter =>
 
   val specimenGroupDomainService = new SpecimenGroupDomainService(
     studyRepository, specimenGroupRepository)
   val collectionEventTypeDomainService = new CollectionEventTypeDomainService(
     studyRepository, collectionEventTypeRepository, specimenGroupRepository,
-    specimenGroupCollectionEventTypes)
+    sg2cetRepo)
 
   def receive = {
     case cmd: AddStudyCmd =>
@@ -164,7 +164,7 @@ class StudyProcessor(
     }
   }
 
-  private def validateStudy[T <: ConcurrencySafeEntity[_]](studyIdAsString: String)(f: DisabledStudy => DomainValidation[T]) = {
+  private def validateStudy(studyIdAsString: String)(f: DisabledStudy => DomainValidation[_]) = {
     val studyId = new StudyId(studyIdAsString)
     studyRepository.getByKey(studyId) match {
       case None => StudyService.noSuchStudy(studyId).fail

@@ -1,8 +1,8 @@
 package domain.study
 
-import domain.Identity
+import domain.IdentifiedValueObject
 
-case class CollectionEventTypeId(identity: String) extends { val id = identity } with Identity {
+case class CollectionEventTypeId(identity: String) extends { val id = identity } with IdentifiedValueObject[String] {
 
 }
 

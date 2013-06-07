@@ -39,14 +39,17 @@ object AppServices {
     val extension = EventsourcingExtension(system, journal)
 
     val studyRepository = new ReadWriteRepository[StudyId, Study](v => v.id)
-    val specimenGroupRepository = new ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id)
-    val collectionEventTypeRepository = new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
-    val specimenGroupCollectionEventTypes = new ValueObjectList[SpecimenGroupCollectionEventType]
+    val specimenGroupRepository =
+      new ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id)
+    val collectionEventTypeRepository =
+      new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
+    val sg2cetRepo =
+      new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
     val usersRef = Ref(Map.empty[domain.UserId, User])
 
     val studyProcessor = extension.processorOf(Props(
       new StudyProcessor(studyRepository, specimenGroupRepository, collectionEventTypeRepository,
-        specimenGroupCollectionEventTypes) with Emitter with Eventsourced { val id = 1 }))
+        sg2cetRepo) with Emitter with Eventsourced { val id = 1 }))
 
     val userProcessor = extension.processorOf(Props(
       new UserProcessor(usersRef) with Emitter with Eventsourced { val id = 1 }))

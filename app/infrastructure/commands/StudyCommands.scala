@@ -51,3 +51,4 @@ case class AddAnnotationToCollectionEventTypeCmd(studyIdentity: String, collecti
   expectedVersion: Option[Long], collectionEventAnnotationTypeId: String) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 case class RemoveAnnotationFromCollectionEventTypeCmd(studyIdentity: String, collectionEventTypeId: String,
   expectedVersion: Option[Long], collectionEventAnnotationTypeId: String) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+

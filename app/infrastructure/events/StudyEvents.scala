@@ -1,6 +1,5 @@
 package infrastructure.events
 
-import domain.study.SpecimenTypeId
 import domain.study.StudyId
 import domain.study.SpecimenGroupId
 import domain.UserId

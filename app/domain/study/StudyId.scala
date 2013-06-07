@@ -1,8 +1,8 @@
 package domain.study
 
-import domain.Identity
+import domain.IdentifiedValueObject
 
-case class StudyId(identity: String) extends { val id = identity } with Identity {
+case class StudyId(identity: String) extends { val id = identity } with IdentifiedValueObject[String] {
 }
 
 object StudyIdentityService {

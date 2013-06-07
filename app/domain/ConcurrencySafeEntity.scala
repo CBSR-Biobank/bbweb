@@ -3,8 +3,7 @@ package domain
 import scalaz._
 import scalaz.Scalaz._
 
-abstract class ConcurrencySafeEntity[T <: Identity] {
-  def id: T
+abstract class ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
   def version: Long
   def versionOption = if (version == -1L) None else Some(version)
 
@@ -29,7 +28,7 @@ abstract class ConcurrencySafeEntity[T <: Identity] {
 object Entity {
 
   def update[S <: ConcurrencySafeEntity[_], T <: ConcurrencySafeEntity[_]](entity: Option[S],
-    id: domain.Identity, expectedVersion: Option[Long])(f: S => DomainValidation[T]): DomainValidation[T] =
+    id: Identity[_], expectedVersion: Option[Long])(f: S => DomainValidation[T]): DomainValidation[T] =
     entity match {
       case None => DomainError("no entity with id: %s" format id).fail
       case Some(entity) => for {

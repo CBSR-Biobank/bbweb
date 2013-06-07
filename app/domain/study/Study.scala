@@ -1,10 +1,8 @@
 package domain.study
 
-import domain.AnatomicalSourceId
 import domain.DomainError
 import domain.DomainValidation
 import domain.ConcurrencySafeEntity
-import domain.Identity
 import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
