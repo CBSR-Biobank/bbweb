@@ -44,7 +44,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
   "add a study" in {
     fragmentName: String =>
       val name = new NameGenerator(fragmentName).next[Study]
-      val study = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+      val study = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
       studyRepository.getMap must not be empty
       studyRepository.getMap must haveKey(study.id)
       studyRepository.getByKey(study.id) must beSome.like {
@@ -59,10 +59,10 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
     fragmentName: String =>
       val ng = new NameGenerator(fragmentName)
       val name = ng.next[Study]
-      val study = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+      val study = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
       val name2 = ng.next[Study]
-      val study2 = entityResult(studyService.updateStudy(new UpdateStudyCmd(study.id.toString,
+      val study2 = validationResult(studyService.updateStudy(new UpdateStudyCmd(study.id.toString,
         study.versionOption, name2, name2)))
 
       studyRepository.getMap must not be empty
@@ -85,13 +85,13 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
-      val study = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+      val study = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
-      val sg = entityResult(studyService.addSpecimenGroup(
+      val sg = validationResult(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
 
-      entityResult(studyService.enableStudy(new EnableStudyCmd(study.id.toString, study.versionOption)))
+      validationResult(studyService.enableStudy(new EnableStudyCmd(study.id.toString, study.versionOption)))
 
       studyRepository.getByKey(study.id) must beSome.like {
         case s => s must beAnInstanceOf[EnabledStudy]
@@ -108,20 +108,20 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
-      val study = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+      val study = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
-      val sg = entityResult(studyService.addSpecimenGroup(
+      val sg = validationResult(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
 
-      val study2 = entityResult(studyService.enableStudy(
+      val study2 = validationResult(studyService.enableStudy(
         new EnableStudyCmd(study.id.toString, study.versionOption)))
 
       studyRepository.getByKey(study2.id) must beSome.like {
         case s => s must beAnInstanceOf[EnabledStudy]
       }
 
-      entityResult(studyService.disableStudy(
+      validationResult(studyService.disableStudy(
         new DisableStudyCmd(study2.id.toString, study2.versionOption)))
 
       studyRepository.getByKey(study.id) must beSome.like {
@@ -151,9 +151,9 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
-      val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+      val study1 = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
-      val sg1 = entityResult(studyService.addSpecimenGroup(
+      val sg1 = validationResult(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
 
@@ -171,7 +171,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       }
 
       val name2 = ng.next[Study]
-      val sg2 = entityResult(studyService.addSpecimenGroup(
+      val sg2 = validationResult(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study1.id.toString, name2, name2, units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
 
@@ -199,8 +199,8 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
-      val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
-      val sg1 = entityResult(studyService.addSpecimenGroup(
+      val study1 = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
+      val sg1 = validationResult(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
 
@@ -211,7 +211,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val preservationTempType2 = PreservationTemperatureType.Minus180celcius
       val specimenType2 = SpecimenType.DnaBlood
 
-      val sg2 = entityResult(studyService.updateSpecimenGroup(
+      val sg2 = validationResult(studyService.updateSpecimenGroup(
         new UpdateSpecimenGroupCmd(study1.id.toString, sg1.id.toString, sg1.versionOption, name2,
           name2, units2, anatomicalSourceType2, preservationType2, preservationTempType2, specimenType2)))
 
@@ -238,14 +238,14 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
-      val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+      val study1 = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
-      val sg1 = entityResult(studyService.addSpecimenGroup(
+      val sg1 = validationResult(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
 
       specimenGroupRepository.getMap must haveKey(sg1.id)
-      entityResult(studyService.removeSpecimenGroup(
+      validationResult(studyService.removeSpecimenGroup(
         new RemoveSpecimenGroupCmd(study1.id.toString, sg1.id.toString, sg1.versionOption)))
 
       specimenGroupRepository.getMap must not haveKey (sg1.id)
@@ -257,9 +257,9 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val name = ng.next[Study]
       val recurring = true
 
-      val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+      val study1 = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
-      val cet1 = entityResult(studyService.addCollectionEventType(
+      val cet1 = validationResult(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring)))
 
       collectionEventTypeRepository.getMap must haveKey(cet1.id)
@@ -274,7 +274,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val name2 = ng.next[Study]
       val recurring2 = false
 
-      val cet2 = entityResult(studyService.addCollectionEventType(
+      val cet2 = validationResult(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study1.id.toString, name2, name2, recurring2)))
 
       collectionEventTypeRepository.getMap must haveKey(cet2.id)
@@ -293,9 +293,9 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val name = ng.next[Study]
       val recurring = true
 
-      val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+      val study1 = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
-      val cet1 = entityResult(studyService.addCollectionEventType(
+      val cet1 = validationResult(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring)))
 
       collectionEventTypeRepository.getMap must haveKey(cet1.id)
@@ -310,7 +310,7 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val name2 = ng.next[Study]
       val recurring2 = false
 
-      val cet2 = entityResult(studyService.updateCollectionEventType(
+      val cet2 = validationResult(studyService.updateCollectionEventType(
         new UpdateCollectionEventTypeCmd(study1.id.toString, cet1.id.toString, cet1.versionOption,
           name2, name2, recurring2)))
 
@@ -330,16 +330,73 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
       val name = ng.next[Study]
       val recurring = true
 
-      val study1 = entityResult(studyService.addStudy(new AddStudyCmd(name, name)))
+      val study1 = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
-      val cet1 = entityResult(studyService.addCollectionEventType(
+      val cet1 = validationResult(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring)))
       collectionEventTypeRepository.getMap must haveKey(cet1.id)
 
-      entityResult(studyService.removeCollectionEventType(
+      validationResult(studyService.removeCollectionEventType(
         new RemoveCollectionEventTypeCmd(study1.id.toString, cet1.id.toString, cet1.versionOption)))
 
       collectionEventTypeRepository.getMap must not haveKey (cet1.id)
+  }
+
+  "add specimen group to collection event type" in {
+    fragmentName: String =>
+      val ng = new NameGenerator(fragmentName)
+      val name = ng.next[Study]
+      val units = ng.next[String]
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
+
+      val study1 = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
+
+      val sg1 = validationResult(studyService.addSpecimenGroup(
+        AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType)))
+      specimenGroupRepository.getMap must haveKey(sg1.id)
+
+      val cet1 = validationResult(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring = true)))
+      collectionEventTypeRepository.getMap must haveKey(cet1.id)
+
+      val sg2cet1 = validationResult(studyService.addSpecimenGroupToCollectionEventType(
+        AddSpecimenGroupToCollectionEventTypeCmd(study1.id.toString,
+          sg1.id.toString, cet1.id.toString, 1, 1.0)))
+
+      sg2cetRepo.getMap must haveKey(sg2cet1.id)
+  }
+
+  "remove specimen group from collection event type" in {
+    fragmentName: String =>
+      val ng = new NameGenerator(fragmentName)
+      val name = ng.next[Study]
+      val units = ng.next[String]
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
+
+      val study1 = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
+
+      val sg1 = validationResult(studyService.addSpecimenGroup(
+        AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType)))
+
+      val cet1 = validationResult(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring = true)))
+
+      val sg2cet1 = validationResult(studyService.addSpecimenGroupToCollectionEventType(
+        AddSpecimenGroupToCollectionEventTypeCmd(study1.id.toString,
+          sg1.id.toString, cet1.id.toString, 1, 1.0)))
+
+      val sg2cet2 = validationResult(studyService.removeSpecimenGroupFromCollectionEventType(
+        RemoveSpecimenGroupFromCollectionEventTypeCmd(sg2cet1.id.toString, study1.id.toString)))
+
+      sg2cetRepo.getMap must not haveKey (sg2cet1.id)
   }
 }
 
@@ -372,14 +429,14 @@ object StudyServiceFixture {
     val studyService = new StudyService(studyRepository, specimenGroupRepository,
       collectionEventTypeRepository, studyProcessor)
 
-    def result[T <: ConcurrencySafeEntity[_]](f: Future[DomainValidation[T]]) = {
+    def result[T](f: Future[DomainValidation[T]]) = {
       Await.result(f, timeout.duration)
     }
 
-    def entityResult[T <: ConcurrencySafeEntity[_]](f: Future[DomainValidation[T]]): T = {
+    def validationResult[T](f: Future[DomainValidation[T]]): T = {
       result(f) match {
         case Success(e) => e
-        case Failure(msg) => throw new Error("null entity, validation failed: " + msg)
+        case Failure(msg) => throw new Error("validation failed: " + msg)
       }
     }
   }

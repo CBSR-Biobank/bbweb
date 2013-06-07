@@ -49,7 +49,7 @@ case class RemoveCollectionEventTypeCmd(studyIdentity: String, collectionEventTy
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
 case class AddSpecimenGroupToCollectionEventTypeCmd(studyIdentity: String,
-  collectionEventTypeId: String, specimenGroupId: String, count: Int, amount: BigDecimal)
+  specimenGroupId: String, collectionEventTypeId: String, count: Int, amount: BigDecimal)
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
 case class RemoveSpecimenGroupFromCollectionEventTypeCmd(sg2cetId: String, studyIdentity: String)
