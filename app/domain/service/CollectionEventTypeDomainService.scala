@@ -147,6 +147,7 @@ class CollectionEventTypeDomainService(
   private def removeAnnotationTypeFromCollectionEventType(study: DisabledStudy,
     cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
+    cet2atRepo.getByKey(cmd.cetAtId)
     listeners sendEvent AnnotationRemovedFromCollectionEventTypeEvent(
       cmd.studyId, cmd.collectionEventTypeId, cmd.collectionEventAnnotationTypeId)
     ???
