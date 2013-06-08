@@ -16,8 +16,5 @@ GET     /logout                             controllers.Application.logout
 # studies                   
 POST    /study                           controllers.StudyController.add
 
-# Javascript routing
-GET     /assets/javascripts/routes          controllers.Application.javascriptRoutes
-
 GET     /assets/images/glyphicons-halflings-white.png      controllers.Assets.at(path="/public", file="/images/glyphicons-halflings-white.png")
 GET     /assets/images/glyphicons-halflings.png            controllers.Assets.at(path="/public", file="/images/glyphicons-halflings.png")

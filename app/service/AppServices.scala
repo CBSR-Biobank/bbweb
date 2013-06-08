@@ -67,6 +67,9 @@ object AppServices {
       collectionEventTypeRepository, studyProcessor)
     val userService = new UserService(userRepo, userProcessor)
 
+    // for debug only
+    userRepo.updateMap(User.add("admin", "admin@admin.com", "admin"))
+
     extension.recover()
     // wait for processor 1 to complete processing of replayed event messages
     // (ensures that recovery of externally visible state maintained by

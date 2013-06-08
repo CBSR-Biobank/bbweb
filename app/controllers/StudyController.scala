@@ -27,7 +27,8 @@ object StudyController extends Controller with Secured {
   def index = IsAuthenticated { username =>
     _ =>
       userService.getByEmail(username) match {
-        case Some(user) => Ok(html.dashboard(user))
+        case Some(user) =>
+          Ok(html.dashboard(user))
         case _ => Forbidden
       }
   }

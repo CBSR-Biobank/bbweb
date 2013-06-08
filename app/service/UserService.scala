@@ -55,19 +55,15 @@ class UserProcessor(userRepo: ReadWriteRepository[UserId, User]) extends Process
   }
 
   def authenticateUser(cmd: AuthenticateUserCmd, listeners: MessageEmitter): DomainValidation[User] = {
-    if (cmd.email.equals("admin@admin.com")) {
-      User.add("admin", "admin@admin.com", "admin").success
-    } else {
-      userRepo.getMap.values.find(u => u.email.equals(cmd.email)) match {
-        case Some(user) =>
-          val v = user.authenticate(cmd.email, cmd.password)
-          v match {
-            case Success(u) => listeners sendEvent UserAuthenticatedEvent(u.id, u.name, u.email)
-            case Failure(_) => // do nothing
-          }
-          v
-        case None => DomainError("authentication failure").fail
-      }
+    userRepo.getMap.values.find(u => u.email.equals(cmd.email)) match {
+      case Some(user) =>
+        val v = user.authenticate(cmd.email, cmd.password)
+        v match {
+          case Success(u) => listeners sendEvent UserAuthenticatedEvent(u.id, u.name, u.email)
+          case Failure(_) => // do nothing
+        }
+        v
+      case None => DomainError("authentication failure").fail
     }
   }
 }

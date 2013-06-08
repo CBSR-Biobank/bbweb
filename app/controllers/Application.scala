@@ -61,13 +61,6 @@ object Application extends Controller {
       "success" -> "You've been logged out")
   }
 
-  // -- Javascript routing
-
-  def javascriptRoutes = Action { implicit request =>
-    import routes.javascript._
-    Ok(Routes.javascriptRouter("jsRoutes")(StudyController.add)).as("text/javascript")
-  }
-
 }
 
 /**

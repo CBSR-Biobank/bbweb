@@ -1,51 +1,29 @@
 @(form: Form[(String,String)])(implicit flash: Flash)
 
-<html>
-    <head>
-        <title>Biobank</title>
-        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-        <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.at("stylesheets/bootstrap/bootstrap.min.css")">
-    </head>
-    <body>
+@unauthpage("Biobank Login"){
+    <p/>
+    @helper.form(routes.Application.authenticate, 'class -> "form-signin") {
 
-        <header>
-            <a href="@routes.StudyController.index" id="logo">Biobank</a>
-        </header>
+        <h2 class="form-signin-heading">Please sign in</h2>
 
-        @helper.form(routes.Application.authenticate) {
-
-            <h1>Sign in</h1>
-
-            @form.globalError.map { error =>
-                <p class="error">
-                    @error.message
-                </p>
-            }
-
-            @flash.get("success").map { message =>
-                <p class="success">
-                    @message
-                </p>
-            }
-
-            <p>
-                <input type="email" name="email" placeholder="Email" id="email" value="@form("email").value">
+        @form.globalError.map { error =>
+            <p class="error"> 
+            @error.message
             </p>
-            <p>
-                <input type="password" name="password" id="password" placeholder="Password">
-            </p>
-            <p>
-                <button type="submit" id="loginbutton">Login</button>
-            </p>
-
         }
 
-        <p class="note">
-            Try <em>admin@@admin.com</em> with <em>admin</em> as password.
-        </p>
+        @flash.get("success").map { message =>
+            <p class="success">
+            @message
+            </p>  
+        }
 
-    </body>
-</html>
+        <input type="email" class="input-block-level" name="email" placeholder="Email" id="email" value="@form("email").value">
+        <input type="password" class="input-block-level" name="password" id="password" placeholder="Password">
+        <button type="submit" id="loginbutton" class="btn btn-large btn-primary" >Login</button>
+     }
 
-
-
+     <p class="note">
+     Try <em>admin@@admin.com</em> with <em>admin</em> as password.
+     </p>
+}      
