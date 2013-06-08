@@ -61,6 +61,10 @@ object Application extends Controller {
       "success" -> "You've been logged out")
   }
 
+  def about = Action {
+    Ok(html.about())
+  }
+
 }
 
 /**

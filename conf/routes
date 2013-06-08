@@ -13,6 +13,8 @@ GET     /login                              controllers.Application.login
 POST    /login                              controllers.Application.authenticate
 GET     /logout                             controllers.Application.logout
 
+GET     /about                              controllers.Application.about
+
 # studies                   
 POST    /study                           controllers.StudyController.add
 
