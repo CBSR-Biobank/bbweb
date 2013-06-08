@@ -65,8 +65,7 @@ object Application extends Controller {
 
   def javascriptRoutes = Action { implicit request =>
     import routes.javascript._
-    Ok(
-      Routes.javascriptRouter("jsRoutes")(StudyController.add)).as("text/javascript")
+    Ok(Routes.javascriptRouter("jsRoutes")(StudyController.add)).as("text/javascript")
   }
 
 }
@@ -91,8 +90,10 @@ trait Secured {
   /**
    * Action for authenticated users.
    */
-  def IsAuthenticated(f: => String => Request[AnyContent] => Result) = Security.Authenticated(username, onUnauthorized) { user =>
-    Action(request => f(user)(request))
+  def IsAuthenticated(f: => String => Request[AnyContent] => Result) = {
+    Security.Authenticated(username, onUnauthorized) { user =>
+      Action(request => f(user)(request))
+    }
   }
 
   /**

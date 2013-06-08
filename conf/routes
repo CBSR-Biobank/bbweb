@@ -13,8 +13,11 @@ GET     /login                              controllers.Application.login
 POST    /login                              controllers.Application.authenticate
 GET     /logout                             controllers.Application.logout
 
-# Projects                                  
-POST    /studies                           controllers.StudyController.add
+# studies                   
+POST    /study                           controllers.StudyController.add
 
 # Javascript routing
 GET     /assets/javascripts/routes          controllers.Application.javascriptRoutes
+
+GET     /assets/images/glyphicons-halflings-white.png      controllers.Assets.at(path="/public", file="/images/glyphicons-halflings-white.png")
+GET     /assets/images/glyphicons-halflings.png            controllers.Assets.at(path="/public", file="/images/glyphicons-halflings.png")

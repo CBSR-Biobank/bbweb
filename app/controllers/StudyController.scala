@@ -35,16 +35,26 @@ object StudyController extends Controller with Secured {
   /**
    * Add a study.
    */
-  def add = IsAuthenticated { username =>
-    implicit request =>
-      val form = Form(tuple("name" -> nonEmptyText, "description" -> nonEmptyText)).bindFromRequest.fold(
-        errors => BadRequest,
-        values =>
-          Await.result(studyService.addStudy(new AddStudyCmd(values._1, values._2)), 5.seconds) match {
-            case Success(study) => Ok(views.html.study.item(study))
-            case _ =>
-          })
-      BadRequest
+  //  def add = IsAuthenticated { username =>
+  //    implicit request =>
+  //      val form = Form(tuple("name" -> nonEmptyText, "description" -> nonEmptyText)).bindFromRequest.fold(
+  //        errors => BadRequest,
+  //        values =>
+  //          Await.result(studyService.addStudy(new AddStudyCmd(values._1, values._2)), 5.seconds) match {
+  //            case Success(study) => Ok(views.html.study.item(study))
+  //            case _ =>
+  //          })
+  //      BadRequest
+  //}
+
+  val helloForm = Form(
+    tuple(
+      "name" -> nonEmptyText,
+      "repeat" -> number(min = 1, max = 100),
+      "color" -> optional(text)))
+
+  def add = Action {
+    Ok(html.dashboard(AuthenticatedUser(new UserId("aa"), 0, "name", "email", "password")))
   }
 
 }
