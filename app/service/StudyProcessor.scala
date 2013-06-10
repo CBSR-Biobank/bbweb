@@ -20,15 +20,20 @@ import domain.study._
 import infrastructure.commands._
 import infrastructure.events._
 import infrastructure._
-import domain.service.{ CollectionEventTypeDomainService, SpecimenGroupDomainService }
-
+import domain.service.{
+  CollectionEventTypeDomainService,
+  SpecimenGroupDomainService,
+  StudyAnnotationTypeDomainService,
+  StudyValidationUtil
+}
+import StudyValidationUtil._
 import scalaz._
 import Scalaz._
 
 /**
  * This is the Study Aggregate Processor.
  *
- * Handles the commands to configure studies.
+ * It handles the commands to configure studies.
  *
  * @param studyRepository The repository for study entities.
  * @param specimenGroupRepository The repository for specimen group entities.
@@ -43,7 +48,8 @@ class StudyProcessor(
   studyRepository: ReadWriteRepository[StudyId, Study],
   specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup],
   cetRepo: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
-  annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType],
+  annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType],
+  annotationOptionRepo: ReadWriteRepository[String, AnnotationOption],
   sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType],
   at2cetRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType])
   extends Processor { this: Emitter =>
@@ -61,6 +67,9 @@ class StudyProcessor(
     studyRepository, cetRepo, specimenGroupRepository, annotationTypeRepo,
     sg2cetRepo, at2cetRepo)
 
+  val annotationTypeDomainService = new StudyAnnotationTypeDomainService(
+    annotationTypeRepo, annotationOptionRepo)
+
   def receive = {
     case cmd: AddStudyCmd =>
       process(addStudy(cmd, emitter("listeners")))
@@ -75,12 +84,12 @@ class StudyProcessor(
       process(disableStudy(cmd, emitter("listeners")))
 
     case cmd: SpecimenGroupCommand =>
-      process(validateStudy(cmd.studyId) { study =>
+      process(validateStudy(cmd.studyId, studyRepository) { study =>
         specimenGroupDomainService.process(cmd, study, emitter("listeners"))
       })
 
     case cmd: CollectionEventTypeCommand =>
-      process(validateStudy(cmd.studyId) { study =>
+      process(validateStudy(cmd.studyId, studyRepository) { study =>
         collectionEventTypeDomainService.process(cmd, study, emitter("listeners"))
       })
 
@@ -131,17 +140,6 @@ class StudyProcessor(
       studyRepository.updateMap(study)
       listeners sendEvent StudyDisabledEvent(study.id)
       study.success
-    }
-  }
-
-  private def validateStudy(studyIdAsString: String)(f: DisabledStudy => DomainValidation[_]) = {
-    val studyId = new StudyId(studyIdAsString)
-    studyRepository.getByKey(studyId) match {
-      case None => StudyService.noSuchStudy(studyId).fail
-      case Some(study) => study match {
-        case study: EnabledStudy => StudyService.notDisabledError(study.name).fail
-        case study: DisabledStudy => f(study)
-      }
     }
   }
 }

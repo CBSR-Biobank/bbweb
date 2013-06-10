@@ -4,6 +4,7 @@ import domain.study.StudyId
 import domain.study.SpecimenGroupId
 import domain.UserId
 import domain.AnatomicalSourceType._
+import domain.AnnotationValueType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
@@ -38,6 +39,16 @@ case class SpecimenGroupAddedToCollectionEventTypeEvent(
   studyId: String, collectionEventId: String, specimenGroupId: String, count: Int, amount: BigDecimal)
 
 case class SpecimenGroupRemovedFromCollectionEventTypeEvent(sg2cetId: String)
+
+case class CollectionEventAnnotationTypeAddedEvent(studyId: String, name: String,
+  description: String, valueType: AnnotationValueType, maxValueCount: Int)
+
+case class CollectionEventAnnotationTypeUpdatedEvent(
+  studyId: String, collectionEventAnnotationTypeId: String,
+  name: String, description: String, valueType: AnnotationValueType, maxValueCount: Int)
+
+case class CollectionEventAnnotationTypeRemovedEvent(
+  studyId: String, collectionEventAnnotationTypeId: String)
 
 case class AnnotationTypeAddedToCollectionEventTypeEvent(
   studyId: String, collectionEventId: String, annotationTypeId: String)

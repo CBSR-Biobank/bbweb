@@ -16,6 +16,7 @@ import service.{ StudyService, StudyProcessor }
 import domain.{
   AnatomicalSourceType,
   AnnotationTypeId,
+  AnnotationValueType,
   ConcurrencySafeEntity,
   DomainValidation,
   DomainError,
@@ -23,6 +24,7 @@ import domain.{
   PreservationTemperatureType,
   SpecimenType
 }
+import AnnotationValueType._
 import domain.study._
 import infrastructure._
 import infrastructure.commands._
@@ -403,38 +405,44 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
     fragmentName: String =>
       val ng = new NameGenerator(fragmentName)
       val name = ng.next[Study]
-      val recurring = true
+      val valueType = AnnotationValueType.String
+      val maxValueCount = 0
 
       val study1 = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
 
       val cet1 = validationResult(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring)))
+        new AddCollectionEventTypeCmd(study1.id.toString, name, name, true)))
 
-      val at = validationResult(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring)))
+      val at1 = validationResult(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study1.id.toString, name, name,
+          valueType, maxValueCount)))
 
-      collectionEventTypeRepository.getMap must haveKey(cet1.id)
-      collectionEventTypeRepository.getByKey(cet1.id) must beSome.like {
+      cetAnnotationTypeRepo.getMap must haveKey(at1.id)
+      cetAnnotationTypeRepo.getByKey(at1.id) must beSome.like {
         case x =>
           x.version must beEqualTo(0)
           x.name must be(name)
           x.description must be(name)
-          x.recurring must beEqualTo(recurring)
+          x.valueType must beEqualTo(valueType)
+          x.maxValueCount must beEqualTo(maxValueCount)
       }
 
       val name2 = ng.next[Study]
-      val recurring2 = false
+      val valueType2 = AnnotationValueType.Select
+      val maxValueCount2 = 2
 
-      val cet2 = validationResult(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study1.id.toString, name2, name2, recurring2)))
+      val at2 = validationResult(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study1.id.toString, name2, name2,
+          valueType2, maxValueCount2)))
 
-      collectionEventTypeRepository.getMap must haveKey(cet2.id)
-      collectionEventTypeRepository.getByKey(cet2.id) must beSome.like {
+      cetAnnotationTypeRepo.getMap must haveKey(at2.id)
+      cetAnnotationTypeRepo.getByKey(at2.id) must beSome.like {
         case x =>
           x.version must beEqualTo(0)
-          x.name must be(name2)
-          x.description must be(name2)
-          x.recurring must beEqualTo(recurring2)
+          x.name must be(name)
+          x.description must be(name)
+          x.valueType must beEqualTo(valueType)
+          x.maxValueCount must beEqualTo(maxValueCount)
       }
   }
 }

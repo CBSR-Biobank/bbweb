@@ -3,20 +3,26 @@ package domain.service
 import org.eligosource.eventsourced.core._
 
 import domain._
-import domain.study._
 import infrastructure._
 import infrastructure.commands._
 import infrastructure.events._
 import domain.study.{
+  CollectionEventAnnotationType,
   CollectionEventType,
+  CollectionEventTypeAnnotationType,
   CollectionEventTypeId,
+  CollectionEventTypeAnnotationTypeIdentityService,
   DisabledStudy,
   EnabledStudy,
   SpecimenGroup,
   SpecimenGroupId,
+  SpecimenGroupCollectionEventType,
+  SpecimenGroupCollectionEventTypeIdentityService,
+  StudyAnnotationType,
   Study,
   StudyId
 }
+import domain.service.StudyValidationUtil._
 import scalaz._
 import Scalaz._
 
@@ -37,9 +43,10 @@ class CollectionEventTypeDomainService(
   studyRepository: ReadRepository[StudyId, Study],
   collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
   specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
-  annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType],
+  annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType],
   sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType],
-  cet2atRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType]) {
+  cet2atRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType])
+  extends DomainService {
 
   /**
    * This partial function handles each command. The input is a Tuple3 consisting of:
@@ -64,22 +71,6 @@ class CollectionEventTypeDomainService(
       addSpecimenGroupToCollectionEventType(cmd, study, listeners)
     case _@ (cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
       removeSpecimenGroupFromCollectionEventType(cmd, study, listeners)
-
-    // collection event  annotations
-    case _@ (cmd: AddCollectionEventAnnotationTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      addCollectionEventAnnotationTypeCmd(cmd, study, listeners)
-    case _@ (cmd: UpdateCollectionEventAnnotationTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      updateCollectionEventAnnotationTypeCmd(cmd, study, listeners)
-    case _@ (cmd: RemoveCollectionEventAnnotationTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      removeCollectionEventAnnotationTypeCmd(cmd, study, listeners)
-
-    // collection event annotation options
-    case _@ (cmd: AddCollectionEventAnnotationOptionsCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      addCollectionEventAnnotationOptionsCmd(cmd, study, listeners)
-    case _@ (cmd: UpdateCollectionEventAnnotationOptionsCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      updateCollectionEventAnnotationOptionsCmd(cmd, study, listeners)
-    case _@ (cmd: RemoveCollectionEventAnnotationOptionsCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      removeCollectionEventAnnotationOptionsCmd(cmd, study, listeners)
 
     // annotation types -> collection event types
     case _@ (cmd: AddAnnotationTypeToCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
@@ -154,8 +145,8 @@ class CollectionEventTypeDomainService(
     }
 
     for {
-      v1 <- validateSpecimenGroupId(study, cmd.specimenGroupId)
-      v2 <- validateCollectionEventTypeId(study, cmd.collectionEventTypeId)
+      v1 <- validateSpecimenGroupId(study, specimenGroupRepository, cmd.specimenGroupId)
+      v2 <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
       v3 <- createItem(v1, v2)
     } yield v3
   }
@@ -190,8 +181,8 @@ class CollectionEventTypeDomainService(
     }
 
     for {
-      v1 <- validateCollectionEventTypeId(study, cmd.collectionEventTypeId)
-      v2 <- validateAnnotationTypeId(study, cmd.annotationTypeId)
+      v1 <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
+      v2 <- validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
       v3 <- createItem(v1, v2)
     } yield v3
   }
@@ -208,80 +199,6 @@ class CollectionEventTypeDomainService(
       case None =>
         DomainError("annotation type -> collection event type does not exist: %s" format
           cmd.cetAtId).fail
-    }
-  }
-
-  private def addCollectionEventAnnotationTypeCmd(
-    cmd: AddCollectionEventAnnotationTypeCmd,
-    study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
-    ???
-  }
-  private def updateCollectionEventAnnotationTypeCmd(
-    cmd: UpdateCollectionEventAnnotationTypeCmd,
-    study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
-    ???
-  }
-  private def removeCollectionEventAnnotationTypeCmd(
-    cmd: RemoveCollectionEventAnnotationTypeCmd,
-    study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
-    ???
-  }
-  private def addCollectionEventAnnotationOptionsCmd(
-    cmd: AddCollectionEventAnnotationOptionsCmd,
-    study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[AnnotationOption] = {
-    ???
-  }
-  private def updateCollectionEventAnnotationOptionsCmd(
-    cmd: UpdateCollectionEventAnnotationOptionsCmd,
-    study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[AnnotationOption] = {
-    ???
-  }
-  private def removeCollectionEventAnnotationOptionsCmd(
-    cmd: RemoveCollectionEventAnnotationOptionsCmd,
-    study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[AnnotationOption] = {
-    ???
-  }
-
-  private def validateSpecimenGroupId(study: DisabledStudy,
-    specimenGroupId: String): DomainValidation[SpecimenGroup] = {
-    specimenGroupRepository.getByKey(new SpecimenGroupId(specimenGroupId)) match {
-      case Some(sg) =>
-        if (study.id.equals(sg.studyId)) sg.success
-        else DomainError("specimen group does not belong to study: %s" format specimenGroupId).fail
-      case None =>
-        DomainError("specimen group does not exist: %s" format specimenGroupId).fail
-    }
-  }
-
-  private def validateCollectionEventTypeId(study: DisabledStudy,
-    collectionEventTypeId: String): DomainValidation[CollectionEventType] = {
-    collectionEventTypeRepository.getByKey(new CollectionEventTypeId(collectionEventTypeId)) match {
-      case Some(cet) =>
-        if (study.id.equals(cet.studyId)) cet.success
-        else DomainError("collection event type does not belong to study: %s" format collectionEventTypeId).fail
-      case None =>
-        DomainError("collection event type does not exist: %s" format collectionEventTypeId).fail
-    }
-  }
-
-  /**
-   * Validates that the CollectionEventAnnotationType with id {@link annotationTypeId} exists
-   * and that it belongs to {@link study}.
-   */
-  private def validateAnnotationTypeId(study: DisabledStudy,
-    annotationTypeId: String): DomainValidation[CollectionEventAnnotationType] = {
-    annotationTypeRepo.getByKey(new AnnotationTypeId(annotationTypeId)) match {
-      case Some(annot) =>
-        if (study.id.equals(annot.studyId)) annot.success
-        else DomainError("CE annotation type does not belong to study: %s" format annotationTypeId).fail
-      case None =>
-        DomainError("CE annotation type does not exist: %s" format annotationTypeId).fail
     }
   }
 

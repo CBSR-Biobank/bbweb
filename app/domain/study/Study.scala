@@ -1,6 +1,6 @@
 package domain.study
 
-import domain.{ ConcurrencySafeEntity, DomainError, DomainValidation }
+import domain.{ AnnotationTypeId, ConcurrencySafeEntity, DomainError, DomainValidation }
 import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
@@ -46,11 +46,22 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
   def addCollectionEventType(
     collectionEventTypes: Map[CollectionEventTypeId, CollectionEventType],
     cmd: AddCollectionEventTypeCmd): DomainValidation[CollectionEventType] =
-    collectionEventTypes.find(cet => cet._2.name.equals(cmd.name)) match {
+    collectionEventTypes.values.find(cet => cet.name.equals(cmd.name)) match {
       case Some(sg) =>
         DomainError("collection event type with name already exists: %s" format cmd.name).fail
       case None =>
         CollectionEventType.add(this.id, cmd.name, cmd.description, cmd.recurring)
+    }
+
+  def addCollectionEventAnnotationType(
+    collectionEventAnnotationTypes: Map[AnnotationTypeId, StudyAnnotationType],
+    cmd: AddCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] =
+    collectionEventAnnotationTypes.values.find(annot => annot.equals(cmd.name)) match {
+      case Some(sg) =>
+        DomainError("collection event annotation type with name already exists: %s" format cmd.name).fail
+      case None =>
+        CollectionEventAnnotationType.add(this.id, cmd.name, cmd.description, cmd.valueType,
+          cmd.maxValueCount)
     }
 
 }

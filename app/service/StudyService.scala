@@ -101,13 +101,13 @@ class StudyService(
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
 
   // collection event annotation options
-  def addCollectionEventAnnotationOptions(cmd: AddCollectionEventAnnotationOptionsCmd): Future[DomainValidation[AnnotationOption]] =
+  def addAnnotationOptions(cmd: AddAnnotationOptionsCmd): Future[DomainValidation[AnnotationOption]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[AnnotationOption]])
 
-  def updateCollectionEventAnnotationOptions(cmd: UpdateCollectionEventAnnotationOptionsCmd): Future[DomainValidation[AnnotationOption]] =
+  def updateAnnotationOptions(cmd: UpdateAnnotationOptionsCmd): Future[DomainValidation[AnnotationOption]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[AnnotationOption]])
 
-  def removeCollectionEventAnnotationOptions(cmd: RemoveCollectionEventAnnotationOptionsCmd): Future[DomainValidation[AnnotationOption]] =
+  def removeAnnotationOptions(cmd: RemoveAnnotationOptionsCmd): Future[DomainValidation[AnnotationOption]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[AnnotationOption]])
 
   // annotation types -> collection event types
@@ -119,13 +119,4 @@ class StudyService(
 }
 
 object StudyService {
-
-  def noSuchStudy(studyId: StudyId) =
-    DomainError("no study with id: %s" format studyId)
-
-  def notDisabledError(name: String) =
-    DomainError("study is not disabled: %s" format name)
-
-  def notEnabledError(name: String) =
-    DomainError("study is not enabled: %s" format name)
 }

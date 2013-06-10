@@ -20,7 +20,6 @@ case class CollectionEventAnnotationType(
 object CollectionEventAnnotationType {
 
   def add(
-    annotationTypeId: AnnotationTypeId,
     studyId: StudyId,
     name: String,
     description: String,

@@ -69,23 +69,23 @@ case class AddCollectionEventAnnotationTypeCmd(studyIdentity: String, name: Stri
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
 case class UpdateCollectionEventAnnotationTypeCmd(studyIdentity: String,
-  collectionEventAnnotationTypeId: String, expectedVersion: Option[Long], name: String,
+  annotationTypeId: String, expectedVersion: Option[Long], name: String,
   description: String, valueType: AnnotationValueType, maxValueCount: Int)
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
 case class RemoveCollectionEventAnnotationTypeCmd(studyIdentity: String,
-  collectionEventAnnotationTypeId: String, expectedVersion: Option[Long])
+  annotationTypeId: String, expectedVersion: Option[Long])
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
-case class AddCollectionEventAnnotationOptionsCmd(studyIdentity: String,
+case class AddAnnotationOptionsCmd(studyIdentity: String,
   collectionEventAnnotationTypeId: String, options: Set[String])
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
-case class UpdateCollectionEventAnnotationOptionsCmd(studyIdentity: String,
+case class UpdateAnnotationOptionsCmd(studyIdentity: String,
   collectionEventAnnotationOptionId: String, expectedVersion: Option[Long], options: Set[String])
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
-case class RemoveCollectionEventAnnotationOptionsCmd(studyIdentity: String,
+case class RemoveAnnotationOptionsCmd(studyIdentity: String,
   collectionEventAnnotationOptionId: String, expectedVersion: Option[Long])
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
