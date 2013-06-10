@@ -22,25 +22,43 @@ import domain.study.{
 import scalaz._
 import scalaz.Scalaz._
 
+/**
+ * This is the Specimen Group Domain Service.
+ *
+ * It handles commands that deal with a Specimen Group.
+ *
+ * @param studyRepository The repository for study entities. This repository is only used for
+ *        reading.
+ * @param specimenGroupRepository The repository for specimen group entities.
+ */
 class SpecimenGroupDomainService(
   studyRepository: ReadRepository[StudyId, Study],
   specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup]) {
 
+  /**
+   * This partial function handles each command. The input is a Tuple3 consisting of:
+   *
+   *  1. The command to handle.
+   *  2. The study entity the command is associated with,
+   *  3. The event message listener to be notified if the command is successful.
+   *
+   *  If the command is invalid, then this method throws an Error exception.
+   */
   def process = PartialFunction[Any, DomainValidation[SpecimenGroup]] {
-    case _@ (study: DisabledStudy, cmd: AddSpecimenGroupCmd, listeners: MessageEmitter) =>
-      addSpecimenGroup(study, cmd, listeners)
-    case _@ (study: DisabledStudy, cmd: UpdateSpecimenGroupCmd, listeners: MessageEmitter) =>
-      updateSpecimenGroup(study, cmd, listeners)
-    case _@ (study: DisabledStudy, cmd: RemoveSpecimenGroupCmd, listeners: MessageEmitter) =>
-      removeSpecimenGroup(study, cmd, listeners)
+    case _@ (cmd: AddSpecimenGroupCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      addSpecimenGroup(cmd, study, listeners)
+    case _@ (cmd: UpdateSpecimenGroupCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      updateSpecimenGroup(cmd, study, listeners)
+    case _@ (cmd: RemoveSpecimenGroupCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      removeSpecimenGroup(cmd, study, listeners)
     case _ =>
       throw new Error("invalid command received")
 
   }
 
   private def addSpecimenGroup(
-    study: DisabledStudy,
     cmd: AddSpecimenGroupCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
     val studySpecimenGroups = specimenGroupRepository.getMap.filter(
       sg => sg._2.studyId.equals(study.id))
@@ -57,8 +75,8 @@ class SpecimenGroupDomainService(
   }
 
   private def updateSpecimenGroup(
-    study: DisabledStudy,
     cmd: UpdateSpecimenGroupCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
     val specimenGroupId = new SpecimenGroupId(cmd.specimenGroupId)
     Entity.update(specimenGroupRepository.getByKey(specimenGroupId), specimenGroupId,
@@ -75,8 +93,8 @@ class SpecimenGroupDomainService(
   }
 
   private def removeSpecimenGroup(
-    study: DisabledStudy,
     cmd: RemoveSpecimenGroupCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
     val specimenGroupId = new SpecimenGroupId(cmd.specimenGroupId)
     specimenGroupRepository.getByKey(specimenGroupId) match {

@@ -20,6 +20,19 @@ import domain.study.{
 import scalaz._
 import Scalaz._
 
+/**
+ * This is the Collection Event Type Domain Service.
+ *
+ * It handles commands that deal with a Collection Event Type.
+ *
+ * @param studyRepository The read-only repository for study entities.
+ * @param collectionEventTypeRepository The repository for specimen group entities.
+ * @param specimenGroupRepository The read-only repository for specimen group entities.
+ * @param sg2cetRepo The value object repository that associates a specimen group to a
+ *         collection event type.
+ * @param at2cetRepo The value object repository that associates a collection event annotation
+ *         type to a collection event type.
+ */
 class CollectionEventTypeDomainService(
   studyRepository: ReadRepository[StudyId, Study],
   collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
@@ -28,49 +41,59 @@ class CollectionEventTypeDomainService(
   sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType],
   cet2atRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType]) {
 
+  /**
+   * This partial function handles each command. The input is a Tuple3 consisting of:
+   *
+   *  1. The command to handle.
+   *  2. The study entity the command is associated with,
+   *  3. The event message listener to be notified if the command is successful.
+   *
+   *  If the command is invalid, then this method throws an Error exception.
+   */
   def process = PartialFunction[Any, DomainValidation[_]] {
     // collection event types
-    case _@ (study: DisabledStudy, cmd: AddCollectionEventTypeCmd, listeners: MessageEmitter) =>
-      addCollectionEventType(study, cmd, listeners)
-    case _@ (study: DisabledStudy, cmd: UpdateCollectionEventTypeCmd, listeners: MessageEmitter) =>
-      updateCollectionEventType(study, cmd, listeners)
-    case _@ (study: DisabledStudy, cmd: RemoveCollectionEventTypeCmd, listeners: MessageEmitter) =>
-      removeCollectionEventType(study, cmd, listeners)
+    case _@ (cmd: AddCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      addCollectionEventType(cmd, study, listeners)
+    case _@ (cmd: UpdateCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      updateCollectionEventType(cmd, study, listeners)
+    case _@ (cmd: RemoveCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      removeCollectionEventType(cmd, study, listeners)
 
     // specimen group -> collection event types
-    case _@ (study: DisabledStudy, cmd: AddSpecimenGroupToCollectionEventTypeCmd, listeners: MessageEmitter) =>
-      addSpecimenGroupToCollectionEventType(study, cmd, listeners)
-    case _@ (study: DisabledStudy, cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd, listeners: MessageEmitter) =>
-      removeSpecimenGroupFromCollectionEventType(study, cmd, listeners)
+    case _@ (cmd: AddSpecimenGroupToCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      addSpecimenGroupToCollectionEventType(cmd, study, listeners)
+    case _@ (cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      removeSpecimenGroupFromCollectionEventType(cmd, study, listeners)
 
     // collection event  annotations
-    case _@ (study: DisabledStudy, cmd: AddCollectionEventAnnotationTypeCmd, listeners: MessageEmitter) =>
-      addCollectionEventAnnotationTypeCmd(study, cmd, listeners)
-    case _@ (study: DisabledStudy, cmd: UpdateCollectionEventAnnotationTypeCmd, listeners: MessageEmitter) =>
-      updateCollectionEventAnnotationTypeCmd(study, cmd, listeners)
-    case _@ (study: DisabledStudy, cmd: RemoveCollectionEventAnnotationTypeCmd, listeners: MessageEmitter) =>
-      removeCollectionEventAnnotationTypeCmd(study, cmd, listeners)
+    case _@ (cmd: AddCollectionEventAnnotationTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      addCollectionEventAnnotationTypeCmd(cmd, study, listeners)
+    case _@ (cmd: UpdateCollectionEventAnnotationTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      updateCollectionEventAnnotationTypeCmd(cmd, study, listeners)
+    case _@ (cmd: RemoveCollectionEventAnnotationTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      removeCollectionEventAnnotationTypeCmd(cmd, study, listeners)
 
     // collection event annotation options
-    case _@ (study: DisabledStudy, cmd: AddCollectionEventAnnotationOptionsCmd, listeners: MessageEmitter) =>
-      addCollectionEventAnnotationOptionsCmd(study, cmd, listeners)
-    case _@ (study: DisabledStudy, cmd: UpdateCollectionEventAnnotationOptionsCmd, listeners: MessageEmitter) =>
-      updateCollectionEventAnnotationOptionsCmd(study, cmd, listeners)
-    case _@ (study: DisabledStudy, cmd: RemoveCollectionEventAnnotationOptionsCmd, listeners: MessageEmitter) =>
-      removeCollectionEventAnnotationOptionsCmd(study, cmd, listeners)
+    case _@ (cmd: AddCollectionEventAnnotationOptionsCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      addCollectionEventAnnotationOptionsCmd(cmd, study, listeners)
+    case _@ (cmd: UpdateCollectionEventAnnotationOptionsCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      updateCollectionEventAnnotationOptionsCmd(cmd, study, listeners)
+    case _@ (cmd: RemoveCollectionEventAnnotationOptionsCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      removeCollectionEventAnnotationOptionsCmd(cmd, study, listeners)
 
     // annotation types -> collection event types
-    case _@ (study: DisabledStudy, cmd: AddAnnotationTypeToCollectionEventTypeCmd, listeners: MessageEmitter) =>
-      addAnnotationTypeToCollectionEventType(study, cmd, listeners)
-    case _@ (study: DisabledStudy, cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd, listeners: MessageEmitter) =>
-      removeAnnotationTypeFromCollectionEventType(study, cmd, listeners)
+    case _@ (cmd: AddAnnotationTypeToCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      addAnnotationTypeToCollectionEventType(cmd, study, listeners)
+    case _@ (cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+      removeAnnotationTypeFromCollectionEventType(cmd, study, listeners)
 
     case _ =>
       throw new Error("invalid command received")
   }
 
-  private def addCollectionEventType(study: DisabledStudy,
+  private def addCollectionEventType(
     cmd: AddCollectionEventTypeCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
     val collectionEventTypes = collectionEventTypeRepository.getMap.filter(
       cet => cet._2.studyId.equals(study.id))
@@ -85,7 +108,9 @@ class CollectionEventTypeDomainService(
     v
   }
 
-  private def updateCollectionEventType(study: DisabledStudy, cmd: UpdateCollectionEventTypeCmd,
+  private def updateCollectionEventType(
+    cmd: UpdateCollectionEventTypeCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
     val collectionEventTypeId = new CollectionEventTypeId(cmd.collectionEventTypeId)
     Entity.update(collectionEventTypeRepository.getByKey(collectionEventTypeId),
@@ -99,7 +124,9 @@ class CollectionEventTypeDomainService(
       }
   }
 
-  private def removeCollectionEventType(study: DisabledStudy, cmd: RemoveCollectionEventTypeCmd,
+  private def removeCollectionEventType(
+    cmd: RemoveCollectionEventTypeCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
     val collectionEventTypeId = new CollectionEventTypeId(cmd.collectionEventTypeId)
     collectionEventTypeRepository.getByKey(collectionEventTypeId) match {
@@ -112,8 +139,9 @@ class CollectionEventTypeDomainService(
     }
   }
 
-  private def addSpecimenGroupToCollectionEventType(study: DisabledStudy,
+  private def addSpecimenGroupToCollectionEventType(
     cmd: AddSpecimenGroupToCollectionEventTypeCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
     def createItem(sg: SpecimenGroup, cet: CollectionEventType) = {
       val sg2cet = SpecimenGroupCollectionEventType(
@@ -132,8 +160,9 @@ class CollectionEventTypeDomainService(
     } yield v3
   }
 
-  private def removeSpecimenGroupFromCollectionEventType(study: DisabledStudy,
+  private def removeSpecimenGroupFromCollectionEventType(
     cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
     sg2cetRepo.getByKey(cmd.sg2cetId) match {
       case Some(cg2cet) =>
@@ -145,8 +174,9 @@ class CollectionEventTypeDomainService(
     }
   }
 
-  private def addAnnotationTypeToCollectionEventType(study: DisabledStudy,
+  private def addAnnotationTypeToCollectionEventType(
     cmd: AddAnnotationTypeToCollectionEventTypeCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventTypeAnnotationType] = {
 
     def createItem(cet: CollectionEventType, cetAt: CollectionEventAnnotationType) = {
@@ -166,8 +196,9 @@ class CollectionEventTypeDomainService(
     } yield v3
   }
 
-  private def removeAnnotationTypeFromCollectionEventType(study: DisabledStudy,
+  private def removeAnnotationTypeFromCollectionEventType(
     cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventTypeAnnotationType] = {
     cet2atRepo.getByKey(cmd.cetAtId) match {
       case Some(cet2at) =>
@@ -181,38 +212,38 @@ class CollectionEventTypeDomainService(
   }
 
   private def addCollectionEventAnnotationTypeCmd(
-    study: DisabledStudy,
     cmd: AddCollectionEventAnnotationTypeCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
     ???
   }
   private def updateCollectionEventAnnotationTypeCmd(
-    study: DisabledStudy,
     cmd: UpdateCollectionEventAnnotationTypeCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
     ???
   }
   private def removeCollectionEventAnnotationTypeCmd(
-    study: DisabledStudy,
     cmd: RemoveCollectionEventAnnotationTypeCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
     ???
   }
   private def addCollectionEventAnnotationOptionsCmd(
-    study: DisabledStudy,
     cmd: AddCollectionEventAnnotationOptionsCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[AnnotationOption] = {
     ???
   }
   private def updateCollectionEventAnnotationOptionsCmd(
-    study: DisabledStudy,
     cmd: UpdateCollectionEventAnnotationOptionsCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[AnnotationOption] = {
     ???
   }
   private def removeCollectionEventAnnotationOptionsCmd(
-    study: DisabledStudy,
     cmd: RemoveCollectionEventAnnotationOptionsCmd,
+    study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[AnnotationOption] = {
     ???
   }

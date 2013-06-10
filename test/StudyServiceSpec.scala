@@ -398,6 +398,45 @@ class StudyServiceSpec extends EventsourcedSpec[StudyServiceFixture.Fixture] {
 
       sg2cetRepo.getMap must not haveKey (sg2cet1.id)
   }
+
+  "add collection event annotation types" in {
+    fragmentName: String =>
+      val ng = new NameGenerator(fragmentName)
+      val name = ng.next[Study]
+      val recurring = true
+
+      val study1 = validationResult(studyService.addStudy(new AddStudyCmd(name, name)))
+
+      val cet1 = validationResult(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring)))
+
+      val at = validationResult(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring)))
+
+      collectionEventTypeRepository.getMap must haveKey(cet1.id)
+      collectionEventTypeRepository.getByKey(cet1.id) must beSome.like {
+        case x =>
+          x.version must beEqualTo(0)
+          x.name must be(name)
+          x.description must be(name)
+          x.recurring must beEqualTo(recurring)
+      }
+
+      val name2 = ng.next[Study]
+      val recurring2 = false
+
+      val cet2 = validationResult(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study1.id.toString, name2, name2, recurring2)))
+
+      collectionEventTypeRepository.getMap must haveKey(cet2.id)
+      collectionEventTypeRepository.getByKey(cet2.id) must beSome.like {
+        case x =>
+          x.version must beEqualTo(0)
+          x.name must be(name2)
+          x.description must be(name2)
+          x.recurring must beEqualTo(recurring2)
+      }
+  }
 }
 
 object StudyServiceFixture {
@@ -411,10 +450,12 @@ object StudyServiceFixture {
     val cetAnnotationTypeRepo =
       new ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType](v => v.id)
 
+    // specimen group -> collection event type repository
     val sg2cetRepo =
       new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
 
-    val cet2atRepo =
+    // annotation type -> collection type event repository
+    val at2cetRepo =
       new ReadWriteRepository[String, CollectionEventTypeAnnotationType](v => v.id)
 
     val studyProcessor = extension.processorOf(Props(
@@ -424,7 +465,7 @@ object StudyServiceFixture {
         collectionEventTypeRepository,
         cetAnnotationTypeRepo,
         sg2cetRepo,
-        cet2atRepo) with Emitter with Eventsourced { val id = 1 }))
+        at2cetRepo) with Emitter with Eventsourced { val id = 1 }))
 
     val studyService = new StudyService(studyRepository, specimenGroupRepository,
       collectionEventTypeRepository, studyProcessor)

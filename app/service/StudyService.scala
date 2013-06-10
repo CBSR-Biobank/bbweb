@@ -9,6 +9,7 @@ import scala.concurrent.stm.Ref
 import scala.language.postfixOps
 import org.eligosource.eventsourced.core._
 import domain.{
+  AnnotationOption,
   AnnotationTypeId,
   ConcurrencySafeEntity,
   DomainValidation,
@@ -24,10 +25,22 @@ import domain.service.{ CollectionEventTypeDomainService, SpecimenGroupDomainSer
 import scalaz._
 import Scalaz._
 
+/**
+ * This is the Study Aggregate Application Service.
+ *
+ * Handles the commands to configure studies. the commands are forwarded to the Study Aggregate
+ * Processor.
+ *
+ * @param studyRepository The repository for study entities.
+ * @param specimenGroupRepository The repository for specimen group entities.
+ * @param cetRepo The repository for Container Event Type entities.
+ * @param The study aggregate processor that command messages should be forwarded to.
+ *
+ */
 class StudyService(
   studyRepository: ReadRepository[StudyId, Study],
   specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
-  collectionEventTypeRepository: ReadRepository[CollectionEventTypeId, CollectionEventType],
+  cetRepo: ReadRepository[CollectionEventTypeId, CollectionEventType],
   studyProcessor: ActorRef)(implicit system: ActorSystem)
   extends ApplicationService {
   import system.dispatcher
@@ -44,6 +57,7 @@ class StudyService(
   def disableStudy(cmd: DisableStudyCmd): Future[DomainValidation[DisabledStudy]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 
+  // specimen groups
   def addSpecimenGroup(cmd: AddSpecimenGroupCmd): Future[DomainValidation[SpecimenGroup]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroup]])
 
@@ -53,6 +67,7 @@ class StudyService(
   def removeSpecimenGroup(cmd: RemoveSpecimenGroupCmd): Future[DomainValidation[SpecimenGroup]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroup]])
 
+  // collection event types
   def addCollectionEventType(cmd: AddCollectionEventTypeCmd): Future[DomainValidation[CollectionEventType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventType]])
 
@@ -62,6 +77,7 @@ class StudyService(
   def removeCollectionEventType(cmd: RemoveCollectionEventTypeCmd): Future[DomainValidation[CollectionEventType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventType]])
 
+  // specimen group -> collection event types
   def addSpecimenGroupToCollectionEventType(cmd: AddSpecimenGroupToCollectionEventTypeCmd): Future[DomainValidation[SpecimenGroupCollectionEventType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroupCollectionEventType]])
 
@@ -74,110 +90,32 @@ class StudyService(
   def removeAnnotationFromCollectionEventType(cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
 
-}
+  // collection event  annotations types
+  def addCollectionEventAnnotationType(cmd: AddCollectionEventAnnotationTypeCmd): Future[DomainValidation[CollectionEventAnnotationType]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
 
-// -------------------------------------------------------------------------------------------------------------
-//  InvoiceProcessor is single writer to studiesRef, so we can have reads and writes in separate transactions
-// -------------------------------------------------------------------------------------------------------------
-class StudyProcessor(
-  studyRepository: ReadWriteRepository[StudyId, Study],
-  specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup],
-  collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
-  annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType],
-  sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType],
-  cet2atRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType])
-  extends Processor { this: Emitter =>
+  def updateCollectionEventAnnotationType(cmd: UpdateCollectionEventAnnotationTypeCmd): Future[DomainValidation[CollectionEventAnnotationType]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
 
-  val specimenGroupDomainService = new SpecimenGroupDomainService(
-    studyRepository, specimenGroupRepository)
+  def removeCollectionEventAnnotationType(cmd: RemoveCollectionEventAnnotationTypeCmd): Future[DomainValidation[CollectionEventAnnotationType]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
 
-  val collectionEventTypeDomainService = new CollectionEventTypeDomainService(
-    studyRepository, collectionEventTypeRepository, specimenGroupRepository, annotationTypeRepo,
-    sg2cetRepo, cet2atRepo)
+  // collection event annotation options
+  def addCollectionEventAnnotationOptions(cmd: AddCollectionEventAnnotationOptionsCmd): Future[DomainValidation[AnnotationOption]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[AnnotationOption]])
 
-  def receive = {
-    case cmd: AddStudyCmd =>
-      process(addStudy(cmd, emitter("listeners")))
+  def updateCollectionEventAnnotationOptions(cmd: UpdateCollectionEventAnnotationOptionsCmd): Future[DomainValidation[AnnotationOption]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[AnnotationOption]])
 
-    case cmd: UpdateStudyCmd =>
-      process(updateStudy(cmd, emitter("listeners")))
+  def removeCollectionEventAnnotationOptions(cmd: RemoveCollectionEventAnnotationOptionsCmd): Future[DomainValidation[AnnotationOption]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[AnnotationOption]])
 
-    case cmd: EnableStudyCmd =>
-      process(enableStudy(cmd, emitter("listeners")))
+  // annotation types -> collection event types
+  def addAnnotationTypeToCollectionEventType(cmd: AddAnnotationTypeToCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
 
-    case cmd: DisableStudyCmd =>
-      process(disableStudy(cmd, emitter("listeners")))
-
-    case cmd: SpecimenGroupCommand =>
-      process(validateStudy(cmd.studyId) { study =>
-        specimenGroupDomainService.process(study, cmd, emitter("listeners"))
-      })
-
-    case cmd: CollectionEventTypeCommand =>
-      process(validateStudy(cmd.studyId) { study =>
-        collectionEventTypeDomainService.process(study, cmd, emitter("listeners"))
-      })
-
-    case _ =>
-      throw new Error("invalid command received")
-  }
-
-  private def addStudy(cmd: AddStudyCmd, listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
-    studyRepository.getValues.find(s => s.name.equals(cmd.name)) match {
-      case Some(study) =>
-        DomainError("study with name already exists: %s" format cmd.name).fail
-      case None =>
-        val study = Study.add(cmd.name, cmd.description)
-        study match {
-          case Success(study) =>
-            studyRepository.updateMap(study)
-            listeners sendEvent StudyAddedEvent(study.id, study.name, study.description)
-          case _ => // nothing to do in this case
-        }
-        study
-    }
-  }
-
-  private def updateStudy(cmd: UpdateStudyCmd, listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
-    val studyId = new StudyId(cmd.studyId)
-    Entity.update(studyRepository.getByKey(studyId), studyId, cmd.expectedVersion) { prevStudy =>
-      val study = DisabledStudy(studyId, prevStudy.version + 1, cmd.name, cmd.description)
-      studyRepository.updateMap(study)
-      listeners sendEvent StudyUpdatedEvent(study.id, study.name, study.description)
-      study.success
-    }
-  }
-
-  private def enableStudy(cmd: EnableStudyCmd, listeners: MessageEmitter): DomainValidation[EnabledStudy] = {
-    val studyId = new StudyId(cmd.studyId)
-    Entity.update(studyRepository.getByKey(studyId), studyId, cmd.expectedVersion) { prevStudy =>
-      val study = EnabledStudy(studyId, prevStudy.version + 1, prevStudy.name, prevStudy.description)
-      studyRepository.updateMap(study)
-      listeners sendEvent StudyEnabledEvent(study.id)
-      study.success
-    }
-  }
-
-  private def disableStudy(cmd: DisableStudyCmd, listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
-    val studyId = new StudyId(cmd.studyId)
-    Entity.update(studyRepository.getByKey(studyId), studyId, cmd.expectedVersion) { prevStudy =>
-      val study = DisabledStudy(studyId, prevStudy.version + 1, prevStudy.name, prevStudy.description)
-      studyRepository.updateMap(study)
-      listeners sendEvent StudyDisabledEvent(study.id)
-      study.success
-    }
-  }
-
-  private def validateStudy(studyIdAsString: String)(f: DisabledStudy => DomainValidation[_]) = {
-    val studyId = new StudyId(studyIdAsString)
-    studyRepository.getByKey(studyId) match {
-      case None => StudyService.noSuchStudy(studyId).fail
-      case Some(study) => study match {
-        case study: EnabledStudy => StudyService.notDisabledError(study.name).fail
-        case study: DisabledStudy => f(study)
-      }
-    }
-  }
+  def removeAnnotationTypeFromCollectionEventType(cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
+    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
 }
 
 object StudyService {
