@@ -1,4 +1,4 @@
-package test
+package fixture
 
 import scala.concurrent.stm.Ref
 import scala.collection.mutable.ConcurrentMap

@@ -1,38 +1,42 @@
 package fixture
 
-import scala.concurrent._
-import scala.concurrent.duration._
-import scala.reflect.ClassTag
-import scala.language.postfixOps
-
-import org.eligosource.eventsourced.core._
-import org.eligosource.eventsourced.journal.mongodb.casbah.MongodbCasbahJournalProps
-
-import com.mongodb.casbah.Imports._
-
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import akka.pattern.ask
-import akka.util.Timeout
-import akka.actor.Props
-import akka.actor.Actor
-import akka.actor.TypedActor.Receiver
-
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.TimeUnit
-
-import org.specs2.matcher.MustMatchers
-import org.specs2.mutable.Specification
-
 import domain._
 import domain.study._
 import service._
 
-abstract class EventsourcedSpec extends Specification {
+import scala.concurrent._
+import scala.reflect.ClassTag
 
+import scala.concurrent.duration._
+import scala.concurrent.stm.Ref
+import org.eligosource.eventsourced.core._
+import org.eligosource.eventsourced.journal.mongodb.casbah.MongodbCasbahJournalProps
+import com.mongodb.casbah.Imports._
+import akka.actor.ActorRef
+import akka.actor.ActorSystem
+import akka.actor.Props
+import akka.pattern.ask
+import akka.util.Timeout
+import akka.testkit._
+import java.util.concurrent.TimeUnit
+import org.specs2.mutable._
+import org.specs2.time.NoTimeConversions
+
+/* A tiny class that can be used as a Specs2 'context'. */
+abstract class AkkaTestkitSupport extends TestKit(ActorSystem())
+  with After
+  with ImplicitSender {
+  // make sure we shut down the actor system after all tests have run
+  def after = {
+    system.shutdown()
+    //system.awaitTermination(timeout.duration)
+  }
 }
 
-trait EventsourcingFixtureOps { self: EventsourcingFixture =>
+abstract class AppFixture extends Specification with NoTimeConversions {
+
+  implicit val timeout = Timeout(10 seconds)
+  implicit val system = ActorSystem("test")
 
   val MongoDbName = "biobank-test"
   val MongoCollName = "bbweb"
@@ -47,24 +51,11 @@ trait EventsourcingFixtureOps { self: EventsourcingFixture =>
   def journalProps: JournalProps =
     MongodbCasbahJournalProps(mongoClient, MongoDbName, MongoCollName)
 
-  def result[A: ClassTag](actor: ActorRef)(r: Any): A = {
-    Await.result(actor.ask(r)(timeout).mapTo[A], timeout.duration)
-  }
-}
-
-// TODO: this may need a better implementation
-//
-//  
-class EventsourcingFixture extends EventsourcingFixtureOps {
-  implicit val timeout = Timeout(10 seconds)
-  implicit val system = ActorSystem("test")
-
   val journal = Journal(journalProps)
   val extension = EventsourcingExtension(system, journal)
 
-  def shutdown() {
-    system.shutdown()
-    system.awaitTermination(timeout.duration)
+  def await[T](f: Future[DomainValidation[T]]) = {
+    Await.result(f, timeout.duration)
   }
 
   extension.recover()

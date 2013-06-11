@@ -89,7 +89,7 @@ class CollectionEventTypeDomainService(
     def addItem(item: CollectionEventType) {
       collectionEventTypeRepository.updateMap(item);
       listeners sendEvent CollectionEventTypeAddedEvent(
-        cmd.studyId, item.name, item.description, item.recurring)
+        study.id, item.id, item.name, item.description, item.recurring)
     }
 
     for {
@@ -109,7 +109,7 @@ class CollectionEventTypeDomainService(
         cmd.name, cmd.description, cmd.recurring)
       collectionEventTypeRepository.updateMap(item)
       listeners sendEvent CollectionEventTypeUpdatedEvent(
-        cmd.studyId, cmd.collectionEventTypeId, item.name, item.description, item.recurring)
+        study.id, item.id, item.name, item.description, item.recurring)
       item
     }
 
@@ -124,35 +124,39 @@ class CollectionEventTypeDomainService(
     cmd: RemoveCollectionEventTypeCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
-    val collectionEventTypeId = new CollectionEventTypeId(cmd.collectionEventTypeId)
-    collectionEventTypeRepository.getByKey(collectionEventTypeId) match {
-      case None =>
-        DomainError("collection event type does not exist: %s" format cmd.collectionEventTypeId).fail
-      case Some(cet) =>
-        collectionEventTypeRepository.remove(cet)
-        listeners sendEvent CollectionEventTypeRemovedEvent(cmd.studyId, cmd.collectionEventTypeId)
-        cet.success
+
+    def removeItem(item: CollectionEventType): CollectionEventType = {
+      collectionEventTypeRepository.remove(item)
+      listeners sendEvent CollectionEventTypeRemovedEvent(study.id, item.id)
+      item
     }
+
+    for {
+      prevItem <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
+      versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
+      item <- removeItem(prevItem).success
+    } yield item
   }
 
   private def addSpecimenGroupToCollectionEventType(
     cmd: AddSpecimenGroupToCollectionEventTypeCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
+
     def createItem(sg: SpecimenGroup, cet: CollectionEventType) = {
-      val sg2cet = SpecimenGroupCollectionEventType(
+      val item = SpecimenGroupCollectionEventType(
         SpecimenGroupCollectionEventTypeIdentityService.nextIdentity,
         sg.id, cet.id, cmd.count, cmd.amount)
-      sg2cetRepo.updateMap(sg2cet)
+      sg2cetRepo.updateMap(item)
       listeners sendEvent SpecimenGroupAddedToCollectionEventTypeEvent(
-        cmd.studyId, cmd.collectionEventTypeId, cmd.specimenGroupId, cmd.count, cmd.amount)
-      sg2cet.success
+        study.id, item.id, item.collectionEventTypeId, item.specimenGroupId, cmd.count, cmd.amount)
+      item
     }
 
     for {
       v1 <- validateSpecimenGroupId(study, specimenGroupRepository, cmd.specimenGroupId)
       v2 <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
-      v3 <- createItem(v1, v2)
+      v3 <- createItem(v1, v2).success
     } yield v3
   }
 
@@ -161,12 +165,14 @@ class CollectionEventTypeDomainService(
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
     sg2cetRepo.getByKey(cmd.sg2cetId) match {
-      case Some(cg2cet) =>
-        sg2cetRepo.remove(cg2cet)
-        listeners sendEvent SpecimenGroupRemovedFromCollectionEventTypeEvent(cmd.sg2cetId)
-        cg2cet.success
+      case Some(item) =>
+        sg2cetRepo.remove(item)
+        listeners sendEvent SpecimenGroupRemovedFromCollectionEventTypeEvent(
+          study.id, item.id, item.collectionEventTypeId, item.specimenGroupId)
+        item.success
       case None =>
-        DomainError("specimen group -> collection event type does not exist: %s" format cmd.sg2cetId).fail
+        DomainError("specimen group -> collection event type does not exist: %s"
+          format cmd.sg2cetId).fail
     }
   }
 
@@ -175,20 +181,21 @@ class CollectionEventTypeDomainService(
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventTypeAnnotationType] = {
 
-    def createItem(cet: CollectionEventType, cetAt: CollectionEventAnnotationType) = {
-      val cetAnnotationType = CollectionEventTypeAnnotationType(
+    def createItem(cet: CollectionEventType,
+      cetAt: CollectionEventAnnotationType): CollectionEventTypeAnnotationType = {
+      val item = CollectionEventTypeAnnotationType(
         CollectionEventTypeAnnotationTypeIdentityService.nextIdentity,
         cet.id, cetAt.id, cmd.required)
-      cet2atRepo.updateMap(cetAnnotationType)
+      cet2atRepo.updateMap(item)
       listeners sendEvent AnnotationTypeAddedToCollectionEventTypeEvent(
-        cmd.studyId, cmd.collectionEventTypeId, cmd.annotationTypeId)
-      cetAnnotationType.success
+        study.id, item.id, item.collectionEventTypeId, item.annotationTypeId)
+      item
     }
 
     for {
       v1 <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
       v2 <- validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
-      v3 <- createItem(v1, v2)
+      v3 <- createItem(v1, v2).success
     } yield v3
   }
 
@@ -197,10 +204,11 @@ class CollectionEventTypeDomainService(
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventTypeAnnotationType] = {
     cet2atRepo.getByKey(cmd.cetAtId) match {
-      case Some(cet2at) =>
-        cet2atRepo.remove(cet2at)
-        listeners sendEvent AnnotationTypeRemovedFromCollectionEventTypeEvent(cmd.studyId, cmd.cetAtId)
-        cet2at.success
+      case Some(item) =>
+        cet2atRepo.remove(item)
+        listeners sendEvent AnnotationTypeRemovedFromCollectionEventTypeEvent(
+          study.id, item.id, item.collectionEventTypeId, item.annotationTypeId)
+        item.success
       case None =>
         DomainError("annotation type -> collection event type does not exist: %s" format
           cmd.cetAtId).fail

@@ -5,7 +5,7 @@ import domain._
 case class CollectionEventTypeAnnotationType(
   id: String,
   collectionEventTypeId: CollectionEventTypeId,
-  collectionEventAnnotationTypeId: AnnotationTypeId,
+  annotationTypeId: AnnotationTypeId,
   required: Boolean) extends IdentifiedValueObject[String] {
 }
 

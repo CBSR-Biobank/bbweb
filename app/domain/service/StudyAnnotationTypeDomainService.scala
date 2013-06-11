@@ -99,16 +99,17 @@ class StudyAnnotationTypeDomainService(
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
 
-    def removeItem(annotType: CollectionEventAnnotationType): DomainValidation[CollectionEventAnnotationType] = {
-      annotationTypeRepo.remove(annotType)
-      listeners sendEvent CollectionEventAnnotationTypeRemovedEvent(cmd.studyId, cmd.annotationTypeId)
-      annotType.success
+    def removeItem(item: CollectionEventAnnotationType): CollectionEventAnnotationType = {
+      annotationTypeRepo.remove(item)
+      listeners sendEvent CollectionEventAnnotationTypeRemovedEvent(item.studyId, item.id)
+      item
     }
 
     for {
-      annot <- validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
-      removedAnot <- removeItem(annot)
-    } yield removedAnot
+      item <- validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
+      versionCheck <- item.requireVersion(cmd.expectedVersion)
+      removedItem <- removeItem(item).success
+    } yield removedItem
   }
 
   private def addAnnotationOptions(

@@ -2,6 +2,8 @@ package infrastructure.events
 
 import domain.study.StudyId
 import domain.study.SpecimenGroupId
+import domain.study.CollectionEventTypeId
+import domain.AnnotationTypeId
 import domain.UserId
 import domain.AnatomicalSourceType._
 import domain.AnnotationValueType._
@@ -28,29 +30,40 @@ case class StudySpecimenGroupRemovedEvent(studyId: StudyId, specimenGroupId: Spe
 
 // collection event events
 case class CollectionEventTypeAddedEvent(
-  studyId: String, name: String, description: String, recurring: Boolean)
+  studyId: StudyId, collectionEventTypeId: CollectionEventTypeId,
+  name: String, description: String, recurring: Boolean)
 
 case class CollectionEventTypeUpdatedEvent(
-  studyId: String, collectionEventId: String, name: String, description: String, recurring: Boolean)
+  studyId: StudyId, collectionEventTypeId: CollectionEventTypeId,
+  name: String, description: String, recurring: Boolean)
 
-case class CollectionEventTypeRemovedEvent(studyId: String, collectionEventId: String)
+case class CollectionEventTypeRemovedEvent(
+  studyId: StudyId, collectionEventTypeId: CollectionEventTypeId)
 
 case class SpecimenGroupAddedToCollectionEventTypeEvent(
-  studyId: String, collectionEventId: String, specimenGroupId: String, count: Int, amount: BigDecimal)
+  studyId: StudyId, sg2cetId: String,
+  collectionEventTypeId: CollectionEventTypeId, specimenGroupId: SpecimenGroupId,
+  count: Int, amount: BigDecimal)
 
-case class SpecimenGroupRemovedFromCollectionEventTypeEvent(sg2cetId: String)
+case class SpecimenGroupRemovedFromCollectionEventTypeEvent(
+  studyId: StudyId, sg2cetId: String,
+  collectionEventTypeId: CollectionEventTypeId, specimenGroupId: SpecimenGroupId)
 
-case class CollectionEventAnnotationTypeAddedEvent(studyId: String, name: String,
-  description: String, valueType: AnnotationValueType, maxValueCount: Int)
+case class CollectionEventAnnotationTypeAddedEvent(
+  studyId: StudyId, annotationTypeId: AnnotationTypeId,
+  name: String, description: String, valueType: AnnotationValueType, maxValueCount: Int)
 
 case class CollectionEventAnnotationTypeUpdatedEvent(
-  studyId: String, collectionEventAnnotationTypeId: String,
+  studyId: StudyId, annotationTypeId: AnnotationTypeId,
   name: String, description: String, valueType: AnnotationValueType, maxValueCount: Int)
 
 case class CollectionEventAnnotationTypeRemovedEvent(
-  studyId: String, collectionEventAnnotationTypeId: String)
+  studyId: StudyId, annotationTypeId: AnnotationTypeId)
 
 case class AnnotationTypeAddedToCollectionEventTypeEvent(
-  studyId: String, collectionEventId: String, annotationTypeId: String)
+  studyId: StudyId, collectionEventTypeAnnotationTypeId: String,
+  collectionEventTypeId: CollectionEventTypeId, annotationTypeId: AnnotationTypeId)
 
-case class AnnotationTypeRemovedFromCollectionEventTypeEvent(studyId: String, cet2AtId: String)
+case class AnnotationTypeRemovedFromCollectionEventTypeEvent(
+  studyId: StudyId, collectionEventTypeAnnotationTypeId: String,
+  collectionEventTypeId: CollectionEventTypeId, annotationTypeId: AnnotationTypeId)

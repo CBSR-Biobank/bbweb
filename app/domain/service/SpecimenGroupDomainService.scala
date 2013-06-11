@@ -18,6 +18,7 @@ import domain.study.{
   Study,
   StudyId
 }
+import domain.service.StudyValidationUtil._
 
 import scalaz._
 import scalaz.Scalaz._
@@ -79,33 +80,40 @@ class SpecimenGroupDomainService(
     cmd: UpdateSpecimenGroupCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
-    val specimenGroupId = new SpecimenGroupId(cmd.specimenGroupId)
-    Entity.update(specimenGroupRepository.getByKey(specimenGroupId), specimenGroupId,
-      cmd.expectedVersion) { prevSg =>
-        val sg = SpecimenGroup(specimenGroupId, study.id, prevSg.version + 1, cmd.name,
-          cmd.description, cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
-          cmd.preservationTemperatureType, cmd.specimenType)
-        specimenGroupRepository.updateMap(sg)
-        listeners sendEvent StudySpecimenGroupUpdatedEvent(sg.studyId,
-          sg.id, sg.name, sg.description, sg.units, sg.anatomicalSourceType, sg.preservationType,
-          sg.preservationTemperatureType, sg.specimenType)
-        sg.success
-      }
+    def update(prevItem: SpecimenGroup): SpecimenGroup = {
+      val item = SpecimenGroup(prevItem.id, study.id, prevItem.version + 1,
+        cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
+        cmd.preservationTemperatureType, cmd.specimenType)
+      specimenGroupRepository.updateMap(item)
+      listeners sendEvent StudySpecimenGroupUpdatedEvent(item.studyId,
+        item.id, item.name, item.description, item.units, item.anatomicalSourceType,
+        item.preservationType, item.preservationTemperatureType, item.specimenType)
+      item
+    }
+
+    for {
+      prevItem <- validateSpecimenGroupId(study, specimenGroupRepository, cmd.specimenGroupId)
+      versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
+      item <- update(prevItem).success
+    } yield item
   }
 
   private def removeSpecimenGroup(
     cmd: RemoveSpecimenGroupCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
-    val specimenGroupId = new SpecimenGroupId(cmd.specimenGroupId)
-    specimenGroupRepository.getByKey(specimenGroupId) match {
-      case None =>
-        DomainError("specimen group does not exist: %s" format cmd.specimenGroupId).fail
-      case Some(sg) =>
-        specimenGroupRepository.remove(sg)
-        listeners sendEvent StudySpecimenGroupRemovedEvent(sg.studyId, sg.id)
-        sg.success
+
+    def removeItem(item: SpecimenGroup): SpecimenGroup = {
+      specimenGroupRepository.remove(item)
+      listeners sendEvent StudySpecimenGroupRemovedEvent(item.studyId, item.id)
+      item
     }
+
+    for {
+      prevItem <- validateSpecimenGroupId(study, specimenGroupRepository, cmd.specimenGroupId)
+      versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
+      item <- removeItem(prevItem).success
+    } yield item
   }
 
 }

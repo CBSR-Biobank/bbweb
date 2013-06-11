@@ -1,5 +1,5 @@
 package fixture
-import fixture._
+
 import infrastructure._
 import service._
 import domain._
@@ -15,51 +15,38 @@ import org.eligosource.eventsourced.journal.mongodb.casbah.MongodbCasbahJournalP
 import scalaz._
 import Scalaz._
 
-object StudyFixture {
+class StudyFixture extends AppFixture {
 
-  class Fixture extends EventsourcingFixture {
+  val nameGenerator = new NameGenerator(this.getClass.getName)
 
-    val studyRepository = new ReadWriteRepository[StudyId, Study](v => v.id)
-    val specimenGroupRepository = new ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id)
-    val collectionEventTypeRepository = new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
+  val studyRepository = new ReadWriteRepository[StudyId, Study](v => v.id)
+  val specimenGroupRepository = new ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id)
+  val collectionEventTypeRepository = new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
 
-    val annotationTypeRepo =
-      new ReadWriteRepository[AnnotationTypeId, StudyAnnotationType](v => v.id)
+  val annotationTypeRepo =
+    new ReadWriteRepository[AnnotationTypeId, StudyAnnotationType](v => v.id)
 
-    val annotationOptionRepo =
-      new ReadWriteRepository[String, AnnotationOption](v => v.id)
+  val annotationOptionRepo =
+    new ReadWriteRepository[String, AnnotationOption](v => v.id)
 
-    // specimen group -> collection event type repository
-    val sg2cetRepo =
-      new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
+  // specimen group -> collection event type repository
+  val sg2cetRepo =
+    new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
 
-    // annotation type -> collection type event repository
-    val at2cetRepo =
-      new ReadWriteRepository[String, CollectionEventTypeAnnotationType](v => v.id)
+  // annotation type -> collection type event repository
+  val at2cetRepo =
+    new ReadWriteRepository[String, CollectionEventTypeAnnotationType](v => v.id)
 
-    val studyProcessor = extension.processorOf(Props(
-      new StudyProcessor(
-        studyRepository,
-        specimenGroupRepository,
-        collectionEventTypeRepository,
-        annotationTypeRepo,
-        annotationOptionRepo,
-        sg2cetRepo,
-        at2cetRepo) with Emitter with Eventsourced { val id = 1 }))
+  val studyProcessor = extension.processorOf(Props(
+    new StudyProcessor(
+      studyRepository,
+      specimenGroupRepository,
+      collectionEventTypeRepository,
+      annotationTypeRepo,
+      annotationOptionRepo,
+      sg2cetRepo,
+      at2cetRepo) with Emitter with Eventsourced { val id = 1 }))
 
-    val studyService = new StudyService(studyRepository, specimenGroupRepository,
-      collectionEventTypeRepository, studyProcessor)
-
-    def await[T](f: Future[DomainValidation[T]]) = {
-      Await.result(f, timeout.duration)
-    }
-
-    def validationResult[T](f: Future[DomainValidation[T]]): T = {
-      await(f) match {
-        case Success(e) => e
-        case Failure(msg) => throw new Error("validation failed: " + msg)
-      }
-    }
-  }
-
+  val studyService = new StudyService(studyRepository, specimenGroupRepository,
+    collectionEventTypeRepository, studyProcessor)
 }
