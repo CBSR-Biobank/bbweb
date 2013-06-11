@@ -180,19 +180,17 @@ class CollectionEventTypeSpec extends StudyFixture {
         val preservationTempType = PreservationTemperatureType.Minus80celcius
         val specimenType = SpecimenType.FilteredUrine
 
-        val study1 = await(studyService.addStudy(new AddStudyCmd(name, name))) | null
-
         val sg1 = await(studyService.addSpecimenGroup(
-          AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
+          AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
             preservationType, preservationTempType, specimenType))) | null
         specimenGroupRepository.getMap must haveKey(sg1.id)
 
         val cet1 = await(studyService.addCollectionEventType(
-          new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring = true))) | null
+          new AddCollectionEventTypeCmd(study.id.toString, name, name, recurring = true))) | null
         collectionEventTypeRepository.getMap must haveKey(cet1.id)
 
         val sg2cet1 = await(studyService.addSpecimenGroupToCollectionEventType(
-          AddSpecimenGroupToCollectionEventTypeCmd(study1.id.toString,
+          AddSpecimenGroupToCollectionEventTypeCmd(study.id.toString,
             sg1.id.toString, cet1.id.toString, 1, 1.0))) | null
 
         sg2cetRepo.getMap must haveKey(sg2cet1.id)
@@ -208,21 +206,19 @@ class CollectionEventTypeSpec extends StudyFixture {
         val preservationTempType = PreservationTemperatureType.Minus80celcius
         val specimenType = SpecimenType.FilteredUrine
 
-        val study1 = await(studyService.addStudy(new AddStudyCmd(name, name))) | null
-
         val sg1 = await(studyService.addSpecimenGroup(
-          AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
+          AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
             preservationType, preservationTempType, specimenType))) | null
 
         val cet1 = await(studyService.addCollectionEventType(
-          new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring = true))) | null
+          new AddCollectionEventTypeCmd(study.id.toString, name, name, recurring = true))) | null
 
         val sg2cet1 = await(studyService.addSpecimenGroupToCollectionEventType(
-          AddSpecimenGroupToCollectionEventTypeCmd(study1.id.toString,
+          AddSpecimenGroupToCollectionEventTypeCmd(study.id.toString,
             sg1.id.toString, cet1.id.toString, 1, 1.0))) | null
 
         val sg2cet2 = await(studyService.removeSpecimenGroupFromCollectionEventType(
-          RemoveSpecimenGroupFromCollectionEventTypeCmd(sg2cet1.id.toString, study1.id.toString)))
+          RemoveSpecimenGroupFromCollectionEventTypeCmd(sg2cet1.id.toString, study.id.toString)))
 
         sg2cetRepo.getMap must not haveKey (sg2cet1.id)
     }
@@ -234,44 +230,24 @@ class CollectionEventTypeSpec extends StudyFixture {
       fragmentName: String =>
         val ng = new NameGenerator(fragmentName)
         val name = ng.next[Study]
-        val valueType = AnnotationValueType.String
-        val maxValueCount = 0
-
-        val study1 = await(studyService.addStudy(new AddStudyCmd(name, name))) | null
+        val required = true
 
         val cet1 = await(studyService.addCollectionEventType(
-          new AddCollectionEventTypeCmd(study1.id.toString, name, name, true))) | null
+          new AddCollectionEventTypeCmd(study.id.toString, name, name, true))) | null
 
         val at1 = await(studyService.addCollectionEventAnnotationType(
-          new AddCollectionEventAnnotationTypeCmd(study1.id.toString, name, name,
-            valueType, maxValueCount))) | null
+          new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+            AnnotationValueType.Date, 0))) | null
 
-        annotationTypeRepo.getMap must haveKey(at1.id)
-        annotationTypeRepo.getByKey(at1.id) must beSome.like {
+        val at2cet = await(studyService.addAnnotationTypeToCollectionEventType(
+          new AddAnnotationTypeToCollectionEventTypeCmd(study.id.toString,
+            cet1.id.toString, at1.id.toString, required)))
+
+        at2cet must beSuccessful.like {
           case x =>
-            x.version must beEqualTo(0)
-            x.name must be(name)
-            x.description must be(name)
-            x.valueType must beEqualTo(valueType)
-            x.maxValueCount must beEqualTo(maxValueCount)
-        }
-
-        val name2 = ng.next[Study]
-        val valueType2 = AnnotationValueType.Select
-        val maxValueCount2 = 2
-
-        val at2 = await(studyService.addCollectionEventAnnotationType(
-          new AddCollectionEventAnnotationTypeCmd(study1.id.toString, name2, name2,
-            valueType2, maxValueCount2))) | null
-
-        annotationTypeRepo.getMap must haveKey(at2.id)
-        annotationTypeRepo.getByKey(at2.id) must beSome.like {
-          case x =>
-            x.version must beEqualTo(0)
-            x.name must be(name)
-            x.description must be(name)
-            x.valueType must beEqualTo(valueType)
-            x.maxValueCount must beEqualTo(maxValueCount)
+            x.annotationTypeId must beEqualTo(at1.id)
+            x.collectionEventTypeId must beEqualTo(cet1.id)
+            x.required must beEqualTo(required)
         }
     }
   }

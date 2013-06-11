@@ -93,6 +93,11 @@ class StudyProcessor(
         collectionEventTypeDomainService.process(cmd, study, emitter("listeners"))
       })
 
+    case cmd: StudyAnnotationTypeCommand =>
+      process(validateStudy(cmd.studyId, studyRepository) { study =>
+        annotationTypeDomainService.process(cmd, study, emitter("listeners"))
+      })
+
     case _ =>
       throw new Error("invalid command received")
   }

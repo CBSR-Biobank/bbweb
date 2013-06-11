@@ -63,29 +63,32 @@ case class AddAnnotationTypeToCollectionEventTypeCmd(studyIdentity: String,
 case class RemoveAnnotationTypeFromCollectionEventTypeCmd(cetAtId: String, studyIdentity: String)
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
-// collection event commands
+// study annotation type commands
+sealed trait StudyAnnotationTypeCommand {
+  val studyId: String
+}
 case class AddCollectionEventAnnotationTypeCmd(studyIdentity: String, name: String,
   description: String, valueType: AnnotationValueType, maxValueCount: Int)
-  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+  extends { val studyId = studyIdentity } with StudyAnnotationTypeCommand
 
 case class UpdateCollectionEventAnnotationTypeCmd(studyIdentity: String,
   annotationTypeId: String, expectedVersion: Option[Long], name: String,
   description: String, valueType: AnnotationValueType, maxValueCount: Int)
-  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+  extends { val studyId = studyIdentity } with StudyAnnotationTypeCommand
 
 case class RemoveCollectionEventAnnotationTypeCmd(studyIdentity: String,
   annotationTypeId: String, expectedVersion: Option[Long])
-  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+  extends { val studyId = studyIdentity } with StudyAnnotationTypeCommand
 
 case class AddAnnotationOptionsCmd(studyIdentity: String,
   collectionEventAnnotationTypeId: String, options: Set[String])
-  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+  extends { val studyId = studyIdentity } with StudyAnnotationTypeCommand
 
 case class UpdateAnnotationOptionsCmd(studyIdentity: String,
   collectionEventAnnotationOptionId: String, expectedVersion: Option[Long], options: Set[String])
-  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+  extends { val studyId = studyIdentity } with StudyAnnotationTypeCommand
 
 case class RemoveAnnotationOptionsCmd(studyIdentity: String,
   collectionEventAnnotationOptionId: String, expectedVersion: Option[Long])
-  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+  extends { val studyId = studyIdentity } with StudyAnnotationTypeCommand
 

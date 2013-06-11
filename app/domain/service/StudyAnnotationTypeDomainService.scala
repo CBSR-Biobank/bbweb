@@ -60,17 +60,18 @@ class StudyAnnotationTypeDomainService(
     cmd: AddCollectionEventAnnotationTypeCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
-    val annotationTypes = annotationTypeRepo.getMap.filter(
-      cet => cet._2.studyId.equals(study.id))
-    val v = study.addCollectionEventAnnotationType(annotationTypes, cmd)
-    v match {
-      case Success(annot) =>
-        annotationTypeRepo.updateMap(annot)
-        listeners sendEvent CollectionEventAnnotationTypeAddedEvent(
-          cmd.studyId, annot.name, annot.description, annot.valueType, annot.maxValueCount)
-      case _ => // nothing to do in this case
+    def addItem(item: StudyAnnotationType) {
+      annotationTypeRepo.updateMap(item);
+      listeners sendEvent CollectionEventAnnotationTypeAddedEvent(
+        study.id, item.id, item.name, item.description, item.valueType, item.maxValueCount)
     }
-    v
+
+    for {
+      ceAnnotationTypes <- annotationTypeRepo.getMap.filter(
+        cet => cet._2.studyId.equals(study.id)).success
+      newItem <- study.addCollectionEventAnnotationType(ceAnnotationTypes, cmd)
+      addItem <- addItem(newItem).success
+    } yield newItem
   }
 
   private def updateCollectionEventAnnotationType(
@@ -78,13 +79,13 @@ class StudyAnnotationTypeDomainService(
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
     def update(prevItem: CollectionEventAnnotationType): DomainValidation[CollectionEventAnnotationType] = {
-      val iitem = CollectionEventAnnotationType(prevItem.id, prevItem.version + 1, study.id,
+      val item = CollectionEventAnnotationType(prevItem.id, prevItem.version + 1, study.id,
         cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount)
-      annotationTypeRepo.updateMap(iitem)
+      annotationTypeRepo.updateMap(item)
       listeners sendEvent CollectionEventAnnotationTypeUpdatedEvent(
-        cmd.studyId, cmd.annotationTypeId, iitem.name, iitem.description, iitem.valueType,
-        iitem.maxValueCount)
-      iitem.success
+        study.id, item.id, item.name, item.description, item.valueType,
+        item.maxValueCount)
+      item.success
     }
 
     for {

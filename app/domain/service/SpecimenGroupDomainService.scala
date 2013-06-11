@@ -62,18 +62,20 @@ class SpecimenGroupDomainService(
     cmd: AddSpecimenGroupCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
-    val studySpecimenGroups = specimenGroupRepository.getMap.filter(
-      sg => sg._2.studyId.equals(study.id))
-    val v = study.addSpecimenGroup(studySpecimenGroups, cmd)
-    v match {
-      case Success(sg) =>
-        specimenGroupRepository.updateMap(sg)
-        listeners sendEvent StudySpecimenGroupAddedEvent(sg.studyId, sg.id,
-          sg.name, sg.description, sg.units, sg.anatomicalSourceType, sg.preservationType,
-          sg.preservationTemperatureType, sg.specimenType)
-      case _ => // nothing to do in this case
+
+    def addItem(item: SpecimenGroup) {
+      specimenGroupRepository.updateMap(item);
+      listeners sendEvent StudySpecimenGroupAddedEvent(item.studyId, item.id,
+        item.name, item.description, item.units, item.anatomicalSourceType,
+        item.preservationType, item.preservationTemperatureType, item.specimenType)
     }
-    v
+
+    for {
+      specimenGroups <- specimenGroupRepository.getMap.filter(
+        cet => cet._2.studyId.equals(study.id)).success
+      newItem <- study.addSpecimenGroup(specimenGroups, cmd)
+      addItem <- addItem(newItem).success
+    } yield newItem
   }
 
   private def updateSpecimenGroup(
