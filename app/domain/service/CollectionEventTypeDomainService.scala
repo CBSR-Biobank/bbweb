@@ -46,7 +46,7 @@ class CollectionEventTypeDomainService(
   annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType],
   sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType],
   cet2atRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType])
-  extends DomainService {
+  extends CommandHandler {
 
   /**
    * This partial function handles each command. The input is a Tuple3 consisting of:
@@ -180,7 +180,6 @@ class CollectionEventTypeDomainService(
     cmd: AddAnnotationTypeToCollectionEventTypeCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventTypeAnnotationType] = {
-
     def createItem(cet: CollectionEventType,
       cetAt: CollectionEventAnnotationType): CollectionEventTypeAnnotationType = {
       val item = CollectionEventTypeAnnotationType(

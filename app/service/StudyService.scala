@@ -84,13 +84,7 @@ class StudyService(
   def removeSpecimenGroupFromCollectionEventType(cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd): Future[DomainValidation[SpecimenGroupCollectionEventType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroupCollectionEventType]])
 
-  def addAnnotationToCollectionEventType(cmd: AddAnnotationTypeToCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
-
-  def removeAnnotationFromCollectionEventType(cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
-
-  // collection event  annotations types
+  // study annotation type
   def addCollectionEventAnnotationType(cmd: AddCollectionEventAnnotationTypeCmd): Future[DomainValidation[CollectionEventAnnotationType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
 
@@ -100,7 +94,7 @@ class StudyService(
   def removeCollectionEventAnnotationType(cmd: RemoveCollectionEventAnnotationTypeCmd): Future[DomainValidation[CollectionEventAnnotationType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
 
-  // collection event annotation options
+  // study annotation options
   def addAnnotationOptions(cmd: AddAnnotationOptionsCmd): Future[DomainValidation[AnnotationOption]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[AnnotationOption]])
 
@@ -111,8 +105,10 @@ class StudyService(
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[AnnotationOption]])
 
   // annotation types -> collection event types
-  def addAnnotationTypeToCollectionEventType(cmd: AddAnnotationTypeToCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
+  def addAnnotationTypeToCollectionEventType(cmd: AddAnnotationTypeToCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] = {
+    println("********* here ********")
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
+  }
 
   def removeAnnotationTypeFromCollectionEventType(cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])

@@ -15,6 +15,10 @@ case class CollectionEventAnnotationType(
   valueType: AnnotationValueType,
   maxValueCount: Int) extends StudyAnnotationType {
 
+  override def toString: String = {
+    "{ id:%s, version: %d, name:%s, description:%s }" format (id, version, name, description)
+  }
+
 }
 
 object CollectionEventAnnotationType {

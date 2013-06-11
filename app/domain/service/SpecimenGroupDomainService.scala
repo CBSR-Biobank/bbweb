@@ -35,7 +35,7 @@ import scalaz.Scalaz._
 class SpecimenGroupDomainService(
   studyRepository: ReadRepository[StudyId, Study],
   specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup])
-  extends DomainService {
+  extends CommandHandler {
 
   /**
    * This partial function handles each command. The input is a Tuple3 consisting of:

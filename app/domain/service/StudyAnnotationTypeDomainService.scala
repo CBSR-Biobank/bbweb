@@ -14,6 +14,7 @@ import domain.study.{
   StudyAnnotationType,
   StudyId
 }
+import AnnotationValueType._
 import infrastructure._
 import infrastructure.commands._
 import infrastructure.events._
@@ -27,12 +28,21 @@ import Scalaz._
  * @author Nelson Loyola
  */
 class StudyAnnotationTypeDomainService(
+  annotationOptionsDomainService: AnnotationOptionsDomainService,
   annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType],
   annotationOptionRepo: ReadWriteRepository[String, AnnotationOption])
-  extends DomainService {
+  extends CommandHandler {
 
-  /** @inheritdoc */
-  def process = PartialFunction[Any, DomainValidation[_]] {
+  /**
+   * This partial function handles each command. The input is a Tuple3 consisting of:
+   *
+   *  1. The command to handle.
+   *  2. The study entity the command is associated with,
+   *  3. The event message listener to be notified if the command is successful.
+   *
+   *  If the command is invalid, then this method throws an Error exception.
+   */
+  def process = {
 
     // collection event  annotations
     case _@ (cmd: AddCollectionEventAnnotationTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
@@ -42,24 +52,16 @@ class StudyAnnotationTypeDomainService(
     case _@ (cmd: RemoveCollectionEventAnnotationTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
       removeCollectionEventAnnotationType(cmd, study, listeners)
 
-    // annotation options
-    case _@ (cmd: AddAnnotationOptionsCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      addAnnotationOptions(cmd, study, listeners)
-    case _@ (cmd: UpdateAnnotationOptionsCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      updateAnnotationOptions(cmd, study, listeners)
-    case _@ (cmd: RemoveAnnotationOptionsCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      removeAnnotationOptions(cmd, study, listeners)
-
     case _ =>
       throw new Error("invalid command received")
 
   }
 
-  /** test */
   private def addCollectionEventAnnotationType(
     cmd: AddCollectionEventAnnotationTypeCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
+
     def addItem(item: StudyAnnotationType) {
       annotationTypeRepo.updateMap(item);
       listeners sendEvent CollectionEventAnnotationTypeAddedEvent(
@@ -67,8 +69,10 @@ class StudyAnnotationTypeDomainService(
     }
 
     for {
+      validValueType <- validateValueType(cmd.valueType, cmd.options)
       ceAnnotationTypes <- annotationTypeRepo.getMap.filter(
-        cet => cet._2.studyId.equals(study.id)).success
+        cet => cet._2.studyId.equals(study.id)
+          && cet._2.isInstanceOf[CollectionEventAnnotationType]).success
       newItem <- study.addCollectionEventAnnotationType(ceAnnotationTypes, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
@@ -78,9 +82,8 @@ class StudyAnnotationTypeDomainService(
     cmd: UpdateCollectionEventAnnotationTypeCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
-    def update(prevItem: CollectionEventAnnotationType): DomainValidation[CollectionEventAnnotationType] = {
-      val item = CollectionEventAnnotationType(prevItem.id, prevItem.version + 1, study.id,
-        cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount)
+    def update(item: CollectionEventAnnotationType): DomainValidation[CollectionEventAnnotationType] = {
+
       annotationTypeRepo.updateMap(item)
       listeners sendEvent CollectionEventAnnotationTypeUpdatedEvent(
         study.id, item.id, item.name, item.description, item.valueType,
@@ -89,10 +92,15 @@ class StudyAnnotationTypeDomainService(
     }
 
     for {
+      validValueType <- validateValueType(cmd.valueType, cmd.options)
+      ceAnnotationTypes <- annotationTypeRepo.getMap.filter(
+        cet => cet._2.studyId.equals(study.id)
+          && cet._2.isInstanceOf[CollectionEventAnnotationType]).success
       prevItem <- validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
       versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
-      item <- update(prevItem)
-    } yield item
+      newItem = study.updateCollectionEventAnnotationType(ceAnnotationTypes, cmd)
+      updatedItem <- update(prevItem)
+    } yield updatedItem
   }
 
   private def removeCollectionEventAnnotationType(
@@ -113,28 +121,15 @@ class StudyAnnotationTypeDomainService(
     } yield removedItem
   }
 
-  private def addAnnotationOptions(
-    cmd: AddAnnotationOptionsCmd,
-    study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[AnnotationOption] = {
-
-    //annotationOptionRepo
-
-    ???
-  }
-
-  private def updateAnnotationOptions(
-    cmd: UpdateAnnotationOptionsCmd,
-    study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[AnnotationOption] = {
-    ???
-  }
-
-  private def removeAnnotationOptions(
-    cmd: RemoveAnnotationOptionsCmd,
-    study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[AnnotationOption] = {
-    ???
+  private def validateValueType(
+    valueType: AnnotationValueType,
+    options: Set[String]): DomainValidation[Boolean] = {
+    if (valueType.equals(AnnotationValueType.Select)) {
+      if (options.isEmpty) ("select annotation type with no values to select").fail
+    } else {
+      if (!options.isEmpty) ("non select annotation type with values to select").fail
+    }
+    true.success
   }
 
 }

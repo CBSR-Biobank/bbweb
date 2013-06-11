@@ -5,7 +5,7 @@ import domain._
 case class AnnotationOption(
   id: String,
   annotationTypeId: AnnotationTypeId,
-  value: String) extends IdentifiedValueObject[String] {
+  values: Set[String]) extends IdentifiedValueObject[String] {
 }
 
 object AnnotationOptionIdentityService {

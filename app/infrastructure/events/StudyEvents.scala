@@ -67,3 +67,4 @@ case class AnnotationTypeAddedToCollectionEventTypeEvent(
 case class AnnotationTypeRemovedFromCollectionEventTypeEvent(
   studyId: StudyId, collectionEventTypeAnnotationTypeId: String,
   collectionEventTypeId: CollectionEventTypeId, annotationTypeId: AnnotationTypeId)
+

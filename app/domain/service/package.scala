@@ -7,7 +7,7 @@ package service {
    *
    * @author Nelson Loyola
    */
-  trait DomainService {
+  trait CommandHandler {
 
     type ProcessResult = PartialFunction[Any, DomainValidation[Any]]
 

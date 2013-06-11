@@ -53,17 +53,39 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
         CollectionEventType.add(this.id, cmd.name, cmd.description, cmd.recurring)
     }
 
+  def updateCollectionEventType(
+    collectionEventTypes: Map[CollectionEventTypeId, CollectionEventType],
+    cmd: UpdateCollectionEventTypeCmd): DomainValidation[CollectionEventType] =
+    collectionEventTypes.values.find(cet => cet.name.equals(cmd.name)) match {
+      case None =>
+        DomainError("collection event type does not exists: %s" format cmd.name).fail
+      case Some(sg) =>
+        CollectionEventType.add(this.id, cmd.name, cmd.description, cmd.recurring)
+    }
+
   def addCollectionEventAnnotationType(
     collectionEventAnnotationTypes: Map[AnnotationTypeId, StudyAnnotationType],
-    cmd: AddCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] =
-    collectionEventAnnotationTypes.values.find(annot => annot.equals(cmd.name)) match {
-      case Some(sg) =>
+    cmd: AddCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] = {
+    collectionEventAnnotationTypes.values.find(annot => annot.name.equals(cmd.name)) match {
+      case Some(item) =>
         DomainError("collection event annotation type with name already exists: %s" format cmd.name).fail
       case None =>
         CollectionEventAnnotationType.add(this.id, cmd.name, cmd.description, cmd.valueType,
           cmd.maxValueCount)
     }
+  }
 
+  def updateCollectionEventAnnotationType(
+    collectionEventAnnotationTypes: Map[AnnotationTypeId, StudyAnnotationType],
+    cmd: UpdateCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] = {
+    collectionEventAnnotationTypes.values.find(annot => annot.name.equals(cmd.name)) match {
+      case None =>
+        DomainError("collection event annotation type does not exists: %s" format cmd.name).fail
+      case Some(item) =>
+        CollectionEventAnnotationType(item.id, item.version + 1, this.id, cmd.name,
+          cmd.description, cmd.valueType, cmd.maxValueCount).success
+    }
+  }
 }
 
 case class EnabledStudy(id: StudyId, version: Long = -1, name: String, description: String)

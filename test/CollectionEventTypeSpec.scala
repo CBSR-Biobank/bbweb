@@ -229,7 +229,7 @@ class CollectionEventTypeSpec extends StudyFixture {
     "can be added" in {
       fragmentName: String =>
         val ng = new NameGenerator(fragmentName)
-        val name = ng.next[Study]
+        val name = ng.next[StudyAnnotationType]
         val required = true
 
         val cet1 = await(studyService.addCollectionEventType(
