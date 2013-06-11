@@ -9,6 +9,8 @@ package service {
    */
   trait DomainService {
 
+    type ProcessResult = PartialFunction[Any, DomainValidation[Any]]
+
     /**
      * A partial function to handle each command. The input is a Tuple3 consisting of:
      *
@@ -18,7 +20,7 @@ package service {
      *
      *  If the command is invalid, then the method throws an Error exception.
      */
-    def process
+    def process: ProcessResult
 
   }
 

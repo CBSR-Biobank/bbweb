@@ -1,4 +1,4 @@
-package test
+package fixture
 
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -28,17 +28,11 @@ import domain._
 import domain.study._
 import service._
 
-abstract class EventsourcedSpec[T <: EventsourcingFixture[_]: ClassTag] extends Specification {
+abstract class EventsourcedSpec extends Specification {
 
-  type FixtureParam = T
-
-  def createFixture =
-    implicitly[ClassTag[T]].runtimeClass.newInstance().asInstanceOf[T]
-
-  val fixture = createFixture
 }
 
-trait EventsourcingFixtureOps[A] { self: EventsourcingFixture[A] =>
+trait EventsourcingFixtureOps { self: EventsourcingFixture =>
 
   val MongoDbName = "biobank-test"
   val MongoCollName = "bbweb"
@@ -61,7 +55,7 @@ trait EventsourcingFixtureOps[A] { self: EventsourcingFixture[A] =>
 // TODO: this may need a better implementation
 //
 //  
-class EventsourcingFixture[A] extends EventsourcingFixtureOps[A] {
+class EventsourcingFixture extends EventsourcingFixtureOps {
   implicit val timeout = Timeout(10 seconds)
   implicit val system = ActorSystem("test")
 

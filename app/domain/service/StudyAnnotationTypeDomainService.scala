@@ -77,22 +77,21 @@ class StudyAnnotationTypeDomainService(
     cmd: UpdateCollectionEventAnnotationTypeCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
-    val annotationTypeId = new AnnotationTypeId(cmd.annotationTypeId)
-
-    def update(prevAnnot: CollectionEventAnnotationType): DomainValidation[CollectionEventAnnotationType] = {
-      val annot = CollectionEventAnnotationType(annotationTypeId, prevAnnot.version + 1, study.id,
+    def update(prevItem: CollectionEventAnnotationType): DomainValidation[CollectionEventAnnotationType] = {
+      val iitem = CollectionEventAnnotationType(prevItem.id, prevItem.version + 1, study.id,
         cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount)
-      annotationTypeRepo.updateMap(annot)
+      annotationTypeRepo.updateMap(iitem)
       listeners sendEvent CollectionEventAnnotationTypeUpdatedEvent(
-        cmd.studyId, cmd.annotationTypeId, annot.name, annot.description, annot.valueType,
-        annot.maxValueCount)
-      annot.success
+        cmd.studyId, cmd.annotationTypeId, iitem.name, iitem.description, iitem.valueType,
+        iitem.maxValueCount)
+      iitem.success
     }
 
     for {
-      annot <- validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
-      updatedAnnot <- update(annot)
-    } yield updatedAnnot
+      prevItem <- validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
+      versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
+      item <- update(prevItem)
+    } yield item
   }
 
   private def removeCollectionEventAnnotationType(

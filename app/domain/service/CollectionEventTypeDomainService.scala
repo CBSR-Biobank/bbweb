@@ -57,7 +57,7 @@ class CollectionEventTypeDomainService(
    *
    *  If the command is invalid, then this method throws an Error exception.
    */
-  def process = PartialFunction[Any, DomainValidation[_]] {
+  def process = {
     // collection event types
     case _@ (cmd: AddCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
       addCollectionEventType(cmd, study, listeners)
@@ -86,33 +86,38 @@ class CollectionEventTypeDomainService(
     cmd: AddCollectionEventTypeCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
-    val collectionEventTypes = collectionEventTypeRepository.getMap.filter(
-      cet => cet._2.studyId.equals(study.id))
-    val v = study.addCollectionEventType(collectionEventTypes, cmd)
-    v match {
-      case Success(cet) =>
-        collectionEventTypeRepository.updateMap(cet)
-        listeners sendEvent CollectionEventTypeAddedEvent(
-          cmd.studyId, cet.name, cet.description, cet.recurring)
-      case _ => // nothing to do in this case
+    def addItem(item: CollectionEventType) {
+      collectionEventTypeRepository.updateMap(item);
+      listeners sendEvent CollectionEventTypeAddedEvent(
+        cmd.studyId, item.name, item.description, item.recurring)
     }
-    v
+
+    for {
+      collectionEventTypes <- collectionEventTypeRepository.getMap.filter(
+        cet => cet._2.studyId.equals(study.id)).success
+      newItem <- study.addCollectionEventType(collectionEventTypes, cmd)
+      addItem <- addItem(newItem).success
+    } yield newItem
   }
 
   private def updateCollectionEventType(
     cmd: UpdateCollectionEventTypeCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
-    val collectionEventTypeId = new CollectionEventTypeId(cmd.collectionEventTypeId)
-    Entity.update(collectionEventTypeRepository.getByKey(collectionEventTypeId),
-      collectionEventTypeId, cmd.expectedVersion) { prevCet =>
-        val cet = CollectionEventType(collectionEventTypeId, study.id, prevCet.version + 1,
-          cmd.name, cmd.description, cmd.recurring)
-        collectionEventTypeRepository.updateMap(cet)
-        listeners sendEvent CollectionEventTypeUpdatedEvent(
-          cmd.studyId, cmd.collectionEventTypeId, cet.name, cet.description, cet.recurring)
-        cet.success
-      }
+    def update(prevItem: CollectionEventType): CollectionEventType = {
+      val item = CollectionEventType(prevItem.id, study.id, prevItem.version + 1,
+        cmd.name, cmd.description, cmd.recurring)
+      collectionEventTypeRepository.updateMap(item)
+      listeners sendEvent CollectionEventTypeUpdatedEvent(
+        cmd.studyId, cmd.collectionEventTypeId, item.name, item.description, item.recurring)
+      item
+    }
+
+    for {
+      prevItem <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
+      versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
+      item <- update(prevItem).success
+    } yield item
   }
 
   private def removeCollectionEventType(

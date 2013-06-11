@@ -45,7 +45,7 @@ class SpecimenGroupDomainService(
    *
    *  If the command is invalid, then this method throws an Error exception.
    */
-  def process = PartialFunction[Any, DomainValidation[SpecimenGroup]] {
+  def process = {
     case _@ (cmd: AddSpecimenGroupCmd, study: DisabledStudy, listeners: MessageEmitter) =>
       addSpecimenGroup(cmd, study, listeners)
     case _@ (cmd: UpdateSpecimenGroupCmd, study: DisabledStudy, listeners: MessageEmitter) =>
