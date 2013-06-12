@@ -94,16 +94,6 @@ class StudyService(
   def removeCollectionEventAnnotationType(cmd: RemoveCollectionEventAnnotationTypeCmd): Future[DomainValidation[CollectionEventAnnotationType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
 
-  // study annotation options
-  def addAnnotationOptions(cmd: AddAnnotationOptionsCmd): Future[DomainValidation[AnnotationOption]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[AnnotationOption]])
-
-  def updateAnnotationOptions(cmd: UpdateAnnotationOptionsCmd): Future[DomainValidation[AnnotationOption]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[AnnotationOption]])
-
-  def removeAnnotationOptions(cmd: RemoveAnnotationOptionsCmd): Future[DomainValidation[AnnotationOption]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[AnnotationOption]])
-
   // annotation types -> collection event types
   def addAnnotationTypeToCollectionEventType(cmd: AddAnnotationTypeToCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] = {
     println("********* here ********")

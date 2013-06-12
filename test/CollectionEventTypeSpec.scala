@@ -237,7 +237,7 @@ class CollectionEventTypeSpec extends StudyFixture {
 
         val at1 = await(studyService.addCollectionEventAnnotationType(
           new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
-            AnnotationValueType.Date, 0))) | null
+            AnnotationValueType.Date, 0, Set.empty[String]))) | null
 
         val at2cet = await(studyService.addAnnotationTypeToCollectionEventType(
           new AddAnnotationTypeToCollectionEventTypeCmd(study.id.toString,
