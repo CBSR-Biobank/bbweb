@@ -24,133 +24,126 @@ import Scalaz._
 class StudyAnnotationTypeSpec extends StudyFixture {
   sequential // forces all tests to be run sequentially
 
+  val nameGenerator = new NameGenerator(classOf[StudyAnnotationTypeSpec].getSimpleName)
   val studyName = nameGenerator.next[Study]
   val study = await(studyService.addStudy(new AddStudyCmd(studyName, studyName))) | null
 
   "Collection event annotation type" can {
 
     "be added" in {
-      fragmentName: String =>
-        val ng = new NameGenerator(fragmentName)
-        val name = ng.next[AnnotationType]
-        val valueType = AnnotationValueType.String
-        val maxValueCount = 0
+      val name = nameGenerator.next[AnnotationType]
+      val valueType = AnnotationValueType.String
+      val maxValueCount = 0
 
-        val at1 = await(studyService.addCollectionEventAnnotationType(
-          new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
-            valueType, maxValueCount, Map.empty[String, String])))
+      val at1 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+          valueType, maxValueCount, Map.empty[String, String])))
 
-        at1 must beSuccessful.like {
-          case x =>
-            x.version must beEqualTo(0)
-            x.name must be(name)
-            x.description must be(name)
-            x.valueType must beEqualTo(valueType)
-            x.maxValueCount must beEqualTo(maxValueCount)
-            annotationTypeRepo.getMap must haveKey(x.id)
-        }
+      at1 must beSuccessful.like {
+        case x =>
+          x.version must beEqualTo(0)
+          x.name must be(name)
+          x.description must be(name)
+          x.valueType must beEqualTo(valueType)
+          x.maxValueCount must beEqualTo(maxValueCount)
+          annotationTypeRepo.getMap must haveKey(x.id)
+      }
 
-        val name2 = ng.next[AnnotationType]
-        val valueType2 = AnnotationValueType.Select
-        val maxValueCount2 = 2
-        val options = Map("1" -> "a", "2" -> "b")
+      val name2 = nameGenerator.next[AnnotationType]
+      val valueType2 = AnnotationValueType.Select
+      val maxValueCount2 = 2
+      val options = Map("1" -> "a", "2" -> "b")
 
-        val at2 = await(studyService.addCollectionEventAnnotationType(
-          new AddCollectionEventAnnotationTypeCmd(study.id.toString, name2, name2,
-            valueType2, maxValueCount2, options)))
+      val at2 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name2, name2,
+          valueType2, maxValueCount2, options)))
 
-        at2 must beSuccessful.like {
-          case x =>
-            x.version must beEqualTo(0)
-            x.name must be(name2)
-            x.description must be(name2)
-            x.valueType must beEqualTo(valueType2)
-            x.maxValueCount must beEqualTo(maxValueCount2)
-            annotationTypeRepo.getMap must haveKey(x.id)
-        }
+      at2 must beSuccessful.like {
+        case x =>
+          x.version must beEqualTo(0)
+          x.name must be(name2)
+          x.description must be(name2)
+          x.valueType must beEqualTo(valueType2)
+          x.maxValueCount must beEqualTo(maxValueCount2)
+          annotationTypeRepo.getMap must haveKey(x.id)
+      }
     }
 
     "be updated" in {
-      fragmentName: String =>
-        val ng = new NameGenerator(fragmentName)
-        val name = ng.next[AnnotationType]
-        val valueType = AnnotationValueType.String
-        val maxValueCount = 0
+      val name = nameGenerator.next[AnnotationType]
+      val valueType = AnnotationValueType.String
+      val maxValueCount = 0
 
-        val at1 = await(studyService.addCollectionEventAnnotationType(
-          new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
-            valueType, maxValueCount, Map.empty[String, String]))) | null
+      val at1 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+          valueType, maxValueCount, Map.empty[String, String]))) | null
 
-        val name2 = ng.next[Study]
-        val valueType2 = AnnotationValueType.Select
-        val maxValueCount2 = 2
-        val options = Map("1" -> "a", "2" -> "b")
+      val name2 = nameGenerator.next[Study]
+      val valueType2 = AnnotationValueType.Select
+      val maxValueCount2 = 2
+      val options = Map("1" -> "a", "2" -> "b")
 
-        val at2 = await(studyService.updateCollectionEventAnnotationType(
-          new UpdateCollectionEventAnnotationTypeCmd(study.id.toString,
-            at1.id.toString, at1.versionOption, name2, name2, valueType2,
-            maxValueCount2, options)))
+      val at2 = await(studyService.updateCollectionEventAnnotationType(
+        new UpdateCollectionEventAnnotationTypeCmd(study.id.toString,
+          at1.id.toString, at1.versionOption, name2, name2, valueType2,
+          maxValueCount2, options)))
 
-        at2 must beSuccessful.like {
-          case x =>
-            x.version must beEqualTo(at1.version + 1)
-            x.name must be(name2)
-            x.description must be(name2)
-            x.valueType must beEqualTo(valueType2)
-            x.maxValueCount must beEqualTo(maxValueCount2)
-            annotationTypeRepo.getMap must haveKey(x.id)
-        }
+      at2 must beSuccessful.like {
+        case x =>
+          x.version must beEqualTo(at1.version + 1)
+          x.name must be(name2)
+          x.description must be(name2)
+          x.valueType must beEqualTo(valueType2)
+          x.maxValueCount must beEqualTo(maxValueCount2)
+          annotationTypeRepo.getMap must haveKey(x.id)
+      }
     }
 
     "be removed" in {
-      fragmentName: String =>
-        val ng = new NameGenerator(fragmentName)
-        val name = ng.next[AnnotationType]
-        val valueType = AnnotationValueType.String
-        val maxValueCount = 0
+      val name = nameGenerator.next[AnnotationType]
+      val valueType = AnnotationValueType.String
+      val maxValueCount = 0
 
-        val at1 = await(studyService.addCollectionEventAnnotationType(
-          new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
-            valueType, maxValueCount, Map.empty[String, String]))) | null
+      val at1 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+          valueType, maxValueCount, Map.empty[String, String]))) | null
 
-        val at2 = await(studyService.removeCollectionEventAnnotationType(
-          new RemoveCollectionEventAnnotationTypeCmd(study.id.toString,
-            at1.id.toString, at1.versionOption)))
+      val at2 = await(studyService.removeCollectionEventAnnotationType(
+        new RemoveCollectionEventAnnotationTypeCmd(study.id.toString,
+          at1.id.toString, at1.versionOption)))
 
-        at2 must beSuccessful.like {
-          case x =>
-            x.version must beEqualTo(at1.version)
-            x.name must be(name)
-            x.description must be(name)
-            x.valueType must beEqualTo(valueType)
-            x.maxValueCount must beEqualTo(maxValueCount)
-            annotationTypeRepo.getMap must not haveKey (at1.id)
-        }
+      at2 must beSuccessful.like {
+        case x =>
+          x.version must beEqualTo(at1.version)
+          x.name must be(name)
+          x.description must be(name)
+          x.valueType must beEqualTo(valueType)
+          x.maxValueCount must beEqualTo(maxValueCount)
+          annotationTypeRepo.getMap must not haveKey (at1.id)
+      }
     }
 
     "not be added if name already exists" in {
-      fragmentName: String =>
-        val ng = new NameGenerator(fragmentName)
-        val name = ng.next[AnnotationType]
-        val valueType = AnnotationValueType.String
-        val maxValueCount = 0
+      val name = nameGenerator.next[AnnotationType]
+      val valueType = AnnotationValueType.String
+      val maxValueCount = 0
 
-        val at1 = await(studyService.addCollectionEventAnnotationType(
-          new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
-            valueType, maxValueCount, Map.empty[String, String]))) | null
-        annotationTypeRepo.getMap must haveKey(at1.id)
+      val at1 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+          valueType, maxValueCount, Map.empty[String, String]))) | null
+      annotationTypeRepo.getMap must haveKey(at1.id)
 
-        val valueType2 = AnnotationValueType.Select
-        val maxValueCount2 = 2
-        val options = Map("1" -> "a", "2" -> "b")
+      val valueType2 = AnnotationValueType.Select
+      val maxValueCount2 = 2
+      val options = Map("1" -> "a", "2" -> "b")
 
-        val at2 = await(studyService.addCollectionEventAnnotationType(
-          new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
-            valueType2, maxValueCount2, options)))
+      val at2 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+          valueType2, maxValueCount2, options)))
 
-        at2 must beFailing.like {
-          case msgs => msgs.head must contain("name already exists")
-        }
+      at2 must beFailing.like {
+        case msgs => msgs.head must contain("name already exists")
+      }
     }
   }
 

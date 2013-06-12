@@ -1,11 +1,12 @@
 package domain.study
 
-import domain.{ AnnotationTypeId, ConcurrencySafeEntity, DomainError, DomainValidation }
+import domain.{ AnnotationTypeId, ConcurrencySafeEntity }
 import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
 
+import infrastructure._
 import infrastructure.commands._
 
 import scalaz._
@@ -75,16 +76,10 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
     }
   }
 
-  def updateCollectionEventAnnotationType(
-    collectionEventAnnotationTypes: Map[AnnotationTypeId, StudyAnnotationType],
-    cmd: UpdateCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] = {
-    collectionEventAnnotationTypes.values.find(annot => annot.name.equals(cmd.name)) match {
-      case None =>
-        DomainError("collection event annotation type does not exists: %s" format cmd.name).fail
-      case Some(item) =>
-        CollectionEventAnnotationType(item.id, item.version + 1, this.id, cmd.name,
-          cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options).success
-    }
+  def updateCollectionEventAnnotationType(prevItem: CollectionEventAnnotationType,
+    cmd: UpdateCollectionEventAnnotationTypeCmd): CollectionEventAnnotationType = {
+    CollectionEventAnnotationType(prevItem.id, prevItem.version + 1, this.id, cmd.name,
+      cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options)
   }
 }
 

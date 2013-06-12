@@ -1,6 +1,6 @@
 import scalaz.Validation
 
-package object domain {
+package object infrastructure {
   type DomainValidation[A] = Validation[DomainError, A]
   type DomainError = List[String]
 

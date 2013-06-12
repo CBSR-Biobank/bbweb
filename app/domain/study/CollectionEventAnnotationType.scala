@@ -1,5 +1,6 @@
 package domain.study
 
+import infrastructure._
 import domain._
 import domain.AnnotationValueType._
 
@@ -17,7 +18,8 @@ case class CollectionEventAnnotationType(
   options: Map[String, String]) extends StudyAnnotationType {
 
   override def toString: String = {
-    "{ id:%s, version: %d, name:%s, description:%s }" format (id, version, name, description)
+    "{ id:%s, version: %d, name:%s, description:%s, valueType: %s, maxValueCount: %d, options: %s }" format (
+      id, version, name, description, valueType, maxValueCount, options)
   }
 
 }

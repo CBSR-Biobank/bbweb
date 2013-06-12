@@ -1,5 +1,6 @@
 package domain.study
 
+import infrastructure._
 import domain._
 
 import scalaz._

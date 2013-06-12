@@ -1,5 +1,7 @@
 package domain
 
+import infrastructure._
+
 import scalaz._
 import scalaz.Scalaz._
 

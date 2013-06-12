@@ -1,5 +1,6 @@
 package service
 
+import infrastructure._
 import domain._
 import akka.actor._
 import scalaz._

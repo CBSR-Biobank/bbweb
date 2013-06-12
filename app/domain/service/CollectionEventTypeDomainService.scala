@@ -164,16 +164,18 @@ class CollectionEventTypeDomainService(
     cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
-    sg2cetRepo.getByKey(cmd.sg2cetId) match {
-      case Some(item) =>
-        sg2cetRepo.remove(item)
-        listeners sendEvent SpecimenGroupRemovedFromCollectionEventTypeEvent(
-          study.id, item.id, item.collectionEventTypeId, item.specimenGroupId)
-        item.success
-      case None =>
-        DomainError("specimen group -> collection event type does not exist: %s"
-          format cmd.sg2cetId).fail
+
+    def removeItem(item: SpecimenGroupCollectionEventType) = {
+      sg2cetRepo.remove(item)
+      listeners sendEvent SpecimenGroupRemovedFromCollectionEventTypeEvent(
+        study.id, item.id, item.collectionEventTypeId, item.specimenGroupId)
+      item.success
     }
+
+    for {
+      item <- sg2cetRepo.getByKey(cmd.sg2cetId)
+      removedItem <- removeItem(item)
+    } yield removedItem
   }
 
   private def addAnnotationTypeToCollectionEventType(
@@ -202,16 +204,18 @@ class CollectionEventTypeDomainService(
     cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventTypeAnnotationType] = {
-    cet2atRepo.getByKey(cmd.cetAtId) match {
-      case Some(item) =>
-        cet2atRepo.remove(item)
-        listeners sendEvent AnnotationTypeRemovedFromCollectionEventTypeEvent(
-          study.id, item.id, item.collectionEventTypeId, item.annotationTypeId)
-        item.success
-      case None =>
-        DomainError("annotation type -> collection event type does not exist: %s" format
-          cmd.cetAtId).fail
+
+    def removeItem(item: CollectionEventTypeAnnotationType): CollectionEventTypeAnnotationType = {
+      cet2atRepo.remove(item)
+      listeners sendEvent AnnotationTypeRemovedFromCollectionEventTypeEvent(
+        study.id, item.id, item.collectionEventTypeId, item.annotationTypeId)
+      item
     }
+
+    for {
+      item <- cet2atRepo.getByKey(cmd.cetAtId)
+      removedItem <- removeItem(item).success
+    } yield removedItem
   }
 
 }

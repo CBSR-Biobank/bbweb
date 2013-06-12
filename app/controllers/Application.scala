@@ -1,5 +1,9 @@
 package controllers
 
+import infrastructure._
+import domain._
+import service._
+
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -9,8 +13,6 @@ import play.api.data._
 import play.api.data.Forms._
 import akka._
 import akka.util.Timeout
-import domain._
-import service._
 import views._
 import scalaz._
 import Scalaz._

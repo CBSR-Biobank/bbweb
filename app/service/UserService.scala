@@ -1,5 +1,10 @@
 package service
 
+import infrastructure.{ DomainValidation, DomainError, ReadWriteRepository }
+import infrastructure.commands._
+import infrastructure.events._
+import domain._
+
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
@@ -9,11 +14,6 @@ import akka.pattern.ask
 import akka.util.Timeout
 
 import org.eligosource.eventsourced.core._
-
-import domain._
-import infrastructure.{ ReadWriteRepository }
-import infrastructure.commands._
-import infrastructure.events._
 
 import scalaz._
 import Scalaz._

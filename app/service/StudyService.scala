@@ -1,5 +1,16 @@
 package service
 
+import infrastructure._
+import infrastructure.commands._
+import infrastructure.events._
+import domain.{
+  AnnotationTypeId,
+  ConcurrencySafeEntity,
+  Entity
+}
+import domain.study._
+import domain.service.{ CollectionEventTypeDomainService, SpecimenGroupDomainService }
+
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
@@ -8,19 +19,6 @@ import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
 import scala.language.postfixOps
 import org.eligosource.eventsourced.core._
-import domain.{
-  AnnotationTypeId,
-  ConcurrencySafeEntity,
-  DomainValidation,
-  DomainError,
-  Entity
-}
-import domain.study._
-import infrastructure.commands._
-import infrastructure.events._
-import infrastructure._
-import domain.service.{ CollectionEventTypeDomainService, SpecimenGroupDomainService }
-
 import scalaz._
 import Scalaz._
 
@@ -94,10 +92,8 @@ class StudyService(
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
 
   // annotation types -> collection event types
-  def addAnnotationTypeToCollectionEventType(cmd: AddAnnotationTypeToCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] = {
-    println("********* here ********")
+  def addAnnotationTypeToCollectionEventType(cmd: AddAnnotationTypeToCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
-  }
 
   def removeAnnotationTypeFromCollectionEventType(cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])

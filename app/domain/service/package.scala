@@ -1,5 +1,7 @@
 package domain
 
+import infrastructure._
+
 package service {
 
   /**

@@ -1,5 +1,6 @@
 package fixture
 
+import infrastructure._
 import domain._
 import domain.study._
 import service._

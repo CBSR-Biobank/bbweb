@@ -22,8 +22,8 @@ object StudyValidationUtil {
     studyRepository: ReadWriteRepository[StudyId, Study])(f: DisabledStudy => DomainValidation[_]) = {
     val studyId = new StudyId(studyIdAsString)
     studyRepository.getByKey(studyId) match {
-      case None => noSuchStudy(studyId).fail
-      case Some(study) => study match {
+      case Failure(msglist) => noSuchStudy(studyId).fail
+      case Success(study) => study match {
         case study: EnabledStudy => notDisabledError(study.name).fail
         case study: DisabledStudy => f(study)
       }
@@ -34,10 +34,10 @@ object StudyValidationUtil {
     specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
     specimenGroupId: String): DomainValidation[SpecimenGroup] = {
     specimenGroupRepository.getByKey(new SpecimenGroupId(specimenGroupId)) match {
-      case Some(sg) =>
+      case Success(sg) =>
         if (study.id.equals(sg.studyId)) sg.success
         else DomainError("specimen group does not belong to study: %s" format specimenGroupId).fail
-      case None =>
+      case Failure(x) =>
         DomainError("specimen group does not exist: %s" format specimenGroupId).fail
     }
   }
@@ -47,10 +47,10 @@ object StudyValidationUtil {
     collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
     collectionEventTypeId: String): DomainValidation[CollectionEventType] = {
     collectionEventTypeRepository.getByKey(new CollectionEventTypeId(collectionEventTypeId)) match {
-      case Some(cet) =>
+      case Success(cet) =>
         if (study.id.equals(cet.studyId)) cet.success
         else DomainError("collection event type does not belong to study: %s" format collectionEventTypeId).fail
-      case None =>
+      case Failure(x) =>
         DomainError("collection event type does not exist: %s" format collectionEventTypeId).fail
     }
   }
@@ -64,7 +64,7 @@ object StudyValidationUtil {
     annotationTypeRepo: ReadRepository[AnnotationTypeId, StudyAnnotationType],
     annotationTypeId: String): DomainValidation[CollectionEventAnnotationType] = {
     annotationTypeRepo.getByKey(new AnnotationTypeId(annotationTypeId)) match {
-      case Some(annot) =>
+      case Success(annot) =>
         if (study.id.equals(annot.studyId)) {
           annot match {
             case ceAnnot: CollectionEventAnnotationType => ceAnnot.success
@@ -74,9 +74,8 @@ object StudyValidationUtil {
           }
         } else
           DomainError("CE annotation type does not belong to study: %s" format annotationTypeId).fail
-      case None =>
+      case Failure(x) =>
         DomainError("CE annotation type does not exist: %s" format annotationTypeId).fail
     }
   }
-
 }

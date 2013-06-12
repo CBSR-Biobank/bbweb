@@ -7,6 +7,8 @@ import play.api.test.Helpers._
 
 class ApplicationSpec extends Specification {
 
+  args(skipAll = true)
+
   "Application" should {
 
     "send 404 on a bad request" in {

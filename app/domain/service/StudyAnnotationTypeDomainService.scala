@@ -69,10 +69,10 @@ class StudyAnnotationTypeDomainService(
 
     for {
       validValueType <- validateValueType(cmd.valueType, cmd.options)
-      ceAnnotationTypes <- annotationTypeRepo.getMap.filter(
+      studyItems <- annotationTypeRepo.getMap.filter(
         cet => cet._2.studyId.equals(study.id)
           && cet._2.isInstanceOf[CollectionEventAnnotationType]).success
-      newItem <- study.addCollectionEventAnnotationType(ceAnnotationTypes, cmd)
+      newItem <- study.addCollectionEventAnnotationType(studyItems, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
   }
@@ -81,8 +81,8 @@ class StudyAnnotationTypeDomainService(
     cmd: UpdateCollectionEventAnnotationTypeCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
-    def update(item: CollectionEventAnnotationType): DomainValidation[CollectionEventAnnotationType] = {
 
+    def update(item: CollectionEventAnnotationType): DomainValidation[CollectionEventAnnotationType] = {
       annotationTypeRepo.updateMap(item)
       listeners sendEvent CollectionEventAnnotationTypeUpdatedEvent(
         study.id, item.id, item.name, item.description, item.valueType,
@@ -92,13 +92,10 @@ class StudyAnnotationTypeDomainService(
 
     for {
       validValueType <- validateValueType(cmd.valueType, cmd.options)
-      ceAnnotationTypes <- annotationTypeRepo.getMap.filter(
-        cet => cet._2.studyId.equals(study.id)
-          && cet._2.isInstanceOf[CollectionEventAnnotationType]).success
       prevItem <- validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
       versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
-      newItem = study.updateCollectionEventAnnotationType(ceAnnotationTypes, cmd)
-      updatedItem <- update(prevItem)
+      newItem <- study.updateCollectionEventAnnotationType(prevItem, cmd).success
+      updatedItem <- update(newItem)
     } yield updatedItem
   }
 

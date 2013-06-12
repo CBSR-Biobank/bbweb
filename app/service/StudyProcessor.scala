@@ -1,5 +1,22 @@
 package service
 
+import infrastructure._
+import infrastructure.commands._
+import infrastructure.events._
+import domain.{
+  AnnotationTypeId,
+  ConcurrencySafeEntity,
+  Entity
+}
+import domain.study._
+import domain.service.{
+  CollectionEventTypeDomainService,
+  SpecimenGroupDomainService,
+  StudyAnnotationTypeDomainService,
+  StudyValidationUtil
+}
+import StudyValidationUtil._
+
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
@@ -8,24 +25,6 @@ import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
 import scala.language.postfixOps
 import org.eligosource.eventsourced.core._
-import domain.{
-  AnnotationTypeId,
-  ConcurrencySafeEntity,
-  DomainValidation,
-  DomainError,
-  Entity
-}
-import domain.study._
-import infrastructure.commands._
-import infrastructure.events._
-import infrastructure._
-import domain.service.{
-  CollectionEventTypeDomainService,
-  SpecimenGroupDomainService,
-  StudyAnnotationTypeDomainService,
-  StudyValidationUtil
-}
-import StudyValidationUtil._
 import scalaz._
 import Scalaz._
 

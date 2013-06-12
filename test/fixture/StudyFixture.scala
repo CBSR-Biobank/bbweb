@@ -15,9 +15,9 @@ import org.eligosource.eventsourced.journal.mongodb.casbah.MongodbCasbahJournalP
 import scalaz._
 import Scalaz._
 
-class StudyFixture extends AppFixture {
+abstract class StudyFixture extends AppFixture {
 
-  val nameGenerator = new NameGenerator(this.getClass.getName)
+  val nameGenerator: NameGenerator
 
   val studyRepository = new ReadWriteRepository[StudyId, Study](v => v.id)
   val specimenGroupRepository = new ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id)
