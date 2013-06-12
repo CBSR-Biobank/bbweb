@@ -26,9 +26,6 @@ class StudyFixture extends AppFixture {
   val annotationTypeRepo =
     new ReadWriteRepository[AnnotationTypeId, StudyAnnotationType](v => v.id)
 
-  val annotationOptionRepo =
-    new ReadWriteRepository[String, AnnotationOption](v => v.id)
-
   // specimen group -> collection event type repository
   val sg2cetRepo =
     new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
@@ -43,7 +40,6 @@ class StudyFixture extends AppFixture {
       specimenGroupRepository,
       collectionEventTypeRepository,
       annotationTypeRepo,
-      annotationOptionRepo,
       sg2cetRepo,
       at2cetRepo) with Emitter with Eventsourced { val id = 1 }))
 

@@ -51,11 +51,13 @@ case class SpecimenGroupRemovedFromCollectionEventTypeEvent(
 
 case class CollectionEventAnnotationTypeAddedEvent(
   studyId: StudyId, annotationTypeId: AnnotationTypeId,
-  name: String, description: String, valueType: AnnotationValueType, maxValueCount: Int)
+  name: String, description: String, valueType: AnnotationValueType, maxValueCount: Int,
+  options: Map[String, String])
 
 case class CollectionEventAnnotationTypeUpdatedEvent(
   studyId: StudyId, annotationTypeId: AnnotationTypeId,
-  name: String, description: String, valueType: AnnotationValueType, maxValueCount: Int)
+  name: String, description: String, valueType: AnnotationValueType, maxValueCount: Int,
+  options: Map[String, String])
 
 case class CollectionEventAnnotationTypeRemovedEvent(
   studyId: StudyId, annotationTypeId: AnnotationTypeId)

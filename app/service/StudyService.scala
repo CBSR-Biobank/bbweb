@@ -9,7 +9,6 @@ import scala.concurrent.stm.Ref
 import scala.language.postfixOps
 import org.eligosource.eventsourced.core._
 import domain.{
-  AnnotationOption,
   AnnotationTypeId,
   ConcurrencySafeEntity,
   DomainValidation,

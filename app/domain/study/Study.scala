@@ -71,7 +71,7 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
         DomainError("collection event annotation type with name already exists: %s" format cmd.name).fail
       case None =>
         CollectionEventAnnotationType.add(this.id, cmd.name, cmd.description, cmd.valueType,
-          cmd.maxValueCount)
+          cmd.maxValueCount, cmd.options)
     }
   }
 
@@ -83,7 +83,7 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
         DomainError("collection event annotation type does not exists: %s" format cmd.name).fail
       case Some(item) =>
         CollectionEventAnnotationType(item.id, item.version + 1, this.id, cmd.name,
-          cmd.description, cmd.valueType, cmd.maxValueCount).success
+          cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options).success
     }
   }
 }

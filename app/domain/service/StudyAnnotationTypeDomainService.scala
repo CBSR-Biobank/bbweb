@@ -28,9 +28,7 @@ import Scalaz._
  * @author Nelson Loyola
  */
 class StudyAnnotationTypeDomainService(
-  annotationOptionsDomainService: AnnotationOptionsDomainService,
-  annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType],
-  annotationOptionRepo: ReadWriteRepository[String, AnnotationOption])
+  annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType])
   extends CommandHandler {
 
   /**
@@ -65,7 +63,8 @@ class StudyAnnotationTypeDomainService(
     def addItem(item: StudyAnnotationType) {
       annotationTypeRepo.updateMap(item);
       listeners sendEvent CollectionEventAnnotationTypeAddedEvent(
-        study.id, item.id, item.name, item.description, item.valueType, item.maxValueCount)
+        study.id, item.id, item.name, item.description, item.valueType, item.maxValueCount,
+        item.options)
     }
 
     for {
@@ -87,7 +86,7 @@ class StudyAnnotationTypeDomainService(
       annotationTypeRepo.updateMap(item)
       listeners sendEvent CollectionEventAnnotationTypeUpdatedEvent(
         study.id, item.id, item.name, item.description, item.valueType,
-        item.maxValueCount)
+        item.maxValueCount, item.options)
       item.success
     }
 
@@ -123,7 +122,7 @@ class StudyAnnotationTypeDomainService(
 
   private def validateValueType(
     valueType: AnnotationValueType,
-    options: Set[String]): DomainValidation[Boolean] = {
+    options: Map[String, String]): DomainValidation[Boolean] = {
     if (valueType.equals(AnnotationValueType.Select)) {
       if (options.isEmpty) ("select annotation type with no values to select").fail
     } else {

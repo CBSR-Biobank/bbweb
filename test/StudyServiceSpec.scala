@@ -3,7 +3,6 @@ import fixture._
 import service.{ StudyService, StudyProcessor }
 import domain.{
   AnatomicalSourceType,
-  AnnotationOption,
   AnnotationTypeId,
   AnnotationValueType,
   ConcurrencySafeEntity,

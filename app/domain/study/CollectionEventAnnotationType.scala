@@ -13,7 +13,8 @@ case class CollectionEventAnnotationType(
   name: String,
   description: String,
   valueType: AnnotationValueType,
-  maxValueCount: Int) extends StudyAnnotationType {
+  maxValueCount: Int,
+  options: Map[String, String]) extends StudyAnnotationType {
 
   override def toString: String = {
     "{ id:%s, version: %d, name:%s, description:%s }" format (id, version, name, description)
@@ -28,7 +29,8 @@ object CollectionEventAnnotationType {
     name: String,
     description: String,
     valueType: AnnotationValueType,
-    maxValueCount: Int): DomainValidation[CollectionEventAnnotationType] =
+    maxValueCount: Int,
+    options: Map[String, String]): DomainValidation[CollectionEventAnnotationType] =
     CollectionEventAnnotationType(AnnotationTypeIdentityService.nextIdentity, version = 0L,
-      studyId, name, description, valueType, maxValueCount).success
+      studyId, name, description, valueType, maxValueCount, options).success
 }

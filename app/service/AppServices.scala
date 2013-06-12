@@ -46,8 +46,6 @@ object AppServices {
       new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
     val annotationTypeRepo =
       new ReadWriteRepository[AnnotationTypeId, StudyAnnotationType](v => v.id)
-    val annotationOptionRepo =
-      new ReadWriteRepository[String, AnnotationOption](v => v.id)
     val sg2cetRepo =
       new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
     val cet2atRepo =
@@ -60,7 +58,6 @@ object AppServices {
         specimenGroupRepository,
         collectionEventTypeRepository,
         annotationTypeRepo,
-        annotationOptionRepo,
         sg2cetRepo,
         cet2atRepo) with Emitter with Eventsourced { val id = 1 }))
 
