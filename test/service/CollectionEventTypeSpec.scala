@@ -39,11 +39,15 @@ class CollectionEventTypeSpec extends StudyFixture {
 
       cet1 must beSuccessful.like {
         case x =>
-          collectionEventTypeRepository.getMap must haveKey(x.id)
           x.version must beEqualTo(0)
           x.name must be(name)
           x.description must be(name)
           x.recurring must beEqualTo(recurring)
+          collectionEventTypeRepository.getMap must haveKey(x.id)
+          collectionEventTypeRepository.getByKey(x.id) must beSuccessful.like {
+            case y =>
+              y.version must beEqualTo(x.version)
+          }
       }
 
       val name2 = nameGenerator.next[Study]
@@ -54,11 +58,15 @@ class CollectionEventTypeSpec extends StudyFixture {
 
       cet2 must beSuccessful.like {
         case x =>
-          collectionEventTypeRepository.getMap must haveKey(x.id)
           x.version must beEqualTo(0)
           x.name must be(name2)
           x.description must be(name2)
           x.recurring must beEqualTo(recurring2)
+          collectionEventTypeRepository.getMap must haveKey(x.id)
+          collectionEventTypeRepository.getByKey(x.id) must beSuccessful.like {
+            case y =>
+              y.version must beEqualTo(x.version)
+          }
       }
     }
 
@@ -85,28 +93,25 @@ class CollectionEventTypeSpec extends StudyFixture {
         new AddCollectionEventTypeCmd(study1.id.toString, name, name, recurring))) | null
 
       collectionEventTypeRepository.getMap must haveKey(cet1.id)
-      collectionEventTypeRepository.getByKey(cet1.id) must beSuccessful.like {
-        case x =>
-          x.version must beEqualTo(0)
-          x.name must be(name)
-          x.description must be(name)
-          x.recurring must beEqualTo(recurring)
-      }
 
       val name2 = nameGenerator.next[Study]
       val recurring2 = false
 
       val cet2 = await(studyService.updateCollectionEventType(
         new UpdateCollectionEventTypeCmd(study1.id.toString, cet1.id.toString, cet1.versionOption,
-          name2, name2, recurring2))) | null
+          name2, name2, recurring2)))
 
-      collectionEventTypeRepository.getMap must haveKey(cet2.id)
-      collectionEventTypeRepository.getByKey(cet2.id) must beSuccessful.like {
+      cet2 must beSuccessful.like {
         case x =>
           x.version must beEqualTo(cet1.version + 1)
           x.name must be(name2)
           x.description must be(name2)
           x.recurring must beEqualTo(recurring2)
+          collectionEventTypeRepository.getMap must haveKey(x.id)
+          collectionEventTypeRepository.getByKey(x.id) must beSuccessful.like {
+            case y =>
+              y.version must beEqualTo(x.version)
+          }
       }
     }
 

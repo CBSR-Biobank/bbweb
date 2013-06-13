@@ -71,10 +71,7 @@ class SpecimenGroupDomainService(
     }
 
     for {
-      specimenGroups <- specimenGroupRepository.getMap.filter {
-        case (_, item) => item.studyId.equals(study.id)
-      }.success
-      newItem <- study.addSpecimenGroup(specimenGroups, cmd)
+      newItem <- study.addSpecimenGroup(specimenGroupRepository, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
   }
@@ -83,23 +80,17 @@ class SpecimenGroupDomainService(
     cmd: UpdateSpecimenGroupCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
-    def update(item: SpecimenGroup): SpecimenGroup = {
+    def update(item: SpecimenGroup) = {
       specimenGroupRepository.updateMap(item)
       listeners sendEvent StudySpecimenGroupUpdatedEvent(study.id,
         item.id, item.name, item.description, item.units, item.anatomicalSourceType,
         item.preservationType, item.preservationTemperatureType, item.specimenType)
-      item
     }
 
     for {
-      prevItem <- specimenGroupRepository.getByKey(new SpecimenGroupId(cmd.specimenGroupId))
-      versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
-      specimenGroups <- specimenGroupRepository.getMap.filter {
-        case (_, item) => item.studyId.equals(study.id)
-      }.success
-      newItem <- study.updateSpecimenGroup(specimenGroups, prevItem, cmd)
+      newItem <- study.updateSpecimenGroup(specimenGroupRepository, cmd)
       item <- update(newItem).success
-    } yield item
+    } yield newItem
   }
 
   private def removeSpecimenGroup(
@@ -113,7 +104,7 @@ class SpecimenGroupDomainService(
     }
 
     for {
-      item <- validateSpecimenGroupId(study, specimenGroupRepository, cmd.specimenGroupId)
+      item <- study.validateSpecimenGroupId(specimenGroupRepository, cmd.specimenGroupId)
       versionCheck <- item.requireVersion(cmd.expectedVersion)
       removedItem <- removeItem(item).success
     } yield item

@@ -68,11 +68,7 @@ class StudyAnnotationTypeDomainService(
     }
 
     for {
-      validValueType <- validateValueType(cmd.valueType, cmd.options)
-      annotationTypes <- annotationTypeRepo.getMap.filter(
-        cet => cet._2.studyId.equals(study.id)
-          && cet._2.isInstanceOf[CollectionEventAnnotationType]).success
-      newItem <- study.addCollectionEventAnnotationType(annotationTypes, cmd)
+      newItem <- study.addCollectionEventAnnotationType(annotationTypeRepo, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
   }
@@ -91,14 +87,7 @@ class StudyAnnotationTypeDomainService(
     }
 
     for {
-      validValueType <- validateValueType(cmd.valueType, cmd.options)
-      prevItem <- validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
-      versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
-      annotationTypes <- annotationTypeRepo.getMap.filter {
-        case (_, item) => (item.studyId.equals(study.id)
-          && item.isInstanceOf[CollectionEventAnnotationType])
-      }.success
-      newItem <- study.updateCollectionEventAnnotationType(annotationTypes, prevItem, cmd)
+      newItem <- study.updateCollectionEventAnnotationType(annotationTypeRepo, cmd)
       updatedItem <- update(newItem)
     } yield updatedItem
   }
@@ -114,7 +103,7 @@ class StudyAnnotationTypeDomainService(
     }
 
     for {
-      item <- validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
+      item <- study.validateCollectionEventAnnotationTypeId(annotationTypeRepo, cmd.annotationTypeId)
       versionCheck <- item.requireVersion(cmd.expectedVersion)
       removedItem <- removeItem(item).success
     } yield item

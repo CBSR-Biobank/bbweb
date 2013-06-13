@@ -93,10 +93,7 @@ class CollectionEventTypeDomainService(
     }
 
     for {
-      collectionEventTypes <- collectionEventTypeRepository.getMap.filter {
-        case (_, item) => item.studyId.equals(study.id)
-      }.success
-      newItem <- study.addCollectionEventType(collectionEventTypes, cmd)
+      newItem <- study.addCollectionEventType(collectionEventTypeRepository, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
   }
@@ -113,14 +110,9 @@ class CollectionEventTypeDomainService(
     }
 
     for {
-      prevItem <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
-      versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
-      collectionEventTypes <- collectionEventTypeRepository.getMap.filter {
-        case (_, item) => item.studyId.equals(study.id)
-      }.success
-      newItem <- study.updateCollectionEventType(collectionEventTypes, prevItem, cmd)
+      newItem <- study.updateCollectionEventType(collectionEventTypeRepository, cmd)
       item <- update(newItem).success
-    } yield item
+    } yield newItem
   }
 
   private def removeCollectionEventType(
@@ -134,7 +126,7 @@ class CollectionEventTypeDomainService(
     }
 
     for {
-      item <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
+      item <- study.validateCollectionEventTypeId(collectionEventTypeRepository, cmd.collectionEventTypeId)
       versionCheck <- item.requireVersion(cmd.expectedVersion)
       removedItem <- removeItem(item).success
     } yield item
@@ -154,8 +146,8 @@ class CollectionEventTypeDomainService(
     }
 
     for {
-      v1 <- validateSpecimenGroupId(study, specimenGroupRepository, cmd.specimenGroupId)
-      v2 <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
+      v1 <- study.validateSpecimenGroupId(specimenGroupRepository, cmd.specimenGroupId)
+      v2 <- study.validateCollectionEventTypeId(collectionEventTypeRepository, cmd.collectionEventTypeId)
       v3 <- createItem(v1, v2).success
     } yield v3
   }
@@ -192,8 +184,8 @@ class CollectionEventTypeDomainService(
     }
 
     for {
-      v1 <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
-      v2 <- validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
+      v1 <- study.validateCollectionEventTypeId(collectionEventTypeRepository, cmd.collectionEventTypeId)
+      v2 <- study.validateCollectionEventAnnotationTypeId(annotationTypeRepo, cmd.annotationTypeId)
       v3 <- createItem(v1, v2).success
     } yield v3
   }

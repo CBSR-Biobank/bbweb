@@ -19,71 +19,52 @@ sealed abstract class Study extends ConcurrencySafeEntity[StudyId] {
 
   override def toString =
     "{ id:%s, version: %d, name:%s, description:%s }" format (id, version, name, description)
-}
 
-object Study {
-
-  def add(name: String, description: String): DomainValidation[DisabledStudy] =
-    DisabledStudy(StudyIdentityService.nextIdentity, version = 0L, name, description).success
-
-  def noSuchStudy(studyId: StudyId) =
-    DomainError("no study with id: %s" format studyId)
-
-  def notDisabledError(name: String) =
-    DomainError("study is not disabled: %s" format name)
-
-  def notEnabledError(name: String) =
-    DomainError("study is not enabled: %s" format name)
-
-  def validateStudy(
-    studyIdAsString: String,
-    studyRepository: ReadWriteRepository[StudyId, Study])(f: DisabledStudy => DomainValidation[_]) = {
-    val studyId = new StudyId(studyIdAsString)
-    studyRepository.getByKey(studyId) match {
-      case Failure(msglist) => noSuchStudy(studyId).fail
-      case Success(study) => study match {
-        case study: EnabledStudy => notDisabledError(study.name).fail
-        case study: DisabledStudy => f(study)
-      }
-    }
-  }
-
-  def validateSpecimenGroupId(study: DisabledStudy,
+  def validateSpecimenGroupId(
     specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
-    specimenGroupId: String): DomainValidation[SpecimenGroup] = {
-    specimenGroupRepository.getByKey(new SpecimenGroupId(specimenGroupId)) match {
+    specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
+    specimenGroupRepository.getByKey(specimenGroupId) match {
       case Success(sg) =>
-        if (study.id.equals(sg.studyId)) sg.success
+        if (this.id.equals(sg.studyId)) sg.success
         else DomainError("specimen group does not belong to study: %s" format specimenGroupId).fail
       case Failure(x) =>
         DomainError("specimen group does not exist: %s" format specimenGroupId).fail
     }
   }
 
+  def validateSpecimenGroupId(
+    specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
+    specimenGroupId: String): DomainValidation[SpecimenGroup] =
+    validateSpecimenGroupId(specimenGroupRepository, new SpecimenGroupId(specimenGroupId))
+
   def validateCollectionEventTypeId(
-    study: DisabledStudy,
     collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
-    collectionEventTypeId: String): DomainValidation[CollectionEventType] = {
-    collectionEventTypeRepository.getByKey(new CollectionEventTypeId(collectionEventTypeId)) match {
+    collectionEventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType] = {
+    collectionEventTypeRepository.getByKey(collectionEventTypeId) match {
       case Success(cet) =>
-        if (study.id.equals(cet.studyId)) cet.success
+        if (this.id.equals(cet.studyId)) cet.success
         else DomainError("collection event type does not belong to study: %s" format collectionEventTypeId).fail
       case Failure(x) =>
         DomainError("collection event type does not exist: %s" format collectionEventTypeId).fail
     }
   }
 
+  def validateCollectionEventTypeId(
+    collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
+    collectionEventTypeId: String): DomainValidation[CollectionEventType] =
+    validateCollectionEventTypeId(collectionEventTypeRepository,
+      new CollectionEventTypeId(collectionEventTypeId))
+
   /**
    * Validates that the CollectionEventAnnotationType with id {@link annotationTypeId} exists
    * and that it belongs to {@link study}.
    */
   def validateCollectionEventAnnotationTypeId(
-    study: DisabledStudy,
     annotationTypeRepo: ReadRepository[AnnotationTypeId, StudyAnnotationType],
-    annotationTypeId: String): DomainValidation[CollectionEventAnnotationType] = {
-    annotationTypeRepo.getByKey(new AnnotationTypeId(annotationTypeId)) match {
+    annotationTypeId: AnnotationTypeId): DomainValidation[CollectionEventAnnotationType] = {
+    annotationTypeRepo.getByKey(annotationTypeId) match {
       case Success(annot) =>
-        if (study.id.equals(annot.studyId)) {
+        if (this.id.equals(annot.studyId)) {
           annot match {
             case ceAnnot: CollectionEventAnnotationType => ceAnnot.success
             case _ =>
@@ -96,6 +77,43 @@ object Study {
         DomainError("CE annotation type does not exist: %s" format annotationTypeId).fail
     }
   }
+
+  def validateCollectionEventAnnotationTypeId(
+    annotationTypeRepo: ReadRepository[AnnotationTypeId, StudyAnnotationType],
+    annotationTypeId: String): DomainValidation[CollectionEventAnnotationType] =
+    validateCollectionEventAnnotationTypeId(annotationTypeRepo,
+      new AnnotationTypeId(annotationTypeId))
+}
+
+object Study {
+
+  def validateStudy(
+    studyRepository: ReadWriteRepository[StudyId, Study],
+    studyId: StudyId)(f: DisabledStudy => DomainValidation[_]): DomainValidation[_] =
+    studyRepository.getByKey(studyId) match {
+      case Failure(msglist) => noSuchStudy(studyId).fail
+      case Success(study) => study match {
+        case study: EnabledStudy => notDisabledError(study.name).fail
+        case study: DisabledStudy => f(study)
+      }
+    }
+
+  def validateStudy(
+    studyRepository: ReadWriteRepository[StudyId, Study],
+    studyId: String)(f: DisabledStudy => DomainValidation[_]): DomainValidation[_] =
+    validateStudy(studyRepository, new StudyId(studyId))(f)
+
+  def add(name: String, description: String): DomainValidation[DisabledStudy] =
+    DisabledStudy(StudyIdentityService.nextIdentity, version = 0L, name, description).success
+
+  def noSuchStudy(studyId: StudyId) =
+    DomainError("no study with id: %s" format studyId)
+
+  def notDisabledError(name: String) =
+    DomainError("study is not disabled: %s" format name)
+
+  def notEnabledError(name: String) =
+    DomainError("study is not enabled: %s" format name)
 }
 
 case class DisabledStudy(id: StudyId, version: Long = -1, name: String, description: String)
@@ -108,7 +126,7 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
       EnabledStudy(id, version + 1, name, description).success
 
   def addSpecimenGroup(
-    specimenGroups: Map[SpecimenGroupId, SpecimenGroup],
+    specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup],
     id: SpecimenGroupId,
     version: Long,
     name: String,
@@ -118,68 +136,65 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
     preservationType: PreservationType,
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =
-    specimenGroups.find(sg => sg._2.name.equals(name)) match {
-      case Some(sg) =>
-        DomainError("specimen group with name already exists: %s" format name).fail
-      case None =>
-        SpecimenGroup(id, this.id, version, name, description, units, anatomicalSourceType,
-          preservationType, preservationTemperatureType, specimenType).success
-    }
+    if (specimenGroupRepository.getValues.exists(
+      item => item.studyId.equals(this.id) && item.name.equals(name)))
+      DomainError("specimen group with name already exists: %s" format name).fail
+    else
+      SpecimenGroup(id, this.id, version, name, description, units, anatomicalSourceType,
+        preservationType, preservationTemperatureType, specimenType).success
 
   def addSpecimenGroup(
-    specimenGroups: Map[SpecimenGroupId, SpecimenGroup],
+    specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup],
     cmd: AddSpecimenGroupCmd): DomainValidation[SpecimenGroup] =
-    addSpecimenGroup(specimenGroups, SpecimenGroupIdentityService.nextIdentity, version = 0L,
-      cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType,
+    addSpecimenGroup(specimenGroupRepository, SpecimenGroupIdentityService.nextIdentity,
+      version = 0L, cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType,
       cmd.preservationType, cmd.preservationTemperatureType, cmd.specimenType)
 
   def updateSpecimenGroup(
-    specimenGroups: Map[SpecimenGroupId, SpecimenGroup],
-    prevItem: SpecimenGroup,
+    specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup],
     cmd: UpdateSpecimenGroupCmd): DomainValidation[SpecimenGroup] =
-    specimenGroups.get(prevItem.id) match {
-      case None =>
-        DomainError("specimen group with id does not exists: %s" format prevItem.id).fail
-      case Some(sg) =>
-        addSpecimenGroup(specimenGroups, prevItem.id, prevItem.version + 1, cmd.name,
-          cmd.description, cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
-          cmd.preservationTemperatureType, cmd.specimenType)
-    }
+    for {
+      prevItem <- specimenGroupRepository.getByKey(new SpecimenGroupId(cmd.specimenGroupId))
+      validVersion <- prevItem.requireVersion(cmd.expectedVersion)
+      validStudy <- validateSpecimenGroupId(specimenGroupRepository, prevItem.id)
+      newItem <- addSpecimenGroup(specimenGroupRepository, prevItem.id, prevItem.version + 1,
+        cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
+        cmd.preservationTemperatureType, cmd.specimenType)
+    } yield newItem
 
   def addCollectionEventType(
-    collectionEventTypes: Map[CollectionEventTypeId, CollectionEventType],
+    collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
     id: CollectionEventTypeId,
     version: Long,
     name: String,
     description: String,
     recurring: Boolean): DomainValidation[CollectionEventType] =
-    collectionEventTypes.values.find(cet => cet.name.equals(name)) match {
-      case Some(sg) =>
-        DomainError("collection event type with name already exists: %s" format name).fail
-      case None =>
-        CollectionEventType(id, version = 0L, this.id, name, description, recurring).success
-    }
+    if (collectionEventTypeRepository.getValues.exists(
+      item => item.studyId.equals(this.id) && item.name.equals(name)))
+      DomainError("collection event type with name already exists: %s" format name).fail
+    else
+      CollectionEventType(id, version, this.id, name, description, recurring).success
 
   def addCollectionEventType(
-    collectionEventTypes: Map[CollectionEventTypeId, CollectionEventType],
+    collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
     cmd: AddCollectionEventTypeCmd): DomainValidation[CollectionEventType] =
-    addCollectionEventType(collectionEventTypes, CollectionEventTypeIdentityService.nextIdentity,
-      version = 0L, cmd.name, cmd.description, cmd.recurring)
+    addCollectionEventType(collectionEventTypeRepository,
+      CollectionEventTypeIdentityService.nextIdentity, version = 0L, cmd.name,
+      cmd.description, cmd.recurring)
 
   def updateCollectionEventType(
-    collectionEventTypes: Map[CollectionEventTypeId, CollectionEventType],
-    prevItem: CollectionEventType,
+    collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
     cmd: UpdateCollectionEventTypeCmd): DomainValidation[CollectionEventType] =
-    collectionEventTypes.get(prevItem.id) match {
-      case None =>
-        DomainError("collection event type does not exists: %s" format cmd.name).fail
-      case Some(sg) =>
-        addCollectionEventType(collectionEventTypes, prevItem.id, prevItem.version + 1,
-          cmd.name, cmd.description, cmd.recurring)
-    }
+    for {
+      prevItem <- collectionEventTypeRepository.getByKey(new CollectionEventTypeId(cmd.collectionEventTypeId))
+      validVersion <- prevItem.requireVersion(cmd.expectedVersion)
+      validStudy <- validateCollectionEventTypeId(collectionEventTypeRepository, prevItem.id)
+      newItem <- addCollectionEventType(collectionEventTypeRepository, prevItem.id, prevItem.version + 1,
+        cmd.name, cmd.description, cmd.recurring)
+    } yield newItem
 
   def addCollectionEventAnnotationType(
-    collectionEventAnnotationTypes: Map[AnnotationTypeId, StudyAnnotationType],
+    annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType],
     id: AnnotationTypeId,
     version: Long,
     name: String,
@@ -187,33 +202,32 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
     valueType: AnnotationValueType,
     maxValueCount: Int,
     options: Map[String, String]): DomainValidation[CollectionEventAnnotationType] =
-    collectionEventAnnotationTypes.values.find(annot => annot.name.equals(name)) match {
-      case Some(item) =>
-        DomainError("collection event annotation type with name already exists: %s" format name).fail
-      case None =>
-        CollectionEventAnnotationType(id, version, this.id, name, description, valueType,
-          maxValueCount, options).success
-    }
+    if (annotationTypeRepo.getValues.exists(
+      item => item.studyId.equals(this.id) && item.name.equals(name)))
+      DomainError("collection event annotation type with name already exists: %s" format name).fail
+    else
+      CollectionEventAnnotationType(id, version, this.id, name, description, valueType,
+        maxValueCount, options).success
 
   def addCollectionEventAnnotationType(
-    collectionEventAnnotationTypes: Map[AnnotationTypeId, StudyAnnotationType],
+    annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType],
     cmd: AddCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] =
-    addCollectionEventAnnotationType(collectionEventAnnotationTypes,
+    addCollectionEventAnnotationType(annotationTypeRepo,
       AnnotationTypeIdentityService.nextIdentity, version = 0L,
       cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options)
 
   def updateCollectionEventAnnotationType(
-    collectionEventAnnotationTypes: Map[AnnotationTypeId, StudyAnnotationType],
-    prevItem: CollectionEventAnnotationType,
+    annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType],
     cmd: UpdateCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] =
-    collectionEventAnnotationTypes.get(prevItem.id) match {
-      case None =>
-        DomainError("collection event annotation type does not exists: %s" format cmd.name).fail
-      case Some(sg) =>
-        addCollectionEventAnnotationType(collectionEventAnnotationTypes, prevItem.id,
-          prevItem.version + 1, cmd.name, cmd.description, cmd.valueType,
-          cmd.maxValueCount, cmd.options)
-    }
+
+    for {
+      prevItem <- annotationTypeRepo.getByKey(new AnnotationTypeId(cmd.annotationTypeId))
+      validVersion <- prevItem.requireVersion(cmd.expectedVersion)
+      validStudy <- validateCollectionEventAnnotationTypeId(annotationTypeRepo, prevItem.id)
+      newItem <- addCollectionEventAnnotationType(annotationTypeRepo, prevItem.id,
+        prevItem.version + 1, cmd.name, cmd.description, cmd.valueType,
+        cmd.maxValueCount, cmd.options)
+    } yield newItem
 }
 
 case class EnabledStudy(id: StudyId, version: Long = -1, name: String, description: String)

@@ -80,17 +80,17 @@ class StudyProcessor(
       process(disableStudy(cmd, emitter("listeners")))
 
     case cmd: SpecimenGroupCommand =>
-      process(validateStudy(cmd.studyId, studyRepository) { study =>
+      process(validateStudy(studyRepository, cmd.studyId) { study =>
         specimenGroupDomainService.process(cmd, study, emitter("listeners"))
       })
 
     case cmd: CollectionEventTypeCommand =>
-      process(validateStudy(cmd.studyId, studyRepository) { study =>
+      process(validateStudy(studyRepository, cmd.studyId) { study =>
         collectionEventTypeDomainService.process(cmd, study, emitter("listeners"))
       })
 
     case cmd: StudyAnnotationTypeCommand =>
-      process(validateStudy(cmd.studyId, studyRepository) { study =>
+      process(validateStudy(studyRepository, cmd.studyId) { study =>
         annotationTypeDomainService.process(cmd, study, emitter("listeners"))
       })
 
