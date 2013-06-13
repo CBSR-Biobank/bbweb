@@ -12,10 +12,9 @@ import domain.study._
 import domain.service.{
   CollectionEventTypeDomainService,
   SpecimenGroupDomainService,
-  StudyAnnotationTypeDomainService,
-  StudyValidationUtil
+  StudyAnnotationTypeDomainService
 }
-import StudyValidationUtil._
+import Study._
 
 import akka.actor._
 import akka.pattern.ask

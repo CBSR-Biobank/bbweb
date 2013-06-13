@@ -162,6 +162,10 @@ class SpecimenGroupSpec extends StudyFixture {
       }
     }
 
+    "not be updated to name that already exists" in {
+      ko
+    }
+
     "not be updated to wrong study" in {
       val name = nameGenerator.next[Study]
       val units = nameGenerator.next[String]

@@ -18,7 +18,7 @@ import domain.study.{
   Study,
   StudyId
 }
-import domain.service.StudyValidationUtil._
+import Study._
 
 import scalaz._
 import scalaz.Scalaz._
@@ -82,21 +82,21 @@ class SpecimenGroupDomainService(
     cmd: UpdateSpecimenGroupCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
-    def update(prevItem: SpecimenGroup): SpecimenGroup = {
-      val item = SpecimenGroup(prevItem.id, study.id, prevItem.version + 1,
-        cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
-        cmd.preservationTemperatureType, cmd.specimenType)
+    def update(item: SpecimenGroup): SpecimenGroup = {
       specimenGroupRepository.updateMap(item)
-      listeners sendEvent StudySpecimenGroupUpdatedEvent(item.studyId,
+      listeners sendEvent StudySpecimenGroupUpdatedEvent(study.id,
         item.id, item.name, item.description, item.units, item.anatomicalSourceType,
         item.preservationType, item.preservationTemperatureType, item.specimenType)
       item
     }
 
     for {
-      prevItem <- validateSpecimenGroupId(study, specimenGroupRepository, cmd.specimenGroupId)
+      prevItem <- specimenGroupRepository.getByKey(new SpecimenGroupId(cmd.specimenGroupId))
       versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
-      item <- update(prevItem).success
+      specimenGroups <- specimenGroupRepository.getMap.filter(
+        cet => cet._2.studyId.equals(study.id)).success
+      newItem <- study.updateSpecimenGroup(specimenGroups, prevItem, cmd)
+      item <- update(newItem).success
     } yield item
   }
 
@@ -105,16 +105,15 @@ class SpecimenGroupDomainService(
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
 
-    def removeItem(item: SpecimenGroup): SpecimenGroup = {
+    def removeItem(item: SpecimenGroup) = {
       specimenGroupRepository.remove(item)
       listeners sendEvent StudySpecimenGroupRemovedEvent(item.studyId, item.id)
-      item
     }
 
     for {
-      prevItem <- validateSpecimenGroupId(study, specimenGroupRepository, cmd.specimenGroupId)
-      versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
-      item <- removeItem(prevItem).success
+      item <- validateSpecimenGroupId(study, specimenGroupRepository, cmd.specimenGroupId)
+      versionCheck <- item.requireVersion(cmd.expectedVersion)
+      removedItem <- removeItem(item).success
     } yield item
   }
 

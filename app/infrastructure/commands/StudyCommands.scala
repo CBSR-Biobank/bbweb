@@ -22,7 +22,8 @@ case class DisableStudyCmd(studyId: String, expectedVersion: Option[Long])
 // specimen group commands
 sealed trait SpecimenGroupCommand extends StudyCommand {
 }
-case class AddSpecimenGroupCmd(studyIdentity: String, name: String, description: String, units: String,
+case class AddSpecimenGroupCmd(
+  studyIdentity: String, name: String, description: String, units: String,
   anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
   preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
   extends { val studyId = studyIdentity } with SpecimenGroupCommand

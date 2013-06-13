@@ -2,7 +2,6 @@ package domain.service
 
 import org.eligosource.eventsourced.core._
 
-import StudyValidationUtil._
 import domain._
 import domain.study.{
   CollectionEventAnnotationType,
@@ -14,6 +13,7 @@ import domain.study.{
   StudyAnnotationType,
   StudyId
 }
+import Study._
 import AnnotationValueType._
 import infrastructure._
 import infrastructure.commands._
@@ -69,10 +69,10 @@ class StudyAnnotationTypeDomainService(
 
     for {
       validValueType <- validateValueType(cmd.valueType, cmd.options)
-      studyItems <- annotationTypeRepo.getMap.filter(
+      annotationTypes <- annotationTypeRepo.getMap.filter(
         cet => cet._2.studyId.equals(study.id)
           && cet._2.isInstanceOf[CollectionEventAnnotationType]).success
-      newItem <- study.addCollectionEventAnnotationType(studyItems, cmd)
+      newItem <- study.addCollectionEventAnnotationType(annotationTypes, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
   }
@@ -94,7 +94,10 @@ class StudyAnnotationTypeDomainService(
       validValueType <- validateValueType(cmd.valueType, cmd.options)
       prevItem <- validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
       versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
-      newItem <- study.updateCollectionEventAnnotationType(prevItem, cmd).success
+      annotationTypes <- annotationTypeRepo.getMap.filter(
+        cet => cet._2.studyId.equals(study.id)
+          && cet._2.isInstanceOf[CollectionEventAnnotationType]).success
+      newItem <- study.updateCollectionEventAnnotationType(annotationTypes, prevItem, cmd)
       updatedItem <- update(newItem)
     } yield updatedItem
   }
@@ -104,17 +107,16 @@ class StudyAnnotationTypeDomainService(
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
 
-    def removeItem(item: CollectionEventAnnotationType): CollectionEventAnnotationType = {
+    def removeItem(item: CollectionEventAnnotationType) = {
       annotationTypeRepo.remove(item)
       listeners sendEvent CollectionEventAnnotationTypeRemovedEvent(item.studyId, item.id)
-      item
     }
 
     for {
       item <- validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
       versionCheck <- item.requireVersion(cmd.expectedVersion)
       removedItem <- removeItem(item).success
-    } yield removedItem
+    } yield item
   }
 
   private def validateValueType(

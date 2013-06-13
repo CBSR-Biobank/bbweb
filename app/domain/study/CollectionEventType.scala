@@ -8,11 +8,26 @@ import Scalaz._
 
 case class CollectionEventType(
   id: CollectionEventTypeId,
-  studyId: StudyId,
   version: Long = -1,
+  studyId: StudyId,
   name: String,
   description: String,
   recurring: Boolean) extends ConcurrencySafeEntity[CollectionEventTypeId] {
+
+  def addSpecimenGroup(
+    sg: SpecimenGroup,
+    count: Int,
+    amount: BigDecimal): SpecimenGroupCollectionEventType =
+    SpecimenGroupCollectionEventType(
+      SpecimenGroupCollectionEventTypeIdentityService.nextIdentity,
+      sg.id, this.id, count, amount)
+
+  def addAnnotationType(
+    annotType: CollectionEventAnnotationType,
+    required: Boolean): CollectionEventTypeAnnotationType =
+    CollectionEventTypeAnnotationType(
+      CollectionEventTypeAnnotationTypeIdentityService.nextIdentity,
+      this.id, annotType.id, required)
 }
 
 object CollectionEventType {
@@ -22,6 +37,6 @@ object CollectionEventType {
     name: String,
     description: String,
     recurring: Boolean): DomainValidation[CollectionEventType] =
-    CollectionEventType(CollectionEventTypeIdentityService.nextIdentity, studyId, version = 0L,
-      name, description, recurring).success
+    CollectionEventType(CollectionEventTypeIdentityService.nextIdentity, version = 0L,
+      studyId, name, description, recurring).success
 }

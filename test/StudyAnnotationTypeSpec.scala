@@ -145,6 +145,14 @@ class StudyAnnotationTypeSpec extends StudyFixture {
         case msgs => msgs.head must contain("name already exists")
       }
     }
+
+    "not be updated to name that already exists" in {
+      ko
+    }
+
+    "not be updated to wrong study" in {
+      ko
+    }
   }
 
 }

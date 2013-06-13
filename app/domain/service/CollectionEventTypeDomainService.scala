@@ -22,7 +22,7 @@ import domain.study.{
   Study,
   StudyId
 }
-import domain.service.StudyValidationUtil._
+import Study._
 import scalaz._
 import Scalaz._
 
@@ -104,9 +104,7 @@ class CollectionEventTypeDomainService(
     cmd: UpdateCollectionEventTypeCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
-    def update(prevItem: CollectionEventType): CollectionEventType = {
-      val item = CollectionEventType(prevItem.id, study.id, prevItem.version + 1,
-        cmd.name, cmd.description, cmd.recurring)
+    def update(item: CollectionEventType): CollectionEventType = {
       collectionEventTypeRepository.updateMap(item)
       listeners sendEvent CollectionEventTypeUpdatedEvent(
         study.id, item.id, item.name, item.description, item.recurring)
@@ -116,7 +114,10 @@ class CollectionEventTypeDomainService(
     for {
       prevItem <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
       versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
-      item <- update(prevItem).success
+      collectionEventTypes <- collectionEventTypeRepository.getMap.filter(
+        cet => cet._2.studyId.equals(study.id)).success
+      newItem <- study.updateCollectionEventType(collectionEventTypes, prevItem, cmd)
+      item <- update(newItem).success
     } yield item
   }
 
@@ -125,16 +126,15 @@ class CollectionEventTypeDomainService(
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
 
-    def removeItem(item: CollectionEventType): CollectionEventType = {
+    def removeItem(item: CollectionEventType) = {
       collectionEventTypeRepository.remove(item)
       listeners sendEvent CollectionEventTypeRemovedEvent(study.id, item.id)
-      item
     }
 
     for {
-      prevItem <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
-      versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
-      item <- removeItem(prevItem).success
+      item <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
+      versionCheck <- item.requireVersion(cmd.expectedVersion)
+      removedItem <- removeItem(item).success
     } yield item
   }
 
@@ -144,12 +144,10 @@ class CollectionEventTypeDomainService(
     listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
 
     def createItem(sg: SpecimenGroup, cet: CollectionEventType) = {
-      val item = SpecimenGroupCollectionEventType(
-        SpecimenGroupCollectionEventTypeIdentityService.nextIdentity,
-        sg.id, cet.id, cmd.count, cmd.amount)
+      val item = cet.addSpecimenGroup(sg, cmd.count, cmd.amount)
       sg2cetRepo.updateMap(item)
       listeners sendEvent SpecimenGroupAddedToCollectionEventTypeEvent(
-        study.id, item.id, item.collectionEventTypeId, item.specimenGroupId, cmd.count, cmd.amount)
+        study.id, item.id, item.collectionEventTypeId, item.specimenGroupId, item.count, item.amount)
       item
     }
 
@@ -184,9 +182,7 @@ class CollectionEventTypeDomainService(
     listeners: MessageEmitter): DomainValidation[CollectionEventTypeAnnotationType] = {
     def createItem(cet: CollectionEventType,
       cetAt: CollectionEventAnnotationType): CollectionEventTypeAnnotationType = {
-      val item = CollectionEventTypeAnnotationType(
-        CollectionEventTypeAnnotationTypeIdentityService.nextIdentity,
-        cet.id, cetAt.id, cmd.required)
+      val item = cet.addAnnotationType(cetAt, cmd.required)
       cet2atRepo.updateMap(item)
       listeners sendEvent AnnotationTypeAddedToCollectionEventTypeEvent(
         study.id, item.id, item.collectionEventTypeId, item.annotationTypeId)
