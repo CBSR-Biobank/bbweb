@@ -93,8 +93,9 @@ class CollectionEventTypeDomainService(
     }
 
     for {
-      collectionEventTypes <- collectionEventTypeRepository.getMap.filter(
-        cet => cet._2.studyId.equals(study.id)).success
+      collectionEventTypes <- collectionEventTypeRepository.getMap.filter {
+        case (_, item) => item.studyId.equals(study.id)
+      }.success
       newItem <- study.addCollectionEventType(collectionEventTypes, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
@@ -114,8 +115,9 @@ class CollectionEventTypeDomainService(
     for {
       prevItem <- validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
       versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
-      collectionEventTypes <- collectionEventTypeRepository.getMap.filter(
-        cet => cet._2.studyId.equals(study.id)).success
+      collectionEventTypes <- collectionEventTypeRepository.getMap.filter {
+        case (_, item) => item.studyId.equals(study.id)
+      }.success
       newItem <- study.updateCollectionEventType(collectionEventTypes, prevItem, cmd)
       item <- update(newItem).success
     } yield item

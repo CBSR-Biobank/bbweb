@@ -1,22 +1,18 @@
+package service
+
 import test._
 import fixture._
 import domain._
 import domain.study._
 import infrastructure.commands._
-
 import scala.concurrent._
 import scala.concurrent.duration._
-import scala.concurrent.stm.Ref
-import org.specs2.specification.BeforeExample
 import org.specs2.scalaz.ValidationMatchers._
 import org.specs2.mutable._
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
-import org.specs2.execute.Result
 import akka.actor._
-import akka.util.Timeout
 import org.eligosource.eventsourced.core._
-
 import scalaz._
 import Scalaz._
 

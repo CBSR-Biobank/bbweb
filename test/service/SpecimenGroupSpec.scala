@@ -1,7 +1,8 @@
+package service
+
 import test._
 import fixture._
 import infrastructure._
-import service.{ StudyService, StudyProcessor }
 import domain.{
   AnatomicalSourceType,
   AnnotationTypeId,
@@ -186,7 +187,7 @@ class SpecimenGroupSpec extends StudyFixture {
           name, name, units, anatomicalSourceType, preservationType, preservationTempType,
           specimenType)))
       sg2 must beFailing.like {
-        case msgs => msgs.head must contain("does not belong to study")
+        case msgs => msgs.head must contain("does not exist")
       }
     }
   }

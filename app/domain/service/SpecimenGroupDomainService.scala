@@ -71,8 +71,9 @@ class SpecimenGroupDomainService(
     }
 
     for {
-      specimenGroups <- specimenGroupRepository.getMap.filter(
-        cet => cet._2.studyId.equals(study.id)).success
+      specimenGroups <- specimenGroupRepository.getMap.filter {
+        case (_, item) => item.studyId.equals(study.id)
+      }.success
       newItem <- study.addSpecimenGroup(specimenGroups, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
@@ -93,8 +94,9 @@ class SpecimenGroupDomainService(
     for {
       prevItem <- specimenGroupRepository.getByKey(new SpecimenGroupId(cmd.specimenGroupId))
       versionCheck <- prevItem.requireVersion(cmd.expectedVersion)
-      specimenGroups <- specimenGroupRepository.getMap.filter(
-        cet => cet._2.studyId.equals(study.id)).success
+      specimenGroups <- specimenGroupRepository.getMap.filter {
+        case (_, item) => item.studyId.equals(study.id)
+      }.success
       newItem <- study.updateSpecimenGroup(specimenGroups, prevItem, cmd)
       item <- update(newItem).success
     } yield item

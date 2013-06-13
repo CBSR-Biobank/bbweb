@@ -23,11 +23,11 @@ case class CollectionEventType(
       sg.id, this.id, count, amount)
 
   def addAnnotationType(
-    annotType: CollectionEventAnnotationType,
+    item: CollectionEventAnnotationType,
     required: Boolean): CollectionEventTypeAnnotationType =
     CollectionEventTypeAnnotationType(
       CollectionEventTypeAnnotationTypeIdentityService.nextIdentity,
-      this.id, annotType.id, required)
+      this.id, item.id, required)
 }
 
 object CollectionEventType {
