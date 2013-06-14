@@ -38,7 +38,7 @@ abstract class Study extends ConcurrencySafeEntity[StudyId] {
     validateSpecimenGroupId(specimenGroupRepository, new SpecimenGroupId(specimenGroupId))
 
   def validateCollectionEventTypeId(
-    collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
+    collectionEventTypeRepository: ReadRepository[CollectionEventTypeId, CollectionEventType],
     collectionEventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType] = {
     collectionEventTypeRepository.getByKey(collectionEventTypeId) match {
       case Success(cet) =>
@@ -50,7 +50,7 @@ abstract class Study extends ConcurrencySafeEntity[StudyId] {
   }
 
   def validateCollectionEventTypeId(
-    collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
+    collectionEventTypeRepository: ReadRepository[CollectionEventTypeId, CollectionEventType],
     collectionEventTypeId: String): DomainValidation[CollectionEventType] =
     validateCollectionEventTypeId(collectionEventTypeRepository,
       new CollectionEventTypeId(collectionEventTypeId))
@@ -88,7 +88,7 @@ abstract class Study extends ConcurrencySafeEntity[StudyId] {
 object Study {
 
   def validateStudy(
-    studyRepository: ReadWriteRepository[StudyId, Study],
+    studyRepository: ReadRepository[StudyId, Study],
     studyId: StudyId)(f: DisabledStudy => DomainValidation[_]): DomainValidation[_] =
     studyRepository.getByKey(studyId) match {
       case Failure(msglist) => noSuchStudy(studyId).fail
@@ -99,7 +99,7 @@ object Study {
     }
 
   def validateStudy(
-    studyRepository: ReadWriteRepository[StudyId, Study],
+    studyRepository: ReadRepository[StudyId, Study],
     studyId: String)(f: DisabledStudy => DomainValidation[_]): DomainValidation[_] =
     validateStudy(studyRepository, new StudyId(studyId))(f)
 

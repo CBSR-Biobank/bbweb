@@ -54,6 +54,26 @@ class StudyServiceSpec extends StudyFixture {
           s.description must be(name2)
           studyRepository.getMap must haveKey(s.id)
       }
+
+      // update something other than the name
+      val study3 = await(studyService.updateStudy(
+        new UpdateStudyCmd(study1.id.toString, study1.versionOption, name2, name)))
+      study3 must beSuccessful
+    }
+
+    "not be updated to name that exists" in {
+      val name = nameGenerator.next[Study]
+      val study1 = await(studyService.addStudy(new AddStudyCmd(name, name))) | null
+
+      val name2 = nameGenerator.next[Study]
+      val study2 = await(studyService.addStudy(new AddStudyCmd(name2, name2))) | null
+
+      val study3 = await(studyService.updateStudy(
+        new UpdateStudyCmd(study2.id.toString, study2.versionOption, name, name)))
+      study3 must beFailing.like {
+        case msgs => msgs.head must contain("name already exists")
+      }
+
     }
 
     "not be updated with invalid version" in {

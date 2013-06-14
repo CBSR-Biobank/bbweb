@@ -1,6 +1,8 @@
 package infrastructure
 
 import scala.concurrent.stm.Ref
+import scala.reflect.ClassTag
+import scala.reflect._
 import scalaz._
 import Scalaz._
 
@@ -9,7 +11,6 @@ import Scalaz._
  * To be used by the "Service" class and the "Processor" classes only
  */
 class ReadRepository[K, A](keyGetter: (A) => K) {
-
   protected val internalMap: Ref[Map[K, A]] = Ref(Map.empty[K, A])
 
   def getMap = internalMap.single.get

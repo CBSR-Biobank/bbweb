@@ -98,30 +98,56 @@ class StudyProcessor(
       throw new Error("invalid command received")
   }
 
-  private def addStudy(cmd: AddStudyCmd, listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
-    studyRepository.getValues.find(s => s.name.equals(cmd.name)) match {
-      case Some(study) =>
-        DomainError("study with name already exists: %s" format cmd.name).fail
-      case None =>
-        val study = Study.add(cmd.name, cmd.description)
-        study match {
-          case Success(study) =>
-            studyRepository.updateMap(study)
-            listeners sendEvent StudyAddedEvent(study.id, study.name, study.description)
-          case _ => // nothing to do in this case
-        }
-        study
+  private def addStudy(
+    id: StudyId,
+    version: Long,
+    name: String,
+    description: String): DomainValidation[DisabledStudy] = {
+
+    def nameCheck(id: StudyId, name: String): DomainValidation[Boolean] = {
+      studyRepository.getValues.exists {
+        item => !item.id.equals(id) && item.name.equals(name)
+      } match {
+        case true => DomainError("study with name already exists: %s" format name).fail
+        case false => true.success
+      }
     }
+
+    for {
+      nameCheck <- nameCheck(id, name)
+      newItem <- DisabledStudy(id, version, name, description).success
+    } yield newItem
+  }
+
+  private def addStudy(
+    cmd: AddStudyCmd,
+    listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
+
+    def addItem(item: Study): Study = {
+      studyRepository.updateMap(item)
+      listeners sendEvent StudyAddedEvent(item.id, item.name, item.description)
+      item
+    }
+
+    for {
+      newItem <- addStudy(StudyIdentityService.nextIdentity, version = 0L, cmd.name, cmd.description)
+      addedItem <- addItem(newItem).success
+    } yield newItem
   }
 
   private def updateStudy(cmd: UpdateStudyCmd, listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
     val studyId = new StudyId(cmd.studyId)
-    Entity.update(studyRepository.getByKey(studyId), studyId, cmd.expectedVersion) { prevStudy =>
-      val study = DisabledStudy(studyId, prevStudy.version + 1, cmd.name, cmd.description)
-      studyRepository.updateMap(study)
-      listeners sendEvent StudyUpdatedEvent(study.id, study.name, study.description)
-      study.success
+
+    def updateItem(item: Study) = {
+      studyRepository.updateMap(item)
+      listeners sendEvent StudyUpdatedEvent(item.id, item.name, item.description)
     }
+
+    for {
+      prevItem <- studyRepository.getByKey(new StudyId(cmd.studyId))
+      newItem <- addStudy(prevItem.id, prevItem.version + 1, cmd.name, cmd.description)
+      updatedItem <- updateItem(newItem).success
+    } yield newItem
   }
 
   private def enableStudy(cmd: EnableStudyCmd, listeners: MessageEmitter): DomainValidation[EnabledStudy] = {

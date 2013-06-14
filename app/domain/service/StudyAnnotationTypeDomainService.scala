@@ -60,11 +60,12 @@ class StudyAnnotationTypeDomainService(
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
 
-    def addItem(item: StudyAnnotationType) {
-      annotationTypeRepo.updateMap(item);
+    def addItem(item: CollectionEventAnnotationType): CollectionEventAnnotationType = {
+      annotationTypeRepo.updateMap(item)
       listeners sendEvent CollectionEventAnnotationTypeAddedEvent(
         study.id, item.id, item.name, item.description, item.valueType, item.maxValueCount,
         item.options)
+      item
     }
 
     for {
@@ -78,17 +79,23 @@ class StudyAnnotationTypeDomainService(
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
 
-    def update(item: CollectionEventAnnotationType): DomainValidation[CollectionEventAnnotationType] = {
+    def update(item: CollectionEventAnnotationType): CollectionEventAnnotationType = {
       annotationTypeRepo.updateMap(item)
       listeners sendEvent CollectionEventAnnotationTypeUpdatedEvent(
         study.id, item.id, item.name, item.description, item.valueType,
         item.maxValueCount, item.options)
-      item.success
+      item
+    }
+
+    println("update: getting annotation type with id:" + cmd.annotationTypeId)
+    annotationTypeRepo.getByKey(new AnnotationTypeId(cmd.annotationTypeId)) match {
+      case Success(item) => println("annotationTypeId exists:" + item.id)
+      case _ => println("annotationTypeId DOES NOT exists:" + cmd.annotationTypeId)
     }
 
     for {
       newItem <- study.updateCollectionEventAnnotationType(annotationTypeRepo, cmd)
-      updatedItem <- update(newItem)
+      updatedItem <- update(newItem).success
     } yield updatedItem
   }
 

@@ -17,8 +17,10 @@ import scalaz._
 import Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class StudyAnnotationTypeSpec extends StudyFixture {
-  sequential // forces all tests to be run sequentially
+class StudyAnnotationTypeSpec extends StudyFixture with Tags {
+  args(
+    //include = "tag1",
+    sequential = true) // forces all tests to be run sequentially
 
   val nameGenerator = new NameGenerator(classOf[StudyAnnotationTypeSpec].getSimpleName)
   val studyName = nameGenerator.next[Study]
@@ -65,6 +67,29 @@ class StudyAnnotationTypeSpec extends StudyFixture {
       }
     }
 
+    "not be added if name already exists" in {
+      val name = nameGenerator.next[AnnotationType]
+      val valueType = AnnotationValueType.String
+      val maxValueCount = 0
+
+      val at1 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+          valueType, maxValueCount, Map.empty[String, String]))) | null
+      annotationTypeRepo.getMap must haveKey(at1.id)
+
+      val valueType2 = AnnotationValueType.Select
+      val maxValueCount2 = 2
+      val options = Map("1" -> "a", "2" -> "b")
+
+      val at2 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+          valueType2, maxValueCount2, options)))
+
+      at2 must beFailing.like {
+        case msgs => msgs.head must contain("name already exists")
+      }
+    }
+
     "be updated" in {
       val name = nameGenerator.next[AnnotationType]
       val valueType = AnnotationValueType.String
@@ -95,6 +120,45 @@ class StudyAnnotationTypeSpec extends StudyFixture {
       }
     }
 
+    "not be updated to name that already exists" in {
+      val name = nameGenerator.next[AnnotationType]
+      val valueType = AnnotationValueType.String
+      val maxValueCount = 0
+
+      val at1 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+          valueType, maxValueCount, Map.empty[String, String]))) | null
+      annotationTypeRepo.getMap must haveKey(at1.id)
+
+      val name2 = nameGenerator.next[AnnotationType]
+      val valueType2 = AnnotationValueType.Select
+      val maxValueCount2 = 2
+      val options = Map("1" -> "a", "2" -> "b")
+
+      val at2 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name2, name2,
+          valueType2, maxValueCount2, options))) | null
+      annotationTypeRepo.getMap must haveKey(at2.id)
+
+      println("*** annot type is: " + annotationTypeRepo.getByKey(at2.id))
+
+      val at3 = await(studyService.updateCollectionEventAnnotationType(
+        new UpdateCollectionEventAnnotationTypeCmd(study.id.toString,
+          at2.id.toString, at2.versionOption, name, name, valueType,
+          maxValueCount, options)))
+      at3 must beFailing.like {
+        case msgs => msgs.head must contain("name already exists")
+      }
+    } tag ("tag1")
+
+    "not be updated to wrong study" in {
+      pending
+    }
+
+    "not be updated with invalid version" in {
+      pending
+    }
+
     "be removed" in {
       val name = nameGenerator.next[AnnotationType]
       val valueType = AnnotationValueType.String
@@ -103,6 +167,7 @@ class StudyAnnotationTypeSpec extends StudyFixture {
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
           valueType, maxValueCount, Map.empty[String, String]))) | null
+      annotationTypeRepo.getMap must haveKey(at1.id)
 
       val at2 = await(studyService.removeCollectionEventAnnotationType(
         new RemoveCollectionEventAnnotationTypeCmd(study.id.toString,
@@ -119,47 +184,8 @@ class StudyAnnotationTypeSpec extends StudyFixture {
       }
     }
 
-    "not be added if name already exists" in {
-      val name = nameGenerator.next[AnnotationType]
-      val valueType = AnnotationValueType.String
-      val maxValueCount = 0
-
-      val at1 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
-          valueType, maxValueCount, Map.empty[String, String]))) | null
-      annotationTypeRepo.getMap must haveKey(at1.id)
-
-      val valueType2 = AnnotationValueType.Select
-      val maxValueCount2 = 2
-      val options = Map("1" -> "a", "2" -> "b")
-
-      val at2 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
-          valueType2, maxValueCount2, options)))
-
-      at2 must beFailing.like {
-        case msgs => msgs.head must contain("name already exists")
-      }
-    }
-
-    "not be updated to name that already exists" in {
-      ko
-    }
-
-    "not be updated to wrong study" in {
-      ko
-    }
-
-    "not be updated with invalid version" in {
-      ko
-    }
-
-    "be removed" in {
-
-    }
-
     "not be removed with invalid version" in {
-      ko
+      pending
     }
   }
 
