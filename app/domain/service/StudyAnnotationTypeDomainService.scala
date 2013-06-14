@@ -87,12 +87,6 @@ class StudyAnnotationTypeDomainService(
       item
     }
 
-    println("update: getting annotation type with id:" + cmd.annotationTypeId)
-    annotationTypeRepo.getByKey(new AnnotationTypeId(cmd.annotationTypeId)) match {
-      case Success(item) => println("annotationTypeId exists:" + item.id)
-      case _ => println("annotationTypeId DOES NOT exists:" + cmd.annotationTypeId)
-    }
-
     for {
       newItem <- study.updateCollectionEventAnnotationType(annotationTypeRepo, cmd)
       updatedItem <- update(newItem).success

@@ -140,8 +140,6 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
           valueType2, maxValueCount2, options))) | null
       annotationTypeRepo.getMap must haveKey(at2.id)
 
-      println("*** annot type is: " + annotationTypeRepo.getByKey(at2.id))
-
       val at3 = await(studyService.updateCollectionEventAnnotationType(
         new UpdateCollectionEventAnnotationTypeCmd(study.id.toString,
           at2.id.toString, at2.versionOption, name, name, valueType,

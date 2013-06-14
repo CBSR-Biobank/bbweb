@@ -7,4 +7,6 @@ abstract class IdentifiedValueObject[T] extends IdentifiedDomainObject[T] {
       case that: IdentifiedValueObject[T] => this.id.equals(that.id)
       case _ => false
     }
+
+  override def hashCode: Int = this.id.hashCode + 41
 }
