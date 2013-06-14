@@ -126,8 +126,7 @@ class CollectionEventTypeDomainService(
     }
 
     for {
-      item <- study.validateCollectionEventTypeId(collectionEventTypeRepository, cmd.collectionEventTypeId)
-      versionCheck <- item.requireVersion(cmd.expectedVersion)
+      item <- study.removeCollectionEventType(collectionEventTypeRepository, cmd)
       removedItem <- removeItem(item).success
     } yield item
   }

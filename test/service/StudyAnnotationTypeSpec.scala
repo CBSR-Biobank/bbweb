@@ -149,6 +149,18 @@ class StudyAnnotationTypeSpec extends StudyFixture {
     "not be updated to wrong study" in {
       ko
     }
+
+    "not be updated with invalid version" in {
+      ko
+    }
+
+    "be removed" in {
+
+    }
+
+    "not be removed with invalid version" in {
+      ko
+    }
   }
 
 }

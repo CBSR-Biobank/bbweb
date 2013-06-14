@@ -103,21 +103,9 @@ class StudyAnnotationTypeDomainService(
     }
 
     for {
-      item <- study.validateCollectionEventAnnotationTypeId(annotationTypeRepo, cmd.annotationTypeId)
-      versionCheck <- item.requireVersion(cmd.expectedVersion)
+      item <- study.removeCollectionEventAnnotationType(annotationTypeRepo, cmd)
       removedItem <- removeItem(item).success
     } yield item
-  }
-
-  private def validateValueType(
-    valueType: AnnotationValueType,
-    options: Map[String, String]): DomainValidation[Boolean] = {
-    if (valueType.equals(AnnotationValueType.Select)) {
-      if (options.isEmpty) ("select annotation type with no values to select").fail
-    } else {
-      if (!options.isEmpty) ("non select annotation type with values to select").fail
-    }
-    true.success
   }
 
 }

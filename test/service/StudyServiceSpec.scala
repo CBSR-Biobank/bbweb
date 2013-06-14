@@ -47,14 +47,24 @@ class StudyServiceSpec extends StudyFixture {
       val study2 = await(studyService.updateStudy(
         new UpdateStudyCmd(study1.id.toString, study1.versionOption, name2, name2)))
 
-      studyRepository.getMap must not be empty
       study2 must beSuccessful.like {
         case s =>
-          studyRepository.getMap must haveKey(s.id)
           s.version must beEqualTo(study1.version + 1)
           s.name must be(name2)
           s.description must be(name2)
+          studyRepository.getMap must haveKey(s.id)
       }
+    }
+
+    "not be updated with invalid version" in {
+      val name = nameGenerator.next[Study]
+      val study1 = await(studyService.addStudy(new AddStudyCmd(name, name))) | null
+
+      val name2 = nameGenerator.next[Study]
+      val versionOption = Some(study1.version + 1)
+      val study2 = await(studyService.updateStudy(
+        new UpdateStudyCmd(study1.id.toString, versionOption, name2, name2)))
+
     }
 
     "be enabled" in {

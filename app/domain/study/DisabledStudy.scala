@@ -66,6 +66,15 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
         cmd.preservationTemperatureType, cmd.specimenType)
     } yield newItem
 
+  def removeSpecimenGroup(
+    specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup],
+    cmd: RemoveSpecimenGroupCmd): DomainValidation[SpecimenGroup] =
+    for {
+      item <- specimenGroupRepository.getByKey(new SpecimenGroupId(cmd.specimenGroupId))
+      validVersion <- item.requireVersion(cmd.expectedVersion)
+      validStudy <- validateSpecimenGroupId(specimenGroupRepository, item.id)
+    } yield item
+
   def addCollectionEventType(
     collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
     id: CollectionEventTypeId,
@@ -96,6 +105,15 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
       newItem <- addCollectionEventType(collectionEventTypeRepository, prevItem.id, prevItem.version + 1,
         cmd.name, cmd.description, cmd.recurring)
     } yield newItem
+
+  def removeCollectionEventType(
+    collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
+    cmd: RemoveCollectionEventTypeCmd): DomainValidation[CollectionEventType] =
+    for {
+      item <- collectionEventTypeRepository.getByKey(new CollectionEventTypeId(cmd.collectionEventTypeId))
+      validVersion <- item.requireVersion(cmd.expectedVersion)
+      validStudy <- validateCollectionEventTypeId(collectionEventTypeRepository, item.id)
+    } yield item
 
   def addCollectionEventAnnotationType(
     annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType],
@@ -132,4 +150,15 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
         prevItem.version + 1, cmd.name, cmd.description, cmd.valueType,
         cmd.maxValueCount, cmd.options)
     } yield newItem
+
+  def removeCollectionEventAnnotationType(
+    studyAnnotationTypeRepository: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType],
+    cmd: RemoveCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] = {
+    for {
+      item <- studyAnnotationTypeRepository.getByKey(new AnnotationTypeId(cmd.annotationTypeId))
+      validVersion <- item.requireVersion(cmd.expectedVersion)
+      ceAttrType <- validateCollectionEventAnnotationTypeId(studyAnnotationTypeRepository, item.id)
+    } yield ceAttrType
+
+  }
 }

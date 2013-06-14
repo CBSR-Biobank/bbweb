@@ -104,8 +104,7 @@ class SpecimenGroupDomainService(
     }
 
     for {
-      item <- study.validateSpecimenGroupId(specimenGroupRepository, cmd.specimenGroupId)
-      versionCheck <- item.requireVersion(cmd.expectedVersion)
+      item <- study.removeSpecimenGroup(specimenGroupRepository, cmd)
       removedItem <- removeItem(item).success
     } yield item
   }
