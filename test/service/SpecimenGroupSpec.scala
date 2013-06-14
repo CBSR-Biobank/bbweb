@@ -124,6 +124,35 @@ class SpecimenGroupSpec extends StudyFixture {
       }
     }
 
+    "not be updated with invalid version" in {
+      val name = nameGenerator.next[Study]
+      val units = nameGenerator.next[String]
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
+
+      val sg1 = await(studyService.addSpecimenGroup(
+        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType))) | null
+
+      val name2 = nameGenerator.next[Study]
+      val units2 = nameGenerator.next[String]
+      val anatomicalSourceType2 = AnatomicalSourceType.Brain
+      val preservationType2 = PreservationType.FrozenSpecimen
+      val preservationTempType2 = PreservationTemperatureType.Minus180celcius
+      val specimenType2 = SpecimenType.DnaBlood
+      val versionOption = Some(sg1.version + 1)
+
+      val sg2 = await(studyService.updateSpecimenGroup(
+        new UpdateSpecimenGroupCmd(study.id.toString, sg1.id.toString, versionOption, name2,
+          name2, units2, anatomicalSourceType2, preservationType2, preservationTempType2,
+          specimenType2)))
+      sg2 must beFailing.like {
+        case msgs => msgs.head must contain("doesn't match current version")
+      }
+    }
+
     "not be added if name already exists" in {
       val name = nameGenerator.next[Study]
       val units = nameGenerator.next[String]
@@ -179,10 +208,6 @@ class SpecimenGroupSpec extends StudyFixture {
       }
     }
 
-    "not be updated with invalid version" in {
-      ko
-    }
-
     "not be updated to wrong study" in {
       val name = nameGenerator.next[Study]
       val units = nameGenerator.next[String]
@@ -226,7 +251,24 @@ class SpecimenGroupSpec extends StudyFixture {
     }
 
     "not be removed with invalid version" in {
-      ko
+      val name = nameGenerator.next[Study]
+      val units = nameGenerator.next[String]
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
+
+      val sg1 = await(studyService.addSpecimenGroup(
+        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType))) | null
+      specimenGroupRepository.getMap must haveKey(sg1.id)
+
+      val versionOption = Some(sg1.version + 1)
+      val sg2 = await(studyService.removeSpecimenGroup(
+        new RemoveSpecimenGroupCmd(study.id.toString, sg1.id.toString, versionOption)))
+      sg2 must beFailing.like {
+        case msgs => msgs.head must contain("doesn't match current version")
+      }
     }
   }
 }
