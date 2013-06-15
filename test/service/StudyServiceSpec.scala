@@ -39,6 +39,15 @@ class StudyServiceSpec extends StudyFixture {
       }
     }
 
+    "not be added if same name exists" in {
+      val name = nameGenerator.next[Study]
+      await(studyService.addStudy(new AddStudyCmd(name, name))) must beSuccessful
+
+      await(studyService.addStudy(new AddStudyCmd(name, name))) must beFailing.like {
+        case msgs => msgs.head must contain("name already exists")
+      }
+    }
+
     "be updated" in {
       val name = nameGenerator.next[Study]
       val study1 = await(studyService.addStudy(new AddStudyCmd(name, name))) | null
@@ -135,15 +144,6 @@ class StudyServiceSpec extends StudyFixture {
 
       studyRepository.getByKey(study1.id) must beSuccessful.like {
         case s => s must beAnInstanceOf[DisabledStudy]
-      }
-    }
-
-    "not be added if same name exists" in {
-      val name = nameGenerator.next[Study]
-      await(studyService.addStudy(new AddStudyCmd(name, name))) must beSuccessful
-
-      await(studyService.addStudy(new AddStudyCmd(name, name))) must beFailing.like {
-        case msgs => msgs.head must contain("name already exists")
       }
     }
   }
