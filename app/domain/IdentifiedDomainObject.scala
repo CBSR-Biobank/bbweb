@@ -8,5 +8,7 @@ trait IdentifiedDomainObject[T] {
     case _ => false
   }
 
+  override def hashCode: Int = this.id.hashCode + 41
+
   override def toString = id.toString
 }

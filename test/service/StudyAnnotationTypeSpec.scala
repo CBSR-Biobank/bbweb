@@ -150,11 +150,50 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
     } tag ("tag1")
 
     "not be updated to wrong study" in {
-      pending
+      val name = nameGenerator.next[AnnotationType]
+      val valueType = AnnotationValueType.String
+      val maxValueCount = 0
+
+      val at1 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+          valueType, maxValueCount, Map.empty[String, String]))) | null
+
+      val name2 = nameGenerator.next[Study]
+      val valueType2 = AnnotationValueType.Select
+      val maxValueCount2 = 2
+      val options = Map("1" -> "a", "2" -> "b")
+
+      val study2 = await(studyService.addStudy(new AddStudyCmd(name2, name2))) | null
+
+      val at2 = await(studyService.updateCollectionEventAnnotationType(
+        new UpdateCollectionEventAnnotationTypeCmd(study2.id.toString,
+          at1.id.toString, at1.versionOption, name2, name2, valueType2,
+          maxValueCount2, options)))
+      at2 must beFailing.like { case msgs => msgs.head must contain("does not belong to study") }
     }
 
     "not be updated with invalid version" in {
-      pending
+      val name = nameGenerator.next[AnnotationType]
+      val valueType = AnnotationValueType.String
+      val maxValueCount = 0
+
+      val at1 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+          valueType, maxValueCount, Map.empty[String, String]))) | null
+
+      val name2 = nameGenerator.next[Study]
+      val valueType2 = AnnotationValueType.Select
+      val maxValueCount2 = 2
+      val options = Map("1" -> "a", "2" -> "b")
+      val versionOption = Some(at1.version + 1)
+
+      val at2 = await(studyService.updateCollectionEventAnnotationType(
+        new UpdateCollectionEventAnnotationTypeCmd(study.id.toString,
+          at1.id.toString, versionOption, name2, name2, valueType2,
+          maxValueCount2, options)))
+      at2 must beFailing.like {
+        case msgs => msgs.head must contain("doesn't match current version")
+      }
     }
 
     "be removed" in {
@@ -183,7 +222,22 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
     }
 
     "not be removed with invalid version" in {
-      pending
+      val name = nameGenerator.next[AnnotationType]
+      val valueType = AnnotationValueType.String
+      val maxValueCount = 0
+
+      val at1 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+          valueType, maxValueCount, Map.empty[String, String]))) | null
+      annotationTypeRepo.getMap must haveKey(at1.id)
+
+      val versionOption = Some(at1.version + 1)
+      val at2 = await(studyService.removeCollectionEventAnnotationType(
+        new RemoveCollectionEventAnnotationTypeCmd(study.id.toString,
+          at1.id.toString, versionOption)))
+      at2 must beFailing.like {
+        case msgs => msgs.head must contain("doesn't match current version")
+      }
     }
   }
 
