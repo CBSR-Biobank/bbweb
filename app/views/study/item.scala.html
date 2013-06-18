@@ -1,8 +1,0 @@
-@(study: domain.study.Study)
-
-<li data-project="@study.id.toString">
-    <a class="name" href="#@routes.StudyController.index">@study.name</a>
-    @* <button class="delete"
-    href="@routes.StudyController.delete(study.id.get)">Delete</button> *@
-    <span class="loader">Loading</span>
-</li>

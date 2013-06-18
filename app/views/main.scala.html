@@ -1,6 +1,6 @@
-@(title: String, user: domain.User)(body: Html)
+@(title: String,user:securesocial.core.Identity)(content: Html)
 
-<!DOCTYPE html>
+<!DOCTYPE html> 
 
 <html>
   <head>
@@ -88,7 +88,7 @@
                         </ul>
                       </li>
                       
-                      <li><a href="@routes.Application.logout()">Log out</a></li>
+                      <li><a class "btn" href="@securesocial.controllers.routes.LoginPage.logout()">Log out</a></li>
                     </ul>
                   </div>
                   <!--/.nav-collapse -->
@@ -97,7 +97,7 @@
           </div>
         </div>
         <div class="container">
-            @body
+            @content
         </div>
       </body>
     </html>

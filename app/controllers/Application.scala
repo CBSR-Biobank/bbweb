@@ -18,95 +18,35 @@ import scalaz._
 import Scalaz._
 import play.api.libs.concurrent.Akka
 import play.api.Play.current
-import java.util.concurrent.TimeUnit
+import securesocial.core.{ Identity, Authorization }
 
-object Application extends Controller {
+object Application extends Controller with securesocial.core.SecureSocial {
 
   lazy val userService = Global.services.userService
   lazy val studyService = Global.services.studyService
 
-  // -- Authentication
-
-  val loginForm = Form(
-    tuple(
-      "email" -> text,
-      "password" -> text) verifying (
-        "Invalid email or password", result => result match {
-          case (email, password) =>
-            Await.result(userService.authenticate(email, password), 5.seconds) match {
-              case Success(user) => true
-              case _ => false
-            }
-        }))
-
-  /**
-   * Login page.
-   */
-  def login = Action { implicit request =>
-    Ok(html.login(loginForm))
+  def index = SecuredAction { implicit request =>
+    Ok(views.html.index(request.user))
   }
 
-  /**
-   * Handle login form submission.
-   */
-  def authenticate = Action { implicit request =>
-    loginForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.login(formWithErrors)),
-      user => Redirect(routes.StudyController.index).withSession("email" -> user._1))
-  }
-
-  /**
-   * Logout and clean the session.
-   */
-  def logout = Action {
-    Redirect(routes.Application.login).withNewSession.flashing(
-      "success" -> "You've been logged out")
-  }
-
-  def about = Action {
-    Ok(html.about())
+  def onlyGoogle = SecuredAction(WithProvider("google")) { implicit request =>
+    //
+    //    Note: If you had a User class and returned an instance of it from UserService, this
+    //          is how you would convert Identity to your own class:
+    //
+    //    request.user match {
+    //      case user: User => // do whatever you need with your user class
+    //      case _ => // did not get a User instance, should not happen,log error/thow exception
+    //    }
+    Ok("You can see this because you logged in using Google")
   }
 
 }
 
-/**
- * Provide security features
- */
-trait Secured {
-
-  /**
-   * Retrieve the connected user email.
-   */
-  private def username(request: RequestHeader) = request.session.get("email")
-
-  /**
-   * Redirect to login if the user in not authorized.
-   */
-  private def onUnauthorized(request: RequestHeader) = Results.Redirect(routes.Application.login)
-
-  // --
-
-  /**
-   * Action for authenticated users.
-   */
-  def IsAuthenticated(f: => String => Request[AnyContent] => Result) = {
-    Security.Authenticated(username, onUnauthorized) { user =>
-      Action(request => f(user)(request))
-    }
+// An Authorization implementation that only authorizes uses that logged in using twitter
+case class WithProvider(provider: String) extends Authorization {
+  def isAuthorized(user: Identity) = {
+    user.id.providerId == provider
   }
-
-  /**
-   * Check if the connected user is a member of this project.
-   */
-  def IsMemberOf(project: Long)(f: => String => Request[AnyContent] => Result) = IsAuthenticated { user =>
-    request =>
-      //      if (Study.isMember(project, user)) {
-      //        f(user)(request)
-      //      } else {
-      //        Results.Forbidden
-      //      }
-      f(user)(request)
-
-  }
-
 }
+

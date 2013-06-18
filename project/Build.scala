@@ -8,15 +8,22 @@ object ApplicationBuild extends Build {
     val appVersion      = "0.1-SNAPSHOT"
 
     val appDependencies = Seq(
+      "securesocial" %% "securesocial" % "master-SNAPSHOT"
     )
 
   val main = play.Project(
-    appName, appVersion, appDependencies
-  ).settings(
+    appName, appVersion, appDependencies).settings(
 
     resolvers ++= Seq(
       "Eligosource Releases Repo" at "http://repo.eligotech.com/nexus/content/repositories/eligosource-releases/"
+
+      //Resolver.url("sbt-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns)
+
     ),
+
+    resolvers += Resolver.url("sbt-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns),
+
+
 
     libraryDependencies ++= Seq(
       "org.eligosource" %% "eventsourced-core" % "0.5.0",
@@ -30,13 +37,13 @@ object ApplicationBuild extends Build {
     ),
 
     scalacOptions ++= Seq("-feature"),
-    
+
     lessEntryPoints <<= baseDirectory(customLessEntryPoints)
   )
-  
-  // Only compile the bootstrap bootstrap.less file and any other *.less file in the stylesheets directory 
-  def customLessEntryPoints(base: File): PathFinder = ( 
-    (base / "app" / "assets" / "stylesheets" / "bootstrap" * "bootstrap.less") 
-    +++ (base / "app" / "assets" / "stylesheets" / "bootstrap" * "responsive.less") 
+
+  // Only compile the bootstrap bootstrap.less file and any other *.less file in the stylesheets directory
+  def customLessEntryPoints(base: File): PathFinder = (
+    (base / "app" / "assets" / "stylesheets" / "bootstrap" * "bootstrap.less")
+    +++ (base / "app" / "assets" / "stylesheets" / "bootstrap" * "responsive.less")
     +++ (base / "app" / "assets" / "stylesheets" * "*.less") )
 }

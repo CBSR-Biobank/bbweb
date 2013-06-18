@@ -13,27 +13,55 @@ import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 
+import play.api.Logger
+import securesocial.core._
+
 import org.eligosource.eventsourced.core._
 
 import scalaz._
 import Scalaz._
 
 class UserService(
-  userRepo: ReadWriteRepository[UserId, User],
+  userRepo: ReadWriteRepository[domain.UserId, User],
   userProcessor: ActorRef)(implicit system: ActorSystem) {
   import system.dispatcher
+
+  implicit val timeout = Timeout(5.seconds)
+
+  def find(id: securesocial.core.UserId): Option[securesocial.core.Identity] = {
+    if (Logger.isDebugEnabled) {
+      Logger.debug("find user id: %s".format(id))
+    }
+    userRepo.getByKey(new domain.UserId(id.id)) match {
+      case Success(user) => some(toSecureSocialUser(user))
+      case Failure(x) => none
+    }
+  }
+
+  def findByEmailAndProvider(
+    email: String, providerId: String): Option[securesocial.core.Identity] = {
+    ???
+  }
 
   def getByEmail(email: String): Option[User] =
     userRepo.getMap.values.find(u => u.email.equals(email))
 
-  implicit val timeout = Timeout(5.seconds)
+  def toSecureSocialUser(user: User): securesocial.core.SocialUser = {
+    SocialUser(securesocial.core.UserId(user.id.id, user.id.id),
+      "", "", user.name, some(user.email), None, AuthenticationMethod(""), None, None)
+  }
 
-  def authenticate(email: String, password: String): Future[DomainValidation[User]] =
-    userProcessor ? Message(AuthenticateUserCmd(email, password)) map (_.asInstanceOf[DomainValidation[User]])
+  def authenticate(email: String, password: String): Future[DomainValidation[User]] = {
+    userProcessor ? Message(AuthenticateUserCmd(email, password)) map {
+      _.asInstanceOf[DomainValidation[User]]
+    }
+  }
 
 }
 
-class UserProcessor(userRepo: ReadWriteRepository[UserId, User]) extends Processor { this: Emitter =>
+class UserProcessor(
+  userRepo: ReadWriteRepository[domain.UserId, User]) extends Processor {
+  this: Emitter =>
 
   def receive = {
     case cmd: AddUserCmd =>

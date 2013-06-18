@@ -3,20 +3,38 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.StudyController.index
+GET     /                           controllers.Application.index
+GET     /only-google                controllers.Application.onlyGoogle
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
-# Authentication
-GET     /login                              controllers.Application.login
-POST    /login                              controllers.Application.authenticate
-GET     /logout                             controllers.Application.logout
+# Login page
+GET     /login                      securesocial.controllers.LoginPage.login
+GET     /logout                     securesocial.controllers.LoginPage.logout
 
-GET     /about                              controllers.Application.about
+# User Registration and password handling (only needed if you are using UsernamePasswordProvider)
+GET     /signup                     securesocial.controllers.Registration.startSignUp
+POST    /signup                     securesocial.controllers.Registration.handleStartSignUp
+GET     /signup/:token              securesocial.controllers.Registration.signUp(token)
+POST    /signup/:token              securesocial.controllers.Registration.handleSignUp(token)
+GET     /reset                      securesocial.controllers.Registration.startResetPassword
+POST    /reset                      securesocial.controllers.Registration.handleStartResetPassword
+GET     /reset/:token               securesocial.controllers.Registration.resetPassword(token)
+POST    /reset/:token               securesocial.controllers.Registration.handleResetPassword(token)
+GET     /password                   securesocial.controllers.PasswordChange.page
+POST    /password                   securesocial.controllers.PasswordChange.handlePasswordChange
+
+
+# Providers entry points
+GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider)
+POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider)
+GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
+
+#GET     /about                      controllers.Application.about
 
 # studies                   
-POST    /study                           controllers.StudyController.add
+#POST    /study                       controllers.StudyController.add
 
 GET     /assets/images/glyphicons-halflings-white.png      controllers.Assets.at(path="/public", file="/images/glyphicons-halflings-white.png")
 GET     /assets/images/glyphicons-halflings.png            controllers.Assets.at(path="/public", file="/images/glyphicons-halflings.png")
