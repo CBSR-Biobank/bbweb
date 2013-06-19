@@ -4,10 +4,19 @@
 
 # Home page
 GET     /                           controllers.Application.index
-GET     /only-google                controllers.Application.onlyGoogle
+GET     /about                      controllers.Application.about
+GET     /contact                    controllers.Application.contact
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+# studies
+GET     /study                      controllers.StudyController.index
+GET     /study                      controllers.StudyController.add
+
+# user
+GET     /user/profile               controllers.UserController.profile
 
 # Login page
 GET     /login                      securesocial.controllers.LoginPage.login
@@ -30,12 +39,6 @@ POST    /password                   securesocial.controllers.PasswordChange.hand
 GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider)
 POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider)
 GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
-
-GET     /about                      controllers.Application.about
-GET     /contact                    controllers.Application.contact
-
-# studies                   
-#POST    /study                       controllers.StudyController.add
 
 GET     /assets/images/glyphicons-halflings-white.png      controllers.Assets.at(path="/public", file="/images/glyphicons-halflings-white.png")
 GET     /assets/images/glyphicons-halflings.png            controllers.Assets.at(path="/public", file="/images/glyphicons-halflings.png")

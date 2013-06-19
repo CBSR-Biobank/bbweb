@@ -20,10 +20,9 @@ class SecureSocialViews(application: play.api.Application) extends TemplatesPlug
    * @return
    */
   override def getLoginPage[A](implicit request: Request[A], form: Form[(String, String)],
-    msg: Option[String] = None): Html =
-    {
-      views.html.custom.login(form, msg)
-    }
+    msg: Option[String] = None): Html = {
+    views.html.custom.login(form, msg)
+  }
 
   /**
    * Returns the html for the signup page

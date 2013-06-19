@@ -22,31 +22,18 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
   lazy val userService = Global.services.userService
   lazy val studyService = Global.services.studyService
 
-  /**
-   * Display the dashboard.
-   */
-  def index = UserAwareAction { implicit request =>
-    request.user match {
-      case Some(user) =>
-        user.fullName
-        userService.getByEmail(user.email.getOrElse("")) match {
-          case Some(email) =>
-            Ok(html.index(user))
-          case _ => Forbidden
-        }
-      case _ => Forbidden
-    }
+  def index = SecuredAction { implicit request =>
+    // get list of studies the user has access to
+    val studies = studyService.getAll
+    Ok(views.html.study.index(studies, request.user))
   }
 
   /**
    * Add a study.
    */
-  def add = UserAwareAction { implicit request =>
-    request.user match {
-      case Some(user) =>
-        Ok(views.html.index(user))
-      case _ => Forbidden
-    }
+  def add = SecuredAction { implicit request =>
+    //Ok(views.html.study.add())
+    Ok
   }
 
 }

@@ -42,6 +42,10 @@ class StudyService(
   extends ApplicationService {
   import system.dispatcher
 
+  def getAll: List[Study] = {
+    studyRepository.getValues.toList
+  }
+
   def addStudy(cmd: AddStudyCmd): Future[DomainValidation[DisabledStudy]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 
@@ -97,7 +101,4 @@ class StudyService(
 
   def removeAnnotationTypeFromCollectionEventType(cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
-}
-
-object StudyService {
 }

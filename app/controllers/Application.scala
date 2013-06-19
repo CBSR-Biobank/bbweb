@@ -29,18 +29,6 @@ object Application extends Controller with securesocial.core.SecureSocial {
     Ok(views.html.index(request.user))
   }
 
-  def onlyGoogle = SecuredAction(WithProvider("google")) { implicit request =>
-    //
-    //    Note: If you had a User class and returned an instance of it from UserService, this
-    //          is how you would convert Identity to your own class:
-    //
-    //    request.user match {
-    //      case user: User => // do whatever you need with your user class
-    //      case _ => // did not get a User instance, should not happen,log error/thow exception
-    //    }
-    Ok("You can see this because you logged in using Google")
-  }
-
   def about = UserAwareAction { implicit request =>
     Ok(html.about(request.user))
   }
@@ -49,12 +37,5 @@ object Application extends Controller with securesocial.core.SecureSocial {
     Ok(html.contact(request.user))
   }
 
-}
-
-// An Authorization implementation that only authorizes uses that logged in using twitter
-case class WithProvider(provider: String) extends Authorization {
-  def isAuthorized(user: Identity) = {
-    user.id.providerId == provider
-  }
 }
 
