@@ -30,24 +30,24 @@ class UserService(
 
   def find(id: securesocial.core.UserId): Option[securesocial.core.Identity] = {
     if (Logger.isDebugEnabled) {
-      Logger.debug("find user id: %s".format(id))
+      Logger.debug("find { id: %s }".format(id))
     }
-    userRepo.getByKey(new domain.UserId(id.id)) match {
-      case Success(user) => some(toSecureSocialUser(user))
-      case Failure(x) => none
+    userRepo.getValues.find(u => u.email.equals(id.id)) match {
+      case Some(user) => some(toSecureSocialIdentity(user))
+      case None => none
     }
   }
 
   def findByEmailAndProvider(
     email: String, providerId: String): Option[securesocial.core.Identity] = {
     if (Logger.isDebugEnabled) {
-      Logger.debug("find user { email: %s, providerId: %s }".format(email, providerId))
+      Logger.debug("findByEmailAndProvider { email: %s, providerId: %s }".format(email, providerId))
     }
     userRepo.getValues.find {
       // FIXME: add provider
       user => user.email.equals(email)
     } match {
-      case Some(user) => some(toSecureSocialUser(user))
+      case Some(user) => some(toSecureSocialIdentity(user))
       case None => none
     }
   }
@@ -55,9 +55,10 @@ class UserService(
   def getByEmail(email: String): Option[User] =
     userRepo.getMap.values.find(u => u.email.equals(email))
 
-  def toSecureSocialUser(user: User): securesocial.core.SocialUser = {
-    SocialUser(securesocial.core.UserId(user.id.id, user.id.id),
-      "", "", user.name, some(user.email), None, AuthenticationMethod(""), None, None)
+  def toSecureSocialIdentity(user: User): securesocial.core.Identity = {
+    SocialUser(securesocial.core.UserId(user.email, "userpass"),
+      user.email, user.email, user.email,
+      some(user.email), None, AuthenticationMethod.UserPassword, None, None)
   }
 
   def add(user: securesocial.core.Identity): securesocial.core.Identity = {

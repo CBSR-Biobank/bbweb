@@ -24,35 +24,27 @@ import scala.Some
 import org.mindrot.jbcrypt.BCrypt
 
 /**
- * A Sample In Memory user service in Scala
  *
- * IMPORTANT: This is just a sample and not suitable for a production environment since
- * it stores everything in memory.
  */
 class SecureSocialUserService(application: Application) extends UserServicePlugin(application) {
-  private var users = Map[String, Identity]()
+
+  private lazy val userService = controllers.Global.services.userService
   private var tokens = Map[String, Token]()
 
   def find(id: UserId): Option[Identity] = {
+    val user = userService.find(id)
     if (Logger.isDebugEnabled) {
-      Logger.debug("users = %s".format(users))
+      Logger.debug("find { user: %s }".format(user.getOrElse("")))
     }
-    users.get(id.id + id.providerId)
+    user map { _.asInstanceOf[Identity] }
   }
 
   def findByEmailAndProvider(email: String, providerId: String): Option[Identity] = {
-    if (Logger.isDebugEnabled) {
-      Logger.debug("users = %s".format(users))
-    }
-    users.values.find(u => u.email.map(e => e == email && u.id.providerId == providerId).getOrElse(false))
+    userService.findByEmailAndProvider(email, providerId)
   }
 
   def save(user: Identity): Identity = {
-    users = users + (user.id.id + user.id.providerId -> user)
-    // this sample returns the same user object, but you could return an instance of your own class
-    // here as long as it implements the Identity trait. This will allow you to use your own class in the protected
-    // actions and event callbacks. The same goes for the find(id: UserId) method.
-    user
+    userService.add(user)
   }
 
   def save(token: Token) {
