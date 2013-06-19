@@ -4,22 +4,18 @@ import infrastructure.{ DomainValidation, DomainError, ReadWriteRepository }
 import infrastructure.commands._
 import infrastructure.events._
 import domain._
-
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
-
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-
 import play.api.Logger
 import securesocial.core._
-
 import org.eligosource.eventsourced.core._
-
 import scalaz._
 import Scalaz._
+import securesocial.core.providers.utils.PasswordHasher
 
 class UserService(
   userRepo: ReadWriteRepository[domain.UserId, User],
@@ -58,7 +54,8 @@ class UserService(
   def toSecureSocialIdentity(user: User): securesocial.core.Identity = {
     SocialUser(securesocial.core.UserId(user.email, "userpass"),
       user.email, user.email, user.email,
-      some(user.email), None, AuthenticationMethod.UserPassword, None, None)
+      some(user.email), None, AuthenticationMethod.UserPassword, None, None,
+      some(PasswordInfo(PasswordHasher.BCryptHasher, user.password, None)))
   }
 
   def add(user: securesocial.core.Identity): securesocial.core.Identity = {
