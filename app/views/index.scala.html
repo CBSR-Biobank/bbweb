@@ -1,7 +1,7 @@
 @(user: securesocial.core.Identity)(implicit request: RequestHeader)
 @import securesocial.core.IdentityProvider
 
-@main("Biobank",user) {
+@main("Biobank",Some(user)) {
 <div class="page-header">
     <h2><img src="@user.avatarUrl" alt="@user.firstName" width="40px" height="40px"/> Welcome @user.firstName</h2>
 </div>

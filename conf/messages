@@ -1,0 +1,64 @@
+biobank.appName=Biobank
+
+# Login page
+biobank.login.title=Login
+biobank.login.instructions=Use your existing account on one of the following networks to log in.
+biobank.login.accessDenied=You denied access to your account. Please grant it to log in.
+biobank.login.errorLoggingIn=An error occurred while logging you in. Please try again.
+biobank.login.useEmailAndPassword=Or login using a username and password.
+biobank.login.useEmailAndPasswordOnly=Login using a username and password.
+biobank.login.signUp=If you don''t have an account with us yet you can sign up
+biobank.login.here=here
+biobank.login.invalidCredentials=The credentials you entered are not valid
+biobank.login.forgotPassword=Did you forget your password?
+
+# Sign up page
+biobank.signup.title=Sign Up
+biobank.signup.username=Username
+biobank.signup.firstName=First Name
+biobank.signup.lastName=Last Name
+biobank.signup.email1=Email
+biobank.signup.email2=Email confirmation
+biobank.signup.password1=Password
+biobank.signup.password2=Password confirmation
+biobank.signup.createAccount=Create Account
+biobank.signup.cancel=Cancel
+biobank.signup.userNameAlreadyTaken=Username already taken
+biobank.signup.passwordsDoNotMatch=Passwords do not match
+biobank.signup.thankYouCheckEmail=Thank you. Please check your email for further instructions
+biobank.signup.invalidLink=The link you followed is invalid
+biobank.signup.signUpDone=Thank you for signing up.  You can log in now
+biobank.signup.invalidPassword=Enter at least {0} characters
+
+# Password reset
+biobank.password.title=Reset Password
+biobank.password.passwordUpdated=Your password was updated successfully
+biobank.password.reset=Reset Password
+biobank.password.error=There was a problem changing your password. Please try again
+
+# Password change
+biobank.passwordChange.title=Change Password
+biobank.passwordChange.currentPassword=Current Password
+biobank.passwordChange.newPassword1=New Password
+biobank.passwordChange.newPassword2=New Password Confirmation
+biobank.passwordChange.changeButton=Change
+biobank.passwordChange.invalidPassword=Invalid password
+biobank.passwordChange.ok=Your password was changed successfully
+biobank.passwordChange.okButton=Ok
+
+# Not authorized page
+biobank.notAuthorized.title=Not Authorized
+biobank.notAuthorized.message=You are not authorized to access that page
+
+#
+biobank.loginRequired=You need to log in to access that page.
+
+# Mails
+#
+mails.sendAlreadyRegisteredEmail.subject=Sign up instructions
+mails.sendSignUpEmail.subject=Sign up instructions
+mails.welcomeEmail.subject=Welcome
+mails.passwordResetEmail.subject=Password reset instructions
+mails.unknownEmail.subject=Password reset request
+mails.passwordResetOk.subject=Password change confirmation
+

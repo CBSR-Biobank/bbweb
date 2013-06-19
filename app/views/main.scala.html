@@ -1,4 +1,4 @@
-@(title: String,user:securesocial.core.Identity)(content: Html)
+@(title: String,user: Option[securesocial.core.Identity])(content: Html)
 
 <!DOCTYPE html> 
 
@@ -69,7 +69,7 @@
                 <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
                   <span class="icon-bar"></span> <span class="icon-bar"></span> <span
                   class="icon-bar"></span>
-                  </a> <a class="brand" href="#">Biobank</a>
+                  </a> <a class="brand" href="/">Biobank</a>
                   <div class="nav-collapse collapse">
                     <ul class="nav">
                       <li class="active"><a href="/">Home</a></li>
@@ -77,11 +77,13 @@
                       <li><a href="#contact">Contact</a></li>
                     </ul>
                   </div>
+                  @user.map { user =>
                   <div class="nav-collapse collapse navbar-responsive-collapse">
                     <ul class="nav navbar-nav pull-right">
 
                       <li class="dropdown">
                         <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+                        
                         <strong>@user.email</strong> <span class="caret"></span></a>
                         <ul id="g-account-menu" class="dropdown-menu" role="menu">
                           <li><a href="#">My Profile</a></li>
@@ -91,6 +93,7 @@
                       <li><a class "btn" href="@securesocial.controllers.routes.LoginPage.logout()">Log out</a></li>
                     </ul>
                   </div>
+                  }
                   <!--/.nav-collapse -->
               </div>
             </div>

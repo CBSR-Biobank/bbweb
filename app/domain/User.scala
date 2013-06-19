@@ -29,15 +29,15 @@ object User {
     password: String,
     hasher: String,
     salt: Option[String],
-    avatarUrl: Option[String]): DomainValidation[UnauthorizedUser] =
-    UnauthorizedUser(
+    avatarUrl: Option[String]): DomainValidation[RegisteredUser] =
+    RegisteredUser(
       UserIdentityService.nextIdentity, version = 0L,
       name, email, password,
       hasher, salt, avatarUrl).success
 
 }
 
-case class UnauthorizedUser(
+case class RegisteredUser(
   id: UserId,
   version: Long = -1,
   name: String,
@@ -49,7 +49,19 @@ case class UnauthorizedUser(
 
 }
 
-case class AuthorizedUser(
+case class ActiveUser(
+  id: UserId,
+  version: Long = -1,
+  name: String,
+  email: String,
+  password: String,
+  hasher: String,
+  salt: Option[String],
+  avatarUrl: Option[String]) extends User {
+
+}
+
+case class LockedUser(
   id: UserId,
   version: Long = -1,
   name: String,
