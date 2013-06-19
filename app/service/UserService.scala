@@ -40,7 +40,16 @@ class UserService(
 
   def findByEmailAndProvider(
     email: String, providerId: String): Option[securesocial.core.Identity] = {
-    ???
+    if (Logger.isDebugEnabled) {
+      Logger.debug("find user { email: %s, providerId: %s }".format(email, providerId))
+    }
+    userRepo.getValues.find {
+      // FIXME: add provider
+      user => user.email.equals(email)
+    } match {
+      case Some(user) => some(toSecureSocialUser(user))
+      case None => none
+    }
   }
 
   def getByEmail(email: String): Option[User] =
@@ -51,10 +60,12 @@ class UserService(
       "", "", user.name, some(user.email), None, AuthenticationMethod(""), None, None)
   }
 
-  def authenticate(email: String, password: String): Future[DomainValidation[User]] = {
-    userProcessor ? Message(AuthenticateUserCmd(email, password)) map {
+  def add(user: securesocial.core.Identity): securesocial.core.Identity = {
+    // FIXME: add password
+    userProcessor ? Message(AddUserCmd(user.fullName, user.email.getOrElse(""), "")) map {
       _.asInstanceOf[DomainValidation[User]]
     }
+    user
   }
 
 }

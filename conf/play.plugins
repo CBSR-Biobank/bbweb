@@ -3,7 +3,7 @@
 9995:securesocial.core.DefaultIdGenerator
 9996:securesocial.core.providers.utils.DefaultPasswordValidator
 9997:securesocial.controllers.DefaultTemplatesPlugin
-9998:service.InMemoryUserService
+9998:service.SecureSocialUserService
 9999:securesocial.core.providers.utils.BCryptPasswordHasher
 10000:securesocial.core.providers.TwitterProvider
 10001:securesocial.core.providers.FacebookProvider
