@@ -69,7 +69,14 @@ object AppServices {
     val userService = new UserService(userRepo, userProcessor)
 
     // for debug only
-    userRepo.updateMap(User.add("admin", "admin@admin.com", "admin"))
+    //  find { user: SocialUser(UserId(admin@admin.com,userpass),
+    // admin@admin.com,admin@admin.com,admin@admin.com,
+    // Some(admin@admin.com),None,
+    // AuthenticationMethod(userPassword),None,None,
+    // Some(PasswordInfo(bcrypt,$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS,None))) }
+    userRepo.updateMap(User.add("admin", "admin@admin.com",
+      "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS",
+      "bcrypt", None, None) | null)
 
     extension.recover()
     // wait for processor 1 to complete processing of replayed event messages

@@ -9,6 +9,9 @@ sealed abstract class User extends ConcurrencySafeEntity[UserId] {
   def name: String
   def email: String
   def password: String
+  def hasher: String
+  def salt: Option[String]
+  def avatarUrl: Option[String]
 
   /**
    * Authenticate a User.
@@ -20,25 +23,40 @@ sealed abstract class User extends ConcurrencySafeEntity[UserId] {
 
 object User {
 
-  def add(name: String, email: String, password: String): UnauthenticatedUser =
-    UnauthenticatedUser(UserIdentityService.nextIdentity, version = 0L, name, email, password)
+  def add(
+    name: String,
+    email: String,
+    password: String,
+    hasher: String,
+    salt: Option[String],
+    avatarUrl: Option[String]): DomainValidation[UnauthorizedUser] =
+    UnauthorizedUser(
+      UserIdentityService.nextIdentity, version = 0L,
+      name, email, password,
+      hasher, salt, avatarUrl).success
 
 }
 
-case class UnauthenticatedUser(
+case class UnauthorizedUser(
   id: UserId,
   version: Long = -1,
   name: String,
   email: String,
-  password: String) extends User {
+  password: String,
+  hasher: String,
+  salt: Option[String],
+  avatarUrl: Option[String]) extends User {
 
 }
 
-case class AuthenticatedUser(
+case class AuthorizedUser(
   id: UserId,
   version: Long = -1,
   name: String,
   email: String,
-  password: String) extends User {
+  password: String,
+  hasher: String,
+  salt: Option[String],
+  avatarUrl: Option[String]) extends User {
 
 }

@@ -4,6 +4,7 @@ import infrastructure.{ DomainValidation, DomainError, ReadWriteRepository }
 import infrastructure.commands._
 import infrastructure.events._
 import domain._
+
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
@@ -11,11 +12,12 @@ import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 import play.api.Logger
-import securesocial.core._
+import securesocial.core.{ Identity, SocialUser, PasswordInfo, AuthenticationMethod }
+import securesocial.core.providers.utils.PasswordHasher
 import org.eligosource.eventsourced.core._
+
 import scalaz._
 import Scalaz._
-import securesocial.core.providers.utils.PasswordHasher
 
 class UserService(
   userRepo: ReadWriteRepository[domain.UserId, User],
@@ -26,7 +28,7 @@ class UserService(
 
   def find(id: securesocial.core.UserId): Option[securesocial.core.Identity] = {
     if (Logger.isDebugEnabled) {
-      Logger.debug("find { id: %s }".format(id))
+      Logger.debug("find { id: %s }".format(id.id))
     }
     userRepo.getValues.find(u => u.email.equals(id.id)) match {
       case Some(user) => some(toSecureSocialIdentity(user))
@@ -59,11 +61,16 @@ class UserService(
   }
 
   def add(user: securesocial.core.Identity): securesocial.core.Identity = {
-    // FIXME: add password
-    userProcessor ? Message(AddUserCmd(user.fullName, user.email.getOrElse(""), "")) map {
-      _.asInstanceOf[DomainValidation[User]]
+    user.passwordInfo match {
+      case Some(passwordInfo) =>
+        userProcessor ? Message(AddUserCmd(user.fullName, user.email.getOrElse(""),
+          passwordInfo.password, passwordInfo.hasher, passwordInfo.salt,
+          user.avatarUrl)) map {
+          _.asInstanceOf[DomainValidation[User]]
+        }
+        user
+      case None => null
     }
-    user
   }
 
 }
@@ -75,32 +82,25 @@ class UserProcessor(
   def receive = {
     case cmd: AddUserCmd =>
       process(addUser(cmd, emitter("listenter")))
-    case cmd: AuthenticateUserCmd =>
-      process(authenticateUser(cmd, emitter("listenter")))
   }
 
   def addUser(cmd: AddUserCmd, listeners: MessageEmitter): DomainValidation[User] = {
-    userRepo.getMap.values.find(u => u.email.equals(cmd.email)) match {
-      case Some(user) =>
+    def userExists(email: String): DomainValidation[Boolean] = {
+      if (userRepo.getValues.exists(u => u.email.equals(cmd.email)))
         DomainError("user with email already exists: %s" format cmd.email).fail
-      case None =>
-        val newUser = User.add(cmd.name, cmd.email, cmd.password)
-        userRepo.updateMap(newUser)
-        listeners sendEvent UserAddedEvent(newUser.id, newUser.name, newUser.email)
-        newUser.success
+      else
+        true.success
     }
-  }
 
-  def authenticateUser(cmd: AuthenticateUserCmd, listeners: MessageEmitter): DomainValidation[User] = {
-    userRepo.getMap.values.find(u => u.email.equals(cmd.email)) match {
-      case Some(user) =>
-        val v = user.authenticate(cmd.email, cmd.password)
-        v match {
-          case Success(u) => listeners sendEvent UserAuthenticatedEvent(u.id, u.name, u.email)
-          case Failure(_) => // do nothing
-        }
-        v
-      case None => DomainError("authentication failure").fail
+    def addItem(item: User) {
+      userRepo.updateMap(item)
+      listeners sendEvent UserAddedEvent(item.id, item.name, item.email)
     }
+
+    for {
+      emailCheck <- userExists(cmd.email)
+      newUser <- User.add(cmd.name, cmd.email, cmd.password, cmd.hasher, cmd.salt, cmd.salt)
+      addedItem <- addItem(newUser).success
+    } yield newUser
   }
 }
