@@ -41,6 +41,14 @@ object Application extends Controller with securesocial.core.SecureSocial {
     Ok("You can see this because you logged in using Google")
   }
 
+  def about = UserAwareAction { implicit request =>
+    Ok(html.about(request.user))
+  }
+
+  def contact = UserAwareAction { implicit request =>
+    Ok(html.contact(request.user))
+  }
+
 }
 
 // An Authorization implementation that only authorizes uses that logged in using twitter
