@@ -6,61 +6,61 @@
   <head>
     <title>@title</title>
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-      <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.at("stylesheets/bootstrap/bootstrap.min.css")">
-      <link rel="stylesheet" href="@routes.Assets.at("stylesheets/bootstrap/responsive.min.css")">
-        <style>
-          body {
+      <link rel="stylesheet" type="text/css" media="screen" href='@routes.Assets.at("stylesheets/bootstrap/bootstrap.min.css")'>
+      <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.at("stylesheets/bootstrap/responsive.min.css")">
+      <style>
+        body {
           padding-top: 60px;
           /* 60px to make the container go all the way to the bottom of the topbar */
-          }
+        }
 
-          /* Sticky footer styles
+        /* Sticky footer styles
           -------------------------------------------------- */
-          html,body {
+        html,body {
           height: 100%;
           /* The html and body elements cannot have any padding or margin. */
-          }
+        }
 
-          /* Wrapper for page content to push down footer */
-          #wrap {
+        /* Wrapper for page content to push down footer */
+        #wrap {
           min-height: 100%;
           height: auto !important;
           height: 100%;
           /* Negative indent footer by it's height */
           margin: 0 auto -60px;
-          }
+        }
 
-          /* Set the fixed height of the footer here */
+        /* Set the fixed height of the footer here */
           #push,#footer {
           height: 60px;
-          }
+        }
 
-          #footer {
+        #footer {
           background-color: #f5f5f5;
-          }
+        }
 
-          /* Lastly, apply responsive CSS fixes as necessary */
+        /* Lastly, apply responsive CSS fixes as necessary */
           @@media ( max-width : 767px) {
           #footer {
-          margin-left: -20px;
-          margin-right: -20px;
-          padding-left: 20px;
-          padding-right: 20px;
+            margin-left: -20px;
+            margin-right: -20px;
+            padding-left: 20px;
+            padding-right: 20px;
           }
-          }
+        }
 
-          /* Custom page CSS
-          -------------------------------------------------- */
-          /* Not required for template or sticky footer method. */
-          .container {
+        /* Custom page CSS
+        -------------------------------------------------- */
+        /* Not required for template or sticky footer method. */
+        .container {
           width: auto;
           max-width: 680px;
-          }
+        }
 
-          .container .credit {
+        .container .credit {
           margin: 20px 0;
-          }
-        </style>
+        }
+      </style>
       </head>
       <body>
         <div id="navbar">
@@ -84,10 +84,10 @@
                 <div class="nav-collapse collapse navbar-responsive-collapse">
                   <ul class="nav navbar-nav pull-right">
                     <li class="dropdown">
-                      <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+                      <a class="dropdown-toggle" id="drop1" role="button" data-toggle="dropdown" href="#">
                       <strong>@user.email</strong> <span class="caret"></span></a>
-                      <ul id="g-account-menu" class="dropdown-menu" role="menu">
-                        <li><a href="#">My Profile</a></li>
+                      <ul class="dropdown-menu" role="menu"  aria-labelledby="drop1">
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="user/profile">My Profile</a></li>
                       </ul>
                     </li>
                     <li><a href="@securesocial.controllers.routes.LoginPage.logout()">Log out</a></li>
@@ -102,5 +102,8 @@
         <div class="container">
             @content
         </div>
+        <!-- javascript placed at the end of the document so the pages load faster -->
+        <script type="text/javascript" src='@routes.Assets.at("js/jquery.js")'></script>
+        <script type="text/javascript" src='@routes.Assets.at("js/bootstrap.min.js")'></script>
       </body>
     </html>
