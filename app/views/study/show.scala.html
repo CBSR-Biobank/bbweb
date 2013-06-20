@@ -1,0 +1,30 @@
+@(study: domain.study.Study, user: securesocial.core.Identity)
+
+@main("Biobank", Some(user)) {
+<div class="page-header">
+  <h2>Study</h2>
+</div>
+<div class="clearfix">
+    <table class="table table-bordered table-hover table-condensed">
+      <tbody>
+        <tr>
+          <td>Name</td>
+          <td>@study.name</td>
+        <tr>
+        <tr>
+          <td>Status</td>
+          <td>@study.status</td>
+        <tr>
+        <tr>
+          <td>Description</td>
+          <td>@study.description</td>
+        <tr>
+      </tbody>
+    </table>
+  
+  <p>
+    <a href="/study" class="btn btn-small btn-primary" type="button">List Studies</a>
+  </p>
+</div>
+}
+    

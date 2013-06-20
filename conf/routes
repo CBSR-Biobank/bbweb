@@ -13,7 +13,9 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # studies
 GET     /study                      controllers.StudyController.index
-GET     /study                      controllers.StudyController.add
+GET     /study/add                  controllers.StudyController.add
+GET     /study/submit               controllers.StudyController.addSubmission
+GET     /study/show:id                 controllers.StudyController.show(id:String)
 
 # user
 GET     /user/profile               controllers.UserController.profile

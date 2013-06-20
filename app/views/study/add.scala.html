@@ -1,8 +1,26 @@
-@(addForm: Form[(String,String)], errorMsg: Option[String] = None, user: securesocial.core.Identity)(implicit request: securesocial.core.RequestWithUser[AnyContent])
+@(addForm: Form[(String,Option[String])], user: securesocial.core.Identity)
+
+@import helper._
 
 @main("Biobank", Some(user)) {
 <div class="page-header">
   <h2>Add Study</h2>
+</div>
+<div class="clearfix">
+  @form(action = routes.StudyController.addSubmission, args = 'id -> "addform") {
+      @inputText(
+          field = addForm("name"),
+          args = '_label -> "Name", 'placeholder -> "short name"
+          )
+          
+      @inputText(
+          field = addForm("description"),
+          args = '_label -> "Description", 'placeholder -> "describes the name"
+          )
+          <p class="buttons">
+            <input type="submit" id="submit">
+          <p>
+  }
 </div>
 }
     

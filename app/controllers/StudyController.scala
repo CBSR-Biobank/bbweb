@@ -8,16 +8,20 @@ import views._
 
 import scala.concurrent._
 import scala.concurrent.duration._
+import scala.language.postfixOps
 import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
+import akka.util.Timeout
 import securesocial.core.{ Identity, Authorization }
 
 import scalaz._
 import Scalaz._
 
 object StudyController extends Controller with securesocial.core.SecureSocial {
+
+  implicit val timeout = Timeout(10 seconds)
 
   lazy val userService = Global.services.userService
   lazy val studyService = Global.services.studyService
@@ -28,12 +32,35 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
     Ok(views.html.study.index(studies, request.user))
   }
 
+  val addForm = Form(
+    tuple(
+      "name" -> nonEmptyText,
+      "description" -> optional(text)))
+
   /**
    * Add a study.
    */
   def add = SecuredAction { implicit request =>
-    //Ok(views.html.study.add())
-    Ok
+    Ok(html.study.add(addForm, request.user))
+  }
+
+  def addSubmission = SecuredAction { implicit request =>
+    addForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(html.study.add(formWithErrors, request.user)),
+      {
+        case (name, description) =>
+          Await.result(studyService.addStudy(AddStudyCmd(name, description.getOrElse(""))), timeout.duration) match {
+            case Success(study) => Ok(html.study.show(study, request.user))
+            case Failure(x) => BadRequest
+          }
+      })
+  }
+
+  def show(id: String) = SecuredAction { implicit request =>
+    studyService.getStudy(id) match {
+      case Success(study) => Ok(html.study.show(study, request.user))
+      case Failure(x) => BadRequest
+    }
   }
 
 }

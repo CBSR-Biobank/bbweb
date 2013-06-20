@@ -46,6 +46,10 @@ class StudyService(
     studyRepository.getValues.toList
   }
 
+  def getStudy(id: String): DomainValidation[Study] = {
+    studyRepository.getByKey(new StudyId(id));
+  }
+
   def addStudy(cmd: AddStudyCmd): Future[DomainValidation[DisabledStudy]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 

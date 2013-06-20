@@ -20,6 +20,8 @@ abstract class Study extends ConcurrencySafeEntity[StudyId] {
   override def toString =
     "{ id:%s, version: %d, name:%s, description:%s }" format (id, version, name, description)
 
+  val status: String = "invalid"
+
   def validateSpecimenGroupId(
     specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
     specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {

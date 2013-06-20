@@ -23,6 +23,8 @@ import Scalaz._
 case class DisabledStudy(id: StudyId, version: Long = -1, name: String, description: String)
   extends Study {
 
+  override val status = "Disabled"
+
   def enable(specimenGroupCount: Int, collectionEventTypecount: Int): DomainValidation[EnabledStudy] =
     if ((specimenGroupCount == 0) || (collectionEventTypecount == 0))
       DomainError("study has no specimen groups and / or no collection event types").fail
