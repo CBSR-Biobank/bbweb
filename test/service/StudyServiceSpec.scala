@@ -110,6 +110,9 @@ class StudyServiceSpec extends StudyFixture {
         new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
 
+      await(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study1.id.toString, name, name, true)))
+
       await(studyService.enableStudy(
         new EnableStudyCmd(study1.id.toString, study1.versionOption)))
 
@@ -131,6 +134,9 @@ class StudyServiceSpec extends StudyFixture {
       await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
+
+      await(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study1.id.toString, name, name, true)))
 
       val study2 = await(studyService.enableStudy(
         new EnableStudyCmd(study1.id.toString, study1.versionOption))) | null

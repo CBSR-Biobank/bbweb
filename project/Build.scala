@@ -23,8 +23,6 @@ object ApplicationBuild extends Build {
 
     resolvers += Resolver.url("sbt-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns),
 
-
-
     libraryDependencies ++= Seq(
       "org.eligosource" %% "eventsourced-core" % "0.5.0",
       "org.eligosource" %% "eventsourced-journal-mongodb-casbah" % "0.5.0",

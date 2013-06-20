@@ -82,6 +82,9 @@ class UserProcessor(
   def receive = {
     case cmd: AddUserCmd =>
       process(addUser(cmd, emitter("listenter")))
+
+    case _ =>
+      throw new Error("invalid command received: ")
   }
 
   def addUser(cmd: AddUserCmd, listeners: MessageEmitter): DomainValidation[User] = {

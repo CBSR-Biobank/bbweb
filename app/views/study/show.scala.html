@@ -1,9 +1,15 @@
 @(study: domain.study.Study, user: securesocial.core.Identity)
 
 @main("Biobank", Some(user)) {
+<ul class="breadcrumb">
+  <li><a href="/study">Studies</a> <span class="divider">/</span></li>
+  <li class="active">Study: @study.name</li>
+</ul>
+
 <div class="page-header">
   <h2>Study</h2>
 </div>
+
 <div class="clearfix">
     <table class="table table-bordered table-hover table-condensed">
       <tbody>

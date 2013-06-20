@@ -62,7 +62,7 @@ object AppServices {
         cet2atRepo) with Emitter with Eventsourced { val id = 1 }))
 
     val userProcessor = extension.processorOf(Props(
-      new UserProcessor(userRepo) with Emitter with Eventsourced { val id = 1 }))
+      new UserProcessor(userRepo) with Emitter with Eventsourced { val id = 2 }))
 
     val studyService = new StudyService(studyRepository, specimenGroupRepository,
       collectionEventTypeRepository, studyProcessor)
@@ -77,6 +77,6 @@ object AppServices {
     // wait for processor 1 to complete processing of replayed event messages
     // (ensures that recovery of externally visible state maintained by
     //  studiesRef is completed when awaitProcessing returns)
-    extension.awaitProcessing(Set(1))
+    //extension.awaitProcessing(Set(1))
   }
 }

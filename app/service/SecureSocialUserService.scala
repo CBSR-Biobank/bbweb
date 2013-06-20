@@ -17,8 +17,8 @@ class SecureSocialUserService(application: Application) extends UserServicePlugi
 
   def find(id: UserId): Option[Identity] = {
     val user = userService.find(id)
-    if (Logger.isDebugEnabled) {
-      Logger.debug("find { user: %s }".format(user.getOrElse("")))
+    if (Logger.isTraceEnabled) {
+      Logger.trace("find { user: %s }".format(user.getOrElse("")))
     }
     user map { _.asInstanceOf[Identity] }
   }

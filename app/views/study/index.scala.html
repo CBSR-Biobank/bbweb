@@ -1,6 +1,10 @@
 @(studies: List[domain.study.Study], user: securesocial.core.Identity)
 
 @main("Biobank", Some(user)) {
+<ul class="breadcrumb">
+  <li class="active">Studies</li>
+</ul>
+
 <div class="page-header">
   <h2>All Studies</h2>
 </div>
