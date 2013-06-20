@@ -12,8 +12,8 @@ import Scalaz._
 
 case class SpecimenGroup(
   id: SpecimenGroupId,
-  studyId: StudyId,
   version: Long = -1,
+  studyId: StudyId,
   name: String,
   description: String,
   units: String,
@@ -21,6 +21,15 @@ case class SpecimenGroup(
   preservationType: PreservationType,
   preservationTemperatureType: PreservationTemperatureType,
   specimenType: SpecimenType) extends ConcurrencySafeEntity[SpecimenGroupId] {
+
+  val toStringFormat = """{ id: %s, version: %d, studyId: %s, name: %s, description: %s,""" +
+    """ units: %s, anatomicalSourceType: %s, preservationType: %s,""" +
+    """ preservationTemperatureType: %s, specimenType: %s }"""
+
+  override def toString: String = {
+    toStringFormat.format(id, version, studyId, name, description, units,
+      anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
+  }
 }
 
 object SpecimenGroup {
@@ -33,7 +42,7 @@ object SpecimenGroup {
     preservationType: PreservationType,
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =
-    SpecimenGroup(SpecimenGroupIdentityService.nextIdentity, studyId, version = 0L, name,
+    SpecimenGroup(SpecimenGroupIdentityService.nextIdentity, version = 0L, studyId, name,
       description, units, anatomicalSourceType, preservationType, preservationTemperatureType,
       specimenType).success
 

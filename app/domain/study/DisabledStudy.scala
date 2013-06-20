@@ -48,7 +48,7 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
       case true =>
         DomainError("specimen group with name already exists: %s" format name).fail
       case false =>
-        SpecimenGroup(id, this.id, version, name, description, units, anatomicalSourceType,
+        SpecimenGroup(id, version, this.id, name, description, units, anatomicalSourceType,
           preservationType, preservationTemperatureType, specimenType).success
     }
 

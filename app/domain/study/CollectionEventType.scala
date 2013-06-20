@@ -28,6 +28,13 @@ case class CollectionEventType(
     CollectionEventTypeAnnotationType(
       CollectionEventTypeAnnotationTypeIdentityService.nextIdentity,
       this.id, item.id, required)
+
+  val toStringFormat = """{ id: %s, version: %d, studyId: %s, name: %s, description: %s,""" +
+    """ recurring: %s }"""
+
+  override def toString: String = {
+    toStringFormat.format(id, version, studyId, name, description, recurring)
+  }
 }
 
 object CollectionEventType {

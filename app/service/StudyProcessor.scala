@@ -19,12 +19,12 @@ import Study._
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
+import akka.event.Logging
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
 import scala.language.postfixOps
 import org.eligosource.eventsourced.core._
-import org.slf4j.LoggerFactory
 
 import scalaz._
 import Scalaz._
@@ -50,8 +50,7 @@ class StudyProcessor(
   annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType],
   sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType],
   at2cetRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType])
-  extends Processor { this: Emitter =>
-  import StudyProcessor._
+  extends Processor with akka.actor.ActorLogging { this: Emitter =>
 
   /**
    * The domain service that handles specimen group commands.
@@ -101,14 +100,14 @@ class StudyProcessor(
       throw new Error("invalid command received: ")
   }
 
-  def log(methodName: String, study: DomainValidation[Study]) {
-    if (logger.isDebugEnabled) {
+  def logMethod(methodName: String, cmd: Any, study: DomainValidation[Study]) {
+    if (log.isDebugEnabled) {
+      log.debug("%s: %s".format(methodName, cmd))
       study match {
         case Success(item) =>
-          logger.debug("%s: { id: %s, version: %d, name: %s, description: %s }".format(
-            methodName, item.id, item.version, item.name, item.description))
+          log.debug("%s: %s".format(methodName, item))
         case Failure(msglist) =>
-          logger.debug("%s: { msg: %s }".format(methodName, msglist.head))
+          log.debug("%s: { msg: %s }".format(methodName, msglist.head))
       }
     }
   }
@@ -149,7 +148,7 @@ class StudyProcessor(
       addedItem <- addItem(newItem).success
     } yield newItem
 
-    log("addStudy", item)
+    logMethod("addStudy", cmd, item)
     item
   }
 
@@ -167,7 +166,7 @@ class StudyProcessor(
       updatedItem <- updateItem(newItem).success
     } yield newItem
 
-    log("updateStudy", item)
+    logMethod("updateStudy", cmd, item)
     item
   }
 
@@ -196,7 +195,7 @@ class StudyProcessor(
       updatedItem <- updateItem(newItem).success
     } yield newItem
 
-    log("enableStudy", item)
+    logMethod("enableStudy", cmd, item)
     item
   }
 
@@ -221,11 +220,7 @@ class StudyProcessor(
       updatedItem <- updateItem(newItem).success
     } yield newItem
 
-    log("disableStudy", item)
+    logMethod("disableStudy", cmd, item)
     item
   }
-}
-
-object StudyProcessor {
-  val logger = LoggerFactory.getLogger(StudyProcessor.getClass)
 }

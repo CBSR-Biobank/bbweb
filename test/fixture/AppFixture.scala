@@ -36,7 +36,7 @@ abstract class AkkaTestkitSupport extends TestKit(ActorSystem())
 
 abstract class AppFixture extends Specification with NoTimeConversions {
 
-  implicit val timeout = Timeout(10 seconds)
+  implicit val timeout = Timeout(3 seconds)
   implicit val system = ActorSystem("test")
 
   val MongoDbName = "biobank-test"

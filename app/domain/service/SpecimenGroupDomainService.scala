@@ -1,15 +1,13 @@
 package domain.service
 
-import org.eligosource.eventsourced.core._
-
+import infrastructure._
+import infrastructure.commands._
+import infrastructure.events._
 import domain._
 import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
-import infrastructure._
-import infrastructure.commands._
-import infrastructure.events._
 import domain.study.{
   DisabledStudy,
   EnabledStudy,
@@ -19,6 +17,9 @@ import domain.study.{
   StudyId
 }
 import Study._
+
+import org.eligosource.eventsourced.core._
+import org.slf4j.LoggerFactory
 
 import scalaz._
 import scalaz.Scalaz._
@@ -36,6 +37,7 @@ class SpecimenGroupDomainService(
   studyRepository: ReadRepository[StudyId, Study],
   specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup])
   extends CommandHandler {
+  import SpecimenGroupDomainService._
 
   /**
    * This partial function handles each command. The input is a Tuple3 consisting of:
@@ -58,6 +60,18 @@ class SpecimenGroupDomainService(
 
   }
 
+  private def logMethod(methodName: String, cmd: Any, validation: DomainValidation[SpecimenGroup]) {
+    if (log.isDebugEnabled) {
+      log.debug("%s: %s".format(methodName, cmd))
+      validation match {
+        case Success(item) =>
+          log.debug("%s: %s".format(methodName, item))
+        case Failure(msglist) =>
+          log.debug("%s: { msg: %s }".format(methodName, msglist.head))
+      }
+    }
+  }
+
   private def addSpecimenGroup(
     cmd: AddSpecimenGroupCmd,
     study: DisabledStudy,
@@ -70,10 +84,12 @@ class SpecimenGroupDomainService(
         item.preservationType, item.preservationTemperatureType, item.specimenType)
     }
 
-    for {
+    val item = for {
       newItem <- study.addSpecimenGroup(specimenGroupRepository, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
+    logMethod("addSpecimenGroup", cmd, item)
+    item
   }
 
   private def updateSpecimenGroup(
@@ -87,10 +103,12 @@ class SpecimenGroupDomainService(
         item.preservationType, item.preservationTemperatureType, item.specimenType)
     }
 
-    for {
+    val item = for {
       newItem <- study.updateSpecimenGroup(specimenGroupRepository, cmd)
       item <- update(newItem).success
     } yield newItem
+    logMethod("updateSpecimenGroup", cmd, item)
+    item
   }
 
   private def removeSpecimenGroup(
@@ -103,10 +121,16 @@ class SpecimenGroupDomainService(
       listeners sendEvent StudySpecimenGroupRemovedEvent(item.studyId, item.id)
     }
 
-    for {
-      item <- study.removeSpecimenGroup(specimenGroupRepository, cmd)
-      removedItem <- removeItem(item).success
-    } yield item
+    val item = for {
+      oldItem <- study.removeSpecimenGroup(specimenGroupRepository, cmd)
+      removedItem <- removeItem(oldItem).success
+    } yield oldItem
+    logMethod("removeSpecimenGroup", cmd, item)
+    item
   }
 
+}
+
+object SpecimenGroupDomainService {
+  val log = LoggerFactory.getLogger(SpecimenGroupDomainService.getClass)
 }

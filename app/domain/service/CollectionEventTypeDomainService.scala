@@ -1,11 +1,9 @@
 package domain.service
 
-import org.eligosource.eventsourced.core._
-
-import domain._
 import infrastructure._
 import infrastructure.commands._
 import infrastructure.events._
+import domain._
 import domain.study.{
   CollectionEventAnnotationType,
   CollectionEventType,
@@ -23,6 +21,10 @@ import domain.study.{
   StudyId
 }
 import Study._
+
+import org.eligosource.eventsourced.core._
+import org.slf4j.LoggerFactory
+
 import scalaz._
 import Scalaz._
 
@@ -47,6 +49,7 @@ class CollectionEventTypeDomainService(
   sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType],
   cet2atRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType])
   extends CommandHandler {
+  import CollectionEventTypeDomainService._
 
   /**
    * This partial function handles each command. The input is a Tuple3 consisting of:
@@ -82,6 +85,18 @@ class CollectionEventTypeDomainService(
       throw new Error("invalid command received")
   }
 
+  private def logMethod(methodName: String, cmd: Any, validation: DomainValidation[Any]) {
+    if (log.isDebugEnabled) {
+      log.debug("%s: %s".format(methodName, cmd))
+      validation match {
+        case Success(item) =>
+          log.debug("%s: %s".format(methodName, item))
+        case Failure(msglist) =>
+          log.debug("%s: { msg: %s }".format(methodName, msglist.head))
+      }
+    }
+  }
+
   private def addCollectionEventType(
     cmd: AddCollectionEventTypeCmd,
     study: DisabledStudy,
@@ -92,10 +107,12 @@ class CollectionEventTypeDomainService(
         study.id, item.id, item.name, item.description, item.recurring)
     }
 
-    for {
+    val item = for {
       newItem <- study.addCollectionEventType(collectionEventTypeRepository, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
+    logMethod("addCollectionEventType", cmd, item)
+    item
   }
 
   private def updateCollectionEventType(
@@ -109,10 +126,12 @@ class CollectionEventTypeDomainService(
       item
     }
 
-    for {
+    val item = for {
       newItem <- study.updateCollectionEventType(collectionEventTypeRepository, cmd)
       item <- update(newItem).success
     } yield newItem
+    logMethod("updateCollectionEventType", cmd, item)
+    item
   }
 
   private def removeCollectionEventType(
@@ -125,10 +144,12 @@ class CollectionEventTypeDomainService(
       listeners sendEvent CollectionEventTypeRemovedEvent(study.id, item.id)
     }
 
-    for {
+    val item = for {
       item <- study.removeCollectionEventType(collectionEventTypeRepository, cmd)
       removedItem <- removeItem(item).success
     } yield item
+    logMethod("removeCollectionEventType", cmd, item)
+    item
   }
 
   private def addSpecimenGroupToCollectionEventType(
@@ -144,11 +165,13 @@ class CollectionEventTypeDomainService(
       item
     }
 
-    for {
+    val item = for {
       v1 <- study.validateSpecimenGroupId(specimenGroupRepository, cmd.specimenGroupId)
       v2 <- study.validateCollectionEventTypeId(collectionEventTypeRepository, cmd.collectionEventTypeId)
-      v3 <- createItem(v1, v2).success
-    } yield v3
+      newItem <- createItem(v1, v2).success
+    } yield newItem
+    logMethod("addSpecimenGroupToCollectionEventType", cmd, item)
+    item
   }
 
   private def removeSpecimenGroupFromCollectionEventType(
@@ -163,10 +186,12 @@ class CollectionEventTypeDomainService(
       item.success
     }
 
-    for {
+    val item = for {
       item <- sg2cetRepo.getByKey(cmd.sg2cetId)
       removedItem <- removeItem(item)
     } yield removedItem
+    logMethod("removeSpecimenGroupFromCollectionEventType", cmd, item)
+    item
   }
 
   private def addAnnotationTypeToCollectionEventType(
@@ -182,11 +207,13 @@ class CollectionEventTypeDomainService(
       item
     }
 
-    for {
+    val item = for {
       v1 <- study.validateCollectionEventTypeId(collectionEventTypeRepository, cmd.collectionEventTypeId)
       v2 <- study.validateCollectionEventAnnotationTypeId(annotationTypeRepo, cmd.annotationTypeId)
-      v3 <- createItem(v1, v2).success
-    } yield v3
+      newItem <- createItem(v1, v2).success
+    } yield newItem
+    logMethod("addAnnotationTypeToCollectionEventType", cmd, item)
+    item
   }
 
   private def removeAnnotationTypeFromCollectionEventType(
@@ -201,10 +228,16 @@ class CollectionEventTypeDomainService(
       item
     }
 
-    for {
+    val item = for {
       item <- cet2atRepo.getByKey(cmd.cetAtId)
       removedItem <- removeItem(item).success
     } yield removedItem
+    logMethod("removeAnnotationTypeFromCollectionEventType", cmd, item)
+    item
   }
 
+}
+
+object CollectionEventTypeDomainService {
+  val log = LoggerFactory.getLogger(SpecimenGroupDomainService.getClass)
 }
