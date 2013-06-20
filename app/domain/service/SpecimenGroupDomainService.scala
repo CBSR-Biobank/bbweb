@@ -60,18 +60,6 @@ class SpecimenGroupDomainService(
 
   }
 
-  private def logMethod(methodName: String, cmd: Any, validation: DomainValidation[SpecimenGroup]) {
-    if (log.isDebugEnabled) {
-      log.debug("%s: %s".format(methodName, cmd))
-      validation match {
-        case Success(item) =>
-          log.debug("%s: %s".format(methodName, item))
-        case Failure(msglist) =>
-          log.debug("%s: { msg: %s }".format(methodName, msglist.head))
-      }
-    }
-  }
-
   private def addSpecimenGroup(
     cmd: AddSpecimenGroupCmd,
     study: DisabledStudy,
@@ -88,7 +76,7 @@ class SpecimenGroupDomainService(
       newItem <- study.addSpecimenGroup(specimenGroupRepository, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
-    logMethod("addSpecimenGroup", cmd, item)
+    CommandHandler.logMethod(log, "addSpecimenGroup", cmd, item)
     item
   }
 
@@ -107,7 +95,7 @@ class SpecimenGroupDomainService(
       newItem <- study.updateSpecimenGroup(specimenGroupRepository, cmd)
       item <- update(newItem).success
     } yield newItem
-    logMethod("updateSpecimenGroup", cmd, item)
+    CommandHandler.logMethod(log, "updateSpecimenGroup", cmd, item)
     item
   }
 
@@ -125,7 +113,7 @@ class SpecimenGroupDomainService(
       oldItem <- study.removeSpecimenGroup(specimenGroupRepository, cmd)
       removedItem <- removeItem(oldItem).success
     } yield oldItem
-    logMethod("removeSpecimenGroup", cmd, item)
+    CommandHandler.logMethod(log, "removeSpecimenGroup", cmd, item)
     item
   }
 

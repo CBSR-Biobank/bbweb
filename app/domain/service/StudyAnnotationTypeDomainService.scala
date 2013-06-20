@@ -1,7 +1,8 @@
 package domain.service
 
-import org.eligosource.eventsourced.core._
-
+import infrastructure._
+import infrastructure.commands._
+import infrastructure.events._
 import domain._
 import domain.study.{
   CollectionEventAnnotationType,
@@ -15,9 +16,10 @@ import domain.study.{
 }
 import Study._
 import AnnotationValueType._
-import infrastructure._
-import infrastructure.commands._
-import infrastructure.events._
+
+import org.eligosource.eventsourced.core._
+import org.slf4j.LoggerFactory
+
 import scalaz._
 import Scalaz._
 
@@ -30,6 +32,7 @@ import Scalaz._
 class StudyAnnotationTypeDomainService(
   annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType])
   extends CommandHandler {
+  import StudyAnnotationTypeDomainService._
 
   /**
    * This partial function handles each command. The input is a Tuple3 consisting of:
@@ -68,10 +71,12 @@ class StudyAnnotationTypeDomainService(
       item
     }
 
-    for {
+    val item = for {
       newItem <- study.addCollectionEventAnnotationType(annotationTypeRepo, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
+    CommandHandler.logMethod(log, "addCollectionEventAnnotationType", cmd, item)
+    item
   }
 
   private def updateCollectionEventAnnotationType(
@@ -87,10 +92,12 @@ class StudyAnnotationTypeDomainService(
       item
     }
 
-    for {
+    val item = for {
       newItem <- study.updateCollectionEventAnnotationType(annotationTypeRepo, cmd)
       updatedItem <- update(newItem).success
     } yield updatedItem
+    CommandHandler.logMethod(log, "updateCollectionEventAnnotationType", cmd, item)
+    item
   }
 
   private def removeCollectionEventAnnotationType(
@@ -103,10 +110,16 @@ class StudyAnnotationTypeDomainService(
       listeners sendEvent CollectionEventAnnotationTypeRemovedEvent(item.studyId, item.id)
     }
 
-    for {
-      item <- study.removeCollectionEventAnnotationType(annotationTypeRepo, cmd)
-      removedItem <- removeItem(item).success
-    } yield item
+    val item = for {
+      oldItem <- study.removeCollectionEventAnnotationType(annotationTypeRepo, cmd)
+      removedItem <- removeItem(oldItem).success
+    } yield oldItem
+    CommandHandler.logMethod(log, "removeCollectionEventAnnotationType", cmd, item)
+    item
   }
-
 }
+
+object StudyAnnotationTypeDomainService {
+  val log = LoggerFactory.getLogger(StudyAnnotationTypeDomainService.getClass)
+}
+

@@ -85,18 +85,6 @@ class CollectionEventTypeDomainService(
       throw new Error("invalid command received")
   }
 
-  private def logMethod(methodName: String, cmd: Any, validation: DomainValidation[Any]) {
-    if (log.isDebugEnabled) {
-      log.debug("%s: %s".format(methodName, cmd))
-      validation match {
-        case Success(item) =>
-          log.debug("%s: %s".format(methodName, item))
-        case Failure(msglist) =>
-          log.debug("%s: { msg: %s }".format(methodName, msglist.head))
-      }
-    }
-  }
-
   private def addCollectionEventType(
     cmd: AddCollectionEventTypeCmd,
     study: DisabledStudy,
@@ -111,7 +99,7 @@ class CollectionEventTypeDomainService(
       newItem <- study.addCollectionEventType(collectionEventTypeRepository, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
-    logMethod("addCollectionEventType", cmd, item)
+    CommandHandler.logMethod(log, "addCollectionEventType", cmd, item)
     item
   }
 
@@ -130,7 +118,7 @@ class CollectionEventTypeDomainService(
       newItem <- study.updateCollectionEventType(collectionEventTypeRepository, cmd)
       item <- update(newItem).success
     } yield newItem
-    logMethod("updateCollectionEventType", cmd, item)
+    CommandHandler.logMethod(log, "updateCollectionEventType", cmd, item)
     item
   }
 
@@ -148,7 +136,7 @@ class CollectionEventTypeDomainService(
       item <- study.removeCollectionEventType(collectionEventTypeRepository, cmd)
       removedItem <- removeItem(item).success
     } yield item
-    logMethod("removeCollectionEventType", cmd, item)
+    CommandHandler.logMethod(log, "removeCollectionEventType", cmd, item)
     item
   }
 
@@ -170,7 +158,7 @@ class CollectionEventTypeDomainService(
       v2 <- study.validateCollectionEventTypeId(collectionEventTypeRepository, cmd.collectionEventTypeId)
       newItem <- createItem(v1, v2).success
     } yield newItem
-    logMethod("addSpecimenGroupToCollectionEventType", cmd, item)
+    CommandHandler.logMethod(log, "addSpecimenGroupToCollectionEventType", cmd, item)
     item
   }
 
@@ -190,7 +178,7 @@ class CollectionEventTypeDomainService(
       item <- sg2cetRepo.getByKey(cmd.sg2cetId)
       removedItem <- removeItem(item)
     } yield removedItem
-    logMethod("removeSpecimenGroupFromCollectionEventType", cmd, item)
+    CommandHandler.logMethod(log, "removeSpecimenGroupFromCollectionEventType", cmd, item)
     item
   }
 
@@ -212,7 +200,7 @@ class CollectionEventTypeDomainService(
       v2 <- study.validateCollectionEventAnnotationTypeId(annotationTypeRepo, cmd.annotationTypeId)
       newItem <- createItem(v1, v2).success
     } yield newItem
-    logMethod("addAnnotationTypeToCollectionEventType", cmd, item)
+    CommandHandler.logMethod(log, "addAnnotationTypeToCollectionEventType", cmd, item)
     item
   }
 
@@ -232,7 +220,7 @@ class CollectionEventTypeDomainService(
       item <- cet2atRepo.getByKey(cmd.cetAtId)
       removedItem <- removeItem(item).success
     } yield removedItem
-    logMethod("removeAnnotationTypeFromCollectionEventType", cmd, item)
+    CommandHandler.logMethod(log, "removeAnnotationTypeFromCollectionEventType", cmd, item)
     item
   }
 
