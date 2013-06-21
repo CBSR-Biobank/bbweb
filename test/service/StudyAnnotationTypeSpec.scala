@@ -24,18 +24,18 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
 
   val nameGenerator = new NameGenerator(classOf[StudyAnnotationTypeSpec].getSimpleName)
   val studyName = nameGenerator.next[Study]
-  val study = await(studyService.addStudy(new AddStudyCmd(studyName, studyName))) | null
+  val study = await(studyService.addStudy(new AddStudyCmd(studyName, Some(studyName)))) | null
 
   "Collection event annotation type" can {
 
     "be added" in {
       val name = nameGenerator.next[AnnotationType]
       val valueType = AnnotationValueType.String
-      val maxValueCount = 0
+      val maxValueCount = None
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
-          valueType, maxValueCount, Map.empty[String, String])))
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
+          valueType, maxValueCount, None)))
 
       at1 must beSuccessful.like {
         case x =>
@@ -49,11 +49,11 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
 
       val name2 = nameGenerator.next[AnnotationType]
       val valueType2 = AnnotationValueType.Select
-      val maxValueCount2 = 2
-      val options = Map("1" -> "a", "2" -> "b")
+      val maxValueCount2 = Some(2)
+      val options = Some(Map("1" -> "a", "2" -> "b"))
 
       val at2 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name2, name2,
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name2, None,
           valueType2, maxValueCount2, options)))
 
       at2 must beSuccessful.like {
@@ -70,19 +70,19 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
     "not be added if name already exists" in {
       val name = nameGenerator.next[AnnotationType]
       val valueType = AnnotationValueType.String
-      val maxValueCount = 0
+      val maxValueCount = None
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
-          valueType, maxValueCount, Map.empty[String, String]))) | null
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
+          valueType, maxValueCount, None))) | null
       annotationTypeRepo.getMap must haveKey(at1.id)
 
       val valueType2 = AnnotationValueType.Select
-      val maxValueCount2 = 2
-      val options = Map("1" -> "a", "2" -> "b")
+      val maxValueCount2 = Some(2)
+      val options = Some(Map("1" -> "a", "2" -> "b"))
 
       val at2 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
           valueType2, maxValueCount2, options)))
 
       at2 must beFailing.like {
@@ -93,11 +93,11 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
     "be updated" in {
       val name = nameGenerator.next[AnnotationType]
       val valueType = AnnotationValueType.String
-      val maxValueCount = 0
+      val maxValueCount = None
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
-          valueType, maxValueCount, Map.empty[String, String]))) | null
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
+          valueType, maxValueCount, None))) | null
 
       val name2 = nameGenerator.next[Study]
       val valueType2 = AnnotationValueType.Select
@@ -106,7 +106,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
 
       val at2 = await(studyService.updateCollectionEventAnnotationType(
         new UpdateCollectionEventAnnotationTypeCmd(study.id.toString,
-          at1.id.toString, at1.versionOption, name2, name2, valueType2,
+          at1.id.toString, at1.versionOption, name2, None, valueType2,
           maxValueCount2, options)))
 
       at2 must beSuccessful.like {
@@ -126,7 +126,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
       val maxValueCount = 0
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
           valueType, maxValueCount, Map.empty[String, String]))) | null
       annotationTypeRepo.getMap must haveKey(at1.id)
 
@@ -136,13 +136,13 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
       val options = Map("1" -> "a", "2" -> "b")
 
       val at2 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name2, name2,
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name2, None,
           valueType2, maxValueCount2, options))) | null
       annotationTypeRepo.getMap must haveKey(at2.id)
 
       val at3 = await(studyService.updateCollectionEventAnnotationType(
         new UpdateCollectionEventAnnotationTypeCmd(study.id.toString,
-          at2.id.toString, at2.versionOption, name, name, valueType,
+          at2.id.toString, at2.versionOption, name, Some(name), valueType,
           maxValueCount, options)))
       at3 must beFailing.like {
         case msgs => msgs.head must contain("name already exists")
@@ -155,7 +155,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
       val maxValueCount = 0
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
           valueType, maxValueCount, Map.empty[String, String]))) | null
 
       val name2 = nameGenerator.next[Study]
@@ -163,11 +163,11 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
       val maxValueCount2 = 2
       val options = Map("1" -> "a", "2" -> "b")
 
-      val study2 = await(studyService.addStudy(new AddStudyCmd(name2, name2))) | null
+      val study2 = await(studyService.addStudy(new AddStudyCmd(name2, None))) | null
 
       val at2 = await(studyService.updateCollectionEventAnnotationType(
         new UpdateCollectionEventAnnotationTypeCmd(study2.id.toString,
-          at1.id.toString, at1.versionOption, name2, name2, valueType2,
+          at1.id.toString, at1.versionOption, name2, None, valueType2,
           maxValueCount2, options)))
       at2 must beFailing.like { case msgs => msgs.head must contain("does not belong to study") }
     }
@@ -178,7 +178,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
       val maxValueCount = 0
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
           valueType, maxValueCount, Map.empty[String, String]))) | null
 
       val name2 = nameGenerator.next[Study]
@@ -189,7 +189,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
 
       val at2 = await(studyService.updateCollectionEventAnnotationType(
         new UpdateCollectionEventAnnotationTypeCmd(study.id.toString,
-          at1.id.toString, versionOption, name2, name2, valueType2,
+          at1.id.toString, versionOption, name2, None, valueType2,
           maxValueCount2, options)))
       at2 must beFailing.like {
         case msgs => msgs.head must contain("doesn't match current version")
@@ -202,7 +202,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
       val maxValueCount = 0
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
           valueType, maxValueCount, Map.empty[String, String]))) | null
       annotationTypeRepo.getMap must haveKey(at1.id)
 
@@ -227,7 +227,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
       val maxValueCount = 0
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, name,
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
           valueType, maxValueCount, Map.empty[String, String]))) | null
       annotationTypeRepo.getMap must haveKey(at1.id)
 
