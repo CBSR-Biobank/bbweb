@@ -26,16 +26,3 @@ case class CollectionEventAnnotationType(
   }
 
 }
-
-object CollectionEventAnnotationType {
-
-  def add(
-    studyId: StudyId,
-    name: String,
-    description: String,
-    valueType: AnnotationValueType,
-    maxValueCount: Int,
-    options: Map[String, String]): DomainValidation[CollectionEventAnnotationType] =
-    CollectionEventAnnotationType(AnnotationTypeIdentityService.nextIdentity, version = 0L,
-      studyId, name, description, valueType, maxValueCount, options).success
-}

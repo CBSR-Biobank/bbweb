@@ -50,8 +50,10 @@ class StudyService(
     studyRepository.getByKey(new StudyId(id));
   }
 
-  def addStudy(cmd: AddStudyCmd): Future[DomainValidation[DisabledStudy]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
+  def addStudy(cmd: AddStudyCmd): Future[DomainValidation[DisabledStudy]] = {
+    val cmdWithId = AddStudyCmdWithId(cmd.name, cmd.description, StudyIdentityService.nextIdentity)
+    studyProcessor ? Message(cmdWithId) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
+  }
 
   def updateStudy(cmd: UpdateStudyCmd): Future[DomainValidation[DisabledStudy]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])

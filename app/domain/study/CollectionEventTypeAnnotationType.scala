@@ -8,10 +8,3 @@ case class CollectionEventTypeAnnotationType(
   annotationTypeId: AnnotationTypeId,
   required: Boolean) extends IdentifiedValueObject[String] {
 }
-
-object CollectionEventTypeAnnotationTypeIdentityService {
-
-  def nextIdentity: String =
-    java.util.UUID.randomUUID.toString.toUpperCase
-
-}

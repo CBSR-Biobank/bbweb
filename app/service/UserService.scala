@@ -88,6 +88,13 @@ class UserProcessor(
   }
 
   def addUser(cmd: AddUserCmd, listeners: MessageEmitter): DomainValidation[User] = {
+    def userIdExists(id: Option[String]): DomainValidation[UserId] = {
+      id match {
+        case Some(id) => new UserId(id).success
+        case None => DomainError("missing ID value").fail
+      }
+    }
+
     def userExists(email: String): DomainValidation[Boolean] = {
       if (userRepo.getValues.exists(u => u.email.equals(cmd.email)))
         DomainError("user with email already exists: %s" format cmd.email).fail
@@ -101,8 +108,9 @@ class UserProcessor(
     }
 
     for {
+      userId <- userIdExists(cmd.userId)
       emailCheck <- userExists(cmd.email)
-      newUser <- User.add(cmd.name, cmd.email, cmd.password, cmd.hasher, cmd.salt, cmd.salt)
+      newUser <- User.add(userId, cmd.name, cmd.email, cmd.password, cmd.hasher, cmd.salt, cmd.salt)
       addedItem <- addItem(newUser).success
     } yield newUser
   }

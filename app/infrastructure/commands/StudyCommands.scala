@@ -11,9 +11,9 @@ import domain.AnnotationValueType._
 sealed trait StudyCommand extends Command {
   val studyId: String
 }
-case class AddStudyCmd(name: String, description: String)
+case class AddStudyCmd(name: String, description: Option[String]) extends StudyCommand
 case class UpdateStudyCmd(studyId: String, expectedVersion: Option[Long], name: String,
-  description: String) extends StudyCommand
+  description: Option[String]) extends StudyCommand
 case class EnableStudyCmd(studyId: String, expectedVersion: Option[Long])
   extends StudyCommand
 case class DisableStudyCmd(studyId: String, expectedVersion: Option[Long])
@@ -22,35 +22,34 @@ case class DisableStudyCmd(studyId: String, expectedVersion: Option[Long])
 // specimen group commands
 sealed trait SpecimenGroupCommand extends StudyCommand {
 }
-case class AddSpecimenGroupCmd(
-  studyIdentity: String, name: String, description: String, units: String,
+case class AddSpecimenGroupCmd(studyIdentity: String, name: String, description: Option[String],
+  units: String, anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
+  preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
+  extends { val studyId = studyIdentity } with SpecimenGroupCommand
+
+case class UpdateSpecimenGroupCmd(specimenGroupId: String, expectedVersion: Option[Long],
+  studyIdentity: String, name: String, description: Option[String], units: String,
   anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
   preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
   extends { val studyId = studyIdentity } with SpecimenGroupCommand
 
-case class UpdateSpecimenGroupCmd(studyIdentity: String, specimenGroupId: String,
-  expectedVersion: Option[Long], name: String, description: String, units: String,
-  anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
-  preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
-  extends { val studyId = studyIdentity } with SpecimenGroupCommand
-
-case class RemoveSpecimenGroupCmd(studyIdentity: String, specimenGroupId: String,
-  expectedVersion: Option[Long])
+case class RemoveSpecimenGroupCmd(specimenGroupId: String, expectedVersion: Option[Long],
+  studyIdentity: String)
   extends { val studyId = studyIdentity } with SpecimenGroupCommand
 
 // collection event commands
 sealed trait CollectionEventTypeCommand extends StudyCommand {
 }
-case class AddCollectionEventTypeCmd(studyIdentity: String, name: String, description: String,
-  recurring: Boolean)
+case class AddCollectionEventTypeCmd(studyIdentity: String, name: String,
+  description: Option[String], recurring: Boolean)
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
-case class UpdateCollectionEventTypeCmd(studyIdentity: String, collectionEventTypeId: String,
-  expectedVersion: Option[Long], name: String, description: String,
+case class UpdateCollectionEventTypeCmd(collectionEventTypeId: String,
+  expectedVersion: Option[Long], studyIdentity: String, name: String, description: String,
   recurring: Boolean) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
-case class RemoveCollectionEventTypeCmd(studyIdentity: String, collectionEventTypeId: String,
-  expectedVersion: Option[Long])
+case class RemoveCollectionEventTypeCmd(collectionEventTypeId: String, expectedVersion: Option[Long],
+  studyIdentity: String)
   extends { val studyId = studyIdentity } with CollectionEventTypeCommand
 
 case class AddSpecimenGroupToCollectionEventTypeCmd(studyIdentity: String,
@@ -70,17 +69,17 @@ case class RemoveAnnotationTypeFromCollectionEventTypeCmd(cetAtId: String, study
 // study annotation type commands
 sealed trait StudyAnnotationTypeCommand extends StudyCommand {
 }
-case class AddCollectionEventAnnotationTypeCmd(studyIdentity: String, name: String,
-  description: String, valueType: AnnotationValueType, maxValueCount: Int,
+case class AddCollectionEventAnnotationTypeCmd(studyIdentity: String,
+  name: String, description: Option[String], valueType: AnnotationValueType,
+  maxValueCount: Option[Int], options: Option[Map[String, String]])
+  extends { val studyId = studyIdentity } with StudyAnnotationTypeCommand
+
+case class UpdateCollectionEventAnnotationTypeCmd(annotationTypeId: String,
+  expectedVersion: Option[Long], studyIdentity: String, name: String,
+  description: Option[String], valueType: AnnotationValueType, maxValueCount: Int,
   options: Map[String, String])
   extends { val studyId = studyIdentity } with StudyAnnotationTypeCommand
 
-case class UpdateCollectionEventAnnotationTypeCmd(studyIdentity: String,
-  annotationTypeId: String, expectedVersion: Option[Long], name: String,
-  description: String, valueType: AnnotationValueType, maxValueCount: Int,
-  options: Map[String, String])
-  extends { val studyId = studyIdentity } with StudyAnnotationTypeCommand
-
-case class RemoveCollectionEventAnnotationTypeCmd(studyIdentity: String,
-  annotationTypeId: String, expectedVersion: Option[Long])
+case class RemoveCollectionEventAnnotationTypeCmd(annotationTypeId: String,
+  expectedVersion: Option[Long], studyIdentity: String)
   extends { val studyId = studyIdentity } with StudyAnnotationTypeCommand

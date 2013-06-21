@@ -69,7 +69,7 @@ class StudyProcessor(
     annotationTypeRepo)
 
   def receive = {
-    case cmd: AddStudyCmd =>
+    case cmd: AddStudyCmdWithId =>
       process(addStudy(cmd, emitter("listeners")))
 
     case cmd: UpdateStudyCmd =>
@@ -116,7 +116,7 @@ class StudyProcessor(
     id: StudyId,
     version: Long,
     name: String,
-    description: String): DomainValidation[DisabledStudy] = {
+    description: Option[String]): DomainValidation[DisabledStudy] = {
 
     def nameCheck(id: StudyId, name: String): DomainValidation[Boolean] = {
       studyRepository.getValues.exists {
@@ -134,7 +134,7 @@ class StudyProcessor(
   }
 
   private def addStudy(
-    cmd: AddStudyCmd,
+    cmd: AddStudyCmdWithId,
     listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
 
     def addItem(item: Study): Study = {
@@ -144,7 +144,7 @@ class StudyProcessor(
     }
 
     val item = for {
-      newItem <- addStudy(StudyIdentityService.nextIdentity, version = 0L, cmd.name, cmd.description)
+      newItem <- addStudy(cmd.studyId, version = 0L, cmd.name, cmd.description)
       addedItem <- addItem(newItem).success
     } yield newItem
 
@@ -224,3 +224,9 @@ class StudyProcessor(
     item
   }
 }
+
+private[service] case class AddStudyCmdWithId(name: String, description: Option[String], studyId: StudyId)
+
+private[service] case class AddCollectionEventTypeCmdWithId(
+  collectionEventTypeId: CollectionEventTypeId, studyId: String, name: String,
+  description: Option[String], recurring: Boolean)

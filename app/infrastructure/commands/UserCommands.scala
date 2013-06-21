@@ -6,4 +6,5 @@ case class AddUserCmd(
   password: String,
   hasher: String,
   salt: Option[String],
-  avatarUrl: Option[String])
+  avatarUrl: Option[String],
+  userId: Option[String] = None)

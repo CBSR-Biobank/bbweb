@@ -12,10 +12,3 @@ case class SpecimenGroupCollectionEventType(
   count: Int,
   amount: BigDecimal) extends IdentifiedValueObject[String] {
 }
-
-object SpecimenGroupCollectionEventTypeIdentityService {
-
-  def nextIdentity: String =
-    java.util.UUID.randomUUID.toString.toUpperCase
-
-}

@@ -5,7 +5,6 @@ import infrastructure.commands._
 import domain.{
   AnatomicalSourceType,
   AnnotationTypeId,
-  AnnotationTypeIdentityService,
   AnnotationValueType,
   PreservationTemperatureType,
   PreservationType,
@@ -20,7 +19,7 @@ import SpecimenType._
 import scalaz._
 import Scalaz._
 
-case class DisabledStudy(id: StudyId, version: Long = -1, name: String, description: String)
+case class DisabledStudy(id: StudyId, version: Long = -1, name: String, description: Option[String])
   extends Study {
 
   override val status = "Disabled"
@@ -55,7 +54,7 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
   def addSpecimenGroup(
     specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
     cmd: AddSpecimenGroupCmd): DomainValidation[SpecimenGroup] =
-    addSpecimenGroup(specimenGroupRepository, SpecimenGroupIdentityService.nextIdentity,
+    addSpecimenGroup(specimenGroupRepository, new SpecimenGroupId(cmd.specimenGroupId),
       version = 0L, cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType,
       cmd.preservationType, cmd.preservationTemperatureType, cmd.specimenType)
 
@@ -100,7 +99,7 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
     collectionEventTypeRepository: ReadRepository[CollectionEventTypeId, CollectionEventType],
     cmd: AddCollectionEventTypeCmd): DomainValidation[CollectionEventType] =
     addCollectionEventType(collectionEventTypeRepository,
-      CollectionEventTypeIdentityService.nextIdentity, version = 0L, cmd.name,
+      new CollectionEventTypeId(cmd.collectionEventTypeId), version = 0L, cmd.name,
       cmd.description, cmd.recurring)
 
   def updateCollectionEventType(
@@ -147,7 +146,7 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
     annotationTypeRepo: ReadRepository[AnnotationTypeId, StudyAnnotationType],
     cmd: AddCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] = {
     addCollectionEventAnnotationType(annotationTypeRepo,
-      AnnotationTypeIdentityService.nextIdentity, version = 0L,
+      new AnnotationTypeId(cmd.annotationTypeId), version = 0L,
       cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options)
   }
 

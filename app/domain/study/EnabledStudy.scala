@@ -6,7 +6,7 @@ import infrastructure.commands._
 import scalaz._
 import scalaz.Scalaz._
 
-case class EnabledStudy(id: StudyId, version: Long = -1, name: String, description: String)
+case class EnabledStudy(id: StudyId, version: Long = -1, name: String, description: Option[String])
   extends Study {
 
   override val status = "Ensabled"

@@ -15,19 +15,17 @@ case class CollectionEventType(
   recurring: Boolean) extends ConcurrencySafeEntity[CollectionEventTypeId] {
 
   def addSpecimenGroup(
+    id: String,
     sg: SpecimenGroup,
     count: Int,
     amount: BigDecimal): SpecimenGroupCollectionEventType =
-    SpecimenGroupCollectionEventType(
-      SpecimenGroupCollectionEventTypeIdentityService.nextIdentity,
-      sg.id, this.id, count, amount)
+    SpecimenGroupCollectionEventType(id, sg.id, this.id, count, amount)
 
   def addAnnotationType(
+    id: String,
     item: CollectionEventAnnotationType,
     required: Boolean): CollectionEventTypeAnnotationType =
-    CollectionEventTypeAnnotationType(
-      CollectionEventTypeAnnotationTypeIdentityService.nextIdentity,
-      this.id, item.id, required)
+    CollectionEventTypeAnnotationType(id, this.id, item.id, required)
 
   val toStringFormat = """{ id: %s, version: %d, studyId: %s, name: %s, description: %s,""" +
     """ recurring: %s }"""
@@ -37,13 +35,3 @@ case class CollectionEventType(
   }
 }
 
-object CollectionEventType {
-
-  def add(
-    studyId: StudyId,
-    name: String,
-    description: String,
-    recurring: Boolean): DomainValidation[CollectionEventType] =
-    CollectionEventType(CollectionEventTypeIdentityService.nextIdentity, version = 0L,
-      studyId, name, description, recurring).success
-}

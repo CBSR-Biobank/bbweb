@@ -9,13 +9,11 @@ import domain.study.{
   CollectionEventType,
   CollectionEventTypeAnnotationType,
   CollectionEventTypeId,
-  CollectionEventTypeAnnotationTypeIdentityService,
   DisabledStudy,
   EnabledStudy,
   SpecimenGroup,
   SpecimenGroupId,
   SpecimenGroupCollectionEventType,
-  SpecimenGroupCollectionEventTypeIdentityService,
   StudyAnnotationType,
   Study,
   StudyId

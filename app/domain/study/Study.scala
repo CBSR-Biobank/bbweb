@@ -1,6 +1,6 @@
 package domain.study
 
-import domain.{ AnnotationTypeId, AnnotationTypeIdentityService, ConcurrencySafeEntity }
+import domain.{ AnnotationTypeId, ConcurrencySafeEntity }
 import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
@@ -15,7 +15,7 @@ import scalaz.Scalaz._
 
 abstract class Study extends ConcurrencySafeEntity[StudyId] {
   def name: String
-  def description: String
+  def description: Option[String]
 
   override def toString =
     "{ id:%s, version: %d, name:%s, description:%s }" format (id, version, name, description)
@@ -104,9 +104,6 @@ object Study {
     studyRepository: ReadRepository[StudyId, Study],
     studyId: String)(f: DisabledStudy => DomainValidation[_]): DomainValidation[_] =
     validateStudy(studyRepository, new StudyId(studyId))(f)
-
-  def add(name: String, description: String): DomainValidation[DisabledStudy] =
-    DisabledStudy(StudyIdentityService.nextIdentity, version = 0L, name, description).success
 
   def noSuchStudy(studyId: StudyId) =
     DomainError("no study with id: %s" format studyId)

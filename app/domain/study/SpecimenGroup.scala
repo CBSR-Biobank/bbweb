@@ -32,18 +32,3 @@ case class SpecimenGroup(
   }
 }
 
-object SpecimenGroup {
-
-  def add(studyId: StudyId,
-    name: String,
-    description: String,
-    units: String,
-    anatomicalSourceType: AnatomicalSourceType,
-    preservationType: PreservationType,
-    preservationTemperatureType: PreservationTemperatureType,
-    specimenType: SpecimenType): DomainValidation[SpecimenGroup] =
-    SpecimenGroup(SpecimenGroupIdentityService.nextIdentity, version = 0L, studyId, name,
-      description, units, anatomicalSourceType, preservationType, preservationTemperatureType,
-      specimenType).success
-
-}

@@ -49,9 +49,9 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
       formWithErrors => BadRequest(html.study.add(formWithErrors, request.user)),
       {
         case (name, description) =>
-          Await.result(studyService.addStudy(AddStudyCmd(name, description.getOrElse(""))), timeout.duration) match {
+          Await.result(studyService.addStudy(AddStudyCmd(name, description)), timeout.duration) match {
             case Success(study) => Ok(html.study.show(study, request.user))
-            case Failure(x) => BadRequest
+            case Failure(x) => BadRequest("Bad Request: " + x.head)
           }
       })
   }
@@ -59,7 +59,9 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
   def show(id: String) = SecuredAction { implicit request =>
     studyService.getStudy(id) match {
       case Success(study) => Ok(html.study.show(study, request.user))
-      case Failure(x) => BadRequest
+      case Failure(x) =>
+        // FIXME: is this the best way to handle it?
+        BadRequest("Bad Request: " + x.head)
     }
   }
 

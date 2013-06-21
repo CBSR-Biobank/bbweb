@@ -14,8 +14,8 @@ import domain.SpecimenType._
 // study events
 //
 // FIXME: need a base class here
-case class StudyAddedEvent(id: StudyId, name: String, description: String)
-case class StudyUpdatedEvent(id: StudyId, name: String, description: String)
+case class StudyAddedEvent(id: StudyId, name: String, description: Option[String])
+case class StudyUpdatedEvent(id: StudyId, name: String, description: Option[String])
 case class StudyEnabledEvent(id: StudyId)
 case class StudyDisabledEvent(id: StudyId)
 
