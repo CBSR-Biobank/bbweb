@@ -181,7 +181,7 @@ class CollectionEventTypeDomainService(
   }
 
   private def addAnnotationTypeToCollectionEventType(
-    cmd: AddAnnotationTypeToCollectionEventTypeCmd,
+    cmd: AddAnnotationTypeToCollectionEventTypeCmdWithId,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventTypeAnnotationType] = {
     def createItem(cet: CollectionEventType,

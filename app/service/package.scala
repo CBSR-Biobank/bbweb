@@ -3,44 +3,44 @@ package service
 import domain._
 import domain.study._
 
-object SpecimenGroupIdentityService {
+trait IdentityService[T] {
 
-  def nextIdentity: SpecimenGroupId =
-    new SpecimenGroupId(java.util.UUID.randomUUID.toString.toUpperCase)
-
-}
-
-object CollectionEventTypeAnnotationTypeIdentityService {
-
-  def nextIdentity: String =
-    java.util.UUID.randomUUID.toString.toUpperCase
+  def nextStringIdentity: String = java.util.UUID.randomUUID.toString.toUpperCase
 
 }
 
-object CollectionEventTypeIdentityService {
+object SpecimenGroupIdentityService extends IdentityService[SpecimenGroupId] {
 
-  def nextIdentity: CollectionEventTypeId =
-    new CollectionEventTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
-
-}
-
-object SpecimenGroupCollectionEventTypeIdentityService {
-
-  def nextIdentity: String =
-    java.util.UUID.randomUUID.toString.toUpperCase
+  def nextIdentity: SpecimenGroupId = new SpecimenGroupId(nextStringIdentity)
 
 }
 
-object AnnotationTypeIdentityService {
+object CollectionEventTypeAnnotationTypeIdentityService extends IdentityService[String] {
 
-  def nextIdentity: AnnotationTypeId =
-    new AnnotationTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
+  def nextIdentity: String = nextStringIdentity
 
 }
 
-object UserIdentityService {
+object CollectionEventTypeIdentityService extends IdentityService[CollectionEventTypeId] {
 
-  def nextIdentity: UserId =
-    new UserId(java.util.UUID.randomUUID.toString.toUpperCase)
+  def nextIdentity: CollectionEventTypeId = new CollectionEventTypeId(nextStringIdentity)
+
+}
+
+object SpecimenGroupCollectionEventTypeIdentityService extends IdentityService[String] {
+
+  def nextIdentity: String = nextStringIdentity
+
+}
+
+object AnnotationTypeIdentityService extends IdentityService[AnnotationTypeId] {
+
+  def nextIdentity: AnnotationTypeId = new AnnotationTypeId(nextStringIdentity)
+
+}
+
+object UserIdentityService extends IdentityService[UserId] {
+
+  def nextIdentity: UserId = new UserId(nextStringIdentity)
 
 }

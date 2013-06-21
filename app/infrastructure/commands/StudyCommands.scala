@@ -8,34 +8,37 @@ import domain.SpecimenType._
 import domain.AnnotationValueType._
 
 // study commands
-sealed trait StudyCommand extends Command {
-  val studyId: String
-}
+trait StudyCommand extends Command {}
+trait StudyId { val studyId: String }
+
 case class AddStudyCmd(name: String, description: Option[String]) extends StudyCommand
-case class UpdateStudyCmd(studyId: String, expectedVersion: Option[Long], name: String,
-  description: Option[String]) extends StudyCommand
-case class EnableStudyCmd(studyId: String, expectedVersion: Option[Long])
-  extends StudyCommand
+
+case class UpdateStudyCmd(id: String, expectedVersion: Option[Long], name: String,
+  description: Option[String])
+  extends StudyCommand with Identity with ExpectedVersion
+
+case class EnableStudyCmd(id: String, expectedVersion: Option[Long])
+  extends StudyCommand with Identity with ExpectedVersion
+
 case class DisableStudyCmd(studyId: String, expectedVersion: Option[Long])
-  extends StudyCommand
+  extends StudyCommand with Identity with ExpectedVersion
 
 // specimen group commands
-sealed trait SpecimenGroupCommand extends StudyCommand {
-}
-case class AddSpecimenGroupCmd(studyIdentity: String, name: String, description: Option[String],
+trait SpecimenGroupCommand extends StudyCommand with StudyId
+
+case class AddSpecimenGroupCmd(studyId: String, name: String, description: Option[String],
   units: String, anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
   preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
-  extends { val studyId = studyIdentity } with SpecimenGroupCommand
+  extends SpecimenGroupCommand
 
 case class UpdateSpecimenGroupCmd(specimenGroupId: String, expectedVersion: Option[Long],
-  studyIdentity: String, name: String, description: Option[String], units: String,
+  studyId: String, name: String, description: Option[String], units: String,
   anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
   preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
-  extends { val studyId = studyIdentity } with SpecimenGroupCommand
+  extends SpecimenGroupCommand with Identity with ExpectedVersion
 
-case class RemoveSpecimenGroupCmd(specimenGroupId: String, expectedVersion: Option[Long],
-  studyIdentity: String)
-  extends { val studyId = studyIdentity } with SpecimenGroupCommand
+case class RemoveSpecimenGroupCmd(specimenGroupId: String, expectedVersion: Option[Long])
+  extends SpecimenGroupCommand with Identity with ExpectedVersion
 
 // collection event commands
 sealed trait CollectionEventTypeCommand extends StudyCommand {

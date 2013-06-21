@@ -225,8 +225,11 @@ class StudyProcessor(
   }
 }
 
-private[service] case class AddStudyCmdWithId(name: String, description: Option[String], studyId: StudyId)
+private[service] case class AddStudyCmdWithId(
+  name: String, description: Option[String], studyId: StudyId)
+  extends StudyCommand with infrastructure.commands.Identity
 
 private[service] case class AddCollectionEventTypeCmdWithId(
   collectionEventTypeId: CollectionEventTypeId, studyId: String, name: String,
   description: Option[String], recurring: Boolean)
+  extends StudyCommand with infrastructure.commands.Identity
