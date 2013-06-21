@@ -3,44 +3,22 @@ package service
 import domain._
 import domain.study._
 
-trait IdentityService[T] {
+trait IdentityService {
 
-  def nextStringIdentity: String = java.util.UUID.randomUUID.toString.toUpperCase
-
-}
-
-object SpecimenGroupIdentityService extends IdentityService[SpecimenGroupId] {
-
-  def nextIdentity: SpecimenGroupId = new SpecimenGroupId(nextStringIdentity)
+  def nextIdentity: String = java.util.UUID.randomUUID.toString.toUpperCase
 
 }
 
-object CollectionEventTypeAnnotationTypeIdentityService extends IdentityService[String] {
+object StudyIdentityService extends IdentityService
 
-  def nextIdentity: String = nextStringIdentity
+object SpecimenGroupIdentityService extends IdentityService
 
-}
+object CollectionEventTypeIdentityService extends IdentityService
 
-object CollectionEventTypeIdentityService extends IdentityService[CollectionEventTypeId] {
+object AnnotationTypeIdentityService extends IdentityService
 
-  def nextIdentity: CollectionEventTypeId = new CollectionEventTypeId(nextStringIdentity)
+object SpecimenGroupCollectionEventTypeIdentityService extends IdentityService
 
-}
+object CollectionEventTypeAnnotationTypeIdentityService extends IdentityService
 
-object SpecimenGroupCollectionEventTypeIdentityService extends IdentityService[String] {
-
-  def nextIdentity: String = nextStringIdentity
-
-}
-
-object AnnotationTypeIdentityService extends IdentityService[AnnotationTypeId] {
-
-  def nextIdentity: AnnotationTypeId = new AnnotationTypeId(nextStringIdentity)
-
-}
-
-object UserIdentityService extends IdentityService[UserId] {
-
-  def nextIdentity: UserId = new UserId(nextStringIdentity)
-
-}
+object UserIdentityService extends IdentityService

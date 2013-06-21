@@ -49,7 +49,7 @@ class SpecimenGroupDomainService(
    *  If the command is invalid, then this method throws an Error exception.
    */
   def process = {
-    case _@ (cmd: AddSpecimenGroupCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+    case _@ (cmd: AddSpecimenGroupCmdWithId, study: DisabledStudy, listeners: MessageEmitter) =>
       addSpecimenGroup(cmd, study, listeners)
     case _@ (cmd: UpdateSpecimenGroupCmd, study: DisabledStudy, listeners: MessageEmitter) =>
       updateSpecimenGroup(cmd, study, listeners)
@@ -61,7 +61,7 @@ class SpecimenGroupDomainService(
   }
 
   private def addSpecimenGroup(
-    cmd: AddSpecimenGroupCmd,
+    cmd: AddSpecimenGroupCmdWithId,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
 

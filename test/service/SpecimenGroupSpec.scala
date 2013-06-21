@@ -39,7 +39,7 @@ class SpecimenGroupSpec extends StudyFixture {
 
   val nameGenerator = new NameGenerator(classOf[SpecimenGroupSpec].getName)
   val studyName = nameGenerator.next[Study]
-  val study = await(studyService.addStudy(new AddStudyCmd(studyName, studyName))) | null
+  val study = await(studyService.addStudy(new AddStudyCmd(studyName, Some(studyName)))) | null
 
   "Specimen group" can {
 
@@ -52,7 +52,7 @@ class SpecimenGroupSpec extends StudyFixture {
       val specimenType = SpecimenType.FilteredUrine
 
       val sg1 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
 
       sg1 must beSuccessful.like {
@@ -70,7 +70,7 @@ class SpecimenGroupSpec extends StudyFixture {
 
       val name2 = nameGenerator.next[Study]
       val sg2 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study.id.toString, name2, name2, units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(study.id.toString, name2, None, units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
 
       sg2 must beSuccessful.like {
@@ -96,7 +96,7 @@ class SpecimenGroupSpec extends StudyFixture {
       val specimenType = SpecimenType.FilteredUrine
 
       val sg1 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
 
       val name2 = nameGenerator.next[Study]
@@ -107,8 +107,8 @@ class SpecimenGroupSpec extends StudyFixture {
       val specimenType2 = SpecimenType.DnaBlood
 
       val sg2 = await(studyService.updateSpecimenGroup(
-        new UpdateSpecimenGroupCmd(study.id.toString, sg1.id.toString, sg1.versionOption, name2,
-          name2, units2, anatomicalSourceType2, preservationType2, preservationTempType2,
+        new UpdateSpecimenGroupCmd(sg1.id.toString, sg1.versionOption, study.id.toString, name2,
+          Some(name2), units2, anatomicalSourceType2, preservationType2, preservationTempType2,
           specimenType2)))
 
       sg2 must beSuccessful.like {
@@ -133,7 +133,7 @@ class SpecimenGroupSpec extends StudyFixture {
       val specimenType = SpecimenType.FilteredUrine
 
       val sg1 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
 
       val name2 = nameGenerator.next[Study]
@@ -145,8 +145,8 @@ class SpecimenGroupSpec extends StudyFixture {
       val versionOption = Some(sg1.version + 1)
 
       val sg2 = await(studyService.updateSpecimenGroup(
-        new UpdateSpecimenGroupCmd(study.id.toString, sg1.id.toString, versionOption, name2,
-          name2, units2, anatomicalSourceType2, preservationType2, preservationTempType2,
+        new UpdateSpecimenGroupCmd(sg1.id.toString, versionOption, study.id.toString, name2,
+          None, units2, anatomicalSourceType2, preservationType2, preservationTempType2,
           specimenType2)))
       sg2 must beFailing.like {
         case msgs => msgs.head must contain("doesn't match current version")
@@ -162,12 +162,12 @@ class SpecimenGroupSpec extends StudyFixture {
       val specimenType = SpecimenType.FilteredUrine
 
       val sg1 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
       specimenGroupRepository.getMap must haveKey(sg1.id)
 
       val sg2 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
       sg2 must beFailing.like {
         case msgs => msgs.head must contain("name already exists")
@@ -183,7 +183,7 @@ class SpecimenGroupSpec extends StudyFixture {
       val specimenType = SpecimenType.FilteredUrine
 
       val sg1 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
       specimenGroupRepository.getMap must haveKey(sg1.id)
 
@@ -195,13 +195,13 @@ class SpecimenGroupSpec extends StudyFixture {
       val specimenType2 = SpecimenType.DnaBlood
 
       val sg2 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study.id.toString, name2, name2, units2, anatomicalSourceType2,
+        new AddSpecimenGroupCmd(study.id.toString, name2, None, units2, anatomicalSourceType2,
           preservationType2, preservationTempType2, specimenType2))) | null
       specimenGroupRepository.getMap must haveKey(sg2.id)
 
       val sg3 = await(studyService.updateSpecimenGroup(
-        new UpdateSpecimenGroupCmd(study.id.toString, sg2.id.toString, sg2.versionOption, name,
-          name, units, anatomicalSourceType, preservationType, preservationTempType,
+        new UpdateSpecimenGroupCmd(sg2.id.toString, sg2.versionOption, study.id.toString, name,
+          None, units, anatomicalSourceType, preservationType, preservationTempType,
           specimenType)))
       sg3 must beFailing.like {
         case msgs => msgs.head must contain("name already exists")
@@ -217,15 +217,15 @@ class SpecimenGroupSpec extends StudyFixture {
       val specimenType = SpecimenType.FilteredUrine
 
       val sg1 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
       specimenGroupRepository.getMap must haveKey(sg1.id)
 
-      val study2 = await(studyService.addStudy(new AddStudyCmd(name, name))) | null
+      val study2 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
 
       val sg2 = await(studyService.updateSpecimenGroup(
-        new UpdateSpecimenGroupCmd(study2.id.toString, sg1.id.toString, sg1.versionOption,
-          name, name, units, anatomicalSourceType, preservationType, preservationTempType,
+        new UpdateSpecimenGroupCmd(sg1.id.toString, sg1.versionOption, study2.id.toString,
+          name, Some(name), units, anatomicalSourceType, preservationType, preservationTempType,
           specimenType)))
       sg2 must beFailing.like {
         case msgs => msgs.head must contain("does not belong")
@@ -241,12 +241,12 @@ class SpecimenGroupSpec extends StudyFixture {
       val specimenType = SpecimenType.FilteredUrine
 
       val sg1 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
       specimenGroupRepository.getMap must haveKey(sg1.id)
 
       await(studyService.removeSpecimenGroup(
-        new RemoveSpecimenGroupCmd(study.id.toString, sg1.id.toString, sg1.versionOption)))
+        new RemoveSpecimenGroupCmd(sg1.id.toString, sg1.versionOption, study.id.toString)))
       specimenGroupRepository.getMap must not haveKey (sg1.id)
     }
 
@@ -259,13 +259,13 @@ class SpecimenGroupSpec extends StudyFixture {
       val specimenType = SpecimenType.FilteredUrine
 
       val sg1 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study.id.toString, name, name, units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
       specimenGroupRepository.getMap must haveKey(sg1.id)
 
       val versionOption = Some(sg1.version + 1)
       val sg2 = await(studyService.removeSpecimenGroup(
-        new RemoveSpecimenGroupCmd(study.id.toString, sg1.id.toString, versionOption)))
+        new RemoveSpecimenGroupCmd(sg1.id.toString, versionOption, study.id.toString)))
       sg2 must beFailing.like {
         case msgs => msgs.head must contain("doesn't match current version")
       }

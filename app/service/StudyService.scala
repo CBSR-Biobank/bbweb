@@ -51,7 +51,7 @@ class StudyService(
   }
 
   def addStudy(cmd: AddStudyCmd): Future[DomainValidation[DisabledStudy]] = {
-    val cmdWithId = AddStudyCmdWithId(cmd.name, cmd.description, StudyIdentityService.nextIdentity)
+    val cmdWithId = AddStudyCmdWithId(StudyIdentityService.nextIdentity, cmd.name, cmd.description)
     studyProcessor ? Message(cmdWithId) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
   }
 
@@ -65,8 +65,12 @@ class StudyService(
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[DisabledStudy]])
 
   // specimen groups
-  def addSpecimenGroup(cmd: AddSpecimenGroupCmd): Future[DomainValidation[SpecimenGroup]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroup]])
+  def addSpecimenGroup(cmd: AddSpecimenGroupCmd): Future[DomainValidation[SpecimenGroup]] = {
+    val cmdWithId = AddSpecimenGroupCmdWithId(SpecimenGroupIdentityService.nextIdentity,
+      cmd.studyId, cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType,
+      cmd.preservationType, cmd.preservationTemperatureType, cmd.specimenType)
+    studyProcessor ? Message(cmdWithId) map (_.asInstanceOf[DomainValidation[SpecimenGroup]])
+  }
 
   def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd): Future[DomainValidation[SpecimenGroup]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroup]])
@@ -75,8 +79,11 @@ class StudyService(
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroup]])
 
   // collection event types
-  def addCollectionEventType(cmd: AddCollectionEventTypeCmd): Future[DomainValidation[CollectionEventType]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventType]])
+  def addCollectionEventType(cmd: AddCollectionEventTypeCmd): Future[DomainValidation[CollectionEventType]] = {
+    val cmdWithId = AddCollectionEventTypeCmdWithId(CollectionEventTypeIdentityService.nextIdentity,
+      cmd.studyId, cmd.name, cmd.description, cmd.recurring)
+    studyProcessor ? Message(cmdWithId) map (_.asInstanceOf[DomainValidation[CollectionEventType]])
+  }
 
   def updateCollectionEventType(cmd: UpdateCollectionEventTypeCmd): Future[DomainValidation[CollectionEventType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventType]])
@@ -85,15 +92,25 @@ class StudyService(
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventType]])
 
   // specimen group -> collection event types
-  def addSpecimenGroupToCollectionEventType(cmd: AddSpecimenGroupToCollectionEventTypeCmd): Future[DomainValidation[SpecimenGroupCollectionEventType]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroupCollectionEventType]])
+  def addSpecimenGroupToCollectionEventType(
+    cmd: AddSpecimenGroupToCollectionEventTypeCmd): Future[DomainValidation[SpecimenGroupCollectionEventType]] = {
+    val cmdWithId = AddSpecimenGroupToCollectionEventTypeCmdWithId(
+      SpecimenGroupCollectionEventTypeIdentityService.nextIdentity,
+      cmd.studyId, cmd.specimenGroupId, cmd.collectionEventTypeId, cmd.count, cmd.amount)
+    studyProcessor ? Message(cmdWithId) map (_.asInstanceOf[DomainValidation[SpecimenGroupCollectionEventType]])
+  }
 
   def removeSpecimenGroupFromCollectionEventType(cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd): Future[DomainValidation[SpecimenGroupCollectionEventType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[SpecimenGroupCollectionEventType]])
 
   // study annotation type
-  def addCollectionEventAnnotationType(cmd: AddCollectionEventAnnotationTypeCmd): Future[DomainValidation[CollectionEventAnnotationType]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
+  def addCollectionEventAnnotationType(
+    cmd: AddCollectionEventAnnotationTypeCmd): Future[DomainValidation[CollectionEventAnnotationType]] = {
+    val cmdWithId = AddCollectionEventAnnotationTypeCmdWithId(
+      CollectionEventTypeAnnotationTypeIdentityService.nextIdentity,
+      cmd.studyId, cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options)
+    studyProcessor ? Message(cmdWithId) map (_.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
+  }
 
   def updateCollectionEventAnnotationType(cmd: UpdateCollectionEventAnnotationTypeCmd): Future[DomainValidation[CollectionEventAnnotationType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
@@ -102,8 +119,13 @@ class StudyService(
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
 
   // annotation types -> collection event types
-  def addAnnotationTypeToCollectionEventType(cmd: AddAnnotationTypeToCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
-    studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
+  def addAnnotationTypeToCollectionEventType(
+    cmd: AddAnnotationTypeToCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] = {
+    val cmdWithId = AddAnnotationTypeToCollectionEventTypeCmdWithId(
+      CollectionEventTypeAnnotationTypeIdentityService.nextIdentity,
+      cmd.studyId, cmd.annotationTypeId, cmd.collectionEventTypeId, cmd.required)
+    studyProcessor ? Message(cmdWithId) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
+  }
 
   def removeAnnotationTypeFromCollectionEventType(cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
     studyProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])

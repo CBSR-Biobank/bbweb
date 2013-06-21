@@ -21,29 +21,28 @@ case class StudyDisabledEvent(id: StudyId)
 
 // specimen group events
 case class StudySpecimenGroupAddedEvent(studyId: StudyId, specimenGroupId: SpecimenGroupId,
-  name: String, description: String, units: String, anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
+  name: String, description: Option[String], units: String, anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
   preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
 case class StudySpecimenGroupUpdatedEvent(studyId: StudyId, specimenGroupId: SpecimenGroupId,
-  name: String, description: String, units: String, anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
+  name: String, description: Option[String], units: String, anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
   preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
 case class StudySpecimenGroupRemovedEvent(studyId: StudyId, specimenGroupId: SpecimenGroupId)
 
 // collection event events
 case class CollectionEventTypeAddedEvent(
   studyId: StudyId, collectionEventTypeId: CollectionEventTypeId,
-  name: String, description: String, recurring: Boolean)
+  name: String, description: Option[String], recurring: Boolean)
 
 case class CollectionEventTypeUpdatedEvent(
   studyId: StudyId, collectionEventTypeId: CollectionEventTypeId,
-  name: String, description: String, recurring: Boolean)
+  name: String, description: Option[String], recurring: Boolean)
 
 case class CollectionEventTypeRemovedEvent(
   studyId: StudyId, collectionEventTypeId: CollectionEventTypeId)
 
 case class SpecimenGroupAddedToCollectionEventTypeEvent(
-  studyId: StudyId, sg2cetId: String,
-  collectionEventTypeId: CollectionEventTypeId, specimenGroupId: SpecimenGroupId,
-  count: Int, amount: BigDecimal)
+  studyId: StudyId, sg2cetId: String, collectionEventTypeId: CollectionEventTypeId,
+  specimenGroupId: SpecimenGroupId, ount: Int, amount: BigDecimal)
 
 case class SpecimenGroupRemovedFromCollectionEventTypeEvent(
   studyId: StudyId, sg2cetId: String,
@@ -51,13 +50,13 @@ case class SpecimenGroupRemovedFromCollectionEventTypeEvent(
 
 case class CollectionEventAnnotationTypeAddedEvent(
   studyId: StudyId, annotationTypeId: AnnotationTypeId,
-  name: String, description: String, valueType: AnnotationValueType, maxValueCount: Int,
-  options: Map[String, String])
+  name: String, description: Option[String], valueType: AnnotationValueType,
+  maxValueCount: Option[Int], options: Option[Map[String, String]])
 
 case class CollectionEventAnnotationTypeUpdatedEvent(
   studyId: StudyId, annotationTypeId: AnnotationTypeId,
-  name: String, description: String, valueType: AnnotationValueType, maxValueCount: Int,
-  options: Map[String, String])
+  name: String, description: Option[String], valueType: AnnotationValueType,
+  maxValueCount: Option[Int], options: Option[Map[String, String]])
 
 case class CollectionEventAnnotationTypeRemovedEvent(
   studyId: StudyId, annotationTypeId: AnnotationTypeId)

@@ -1,6 +1,13 @@
 package domain
 
 import infrastructure._
+import infrastructure.commands._
+import domain.AnatomicalSourceType._
+import domain.PreservationType._
+import domain.PreservationTemperatureType._
+import domain.SpecimenType._
+import domain.AnnotationValueType._
+
 import org.slf4j.Logger
 
 import scalaz._

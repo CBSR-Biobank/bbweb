@@ -8,6 +8,11 @@ import domain.{
   ConcurrencySafeEntity,
   Entity
 }
+import domain.AnatomicalSourceType._
+import domain.PreservationType._
+import domain.PreservationTemperatureType._
+import domain.SpecimenType._
+import domain.AnnotationValueType._
 import domain.study._
 import domain.service.{
   CollectionEventTypeDomainService,
@@ -225,11 +230,6 @@ class StudyProcessor(
   }
 }
 
-private[service] case class AddStudyCmdWithId(
-  name: String, description: Option[String], studyId: StudyId)
-  extends StudyCommand with infrastructure.commands.Identity
-
-private[service] case class AddCollectionEventTypeCmdWithId(
-  collectionEventTypeId: CollectionEventTypeId, studyId: String, name: String,
-  description: Option[String], recurring: Boolean)
+case class AddStudyCmdWithId(
+  id: String, name: String, description: Option[String])
   extends StudyCommand with infrastructure.commands.Identity

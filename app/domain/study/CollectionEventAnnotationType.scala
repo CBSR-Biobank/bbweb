@@ -12,10 +12,10 @@ case class CollectionEventAnnotationType(
   version: Long = -1,
   studyId: StudyId,
   name: String,
-  description: String,
+  description: Option[String],
   valueType: AnnotationValueType,
-  maxValueCount: Int,
-  options: Map[String, String]) extends StudyAnnotationType {
+  maxValueCount: Option[Int],
+  options: Option[Map[String, String]]) extends StudyAnnotationType {
 
   val toStringFormat = """{ id: %s, version: %d, studyId: %s, name: %s, description: %s,""" +
     """ valueType: %s, maxValueCount: %d, options: %s }"""

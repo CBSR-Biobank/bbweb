@@ -15,7 +15,7 @@ case class SpecimenGroup(
   version: Long = -1,
   studyId: StudyId,
   name: String,
-  description: String,
+  description: Option[String],
   units: String,
   anatomicalSourceType: AnatomicalSourceType,
   preservationType: PreservationType,

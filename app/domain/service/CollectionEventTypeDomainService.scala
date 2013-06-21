@@ -60,7 +60,7 @@ class CollectionEventTypeDomainService(
    */
   def process = {
     // collection event types
-    case _@ (cmd: AddCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+    case _@ (cmd: AddCollectionEventTypeCmdWithId, study: DisabledStudy, listeners: MessageEmitter) =>
       addCollectionEventType(cmd, study, listeners)
     case _@ (cmd: UpdateCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
       updateCollectionEventType(cmd, study, listeners)
@@ -68,13 +68,13 @@ class CollectionEventTypeDomainService(
       removeCollectionEventType(cmd, study, listeners)
 
     // specimen group -> collection event types
-    case _@ (cmd: AddSpecimenGroupToCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+    case _@ (cmd: AddSpecimenGroupToCollectionEventTypeCmdWithId, study: DisabledStudy, listeners: MessageEmitter) =>
       addSpecimenGroupToCollectionEventType(cmd, study, listeners)
     case _@ (cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
       removeSpecimenGroupFromCollectionEventType(cmd, study, listeners)
 
     // annotation types -> collection event types
-    case _@ (cmd: AddAnnotationTypeToCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+    case _@ (cmd: AddAnnotationTypeToCollectionEventTypeCmdWithId, study: DisabledStudy, listeners: MessageEmitter) =>
       addAnnotationTypeToCollectionEventType(cmd, study, listeners)
     case _@ (cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
       removeAnnotationTypeFromCollectionEventType(cmd, study, listeners)
@@ -84,7 +84,7 @@ class CollectionEventTypeDomainService(
   }
 
   private def addCollectionEventType(
-    cmd: AddCollectionEventTypeCmd,
+    cmd: AddCollectionEventTypeCmdWithId,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
     def addItem(item: CollectionEventType) {
@@ -139,12 +139,12 @@ class CollectionEventTypeDomainService(
   }
 
   private def addSpecimenGroupToCollectionEventType(
-    cmd: AddSpecimenGroupToCollectionEventTypeCmd,
+    cmd: AddSpecimenGroupToCollectionEventTypeCmdWithId,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
 
-    def createItem(sg: SpecimenGroup, cet: CollectionEventType) = {
-      val item = cet.addSpecimenGroup(sg, cmd.count, cmd.amount)
+    def createItem(id: String, sg: SpecimenGroup, cet: CollectionEventType) = {
+      val item = cet.addSpecimenGroup(id, sg, cmd.count, cmd.amount)
       sg2cetRepo.updateMap(item)
       listeners sendEvent SpecimenGroupAddedToCollectionEventTypeEvent(
         study.id, item.id, item.collectionEventTypeId, item.specimenGroupId, item.count, item.amount)
@@ -152,9 +152,9 @@ class CollectionEventTypeDomainService(
     }
 
     val item = for {
-      v1 <- study.validateSpecimenGroupId(specimenGroupRepository, cmd.specimenGroupId)
-      v2 <- study.validateCollectionEventTypeId(collectionEventTypeRepository, cmd.collectionEventTypeId)
-      newItem <- createItem(v1, v2).success
+      sg <- study.validateSpecimenGroupId(specimenGroupRepository, cmd.specimenGroupId)
+      cet <- study.validateCollectionEventTypeId(collectionEventTypeRepository, cmd.collectionEventTypeId)
+      newItem <- createItem(cmd.id, sg, cet).success
     } yield newItem
     CommandHandler.logMethod(log, "addSpecimenGroupToCollectionEventType", cmd, item)
     item
@@ -173,7 +173,7 @@ class CollectionEventTypeDomainService(
     }
 
     val item = for {
-      item <- sg2cetRepo.getByKey(cmd.sg2cetId)
+      item <- sg2cetRepo.getByKey(cmd.id)
       removedItem <- removeItem(item)
     } yield removedItem
     CommandHandler.logMethod(log, "removeSpecimenGroupFromCollectionEventType", cmd, item)
@@ -186,7 +186,7 @@ class CollectionEventTypeDomainService(
     listeners: MessageEmitter): DomainValidation[CollectionEventTypeAnnotationType] = {
     def createItem(cet: CollectionEventType,
       cetAt: CollectionEventAnnotationType): CollectionEventTypeAnnotationType = {
-      val item = cet.addAnnotationType(cetAt, cmd.required)
+      val item = cet.addAnnotationType(cmd.id, cetAt, cmd.required)
       cet2atRepo.updateMap(item)
       listeners sendEvent AnnotationTypeAddedToCollectionEventTypeEvent(
         study.id, item.id, item.collectionEventTypeId, item.annotationTypeId)
@@ -215,7 +215,7 @@ class CollectionEventTypeDomainService(
     }
 
     val item = for {
-      item <- cet2atRepo.getByKey(cmd.cetAtId)
+      item <- cet2atRepo.getByKey(cmd.id)
       removedItem <- removeItem(item).success
     } yield removedItem
     CommandHandler.logMethod(log, "removeAnnotationTypeFromCollectionEventType", cmd, item)

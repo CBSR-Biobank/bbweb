@@ -8,8 +8,8 @@ import domain.SpecimenType._
 import domain.AnnotationValueType._
 
 // study commands
-trait StudyCommand extends Command {}
-trait StudyId { val studyId: String }
+trait StudyCommand extends Command
+trait StudyIdentity { val studyId: String }
 
 case class AddStudyCmd(name: String, description: Option[String]) extends StudyCommand
 
@@ -24,65 +24,95 @@ case class DisableStudyCmd(studyId: String, expectedVersion: Option[Long])
   extends StudyCommand with Identity with ExpectedVersion
 
 // specimen group commands
-trait SpecimenGroupCommand extends StudyCommand with StudyId
+trait SpecimenGroupCommand extends StudyCommand with StudyIdentity
 
 case class AddSpecimenGroupCmd(studyId: String, name: String, description: Option[String],
   units: String, anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
   preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
   extends SpecimenGroupCommand
 
-case class UpdateSpecimenGroupCmd(specimenGroupId: String, expectedVersion: Option[Long],
+case class UpdateSpecimenGroupCmd(id: String, expectedVersion: Option[Long],
   studyId: String, name: String, description: Option[String], units: String,
   anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
   preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
   extends SpecimenGroupCommand with Identity with ExpectedVersion
 
-case class RemoveSpecimenGroupCmd(specimenGroupId: String, expectedVersion: Option[Long])
+case class RemoveSpecimenGroupCmd(id: String, expectedVersion: Option[Long], studyId: String)
   extends SpecimenGroupCommand with Identity with ExpectedVersion
 
 // collection event commands
-sealed trait CollectionEventTypeCommand extends StudyCommand {
-}
-case class AddCollectionEventTypeCmd(studyIdentity: String, name: String,
-  description: Option[String], recurring: Boolean)
-  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+trait CollectionEventTypeCommand extends StudyCommand with StudyIdentity
 
-case class UpdateCollectionEventTypeCmd(collectionEventTypeId: String,
-  expectedVersion: Option[Long], studyIdentity: String, name: String, description: String,
-  recurring: Boolean) extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+case class AddCollectionEventTypeCmd(
+  studyId: String, name: String, description: Option[String], recurring: Boolean)
+  extends CollectionEventTypeCommand
 
-case class RemoveCollectionEventTypeCmd(collectionEventTypeId: String, expectedVersion: Option[Long],
-  studyIdentity: String)
-  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+case class UpdateCollectionEventTypeCmd(
+  id: String, expectedVersion: Option[Long], studyId: String,
+  name: String, description: Option[String], recurring: Boolean)
+  extends CollectionEventTypeCommand with Identity with ExpectedVersion
 
-case class AddSpecimenGroupToCollectionEventTypeCmd(studyIdentity: String,
-  specimenGroupId: String, collectionEventTypeId: String, count: Int, amount: BigDecimal)
-  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+case class RemoveCollectionEventTypeCmd(
+  id: String, expectedVersion: Option[Long], studyId: String)
+  extends CollectionEventTypeCommand with Identity with ExpectedVersion
 
-case class RemoveSpecimenGroupFromCollectionEventTypeCmd(sg2cetId: String, studyIdentity: String)
-  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+case class AddSpecimenGroupToCollectionEventTypeCmd(
+  studyId: String, specimenGroupId: String, collectionEventTypeId: String,
+  count: Int, amount: BigDecimal)
+  extends CollectionEventTypeCommand
 
-case class AddAnnotationTypeToCollectionEventTypeCmd(studyIdentity: String,
-  collectionEventTypeId: String, annotationTypeId: String, required: Boolean)
-  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+case class RemoveSpecimenGroupFromCollectionEventTypeCmd(
+  id: String, studyIdentity: String)
+  extends CollectionEventTypeCommand with Identity
 
-case class RemoveAnnotationTypeFromCollectionEventTypeCmd(cetAtId: String, studyIdentity: String)
-  extends { val studyId = studyIdentity } with CollectionEventTypeCommand
+case class AddAnnotationTypeToCollectionEventTypeCmd(
+  studyId: String, annotationTypeId: String, collectionEventTypeId: String, required: Boolean)
+  extends CollectionEventTypeCommand
+
+case class RemoveAnnotationTypeFromCollectionEventTypeCmd(
+  id: String, studyId: String)
+  extends CollectionEventTypeCommand with Identity
 
 // study annotation type commands
-sealed trait StudyAnnotationTypeCommand extends StudyCommand {
-}
-case class AddCollectionEventAnnotationTypeCmd(studyIdentity: String,
+trait StudyAnnotationTypeCommand extends StudyCommand with StudyIdentity
+
+case class AddCollectionEventAnnotationTypeCmd(studyId: String,
   name: String, description: Option[String], valueType: AnnotationValueType,
   maxValueCount: Option[Int], options: Option[Map[String, String]])
-  extends { val studyId = studyIdentity } with StudyAnnotationTypeCommand
+  extends StudyAnnotationTypeCommand
 
 case class UpdateCollectionEventAnnotationTypeCmd(annotationTypeId: String,
   expectedVersion: Option[Long], studyIdentity: String, name: String,
-  description: Option[String], valueType: AnnotationValueType, maxValueCount: Int,
-  options: Map[String, String])
-  extends { val studyId = studyIdentity } with StudyAnnotationTypeCommand
+  description: Option[String], valueType: AnnotationValueType, maxValueCount: Option[Int],
+  options: Option[Map[String, String]])
+  extends StudyAnnotationTypeCommand with Identity with ExpectedVersion
 
-case class RemoveCollectionEventAnnotationTypeCmd(annotationTypeId: String,
-  expectedVersion: Option[Long], studyIdentity: String)
-  extends { val studyId = studyIdentity } with StudyAnnotationTypeCommand
+case class RemoveCollectionEventAnnotationTypeCmd(id: String,
+  expectedVersion: Option[Long], studyId: String)
+  extends StudyAnnotationTypeCommand with Identity with ExpectedVersion
+
+// To be used within the service and domain layers
+
+case class AddSpecimenGroupCmdWithId(
+  id: String, studyId: String, name: String, description: Option[String],
+  units: String, anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
+  preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
+  extends SpecimenGroupCommand with infrastructure.commands.Identity
+
+case class AddCollectionEventTypeCmdWithId(
+  id: String, studyId: String, name: String, description: Option[String], recurring: Boolean)
+  extends CollectionEventTypeCommand with infrastructure.commands.Identity
+
+case class AddCollectionEventAnnotationTypeCmdWithId(
+  id: String, studyId: String, name: String, description: Option[String],
+  valueType: AnnotationValueType, maxValueCount: Option[Int], options: Option[Map[String, String]])
+  extends StudyAnnotationTypeCommand with infrastructure.commands.Identity
+
+case class AddSpecimenGroupToCollectionEventTypeCmdWithId(
+  id: String, studyId: String, specimenGroupId: String, collectionEventTypeId: String,
+  count: Int, amount: BigDecimal)
+  extends CollectionEventTypeCommand with infrastructure.commands.Identity
+
+case class AddAnnotationTypeToCollectionEventTypeCmdWithId(
+  id: String, studyId: String, annotationTypeId: String, collectionEventTypeId: String, required: Boolean)
+  extends CollectionEventTypeCommand with infrastructure.commands.Identity

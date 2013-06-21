@@ -69,7 +69,7 @@ object AppServices {
     val userService = new UserService(userRepo, userProcessor)
 
     // for debug only - password is "administrator"
-    userRepo.updateMap(User.add("admin@admin.com", "admin", "admin@admin.com",
+    userRepo.updateMap(User.add(new UserId("admin@admin.com"), "admin", "admin@admin.com",
       "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS",
       "bcrypt", None, None) | null)
 

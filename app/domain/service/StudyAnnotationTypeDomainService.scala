@@ -46,7 +46,7 @@ class StudyAnnotationTypeDomainService(
   def process = {
 
     // collection event  annotations
-    case _@ (cmd: AddCollectionEventAnnotationTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
+    case _@ (cmd: AddCollectionEventAnnotationTypeCmdWithId, study: DisabledStudy, listeners: MessageEmitter) =>
       addCollectionEventAnnotationType(cmd, study, listeners)
     case _@ (cmd: UpdateCollectionEventAnnotationTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
       updateCollectionEventAnnotationType(cmd, study, listeners)
@@ -59,7 +59,7 @@ class StudyAnnotationTypeDomainService(
   }
 
   private def addCollectionEventAnnotationType(
-    cmd: AddCollectionEventAnnotationTypeCmd,
+    cmd: AddCollectionEventAnnotationTypeCmdWithId,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
 
