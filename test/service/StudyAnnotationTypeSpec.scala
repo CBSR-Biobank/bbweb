@@ -31,19 +31,18 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
     "be added" in {
       val name = nameGenerator.next[AnnotationType]
       val valueType = AnnotationValueType.String
-      val maxValueCount = None
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
-          valueType, maxValueCount, None)))
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name), valueType)))
 
       at1 must beSuccessful.like {
         case x =>
           x.version must beEqualTo(0)
           x.name must be(name)
-          x.description must be(name)
+          x.description must beSome(name)
           x.valueType must beEqualTo(valueType)
-          x.maxValueCount must beEqualTo(maxValueCount)
+          x.maxValueCount must beNone
+          x.options must beNone
           annotationTypeRepo.getMap must haveKey(x.id)
       }
 
@@ -60,9 +59,10 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
         case x =>
           x.version must beEqualTo(0)
           x.name must be(name2)
-          x.description must be(name2)
+          x.description must beNone
           x.valueType must beEqualTo(valueType2)
-          x.maxValueCount must beEqualTo(maxValueCount2)
+          x.maxValueCount must be(maxValueCount2)
+          x.options must be(options)
           annotationTypeRepo.getMap must haveKey(x.id)
       }
     }
@@ -93,11 +93,10 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
     "be updated" in {
       val name = nameGenerator.next[AnnotationType]
       val valueType = AnnotationValueType.String
-      val maxValueCount = None
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
-          valueType, maxValueCount, None))) | null
+          valueType))) | null
 
       val name2 = nameGenerator.next[Study]
       val valueType2 = AnnotationValueType.Select
@@ -113,9 +112,10 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
         case x =>
           x.version must beEqualTo(at1.version + 1)
           x.name must be(name2)
-          x.description must be(name2)
+          x.description must beNone
           x.valueType must beEqualTo(valueType2)
-          x.maxValueCount must beEqualTo(maxValueCount2)
+          x.maxValueCount must be(maxValueCount2)
+          x.options must be(options)
           annotationTypeRepo.getMap must haveKey(x.id)
       }
     }
@@ -212,9 +212,10 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
         case x =>
           x.version must beEqualTo(at1.version)
           x.name must be(name)
-          x.description must be(name)
+          x.description must beSome(name)
           x.valueType must beEqualTo(valueType)
-          x.maxValueCount must beEqualTo(None)
+          x.maxValueCount must beNone
+          x.options must beNone
           annotationTypeRepo.getMap must not haveKey (at1.id)
       }
     }

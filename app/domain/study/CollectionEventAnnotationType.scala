@@ -22,7 +22,8 @@ case class CollectionEventAnnotationType(
 
   override def toString: String = {
     toStringFormat.format(
-      id, version, studyId, name, description, valueType, maxValueCount, options)
+      id, version, studyId, name, description, valueType, maxValueCount.getOrElse(-1),
+      options.getOrElse("None"))
   }
 
 }

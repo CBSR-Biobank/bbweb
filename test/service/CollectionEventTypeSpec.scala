@@ -41,7 +41,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         case x =>
           x.version must beEqualTo(0)
           x.name must be(name)
-          x.description must be(name)
+          x.description must beSome(name)
           x.recurring must beEqualTo(recurring)
           collectionEventTypeRepository.getMap must haveKey(x.id)
           collectionEventTypeRepository.getByKey(x.id) must beSuccessful.like {
@@ -54,13 +54,13 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring2 = false
 
       val cet2 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name2, Some(name2), recurring2)))
+        new AddCollectionEventTypeCmd(study.id.toString, name2, None, recurring2)))
 
       cet2 must beSuccessful.like {
         case x =>
           x.version must beEqualTo(0)
           x.name must be(name2)
-          x.description must be(name2)
+          x.description must beNone
           x.recurring must beEqualTo(recurring2)
           collectionEventTypeRepository.getMap must haveKey(x.id)
           collectionEventTypeRepository.getByKey(x.id) must beSuccessful.like {
