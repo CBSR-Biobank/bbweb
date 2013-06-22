@@ -55,7 +55,7 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
     specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
     cmd: UpdateSpecimenGroupCmd): DomainValidation[SpecimenGroup] =
     for {
-      prevItem <- specimenGroupRepository.getByKey(new SpecimenGroupId(cmd.specimenGroupId))
+      prevItem <- specimenGroupRepository.getByKey(new SpecimenGroupId(cmd.id))
       validVersion <- prevItem.requireVersion(cmd.expectedVersion)
       validStudy <- validateSpecimenGroupId(specimenGroupRepository, prevItem.id)
       newItem <- addSpecimenGroup(specimenGroupRepository, prevItem.id, prevItem.version + 1,
@@ -67,7 +67,7 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
     specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
     cmd: RemoveSpecimenGroupCmd): DomainValidation[SpecimenGroup] =
     for {
-      item <- specimenGroupRepository.getByKey(new SpecimenGroupId(cmd.specimenGroupId))
+      item <- specimenGroupRepository.getByKey(new SpecimenGroupId(cmd.id))
       validVersion <- item.requireVersion(cmd.expectedVersion)
       validStudy <- validateSpecimenGroupId(specimenGroupRepository, item.id)
     } yield item
@@ -147,7 +147,7 @@ case class DisabledStudy(id: StudyId, version: Long = -1, name: String, descript
     annotationTypeRepo: ReadRepository[AnnotationTypeId, StudyAnnotationType],
     cmd: UpdateCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] = {
     for {
-      prevItem <- annotationTypeRepo.getByKey(new AnnotationTypeId(cmd.annotationTypeId))
+      prevItem <- annotationTypeRepo.getByKey(new AnnotationTypeId(cmd.id))
       validVersion <- prevItem.requireVersion(cmd.expectedVersion)
       validStudy <- validateCollectionEventAnnotationTypeId(annotationTypeRepo, prevItem.id)
       newItem <- addCollectionEventAnnotationType(annotationTypeRepo, prevItem.id,

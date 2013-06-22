@@ -9,10 +9,10 @@ import Scalaz._
 abstract class AnnotationType extends ConcurrencySafeEntity[AnnotationTypeId] {
 
   val name: String
-  val description: String
+  val description: Option[String]
   val valueType: AnnotationValueType
-  val maxValueCount: Int
-  val options: Map[String, String]
+  val maxValueCount: Option[Int]
+  val options: Option[Map[String, String]]
 
   private def validateValueType: DomainValidation[Boolean] = {
     if (valueType.equals(AnnotationValueType.Select)) {

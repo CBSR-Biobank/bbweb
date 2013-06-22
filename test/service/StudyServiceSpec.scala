@@ -28,7 +28,7 @@ class StudyServiceSpec extends StudyFixture {
 
     "be added" in {
       val name = nameGenerator.next[Study]
-      val study = await(studyService.addStudy(new AddStudyCmd(name, name)))
+      val study = await(studyService.addStudy(new AddStudyCmd(name, Some(name))))
       studyRepository.getMap must not be empty
       study must beSuccessful.like {
         case s =>
@@ -41,20 +41,20 @@ class StudyServiceSpec extends StudyFixture {
 
     "not be added if same name exists" in {
       val name = nameGenerator.next[Study]
-      await(studyService.addStudy(new AddStudyCmd(name, name))) must beSuccessful
+      await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) must beSuccessful
 
-      await(studyService.addStudy(new AddStudyCmd(name, name))) must beFailing.like {
+      await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) must beFailing.like {
         case msgs => msgs.head must contain("name already exists")
       }
     }
 
     "be updated" in {
       val name = nameGenerator.next[Study]
-      val study1 = await(studyService.addStudy(new AddStudyCmd(name, name))) | null
+      val study1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
 
       val name2 = nameGenerator.next[Study]
       val study2 = await(studyService.updateStudy(
-        new UpdateStudyCmd(study1.id.toString, study1.versionOption, name2, name2)))
+        new UpdateStudyCmd(study1.id.toString, study1.versionOption, name2, Some(name2))))
 
       study2 must beSuccessful.like {
         case s =>
@@ -66,19 +66,19 @@ class StudyServiceSpec extends StudyFixture {
 
       // update something other than the name
       val study3 = await(studyService.updateStudy(
-        new UpdateStudyCmd(study1.id.toString, study1.versionOption, name2, name)))
+        new UpdateStudyCmd(study1.id.toString, study1.versionOption, name2)))
       study3 must beSuccessful
     }
 
     "not be updated to name that exists" in {
       val name = nameGenerator.next[Study]
-      val study1 = await(studyService.addStudy(new AddStudyCmd(name, name))) | null
+      val study1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
 
       val name2 = nameGenerator.next[Study]
-      val study2 = await(studyService.addStudy(new AddStudyCmd(name2, name2))) | null
+      val study2 = await(studyService.addStudy(new AddStudyCmd(name2, Some(name2)))) | null
 
       val study3 = await(studyService.updateStudy(
-        new UpdateStudyCmd(study2.id.toString, study2.versionOption, name, name)))
+        new UpdateStudyCmd(study2.id.toString, study2.versionOption, name, Some(name))))
       study3 must beFailing.like {
         case msgs => msgs.head must contain("name already exists")
       }
@@ -87,12 +87,12 @@ class StudyServiceSpec extends StudyFixture {
 
     "not be updated with invalid version" in {
       val name = nameGenerator.next[Study]
-      val study1 = await(studyService.addStudy(new AddStudyCmd(name, name))) | null
+      val study1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
 
       val name2 = nameGenerator.next[Study]
       val versionOption = Some(study1.version + 1)
       val study2 = await(studyService.updateStudy(
-        new UpdateStudyCmd(study1.id.toString, versionOption, name2, name2)))
+        new UpdateStudyCmd(study1.id.toString, versionOption, name2, None)))
 
     }
 
@@ -104,14 +104,14 @@ class StudyServiceSpec extends StudyFixture {
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
-      val study1 = await(studyService.addStudy(new AddStudyCmd(name, name))) | null
+      val study1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
 
       await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(study1.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
 
       await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study1.id.toString, name, name, true)))
+        new AddCollectionEventTypeCmd(study1.id.toString, name, Some(name), true)))
 
       await(studyService.enableStudy(
         new EnableStudyCmd(study1.id.toString, study1.versionOption)))
@@ -129,14 +129,14 @@ class StudyServiceSpec extends StudyFixture {
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
-      val study1 = await(studyService.addStudy(new AddStudyCmd(name, name))) | null
+      val study1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
 
       await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study1.id.toString, name, name, units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(study1.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
 
       await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study1.id.toString, name, name, true)))
+        new AddCollectionEventTypeCmd(study1.id.toString, name, Some(name), true)))
 
       val study2 = await(studyService.enableStudy(
         new EnableStudyCmd(study1.id.toString, study1.versionOption))) | null

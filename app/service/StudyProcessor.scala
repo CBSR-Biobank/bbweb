@@ -149,7 +149,7 @@ class StudyProcessor(
     }
 
     val item = for {
-      newItem <- addStudy(cmd.studyId, version = 0L, cmd.name, cmd.description)
+      newItem <- addStudy(new StudyId(cmd.id), version = 0L, cmd.name, cmd.description)
       addedItem <- addItem(newItem).success
     } yield newItem
 
@@ -158,7 +158,7 @@ class StudyProcessor(
   }
 
   private def updateStudy(cmd: UpdateStudyCmd, listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
-    val studyId = new StudyId(cmd.studyId)
+    val studyId = new StudyId(cmd.id)
 
     def updateItem(item: Study) = {
       studyRepository.updateMap(item)
@@ -166,7 +166,7 @@ class StudyProcessor(
     }
 
     val item = for {
-      prevItem <- studyRepository.getByKey(new StudyId(cmd.studyId))
+      prevItem <- studyRepository.getByKey(new StudyId(cmd.id))
       newItem <- addStudy(prevItem.id, prevItem.version + 1, cmd.name, cmd.description)
       updatedItem <- updateItem(newItem).success
     } yield newItem
@@ -195,7 +195,7 @@ class StudyProcessor(
     }
 
     val item = for {
-      prevItem <- studyRepository.getByKey(new StudyId(cmd.studyId))
+      prevItem <- studyRepository.getByKey(new StudyId(cmd.id))
       newItem <- enableStudy(prevItem)
       updatedItem <- updateItem(newItem).success
     } yield newItem
@@ -220,7 +220,7 @@ class StudyProcessor(
     }
 
     val item = for {
-      prevItem <- studyRepository.getByKey(new StudyId(cmd.studyId))
+      prevItem <- studyRepository.getByKey(new StudyId(cmd.id))
       newItem <- disableStudy(prevItem)
       updatedItem <- updateItem(newItem).success
     } yield newItem

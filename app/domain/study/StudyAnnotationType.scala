@@ -10,8 +10,9 @@ abstract class StudyAnnotationType extends AnnotationType {
 
   val studyId: StudyId
   val name: String
-  val description: String
+  val description: Option[String]
   val valueType: AnnotationValueType
-  val maxValueCount: Int
+  val maxValueCount: Option[Int]
+  val options: Option[Map[String, String]]
 
 }
