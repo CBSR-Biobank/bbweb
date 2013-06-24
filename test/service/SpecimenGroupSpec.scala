@@ -59,7 +59,7 @@ class SpecimenGroupSpec extends StudyFixture {
         case x =>
           x.version must beEqualTo(0)
           x.name must be(name)
-          x.description must be(name)
+          x.description must beSome(name)
           x.units must be(units)
           x.anatomicalSourceType must be(anatomicalSourceType)
           x.preservationType must be(preservationType)
@@ -77,7 +77,7 @@ class SpecimenGroupSpec extends StudyFixture {
         case x =>
           x.version must beEqualTo(0)
           x.name must be(name2)
-          x.description must be(name2)
+          x.description must beNone
           x.units must be(units)
           x.anatomicalSourceType must be(anatomicalSourceType)
           x.preservationType must be(preservationType)
@@ -115,7 +115,7 @@ class SpecimenGroupSpec extends StudyFixture {
         case x =>
           x.version must beEqualTo(sg1.version + 1)
           x.name must be(name2)
-          x.description must be(name2)
+          x.description must beSome(name2)
           x.units must be(units2)
           x.anatomicalSourceType must be(anatomicalSourceType2)
           x.preservationType must be(preservationType2)

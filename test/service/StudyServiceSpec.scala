@@ -34,7 +34,7 @@ class StudyServiceSpec extends StudyFixture {
         case s =>
           s.version must beEqualTo(0)
           s.name must be(name)
-          s.description must be(name)
+          s.description must beSome(name)
           studyRepository.getMap must haveKey(s.id)
       }
     }
@@ -54,13 +54,13 @@ class StudyServiceSpec extends StudyFixture {
 
       val name2 = nameGenerator.next[Study]
       val study2 = await(studyService.updateStudy(
-        new UpdateStudyCmd(study1.id.toString, study1.versionOption, name2, Some(name2))))
+        new UpdateStudyCmd(study1.id.toString, study1.versionOption, name2, None)))
 
       study2 must beSuccessful.like {
         case s =>
           s.version must beEqualTo(study1.version + 1)
           s.name must be(name2)
-          s.description must be(name2)
+          s.description must beNone
           studyRepository.getMap must haveKey(s.id)
       }
 

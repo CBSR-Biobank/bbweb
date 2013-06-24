@@ -102,7 +102,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         case x =>
           x.version must beEqualTo(cet1.version + 1)
           x.name must be(name2)
-          x.description must be(name2)
+          x.description must beSome(name2)
           x.recurring must beEqualTo(recurring2)
           collectionEventTypeRepository.getMap must haveKey(x.id)
           collectionEventTypeRepository.getByKey(x.id) must beSuccessful.like {
@@ -269,7 +269,7 @@ class CollectionEventTypeSpec extends StudyFixture {
 
       val at2cet = await(studyService.addAnnotationTypeToCollectionEventType(
         AddAnnotationTypeToCollectionEventTypeCmd(study.id.toString,
-          cet1.id.toString, at1.id.toString, required)))
+          at1.id.toString, cet1.id.toString, required)))
 
       at2cet must beSuccessful.like {
         case x =>
@@ -293,7 +293,7 @@ class CollectionEventTypeSpec extends StudyFixture {
 
       val at2cet1 = await(studyService.addAnnotationTypeToCollectionEventType(
         AddAnnotationTypeToCollectionEventTypeCmd(study.id.toString,
-          cet1.id.toString, at1.id.toString, required))) | null
+          at1.id.toString, cet1.id.toString, required))) | null
 
       val at2cet2 = await(studyService.removeAnnotationTypeFromCollectionEventType(
         RemoveAnnotationTypeFromCollectionEventTypeCmd(at2cet1.id.toString, study.id.toString)))
