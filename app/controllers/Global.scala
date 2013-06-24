@@ -11,6 +11,10 @@ object Global extends GlobalSettings {
 
   lazy val services: AppServices = boot
 
+  override def beforeStart(app: Application) {
+    services
+  }
+
   override def onBadRequest(request: RequestHeader, error: String) = {
     BadRequest("Bad Request: " + error)
   }
