@@ -1,6 +1,6 @@
 package domain.study
 
-import domain.{ AnnotationTypeId, ConcurrencySafeEntity }
+import domain._
 import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
@@ -13,9 +13,10 @@ import infrastructure.commands._
 import scalaz._
 import scalaz.Scalaz._
 
-abstract class Study extends ConcurrencySafeEntity[StudyId] {
-  def name: String
-  def description: Option[String]
+abstract class Study extends ConcurrencySafeEntity[StudyId]
+  with HasName with HasDescriptionOption {
+  val name: String
+  val description: Option[String]
 
   override def toString =
     "{ id:%s, version: %d, name:%s, description:%s }" format (id, version, name, description)

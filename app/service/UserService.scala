@@ -1,6 +1,7 @@
 package service
 
 import infrastructure.{ DomainValidation, DomainError, ReadWriteRepository }
+import infrastructure._
 import infrastructure.commands._
 import infrastructure.events._
 import domain._
@@ -63,11 +64,10 @@ class UserService(
   def add(user: securesocial.core.Identity): securesocial.core.Identity = {
     user.passwordInfo match {
       case Some(passwordInfo) =>
-        userProcessor ? Message(AddUserCmd(user.fullName, user.email.getOrElse(""),
+        val cmd = AddUserCmd(user.fullName, user.email.getOrElse(""),
           passwordInfo.password, passwordInfo.hasher, passwordInfo.salt,
-          user.avatarUrl)) map {
-          _.asInstanceOf[DomainValidation[User]]
-        }
+          user.avatarUrl)
+        userProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[User]])
         user
       case None => null
     }
@@ -80,11 +80,15 @@ class UserProcessor(
   this: Emitter =>
 
   def receive = {
-    case cmd: AddUserCmd =>
-      process(addUser(cmd, emitter("listenter")))
+    case msg: BiobankMsg =>
+      msg.cmd match {
+        case cmd: AddUserCmd =>
+          process(addUser(cmd, emitter("listenter")))
 
-    case _ =>
-      throw new Error("invalid command received: ")
+        case _ =>
+          throw new Error("invalid command received: ")
+
+      }
   }
 
   def addUser(cmd: AddUserCmd, listeners: MessageEmitter): DomainValidation[User] = {

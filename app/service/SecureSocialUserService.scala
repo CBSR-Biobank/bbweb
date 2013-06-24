@@ -4,7 +4,6 @@ import play.api.{ Logger, Application }
 import securesocial.core._
 import securesocial.core.providers.Token
 import securesocial.core.UserId
-import scala.Some
 import org.mindrot.jbcrypt.BCrypt
 
 /**
@@ -27,8 +26,8 @@ class SecureSocialUserService(application: Application) extends UserServicePlugi
     userService.findByEmailAndProvider(email, providerId)
   }
 
-  def save(user: Identity): Identity = {
-    userService.add(user)
+  def save(newUser: Identity): Identity = {
+    userService.add(newUser)
   }
 
   def save(token: Token) {

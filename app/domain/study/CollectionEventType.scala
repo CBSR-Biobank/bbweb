@@ -12,7 +12,9 @@ case class CollectionEventType(
   studyId: StudyId,
   name: String,
   description: Option[String],
-  recurring: Boolean) extends ConcurrencySafeEntity[CollectionEventTypeId] {
+  recurring: Boolean)
+  extends ConcurrencySafeEntity[CollectionEventTypeId]
+  with HasName with HasDescriptionOption {
 
   def addSpecimenGroup(
     id: String,

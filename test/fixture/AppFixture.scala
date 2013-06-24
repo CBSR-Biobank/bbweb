@@ -1,9 +1,9 @@
 package fixture
 
 import infrastructure._
+import service._
 import domain._
 import domain.study._
-import service._
 
 import scala.concurrent._
 import scala.reflect.ClassTag
@@ -46,6 +46,13 @@ abstract class AppFixture extends Specification with NoTimeConversions {
   val mongoDB = mongoClient(MongoDbName)
   val mongoColl = mongoClient(MongoDbName)(MongoCollName)
 
+  val userRepo = new ReadWriteRepository[UserId, User](v => new UserId(v.email))
+
+  val userProcessor = extension.processorOf(Props(
+    new UserProcessor(userRepo) with Emitter with Eventsourced { val id = 2 }))
+
+  implicit val adminUserId = new UserId("admin@admin.com")
+
   // delete the journal contents
   mongoColl.remove(MongoDBObject.empty)
 
@@ -58,6 +65,11 @@ abstract class AppFixture extends Specification with NoTimeConversions {
   def await[T](f: Future[DomainValidation[T]]) = {
     Await.result(f, timeout.duration)
   }
+
+  // for debug only - password is "administrator"
+  userRepo.updateMap(User.add(adminUserId, "admin", "admin@admin.com",
+    "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS",
+    "bcrypt", None, None) | null)
 
   extension.recover()
   // wait for processor 1 to complete processing of replayed event messages

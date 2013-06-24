@@ -6,13 +6,19 @@ import infrastructure._
 import scalaz._
 import Scalaz._
 
-abstract class AnnotationType extends ConcurrencySafeEntity[AnnotationTypeId] {
+abstract class AnnotationType
+  extends ConcurrencySafeEntity[AnnotationTypeId]
+  with HasName with HasDescriptionOption {
 
   val name: String
   val description: Option[String]
   val valueType: AnnotationValueType
   val maxValueCount: Option[Int]
   val options: Option[Map[String, String]]
+  val addedBy: UserId
+  val timeAdded: Long
+  val updatedBy: Option[UserId]
+  val timeUpdated: Option[Long]
 
   private def validateValueType: DomainValidation[Boolean] = {
     if (valueType.equals(AnnotationValueType.Select)) {

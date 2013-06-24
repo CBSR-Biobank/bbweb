@@ -50,7 +50,7 @@ object AppServices {
       new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
     val cet2atRepo =
       new ReadWriteRepository[String, CollectionEventTypeAnnotationType](v => v.id)
-    val userRepo = new ReadWriteRepository[UserId, User](v => v.id)
+    val userRepo = new ReadWriteRepository[UserId, User](v => new UserId(v.email))
 
     val studyProcessor = extension.processorOf(Props(
       new StudyProcessor(

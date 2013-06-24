@@ -6,7 +6,8 @@ import infrastructure.events._
 import domain.{
   AnnotationTypeId,
   ConcurrencySafeEntity,
-  Entity
+  Entity,
+  UserId
 }
 import domain.AnatomicalSourceType._
 import domain.PreservationType._
@@ -33,6 +34,8 @@ import org.eligosource.eventsourced.core._
 
 import scalaz._
 import Scalaz._
+
+case class StudyMessage(cmd: Any, userId: UserId, time: Long, listeners: MessageEmitter)
 
 /**
  * This is the Study Aggregate Processor.
@@ -74,9 +77,17 @@ class StudyProcessor(
     annotationTypeRepo)
 
   def receive = {
-    case cmd: AddStudyCmdWithId =>
-      process(addStudy(cmd, emitter("listeners")))
+    case msg: org.eligosource.eventsourced.core.Message =>
+      msg.event match {
+        case bbMsg: BiobankMsgWithId =>
+          bbMsg.cmd match {
+            case cmd: AddStudyCmdWithId =>
+              process(addStudy(StudyMessage(bbMsg.cmd, bbMsg.userId: UserId, msg.timestamp,
+                emitter("listeners"))))
+          }
 
+        case bbMsg: BiobankMsg =>
+      }
     case cmd: UpdateStudyCmd =>
       process(updateStudy(cmd, emitter("listeners")))
 
@@ -121,7 +132,11 @@ class StudyProcessor(
     id: StudyId,
     version: Long,
     name: String,
-    description: Option[String]): DomainValidation[DisabledStudy] = {
+    description: Option[String],
+    addedBy: UserId,
+    timeAdded: Long,
+    updatedBy: Option[UserId] = None,
+    timeUpdated: Option[Long] = None): DomainValidation[DisabledStudy] = {
 
     def nameCheck(id: StudyId, name: String): DomainValidation[Boolean] = {
       studyRepository.getValues.exists {
@@ -134,13 +149,12 @@ class StudyProcessor(
 
     for {
       nameCheck <- nameCheck(id, name)
-      newItem <- DisabledStudy(id, version, name, description).success
+      newItem <- DisabledStudy(id, version, name, description, addedBy, timeAdded,
+        updatedBy, timeUpdated).success
     } yield newItem
   }
 
-  private def addStudy(
-    cmd: AddStudyCmdWithId,
-    listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
+  private def addStudy(msg: StudyMessageWithId): DomainValidation[DisabledStudy] = {
 
     def addItem(item: Study): Study = {
       studyRepository.updateMap(item)
@@ -149,7 +163,7 @@ class StudyProcessor(
     }
 
     val item = for {
-      newItem <- addStudy(new StudyId(cmd.id), version = 0L, cmd.name, cmd.description)
+      newItem <- addStudy(new StudyId(cmd.id), version = 0L, cmd.name, cmd.description, userId, time)
       addedItem <- addItem(newItem).success
     } yield newItem
 
@@ -157,7 +171,9 @@ class StudyProcessor(
     item
   }
 
-  private def updateStudy(cmd: UpdateStudyCmd, listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
+  private def updateStudy(
+    cmd: UpdateStudyCmd,
+    listeners: MessageEmitter)(implicit userId: UserId, time: Long): DomainValidation[DisabledStudy] = {
     val studyId = new StudyId(cmd.id)
 
     def updateItem(item: Study) = {
@@ -167,7 +183,8 @@ class StudyProcessor(
 
     val item = for {
       prevItem <- studyRepository.getByKey(new StudyId(cmd.id))
-      newItem <- addStudy(prevItem.id, prevItem.version + 1, cmd.name, cmd.description)
+      newItem <- addStudy(prevItem.id, prevItem.version + 1, cmd.name, cmd.description,
+        prevItem.addedBy, prevItem.timeAdded, Some(userId), Some(time))
       updatedItem <- updateItem(newItem).success
     } yield newItem
 
@@ -229,7 +246,3 @@ class StudyProcessor(
     item
   }
 }
-
-case class AddStudyCmdWithId(
-  id: String, name: String, description: Option[String])
-  extends StudyCommand with infrastructure.commands.Identity

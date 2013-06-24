@@ -5,13 +5,20 @@ import infrastructure._
 import scalaz._
 import scalaz.Scalaz._
 
-abstract class ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
-  def version: Long
-  def versionOption = if (version == -1L) None else Some(version)
+abstract class ConcurrencySafeEntity[T]
+  extends IdentifiedDomainObject[T]
+  with HasAddedBy
+  with HasTimeAdded
+  with HasUpdatedBy
+  with HasTimeUpdated {
 
-  // FIXME: add creation time and update time
-  //def creationTime
-  //def updateTime
+  val version: Long
+  val versionOption = if (version == -1L) None else Some(version)
+
+  val addedBy: UserId
+  val timeAdded: Long
+  val updatedBy: Option[UserId]
+  val timeUpdated: Option[Long]
 
   val invalidVersionMessage = "expected version %s doesn't match current version %s"
 

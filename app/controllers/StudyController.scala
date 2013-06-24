@@ -44,16 +44,18 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
     Ok(html.study.add(addForm, request.user))
   }
 
-  def addSubmission = SecuredAction { implicit request =>
-    addForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.study.add(formWithErrors, request.user)),
-      {
-        case (name, description) =>
-          Await.result(studyService.addStudy(AddStudyCmd(name, description)), timeout.duration) match {
-            case Success(study) => Ok(html.study.show(study, request.user))
-            case Failure(x) => BadRequest("Bad Request: " + x.head)
-          }
-      })
+  def addSubmission = SecuredAction {
+    implicit request =>
+      implicit val userId = new UserId(request.user.id.id)
+      addForm.bindFromRequest.fold(
+        formWithErrors => BadRequest(html.study.add(formWithErrors, request.user)),
+        {
+          case (name, description) =>
+            Await.result(studyService.addStudy(AddStudyCmd(name, description)), timeout.duration) match {
+              case Success(study) => Ok(html.study.show(study, request.user))
+              case Failure(x) => BadRequest("Bad Request: " + x.head)
+            }
+        })
   }
 
   def show(id: String) = SecuredAction { implicit request =>

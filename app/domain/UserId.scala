@@ -1,5 +1,3 @@
 package domain
 
-case class UserId(identity: String) extends { val id = identity } with IdentifiedValueObject[String] {
-
-}
+case class UserId(id: String) extends IdentifiedValueObject[String] {}

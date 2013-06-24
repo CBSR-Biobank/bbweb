@@ -6,12 +6,12 @@ import scalaz._
 import scalaz.Scalaz._
 
 sealed abstract class User extends ConcurrencySafeEntity[UserId] {
-  def name: String
-  def email: String
-  def password: String
-  def hasher: String
-  def salt: Option[String]
-  def avatarUrl: Option[String]
+  val name: String
+  val email: String
+  val password: String
+  val hasher: String
+  val salt: Option[String]
+  val avatarUrl: Option[String]
 
   /**
    * Authenticate a User.
@@ -31,7 +31,8 @@ object User {
     hasher: String,
     salt: Option[String],
     avatarUrl: Option[String]): DomainValidation[RegisteredUser] =
-    RegisteredUser(id, version = 0L, name, email, password, hasher, salt, avatarUrl).success
+    RegisteredUser(id, version = 0L, name, email, password, hasher, salt, avatarUrl,
+      addedBy = null, timeAdded = -1, updatedBy = None, timeUpdated = None).success
 
 }
 
@@ -43,7 +44,11 @@ case class RegisteredUser(
   password: String,
   hasher: String,
   salt: Option[String],
-  avatarUrl: Option[String]) extends User {
+  avatarUrl: Option[String],
+  addedBy: UserId = null,
+  timeAdded: Long = -1,
+  updatedBy: Option[UserId] = None,
+  timeUpdated: Option[Long] = None) extends User {
 
 }
 
@@ -55,7 +60,11 @@ case class ActiveUser(
   password: String,
   hasher: String,
   salt: Option[String],
-  avatarUrl: Option[String]) extends User {
+  avatarUrl: Option[String],
+  addedBy: UserId = null,
+  timeAdded: Long = -1,
+  updatedBy: Option[UserId] = None,
+  timeUpdated: Option[Long] = None) extends User {
 
 }
 
@@ -67,6 +76,10 @@ case class LockedUser(
   password: String,
   hasher: String,
   salt: Option[String],
-  avatarUrl: Option[String]) extends User {
+  avatarUrl: Option[String],
+  addedBy: UserId = null,
+  timeAdded: Long = -1,
+  updatedBy: Option[UserId] = None,
+  timeUpdated: Option[Long] = None) extends User {
 
 }
