@@ -46,8 +46,8 @@ class SpecimenGroupDomainService(
 
     case msg: StudyProcessorMsg =>
       msg.cmd match {
-        case cmd: AddSpecimenGroupCmdWithId =>
-          addSpecimenGroup(cmd, msg.study, msg.listeners)
+        case cmd: AddSpecimenGroupCmd =>
+          addSpecimenGroup(cmd, msg.study, msg.listeners, msg.id)
         case cmd: UpdateSpecimenGroupCmd =>
           updateSpecimenGroup(cmd, msg.study, msg.listeners)
         case cmd: RemoveSpecimenGroupCmd =>
@@ -62,9 +62,10 @@ class SpecimenGroupDomainService(
   }
 
   private def addSpecimenGroup(
-    cmd: AddSpecimenGroupCmdWithId,
+    cmd: AddSpecimenGroupCmd,
     study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
+    listeners: MessageEmitter,
+    id: Option[String]): DomainValidation[SpecimenGroup] = {
 
     def addItem(item: SpecimenGroup) {
       specimenGroupRepository.updateMap(item);
@@ -74,7 +75,8 @@ class SpecimenGroupDomainService(
     }
 
     val item = for {
-      newItem <- study.addSpecimenGroup(specimenGroupRepository, cmd)
+      sgId <- id.toSuccess(DomainError("specimen group ID is missing"))
+      newItem <- study.addSpecimenGroup(specimenGroupRepository, cmd, sgId)
       addItem <- addItem(newItem).success
     } yield newItem
     CommandHandler.logMethod(log, "addSpecimenGroup", cmd, item)

@@ -1,6 +1,5 @@
 package service
 
-import test._
 import fixture._
 import infrastructure._
 import infrastructure.commands._
@@ -19,8 +18,10 @@ import scalaz._
 import scalaz.Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class StudyServiceSpec extends StudyFixture {
-  sequential // forces all tests to be run sequentially
+class StudyServiceSpec extends StudyFixture with Tags {
+  args(
+    //include = "tag1",
+    sequential = true) // forces all tests to be run sequentially
 
   val nameGenerator = new NameGenerator(classOf[StudyServiceSpec].getName)
 
@@ -37,7 +38,7 @@ class StudyServiceSpec extends StudyFixture {
           s.description must beSome(name)
           studyRepository.getMap must haveKey(s.id)
       }
-    }
+    } tag ("tag1")
 
     "not be added if same name exists" in {
       val name = nameGenerator.next[Study]

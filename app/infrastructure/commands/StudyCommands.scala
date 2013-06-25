@@ -90,32 +90,3 @@ case class RemoveCollectionEventAnnotationTypeCmd(id: String,
   expectedVersion: Option[Long], studyId: String)
   extends StudyAnnotationTypeCommand with HasExpectedVersion
 
-// To be used within the service and domain layers
-
-case class AddStudyCmdWithId(
-  id: String, name: String, description: Option[String])
-  extends StudyCommand
-
-case class AddSpecimenGroupCmdWithId(
-  id: String, studyId: String, name: String, description: Option[String],
-  units: String, anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
-  preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
-  extends SpecimenGroupCommand
-
-case class AddCollectionEventTypeCmdWithId(
-  id: String, studyId: String, name: String, description: Option[String], recurring: Boolean)
-  extends CollectionEventTypeCommand
-
-case class AddCollectionEventAnnotationTypeCmdWithId(
-  id: String, studyId: String, name: String, description: Option[String],
-  valueType: AnnotationValueType, maxValueCount: Option[Int], options: Option[Map[String, String]])
-  extends StudyAnnotationTypeCommand
-
-case class AddSpecimenGroupToCollectionEventTypeCmdWithId(
-  id: String, studyId: String, specimenGroupId: String, collectionEventTypeId: String,
-  count: Int, amount: BigDecimal)
-  extends CollectionEventTypeCommand
-
-case class AddAnnotationTypeToCollectionEventTypeCmdWithId(
-  id: String, studyId: String, annotationTypeId: String, collectionEventTypeId: String, required: Boolean)
-  extends CollectionEventTypeCommand

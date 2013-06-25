@@ -1,6 +1,5 @@
 package service
 
-import test._
 import fixture._
 import infrastructure._
 import domain.{ AnatomicalSourceType, AnnotationValueType, PreservationType, PreservationTemperatureType, SpecimenType }

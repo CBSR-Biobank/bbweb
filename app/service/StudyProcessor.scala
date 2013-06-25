@@ -86,44 +86,44 @@ class StudyProcessor(
     annotationTypeRepo)
 
   def receive = {
-    case msg: org.eligosource.eventsourced.core.Message =>
-      msg.event match {
-        case serviceMsg: ServiceMsg =>
-          serviceMsg.cmd match {
-            case cmd: AddStudyCmd =>
-              process(addStudy(cmd, emitter("listeners"), serviceMsg.id))
+    case serviceMsg: ServiceMsg =>
+      serviceMsg.cmd match {
+        case cmd: AddStudyCmd =>
+          process(addStudy(cmd, emitter("listeners"), serviceMsg.id))
 
-            case cmd: UpdateStudyCmd =>
-              process(updateStudy(cmd, emitter("listeners")))
+        case cmd: UpdateStudyCmd =>
+          process(updateStudy(cmd, emitter("listeners")))
 
-            case cmd: EnableStudyCmd =>
-              process(enableStudy(cmd, emitter("listeners")))
+        case cmd: EnableStudyCmd =>
+          process(enableStudy(cmd, emitter("listeners")))
 
-            case cmd: DisableStudyCmd =>
-              process(disableStudy(cmd, emitter("listeners")))
+        case cmd: DisableStudyCmd =>
+          process(disableStudy(cmd, emitter("listeners")))
 
-            case cmd: SpecimenGroupCommand =>
-              process(validateStudy(studyRepository, cmd.studyId) { study =>
-                specimenGroupDomainService.process(
-                  StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
-              })
+        case cmd: SpecimenGroupCommand =>
+          process(validateStudy(studyRepository, cmd.studyId) { study =>
+            specimenGroupDomainService.process(
+              StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
+          })
 
-            case cmd: CollectionEventTypeCommand =>
-              process(validateStudy(studyRepository, cmd.studyId) { study =>
-                collectionEventTypeDomainService.process(
-                  StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
-              })
+        case cmd: CollectionEventTypeCommand =>
+          process(validateStudy(studyRepository, cmd.studyId) { study =>
+            collectionEventTypeDomainService.process(
+              StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
+          })
 
-            case cmd: StudyAnnotationTypeCommand =>
-              process(validateStudy(studyRepository, cmd.studyId) { study =>
-                annotationTypeDomainService.process(
-                  StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
-              })
+        case cmd: StudyAnnotationTypeCommand =>
+          process(validateStudy(studyRepository, cmd.studyId) { study =>
+            annotationTypeDomainService.process(
+              StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
+          })
 
-            case _ =>
-              throw new Error("invalid command received: ")
-          }
+        case _ =>
+          throw new Error("invalid command received: ")
       }
+
+    case _ =>
+      throw new Error("invalid message received: ")
   }
 
   def logMethod(methodName: String, cmd: Any, study: DomainValidation[Study]) {

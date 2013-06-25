@@ -59,34 +59,42 @@ protected[service] class CollectionEventTypeDomainService(
    *  If the command is invalid, then this method throws an Error exception.
    */
   def process = {
-    // collection event types
-    case _@ (cmd: AddCollectionEventTypeCmdWithId, study: DisabledStudy, listeners: MessageEmitter) =>
-      addCollectionEventType(cmd, study, listeners)
-    case _@ (cmd: UpdateCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      updateCollectionEventType(cmd, study, listeners)
-    case _@ (cmd: RemoveCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      removeCollectionEventType(cmd, study, listeners)
 
-    // specimen group -> collection event types
-    case _@ (cmd: AddSpecimenGroupToCollectionEventTypeCmdWithId, study: DisabledStudy, listeners: MessageEmitter) =>
-      addSpecimenGroupToCollectionEventType(cmd, study, listeners)
-    case _@ (cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      removeSpecimenGroupFromCollectionEventType(cmd, study, listeners)
+    case msg: StudyProcessorMsg =>
+      msg.cmd match {
+        // collection event types
+        case cmd: AddCollectionEventTypeCmd =>
+          addCollectionEventType(cmd, msg.study, msg.listeners, msg.id)
+        case cmd: UpdateCollectionEventTypeCmd =>
+          updateCollectionEventType(cmd, msg.study, msg.listeners)
+        case cmd: RemoveCollectionEventTypeCmd =>
+          removeCollectionEventType(cmd, msg.study, msg.listeners)
 
-    // annotation types -> collection event types
-    case _@ (cmd: AddAnnotationTypeToCollectionEventTypeCmdWithId, study: DisabledStudy, listeners: MessageEmitter) =>
-      addAnnotationTypeToCollectionEventType(cmd, study, listeners)
-    case _@ (cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      removeAnnotationTypeFromCollectionEventType(cmd, study, listeners)
+        // specimen group -> collection event types
+        case cmd: AddSpecimenGroupToCollectionEventTypeCmd =>
+          addSpecimenGroupToCollectionEventType(cmd, msg.study, msg.listeners, msg.id)
+        case cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd =>
+          removeSpecimenGroupFromCollectionEventType(cmd, msg.study, msg.listeners)
+
+        // annotation types -> collection event types
+        case cmd: AddAnnotationTypeToCollectionEventTypeCmd =>
+          addAnnotationTypeToCollectionEventType(cmd, msg.study, msg.listeners, msg.id)
+        case cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd =>
+          removeAnnotationTypeFromCollectionEventType(cmd, msg.study, msg.listeners)
+
+        case _ =>
+          throw new Error("invalid command received")
+      }
 
     case _ =>
-      throw new Error("invalid command received")
+      throw new Error("invalid message received")
   }
 
   private def addCollectionEventType(
-    cmd: AddCollectionEventTypeCmdWithId,
+    cmd: AddCollectionEventTypeCmd,
     study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
+    listeners: MessageEmitter,
+    id: Option[String]): DomainValidation[CollectionEventType] = {
     def addItem(item: CollectionEventType) {
       collectionEventTypeRepository.updateMap(item);
       listeners sendEvent CollectionEventTypeAddedEvent(
@@ -94,7 +102,8 @@ protected[service] class CollectionEventTypeDomainService(
     }
 
     val item = for {
-      newItem <- study.addCollectionEventType(collectionEventTypeRepository, cmd)
+      cetId <- id.toSuccess(DomainError("collection event type ID is missing"))
+      newItem <- study.addCollectionEventType(collectionEventTypeRepository, cmd, cetId)
       addItem <- addItem(newItem).success
     } yield newItem
     CommandHandler.logMethod(log, "addCollectionEventType", cmd, item)
@@ -139,9 +148,10 @@ protected[service] class CollectionEventTypeDomainService(
   }
 
   private def addSpecimenGroupToCollectionEventType(
-    cmd: AddSpecimenGroupToCollectionEventTypeCmdWithId,
+    cmd: AddSpecimenGroupToCollectionEventTypeCmd,
     study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
+    listeners: MessageEmitter,
+    id: Option[String]): DomainValidation[SpecimenGroupCollectionEventType] = {
 
     def createItem(id: String, sg: SpecimenGroup, cet: CollectionEventType) = {
       val item = cet.addSpecimenGroup(id, sg, cmd.count, cmd.amount)
@@ -152,9 +162,10 @@ protected[service] class CollectionEventTypeDomainService(
     }
 
     val item = for {
+      sg2cetId <- id.toSuccess(DomainError("sg to cet ID is missing"))
       sg <- study.validateSpecimenGroupId(specimenGroupRepository, cmd.specimenGroupId)
       cet <- study.validateCollectionEventTypeId(collectionEventTypeRepository, cmd.collectionEventTypeId)
-      newItem <- createItem(cmd.id, sg, cet).success
+      newItem <- createItem(sg2cetId, sg, cet).success
     } yield newItem
     CommandHandler.logMethod(log, "addSpecimenGroupToCollectionEventType", cmd, item)
     item
@@ -181,12 +192,13 @@ protected[service] class CollectionEventTypeDomainService(
   }
 
   private def addAnnotationTypeToCollectionEventType(
-    cmd: AddAnnotationTypeToCollectionEventTypeCmdWithId,
+    cmd: AddAnnotationTypeToCollectionEventTypeCmd,
     study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[CollectionEventTypeAnnotationType] = {
-    def createItem(cet: CollectionEventType,
+    listeners: MessageEmitter,
+    id: Option[String]): DomainValidation[CollectionEventTypeAnnotationType] = {
+    def createItem(at2cetid: String, cet: CollectionEventType,
       cetAt: CollectionEventAnnotationType): CollectionEventTypeAnnotationType = {
-      val item = cet.addAnnotationType(cmd.id, cetAt, cmd.required)
+      val item = cet.addAnnotationType(at2cetid, cetAt, cmd.required)
       cet2atRepo.updateMap(item)
       listeners sendEvent AnnotationTypeAddedToCollectionEventTypeEvent(
         study.id, item.id, item.collectionEventTypeId, item.annotationTypeId)
@@ -194,9 +206,10 @@ protected[service] class CollectionEventTypeDomainService(
     }
 
     val item = for {
+      at2cetId <- id.toSuccess(DomainError("at to cet ID is missing"))
       v1 <- study.validateCollectionEventTypeId(collectionEventTypeRepository, cmd.collectionEventTypeId)
       v2 <- study.validateCollectionEventAnnotationTypeId(annotationTypeRepo, cmd.annotationTypeId)
-      newItem <- createItem(v1, v2).success
+      newItem <- createItem(at2cetId, v1, v2).success
     } yield newItem
     CommandHandler.logMethod(log, "addAnnotationTypeToCollectionEventType", cmd, item)
     item

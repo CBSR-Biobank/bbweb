@@ -36,7 +36,7 @@ abstract class AkkaTestkitSupport extends TestKit(ActorSystem())
 
 abstract class AppFixture extends Specification with NoTimeConversions {
 
-  implicit val timeout = Timeout(3 seconds)
+  implicit val timeout = Timeout(5 seconds)
   implicit val system = ActorSystem("test")
 
   val MongoDbName = "biobank-test"
@@ -47,11 +47,6 @@ abstract class AppFixture extends Specification with NoTimeConversions {
   val mongoColl = mongoClient(MongoDbName)(MongoCollName)
 
   val userRepo = new ReadWriteRepository[UserId, User](v => new UserId(v.email))
-
-  val userProcessor = extension.processorOf(Props(
-    new UserProcessor(userRepo) with Emitter with Eventsourced { val id = 2 }))
-
-  implicit val adminUserId = new UserId("admin@admin.com")
 
   // delete the journal contents
   mongoColl.remove(MongoDBObject.empty)
@@ -65,6 +60,11 @@ abstract class AppFixture extends Specification with NoTimeConversions {
   def await[T](f: Future[DomainValidation[T]]) = {
     Await.result(f, timeout.duration)
   }
+
+  val userProcessor = extension.processorOf(Props(
+    new UserProcessor(userRepo) with Emitter with Eventsourced { val id = 2 }))
+
+  implicit val adminUserId = new UserId("admin@admin.com")
 
   // for debug only - password is "administrator"
   userRepo.updateMap(User.add(adminUserId, "admin", "admin@admin.com",

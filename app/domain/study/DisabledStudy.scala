@@ -50,8 +50,9 @@ case class DisabledStudy(
 
   def addSpecimenGroup(
     specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
-    cmd: AddSpecimenGroupCmdWithId): DomainValidation[SpecimenGroup] =
-    addSpecimenGroup(specimenGroupRepository, new SpecimenGroupId(cmd.id),
+    cmd: AddSpecimenGroupCmd,
+    id: String): DomainValidation[SpecimenGroup] =
+    addSpecimenGroup(specimenGroupRepository, new SpecimenGroupId(id),
       version = 0L, cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType,
       cmd.preservationType, cmd.preservationTemperatureType, cmd.specimenType)
 
@@ -94,9 +95,10 @@ case class DisabledStudy(
 
   def addCollectionEventType(
     collectionEventTypeRepository: ReadRepository[CollectionEventTypeId, CollectionEventType],
-    cmd: AddCollectionEventTypeCmdWithId): DomainValidation[CollectionEventType] =
+    cmd: AddCollectionEventTypeCmd,
+    id: String): DomainValidation[CollectionEventType] =
     addCollectionEventType(collectionEventTypeRepository,
-      new CollectionEventTypeId(cmd.id), version = 0L, cmd.name,
+      new CollectionEventTypeId(id), version = 0L, cmd.name,
       cmd.description, cmd.recurring)
 
   def updateCollectionEventType(
@@ -141,9 +143,10 @@ case class DisabledStudy(
 
   def addCollectionEventAnnotationType(
     annotationTypeRepo: ReadRepository[AnnotationTypeId, StudyAnnotationType],
-    cmd: AddCollectionEventAnnotationTypeCmdWithId): DomainValidation[CollectionEventAnnotationType] = {
+    cmd: AddCollectionEventAnnotationTypeCmd,
+    id: String): DomainValidation[CollectionEventAnnotationType] = {
     addCollectionEventAnnotationType(annotationTypeRepo,
-      new AnnotationTypeId(cmd.id), version = 0L,
+      new AnnotationTypeId(id), version = 0L,
       cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options)
   }
 

@@ -39,8 +39,8 @@ protected[service] class StudyAnnotationTypeDomainService(
 
     case msg: StudyProcessorMsg =>
       msg.cmd match {
-        case cmd: AddCollectionEventAnnotationTypeCmdWithId =>
-          addCollectionEventAnnotationType(cmd, msg.study, msg.listeners)
+        case cmd: AddCollectionEventAnnotationTypeCmd =>
+          addCollectionEventAnnotationType(cmd, msg.study, msg.listeners, msg.id)
         case cmd: UpdateCollectionEventAnnotationTypeCmd =>
           updateCollectionEventAnnotationType(cmd, msg.study, msg.listeners)
         case cmd: RemoveCollectionEventAnnotationTypeCmd =>
@@ -55,9 +55,10 @@ protected[service] class StudyAnnotationTypeDomainService(
   }
 
   private def addCollectionEventAnnotationType(
-    cmd: AddCollectionEventAnnotationTypeCmdWithId,
+    cmd: AddCollectionEventAnnotationTypeCmd,
     study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
+    listeners: MessageEmitter,
+    id: Option[String]): DomainValidation[CollectionEventAnnotationType] = {
 
     def addItem(item: CollectionEventAnnotationType): CollectionEventAnnotationType = {
       annotationTypeRepo.updateMap(item)
@@ -68,7 +69,8 @@ protected[service] class StudyAnnotationTypeDomainService(
     }
 
     val item = for {
-      newItem <- study.addCollectionEventAnnotationType(annotationTypeRepo, cmd)
+      atId <- id.toSuccess(DomainError("annotation type ID is missing"))
+      newItem <- study.addCollectionEventAnnotationType(annotationTypeRepo, cmd, atId)
       addItem <- addItem(newItem).success
     } yield newItem
     CommandHandler.logMethod(log, "addCollectionEventAnnotationType", cmd, item)
