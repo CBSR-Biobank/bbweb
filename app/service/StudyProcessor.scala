@@ -79,7 +79,7 @@ class StudyProcessor(
   def receive = {
     case msg: org.eligosource.eventsourced.core.Message =>
       msg.event match {
-        case bbMsg: BiobankMsgWithId =>
+        case bbMsg: BiobankMsg =>
           bbMsg.cmd match {
             case cmd: AddStudyCmdWithId =>
               process(addStudy(StudyMessage(bbMsg.cmd, bbMsg.userId: UserId, msg.timestamp,
@@ -88,29 +88,30 @@ class StudyProcessor(
 
         case bbMsg: BiobankMsg =>
       }
-    case cmd: UpdateStudyCmd =>
-      process(updateStudy(cmd, emitter("listeners")))
 
-    case cmd: EnableStudyCmd =>
-      process(enableStudy(cmd, emitter("listeners")))
-
-    case cmd: DisableStudyCmd =>
-      process(disableStudy(cmd, emitter("listeners")))
-
-    case cmd: SpecimenGroupCommand =>
-      process(validateStudy(studyRepository, cmd.studyId) { study =>
-        specimenGroupDomainService.process(cmd, study, emitter("listeners"))
-      })
-
-    case cmd: CollectionEventTypeCommand =>
-      process(validateStudy(studyRepository, cmd.studyId) { study =>
-        collectionEventTypeDomainService.process(cmd, study, emitter("listeners"))
-      })
-
-    case cmd: StudyAnnotationTypeCommand =>
-      process(validateStudy(studyRepository, cmd.studyId) { study =>
-        annotationTypeDomainService.process(cmd, study, emitter("listeners"))
-      })
+    //    case cmd: UpdateStudyCmd =>
+    //      process(updateStudy(cmd, emitter("listeners")))
+    //
+    //    case cmd: EnableStudyCmd =>
+    //      process(enableStudy(cmd, emitter("listeners")))
+    //
+    //    case cmd: DisableStudyCmd =>
+    //      process(disableStudy(cmd, emitter("listeners")))
+    //
+    //    case cmd: SpecimenGroupCommand =>
+    //      process(validateStudy(studyRepository, cmd.studyId) { study =>
+    //        specimenGroupDomainService.process(cmd, study, emitter("listeners"))
+    //      })
+    //
+    //    case cmd: CollectionEventTypeCommand =>
+    //      process(validateStudy(studyRepository, cmd.studyId) { study =>
+    //        collectionEventTypeDomainService.process(cmd, study, emitter("listeners"))
+    //      })
+    //
+    //    case cmd: StudyAnnotationTypeCommand =>
+    //      process(validateStudy(studyRepository, cmd.studyId) { study =>
+    //        annotationTypeDomainService.process(cmd, study, emitter("listeners"))
+    //      })
 
     case _ =>
       throw new Error("invalid command received: ")
@@ -154,11 +155,11 @@ class StudyProcessor(
     } yield newItem
   }
 
-  private def addStudy(msg: StudyMessageWithId): DomainValidation[DisabledStudy] = {
+  private def addStudy(msg: BiobankMsg): DomainValidation[DisabledStudy] = {
 
     def addItem(item: Study): Study = {
       studyRepository.updateMap(item)
-      listeners sendEvent StudyAddedEvent(item.id, item.name, item.description)
+      msg.listeners sendEvent StudyAddedEvent(item.id, item.name, item.description)
       item
     }
 

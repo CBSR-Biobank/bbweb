@@ -19,6 +19,8 @@ object AnnotationTypeIdentityService extends IdentityService
 
 object SpecimenGroupCollectionEventTypeIdentityService extends IdentityService
 
+object CollectionEventAnnotationTypeIdentityService extends IdentityService
+
 object CollectionEventTypeAnnotationTypeIdentityService extends IdentityService
 
 object UserIdentityService extends IdentityService
