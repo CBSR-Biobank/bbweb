@@ -5,10 +5,10 @@ import service._
 import domain._
 import domain.study._
 
+import scala.util.{ Try, Success, Failure }
 import scala.concurrent._
-import scala.reflect.ClassTag
-
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.stm.Ref
 import org.eligosource.eventsourced.core._
 import org.eligosource.eventsourced.journal.mongodb.casbah.MongodbCasbahJournalProps
@@ -57,7 +57,8 @@ abstract class AppFixture extends Specification with NoTimeConversions {
   val journal = Journal(journalProps)
   val extension = EventsourcingExtension(system, journal)
 
-  def await[T](f: Future[DomainValidation[T]]) = {
+  def await[T](f: Future[DomainValidation[T]]): DomainValidation[T] = {
+    // use blocking for now so that tests can be run in parallel
     Await.result(f, timeout.duration)
   }
 

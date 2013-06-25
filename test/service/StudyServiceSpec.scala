@@ -6,6 +6,7 @@ import infrastructure.commands._
 import domain.{ AnatomicalSourceType, PreservationType, PreservationTemperatureType, SpecimenType }
 import domain.AnnotationValueType._
 import domain.study._
+
 import scala.concurrent._
 import scala.concurrent.duration._
 import org.specs2.scalaz.ValidationMatchers._
@@ -14,8 +15,9 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import akka.actor._
 import org.eligosource.eventsourced.core._
+
 import scalaz._
-import scalaz.Scalaz._
+import Scalaz._
 
 @RunWith(classOf[JUnitRunner])
 class StudyServiceSpec extends StudyFixture with Tags {
