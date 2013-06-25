@@ -90,22 +90,6 @@ abstract class Study extends ConcurrencySafeEntity[StudyId]
 
 object Study {
 
-  def validateStudy(
-    studyRepository: ReadRepository[StudyId, Study],
-    studyId: StudyId)(f: DisabledStudy => DomainValidation[_]): DomainValidation[_] =
-    studyRepository.getByKey(studyId) match {
-      case Failure(msglist) => noSuchStudy(studyId).fail
-      case Success(study) => study match {
-        case study: EnabledStudy => notDisabledError(study.name).fail
-        case study: DisabledStudy => f(study)
-      }
-    }
-
-  def validateStudy(
-    studyRepository: ReadRepository[StudyId, Study],
-    studyId: String)(f: DisabledStudy => DomainValidation[_]): DomainValidation[_] =
-    validateStudy(studyRepository, new StudyId(studyId))(f)
-
   def noSuchStudy(studyId: StudyId) =
     DomainError("no study with id: %s" format studyId)
 

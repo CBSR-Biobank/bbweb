@@ -10,7 +10,7 @@ import scalaz.Scalaz._
 
 trait Processor extends Actor {
 
-  protected def process(validation: DomainValidation[_]) = {
+  protected def process[T](validation: DomainValidation[T]) = {
     sender ! validation
   }
 }

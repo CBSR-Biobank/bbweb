@@ -55,7 +55,7 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
           case (name, description) =>
             Async {
               studyService.addStudy(AddStudyCmd(name, description)).map(
-                _.asInstanceOf[DomainValidation[DisabledStudy]] match {
+                study => study match {
                   case Success(study) => Ok(html.study.show(study, request.user))
                   case Failure(x) => BadRequest("Bad Request: " + x.head)
                 })

@@ -100,20 +100,23 @@ class StudyProcessor(
         case cmd: DisableStudyCmd =>
           process(disableStudy(cmd, emitter("listeners")))
 
+        case @(_: SpecimenGroupCommand | _: CollectionEventTypeCommand) =>
+          ???
+
         case cmd: SpecimenGroupCommand =>
-          process(validateStudy(studyRepository, cmd.studyId) { study =>
+          process(validateStudy(new StudyId(cmd.studyId)) { study =>
             specimenGroupDomainService.process(
               StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
           })
 
         case cmd: CollectionEventTypeCommand =>
-          process(validateStudy(studyRepository, cmd.studyId) { study =>
+          process(validateStudy(new StudyId(cmd.studyId)) { study =>
             collectionEventTypeDomainService.process(
               StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
           })
 
         case cmd: StudyAnnotationTypeCommand =>
-          process(validateStudy(studyRepository, cmd.studyId) { study =>
+          process(validateStudy(new StudyId(cmd.studyId)) { study =>
             annotationTypeDomainService.process(
               StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
           })
@@ -125,6 +128,25 @@ class StudyProcessor(
     case _ =>
       throw new Error("invalid message received: ")
   }
+
+  override protected def process[T](validation: DomainValidation[T]) = {
+    validation match {
+      case Success(domainObject) =>
+      // update the addedBy and updatedBy fields on the study aggregate
+      case Failure(x) =>
+    }
+    super.process(validation)
+  }
+
+  def validateStudy(
+    studyId: StudyId)(f: DisabledStudy => DomainValidation[_]): DomainValidation[_] =
+    studyRepository.getByKey(studyId) match {
+      case Failure(msglist) => noSuchStudy(studyId).fail
+      case Success(study) => study match {
+        case study: EnabledStudy => notDisabledError(study.name).fail
+        case study: DisabledStudy => f(study)
+      }
+    }
 
   def logMethod(methodName: String, cmd: Any, study: DomainValidation[Study]) {
     if (log.isDebugEnabled) {
