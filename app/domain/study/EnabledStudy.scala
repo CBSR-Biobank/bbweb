@@ -11,15 +11,11 @@ case class EnabledStudy(
   id: StudyId,
   version: Long = -1,
   name: String,
-  description: Option[String],
-  addedBy: UserId,
-  timeAdded: Long,
-  updatedBy: Option[UserId],
-  timeUpdated: Option[Long])
+  description: Option[String])
   extends Study {
 
   override val status = "Ensabled"
 
   def disable: DomainValidation[DisabledStudy] =
-    DisabledStudy(id, version + 1, name, description, addedBy, timeAdded, updatedBy, timeUpdated).success
+    DisabledStudy(id, version + 1, name, description).success
 }

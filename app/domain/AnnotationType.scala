@@ -15,10 +15,6 @@ abstract class AnnotationType
   val valueType: AnnotationValueType
   val maxValueCount: Option[Int]
   val options: Option[Map[String, String]]
-  val addedBy: UserId
-  val timeAdded: Long
-  val updatedBy: Option[UserId]
-  val timeUpdated: Option[Long]
 
   private def validateValueType: DomainValidation[Boolean] = {
     if (valueType.equals(AnnotationValueType.Select)) {

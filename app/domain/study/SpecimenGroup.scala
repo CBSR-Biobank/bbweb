@@ -20,11 +20,7 @@ case class SpecimenGroup(
   anatomicalSourceType: AnatomicalSourceType,
   preservationType: PreservationType,
   preservationTemperatureType: PreservationTemperatureType,
-  specimenType: SpecimenType,
-  addedBy: UserId,
-  timeAdded: Long,
-  updatedBy: Option[UserId] = None,
-  timeUpdated: Option[Long] = None)
+  specimenType: SpecimenType)
   extends ConcurrencySafeEntity[SpecimenGroupId]
   with HasName with HasDescriptionOption {
 

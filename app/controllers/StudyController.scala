@@ -1,6 +1,7 @@
 package controllers
 
 import service._
+import infrastructure._
 import infrastructure.commands._
 import domain._
 import domain.study._
@@ -8,6 +9,7 @@ import views._
 
 import scala.concurrent._
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 import play.api._
 import play.api.mvc._
@@ -21,7 +23,7 @@ import Scalaz._
 
 object StudyController extends Controller with securesocial.core.SecureSocial {
 
-  implicit val timeout = Timeout(10 seconds)
+  //implicit val timeout = Timeout(10 seconds)
 
   lazy val userService = Global.services.userService
   lazy val studyService = Global.services.studyService
@@ -51,9 +53,12 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
         formWithErrors => BadRequest(html.study.add(formWithErrors, request.user)),
         {
           case (name, description) =>
-            Await.result(studyService.addStudy(AddStudyCmd(name, description)), timeout.duration) match {
-              case Success(study) => Ok(html.study.show(study, request.user))
-              case Failure(x) => BadRequest("Bad Request: " + x.head)
+            Async {
+              studyService.addStudy(AddStudyCmd(name, description)).map(
+                _.asInstanceOf[DomainValidation[DisabledStudy]] match {
+                  case Success(study) => Ok(html.study.show(study, request.user))
+                  case Failure(x) => BadRequest("Bad Request: " + x.head)
+                })
             }
         })
   }

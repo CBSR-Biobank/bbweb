@@ -1,4 +1,4 @@
-package domain.service
+package service.study
 
 import infrastructure._
 import infrastructure.commands._
@@ -8,15 +8,9 @@ import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
-import domain.study.{
-  DisabledStudy,
-  EnabledStudy,
-  SpecimenGroup,
-  SpecimenGroupId,
-  Study,
-  StudyId
-}
-import Study._
+import domain.study.{ DisabledStudy, SpecimenGroup, SpecimenGroupId, Study, StudyId }
+import domain.study.Study._
+import service.CommandHandler
 
 import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
@@ -49,14 +43,21 @@ class SpecimenGroupDomainService(
    *  If the command is invalid, then this method throws an Error exception.
    */
   def process = {
-    case _@ (cmd: AddSpecimenGroupCmdWithId, study: DisabledStudy, listeners: MessageEmitter) =>
-      addSpecimenGroup(cmd, study, listeners)
-    case _@ (cmd: UpdateSpecimenGroupCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      updateSpecimenGroup(cmd, study, listeners)
-    case _@ (cmd: RemoveSpecimenGroupCmd, study: DisabledStudy, listeners: MessageEmitter) =>
-      removeSpecimenGroup(cmd, study, listeners)
+
+    case msg: StudyProcessorMsg =>
+      msg.cmd match {
+        case cmd: AddSpecimenGroupCmdWithId =>
+          addSpecimenGroup(cmd, msg.study, msg.listeners)
+        case cmd: UpdateSpecimenGroupCmd =>
+          updateSpecimenGroup(cmd, msg.study, msg.listeners)
+        case cmd: RemoveSpecimenGroupCmd =>
+          removeSpecimenGroup(cmd, msg.study, msg.listeners)
+        case _ =>
+          throw new Error("invalid command received")
+      }
+
     case _ =>
-      throw new Error("invalid command received")
+      throw new Error("invalid message received")
 
   }
 

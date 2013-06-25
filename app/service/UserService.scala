@@ -80,7 +80,7 @@ class UserProcessor(
   this: Emitter =>
 
   def receive = {
-    case msg: BiobankMsg =>
+    case msg: ServiceMsg =>
       msg.cmd match {
         case cmd: AddUserCmd =>
           process(addUser(cmd, emitter("listenter")))

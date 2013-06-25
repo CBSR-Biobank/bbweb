@@ -10,8 +10,7 @@ import domain.{
   UserId
 }
 import domain.study._
-import domain.service.{ CollectionEventTypeDomainService, SpecimenGroupDomainService }
-
+import service.study.{ SpecimenGroupDomainService }
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
@@ -53,89 +52,89 @@ class StudyService(
 
   def addStudy(cmd: AddStudyCmd)(implicit userId: UserId): Future[DomainValidation[DisabledStudy]] = {
     studyProcessor.ask(
-      Message(BiobankMsg(cmd, userId, Some(StudyIdentityService.nextIdentity)))).map(
+      Message(ServiceMsg(cmd, userId, Some(StudyIdentityService.nextIdentity)))).map(
         _.asInstanceOf[DomainValidation[DisabledStudy]])
   }
 
   def updateStudy(cmd: UpdateStudyCmd)(implicit userId: UserId): Future[DomainValidation[DisabledStudy]] =
-    studyProcessor.ask(Message(BiobankMsg(cmd, userId))).map(
+    studyProcessor.ask(Message(ServiceMsg(cmd, userId))).map(
       _.asInstanceOf[DomainValidation[DisabledStudy]])
 
   def enableStudy(cmd: EnableStudyCmd)(implicit userId: UserId): Future[DomainValidation[EnabledStudy]] =
-    studyProcessor.ask(Message(BiobankMsg(cmd, userId))).map(
+    studyProcessor.ask(Message(ServiceMsg(cmd, userId))).map(
       _.asInstanceOf[DomainValidation[EnabledStudy]])
 
   def disableStudy(cmd: DisableStudyCmd)(implicit userId: UserId): Future[DomainValidation[DisabledStudy]] =
-    studyProcessor.ask(Message(BiobankMsg(cmd, userId))).map(
+    studyProcessor.ask(Message(ServiceMsg(cmd, userId))).map(
       _.asInstanceOf[DomainValidation[DisabledStudy]])
 
   // specimen groups
   def addSpecimenGroup(cmd: AddSpecimenGroupCmd)(implicit userId: UserId): Future[DomainValidation[SpecimenGroup]] = {
     studyProcessor.ask(
-      Message(BiobankMsg(cmd, userId, Some(SpecimenGroupIdentityService.nextIdentity)))).map(
+      Message(ServiceMsg(cmd, userId, Some(SpecimenGroupIdentityService.nextIdentity)))).map(
         _.asInstanceOf[DomainValidation[SpecimenGroup]])
   }
 
   def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd)(implicit userId: UserId): Future[DomainValidation[SpecimenGroup]] =
     studyProcessor.ask(
-      Message(BiobankMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[SpecimenGroup]])
+      Message(ServiceMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[SpecimenGroup]])
 
   def removeSpecimenGroup(cmd: RemoveSpecimenGroupCmd)(implicit userId: UserId): Future[DomainValidation[SpecimenGroup]] =
     studyProcessor.ask(
-      Message(BiobankMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[SpecimenGroup]])
+      Message(ServiceMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[SpecimenGroup]])
 
   // collection event types
   def addCollectionEventType(cmd: AddCollectionEventTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventType]] = {
     studyProcessor.ask(
-      Message(BiobankMsg(cmd, userId, Some(CollectionEventTypeIdentityService.nextIdentity)))).map(
+      Message(ServiceMsg(cmd, userId, Some(CollectionEventTypeIdentityService.nextIdentity)))).map(
         _.asInstanceOf[DomainValidation[CollectionEventType]])
   }
 
   def updateCollectionEventType(cmd: UpdateCollectionEventTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventType]] =
-    studyProcessor.ask(Message(BiobankMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[CollectionEventType]])
+    studyProcessor.ask(Message(ServiceMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[CollectionEventType]])
 
   def removeCollectionEventType(cmd: RemoveCollectionEventTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventType]] =
     studyProcessor.ask(
-      Message(BiobankMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[CollectionEventType]])
+      Message(ServiceMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[CollectionEventType]])
 
   // specimen group -> collection event types
   def addSpecimenGroupToCollectionEventType(
     cmd: AddSpecimenGroupToCollectionEventTypeCmd)(implicit userId: UserId): Future[DomainValidation[SpecimenGroupCollectionEventType]] = {
     studyProcessor.ask(
-      Message(BiobankMsg(cmd, userId, Some(SpecimenGroupCollectionEventTypeIdentityService.nextIdentity)))).map(
+      Message(ServiceMsg(cmd, userId, Some(SpecimenGroupCollectionEventTypeIdentityService.nextIdentity)))).map(
         _.asInstanceOf[DomainValidation[SpecimenGroupCollectionEventType]])
   }
 
   def removeSpecimenGroupFromCollectionEventType(cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd)(implicit userId: UserId): Future[DomainValidation[SpecimenGroupCollectionEventType]] =
-    studyProcessor.ask(Message(BiobankMsg(cmd, userId))).map(
+    studyProcessor.ask(Message(ServiceMsg(cmd, userId))).map(
       _.asInstanceOf[DomainValidation[SpecimenGroupCollectionEventType]])
 
   // study annotation type
   def addCollectionEventAnnotationType(
     cmd: AddCollectionEventAnnotationTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]] = {
     studyProcessor.ask(
-      Message(BiobankMsg(cmd, userId, Some(CollectionEventAnnotationTypeIdentityService.nextIdentity)))).map(
+      Message(ServiceMsg(cmd, userId, Some(CollectionEventAnnotationTypeIdentityService.nextIdentity)))).map(
         _.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
   }
 
   def updateCollectionEventAnnotationType(cmd: UpdateCollectionEventAnnotationTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]] =
-    studyProcessor.ask(Message(BiobankMsg(cmd, userId))).map(
+    studyProcessor.ask(Message(ServiceMsg(cmd, userId))).map(
       _.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
 
   def removeCollectionEventAnnotationType(cmd: RemoveCollectionEventAnnotationTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]] =
     studyProcessor.ask(
-      Message(BiobankMsg(cmd, userId))).map(
+      Message(ServiceMsg(cmd, userId))).map(
         _.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
 
   // annotation types -> collection event types
   def addAnnotationTypeToCollectionEventType(
     cmd: AddAnnotationTypeToCollectionEventTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventTypeAnnotationType]] = {
     studyProcessor.ask(
-      Message(BiobankMsg(cmd, userId, Some(CollectionEventTypeAnnotationTypeIdentityService.nextIdentity)))).map(
+      Message(ServiceMsg(cmd, userId, Some(CollectionEventTypeAnnotationTypeIdentityService.nextIdentity)))).map(
         _.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
   }
 
   def removeAnnotationTypeFromCollectionEventType(cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
     studyProcessor.ask(
-      Message(BiobankMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
+      Message(ServiceMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
 }

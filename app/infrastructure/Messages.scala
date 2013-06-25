@@ -1,16 +1,20 @@
 package infrastructure
 
-import domain._
+import domain.UserId
+import domain.study.DisabledStudy
 
 import org.eligosource.eventsourced.core.MessageEmitter
 
 trait HasCommand { val cmd: Any }
+trait HasIdentityOption { val id: Option[String] }
 trait HasUserId { val userId: UserId }
-trait HasIdentity { val id: String }
 
-case class BiobankMsg(cmd: Any, userId: UserId, id: Option[String] = None)
-  extends HasCommand with HasUserId with HasIdentity
+case class ServiceMsg(cmd: Any, userId: UserId, id: Option[String] = None)
+  extends HasCommand with HasIdentityOption
 
-case class ProcessorMsg(cmd: Any, userId: UserId, time: Long, listeners: MessageEmitter,
-  id: Option[String] = None)
-  extends HasCommand with HasUserId with HasIdentity
+case class ProcessorMsg(cmd: Any, listeners: MessageEmitter, id: Option[String] = None)
+  extends HasCommand with HasIdentityOption
+
+case class StudyProcessorMsg(cmd: Any, study: DisabledStudy,
+  listeners: MessageEmitter, id: Option[String] = None)
+  extends HasCommand with HasIdentityOption

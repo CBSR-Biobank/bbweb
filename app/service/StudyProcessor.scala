@@ -1,6 +1,14 @@
 package service
 
-import infrastructure._
+import infrastructure.{
+  DomainValidation,
+  DomainError,
+  ProcessorMsg,
+  ReadRepository,
+  ReadWriteRepository,
+  ServiceMsg,
+  StudyProcessorMsg
+}
 import infrastructure.commands._
 import infrastructure.events._
 import domain.{
@@ -15,11 +23,12 @@ import domain.PreservationTemperatureType._
 import domain.SpecimenType._
 import domain.AnnotationValueType._
 import domain.study._
-import domain.service.{
+import service.study.{
   CollectionEventTypeDomainService,
   SpecimenGroupDomainService,
   StudyAnnotationTypeDomainService
 }
+import service.study.SpecimenGroupDomainService
 import Study._
 
 import akka.actor._
@@ -79,42 +88,42 @@ class StudyProcessor(
   def receive = {
     case msg: org.eligosource.eventsourced.core.Message =>
       msg.event match {
-        case bbMsg: BiobankMsg =>
-          bbMsg.cmd match {
-            case cmd: AddStudyCmdWithId =>
-              process(addStudy(StudyMessage(bbMsg.cmd, bbMsg.userId: UserId, msg.timestamp,
-                emitter("listeners"))))
+        case serviceMsg: ServiceMsg =>
+          serviceMsg.cmd match {
+            case cmd: AddStudyCmd =>
+              process(addStudy(cmd, emitter("listeners"), serviceMsg.id))
+
+            case cmd: UpdateStudyCmd =>
+              process(updateStudy(cmd, emitter("listeners")))
+
+            case cmd: EnableStudyCmd =>
+              process(enableStudy(cmd, emitter("listeners")))
+
+            case cmd: DisableStudyCmd =>
+              process(disableStudy(cmd, emitter("listeners")))
+
+            case cmd: SpecimenGroupCommand =>
+              process(validateStudy(studyRepository, cmd.studyId) { study =>
+                specimenGroupDomainService.process(
+                  StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
+              })
+
+            case cmd: CollectionEventTypeCommand =>
+              process(validateStudy(studyRepository, cmd.studyId) { study =>
+                collectionEventTypeDomainService.process(
+                  StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
+              })
+
+            case cmd: StudyAnnotationTypeCommand =>
+              process(validateStudy(studyRepository, cmd.studyId) { study =>
+                annotationTypeDomainService.process(
+                  StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
+              })
+
+            case _ =>
+              throw new Error("invalid command received: ")
           }
-
-        case bbMsg: BiobankMsg =>
       }
-
-    //    case cmd: UpdateStudyCmd =>
-    //      process(updateStudy(cmd, emitter("listeners")))
-    //
-    //    case cmd: EnableStudyCmd =>
-    //      process(enableStudy(cmd, emitter("listeners")))
-    //
-    //    case cmd: DisableStudyCmd =>
-    //      process(disableStudy(cmd, emitter("listeners")))
-    //
-    //    case cmd: SpecimenGroupCommand =>
-    //      process(validateStudy(studyRepository, cmd.studyId) { study =>
-    //        specimenGroupDomainService.process(cmd, study, emitter("listeners"))
-    //      })
-    //
-    //    case cmd: CollectionEventTypeCommand =>
-    //      process(validateStudy(studyRepository, cmd.studyId) { study =>
-    //        collectionEventTypeDomainService.process(cmd, study, emitter("listeners"))
-    //      })
-    //
-    //    case cmd: StudyAnnotationTypeCommand =>
-    //      process(validateStudy(studyRepository, cmd.studyId) { study =>
-    //        annotationTypeDomainService.process(cmd, study, emitter("listeners"))
-    //      })
-
-    case _ =>
-      throw new Error("invalid command received: ")
   }
 
   def logMethod(methodName: String, cmd: Any, study: DomainValidation[Study]) {
@@ -133,11 +142,7 @@ class StudyProcessor(
     id: StudyId,
     version: Long,
     name: String,
-    description: Option[String],
-    addedBy: UserId,
-    timeAdded: Long,
-    updatedBy: Option[UserId] = None,
-    timeUpdated: Option[Long] = None): DomainValidation[DisabledStudy] = {
+    description: Option[String]): DomainValidation[DisabledStudy] = {
 
     def nameCheck(id: StudyId, name: String): DomainValidation[Boolean] = {
       studyRepository.getValues.exists {
@@ -150,21 +155,24 @@ class StudyProcessor(
 
     for {
       nameCheck <- nameCheck(id, name)
-      newItem <- DisabledStudy(id, version, name, description, addedBy, timeAdded,
-        updatedBy, timeUpdated).success
+      newItem <- DisabledStudy(id, version, name, description).success
     } yield newItem
   }
 
-  private def addStudy(msg: BiobankMsg): DomainValidation[DisabledStudy] = {
+  private def addStudy(
+    cmd: AddStudyCmd,
+    listeners: MessageEmitter,
+    id: Option[String]): DomainValidation[DisabledStudy] = {
 
     def addItem(item: Study): Study = {
       studyRepository.updateMap(item)
-      msg.listeners sendEvent StudyAddedEvent(item.id, item.name, item.description)
+      listeners sendEvent StudyAddedEvent(item.id, item.name, item.description)
       item
     }
 
     val item = for {
-      newItem <- addStudy(new StudyId(cmd.id), version = 0L, cmd.name, cmd.description, userId, time)
+      studyId <- id.toSuccess(DomainError("study ID is missing"))
+      newItem <- addStudy(new StudyId(studyId), version = 0L, cmd.name, cmd.description)
       addedItem <- addItem(newItem).success
     } yield newItem
 
@@ -174,7 +182,7 @@ class StudyProcessor(
 
   private def updateStudy(
     cmd: UpdateStudyCmd,
-    listeners: MessageEmitter)(implicit userId: UserId, time: Long): DomainValidation[DisabledStudy] = {
+    listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
     val studyId = new StudyId(cmd.id)
 
     def updateItem(item: Study) = {
@@ -184,8 +192,7 @@ class StudyProcessor(
 
     val item = for {
       prevItem <- studyRepository.getByKey(new StudyId(cmd.id))
-      newItem <- addStudy(prevItem.id, prevItem.version + 1, cmd.name, cmd.description,
-        prevItem.addedBy, prevItem.timeAdded, Some(userId), Some(time))
+      newItem <- addStudy(prevItem.id, prevItem.version + 1, cmd.name, cmd.description)
       updatedItem <- updateItem(newItem).success
     } yield newItem
 

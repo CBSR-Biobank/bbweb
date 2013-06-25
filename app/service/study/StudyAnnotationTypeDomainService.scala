@@ -1,29 +1,19 @@
-package domain.service
+package service.study
 
 import infrastructure._
 import infrastructure.commands._
 import infrastructure.events._
 import domain._
-import domain.study.{
-  CollectionEventAnnotationType,
-  CollectionEventType,
-  CollectionEventTypeId,
-  DisabledStudy,
-  EnabledStudy,
-  Study,
-  StudyAnnotationType,
-  StudyId
-}
-import Study._
-import AnnotationValueType._
+import domain.study.{ CollectionEventAnnotationType, DisabledStudy, Study, StudyAnnotationType }
+import domain.study.Study._
+import domain.AnnotationValueType._
+import service.CommandHandler
 
 import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
 
 import scalaz._
-import Scalaz._
-
-case class StudyAnnotationTypeMessage(cmd: Any, study: Study, userId: UserId, time: Long, listeners: MessageEmitter)
+import scalaz.Scalaz._
 
 /**
  * This domain service class handled commands that deal with study
@@ -31,7 +21,7 @@ case class StudyAnnotationTypeMessage(cmd: Any, study: Study, userId: UserId, ti
  *
  * @author Nelson Loyola
  */
-class StudyAnnotationTypeDomainService(
+protected[service] class StudyAnnotationTypeDomainService(
   annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType])
   extends CommandHandler {
   import StudyAnnotationTypeDomainService._
@@ -47,14 +37,14 @@ class StudyAnnotationTypeDomainService(
    */
   def process = {
 
-    case msg: StudyAnnotationTypeMessage =>
+    case msg: StudyProcessorMsg =>
       msg.cmd match {
         case cmd: AddCollectionEventAnnotationTypeCmdWithId =>
-          addCollectionEventAnnotationType(msg)
+          addCollectionEventAnnotationType(cmd, msg.study, msg.listeners)
         case cmd: UpdateCollectionEventAnnotationTypeCmd =>
-          updateCollectionEventAnnotationType(msg)
+          updateCollectionEventAnnotationType(cmd, msg.study, msg.listeners)
         case cmd: RemoveCollectionEventAnnotationTypeCmd =>
-          removeCollectionEventAnnotationType(msg)
+          removeCollectionEventAnnotationType(cmd, msg.study, msg.listeners)
 
         case _ =>
           throw new Error("invalid command received")
@@ -65,57 +55,62 @@ class StudyAnnotationTypeDomainService(
   }
 
   private def addCollectionEventAnnotationType(
-    msg: StudyAnnotationTypeMessage): DomainValidation[CollectionEventAnnotationType] = {
+    cmd: AddCollectionEventAnnotationTypeCmdWithId,
+    study: DisabledStudy,
+    listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
 
     def addItem(item: CollectionEventAnnotationType): CollectionEventAnnotationType = {
       annotationTypeRepo.updateMap(item)
-      msg.listeners sendEvent CollectionEventAnnotationTypeAddedEvent(
-        study.id, item.id, item.name, item.description, item.valueType, item.maxValueCount,
+      listeners sendEvent CollectionEventAnnotationTypeAddedEvent(
+        item.studyId, item.id, item.name, item.description, item.valueType, item.maxValueCount,
         item.options)
       item
     }
 
     val item = for {
-      newItem <- study.addCollectionEventAnnotationType(annotationTypeRepo, msg.cmd,
-        msg.userId, msg.time)
+      newItem <- study.addCollectionEventAnnotationType(annotationTypeRepo, cmd)
       addItem <- addItem(newItem).success
     } yield newItem
-    CommandHandler.logMethod(log, "addCollectionEventAnnotationType", msg.cmd, item)
+    CommandHandler.logMethod(log, "addCollectionEventAnnotationType", cmd, item)
     item
   }
 
   private def updateCollectionEventAnnotationType(
-    msg: StudyAnnotationTypeMessage): DomainValidation[CollectionEventAnnotationType] = {
+    cmd: UpdateCollectionEventAnnotationTypeCmd,
+    study: DisabledStudy,
+    listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
 
     def update(item: CollectionEventAnnotationType): CollectionEventAnnotationType = {
       annotationTypeRepo.updateMap(item)
-      msg.listeners sendEvent CollectionEventAnnotationTypeUpdatedEvent(
-        study.id, item.id, item.name, item.description, item.valueType,
+      listeners sendEvent CollectionEventAnnotationTypeUpdatedEvent(
+        item.studyId, item.id, item.name, item.description, item.valueType,
         item.maxValueCount, item.options)
       item
     }
 
     val item = for {
-      newItem <- study.updateCollectionEventAnnotationType(annotationTypeRepo, msg.cmd)
+      newItem <- study.updateCollectionEventAnnotationType(annotationTypeRepo, cmd)
       updatedItem <- update(newItem).success
     } yield updatedItem
-    CommandHandler.logMethod(log, "updateCollectionEventAnnotationType", msg.cmd, item)
+    CommandHandler.logMethod(log, "updateCollectionEventAnnotationType", cmd, item)
     item
   }
 
   private def removeCollectionEventAnnotationType(
-    msg: StudyAnnotationTypeMessage): DomainValidation[CollectionEventAnnotationType] = {
+    cmd: RemoveCollectionEventAnnotationTypeCmd,
+    study: DisabledStudy,
+    listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
 
     def removeItem(item: CollectionEventAnnotationType) = {
       annotationTypeRepo.remove(item)
-      msg.listeners sendEvent CollectionEventAnnotationTypeRemovedEvent(item.studyId, item.id)
+      listeners sendEvent CollectionEventAnnotationTypeRemovedEvent(item.studyId, item.id)
     }
 
     val item = for {
-      oldItem <- study.removeCollectionEventAnnotationType(annotationTypeRepo, msg.cmd)
+      oldItem <- study.removeCollectionEventAnnotationType(annotationTypeRepo, cmd)
       removedItem <- removeItem(oldItem).success
     } yield oldItem
-    CommandHandler.logMethod(log, "removeCollectionEventAnnotationType", msg.cmd, item)
+    CommandHandler.logMethod(log, "removeCollectionEventAnnotationType", cmd, item)
     item
   }
 }

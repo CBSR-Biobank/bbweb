@@ -1,4 +1,4 @@
-package domain.service
+package service.study
 
 import infrastructure._
 import infrastructure.commands._
@@ -10,7 +10,6 @@ import domain.study.{
   CollectionEventTypeAnnotationType,
   CollectionEventTypeId,
   DisabledStudy,
-  EnabledStudy,
   SpecimenGroup,
   SpecimenGroupId,
   SpecimenGroupCollectionEventType,
@@ -18,7 +17,8 @@ import domain.study.{
   Study,
   StudyId
 }
-import Study._
+import domain.study.Study._
+import service.CommandHandler
 
 import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
@@ -39,7 +39,7 @@ import Scalaz._
  * @param at2cetRepo The value object repository that associates a collection event annotation
  *         type to a collection event type.
  */
-class CollectionEventTypeDomainService(
+protected[service] class CollectionEventTypeDomainService(
   studyRepository: ReadRepository[StudyId, Study],
   collectionEventTypeRepository: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
   specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
