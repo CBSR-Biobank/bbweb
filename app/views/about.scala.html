@@ -1,6 +1,6 @@
-@(user: Option[securesocial.core.Identity])
+@()(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
-@main("About Biobank", user){
+@main("About Biobank"){
         <h1>CBSR</h1>
         <p>The Canadian BioSample Repository (CBSR) has processed and stored biospecimens since
             2000. In 2008, CBSR began developing a comprehensive client-server Java application,

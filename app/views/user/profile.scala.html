@@ -1,7 +1,8 @@
-@(user: securesocial.core.Identity)(implicit request: RequestHeader)
+@()(implicit request: securesocial.core.SecuredRequest[play.api.mvc.AnyContent])
 @import securesocial.core.IdentityProvider
 
-@main("Biobank",Some(user)) {
+@main("User Profile") {
+    @defining(request.user) { user =>
 <div class="page-header">
     <h2><img src="@user.avatarUrl" alt="@user.firstName" width="40px" height="40px"/> Welcome @user.firstName</h2>
 </div>
@@ -43,4 +44,5 @@
         <a class="btn" href="@securesocial.core.providers.utils.RoutesHelper.changePasswordPage.absoluteURL(IdentityProvider.sslEnabled)">Change Password</a>
     }
 </div>
+}
 }

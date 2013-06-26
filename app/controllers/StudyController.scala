@@ -35,7 +35,7 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
   def index = SecuredAction { implicit request =>
     // get list of studies the user has access to
     val studies = studyService.getAll
-    Ok(views.html.study.index(studies, request.user))
+    Ok(views.html.study.index(studies))
   }
 
   val addForm = Form(
@@ -47,20 +47,20 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
    * Add a study.
    */
   def add = SecuredAction { implicit request =>
-    Ok(html.study.add(addForm, request.user))
+    Ok(html.study.add(addForm))
   }
 
   def addSubmission = SecuredAction {
     implicit request =>
       implicit val userId = new UserId(request.user.id.id)
       addForm.bindFromRequest.fold(
-        formWithErrors => BadRequest(html.study.add(formWithErrors, request.user)),
+        formWithErrors => BadRequest(html.study.add(formWithErrors)),
         {
           case (name, description) =>
             Async {
               studyService.addStudy(AddStudyCmd(name, description)).map(
                 study => study match {
-                  case Success(study) => Ok(html.study.show(study, request.user))
+                  case Success(study) => Ok(html.study.show(study))
                   case Failure(x) => BadRequest("Bad Request: " + x.head)
                 })
             }
@@ -69,17 +69,27 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
 
   def show(id: String) = SecuredAction { implicit request =>
     studyService.getStudy(id) match {
-      case Success(study) => Ok(html.study.show(study, request.user))
+      case Success(study) => Ok(html.study.show(study))
       case Failure(x) =>
         // FIXME: is this the best way to handle it?
         BadRequest("Bad Request: " + x.head)
     }
   }
 
-  val specimenGroupAdd = Form(
+  val specimenGroupForm = Form(
     tuple(
       "name" -> nonEmptyText,
       "description" -> optional(text),
-      "units" -> nonEmptyText))
+      "units" -> nonEmptyText,
+      "anatomicalSourceType" -> optional(text),
+      "preservationType" -> optional(text),
+      "preservationTemperatureType" -> optional(text),
+      "specimenType" -> optional(text)))
 
+  /**
+   * Add a specimen group.
+   */
+  def addSpecimenGroup(id: String) = SecuredAction { implicit request =>
+    Ok(html.study.specimenGroupAdd(id, specimenGroupForm))
+  }
 }

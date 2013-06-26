@@ -1,6 +1,6 @@
-@(study: domain.study.Study, user: securesocial.core.Identity)
+@(study: domain.study.Study)(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
-@main("Biobank", Some(user)) {
+@main("Biobank") {
 <ul class="breadcrumb">
   <li><a href="/study">Studies</a> <span class="divider">/</span></li>
   <li class="active">@study.name</li>

@@ -1,4 +1,6 @@
-@main(Messages("biobank.notAuthorized.title"),None) {
+@()(implicit request: RequestHeader)
+
+@main(Messages("biobank.notAuthorized.title")) {
     <div class="page-header">
         <h1>@Messages("biobank.notAuthorized.title")</h1>
     </div>

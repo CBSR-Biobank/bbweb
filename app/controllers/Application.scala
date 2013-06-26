@@ -11,6 +11,7 @@ import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
+import play.api.templates.Html
 import akka._
 import akka.util.Timeout
 import views._
@@ -26,15 +27,15 @@ object Application extends Controller with securesocial.core.SecureSocial {
   lazy val studyService = Global.services.studyService
 
   def index = SecuredAction { implicit request =>
-    Ok(views.html.index(request.user))
+    Ok(views.html.index(request))
   }
 
   def about = UserAwareAction { implicit request =>
-    Ok(html.about(request.user))
+    Ok(html.about())
   }
 
   def contact = UserAwareAction { implicit request =>
-    Ok(html.contact(request.user))
+    Ok(html.contact())
   }
 
 }

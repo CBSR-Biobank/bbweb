@@ -20,7 +20,7 @@ object UserController extends Controller with securesocial.core.SecureSocial {
   def profile = SecuredAction { implicit request =>
     userService.getByEmail(request.user.email.getOrElse("")) match {
       case Some(user) =>
-        Ok(views.html.user.profile(request.user))
+        Ok(views.html.user.profile())
       case _ => Forbidden
     }
   }

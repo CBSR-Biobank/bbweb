@@ -1,5 +1,4 @@
-@(title: String,user: Option[securesocial.core.Identity])(content: Html)
-
+@(title: String)(content: Html)(implicit request: RequestHeader)
 <!DOCTYPE html> 
 
 <html>
@@ -81,21 +80,24 @@
                     <li><a href="contact">Contact</a></li>
                   </ul>
                 </div>
-                @user.map { user =>
-                <div class="nav-collapse collapse navbar-responsive-collapse">
-                  <ul class="nav navbar-nav pull-right">
-                    <li class="dropdown">
-                      <a class="dropdown-toggle" id="drop1" role="button" data-toggle="dropdown" href="#">
-                      <strong>@user.email</strong> <span class="caret"></span></a>
-                      <ul class="dropdown-menu" role="menu"  aria-labelledby="drop1">
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="user/profile">My Profile</a></li>
-                      </ul>
-                    </li>
-                    <li><a href="@securesocial.controllers.routes.LoginPage.logout()">Log out</a></li>
-                    </ul>
-                  </div>
-                  }
-                  <!--/.nav-collapse -->
+                @request match {
+                    case req : securesocial.core.SecuredRequest[_]  => {
+                        <div class="nav-collapse collapse navbar-responsive-collapse">
+                            <ul class="nav navbar-nav pull-right">
+                              <li class="dropdown">
+                                <a class="dropdown-toggle" id="drop1" role="button" data-toggle="dropdown" href="#">
+                                <strong>@req.user.email</strong> <span class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu"  aria-labelledby="drop1">
+                                  <li role="presentation"><a role="menuitem" tabindex="-1" href="user/profile">My Profile</a></li>
+                                </ul>
+                              </li>
+                              <li><a href="@securesocial.controllers.routes.LoginPage.logout()">Log out</a></li>
+                              </ul>
+                            </div>
+                    }
+                    case _ => { }
+                }
+                <!--/.nav-collapse -->
               </div>
             </div>
           </div>

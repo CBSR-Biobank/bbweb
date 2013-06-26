@@ -1,6 +1,6 @@
-@(user: securesocial.core.Identity)(implicit request: RequestHeader)
+@(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
-@main("Biobank",Some(user)) {
+@main("Biobank") {
 <div class="page-header">
   <h2>Select a task</h2>
 </div>
