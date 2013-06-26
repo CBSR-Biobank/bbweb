@@ -101,13 +101,13 @@ class StudyProcessor(
           process(disableStudy(cmd, emitter("listeners")))
 
         case cmd: SpecimenGroupCommand =>
-          processSubEntityMsg(cmd, cmd.studyId, serviceMsg.id, specimenGroupService.process)
+          processEntityMsg(cmd, cmd.studyId, serviceMsg.id, specimenGroupService.process)
 
         case cmd: CollectionEventTypeCommand =>
-          processSubEntityMsg(cmd, cmd.studyId, serviceMsg.id, collectionEventTypeService.process)
+          processEntityMsg(cmd, cmd.studyId, serviceMsg.id, collectionEventTypeService.process)
 
         case cmd: StudyAnnotationTypeCommand =>
-          processSubEntityMsg(cmd, cmd.studyId, serviceMsg.id, annotationTypeService.process)
+          processEntityMsg(cmd, cmd.studyId, serviceMsg.id, annotationTypeService.process)
 
         case _ =>
           throw new Error("invalid command received: ")
@@ -117,7 +117,7 @@ class StudyProcessor(
       throw new Error("invalid message received: ")
   }
 
-  private def processSubEntityMsg[T](
+  private def processEntityMsg[T](
     cmd: StudyCommand,
     studyId: String,
     id: Option[String],
