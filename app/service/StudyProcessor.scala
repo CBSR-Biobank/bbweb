@@ -100,26 +100,14 @@ class StudyProcessor(
         case cmd: DisableStudyCmd =>
           process(disableStudy(cmd, emitter("listeners")))
 
-        case @(_: SpecimenGroupCommand | _: CollectionEventTypeCommand) =>
-          ???
-
         case cmd: SpecimenGroupCommand =>
-          process(validateStudy(new StudyId(cmd.studyId)) { study =>
-            specimenGroupDomainService.process(
-              StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
-          })
+          processSubEntityMsg(cmd, cmd.studyId, serviceMsg.id, specimenGroupDomainService.process)
 
         case cmd: CollectionEventTypeCommand =>
-          process(validateStudy(new StudyId(cmd.studyId)) { study =>
-            collectionEventTypeDomainService.process(
-              StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
-          })
+          processSubEntityMsg(cmd, cmd.studyId, serviceMsg.id, collectionEventTypeDomainService.process)
 
         case cmd: StudyAnnotationTypeCommand =>
-          process(validateStudy(new StudyId(cmd.studyId)) { study =>
-            annotationTypeDomainService.process(
-              StudyProcessorMsg(cmd, study, emitter("listeners"), serviceMsg.id))
-          })
+          processSubEntityMsg(cmd, cmd.studyId, serviceMsg.id, annotationTypeDomainService.process)
 
         case _ =>
           throw new Error("invalid command received: ")
@@ -129,22 +117,35 @@ class StudyProcessor(
       throw new Error("invalid message received: ")
   }
 
+  private def processSubEntityMsg[T](
+    cmd: StudyCommand,
+    studyId: String,
+    id: Option[String],
+    processFunc: StudyProcessorMsg => DomainValidation[T]) = {
+
+    val updatedItem = for {
+      study <- validateStudy(new StudyId(studyId))
+      item <- processFunc(StudyProcessorMsg(cmd, study, emitter("listeners"), id))
+    } yield item
+    process(updatedItem)
+  }
+
   override protected def process[T](validation: DomainValidation[T]) = {
     validation match {
       case Success(domainObject) =>
       // update the addedBy and updatedBy fields on the study aggregate
       case Failure(x) =>
+      // do nothing
     }
     super.process(validation)
   }
 
-  def validateStudy(
-    studyId: StudyId)(f: DisabledStudy => DomainValidation[_]): DomainValidation[_] =
+  private def validateStudy(studyId: StudyId): DomainValidation[DisabledStudy] =
     studyRepository.getByKey(studyId) match {
       case Failure(msglist) => noSuchStudy(studyId).fail
       case Success(study) => study match {
-        case study: EnabledStudy => notDisabledError(study.name).fail
-        case study: DisabledStudy => f(study)
+        case _: EnabledStudy => notDisabledError(study.name).fail
+        case dstudy: DisabledStudy => dstudy.success
       }
     }
 
