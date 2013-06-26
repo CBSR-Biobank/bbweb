@@ -50,29 +50,27 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
     Ok(html.study.add(addForm))
   }
 
-  def addSubmission = SecuredAction {
-    implicit request =>
-      implicit val userId = new UserId(request.user.id.id)
-      addForm.bindFromRequest.fold(
-        formWithErrors => BadRequest(html.study.add(formWithErrors)),
-        {
-          case (name, description) =>
-            Async {
-              studyService.addStudy(AddStudyCmd(name, description)).map(
-                study => study match {
-                  case Success(study) => Ok(html.study.show(study))
-                  case Failure(x) => BadRequest("Bad Request: " + x.head)
-                })
-            }
-        })
+  def addSubmit = SecuredAction { implicit request =>
+    implicit val userId = new UserId(request.user.id.id)
+    addForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(html.study.add(formWithErrors)),
+      {
+        case (name, description) =>
+          Async {
+            studyService.addStudy(AddStudyCmd(name, description)).map(
+              study => study match {
+                case Success(study) => Ok(html.study.show(study))
+                case Failure(x) => BadRequest("Bad Request: " + x.head)
+              })
+          }
+      })
   }
 
   def show(id: String) = SecuredAction { implicit request =>
     studyService.getStudy(id) match {
       case Success(study) => Ok(html.study.show(study))
       case Failure(x) =>
-        // FIXME: is this the best way to handle it?
-        BadRequest("Bad Request: " + x.head)
+        NotFound("Bad Request: " + x.head)
     }
   }
 
@@ -90,6 +88,26 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
    * Add a specimen group.
    */
   def addSpecimenGroup(id: String) = SecuredAction { implicit request =>
-    Ok(html.study.specimenGroupAdd(id, specimenGroupForm))
+    studyService.getStudy(id) match {
+      case Failure(x) =>
+        NotFound("Bad Request: " + x.head)
+      case Success(study) =>
+        Ok(html.study.specimenGroupAdd(id, study.name, specimenGroupForm))
+    }
+  }
+
+  def addSpecimenGroupSubmit = SecuredAction { implicit request =>
+    addForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(html.study.add(formWithErrors)), {
+        case (name, description) =>
+          implicit val userId = new UserId(request.user.id.id)
+          Async {
+            studyService.addStudy(AddStudyCmd(name, description)).map(
+              study => study match {
+                case Success(study) => Ok(html.study.show(study))
+                case Failure(x) => BadRequest("Bad Request: " + x.head)
+              })
+          }
+      })
   }
 }

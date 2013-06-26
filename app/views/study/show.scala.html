@@ -2,7 +2,7 @@
 
 @main("Biobank") {
 <ul class="breadcrumb">
-  <li><a href="/study">Studies</a> <span class="divider">/</span></li>
+  <li><a href="@routes.StudyController.index">Studies</a> <span class="divider">/</span></li>
   <li class="active">@study.name</li>
 </ul>
 
@@ -36,9 +36,9 @@
   </table>
 
   <div class="form-actions">
-    <a href="/study" class="btn btn-small btn-primary" type="button">Specimen Groups</a>
-    <a href="/study" class="btn btn-small btn-primary" type="button">Annotation Types</a>
-    <a href="/study" class="btn btn-small btn-primary" type="button">Collection Event Types</a>
+    <a href="@routes.StudyController.addSpecimenGroup(study.id.id)" class="btn btn-small btn-primary" type="button">Specimen Groups</a>
+    <a href="@routes.StudyController.index" class="btn btn-small btn-primary" type="button">Annotation Types</a>
+    <a href="@routes.StudyController.index" class="btn btn-small btn-primary" type="button">Collection Event Types</a>
   </div>
 </div>
 }

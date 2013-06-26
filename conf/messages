@@ -1,5 +1,22 @@
 biobank.appName=Biobank
 
+# Forms
+biobank.form.submit=Submit
+
+# Common form prompts
+biobank.form.field.name=Name
+biobank.form.field.description=Description
+
+# Study
+biobank.study.singular=Study
+biobank.study.plural=Studies
+biobank.study.form.title=Add Study
+
+# Specimen Groups
+biobank.study.specimengroup.form.title=Add Specimen Group
+biobank.study.specimengroup.form.field.unit.plural=Units
+biobank.study.specimengroup.form.field.anatomicalsource=Anatomical Source
+
 # Login page
 biobank.login.title=Login
 biobank.login.instructions=Use your existing account on one of the following networks to log in.

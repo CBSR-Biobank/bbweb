@@ -1,0 +1,16 @@
+@(theForm: Form[_])
+
+@import helper._
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) } 
+
+@inputText(
+    field = theForm("name"),
+    args = '_label -> Messages("biobank.form.field.name"), 'placeholder -> "short name"
+    )
+
+@textarea(
+    field = theForm("description"),
+    args = '_label -> Messages("biobank.form.field.description"), 'rows -> 3, 'cols -> 50, 
+      'placeholder -> "describes the name",
+      'class -> "input-xxlarge"
+    )

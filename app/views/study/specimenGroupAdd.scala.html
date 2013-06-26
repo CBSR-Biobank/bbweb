@@ -1,32 +1,45 @@
-@(studyId: String, 
+@(studyId: String, studyName: String,
     addForm: Form[(String,Option[String],String,Option[String],Option[String],Option[String],
         Option[String])])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
+@import domain.AnatomicalSourceType._
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) } 
 
-@main("Add Specimen Group") {
+@main(Messages("biobank.study.specimengroup.form.title")) {
 <ul class="breadcrumb">
-  <li><a href="/study">Studies</a> <span class="divider">/</span></li>
-  <li class="active">Add Study</li>
+  <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
+  <li><a href="@routes.StudyController.show(studyId)">@studyName</a> <span class="divider">/</span></li>
+  <li class="active">@Messages("biobank.study.specimengroup.form.title")</li>
 </ul>
 <div class="page-header">
-  <h2>Add Study</h2>
+  <h2>@Messages("biobank.study.singular"): @studyName</h2>
+  <h3>@Messages("biobank.study.specimengroup.form.title")</h3>
 </div>
 <div class="clearfix">
-  @form(action = routes.StudyController.addSubmission, args = 'id -> "addform") {
+    @form(action = routes.StudyController.addSpecimenGroupSubmit, args = 'id -> "addform", 'class -> "form-horizontal") {
+      @formNameAndDescription(addForm) 
+
       @inputText(
-          field = addForm("name"),
-          args = '_label -> "Name", 'placeholder -> "short name"
+          field = addForm("units"),
+          args = '_label -> Messages("biobank.study.specimengroup.form.field.unit.plural"), 
+            'placeholder -> "unit specimens are measured in (Eg. ml, cm, etc.)",
+            'class -> "input-xxlarge"
           )
+
+      @select(
+          field = addForm("anatomicalSourceType"),
+          options = options(
+              "" -> "Default"
+          ),
+          args = '_label -> Messages("biobank.study.specimengroup.form.field.anatomicalsource")
+       )
+
           
-      @inputText(
-          field = addForm("description"),
-          args = '_label -> "Description", 'placeholder -> "describes the name"
-          )
-          <p class="buttons">
-            <input type="submit" id="submit">
-          <p>
+       <div class="form-actions">
+            <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
+       </div>
   }
 </div>
 }
-    
+

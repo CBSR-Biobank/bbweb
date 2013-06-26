@@ -14,9 +14,10 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 # studies
 GET     /study                      controllers.StudyController.index
 GET     /study/add                  controllers.StudyController.add
-GET     /study/submit               controllers.StudyController.addSubmission
+GET     /study/submit               controllers.StudyController.addSubmit
 GET     /study/show:id              controllers.StudyController.show(id:String)
-GET     /study/addSpecimenGroup:id  controllers.StudyController.addSpecimenGroup(id:String)
+GET     /study/addsg:id             controllers.StudyController.addSpecimenGroup(id:String)
+GET     /study/sgsubmit             controllers.StudyController.addSpecimenGroupSubmit
 
 # user
 GET     /user/profile               controllers.UserController.profile
