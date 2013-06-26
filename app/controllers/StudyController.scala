@@ -74,15 +74,22 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
+  case class SpecimenGroupFormObject(
+    studyId: Long, studyName: String, name: String, description: Option[String], units: String,
+    anatomicalSourceType: String, preservationType: String, preservationTemperatureType: String,
+    specimenType: String)
+
   val specimenGroupForm = Form(
-    tuple(
+    mapping(
+      "studyId" -> ignored(-1L),
+      "studyName" -> ignored(""),
       "name" -> nonEmptyText,
       "description" -> optional(text),
       "units" -> nonEmptyText,
-      "anatomicalSourceType" -> optional(text),
-      "preservationType" -> optional(text),
-      "preservationTemperatureType" -> optional(text),
-      "specimenType" -> optional(text)))
+      "anatomicalSourceType" -> nonEmptyText,
+      "preservationType" -> nonEmptyText,
+      "preservationTemperatureType" -> nonEmptyText,
+      "specimenType" -> nonEmptyText)(SpecimenGroupFormObject.apply)(SpecimenGroupFormObject.unapply))
 
   /**
    * Add a specimen group.
@@ -92,21 +99,26 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
       case Failure(x) =>
         NotFound("Bad Request: " + x.head)
       case Success(study) =>
-        Ok(html.study.specimenGroupAdd(id, study.name, specimenGroupForm))
+        val anatomicalSources = Seq("" -> "make a selection") ++ AnatomicalSourceType.values.map(
+          x => (x.toString -> x.toString)).toSeq
+        Ok(html.study.specimenGroupAdd(specimenGroupForm))
     }
   }
 
   def addSpecimenGroupSubmit = SecuredAction { implicit request =>
-    addForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.study.add(formWithErrors)), {
-        case (name, description) =>
+    specimenGroupForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(html.study.specimenGroupAdd(formWithErrors)), {
+        case sg =>
           implicit val userId = new UserId(request.user.id.id)
           Async {
-            studyService.addStudy(AddStudyCmd(name, description)).map(
-              study => study match {
-                case Success(study) => Ok(html.study.show(study))
-                case Failure(x) => BadRequest("Bad Request: " + x.head)
-              })
+            ???
+            //            studyService.addSpecimenGroup(
+            //              AddSpecimenGroupCmd(sg.name, sg.description, sg.units, sg.anatomicalSource,
+            //                sg.preservationType, sg.preservationTemp, sg.specimenType)).map(
+            //                study => study match {
+            //                  case Success(study) => Ok(html.study.show(study))
+            //                  case Failure(x) => BadRequest("Bad Request: " + x.head)
+            //                })
           }
       })
   }

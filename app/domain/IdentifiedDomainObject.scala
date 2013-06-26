@@ -1,7 +1,7 @@
 package domain
 
 trait IdentifiedDomainObject[T] {
-  def id: T
+  val id: T
 
   override def equals(that: Any) = that match {
     case that: IdentifiedDomainObject[_] => this.id.equals(that.id)

@@ -1,38 +1,65 @@
-@(studyId: String, studyName: String,
-    addForm: Form[(String,Option[String],String,Option[String],Option[String],Option[String],
-        Option[String])])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+@(addForm: Form[controllers.StudyController.SpecimenGroupFormObject])(
+    implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
-@import domain.AnatomicalSourceType._
+@import domain._
+@import AnatomicalSourceType._
+@import PreservationType._
+@import PreservationTemperatureType._
+@import SpecimenType._
+
 @implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) } 
 
 @main(Messages("biobank.study.specimengroup.form.title")) {
-<ul class="breadcrumb">
-  <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
-  <li><a href="@routes.StudyController.show(studyId)">@studyName</a> <span class="divider">/</span></li>
-  <li class="active">@Messages("biobank.study.specimengroup.form.title")</li>
-</ul>
-<div class="page-header">
-  <h2>@Messages("biobank.study.singular"): @studyName</h2>
-  <h3>@Messages("biobank.study.specimengroup.form.title")</h3>
-</div>
-<div class="clearfix">
-    @form(action = routes.StudyController.addSpecimenGroupSubmit, args = 'id -> "addform", 'class -> "form-horizontal") {
+    <ul class="breadcrumb">
+      <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
+      <li><a href="@routes.StudyController.show(addForm("studyId").value.getOrElse(""))">
+      @addForm("studyName").value.getOrElse("")</a> <span class="divider">/</span></li>
+      <li class="active">@Messages("biobank.study.specimengroup.form.title")</li>
+    </ul>
+    <div class="page-header">
+      <h2>@Messages("biobank.study.singular"): @addForm("studyName").value.getOrElse("")</h2>
+      <h3>@Messages("biobank.study.specimengroup.form.title")</h3>
+    </div>
+    
+    <div class="clearfix">
+    @form(action = routes.StudyController.addSpecimenGroupSubmit, 
+        args = 'id -> "addform", 'class -> "form-horizontal") {
       @formNameAndDescription(addForm) 
 
       @inputText(
           field = addForm("units"),
           args = '_label -> Messages("biobank.study.specimengroup.form.field.unit.plural"), 
-            'placeholder -> "unit specimens are measured in (Eg. ml, cm, etc.)",
+            'placeholder -> "the type of units the specimens are measured in (Eg. mL, cm, etc.)",
             'class -> "input-xxlarge"
           )
 
       @select(
           field = addForm("anatomicalSourceType"),
-          options = options(
-              "" -> "Default"
-          ),
+          options = Seq("" -> "make a selection") ++ AnatomicalSourceType.values.map(
+          x => (x.toString -> x.toString)).toSeq,
           args = '_label -> Messages("biobank.study.specimengroup.form.field.anatomicalsource")
+       )
+
+      @select(
+          field = addForm("preservationType"),
+          options = Seq("" -> "make a selection") ++ PreservationType.values.map(
+          x => (x.toString -> x.toString)).toSeq,
+          args = '_label -> Messages("biobank.study.specimengroup.form.field.preservationType")
+       )
+
+      @select(
+          field = addForm("preservationTemperatureType"),
+          options = Seq("" -> "make a selection") ++ PreservationTemperatureType.values.map(
+          x => (x.toString -> x.toString)).toSeq,
+          args = '_label -> Messages("biobank.study.specimengroup.form.field.preservationTemperatureType")
+       )
+
+      @select(
+          field = addForm("specimenType"),
+          options = Seq("" -> "make a selection") ++ SpecimenType.values.map(
+          x => (x.toString -> x.toString)).toSeq,
+          args = '_label -> Messages("biobank.study.specimengroup.form.field.specimenType")
        )
 
           

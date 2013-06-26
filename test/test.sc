@@ -1,19 +1,14 @@
 import scalaz._
 import scalaz.Scalaz._
 
+import domain.AnatomicalSourceType
+import AnatomicalSourceType._
+
 object test {
-  val cmd = UpdateStudyCmd("a",1)
-  cmd.studyId
+AnatomicalSourceType.values.map(x => (x.toString -> x.toString))
+                                                  //> res0: scala.collection.immutable.SortedSet[(String, String)] = TreeSet((Asce
+                                                  //| nding Colon,Ascending Colon), (Blood,Blood), (Brain,Brain), (Colon,Colon), (
+                                                  //| Descending Colon,Descending Colon), (Duodenum,Duodenum), (Ileum,Ileum), (Kid
+                                                  //| ney,Kidney), (Stomach Antrum,Stomach Antrum), (Stomach Body,Stomach Body), (
+                                                  //| Toe Nails,Toe Nails), (Transverse Colon,Transverse Colon), (Urine,Urine))
 }
-
-trait Command {}
-
-trait Identity { val id: String }
-
-trait ExpectedVersion { val expectedVersion: Option[Long] }
-
-trait StudyCommand extends Command with Identity with ExpectedVersion {
-  val studyId: String
-}
-case class UpdateStudyCmd(id: String, expectedVersion: Option[String],
-studyId: String, version: Long) extends StudyCommand
