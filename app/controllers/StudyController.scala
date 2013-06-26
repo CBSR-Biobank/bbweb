@@ -6,6 +6,10 @@ import infrastructure.commands._
 import domain._
 import domain.study._
 import views._
+import domain.AnatomicalSourceType._
+import domain.PreservationType._
+import domain.PreservationTemperatureType._
+import domain.SpecimenType._
 
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -71,5 +75,11 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
         BadRequest("Bad Request: " + x.head)
     }
   }
+
+  val specimenGroupAdd = Form(
+    tuple(
+      "name" -> nonEmptyText,
+      "description" -> optional(text),
+      "units" -> nonEmptyText))
 
 }
