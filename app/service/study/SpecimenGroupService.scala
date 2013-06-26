@@ -10,7 +10,7 @@ import domain.PreservationTemperatureType._
 import domain.SpecimenType._
 import domain.study.{ DisabledStudy, SpecimenGroup, SpecimenGroupId, Study, StudyId }
 import domain.study.Study._
-import service.CommandHandler
+import service._
 
 import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
@@ -27,18 +27,15 @@ import scalaz.Scalaz._
  *        reading.
  * @param specimenGroupRepository The repository for specimen group entities.
  */
-class SpecimenGroupDomainService(
-  studyRepository: ReadRepository[StudyId, Study],
-  specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup])
+class SpecimenGroupService(
+  studyRepository: StudyReadRepository,
+  specimenGroupRepository: SpecimenGroupReadWriteRepository)
   extends CommandHandler {
-  import SpecimenGroupDomainService._
+  import SpecimenGroupService._
 
   /**
-   * This partial function handles each command. The input is a Tuple3 consisting of:
-   *
-   *  1. The command to handle.
-   *  2. The study entity the command is associated with,
-   *  3. The event message listener to be notified if the command is successful.
+   * This partial function handles each command. The command is contained within the
+   * StudyProcessorMsg.
    *
    *  If the command is invalid, then this method throws an Error exception.
    */
@@ -122,6 +119,6 @@ class SpecimenGroupDomainService(
 
 }
 
-object SpecimenGroupDomainService {
-  val log = LoggerFactory.getLogger(SpecimenGroupDomainService.getClass)
+object SpecimenGroupService {
+  val log = LoggerFactory.getLogger(SpecimenGroupService.getClass)
 }

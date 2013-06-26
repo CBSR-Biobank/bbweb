@@ -46,7 +46,7 @@ abstract class AppFixture extends Specification with NoTimeConversions {
   val mongoDB = mongoClient(MongoDbName)
   val mongoColl = mongoClient(MongoDbName)(MongoCollName)
 
-  val userRepo = new ReadWriteRepository[UserId, User](v => new UserId(v.email))
+  val userRepo = new UserReadWriteRepository(v => new UserId(v.email))
 
   // delete the journal contents
   mongoColl.remove(MongoDBObject.empty)

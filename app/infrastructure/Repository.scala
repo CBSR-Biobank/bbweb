@@ -32,3 +32,4 @@ class ReadWriteRepository[K, A](keyGetter: (A) => K) extends ReadRepository[K, A
     internalMap.single.transform(map => map - keyGetter(value))
 
 }
+

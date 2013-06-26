@@ -1,6 +1,4 @@
-package service
-
-import infrastructure.DomainValidation
+import infrastructure._
 import domain._
 import domain.study._
 
@@ -9,66 +7,95 @@ import org.slf4j.Logger
 import scalaz._
 import scalaz.Scalaz._
 
-/**
- * All Domain Services extend this trait.
- *
- * @author Nelson Loyola
- */
-trait CommandHandler {
-
-  type ProcessResult = PartialFunction[Any, DomainValidation[Any]]
-
+package object service {
   /**
-   * A partial function to handle each command. The input is a Tuple3 consisting of:
-   *
-   *  1. The command to handle.
-   *  2. The study entity the command is associated with,
-   *  3. The event message listener to be notified if the command is successful.
-   *
-   *  If the command is invalid, then the method throws an Error exception.
+   * All Domain Services extend this trait.
    */
-  def process: ProcessResult
+  trait CommandHandler {
 
-}
+    type ProcessResult = PartialFunction[Any, DomainValidation[Any]]
 
-object CommandHandler {
+    /**
+     * A partial function to handle each command. The input is a Tuple3 consisting of:
+     *
+     *  1. The command to handle.
+     *  2. The study entity the command is associated with,
+     *  3. The event message listener to be notified if the command is successful.
+     *
+     *  If the command is invalid, then the method throws an Error exception.
+     */
+    def process: ProcessResult
 
-  def logMethod(
-    log: Logger,
-    methodName: String,
-    cmd: Any,
-    validation: DomainValidation[Any]) {
-    if (log.isDebugEnabled) {
-      log.debug("%s: %s".format(methodName, cmd))
-      validation match {
-        case Success(item) =>
-          log.debug("%s: %s".format(methodName, item))
-        case Failure(msglist) =>
-          log.debug("%s: { msg: %s }".format(methodName, msglist.head))
-      }
-    }
   }
 
+  object CommandHandler {
+
+    def logMethod(
+      log: Logger,
+      methodName: String,
+      cmd: Any,
+      validation: DomainValidation[Any]) {
+      if (log.isDebugEnabled) {
+        log.debug("%s: %s".format(methodName, cmd))
+        validation match {
+          case Success(item) =>
+            log.debug("%s: %s".format(methodName, item))
+          case Failure(msglist) =>
+            log.debug("%s: { msg: %s }".format(methodName, msglist.head))
+        }
+      }
+    }
+
+  }
+
+  trait IdentityService {
+
+    def nextIdentity: String = java.util.UUID.randomUUID.toString.toUpperCase
+
+  }
+
+  object StudyIdentityService extends IdentityService
+
+  object SpecimenGroupIdentityService extends IdentityService
+
+  object CollectionEventTypeIdentityService extends IdentityService
+
+  object AnnotationTypeIdentityService extends IdentityService
+
+  object SpecimenGroupCollectionEventTypeIdentityService extends IdentityService
+
+  object CollectionEventAnnotationTypeIdentityService extends IdentityService
+
+  object CollectionEventTypeAnnotationTypeIdentityService extends IdentityService
+
+  object UserIdentityService extends IdentityService
+
+  type StudyReadRepository = ReadRepository[StudyId, Study]
+
+  type StudyReadWriteRepository = ReadWriteRepository[StudyId, Study]
+
+  type CollectionEventTypeReadRepository = ReadRepository[CollectionEventTypeId, CollectionEventType]
+
+  type CollectionEventTypeReadWriteRepository = ReadWriteRepository[CollectionEventTypeId, CollectionEventType]
+
+  type SpecimenGroupReadRepository = ReadRepository[SpecimenGroupId, SpecimenGroup]
+
+  type SpecimenGroupReadWriteRepository = ReadWriteRepository[SpecimenGroupId, SpecimenGroup]
+
+  type StudyAnnotationTypeReadRepository = ReadWriteRepository[AnnotationTypeId, StudyAnnotationType]
+
+  type StudyAnnotationTypeReadWriteRepository = ReadWriteRepository[AnnotationTypeId, StudyAnnotationType]
+
+  type SpecimenGroupCollectionEventTypeReadRepository = ReadWriteRepository[String, SpecimenGroupCollectionEventType]
+
+  type SpecimenGroupCollectionEventTypeReadWriteRepository = ReadWriteRepository[String, SpecimenGroupCollectionEventType]
+
+  type CollectionEventTypeAnnotationTypeWriteRepository = ReadWriteRepository[String, CollectionEventTypeAnnotationType]
+
+  type CollectionEventTypeAnnotationTypeReadWriteRepository = ReadWriteRepository[String, CollectionEventTypeAnnotationType]
+
+  type UserReadRepository = ReadRepository[UserId, User]
+
+  type UserReadWriteRepository = ReadWriteRepository[UserId, User]
 }
 
-trait IdentityService {
-
-  def nextIdentity: String = java.util.UUID.randomUUID.toString.toUpperCase
-
-}
-
-object StudyIdentityService extends IdentityService
-
-object SpecimenGroupIdentityService extends IdentityService
-
-object CollectionEventTypeIdentityService extends IdentityService
-
-object AnnotationTypeIdentityService extends IdentityService
-
-object SpecimenGroupCollectionEventTypeIdentityService extends IdentityService
-
-object CollectionEventAnnotationTypeIdentityService extends IdentityService
-
-object CollectionEventTypeAnnotationTypeIdentityService extends IdentityService
-
-object UserIdentityService extends IdentityService

@@ -10,7 +10,7 @@ import domain.{
   UserId
 }
 import domain.study._
-import service.study.{ SpecimenGroupDomainService }
+import service.study.{ SpecimenGroupService }
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout

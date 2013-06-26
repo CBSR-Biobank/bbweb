@@ -19,20 +19,19 @@ abstract class StudyFixture extends AppFixture {
 
   val nameGenerator: NameGenerator
 
-  val studyRepository = new ReadWriteRepository[StudyId, Study](v => v.id)
-  val specimenGroupRepository = new ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id)
-  val collectionEventTypeRepository = new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
+  val studyRepository = new StudyReadWriteRepository(v => v.id)
+  val specimenGroupRepository = new SpecimenGroupReadWriteRepository(v => v.id)
+  val collectionEventTypeRepository = new CollectionEventTypeReadWriteRepository(v => v.id)
 
-  val annotationTypeRepo =
-    new ReadWriteRepository[AnnotationTypeId, StudyAnnotationType](v => v.id)
+  val annotationTypeRepo = new StudyAnnotationTypeReadWriteRepository(v => v.id)
 
   // specimen group -> collection event type repository
   val sg2cetRepo =
-    new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
+    new SpecimenGroupCollectionEventTypeReadWriteRepository(v => v.id)
 
   // annotation type -> collection type event repository
   val at2cetRepo =
-    new ReadWriteRepository[String, CollectionEventTypeAnnotationType](v => v.id)
+    new CollectionEventTypeAnnotationTypeReadWriteRepository(v => v.id)
 
   val studyProcessor = extension.processorOf(Props(
     new StudyProcessor(

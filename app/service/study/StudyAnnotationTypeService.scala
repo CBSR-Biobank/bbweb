@@ -7,7 +7,7 @@ import domain._
 import domain.study.{ CollectionEventAnnotationType, DisabledStudy, Study, StudyAnnotationType }
 import domain.study.Study._
 import domain.AnnotationValueType._
-import service.CommandHandler
+import service._
 
 import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
@@ -21,17 +21,14 @@ import scalaz.Scalaz._
  *
  * @author Nelson Loyola
  */
-protected[service] class StudyAnnotationTypeDomainService(
-  annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType])
+protected[service] class StudyAnnotationTypeService(
+  annotationTypeRepo: StudyAnnotationTypeReadWriteRepository)
   extends CommandHandler {
-  import StudyAnnotationTypeDomainService._
+  import StudyAnnotationTypeService._
 
   /**
-   * This partial function handles each command. The input is a Tuple3 consisting of:
-   *
-   *  1. The command to handle.
-   *  2. The study entity the command is associated with,
-   *  3. The event message listener to be notified if the command is successful.
+   * This partial function handles each command. The command is contained within the
+   * StudyProcessorMsg.
    *
    *  If the command is invalid, then this method throws an Error exception.
    */
@@ -117,7 +114,7 @@ protected[service] class StudyAnnotationTypeDomainService(
   }
 }
 
-object StudyAnnotationTypeDomainService {
-  val log = LoggerFactory.getLogger(StudyAnnotationTypeDomainService.getClass)
+object StudyAnnotationTypeService {
+  val log = LoggerFactory.getLogger(StudyAnnotationTypeService.getClass)
 }
 

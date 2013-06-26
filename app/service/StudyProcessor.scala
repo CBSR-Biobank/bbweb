@@ -24,11 +24,11 @@ import domain.SpecimenType._
 import domain.AnnotationValueType._
 import domain.study._
 import service.study.{
-  CollectionEventTypeDomainService,
-  SpecimenGroupDomainService,
-  StudyAnnotationTypeDomainService
+  CollectionEventTypeService,
+  SpecimenGroupService,
+  StudyAnnotationTypeService
 }
-import service.study.SpecimenGroupDomainService
+import service.study.SpecimenGroupService
 import Study._
 
 import akka.actor._
@@ -61,28 +61,28 @@ case class StudyMessage(cmd: Any, userId: UserId, time: Long, listeners: Message
  *         type to a collection event type.
  */
 class StudyProcessor(
-  studyRepository: ReadWriteRepository[StudyId, Study],
-  specimenGroupRepository: ReadWriteRepository[SpecimenGroupId, SpecimenGroup],
-  cetRepo: ReadWriteRepository[CollectionEventTypeId, CollectionEventType],
-  annotationTypeRepo: ReadWriteRepository[AnnotationTypeId, StudyAnnotationType],
-  sg2cetRepo: ReadWriteRepository[String, SpecimenGroupCollectionEventType],
-  at2cetRepo: ReadWriteRepository[String, CollectionEventTypeAnnotationType])
+  studyRepository: StudyReadWriteRepository,
+  specimenGroupRepository: SpecimenGroupReadWriteRepository,
+  cetRepo: CollectionEventTypeReadWriteRepository,
+  annotationTypeRepo: StudyAnnotationTypeReadWriteRepository,
+  sg2cetRepo: SpecimenGroupCollectionEventTypeReadWriteRepository,
+  at2cetRepo: CollectionEventTypeAnnotationTypeReadWriteRepository)
   extends Processor with akka.actor.ActorLogging { this: Emitter =>
 
   /**
    * The domain service that handles specimen group commands.
    */
-  val specimenGroupDomainService = new SpecimenGroupDomainService(
+  val specimenGroupService = new SpecimenGroupService(
     studyRepository, specimenGroupRepository)
 
   /**
    * The domain service that handles collection event type commands.
    */
-  val collectionEventTypeDomainService = new CollectionEventTypeDomainService(
+  val collectionEventTypeService = new CollectionEventTypeService(
     studyRepository, cetRepo, specimenGroupRepository, annotationTypeRepo,
     sg2cetRepo, at2cetRepo)
 
-  val annotationTypeDomainService = new StudyAnnotationTypeDomainService(
+  val annotationTypeService = new StudyAnnotationTypeService(
     annotationTypeRepo)
 
   def receive = {
@@ -101,13 +101,13 @@ class StudyProcessor(
           process(disableStudy(cmd, emitter("listeners")))
 
         case cmd: SpecimenGroupCommand =>
-          processSubEntityMsg(cmd, cmd.studyId, serviceMsg.id, specimenGroupDomainService.process)
+          processSubEntityMsg(cmd, cmd.studyId, serviceMsg.id, specimenGroupService.process)
 
         case cmd: CollectionEventTypeCommand =>
-          processSubEntityMsg(cmd, cmd.studyId, serviceMsg.id, collectionEventTypeDomainService.process)
+          processSubEntityMsg(cmd, cmd.studyId, serviceMsg.id, collectionEventTypeService.process)
 
         case cmd: StudyAnnotationTypeCommand =>
-          processSubEntityMsg(cmd, cmd.studyId, serviceMsg.id, annotationTypeDomainService.process)
+          processSubEntityMsg(cmd, cmd.studyId, serviceMsg.id, annotationTypeService.process)
 
         case _ =>
           throw new Error("invalid command received: ")
