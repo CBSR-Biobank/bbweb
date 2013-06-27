@@ -1,4 +1,4 @@
-@(addForm: Form[controllers.SpecimenGroupFormObject])(
+@(addForm: Form[controllers.SpecimenGroupFormObject], studyId: String, studyName: String)(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
@@ -9,18 +9,21 @@
 @main(Messages("biobank.study.specimengroup.form.title")) {
     <ul class="breadcrumb">
       <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
-      <li><a href="@routes.StudyController.show(addForm("studyId").value.getOrElse(""))">
-      @addForm("studyName").value.getOrElse("")</a> <span class="divider">/</span></li>
+      <li><a href="@routes.StudyController.show(studyId)">@studyName</a> <span class="divider">/</span></li>
       <li class="active">@Messages("biobank.study.specimengroup.form.title")</li>
     </ul>
     <div class="page-header">
-      <h2>@Messages("biobank.study.singular"): @addForm("studyName").value.getOrElse("")</h2>
+      <h2>@Messages("biobank.study.singular"): @studyName</h2>
       <h3>@Messages("biobank.study.specimengroup.form.title")</h3>
     </div>
     
     <div class="clearfix">
-    @form(action = routes.StudyController.addSpecimenGroupSubmit, 
+    @form(routes.StudyController.addSpecimenGroupSubmit, 
         args = 'id -> "addform", 'class -> "form-horizontal") {
+        
+      <input type="hidden" name="studyId" value="@studyId" >  
+      <input type="hidden" name="studyName" value="@studyName" >  
+        
       @formNameAndDescription(addForm("name"), addForm("description")) 
 
       @inputText(
@@ -39,13 +42,13 @@
       @select(
           field = addForm("preservationType"),
           options = SpecimenGroupSelections.preservationTypes,
-          args = '_label -> Messages("biobank.study.specimengroup.form.field.preservation")
+          args = '_label -> Messages("biobank.study.specimengroup.form.field.preservationType")
        )
 
       @select(
           field = addForm("preservationTemperatureType"),
           options = SpecimenGroupSelections.preservationTemperatureTypes,
-          args = '_label -> Messages("biobank.study.specimengroup.form.field.preservationTemperature")
+          args = '_label -> Messages("biobank.study.specimengroup.form.field.preservationTemperatureType")
        )
 
       @select(

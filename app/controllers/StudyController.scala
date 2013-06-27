@@ -20,6 +20,7 @@ import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
 import play.api.i18n.Messages
+import play.Logger
 import akka.util.Timeout
 import securesocial.core.{ Identity, Authorization }
 
@@ -77,8 +78,8 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
 
   val specimenGroupForm = Form(
     mapping(
-      "studyId" -> ignored(-1L),
-      "studyName" -> ignored(""),
+      "studyId" -> nonEmptyText,
+      "studyName" -> nonEmptyText,
       "name" -> nonEmptyText,
       "description" -> optional(text),
       "units" -> nonEmptyText,
@@ -95,19 +96,21 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
       case Failure(x) =>
         NotFound("Bad Request: " + x.head)
       case Success(study) =>
-        val anatomicalSources = Seq("" -> "make a selection") ++ AnatomicalSourceType.values.map(
-          x => (x.toString -> x.toString)).toSeq
-        Ok(html.study.specimenGroupAdd(specimenGroupForm))
+        val form = specimenGroupForm.fill(SpecimenGroupFormObject(
+          id, study.name, "", None, "", "", "", "", ""))
+        Ok(html.study.specimenGroupAdd(form, id, study.name))
     }
   }
 
   def addSpecimenGroupSubmit = SecuredAction { implicit request =>
     specimenGroupForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.study.specimenGroupAdd(formWithErrors)), {
-        case sgConv =>
+      formWithErrors => BadRequest(html.study.specimenGroupAdd(
+        formWithErrors, formWithErrors.get.studyId, formWithErrors.get.studyName)), {
+        case sgForm =>
+          Logger.debug("sgForm:" + sgForm)
           Async {
             implicit val userId = new UserId(request.user.id.id)
-            studyService.addSpecimenGroup(sgConv.getCmd).map(
+            studyService.addSpecimenGroup(sgForm.getCmd).map(
               sg => sg match {
                 case Success(sg) =>
                   val study = studyService.getStudy(sg.studyId.id) | null
@@ -127,27 +130,29 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
 }
 
 case class SpecimenGroupFormObject(
-  studyId: Long, studyName: String, name: String, description: Option[String], units: String,
+  studyId: String, studyName: String, name: String, description: Option[String], units: String,
   anatomicalSourceType: String, preservationType: String, preservationTemperatureType: String,
   specimenType: String) {
 
   def getCmd: AddSpecimenGroupCmd = {
-    val asTypeId = anatomicalSourceType.toInt
-    val asType = AnatomicalSourceType.values.find(x => x.id.equals(asTypeId))
+    val asType = AnatomicalSourceType.withName(anatomicalSourceType)
+    val pType = PreservationType.withName(preservationType)
+    val pTempType = PreservationTemperatureType.withName(preservationTemperatureType)
+    val spcType = SpecimenType.withName(specimenType)
+    AddSpecimenGroupCmd(studyId, name, description, units, asType, pType, pTempType, spcType)
   }
 }
 
 object SpecimenGroupSelections {
   val anatomicalSourceTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
-    // FIXME: ordering
-    AnatomicalSourceType.values.map(x => (x.id.toString -> x.toString)).toSeq
+    AnatomicalSourceType.values.map(x => (x.toString -> x.toString)).toSeq
 
   val preservationTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
-    PreservationType.values.map(x => (x.id.toString -> x.toString)).toSeq
+    PreservationType.values.map(x => (x.toString -> x.toString)).toSeq
 
   val preservationTemperatureTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
-    PreservationTemperatureType.values.map(x => (x.id.toString -> x.toString)).toSeq
+    PreservationTemperatureType.values.map(x => (x.toString -> x.toString)).toSeq
 
   val specimenTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
-    SpecimenType.values.map(x => (x.id.toString -> x.toString)).toSeq
+    SpecimenType.values.map(x => (x.toString -> x.toString)).toSeq
 }

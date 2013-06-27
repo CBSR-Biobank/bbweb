@@ -5,10 +5,10 @@ import domain.AnatomicalSourceType
 import AnatomicalSourceType._
 
 object test {
-AnatomicalSourceType.values.map(x => (x.toString -> x.toString))
-                                                  //> res0: scala.collection.immutable.SortedSet[(String, String)] = TreeSet((Asce
-                                                  //| nding Colon,Ascending Colon), (Blood,Blood), (Brain,Brain), (Colon,Colon), (
-                                                  //| Descending Colon,Descending Colon), (Duodenum,Duodenum), (Ileum,Ileum), (Kid
-                                                  //| ney,Kidney), (Stomach Antrum,Stomach Antrum), (Stomach Body,Stomach Body), (
-                                                  //| Toe Nails,Toe Nails), (Transverse Colon,Transverse Colon), (Urine,Urine))
+  val v = AnatomicalSourceType.values             //> v  : domain.AnatomicalSourceType.ValueSet = AnatomicalSourceType.ValueSet(Bl
+                                                  //| ood, Brain, Colon, Kidney, Ascending Colon, Descending Colon, Transverse Col
+                                                  //| on, Duodenum, Ileum, Jejenum, Stomach Antrum, Stomach Body, Toe Nails, Urine
+                                                  //| )
+  val blood = AnatomicalSourceType.withName("Blood")
+                                                  //> blood  : domain.AnatomicalSourceType.Value = Blood
 }

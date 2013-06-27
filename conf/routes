@@ -17,7 +17,7 @@ GET     /study/add                  controllers.StudyController.add
 POST    /study/submit               controllers.StudyController.addSubmit
 GET     /study/show:id              controllers.StudyController.show(id:String)
 GET     /study/addsg:id             controllers.StudyController.addSpecimenGroup(id:String)
-GET     /study/sgsubmit             controllers.StudyController.addSpecimenGroupSubmit
+POST    /study/sgsubmit             controllers.StudyController.addSpecimenGroupSubmit
 GET     /study/allsg:id             controllers.StudyController.specimenGroupsShow(id:String)
 
 # user

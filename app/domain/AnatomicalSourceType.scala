@@ -11,7 +11,7 @@ object AnatomicalSourceType extends Enumeration {
   val ColonTransverse = Value("Transverse Colon")
   val Duodenum = Value("Duodenum")
   val Ileum = Value("Ileum")
-  val Jejenum = Value("Ileum")
+  val Jejenum = Value("Jejenum")
   val StomachAntrum = Value("Stomach Antrum")
   val StomachBody = Value("Stomach Body")
   val ToeNails = Value("Toe Nails")
