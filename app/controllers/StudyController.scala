@@ -104,37 +104,50 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
   def addSpecimenGroupSubmit = SecuredAction { implicit request =>
     specimenGroupForm.bindFromRequest.fold(
       formWithErrors => BadRequest(html.study.specimenGroupAdd(formWithErrors)), {
-        case sg =>
-          implicit val userId = new UserId(request.user.id.id)
+        case sgConv =>
           Async {
-            ???
-            //            studyService.addSpecimenGroup(
-            //              AddSpecimenGroupCmd(sg.name, sg.description, sg.units, sg.anatomicalSource,
-            //                sg.preservationType, sg.preservationTemp, sg.specimenType)).map(
-            //                study => study match {
-            //                  case Success(study) => Ok(html.study.show(study))
-            //                  case Failure(x) => BadRequest("Bad Request: " + x.head)
-            //                })
+            implicit val userId = new UserId(request.user.id.id)
+            studyService.addSpecimenGroup(sgConv.getCmd).map(
+              sg => sg match {
+                case Success(sg) =>
+                  val study = studyService.getStudy(sg.studyId.id) | null
+                  Ok(html.study.specimenGroupsShow(study.name,
+                    studyService.getSpecimenGroups(sg.studyId.id)))
+                case Failure(x) => BadRequest("Bad Request: " + x.head)
+              })
           }
       })
+  }
+
+  def specimenGroupsShow(studyId: String) = SecuredAction { implicit request =>
+    // get list of studies the user has access to
+    val studies = studyService.getAll
+    Ok(views.html.study.index(studies))
   }
 }
 
 case class SpecimenGroupFormObject(
   studyId: Long, studyName: String, name: String, description: Option[String], units: String,
   anatomicalSourceType: String, preservationType: String, preservationTemperatureType: String,
-  specimenType: String)
+  specimenType: String) {
+
+  def getCmd: AddSpecimenGroupCmd = {
+    val asTypeId = anatomicalSourceType.toInt
+    val asType = AnatomicalSourceType.values.find(x => x.id.equals(asTypeId))
+  }
+}
 
 object SpecimenGroupSelections {
   val anatomicalSourceTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
-    AnatomicalSourceType.values.map(x => (x.toString -> x.toString)).toSeq
+    // FIXME: ordering
+    AnatomicalSourceType.values.map(x => (x.id.toString -> x.toString)).toSeq
 
   val preservationTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
-    PreservationType.values.map(x => (x.toString -> x.toString)).toSeq
+    PreservationType.values.map(x => (x.id.toString -> x.toString)).toSeq
 
   val preservationTemperatureTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
-    PreservationTemperatureType.values.map(x => (x.toString -> x.toString)).toSeq
+    PreservationTemperatureType.values.map(x => (x.id.toString -> x.toString)).toSeq
 
   val specimenTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
-    SpecimenType.values.map(x => (x.toString -> x.toString)).toSeq
+    SpecimenType.values.map(x => (x.id.toString -> x.toString)).toSeq
 }

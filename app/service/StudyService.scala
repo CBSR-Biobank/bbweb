@@ -50,6 +50,10 @@ class StudyService(
     studyRepository.getByKey(new StudyId(id));
   }
 
+  def getSpecimenGroups(id: String): Set[SpecimenGroup] = {
+    specimenGroupRepository.getValues.filter(x => x.studyId.id.equals(id)).toSet;
+  }
+
   def addStudy(cmd: AddStudyCmd)(implicit userId: UserId): Future[DomainValidation[DisabledStudy]] = {
     studyProcessor.ask(
       Message(ServiceMsg(cmd, userId, Some(StudyIdentityService.nextIdentity)))).map(
