@@ -1,12 +1,8 @@
-@(addForm: Form[controllers.StudyController.SpecimenGroupFormObject])(
+@(addForm: Form[controllers.SpecimenGroupFormObject])(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
-@import domain._
-@import AnatomicalSourceType._
-@import PreservationType._
-@import PreservationTemperatureType._
-@import SpecimenType._
+@import controllers._
 
 @implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) } 
 
@@ -25,7 +21,7 @@
     <div class="clearfix">
     @form(action = routes.StudyController.addSpecimenGroupSubmit, 
         args = 'id -> "addform", 'class -> "form-horizontal") {
-      @formNameAndDescription(addForm) 
+      @formNameAndDescription(addForm("name"), addForm("description")) 
 
       @inputText(
           field = addForm("units"),
@@ -36,29 +32,25 @@
 
       @select(
           field = addForm("anatomicalSourceType"),
-          options = Seq("" -> "make a selection") ++ AnatomicalSourceType.values.map(
-          x => (x.toString -> x.toString)).toSeq,
+          options = SpecimenGroupSelections.anatomicalSourceTypes,
           args = '_label -> Messages("biobank.study.specimengroup.form.field.anatomicalsource")
        )
 
       @select(
           field = addForm("preservationType"),
-          options = Seq("" -> "make a selection") ++ PreservationType.values.map(
-          x => (x.toString -> x.toString)).toSeq,
+          options = SpecimenGroupSelections.preservationTypes,
           args = '_label -> Messages("biobank.study.specimengroup.form.field.preservationType")
        )
 
       @select(
           field = addForm("preservationTemperatureType"),
-          options = Seq("" -> "make a selection") ++ PreservationTemperatureType.values.map(
-          x => (x.toString -> x.toString)).toSeq,
+          options = SpecimenGroupSelections.preservationTemperatureTypes,
           args = '_label -> Messages("biobank.study.specimengroup.form.field.preservationTemperatureType")
        )
 
       @select(
           field = addForm("specimenType"),
-          options = Seq("" -> "make a selection") ++ SpecimenType.values.map(
-          x => (x.toString -> x.toString)).toSeq,
+          options = SpecimenGroupSelections.specimenTypes,
           args = '_label -> Messages("biobank.study.specimengroup.form.field.specimenType")
        )
 

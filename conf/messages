@@ -2,6 +2,7 @@ biobank.appName=Biobank
 
 # Forms
 biobank.form.submit=Submit
+biobank.form.selection.default=-- Make a selection --
 
 # Common form prompts
 biobank.form.field.name=Name
@@ -16,6 +17,9 @@ biobank.study.form.title=Add Study
 biobank.study.specimengroup.form.title=Add Specimen Group
 biobank.study.specimengroup.form.field.unit.plural=Units
 biobank.study.specimengroup.form.field.anatomicalsource=Anatomical Source
+biobank.study.specimengroup.form.field.preservationType=Preservation
+biobank.study.specimengroup.form.field.preservationTemperatureType=Preservation Temperature
+biobank.study.specimengroup.form.field.specimenType=Specimen Type
 
 # Login page
 biobank.login.title=Login

@@ -14,7 +14,7 @@
 <div class="clearfix">
   @form(action = routes.StudyController.addSubmit, 
       args = 'id -> "addform", 'class -> "form-horizontal") {
-      @formNameAndDescription(addForm) 
+      @formNameAndDescription(addForm("name"), addForm("description")) 
           
        <div class="form-actions">
             <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>

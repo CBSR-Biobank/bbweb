@@ -19,6 +19,7 @@ import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
+import play.api.i18n.Messages
 import akka.util.Timeout
 import securesocial.core.{ Identity, Authorization }
 
@@ -51,11 +52,11 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
   }
 
   def addSubmit = SecuredAction { implicit request =>
-    implicit val userId = new UserId(request.user.id.id)
     addForm.bindFromRequest.fold(
       formWithErrors => BadRequest(html.study.add(formWithErrors)),
       {
         case (name, description) =>
+          implicit val userId = UserId(request.user.id.id)
           Async {
             studyService.addStudy(AddStudyCmd(name, description)).map(
               study => study match {
@@ -73,11 +74,6 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
         NotFound("Bad Request: " + x.head)
     }
   }
-
-  case class SpecimenGroupFormObject(
-    studyId: Long, studyName: String, name: String, description: Option[String], units: String,
-    anatomicalSourceType: String, preservationType: String, preservationTemperatureType: String,
-    specimenType: String)
 
   val specimenGroupForm = Form(
     mapping(
@@ -122,4 +118,23 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
           }
       })
   }
+}
+
+case class SpecimenGroupFormObject(
+  studyId: Long, studyName: String, name: String, description: Option[String], units: String,
+  anatomicalSourceType: String, preservationType: String, preservationTemperatureType: String,
+  specimenType: String)
+
+object SpecimenGroupSelections {
+  val anatomicalSourceTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
+    AnatomicalSourceType.values.map(x => (x.toString -> x.toString)).toSeq
+
+  val preservationTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
+    PreservationType.values.map(x => (x.toString -> x.toString)).toSeq
+
+  val preservationTemperatureTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
+    PreservationTemperatureType.values.map(x => (x.toString -> x.toString)).toSeq
+
+  val specimenTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
+    SpecimenType.values.map(x => (x.toString -> x.toString)).toSeq
 }
