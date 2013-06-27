@@ -1,4 +1,61 @@
-@(studyName: String, specimenGroups: Set[domain.study.SpecimenGroup])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+@(studyId: String, studyName: String, specimenGroups: Set[domain.study.SpecimenGroup])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @main("Study " + studyName) {
-    }
+    <ul class="breadcrumb">
+      <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
+      <li><a href="@routes.StudyController.show(studyId)">@studyName</a> <span class="divider">/</span></li>
+      <li class="active">@Messages("biobank.study.field.specimengroups")</li>
+    </ul>
+    <div class="page-header">
+      <h2>@Messages("biobank.study.singular"): @studyName</h2>
+      <h3>@Messages("biobank.study.specimengroup.show.title")</h3>
+    </div>
+    <div class="clearfix">
+        @if(specimenGroups.size <= 0) {
+            <p>@Messages("biobank.study.specimengroup.show.none")</p>
+        } else {
+            <table class="table table-bordered table-hover table-condensed">
+              <thead>
+                <th>@Messages("biobank.common.name")</th>
+                <th>@Messages("biobank.common.description")</th>
+                <th>@Messages("biobank.study.specimengroup.field.units")</th>
+                <th>@Messages("biobank.study.specimengroup.field.anatomicalsource")</th>
+                <th>@Messages("biobank.study.specimengroup.field.preservation")</th>
+                <th>@Messages("biobank.study.specimengroup.field.preservationtemperature")</th>
+                <th>@Messages("biobank.study.specimengroup.field.specimenType")</th>
+                <th></th>
+              </thead>
+              <tbody>
+                @for(sg <- specimenGroups) {
+                    <tr>
+                      <td>@sg.name</td>
+                      <td>@sg.description</td>
+                      <td>@sg.units</td>
+                      <td>@sg.anatomicalSourceType</td>
+                      <td>@sg.preservationType</td>
+                      <td>@sg.preservationTemperatureType</td>
+                      <td>@sg.specimenType</td>
+                      <td>
+                          <i class="icon-pencil"></i>
+                          <i class="icon-pencil icon-white"></i>
+                          
+                          <a href="#" class="btn btn-mini btn-primary" type="button">
+                          <i class="icon-pencil"></i>
+                          <i class="icon-pencil icon-white"></i>
+                          @* @Messages("biobank.common.action.update") *@ </a>
+                           <span class="divider">/</span>
+                          <a href="#" class="btn btn-mini btn-primary" type="button">
+                            @Messages("biobank.common.action.remove")</a>
+                      </td>
+                    <tr>
+                }
+              </tbody>
+            </table>
+        }
+    
+        <div class="form-actions">
+          <a href="@routes.StudyController.addSpecimenGroup(studyId)" class="btn btn-small btn-primary" type="button">
+          @Messages("biobank.study.specimengroup.show.action.add")</a>
+        </div>
+    </div>
+}

@@ -2,7 +2,7 @@
 
 @main("Study " + study.name) {
 <ul class="breadcrumb">
-  <li><a href="@routes.StudyController.index">Studies</a> <span class="divider">/</span></li>
+  <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
   <li class="active">@study.name</li>
 </ul>
 
@@ -13,32 +13,35 @@
   <table class="table table-bordered table-hover table-condensed">
     <tbody>
       <tr>
-	<td class="header">Name</td>
+	<td class="header">@Messages("biobank.common.name")</td>
 	<td>@study.name</td>
       </tr>
       <tr>
-	<td class="header">Status</td>
+	<td class="header">@Messages("biobank.study.field.status")</td>
 	<td>@study.status</td>
       </tr>
       <tr>
-	<td class="header">Description</td>
+	<td class="header">@Messages("biobank.common.description")</td>
 	<td>@study.description</td>
       </tr>
       <tr>
-	<td class="header">Patients</td>
+	<td class="header">@Messages("biobank.study.field.participants")</td>
 	<td><i>to be implemented</i></td>
       </tr>
       <tr>
-	<td class="header">Collection Events</td>
+    <td class="header">@Messages("biobank.study.field.collectionevents")</td>
 	<td><i>to be implemented</i></td>
       </tr>
     </tbody>
   </table>
 
   <div class="form-actions">
-    <a href="@routes.StudyController.addSpecimenGroup(study.id.id)" class="btn btn-small btn-primary" type="button">Specimen Groups</a>
-    <a href="@routes.StudyController.index" class="btn btn-small btn-primary" type="button">Annotation Types</a>
-    <a href="@routes.StudyController.index" class="btn btn-small btn-primary" type="button">Collection Event Types</a>
+    <a href="@routes.StudyController.showSpecimenGroups(study.id.id)" class="btn btn-small btn-primary" type="button">
+    @Messages("biobank.study.field.specimengroups")</a>
+    <a href="@routes.StudyController.index" class="btn btn-small btn-primary" type="button">
+    @Messages("biobank.study.field.annotationtypes")</a>
+    <a href="@routes.StudyController.index" class="btn btn-small btn-primary" type="button">
+    @Messages("biobank.study.field.collectioneventTypes")</a>
   </div>
 </div>
 }

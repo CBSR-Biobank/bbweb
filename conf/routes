@@ -7,10 +7,6 @@ GET     /                           controllers.Application.index
 GET     /about                      controllers.Application.about
 GET     /contact                    controllers.Application.contact
 
-
-# Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
-
 # studies
 GET     /study                      controllers.StudyController.index
 GET     /study/add                  controllers.StudyController.add
@@ -18,7 +14,7 @@ POST    /study/submit               controllers.StudyController.addSubmit
 GET     /study/show:id              controllers.StudyController.show(id:String)
 GET     /study/addsg:id             controllers.StudyController.addSpecimenGroup(id:String)
 POST    /study/sgsubmit             controllers.StudyController.addSpecimenGroupSubmit
-GET     /study/allsg:id             controllers.StudyController.specimenGroupsShow(id:String)
+GET     /study/allsg:id             controllers.StudyController.showSpecimenGroups(id:String)
 
 # user
 GET     /user/profile               controllers.UserController.profile
@@ -45,5 +41,8 @@ GET     /authenticate/:provider     securesocial.controllers.ProviderController.
 POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider)
 GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
 
-GET     /assets/images/glyphicons-halflings-white.png      controllers.Assets.at(path="/public", file="/images/glyphicons-halflings-white.png")
-GET     /assets/images/glyphicons-halflings.png            controllers.Assets.at(path="/public", file="/images/glyphicons-halflings.png")
+GET     /assets/stylesheets/img/glyphicons-halflings-white.png      controllers.Assets.at(path="/public", file="/images/glyphicons-halflings-white.png")
+GET     /assets/stylesheets/img/glyphicons-halflings.png            controllers.Assets.at(path="/public", file="/images/glyphicons-halflings.png")
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)

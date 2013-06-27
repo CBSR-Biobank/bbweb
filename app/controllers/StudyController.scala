@@ -114,7 +114,7 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
               sg => sg match {
                 case Success(sg) =>
                   val study = studyService.getStudy(sg.studyId.id) | null
-                  Ok(html.study.specimenGroupsShow(study.name,
+                  Ok(html.study.specimenGroupsShow(study.id.id, study.name,
                     studyService.getSpecimenGroups(sg.studyId.id)))
                 case Failure(x) => BadRequest("Bad Request: " + x.head)
               })
@@ -122,10 +122,15 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
       })
   }
 
-  def specimenGroupsShow(studyId: String) = SecuredAction { implicit request =>
+  def showSpecimenGroups(studyId: String) = SecuredAction { implicit request =>
     // get list of studies the user has access to
-    val studies = studyService.getAll
-    Ok(views.html.study.index(studies))
+    studyService.getStudy(studyId) match {
+      case Failure(x) =>
+        NotFound("Bad Request: " + x.head)
+      case Success(study) =>
+        Ok(views.html.study.specimenGroupsShow(studyId, study.name,
+          studyService.getSpecimenGroups(studyId)))
+    }
   }
 }
 

@@ -4,16 +4,35 @@ biobank.appName=Biobank
 biobank.form.submit=Submit
 biobank.form.selection.default=-- Make a selection --
 
-# Common form prompts
-biobank.form.field.name=Name
-biobank.form.field.description=Description
+# Common messages
+biobank.common.name=Name
+biobank.common.description=Description
+biobank.common.action.update=Update
+biobank.common.action.remove=Remove
 
 # Study
 biobank.study.singular=Study
 biobank.study.plural=Studies
+biobank.study.all=All Studies
+biobank.study.add=Add Study
+biobank.study.none=No studies have been added.
+biobank.study.field.status=Status
+biobank.study.field.participants=Participants
+biobank.study.field.collectionevents=Collection Events
+biobank.study.field.collectioneventTypes=Collection Event Types
+biobank.study.field.specimengroups=Specimen Groups
+biobank.study.field.annotationtypes=Annotation Types
 biobank.study.form.title=Add Study
 
-# Specimen Groups
+# Specimen Groups 
+biobank.study.specimengroup.field.units=Units
+biobank.study.specimengroup.field.anatomicalsource=Anatomical Source
+biobank.study.specimengroup.field.preservation=Preservation Type
+biobank.study.specimengroup.field.preservationtemperature=Preservation Temperature
+biobank.study.specimengroup.field.specimenType=Specimen Type
+biobank.study.specimengroup.show.title=Specimen Groups
+biobank.study.specimengroup.show.none=No Specimen Groups have been added to this study.
+biobank.study.specimengroup.show.action.add=Add Specimen Group
 biobank.study.specimengroup.form.title=Add Specimen Group
 biobank.study.specimengroup.form.field.unit.plural=Units
 biobank.study.specimengroup.form.field.anatomicalsource=Anatomical Source

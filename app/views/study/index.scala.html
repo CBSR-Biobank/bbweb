@@ -2,18 +2,22 @@
 
 @main("Biobank") {
 <ul class="breadcrumb">
-  <li class="active">Studies</li>
+  <li class="active">@Messages("biobank.study.plural")</li>
 </ul>
 
 <div class="page-header">
-  <h2>All Studies</h2>
+  <h2>@Messages("biobank.study.all")</h2>
 </div>
 
 <div class="clearfix">
-  @if(studies.size > 0) {
+  @if(studies.size <= 0) {
+    <p>@Messages("biobank.study.none")</p>
+  } else {
     <table class="table table-bordered table-hover table-condensed">
       <thead>
-        <th>Name</th><th>Status</th><th>Description</th>
+        <th>@Messages("biobank.common.name")</th>
+        <th>@Messages("biobank.study.field.status")</th>
+        <th>@Messages("biobank.common.description")</th>
       </thead>
       <tbody>
         @for(s <- studies) {
@@ -25,12 +29,11 @@
         }
       </tbody>
     </table>
-  } else {
-    <p>No studies have been added.</p>
   }
 
   <div class="form-actions">
-    <a href="@routes.StudyController.add" class="btn btn-small btn-primary" type="button">Add Study</a>
+    <a href="@routes.StudyController.add" class="btn btn-small btn-primary" type="button">
+    @Messages("biobank.study.add")</a>
   </div>
 </div>
 }
