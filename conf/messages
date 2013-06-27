@@ -15,6 +15,7 @@ biobank.study.singular=Study
 biobank.study.plural=Studies
 biobank.study.all=All Studies
 biobank.study.add=Add Study
+biobank.study.update=Update Study
 biobank.study.none=No studies have been added.
 biobank.study.field.status=Status
 biobank.study.field.participants=Participants

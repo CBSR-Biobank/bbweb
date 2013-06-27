@@ -23,7 +23,7 @@
                 <th>@Messages("biobank.study.specimengroup.field.preservation")</th>
                 <th>@Messages("biobank.study.specimengroup.field.preservationtemperature")</th>
                 <th>@Messages("biobank.study.specimengroup.field.specimenType")</th>
-                <th></th>
+                <th style="width: 15%"></th>
               </thead>
               <tbody>
                 @for(sg <- specimenGroups) {
@@ -35,22 +35,21 @@
                       <td>@sg.preservationType</td>
                       <td>@sg.preservationTemperatureType</td>
                       <td>@sg.specimenType</td>
-                      <td>
-                          <i class="icon-pencil"></i>
-                          <i class="icon-pencil icon-white"></i>
-                          
-                          <a href="#" class="btn btn-mini btn-primary" type="button">
-                          <i class="icon-pencil"></i>
-                          <i class="icon-pencil icon-white"></i>
-                          @* @Messages("biobank.common.action.update") *@ </a>
-                           <span class="divider">/</span>
-                          <a href="#" class="btn btn-mini btn-primary" type="button">
-                            @Messages("biobank.common.action.remove")</a>
+                      <td>                          
+                          <a href="#" class="btn btn-mini btn-primary" type="button"
+                             data-toggle="tooltip" title="Update">
+                              <i class="icon-pencil icon-white"></i></a>
+                          <span class="divider"></span>
+                          <a href="#" class="btn btn-mini btn-primary" type="button"
+                             data-toggle="tooltip" title="Remove">
+                              <i class="icon-remove-sign icon-white"></i></a>
                       </td>
                     <tr>
                 }
               </tbody>
             </table>
+            <script type="text/javascript">
+            </script>
         }
     
         <div class="form-actions">

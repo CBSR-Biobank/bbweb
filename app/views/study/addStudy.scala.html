@@ -1,0 +1,29 @@
+@(studyForm: Form[controllers.StudyFormObject], 
+    title: String, 
+    studyId: String)(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+
+@import helper._
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+
+@main(title) {
+<ul class="breadcrumb">
+  <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
+  <li class="active">@title</li>
+</ul>
+<div class="page-header">
+  <h2>@Messages("biobank.study.form.title")</h2>
+</div>
+<div class="clearfix">
+  @form(action = routes.StudyController.addStudySubmit, 
+      args = 'id -> "studyForm", 'class -> "form-horizontal") { 
+      <input type="hidden" name="studyId" value="@studyId" >  
+      
+      @formNameAndDescription(studyForm("name"), studyForm("description")) >  
+          
+      <div class="form-actions">
+           <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
+      </div>
+  }
+</div>
+}
+    

@@ -18,11 +18,8 @@
     </div>
     
     <div class="clearfix">
-    @form(routes.StudyController.addSpecimenGroupSubmit, 
+    @form(routes.StudyController.addSpecimenGroupSubmit(studyId, studyName), 
         args = 'id -> "addform", 'class -> "form-horizontal") {
-        
-      <input type="hidden" name="studyId" value="@studyId" >  
-      <input type="hidden" name="studyName" value="@studyName" >  
         
       @formNameAndDescription(addForm("name"), addForm("description")) 
 

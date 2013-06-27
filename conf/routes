@@ -9,12 +9,14 @@ GET     /contact                    controllers.Application.contact
 
 # studies
 GET     /study                      controllers.StudyController.index
-GET     /study/add                  controllers.StudyController.add
-POST    /study/submit               controllers.StudyController.addSubmit
-GET     /study/show:id              controllers.StudyController.show(id:String)
-GET     /study/addsg:id             controllers.StudyController.addSpecimenGroup(id:String)
-POST    /study/sgsubmit             controllers.StudyController.addSpecimenGroupSubmit
-GET     /study/allsg:id             controllers.StudyController.showSpecimenGroups(id:String)
+GET     /study/add                  controllers.StudyController.addStudy
+POST    /study/submit               controllers.StudyController.addStudySubmit
+GET     /study/update/:id           controllers.StudyController.updateStudy(id:String)
+POST    /study/updateSubmit         controllers.StudyController.addStudySubmit
+GET     /study/show/:id             controllers.StudyController.showAtudy(id:String)
+GET     /study/addsg/:id            controllers.StudyController.addSpecimenGroup(id:String)
+POST    /study/submitSg             controllers.StudyController.addSpecimenGroupSubmit(id:String, name:String)
+GET     /study/showSg/:id           controllers.StudyController.showSpecimenGroups(id:String)
 
 # user
 GET     /user/profile               controllers.UserController.profile

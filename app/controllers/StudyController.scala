@@ -40,37 +40,69 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
     Ok(views.html.study.index(studies))
   }
 
-  val addForm = Form(
-    tuple(
+  val studyForm = Form(
+    mapping(
+      "studyId" -> nonEmptyText,
+      "expectedVersion" -> ignored(-1L),
       "name" -> nonEmptyText,
-      "description" -> optional(text)))
+      "description" -> optional(text))(StudyFormObject.apply)(StudyFormObject.unapply))
 
   /**
    * Add a study.
    */
-  def add = SecuredAction { implicit request =>
-    Ok(html.study.add(addForm))
+  def addStudy = SecuredAction { implicit request =>
+    Ok(html.study.addStudy(studyForm, Messages("biobank.study.add"), ""))
   }
 
-  def addSubmit = SecuredAction { implicit request =>
-    addForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.study.add(formWithErrors)),
+  def addStudySubmit = SecuredAction { implicit request =>
+    studyForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(html.study.addStudy(formWithErrors, Messages("biobank.study.add"), "")),
       {
-        case (name, description) =>
+        case formObj: StudyFormObject =>
           implicit val userId = UserId(request.user.id.id)
           Async {
-            studyService.addStudy(AddStudyCmd(name, description)).map(
+            studyService.addStudy(formObj.getAddCmd).map(
               study => study match {
-                case Success(study) => Ok(html.study.show(study))
+                case Success(study) => Ok(html.study.showStudy(study))
                 case Failure(x) => BadRequest("Bad Request: " + x.head)
               })
           }
       })
   }
 
-  def show(id: String) = SecuredAction { implicit request =>
+  /**
+   * Update a study.
+   */
+  def updateStudy(id: String) = SecuredAction { implicit request =>
     studyService.getStudy(id) match {
-      case Success(study) => Ok(html.study.show(study))
+      case Success(study) =>
+        Ok(html.study.addStudy(
+          studyForm.fill(StudyFormObject(id, study.version, study.name, study.description)),
+          Messages("biobank.study.add"), id))
+      case Failure(x) =>
+        NotFound("Bad Request: " + x.head)
+    }
+  }
+
+  def updateStudySubmit(id: String) = SecuredAction { implicit request =>
+    studyForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(html.study.addStudy(formWithErrors)),
+      {
+        case formObj: StudyFormObject =>
+          implicit val userId = UserId(request.user.id.id)
+          Async {
+            studyService.addStudy(formObj.getAddCmd).map(
+              study => study match {
+                case Success(study) => Ok(html.study.showStudy(study))
+                case Failure(x) => BadRequest("Bad Request: " + x.head)
+              })
+          }
+      })
+  }
+
+  def showStudy(id: String) = SecuredAction { implicit request =>
+    studyService.getStudy(id) match {
+      case Success(study) => Ok(html.study.showStudy(study))
       case Failure(x) =>
         NotFound("Bad Request: " + x.head)
     }
@@ -91,30 +123,30 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
   /**
    * Add a specimen group.
    */
-  def addSpecimenGroup(id: String) = SecuredAction { implicit request =>
-    studyService.getStudy(id) match {
+  def addSpecimenGroup(studyId: String) = SecuredAction { implicit request =>
+    studyService.getStudy(studyId) match {
       case Failure(x) =>
         NotFound("Bad Request: " + x.head)
       case Success(study) =>
         val form = specimenGroupForm.fill(SpecimenGroupFormObject(
-          id, study.name, "", None, "", "", "", "", ""))
-        Ok(html.study.specimenGroupAdd(form, id, study.name))
+          studyId, study.name, "", None, "", "", "", "", ""))
+        Ok(html.study.addSpecimenGroup(form, studyId, study.name))
     }
   }
 
-  def addSpecimenGroupSubmit = SecuredAction { implicit request =>
+  def addSpecimenGroupSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
     specimenGroupForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.study.specimenGroupAdd(
-        formWithErrors, formWithErrors.get.studyId, formWithErrors.get.studyName)), {
+      formWithErrors => BadRequest(html.study.addSpecimenGroup(
+        formWithErrors, studyId, studyName)), {
         case sgForm =>
           Logger.debug("sgForm:" + sgForm)
           Async {
             implicit val userId = new UserId(request.user.id.id)
-            studyService.addSpecimenGroup(sgForm.getCmd).map(
+            studyService.addSpecimenGroup(sgForm.getAddCmd).map(
               sg => sg match {
                 case Success(sg) =>
                   val study = studyService.getStudy(sg.studyId.id) | null
-                  Ok(html.study.specimenGroupsShow(study.id.id, study.name,
+                  Ok(html.study.showSpecimenGroups(study.id.id, study.name,
                     studyService.getSpecimenGroups(sg.studyId.id)))
                 case Failure(x) => BadRequest("Bad Request: " + x.head)
               })
@@ -128,9 +160,21 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
       case Failure(x) =>
         NotFound("Bad Request: " + x.head)
       case Success(study) =>
-        Ok(views.html.study.specimenGroupsShow(studyId, study.name,
+        Ok(views.html.study.showSpecimenGroups(studyId, study.name,
           studyService.getSpecimenGroups(studyId)))
     }
+  }
+}
+
+case class StudyFormObject(
+  studyId: String, expectedVersion: Long, name: String, description: Option[String]) {
+
+  def getAddCmd: AddStudyCmd = {
+    AddStudyCmd(name, description)
+  }
+
+  def getUpdateCmd: UpdateStudyCmd = {
+    UpdateStudyCmd(studyId, some(expectedVersion), name, description)
   }
 }
 
@@ -139,7 +183,7 @@ case class SpecimenGroupFormObject(
   anatomicalSourceType: String, preservationType: String, preservationTemperatureType: String,
   specimenType: String) {
 
-  def getCmd: AddSpecimenGroupCmd = {
+  def getAddCmd: AddSpecimenGroupCmd = {
     val asType = AnatomicalSourceType.withName(anatomicalSourceType)
     val pType = PreservationType.withName(preservationType)
     val pTempType = PreservationTemperatureType.withName(preservationTemperatureType)

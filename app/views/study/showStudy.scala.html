@@ -35,7 +35,13 @@
     </tbody>
   </table>
 
-  <div class="form-actions">
+  <div class="form-actions">                        
+    <a href="@routes.StudyController.updateStudy(study.id.id)" class="btn btn-mini btn-primary" 
+        type="button" data-toggle="tooltip" title="Update">
+        <i class="icon-pencil icon-white"></i></a>
+    <a href="#" class="btn btn-mini btn-primary" type="button"
+       data-toggle="tooltip" title="Remove">
+        <i class="icon-remove-sign icon-white"></i></a>
     <a href="@routes.StudyController.showSpecimenGroups(study.id.id)" class="btn btn-small btn-primary" type="button">
     @Messages("biobank.study.field.specimengroups")</a>
     <a href="@routes.StudyController.index" class="btn btn-small btn-primary" type="button">
