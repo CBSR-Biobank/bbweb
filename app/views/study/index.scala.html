@@ -22,7 +22,7 @@
       <tbody>
         @for(s <- studies) {
             <tr>
-              <td><a href="@routes.StudyController.show(s.id.id)">@s.name</a></td>
+              <td><a href="@routes.StudyController.showStudy(s.id.id)">@s.name</a></td>
               <td>@s.status</td>
               <td>@s.description</td>
             <tr>

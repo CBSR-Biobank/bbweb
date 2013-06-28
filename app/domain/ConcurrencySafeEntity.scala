@@ -17,10 +17,10 @@ abstract class ConcurrencySafeEntity[T]
   //  val updatedBy: Option[UserId]
   //  val timeUpdated: Option[Long]
 
-  val invalidVersionMessage = "expected version %s doesn't match current version %s"
+  val invalidVersionMessage = "%s: expected version doesn't match current version: { id: %s, actualVersion: %d, expectedVersion: %d }"
 
   def invalidVersion(expected: Long) =
-    DomainError(invalidVersionMessage format (id, expected, version))
+    DomainError(invalidVersionMessage.format(this.getClass.getSimpleName, id, version, expected))
 
   def requireVersion(expectedVersion: Option[Long]): DomainValidation[ConcurrencySafeEntity[T]] = {
     expectedVersion match {

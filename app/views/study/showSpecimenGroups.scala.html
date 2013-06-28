@@ -1,9 +1,12 @@
-@(studyId: String, studyName: String, specimenGroups: Set[domain.study.SpecimenGroup])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+@(studyId: String, 
+    studyName: String, 
+    specimenGroups: Set[domain.study.SpecimenGroup])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
+    flash: play.api.mvc.Flash)
 
 @main("Study " + studyName) {
     <ul class="breadcrumb">
       <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
-      <li><a href="@routes.StudyController.show(studyId)">@studyName</a> <span class="divider">/</span></li>
+      <li><a href="@routes.StudyController.showStudy(studyId)">@studyName</a> <span class="divider">/</span></li>
       <li class="active">@Messages("biobank.study.field.specimengroups")</li>
     </ul>
     <div class="page-header">
@@ -14,6 +17,13 @@
         @if(specimenGroups.size <= 0) {
             <p>@Messages("biobank.study.specimengroup.show.none")</p>
         } else {
+
+            @flash.get("success").map { message =>
+              <div class="alert alert-success">
+                @message
+              </div>
+            }
+            
             <table class="table table-bordered table-hover table-condensed">
               <thead>
                 <th>@Messages("biobank.common.name")</th>

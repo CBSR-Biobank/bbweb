@@ -16,6 +16,8 @@ biobank.study.plural=Studies
 biobank.study.all=All Studies
 biobank.study.add=Add Study
 biobank.study.update=Update Study
+biobank.study.added=Study {0} has been added.
+biobank.study.added=Study {0} has been updated.
 biobank.study.none=No studies have been added.
 biobank.study.field.status=Status
 biobank.study.field.participants=Participants
@@ -26,6 +28,10 @@ biobank.study.field.annotationtypes=Annotation Types
 biobank.study.form.title=Add Study
 
 # Specimen Groups 
+biobank.study.specimengroup.add=Add Specimen Group
+biobank.study.specimengroup.update=Update Specimen Group
+biobank.study.specimengroup.added=Specimen Group {0} has been added.
+biobank.study.specimengroup.updated=Specimen Group {0} has been updated.
 biobank.study.specimengroup.field.units=Units
 biobank.study.specimengroup.field.anatomicalsource=Anatomical Source
 biobank.study.specimengroup.field.preservation=Preservation Type
@@ -34,7 +40,6 @@ biobank.study.specimengroup.field.specimenType=Specimen Type
 biobank.study.specimengroup.show.title=Specimen Groups
 biobank.study.specimengroup.show.none=No Specimen Groups have been added to this study.
 biobank.study.specimengroup.show.action.add=Add Specimen Group
-biobank.study.specimengroup.form.title=Add Specimen Group
 biobank.study.specimengroup.form.field.unit.plural=Units
 biobank.study.specimengroup.form.field.anatomicalsource=Anatomical Source
 biobank.study.specimengroup.form.field.preservationType=Preservation

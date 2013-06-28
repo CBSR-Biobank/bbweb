@@ -65,12 +65,12 @@ class StudyServiceSpec extends StudyFixture with Tags {
           s.name must be(name2)
           s.description must beNone
           studyRepository.getMap must haveKey(s.id)
-      }
 
-      // update something other than the name
-      val study3 = await(studyService.updateStudy(
-        new UpdateStudyCmd(study1.id.toString, study1.versionOption, name2)))
-      study3 must beSuccessful
+          // update something other than the name
+          val study3 = await(studyService.updateStudy(
+            new UpdateStudyCmd(study1.id.toString, Some(s.version), name2)))
+          study3 must beSuccessful
+      }
     }
 
     "not be updated to name that exists" in {
@@ -97,6 +97,9 @@ class StudyServiceSpec extends StudyFixture with Tags {
       val study2 = await(studyService.updateStudy(
         new UpdateStudyCmd(study1.id.toString, versionOption, name2, None)))
 
+      study2 must beFailing.like {
+        case msgs => msgs.head must contain("doesn't match current version")
+      }
     }
 
     "be enabled" in {

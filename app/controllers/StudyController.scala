@@ -34,69 +34,95 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
   lazy val userService = Global.services.userService
   lazy val studyService = Global.services.studyService
 
-  def index = SecuredAction { implicit request =>
-    // get list of studies the user has access to
-    val studies = studyService.getAll
-    Ok(views.html.study.index(studies))
-  }
-
   val studyForm = Form(
     mapping(
-      "studyId" -> nonEmptyText,
-      "expectedVersion" -> ignored(-1L),
+      "studyId" -> ignored(""),
+      "version" -> ignored(-1L),
       "name" -> nonEmptyText,
       "description" -> optional(text))(StudyFormObject.apply)(StudyFormObject.unapply))
 
+  val specimenGroupForm = Form(
+    mapping(
+      "specimenGroupId" -> ignored(""),
+      "version" -> ignored(-1L),
+      "studyId" -> ignored(""),
+      "name" -> nonEmptyText,
+      "description" -> optional(text),
+      "units" -> nonEmptyText,
+      "anatomicalSourceType" -> nonEmptyText,
+      "preservationType" -> nonEmptyText,
+      "preservationTemperatureType" -> nonEmptyText,
+      "specimenType" -> nonEmptyText)(SpecimenGroupFormObject.apply)(SpecimenGroupFormObject.unapply))
+
+  def index = SecuredAction { implicit request =>
+    // get list of studies the user has access to
+    //
+    // FIXME add paging and filtering -> see "computer-databse" Play sample app
+    val studies = studyService.getAll
+    Ok(views.html.study.index(studies))
+  }
   /**
    * Add a study.
    */
   def addStudy = SecuredAction { implicit request =>
-    Ok(html.study.addStudy(studyForm, Messages("biobank.study.add"), ""))
+    Ok(html.study.addStudy(studyForm, AddFormType(), ""))
   }
 
   def addStudySubmit = SecuredAction { implicit request =>
     studyForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.study.addStudy(formWithErrors, Messages("biobank.study.add"), "")),
-      {
-        case formObj: StudyFormObject =>
+      formWithErrors => {
+        BadRequest(html.study.addStudy(formWithErrors, AddFormType(), ""))
+      },
+      formObj => {
+        Async {
+          Logger.debug("here3")
           implicit val userId = UserId(request.user.id.id)
-          Async {
-            studyService.addStudy(formObj.getAddCmd).map(
-              study => study match {
-                case Success(study) => Ok(html.study.showStudy(study))
-                case Failure(x) => BadRequest("Bad Request: " + x.head)
-              })
-          }
+          studyService.addStudy(formObj.getAddCmd).map(
+            study => study match {
+              case Success(study) =>
+                Ok(html.study.showStudy(study))
+                Redirect(routes.StudyController.showStudy(study.id.id)).flashing(
+                  "success" -> Messages("biobank.study.added", study.name))
+              case Failure(x) =>
+                BadRequest("Bad Request: " + x.head)
+            })
+        }
       })
   }
 
   /**
    * Update a study.
    */
-  def updateStudy(id: String) = SecuredAction { implicit request =>
-    studyService.getStudy(id) match {
+  def updateStudy(studyId: String) = SecuredAction { implicit request =>
+    studyService.getStudy(studyId) match {
       case Success(study) =>
+        Logger.debug("study version: " + study.version)
         Ok(html.study.addStudy(
-          studyForm.fill(StudyFormObject(id, study.version, study.name, study.description)),
-          Messages("biobank.study.add"), id))
+          studyForm.fill(StudyFormObject(studyId, study.version, study.name, study.description)),
+          UpdateFormType(),
+          studyId))
       case Failure(x) =>
         NotFound("Bad Request: " + x.head)
     }
   }
 
-  def updateStudySubmit(id: String) = SecuredAction { implicit request =>
+  def updateStudySubmit(studyId: String) = SecuredAction { implicit request =>
     studyForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.study.addStudy(formWithErrors)),
-      {
-        case formObj: StudyFormObject =>
-          implicit val userId = UserId(request.user.id.id)
+      formWithErrors => BadRequest(html.study.addStudy(
+        formWithErrors, UpdateFormType(), studyId)), {
+        case formObj => {
           Async {
-            studyService.addStudy(formObj.getAddCmd).map(
-              study => study match {
-                case Success(study) => Ok(html.study.showStudy(study))
+            implicit val userId = UserId(request.user.id.id)
+            studyService.updateStudy(formObj.getUpdateCmd).map(study =>
+              study match {
                 case Failure(x) => BadRequest("Bad Request: " + x.head)
+                case Success(study) =>
+                  Ok(html.study.showStudy(study))
+                  Redirect(routes.StudyController.showStudy(study.id.id)).flashing(
+                    "success" -> Messages("biobank.study.updated", study.name))
               })
           }
+        }
       })
   }
 
@@ -108,18 +134,6 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
     }
   }
 
-  val specimenGroupForm = Form(
-    mapping(
-      "studyId" -> nonEmptyText,
-      "studyName" -> nonEmptyText,
-      "name" -> nonEmptyText,
-      "description" -> optional(text),
-      "units" -> nonEmptyText,
-      "anatomicalSourceType" -> nonEmptyText,
-      "preservationType" -> nonEmptyText,
-      "preservationTemperatureType" -> nonEmptyText,
-      "specimenType" -> nonEmptyText)(SpecimenGroupFormObject.apply)(SpecimenGroupFormObject.unapply))
-
   /**
    * Add a specimen group.
    */
@@ -129,29 +143,42 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
         NotFound("Bad Request: " + x.head)
       case Success(study) =>
         val form = specimenGroupForm.fill(SpecimenGroupFormObject(
-          studyId, study.name, "", None, "", "", "", "", ""))
-        Ok(html.study.addSpecimenGroup(form, studyId, study.name))
+          "", -1, studyId, "", None, "", "", "", "", ""))
+        Ok(html.study.addSpecimenGroup(form, AddFormType(), studyId, study.name))
     }
   }
 
   def addSpecimenGroupSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
+    Logger.debug("here1")
     specimenGroupForm.bindFromRequest.fold(
       formWithErrors => BadRequest(html.study.addSpecimenGroup(
-        formWithErrors, studyId, studyName)), {
-        case sgForm =>
-          Logger.debug("sgForm:" + sgForm)
-          Async {
-            implicit val userId = new UserId(request.user.id.id)
-            studyService.addSpecimenGroup(sgForm.getAddCmd).map(
-              sg => sg match {
-                case Success(sg) =>
-                  val study = studyService.getStudy(sg.studyId.id) | null
-                  Ok(html.study.showSpecimenGroups(study.id.id, study.name,
-                    studyService.getSpecimenGroups(sg.studyId.id)))
-                case Failure(x) => BadRequest("Bad Request: " + x.head)
-              })
-          }
+        formWithErrors, AddFormType(), studyId, studyName)),
+      sgForm => {
+        Logger.debug("here2")
+        Async {
+          Logger.debug("here3")
+          implicit val userId = new UserId(request.user.id.id)
+          studyService.addSpecimenGroup(sgForm.getAddCmd).map(validation =>
+            validation match {
+              case Success(sg) =>
+                Ok(html.study.showSpecimenGroups(studyId, studyName,
+                  studyService.getSpecimenGroups(studyId)))
+                Redirect(routes.StudyController.showSpecimenGroups(sg.studyId.id)).flashing(
+                  "success" -> Messages("biobank.study.specimengroup.added", sg.name))
+              case Failure(x) =>
+                Logger.debug("add specimen group failed: " + x.head)
+                BadRequest("Bad Request: " + x.head)
+            })
+        }
       })
+  }
+
+  def updateSpecimenGroup(studyId: String) = SecuredAction { implicit request =>
+    ???
+  }
+
+  def updateSpecimenGroupSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
+    ???
   }
 
   def showSpecimenGroups(studyId: String) = SecuredAction { implicit request =>
@@ -167,28 +194,36 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
 }
 
 case class StudyFormObject(
-  studyId: String, expectedVersion: Long, name: String, description: Option[String]) {
+  studyId: String, version: Long, name: String, description: Option[String]) {
 
   def getAddCmd: AddStudyCmd = {
     AddStudyCmd(name, description)
   }
 
   def getUpdateCmd: UpdateStudyCmd = {
-    UpdateStudyCmd(studyId, some(expectedVersion), name, description)
+    UpdateStudyCmd(studyId, some(version), name, description)
   }
 }
 
 case class SpecimenGroupFormObject(
-  studyId: String, studyName: String, name: String, description: Option[String], units: String,
-  anatomicalSourceType: String, preservationType: String, preservationTemperatureType: String,
-  specimenType: String) {
+  specimenGroupId: String, version: Long, studyId: String, name: String,
+  description: Option[String], units: String, anatomicalSourceType: String, preservationType: String,
+  preservationTemperatureType: String, specimenType: String) {
 
   def getAddCmd: AddSpecimenGroupCmd = {
-    val asType = AnatomicalSourceType.withName(anatomicalSourceType)
-    val pType = PreservationType.withName(preservationType)
-    val pTempType = PreservationTemperatureType.withName(preservationTemperatureType)
-    val spcType = SpecimenType.withName(specimenType)
-    AddSpecimenGroupCmd(studyId, name, description, units, asType, pType, pTempType, spcType)
+    AddSpecimenGroupCmd(studyId, name, description, units,
+      AnatomicalSourceType.withName(anatomicalSourceType),
+      PreservationType.withName(preservationType),
+      PreservationTemperatureType.withName(preservationTemperatureType),
+      SpecimenType.withName(specimenType))
+  }
+
+  def getUpdateCmd: UpdateSpecimenGroupCmd = {
+    UpdateSpecimenGroupCmd(specimenGroupId, some(version), studyId, name, description, units,
+      AnatomicalSourceType.withName(anatomicalSourceType),
+      PreservationType.withName(preservationType),
+      PreservationTemperatureType.withName(preservationTemperatureType),
+      SpecimenType.withName(specimenType))
   }
 }
 

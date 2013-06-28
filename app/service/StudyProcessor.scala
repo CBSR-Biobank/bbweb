@@ -122,7 +122,6 @@ class StudyProcessor(
     studyId: String,
     id: Option[String],
     processFunc: StudyProcessorMsg => DomainValidation[T]) = {
-
     val updatedItem = for {
       study <- validateStudy(new StudyId(studyId))
       item <- processFunc(StudyProcessorMsg(cmd, study, emitter("listeners"), id))
@@ -215,6 +214,7 @@ class StudyProcessor(
 
     val item = for {
       prevItem <- studyRepository.getByKey(new StudyId(cmd.id))
+      validVersion <- prevItem.requireVersion(cmd.expectedVersion)
       newItem <- addStudy(prevItem.id, prevItem.version + 1, cmd.name, cmd.description)
       updatedItem <- updateItem(newItem).success
     } yield newItem

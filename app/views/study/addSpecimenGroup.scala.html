@@ -1,4 +1,7 @@
-@(addForm: Form[controllers.SpecimenGroupFormObject], studyId: String, studyName: String)(
+@(sgForm: Form[controllers.SpecimenGroupFormObject], 
+    formType: FormType, 
+    studyId: String, 
+    studyName: String)(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
@@ -6,58 +9,70 @@
 
 @implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) } 
 
-@main(Messages("biobank.study.specimengroup.form.title")) {
+@formInfo = @{ formType match {
+    case AddFormType() => 
+        FormInfo(Messages("biobank.study.specimengroup.add"), 
+            routes.StudyController.addSpecimenGroupSubmit(studyId, studyName))
+    case UpdateFormType() => 
+        FormInfo(Messages("biobank.study.specimengroup.update"), 
+            routes.StudyController.updateSpecimenGroupSubmit(studyId, studyName))  
+}}
+
+@main(formInfo.title) {
     <ul class="breadcrumb">
       <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
-      <li><a href="@routes.StudyController.show(studyId)">@studyName</a> <span class="divider">/</span></li>
-      <li class="active">@Messages("biobank.study.specimengroup.form.title")</li>
+      <li><a href="@routes.StudyController.showStudy(studyId)">@studyName</a> <span class="divider">/</span></li>
+      <li class="active">@formInfo.title</li>
     </ul>
     <div class="page-header">
       <h2>@Messages("biobank.study.singular"): @studyName</h2>
-      <h3>@Messages("biobank.study.specimengroup.form.title")</h3>
+      <h3>@formInfo.title</h3>
     </div>
     
     <div class="clearfix">
-    @form(routes.StudyController.addSpecimenGroupSubmit(studyId, studyName), 
-        args = 'id -> "addform", 'class -> "form-horizontal") {
+    @form(formInfo.action, args = 'id -> "addform", 'class -> "form-horizontal") {
         
-      @formNameAndDescription(addForm("name"), addForm("description")) 
-
-      @inputText(
-          field = addForm("units"),
-          args = '_label -> Messages("biobank.study.specimengroup.form.field.unit.plural"), 
-            'placeholder -> "the type of units the specimens are measured in (Eg. mL, cm, etc.)",
-            'class -> "input-xxlarge"
-          )
-
-      @select(
-          field = addForm("anatomicalSourceType"),
-          options = SpecimenGroupSelections.anatomicalSourceTypes,
-          args = '_label -> Messages("biobank.study.specimengroup.form.field.anatomicalsource")
-       )
-
-      @select(
-          field = addForm("preservationType"),
-          options = SpecimenGroupSelections.preservationTypes,
-          args = '_label -> Messages("biobank.study.specimengroup.form.field.preservationType")
-       )
-
-      @select(
-          field = addForm("preservationTemperatureType"),
-          options = SpecimenGroupSelections.preservationTemperatureTypes,
-          args = '_label -> Messages("biobank.study.specimengroup.form.field.preservationTemperatureType")
-       )
-
-      @select(
-          field = addForm("specimenType"),
-          options = SpecimenGroupSelections.specimenTypes,
-          args = '_label -> Messages("biobank.study.specimengroup.form.field.specimenType")
-       )
-
-          
-       <div class="form-actions">
-            <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
-       </div>
+        <input type="hidden" name="specimenGroupId" value=""@sgForm("specimenGroupId").value.getOrElse("")" >  
+        <input type="hidden" name="version" value="@sgForm("version").value.getOrElse(-1)" >  
+        <input type="hidden" name="studyId" value="@studyId" >  
+        
+        @formNameAndDescription(sgForm("name"), sgForm("description")) 
+        
+        @inputText(
+           field = sgForm("units"),
+           args = '_label -> Messages("biobank.study.specimengroup.form.field.unit.plural"), 
+             'placeholder -> "the type of units the specimens are measured in (Eg. mL, cm, etc.)",
+             'class -> "input-xxlarge"
+           )
+        
+        @select(
+           field = sgForm("anatomicalSourceType"),
+           options = SpecimenGroupSelections.anatomicalSourceTypes,
+           args = '_label -> Messages("biobank.study.specimengroup.form.field.anatomicalsource")
+        )
+        
+        @select(
+           field = sgForm("preservationType"),
+           options = SpecimenGroupSelections.preservationTypes,
+           args = '_label -> Messages("biobank.study.specimengroup.form.field.preservationType")
+        )
+        
+        @select(
+           field = sgForm("preservationTemperatureType"),
+           options = SpecimenGroupSelections.preservationTemperatureTypes,
+           args = '_label -> Messages("biobank.study.specimengroup.form.field.preservationTemperatureType")
+        )
+        
+        @select(
+           field = sgForm("specimenType"),
+           options = SpecimenGroupSelections.specimenTypes,
+           args = '_label -> Messages("biobank.study.specimengroup.form.field.specimenType")
+        )
+        
+           
+        <div class="form-actions">
+             <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
+        </div>
   }
 </div>
 }

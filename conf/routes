@@ -10,13 +10,17 @@ GET     /contact                    controllers.Application.contact
 # studies
 GET     /study                      controllers.StudyController.index
 GET     /study/add                  controllers.StudyController.addStudy
-POST    /study/submit               controllers.StudyController.addStudySubmit
+POST    /study/addSubmit            controllers.StudyController.addStudySubmit
 GET     /study/update/:id           controllers.StudyController.updateStudy(id:String)
-POST    /study/updateSubmit         controllers.StudyController.addStudySubmit
-GET     /study/show/:id             controllers.StudyController.showAtudy(id:String)
-GET     /study/addsg/:id            controllers.StudyController.addSpecimenGroup(id:String)
-POST    /study/submitSg             controllers.StudyController.addSpecimenGroupSubmit(id:String, name:String)
-GET     /study/showSg/:id           controllers.StudyController.showSpecimenGroups(id:String)
+POST    /study/updateSubmit/:id     controllers.StudyController.updateStudySubmit(id:String)
+GET     /study/show/:id             controllers.StudyController.showStudy(id:String)
+
+# specimen groups
+GET     /study/sg/add/:id           controllers.StudyController.addSpecimenGroup(id:String)
+POST    /study/sg/addSubmit         controllers.StudyController.addSpecimenGroupSubmit(id:String, name:String)
+GET     /study/sg/update/:id        controllers.StudyController.updateSpecimenGroup(id:String)
+POST    /study/sg/updateSubmit      controllers.StudyController.updateSpecimenGroupSubmit(id:String, name:String)
+GET     /study/sg/show/:id          controllers.StudyController.showSpecimenGroups(id:String)
 
 # user
 GET     /user/profile               controllers.UserController.profile

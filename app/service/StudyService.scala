@@ -55,6 +55,7 @@ class StudyService(
   }
 
   def addStudy(cmd: AddStudyCmd)(implicit userId: UserId): Future[DomainValidation[DisabledStudy]] = {
+    play.Logger.debug("addStudy")
     studyProcessor.ask(
       Message(ServiceMsg(cmd, userId, Some(StudyIdentityService.nextIdentity)))).map(
         _.asInstanceOf[DomainValidation[DisabledStudy]])
