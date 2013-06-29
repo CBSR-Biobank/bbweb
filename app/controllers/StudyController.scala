@@ -83,7 +83,13 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
                 Redirect(routes.StudyController.showStudy(study.id.id)).flashing(
                   "success" -> Messages("biobank.study.added", study.name))
               case Failure(x) =>
-                BadRequest("Bad Request: " + x.head)
+                if (x.head.contains("study with name already exists")) {
+                  val form = studyForm.fill(formObj).withError("name",
+                    Messages("biobank.study.form.error.name"))
+                  BadRequest(html.study.addStudy(form, AddFormType(), ""))
+                } else {
+                  throw new Error(x.head)
+                }
             })
         }
       })
@@ -101,7 +107,7 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
           UpdateFormType(),
           studyId))
       case Failure(x) =>
-        NotFound("Bad Request: " + x.head)
+        throw new Error(x.head)
     }
   }
 
@@ -114,7 +120,14 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
             implicit val userId = UserId(request.user.id.id)
             studyService.updateStudy(formObj.getUpdateCmd).map(study =>
               study match {
-                case Failure(x) => BadRequest("Bad Request: " + x.head)
+                case Failure(x) =>
+                  if (x.head.contains("study with name already exists")) {
+                    val form = studyForm.fill(formObj).withError("name",
+                      Messages("biobank.study.form.error.name"))
+                    BadRequest(html.study.addStudy(form, UpdateFormType(), studyId))
+                  } else {
+                    throw new Error(x.head)
+                  }
                 case Success(study) =>
                   Ok(html.study.showStudy(study))
                   Redirect(routes.StudyController.showStudy(study.id.id)).flashing(
@@ -128,8 +141,7 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
   def showStudy(id: String) = SecuredAction { implicit request =>
     studyService.getStudy(id) match {
       case Success(study) => Ok(html.study.showStudy(study))
-      case Failure(x) =>
-        NotFound("Bad Request: " + x.head)
+      case Failure(x) => throw new Error(x.head)
     }
   }
 
@@ -138,12 +150,9 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
    */
   def addSpecimenGroup(studyId: String) = SecuredAction { implicit request =>
     studyService.getStudy(studyId) match {
-      case Failure(x) =>
-        NotFound("Bad Request: " + x.head)
+      case Failure(x) => throw new Error(x.head)
       case Success(study) =>
-        val form = specimenGroupForm.fill(SpecimenGroupFormObject(
-          "", -1, studyId, "", None, "", "", "", "", ""))
-        Ok(html.study.addSpecimenGroup(form, AddFormType(), studyId, study.name))
+        Ok(html.study.addSpecimenGroup(specimenGroupForm, AddFormType(), studyId, study.name))
     }
   }
 
@@ -160,8 +169,13 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
                 Redirect(routes.StudyController.showSpecimenGroups(studyId, studyName)).flashing(
                   "success" -> Messages("biobank.study.specimengroup.added", sg.name))
               case Failure(x) =>
-                Logger.debug("add specimen group failed: " + x.head)
-                BadRequest("Bad Request: " + x.head)
+                if (x.head.contains("name already exists")) {
+                  val form = specimenGroupForm.fill(sgForm).withError("name",
+                    Messages("biobank.study.specimengroup.form.error.name"))
+                  BadRequest(html.study.addSpecimenGroup(form, AddFormType(), studyId, studyName))
+                } else {
+                  throw new Error(x.head)
+                }
             })
         }
       })
@@ -169,8 +183,7 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
 
   def updateSpecimenGroup(studyId: String, studyName: String, specimenGroupId: String) = SecuredAction { implicit request =>
     studyService.getSpecimenGroup(studyId, specimenGroupId) match {
-      case Failure(x) =>
-        NotFound("Bad Request: " + x.head)
+      case Failure(x) => throw new Error(x.head)
       case Success(sg) =>
         val form = specimenGroupForm.fill(SpecimenGroupFormObject(
           sg.id.id, sg.version, sg.studyId.id, sg.name, sg.description, sg.units,
@@ -193,8 +206,13 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
                 Redirect(routes.StudyController.showSpecimenGroups(studyId, studyName)).flashing(
                   "success" -> Messages("biobank.study.specimengroup.added", sg.name))
               case Failure(x) =>
-                Logger.debug("add specimen group failed: " + x.head)
-                BadRequest("Bad Request: " + x.head)
+                if (x.head.contains("name already exists")) {
+                  val form = specimenGroupForm.fill(sgForm).withError("name",
+                    Messages("biobank.study.specimengroup.form.error.name"))
+                  BadRequest(html.study.addSpecimenGroup(form, UpdateFormType(), studyId, studyName))
+                } else {
+                  throw new Error(x.head)
+                }
             })
         }
       })
@@ -202,8 +220,7 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
 
   def showSpecimenGroups(studyId: String, studyName: String) = SecuredAction { implicit request =>
     studyService.getSpecimenGroups(studyId) match {
-      case Failure(x) =>
-        NotFound("Bad Request: " + x.head)
+      case Failure(x) => throw new Error(x.head)
       case Success(sgSet) =>
         Ok(views.html.study.showSpecimenGroups(studyId, studyName, sgSet))
     }

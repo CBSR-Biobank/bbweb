@@ -16,10 +16,10 @@ POST    /study/updateSubmit/:id     controllers.StudyController.updateStudySubmi
 GET     /study/show/:id             controllers.StudyController.showStudy(id:String)
 
 # specimen groups
-GET     /study/sg/add/:id           controllers.StudyController.addSpecimenGroup(id:String)
-POST    /study/sg/addSubmit         controllers.StudyController.addSpecimenGroupSubmit(id:String, name:String)
+GET     /study/sg/add/:studyId      controllers.StudyController.addSpecimenGroup(studyId:String)
+POST    /study/sg/addSubmit         controllers.StudyController.addSpecimenGroupSubmit(studyId:String, studyName:String)
 GET     /study/sg/update            controllers.StudyController.updateSpecimenGroup(studyId:String, studyName: String, sgId:String)
-POST    /study/sg/updateSubmit      controllers.StudyController.updateSpecimenGroupSubmit(id:String, name:String)
+POST    /study/sg/updateSubmit      controllers.StudyController.updateSpecimenGroupSubmit(id:String, studyName:String)
 GET     /study/sg/show              controllers.StudyController.showSpecimenGroups(studyId:String,studyName:String)
 
 # user

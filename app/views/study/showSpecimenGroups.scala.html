@@ -11,7 +11,12 @@
     </ul>
     <div class="page-header">
       <h2>@Messages("biobank.study.singular"): @studyName</h2>
-      <h3>@Messages("biobank.study.specimengroup.show.title")</h3>
+      <h3>@Messages("biobank.study.specimengroup.show.title")
+      <a href="@routes.StudyController.addSpecimenGroup(studyId)" 
+          class="btn btn-small btn-primary" type="button"
+          data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
+          <i class="icon-plus-sign icon-white"></i></a>
+      </h3>
     </div>
     <div class="clearfix">
         @if(specimenGroups.size <= 0) {
@@ -33,7 +38,7 @@
                 <th>@Messages("biobank.study.specimengroup.field.preservation")</th>
                 <th>@Messages("biobank.study.specimengroup.field.preservationtemperature")</th>
                 <th>@Messages("biobank.study.specimengroup.field.specimenType")</th>
-                <th style="width: 15%"></th>
+                <th></th>
               </thead>
               <tbody>
                 @for(sg <- specimenGroups) {
@@ -45,15 +50,16 @@
                       <td>@sg.preservationType</td>
                       <td>@sg.preservationTemperatureType</td>
                       <td>@sg.specimenType</td>
-                      <td>                          
-                          <a href="@routes.StudyController.updateSpecimenGroup(studyId,studyName,sg.id.id)" 
-                              class="btn btn-mini btn-primary" type="button" data-toggle="tooltip" 
-                              title="Update">
-                              <i class="icon-pencil icon-white"></i></a>
-                          <span class="divider"></span>
-                          <a href="#" class="btn btn-mini btn-primary" type="button"
-                             data-toggle="tooltip" title="Remove">
-                              <i class="icon-remove-sign icon-white"></i></a>
+                      <td>      
+                          <div class="btn-group">         
+                              <a href="@routes.StudyController.updateSpecimenGroup(studyId,studyName,sg.id.id)" 
+                                  class="btn btn-mini btn-primary" type="button" data-toggle="tooltip" 
+                                  title="@Messages("biobank.common.action.update")">
+                                  <i class="icon-pencil icon-white"></i></a>
+                              <a href="#" class="btn btn-mini btn-warning" type="button"
+                                 data-toggle="tooltip" title="@Messages("biobank.common.action.remove")">
+                                 <i class="icon-remove-sign icon-white"></i></a>
+                          </div>
                       </td>
                     <tr>
                 }
@@ -62,10 +68,5 @@
             <script type="text/javascript">
             </script>
         }
-    
-        <div class="form-actions">
-          <a href="@routes.StudyController.addSpecimenGroup(studyId)" class="btn btn-small btn-primary" type="button">
-          @Messages("biobank.study.specimengroup.show.action.add")</a>
-        </div>
     </div>
 }

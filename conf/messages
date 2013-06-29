@@ -7,6 +7,7 @@ biobank.form.selection.default=-- Make a selection --
 # Common messages
 biobank.common.name=Name
 biobank.common.description=Description
+biobank.common.action.add=Add
 biobank.common.action.update=Update
 biobank.common.action.remove=Remove
 
@@ -16,7 +17,7 @@ biobank.study.plural=Studies
 biobank.study.all=All Studies
 biobank.study.add=Add Study
 biobank.study.update=Update Study
-biobank.study.added=Studyhas been added:  {0}.
+biobank.study.added=Study has been added:  {0}.
 biobank.study.updated=Study has been updated: {0}.
 biobank.study.none=No studies have been added.
 biobank.study.field.status=Status
@@ -26,6 +27,7 @@ biobank.study.field.collectioneventTypes=Collection Event Types
 biobank.study.field.specimengroups=Specimen Groups
 biobank.study.field.annotationtypes=Annotation Types
 biobank.study.form.title=Add Study
+biobank.study.form.error.name=Study with this name already exists
 
 # Specimen Groups 
 biobank.study.specimengroup.add=Add Specimen Group
@@ -45,6 +47,7 @@ biobank.study.specimengroup.form.field.anatomicalsource=Anatomical Source
 biobank.study.specimengroup.form.field.preservationType=Preservation
 biobank.study.specimengroup.form.field.preservationTemperatureType=Preservation Temperature
 biobank.study.specimengroup.form.field.specimenType=Specimen Type
+biobank.study.specimengroup.form.error.name=Specimen Group with this name already exists
 
 # Login page
 biobank.login.title=Login
