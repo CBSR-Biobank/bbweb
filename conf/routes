@@ -18,9 +18,9 @@ GET     /study/show/:id             controllers.StudyController.showStudy(id:Str
 # specimen groups
 GET     /study/sg/add/:id           controllers.StudyController.addSpecimenGroup(id:String)
 POST    /study/sg/addSubmit         controllers.StudyController.addSpecimenGroupSubmit(id:String, name:String)
-GET     /study/sg/update/:id        controllers.StudyController.updateSpecimenGroup(id:String)
+GET     /study/sg/update            controllers.StudyController.updateSpecimenGroup(studyId:String, studyName: String, sgId:String)
 POST    /study/sg/updateSubmit      controllers.StudyController.updateSpecimenGroupSubmit(id:String, name:String)
-GET     /study/sg/show/:id          controllers.StudyController.showSpecimenGroups(id:String)
+GET     /study/sg/show              controllers.StudyController.showSpecimenGroups(studyId:String,studyName:String)
 
 # user
 GET     /user/profile               controllers.UserController.profile

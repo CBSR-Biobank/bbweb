@@ -47,11 +47,22 @@ class StudyService(
   }
 
   def getStudy(id: String): DomainValidation[Study] = {
-    studyRepository.getByKey(new StudyId(id));
+    studyRepository.getByKey(new StudyId(id))
   }
 
-  def getSpecimenGroups(id: String): Set[SpecimenGroup] = {
-    specimenGroupRepository.getValues.filter(x => x.studyId.id.equals(id)).toSet;
+  def getSpecimenGroup(studyId: String, specimenGroupId: String): DomainValidation[SpecimenGroup] = {
+    specimenGroupRepository.getByKey(SpecimenGroupId(specimenGroupId)) match {
+      case Failure(x) => x.fail
+      case Success(sg) =>
+        if (sg.studyId.id.equals(studyId)) sg.success
+        else DomainError("study does not have specimen group").fail
+    }
+  }
+
+  def getSpecimenGroups(id: String): DomainValidation[Set[SpecimenGroup]] = {
+    val sgSet = specimenGroupRepository.getValues.filter(x => x.studyId.id.equals(id)).toSet;
+    if (sgSet.size > 0) sgSet.success
+    else DomainError("Study does not have specimen groups: " + id).fail
   }
 
   def addStudy(cmd: AddStudyCmd)(implicit userId: UserId): Future[DomainValidation[DisabledStudy]] = {

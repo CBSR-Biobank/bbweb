@@ -36,16 +36,16 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
 
   val studyForm = Form(
     mapping(
-      "studyId" -> ignored(""),
-      "version" -> ignored(-1L),
+      "studyId" -> text,
+      "version" -> longNumber,
       "name" -> nonEmptyText,
       "description" -> optional(text))(StudyFormObject.apply)(StudyFormObject.unapply))
 
   val specimenGroupForm = Form(
     mapping(
-      "specimenGroupId" -> ignored(""),
-      "version" -> ignored(-1L),
-      "studyId" -> ignored(""),
+      "specimenGroupId" -> text,
+      "version" -> longNumber,
+      "studyId" -> text,
       "name" -> nonEmptyText,
       "description" -> optional(text),
       "units" -> nonEmptyText,
@@ -75,7 +75,6 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
       },
       formObj => {
         Async {
-          Logger.debug("here3")
           implicit val userId = UserId(request.user.id.id)
           studyService.addStudy(formObj.getAddCmd).map(
             study => study match {
@@ -149,21 +148,16 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
   }
 
   def addSpecimenGroupSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
-    Logger.debug("here1")
     specimenGroupForm.bindFromRequest.fold(
       formWithErrors => BadRequest(html.study.addSpecimenGroup(
         formWithErrors, AddFormType(), studyId, studyName)),
       sgForm => {
-        Logger.debug("here2")
         Async {
-          Logger.debug("here3")
           implicit val userId = new UserId(request.user.id.id)
           studyService.addSpecimenGroup(sgForm.getAddCmd).map(validation =>
             validation match {
               case Success(sg) =>
-                Ok(html.study.showSpecimenGroups(studyId, studyName,
-                  studyService.getSpecimenGroups(studyId)))
-                Redirect(routes.StudyController.showSpecimenGroups(sg.studyId.id)).flashing(
+                Redirect(routes.StudyController.showSpecimenGroups(studyId, studyName)).flashing(
                   "success" -> Messages("biobank.study.specimengroup.added", sg.name))
               case Failure(x) =>
                 Logger.debug("add specimen group failed: " + x.head)
@@ -173,22 +167,45 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
       })
   }
 
-  def updateSpecimenGroup(studyId: String) = SecuredAction { implicit request =>
-    ???
+  def updateSpecimenGroup(studyId: String, studyName: String, specimenGroupId: String) = SecuredAction { implicit request =>
+    studyService.getSpecimenGroup(studyId, specimenGroupId) match {
+      case Failure(x) =>
+        NotFound("Bad Request: " + x.head)
+      case Success(sg) =>
+        val form = specimenGroupForm.fill(SpecimenGroupFormObject(
+          sg.id.id, sg.version, sg.studyId.id, sg.name, sg.description, sg.units,
+          sg.anatomicalSourceType.toString, sg.preservationType.toString,
+          sg.preservationTemperatureType.toString, sg.specimenType.toString))
+        Ok(html.study.addSpecimenGroup(form, UpdateFormType(), studyId, studyName))
+    }
   }
 
   def updateSpecimenGroupSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
-    ???
+    specimenGroupForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(html.study.addSpecimenGroup(
+        formWithErrors, AddFormType(), studyId, studyName)),
+      sgForm => {
+        Async {
+          implicit val userId = new UserId(request.user.id.id)
+          studyService.updateSpecimenGroup(sgForm.getUpdateCmd).map(validation =>
+            validation match {
+              case Success(sg) =>
+                Redirect(routes.StudyController.showSpecimenGroups(studyId, studyName)).flashing(
+                  "success" -> Messages("biobank.study.specimengroup.added", sg.name))
+              case Failure(x) =>
+                Logger.debug("add specimen group failed: " + x.head)
+                BadRequest("Bad Request: " + x.head)
+            })
+        }
+      })
   }
 
-  def showSpecimenGroups(studyId: String) = SecuredAction { implicit request =>
-    // get list of studies the user has access to
-    studyService.getStudy(studyId) match {
+  def showSpecimenGroups(studyId: String, studyName: String) = SecuredAction { implicit request =>
+    studyService.getSpecimenGroups(studyId) match {
       case Failure(x) =>
         NotFound("Bad Request: " + x.head)
-      case Success(study) =>
-        Ok(views.html.study.showSpecimenGroups(studyId, study.name,
-          studyService.getSpecimenGroups(studyId)))
+      case Success(sgSet) =>
+        Ok(views.html.study.showSpecimenGroups(studyId, studyName, sgSet))
     }
   }
 }

@@ -32,9 +32,18 @@
     <div class="clearfix">
     @form(formInfo.action, args = 'id -> "addform", 'class -> "form-horizontal") {
         
-        <input type="hidden" name="specimenGroupId" value=""@sgForm("specimenGroupId").value.getOrElse("")" >  
-        <input type="hidden" name="version" value="@sgForm("version").value.getOrElse(-1)" >  
-        <input type="hidden" name="studyId" value="@studyId" >  
+        @formType match {
+            case AddFormType() => { 
+                <input type="hidden" name="specimenGroupId" value="dont-care">  
+                <input type="hidden" name="version" value="-1" >  
+                }
+            case UpdateFormType() => { 
+                <input type="hidden" name="specimenGroupId" value="@sgForm("specimenGroupId").value" >  
+                <input type="hidden" name="version" value="@sgForm("version").value" >  
+                }
+        }
+        
+        <input type="hidden" name="studyId" value="@sgForm("studyId").value" >  
         
         @formNameAndDescription(sgForm("name"), sgForm("description")) 
         

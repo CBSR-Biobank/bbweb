@@ -24,9 +24,17 @@
     </div>
     <div class="clearfix">
         @form(formInfo.action, args = 'id -> "studyForm", 'class -> "form-horizontal") {
-    
-        <input type="hidden" name="studyId" value="@studyId" >  
-        <input type="hidden" name="version" value="@studyForm("name").value.getOrElse(-1)" >  
+ 
+        @formType match {
+            case AddFormType() => { 
+                <input type="hidden" name="studyId" value="dont-care" >  
+                <input type="hidden" name="version" value="-1" >  
+                }
+            case UpdateFormType() => { 
+                <input type="hidden" name="studyId" value="@studyForm("studyId").value" >  
+                <input type="hidden" name="version" value="@studyForm("version").value" >  
+                }
+        }
 
         @formNameAndDescription(studyForm("name"), studyForm("description"))
         
