@@ -52,21 +52,19 @@ object AppServices {
       new ReadWriteRepository[String, CollectionEventTypeAnnotationType](v => v.id)
     val userRepo = new ReadWriteRepository[UserId, User](v => new UserId(v.email))
 
-    val studyProcessor = extension.processorOf(Props(
-      new StudyProcessor(
-        studyRepository,
-        specimenGroupRepository,
-        collectionEventTypeRepository,
-        annotationTypeRepo,
-        sg2cetRepo,
-        cet2atRepo) with Emitter with Eventsourced { val id = 1 }))
+    val multicastTargets = List(
+      system.actorOf(Props(new StudyProcessor(
+        studyRepository, specimenGroupRepository, collectionEventTypeRepository,
+        annotationTypeRepo, sg2cetRepo, cet2atRepo) with Emitter)),
+      system.actorOf(Props(new UserProcessor(userRepo) with Emitter)))
 
-    val userProcessor = extension.processorOf(Props(
-      new UserProcessor(userRepo) with Emitter with Eventsourced { val id = 2 }))
+    // this is the commnad bus
+    val multicastProcessor = extension.processorOf(
+      ProcessorProps(1, pid => new Multicast(multicastTargets, identity) with Confirm with Eventsourced { val id = pid }))
 
     val studyService = new StudyService(studyRepository, specimenGroupRepository,
-      collectionEventTypeRepository, studyProcessor)
-    val userService = new UserService(userRepo, userProcessor)
+      collectionEventTypeRepository, multicastProcessor)
+    val userService = new UserService(userRepo, multicastProcessor)
 
     // for debug only - password is "administrator"
     userRepo.updateMap(User.add(new UserId("admin@admin.com"), "admin", "admin@admin.com",

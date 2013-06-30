@@ -109,8 +109,7 @@ class StudyProcessor(
         case cmd: StudyAnnotationTypeCommand =>
           processEntityMsg(cmd, cmd.studyId, serviceMsg.id, annotationTypeService.process)
 
-        case _ =>
-          throw new Error("invalid command received: ")
+        case other => // must be for another command handler
       }
 
     case _ =>

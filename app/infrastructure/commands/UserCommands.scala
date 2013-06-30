@@ -7,4 +7,4 @@ case class AddUserCmd(
   hasher: String,
   salt: Option[String],
   avatarUrl: Option[String],
-  userId: Option[String] = None)
+  userId: Option[String] = None) extends Command

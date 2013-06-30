@@ -67,7 +67,7 @@ class UserService(
         val cmd = AddUserCmd(user.fullName, user.email.getOrElse(""),
           passwordInfo.password, passwordInfo.hasher, passwordInfo.salt,
           user.avatarUrl)
-        userProcessor ? Message(cmd) map (_.asInstanceOf[DomainValidation[User]])
+        userProcessor ? Message(ServiceMsg(cmd, null)) map (_.asInstanceOf[DomainValidation[User]])
         user
       case None => null
     }
@@ -85,10 +85,11 @@ class UserProcessor(
         case cmd: AddUserCmd =>
           process(addUser(cmd, emitter("listenter")))
 
-        case _ =>
-          throw new Error("invalid command received: ")
-
+        case other => // must be for another command handler
       }
+
+    case x =>
+      throw new Error("invalid message received: " + x)
   }
 
   def addUser(cmd: AddUserCmd, listeners: MessageEmitter): DomainValidation[User] = {
