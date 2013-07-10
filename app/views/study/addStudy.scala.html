@@ -1,9 +1,10 @@
-@(studyForm: Form[controllers.StudyFormObject], 
+@(studyForm: Form[controllers.study.StudyFormObject], 
     formType: FormType, 
     studyId: String)(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
 @import controllers.{FormType, AddFormType, UpdateFormType, FormInfo}
+@import controllers.study._
 
 @implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
 

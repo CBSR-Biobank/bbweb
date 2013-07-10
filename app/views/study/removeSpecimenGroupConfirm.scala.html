@@ -4,7 +4,7 @@
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
-@import controllers._
+@import controllers.study._
 
 @main(Messages("biobank.study.specimengroup.remove")) {
   <ul class="breadcrumb">
@@ -53,9 +53,9 @@
       </tbody>
     </table>
     <div class="form-actions"> 
-      <a href="@routes.StudyController.index" class="btn btn-small" type="button">
+      <a href="@routes.SgController.index(studyId,studyName)" class="btn btn-small" type="button">
       @Messages("biobank.common.cancel")</a>
-      <a href="@routes.StudyController.removeSpecimenGroup(studyId,studyName,sg.id.id)" 
+      <a href="@routes.SgController.removeSpecimenGroup(studyId,studyName,sg.id.id)" 
       class="btn btn-small btn-warning" type="button">
       @Messages("biobank.common.confirm")</a>
     </div>

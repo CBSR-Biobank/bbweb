@@ -2,6 +2,8 @@
     studyName: String, 
     specimenGroups: Set[domain.study.SpecimenGroup])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
     flash: play.api.mvc.Flash)
+    
+@import controllers.study._
 
 @main(Messages("biobank.study.singular") + " " + studyName) {
     <ul class="breadcrumb">
@@ -12,7 +14,7 @@
     <div class="page-header">
       <h2>@Messages("biobank.study.singular"): @studyName</h2>
       <h3>@Messages("biobank.study.specimengroup.show.title")
-      <a href="@routes.StudyController.addSpecimenGroup(studyId)" 
+      <a href="@routes.SgController.addSpecimenGroup(studyId)" 
           class="btn btn-small btn-primary" type="button"
           data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
           <i class="icon-plus-sign icon-white"></i></a>
@@ -52,11 +54,11 @@
                       <td>@sg.specimenType</td>
                       <td>      
                           <div class="btn-group">          
-                              <a href="@routes.StudyController.updateSpecimenGroup(studyId,studyName,sg.id.id)" 
+                              <a href="@routes.SgController.updateSpecimenGroup(studyId,studyName,sg.id.id)" 
                                   class="btn btn-mini btn-primary" type="button" data-toggle="tooltip" 
                                   title="@Messages("biobank.common.action.update")">
                                   <i class="icon-pencil icon-white"></i></a>
-                              <a href="@routes.StudyController.removeSpecimenGroupConfirm(studyId,studyName,sg.id.id)" 
+                              <a href="@routes.SgController.removeSpecimenGroupConfirm(studyId,studyName,sg.id.id)" 
                                   class="btn btn-mini btn-warning" type="button"
                                  data-toggle="tooltip" title="@Messages("biobank.common.action.remove")">
                                  <i class="icon-remove-sign icon-white"></i></a>

@@ -1,12 +1,14 @@
 @(studies: List[domain.study.Study])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
+@import controllers.study._
+
 @main("Biobank") {
 <ul class="breadcrumb">
   <li class="active">@Messages("biobank.study.plural")</li>
 </ul>
 
 <div class="page-header">
-  <h2>@Messages("biobank.study.all")</h2>
+  <h2>@Messages("biobank.study.plural")</h2>
 </div>
 
 <div class="clearfix">

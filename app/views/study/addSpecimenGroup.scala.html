@@ -1,21 +1,21 @@
-@(sgForm: Form[controllers.SpecimenGroupFormObject], 
+@(sgForm: Form[controllers.study.SpecimenGroupFormObject], 
     formType: FormType, 
     studyId: String, 
     studyName: String)(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
-@import controllers._
+@import controllers.study._
 
 @implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) } 
 
 @formInfo = @{ formType match {
     case AddFormType() => 
         FormInfo(Messages("biobank.study.specimengroup.add"), 
-            routes.StudyController.addSpecimenGroupSubmit(studyId, studyName))
+            routes.SgController.addSpecimenGroupSubmit(studyId, studyName))
     case UpdateFormType() => 
         FormInfo(Messages("biobank.study.specimengroup.update"), 
-            routes.StudyController.updateSpecimenGroupSubmit(studyId, studyName))  
+            routes.SgController.updateSpecimenGroupSubmit(studyId, studyName))  
 }}
 
 @main(formInfo.title) {
