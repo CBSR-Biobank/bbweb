@@ -10,6 +10,9 @@ biobank.common.description=Description
 biobank.common.action.add=Add
 biobank.common.action.update=Update
 biobank.common.action.remove=Remove
+biobank.common.warning=Warning
+biobank.common.confirm=Confirm
+biobank.common.cancel=Cancel
 
 # Study
 biobank.study.singular=Study
@@ -21,7 +24,7 @@ biobank.study.added=Study has been added:  {0}.
 biobank.study.updated=Study has been updated: {0}.
 biobank.study.none=No studies have been added.
 biobank.study.field.status=Status
-biobank.study.field.participants=Participants
+biobank.study.field.participants=Participantss
 biobank.study.field.collectionevents=Collection Events
 biobank.study.field.collectioneventTypes=Collection Event Types
 biobank.study.field.specimengroups=Specimen Groups
@@ -32,8 +35,11 @@ biobank.study.form.error.name=Study with this name already exists
 # Specimen Groups 
 biobank.study.specimengroup.add=Add Specimen Group
 biobank.study.specimengroup.update=Update Specimen Group
+biobank.study.specimengroup.remove=Remove Specimen Group
+biobank.study.specimengroup.remove.confirm=Are you sure you want to remove Specimen Group "{0}"?
+biobank.study.specimengroup.removed=Specimen Group "{0}" removed.
 biobank.study.specimengroup.added=Specimen Group has been added: {0}.
-biobank.study.specimengroup.updated=Specimen Group has been updated: {0} .
+biobank.study.specimengroup.updated=Specimen Group has been updated: {0}.
 biobank.study.specimengroup.field.units=Units
 biobank.study.specimengroup.field.anatomicalsource=Anatomical Source
 biobank.study.specimengroup.field.preservation=Preservation Type

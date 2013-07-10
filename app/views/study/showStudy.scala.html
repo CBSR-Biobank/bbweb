@@ -1,7 +1,7 @@
 @(study: domain.study.Study)(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
     flash: play.api.mvc.Flash)
 
-@main("Study " + study.name) {
+@main(Messages("biobank.study.singular") + " " + study.name) {
 <ul class="breadcrumb">
   <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a>
       <span class="divider">/</span></li>

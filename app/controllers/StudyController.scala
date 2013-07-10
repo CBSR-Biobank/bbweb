@@ -61,6 +61,7 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
     val studies = studyService.getAll
     Ok(views.html.study.index(studies))
   }
+
   /**
    * Add a study.
    */
@@ -223,6 +224,37 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
       case Failure(x) => throw new Error(x.head)
       case Success(sgSet) =>
         Ok(views.html.study.showSpecimenGroups(studyId, studyName, sgSet))
+    }
+  }
+
+  def removeSpecimenGroupConfirm(studyId: String,
+    studyName: String,
+    specimenGroupId: String) = SecuredAction { implicit request =>
+    studyService.getSpecimenGroup(studyId, specimenGroupId) match {
+      case Failure(x) => throw new Error(x.head)
+      case Success(sg) =>
+        Ok(views.html.study.removeSpecimenGroupConfirm(studyId, studyName, sg))
+    }
+  }
+
+  def removeSpecimenGroup(studyId: String,
+    studyName: String,
+    sgId: String) = SecuredAction { implicit request =>
+    studyService.getSpecimenGroup(studyId, sgId) match {
+      case Failure(x) => throw new Error(x.head)
+      case Success(sg) =>
+        Async {
+          implicit val userId = new UserId(request.user.id.id)
+          studyService.removeSpecimenGroup(RemoveSpecimenGroupCmd(
+            sg.id.id, sg.versionOption, sg.studyId.id)).map(validation =>
+            validation match {
+              case Success(sg) =>
+                Redirect(routes.StudyController.showSpecimenGroups(studyId, studyName)).flashing(
+                  "success" -> Messages("biobank.study.specimengroup.removed", sg.name))
+              case Failure(x) =>
+                throw new Error(x.head)
+            })
+        }
     }
   }
 }

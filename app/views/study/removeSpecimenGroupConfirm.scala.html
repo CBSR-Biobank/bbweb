@@ -1,0 +1,63 @@
+@(studyId: String, 
+    studyName: String,
+    sg: domain.study.SpecimenGroup)(
+    implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+
+@import helper._
+@import controllers._
+
+@main(Messages("biobank.study.specimengroup.remove")) {
+  <ul class="breadcrumb">
+    <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
+    <li><a href="@routes.StudyController.showStudy(studyId)">@studyName</a> <span class="divider">/</span></li>
+    <li class="active">@Messages("biobank.study.specimengroup.remove")</li>
+  </ul>
+  <div class="page-header">
+    <h2>@Messages("biobank.study.singular"): @studyName</h2>
+    <div class="alert alert-block">
+     <h3>@Messages("biobank.common.warning")</h3>
+     @Messages("biobank.study.specimengroup.remove.confirm", sg.name)
+    </div>
+  </div>
+  <div class="clearfix">    
+    <table class="table table-bordered table-hover table-condensed">
+      <tbody>
+        <tr>
+          <td class="header">@Messages("biobank.common.name")</td>
+          <td>@sg.name</td>
+        </tr>
+        <tr>
+          <td class="header">@Messages("biobank.common.description")</td>
+          <td>@sg.description</td>
+        </tr>
+        <tr>
+           <td class="header">@Messages("biobank.study.specimengroup.field.units")</td>
+           <td>@sg.units</td>
+        </tr>
+        <tr>
+           <td class="header">@Messages("biobank.study.specimengroup.field.anatomicalsource")</td>
+           <td>@sg.anatomicalSourceType</td>
+        </tr>
+        <tr>
+           <td class="header">@Messages("biobank.study.specimengroup.field.preservation")</td>
+           <td>@sg.preservationType</td>
+        </tr>
+        <tr>
+           <td class="header">@Messages("biobank.study.specimengroup.field.preservationtemperature")</td>
+           <td>@sg.preservationTemperatureType</td>
+        </tr>
+        <tr>
+           <td class="header">@Messages("biobank.study.specimengroup.field.specimenType")</td>
+           <td>@sg.specimenType</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="form-actions"> 
+      <a href="@routes.StudyController.index" class="btn btn-small" type="button">
+      @Messages("biobank.common.cancel")</a>
+      <a href="@routes.StudyController.removeSpecimenGroup(studyId,studyName,sg.id.id)" 
+      class="btn btn-small btn-warning" type="button">
+      @Messages("biobank.common.confirm")</a>
+    </div>
+  </div>  
+}    

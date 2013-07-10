@@ -21,6 +21,8 @@ POST    /study/sg/addSubmit         controllers.StudyController.addSpecimenGroup
 GET     /study/sg/update            controllers.StudyController.updateSpecimenGroup(studyId:String, studyName: String, sgId:String)
 POST    /study/sg/updateSubmit      controllers.StudyController.updateSpecimenGroupSubmit(id:String, studyName:String)
 GET     /study/sg/show              controllers.StudyController.showSpecimenGroups(studyId:String,studyName:String)
+GET     /study/sg/removeConfirm     controllers.StudyController.removeSpecimenGroupConfirm(studyId:String, studyName: String, sgId:String)
+GET     /study/sg/remove            controllers.StudyController.removeSpecimenGroup(studyId:String, studyName: String, sgId:String)
 
 # user
 GET     /user/profile               controllers.UserController.profile
