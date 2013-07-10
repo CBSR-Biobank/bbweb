@@ -43,7 +43,7 @@ protected[service] class CollectionEventTypeService(
   studyRepository: StudyReadRepository,
   collectionEventTypeRepository: CollectionEventTypeReadWriteRepository,
   specimenGroupRepository: SpecimenGroupReadRepository,
-  annotationTypeRepo: StudyAnnotationTypeReadWriteRepository,
+  annotationTypeRepo: CollectionEventAnnotationTypeReadWriteRepository,
   sg2cetRepo: SpecimenGroupCollectionEventTypeReadWriteRepository,
   cet2atRepo: CollectionEventTypeAnnotationTypeReadWriteRepository)
   extends CommandHandler {

@@ -142,7 +142,7 @@ case class DisabledStudy(
   }
 
   def addCollectionEventAnnotationType(
-    annotationTypeRepo: ReadRepository[AnnotationTypeId, StudyAnnotationType],
+    annotationTypeRepo: ReadRepository[AnnotationTypeId, CollectionEventAnnotationType],
     cmd: AddCollectionEventAnnotationTypeCmd,
     id: String): DomainValidation[CollectionEventAnnotationType] = {
     addCollectionEventAnnotationType(annotationTypeRepo,
@@ -151,7 +151,7 @@ case class DisabledStudy(
   }
 
   def updateCollectionEventAnnotationType(
-    annotationTypeRepo: ReadRepository[AnnotationTypeId, StudyAnnotationType],
+    annotationTypeRepo: ReadRepository[AnnotationTypeId, CollectionEventAnnotationType],
     cmd: UpdateCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] = {
     for {
       prevItem <- annotationTypeRepo.getByKey(new AnnotationTypeId(cmd.id))
@@ -164,7 +164,7 @@ case class DisabledStudy(
   }
 
   def removeCollectionEventAnnotationType(
-    studyAnnotationTypeRepository: ReadRepository[AnnotationTypeId, StudyAnnotationType],
+    studyAnnotationTypeRepository: ReadRepository[AnnotationTypeId, CollectionEventAnnotationType],
     cmd: RemoveCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] = {
     for {
       item <- studyAnnotationTypeRepository.getByKey(new AnnotationTypeId(cmd.id))

@@ -2,7 +2,7 @@ package domain.study
 
 import infrastructure._
 import domain._
-import domain.AnnotationValueType._
+import AnnotationValueType._
 
 import scalaz._
 import Scalaz._

@@ -44,8 +44,7 @@ object AppServices {
       new ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id)
     val collectionEventTypeRepository =
       new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
-    val annotationTypeRepo =
-      new ReadWriteRepository[AnnotationTypeId, StudyAnnotationType](v => v.id)
+    val ceventAnnotationTypeRepo = new CollectionEventAnnotationTypeReadWriteRepository(v => v.id)
     val sg2cetRepo =
       new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
     val cet2atRepo =
@@ -55,7 +54,7 @@ object AppServices {
     val multicastTargets = List(
       system.actorOf(Props(new StudyProcessor(
         studyRepository, specimenGroupRepository, collectionEventTypeRepository,
-        annotationTypeRepo, sg2cetRepo, cet2atRepo) with Emitter)),
+        ceventAnnotationTypeRepo, sg2cetRepo, cet2atRepo) with Emitter)),
       system.actorOf(Props(new UserProcessor(userRepo) with Emitter)))
 
     // this is the commnad bus
@@ -63,7 +62,7 @@ object AppServices {
       ProcessorProps(1, pid => new Multicast(multicastTargets, identity) with Confirm with Eventsourced { val id = pid }))
 
     val studyService = new StudyService(studyRepository, specimenGroupRepository,
-      collectionEventTypeRepository, multicastProcessor)
+      collectionEventTypeRepository, ceventAnnotationTypeRepo, multicastProcessor)
     val userService = new UserService(userRepo, multicastProcessor)
 
     // for debug only - password is "administrator"

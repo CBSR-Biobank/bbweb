@@ -24,6 +24,15 @@ POST    /study/sg/updateSubmit      controllers.study.SgController.updateSpecime
 GET     /study/sg/removeConfirm     controllers.study.SgController.removeSpecimenGroupConfirm(studyId:String, studyName: String, sgId:String)
 GET     /study/sg/remove            controllers.study.SgController.removeSpecimenGroup(studyId:String, studyName: String, sgId:String)
 
+# collection event annotation types
+GET     /study/cevent/annot                   controllers.study.CeventAnnotTypeController.index(studyId:String,studyName:String)
+GET     /study/cevent/annot/add/:studyId      controllers.study.CeventAnnotTypeController.addAnnotationType(studyId:String)
+POST    /study/cevent/annot/addSubmit         controllers.study.CeventAnnotTypeController.addAnnotationTypeSubmit(studyId:String, studyName:String)
+GET     /study/cevent/annot/update            controllers.study.CeventAnnotTypeController.updateAnnotationType(studyId:String, studyName: String, sgId:String)
+POST    /study/cevent/annot/updateSubmit      controllers.study.CeventAnnotTypeController.updateAnnotationTypeSubmit(id:String, studyName:String)
+GET     /study/cevent/annot/removeConfirm     controllers.study.CeventAnnotTypeController.removeAnnotationTypeConfirm(studyId:String, studyName: String, sgId:String)
+GET     /study/cevent/annot/remove            controllers.study.CeventAnnotTypeController.removeAnnotationType(studyId:String, studyName: String, sgId:String)
+
 # user
 GET     /user/profile               controllers.UserController.profile
 

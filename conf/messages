@@ -28,7 +28,7 @@ biobank.study.field.participants=Participants
 biobank.study.field.collectionevents=Collection Events
 biobank.study.field.collectioneventTypes=Collection Event Types
 biobank.study.field.specimengroups=Specimen Groups
-biobank.study.field.annotationtypes=Annotation Types
+biobank.study.field.collection.event.annotationtypes=Collection Event Annotation Types
 biobank.study.form.title=Add Study
 biobank.study.form.error.name=Study with this name already exists
 

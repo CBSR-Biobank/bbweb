@@ -21,6 +21,7 @@ import scala.language.postfixOps
 import org.eligosource.eventsourced.core._
 import scalaz._
 import Scalaz._
+import domain.AnnotationTypeId
 
 /**
  * This is the Study Aggregate Application Service.
@@ -35,13 +36,17 @@ import Scalaz._
  *
  */
 class StudyService(
-  studyRepository: ReadRepository[StudyId, Study],
-  specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
-  cetRepo: ReadRepository[CollectionEventTypeId, CollectionEventType],
+  studyRepository: StudyReadRepository,
+  specimenGroupRepository: SpecimenGroupReadRepository,
+  cetRepo: CollectionEventTypeReadRepository,
+  ceventAnnotationTypeRepo: CollectionEventAnnotationTypeReadRepository,
   studyProcessor: ActorRef)(implicit system: ActorSystem)
   extends ApplicationService {
   import system.dispatcher
 
+  /**
+   * FIXME: use paging and sorting
+   */
   def getAll: List[Study] = {
     studyRepository.getValues.toList
   }
@@ -64,6 +69,24 @@ class StudyService(
       study <- studyRepository.getByKey(StudyId(id))
       sgSet <- specimenGroupRepository.getValues.filter(x => x.studyId.id.equals(id)).toSet.success
     } yield sgSet
+  }
+
+  def getCollectionEventAnnotationType(studyId: String, annotationTypeId: String) {
+    ceventAnnotationTypeRepo.getByKey(new AnnotationTypeId(annotationTypeId)) match {
+      case Failure(x) => x.fail
+      case Success(annot) =>
+        if (annot.studyId.id.equals(studyId)) annot.success
+        else DomainError("study does not have specimen group").fail
+    }
+  }
+
+  def getCollectionEventAnnotationType(id: String): DomainValidation[Set[CollectionEventAnnotationType]] = {
+    for {
+      study <- studyRepository.getByKey(StudyId(id))
+      annotTypeSet <- ceventAnnotationTypeRepo.getValues.filter { x =>
+        x.studyId.id.equals(id) && x.isInstanceOf[CollectionEventAnnotationType]
+      }.toSet.success
+    } yield annotTypeSet
   }
 
   def addStudy(cmd: AddStudyCmd)(implicit userId: UserId): Future[DomainValidation[DisabledStudy]] = {

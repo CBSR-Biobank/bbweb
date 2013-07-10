@@ -22,7 +22,7 @@ import scalaz.Scalaz._
  * @author Nelson Loyola
  */
 protected[service] class StudyAnnotationTypeService(
-  annotationTypeRepo: StudyAnnotationTypeReadWriteRepository)
+  annotationTypeRepo: CollectionEventAnnotationTypeReadWriteRepository)
   extends CommandHandler {
   import StudyAnnotationTypeService._
 

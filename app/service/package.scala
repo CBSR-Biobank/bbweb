@@ -82,9 +82,9 @@ package object service {
 
   type SpecimenGroupReadWriteRepository = ReadWriteRepository[SpecimenGroupId, SpecimenGroup]
 
-  type StudyAnnotationTypeReadRepository = ReadWriteRepository[AnnotationTypeId, StudyAnnotationType]
+  type CollectionEventAnnotationTypeReadRepository = ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType]
 
-  type StudyAnnotationTypeReadWriteRepository = ReadWriteRepository[AnnotationTypeId, StudyAnnotationType]
+  type CollectionEventAnnotationTypeReadWriteRepository = ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType]
 
   type SpecimenGroupCollectionEventTypeReadRepository = ReadWriteRepository[String, SpecimenGroupCollectionEventType]
 

@@ -2,5 +2,4 @@ package domain.study
 
 import domain.IdentifiedValueObject
 
-case class StudyId(identity: String) extends { val id = identity } with IdentifiedValueObject[String] {
-}
+case class StudyId(val id: String) extends IdentifiedValueObject[String] {}
