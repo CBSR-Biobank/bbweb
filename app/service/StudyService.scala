@@ -80,7 +80,7 @@ class StudyService(
     }
   }
 
-  def getCollectionEventAnnotationType(id: String): DomainValidation[Set[CollectionEventAnnotationType]] = {
+  def getCollectionEventAnnotationTypes(id: String): DomainValidation[Set[CollectionEventAnnotationType]] = {
     for {
       study <- studyRepository.getByKey(StudyId(id))
       annotTypeSet <- ceventAnnotationTypeRepo.getValues.filter { x =>

@@ -1,0 +1,128 @@
+@(attrTypeForm: Form[controllers.study.AnnotationTypeFormObject], 
+    formType: FormType, 
+    studyId: String, 
+    studyName: String)(
+    implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+
+@import helper._
+@import controllers.study._
+
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) } 
+
+@formInfo = @{ formType match {
+    case AddFormType() => 
+        FormInfo(Messages("biobank.study.collection.event.annotation.type.add"), 
+            routes.CeventAnnotTypeController.addAnnotationTypeSubmit(studyId, studyName))
+    case UpdateFormType() => 
+        FormInfo(Messages("biobank.study.collection.event.annotation.type.update"), 
+            routes.CeventAnnotTypeController.updateAnnotationTypeSubmit(studyId, studyName))  
+}}
+
+@selectionField(field: Field, className: String = "selections") = {
+    @input(field, '_label ->
+        Messages("biobank.study.collection.event.annotation.type.field.option"),
+        '_class -> className) { (id, name, value, _) =>
+        <input type="text" name="@name" value="@value"> 
+        <a class="removeSelection btn danger">@Messages("biobank.common.action.remove")</a>
+    }
+}
+
+@main(formInfo.title) {
+    <ul class="breadcrumb">
+      <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
+      <li><a href="@routes.StudyController.showStudy(studyId)">@studyName</a> <span class="divider">/</span></li>
+      <li class="active">@formInfo.title</li>
+    </ul>
+    <div class="page-header">
+      <h2>@Messages("biobank.study.singular"): @studyName</h2>
+      <h3>@formInfo.title</h3>
+    </div>
+    
+    
+    @if(attrTypeForm.hasErrors) {
+      <div class="alert">
+        <p>@Messages("biobank.common.form.fix.errors")</p>
+      </div>
+    }
+    
+    <div class="clearfix">
+    @form(formInfo.action, args = 'id -> "addform", 'class -> "form-horizontal") {
+      
+      @formType match {
+          case AddFormType() => { 
+              <input type="hidden" name="specimenGroupId" value="dont-care">  
+              <input type="hidden" name="version" value="-1" >  
+              }
+          case UpdateFormType() => { 
+              <input type="hidden" name="attributeTypeId" value="@attrTypeForm("attributeTypeId").value" >  
+              <input type="hidden" name="version" value="@attrTypeForm("version").value" >  
+              }
+      }
+      
+      <input type="hidden" name="studyId" value="@studyId" >  
+      
+      @formNameAndDescription(attrTypeForm("name"), attrTypeForm("description"))
+      
+      @select(
+         field = attrTypeForm("valueType"),
+         options = CollectionEventAnnotationTypeSelections.annotationValueTypes,
+         args = '_label -> Messages("biobank.study.collection.event.annotation.type.field.value.type")
+      ) 
+      
+      @repeat(attrTypeForm("selections"), min = 0) { selection =>                
+        @selectionField(selection)    
+      }
+      
+      @**
+       * Keep an hidden block that will be used as template for Javascript copy code
+       **@
+      @selectionField(
+        attrTypeForm("selections[x]"),
+        className = "selection_template"
+      )
+      
+      <div class="clearfix">
+        <div class="input">
+          <a class="addSelection btn success">@Messages("biobank.study.specimengroup.form.selection.add")</a>
+        </div>
+     </div>
+      
+      <div class="form-actions">
+           <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
+      </div>
+    }
+    </div>
+    
+    <script type="text/javascript" charset="utf-8">
+            
+      $('.addSelection').live('click', function(e) {
+        var selections = $(this).parents('.selections')
+        var template = $('.selection_template', selections)
+        template.before('<div class="clearfix phone">' + template.html() + '</div>')
+        renumber(selections)
+      })
+        
+      $('.removePhone').live('click', function(e) {
+        var selections = $(this).parents('.selections')
+        $(this).parents('.selections').remove()
+        renumber(phones)
+      })
+        
+      // -- renumber fields
+      
+      // Rename fields to have a coherent payload like:
+      //
+      // selections[0]
+      // selections[1]
+      // ...
+      //
+      // This is probably not the easiest way to do it. A jQuery plugin would help.
+      
+      var renumber = function(phones) {
+        $('.selections input', this).each(function(i) {
+          $(this).attr('name', $(this).attr('name').replace(/selections\[.+\]/g, 'selections[' + i + ']'))
+        })
+      }
+        
+    </script>
+}    

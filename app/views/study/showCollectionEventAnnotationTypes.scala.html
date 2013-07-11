@@ -1,0 +1,70 @@
+@(studyId: String, 
+    studyName: String, 
+    annotationTypes: Set[domain.study.CollectionEventAnnotationType])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
+    flash: play.api.mvc.Flash)
+    
+@import controllers.study._
+
+@main(Messages("biobank.study.singular") + " " + studyName) {
+    <ul class="breadcrumb">
+      <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
+      <li><a href="@routes.StudyController.showStudy(studyId)">@studyName</a> <span class="divider">/</span></li>
+      <li class="active">@Messages("biobank.study.collection.event.annotation.type.show.title")</li>
+    </ul>
+    <div class="page-header">
+      <h2>@Messages("biobank.study.singular"): @studyName</h2>
+      <h3>@Messages("biobank.study.collection.event.annotation.type.show.title")
+      <a href="@routes.CeventAnnotTypeController.addAnnotationType(studyId)" 
+          class="btn btn-small btn-primary" type="button"
+          data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
+          <i class="icon-plus-sign icon-white"></i></a>
+      </h3>
+    </div>
+    <div class="clearfix">
+        @if(annotationTypes.size <= 0) {
+            <p>@Messages("biobank.study.collection.event.annotation.type.show.none")</p>
+        } else {
+
+      @flash.get("success").map { message =>
+        <div class="alert alert-success">
+          @message
+        </div>
+      }
+
+      <table class="table table-bordered table-hover table-condensed">
+        <thead>
+          <th>@Messages("biobank.common.name")</th>
+          <th>@Messages("biobank.common.description")</th>
+          <th>@Messages("biobank.study.collection.event.annotation.type.field.value.type")</th>
+          <th>@Messages("biobank.study.collection.event.annotation.type.field.max.value.count")</th>
+          <th>@Messages("biobank.study.collection.event.annotation.type.field.options")</th>
+          <th></th>
+        </thead>
+        <tbody>
+          @for(annotType <- annotationTypes) {
+            <tr>
+              <td>@annotType.name</td>
+              <td>@annotType.description</td>
+              <td>@annotType.valueType</td>
+              <td>@annotType.maxValueCount</td>
+              <td>@annotType.options</td>
+              <td>
+                <div class="btn-group">
+                  <a href="@routes.CeventAnnotTypeController.updateAnnotationType(studyId,studyName,annotType.id.id)"
+                      class="btn btn-mini btn-primary" type="button" data-toggle="tooltip"
+                      title="@Messages("biobank.common.action.update")">
+                      <i class="icon-pencil icon-white"></i></a>
+                  <a href="@routes.CeventAnnotTypeController.removeAnnotationTypeConfirm(studyId,studyName,annotType.id.id)"
+                      class="btn btn-mini btn-warning" type="button"
+                     data-toggle="tooltip" title="@Messages("biobank.common.action.remove")">
+                     <i class="icon-remove-sign icon-white"></i></a>
+                </div>
+              </td>
+            <tr>
+          }
+        </tbody>
+      </table>
+        } 
+    </div>    
+}
+    

@@ -13,6 +13,7 @@ biobank.common.action.remove=Remove
 biobank.common.warning=Warning
 biobank.common.confirm=Confirm
 biobank.common.cancel=Cancel
+biobank.common.form.fix.errors=Please fix errors shown below
 
 # Study
 biobank.study.singular=Study
@@ -25,10 +26,10 @@ biobank.study.updated=Study has been updated: {0}.
 biobank.study.none=No studies have been added.
 biobank.study.field.status=Status
 biobank.study.field.participants=Participants
-biobank.study.field.collectionevents=Collection Events
-biobank.study.field.collectioneventTypes=Collection Event Types
+biobank.study.field.collection.events=Collection Events
+biobank.study.field.collection.event.types=Collection Event Types
 biobank.study.field.specimengroups=Specimen Groups
-biobank.study.field.collection.event.annotationtypes=Collection Event Annotation Types
+biobank.study.field.collection.event.annotation.types=Collection Event Annotation Types
 biobank.study.form.title=Add Study
 biobank.study.form.error.name=Study with this name already exists
 
@@ -48,12 +49,18 @@ biobank.study.specimengroup.field.specimenType=Specimen Type
 biobank.study.specimengroup.show.title=Specimen Groups
 biobank.study.specimengroup.show.none=No Specimen Groups have been added to this study.
 biobank.study.specimengroup.show.action.add=Add Specimen Group
-biobank.study.specimengroup.form.field.unit.plural=Units
-biobank.study.specimengroup.form.field.anatomicalsource=Anatomical Source
-biobank.study.specimengroup.form.field.preservationType=Preservation
-biobank.study.specimengroup.form.field.preservationTemperatureType=Preservation Temperature
-biobank.study.specimengroup.form.field.specimenType=Specimen Type
 biobank.study.specimengroup.form.error.name=Specimen Group with this name already exists
+biobank.study.specimengroup.form.selection.add=Add a selection
+
+# Collection Event Annotation Types
+biobank.study.collection.event.annotation.type.show.title=Collection Event Annotation Types
+biobank.study.collection.event.annotation.type.show.none=No Collection Event Annotation Types have been added to this study.
+biobank.study.collection.event.annotation.type.field.value.type=Value Type
+biobank.study.collection.event.annotation.type.field.max.value.count=Maximum Value for Selection
+biobank.study.collection.event.annotation.type.field.option=Selection
+biobank.study.collection.event.annotation.type.field.options=Selections
+biobank.study.collection.event.annotation.type.add=Add Collection Event Annotation Type
+biobank.study.collection.event.annotation.type.update=Update Collection Event Annotation Type
 
 # Login page
 biobank.login.title=Login
