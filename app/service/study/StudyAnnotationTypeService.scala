@@ -88,6 +88,7 @@ protected[service] class StudyAnnotationTypeService(
     }
 
     val item = for {
+      validStudy <- StudyValidation.validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.id)
       newItem <- study.updateCollectionEventAnnotationType(annotationTypeRepo, cmd)
       updatedItem <- update(newItem).success
     } yield updatedItem
@@ -106,6 +107,7 @@ protected[service] class StudyAnnotationTypeService(
     }
 
     val item = for {
+      validStudy <- StudyValidation.validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.id)
       oldItem <- study.removeCollectionEventAnnotationType(annotationTypeRepo, cmd)
       removedItem <- removeItem(oldItem).success
     } yield oldItem

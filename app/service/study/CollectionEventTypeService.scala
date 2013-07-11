@@ -119,6 +119,7 @@ protected[service] class CollectionEventTypeService(
     }
 
     val item = for {
+      validStudy <- StudyValidation.validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.id)
       newItem <- study.updateCollectionEventType(collectionEventTypeRepository, cmd)
       item <- update(newItem).success
     } yield newItem
@@ -137,6 +138,7 @@ protected[service] class CollectionEventTypeService(
     }
 
     val item = for {
+      validStudy <- StudyValidation.validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.id)
       item <- study.removeCollectionEventType(collectionEventTypeRepository, cmd)
       removedItem <- removeItem(item).success
     } yield item
@@ -160,8 +162,8 @@ protected[service] class CollectionEventTypeService(
 
     val item = for {
       sg2cetId <- id.toSuccess(DomainError("sg to cet ID is missing"))
-      sg <- study.validateSpecimenGroupId(specimenGroupRepository, cmd.specimenGroupId)
-      cet <- study.validateCollectionEventTypeId(collectionEventTypeRepository, cmd.collectionEventTypeId)
+      sg <- StudyValidation.validateSpecimenGroupId(study, specimenGroupRepository, cmd.specimenGroupId)
+      cet <- StudyValidation.validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
       newItem <- createItem(sg2cetId, sg, cet).success
     } yield newItem
     CommandHandler.logMethod(log, "addSpecimenGroupToCollectionEventType", cmd, item)
@@ -204,8 +206,8 @@ protected[service] class CollectionEventTypeService(
 
     val item = for {
       at2cetId <- id.toSuccess(DomainError("at to cet ID is missing"))
-      v1 <- study.validateCollectionEventTypeId(collectionEventTypeRepository, cmd.collectionEventTypeId)
-      v2 <- study.validateCollectionEventAnnotationTypeId(annotationTypeRepo, cmd.annotationTypeId)
+      v1 <- StudyValidation.validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
+      v2 <- StudyValidation.validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
       newItem <- createItem(at2cetId, v1, v2).success
     } yield newItem
     CommandHandler.logMethod(log, "addAnnotationTypeToCollectionEventType", cmd, item)

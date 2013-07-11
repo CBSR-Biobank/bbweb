@@ -2,12 +2,12 @@ package domain.study
 
 import infrastructure._
 import infrastructure.commands._
-import domain._
-import AnatomicalSourceType._
-import AnnotationValueType._
-import PreservationTemperatureType._
-import PreservationType._
-import SpecimenType._
+import domain.{ AnnotationTypeId }
+import domain.AnatomicalSourceType._
+import domain.AnnotationValueType._
+import domain.PreservationTemperatureType._
+import domain.PreservationType._
+import domain.SpecimenType._
 
 import scalaz._
 import Scalaz._
@@ -62,7 +62,6 @@ case class DisabledStudy(
     for {
       prevItem <- specimenGroupRepository.getByKey(new SpecimenGroupId(cmd.id))
       validVersion <- prevItem.requireVersion(cmd.expectedVersion)
-      validStudy <- validateSpecimenGroupId(specimenGroupRepository, prevItem.id)
       newItem <- addSpecimenGroup(specimenGroupRepository, prevItem.id, prevItem.version + 1,
         cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
         cmd.preservationTemperatureType, cmd.specimenType)
@@ -74,7 +73,6 @@ case class DisabledStudy(
     for {
       item <- specimenGroupRepository.getByKey(new SpecimenGroupId(cmd.id))
       validVersion <- item.requireVersion(cmd.expectedVersion)
-      validStudy <- validateSpecimenGroupId(specimenGroupRepository, item.id)
     } yield item
 
   def addCollectionEventType(
@@ -107,7 +105,6 @@ case class DisabledStudy(
     for {
       prevItem <- collectionEventTypeRepository.getByKey(new CollectionEventTypeId(cmd.id))
       validVersion <- prevItem.requireVersion(cmd.expectedVersion)
-      validStudy <- validateCollectionEventTypeId(collectionEventTypeRepository, prevItem.id)
       newItem <- addCollectionEventType(collectionEventTypeRepository, prevItem.id, prevItem.version + 1,
         cmd.name, cmd.description, cmd.recurring)
     } yield newItem
@@ -118,11 +115,10 @@ case class DisabledStudy(
     for {
       item <- collectionEventTypeRepository.getByKey(new CollectionEventTypeId(cmd.id))
       validVersion <- item.requireVersion(cmd.expectedVersion)
-      validStudy <- validateCollectionEventTypeId(collectionEventTypeRepository, item.id)
     } yield item
 
   def addCollectionEventAnnotationType(
-    annotationTypeRepo: ReadRepository[AnnotationTypeId, StudyAnnotationType],
+    annotationTypeRepo: ReadRepository[AnnotationTypeId, CollectionEventAnnotationType],
     id: AnnotationTypeId,
     version: Long,
     name: String,
@@ -156,7 +152,6 @@ case class DisabledStudy(
     for {
       prevItem <- annotationTypeRepo.getByKey(new AnnotationTypeId(cmd.id))
       validVersion <- prevItem.requireVersion(cmd.expectedVersion)
-      validStudy <- validateCollectionEventAnnotationTypeId(annotationTypeRepo, prevItem.id)
       newItem <- addCollectionEventAnnotationType(annotationTypeRepo, prevItem.id,
         prevItem.version + 1, cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount,
         cmd.options)
@@ -169,8 +164,7 @@ case class DisabledStudy(
     for {
       item <- studyAnnotationTypeRepository.getByKey(new AnnotationTypeId(cmd.id))
       validVersion <- item.requireVersion(cmd.expectedVersion)
-      ceAttrType <- validateCollectionEventAnnotationTypeId(studyAnnotationTypeRepository, item.id)
-    } yield ceAttrType
+    } yield item
 
   }
 }

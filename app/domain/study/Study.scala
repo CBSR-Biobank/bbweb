@@ -23,69 +23,6 @@ abstract class Study extends ConcurrencySafeEntity[StudyId]
 
   val status: String = "invalid"
 
-  def validateSpecimenGroupId(
-    specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
-    specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
-    specimenGroupRepository.getByKey(specimenGroupId) match {
-      case Success(sg) =>
-        if (this.id.equals(sg.studyId)) sg.success
-        else DomainError("specimen group does not belong to study: %s" format specimenGroupId).fail
-      case Failure(x) =>
-        DomainError("specimen group does not exist: %s" format specimenGroupId).fail
-    }
-  }
-
-  def validateSpecimenGroupId(
-    specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
-    specimenGroupId: String): DomainValidation[SpecimenGroup] =
-    validateSpecimenGroupId(specimenGroupRepository, new SpecimenGroupId(specimenGroupId))
-
-  def validateCollectionEventTypeId(
-    collectionEventTypeRepository: ReadRepository[CollectionEventTypeId, CollectionEventType],
-    collectionEventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType] = {
-    collectionEventTypeRepository.getByKey(collectionEventTypeId) match {
-      case Success(cet) =>
-        if (this.id.equals(cet.studyId)) cet.success
-        else DomainError("collection event type does not belong to study: %s" format collectionEventTypeId).fail
-      case Failure(x) =>
-        DomainError("collection event type does not exist: %s" format collectionEventTypeId).fail
-    }
-  }
-
-  def validateCollectionEventTypeId(
-    collectionEventTypeRepository: ReadRepository[CollectionEventTypeId, CollectionEventType],
-    collectionEventTypeId: String): DomainValidation[CollectionEventType] =
-    validateCollectionEventTypeId(collectionEventTypeRepository,
-      new CollectionEventTypeId(collectionEventTypeId))
-
-  /**
-   * Validates that the CollectionEventAnnotationType with id {@link annotationTypeId} exists
-   * and that it belongs to {@link study}.
-   */
-  def validateCollectionEventAnnotationTypeId(
-    annotationTypeRepo: ReadRepository[AnnotationTypeId, StudyAnnotationType],
-    annotationTypeId: AnnotationTypeId): DomainValidation[CollectionEventAnnotationType] = {
-    annotationTypeRepo.getByKey(annotationTypeId) match {
-      case Success(annot) =>
-        if (this.id.equals(annot.studyId)) {
-          annot match {
-            case ceAnnot: CollectionEventAnnotationType => ceAnnot.success
-            case _ =>
-              DomainError("annotation type is not for a collection event type: %s"
-                format annotationTypeId).fail
-          }
-        } else
-          DomainError("CE annotation type does not belong to study: %s" format annotationTypeId).fail
-      case Failure(x) =>
-        DomainError("CE annotation type does not exist: %s" format annotationTypeId).fail
-    }
-  }
-
-  def validateCollectionEventAnnotationTypeId(
-    annotationTypeRepo: ReadRepository[AnnotationTypeId, StudyAnnotationType],
-    annotationTypeId: String): DomainValidation[CollectionEventAnnotationType] =
-    validateCollectionEventAnnotationTypeId(annotationTypeRepo,
-      new AnnotationTypeId(annotationTypeId))
 }
 
 object Study {

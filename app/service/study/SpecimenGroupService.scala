@@ -92,6 +92,7 @@ class SpecimenGroupService(
     }
 
     val item = for {
+      validStudy <- StudyValidation.validateSpecimenGroupId(study, specimenGroupRepository, cmd.id)
       newItem <- study.updateSpecimenGroup(specimenGroupRepository, cmd)
       item <- update(newItem).success
     } yield newItem
@@ -110,13 +111,13 @@ class SpecimenGroupService(
     }
 
     val item = for {
+      validStudy <- StudyValidation.validateSpecimenGroupId(study, specimenGroupRepository, cmd.id)
       oldItem <- study.removeSpecimenGroup(specimenGroupRepository, cmd)
       removedItem <- removeItem(oldItem).success
     } yield oldItem
     CommandHandler.logMethod(log, "removeSpecimenGroup", cmd, item)
     item
   }
-
 }
 
 object SpecimenGroupService {
