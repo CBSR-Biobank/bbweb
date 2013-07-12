@@ -29,7 +29,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
 
     "be added" in {
       val name = nameGenerator.next[AnnotationType]
-      val valueType = AnnotationValueType.String
+      val valueType = AnnotationValueType.Text
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name), valueType)))
@@ -68,7 +68,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
 
     "not be added if name already exists" in {
       val name = nameGenerator.next[AnnotationType]
-      val valueType = AnnotationValueType.String
+      val valueType = AnnotationValueType.Text
       val maxValueCount = None
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
@@ -91,7 +91,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
 
     "be updated" in {
       val name = nameGenerator.next[AnnotationType]
-      val valueType = AnnotationValueType.String
+      val valueType = AnnotationValueType.Text
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
@@ -121,7 +121,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
 
     "not be updated to name that already exists" in {
       val name = nameGenerator.next[AnnotationType]
-      val valueType = AnnotationValueType.String
+      val valueType = AnnotationValueType.Text
       val maxValueCount = None
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
@@ -150,7 +150,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
 
     "not be updated to wrong study" in {
       val name = nameGenerator.next[AnnotationType]
-      val valueType = AnnotationValueType.String
+      val valueType = AnnotationValueType.Text
       val maxValueCount = 0
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
@@ -173,7 +173,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
 
     "not be updated with invalid version" in {
       val name = nameGenerator.next[AnnotationType]
-      val valueType = AnnotationValueType.String
+      val valueType = AnnotationValueType.Text
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
@@ -196,7 +196,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
 
     "be removed" in {
       val name = nameGenerator.next[AnnotationType]
-      val valueType = AnnotationValueType.String
+      val valueType = AnnotationValueType.Text
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(
@@ -221,7 +221,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
 
     "not be removed with invalid version" in {
       val name = nameGenerator.next[AnnotationType]
-      val valueType = AnnotationValueType.String
+      val valueType = AnnotationValueType.Text
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(

@@ -128,8 +128,6 @@
         $(document).on('click', '.addSelection', function() {
           var template = $('.selection_template', selectionGroup)
           var newSelection = template.clone().removeClass('selection_template')
-          var label = newSelection.find('label')
-          label.text(label.text() + ' ' + (i + 1))
           newSelection.find('input').attr('name', 'selections[' + i + ']')
           newSelection.show()
           template.before(newSelection)
@@ -158,9 +156,6 @@
           selectionGroup.each(function(i) {
             $('input', this).each(function(i) {
               $(this).attr('name', $(this).attr('name').replace(/selections\[.+\]/g, 'selections[' + i + ']'))
-            })
-            $('label', this).each(function(i) {
-              $(this).text($(this).text().replace(/\d+/g, (i + 1)))
             })
           })
         }
