@@ -18,11 +18,11 @@
             routes.CeventAnnotTypeController.updateAnnotationTypeSubmit(studyId, studyName))  
 }}
 
-@selectionField(field: Field, 
+@selectionField(field: Field,
     className: String = "selections",
     style: String = "")(implicit handler: FieldConstructor, lang: play.api.i18n.Lang) = {
     @input(field, 
-        '_label -> Messages("biobank.study.collection.event.annotation.type.field.option"),
+        '_label -> "",  // label is blank intentionally 
         '_class -> className,
         '_style -> style) { (id, name, value, _) =>
         <input type="text" name="@name" value="@value"> 
@@ -32,8 +32,10 @@
 
 @selectionGroup(field: Field)(implicit handler: FieldConstructor, lang: play.api.i18n.Lang) =  {
   <div class="well selectionGroup" style="display:none;">
-      
-      @repeat(attrTypeForm("selections"), min = 0) { selection =>                
+    <fieldset>
+    <legend>@Messages("biobank.study.collection.event.annotation.type.field.options")</legend>
+
+      @repeat(attrTypeForm("selections"), min = 1) { selection =>                
         @selectionField(selection)    
       }
       
@@ -48,6 +50,7 @@
           <a class="addSelection btn success">@Messages("biobank.study.specimengroup.form.selection.add")</a>
         </div>
      </div>
+    </fieldset>
   </div>
 }    
 
@@ -104,7 +107,7 @@
     <script type="text/javascript" charset="utf-8">
       $(function() {
         var selectionGroup = $('.selectionGroup')
-        var i = $('#selectionGroup div').size()
+        var i = $('#selectionGroup div').size() + 1
       
         //
         // Shows or hides the selection group based on the value type selected
@@ -124,9 +127,7 @@
         //  
         $(document).on('click', '.addSelection', function() {
           var template = $('.selection_template', selectionGroup)
-          var newSelection = template.clone()
-          var text = newSelection.find('label').text()
-          newSelection.removeClass('selection_template')
+          var newSelection = template.clone().removeClass('selection_template')
           var label = newSelection.find('label')
           label.text(label.text() + ' ' + (i + 1))
           newSelection.find('input').attr('name', 'selections[' + i + ']')
@@ -139,9 +140,11 @@
         // removes a selection text entry field based on the button pressed
         //  
         $(document).on('click', '.removeSelection', function() {
-          $(this).parent().parent().remove();
-          i--;
-          renumber()
+          if (i > 1) {
+            $(this).parent().parent().remove();
+            i--;
+            renumber()
+          }
         });
         
         // -- renumber fields
