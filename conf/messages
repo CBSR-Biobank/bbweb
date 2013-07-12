@@ -14,6 +14,8 @@ biobank.common.warning=Warning
 biobank.common.confirm=Confirm
 biobank.common.cancel=Cancel
 biobank.common.form.fix.errors=Please fix errors shown below
+biobank.common.name.help=short name
+biobank.common.description.help=describes the name
 
 # Study
 biobank.study.singular=Study
@@ -61,6 +63,12 @@ biobank.study.collection.event.annotation.type.field.option=Selection
 biobank.study.collection.event.annotation.type.field.options=Selections
 biobank.study.collection.event.annotation.type.add=Add Collection Event Annotation Type
 biobank.study.collection.event.annotation.type.update=Update Collection Event Annotation Type
+
+# Value type enumeration
+biobank.enumaration.annotation.value.type.Text=Text
+biobank.enumaration.annotation.value.type.Number=Number
+biobank.enumaration.annotation.value.type.Date=Date
+biobank.enumaration.annotation.value.type.Select=Select
 
 # Login page
 biobank.login.title=Login

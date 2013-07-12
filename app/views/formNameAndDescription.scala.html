@@ -5,12 +5,13 @@
 
 @inputText(
     field = nameField,
-    args = '_label -> Messages("biobank.common.name"), 'placeholder -> "short name"
+    args = '_label -> Messages("biobank.common.name"), 
+    'placeholder -> Messages("biobank.common.name.help")
     )
 
 @textarea(
     field = descriptionField,
     args = '_label -> Messages("biobank.common.description"), 'rows -> 3, 'cols -> 50, 
-      'placeholder -> "describes the name",
+      'placeholder -> Messages("biobank.common.description.help"),
       'class -> "input-xxlarge"
     )

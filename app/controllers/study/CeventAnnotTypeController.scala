@@ -48,7 +48,8 @@ case class AnnotationTypeFormObject(
 
 object CollectionEventAnnotationTypeSelections {
   val annotationValueTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
-    AnnotationValueType.values.map(x => (x.toString -> x.toString)).toSeq
+    AnnotationValueType.values.map(x =>
+      x.toString -> Messages("biobank.enumaration.annotation.value.type." + x.toString)).toSeq
 }
 
 object CeventAnnotTypeController extends Controller with securesocial.core.SecureSocial {

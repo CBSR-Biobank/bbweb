@@ -1,6 +1,7 @@
 @(elements: helper.FieldElements)
 
-<div class="control-group @if(elements.hasErrors) {error}">
+<div class="control-group @elements.args.get('_class) @if(elements.hasErrors) {error}"
+    style="@elements.args.get('_style)">
     @if(elements.label.toString.nonEmpty) {
         <label class="control-label" for="@elements.id">@elements.label</label>
     }
