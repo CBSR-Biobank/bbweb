@@ -33,8 +33,19 @@
 @selectionGroup(field: Field)(implicit handler: FieldConstructor, lang: play.api.i18n.Lang) =  {
   <div class="well selectionGroup" style="display:none;">
     <fieldset>
-    <legend>@Messages("biobank.study.collection.event.annotation.type.field.options")</legend>
+    <legend>@Messages("biobank.annotation.type.field.options")</legend>
 
+      @inputRadioGroup(
+        attrTypeForm("maxValueCount"),
+        options = Seq(
+            "1" -> Messages("biobank.annotation.type.field.max.value.count.single"), 
+            "2" -> Messages("biobank.annotation.type.field.max.value.count.multiple")),
+        '_label -> "",  // label is blank intentionally
+        '_help -> "",  // label is blank intentionally
+        '_class -> "radio",
+        '_error -> attrTypeForm("maxValueCount").error.map(
+            _.withMessage(Messages("biobank.annotation.type.form.max.value.count.error"))))
+ 
       @repeat(attrTypeForm("selections"), min = 1) { selection =>                
         @selectionField(selection)    
       }
@@ -47,7 +58,7 @@
       
       <div class="control-group">
         <div class="controls">
-          <a class="addSelection btn success">@Messages("biobank.study.specimengroup.form.selection.add")</a>
+          <a class="addSelection btn success">@Messages("biobank.annotation.type.form.selection.add")</a>
         </div>
      </div>
     </fieldset>
@@ -93,7 +104,7 @@
       @select(
          field = attrTypeForm("valueType"),
          options = CollectionEventAnnotationTypeSelections.annotationValueTypes,
-         args = '_label -> Messages("biobank.study.collection.event.annotation.type.field.value.type")
+         args = '_label -> Messages("biobank.annotation.type.field.value.type")
       ) 
       
       @selectionGroup(attrTypeForm("selectionGroup"))

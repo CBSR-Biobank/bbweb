@@ -52,15 +52,21 @@ biobank.study.specimengroup.show.title=Specimen Groups
 biobank.study.specimengroup.show.none=No Specimen Groups have been added to this study.
 biobank.study.specimengroup.show.action.add=Add Specimen Group
 biobank.study.specimengroup.form.error.name=Specimen Group with this name already exists
-biobank.study.specimengroup.form.selection.add=Add a selection
+
+# Annotation Types
+biobank.annotation.type.field.value.type=Value Type
+biobank.annotation.type.field.max.value.count=Selection Type:
+biobank.annotation.type.field.max.value.count.single=Single selection only
+biobank.annotation.type.field.max.value.count.multiple=Multiple selections allowed
+biobank.annotation.type.field.option=Selection
+biobank.annotation.type.field.options=Selections
+biobank.annotation.type.added=Annotation type has been added: {0}.
+biobank.annotation.type.form.selection.add=Add a selection
+biobank.annotation.type.form.max.value.count.error=Select a type
 
 # Collection Event Annotation Types
 biobank.study.collection.event.annotation.type.show.title=Collection Event Annotation Types
 biobank.study.collection.event.annotation.type.show.none=No Collection Event Annotation Types have been added to this study.
-biobank.study.collection.event.annotation.type.field.value.type=Value Type
-biobank.study.collection.event.annotation.type.field.max.value.count=Maximum Value for Selection
-biobank.study.collection.event.annotation.type.field.option=Selection
-biobank.study.collection.event.annotation.type.field.options=Selections
 biobank.study.collection.event.annotation.type.add=Add Collection Event Annotation Type
 biobank.study.collection.event.annotation.type.update=Update Collection Event Annotation Type
 

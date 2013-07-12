@@ -56,7 +56,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
 
   lazy val studyService = Global.services.studyService
 
-  val collectionEventAnnotationTypeForm = Form(
+  val annotationTypeForm = Form(
     mapping(
       "specimenGroupId" -> text,
       "version" -> longNumber,
@@ -82,12 +82,36 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
     studyService.getStudy(studyId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(study) =>
-        Ok(html.study.addCollectionEventAnnotationType(collectionEventAnnotationTypeForm, AddFormType(), studyId, study.name))
+        Ok(html.study.addCollectionEventAnnotationType(annotationTypeForm, AddFormType(), studyId, study.name))
     }
   }
 
   def addAnnotationTypeSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
-    ???
+    annotationTypeForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(html.study.addCollectionEventAnnotationType(
+        formWithErrors, AddFormType(), studyId, studyName)),
+      annotTypeForm => {
+        Async {
+          Logger.debug("annotTypeForm: " + annotTypeForm)
+          implicit val userId = new UserId(request.user.id.id)
+          studyService.addCollectionEventAnnotationType(annotTypeForm.getAddCmd).map(validation =>
+            validation match {
+              case Success(annotType) =>
+                Redirect(routes.CeventAnnotTypeController.index(studyId, studyName)).flashing(
+                  "success" -> Messages("biobank.annotation.type.added",
+                    annotType.name))
+              case Failure(x) =>
+                if (x.head.contains("name already exists")) {
+                  val form = annotationTypeForm.fill(annotTypeForm).withError("name",
+                    Messages("biobank.study.specimengroup.form.error.name"))
+                  BadRequest(html.study.addCollectionEventAnnotationType(form, AddFormType(),
+                    studyId, studyName))
+                } else {
+                  throw new Error(x.head)
+                }
+            })
+        }
+      })
   }
 
   def updateAnnotationType(studyId: String, studyName: String, specimenGroupId: String) = SecuredAction { implicit request =>
