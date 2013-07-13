@@ -138,8 +138,8 @@ object SgController extends Controller with securesocial.core.SecureSocial {
 
   def removeSpecimenGroup(studyId: String,
     studyName: String,
-    sgId: String) = SecuredAction { implicit request =>
-    studyService.getSpecimenGroup(studyId, sgId) match {
+    specimenGroupId: String) = SecuredAction { implicit request =>
+    studyService.getSpecimenGroup(studyId, specimenGroupId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(sg) =>
         Async {

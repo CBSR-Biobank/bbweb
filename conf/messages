@@ -55,7 +55,7 @@ biobank.study.specimengroup.form.error.name=A Specimen Group with this name alre
 
 # Annotation Types
 biobank.annotation.type.field.value.type=Value Type
-biobank.annotation.type.field.max.value.count=Selection Type:
+biobank.annotation.type.field.max.value.count=Selection Type
 biobank.annotation.type.field.max.value.count.single=Single 
 biobank.annotation.type.field.max.value.count.multiple=Multiple 
 biobank.annotation.type.field.max.value.count.single.desc=Single selection only
@@ -73,6 +73,7 @@ biobank.study.collection.event.annotation.type.show.none=No Collection Event Ann
 biobank.study.collection.event.annotation.type.add=Add Collection Event Annotation Type
 biobank.study.collection.event.annotation.type.update=Update Collection Event Annotation Type
 biobank.study.collection.event.annotation.type.form.error.name=A Collection Event Annotation Type with this name already exists
+biobank.study.collection.event.annotation.type.removed=Collection Event Annotation Type "{0}" removed.
 
 # Value type enumeration
 biobank.enumaration.annotation.value.type.Text=Text

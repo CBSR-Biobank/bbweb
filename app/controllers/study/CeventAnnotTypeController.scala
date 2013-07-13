@@ -158,13 +158,33 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
 
   def removeAnnotationTypeConfirm(studyId: String,
     studyName: String,
-    specimenGroupId: String) = SecuredAction { implicit request =>
-    ???
+    annotationTypeId: String) = SecuredAction { implicit request =>
+    studyService.getCollectionEventAnnotationType(studyId, annotationTypeId) match {
+      case Failure(x) => throw new Error(x.head)
+      case Success(annotType) =>
+        Ok(views.html.study.removeCollectionEventAnnotationTypeConfirm(studyId, studyName, annotType))
+    }
   }
 
   def removeAnnotationType(studyId: String,
     studyName: String,
-    sgId: String) = SecuredAction { implicit request =>
-    ???
+    annotationTypeId: String) = SecuredAction { implicit request =>
+    studyService.getCollectionEventAnnotationType(studyId, annotationTypeId) match {
+      case Failure(x) => throw new Error(x.head)
+      case Success(annotType) =>
+        Async {
+          implicit val userId = new UserId(request.user.id.id)
+          studyService.removeCollectionEventAnnotationType(
+            RemoveCollectionEventAnnotationTypeCmd(
+              annotType.id.id, annotType.versionOption, annotType.studyId.id)).map(validation =>
+              validation match {
+                case Success(annotType) =>
+                  Redirect(routes.CeventAnnotTypeController.index(studyId, studyName)).flashing(
+                    "success" -> Messages("biobank.study.collection.event.annotation.type.removed", annotType.name))
+                case Failure(x) =>
+                  throw new Error(x.head)
+              })
+        }
+    }
   }
 }
