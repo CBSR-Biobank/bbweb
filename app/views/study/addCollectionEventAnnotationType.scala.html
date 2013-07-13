@@ -38,8 +38,8 @@
       @inputRadioGroup(
         attrTypeForm("maxValueCount"),
         options = Seq(
-            "1" -> Messages("biobank.annotation.type.field.max.value.count.single"), 
-            "2" -> Messages("biobank.annotation.type.field.max.value.count.multiple")),
+            "1" -> Messages("biobank.annotation.type.field.max.value.count.single.desc"), 
+            "2" -> Messages("biobank.annotation.type.field.max.value.count.multiple.desc")),
         '_label -> "",  // label is blank intentionally
         '_help -> "",  // label is blank intentionally
         '_class -> "radio",
@@ -87,14 +87,14 @@
     @form(formInfo.action, args = 'id -> "addform", 'class -> "form-horizontal") {
       
       @formType match {
-          case AddFormType() => { 
-              <input type="hidden" name="specimenGroupId" value="dont-care">  
-              <input type="hidden" name="version" value="-1" >  
-              }
-          case UpdateFormType() => { 
-              <input type="hidden" name="attributeTypeId" value="@attrTypeForm("attributeTypeId").value" >  
-              <input type="hidden" name="version" value="@attrTypeForm("version").value" >  
-              }
+        case AddFormType() => { 
+          <input type="hidden" name="annotationTypeId" value="dont-care">  
+          <input type="hidden" name="version" value="-1" >  
+        }
+        case UpdateFormType() => { 
+          <input type="hidden" name="annotationTypeId" value="@attrTypeForm("annotationTypeId").value" >  
+          <input type="hidden" name="version" value="@attrTypeForm("version").value" >
+        }
       }
       
       <input type="hidden" name="studyId" value="@studyId" >  
@@ -142,7 +142,7 @@
         //  
         $(document).on('click', '.addSelection', function() {
           var template = $('.selection_template', selectionGroup)
-          var newSelection = template.clone().removeClass('selection_template')
+          var newSelection = template.clone().removeClass('selection_template').addClass('selections')
           var i = $('.selectionGroup .selections').size()
           newSelection.find('input').attr('name', 'selections[' + i + ']')
           newSelection.show()

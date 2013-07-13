@@ -4,6 +4,7 @@
     flash: play.api.mvc.Flash)
     
 @import controllers.study._
+@import domain.AnnotationValueType._
 
 @main(Messages("biobank.study.singular") + " " + studyName) {
     <ul class="breadcrumb">
@@ -45,9 +46,24 @@
             <tr>
               <td>@annotType.name</td>
               <td>@annotType.description</td>
-              <td>@annotType.valueType</td>
-              <td>@annotType.maxValueCount</td>
-              <td><p style="width:50%;">@annotType.options.map( m => m.values.mkString(" ") )</p></td>
+              <td><span class="label">@annotType.valueType</span></td>
+              
+              @if(annotType.valueType == domain.AnnotationValueType.Select) {
+                  @if(annotType.maxValueCount.getOrElse(0) == 1) {
+                    <td>@Messages("biobank.annotation.type.field.max.value.count.single")</td>
+                  } else {
+                    @if(annotType.maxValueCount.getOrElse(0) > 1) {
+                      <td>@Messages("biobank.annotation.type.field.max.value.count.multiple")</td>                  
+                    } else {
+                      <td><span class="label label-warning">ERROR: @@annotType.maxValueCount</span></td>
+                    }
+                  }
+                <td><p style="width:50%;">@annotType.options.map( m => m.values.mkString(" ") )</p></td>
+              } else {
+                <td><span class="label">N/A</span></td>
+                <td><span class="label">N/A</span></td>              
+              }
+              
               <td>
                 <div class="btn-group">
                   <a href="@routes.CeventAnnotTypeController.updateAnnotationType(studyId,studyName,annotType.id.id)"

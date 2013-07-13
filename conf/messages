@@ -56,11 +56,14 @@ biobank.study.specimengroup.form.error.name=A Specimen Group with this name alre
 # Annotation Types
 biobank.annotation.type.field.value.type=Value Type
 biobank.annotation.type.field.max.value.count=Selection Type:
-biobank.annotation.type.field.max.value.count.single=Single selection only
-biobank.annotation.type.field.max.value.count.multiple=Multiple selections allowed
+biobank.annotation.type.field.max.value.count.single=Single 
+biobank.annotation.type.field.max.value.count.multiple=Multiple 
+biobank.annotation.type.field.max.value.count.single.desc=Single selection only
+biobank.annotation.type.field.max.value.count.multiple.desc=Multiple selections allowed
 biobank.annotation.type.field.option=Selection
 biobank.annotation.type.field.options=Selections
 biobank.annotation.type.added=Annotation type has been added: {0}.
+biobank.annotation.type.updated=Annotation type has been updated: {0}.
 biobank.annotation.type.form.selection.add=Add a selection
 biobank.annotation.type.form.max.value.count.error=Select a type
 

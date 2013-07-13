@@ -26,7 +26,7 @@ import scalaz._
 import Scalaz._
 
 case class AnnotationTypeFormObject(
-  specimenGroupId: String, version: Long, studyId: String, name: String,
+  annotationTypeId: String, version: Long, studyId: String, name: String,
   description: Option[String], valueType: String,
   maxValueCount: Option[Int] = None, selections: List[String]) {
 
@@ -40,7 +40,7 @@ case class AnnotationTypeFormObject(
   def getUpdateCmd: UpdateCollectionEventAnnotationTypeCmd = {
     val selectionMap = Some(selections.map(v => (v, v)).toMap)
     UpdateCollectionEventAnnotationTypeCmd(
-      specimenGroupId, Some(version), studyId, name, description,
+      annotationTypeId, Some(version), studyId, name, description,
       AnnotationValueType.withName(valueType), maxValueCount,
       selectionMap)
   }
@@ -58,7 +58,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
 
   val annotationTypeForm = Form(
     mapping(
-      "specimenGroupId" -> text,
+      "annotationTypeId" -> text,
       "version" -> longNumber,
       "studyId" -> text,
       "name" -> nonEmptyText,
@@ -118,26 +118,30 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
   def updateAnnotationType(studyId: String, studyName: String, annotationTypeId: String) = SecuredAction { implicit request =>
     studyService.getCollectionEventAnnotationType(studyId, annotationTypeId) match {
       case Failure(x) => throw new Error(x.head)
-      case Success(sg) =>
+      case Success(annotType) =>
         val form = annotationTypeForm.fill(AnnotationTypeFormObject(
-          sg.id.id, sg.version, sg.studyId.id, sg.name, sg.description, sg.valueType.toString,
-          sg.maxValueCount, sg.options.map(v => v.values.toList).getOrElse(List.empty)))
+          annotType.id.id, annotType.version, annotType.studyId.id, annotType.name, annotType.description,
+          annotType.valueType.toString, annotType.maxValueCount,
+          annotType.options.map(v => v.values.toList).getOrElse(List.empty)))
         Ok(html.study.addCollectionEventAnnotationType(form, UpdateFormType(), studyId, studyName))
     }
   }
 
   def updateAnnotationTypeSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
     annotationTypeForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.study.addCollectionEventAnnotationType(
-        formWithErrors, AddFormType(), studyId, studyName)),
+      formWithErrors => {
+        Logger.debug("updateAnnotationTypeSubmit: formWithErrors: " + formWithErrors)
+        BadRequest(html.study.addCollectionEventAnnotationType(
+          formWithErrors, AddFormType(), studyId, studyName))
+      },
       annotTypeForm => {
         Async {
           implicit val userId = new UserId(request.user.id.id)
           studyService.updateCollectionEventAnnotationType(annotTypeForm.getUpdateCmd).map(validation =>
             validation match {
               case Success(annotType) =>
-                Redirect(routes.SgController.index(studyId, studyName)).flashing(
-                  "success" -> Messages("biobank.annotation.type.added", annotType.name))
+                Redirect(routes.CeventAnnotTypeController.index(studyId, studyName)).flashing(
+                  "success" -> Messages("biobank.annotation.type.updated", annotType.name))
               case Failure(x) =>
                 if (x.head.contains("name already exists")) {
                   val form = annotationTypeForm.fill(annotTypeForm).withError("name",
