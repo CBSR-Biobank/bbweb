@@ -51,7 +51,7 @@ biobank.study.specimengroup.field.specimenType=Specimen Type
 biobank.study.specimengroup.show.title=Specimen Groups
 biobank.study.specimengroup.show.none=No Specimen Groups have been added to this study.
 biobank.study.specimengroup.show.action.add=Add Specimen Group
-biobank.study.specimengroup.form.error.name=Specimen Group with this name already exists
+biobank.study.specimengroup.form.error.name=A Specimen Group with this name already exists
 
 # Annotation Types
 biobank.annotation.type.field.value.type=Value Type
@@ -69,6 +69,7 @@ biobank.study.collection.event.annotation.type.show.title=Collection Event Annot
 biobank.study.collection.event.annotation.type.show.none=No Collection Event Annotation Types have been added to this study.
 biobank.study.collection.event.annotation.type.add=Add Collection Event Annotation Type
 biobank.study.collection.event.annotation.type.update=Update Collection Event Annotation Type
+biobank.study.collection.event.annotation.type.form.error.name=A Collection Event Annotation Type with this name already exists
 
 # Value type enumeration
 biobank.enumaration.annotation.value.type.Text=Text

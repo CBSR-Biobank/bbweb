@@ -71,7 +71,9 @@ class StudyService(
     } yield sgSet
   }
 
-  def getCollectionEventAnnotationType(studyId: String, annotationTypeId: String) {
+  def getCollectionEventAnnotationType(
+    studyId: String,
+    annotationTypeId: String): DomainValidation[CollectionEventAnnotationType] = {
     ceventAnnotationTypeRepo.getByKey(new AnnotationTypeId(annotationTypeId)) match {
       case Failure(x) => x.fail
       case Success(annot) =>

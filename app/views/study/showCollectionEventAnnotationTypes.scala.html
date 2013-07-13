@@ -47,7 +47,7 @@
               <td>@annotType.description</td>
               <td>@annotType.valueType</td>
               <td>@annotType.maxValueCount</td>
-              <td>@annotType.options</td>
+              <td><p style="width:50%;">@annotType.options.map( m => m.values.mkString(" ") )</p></td>
               <td>
                 <div class="btn-group">
                   <a href="@routes.CeventAnnotTypeController.updateAnnotationType(studyId,studyName,annotType.id.id)"
