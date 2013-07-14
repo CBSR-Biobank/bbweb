@@ -71,7 +71,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
     studyService.getCollectionEventAnnotationTypes(studyId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(attrSet) =>
-        Ok(views.html.study.showCollectionEventAnnotationTypes(studyId, studyName, attrSet))
+        Ok(html.study.ceventannotationtype.show(studyId, studyName, attrSet))
     }
   }
 
@@ -82,14 +82,14 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
     studyService.getStudy(studyId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(study) =>
-        Ok(html.study.addCollectionEventAnnotationType(annotationTypeForm, AddFormType(), studyId, study.name))
+        Ok(html.study.ceventannotationtype.add(annotationTypeForm, AddFormType(), studyId, study.name))
     }
   }
 
   def addAnnotationTypeSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
     annotationTypeForm.bindFromRequest.fold(
       formWithErrors =>
-        BadRequest(html.study.addCollectionEventAnnotationType(
+        BadRequest(html.study.ceventannotationtype.add(
           formWithErrors, AddFormType(), studyId, studyName)),
       annotTypeForm => {
         Async {
@@ -105,7 +105,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
                   val form = annotationTypeForm.fill(annotTypeForm).withError("name",
                     Messages("biobank.study.collection.event.annotation.type.form.error.name"))
                   Logger.debug("bad name: " + form)
-                  BadRequest(html.study.addCollectionEventAnnotationType(form, AddFormType(),
+                  BadRequest(html.study.ceventannotationtype.add(form, AddFormType(),
                     studyId, studyName))
                 } else {
                   throw new Error(x.head)
@@ -123,7 +123,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
           annotType.id.id, annotType.version, annotType.studyId.id, annotType.name, annotType.description,
           annotType.valueType.toString, annotType.maxValueCount,
           annotType.options.map(v => v.values.toList).getOrElse(List.empty)))
-        Ok(html.study.addCollectionEventAnnotationType(form, UpdateFormType(), studyId, studyName))
+        Ok(html.study.ceventannotationtype.add(form, UpdateFormType(), studyId, studyName))
     }
   }
 
@@ -131,7 +131,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
     annotationTypeForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.debug("updateAnnotationTypeSubmit: formWithErrors: " + formWithErrors)
-        BadRequest(html.study.addCollectionEventAnnotationType(
+        BadRequest(html.study.ceventannotationtype.add(
           formWithErrors, AddFormType(), studyId, studyName))
       },
       annotTypeForm => {
@@ -146,7 +146,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
                 if (x.head.contains("name already exists")) {
                   val form = annotationTypeForm.fill(annotTypeForm).withError("name",
                     Messages("biobank.study.collection.event.annotation.type.form.error.name"))
-                  BadRequest(html.study.addCollectionEventAnnotationType(
+                  BadRequest(html.study.ceventannotationtype.add(
                     form, UpdateFormType(), studyId, studyName))
                 } else {
                   throw new Error(x.head)
@@ -162,7 +162,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
     studyService.getCollectionEventAnnotationType(studyId, annotationTypeId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(annotType) =>
-        Ok(views.html.study.removeCollectionEventAnnotationTypeConfirm(studyId, studyName, annotType))
+        Ok(html.study.ceventannotationtype.remove(studyId, studyName, annotType))
     }
   }
 

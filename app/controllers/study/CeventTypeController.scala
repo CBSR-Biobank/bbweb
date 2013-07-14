@@ -61,7 +61,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
     studyService.getCollectionEventTypes(studyId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(ceventTypeSet) =>
-        Ok(html.study.ceventtype.showCollectionEventTypes(studyId, studyName, ceventTypeSet))
+        Ok(html.study.ceventtype.show(studyId, studyName, ceventTypeSet))
     }
   }
 
@@ -72,14 +72,14 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
     studyService.getStudy(studyId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(study) =>
-        Ok(html.study.ceventtype.addCollectionEventType(ceventTypeForm, AddFormType(), studyId, study.name))
+        Ok(html.study.ceventtype.add(ceventTypeForm, AddFormType(), studyId, study.name))
     }
   }
 
   def addCeventTypeSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
     ceventTypeForm.bindFromRequest.fold(
       formWithErrors =>
-        BadRequest(html.study.ceventtype.addCollectionEventType(
+        BadRequest(html.study.ceventtype.add(
           formWithErrors, AddFormType(), studyId, studyName)),
       submittedForm => {
         Async {
@@ -95,7 +95,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
                   val form = ceventTypeForm.fill(submittedForm).withError("name",
                     Messages("biobank.study.collection.event.type.form.error.name"))
                   Logger.debug("bad name: " + form)
-                  BadRequest(html.study.ceventtype.addCollectionEventType(form, AddFormType(),
+                  BadRequest(html.study.ceventtype.add(form, AddFormType(),
                     studyId, studyName))
                 } else {
                   throw new Error(x.head)
@@ -112,7 +112,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
         val form = ceventTypeForm.fill(CeventTypeFormObject(
           ceventType.id.id, ceventType.version, ceventType.studyId.id, ceventType.name,
           ceventType.description, ceventType.recurring))
-        Ok(html.study.ceventtype.addCollectionEventType(form, UpdateFormType(), studyId, studyName))
+        Ok(html.study.ceventtype.add(form, UpdateFormType(), studyId, studyName))
     }
   }
 
@@ -120,7 +120,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
     ceventTypeForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.debug("updateCeventTypeSubmit: formWithErrors: " + formWithErrors)
-        BadRequest(html.study.ceventtype.addCollectionEventType(
+        BadRequest(html.study.ceventtype.add(
           formWithErrors, AddFormType(), studyId, studyName))
       },
       submittedForm => {
@@ -135,7 +135,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
                 if (x.head.contains("name already exists")) {
                   val form = ceventTypeForm.fill(submittedForm).withError("name",
                     Messages("biobank.study.collection.event.type.form.error.name"))
-                  BadRequest(html.study.ceventtype.addCollectionEventType(
+                  BadRequest(html.study.ceventtype.add(
                     form, UpdateFormType(), studyId, studyName))
                 } else {
                   throw new Error(x.head)
@@ -151,7 +151,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
     studyService.getCollectionEventType(studyId, ceventTypeId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(ceventType) =>
-        Ok(html.study.ceventtype.removeCollectionEventTypeConfirm(studyId, studyName, ceventType))
+        Ok(html.study.ceventtype.remove(studyId, studyName, ceventType))
     }
   }
 

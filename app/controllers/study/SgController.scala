@@ -49,7 +49,7 @@ object SgController extends Controller with securesocial.core.SecureSocial {
     studyService.getSpecimenGroups(studyId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(sgSet) =>
-        Ok(views.html.study.showSpecimenGroups(studyId, studyName, sgSet))
+        Ok(html.study.specimengroup.show(studyId, studyName, sgSet))
     }
   }
 
@@ -60,13 +60,13 @@ object SgController extends Controller with securesocial.core.SecureSocial {
     studyService.getStudy(studyId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(study) =>
-        Ok(html.study.addSpecimenGroup(specimenGroupForm, AddFormType(), studyId, study.name))
+        Ok(html.study.specimengroup.add(specimenGroupForm, AddFormType(), studyId, study.name))
     }
   }
 
   def addSpecimenGroupSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
     specimenGroupForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.study.addSpecimenGroup(
+      formWithErrors => BadRequest(html.study.specimengroup.add(
         formWithErrors, AddFormType(), studyId, studyName)),
       sgForm => {
         Async {
@@ -80,7 +80,7 @@ object SgController extends Controller with securesocial.core.SecureSocial {
                 if (x.head.contains("name already exists")) {
                   val form = specimenGroupForm.fill(sgForm).withError("name",
                     Messages("biobank.study.specimengroup.form.error.name"))
-                  BadRequest(html.study.addSpecimenGroup(form, AddFormType(), studyId, studyName))
+                  BadRequest(html.study.specimengroup.add(form, AddFormType(), studyId, studyName))
                 } else {
                   throw new Error(x.head)
                 }
@@ -97,13 +97,13 @@ object SgController extends Controller with securesocial.core.SecureSocial {
           sg.id.id, sg.version, sg.studyId.id, sg.name, sg.description, sg.units,
           sg.anatomicalSourceType.toString, sg.preservationType.toString,
           sg.preservationTemperatureType.toString, sg.specimenType.toString))
-        Ok(html.study.addSpecimenGroup(form, UpdateFormType(), studyId, studyName))
+        Ok(html.study.specimengroup.add(form, UpdateFormType(), studyId, studyName))
     }
   }
 
   def updateSpecimenGroupSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
     specimenGroupForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.study.addSpecimenGroup(
+      formWithErrors => BadRequest(html.study.specimengroup.add(
         formWithErrors, AddFormType(), studyId, studyName)),
       sgForm => {
         Async {
@@ -117,7 +117,7 @@ object SgController extends Controller with securesocial.core.SecureSocial {
                 if (x.head.contains("name already exists")) {
                   val form = specimenGroupForm.fill(sgForm).withError("name",
                     Messages("biobank.study.specimengroup.form.error.name"))
-                  BadRequest(html.study.addSpecimenGroup(form, UpdateFormType(), studyId, studyName))
+                  BadRequest(html.study.specimengroup.add(form, UpdateFormType(), studyId, studyName))
                 } else {
                   throw new Error(x.head)
                 }
@@ -132,7 +132,7 @@ object SgController extends Controller with securesocial.core.SecureSocial {
     studyService.getSpecimenGroup(studyId, specimenGroupId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(sg) =>
-        Ok(views.html.study.removeSpecimenGroupConfirm(studyId, studyName, sg))
+        Ok(views.html.study.specimengroup.remove(studyId, studyName, sg))
     }
   }
 

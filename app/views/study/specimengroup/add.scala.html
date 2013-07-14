@@ -49,7 +49,7 @@
       
       @inputText(
          field = sgForm("units"),
-         args = '_label -> Messages("biobank.study.specimengroup.form.field.unit.plural"), 
+         args = '_label -> Messages("biobank.study.specimengroup.field.units"), 
            'placeholder -> "the type of units the specimens are measured in (Eg. mL, cm, etc.)",
            'class -> "input-xxlarge"
          )
@@ -57,25 +57,25 @@
       @select(
          field = sgForm("anatomicalSourceType"),
          options = SpecimenGroupSelections.anatomicalSourceTypes,
-         args = '_label -> Messages("biobank.study.specimengroup.form.field.anatomicalsource")
+         args = '_label -> Messages("biobank.study.specimengroup.field.anatomicalsource")
       )
       
       @select(
          field = sgForm("preservationType"),
          options = SpecimenGroupSelections.preservationTypes,
-         args = '_label -> Messages("biobank.study.specimengroup.form.field.preservationType")
+         args = '_label -> Messages("biobank.study.specimengroup.field.preservation")
       )
       
       @select(
          field = sgForm("preservationTemperatureType"),
          options = SpecimenGroupSelections.preservationTemperatureTypes,
-         args = '_label -> Messages("biobank.study.specimengroup.form.field.preservationTemperatureType")
+         args = '_label -> Messages("biobank.study.specimengroup.field.preservationtemperature")
       )
       
       @select(
          field = sgForm("specimenType"),
          options = SpecimenGroupSelections.specimenTypes,
-         args = '_label -> Messages("biobank.study.specimengroup.form.field.specimenType")
+         args = '_label -> Messages("biobank.study.specimengroup.field.specimentype")
       )
       
          
