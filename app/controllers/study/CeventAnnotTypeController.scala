@@ -162,7 +162,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
     studyService.getCollectionEventAnnotationType(studyId, annotationTypeId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(annotType) =>
-        Ok(html.study.ceventannotationtype.remove(studyId, studyName, annotType))
+        Ok(html.study.ceventannotationtype.removeConfirm(studyId, studyName, annotType))
     }
   }
 

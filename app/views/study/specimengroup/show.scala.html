@@ -24,7 +24,6 @@
     @if(specimenGroups.size <= 0) {
       <p>@Messages("biobank.study.specimengroup.show.none")</p>
     } else {
-
       @flash.get("success").map { message =>
         <div class="alert alert-success">
           @message

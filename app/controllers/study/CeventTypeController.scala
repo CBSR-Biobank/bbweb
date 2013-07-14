@@ -25,7 +25,7 @@ import scalaz._
 import Scalaz._
 
 case class CeventTypeFormObject(
-  ceventTypeId: String, version: Long, studyId: String, name: String,
+  collectionEventTypeId: String, version: Long, studyId: String, name: String,
   description: Option[String], recurring: Boolean) {
 
   def getAddCmd: AddCollectionEventTypeCmd = {
@@ -34,7 +34,7 @@ case class CeventTypeFormObject(
 
   def getUpdateCmd: UpdateCollectionEventTypeCmd = {
     UpdateCollectionEventTypeCmd(
-      ceventTypeId, Some(version), studyId, name, description, recurring)
+      collectionEventTypeId, Some(version), studyId, name, description, recurring)
   }
 }
 
@@ -50,7 +50,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
 
   val ceventTypeForm = Form(
     mapping(
-      "ceventTypeId" -> text,
+      "collectionEventTypeId" -> text,
       "version" -> longNumber,
       "studyId" -> text,
       "name" -> nonEmptyText,
@@ -78,9 +78,10 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
 
   def addCeventTypeSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
     ceventTypeForm.bindFromRequest.fold(
-      formWithErrors =>
-        BadRequest(html.study.ceventtype.add(
-          formWithErrors, AddFormType(), studyId, studyName)),
+      formWithErrors => {
+        Logger.debug("addCeventTypeSubmit: formWithErrors: " + formWithErrors)
+        BadRequest(html.study.ceventtype.add(formWithErrors, AddFormType(), studyId, studyName))
+      },
       submittedForm => {
         Async {
           Logger.debug("ceventTypeForm: " + ceventTypeForm)
@@ -151,7 +152,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
     studyService.getCollectionEventType(studyId, ceventTypeId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(ceventType) =>
-        Ok(html.study.ceventtype.remove(studyId, studyName, ceventType))
+        Ok(html.study.ceventtype.removeConfirm(studyId, studyName, ceventType))
     }
   }
 

@@ -7,6 +7,8 @@ biobank.form.selection.default=-- Make a selection --
 # Common messages
 biobank.common.name=Name
 biobank.common.description=Description
+biobank.common.yes=Yes
+biobank.common.no=No
 biobank.common.action.add=Add
 biobank.common.action.update=Update
 biobank.common.action.remove=Remove
@@ -62,12 +64,13 @@ biobank.annotation.type.field.max.value.count.single.desc=Single selection only
 biobank.annotation.type.field.max.value.count.multiple.desc=Multiple selections allowed
 biobank.annotation.type.field.option=Selection
 biobank.annotation.type.field.options=Selections
-biobank.annotation.type.added=Annotation type has been added: {0}.
-biobank.annotation.type.updated=Annotation type has been updated: {0}.
+biobank.annotation.type.added=Annotation Type has been added: {0}.
+biobank.annotation.type.updated=Annotation Type has been updated: {0}.
 biobank.annotation.type.form.selection.add=Add a selection
 biobank.annotation.type.form.max.value.count.error=Select a type
 
 # Collection Event Annotation Types
+biobank.study.collection.event.annotation.type.show.none=No Collection Event Annotation Types have been added to this study.
 biobank.study.collection.event.annotation.type.show.title=Collection Event Annotation Types
 biobank.study.collection.event.annotation.type.show.none=No Collection Event Annotation Types have been added to this study.
 biobank.study.collection.event.annotation.type.add=Add Collection Event Annotation Type
@@ -77,10 +80,14 @@ biobank.study.collection.event.annotation.remove=Remove Collection Event Annotat
 biobank.study.collection.event.annotation.type.removed=Collection Event Annotation Type "{0}" removed.
 
 # Collection Event Types
+biobank.study.collection.event.type.show.none=No Collection Event Types have been added to this study.
+biobank.study.collection.event.type.field.recurring=Recurring
 biobank.study.collection.event.type.show.title=Collection Event Types
 biobank.study.collection.event.type.show.none=No Collection Event Types have been added to this study.
 biobank.study.collection.event.type.add=Add Collection Event Type
 biobank.study.collection.event.type.update=Update Collection Event Type
+biobank.study.collection.event.type.added=Collection Event Type has been added: {0}.
+biobank.study.collection.event.type.updated=Collection Event Type has been updated: {0}.
 biobank.study.collection.event.type.form.error.name=A Collection Event Type with this name already exists
 biobank.study.collection.event.remove=Remove Collection Event Type
 biobank.study.collection.event.type.removed=Collection Event Type "{0}" removed.

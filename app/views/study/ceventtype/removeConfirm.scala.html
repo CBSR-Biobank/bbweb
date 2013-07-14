@@ -1,6 +1,6 @@
 @(studyId: String, 
     studyName: String,
-    annotType: domain.study.CollectionEventType)(
+    ceventType: domain.study.CollectionEventType)(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
@@ -16,7 +16,7 @@
     <h2>@Messages("biobank.study.singular"): @studyName</h2>
     <div class="alert alert-block">
      <h3>@Messages("biobank.common.warning")</h3>
-     @Messages("biobank.study.specimengroup.remove.confirm", annotType.name)
+     @Messages("biobank.study.specimengroup.remove.confirm", ceventType.name)
     </div>
   </div>
   <div class="clearfix">    
@@ -24,22 +24,27 @@
       <tbody>
         <tr>
           <td class="header">@Messages("biobank.common.name")</td>
-          <td>@annotType.name</td>
+          <td>@ceventType.name</td>
         </tr>
         <tr>
           <td class="header">@Messages("biobank.common.description")</td>
-          <td>@annotType.description</td>
+          <td>@ceventType.description</td>
         </tr>
         <tr>
-           <td class="header">@Messages("biobank.annotation.type.field.value.type")</td>
-           <td><span class="label">@annotType.recurring</span></td>
+           <td class="header">@Messages("biobank.study.collection.event.type.field.recurring")</td>
+           <td>
+              @if(ceventType.recurring){ 
+                @Messages("biobank.common.yes")
+              } else { 
+                @Messages("biobank.common.no")
+              }</td>  
         </tr>        
       </tbody>
     </table>
     <div class="form-actions"> 
-      <a href="@routes.CeventAnnotTypeController.index(studyId,studyName)" class="btn btn-small" type="button">
+      <a href="@routes.CeventTypeController.index(studyId,studyName)" class="btn btn-small" type="button">
       @Messages("biobank.common.cancel")</a>
-      <a href="@routes.CeventAnnotTypeController.removeAnnotationType(studyId,studyName,annotType.id.id)" 
+      <a href="@routes.CeventTypeController.removeCeventType(studyId,studyName,ceventType.id.id)" 
       class="btn btn-small btn-warning" type="button">
       @Messages("biobank.common.confirm")</a>
     </div>

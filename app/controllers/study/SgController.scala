@@ -132,7 +132,7 @@ object SgController extends Controller with securesocial.core.SecureSocial {
     studyService.getSpecimenGroup(studyId, specimenGroupId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(sg) =>
-        Ok(views.html.study.specimengroup.remove(studyId, studyName, sg))
+        Ok(views.html.study.specimengroup.removeConfirm(studyId, studyName, sg))
     }
   }
 
