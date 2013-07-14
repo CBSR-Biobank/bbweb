@@ -89,7 +89,7 @@ biobank.study.collection.event.type.update=Update Collection Event Type
 biobank.study.collection.event.type.added=Collection Event Type has been added: {0}.
 biobank.study.collection.event.type.updated=Collection Event Type has been updated: {0}.
 biobank.study.collection.event.type.form.error.name=A Collection Event Type with this name already exists
-biobank.study.collection.event.remove=Remove Collection Event Type
+biobank.study.collection.event.type.remove=Remove Collection Event Type
 biobank.study.collection.event.type.removed=Collection Event Type "{0}" removed.
 
 # Value type enumeration

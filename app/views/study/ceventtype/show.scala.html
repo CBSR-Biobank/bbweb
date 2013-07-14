@@ -10,11 +10,11 @@
   @breadcrumbs(Map(
     (Messages("biobank.study.plural") -> routes.StudyController.index),
     (studyName -> routes.StudyController.showStudy(studyId)),
-    (Messages("biobank.study.collection.event.annotation.type.show.title") -> null)
+    (Messages("biobank.study.collection.event.type.show.title") -> null)
   ))
   <div class="page-header">
     <h2>@Messages("biobank.study.singular"): @studyName</h2>
-    <h3>@Messages("biobank.study.collection.event.annotation.type.show.title")
+    <h3>@Messages("biobank.study.collection.event.type.show.title")
     <a href="@routes.CeventTypeController.addCeventType(studyId)" 
         class="btn btn-small btn-primary" type="button"
         data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
@@ -44,11 +44,12 @@
           <tr>
             <td>@ceventtype.name</td>
             <td>@ceventtype.description</td>
-            <td>@if(ceventtype.recurring){ 
-                  @Messages("biobank.common.yes")
-                } else { 
-                  @Messages("biobank.common.no")
-                }</td>            
+            <td>
+              @if(ceventtype.recurring){ 
+                @Messages("biobank.common.yes")
+              } else { 
+                @Messages("biobank.common.no")
+              }</td>            
             <td> 
               @updateRemoveButtons(
                   routes.CeventTypeController.updateCeventType(studyId,studyName,ceventtype.id.id),
