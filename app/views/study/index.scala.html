@@ -3,39 +3,38 @@
 @import controllers.study._
 
 @main("Biobank") {
-<ul class="breadcrumb">
-  <li class="active">@Messages("biobank.study.plural")</li>
-</ul>
-
-<div class="page-header">
-  <h2>@Messages("biobank.study.plural")</h2>
-</div>
-
-<div class="clearfix">
-  @if(studies.size <= 0) {
-    <p>@Messages("biobank.study.none")</p>
-  } else {
-    <table class="table table-bordered table-hover table-condensed">
-      <thead>
-        <th>@Messages("biobank.common.name")</th>
-        <th>@Messages("biobank.study.field.status")</th>
-        <th>@Messages("biobank.common.description")</th>
-      </thead>
-      <tbody>
-        @for(s <- studies) {
-            <tr>
-              <td><a href="@routes.StudyController.showStudy(s.id.id)">@s.name</a></td>
-              <td>@s.status</td>
-              <td>@s.description</td>
-            <tr>
-        }
-      </tbody>
-    </table>
-  }
-
-  <div class="form-actions">
-    <a href="@routes.StudyController.addStudy" class="btn btn-small btn-primary" type="button">
-    @Messages("biobank.study.add")</a>
+  @breadcrumbs(Map(
+    (Messages("biobank.study.plural") -> null)
+  ))  
+  <div class="page-header">
+    <h2>@Messages("biobank.study.plural")</h2>
   </div>
-</div>
+  
+  <div class="clearfix">
+    @if(studies.size <= 0) {
+      <p>@Messages("biobank.study.none")</p>
+    } else {
+      <table class="table table-bordered table-hover table-condensed">
+        <thead>
+          <th>@Messages("biobank.common.name")</th>
+          <th>@Messages("biobank.study.field.status")</th>
+          <th>@Messages("biobank.common.description")</th>
+        </thead>
+        <tbody>
+          @for(s <- studies) {
+              <tr>
+                <td><a href="@routes.StudyController.showStudy(s.id.id)">@s.name</a></td>
+                <td>@s.status</td>
+                <td>@s.description</td>
+              <tr>
+          }
+        </tbody>
+      </table>
+    }
+  
+    <div class="form-actions">
+      <a href="@routes.StudyController.addStudy" class="btn btn-small btn-primary" type="button">
+      @Messages("biobank.study.add")</a>
+    </div>
+  </div>
 }

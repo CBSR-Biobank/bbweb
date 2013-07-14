@@ -16,32 +16,33 @@
 }}
 
 @main(formInfo.title) {
-    <ul class="breadcrumb">
-        <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
-        <li class="active">@formInfo.title</li>
-    </ul>
-    <div class="page-header">
-        <h2>@formInfo.title</h2>
-    </div>
-    <div class="clearfix">
-        @form(formInfo.action, args = 'id -> "studyForm", 'class -> "form-horizontal") {
- 
-        @formType match {
-            case AddFormType() => { 
-                <input type="hidden" name="studyId" value="dont-care" >  
-                <input type="hidden" name="version" value="-1" >  
-                }
-            case UpdateFormType() => { 
-                <input type="hidden" name="studyId" value="@studyForm("studyId").value" >  
-                <input type="hidden" name="version" value="@studyForm("version").value" >  
-                }
-        }
+  @breadcrumbs(Map(
+    (Messages("biobank.study.plural") -> routes.StudyController.index),
+    (formInfo.title -> null)
+  ))
+  <div class="page-header">
+      <h2>@formInfo.title</h2>
+  </div>
+  <div class="clearfix">
+    @form(formInfo.action, args = 'id -> "studyForm", 'class -> "form-horizontal") {
 
-        @formNameAndDescription(studyForm("name"), studyForm("description"))
-        
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
-        </div>
+    @formType match {
+        case AddFormType() => { 
+            <input type="hidden" name="studyId" value="dont-care" >  
+            <input type="hidden" name="version" value="-1" >  
+            }
+        case UpdateFormType() => { 
+            <input type="hidden" name="studyId" value="@studyForm("studyId").value" >  
+            <input type="hidden" name="version" value="@studyForm("version").value" >  
+            }
+    }
+
+    @formNameAndDescription(studyForm("name"), studyForm("description"))
+    
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
+
+    </div>
     }
 </div>
 }

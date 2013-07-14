@@ -7,11 +7,11 @@
 @import controllers.study._
 
 @main(Messages("biobank.study.specimengroup.remove")) {
-  <ul class="breadcrumb">
-    <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
-    <li><a href="@routes.StudyController.showStudy(studyId)">@studyName</a> <span class="divider">/</span></li>
-    <li class="active">@Messages("biobank.study.specimengroup.remove")</li>
-  </ul>
+  @breadcrumbs(Map(
+    (Messages("biobank.study.plural") -> routes.StudyController.index),
+    (studyName -> routes.StudyController.showStudy(studyId)),
+    (Messages("biobank.study.specimengroup.remove") -> null)
+  ))
   <div class="page-header">
     <h2>@Messages("biobank.study.singular"): @studyName</h2>
     <div class="alert alert-block">
