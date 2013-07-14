@@ -91,6 +91,24 @@ class StudyService(
     } yield annotTypeSet
   }
 
+  def getCollectionEventType(
+    studyId: String,
+    collectionEventTypeId: String): DomainValidation[CollectionEventType] = {
+    cetRepo.getByKey(new CollectionEventTypeId(collectionEventTypeId)) match {
+      case Failure(x) => x.fail
+      case Success(ceventType) =>
+        if (ceventType.studyId.id.equals(studyId)) ceventType.success
+        else DomainError("study does not have specimen group").fail
+    }
+  }
+
+  def getCollectionEventTypes(id: String): DomainValidation[Set[CollectionEventType]] = {
+    for {
+      study <- studyRepository.getByKey(StudyId(id))
+      sgSet <- cetRepo.getValues.filter(x => x.studyId.id.equals(id)).toSet.success
+    } yield sgSet
+  }
+
   def addStudy(cmd: AddStudyCmd)(implicit userId: UserId): Future[DomainValidation[DisabledStudy]] = {
     play.Logger.debug("addStudy")
     studyProcessor.ask(

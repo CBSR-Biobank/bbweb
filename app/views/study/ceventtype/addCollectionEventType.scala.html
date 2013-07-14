@@ -1,0 +1,133 @@
+@(attrTypeForm: Form[controllers.study.CeventTypeFormObject], 
+    formType: FormType, 
+    studyId: String, 
+    studyName: String)(
+    implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+
+@import helper._
+@import controllers.study._
+
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) } 
+
+@formInfo = @{ formType match {
+    case AddFormType() => 
+        FormInfo(Messages("biobank.study.collection.event.type.add"), 
+            routes.CeventAnnotTypeController.addAnnotationTypeSubmit(studyId, studyName))
+    case UpdateFormType() => 
+        FormInfo(Messages("biobank.study.collection.event.type.update"), 
+            routes.CeventAnnotTypeController.updateAnnotationTypeSubmit(studyId, studyName))  
+}}
+
+@main(formInfo.title) {
+    <ul class="breadcrumb">
+      <li><a href="@routes.StudyController.index">@Messages("biobank.study.plural")</a> <span class="divider">/</span></li>
+      <li><a href="@routes.StudyController.showStudy(studyId)">@studyName</a> <span class="divider">/</span></li>
+      <li class="active">@formInfo.title</li>
+    </ul>
+    <div class="page-header">
+      <h2>@Messages("biobank.study.singular"): @studyName</h2>
+      <h3>@formInfo.title</h3>
+    </div>
+    
+    
+    @if(attrTypeForm.hasErrors) {
+      <div class="alert">
+        <p>@Messages("biobank.common.form.fix.errors")</p>
+      </div>
+    }
+    
+    <div class="clearfix">
+    @form(formInfo.action, args = 'id -> "addform", 'class -> "form-horizontal") {
+      
+      @formType match {
+        case AddFormType() => { 
+          <input type="hidden" name="annotationTypeId" value="dont-care">  
+          <input type="hidden" name="version" value="-1" >  
+        }
+        case UpdateFormType() => { 
+          <input type="hidden" name="annotationTypeId" value="@attrTypeForm("annotationTypeId").value" >  
+          <input type="hidden" name="version" value="@attrTypeForm("version").value" >
+        }
+      }
+      
+      <input type="hidden" name="studyId" value="@studyId" >  
+      
+      @formNameAndDescription(attrTypeForm("name"), attrTypeForm("description"))
+      
+      @select(
+         field = attrTypeForm("valueType"),
+         options = CollectionEventAnnotationTypeSelections.annotationValueTypes,
+         args = '_label -> Messages("biobank.annotation.type.field.value.type")
+      ) 
+      
+      <div class="form-actions">
+           <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
+      </div>
+    }
+    </div>  
+    
+    <script type="text/javascript" charset="utf-8">
+      $(function() {
+        var selectionGroup = $('.selectionGroup')
+                      
+        var selectionsToggle = function() {
+          if ($('#valueType').val() == "Select") {
+            $('.selectionGroup').show()
+          } else {
+            $('.selectionGroup').hide()
+          }
+        }  
+        
+        selectionsToggle()
+      
+        //
+        // Shows or hides the selection group based on the value type selected
+        //
+        $('#valueType').change(function() {
+          selectionsToggle()
+        })
+        
+        //
+        // creates a new selection text entry field based on the hidden template. The 
+        // new input field has to be modified to contain the correct parameters
+        //  
+        $(document).on('click', '.addSelection', function() {
+          var template = $('.selection_template', selectionGroup)
+          var newSelection = template.clone().removeClass('selection_template').addClass('selections')
+          var i = $('.selectionGroup .selections').size()
+          newSelection.find('input').attr('name', 'selections[' + i + ']')
+          newSelection.show()
+          template.before(newSelection)
+        });
+        
+        //
+        // removes a selection text entry field based on the button pressed
+        //  
+        $(document).on('click', '.removeSelection', function() {
+          var i = $('.selectionGroup .selections').size()
+          if (i > 1) {
+            $(this).parent().parent().remove();
+            renumber()
+          }
+        });
+        
+        // -- renumber fields
+        //
+        // Rename fields to have a coherent payload like:
+        //
+        // selections[0]
+        // selections[1]
+        //        
+        var renumber = function() {
+          selectionGroup.each(function(i) {
+            $('.selections input', this).each(function(i) {
+              var name = $(this).attr('name').replace(/selections\[.+\]/g, 'selections[' + i + ']')
+              $(this).attr('name', name)
+            })
+          })
+        }
+      
+      });
+        
+    </script>
+}    

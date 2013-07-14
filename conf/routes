@@ -28,10 +28,19 @@ GET     /study/sg/remove            controllers.study.SgController.removeSpecime
 GET     /study/cevent/annot                   controllers.study.CeventAnnotTypeController.index(studyId:String,studyName:String)
 GET     /study/cevent/annot/add/:studyId      controllers.study.CeventAnnotTypeController.addAnnotationType(studyId:String)
 POST    /study/cevent/annot/addSubmit         controllers.study.CeventAnnotTypeController.addAnnotationTypeSubmit(studyId:String, studyName:String)
-GET     /study/cevent/annot/update            controllers.study.CeventAnnotTypeController.updateAnnotationType(studyId:String, studyName: String, sgId:String)
+GET     /study/cevent/annot/update            controllers.study.CeventAnnotTypeController.updateAnnotationType(studyId:String, studyName: String, annotId: String)
 POST    /study/cevent/annot/updateSubmit      controllers.study.CeventAnnotTypeController.updateAnnotationTypeSubmit(id:String, studyName:String)
-GET     /study/cevent/annot/removeConfirm     controllers.study.CeventAnnotTypeController.removeAnnotationTypeConfirm(studyId:String, studyName: String, sgId:String)
-GET     /study/cevent/annot/remove            controllers.study.CeventAnnotTypeController.removeAnnotationType(studyId:String, studyName: String, sgId:String)
+GET     /study/cevent/annot/removeConfirm     controllers.study.CeventAnnotTypeController.removeAnnotationTypeConfirm(studyId:String, studyName: String, annotId: String)
+GET     /study/cevent/annot/remove            controllers.study.CeventAnnotTypeController.removeAnnotationType(studyId:String, studyName: String, annotId: String)
+
+# collection event types
+GET     /study/cetype                   controllers.study.CeventTypeController.index(studyId:String,studyName:String)
+GET     /study/cetype/add/:studyId      controllers.study.CeventTypeController.addCeventType(studyId:String)
+POST    /study/cetype/addSubmit         controllers.study.CeventTypeController.addCeventTypeSubmit(studyId:String, studyName:String)
+GET     /study/cetype/update            controllers.study.CeventTypeController.updateCeventType(studyId:String, studyName: String, ceTypeId: String)
+POST    /study/cetype/updateSubmit      controllers.study.CeventTypeController.updateCeventTypeSubmit(id:String, studyName:String)
+GET     /study/cetype/removeConfirm     controllers.study.CeventTypeController.removeCeventTypeConfirm(studyId:String, studyName: String, ceTypeId: String)
+GET     /study/cetype/remove            controllers.study.CeventTypeController.removeCeventType(studyId:String, studyName: String, ceTypeId: String)
 
 # user
 GET     /user/profile               controllers.UserController.profile

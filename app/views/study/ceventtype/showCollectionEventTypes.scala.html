@@ -1,6 +1,6 @@
 @(studyId: String, 
     studyName: String, 
-    annotationTypes: Set[domain.study.CollectionEventAnnotationType])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
+    ceventTypes: Set[domain.study.CollectionEventType])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
     flash: play.api.mvc.Flash)
     
 @import controllers.study._
@@ -15,14 +15,14 @@
     <div class="page-header">
       <h2>@Messages("biobank.study.singular"): @studyName</h2>
       <h3>@Messages("biobank.study.collection.event.annotation.type.show.title")
-      <a href="@routes.CeventAnnotTypeController.addAnnotationType(studyId)" 
+      <a href="@routes.CeventTypeController.addCeventType(studyId)" 
           class="btn btn-small btn-primary" type="button"
           data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
           <i class="icon-plus-sign icon-white"></i></a>
       </h3>
     </div>
     <div class="clearfix">
-        @if(annotationTypes.size <= 0) {
+        @if(ceventTypes.size <= 0) {
             <p>@Messages("biobank.annotation.type.show.none")</p>
         } else {
 
@@ -42,32 +42,17 @@
           <th></th>
         </thead>
         <tbody>
-          @for(annotType <- annotationTypes) {
+          @for(ceventtype <- ceventTypes) {
             <tr>
-              <td>@annotType.name</td>
-              <td>@annotType.description</td>
-              <td><span class="label">@annotType.valueType</span></td>
+              <td>@ceventtype.name</td>
+              <td>@ceventtype.description</td>
+              <td>@ceventtype.recurring</td>
               
-              @if(annotType.valueType == domain.AnnotationValueType.Select) {
-                  @if(annotType.maxValueCount.getOrElse(0) == 1) {
-                    <td>@Messages("biobank.annotation.type.field.max.value.count.single")</td>
-                  } else {
-                    @if(annotType.maxValueCount.getOrElse(0) > 1) {
-                      <td>@Messages("biobank.annotation.type.field.max.value.count.multiple")</td>                  
-                    } else {
-                      <td><span class="label label-warning">ERROR: @@annotType.maxValueCount</span></td>
-                    }
-                  }
-                <td><p style="width:50%;">@annotType.options.map( m => m.values.mkString(" ") )</p></td>
-              } else {
-                <td><span class="label">N/A</span></td>
-                <td><span class="label">N/A</span></td>              
-              }
-              
-              <td>
+              <td> 
                 @updateRemoveButtons(
-                    routes.CeventAnnotTypeController.updateAnnotationType(studyId,studyName,annotType.id.id),
-                    routes.CeventAnnotTypeController.removeAnnotationTypeConfirm(studyId,studyName,annotType.id.id))
+                    routes.CeventTypeController.updateCeventType(studyId,studyName,ceventtype.id.id),
+                    routes.CeventTypeController.removeCeventType(studyId,studyName,ceventtype.id.id)
+                )
               </td>
             <tr>
           }
