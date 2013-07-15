@@ -63,7 +63,6 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
           studyService.addStudy(formObj.getAddCmd).map(
             study => study match {
               case Success(study) =>
-                Ok(html.study.showStudy(study))
                 Redirect(routes.StudyController.showStudy(study.id.id)).flashing(
                   "success" -> Messages("biobank.study.added", study.name))
               case Failure(x) =>
@@ -113,7 +112,6 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
                     throw new Error(x.head)
                   }
                 case Success(study) =>
-                  Ok(html.study.showStudy(study))
                   Redirect(routes.StudyController.showStudy(study.id.id)).flashing(
                     "success" -> Messages("biobank.study.updated", study.name))
               })
@@ -124,8 +122,20 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
 
   def showStudy(id: String) = SecuredAction { implicit request =>
     studyService.getStudy(id) match {
-      case Success(study) => Ok(html.study.showStudy(study))
       case Failure(x) => throw new Error(x.head)
+      case Success(study) =>
+        val x = studyService.getCollectionEventAnnotationTypes(id).toOption.map(x => x.size).getOrElse(0)
+        Logger.debug("********* x: " + x)
+        val counts = Map(
+          ("participants" -> "<i>to be implemented</i>"),
+          ("collection.events" -> "<i>to be implemented</i>"),
+          ("specimen.groups" -> studyService.getSpecimenGroups(id).toOption.map(
+            x => x.size.toString).getOrElse("0")),
+          ("collection.event.annotation.types" -> studyService.getCollectionEventAnnotationTypes(id).toOption.map(
+            x => x.size.toString).getOrElse("0")),
+          ("collection.event.types" -> studyService.getCollectionEventTypes(id).toOption.map(
+            x => x.size.toString).getOrElse("0")))
+        Ok(html.study.showStudy(study, counts))
     }
   }
 }

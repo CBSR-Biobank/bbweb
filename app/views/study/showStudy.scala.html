@@ -1,4 +1,5 @@
-@(study: domain.study.Study)(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
+@(study: domain.study.Study,
+    counts: Map[String,String])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
     flash: play.api.mvc.Flash)
     
 @import controllers.study._    
@@ -25,9 +26,14 @@
     @nameValueRow(Messages("biobank.common.name"), study.name)
     @nameValueRow(Messages("biobank.study.field.status"), study.status)
     @nameValueRow(Messages("biobank.common.description"), study.description.getOrElse(""))
-    @nameValueRow(Messages("biobank.study.field.participants"), "<i>to be implemented</i>")
-    @nameValueRow(Messages("biobank.study.field.collection.events"), "<i>to be implemented</i>")
-  
+    @nameValueRow(Messages("biobank.study.field.participants"), counts("participants"))
+    @nameValueRow(Messages("biobank.study.field.collection.events"), counts("collection.events"))
+    @nameValueRow(Messages("biobank.study.field.specimengroups"), counts("specimen.groups"))
+    @nameValueRow(Messages("biobank.study.field.collection.event.annotation.types"),
+         counts("collection.event.annotation.types"))
+    @nameValueRow(Messages("biobank.study.field.collection.event.types"),
+         counts("collection.event.types"))
+        
     <div class="form-actions"> 
       <a href="@routes.SgController.index(study.id.id,study.name)" 
          class="btn btn-small btn-primary" 
