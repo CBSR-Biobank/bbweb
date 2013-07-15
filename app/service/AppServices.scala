@@ -54,7 +54,7 @@ object AppServices {
     val multicastTargets = List(
       system.actorOf(Props(new StudyProcessor(
         studyRepository, specimenGroupRepository, collectionEventTypeRepository,
-        ceventAnnotationTypeRepo, sg2cetRepo, cet2atRepo) with Emitter)),
+        ceventAnnotationTypeRepo) with Emitter)),
       system.actorOf(Props(new UserProcessor(userRepo) with Emitter)))
 
     // this is the commnad bus

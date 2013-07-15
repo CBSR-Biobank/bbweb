@@ -88,14 +88,15 @@ package object service {
 
   type SpecimenGroupCollectionEventTypeReadRepository = ReadWriteRepository[String, SpecimenGroupCollectionEventType]
 
-  type SpecimenGroupCollectionEventTypeReadWriteRepository = ReadWriteRepository[String, SpecimenGroupCollectionEventType]
-
-  type CollectionEventTypeAnnotationTypeWriteRepository = ReadWriteRepository[String, CollectionEventTypeAnnotationType]
-
-  type CollectionEventTypeAnnotationTypeReadWriteRepository = ReadWriteRepository[String, CollectionEventTypeAnnotationType]
-
   type UserReadRepository = ReadRepository[UserId, User]
 
   type UserReadWriteRepository = ReadWriteRepository[UserId, User]
+
+  object SpecimenGroupCollectionEventTypeRepository
+    extends ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id) {}
+
+  object CollectionEventTypeAnnotationTypeRepository
+    extends ReadWriteRepository[String, CollectionEventTypeAnnotationType](v => v.id) {}
+
 }
 

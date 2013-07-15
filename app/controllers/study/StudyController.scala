@@ -124,8 +124,6 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
     studyService.getStudy(id) match {
       case Failure(x) => throw new Error(x.head)
       case Success(study) =>
-        val x = studyService.getCollectionEventAnnotationTypes(id).toOption.map(x => x.size).getOrElse(0)
-        Logger.debug("********* x: " + x)
         val counts = Map(
           ("participants" -> "<i>to be implemented</i>"),
           ("collection.events" -> "<i>to be implemented</i>"),

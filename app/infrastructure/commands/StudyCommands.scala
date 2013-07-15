@@ -40,38 +40,6 @@ case class UpdateSpecimenGroupCmd(id: String, expectedVersion: Option[Long],
 case class RemoveSpecimenGroupCmd(id: String, expectedVersion: Option[Long], studyId: String)
   extends SpecimenGroupCommand with HasExpectedVersion
 
-// collection event commands
-trait CollectionEventTypeCommand extends StudyCommand with StudyIdentity
-
-case class AddCollectionEventTypeCmd(
-  studyId: String, name: String, description: Option[String], recurring: Boolean)
-  extends CollectionEventTypeCommand
-
-case class UpdateCollectionEventTypeCmd(
-  id: String, expectedVersion: Option[Long], studyId: String,
-  name: String, description: Option[String], recurring: Boolean)
-  extends CollectionEventTypeCommand with HasExpectedVersion
-
-case class RemoveCollectionEventTypeCmd(
-  id: String, expectedVersion: Option[Long], studyId: String)
-  extends CollectionEventTypeCommand with HasExpectedVersion
-
-case class AddSpecimenGroupToCollectionEventTypeCmd(
-  studyId: String, specimenGroupId: String, collectionEventTypeId: String,
-  count: Int, amount: BigDecimal)
-  extends CollectionEventTypeCommand
-
-case class RemoveSpecimenGroupFromCollectionEventTypeCmd(id: String, studyId: String)
-  extends CollectionEventTypeCommand
-
-case class AddAnnotationTypeToCollectionEventTypeCmd(
-  studyId: String, annotationTypeId: String, collectionEventTypeId: String, required: Boolean)
-  extends CollectionEventTypeCommand
-
-case class RemoveAnnotationTypeFromCollectionEventTypeCmd(
-  id: String, studyId: String)
-  extends CollectionEventTypeCommand
-
 // study annotation type commands
 trait StudyAnnotationTypeCommand extends StudyCommand with StudyIdentity
 
@@ -89,4 +57,22 @@ case class UpdateCollectionEventAnnotationTypeCmd(id: String,
 case class RemoveCollectionEventAnnotationTypeCmd(id: String,
   expectedVersion: Option[Long], studyId: String)
   extends StudyAnnotationTypeCommand with HasExpectedVersion
+
+// collection event commands
+trait CollectionEventTypeCommand extends StudyCommand with StudyIdentity
+
+case class AddCollectionEventTypeCmd(
+  studyId: String, name: String, description: Option[String], recurring: Boolean,
+  specimenGroupIds: Set[String], annotationTypeIds: Set[String])
+  extends CollectionEventTypeCommand
+
+case class UpdateCollectionEventTypeCmd(
+  id: String, expectedVersion: Option[Long], studyId: String, name: String,
+  description: Option[String], recurring: Boolean, specimenGroupIds: Set[String],
+  annotationTypeIds: Set[String])
+  extends CollectionEventTypeCommand with HasExpectedVersion
+
+case class RemoveCollectionEventTypeCmd(
+  id: String, expectedVersion: Option[Long], studyId: String)
+  extends CollectionEventTypeCommand with HasExpectedVersion
 

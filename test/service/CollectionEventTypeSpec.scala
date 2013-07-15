@@ -34,7 +34,8 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring)))
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
+          Set.empty, Set.empty)))
 
       cet1 must beSuccessful.like {
         case x =>
@@ -53,7 +54,8 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring2 = false
 
       val cet2 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name2, None, recurring2)))
+        new AddCollectionEventTypeCmd(study.id.toString, name2, None, recurring2,
+          Set.empty, Set.empty)))
 
       cet2 must beSuccessful.like {
         case x =>
@@ -74,10 +76,12 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring)))
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
+          Set.empty, Set.empty)))
 
       val cet = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring)))
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
+          Set.empty, Set.empty)))
       cet must beFailing.like { case msgs => msgs.head must contain("already exists") }
     }
 
@@ -86,7 +90,8 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring))) | null
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
+          Set.empty, Set.empty))) | null
 
       collectionEventTypeRepository.getMap must haveKey(cet1.id)
 
@@ -95,7 +100,7 @@ class CollectionEventTypeSpec extends StudyFixture {
 
       val cet2 = await(studyService.updateCollectionEventType(
         new UpdateCollectionEventTypeCmd(cet1.id.toString, cet1.versionOption, study.id.toString,
-          name2, Some(name2), recurring2)))
+          name2, Some(name2), recurring2, Set.empty, Set.empty)))
 
       cet2 must beSuccessful.like {
         case x =>
@@ -116,18 +121,20 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring))) | null
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
+          Set.empty, Set.empty))) | null
       collectionEventTypeRepository.getMap must haveKey(cet1.id)
 
       val name2 = nameGenerator.next[Study]
       val recurring2 = true
       val cet2 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name2, Some(name2), recurring2))) | null
+        new AddCollectionEventTypeCmd(study.id.toString, name2, Some(name2), recurring2,
+          Set.empty, Set.empty))) | null
       collectionEventTypeRepository.getMap must haveKey(cet1.id)
 
       val cet3 = await(studyService.updateCollectionEventType(
         new UpdateCollectionEventTypeCmd(cet2.id.toString, cet2.versionOption, study.id.toString,
-          name, Some(name), recurring)))
+          name, Some(name), recurring, Set.empty, Set.empty)))
       cet3 must beFailing.like {
         case msgs => msgs.head must contain("name already exists")
       }
@@ -141,11 +148,12 @@ class CollectionEventTypeSpec extends StudyFixture {
       val study2 = await(studyService.addStudy(new AddStudyCmd(name2, Some(name2)))) | null
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring))) | null
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
+          Set.empty, Set.empty))) | null
 
       val cet2 = await(studyService.updateCollectionEventType(
         new UpdateCollectionEventTypeCmd(cet1.id.toString, cet1.versionOption, study2.id.toString,
-          name2, Some(name2), recurring)))
+          name2, Some(name2), recurring, Set.empty, Set.empty)))
       cet2 must beFailing.like { case msgs => msgs.head must contain("does not belong to study") }
     }
 
@@ -154,7 +162,8 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring))) | null
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
+          Set.empty, Set.empty))) | null
 
       collectionEventTypeRepository.getMap must haveKey(cet1.id)
 
@@ -164,7 +173,7 @@ class CollectionEventTypeSpec extends StudyFixture {
 
       val cet2 = await(studyService.updateCollectionEventType(
         new UpdateCollectionEventTypeCmd(cet1.id.toString, versionOption, study.id.toString,
-          name2, Some(name2), recurring2)))
+          name2, Some(name2), recurring2, Set.empty, Set.empty)))
       cet2 must beFailing.like {
         case msgs => msgs.head must contain("doesn't match current version")
       }
@@ -175,7 +184,8 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, None, recurring))) | null
+        new AddCollectionEventTypeCmd(study.id.toString, name, None, recurring,
+          Set.empty, Set.empty))) | null
       collectionEventTypeRepository.getMap must haveKey(cet1.id)
 
       await(studyService.removeCollectionEventType(
@@ -189,7 +199,8 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring))) | null
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
+          Set.empty, Set.empty))) | null
       collectionEventTypeRepository.getMap must haveKey(cet1.id)
 
       val versionOption = Some(cet1.version + 1)
@@ -217,14 +228,13 @@ class CollectionEventTypeSpec extends StudyFixture {
       specimenGroupRepository.getMap must haveKey(sg1.id)
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring = true))) | null
-      collectionEventTypeRepository.getMap must haveKey(cet1.id)
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring = true,
+          Set(sg1.id.id), Set.empty))) | null
 
-      val sg2cet1 = await(studyService.addSpecimenGroupToCollectionEventType(
-        AddSpecimenGroupToCollectionEventTypeCmd(study.id.toString,
-          sg1.id.toString, cet1.id.toString, 1, 1.0))) | null
-
-      sg2cetRepo.getMap must haveKey(sg2cet1.id)
+      SpecimenGroupCollectionEventTypeRepository.getValues.filter(
+        x => x.collectionEventTypeId.equals(cet1.id)) must contain(
+          (x: SpecimenGroupCollectionEventType) =>
+            x.specimenGroupId mustEqual (sg1.id))
     }
 
     "can be removed" in {
@@ -240,16 +250,22 @@ class CollectionEventTypeSpec extends StudyFixture {
           preservationType, preservationTempType, specimenType))) | null
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring = true))) | null
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring = true,
+          Set(sg1.id.id), Set.empty))) | null
 
-      val sg2cet1 = await(studyService.addSpecimenGroupToCollectionEventType(
-        AddSpecimenGroupToCollectionEventTypeCmd(study.id.toString,
-          sg1.id.toString, cet1.id.toString, 1, 1.0))) | null
+      SpecimenGroupCollectionEventTypeRepository.getValues.filter(
+        x => x.collectionEventTypeId.equals(cet1.id)) must contain(
+          (x: SpecimenGroupCollectionEventType) =>
+            x.specimenGroupId mustEqual (sg1.id))
 
-      val sg2cet2 = await(studyService.removeSpecimenGroupFromCollectionEventType(
-        RemoveSpecimenGroupFromCollectionEventTypeCmd(sg2cet1.id.toString, study.id.toString)))
+      val cet2 = await(studyService.updateCollectionEventType(
+        new UpdateCollectionEventTypeCmd(cet1.id.toString, cet1.versionOption, study.id.toString,
+          name, Some(name), recurring = true, Set.empty, Set.empty))) | null
 
-      sg2cetRepo.getMap must not haveKey (sg2cet1.id)
+      CollectionEventTypeAnnotationTypeRepository.getValues.filter(
+        x => x.collectionEventTypeId.equals(cet1.id)) must contain(
+          (x: CollectionEventTypeAnnotationType) =>
+            x.annotationTypeId mustNotEqual (sg1.id))
     }
   }
 
@@ -259,49 +275,45 @@ class CollectionEventTypeSpec extends StudyFixture {
       val name = nameGenerator.next[CollectionEventTypeAnnotationType]
       val required = true
 
-      val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), true))) | null
-
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
           AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
 
-      val at2cet = await(studyService.addAnnotationTypeToCollectionEventType(
-        AddAnnotationTypeToCollectionEventTypeCmd(study.id.toString,
-          at1.id.toString, cet1.id.toString, required)))
+      val cet1 = await(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), true,
+          Set.empty, Set(at1.id.id)))) | null
 
-      at2cet must beSuccessful.like {
-        case x =>
-          x.annotationTypeId must beEqualTo(at1.id)
-          x.collectionEventTypeId must beEqualTo(cet1.id)
-          x.required must beEqualTo(required)
-          at2cetRepo.getMap must haveKey(x.id)
-      }
+      CollectionEventTypeAnnotationTypeRepository.getValues.filter(
+        x => x.collectionEventTypeId.equals(cet1.id)) must contain(
+          (x: CollectionEventTypeAnnotationType) =>
+            x.annotationTypeId mustEqual (at1.id))
     }
 
     "can be removed" in {
       val name = nameGenerator.next[CollectionEventTypeAnnotationType]
       val required = true
 
-      val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), true))) | null
-
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
           AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
 
-      val at2cet1 = await(studyService.addAnnotationTypeToCollectionEventType(
-        AddAnnotationTypeToCollectionEventTypeCmd(study.id.toString,
-          at1.id.toString, cet1.id.toString, required))) | null
+      val cet1 = await(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), true,
+          Set.empty, Set(at1.id.id)))) | null
 
-      val at2cet2 = await(studyService.removeAnnotationTypeFromCollectionEventType(
-        RemoveAnnotationTypeFromCollectionEventTypeCmd(at2cet1.id.toString, study.id.toString)))
+      CollectionEventTypeAnnotationTypeRepository.getValues.filter(
+        x => x.collectionEventTypeId.equals(cet1.id)) must contain(
+          (x: CollectionEventTypeAnnotationType) =>
+            x.annotationTypeId mustEqual (at1.id))
 
-      at2cet2 must beSuccessful.like {
-        case x =>
-          x.id must beEqualTo(at2cet1.id)
-          at2cetRepo.getMap must not haveKey (x.id)
-      }
+      val cet2 = await(studyService.updateCollectionEventType(
+        new UpdateCollectionEventTypeCmd(cet1.id.toString, cet1.versionOption, study.id.toString,
+          name, Some(name), recurring = true, Set.empty, Set.empty))) | null
+
+      CollectionEventTypeAnnotationTypeRepository.getValues.filter(
+        x => x.collectionEventTypeId.equals(cet1.id)) must contain(
+          (x: CollectionEventTypeAnnotationType) =>
+            x.annotationTypeId mustNotEqual (at1.id))
     }
   }
 }

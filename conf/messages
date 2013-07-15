@@ -31,9 +31,9 @@ biobank.study.none=No studies have been added.
 biobank.study.field.status=Status
 biobank.study.field.participants=Participants
 biobank.study.field.collection.events=Collection Events
-biobank.study.field.collection.event.types=Collection Event Types
 biobank.study.field.specimengroups=Specimen Groups
 biobank.study.field.collection.event.annotation.types=Collection Event Annotation Types
+biobank.study.field.collection.event.types=Collection Event Types
 biobank.study.form.title=Add Study
 biobank.study.form.error.name=Study with this name already exists
 

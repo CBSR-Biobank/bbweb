@@ -102,11 +102,31 @@ class StudyService(
     }
   }
 
-  def getCollectionEventTypes(id: String): DomainValidation[Set[CollectionEventType]] = {
+  def getCollectionEventTypes(studyId: String): DomainValidation[Set[CollectionEventType]] = {
     for {
-      study <- studyRepository.getByKey(StudyId(id))
-      sgSet <- cetRepo.getValues.filter(x => x.studyId.id.equals(id)).toSet.success
+      study <- studyRepository.getByKey(StudyId(studyId))
+      sgSet <- cetRepo.getValues.filter(x => x.studyId.id.equals(studyId)).toSet.success
     } yield sgSet
+  }
+
+  def getCollectionEventTypeSpecimenGroups(
+    studyId: String,
+    collectionEventTypeId: String): DomainValidation[Set[String]] = {
+    for {
+      cet <- getCollectionEventType(studyId, collectionEventTypeId)
+      sgIds <- SpecimenGroupCollectionEventTypeRepository.getValues.filter(
+        x => x.id.equals(collectionEventTypeId)).map(sgcet => sgcet.specimenGroupId.id).success
+    } yield sgIds.toSet
+  }
+
+  def getCollectionEventTypeAnnotationTypes(
+    studyId: String,
+    collectionEventTypeId: String): DomainValidation[Set[String]] = {
+    for {
+      cet <- getCollectionEventType(studyId, collectionEventTypeId)
+      annotTypeIds <- CollectionEventTypeAnnotationTypeRepository.getValues.filter(
+        x => x.id.equals(collectionEventTypeId)).map(cetAt => cetAt.annotationTypeId.id).success
+    } yield annotTypeIds.toSet
   }
 
   def addStudy(cmd: AddStudyCmd)(implicit userId: UserId): Future[DomainValidation[DisabledStudy]] = {
@@ -157,19 +177,7 @@ class StudyService(
     studyProcessor.ask(
       Message(ServiceMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[CollectionEventType]])
 
-  // specimen group -> collection event types
-  def addSpecimenGroupToCollectionEventType(
-    cmd: AddSpecimenGroupToCollectionEventTypeCmd)(implicit userId: UserId): Future[DomainValidation[SpecimenGroupCollectionEventType]] = {
-    studyProcessor.ask(
-      Message(ServiceMsg(cmd, userId, Some(SpecimenGroupCollectionEventTypeIdentityService.nextIdentity)))).map(
-        _.asInstanceOf[DomainValidation[SpecimenGroupCollectionEventType]])
-  }
-
-  def removeSpecimenGroupFromCollectionEventType(cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd)(implicit userId: UserId): Future[DomainValidation[SpecimenGroupCollectionEventType]] =
-    studyProcessor.ask(Message(ServiceMsg(cmd, userId))).map(
-      _.asInstanceOf[DomainValidation[SpecimenGroupCollectionEventType]])
-
-  // study annotation type
+  // collection event annotation types
   def addCollectionEventAnnotationType(
     cmd: AddCollectionEventAnnotationTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]] = {
     studyProcessor.ask(
@@ -185,16 +193,4 @@ class StudyService(
     studyProcessor.ask(
       Message(ServiceMsg(cmd, userId))).map(
         _.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
-
-  // annotation types -> collection event types
-  def addAnnotationTypeToCollectionEventType(
-    cmd: AddAnnotationTypeToCollectionEventTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventTypeAnnotationType]] = {
-    studyProcessor.ask(
-      Message(ServiceMsg(cmd, userId, Some(CollectionEventTypeAnnotationTypeIdentityService.nextIdentity)))).map(
-        _.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
-  }
-
-  def removeAnnotationTypeFromCollectionEventType(cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventTypeAnnotationType]] =
-    studyProcessor.ask(
-      Message(ServiceMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[CollectionEventTypeAnnotationType]])
 }

@@ -117,7 +117,8 @@ class StudyServiceSpec extends StudyFixture with Tags {
           preservationType, preservationTempType, specimenType)))
 
       await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study1.id.toString, name, Some(name), true)))
+        new AddCollectionEventTypeCmd(study1.id.toString, name, Some(name), true,
+          Set.empty, Set.empty)))
 
       await(studyService.enableStudy(
         new EnableStudyCmd(study1.id.toString, study1.versionOption)))
@@ -142,7 +143,8 @@ class StudyServiceSpec extends StudyFixture with Tags {
           preservationType, preservationTempType, specimenType)))
 
       await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study1.id.toString, name, Some(name), true)))
+        new AddCollectionEventTypeCmd(study1.id.toString, name, Some(name), true,
+          Set.empty, Set.empty)))
 
       val study2 = await(studyService.enableStudy(
         new EnableStudyCmd(study1.id.toString, study1.versionOption))) | null

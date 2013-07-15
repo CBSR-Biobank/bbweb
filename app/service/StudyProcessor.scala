@@ -65,9 +65,7 @@ class StudyProcessor(
   studyRepository: StudyReadWriteRepository,
   specimenGroupRepository: SpecimenGroupReadWriteRepository,
   cetRepo: CollectionEventTypeReadWriteRepository,
-  ceventAnnotationTypeRepo: CollectionEventAnnotationTypeReadWriteRepository,
-  sg2cetRepo: SpecimenGroupCollectionEventTypeReadWriteRepository,
-  at2cetRepo: CollectionEventTypeAnnotationTypeReadWriteRepository)
+  ceventAnnotationTypeRepo: CollectionEventAnnotationTypeReadWriteRepository)
   extends Processor with ActorLogging { this: Emitter =>
 
   /**
@@ -80,8 +78,7 @@ class StudyProcessor(
    * The domain service that handles collection event type commands.
    */
   val collectionEventTypeService = new CollectionEventTypeService(
-    studyRepository, cetRepo, specimenGroupRepository, ceventAnnotationTypeRepo,
-    sg2cetRepo, at2cetRepo)
+    studyRepository, cetRepo, specimenGroupRepository, ceventAnnotationTypeRepo)
 
   val annotationTypeService = new StudyAnnotationTypeService(
     ceventAnnotationTypeRepo)
