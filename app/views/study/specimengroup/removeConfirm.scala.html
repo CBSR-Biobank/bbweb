@@ -1,4 +1,4 @@
-@(studyId: String, 
+@(studyId: String,
     studyName: String,
     sg: domain.study.SpecimenGroup)(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
@@ -14,50 +14,28 @@
   ))
   <div class="page-header">
     <h2>@Messages("biobank.study.singular"): @studyName</h2>
+    <h4>@Messages("biobank.study.specimengroup.remove")</h4>
     <div class="alert alert-block">
-     <h3>@Messages("biobank.common.warning")</h3>
+     <h4>@Messages("biobank.common.warning")</h4>
      @Messages("biobank.study.specimengroup.remove.confirm", sg.name)
     </div>
   </div>
-  <div class="clearfix">    
-    <table class="table table-bordered table-hover table-condensed">
-      <tbody>
-        <tr>
-          <td class="header">@Messages("biobank.common.name")</td>
-          <td>@sg.name</td>
-        </tr>
-        <tr>
-          <td class="header">@Messages("biobank.common.description")</td>
-          <td>@sg.description</td>
-        </tr>
-        <tr>
-           <td class="header">@Messages("biobank.study.specimengroup.field.units")</td>
-           <td>@sg.units</td>
-        </tr>
-        <tr>
-           <td class="header">@Messages("biobank.study.specimengroup.field.anatomicalsource")</td>
-           <td>@sg.anatomicalSourceType</td>
-        </tr>
-        <tr>
-           <td class="header">@Messages("biobank.study.specimengroup.field.preservation")</td>
-           <td>@sg.preservationType</td>
-        </tr>
-        <tr>
-           <td class="header">@Messages("biobank.study.specimengroup.field.preservationtemperature")</td>
-           <td>@sg.preservationTemperatureType</td>
-        </tr>
-        <tr>
-           <td class="header">@Messages("biobank.study.specimengroup.field.specimenType")</td>
-           <td>@sg.specimenType</td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="form-actions"> 
+  <div class="clearfix">
+
+    @nameValueRow(Messages("biobank.common.name"), sg.name)
+    @nameValueRow(Messages("biobank.common.description"), sg.description.getOrElse(""))
+    @nameValueRow(Messages("biobank.study.specimengroup.field.units"), sg.units)
+    @nameValueRow(Messages("biobank.study.specimengroup.field.anatomicalsource"), sg.anatomicalSourceType.toString)
+    @nameValueRow(Messages("biobank.study.specimengroup.field.preservation"), sg.preservationType.toString)
+    @nameValueRow(Messages("biobank.study.specimengroup.field.preservationtemperature"), sg.preservationTemperatureType.toString)
+    @nameValueRow(Messages("biobank.study.specimengroup.field.specimentype"), sg.specimenType.toString)
+
+    <div class="form-actions">
       <a href="@routes.SgController.index(studyId,studyName)" class="btn btn-small" type="button">
       @Messages("biobank.common.cancel")</a>
-      <a href="@routes.SgController.removeSpecimenGroup(studyId,studyName,sg.id.id)" 
+      <a href="@routes.SgController.removeSpecimenGroup(studyId,studyName,sg.id.id)"
       class="btn btn-small btn-warning" type="button">
       @Messages("biobank.common.confirm")</a>
     </div>
-  </div>  
-}    
+  </div>
+}

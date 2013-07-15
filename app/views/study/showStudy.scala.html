@@ -21,31 +21,12 @@
         @message
       </div>
     }
-      
-    <table class="table table-bordered table-hover table-condensed">
-      <tbody>
-        <tr>
-  	<td class="header">@Messages("biobank.common.name")</td>
-  	<td>@study.name</td>
-        </tr>
-        <tr>
-  	<td class="header">@Messages("biobank.study.field.status")</td>
-  	<td>@study.status</td>
-        </tr>
-        <tr>
-  	<td class="header">@Messages("biobank.common.description")</td>
-  	<td>@study.description</td>
-        </tr>
-        <tr>
-  	<td class="header">@Messages("biobank.study.field.participants")</td>
-  	<td><i>to be implemented</i></td>
-        </tr>
-        <tr>
-      <td class="header">@Messages("biobank.study.field.collection.events")</td>
-  	<td><i>to be implemented</i></td>
-        </tr>
-      </tbody>
-    </table>
+    
+    @nameValueRow(Messages("biobank.common.name"), study.name)
+    @nameValueRow(Messages("biobank.study.field.status"), study.status)
+    @nameValueRow(Messages("biobank.common.description"), study.description.getOrElse(""))
+    @nameValueRow(Messages("biobank.study.field.participants"), "<i>to be implemented</i>")
+    @nameValueRow(Messages("biobank.study.field.collection.events"), "<i>to be implemented</i>")
   
     <div class="form-actions"> 
       <a href="@routes.SgController.index(study.id.id,study.name)" 

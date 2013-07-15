@@ -1,4 +1,4 @@
-@(studyId: String, 
+@(studyId: String,
     studyName: String,
     ceventType: domain.study.CollectionEventType)(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
@@ -14,39 +14,25 @@
   ))
   <div class="page-header">
     <h2>@Messages("biobank.study.singular"): @studyName</h2>
+    <h4>@Messages("biobank.study.collection.event.type.remove")</h4>
     <div class="alert alert-block">
-     <h3>@Messages("biobank.common.warning")</h3>
+     <h4>@Messages("biobank.common.warning")</h4>
      @Messages("biobank.study.specimengroup.remove.confirm", ceventType.name)
     </div>
   </div>
-  <div class="clearfix">    
-    <table class="table table-bordered table-hover table-condensed">
-      <tbody>
-        <tr>
-          <td class="header">@Messages("biobank.common.name")</td>
-          <td>@ceventType.name</td>
-        </tr>
-        <tr>
-          <td class="header">@Messages("biobank.common.description")</td>
-          <td>@ceventType.description</td>
-        </tr>
-        <tr>
-           <td class="header">@Messages("biobank.study.collection.event.type.field.recurring")</td>
-           <td>
-              @if(ceventType.recurring){ 
-                @Messages("biobank.common.yes")
-              } else { 
-                @Messages("biobank.common.no")
-              }</td>  
-        </tr>        
-      </tbody>
-    </table>
-    <div class="form-actions"> 
+  <div class="clearfix">
+
+    @nameValueRow(Messages("biobank.common.name"), ceventType.name)
+    @nameValueRow(Messages("biobank.common.description"), ceventType.description.getOrElse(""))
+    @nameValueRow(Messages("biobank.study.collection.event.type.field.recurring"),
+      if(ceventType.recurring) Messages("biobank.common.yes") else Messages("biobank.common.no"))
+
+    <div class="form-actions">
       <a href="@routes.CeventTypeController.index(studyId,studyName)" class="btn btn-small" type="button">
       @Messages("biobank.common.cancel")</a>
-      <a href="@routes.CeventTypeController.removeCeventType(studyId,studyName,ceventType.id.id)" 
+      <a href="@routes.CeventTypeController.removeCeventType(studyId,studyName,ceventType.id.id)"
       class="btn btn-small btn-warning" type="button">
       @Messages("biobank.common.confirm")</a>
     </div>
-  </div>  
-}    
+  </div>
+}

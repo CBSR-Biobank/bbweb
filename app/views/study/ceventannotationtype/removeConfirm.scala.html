@@ -1,6 +1,11 @@
-@(studyId: String, 
+@*
+ * fields is a map of the string to display as the field name to the corresponding value.
+ *
+ *@
+@(studyId: String,
     studyName: String,
-    annotType: domain.study.CollectionEventAnnotationType)(
+    annotType: domain.study.CollectionEventAnnotationType,
+    fields: Map[String, String])(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
@@ -14,55 +19,26 @@
   ))
   <div class="page-header">
     <h2>@Messages("biobank.study.singular"): @studyName</h2>
+    <h4>@Messages("biobank.study.collection.event.annotation.type.remove")</h4>
     <div class="alert alert-block">
-     <h3>@Messages("biobank.common.warning")</h3>
-     @Messages("biobank.study.specimengroup.remove.confirm", annotType.name)
+     <h4>@Messages("biobank.common.warning")</h4>
+     <p>
+       @Messages("biobank.study.collection.event.annotation.type.remove.confirm", annotType.name)
+     </p>
     </div>
   </div>
-  <div class="clearfix">    
-    <table class="table table-bordered table-hover table-condensed">
-      <tbody>
-        <tr>
-          <td class="header">@Messages("biobank.common.name")</td>
-          <td>@annotType.name</td>
-        </tr>
-        <tr>
-          <td class="header">@Messages("biobank.common.description")</td>
-          <td>@annotType.description</td>
-        </tr>
-        <tr>
-           <td class="header">@Messages("biobank.annotation.type.field.value.type")</td>
-           <td><span class="label">@annotType.valueType</span></td>
-        </tr>
-        
-        
-        @if(annotType.valueType == domain.AnnotationValueType.Select) {
-          <tr>
-            <td class="header">@Messages("biobank.annotation.type.field.max.value.count")</td>
-            @if(annotType.maxValueCount.getOrElse(0) == 1) {
-              <td>@Messages("biobank.annotation.type.field.max.value.count.single")</td>
-            } else {
-              @if(annotType.maxValueCount.getOrElse(0) > 1) {
-                <td>@Messages("biobank.annotation.type.field.max.value.count.multiple")</td>                  
-              } else {
-                <td><span class="label label-warning">ERROR: @@annotType.maxValueCount</span></td>
-              }
-            }
-          </tr>
-          <tr>
-            <td class="header">@Messages("biobank.annotation.type.field.options")</td>
-            <td><p style="width:50%;">@annotType.options.map( m => m.values.mkString(" ") )</p></td>
-          </tr>
-        } 
-        
-      </tbody>
-    </table>
-    <div class="form-actions"> 
+  <div class="clearfix">
+
+    @for((name,value) <- fields) {
+        @nameValueRow(name, value)
+    }
+    
+    <div class="form-actions">
       <a href="@routes.CeventAnnotTypeController.index(studyId,studyName)" class="btn btn-small" type="button">
       @Messages("biobank.common.cancel")</a>
-      <a href="@routes.CeventAnnotTypeController.removeAnnotationType(studyId,studyName,annotType.id.id)" 
+      <a href="@routes.CeventAnnotTypeController.removeAnnotationType(studyId,studyName,annotType.id.id)"
       class="btn btn-small btn-warning" type="button">
       @Messages("biobank.common.confirm")</a>
     </div>
-  </div>  
-}    
+  </div>
+}

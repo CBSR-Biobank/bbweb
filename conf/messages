@@ -76,8 +76,9 @@ biobank.study.collection.event.annotation.type.show.none=No Collection Event Ann
 biobank.study.collection.event.annotation.type.add=Add Collection Event Annotation Type
 biobank.study.collection.event.annotation.type.update=Update Collection Event Annotation Type
 biobank.study.collection.event.annotation.type.form.error.name=A Collection Event Annotation Type with this name already exists
-biobank.study.collection.event.annotation.remove=Remove Collection Event Annotation Type
+biobank.study.collection.event.annotation.type.remove=Remove Collection Event Annotation Type
 biobank.study.collection.event.annotation.type.removed=Collection Event Annotation Type "{0}" removed.
+biobank.study.collection.event.annotation.type.remove.confirm=Are you sure you want to remove Collection Event Annotation Type "{0}"?
 
 # Collection Event Types
 biobank.study.collection.event.type.show.none=No Collection Event Types have been added to this study.

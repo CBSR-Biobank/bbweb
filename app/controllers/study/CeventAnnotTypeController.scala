@@ -9,6 +9,7 @@ import AnnotationValueType._
 import domain.study._
 import views._
 
+import collection.immutable.ListMap
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -17,6 +18,7 @@ import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
+import play.api.templates._
 import play.api.i18n.Messages
 import play.Logger
 import akka.util.Timeout
@@ -162,7 +164,25 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
     studyService.getCollectionEventAnnotationType(studyId, annotationTypeId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(annotType) =>
-        Ok(html.study.ceventannotationtype.removeConfirm(studyId, studyName, annotType))
+        var fields = ListMap(
+          (Messages("biobank.common.name") -> annotType.name),
+          (Messages("biobank.common.description") -> annotType.name),
+          (Messages("biobank.annotation.type.field.value.type") -> annotType.valueType.toString))
+
+        if (annotType.valueType == domain.AnnotationValueType.Select) {
+          val value = if (annotType.maxValueCount.getOrElse(0) == 1) {
+            Messages("biobank.annotation.type.field.max.value.count.single")
+          } else if (annotType.maxValueCount.getOrElse(0) > 1) {
+            Messages("biobank.annotation.type.field.max.value.count.multiple")
+          } else {
+            "<span class='label label-warning'>ERROR: " + annotType.maxValueCount + "</span>"
+          }
+
+          fields += (Messages("biobank.annotation.type.field.max.value.count") -> value)
+          fields += (Messages("biobank.annotation.type.field.options") ->
+            annotType.options.map(m => m.values.mkString("<br>")).getOrElse(""))
+        }
+        Ok(html.study.ceventannotationtype.removeConfirm(studyId, studyName, annotType, fields))
     }
   }
 

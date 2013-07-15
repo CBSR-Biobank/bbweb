@@ -1,3 +1,18 @@
+@import "bootstrap/variables.less";
+@import "bootstrap/mixins.less";
+
+@borderRadiusTiny:     2px;
+
 .table td.header { 
   font-weight: bold;
+}
+
+.well-tiny {
+  margin-bottom: 10px;
+  padding: 2px;
+  .border-radius(@borderRadiusTiny);
+}
+
+.well-tiny p {
+  margin: 0;
 }
