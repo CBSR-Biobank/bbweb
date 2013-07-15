@@ -267,6 +267,10 @@ class CollectionEventTypeSpec extends StudyFixture {
           (x: CollectionEventTypeAnnotationType) =>
             x.annotationTypeId mustNotEqual (sg1.id))
     }
+
+    "can not be added if specimen group in wrong study" in {
+
+    }
   }
 
   "Annotation type -> collection event type" can {
@@ -314,6 +318,10 @@ class CollectionEventTypeSpec extends StudyFixture {
         x => x.collectionEventTypeId.equals(cet1.id)) must contain(
           (x: CollectionEventTypeAnnotationType) =>
             x.annotationTypeId mustNotEqual (at1.id))
+    }
+
+    "can not be added if annotation type in wrong study" in {
+
     }
   }
 }

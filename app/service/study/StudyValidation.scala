@@ -70,6 +70,22 @@ object StudyValidation {
   }
 
   /**
+   * Returns Success if the Specimen Group with id {@link specimenGroupId} exists and is associated
+   * with the {@link study}.
+   *
+   * @param study the study instance
+   * @param specimenGroupRepository the repository holding all the Specimen Groups
+   * @parm  specimenGroupId the ID of the instance to check.
+   * @return Success if the Specimen Group instance is associated with the study.
+   */
+  def validateSpecimenGroupIds(
+    study: DisabledStudy,
+    specimenGroupRepository: SpecimenGroupReadRepository,
+    specimenGroupIds: Set[String]): DomainValidation[SpecimenGroup] =
+    specimenGroupIds.foreach(
+      x => validateSpecimenGroupId(study, specimenGroupRepository, x))
+
+  /**
    * Returns Success if the Collection Event Type with id {@link collectionEventTypeId} exists and
    * is associated with the {@link study}.
    *

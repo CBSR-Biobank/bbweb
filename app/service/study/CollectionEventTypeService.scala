@@ -78,6 +78,7 @@ protected[service] class CollectionEventTypeService(
     study: DisabledStudy,
     listeners: MessageEmitter,
     id: Option[String]): DomainValidation[CollectionEventType] = {
+
     def addItem(item: CollectionEventType) {
       collectionEventTypeRepository.updateMap(item);
       listeners sendEvent CollectionEventTypeAddedEvent(
@@ -129,6 +130,94 @@ protected[service] class CollectionEventTypeService(
       removedItem <- removeItem(item).success
     } yield item
     CommandHandler.logMethod(log, "removeCollectionEventType", cmd, item)
+    item
+  }
+
+  private def addSpecimenGroupToCollectionEventType(
+    cmd: AddSpecimenGroupToCollectionEventTypeCmd,
+    study: DisabledStudy,
+    listeners: MessageEmitter,
+    id: Option[String]): DomainValidation[SpecimenGroupCollectionEventType] = {
+
+    def createItem(id: String, sg: SpecimenGroup, cet: CollectionEventType) = {
+      val item = cet.addSpecimenGroup(id, sg, cmd.count, cmd.amount)
+      sg2cetRepo.updateMap(item)
+      listeners sendEvent SpecimenGroupAddedToCollectionEventTypeEvent(
+        study.id, item.id, item.collectionEventTypeId, item.specimenGroupId, item.count, item.amount)
+      item
+    }
+
+    val item = for {
+      sg2cetId <- id.toSuccess(DomainError("sg to cet ID is missing"))
+      sg <- StudyValidation.validateSpecimenGroupId(study, specimenGroupRepository, cmd.specimenGroupId)
+      cet <- StudyValidation.validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
+      newItem <- createItem(sg2cetId, sg, cet).success
+    } yield newItem
+    CommandHandler.logMethod(log, "addSpecimenGroupToCollectionEventType", cmd, item)
+    item
+  }
+
+  private def removeSpecimenGroupFromCollectionEventType(
+    cmd: RemoveSpecimenGroupFromCollectionEventTypeCmd,
+    study: DisabledStudy,
+    listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
+
+    def removeItem(item: SpecimenGroupCollectionEventType) = {
+      sg2cetRepo.remove(item)
+      listeners sendEvent SpecimenGroupRemovedFromCollectionEventTypeEvent(
+        study.id, item.id, item.collectionEventTypeId, item.specimenGroupId)
+      item.success
+    }
+
+    val item = for {
+      item <- sg2cetRepo.getByKey(cmd.id)
+      removedItem <- removeItem(item)
+    } yield removedItem
+    CommandHandler.logMethod(log, "removeSpecimenGroupFromCollectionEventType", cmd, item)
+    item
+  }
+
+  private def addAnnotationTypeToCollectionEventType(
+    cmd: AddAnnotationTypeToCollectionEventTypeCmd,
+    study: DisabledStudy,
+    listeners: MessageEmitter,
+    id: Option[String]): DomainValidation[CollectionEventTypeAnnotationType] = {
+    def createItem(at2cetid: String, cet: CollectionEventType,
+      cetAt: CollectionEventAnnotationType): CollectionEventTypeAnnotationType = {
+      val item = cet.addAnnotationType(at2cetid, cetAt, cmd.required)
+      cet2atRepo.updateMap(item)
+      listeners sendEvent AnnotationTypeAddedToCollectionEventTypeEvent(
+        study.id, item.id, item.collectionEventTypeId, item.annotationTypeId)
+      item
+    }
+
+    val item = for {
+      at2cetId <- id.toSuccess(DomainError("at to cet ID is missing"))
+      v1 <- StudyValidation.validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
+      v2 <- StudyValidation.validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
+      newItem <- createItem(at2cetId, v1, v2).success
+    } yield newItem
+    CommandHandler.logMethod(log, "addAnnotationTypeToCollectionEventType", cmd, item)
+    item
+  }
+
+  private def removeAnnotationTypeFromCollectionEventType(
+    cmd: RemoveAnnotationTypeFromCollectionEventTypeCmd,
+    study: DisabledStudy,
+    listeners: MessageEmitter): DomainValidation[CollectionEventTypeAnnotationType] = {
+
+    def removeItem(item: CollectionEventTypeAnnotationType): CollectionEventTypeAnnotationType = {
+      cet2atRepo.remove(item)
+      listeners sendEvent AnnotationTypeRemovedFromCollectionEventTypeEvent(
+        study.id, item.id, item.collectionEventTypeId, item.annotationTypeId)
+      item
+    }
+
+    val item = for {
+      item <- cet2atRepo.getByKey(cmd.id)
+      removedItem <- removeItem(item).success
+    } yield removedItem
+    CommandHandler.logMethod(log, "removeAnnotationTypeFromCollectionEventType", cmd, item)
     item
   }
 
