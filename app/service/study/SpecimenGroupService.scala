@@ -27,9 +27,7 @@ import scalaz.Scalaz._
  *        reading.
  * @param specimenGroupRepository The repository for specimen group entities.
  */
-class SpecimenGroupService(
-  studyRepository: StudyReadRepository,
-  specimenGroupRepository: SpecimenGroupReadWriteRepository)
+class SpecimenGroupService()
   extends CommandHandler {
   import SpecimenGroupService._
 

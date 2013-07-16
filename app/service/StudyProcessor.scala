@@ -1,8 +1,6 @@
 package service
 
 import infrastructure.{
-  DomainValidation,
-  DomainError,
   ProcessorMsg,
   ReadRepository,
   ReadWriteRepository,
@@ -14,6 +12,8 @@ import infrastructure.events._
 import domain.{
   AnnotationTypeId,
   ConcurrencySafeEntity,
+  DomainValidation,
+  DomainError,
   Entity,
   UserId
 }
@@ -63,25 +63,20 @@ case class StudyMessage(cmd: Any, userId: UserId, time: Long, listeners: Message
  */
 class StudyProcessor(
   studyRepository: StudyReadWriteRepository,
-  specimenGroupRepository: SpecimenGroupReadWriteRepository,
-  cetRepo: CollectionEventTypeReadWriteRepository,
-  ceventAnnotationTypeRepo: CollectionEventAnnotationTypeReadWriteRepository)
+  cetRepo: CollectionEventTypeReadWriteRepository)
   extends Processor with ActorLogging { this: Emitter =>
 
   /**
    * The domain service that handles specimen group commands.
    */
-  val specimenGroupService = new SpecimenGroupService(
-    studyRepository, specimenGroupRepository)
+  val specimenGroupService = new SpecimenGroupService()
 
   /**
    * The domain service that handles collection event type commands.
    */
-  val collectionEventTypeService = new CollectionEventTypeService(
-    studyRepository, cetRepo, specimenGroupRepository, ceventAnnotationTypeRepo)
+  val collectionEventTypeService = new CollectionEventTypeService()
 
-  val annotationTypeService = new StudyAnnotationTypeService(
-    ceventAnnotationTypeRepo)
+  val annotationTypeService = new StudyAnnotationTypeService()
 
   def receive = {
     case serviceMsg: ServiceMsg =>

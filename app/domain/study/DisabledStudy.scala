@@ -2,7 +2,14 @@ package domain.study
 
 import infrastructure._
 import infrastructure.commands._
-import domain.{ AnnotationTypeId }
+import domain.{
+  AnnotationTypeId,
+  CollectionEventTypeRepository,
+  CollectionEventAnnotationTypeRepository,
+  DomainError,
+  DomainValidation,
+  SpecimenGroupRepository
+}
 import domain.AnatomicalSourceType._
 import domain.AnnotationValueType._
 import domain.PreservationTemperatureType._
@@ -28,7 +35,6 @@ case class DisabledStudy(
       EnabledStudy(id, version + 1, name, description).success
 
   def addSpecimenGroup(
-    specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
     id: SpecimenGroupId,
     version: Long,
     name: String,
@@ -38,7 +44,7 @@ case class DisabledStudy(
     preservationType: PreservationType,
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =
-    specimenGroupRepository.getValues.exists {
+    SpecimenGroupRepository.getValues.exists {
       item => item.studyId.equals(this.id) && !item.id.equals(id) && item.name.equals(name)
     } match {
       case true =>
@@ -49,40 +55,36 @@ case class DisabledStudy(
     }
 
   def addSpecimenGroup(
-    specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
     cmd: AddSpecimenGroupCmd,
     id: String): DomainValidation[SpecimenGroup] =
-    addSpecimenGroup(specimenGroupRepository, new SpecimenGroupId(id),
+    addSpecimenGroup(new SpecimenGroupId(id),
       version = 0L, cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType,
       cmd.preservationType, cmd.preservationTemperatureType, cmd.specimenType)
 
   def updateSpecimenGroup(
-    specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
     cmd: UpdateSpecimenGroupCmd): DomainValidation[SpecimenGroup] =
     for {
-      prevItem <- specimenGroupRepository.getByKey(new SpecimenGroupId(cmd.id))
+      prevItem <- SpecimenGroupRepository.getByKey(new SpecimenGroupId(cmd.id))
       validVersion <- prevItem.requireVersion(cmd.expectedVersion)
-      newItem <- addSpecimenGroup(specimenGroupRepository, prevItem.id, prevItem.version + 1,
+      newItem <- addSpecimenGroup(prevItem.id, prevItem.version + 1,
         cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
         cmd.preservationTemperatureType, cmd.specimenType)
     } yield newItem
 
   def removeSpecimenGroup(
-    specimenGroupRepository: ReadRepository[SpecimenGroupId, SpecimenGroup],
     cmd: RemoveSpecimenGroupCmd): DomainValidation[SpecimenGroup] =
     for {
-      item <- specimenGroupRepository.getByKey(new SpecimenGroupId(cmd.id))
+      item <- SpecimenGroupRepository.getByKey(new SpecimenGroupId(cmd.id))
       validVersion <- item.requireVersion(cmd.expectedVersion)
     } yield item
 
   def addCollectionEventType(
-    collectionEventTypeRepository: ReadRepository[CollectionEventTypeId, CollectionEventType],
     id: CollectionEventTypeId,
     version: Long,
     name: String,
     description: Option[String],
     recurring: Boolean): DomainValidation[CollectionEventType] =
-    collectionEventTypeRepository.getValues.exists {
+    CollectionEventTypeRepository.getValues.exists {
       item => item.studyId.equals(this.id) && !item.id.equals(id) && item.name.equals(name)
     } match {
       case true =>
@@ -92,33 +94,28 @@ case class DisabledStudy(
     }
 
   def addCollectionEventType(
-    collectionEventTypeRepository: ReadRepository[CollectionEventTypeId, CollectionEventType],
     cmd: AddCollectionEventTypeCmd,
     id: String): DomainValidation[CollectionEventType] =
-    addCollectionEventType(collectionEventTypeRepository,
-      new CollectionEventTypeId(id), version = 0L, cmd.name,
-      cmd.description, cmd.recurring)
+    addCollectionEventType(
+      new CollectionEventTypeId(id), version = 0L, cmd.name, cmd.description, cmd.recurring)
 
   def updateCollectionEventType(
-    collectionEventTypeRepository: ReadRepository[CollectionEventTypeId, CollectionEventType],
     cmd: UpdateCollectionEventTypeCmd): DomainValidation[CollectionEventType] =
     for {
-      prevItem <- collectionEventTypeRepository.getByKey(new CollectionEventTypeId(cmd.id))
+      prevItem <- CollectionEventTypeRepository.getByKey(new CollectionEventTypeId(cmd.id))
       validVersion <- prevItem.requireVersion(cmd.expectedVersion)
-      newItem <- addCollectionEventType(collectionEventTypeRepository, prevItem.id, prevItem.version + 1,
+      newItem <- addCollectionEventType(prevItem.id, prevItem.version + 1,
         cmd.name, cmd.description, cmd.recurring)
     } yield newItem
 
   def removeCollectionEventType(
-    collectionEventTypeRepository: ReadRepository[CollectionEventTypeId, CollectionEventType],
     cmd: RemoveCollectionEventTypeCmd): DomainValidation[CollectionEventType] =
     for {
-      item <- collectionEventTypeRepository.getByKey(new CollectionEventTypeId(cmd.id))
+      item <- CollectionEventTypeRepository.getByKey(new CollectionEventTypeId(cmd.id))
       validVersion <- item.requireVersion(cmd.expectedVersion)
     } yield item
 
   def addCollectionEventAnnotationType(
-    annotationTypeRepo: ReadRepository[AnnotationTypeId, CollectionEventAnnotationType],
     id: AnnotationTypeId,
     version: Long,
     name: String,
@@ -126,7 +123,7 @@ case class DisabledStudy(
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
     options: Option[Map[String, String]]): DomainValidation[CollectionEventAnnotationType] = {
-    annotationTypeRepo.getValues.exists {
+    CollectionEventAnnotationTypeRepository.getValues.exists {
       item => item.studyId.equals(this.id) && !item.id.equals(id) && item.name.equals(name)
     } match {
       case true =>
@@ -138,31 +135,26 @@ case class DisabledStudy(
   }
 
   def addCollectionEventAnnotationType(
-    annotationTypeRepo: ReadRepository[AnnotationTypeId, CollectionEventAnnotationType],
     cmd: AddCollectionEventAnnotationTypeCmd,
     id: String): DomainValidation[CollectionEventAnnotationType] = {
-    addCollectionEventAnnotationType(annotationTypeRepo,
-      new AnnotationTypeId(id), version = 0L,
+    addCollectionEventAnnotationType(new AnnotationTypeId(id), version = 0L,
       cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options)
   }
 
   def updateCollectionEventAnnotationType(
-    annotationTypeRepo: ReadRepository[AnnotationTypeId, CollectionEventAnnotationType],
     cmd: UpdateCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] = {
     for {
-      prevItem <- annotationTypeRepo.getByKey(new AnnotationTypeId(cmd.id))
+      prevItem <- CollectionEventAnnotationTypeRepository.getByKey(new AnnotationTypeId(cmd.id))
       validVersion <- prevItem.requireVersion(cmd.expectedVersion)
-      newItem <- addCollectionEventAnnotationType(annotationTypeRepo, prevItem.id,
-        prevItem.version + 1, cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount,
-        cmd.options)
+      newItem <- addCollectionEventAnnotationType(prevItem.id, prevItem.version + 1, cmd.name,
+        cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options)
     } yield newItem
   }
 
   def removeCollectionEventAnnotationType(
-    studyAnnotationTypeRepository: ReadRepository[AnnotationTypeId, CollectionEventAnnotationType],
     cmd: RemoveCollectionEventAnnotationTypeCmd): DomainValidation[CollectionEventAnnotationType] = {
     for {
-      item <- studyAnnotationTypeRepository.getByKey(new AnnotationTypeId(cmd.id))
+      item <- CollectionEventAnnotationTypeRepository.getByKey(new AnnotationTypeId(cmd.id))
       validVersion <- item.requireVersion(cmd.expectedVersion)
     } yield item
 

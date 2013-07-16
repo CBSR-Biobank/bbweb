@@ -1,8 +1,8 @@
-package infrastructure
+package domain
 
 import scala.concurrent.stm.Ref
 import scala.reflect.ClassTag
-import scala.reflect._
+
 import scalaz._
 import Scalaz._
 
@@ -32,4 +32,3 @@ class ReadWriteRepository[K, A](keyGetter: (A) => K) extends ReadRepository[K, A
     internalMap.single.transform(map => map - keyGetter(value))
 
 }
-

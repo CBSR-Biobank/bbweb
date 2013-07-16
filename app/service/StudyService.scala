@@ -1,14 +1,16 @@
 package service
 
-import infrastructure._
 import infrastructure.commands._
 import infrastructure.events._
 import domain.{
   AnnotationTypeId,
   ConcurrencySafeEntity,
+  DomainValidation,
+  DomainError,
   Entity,
   UserId
 }
+import domain._
 import domain.study._
 import service.study.{ SpecimenGroupService }
 import akka.actor._
@@ -36,10 +38,6 @@ import domain.AnnotationTypeId
  *
  */
 class StudyService(
-  studyRepository: StudyReadRepository,
-  specimenGroupRepository: SpecimenGroupReadRepository,
-  cetRepo: CollectionEventTypeReadRepository,
-  ceventAnnotationTypeRepo: CollectionEventAnnotationTypeReadRepository,
   studyProcessor: ActorRef)(implicit system: ActorSystem)
   extends ApplicationService {
   import system.dispatcher
@@ -48,15 +46,15 @@ class StudyService(
    * FIXME: use paging and sorting
    */
   def getAll: List[Study] = {
-    studyRepository.getValues.toList
+    StudyRepository.getValues.toList
   }
 
   def getStudy(id: String): DomainValidation[Study] = {
-    studyRepository.getByKey(new StudyId(id))
+    StudyRepository.getByKey(new StudyId(id))
   }
 
   def getSpecimenGroup(studyId: String, specimenGroupId: String): DomainValidation[SpecimenGroup] = {
-    specimenGroupRepository.getByKey(SpecimenGroupId(specimenGroupId)) match {
+    SpecimenGroupRepository.getByKey(SpecimenGroupId(specimenGroupId)) match {
       case Failure(x) => x.fail
       case Success(sg) =>
         if (sg.studyId.id.equals(studyId)) sg.success
@@ -66,15 +64,15 @@ class StudyService(
 
   def getSpecimenGroups(id: String): DomainValidation[Set[SpecimenGroup]] = {
     for {
-      study <- studyRepository.getByKey(StudyId(id))
-      sgSet <- specimenGroupRepository.getValues.filter(x => x.studyId.id.equals(id)).toSet.success
+      study <- StudyRepository.getByKey(StudyId(id))
+      sgSet <- SpecimenGroupRepository.getValues.filter(x => x.studyId.id.equals(id)).toSet.success
     } yield sgSet
   }
 
   def getCollectionEventAnnotationType(
     studyId: String,
     annotationTypeId: String): DomainValidation[CollectionEventAnnotationType] = {
-    ceventAnnotationTypeRepo.getByKey(new AnnotationTypeId(annotationTypeId)) match {
+    CollectionEventAnnotationTypeRepository.getByKey(new AnnotationTypeId(annotationTypeId)) match {
       case Failure(x) => x.fail
       case Success(annot) =>
         if (annot.studyId.id.equals(studyId)) annot.success
@@ -84,8 +82,8 @@ class StudyService(
 
   def getCollectionEventAnnotationTypes(id: String): DomainValidation[Set[CollectionEventAnnotationType]] = {
     for {
-      study <- studyRepository.getByKey(StudyId(id))
-      annotTypeSet <- ceventAnnotationTypeRepo.getValues.filter { x =>
+      study <- StudyRepository.getByKey(StudyId(id))
+      annotTypeSet <- CollectionEventTypeAnnotationTypeRepository.getValues.filter { x =>
         x.studyId.id.equals(id) && x.isInstanceOf[CollectionEventAnnotationType]
       }.toSet.success
     } yield annotTypeSet
@@ -94,7 +92,7 @@ class StudyService(
   def getCollectionEventType(
     studyId: String,
     collectionEventTypeId: String): DomainValidation[CollectionEventType] = {
-    cetRepo.getByKey(new CollectionEventTypeId(collectionEventTypeId)) match {
+    CollectionEventTypeRepository.getByKey(new CollectionEventTypeId(collectionEventTypeId)) match {
       case Failure(x) => x.fail
       case Success(ceventType) =>
         if (ceventType.studyId.id.equals(studyId)) ceventType.success
@@ -104,8 +102,8 @@ class StudyService(
 
   def getCollectionEventTypes(studyId: String): DomainValidation[Set[CollectionEventType]] = {
     for {
-      study <- studyRepository.getByKey(StudyId(studyId))
-      sgSet <- cetRepo.getValues.filter(x => x.studyId.id.equals(studyId)).toSet.success
+      study <- StudyRepository.getByKey(StudyId(studyId))
+      sgSet <- CollectionEventTypeRepository.getValues.filter(x => x.studyId.id.equals(studyId)).toSet.success
     } yield sgSet
   }
 

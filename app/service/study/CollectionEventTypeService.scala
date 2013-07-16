@@ -1,8 +1,7 @@
 package service.study
 
-import infrastructure._
 import infrastructure.commands._
-import infrastructure.events._
+import infrastructure.events
 import domain._
 import domain.study.{
   CollectionEventAnnotationType,
@@ -39,11 +38,7 @@ import Scalaz._
  * @param at2cetRepo The value object repository that associates a collection event annotation
  *         type to a collection event type.
  */
-protected[service] class CollectionEventTypeService(
-  studyRepository: StudyReadRepository,
-  collectionEventTypeRepository: CollectionEventTypeReadWriteRepository,
-  specimenGroupRepository: SpecimenGroupReadRepository,
-  annotationTypeRepo: CollectionEventAnnotationTypeReadWriteRepository)
+protected[service] class CollectionEventTypeService()
   extends CommandHandler {
   import CollectionEventTypeService._
 
@@ -80,14 +75,18 @@ protected[service] class CollectionEventTypeService(
     id: Option[String]): DomainValidation[CollectionEventType] = {
 
     def addItem(item: CollectionEventType) {
-      collectionEventTypeRepository.updateMap(item);
+      CollectionEventTypeRepository.updateMap(item);
       listeners sendEvent CollectionEventTypeAddedEvent(
         study.id, item.id, item.name, item.description, item.recurring)
     }
 
     val item = for {
       cetId <- id.toSuccess(DomainError("collection event type ID is missing"))
-      newItem <- study.addCollectionEventType(collectionEventTypeRepository, cmd, cetId)
+      ceventType <- CollectionEventTypeRepository.getValues.exists(
+        item => item.studyId.equals(study.id) && !item.id.equals(id) && item.name.equals(cmd.name)).success
+      validSgs <- StudyValidation.validateSpecimenGroupIds(study, cmd.specimenGroupIds)
+      validAts <- StudyValidation.validateCollectionEventAnnotationTypeIds(study, cmd.annotationTypeIds)
+      newItem <- study.addCollectionEventType(cmd, cetId)
       addItem <- addItem(newItem).success
     } yield newItem
     CommandHandler.logMethod(log, "addCollectionEventType", cmd, item)
@@ -99,15 +98,18 @@ protected[service] class CollectionEventTypeService(
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
     def update(item: CollectionEventType): CollectionEventType = {
-      collectionEventTypeRepository.updateMap(item)
+      CollectionEventTypeRepository.updateMap(item)
       listeners sendEvent CollectionEventTypeUpdatedEvent(
         study.id, item.id, item.name, item.description, item.recurring)
       item
     }
 
     val item = for {
-      validStudy <- StudyValidation.validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.id)
-      newItem <- study.updateCollectionEventType(collectionEventTypeRepository, cmd)
+      validStudy <- StudyValidation.validateCollectionEventTypeId(study, cmd.id)
+      validSgs <- StudyValidation.validateSpecimenGroupIds(study, cmd.specimenGroupIds)
+      validAts <- StudyValidation.validateCollectionEventAnnotationTypeIds(study, cmd.annotationTypeIds)
+      prevItem <- CollectionEventTypeRepository.getByKey(new CollectionEventTypeId(cmd.id))
+      newItem <- study.updateCollectionEventType(prevItem, cmd)
       item <- update(newItem).success
     } yield newItem
     CommandHandler.logMethod(log, "updateCollectionEventType", cmd, item)
@@ -120,7 +122,7 @@ protected[service] class CollectionEventTypeService(
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
 
     def removeItem(item: CollectionEventType) = {
-      collectionEventTypeRepository.remove(item)
+      CollectionEventTypeRepository.remove(item)
       listeners sendEvent CollectionEventTypeRemovedEvent(study.id, item.id)
     }
 
@@ -134,14 +136,12 @@ protected[service] class CollectionEventTypeService(
   }
 
   private def addSpecimenGroupToCollectionEventType(
-    cmd: AddSpecimenGroupToCollectionEventTypeCmd,
-    study: DisabledStudy,
-    listeners: MessageEmitter,
-    id: Option[String]): DomainValidation[SpecimenGroupCollectionEventType] = {
+    collectionEventType: CollectionEventType,
+    specimenGroupIds: Set[String]): DomainValidation[SpecimenGroupCollectionEventType] = {
 
     def createItem(id: String, sg: SpecimenGroup, cet: CollectionEventType) = {
       val item = cet.addSpecimenGroup(id, sg, cmd.count, cmd.amount)
-      sg2cetRepo.updateMap(item)
+      SpecimenGroupCollectionEventTypeRepository.updateMap(item)
       listeners sendEvent SpecimenGroupAddedToCollectionEventTypeEvent(
         study.id, item.id, item.collectionEventTypeId, item.specimenGroupId, item.count, item.amount)
       item
@@ -163,7 +163,7 @@ protected[service] class CollectionEventTypeService(
     listeners: MessageEmitter): DomainValidation[SpecimenGroupCollectionEventType] = {
 
     def removeItem(item: SpecimenGroupCollectionEventType) = {
-      sg2cetRepo.remove(item)
+      SpecimenGroupCollectionEventTypeRepository.remove(item)
       listeners sendEvent SpecimenGroupRemovedFromCollectionEventTypeEvent(
         study.id, item.id, item.collectionEventTypeId, item.specimenGroupId)
       item.success

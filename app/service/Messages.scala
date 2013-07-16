@@ -1,4 +1,4 @@
-package infrastructure
+package service
 
 import infrastructure.commands._
 import domain.UserId

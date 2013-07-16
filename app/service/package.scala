@@ -70,33 +70,5 @@ package object service {
 
   object UserIdentityService extends IdentityService
 
-  type StudyReadRepository = ReadRepository[StudyId, Study]
-
-  type StudyReadWriteRepository = ReadWriteRepository[StudyId, Study]
-
-  type CollectionEventTypeReadRepository = ReadRepository[CollectionEventTypeId, CollectionEventType]
-
-  type CollectionEventTypeReadWriteRepository = ReadWriteRepository[CollectionEventTypeId, CollectionEventType]
-
-  type SpecimenGroupReadRepository = ReadRepository[SpecimenGroupId, SpecimenGroup]
-
-  type SpecimenGroupReadWriteRepository = ReadWriteRepository[SpecimenGroupId, SpecimenGroup]
-
-  type CollectionEventAnnotationTypeReadRepository = ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType]
-
-  type CollectionEventAnnotationTypeReadWriteRepository = ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType]
-
-  type SpecimenGroupCollectionEventTypeReadRepository = ReadWriteRepository[String, SpecimenGroupCollectionEventType]
-
-  type UserReadRepository = ReadRepository[UserId, User]
-
-  type UserReadWriteRepository = ReadWriteRepository[UserId, User]
-
-  object SpecimenGroupCollectionEventTypeRepository
-    extends ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id) {}
-
-  object CollectionEventTypeAnnotationTypeRepository
-    extends ReadWriteRepository[String, CollectionEventTypeAnnotationType](v => v.id) {}
-
 }
 
