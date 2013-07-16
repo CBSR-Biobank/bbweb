@@ -26,10 +26,6 @@ package object service {
      */
     def process: ProcessResult
 
-  }
-
-  object CommandHandler {
-
     def logMethod(
       log: Logger,
       methodName: String,

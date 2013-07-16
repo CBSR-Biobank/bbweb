@@ -1,16 +1,22 @@
 package service.study
 
-import infrastructure._
-import infrastructure.commands._
-import infrastructure.events._
+import service._
+import service.commands._
+import service.events._
 import domain._
 import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
-import domain.study.{ DisabledStudy, SpecimenGroup, SpecimenGroupId, Study, StudyId }
+import domain.study.{
+  DisabledStudy,
+  SpecimenGroup,
+  SpecimenGroupId,
+  SpecimenGroupRepository,
+  Study,
+  StudyId
+}
 import domain.study.Study._
-import service._
 
 import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
@@ -27,8 +33,7 @@ import scalaz.Scalaz._
  *        reading.
  * @param specimenGroupRepository The repository for specimen group entities.
  */
-class SpecimenGroupService()
-  extends CommandHandler {
+class SpecimenGroupService() extends CommandHandler {
   import SpecimenGroupService._
 
   /**
@@ -62,8 +67,7 @@ class SpecimenGroupService()
     listeners: MessageEmitter,
     id: Option[String]): DomainValidation[SpecimenGroup] = {
 
-    def addItem(item: SpecimenGroup) {
-      specimenGroupRepository.updateMap(item);
+    def generateEvent(item: SpecimenGroup) {
       listeners sendEvent StudySpecimenGroupAddedEvent(item.studyId, item.id,
         item.name, item.description, item.units, item.anatomicalSourceType,
         item.preservationType, item.preservationTemperatureType, item.specimenType)
@@ -71,10 +75,13 @@ class SpecimenGroupService()
 
     val item = for {
       sgId <- id.toSuccess(DomainError("specimen group ID is missing"))
-      newItem <- study.addSpecimenGroup(specimenGroupRepository, cmd, sgId)
-      addItem <- addItem(newItem).success
+      newItem <- SpecimenGroupRepository.add(
+        SpecimenGroup(new SpecimenGroupId(sgId), version = -1, study.id, cmd.name, cmd.description,
+          cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
+          cmd.preservationTemperatureType, cmd.specimenType))
+      event <- generateEvent(newItem).success
     } yield newItem
-    CommandHandler.logMethod(log, "addSpecimenGroup", cmd, item)
+    logMethod(log, "addSpecimenGroup", cmd, item)
     item
   }
 
@@ -82,19 +89,22 @@ class SpecimenGroupService()
     cmd: UpdateSpecimenGroupCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
-    def update(item: SpecimenGroup) = {
-      specimenGroupRepository.updateMap(item)
-      listeners sendEvent StudySpecimenGroupUpdatedEvent(study.id,
+
+    def generateEvent(item: SpecimenGroup) = {
+      listeners.sendEvent(StudySpecimenGroupUpdatedEvent(study.id,
         item.id, item.name, item.description, item.units, item.anatomicalSourceType,
-        item.preservationType, item.preservationTemperatureType, item.specimenType)
+        item.preservationType, item.preservationTemperatureType, item.specimenType))
     }
 
     val item = for {
-      validStudy <- StudyValidation.validateSpecimenGroupId(study, specimenGroupRepository, cmd.id)
-      newItem <- study.updateSpecimenGroup(specimenGroupRepository, cmd)
-      item <- update(newItem).success
+      validStudy <- StudyValidation.validateSpecimenGroupId(study, cmd.id)
+      newItem <- SpecimenGroupRepository.add(
+        SpecimenGroup(new SpecimenGroupId(cmd.id), version = -1, study.id, cmd.name, cmd.description,
+          cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
+          cmd.preservationTemperatureType, cmd.specimenType))
+      event <- generateEvent(newItem).success
     } yield newItem
-    CommandHandler.logMethod(log, "updateSpecimenGroup", cmd, item)
+    logMethod(log, "updateSpecimenGroup", cmd, item)
     item
   }
 
@@ -102,18 +112,13 @@ class SpecimenGroupService()
     cmd: RemoveSpecimenGroupCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
-
-    def removeItem(item: SpecimenGroup) = {
-      specimenGroupRepository.remove(item)
-      listeners sendEvent StudySpecimenGroupRemovedEvent(item.studyId, item.id)
-    }
-
     val item = for {
-      validStudy <- StudyValidation.validateSpecimenGroupId(study, specimenGroupRepository, cmd.id)
-      oldItem <- study.removeSpecimenGroup(specimenGroupRepository, cmd)
-      removedItem <- removeItem(oldItem).success
+      specimenGroup <- SpecimenGroupRepository.specimenGroupWithId(
+        StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
+      oldItem <- SpecimenGroupRepository.remove(specimenGroup)
     } yield oldItem
-    CommandHandler.logMethod(log, "removeSpecimenGroup", cmd, item)
+
+    logMethod(log, "removeSpecimenGroup", cmd, item)
     item
   }
 }

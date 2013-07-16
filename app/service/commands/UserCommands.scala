@@ -1,4 +1,4 @@
-package infrastructure.commands
+package service.commands
 
 case class AddUserCmd(
   name: String,

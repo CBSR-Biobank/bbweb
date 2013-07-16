@@ -21,8 +21,7 @@ import scalaz.Scalaz._
  *
  * @author Nelson Loyola
  */
-protected[service] class StudyAnnotationTypeService(
-  annotationTypeRepo: CollectionEventAnnotationTypeReadWriteRepository)
+protected[service] class StudyAnnotationTypeService()
   extends CommandHandler {
   import StudyAnnotationTypeService._
 

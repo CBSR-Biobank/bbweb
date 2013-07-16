@@ -36,6 +36,7 @@ biobank.study.field.collection.event.annotation.types=Collection Event Annotatio
 biobank.study.field.collection.event.types=Collection Event Types
 biobank.study.form.title=Add Study
 biobank.study.form.error.name=Study with this name already exists
+biobank.study.error=Study does not exist
 
 # Specimen Groups 
 biobank.study.specimengroup.add=Add Specimen Group

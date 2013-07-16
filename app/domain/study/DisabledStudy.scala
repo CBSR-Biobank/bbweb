@@ -1,7 +1,6 @@
 package domain.study
 
 import infrastructure._
-import infrastructure.commands._
 import domain.{
   AnnotationTypeId,
   CollectionEventTypeRepository,
@@ -28,34 +27,8 @@ case class DisabledStudy(
 
   override val status = "Disabled"
 
-  def enable(specimenGroupCount: Int, collectionEventTypecount: Int): DomainValidation[EnabledStudy] =
-    if ((specimenGroupCount == 0) || (collectionEventTypecount == 0))
-      DomainError("study has no specimen groups and / or no collection event types").fail
-    else
-      EnabledStudy(id, version + 1, name, description).success
-
   def addSpecimenGroup(
-    id: SpecimenGroupId,
-    version: Long,
-    name: String,
-    description: Option[String],
-    units: String,
-    anatomicalSourceType: AnatomicalSourceType,
-    preservationType: PreservationType,
-    preservationTemperatureType: PreservationTemperatureType,
-    specimenType: SpecimenType): DomainValidation[SpecimenGroup] =
-    SpecimenGroupRepository.getValues.exists {
-      item => item.studyId.equals(this.id) && !item.id.equals(id) && item.name.equals(name)
-    } match {
-      case true =>
-        DomainError("specimen group with name already exists: %s" format name).fail
-      case false =>
-        SpecimenGroup(id, version, this.id, name, description, units, anatomicalSourceType,
-          preservationType, preservationTemperatureType, specimenType).success
-    }
-
-  def addSpecimenGroup(
-    cmd: AddSpecimenGroupCmd,
+    newSpecimenGroup: SpecimenGroup,
     id: String): DomainValidation[SpecimenGroup] =
     addSpecimenGroup(new SpecimenGroupId(id),
       version = 0L, cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType,

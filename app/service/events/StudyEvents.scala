@@ -1,4 +1,4 @@
-package infrastructure.events
+package service.events
 
 import domain.study.StudyId
 import domain.study.SpecimenGroupId

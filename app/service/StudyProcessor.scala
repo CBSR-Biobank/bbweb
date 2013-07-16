@@ -1,14 +1,14 @@
 package service
 
-import infrastructure.{
-  ProcessorMsg,
-  ReadRepository,
-  ReadWriteRepository,
-  ServiceMsg,
-  StudyProcessorMsg
+import service.commands._
+import service.events._
+import service.study.{
+  CollectionEventTypeService,
+  SpecimenGroupService,
+  StudyAnnotationTypeService
 }
-import infrastructure.commands._
-import infrastructure.events._
+import service.study.SpecimenGroupService
+
 import domain.{
   AnnotationTypeId,
   ConcurrencySafeEntity,
@@ -22,13 +22,8 @@ import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
 import domain.AnnotationValueType._
+
 import domain.study._
-import service.study.{
-  CollectionEventTypeService,
-  SpecimenGroupService,
-  StudyAnnotationTypeService
-}
-import service.study.SpecimenGroupService
 import Study._
 
 import akka.actor._
@@ -61,10 +56,8 @@ case class StudyMessage(cmd: Any, userId: UserId, time: Long, listeners: Message
  * @param at2cetRepo The value object repository that associates a collection event annotation
  *         type to a collection event type.
  */
-class StudyProcessor(
-  studyRepository: StudyReadWriteRepository,
-  cetRepo: CollectionEventTypeReadWriteRepository)
-  extends Processor with ActorLogging { this: Emitter =>
+class StudyProcessor()
+  extends Processor { this: Emitter =>
 
   /**
    * The domain service that handles specimen group commands.
@@ -109,6 +102,15 @@ class StudyProcessor(
       throw new Error("invalid message received: ")
   }
 
+  private def validateStudy(studyId: StudyId): DomainValidation[DisabledStudy] =
+    StudyRepository.studyWithId(studyId) match {
+      case Failure(msglist) => noSuchStudy(studyId).fail
+      case Success(study) => study match {
+        case _: EnabledStudy => notDisabledError(study.name).fail
+        case dstudy: DisabledStudy => dstudy.success
+      }
+    }
+
   private def processEntityMsg[T](
     cmd: StudyCommand,
     studyId: String,
@@ -131,63 +133,17 @@ class StudyProcessor(
     super.process(validation)
   }
 
-  private def validateStudy(studyId: StudyId): DomainValidation[DisabledStudy] =
-    studyRepository.getByKey(studyId) match {
-      case Failure(msglist) => noSuchStudy(studyId).fail
-      case Success(study) => study match {
-        case _: EnabledStudy => notDisabledError(study.name).fail
-        case dstudy: DisabledStudy => dstudy.success
-      }
-    }
-
-  def logMethod(methodName: String, cmd: Any, study: DomainValidation[Study]) {
-    if (log.isDebugEnabled) {
-      log.debug("%s: %s".format(methodName, cmd))
-      study match {
-        case Success(item) =>
-          log.debug("%s: %s".format(methodName, item))
-        case Failure(msglist) =>
-          log.debug("%s: { msg: %s }".format(methodName, msglist.head))
-      }
-    }
-  }
-
-  private def addStudy(
-    id: StudyId,
-    version: Long,
-    name: String,
-    description: Option[String]): DomainValidation[DisabledStudy] = {
-
-    def nameCheck(id: StudyId, name: String): DomainValidation[Boolean] = {
-      studyRepository.getValues.exists {
-        item => !item.id.equals(id) && item.name.equals(name)
-      } match {
-        case true => DomainError("study with name already exists: %s" format name).fail
-        case false => true.success
-      }
-    }
-
-    for {
-      nameCheck <- nameCheck(id, name)
-      newItem <- DisabledStudy(id, version, name, description).success
-    } yield newItem
-  }
-
   private def addStudy(
     cmd: AddStudyCmd,
     listeners: MessageEmitter,
     id: Option[String]): DomainValidation[DisabledStudy] = {
 
-    def addItem(item: Study): Study = {
-      studyRepository.updateMap(item)
-      listeners sendEvent StudyAddedEvent(item.id, item.name, item.description)
-      item
-    }
-
     val item = for {
       studyId <- id.toSuccess(DomainError("study ID is missing"))
-      newItem <- addStudy(new StudyId(studyId), version = 0L, cmd.name, cmd.description)
-      addedItem <- addItem(newItem).success
+      newItem <- StudyRepository.add(DisabledStudy(
+        new StudyId(studyId), version = 0L, cmd.name, cmd.description))
+      event <- listeners.sendEvent(StudyAddedEvent(
+        newItem.id, newItem.name, newItem.description)).success
     } yield newItem
 
     logMethod("addStudy", cmd, item)
@@ -197,75 +153,35 @@ class StudyProcessor(
   private def updateStudy(
     cmd: UpdateStudyCmd,
     listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
-    val studyId = new StudyId(cmd.id)
-
-    def updateItem(item: Study) = {
-      studyRepository.updateMap(item)
-      listeners sendEvent StudyUpdatedEvent(item.id, item.name, item.description)
-    }
 
     val item = for {
-      prevItem <- studyRepository.getByKey(new StudyId(cmd.id))
-      validVersion <- prevItem.requireVersion(cmd.expectedVersion)
-      newItem <- addStudy(prevItem.id, prevItem.version + 1, cmd.name, cmd.description)
-      updatedItem <- updateItem(newItem).success
+      newItem <- StudyRepository.update(DisabledStudy(
+        new StudyId(cmd.id), cmd.expectedVersion.getOrElse(-1), cmd.name, cmd.description))
+      event <- listeners.sendEvent(StudyUpdatedEvent(
+        newItem.id, newItem.name, newItem.description)).success
     } yield newItem
 
     logMethod("updateStudy", cmd, item)
     item
   }
 
-  private def enableStudy(cmd: EnableStudyCmd, listeners: MessageEmitter): DomainValidation[EnabledStudy] = {
-    def enableStudy(study: Study): DomainValidation[EnabledStudy] = {
-      study match {
-        case es: EnabledStudy =>
-          DomainError("study is already enabled: {id: %s}".format(es.id)).fail
-        case ds: DisabledStudy =>
-          val specimenGroupCount = specimenGroupRepository.getValues.find(
-            s => s.studyId.equals(ds.id)).size
-          val collectionEventTypecount = cetRepo.getValues.find(
-            s => s.studyId.equals(ds.id)).size
-          ds.enable(specimenGroupCount, collectionEventTypecount)
-      }
-    }
-
-    def updateItem(item: Study) = {
-      studyRepository.updateMap(item)
-      listeners sendEvent StudyEnabledEvent(item.id)
-    }
-
-    val item = for {
-      prevItem <- studyRepository.getByKey(new StudyId(cmd.id))
-      newItem <- enableStudy(prevItem)
-      updatedItem <- updateItem(newItem).success
-    } yield newItem
-
+  private def enableStudy(
+    cmd: EnableStudyCmd,
+    listeners: MessageEmitter): DomainValidation[EnabledStudy] = {
+    val studyId = StudyId(cmd.id)
+    val item = StudyRepository.enable(studyId,
+      SpecimenGroupRepository.allSpecimenGroupsForStudy(studyId).size,
+      CollectionEventTypeRepository.allCollectionEventTypesForStudy(studyId).size)
     logMethod("enableStudy", cmd, item)
     item
   }
 
-  private def disableStudy(cmd: DisableStudyCmd, listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
-    def disableStudy(study: Study): DomainValidation[DisabledStudy] = {
-      study match {
-        case ds: DisabledStudy =>
-          DomainError("study is already disnabled: {id: %s}".format(ds.id)).fail
-        case es: EnabledStudy =>
-          es.disable
-      }
-    }
-
-    def updateItem(item: Study) = {
-      studyRepository.updateMap(item)
-      listeners sendEvent StudyDisabledEvent(item.id)
-    }
-
-    val item = for {
-      prevItem <- studyRepository.getByKey(new StudyId(cmd.id))
-      newItem <- disableStudy(prevItem)
-      updatedItem <- updateItem(newItem).success
-    } yield newItem
-
-    logMethod("disableStudy", cmd, item)
+  private def disableStudy(
+    cmd: DisableStudyCmd,
+    listeners: MessageEmitter): DomainValidation[DisabledStudy] = {
+    val studyId = StudyId(cmd.id)
+    val item = StudyRepository.disable(studyId)
+    logMethod("enableStudy", cmd, item)
     item
   }
 }

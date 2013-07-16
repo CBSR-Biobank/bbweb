@@ -53,21 +53,14 @@ class StudyService(
     StudyRepository.getByKey(new StudyId(id))
   }
 
-  def getSpecimenGroup(studyId: String, specimenGroupId: String): DomainValidation[SpecimenGroup] = {
-    SpecimenGroupRepository.getByKey(SpecimenGroupId(specimenGroupId)) match {
-      case Failure(x) => x.fail
-      case Success(sg) =>
-        if (sg.studyId.id.equals(studyId)) sg.success
-        else DomainError("study does not have specimen group").fail
-    }
+  def getSpecimenGroup(
+    studyId: String, specimenGroupId: String): DomainValidation[SpecimenGroup] = {
+    SpecimenGroupRepository.specimenGroupWithId(
+      StudyId(studyId), SpecimenGroupId(specimenGroupId))
   }
 
-  def getSpecimenGroups(id: String): DomainValidation[Set[SpecimenGroup]] = {
-    for {
-      study <- StudyRepository.getByKey(StudyId(id))
-      sgSet <- SpecimenGroupRepository.getValues.filter(x => x.studyId.id.equals(id)).toSet.success
-    } yield sgSet
-  }
+  def getSpecimenGroups(studyId: String): Set[SpecimenGroup] =
+    SpecimenGroupRepository.allSpecimenGroupsForStudy(StudyId(studyId))
 
   def getCollectionEventAnnotationType(
     studyId: String,

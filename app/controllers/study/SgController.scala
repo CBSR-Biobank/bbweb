@@ -46,11 +46,13 @@ object SgController extends Controller with securesocial.core.SecureSocial {
       "specimenType" -> nonEmptyText)(SpecimenGroupFormObject.apply)(SpecimenGroupFormObject.unapply))
 
   def index(studyId: String, studyName: String) = SecuredAction { implicit request =>
-    studyService.getSpecimenGroups(studyId) match {
-      case Failure(x) => throw new Error(x.head)
-      case Success(sgSet) =>
-        Ok(html.study.specimengroup.show(studyId, studyName, sgSet))
+    studyService.getStudy(studyId) match {
+      case Failure(x) => BadRequest(Messages("biobank.study.error"))
+      case Success(study) =>
+        val specimenGroups = studyService.getSpecimenGroups(studyId)
+        Ok(html.study.specimengroup.show(studyId, studyName, specimenGroups))
     }
+
   }
 
   /**
@@ -58,7 +60,7 @@ object SgController extends Controller with securesocial.core.SecureSocial {
    */
   def addSpecimenGroup(studyId: String) = SecuredAction { implicit request =>
     studyService.getStudy(studyId) match {
-      case Failure(x) => throw new Error(x.head)
+      case Failure(x) => BadRequest(Messages("biobank.study.error"))
       case Success(study) =>
         Ok(html.study.specimengroup.add(specimenGroupForm, AddFormType(), studyId, study.name))
     }

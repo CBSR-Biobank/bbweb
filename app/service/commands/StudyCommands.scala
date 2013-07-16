@@ -1,4 +1,4 @@
-package infrastructure.commands
+package service.commands
 
 import domain.study.CollectionEventId
 import domain.AnatomicalSourceType._

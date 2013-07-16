@@ -1,4 +1,4 @@
-package infrastructure.events
+package service.events
 
 import domain.UserId
 

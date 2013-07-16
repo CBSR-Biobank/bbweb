@@ -13,22 +13,26 @@ import Scalaz._
 class ReadRepository[K, A](keyGetter: (A) => K) {
   protected val internalMap: Ref[Map[K, A]] = Ref(Map.empty[K, A])
 
-  def getMap = internalMap.single.get
-  def getByKey(key: K): DomainValidation[A] = getMap.get(key) match {
+  protected def getMap = internalMap.single.get
+  protected def getByKey(key: K): DomainValidation[A] = getMap.get(key) match {
     case Some(value) => value.success
     case None => DomainError("value does not exist for key: %s" format (key.toString)).fail
   }
-  def getValues: Iterable[A] = getMap.values
-  def getKeys: Iterable[K] = getMap.keys
+  protected def getValues: Iterable[A] = getMap.values
+  protected def getKeys: Iterable[K] = getMap.keys
 
 }
 
 class ReadWriteRepository[K, A](keyGetter: (A) => K) extends ReadRepository[K, A](keyGetter) {
 
-  def updateMap(value: A) =
+  protected def updateMap(value: A) = {
     internalMap.single.transform(map => map + (keyGetter(value) -> value))
+    value
+  }
 
-  def remove(value: A) =
+  protected def removeFromMap(value: A) = {
     internalMap.single.transform(map => map - keyGetter(value))
+    value
+  }
 
 }
