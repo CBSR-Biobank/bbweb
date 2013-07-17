@@ -140,8 +140,8 @@ class StudyProcessor()
 
     val item = for {
       studyId <- id.toSuccess(DomainError("study ID is missing"))
-      newItem <- StudyRepository.add(DisabledStudy(
-        new StudyId(studyId), version = 0L, cmd.name, cmd.description))
+      newItem <- StudyRepository.add(
+        DisabledStudy(new StudyId(studyId), version = 0L, cmd.name, cmd.description))
       event <- listeners.sendEvent(StudyAddedEvent(
         newItem.id, newItem.name, newItem.description)).success
     } yield newItem

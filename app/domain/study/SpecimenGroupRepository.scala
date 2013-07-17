@@ -58,7 +58,11 @@ object SpecimenGroupRepository
       prevItem <- specimenGroupWithId(specimenGroup.studyId, specimenGroup.id)
       validVersion <- prevItem.requireVersion(Some(specimenGroup.version))
       nameValid <- nameAvailable(specimenGroup)
-      updatedItem <- updateMap(specimenGroup).success
+      updatedItem <- SpecimenGroup(specimenGroup.id, prevItem.version + 1, specimenGroup.studyId,
+        specimenGroup.name, specimenGroup.description, specimenGroup.units,
+        specimenGroup.anatomicalSourceType, specimenGroup.preservationType,
+        specimenGroup.preservationTemperatureType, specimenGroup.specimenType).success
+      repoItem <- updateMap(updatedItem).success
     } yield updatedItem
   }
 

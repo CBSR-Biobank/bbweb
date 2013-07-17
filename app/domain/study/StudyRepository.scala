@@ -2,10 +2,14 @@ package domain.study
 
 import domain._
 
+import org.slf4j.LoggerFactory
+
 import scalaz._
 import Scalaz._
 
 object StudyRepository extends ReadWriteRepository[StudyId, Study](v => v.id) {
+
+  val log = LoggerFactory.getLogger(this.getClass)
 
   def allStudies(): Set[Study] = {
     getValues.toSet
@@ -20,7 +24,7 @@ object StudyRepository extends ReadWriteRepository[StudyId, Study](v => v.id) {
 
   private def nameAvailable(study: DisabledStudy): DomainValidation[Boolean] = {
     val exists = getValues.exists { item =>
-      item.id.equals(study.id) && item.name.equals(study.name) && !item.id.equals(study.id)
+      item.name.equals(study.name) && !item.id.equals(study.id)
     }
 
     if (exists)
@@ -46,8 +50,10 @@ object StudyRepository extends ReadWriteRepository[StudyId, Study](v => v.id) {
       prevStudy <- studyWithId(study.id)
       validVersion <- prevStudy.requireVersion(Some(study.version))
       nameValid <- nameAvailable(study)
-      updatedItem <- updateMap(study).success
-    } yield study
+      updatedItem <- DisabledStudy(
+        study.id, prevStudy.version + 1, study.name, study.description).success
+      repoItem <- updateMap(updatedItem).success
+    } yield updatedItem
   }
 
   def enable(
@@ -63,16 +69,18 @@ object StudyRepository extends ReadWriteRepository[StudyId, Study](v => v.id) {
           if ((specimenGroupCount == 0) || (collectionEventTypecount == 0))
             DomainError("study has no specimen groups and / or no collection event types").fail
           else {
-            val study = EnabledStudy(ds.id, ds.version + 1, ds.name, ds.description)
-            updateMap(study)
-            study.success
+            EnabledStudy(ds.id, ds.version + 1, ds.name, ds.description).success
           }
       }
     }
 
+    log.debug("enableStudy: { sgCount: %d, cetCount: %d }".format(
+      specimenGroupCount, collectionEventTypecount))
+
     for {
       prevStudy <- studyWithId(studyId)
       enabledStudy <- doEnable(prevStudy)
+      repoItem <- updateMap(enabledStudy).success
     } yield enabledStudy
   }
 

@@ -33,8 +33,11 @@ import scalaz._
 import Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class SpecimenGroupSpec extends StudyFixture {
-  sequential // forces all tests to be run sequentially
+class SpecimenGroupSpec extends StudyFixture with Tags {
+
+  args(
+    //include = "tag1",
+    sequential = true) // forces all tests to be run sequentially
 
   val nameGenerator = new NameGenerator(classOf[SpecimenGroupSpec].getName)
   val studyName = nameGenerator.next[Study]
@@ -121,7 +124,7 @@ class SpecimenGroupSpec extends StudyFixture {
           x.preservationTemperatureType must be(preservationTempType2)
           x.specimenType must be(specimenType2)
       }
-    }
+    } tag ("tag1")
 
     "not be updated with invalid version" in {
       val name = nameGenerator.next[Study]
@@ -227,7 +230,7 @@ class SpecimenGroupSpec extends StudyFixture {
           name, Some(name), units, anatomicalSourceType, preservationType, preservationTempType,
           specimenType)))
       sg2 must beFailing.like {
-        case msgs => msgs.head must contain("does not belong to study")
+        case msgs => msgs.head must contain("study does not have specimen group")
       }
     }
 

@@ -2,6 +2,7 @@ package domain
 
 import scala.concurrent.stm.Ref
 import scala.reflect.ClassTag
+import org.slf4j.LoggerFactory
 
 import scalaz._
 import Scalaz._
@@ -11,6 +12,7 @@ import Scalaz._
  * To be used by the "Service" class and the "Processor" classes only
  */
 private[domain] class ReadRepository[K, A](keyGetter: (A) => K) {
+
   protected val internalMap: Ref[Map[K, A]] = Ref(Map.empty[K, A])
 
   protected def getMap = internalMap.single.get

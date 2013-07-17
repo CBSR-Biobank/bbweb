@@ -18,7 +18,7 @@ case class CollectionEventType(
   extends ConcurrencySafeEntity[CollectionEventTypeId]
   with HasName with HasDescriptionOption {
 
-  val toStringFormat = """{ id: %s, version: %d, studyId: %s, name: %s, description: %s,""" +
+  val toStringFormat = """CollectionEventType:{ id: %s, version: %d, studyId: %s, name: %s, description: %s,""" +
     """ recurring: %s }"""
 
   override def toString: String = {

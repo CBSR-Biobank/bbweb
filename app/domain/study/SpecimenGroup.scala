@@ -24,7 +24,7 @@ case class SpecimenGroup(
   extends ConcurrencySafeEntity[SpecimenGroupId]
   with HasName with HasDescriptionOption {
 
-  val toStringFormat = """{ id: %s, version: %d, studyId: %s, name: %s, description: %s,""" +
+  val toStringFormat = """SpecimenGroup:{ id: %s, version: %d, studyId: %s, name: %s, description: %s,""" +
     """ units: %s, anatomicalSourceType: %s, preservationType: %s,""" +
     """ preservationTemperatureType: %s, specimenType: %s }"""
 

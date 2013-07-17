@@ -16,13 +16,18 @@ import org.specs2.runner.JUnitRunner
 import akka.actor._
 import org.eligosource.eventsourced.core._
 
+import org.slf4j.LoggerFactory
+
 import scalaz._
 import Scalaz._
 
 @RunWith(classOf[JUnitRunner])
 class StudyServiceSpec extends StudyFixture with Tags {
+
+  val log = LoggerFactory.getLogger(this.getClass)
+
   args(
-    //include = "tag1",
+    include = "tag1",
     sequential = true) // forces all tests to be run sequentially
 
   val nameGenerator = new NameGenerator(classOf[StudyServiceSpec].getName)
@@ -40,7 +45,7 @@ class StudyServiceSpec extends StudyFixture with Tags {
           s.description must beSome(name)
           StudyRepository.studyWithId(s.id) must beSuccessful
       }
-    } tag ("tag1")
+    }
 
     "not be added if same name exists" in {
       val name = nameGenerator.next[Study]
@@ -111,22 +116,28 @@ class StudyServiceSpec extends StudyFixture with Tags {
       val specimenType = SpecimenType.FilteredUrine
 
       val study1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
+      StudyRepository.studyWithId(study1.id) must beSuccessful
 
-      await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study1.id.toString, name, Some(name), units, anatomicalSourceType,
+      val sg1 = await(studyService.addSpecimenGroup(
+        new AddSpecimenGroupCmd(study1.id.id, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
+      sg1 must beSuccessful
 
-      await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study1.id.toString, name, Some(name), true,
+      val cet1 = await(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study1.id.id, name, Some(name), true,
           Set.empty, Set.empty)))
+      cet1 must beSuccessful
 
-      await(studyService.enableStudy(
+      val study2 = await(studyService.enableStudy(
         new EnableStudyCmd(study1.id.toString, study1.versionOption)))
 
-      StudyRepository.studyWithId(study1.id) must beSuccessful.like {
-        case s => s must beAnInstanceOf[EnabledStudy]
+      study2 must beSuccessful.like {
+        case s =>
+          s must beAnInstanceOf[EnabledStudy]
       }
-    }
+
+      StudyRepository.studyWithId(study1.id) must beSuccessful
+    } tag ("tag1")
 
     "be disabled" in {
       val name = nameGenerator.next[Study]

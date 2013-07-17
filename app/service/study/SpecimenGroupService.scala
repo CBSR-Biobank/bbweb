@@ -71,7 +71,7 @@ class SpecimenGroupService() extends CommandHandler {
     val item = for {
       sgId <- id.toSuccess(DomainError("specimen group ID is missing"))
       newItem <- SpecimenGroupRepository.add(
-        SpecimenGroup(new SpecimenGroupId(sgId), version = -1, study.id, cmd.name, cmd.description,
+        SpecimenGroup(new SpecimenGroupId(sgId), 0, study.id, cmd.name, cmd.description,
           cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
           cmd.preservationTemperatureType, cmd.specimenType))
       event <- listeners.sendEvent(StudySpecimenGroupAddedEvent(
@@ -90,8 +90,8 @@ class SpecimenGroupService() extends CommandHandler {
     val item = for {
       oldItem <- SpecimenGroupRepository.specimenGroupWithId(
         StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
-      newItem <- SpecimenGroupRepository.add(
-        SpecimenGroup(new SpecimenGroupId(cmd.id), version = -1, study.id, cmd.name, cmd.description,
+      newItem <- SpecimenGroupRepository.update(
+        SpecimenGroup(new SpecimenGroupId(cmd.id), cmd.expectedVersion.getOrElse(-1), study.id, cmd.name, cmd.description,
           cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
           cmd.preservationTemperatureType, cmd.specimenType))
       event <- listeners.sendEvent(StudySpecimenGroupUpdatedEvent(
@@ -111,6 +111,7 @@ class SpecimenGroupService() extends CommandHandler {
     val item = for {
       specimenGroup <- SpecimenGroupRepository.specimenGroupWithId(
         StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
+      validVersion <- specimenGroup.requireVersion(cmd.expectedVersion)
       oldItem <- SpecimenGroupRepository.remove(specimenGroup)
       event <- listeners.sendEvent(StudySpecimenGroupRemovedEvent(oldItem.studyId, oldItem.id)).success
     } yield oldItem
