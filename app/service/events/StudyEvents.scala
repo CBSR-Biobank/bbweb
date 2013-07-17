@@ -1,10 +1,7 @@
 package service.events
 
-import domain.study.StudyId
-import domain.study.SpecimenGroupId
-import domain.study.CollectionEventTypeId
+import domain.study._
 import domain.AnnotationTypeId
-import domain.UserId
 import domain.AnatomicalSourceType._
 import domain.AnnotationValueType._
 import domain.PreservationType._
@@ -31,11 +28,15 @@ case class StudySpecimenGroupRemovedEvent(studyId: StudyId, specimenGroupId: Spe
 // collection event events
 case class CollectionEventTypeAddedEvent(
   studyId: StudyId, collectionEventTypeId: CollectionEventTypeId,
-  name: String, description: Option[String], recurring: Boolean)
+  name: String, description: Option[String], recurring: Boolean,
+  specimenGroupData: Set[SpecimenGroupCollectionEventType],
+  annotationTypeData: Set[CollectionEventTypeAnnotationType])
 
 case class CollectionEventTypeUpdatedEvent(
   studyId: StudyId, collectionEventTypeId: CollectionEventTypeId,
-  name: String, description: Option[String], recurring: Boolean)
+  name: String, description: Option[String], recurring: Boolean,
+  specimenGroupData: Set[SpecimenGroupCollectionEventType],
+  annotationTypeData: Set[CollectionEventTypeAnnotationType])
 
 case class CollectionEventTypeRemovedEvent(
   studyId: StudyId, collectionEventTypeId: CollectionEventTypeId)

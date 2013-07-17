@@ -12,22 +12,11 @@ case class CollectionEventType(
   studyId: StudyId,
   name: String,
   description: Option[String],
-  recurring: Boolean)
+  recurring: Boolean,
+  specimenGroupData: Set[SpecimenGroupCollectionEventType],
+  annotationTypeData: Set[CollectionEventTypeAnnotationType])
   extends ConcurrencySafeEntity[CollectionEventTypeId]
   with HasName with HasDescriptionOption {
-
-  def addSpecimenGroup(
-    id: String,
-    sg: SpecimenGroup,
-    count: Int,
-    amount: BigDecimal): SpecimenGroupCollectionEventType =
-    SpecimenGroupCollectionEventType(id, sg.id, this.id, count, amount)
-
-  def addAnnotationType(
-    id: String,
-    item: CollectionEventAnnotationType,
-    required: Boolean): CollectionEventTypeAnnotationType =
-    CollectionEventTypeAnnotationType(id, this.id, item.id, required)
 
   val toStringFormat = """{ id: %s, version: %d, studyId: %s, name: %s, description: %s,""" +
     """ recurring: %s }"""

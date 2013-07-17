@@ -66,11 +66,12 @@ class StudyService(
   def getCollectionEventAnnotationType(
     studyId: String,
     annotationTypeId: String): DomainValidation[CollectionEventAnnotationType] = {
-    CollectionEventAnnotationTypeRepository.annotationTypeWithId(new AnnotationTypeId(annotationTypeId))
+    CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+      StudyId(studyId), AnnotationTypeId(annotationTypeId))
   }
 
   // FIXME: rename to allCollectionEventAnnotationType
-  def getCollectionEventAnnotationTypes(id: String): DomainValidation[Set[CollectionEventAnnotationType]] = {
+  def getCollectionEventAnnotationTypes(id: String): Set[CollectionEventAnnotationType] = {
     CollectionEventAnnotationTypeRepository.allCollectionEventAnnotationTypesForStudy(StudyId(id))
   }
 
@@ -85,26 +86,6 @@ class StudyService(
   // FIXME: rename to allCollectionEventType
   def getCollectionEventTypes(studyId: String): Set[CollectionEventType] = {
     CollectionEventTypeRepository.allCollectionEventTypesForStudy(StudyId(studyId))
-  }
-
-  def getCollectionEventTypeSpecimenGroups(
-    studyId: String,
-    collectionEventTypeId: String): DomainValidation[Set[String]] = {
-    for {
-      cet <- getCollectionEventType(studyId, collectionEventTypeId)
-      sgIds <- SpecimenGroupCollectionEventTypeRepository.getValues.filter(
-        x => x.id.equals(collectionEventTypeId)).map(sgcet => sgcet.specimenGroupId.id).success
-    } yield sgIds.toSet
-  }
-
-  def getCollectionEventTypeAnnotationTypes(
-    studyId: String,
-    collectionEventTypeId: String): DomainValidation[Set[String]] = {
-    for {
-      cet <- getCollectionEventType(studyId, collectionEventTypeId)
-      annotTypeIds <- CollectionEventTypeAnnotationTypeRepository.getValues.filter(
-        x => x.id.equals(collectionEventTypeId)).map(cetAt => cetAt.annotationTypeId.id).success
-    } yield annotTypeIds.toSet
   }
 
   def addStudy(cmd: AddStudyCmd)(implicit userId: UserId): Future[DomainValidation[DisabledStudy]] = {

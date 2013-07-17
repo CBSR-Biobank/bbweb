@@ -45,9 +45,7 @@ package object service {
   }
 
   trait IdentityService {
-
     def nextIdentity: String = java.util.UUID.randomUUID.toString.toUpperCase
-
   }
 
   object StudyIdentityService extends IdentityService

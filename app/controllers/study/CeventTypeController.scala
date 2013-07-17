@@ -26,18 +26,19 @@ import Scalaz._
 
 case class CeventTypeFormObject(
   collectionEventTypeId: String, version: Long, studyId: String, name: String,
-  description: Option[String], recurring: Boolean, specimenGroupIds: List[String],
-  annotationTypeIds: List[String]) {
+  description: Option[String], recurring: Boolean,
+  specimenGroupData: List[SpecimenGroupCollectionEventType],
+  annotationTypeData: List[CollectionEventTypeAnnotationType]) {
 
   def getAddCmd: AddCollectionEventTypeCmd = {
     AddCollectionEventTypeCmd(studyId, name, description, recurring,
-      specimenGroupIds.toSet, annotationTypeIds.toSet)
+      specimenGroupData.toSet, annotationTypeData.toSet)
   }
 
   def getUpdateCmd: UpdateCollectionEventTypeCmd = {
     UpdateCollectionEventTypeCmd(
       collectionEventTypeId, Some(version), studyId, name, description, recurring,
-      specimenGroupIds.toSet, annotationTypeIds.toSet)
+      specimenGroupData.toSet, annotationTypeData.toSet)
   }
 }
 
@@ -63,11 +64,8 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
       "annotationTypes" -> list(text))(CeventTypeFormObject.apply)(CeventTypeFormObject.unapply))
 
   def index(studyId: String, studyName: String) = SecuredAction { implicit request =>
-    studyService.getCollectionEventTypes(studyId) match {
-      case Failure(x) => throw new Error(x.head)
-      case Success(ceventTypeSet) =>
-        Ok(html.study.ceventtype.show(studyId, studyName, ceventTypeSet))
-    }
+    val ceventTypes = studyService.getCollectionEventTypes(studyId)
+    Ok(html.study.ceventtype.show(studyId, studyName, ceventTypes))
   }
 
   /**
@@ -115,10 +113,6 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
     studyService.getCollectionEventType(studyId, ceventTypeId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(ceventType) =>
-        val specimenGroupIds = studyService.getCollectionEventTypeSpecimenGroups(
-          studyId, ceventType.id.id).toOption.map(x => x.toList).getOrElse(List.empty)
-        val annotationTypeIds = studyService.getCollectionEventTypeAnnotationTypes(
-          studyId, ceventType.id.id).toOption.map(x => x.toList).getOrElse(List.empty)
         val form = ceventTypeForm.fill(CeventTypeFormObject(
           ceventType.id.id, ceventType.version, ceventType.studyId.id, ceventType.name,
           ceventType.description, ceventType.recurring, specimenGroupIds, annotationTypeIds))

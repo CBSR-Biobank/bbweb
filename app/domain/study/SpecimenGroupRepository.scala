@@ -23,6 +23,7 @@ object SpecimenGroupRepository
     }
 
   }
+
   def allSpecimenGroupsForStudy(studyId: StudyId): Set[SpecimenGroup] = {
     getValues.filter(x => x.studyId.equals(id)).toSet
   }

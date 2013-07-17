@@ -21,16 +21,8 @@ package object domain {
   //trait HasUpdatedBy { val updatedBy: Option[UserId] }
   //trait HasTimeUpdated { val timeUpdated: Option[Long] } 
 
-  type SpecimenGroupCollectionEventTypeReadRepository = ReadWriteRepository[String, SpecimenGroupCollectionEventType]
-
   type UserReadRepository = ReadRepository[UserId, User]
 
   type UserReadWriteRepository = ReadWriteRepository[UserId, User]
-
-  object SpecimenGroupCollectionEventTypeRepository
-    extends ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id) {}
-
-  object CollectionEventTypeAnnotationTypeRepository
-    extends ReadWriteRepository[String, CollectionEventTypeAnnotationType](v => v.id) {}
 
 }

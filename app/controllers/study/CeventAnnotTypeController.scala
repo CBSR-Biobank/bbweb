@@ -70,11 +70,8 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
       "selections" -> list(text))(AnnotationTypeFormObject.apply)(AnnotationTypeFormObject.unapply))
 
   def index(studyId: String, studyName: String) = SecuredAction { implicit request =>
-    studyService.getCollectionEventAnnotationTypes(studyId) match {
-      case Failure(x) => throw new Error(x.head)
-      case Success(attrSet) =>
-        Ok(html.study.ceventannotationtype.show(studyId, studyName, attrSet))
-    }
+    val annotTypes = studyService.getCollectionEventAnnotationTypes(studyId)
+    Ok(html.study.ceventannotationtype.show(studyId, studyName, annotTypes))
   }
 
   /**

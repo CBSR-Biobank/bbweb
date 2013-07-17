@@ -49,8 +49,7 @@ object AppServices {
     val userRepo = new ReadWriteRepository[UserId, User](v => new UserId(v.email))
 
     val multicastTargets = List(
-      system.actorOf(Props(new StudyProcessor(
-        studyRepository, collectionEventTypeRepository) with Emitter)),
+      system.actorOf(Props(new StudyProcessor() with Emitter)),
       system.actorOf(Props(new UserProcessor(userRepo) with Emitter)))
 
     // this is the commnad bus

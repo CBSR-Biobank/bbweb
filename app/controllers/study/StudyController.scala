@@ -60,20 +60,19 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
       formObj => {
         Async {
           implicit val userId = UserId(request.user.id.id)
-          studyService.addStudy(formObj.getAddCmd).map(
-            study => study match {
-              case Success(study) =>
-                Redirect(routes.StudyController.showStudy(study.id.id)).flashing(
-                  "success" -> Messages("biobank.study.added", study.name))
-              case Failure(x) =>
-                if (x.head.contains("study with name already exists")) {
-                  val form = studyForm.fill(formObj).withError("name",
-                    Messages("biobank.study.form.error.name"))
-                  BadRequest(html.study.addStudy(form, AddFormType(), ""))
-                } else {
-                  throw new Error(x.head)
-                }
-            })
+          studyService.addStudy(formObj.getAddCmd).map(study => study match {
+            case Success(study) =>
+              Redirect(routes.StudyController.showStudy(study.id.id)).flashing(
+                "success" -> Messages("biobank.study.added", study.name))
+            case Failure(x) =>
+              if (x.head.contains("study with name already exists")) {
+                val form = studyForm.fill(formObj).withError("name",
+                  Messages("biobank.study.form.error.name"))
+                BadRequest(html.study.addStudy(form, AddFormType(), ""))
+              } else {
+                throw new Error(x.head)
+              }
+          })
         }
       })
   }
@@ -127,12 +126,10 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
         val counts = Map(
           ("participants" -> "<i>to be implemented</i>"),
           ("collection.events" -> "<i>to be implemented</i>"),
-          ("specimen.groups" -> studyService.getSpecimenGroups(id).toOption.map(
-            x => x.size.toString).getOrElse("0")),
-          ("collection.event.annotation.types" -> studyService.getCollectionEventAnnotationTypes(id).toOption.map(
-            x => x.size.toString).getOrElse("0")),
-          ("collection.event.types" -> studyService.getCollectionEventTypes(id).toOption.map(
-            x => x.size.toString).getOrElse("0")))
+          ("specimen.groups" -> studyService.getSpecimenGroups(id).size.toString),
+          ("collection.event.annotation.types" ->
+            studyService.getCollectionEventAnnotationTypes(id).size.toString),
+          ("collection.event.types" -> studyService.getCollectionEventTypes(id).size.toString))
         Ok(html.study.showStudy(study, counts))
     }
   }

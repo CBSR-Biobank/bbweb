@@ -10,7 +10,7 @@ import Scalaz._
  * A Wrapper around an STM Ref of a Map.
  * To be used by the "Service" class and the "Processor" classes only
  */
-class ReadRepository[K, A](keyGetter: (A) => K) {
+private[domain] class ReadRepository[K, A](keyGetter: (A) => K) {
   protected val internalMap: Ref[Map[K, A]] = Ref(Map.empty[K, A])
 
   protected def getMap = internalMap.single.get

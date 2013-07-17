@@ -1,5 +1,6 @@
 package service.commands
 
+import domain.study._
 import domain.study.CollectionEventId
 import domain.AnatomicalSourceType._
 import domain.PreservationType._
@@ -63,13 +64,15 @@ trait CollectionEventTypeCommand extends StudyCommand with StudyIdentity
 
 case class AddCollectionEventTypeCmd(
   studyId: String, name: String, description: Option[String], recurring: Boolean,
-  specimenGroupIds: Set[String], annotationTypeIds: Set[String])
+  specimenGroupData: Set[SpecimenGroupCollectionEventType],
+  annotationTypeData: Set[CollectionEventTypeAnnotationType])
   extends CollectionEventTypeCommand
 
 case class UpdateCollectionEventTypeCmd(
   id: String, expectedVersion: Option[Long], studyId: String, name: String,
-  description: Option[String], recurring: Boolean, specimenGroupIds: Set[String],
-  annotationTypeIds: Set[String])
+  description: Option[String], recurring: Boolean,
+  specimenGroupData: Set[SpecimenGroupCollectionEventType],
+  annotationTypeData: Set[CollectionEventTypeAnnotationType])
   extends CollectionEventTypeCommand with HasExpectedVersion
 
 case class RemoveCollectionEventTypeCmd(
