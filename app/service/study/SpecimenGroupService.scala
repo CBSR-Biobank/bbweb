@@ -91,7 +91,7 @@ class SpecimenGroupService() extends CommandHandler {
       oldItem <- SpecimenGroupRepository.specimenGroupWithId(
         StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
       newItem <- SpecimenGroupRepository.update(
-        SpecimenGroup(new SpecimenGroupId(cmd.id), cmd.expectedVersion.getOrElse(-1), study.id, cmd.name, cmd.description,
+        SpecimenGroup(oldItem.id, cmd.expectedVersion.getOrElse(-1), study.id, cmd.name, cmd.description,
           cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
           cmd.preservationTemperatureType, cmd.specimenType))
       event <- listeners.sendEvent(StudySpecimenGroupUpdatedEvent(
@@ -109,11 +109,14 @@ class SpecimenGroupService() extends CommandHandler {
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
 
     val item = for {
-      specimenGroup <- SpecimenGroupRepository.specimenGroupWithId(
+      oldItem <- SpecimenGroupRepository.specimenGroupWithId(
         StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
-      validVersion <- specimenGroup.requireVersion(cmd.expectedVersion)
-      oldItem <- SpecimenGroupRepository.remove(specimenGroup)
-      event <- listeners.sendEvent(StudySpecimenGroupRemovedEvent(oldItem.studyId, oldItem.id)).success
+      itemToRemove <- SpecimenGroup(oldItem.id, cmd.expectedVersion.getOrElse(-1),
+        study.id, oldItem.name, oldItem.description, oldItem.units, oldItem.anatomicalSourceType,
+        oldItem.preservationType, oldItem.preservationTemperatureType, oldItem.specimenType).success
+      removedItem <- SpecimenGroupRepository.remove(itemToRemove)
+      event <- listeners.sendEvent(StudySpecimenGroupRemovedEvent(
+        removedItem.studyId, removedItem.id)).success
     } yield oldItem
 
     logMethod(log, "removeSpecimenGroup", cmd, item)

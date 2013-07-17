@@ -97,8 +97,8 @@ protected[service] class CollectionEventTypeService() extends CommandHandler {
       oldItem <- CollectionEventTypeRepository.collectionEventTypeWithId(
         study.id, CollectionEventTypeId(cmd.id))
       newItem <- CollectionEventTypeRepository.update(CollectionEventType(
-        CollectionEventTypeId(cmd.id), 0L, study.id, cmd.name, cmd.description, cmd.recurring,
-        cmd.specimenGroupData, cmd.annotationTypeData))
+        CollectionEventTypeId(cmd.id), cmd.expectedVersion.getOrElse(-1), study.id, cmd.name,
+        cmd.description, cmd.recurring, cmd.specimenGroupData, cmd.annotationTypeData))
       event <- listeners.sendEvent(CollectionEventTypeUpdatedEvent(
         study.id, newItem.id, newItem.name, newItem.description, newItem.recurring,
         newItem.specimenGroupData, newItem.annotationTypeData)).success
@@ -112,10 +112,15 @@ protected[service] class CollectionEventTypeService() extends CommandHandler {
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
     val item = for {
-      item <- CollectionEventTypeRepository.collectionEventTypeWithId(
+      oldItem <- CollectionEventTypeRepository.collectionEventTypeWithId(
         study.id, CollectionEventTypeId(cmd.id))
-      oldItem <- CollectionEventTypeRepository.remove(item)
-      event <- listeners.sendEvent(CollectionEventTypeRemovedEvent(item.studyId, item.id)).success
+      itemToRemove <- CollectionEventType(
+        CollectionEventTypeId(cmd.id), cmd.expectedVersion.getOrElse(-1), study.id,
+        oldItem.name, oldItem.description, oldItem.recurring, oldItem.specimenGroupData,
+        oldItem.annotationTypeData).success
+      removedItem <- CollectionEventTypeRepository.remove(itemToRemove)
+      event <- listeners.sendEvent(CollectionEventTypeRemovedEvent(
+        removedItem.studyId, removedItem.id)).success
     } yield oldItem
     logMethod(log, "removeCollectionEventType", cmd, item)
     item

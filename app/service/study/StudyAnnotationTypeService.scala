@@ -79,9 +79,11 @@ protected[service] class StudyAnnotationTypeService() extends CommandHandler {
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
 
     val item = for {
-      item <- CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+      oldItem <- CollectionEventAnnotationTypeRepository.annotationTypeWithId(
         study.id, AnnotationTypeId(cmd.id))
-      newItem <- CollectionEventAnnotationTypeRepository.update(item)
+      newItem <- CollectionEventAnnotationTypeRepository.update(CollectionEventAnnotationType(
+        oldItem.id, cmd.expectedVersion.getOrElse(-1), study.id, cmd.name, cmd.description,
+        cmd.valueType, cmd.maxValueCount, cmd.options))
       event <- listeners.sendEvent(CollectionEventAnnotationTypeUpdatedEvent(
         newItem.studyId, newItem.id, newItem.name, newItem.description, newItem.valueType,
         newItem.maxValueCount, newItem.options)).success
@@ -96,11 +98,14 @@ protected[service] class StudyAnnotationTypeService() extends CommandHandler {
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
 
     val item = for {
-      item <- CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+      oldItem <- CollectionEventAnnotationTypeRepository.annotationTypeWithId(
         study.id, AnnotationTypeId(cmd.id))
-      oldItem <- CollectionEventAnnotationTypeRepository.remove(item)
+      itemToRemove <- CollectionEventAnnotationType(
+        oldItem.id, cmd.expectedVersion.getOrElse(-1), study.id, oldItem.name, oldItem.description,
+        oldItem.valueType, oldItem.maxValueCount, oldItem.options).success
+      removedItem <- CollectionEventAnnotationTypeRepository.remove(itemToRemove)
       event <- listeners.sendEvent(CollectionEventAnnotationTypeRemovedEvent(
-        item.studyId, item.id)).success
+        removedItem.studyId, removedItem.id)).success
     } yield oldItem
     logMethod(log, "removeCollectionEventAnnotationType", cmd, item)
     item
