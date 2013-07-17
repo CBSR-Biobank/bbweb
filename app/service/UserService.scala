@@ -20,41 +20,32 @@ import org.eligosource.eventsourced.core._
 import scalaz._
 import Scalaz._
 
-class UserService(
-  userRepo: ReadWriteRepository[domain.UserId, User],
-  userProcessor: ActorRef)(implicit system: ActorSystem) {
+class UserService(userProcessor: ActorRef)(implicit system: ActorSystem)
+  extends ApplicationService {
   import system.dispatcher
 
-  implicit val timeout = Timeout(5.seconds)
+  //implicit val timeout = Timeout(5.seconds)
 
   def find(id: securesocial.core.UserId): Option[securesocial.core.Identity] = {
-    if (Logger.isDebugEnabled) {
-      Logger.debug("find { id: %s }".format(id.id))
-    }
-    userRepo.getValues.find(u => u.email.equals(id.id)) match {
-      case Some(user) => some(toSecureSocialIdentity(user))
-      case None => none
+    UserRepository.userWithId(UserId(id.id)) match {
+      case Success(user) => some(toSecureSocialIdentity(user))
+      case Failure(x) => none
     }
   }
 
   def findByEmailAndProvider(
     email: String, providerId: String): Option[securesocial.core.Identity] = {
-    if (Logger.isDebugEnabled) {
-      Logger.debug("findByEmailAndProvider { email: %s, providerId: %s }".format(email, providerId))
-    }
-    userRepo.getValues.find {
-      // FIXME: add provider
-      user => user.email.equals(email)
-    } match {
-      case Some(user) => some(toSecureSocialIdentity(user))
-      case None => none
+    UserRepository.userWithId(UserId(email)) match {
+      case Success(user) => some(toSecureSocialIdentity(user))
+      case Failure(x) => none
     }
   }
 
-  def getByEmail(email: String): Option[User] =
-    userRepo.getMap.values.find(u => u.email.equals(email))
+  def getByEmail(email: String): Option[User] = {
+    UserRepository.userWithId(UserId(email)).toOption
+  }
 
-  def toSecureSocialIdentity(user: User): securesocial.core.Identity = {
+  private def toSecureSocialIdentity(user: User): securesocial.core.Identity = {
     SocialUser(securesocial.core.UserId(user.email, "userpass"),
       user.email, user.email, user.email,
       some(user.email), None, AuthenticationMethod.UserPassword, None, None,
@@ -75,8 +66,7 @@ class UserService(
 
 }
 
-class UserProcessor(
-  userRepo: ReadWriteRepository[domain.UserId, User]) extends Processor {
+class UserProcessor() extends Processor {
   this: Emitter =>
 
   def receive = {
@@ -93,30 +83,7 @@ class UserProcessor(
   }
 
   def addUser(cmd: AddUserCmd, listeners: MessageEmitter): DomainValidation[User] = {
-    def userIdExists(id: Option[String]): DomainValidation[UserId] = {
-      id match {
-        case Some(id) => new UserId(id).success
-        case None => DomainError("missing ID value").fail
-      }
-    }
-
-    def userExists(email: String): DomainValidation[Boolean] = {
-      if (userRepo.getValues.exists(u => u.email.equals(cmd.email)))
-        DomainError("user with email already exists: %s" format cmd.email).fail
-      else
-        true.success
-    }
-
-    def addItem(item: User) {
-      userRepo.updateMap(item)
-      listeners sendEvent UserAddedEvent(item.id, item.name, item.email)
-    }
-
-    for {
-      userId <- userIdExists(cmd.userId)
-      emailCheck <- userExists(cmd.email)
-      newUser <- User.add(userId, cmd.name, cmd.email, cmd.password, cmd.hasher, cmd.salt, cmd.salt)
-      addedItem <- addItem(newUser).success
-    } yield newUser
+    UserRepository.add(RegisteredUser(UserId(cmd.email), 0L, cmd.name, cmd.email,
+      cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl))
   }
 }

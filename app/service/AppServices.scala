@@ -39,28 +39,19 @@ object AppServices {
     val journal = Journal(journalProps)
     val extension = EventsourcingExtension(system, journal)
 
-    val studyRepository = new ReadWriteRepository[StudyId, Study](v => v.id)
-    val collectionEventTypeRepository =
-      new ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
-    val sg2cetRepo =
-      new ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id)
-    val cet2atRepo =
-      new ReadWriteRepository[String, CollectionEventTypeAnnotationType](v => v.id)
-    val userRepo = new ReadWriteRepository[UserId, User](v => new UserId(v.email))
-
     val multicastTargets = List(
       system.actorOf(Props(new StudyProcessor() with Emitter)),
-      system.actorOf(Props(new UserProcessor(userRepo) with Emitter)))
+      system.actorOf(Props(new UserProcessor() with Emitter)))
 
     // this is the commnad bus
     val multicastProcessor = extension.processorOf(
       ProcessorProps(1, pid => new Multicast(multicastTargets, identity) with Confirm with Eventsourced { val id = pid }))
 
     val studyService = new StudyService(multicastProcessor)
-    val userService = new UserService(userRepo, multicastProcessor)
+    val userService = new UserService(multicastProcessor)
 
     // for debug only - password is "administrator"
-    userRepo.updateMap(User.add(new UserId("admin@admin.com"), "admin", "admin@admin.com",
+    UserRepository.add(User.add(new UserId("admin@admin.com"), "admin", "admin@admin.com",
       "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS",
       "bcrypt", None, None) | null)
 

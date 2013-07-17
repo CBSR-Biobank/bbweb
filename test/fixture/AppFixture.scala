@@ -39,20 +39,18 @@ abstract class AppFixture extends Specification with NoTimeConversions {
   implicit val timeout = Timeout(5 seconds)
   implicit val system = ActorSystem("test")
 
-  val MongoDbName = "biobank-test"
-  val MongoCollName = "bbweb"
+  val mongoDbName = "biobank-test"
+  val mongoCollName = "bbweb"
 
   val mongoClient = MongoClient()
-  val mongoDB = mongoClient(MongoDbName)
-  val mongoColl = mongoClient(MongoDbName)(MongoCollName)
-
-  val userRepo = new UserReadWriteRepository(v => new UserId(v.email))
+  val mongoDB = mongoClient(mongoDbName)
+  val mongoColl = mongoClient(mongoDbName)(mongoCollName)
 
   // delete the journal contents
   mongoColl.remove(MongoDBObject.empty)
 
   def journalProps: JournalProps =
-    MongodbCasbahJournalProps(mongoClient, MongoDbName, MongoCollName)
+    MongodbCasbahJournalProps(mongoClient, mongoDbName, mongoCollName)
 
   val journal = Journal(journalProps)
   val extension = EventsourcingExtension(system, journal)
@@ -63,12 +61,12 @@ abstract class AppFixture extends Specification with NoTimeConversions {
   }
 
   val userProcessor = extension.processorOf(Props(
-    new UserProcessor(userRepo) with Emitter with Eventsourced { val id = 2 }))
+    new UserProcessor() with Emitter with Eventsourced { val id = 2 }))
 
   implicit val adminUserId = new UserId("admin@admin.com")
 
   // for debug only - password is "administrator"
-  userRepo.updateMap(User.add(adminUserId, "admin", "admin@admin.com",
+  UserRepository.add(User.add(adminUserId, "admin", "admin@admin.com",
     "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS",
     "bcrypt", None, None) | null)
 

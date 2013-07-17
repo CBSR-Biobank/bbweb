@@ -13,7 +13,7 @@ object StudyRepository extends ReadWriteRepository[StudyId, Study](v => v.id) {
 
   def studyWithId(studyId: StudyId): DomainValidation[Study] = {
     getByKey(studyId) match {
-      case Failure(x) => DomainError("study does not exist").fail
+      case Failure(x) => DomainError("study does not exist: { studyId: %s }".format(studyId)).fail
       case Success(study) => study.success
     }
   }

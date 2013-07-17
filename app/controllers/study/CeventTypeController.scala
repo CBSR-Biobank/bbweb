@@ -27,18 +27,18 @@ import Scalaz._
 case class CeventTypeFormObject(
   collectionEventTypeId: String, version: Long, studyId: String, name: String,
   description: Option[String], recurring: Boolean,
-  specimenGroupData: List[SpecimenGroupCollectionEventType],
-  annotationTypeData: List[CollectionEventTypeAnnotationType]) {
+  specimenGroupData: List[String],
+  annotationTypeData: List[String]) {
 
   def getAddCmd: AddCollectionEventTypeCmd = {
     AddCollectionEventTypeCmd(studyId, name, description, recurring,
-      specimenGroupData.toSet, annotationTypeData.toSet)
+      Set.empty, Set.empty)
   }
 
   def getUpdateCmd: UpdateCollectionEventTypeCmd = {
     UpdateCollectionEventTypeCmd(
       collectionEventTypeId, Some(version), studyId, name, description, recurring,
-      specimenGroupData.toSet, annotationTypeData.toSet)
+      Set.empty, Set.empty)
   }
 }
 
@@ -115,7 +115,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
       case Success(ceventType) =>
         val form = ceventTypeForm.fill(CeventTypeFormObject(
           ceventType.id.id, ceventType.version, ceventType.studyId.id, ceventType.name,
-          ceventType.description, ceventType.recurring, specimenGroupIds, annotationTypeIds))
+          ceventType.description, ceventType.recurring, List.empty, List.empty))
         Ok(html.study.ceventtype.add(form, UpdateFormType(), studyId, studyName))
     }
   }

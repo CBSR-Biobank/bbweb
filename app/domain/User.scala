@@ -31,8 +31,7 @@ object User {
     hasher: String,
     salt: Option[String],
     avatarUrl: Option[String]): DomainValidation[RegisteredUser] =
-    RegisteredUser(id, version = 0L, name, email, password, hasher, salt, avatarUrl,
-      addedBy = null, timeAdded = -1, updatedBy = None, timeUpdated = None).success
+    RegisteredUser(id, version = 0L, name, email, password, hasher, salt, avatarUrl).success
 
 }
 
@@ -44,11 +43,7 @@ case class RegisteredUser(
   password: String,
   hasher: String,
   salt: Option[String],
-  avatarUrl: Option[String],
-  addedBy: UserId = null,
-  timeAdded: Long = -1,
-  updatedBy: Option[UserId] = None,
-  timeUpdated: Option[Long] = None) extends User {
+  avatarUrl: Option[String]) extends User {
 
 }
 
