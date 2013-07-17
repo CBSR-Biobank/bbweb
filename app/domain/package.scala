@@ -27,9 +27,6 @@ package object domain {
 
   type UserReadWriteRepository = ReadWriteRepository[UserId, User]
 
-  object CollectionEventAnnotationTypeRepository
-    extends ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType](v => v.id) {}
-
   object SpecimenGroupCollectionEventTypeRepository
     extends ReadWriteRepository[String, SpecimenGroupCollectionEventType](v => v.id) {}
 

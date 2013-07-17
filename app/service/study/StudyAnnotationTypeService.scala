@@ -1,11 +1,16 @@
 package service.study
 
-import infrastructure._
 import service.commands._
 import service.events._
 import service._
 import domain._
-import domain.study.{ CollectionEventAnnotationType, DisabledStudy, Study, StudyAnnotationType }
+import domain.study.{
+  CollectionEventAnnotationType,
+  CollectionEventAnnotationTypeRepository,
+  DisabledStudy,
+  Study,
+  StudyAnnotationType
+}
 import domain.study.Study._
 import domain.AnnotationValueType._
 
@@ -22,7 +27,8 @@ import scalaz.Scalaz._
  * @author Nelson Loyola
  */
 protected[service] class StudyAnnotationTypeService() extends CommandHandler {
-  import StudyAnnotationTypeService._
+
+  val log = LoggerFactory.getLogger(this.getClass)
 
   /**
    * This partial function handles each command. The command is contained within the
@@ -54,21 +60,16 @@ protected[service] class StudyAnnotationTypeService() extends CommandHandler {
     study: DisabledStudy,
     listeners: MessageEmitter,
     id: Option[String]): DomainValidation[CollectionEventAnnotationType] = {
-
-    def addItem(item: CollectionEventAnnotationType): CollectionEventAnnotationType = {
-      annotationTypeRepo.updateMap(item)
-      listeners sendEvent CollectionEventAnnotationTypeAddedEvent(
-        item.studyId, item.id, item.name, item.description, item.valueType, item.maxValueCount,
-        item.options)
-      item
-    }
-
     val item = for {
       atId <- id.toSuccess(DomainError("annotation type ID is missing"))
-      newItem <- study.addCollectionEventAnnotationType(annotationTypeRepo, cmd, atId)
-      addItem <- addItem(newItem).success
+      newItem <- CollectionEventAnnotationTypeRepository.add(CollectionEventAnnotationType(
+        AnnotationTypeId(atId), 0L, study.id, cmd.name, cmd.description, cmd.valueType,
+        cmd.maxValueCount, cmd.options))
+      event <- listeners.sendEvent(CollectionEventAnnotationTypeAddedEvent(
+        newItem.studyId, newItem.id, newItem.name, newItem.description, newItem.valueType,
+        newItem.maxValueCount, newItem.options)).success
     } yield newItem
-    CommandHandler.logMethod(log, "addCollectionEventAnnotationType", cmd, item)
+    logMethod(log, "addCollectionEventAnnotationType", cmd, item)
     item
   }
 
@@ -77,20 +78,15 @@ protected[service] class StudyAnnotationTypeService() extends CommandHandler {
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
 
-    def update(item: CollectionEventAnnotationType): CollectionEventAnnotationType = {
-      annotationTypeRepo.updateMap(item)
-      listeners sendEvent CollectionEventAnnotationTypeUpdatedEvent(
-        item.studyId, item.id, item.name, item.description, item.valueType,
-        item.maxValueCount, item.options)
-      item
-    }
-
     val item = for {
-      validStudy <- StudyValidation.validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.id)
-      newItem <- study.updateCollectionEventAnnotationType(annotationTypeRepo, cmd)
-      updatedItem <- update(newItem).success
-    } yield updatedItem
-    CommandHandler.logMethod(log, "updateCollectionEventAnnotationType", cmd, item)
+      item <- CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+        study.id, AnnotationTypeId(cmd.id))
+      newItem <- CollectionEventAnnotationTypeRepository.update(item)
+      event <- listeners.sendEvent(CollectionEventAnnotationTypeUpdatedEvent(
+        newItem.studyId, newItem.id, newItem.name, newItem.description, newItem.valueType,
+        newItem.maxValueCount, newItem.options)).success
+    } yield newItem
+    logMethod(log, "updateCollectionEventAnnotationType", cmd, item)
     item
   }
 
@@ -99,22 +95,15 @@ protected[service] class StudyAnnotationTypeService() extends CommandHandler {
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
 
-    def removeItem(item: CollectionEventAnnotationType) = {
-      annotationTypeRepo.remove(item)
-      listeners sendEvent CollectionEventAnnotationTypeRemovedEvent(item.studyId, item.id)
-    }
-
     val item = for {
-      validStudy <- StudyValidation.validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.id)
-      oldItem <- study.removeCollectionEventAnnotationType(annotationTypeRepo, cmd)
-      removedItem <- removeItem(oldItem).success
+      item <- CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+        study.id, AnnotationTypeId(cmd.id))
+      oldItem <- CollectionEventAnnotationTypeRepository.remove(item)
+      event <- listeners.sendEvent(CollectionEventAnnotationTypeRemovedEvent(
+        item.studyId, item.id)).success
     } yield oldItem
-    CommandHandler.logMethod(log, "removeCollectionEventAnnotationType", cmd, item)
+    logMethod(log, "removeCollectionEventAnnotationType", cmd, item)
     item
   }
-}
-
-object StudyAnnotationTypeService {
-  val log = LoggerFactory.getLogger(StudyAnnotationTypeService.getClass)
 }
 

@@ -3,11 +3,8 @@ package domain.study
 import infrastructure._
 import domain.{
   AnnotationTypeId,
-  CollectionEventTypeRepository,
-  CollectionEventAnnotationTypeRepository,
   DomainError,
-  DomainValidation,
-  SpecimenGroupRepository
+  DomainValidation
 }
 import domain.AnatomicalSourceType._
 import domain.AnnotationValueType._

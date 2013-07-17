@@ -68,19 +68,16 @@ class SpecimenGroupService() extends CommandHandler {
     listeners: MessageEmitter,
     id: Option[String]): DomainValidation[SpecimenGroup] = {
 
-    def generateEvent(item: SpecimenGroup) {
-      listeners sendEvent StudySpecimenGroupAddedEvent(item.studyId, item.id,
-        item.name, item.description, item.units, item.anatomicalSourceType,
-        item.preservationType, item.preservationTemperatureType, item.specimenType)
-    }
-
     val item = for {
       sgId <- id.toSuccess(DomainError("specimen group ID is missing"))
       newItem <- SpecimenGroupRepository.add(
         SpecimenGroup(new SpecimenGroupId(sgId), version = -1, study.id, cmd.name, cmd.description,
           cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
           cmd.preservationTemperatureType, cmd.specimenType))
-      event <- generateEvent(newItem).success
+      event <- listeners.sendEvent(StudySpecimenGroupAddedEvent(
+        newItem.studyId, newItem.id, newItem.name, newItem.description, newItem.units,
+        newItem.anatomicalSourceType, newItem.preservationType, newItem.preservationTemperatureType,
+        newItem.specimenType)).success
     } yield newItem
     logMethod(log, "addSpecimenGroup", cmd, item)
     item
@@ -90,20 +87,17 @@ class SpecimenGroupService() extends CommandHandler {
     cmd: UpdateSpecimenGroupCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
-
-    def generateEvent(item: SpecimenGroup) = {
-      listeners.sendEvent(StudySpecimenGroupUpdatedEvent(study.id,
-        item.id, item.name, item.description, item.units, item.anatomicalSourceType,
-        item.preservationType, item.preservationTemperatureType, item.specimenType))
-    }
-
     val item = for {
-      validStudy <- StudyValidation.validateSpecimenGroupId(study, cmd.id)
+      oldItem <- SpecimenGroupRepository.specimenGroupWithId(
+        StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
       newItem <- SpecimenGroupRepository.add(
         SpecimenGroup(new SpecimenGroupId(cmd.id), version = -1, study.id, cmd.name, cmd.description,
           cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
           cmd.preservationTemperatureType, cmd.specimenType))
-      event <- generateEvent(newItem).success
+      event <- listeners.sendEvent(StudySpecimenGroupUpdatedEvent(
+        study.id, newItem.id, newItem.name, newItem.description, newItem.units,
+        newItem.anatomicalSourceType, newItem.preservationType, newItem.preservationTemperatureType,
+        newItem.specimenType)).success
     } yield newItem
     logMethod(log, "updateSpecimenGroup", cmd, item)
     item
@@ -118,7 +112,7 @@ class SpecimenGroupService() extends CommandHandler {
       specimenGroup <- SpecimenGroupRepository.specimenGroupWithId(
         StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
       oldItem <- SpecimenGroupRepository.remove(specimenGroup)
-      event <- listeners.sendEvent(StudySpecimenGroupRemovedEvent(item.studyId, item.id))
+      event <- listeners.sendEvent(StudySpecimenGroupRemovedEvent(oldItem.studyId, oldItem.id)).success
     } yield oldItem
 
     logMethod(log, "removeSpecimenGroup", cmd, item)

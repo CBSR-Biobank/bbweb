@@ -1,6 +1,6 @@
 package domain.study
 
-import infrastructure.{ DomainError, DomainValidation, ReadWriteRepository }
+import domain.{ DomainError, DomainValidation }
 import service.commands._
 import domain._
 

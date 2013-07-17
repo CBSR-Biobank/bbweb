@@ -17,8 +17,11 @@ object CollectionEventTypeRepository
           "collection event type does not exist: { studyId: %s, ceventTypeId: %s }".format(
             studyId, ceventTypeId)).fail
       case Success(cet) =>
-        if (cet.studyId.equals(studyId)) cet.success
-        else DomainError("study does not have collection event type").fail
+        if (cet.studyId.equals(studyId))
+          cet.success
+        else DomainError(
+          "study does not have collection event type: { studyId: %s, ceventTypeId: %s }".format(
+            studyId, ceventTypeId)).fail
     }
   }
 
@@ -34,7 +37,7 @@ object CollectionEventTypeRepository
     }
 
     if (exists)
-      DomainError("specimen group with name already exists: %s" format ceventType.name).fail
+      DomainError("collection event type with name already exists: %s" format ceventType.name).fail
     else
       true.success
   }
@@ -42,7 +45,7 @@ object CollectionEventTypeRepository
   def add(ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {
     collectionEventTypeWithId(ceventType.studyId, ceventType.id) match {
       case Success(prevItem) =>
-        DomainError("specimen group with ID already exists: %s" format ceventType.id).fail
+        DomainError("collection event type with ID already exists: %s" format ceventType.id).fail
       case Failure(x) =>
         for {
           nameValid <- nameAvailable(ceventType)

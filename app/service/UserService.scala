@@ -1,6 +1,6 @@
 package service
 
-import infrastructure.{ DomainValidation, DomainError, ReadWriteRepository }
+import domain.{ DomainValidation, DomainError }
 import infrastructure._
 import service.commands._
 import service.events._

@@ -75,16 +75,12 @@ protected[service] class CollectionEventTypeService() extends CommandHandler {
     listeners: MessageEmitter,
     id: Option[String]): DomainValidation[CollectionEventType] = {
 
-    def generateEvent(item: CollectionEventType) {
-      listeners.sendEvent(CollectionEventTypeAddedEvent(
-        study.id, item.id, item.name, item.description, item.recurring))
-    }
-
     val item = for {
       cetId <- id.toSuccess(DomainError("collection event type ID is missing"))
       newItem <- CollectionEventTypeRepository.add(CollectionEventType(
         CollectionEventTypeId(cetId), 0L, study.id, cmd.name, cmd.description, cmd.recurring))
-      event <- generateEvent(newItem).success
+      event <- listeners.sendEvent(CollectionEventTypeAddedEvent(
+        study.id, newItem.id, newItem.name, newItem.description, newItem.recurring)).success
     } yield newItem
     logMethod(log, "addCollectionEventType", cmd, item)
     item
@@ -95,16 +91,13 @@ protected[service] class CollectionEventTypeService() extends CommandHandler {
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
 
-    def generateEvent(item: CollectionEventType) = {
-      listeners.sendEvent(CollectionEventTypeUpdatedEvent(
-        study.id, item.id, item.name, item.description, item.recurring))
-    }
-
     val item = for {
-      validStudy <- StudyValidation.validateCollectionEventTypeId(study, cmd.id)
+      oldItem <- CollectionEventTypeRepository.collectionEventTypeWithId(
+        study.id, CollectionEventTypeId(cmd.id))
       newItem <- CollectionEventTypeRepository.update(CollectionEventType(
-        CollectionEventTypeId(cetId), 0L, study.id, cmd.name, cmd.description, cmd.recurring))
-      event <- generateEvent(newItem).success
+        CollectionEventTypeId(cmd.id), 0L, study.id, cmd.name, cmd.description, cmd.recurring))
+      event <- listeners.sendEvent(CollectionEventTypeUpdatedEvent(
+        study.id, newItem.id, newItem.name, newItem.description, newItem.recurring)).success
     } yield newItem
     logMethod(log, "updateCollectionEventType", cmd, item)
     item
@@ -115,10 +108,10 @@ protected[service] class CollectionEventTypeService() extends CommandHandler {
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
     val item = for {
-      ceventType <- CollectionEventTypeRepository.collectionEventTypeWithId(
+      item <- CollectionEventTypeRepository.collectionEventTypeWithId(
         study.id, CollectionEventTypeId(cmd.id))
-      oldItem <- CollectionEventTypeRepository.remove(ceventType)
-      event <- listeners.sendEvent(StudyCollectionEventTypeRemovedEvent(item.studyId, item.id))
+      oldItem <- CollectionEventTypeRepository.remove(item)
+      event <- listeners.sendEvent(CollectionEventTypeRemovedEvent(item.studyId, item.id)).success
     } yield oldItem
     logMethod(log, "removeCollectionEventType", cmd, item)
     item
@@ -142,7 +135,7 @@ protected[service] class CollectionEventTypeService() extends CommandHandler {
       cet <- StudyValidation.validateCollectionEventTypeId(study, collectionEventTypeRepository, cmd.collectionEventTypeId)
       newItem <- createItem(sg2cetId, sg, cet).success
     } yield newItem
-    CommandHandler.logMethod(log, "addSpecimenGroupToCollectionEventType", cmd, item)
+    logMethod(log, "addSpecimenGroupToCollectionEventType", cmd, item)
     item
   }
 
@@ -162,7 +155,7 @@ protected[service] class CollectionEventTypeService() extends CommandHandler {
       item <- sg2cetRepo.getByKey(cmd.id)
       removedItem <- removeItem(item)
     } yield removedItem
-    CommandHandler.logMethod(log, "removeSpecimenGroupFromCollectionEventType", cmd, item)
+    logMethod(log, "removeSpecimenGroupFromCollectionEventType", cmd, item)
     item
   }
 
@@ -186,7 +179,7 @@ protected[service] class CollectionEventTypeService() extends CommandHandler {
       v2 <- StudyValidation.validateCollectionEventAnnotationTypeId(study, annotationTypeRepo, cmd.annotationTypeId)
       newItem <- createItem(at2cetId, v1, v2).success
     } yield newItem
-    CommandHandler.logMethod(log, "addAnnotationTypeToCollectionEventType", cmd, item)
+    logMethod(log, "addAnnotationTypeToCollectionEventType", cmd, item)
     item
   }
 
@@ -206,7 +199,7 @@ protected[service] class CollectionEventTypeService() extends CommandHandler {
       item <- cet2atRepo.getByKey(cmd.id)
       removedItem <- removeItem(item).success
     } yield removedItem
-    CommandHandler.logMethod(log, "removeAnnotationTypeFromCollectionEventType", cmd, item)
+    logMethod(log, "removeAnnotationTypeFromCollectionEventType", cmd, item)
     item
   }
 

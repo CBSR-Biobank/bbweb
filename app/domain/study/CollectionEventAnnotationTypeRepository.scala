@@ -18,7 +18,9 @@ object CollectionEventAnnotationTypeRepository
             studyId, annotationTypeId)).fail
       case Success(annotType) =>
         if (annotType.studyId.equals(studyId)) annotType.success
-        else DomainError("study does not have collection event type").fail
+        else DomainError(
+          "study does not have collection event annotation type: { studyId: %s, annotationTypeId: %s }".format(
+            studyId, annotationTypeId)).fail
     }
   }
 
@@ -34,15 +36,15 @@ object CollectionEventAnnotationTypeRepository
     }
 
     if (exists)
-      DomainError("specimen group with name already exists: %s" format annotationType.name).fail
+      DomainError("collection event annotation type with name already exists: %s" format annotationType.name).fail
     else
       true.success
   }
 
   def add(annotationType: CollectionEventAnnotationType): DomainValidation[CollectionEventAnnotationType] = {
-    collectionEventTypeWithId(annotationType.studyId, annotationType.id) match {
+    annotationTypeWithId(annotationType.studyId, annotationType.id) match {
       case Success(prevItem) =>
-        DomainError("specimen group with ID already exists: %s" format annotationType.id).fail
+        DomainError("collection event annotation type with ID already exists: %s" format annotationType.id).fail
       case Failure(x) =>
         for {
           nameValid <- nameAvailable(annotationType)
@@ -53,7 +55,7 @@ object CollectionEventAnnotationTypeRepository
 
   def update(annotationType: CollectionEventAnnotationType): DomainValidation[CollectionEventAnnotationType] = {
     for {
-      prevItem <- collectionEventTypeWithId(annotationType.studyId, annotationType.id)
+      prevItem <- annotationTypeWithId(annotationType.studyId, annotationType.id)
       validVersion <- prevItem.requireVersion(Some(annotationType.version))
       nameValid <- nameAvailable(annotationType)
       updatedItem <- updateMap(annotationType).success
@@ -62,7 +64,7 @@ object CollectionEventAnnotationTypeRepository
 
   def remove(annotationType: CollectionEventAnnotationType): DomainValidation[CollectionEventAnnotationType] = {
     for {
-      item <- collectionEventTypeWithId(annotationType.studyId, annotationType.id)
+      item <- annotationTypeWithId(annotationType.studyId, annotationType.id)
       validVersion <- item.requireVersion(Some(annotationType.version))
       removedItem <- removeFromMap(item).success
     } yield removedItem
