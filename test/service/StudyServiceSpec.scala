@@ -32,13 +32,13 @@ class StudyServiceSpec extends StudyFixture with Tags {
     "be added" in {
       val name = nameGenerator.next[Study]
       val study = await(studyService.addStudy(new AddStudyCmd(name, Some(name))))
-      studyRepository.getMap must not be empty
+
       study must beSuccessful.like {
         case s =>
           s.version must beEqualTo(0)
           s.name must be(name)
           s.description must beSome(name)
-          studyRepository.getMap must haveKey(s.id)
+          StudyRepository.studyWithId(s.id) must beSuccessful
       }
     } tag ("tag1")
 
@@ -64,7 +64,7 @@ class StudyServiceSpec extends StudyFixture with Tags {
           s.version must beEqualTo(study1.version + 1)
           s.name must be(name2)
           s.description must beNone
-          studyRepository.getMap must haveKey(s.id)
+          StudyRepository.studyWithId(s.id) must beSuccessful
 
           // update something other than the name
           val study3 = await(studyService.updateStudy(
@@ -123,7 +123,7 @@ class StudyServiceSpec extends StudyFixture with Tags {
       await(studyService.enableStudy(
         new EnableStudyCmd(study1.id.toString, study1.versionOption)))
 
-      studyRepository.getByKey(study1.id) must beSuccessful.like {
+      StudyRepository.studyWithId(study1.id) must beSuccessful.like {
         case s => s must beAnInstanceOf[EnabledStudy]
       }
     }
@@ -149,14 +149,14 @@ class StudyServiceSpec extends StudyFixture with Tags {
       val study2 = await(studyService.enableStudy(
         new EnableStudyCmd(study1.id.toString, study1.versionOption))) | null
 
-      studyRepository.getByKey(study2.id) must beSuccessful.like {
+      StudyRepository.studyWithId(study2.id) must beSuccessful.like {
         case s => s must beAnInstanceOf[EnabledStudy]
       }
 
       await(studyService.disableStudy(
         new DisableStudyCmd(study2.id.toString, study2.versionOption)))
 
-      studyRepository.getByKey(study1.id) must beSuccessful.like {
+      StudyRepository.studyWithId(study1.id) must beSuccessful.like {
         case s => s must beAnInstanceOf[DisabledStudy]
       }
     }

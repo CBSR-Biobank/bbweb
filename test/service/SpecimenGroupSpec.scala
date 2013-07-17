@@ -64,7 +64,7 @@ class SpecimenGroupSpec extends StudyFixture {
           x.preservationType must be(preservationType)
           x.preservationTemperatureType must be(preservationTempType)
           x.specimenType must be(specimenType)
-          specimenGroupRepository.getMap must haveKey(x.id)
+          SpecimenGroupRepository.specimenGroupWithId(study.id, x.id) must beSuccessful
       }
 
       val name2 = nameGenerator.next[Study]
@@ -82,7 +82,7 @@ class SpecimenGroupSpec extends StudyFixture {
           x.preservationType must be(preservationType)
           x.preservationTemperatureType must be(preservationTempType)
           x.specimenType must be(specimenType)
-          specimenGroupRepository.getMap must haveKey(x.id)
+          SpecimenGroupRepository.specimenGroupWithId(study.id, x.id) must beSuccessful
       }
     }
 
@@ -163,7 +163,7 @@ class SpecimenGroupSpec extends StudyFixture {
       val sg1 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
-      specimenGroupRepository.getMap must haveKey(sg1.id)
+      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       val sg2 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
@@ -184,7 +184,7 @@ class SpecimenGroupSpec extends StudyFixture {
       val sg1 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
-      specimenGroupRepository.getMap must haveKey(sg1.id)
+      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       val name2 = nameGenerator.next[Study]
       val units2 = nameGenerator.next[String]
@@ -196,7 +196,7 @@ class SpecimenGroupSpec extends StudyFixture {
       val sg2 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name2, None, units2, anatomicalSourceType2,
           preservationType2, preservationTempType2, specimenType2))) | null
-      specimenGroupRepository.getMap must haveKey(sg2.id)
+      SpecimenGroupRepository.specimenGroupWithId(study.id, sg2.id) must beSuccessful
 
       val sg3 = await(studyService.updateSpecimenGroup(
         new UpdateSpecimenGroupCmd(sg2.id.toString, sg2.versionOption, study.id.toString, name,
@@ -218,7 +218,7 @@ class SpecimenGroupSpec extends StudyFixture {
       val sg1 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
-      specimenGroupRepository.getMap must haveKey(sg1.id)
+      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       val study2 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
 
@@ -242,11 +242,11 @@ class SpecimenGroupSpec extends StudyFixture {
       val sg1 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
-      specimenGroupRepository.getMap must haveKey(sg1.id)
+      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       await(studyService.removeSpecimenGroup(
         new RemoveSpecimenGroupCmd(sg1.id.toString, sg1.versionOption, study.id.toString)))
-      specimenGroupRepository.getMap must not haveKey (sg1.id)
+      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beFailing
     }
 
     "not be removed with invalid version" in {
@@ -260,7 +260,7 @@ class SpecimenGroupSpec extends StudyFixture {
       val sg1 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
-      specimenGroupRepository.getMap must haveKey(sg1.id)
+      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       val versionOption = Some(sg1.version + 1)
       val sg2 = await(studyService.removeSpecimenGroup(

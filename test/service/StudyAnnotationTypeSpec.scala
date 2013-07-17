@@ -42,7 +42,8 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
           x.valueType must beEqualTo(valueType)
           x.maxValueCount must beNone
           x.options must beNone
-          annotationTypeRepo.getMap must haveKey(x.id)
+          CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+            study.id, x.id) must beSuccessful
       }
 
       val name2 = nameGenerator.next[AnnotationType]
@@ -62,7 +63,8 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
           x.valueType must beEqualTo(valueType2)
           x.maxValueCount must be(maxValueCount2)
           x.options must be(options)
-          annotationTypeRepo.getMap must haveKey(x.id)
+          CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+            study.id, x.id) must beSuccessful
       }
     }
 
@@ -74,7 +76,9 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
           valueType, maxValueCount, None))) | null
-      annotationTypeRepo.getMap must haveKey(at1.id)
+
+      CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+        study.id, at1.id) must beSuccessful
 
       val valueType2 = AnnotationValueType.Select
       val maxValueCount2 = Some(2)
@@ -115,7 +119,8 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
           x.valueType must beEqualTo(valueType2)
           x.maxValueCount must be(maxValueCount2)
           x.options must be(options)
-          annotationTypeRepo.getMap must haveKey(x.id)
+          CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+            study.id, x.id) must beSuccessful
       }
     }
 
@@ -127,7 +132,8 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
           valueType, maxValueCount, None))) | null
-      annotationTypeRepo.getMap must haveKey(at1.id)
+      CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+        study.id, at1.id) must beSuccessful
 
       val name2 = nameGenerator.next[AnnotationType]
       val valueType2 = AnnotationValueType.Select
@@ -137,7 +143,9 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
       val at2 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(study.id.toString, name2, None,
           valueType2, maxValueCount2, options))) | null
-      annotationTypeRepo.getMap must haveKey(at2.id)
+
+      CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+        study.id, at2.id) must beSuccessful
 
       val at3 = await(studyService.updateCollectionEventAnnotationType(
         new UpdateCollectionEventAnnotationTypeCmd(
@@ -201,7 +209,8 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(
           study.id.toString, name, Some(name), valueType))) | null
-      annotationTypeRepo.getMap must haveKey(at1.id)
+      CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+        study.id, at1.id) must beSuccessful
 
       val at2 = await(studyService.removeCollectionEventAnnotationType(
         new RemoveCollectionEventAnnotationTypeCmd(
@@ -215,7 +224,8 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
           x.valueType must beEqualTo(valueType)
           x.maxValueCount must beNone
           x.options must beNone
-          annotationTypeRepo.getMap must not haveKey (at1.id)
+          CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+            study.id, x.id) must beSuccessful
       }
     }
 
@@ -226,7 +236,8 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(
           study.id.toString, name, Some(name), valueType))) | null
-      annotationTypeRepo.getMap must haveKey(at1.id)
+      CollectionEventAnnotationTypeRepository.annotationTypeWithId(
+        study.id, at1.id) must beSuccessful
 
       val versionOption = Some(at1.version + 1)
       val at2 = await(studyService.removeCollectionEventAnnotationType(

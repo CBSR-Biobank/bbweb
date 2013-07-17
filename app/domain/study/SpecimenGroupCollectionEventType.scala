@@ -8,5 +8,5 @@ import domain._
 case class SpecimenGroupCollectionEventType(
   specimenGroupId: SpecimenGroupId,
   count: Int,
-  amount: BigDecimal) extends IdentifiedValueObject[String] {
+  amount: BigDecimal) {
 }
