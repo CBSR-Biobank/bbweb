@@ -2,7 +2,7 @@ package service
 
 import fixture._
 import infrastructure._
-import infrastructure.commands._
+import service.commands._
 import domain.{ AnatomicalSourceType, PreservationType, PreservationTemperatureType, SpecimenType }
 import domain.AnnotationValueType._
 import domain.study._

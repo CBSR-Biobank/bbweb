@@ -2,7 +2,7 @@ package controllers.study
 
 import service._
 import infrastructure._
-import infrastructure.commands._
+import service.commands._
 import domain._
 import domain.study._
 import views._

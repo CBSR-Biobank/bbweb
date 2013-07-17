@@ -34,7 +34,8 @@ import scalaz.Scalaz._
  * @param specimenGroupRepository The repository for specimen group entities.
  */
 class SpecimenGroupService() extends CommandHandler {
-  import SpecimenGroupService._
+
+  val log = LoggerFactory.getLogger(this.getClass)
 
   /**
    * This partial function handles each command. The command is contained within the
@@ -112,17 +113,15 @@ class SpecimenGroupService() extends CommandHandler {
     cmd: RemoveSpecimenGroupCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
+
     val item = for {
       specimenGroup <- SpecimenGroupRepository.specimenGroupWithId(
         StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
       oldItem <- SpecimenGroupRepository.remove(specimenGroup)
+      event <- listeners.sendEvent(StudySpecimenGroupRemovedEvent(item.studyId, item.id))
     } yield oldItem
 
     logMethod(log, "removeSpecimenGroup", cmd, item)
     item
   }
-}
-
-object SpecimenGroupService {
-  val log = LoggerFactory.getLogger(SpecimenGroupService.getClass)
 }

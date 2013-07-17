@@ -8,15 +8,17 @@ import Scalaz._
 object SpecimenGroupRepository
   extends ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id) {
 
-  def specimenGroupWithId(studyId: StudyId, specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
+  def specimenGroupWithId(
+    studyId: StudyId,
+    specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
     getByKey(specimenGroupId) match {
-      case Failure(x) => x.fail
+      case Failure(x) => DomainError("specimen group does not exist").fail
       case Success(sg) =>
-        if (sg.studyId.id.equals(studyId)) sg.success
+        if (sg.studyId.equals(studyId)) sg.success
         else DomainError("study does not have specimen group").fail
     }
-  }
 
+  }
   def allSpecimenGroupsForStudy(studyId: StudyId): Set[SpecimenGroup] = {
     getValues.filter(x => x.studyId.equals(id)).toSet
   }

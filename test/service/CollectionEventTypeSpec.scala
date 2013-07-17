@@ -6,7 +6,7 @@ import domain.{ AnatomicalSourceType, AnnotationValueType, PreservationType, Pre
 import domain.AnnotationValueType._
 import domain.study._
 import infrastructure._
-import infrastructure.commands._
+import service.commands._
 import scala.concurrent._
 import scala.concurrent.duration._
 import org.specs2.scalaz.ValidationMatchers._

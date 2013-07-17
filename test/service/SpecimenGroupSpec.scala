@@ -14,7 +14,7 @@ import domain.{
 import AnnotationValueType._
 import domain.study._
 import infrastructure._
-import infrastructure.commands._
+import service.commands._
 
 import scala.concurrent._
 import scala.concurrent.duration._

@@ -1,7 +1,7 @@
 package service
 
-import infrastructure.commands._
-import infrastructure.events._
+import service.commands._
+import service.events._
 import domain.{
   AnnotationTypeId,
   ConcurrencySafeEntity,
@@ -45,12 +45,12 @@ class StudyService(
   /**
    * FIXME: use paging and sorting
    */
-  def getAll: List[Study] = {
-    StudyRepository.getValues.toList
+  def getAll: Set[Study] = {
+    StudyRepository.allStudies
   }
 
   def getStudy(id: String): DomainValidation[Study] = {
-    StudyRepository.getByKey(new StudyId(id))
+    StudyRepository.studyWithId(new StudyId(id))
   }
 
   def getSpecimenGroup(
@@ -62,42 +62,29 @@ class StudyService(
   def getSpecimenGroups(studyId: String): Set[SpecimenGroup] =
     SpecimenGroupRepository.allSpecimenGroupsForStudy(StudyId(studyId))
 
+  // FIXME: rename to collectionEventAnnotationType
   def getCollectionEventAnnotationType(
     studyId: String,
     annotationTypeId: String): DomainValidation[CollectionEventAnnotationType] = {
-    CollectionEventAnnotationTypeRepository.getByKey(new AnnotationTypeId(annotationTypeId)) match {
-      case Failure(x) => x.fail
-      case Success(annot) =>
-        if (annot.studyId.id.equals(studyId)) annot.success
-        else DomainError("study does not have specimen group").fail
-    }
+    CollectionEventAnnotationTypeRepository.annotationTypeWithId(new AnnotationTypeId(annotationTypeId))
   }
 
+  // FIXME: rename to allCollectionEventAnnotationType
   def getCollectionEventAnnotationTypes(id: String): DomainValidation[Set[CollectionEventAnnotationType]] = {
-    for {
-      study <- StudyRepository.getByKey(StudyId(id))
-      annotTypeSet <- CollectionEventTypeAnnotationTypeRepository.getValues.filter { x =>
-        x.studyId.id.equals(id) && x.isInstanceOf[CollectionEventAnnotationType]
-      }.toSet.success
-    } yield annotTypeSet
+    CollectionEventAnnotationTypeRepository.allCollectionEventAnnotationTypesForStudy(StudyId(id))
   }
 
+  // FIXME: rename to collectionEventType
   def getCollectionEventType(
     studyId: String,
     collectionEventTypeId: String): DomainValidation[CollectionEventType] = {
-    CollectionEventTypeRepository.getByKey(new CollectionEventTypeId(collectionEventTypeId)) match {
-      case Failure(x) => x.fail
-      case Success(ceventType) =>
-        if (ceventType.studyId.id.equals(studyId)) ceventType.success
-        else DomainError("study does not have specimen group").fail
-    }
+    CollectionEventTypeRepository.collectionEventTypeWithId(
+      StudyId(studyId), CollectionEventTypeId(collectionEventTypeId))
   }
 
-  def getCollectionEventTypes(studyId: String): DomainValidation[Set[CollectionEventType]] = {
-    for {
-      study <- StudyRepository.getByKey(StudyId(studyId))
-      sgSet <- CollectionEventTypeRepository.getValues.filter(x => x.studyId.id.equals(studyId)).toSet.success
-    } yield sgSet
+  // FIXME: rename to allCollectionEventType
+  def getCollectionEventTypes(studyId: String): Set[CollectionEventType] = {
+    CollectionEventTypeRepository.allCollectionEventTypesForStudy(StudyId(studyId))
   }
 
   def getCollectionEventTypeSpecimenGroups(

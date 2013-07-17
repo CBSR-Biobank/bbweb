@@ -2,8 +2,8 @@ package service
 
 import infrastructure.{ DomainValidation, DomainError, ReadWriteRepository }
 import infrastructure._
-import infrastructure.commands._
-import infrastructure.events._
+import service.commands._
+import service.events._
 import domain._
 
 import scala.concurrent._

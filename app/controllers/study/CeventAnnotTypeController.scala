@@ -3,7 +3,7 @@ package controllers.study
 import controllers._
 import service._
 import infrastructure._
-import infrastructure.commands._
+import service.commands._
 import domain._
 import AnnotationValueType._
 import domain.study._

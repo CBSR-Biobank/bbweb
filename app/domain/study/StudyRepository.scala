@@ -7,7 +7,7 @@ import Scalaz._
 
 object StudyRepository extends ReadWriteRepository[StudyId, Study](v => v.id) {
 
-  def allStudies(studyId: StudyId): Set[Study] = {
+  def allStudies(): Set[Study] = {
     getValues.toSet
   }
 

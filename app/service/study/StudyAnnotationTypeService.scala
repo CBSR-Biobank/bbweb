@@ -1,13 +1,13 @@
 package service.study
 
 import infrastructure._
-import infrastructure.commands._
-import infrastructure.events._
+import service.commands._
+import service.events._
+import service._
 import domain._
 import domain.study.{ CollectionEventAnnotationType, DisabledStudy, Study, StudyAnnotationType }
 import domain.study.Study._
 import domain.AnnotationValueType._
-import service._
 
 import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
@@ -21,8 +21,7 @@ import scalaz.Scalaz._
  *
  * @author Nelson Loyola
  */
-protected[service] class StudyAnnotationTypeService()
-  extends CommandHandler {
+protected[service] class StudyAnnotationTypeService() extends CommandHandler {
   import StudyAnnotationTypeService._
 
   /**

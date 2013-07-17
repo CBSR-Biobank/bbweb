@@ -27,6 +27,7 @@ case class DisabledStudy(
 
   override val status = "Disabled"
 
+  /*
   def addSpecimenGroup(
     newSpecimenGroup: SpecimenGroup,
     id: String): DomainValidation[SpecimenGroup] =
@@ -132,4 +133,6 @@ case class DisabledStudy(
     } yield item
 
   }
+  * 
+  */
 }

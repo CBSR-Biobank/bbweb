@@ -3,7 +3,7 @@ package service
 import fixture._
 import domain._
 import domain.study._
-import infrastructure.commands._
+import service.commands._
 import scala.concurrent._
 import scala.concurrent.duration._
 import org.specs2.scalaz.ValidationMatchers._

@@ -8,7 +8,7 @@ import domain.SpecimenType._
 import domain.AnnotationValueType._
 
 import infrastructure._
-import infrastructure.commands._
+import service.commands._
 
 import scalaz._
 import scalaz.Scalaz._
