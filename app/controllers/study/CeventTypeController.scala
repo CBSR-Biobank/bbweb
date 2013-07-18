@@ -1,29 +1,35 @@
 package controllers.study
 
 import controllers._
-import service._
-import infrastructure._
 import service.commands._
 import domain._
 import domain.study._
 import views._
 
-import scala.concurrent._
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
-import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
 import play.api.i18n.Messages
 import play.Logger
-import akka.util.Timeout
-import securesocial.core.{ Identity, Authorization }
 
 import scalaz._
 import Scalaz._
 
+/**
+ * This object is needed since it handles the Add and Update commands. It is used by the form to access the
+ * data for adding or updating a CollectionEventType.
+ *
+ * @param collectionEventTypeId
+ * @param version
+ * @param studyId
+ * @param name
+ * @param description
+ * @param recurring
+ * @param specimenGroupData
+ * @param annotationTypeData
+ */
 case class CeventTypeFormObject(
   collectionEventTypeId: String, version: Long, studyId: String, name: String,
   description: Option[String], recurring: Boolean,

@@ -1,27 +1,13 @@
 package service
 
 import fixture._
-import infrastructure._
 import domain.{ AnatomicalSourceType, AnnotationValueType, PreservationType, PreservationTemperatureType, SpecimenType }
-import domain.AnnotationValueType._
 import domain.study._
-import infrastructure._
 import service.commands._
-import scala.concurrent._
-import scala.concurrent.duration._
 import org.specs2.scalaz.ValidationMatchers._
-import org.specs2.mutable._
-import org.junit.runner.RunWith
-import org.specs2.runner.JUnitRunner
-import akka.actor._
-import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
 import scala.math.BigDecimal.double2bigDecimal
 
-import scalaz._
-import Scalaz._
-
-@RunWith(classOf[JUnitRunner])
 class CollectionEventTypeSpec extends StudyFixture {
 
   args(
@@ -236,7 +222,7 @@ class CollectionEventTypeSpec extends StudyFixture {
 
       val count = 10
       val amount = 1.1
-      val SpecimenGroupData = Set(SpecimenGroupCollectionEventType(sg1.id, count, amount))
+      val SpecimenGroupData = Set(SpecimenGroupCollectionEventType(sg1.id.id, count, amount))
 
       val cet1 = await(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring = true,
@@ -263,7 +249,7 @@ class CollectionEventTypeSpec extends StudyFixture {
 
       val count = 10
       val amount = 1.1
-      val SpecimenGroupData = Set(SpecimenGroupCollectionEventType(sg1.id, count, amount))
+      val SpecimenGroupData = Set(SpecimenGroupCollectionEventType(sg1.id.id, count, amount))
 
       val cet1 = await(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring = true,
@@ -301,7 +287,7 @@ class CollectionEventTypeSpec extends StudyFixture {
           AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
 
       val annotationTypeData = Set(
-        CollectionEventTypeAnnotationType(at1.id, true))
+        CollectionEventTypeAnnotationType(at1.id.id, true))
 
       val cet1 = await(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), true,
@@ -316,14 +302,13 @@ class CollectionEventTypeSpec extends StudyFixture {
 
     "can be removed" in {
       val name = nameGenerator.next[CollectionEventTypeAnnotationType]
-      val required = true
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
           AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
 
       val annotationTypeData = Set(
-        CollectionEventTypeAnnotationType(at1.id, true))
+        CollectionEventTypeAnnotationType(at1.id.id, true))
 
       val cet1 = await(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), true,
