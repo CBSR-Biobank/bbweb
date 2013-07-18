@@ -31,12 +31,16 @@ object ApplicationBuild extends Build {
 
       "com.typesafe.akka" % "akka-testkit" % "2.0.3" % "test",
       "junit" % "junit" % "4.11" % "test",
-      "org.typelevel" %% "scalaz6-specs2" % "0.1" % "test"
+      "org.typelevel" %% "scalaz6-specs2" % "0.1" % "test",
+      "org.pegdown" % "pegdown" % "1.2.1" // specs2 html output
     ),
 
     scalacOptions ++= Seq("-feature"),
+    
+    (testOptions in Test) += Tests.Argument(TestFrameworks.Specs2, "html", "console"),
 
     lessEntryPoints <<= baseDirectory(customLessEntryPoints)
+    
   )
 
   // Only compile the bootstrap bootstrap.less file and any other *.less file in the stylesheets directory
