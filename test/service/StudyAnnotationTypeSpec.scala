@@ -44,6 +44,8 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
           x.options must beNone
           CollectionEventAnnotationTypeRepository.annotationTypeWithId(
             study.id, x.id) must beSuccessful
+          CollectionEventAnnotationTypeRepository.allCollectionEventAnnotationTypesForStudy(
+            study.id).size mustEqual 1
       }
 
       val name2 = nameGenerator.next[AnnotationType]
@@ -65,6 +67,8 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
           x.options must be(options)
           CollectionEventAnnotationTypeRepository.annotationTypeWithId(
             study.id, x.id) must beSuccessful
+          CollectionEventAnnotationTypeRepository.allCollectionEventAnnotationTypesForStudy(
+            study.id).size mustEqual 2
       }
     }
 

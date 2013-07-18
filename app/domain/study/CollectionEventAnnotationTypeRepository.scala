@@ -25,7 +25,7 @@ object CollectionEventAnnotationTypeRepository
   }
 
   def allCollectionEventAnnotationTypesForStudy(studyId: StudyId): Set[CollectionEventAnnotationType] = {
-    getValues.filter(x => x.studyId.equals(id)).toSet
+    getValues.filter(x => x.studyId.equals(studyId)).toSet
   }
 
   private def nameAvailable(annotationType: CollectionEventAnnotationType): DomainValidation[Boolean] = {

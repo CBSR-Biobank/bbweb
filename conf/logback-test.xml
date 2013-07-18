@@ -15,9 +15,9 @@
      </encoder>
    </appender>
   
-  <logger name="domain" level="DEBUG" />
+  <logger name="domain" level="INFO" />
   
-  <logger name="service" level="DEBUG" />
+  <logger name="service" level="INFO" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />

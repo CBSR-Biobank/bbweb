@@ -2,11 +2,15 @@ package domain.study
 
 import domain._
 
+import org.slf4j.LoggerFactory
+
 import scalaz._
 import Scalaz._
 
 object SpecimenGroupRepository
   extends ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id) {
+
+  val log = LoggerFactory.getLogger(this.getClass)
 
   def specimenGroupWithId(
     studyId: StudyId,
@@ -25,7 +29,7 @@ object SpecimenGroupRepository
   }
 
   def allSpecimenGroupsForStudy(studyId: StudyId): Set[SpecimenGroup] = {
-    getValues.filter(x => x.studyId.equals(id)).toSet
+    getValues.filter(x => x.studyId.equals(studyId)).toSet
   }
 
   private def nameAvailable(specimenGroup: SpecimenGroup): DomainValidation[Boolean] = {

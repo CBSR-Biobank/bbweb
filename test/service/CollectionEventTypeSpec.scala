@@ -21,7 +21,10 @@ import scala.math.BigDecimal.double2bigDecimal
 
 @RunWith(classOf[JUnitRunner])
 class CollectionEventTypeSpec extends StudyFixture {
-  sequential // forces all tests to be run sequentially
+
+  args(
+    //include = "tag1",
+    sequential = true) // forces all tests to be run sequentially
 
   val nameGenerator = new NameGenerator(classOf[CollectionEventTypeSpec].getName)
   val studyName = nameGenerator.next[Study]
@@ -33,9 +36,8 @@ class CollectionEventTypeSpec extends StudyFixture {
       val name = nameGenerator.next[Study]
       val recurring = true
 
-      val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
-          Set.empty, Set.empty)))
+      val cet1 = await(studyService.addCollectionEventType(AddCollectionEventTypeCmd(
+        study.id.toString, name, Some(name), recurring, Set.empty, Set.empty)))
 
       cet1 must beSuccessful.like {
         case x =>
@@ -47,14 +49,14 @@ class CollectionEventTypeSpec extends StudyFixture {
             case y =>
               y.version must beEqualTo(x.version)
           }
+          CollectionEventTypeRepository.allCollectionEventTypesForStudy(study.id).size mustEqual 1
       }
 
       val name2 = nameGenerator.next[Study]
       val recurring2 = false
 
-      val cet2 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name2, None, recurring2,
-          Set.empty, Set.empty)))
+      val cet2 = await(studyService.addCollectionEventType(AddCollectionEventTypeCmd(
+        study.id.toString, name2, None, recurring2, Set.empty, Set.empty)))
 
       cet2 must beSuccessful.like {
         case x =>
@@ -66,6 +68,7 @@ class CollectionEventTypeSpec extends StudyFixture {
             case y =>
               y.version must beEqualTo(x.version)
           }
+          CollectionEventTypeRepository.allCollectionEventTypesForStudy(study.id).size mustEqual 2
 
       }
     }
@@ -74,14 +77,15 @@ class CollectionEventTypeSpec extends StudyFixture {
       val name = nameGenerator.next[Study]
       val recurring = true
 
-      await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
-          Set.empty, Set.empty)))
+      val cet1 = await(studyService.addCollectionEventType(AddCollectionEventTypeCmd(
+        study.id.toString, name, Some(name), recurring, Set.empty, Set.empty)))
 
-      val cet = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
-          Set.empty, Set.empty)))
-      cet must beFailing.like { case msgs => msgs.head must contain("already exists") }
+      cet1 must beSuccessful
+
+      val cet2 = await(studyService.addCollectionEventType(AddCollectionEventTypeCmd(
+        study.id.toString, name, Some(name), recurring, Set.empty, Set.empty)))
+
+      cet2 must beFailing.like { case msgs => msgs.head must contain("already exists") }
     }
 
     "be updated" in {

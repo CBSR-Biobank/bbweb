@@ -2,11 +2,15 @@ package domain.study
 
 import domain._
 
+import org.slf4j.LoggerFactory
+
 import scalaz._
 import Scalaz._
 
 object CollectionEventTypeRepository
   extends ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id) {
+
+  val log = LoggerFactory.getLogger(this.getClass)
 
   def collectionEventTypeWithId(
     studyId: StudyId,
@@ -26,7 +30,7 @@ object CollectionEventTypeRepository
   }
 
   def allCollectionEventTypesForStudy(studyId: StudyId): Set[CollectionEventType] = {
-    getValues.filter(x => x.studyId.equals(id)).toSet
+    getValues.filter(x => x.studyId.equals(studyId)).toSet
   }
 
   private def nameAvailable(ceventType: CollectionEventType): DomainValidation[Boolean] = {

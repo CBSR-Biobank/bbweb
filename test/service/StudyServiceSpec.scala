@@ -27,7 +27,7 @@ class StudyServiceSpec extends StudyFixture with Tags {
   val log = LoggerFactory.getLogger(this.getClass)
 
   args(
-    include = "tag1",
+    //include = "tag1",
     sequential = true) // forces all tests to be run sequentially
 
   val nameGenerator = new NameGenerator(classOf[StudyServiceSpec].getName)
@@ -121,12 +121,20 @@ class StudyServiceSpec extends StudyFixture with Tags {
       val sg1 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study1.id.id, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
-      sg1 must beSuccessful
+      sg1 must beSuccessful.like {
+        case x =>
+          SpecimenGroupRepository.specimenGroupWithId(study1.id, x.id) must beSuccessful
+          SpecimenGroupRepository.allSpecimenGroupsForStudy(study1.id).size mustEqual 1
+      }
 
       val cet1 = await(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study1.id.id, name, Some(name), true,
           Set.empty, Set.empty)))
-      cet1 must beSuccessful
+      cet1 must beSuccessful.like {
+        case x =>
+          CollectionEventTypeRepository.collectionEventTypeWithId(study1.id, x.id) must beSuccessful
+          CollectionEventTypeRepository.allCollectionEventTypesForStudy(study1.id).size mustEqual 1
+      }
 
       val study2 = await(studyService.enableStudy(
         new EnableStudyCmd(study1.id.toString, study1.versionOption)))

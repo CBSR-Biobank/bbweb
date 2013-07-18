@@ -68,6 +68,7 @@ class SpecimenGroupSpec extends StudyFixture with Tags {
           x.preservationTemperatureType must be(preservationTempType)
           x.specimenType must be(specimenType)
           SpecimenGroupRepository.specimenGroupWithId(study.id, x.id) must beSuccessful
+          SpecimenGroupRepository.allSpecimenGroupsForStudy(study.id).size mustEqual 1
       }
 
       val name2 = nameGenerator.next[Study]
@@ -86,6 +87,7 @@ class SpecimenGroupSpec extends StudyFixture with Tags {
           x.preservationTemperatureType must be(preservationTempType)
           x.specimenType must be(specimenType)
           SpecimenGroupRepository.specimenGroupWithId(study.id, x.id) must beSuccessful
+          SpecimenGroupRepository.allSpecimenGroupsForStudy(study.id).size mustEqual 2
       }
     }
 
