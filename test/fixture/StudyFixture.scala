@@ -17,10 +17,8 @@ import Scalaz._
 
 abstract class StudyFixture extends AppFixture {
 
-  val nameGenerator: NameGenerator
-
-  val studyProcessor = extension.processorOf(Props(
+  lazy val studyProcessor = extension.processorOf(Props(
     new StudyProcessor() with Emitter with Eventsourced { val id = 1 }))
 
-  val studyService = new StudyService(studyProcessor)
+  lazy val studyService = new StudyService(studyProcessor)
 }

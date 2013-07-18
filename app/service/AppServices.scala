@@ -2,7 +2,6 @@ package service
 
 import domain._
 import domain.study._
-import infrastructure._
 
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
@@ -16,6 +15,7 @@ import akka.actor.Props
 import akka.pattern.ask
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
+import org.slf4j.LoggerFactory
 
 trait AppServices {
   def studyService: StudyService
@@ -23,6 +23,9 @@ trait AppServices {
 }
 
 object AppServices {
+
+  private val log = LoggerFactory.getLogger(this.getClass)
+
   def boot: AppServices = new AppServices {
     implicit val system = ActorSystem("eventsourced")
     implicit val timeout = Timeout(10 seconds)
@@ -60,5 +63,7 @@ object AppServices {
     // (ensures that recovery of externally visible state maintained by
     //  studiesRef is completed when awaitProcessing returns)
     //extension.awaitProcessing(Set(1))
+
+    log.info("AppServices started")
   }
 }

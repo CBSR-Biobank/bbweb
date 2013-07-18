@@ -15,7 +15,6 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import akka.actor._
 import org.eligosource.eventsourced.core._
-
 import org.slf4j.LoggerFactory
 
 import scalaz._
@@ -24,11 +23,11 @@ import Scalaz._
 @RunWith(classOf[JUnitRunner])
 class StudyServiceSpec extends StudyFixture with Tags {
 
-  val log = LoggerFactory.getLogger(this.getClass)
-
   args(
     //include = "tag1",
     sequential = true) // forces all tests to be run sequentially
+
+  val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(classOf[StudyServiceSpec].getName)
 

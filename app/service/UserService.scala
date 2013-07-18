@@ -1,7 +1,6 @@
 package service
 
 import domain.{ DomainValidation, DomainError }
-import infrastructure._
 import service.commands._
 import service.events._
 import domain._

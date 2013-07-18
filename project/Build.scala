@@ -8,7 +8,10 @@ object ApplicationBuild extends Build {
     val appVersion      = "0.1-SNAPSHOT"
 
     val appDependencies = Seq(
-      "securesocial" %% "securesocial" % "master-SNAPSHOT"
+      "securesocial" %% "securesocial" % "master-SNAPSHOT",
+
+      // in play 2.1.1 tests are run twice unless dependency is added
+      "com.novocode" % "junit-interface" % "0.10-M2"
     )
 
   val main = play.Project(
@@ -38,6 +41,9 @@ object ApplicationBuild extends Build {
     scalacOptions ++= Seq("-feature"),
     
     (testOptions in Test) += Tests.Argument(TestFrameworks.Specs2, "html", "console"),
+    
+    // in play 2.1.1 tests are run twice unless this option is defined
+    testOptions += Tests.Argument(TestFrameworks.JUnit, "--ignore-runners=org.specs2.runner.JUnitRunner"),
 
     lessEntryPoints <<= baseDirectory(customLessEntryPoints)
     

@@ -22,6 +22,7 @@ import akka.testkit._
 import java.util.concurrent.TimeUnit
 import org.specs2.mutable._
 import org.specs2.time.NoTimeConversions
+import org.slf4j.LoggerFactory
 
 /* A tiny class that can be used as a Specs2 'context'. */
 abstract class AkkaTestkitSupport extends TestKit(ActorSystem())
@@ -36,6 +37,8 @@ abstract class AkkaTestkitSupport extends TestKit(ActorSystem())
 
 abstract class AppFixture extends Specification with NoTimeConversions {
 
+  private val log = LoggerFactory.getLogger(this.getClass)
+
   implicit val timeout = Timeout(5 seconds)
   implicit val system = ActorSystem("test")
 
@@ -46,33 +49,45 @@ abstract class AppFixture extends Specification with NoTimeConversions {
   val mongoDB = mongoClient(mongoDbName)
   val mongoColl = mongoClient(mongoDbName)(mongoCollName)
 
-  // delete the journal contents
-  mongoColl.remove(MongoDBObject.empty)
+  val nameGenerator: NameGenerator
+
+  implicit val adminUserId = new UserId("admin@admin.com")
 
   def journalProps: JournalProps =
     MongodbCasbahJournalProps(mongoClient, mongoDbName, mongoCollName)
 
-  val journal = Journal(journalProps)
-  val extension = EventsourcingExtension(system, journal)
+  lazy val journal = Journal(journalProps)
+  lazy val extension = EventsourcingExtension(system, journal)
+
+  def boot {
+    // delete the journal contents
+    mongoColl.remove(MongoDBObject.empty)
+
+    val userProcessor = extension.processorOf(Props(
+      new UserProcessor() with Emitter with Eventsourced { val id = 2 }))
+
+    // for debug only - password is "administrator"
+    UserRepository.add(User.add(adminUserId, "admin", "admin@admin.com",
+      "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS",
+      "bcrypt", None, None) | null)
+
+    extension.recover()
+    // wait for processor 1 to complete processing of replayed event messages
+    // (ensures that recovery of externally visible state maintained by
+    //  studiesRef is completed when awaitProcessing returns)
+    extension.awaitProcessing(Set(1))
+
+    log.debug("system initialized")
+  }
 
   def await[T](f: Future[DomainValidation[T]]): DomainValidation[T] = {
     // use blocking for now so that tests can be run in parallel
-    Await.result(f, timeout.duration)
+    val r = Await.result(f, timeout.duration)
+    r
   }
 
-  val userProcessor = extension.processorOf(Props(
-    new UserProcessor() with Emitter with Eventsourced { val id = 2 }))
-
-  implicit val adminUserId = new UserId("admin@admin.com")
-
-  // for debug only - password is "administrator"
-  UserRepository.add(User.add(adminUserId, "admin", "admin@admin.com",
-    "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS",
-    "bcrypt", None, None) | null)
-
-  extension.recover()
-  // wait for processor 1 to complete processing of replayed event messages
-  // (ensures that recovery of externally visible state maintained by
-  //  studiesRef is completed when awaitProcessing returns)
-  extension.awaitProcessing(Set(1))
+  step {
+    boot
+  }
 }
+
