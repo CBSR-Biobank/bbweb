@@ -46,6 +46,18 @@ object CollectionEventTypeRepository
       true.success
   }
 
+  /* collection event type can't have duplicate specimen groups in {@link specimenGroupData} */
+  private def validateSpecimenGroups(
+    ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {
+    ???
+  }
+
+  /* collection event type can't have duplicate specimen groups in {@link annotationTypeData} */
+  private def validateAnnotationTypes(
+    ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {
+    ???
+  }
+
   def add(ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {
     collectionEventTypeWithId(ceventType.studyId, ceventType.id) match {
       case Success(prevItem) =>
@@ -53,6 +65,8 @@ object CollectionEventTypeRepository
       case Failure(x) =>
         for {
           nameValid <- nameAvailable(ceventType)
+          specimenGroupsValid <- validateSpecimenGroups(ceventType)
+          annotationTypesValid <- validateAnnotationTypes(ceventType)
           item <- updateMap(ceventType).success
         } yield item
     }
@@ -63,6 +77,8 @@ object CollectionEventTypeRepository
       prevItem <- collectionEventTypeWithId(ceventType.studyId, ceventType.id)
       validVersion <- prevItem.requireVersion(Some(ceventType.version))
       nameValid <- nameAvailable(ceventType)
+      specimenGroupsValid <- validateSpecimenGroups(ceventType)
+      annotationTypesValid <- validateAnnotationTypes(ceventType)
       updatedItem <- CollectionEventType(
         ceventType.id, ceventType.version + 1, ceventType.studyId,
         ceventType.name, ceventType.description, ceventType.recurring, ceventType.specimenGroupData,
