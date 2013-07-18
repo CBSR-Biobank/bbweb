@@ -153,7 +153,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       val cet2 = await(studyService.updateCollectionEventType(
         new UpdateCollectionEventTypeCmd(cet1.id.toString, cet1.versionOption, study2.id.toString,
           name2, Some(name2), recurring, Set.empty, Set.empty)))
-      cet2 must beFailing.like { case msgs => msgs.head must contain("does not belong to study") }
+      cet2 must beFailing.like { case msgs => msgs.head must contain("study does not have collection event type") }
     }
 
     "not be updated with invalid version" in {

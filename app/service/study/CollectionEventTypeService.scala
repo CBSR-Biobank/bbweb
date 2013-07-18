@@ -121,7 +121,7 @@ protected[service] class CollectionEventTypeService() extends CommandHandler {
       removedItem <- CollectionEventTypeRepository.remove(itemToRemove)
       event <- listeners.sendEvent(CollectionEventTypeRemovedEvent(
         removedItem.studyId, removedItem.id)).success
-    } yield oldItem
+    } yield removedItem
     logMethod(log, "removeCollectionEventType", cmd, item)
     item
   }

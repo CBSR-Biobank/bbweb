@@ -101,12 +101,13 @@ protected[service] class StudyAnnotationTypeService() extends CommandHandler {
       oldItem <- CollectionEventAnnotationTypeRepository.annotationTypeWithId(
         study.id, AnnotationTypeId(cmd.id))
       itemToRemove <- CollectionEventAnnotationType(
-        oldItem.id, cmd.expectedVersion.getOrElse(-1), study.id, oldItem.name, oldItem.description,
-        oldItem.valueType, oldItem.maxValueCount, oldItem.options).success
+        AnnotationTypeId(cmd.id), cmd.expectedVersion.getOrElse(-1), study.id,
+        oldItem.name, oldItem.description, oldItem.valueType, oldItem.maxValueCount,
+        oldItem.options).success
       removedItem <- CollectionEventAnnotationTypeRepository.remove(itemToRemove)
       event <- listeners.sendEvent(CollectionEventAnnotationTypeRemovedEvent(
         removedItem.studyId, removedItem.id)).success
-    } yield oldItem
+    } yield removedItem
     logMethod(log, "removeCollectionEventAnnotationType", cmd, item)
     item
   }

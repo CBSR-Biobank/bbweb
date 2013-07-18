@@ -176,7 +176,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
         new UpdateCollectionEventAnnotationTypeCmd(
           at1.id.toString, at1.versionOption, study2.id.toString, name2, None, valueType2,
           maxValueCount2, options)))
-      at2 must beFailing.like { case msgs => msgs.head must contain("does not belong to study") }
+      at2 must beFailing.like { case msgs => msgs.head must contain("study does not have collection event annotation type") }
     }
 
     "not be updated with invalid version" in {
@@ -225,7 +225,7 @@ class StudyAnnotationTypeSpec extends StudyFixture with Tags {
           x.maxValueCount must beNone
           x.options must beNone
           CollectionEventAnnotationTypeRepository.annotationTypeWithId(
-            study.id, x.id) must beSuccessful
+            study.id, x.id) must beFailing
       }
     }
 

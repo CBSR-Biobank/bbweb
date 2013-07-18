@@ -61,9 +61,9 @@ object CollectionEventTypeRepository
       nameValid <- nameAvailable(ceventType)
       updatedItem <- CollectionEventType(
         ceventType.id, ceventType.version + 1, ceventType.studyId,
-        oldItem.name, oldItem.description, oldItem.recurring, oldItem.specimenGroupData,
-        oldItem.annotationTypeData).success
-      updatedItem <- updateMap(ceventType).success
+        ceventType.name, ceventType.description, ceventType.recurring, ceventType.specimenGroupData,
+        ceventType.annotationTypeData).success
+      updatedItem <- updateMap(updatedItem).success
     } yield updatedItem
   }
 

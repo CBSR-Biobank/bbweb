@@ -58,7 +58,11 @@ object CollectionEventAnnotationTypeRepository
       prevItem <- annotationTypeWithId(annotationType.studyId, annotationType.id)
       validVersion <- prevItem.requireVersion(Some(annotationType.version))
       nameValid <- nameAvailable(annotationType)
-      updatedItem <- updateMap(annotationType).success
+      updatedItem <- CollectionEventAnnotationType(
+        annotationType.id, annotationType.version + 1, annotationType.studyId, annotationType.name,
+        annotationType.description, annotationType.valueType, annotationType.maxValueCount,
+        annotationType.options).success
+      repoItem <- updateMap(updatedItem).success
     } yield updatedItem
   }
 

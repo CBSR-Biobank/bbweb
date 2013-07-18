@@ -42,7 +42,7 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
     //
     // FIXME add paging and filtering -> see "computer-databse" Play sample app
     val studies = studyService.getAll
-    Ok(views.html.study.index(studies))
+    Ok(views.html.study.index(studies.toList))
   }
 
   /**
