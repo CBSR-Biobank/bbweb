@@ -1,22 +1,29 @@
 <configuration>
 
+  <!-- sends logs to logback-beagle -->
+  <consolePlugin />
+
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <!-- encoders are assigned the type
          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
     <encoder>
+      <!-- Using %L for logging is slow, replace this for production server -->
       <pattern>%d{HH:mm:ss.SSS} %-5level %c{1}:%L - %msg%n</pattern>
+      <immediateFlush>true</immediateFlush>
     </encoder>
   </appender>
   
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-     <file>logs/tests.log</file>
+     <file>logs/application.log</file>
      <encoder>
        <pattern>%date - [%level] - from %logger in %thread %n%message%n%xException%n</pattern>
      </encoder>
    </appender>
   
+  <logger name="application" level="INFO" />  
+  <logger name="play" level="INFO" />  
   <logger name="domain" level="INFO" />  
-  <logger name="service" level="INFO" />
+  <logger name="service" level="DEBUG" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />

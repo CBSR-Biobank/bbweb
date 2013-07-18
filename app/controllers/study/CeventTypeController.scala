@@ -27,18 +27,18 @@ import Scalaz._
 case class CeventTypeFormObject(
   collectionEventTypeId: String, version: Long, studyId: String, name: String,
   description: Option[String], recurring: Boolean,
-  specimenGroupData: List[String],
-  annotationTypeData: List[String]) {
+  specimenGroupData: List[SpecimenGroupCollectionEventType],
+  annotationTypeData: List[CollectionEventTypeAnnotationType]) {
 
   def getAddCmd: AddCollectionEventTypeCmd = {
     AddCollectionEventTypeCmd(studyId, name, description, recurring,
-      Set.empty, Set.empty)
+      specimenGroupData.toSet, annotationTypeData.toSet)
   }
 
   def getUpdateCmd: UpdateCollectionEventTypeCmd = {
     UpdateCollectionEventTypeCmd(
       collectionEventTypeId, Some(version), studyId, name, description, recurring,
-      Set.empty, Set.empty)
+      specimenGroupData.toSet, annotationTypeData.toSet)
   }
 }
 
@@ -60,8 +60,16 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
       "name" -> nonEmptyText,
       "description" -> optional(text),
       "recurring" -> boolean,
-      "specimenGroups" -> list(text),
-      "annotationTypes" -> list(text))(CeventTypeFormObject.apply)(CeventTypeFormObject.unapply))
+      "specimenGroupData" -> list(mapping(
+        "specimenGrouIds" -> text,
+        "specimenGroupCount" -> number,
+        "specimenGroupAmount" -> bigDecimal)(
+          SpecimenGroupCollectionEventType.apply)(SpecimenGroupCollectionEventType.unapply)),
+      "annotationTypeData" -> list(mapping(
+        "annotationTypeId" -> text,
+        "annotationTypeRequired" -> boolean)(
+          CollectionEventTypeAnnotationType.apply)(CollectionEventTypeAnnotationType.unapply)))(
+        CeventTypeFormObject.apply)(CeventTypeFormObject.unapply))
 
   def index(studyId: String, studyName: String) = SecuredAction { implicit request =>
     val ceventTypes = studyService.getCollectionEventTypes(studyId)
