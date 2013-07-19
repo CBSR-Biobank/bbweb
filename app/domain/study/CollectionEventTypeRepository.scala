@@ -65,8 +65,6 @@ object CollectionEventTypeRepository
       case Failure(x) =>
         for {
           nameValid <- nameAvailable(ceventType)
-          specimenGroupsValid <- validateSpecimenGroups(ceventType)
-          annotationTypesValid <- validateAnnotationTypes(ceventType)
           item <- updateMap(ceventType).success
         } yield item
     }
@@ -77,8 +75,6 @@ object CollectionEventTypeRepository
       prevItem <- collectionEventTypeWithId(ceventType.studyId, ceventType.id)
       validVersion <- prevItem.requireVersion(Some(ceventType.version))
       nameValid <- nameAvailable(ceventType)
-      specimenGroupsValid <- validateSpecimenGroups(ceventType)
-      annotationTypesValid <- validateAnnotationTypes(ceventType)
       updatedItem <- CollectionEventType(
         ceventType.id, ceventType.version + 1, ceventType.studyId,
         ceventType.name, ceventType.description, ceventType.recurring, ceventType.specimenGroupData,
