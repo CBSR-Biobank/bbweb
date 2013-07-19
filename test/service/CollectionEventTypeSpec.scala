@@ -1,17 +1,27 @@
 package service
 
 import fixture._
-import domain.{ AnatomicalSourceType, AnnotationValueType, PreservationType, PreservationTemperatureType, SpecimenType }
+import domain.{
+  AnatomicalSourceType,
+  AnnotationValueType,
+  PreservationType,
+  PreservationTemperatureType,
+  SpecimenType
+}
 import domain.study._
 import service.commands._
+
 import org.specs2.scalaz.ValidationMatchers._
 import org.slf4j.LoggerFactory
 import scala.math.BigDecimal.double2bigDecimal
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class CollectionEventTypeSpec extends StudyFixture {
 
   args(
-    //include = "tag1",
+    include = "tag1",
     sequential = true) // forces all tests to be run sequentially
 
   private val log = LoggerFactory.getLogger(this.getClass)
@@ -221,9 +231,9 @@ class CollectionEventTypeSpec extends StudyFixture {
       SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       val count = 10
-      val amount = 1.1
+      val amount = BigDecimal(1.1)
       val count2 = 5
-      val amount2 = 0.1
+      val amount2 = BigDecimal(0.1)
       val SpecimenGroupData = Set(
         SpecimenGroupCollectionEventType(sg1.id.id, count, amount),
         SpecimenGroupCollectionEventType(sg1.id.id, count2, amount2))
@@ -233,17 +243,16 @@ class CollectionEventTypeSpec extends StudyFixture {
           SpecimenGroupData, Set.empty))) | null
 
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
-        case x =>
-          x.specimenGroupData.size mustEqual 2
-          log.info("***** {}", x.specimenGroupData)
-          x.specimenGroupData.exists(x =>
-            x.specimenGroupId.equals(sg1.id.id)
-              && x.count.equals(count)
-              && x.amount.equals(amount)) mustEqual true
-          x.specimenGroupData.exists(x =>
-            x.specimenGroupId.equals(sg1.id.id)
-              && x.count.equals(count2)
-              && x.amount.equals(amount2)) mustEqual true
+        case cet =>
+          cet.specimenGroupData.size mustEqual 2
+          cet.specimenGroupData.exists(sgData =>
+            sgData.specimenGroupId.equals(sg1.id.id)
+              && sgData.count.equals(count)
+              && sgData.amount.equals(amount)) mustEqual true
+          cet.specimenGroupData.exists(sgData =>
+            sgData.specimenGroupId.equals(sg1.id.id)
+              && sgData.count.equals(count2)
+              && sgData.amount.equals(amount2)) mustEqual true
       }
     }
 
@@ -260,9 +269,9 @@ class CollectionEventTypeSpec extends StudyFixture {
           preservationType, preservationTempType, specimenType))) | null
 
       val count = 10
-      val amount = 1.1
+      val amount = BigDecimal(1.1)
       val count2 = 5
-      val amount2 = 0.1
+      val amount2 = BigDecimal(0.1)
       val SpecimenGroupData = Set(
         SpecimenGroupCollectionEventType(sg1.id.id, count, amount),
         SpecimenGroupCollectionEventType(sg1.id.id, count2, amount2))
@@ -287,8 +296,34 @@ class CollectionEventTypeSpec extends StudyFixture {
     }
 
     "can not be added if specimen group in wrong study" in {
+      val name2 = nameGenerator.next[Study]
+      val study2 = await(studyService.addStudy(new AddStudyCmd(name2, Some(name2)))) | null
 
-    }
+      val name3 = nameGenerator.next[SpecimenGroup]
+      val units = nameGenerator.next[String]
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
+
+      val sg1 = await(studyService.addSpecimenGroup(
+        AddSpecimenGroupCmd(study2.id.toString, name3, Some(name3), units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType))) | null
+
+      val count = 10
+      val amount = BigDecimal(1.1)
+      val SpecimenGroupData = Set(
+        SpecimenGroupCollectionEventType(sg1.id.id, count, amount))
+
+      val name = nameGenerator.next[CollectionEventType]
+      val cet1 = await(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), true,
+          SpecimenGroupData, Set.empty)))
+
+      cet1 must beFailing.like {
+        case msgs => msgs.head must contain("specimen group(s) do not belong to study")
+      }
+    } tag ("tag1")
   }
 
   "Annotation type -> collection event type" can {
@@ -311,7 +346,9 @@ class CollectionEventTypeSpec extends StudyFixture {
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
         case x =>
           x.annotationTypeData.size mustEqual 1
-        // FIXME: add test for values of the SpecimenGroupCollectionEventType
+          x.annotationTypeData.exists(atData =>
+            atData.annotationTypeId.equals(at1.id.id)
+              && atData.required.equals(required)) mustEqual true
       }
     }
 
@@ -346,7 +383,7 @@ class CollectionEventTypeSpec extends StudyFixture {
     }
 
     "can not be added if annotation type in wrong study" in {
-
+      ko
     }
   }
 }

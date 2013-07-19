@@ -19,12 +19,13 @@ import domain.study.{
 }
 import domain.study.Study._
 import service._
-
 import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
-
 import scalaz._
 import Scalaz._
+import domain.study.SpecimenGroupCollectionEventType
+import domain.study.SpecimenGroupRepository
+import domain.study.CollectionEventAnnotationTypeRepository
 
 /**
  * This is the Collection Event Type Domain Service.
@@ -69,6 +70,40 @@ protected[service] class CollectionEventTypeService() extends CommandHandler {
       throw new Error("invalid message received")
   }
 
+  /**
+   * Checks that each specimen group belongs to the same study as the collection event type. If
+   * one or more specimen groups are found that belong to a different study, they are returned in
+   * the DomainError.
+   */
+  private def validateSpecimenGroupData(
+    study: DisabledStudy,
+    specimenGroupData: Set[SpecimenGroupCollectionEventType]): DomainValidation[Boolean] = {
+
+    val invalidSet = specimenGroupData.map(v => SpecimenGroupId(v.specimenGroupId)).map { id =>
+      (id -> SpecimenGroupRepository.specimenGroupWithId(study.id, id).isSuccess)
+    }.filter(x => !x._2).map(_._1)
+
+    if (invalidSet.isEmpty) true.success
+    else DomainError("specimen group(s) do not belong to study: " + invalidSet.mkString(", ")).fail
+  }
+
+  /**
+   * Checks that each annotation type belongs to the same study as the collection event type. If
+   * one or more annotation types are found that belong to a different study, theyare returned in
+   * the DomainError.
+   */
+  private def validateAnnotationTypeData(
+    study: DisabledStudy,
+    annotationTypeData: Set[CollectionEventTypeAnnotationType]): DomainValidation[Boolean] = {
+
+    val invalidSet = annotationTypeData.map(v => AnnotationTypeId(v.annotationTypeId)).map { id =>
+      (id -> CollectionEventAnnotationTypeRepository.annotationTypeWithId(study.id, id).isSuccess)
+    }.filter(x => !x._2).map(_._1)
+
+    if (invalidSet.isEmpty) true.success
+    else DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).fail
+  }
+
   private def addCollectionEventType(
     cmd: AddCollectionEventTypeCmd,
     study: DisabledStudy,
@@ -77,9 +112,12 @@ protected[service] class CollectionEventTypeService() extends CommandHandler {
 
     val item = for {
       cetId <- id.toSuccess(DomainError("collection event type ID is missing"))
-      newItem <- CollectionEventTypeRepository.add(CollectionEventType(
+      newItem <- CollectionEventType(
         CollectionEventTypeId(cetId), 0L, study.id, cmd.name, cmd.description, cmd.recurring,
-        cmd.specimenGroupData, cmd.annotationTypeData))
+        cmd.specimenGroupData, cmd.annotationTypeData).success
+      validSgData <- validateSpecimenGroupData(study, newItem.specimenGroupData)
+      validAtData <- validateAnnotationTypeData(study, newItem.annotationTypeData)
+      addItem <- CollectionEventTypeRepository.add(newItem)
       event <- listeners.sendEvent(CollectionEventTypeAddedEvent(
         study.id, newItem.id, newItem.name, newItem.description, newItem.recurring,
         newItem.specimenGroupData, newItem.annotationTypeData)).success

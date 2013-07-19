@@ -1,27 +1,22 @@
 package service
 
 import fixture._
-import infrastructure._
 import service.commands._
 import domain.{ AnatomicalSourceType, PreservationType, PreservationTemperatureType, SpecimenType }
-import domain.AnnotationValueType._
+//import domain.AnnotationValueType._
 import domain.study._
 
-import scala.concurrent._
-import scala.concurrent.duration._
 import org.specs2.scalaz.ValidationMatchers._
 import org.specs2.mutable._
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
-import akka.actor._
-import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
 
 import scalaz._
 import Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class StudyServiceSpec extends StudyFixture with Tags {
+class StudyServiceSpec extends StudyFixture {
 
   args(
     //include = "tag1",

@@ -1,25 +1,20 @@
 package fixture
 
-import infrastructure._
 import service._
 import domain._
-import domain.study._
 
 import scala.util.{ Try, Success, Failure }
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.stm.Ref
 import org.eligosource.eventsourced.core._
 import org.eligosource.eventsourced.journal.mongodb.casbah.MongodbCasbahJournalProps
 import com.mongodb.casbah.Imports._
-import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
-import akka.pattern.ask
 import akka.util.Timeout
 import akka.testkit._
-import java.util.concurrent.TimeUnit
+//import java.util.concurrent.TimeUnit
 import org.specs2.mutable._
 import org.specs2.time.NoTimeConversions
 import org.slf4j.LoggerFactory
@@ -35,7 +30,7 @@ abstract class AkkaTestkitSupport extends TestKit(ActorSystem())
   }
 }
 
-abstract class AppFixture extends Specification with NoTimeConversions {
+abstract class AppFixture extends Specification with NoTimeConversions with Tags {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 

@@ -1,5 +1,5 @@
 import sbt._
-import Keys._
+import sbt.Keys._
 import play.Project._
 
 object ApplicationBuild extends Build {
@@ -16,6 +16,9 @@ object ApplicationBuild extends Build {
 
   val main = play.Project(
     appName, appVersion, appDependencies).settings(
+    scalaVersion := "2.10.2",
+
+    autoScalaLibrary := false,
 
     resolvers ++= Seq(
       "Eligosource Releases Repo" at "http://repo.eligotech.com/nexus/content/repositories/eligosource-releases/"
