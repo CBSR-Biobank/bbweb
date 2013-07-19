@@ -1,7 +1,8 @@
-@(attrTypeForm: Form[controllers.study.CeventTypeFormObject],
+@(cetForm: Form[controllers.study.CeventTypeFormObject],
   formType: FormType,
   studyId: String,
-  studyName: String)(
+  studyName: String,
+  specimenGroupMap : Seq[(String,String)])(
   implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
@@ -30,7 +31,7 @@
   </div>
 
 
-  @if(attrTypeForm.hasErrors) {
+  @if(cetForm.hasErrors) {
     <div class="alert">
     <p>@Messages("biobank.common.form.fix.errors")</p>
     </div>
@@ -46,18 +47,23 @@
       }
       case UpdateFormType() => {
         <input type="hidden" name="collectionEventTypeId"
-        value="@attrTypeForm("collectionEventTypeId").value" >
-        <input type="hidden" name="version" value="@attrTypeForm("version").value" >
+        value="@cetForm("collectionEventTypeId").value" >
+        <input type="hidden" name="version" value="@cetForm("version").value" >
       }
     }
 
     <input type="hidden" name="studyId" value="@studyId" >
 
-    @formNameAndDescription(attrTypeForm("name"), attrTypeForm("description"))
+    @formNameAndDescription(cetForm("name"), cetForm("description"))
 
-    @checkbox(field = attrTypeForm("recurring"),
+    @checkbox(field = cetForm("recurring"),
       args = '_label -> Messages("biobank.study.collection.event.type.field.recurring"),
       '_help -> "")
+
+    @* @sgSelectionGroup(cetForm("specimenGroupData[x]"), "sg_selections_template", "display:none;")
+    *@
+
+    @sgSelectionGroup(cetForm("specimenGroupData[x]"), "sg_selections_template", "", specimenGroupMap)
 
     <div class="form-actions">
     <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>

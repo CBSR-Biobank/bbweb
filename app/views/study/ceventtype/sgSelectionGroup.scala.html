@@ -1,0 +1,29 @@
+@(sgGroupField: Field,
+  className: String = "selections",
+  style: String = "",
+  specimenGroupMap : Seq[(String,String)])
+
+@import helper._
+
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+
+<label class="control-label" for="recurring">
+@Messages("biobank.study.collection.event.type.form.specimen.group")
+</label>
+
+<div class="controls controls-row @className" style="@style">
+@select(
+  field = sgGroupField("specimenGrouIds"),
+  options = specimenGroupMap,
+  args = '_label -> "",
+  '_class -> "span2"
+)
+
+@input(field = sgGroupField("specimenGroupAmount"),
+  '_label -> Messages("biobank.study.collection.event.type.form.specimen.group.amount"),
+  '_class -> className,
+  '_style -> style) { (id, name, value, _) =>
+  <input class="span2" type="text" name="@name" value="@value">
+  <a class="removeSelection btn btn-warning">@Messages("biobank.common.action.remove")</a>
+}
+</div>
