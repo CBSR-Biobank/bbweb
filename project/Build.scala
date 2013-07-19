@@ -1,6 +1,8 @@
 import sbt._
 import sbt.Keys._
 import play.Project._
+import org.ensime.sbt.Plugin.Settings.ensimeConfig
+import org.ensime.sbt.util.SExp._
 
 object ApplicationBuild extends Build {
 
@@ -42,19 +44,30 @@ object ApplicationBuild extends Build {
     ),
 
     scalacOptions ++= Seq("-feature"),
-    
+
     (testOptions in Test) += Tests.Argument(TestFrameworks.Specs2, "html", "console"),
-    
+
     // in play 2.1.1 tests are run twice unless this option is defined
     testOptions += Tests.Argument(TestFrameworks.JUnit, "--ignore-runners=org.specs2.runner.JUnitRunner"),
 
-    lessEntryPoints <<= baseDirectory(customLessEntryPoints)
-    
+    lessEntryPoints <<= baseDirectory(customLessEntryPoints),
+
+    ensimeConfig := sexp(
+        key(":only-include-in-index"), sexp(
+          "controllers\\..*",
+          "models\\..*",
+          "views\\..*",
+          "play\\..*"
+        ),
+        key(":source-roots"), sexp(
+          "/home/loyola/proj/scala/playframework/Play20/framework/src"
+        )
+      )
   )
 
   // Only compile the bootstrap bootstrap.less file and any other *.less file in the stylesheets directory
   def customLessEntryPoints(base: File): PathFinder = (
     (base / "app" / "assets" / "stylesheets" / "bootstrap" * "bootstrap.less")
-    +++ (base / "app" / "assets" / "stylesheets" / "bootstrap" * "responsive.less")    
+    +++ (base / "app" / "assets" / "stylesheets" / "bootstrap" * "responsive.less")
     +++ (base / "app" / "assets" / "stylesheets" * "*.less") )
 }

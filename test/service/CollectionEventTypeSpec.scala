@@ -21,7 +21,7 @@ import org.specs2.runner.JUnitRunner
 class CollectionEventTypeSpec extends StudyFixture {
 
   args(
-    include = "tag1",
+    //include = "tag1",
     sequential = true) // forces all tests to be run sequentially
 
   private val log = LoggerFactory.getLogger(this.getClass)
@@ -306,14 +306,21 @@ class CollectionEventTypeSpec extends StudyFixture {
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
+      // this one is in correct study
       val sg1 = await(studyService.addSpecimenGroup(
+        AddSpecimenGroupCmd(study.id.toString, name3, Some(name3), units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType))) | null
+
+      // this one is in wrong study
+      val sg2 = await(studyService.addSpecimenGroup(
         AddSpecimenGroupCmd(study2.id.toString, name3, Some(name3), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
 
       val count = 10
       val amount = BigDecimal(1.1)
       val SpecimenGroupData = Set(
-        SpecimenGroupCollectionEventType(sg1.id.id, count, amount))
+        SpecimenGroupCollectionEventType(sg1.id.id, count, amount),
+        SpecimenGroupCollectionEventType(sg2.id.id, count, amount))
 
       val name = nameGenerator.next[CollectionEventType]
       val cet1 = await(studyService.addCollectionEventType(
@@ -323,7 +330,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       cet1 must beFailing.like {
         case msgs => msgs.head must contain("specimen group(s) do not belong to study")
       }
-    } tag ("tag1")
+    }
   }
 
   "Annotation type -> collection event type" can {
@@ -383,7 +390,33 @@ class CollectionEventTypeSpec extends StudyFixture {
     }
 
     "can not be added if annotation type in wrong study" in {
-      ko
-    }
+      val name2 = nameGenerator.next[Study]
+      val study2 = await(studyService.addStudy(new AddStudyCmd(name2, Some(name2)))) | null
+
+      // this one is in correct study
+      val at1 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.toString,
+          nameGenerator.next[CollectionEventTypeAnnotationType], None,
+          AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
+
+      // this one is in other study
+      val at2 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study2.id.toString,
+          nameGenerator.next[CollectionEventTypeAnnotationType], None,
+          AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
+
+      val annotationTypeData = Set(
+        CollectionEventTypeAnnotationType(at1.id.id, true),
+        CollectionEventTypeAnnotationType(at2.id.id, true))
+
+      val name = nameGenerator.next[CollectionEventType]
+      val cet1 = await(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), true,
+          Set.empty, annotationTypeData)))
+
+      cet1 must beFailing.like {
+        case msgs => msgs.head must contain("annotation type(s) do not belong to study")
+      }
+    } tag ("tag1")
   }
 }

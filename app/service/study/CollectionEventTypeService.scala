@@ -1,31 +1,15 @@
 package service.study
 
-import service.commands._
-import service.events._
 import domain._
-import domain.study.{
-  CollectionEventAnnotationType,
-  CollectionEventType,
-  CollectionEventTypeAnnotationType,
-  CollectionEventTypeId,
-  CollectionEventTypeRepository,
-  DisabledStudy,
-  SpecimenGroup,
-  SpecimenGroupId,
-  SpecimenGroupCollectionEventType,
-  StudyAnnotationType,
-  Study,
-  StudyId
-}
+import domain.study._
 import domain.study.Study._
-import service._
 import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
 import scalaz._
-import Scalaz._
-import domain.study.SpecimenGroupCollectionEventType
-import domain.study.SpecimenGroupRepository
-import domain.study.CollectionEventAnnotationTypeRepository
+import scalaz.Scalaz._
+import service._
+import service.commands._
+import service.events._
 
 /**
  * This is the Collection Event Type Domain Service.

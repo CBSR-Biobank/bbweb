@@ -1,66 +1,67 @@
-@(attrTypeForm: Form[controllers.study.CeventTypeFormObject], 
-    formType: FormType, 
-    studyId: String, 
-    studyName: String)(
-    implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+@(attrTypeForm: Form[controllers.study.CeventTypeFormObject],
+  formType: FormType,
+  studyId: String,
+  studyName: String)(
+  implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
 @import controllers.study._
 
-@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) } 
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
 
 @formInfo = @{ formType match {
-    case AddFormType() => 
-        FormInfo(Messages("biobank.study.collection.event.type.add"), 
-            routes.CeventTypeController.addCeventTypeSubmit(studyId, studyName))
-    case UpdateFormType() => 
-        FormInfo(Messages("biobank.study.collection.event.type.update"), 
-            routes.CeventTypeController.updateCeventTypeSubmit(studyId, studyName))  
+  case AddFormType() =>
+    FormInfo(Messages("biobank.study.collection.event.type.add"),
+      routes.CeventTypeController.addCeventTypeSubmit(studyId, studyName))
+  case UpdateFormType() =>
+    FormInfo(Messages("biobank.study.collection.event.type.update"),
+      routes.CeventTypeController.updateCeventTypeSubmit(studyId, studyName))
 }}
 
 @main(formInfo.title) {
-    @breadcrumbs(Map(
-      (Messages("biobank.study.plural") -> routes.StudyController.index),
-      (studyName -> routes.StudyController.showStudy(studyId)),
-      (formInfo.title -> null)
-    ))
-    <div class="page-header">
-      <h2>@Messages("biobank.study.singular"): @studyName</h2>
-      <h3>@formInfo.title</h3>
+  @breadcrumbs(Map(
+    (Messages("biobank.study.plural") -> routes.StudyController.index),
+    (studyName -> routes.StudyController.showStudy(studyId)),
+    (formInfo.title -> null)
+  ))
+  <div class="page-header">
+  <h2>@Messages("biobank.study.singular"): @studyName</h2>
+  <h3>@formInfo.title</h3>
+  </div>
+
+
+  @if(attrTypeForm.hasErrors) {
+    <div class="alert">
+    <p>@Messages("biobank.common.form.fix.errors")</p>
     </div>
-    
-    
-    @if(attrTypeForm.hasErrors) {
-      <div class="alert">
-        <p>@Messages("biobank.common.form.fix.errors")</p>
-      </div>
-    }
-    
-    <div class="clearfix">
-    @form(formInfo.action, args = 'id -> "addform", 'class -> "form-horizontal") {
-      
-      @formType match {
-        case AddFormType() => { 
-          <input type="hidden" name="collectionEventTypeId" value="dont-care">  
-          <input type="hidden" name="version" value="-1" >  
-        }
-        case UpdateFormType() => { 
-          <input type="hidden" name="collectionEventTypeId" value="@attrTypeForm("collectionEventTypeId").value" >  
-          <input type="hidden" name="version" value="@attrTypeForm("version").value" >
-        }
+  }
+
+  <div class="clearfix">
+  @form(formInfo.action, args = 'id -> "addform", 'class -> "form-horizontal") {
+
+    @formType match {
+      case AddFormType() => {
+        <input type="hidden" name="collectionEventTypeId" value="dont-care">
+        <input type="hidden" name="version" value="-1" >
       }
-      
-      <input type="hidden" name="studyId" value="@studyId" >  
-      
-      @formNameAndDescription(attrTypeForm("name"), attrTypeForm("description"))
-      
-      @checkbox(field = attrTypeForm("recurring"), 
-          args = '_label -> Messages("biobank.study.collection.event.type.field.recurring"),
-          '_help -> "")
-      
-      <div class="form-actions">
-           <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
-      </div>
+      case UpdateFormType() => {
+        <input type="hidden" name="collectionEventTypeId"
+        value="@attrTypeForm("collectionEventTypeId").value" >
+        <input type="hidden" name="version" value="@attrTypeForm("version").value" >
+      }
     }
-    </div>  
-}    
+
+    <input type="hidden" name="studyId" value="@studyId" >
+
+    @formNameAndDescription(attrTypeForm("name"), attrTypeForm("description"))
+
+    @checkbox(field = attrTypeForm("recurring"),
+      args = '_label -> Messages("biobank.study.collection.event.type.field.recurring"),
+      '_help -> "")
+
+    <div class="form-actions">
+    <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
+    </div>
+  }
+  </div>
+}
