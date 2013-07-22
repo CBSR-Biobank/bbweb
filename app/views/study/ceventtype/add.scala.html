@@ -1,73 +1,100 @@
 @(cetForm: Form[controllers.study.CeventTypeFormObject],
-  formType: FormType,
-  studyId: String,
-  studyName: String,
-  specimenGroupMap : Seq[(String,String)])(
-  implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+        formType: FormType,
+        studyId: String,
+        studyName: String,
+        specimenGroupMap : Seq[(String,String,String)])(
+        implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
 @import controllers.study._
 
-@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+    @implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
 
-@formInfo = @{ formType match {
-  case AddFormType() =>
-    FormInfo(Messages("biobank.study.collection.event.type.add"),
-      routes.CeventTypeController.addCeventTypeSubmit(studyId, studyName))
-  case UpdateFormType() =>
-    FormInfo(Messages("biobank.study.collection.event.type.update"),
-      routes.CeventTypeController.updateCeventTypeSubmit(studyId, studyName))
-}}
+    @formInfo = @{ formType match {
+        case AddFormType() =>
+            FormInfo(Messages("biobank.study.collection.event.type.add"),
+                routes.CeventTypeController.addCeventTypeSubmit(studyId, studyName))
+        case UpdateFormType() =>
+            FormInfo(Messages("biobank.study.collection.event.type.update"),
+                routes.CeventTypeController.updateCeventTypeSubmit(studyId, studyName))
+    }}
 
 @main(formInfo.title) {
-  @breadcrumbs(Map(
-    (Messages("biobank.study.plural") -> routes.StudyController.index),
-    (studyName -> routes.StudyController.showStudy(studyId)),
-    (formInfo.title -> null)
-  ))
-  <div class="page-header">
-  <h2>@Messages("biobank.study.singular"): @studyName</h2>
-  <h3>@formInfo.title</h3>
-  </div>
-
-
-  @if(cetForm.hasErrors) {
-    <div class="alert">
-    <p>@Messages("biobank.common.form.fix.errors")</p>
+    @breadcrumbs(Map(
+        (Messages("biobank.study.plural") -> routes.StudyController.index),
+        (studyName -> routes.StudyController.showStudy(studyId)),
+        (formInfo.title -> null)
+    ))
+    <div class="page-header">
+        <h2>@Messages("biobank.study.singular"): @studyName</h2>
+        <h3>@formInfo.title</h3>
     </div>
-  }
 
-  <div class="clearfix">
-  @form(formInfo.action, args = 'id -> "addform", 'class -> "form-horizontal") {
 
-    @formType match {
-      case AddFormType() => {
-        <input type="hidden" name="collectionEventTypeId" value="dont-care">
-        <input type="hidden" name="version" value="-1" >
-      }
-      case UpdateFormType() => {
-        <input type="hidden" name="collectionEventTypeId"
-        value="@cetForm("collectionEventTypeId").value" >
-        <input type="hidden" name="version" value="@cetForm("version").value" >
-      }
+    @if(cetForm.hasErrors) {
+        <div class="alert">
+            <p>@Messages("biobank.common.form.fix.errors")</p>
+        </div>
     }
 
-    <input type="hidden" name="studyId" value="@studyId" >
+    <div class="clearfix">
+    @form(formInfo.action, args = 'id -> "addform", 'class -> "form-horizontal") {
 
-    @formNameAndDescription(cetForm("name"), cetForm("description"))
+        @formType match {
+            case AddFormType() => {
+                <input type="hidden" name="collectionEventTypeId" value="dont-care">
+                <input type="hidden" name="version" value="-1" >
+            }
+            case UpdateFormType() => {
+                <input type="hidden" name="collectionEventTypeId"
+                value="@cetForm("collectionEventTypeId").value" >
+                <input type="hidden" name="version" value="@cetForm("version").value" >
+            }
+        }
 
-    @checkbox(field = cetForm("recurring"),
-      args = '_label -> Messages("biobank.study.collection.event.type.field.recurring"),
-      '_help -> "")
+        <input type="hidden" name="studyId" value="@studyId" >
 
-    @* @sgSelectionGroup(cetForm("specimenGroupData[x]"), "sg_selections_template", "display:none;")
-    *@
+        @formNameAndDescription(cetForm("name"), cetForm("description"))
 
-    @sgSelectionGroup(cetForm("specimenGroupData[x]"), "sg_selections_template", "", specimenGroupMap)
+        @checkbox(field = cetForm("recurring"),
+            args = '_label -> Messages("biobank.study.collection.event.type.field.recurring"),
+            '_help -> "")
 
-    <div class="form-actions">
-    <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
+        <div class="control-group sgSelectionGroup">
+            <label class="control-label">
+                @Messages("biobank.study.collection.event.field.specimen.groups")
+            </label>
+            <div class="controls">
+                <a class="addSpecimenGroup btn success">
+                @Messages("biobank.study.collection.event.form.action.specimen.group.add")
+                </a>
+            </div>
+        </div>
+        @sgSelectionGroup(cetForm("specimenGroupData[x]"), specimenGroupMap)
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
+        </div>
+    }
     </div>
-  }
-  </div>
+
+    <script type="text/javascript" charset="utf-8">
+        $(function() {
+        var sGSelectionGroup = $('.sgSelectionGroup')
+
+        //
+        // creates a new selection text entry field based on the hidden template. The
+        // new input field has to be modified to contain the correct parameters
+        //
+        $(document).on('click', '.addSpecimenGroup', function() {
+            var template = $('.sg_selection_template', sGSelectionGroup)
+            var newSelection = template.clone().removeClass('sg_selection_template').addClass('sgselections')
+            var i = $('.sgSelectionGroup .sgSelections').size()
+            newSelection.find('input').attr('name', "specimenGroupData[" + i + "]")
+            newSelection.show()
+            template.before(newSelection)
+        })
+
+        })
+    </script>
 }

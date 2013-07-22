@@ -13,7 +13,7 @@ import service.commands._
 
 import org.specs2.scalaz.ValidationMatchers._
 import org.slf4j.LoggerFactory
-import scala.math.BigDecimal.double2bigDecimal
+//import scala.math.BigDecimal.double2bigDecimal
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
@@ -37,7 +37,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       val cet1 = await(studyService.addCollectionEventType(AddCollectionEventTypeCmd(
-        study.id.toString, name, Some(name), recurring, Set.empty, Set.empty)))
+        study.id.id, name, Some(name), recurring, Set.empty, Set.empty)))
 
       cet1 must beSuccessful.like {
         case x =>
@@ -56,7 +56,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring2 = false
 
       val cet2 = await(studyService.addCollectionEventType(AddCollectionEventTypeCmd(
-        study.id.toString, name2, None, recurring2, Set.empty, Set.empty)))
+        study.id.id, name2, None, recurring2, Set.empty, Set.empty)))
 
       cet2 must beSuccessful.like {
         case x =>
@@ -78,12 +78,12 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       val cet1 = await(studyService.addCollectionEventType(AddCollectionEventTypeCmd(
-        study.id.toString, name, Some(name), recurring, Set.empty, Set.empty)))
+        study.id.id, name, Some(name), recurring, Set.empty, Set.empty)))
 
       cet1 must beSuccessful
 
       val cet2 = await(studyService.addCollectionEventType(AddCollectionEventTypeCmd(
-        study.id.toString, name, Some(name), recurring, Set.empty, Set.empty)))
+        study.id.id, name, Some(name), recurring, Set.empty, Set.empty)))
 
       cet2 must beFailing.like { case msgs => msgs.head must contain("already exists") }
     }
@@ -93,7 +93,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring,
           Set.empty, Set.empty))) | null
 
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
@@ -102,7 +102,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring2 = false
 
       val cet2 = await(studyService.updateCollectionEventType(
-        new UpdateCollectionEventTypeCmd(cet1.id.toString, cet1.versionOption, study.id.toString,
+        new UpdateCollectionEventTypeCmd(cet1.id.id, cet1.versionOption, study.id.id,
           name2, Some(name2), recurring2, Set.empty, Set.empty)))
 
       cet2 must beSuccessful.like {
@@ -124,19 +124,19 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring,
           Set.empty, Set.empty))) | null
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
 
       val name2 = nameGenerator.next[Study]
       val recurring2 = true
       val cet2 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name2, Some(name2), recurring2,
+        new AddCollectionEventTypeCmd(study.id.id, name2, Some(name2), recurring2,
           Set.empty, Set.empty))) | null
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet2.id) must beSuccessful
 
       val cet3 = await(studyService.updateCollectionEventType(
-        new UpdateCollectionEventTypeCmd(cet2.id.toString, cet2.versionOption, study.id.toString,
+        new UpdateCollectionEventTypeCmd(cet2.id.id, cet2.versionOption, study.id.id,
           name, Some(name), recurring, Set.empty, Set.empty)))
       cet3 must beFailing.like {
         case msgs => msgs.head must contain("name already exists")
@@ -151,11 +151,11 @@ class CollectionEventTypeSpec extends StudyFixture {
       val study2 = await(studyService.addStudy(new AddStudyCmd(name2, Some(name2)))) | null
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring,
           Set.empty, Set.empty))) | null
 
       val cet2 = await(studyService.updateCollectionEventType(
-        new UpdateCollectionEventTypeCmd(cet1.id.toString, cet1.versionOption, study2.id.toString,
+        new UpdateCollectionEventTypeCmd(cet1.id.id, cet1.versionOption, study2.id.id,
           name2, Some(name2), recurring, Set.empty, Set.empty)))
       cet2 must beFailing.like { case msgs => msgs.head must contain("study does not have collection event type") }
     }
@@ -165,7 +165,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring,
           Set.empty, Set.empty))) | null
 
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
@@ -175,7 +175,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       val versionOption = Some(cet1.version + 1)
 
       val cet2 = await(studyService.updateCollectionEventType(
-        new UpdateCollectionEventTypeCmd(cet1.id.toString, versionOption, study.id.toString,
+        new UpdateCollectionEventTypeCmd(cet1.id.id, versionOption, study.id.id,
           name2, Some(name2), recurring2, Set.empty, Set.empty)))
       cet2 must beFailing.like {
         case msgs => msgs.head must contain("doesn't match current version")
@@ -187,12 +187,12 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, None, recurring,
+        new AddCollectionEventTypeCmd(study.id.id, name, None, recurring,
           Set.empty, Set.empty))) | null
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
 
       await(studyService.removeCollectionEventType(
-        new RemoveCollectionEventTypeCmd(cet1.id.toString, cet1.versionOption, study.id.toString)))
+        new RemoveCollectionEventTypeCmd(cet1.id.id, cet1.versionOption, study.id.id)))
 
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beFailing
     }
@@ -202,13 +202,13 @@ class CollectionEventTypeSpec extends StudyFixture {
       val recurring = true
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring,
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring,
           Set.empty, Set.empty))) | null
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
 
       val versionOption = Some(cet1.version + 1)
       val cet2 = await(studyService.removeCollectionEventType(
-        new RemoveCollectionEventTypeCmd(cet1.id.toString, versionOption, study.id.toString)))
+        new RemoveCollectionEventTypeCmd(cet1.id.id, versionOption, study.id.id)))
       cet2 must beFailing.like {
         case msgs => msgs.head must contain("doesn't match current version")
       }
@@ -226,7 +226,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       val specimenType = SpecimenType.FilteredUrine
 
       val sg1 = await(studyService.addSpecimenGroup(
-        AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
+        AddSpecimenGroupCmd(study.id.id, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
       SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
@@ -239,7 +239,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         SpecimenGroupCollectionEventType(sg1.id.id, count2, amount2))
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring = true,
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring = true,
           SpecimenGroupData, Set.empty))) | null
 
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
@@ -265,7 +265,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       val specimenType = SpecimenType.FilteredUrine
 
       val sg1 = await(studyService.addSpecimenGroup(
-        AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
+        AddSpecimenGroupCmd(study.id.id, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
 
       val count = 10
@@ -277,7 +277,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         SpecimenGroupCollectionEventType(sg1.id.id, count2, amount2))
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), recurring = true,
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring = true,
           SpecimenGroupData, Set.empty))) | null
 
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
@@ -286,7 +286,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       }
 
       val cet2 = await(studyService.updateCollectionEventType(
-        new UpdateCollectionEventTypeCmd(cet1.id.toString, cet1.versionOption, study.id.toString,
+        new UpdateCollectionEventTypeCmd(cet1.id.id, cet1.versionOption, study.id.id,
           name, Some(name), recurring = true, Set.empty, Set.empty))) | null
 
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
@@ -308,12 +308,12 @@ class CollectionEventTypeSpec extends StudyFixture {
 
       // this one is in correct study
       val sg1 = await(studyService.addSpecimenGroup(
-        AddSpecimenGroupCmd(study.id.toString, name3, Some(name3), units, anatomicalSourceType,
+        AddSpecimenGroupCmd(study.id.id, name3, Some(name3), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
 
       // this one is in wrong study
       val sg2 = await(studyService.addSpecimenGroup(
-        AddSpecimenGroupCmd(study2.id.toString, name3, Some(name3), units, anatomicalSourceType,
+        AddSpecimenGroupCmd(study2.id.id, name3, Some(name3), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
 
       val count = 10
@@ -324,7 +324,7 @@ class CollectionEventTypeSpec extends StudyFixture {
 
       val name = nameGenerator.next[CollectionEventType]
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), true,
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), true,
           SpecimenGroupData, Set.empty)))
 
       cet1 must beFailing.like {
@@ -340,14 +340,14 @@ class CollectionEventTypeSpec extends StudyFixture {
       val required = true
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
+        new AddCollectionEventAnnotationTypeCmd(study.id.id, name, Some(name),
           AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
 
       val annotationTypeData = Set(
         CollectionEventTypeAnnotationType(at1.id.id, true))
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), true,
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), true,
           Set.empty, annotationTypeData))) | null
 
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
@@ -363,14 +363,14 @@ class CollectionEventTypeSpec extends StudyFixture {
       val name = nameGenerator.next[CollectionEventTypeAnnotationType]
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString, name, Some(name),
+        new AddCollectionEventAnnotationTypeCmd(study.id.id, name, Some(name),
           AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
 
       val annotationTypeData = Set(
         CollectionEventTypeAnnotationType(at1.id.id, true))
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), true,
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), true,
           Set.empty, annotationTypeData))) | null
 
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
@@ -380,7 +380,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       }
 
       val cet2 = await(studyService.updateCollectionEventType(
-        new UpdateCollectionEventTypeCmd(cet1.id.toString, cet1.versionOption, study.id.toString,
+        new UpdateCollectionEventTypeCmd(cet1.id.id, cet1.versionOption, study.id.id,
           name, Some(name), recurring = true, Set.empty, Set.empty))) | null
 
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
@@ -395,13 +395,13 @@ class CollectionEventTypeSpec extends StudyFixture {
 
       // this one is in correct study
       val at1 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study.id.toString,
+        new AddCollectionEventAnnotationTypeCmd(study.id.id,
           nameGenerator.next[CollectionEventTypeAnnotationType], None,
           AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
 
       // this one is in other study
       val at2 = await(studyService.addCollectionEventAnnotationType(
-        new AddCollectionEventAnnotationTypeCmd(study2.id.toString,
+        new AddCollectionEventAnnotationTypeCmd(study2.id.id,
           nameGenerator.next[CollectionEventTypeAnnotationType], None,
           AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
 
@@ -411,7 +411,7 @@ class CollectionEventTypeSpec extends StudyFixture {
 
       val name = nameGenerator.next[CollectionEventType]
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study.id.toString, name, Some(name), true,
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), true,
           Set.empty, annotationTypeData)))
 
       cet1 must beFailing.like {

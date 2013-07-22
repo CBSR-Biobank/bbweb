@@ -13,3 +13,6 @@ project/plugins/project/
 .scala_dependencies
 /.target
 /bin
+
+# IntelliJ
+.idea*

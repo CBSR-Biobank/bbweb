@@ -11,7 +11,7 @@ import scala.reflect._
 class NameGenerator(rootName: String) {
   val namer = UniqueNames(rootName)
 
-  def next[T: ClassTag] =
+  def next[T: ClassTag]: String =
     namer.uniqueName("%s-%s" format (rootName, classTag[T].getClass.getSimpleName))
 
 }

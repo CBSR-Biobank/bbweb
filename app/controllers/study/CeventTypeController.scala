@@ -82,10 +82,8 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
     Ok(html.study.ceventtype.show(studyId, studyName, ceventTypes))
   }
 
-  private def specimenGroupNames(studyId: String) = {
-    Seq("" -> Messages("biobank.form.selection.default")) ++
-    studyService.getSpecimenGroups(studyId).map(x =>
-      x.id.id -> x.name).toSeq
+  private def specimenGroupInfo(studyId: String) = {
+    studyService.getSpecimenGroups(studyId).map(x => (x.id.id, x.name, x.units)).toSeq
   }
 
   /**
@@ -96,7 +94,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
       case Failure(x) => throw new Error(x.head)
       case Success(study) =>
         Ok(html.study.ceventtype.add(ceventTypeForm, AddFormType(), studyId, study.name,
-          specimenGroupNames(studyId)))
+          specimenGroupInfo(studyId)))
     }
   }
 
@@ -105,7 +103,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
       formWithErrors => {
         Logger.debug("addCeventTypeSubmit: formWithErrors: " + formWithErrors)
         BadRequest(html.study.ceventtype.add(formWithErrors, AddFormType(), studyId, studyName,
-          specimenGroupNames(studyId)))
+          specimenGroupInfo(studyId)))
       },
       submittedForm => {
         Async {
@@ -122,7 +120,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
                     Messages("biobank.study.collection.event.type.form.error.name"))
                   Logger.debug("bad name: " + form)
                   BadRequest(html.study.ceventtype.add(form, AddFormType(),
-                    studyId, studyName, specimenGroupNames(studyId)))
+                    studyId, studyName, specimenGroupInfo(studyId)))
                 } else {
                   throw new Error(x.head)
                 }
@@ -139,7 +137,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
           ceventType.id.id, ceventType.version, ceventType.studyId.id, ceventType.name,
           ceventType.description, ceventType.recurring, List.empty, List.empty))
         Ok(html.study.ceventtype.add(form, UpdateFormType(), studyId, studyName,
-          specimenGroupNames(studyId)))
+          specimenGroupInfo(studyId)))
     }
   }
 
@@ -148,7 +146,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
       formWithErrors => {
         Logger.debug("updateCeventTypeSubmit: formWithErrors: " + formWithErrors)
         BadRequest(html.study.ceventtype.add(
-          formWithErrors, AddFormType(), studyId, studyName, specimenGroupNames(studyId)))
+          formWithErrors, AddFormType(), studyId, studyName, specimenGroupInfo(studyId)))
       },
       submittedForm => {
         Async {
@@ -163,7 +161,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
                   val form = ceventTypeForm.fill(submittedForm).withError("name",
                     Messages("biobank.study.collection.event.type.form.error.name"))
                   BadRequest(html.study.ceventtype.add(
-                    form, UpdateFormType(), studyId, studyName, specimenGroupNames(studyId)))
+                    form, UpdateFormType(), studyId, studyName, specimenGroupInfo(studyId)))
                 } else {
                   throw new Error(x.head)
                 }

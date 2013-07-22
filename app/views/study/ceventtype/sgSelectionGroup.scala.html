@@ -1,25 +1,41 @@
-@(sgGroupField: Field,
-  className: String = "selections",
-  style: String = "",
-  specimenGroupMap : Seq[(String,String)])
+@**
+* Specimen group map is a tuple where the first item is the ID, the second the name and the
+* third is the units.
+**@
+@(sgGroupField: Field, specimenGroupMap: Seq[(String, String, String)])
 
 @import helper._
-
-@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
-
-<label class="control-label" for="recurring">
-@Messages("biobank.study.collection.event.type.form.specimen.group")
-</label>
-
-<div class="controls controls-row sg_selections_template" style="" @* display: none; *@>
-
-<select class="span2" id="specimenGroupData_x__specimenGrouIds"
-  name="specimenGroupData[x].specimenGrouIds" >
-  <option value="" >-- Make a selection --</option>
-  <option value="C1272492-57B4-4CC6-AB37-CFF4F6F343D1" >sg1</option>
-</select>
-
-<input class="span2" type="text" name="specimenGroupData[x].specimenGroupAmount" value="">
-<a class="removeSelection btn btn-warning">@Messages("biobank.common.action.remove")</a>
-
+@implicitFieldConstructor = @{
+    FieldConstructor(twitterBootstrapInput.f)
+}
+<div class="well sg_selection_template"> @** style="display: inline;"> **@
+    <div class="control-group">
+        <label class="control-label" for="specimenGroupData_x__specimenGrouIds">
+            @Messages("biobank.study.collection.event.type.form.specimen.group") [x]
+        </label>
+        <div class="controls">
+            <select class="input-xlarge" id="specimenGroupData_x__specimenGrouIds" name="specimenGroupData[x].specimenGrouIds" >
+                <option value="" >@Messages("biobank.form.selection.default")</option>
+                @Html(specimenGroupMap.map(x => """<option value="%s">%s</option>""".format(x._1, x._2)).mkString)
+            </select>
+            <a class="removeSelection btn btn-warning">@Messages("biobank.common.action.remove")</a>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">@Messages("biobank.study.collection.event.type.form.specimen.group.count")</label>
+        <div class="controls">
+            <input class="input-medium" type="text" name="specimenGroupData[x].specimenGroupCount" id="specimenGroupData_x__specimenGroupCount" value="">
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">@Messages("biobank.study.collection.event.type.form.specimen.group.amount")</label>
+        <div class="controls">
+            <div class="input-append">
+                <input class="input-medium"  type="text" name="specimenGroupData[x].specimenGroupAmount" id="specimenGroupData_x__specimenGroupAmount" value="">
+                <span class="add-on">
+                    @Messages("biobank.study.specimengroup.field.units")
+                </span>
+            </div>
+        </div>
+    </div>
 </div>
