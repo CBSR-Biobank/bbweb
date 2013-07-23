@@ -59,17 +59,18 @@
         @checkbox(field = cetForm("recurring"),
             args = '_label -> Messages("biobank.study.collection.event.type.field.recurring"),
             '_help -> "")
-
+            
         <div class="control-group sgSelectionGroup">
             <label class="control-label">
-            @Messages("biobank.study.collection.event.field.specimen.groups")
+                @Messages("biobank.study.collection.event.field.specimen.groups")
             </label>
             <div class="controls">
                 <a class="addSpecimenGroup btn success">
-                @Messages("biobank.study.collection.event.form.action.specimen.group.add")
+                    @Messages("biobank.study.collection.event.form.action.specimen.group.add")
                 </a>
             </div>
         </div>
+
         @repeat(cetForm("specimenGroupData"), 
             min = cetForm("specimenGroupData").indexes.size) { sgGroupData =>
             @sgSelectionGroup(sgGroupData, specimenGroupMap)
@@ -78,7 +79,8 @@
         @**
         * This hidden block will be used as template for Javascript copy code
         **@
-        @sgSelectionGroup(cetForm("specimenGroupData[x]"), specimenGroupMap, style="display: none;")
+        @sgSelectionGroup(cetForm("specimenGroupData[x]"), specimenGroupMap, 
+            className = "sg_selection_template", style="display: none;")
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
@@ -111,8 +113,8 @@
                 addOn.text(sgUnits[$(this).val()])
             })
             var selectLabel = select.parent().parent().find('label')
-            var newText =  selectLabel.text().replace(/[0-9]+/g, (id + 1))
-            selectLabel.text(newText)
+            //var newText =  selectLabel.text().replace(/[0-9]+/g, (id + 1))
+            //selectLabel.text(newText)
         }
         
         // update existing amount fields "units"
@@ -126,8 +128,8 @@
         // new input field has to be modified to contain the correct parameters
         //
         $(document).on('click', '.addSpecimenGroup', function() {
-            var i = $('.sgselections').size()
-            var newSg = sgTemplate.clone().removeClass('sg_selection_template').addClass('sgselections')
+            var i = $('.sgselection').size()
+            var newSg = sgTemplate.clone().removeClass('sg_selection_template').addClass('sgselection')
             sgRenameGroup(newSg, i)
             newSg.show()
             sgTemplate.before(newSg)
@@ -137,7 +139,7 @@
         // removes a selection text entry field based on the button pressed
         //
         $(document).on('click', '.removeSpecimenGroup', function() {
-            var i = $('.sgselections').size()
+            var i = $('.sgselection').size()
             if (i > 0) {
                 $(this).parent().parent().parent().remove()
                 renumberSpecimenGroups()
@@ -147,7 +149,7 @@
         // -- renumber fields specimen groups
         //
         var renumberSpecimenGroups = function() {
-            $('.sgselections').each(function(i) {
+            $('.sgselection').each(function(i) {
                 sgRenameGroup($(this), i)
             })
         }

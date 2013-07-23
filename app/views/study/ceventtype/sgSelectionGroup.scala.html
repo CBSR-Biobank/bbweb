@@ -2,19 +2,18 @@
 * Specimen group map is a tuple where the first item is the ID, the second the name and the
 * third is the units.
 **@
-@(sgGroupField: Field,
-    
+@(sgGroupField: Field,    
     specimenGroupMap: Seq[(String, String, String)],
+    className: String = "sgselection",
     style: String = "")
 
 @import helper._
 @implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
 
-<div class="well sg_selection_template" style="@style">
+<div class="well @className" style="@style">
     @input(
         sgGroupField("specimenGrouId"), 
-        args = '_label -> Messages("biobank.study.collection.event.type.form.specimen.group") + 
-        (sgGroupField("specimenGrouId").indexes.max + 1)) { (id, name, value, htmlArgs) =>
+        args = '_label -> Messages("biobank.study.collection.event.type.form.specimen.group")) { (id, name, value, htmlArgs) =>
         <select id="@id" name="@name" @toHtmlArgs(htmlArgs)>
             <option value="" >@Messages("biobank.form.selection.default")</option>
             @specimenGroupMap.map { v =>
