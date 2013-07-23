@@ -67,7 +67,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
       "description" -> optional(text),
       "recurring" -> boolean,
       "specimenGroupData" -> list(mapping(
-        "specimenGrouId" -> text,
+        "specimenGroupId" -> text,
         "specimenGroupCount" -> number,
         "specimenGroupAmount" -> bigDecimal)(
           SpecimenGroupCollectionEventType.apply)(SpecimenGroupCollectionEventType.unapply)),
@@ -86,6 +86,10 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
     studyService.getSpecimenGroups(studyId).map(x => (x.id.id, x.name, x.units)).toSeq
   }
 
+  private def annotationTypeInfo(studyId: String) = {
+    studyService.getCollectionEventAnnotationTypes(studyId).map(x => (x.id.id, x.name)).toSeq
+  }
+
   /**
    * Add an attribute type.
    */
@@ -94,7 +98,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
       case Failure(x) => throw new Error(x.head)
       case Success(study) =>
         Ok(html.study.ceventtype.add(ceventTypeForm, AddFormType(), studyId, study.name,
-          specimenGroupInfo(studyId)))
+          specimenGroupInfo(studyId), annotationTypeInfo(studyId)))
     }
   }
 
@@ -103,7 +107,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
       formWithErrors => {
         Logger.debug("addCeventTypeSubmit: formWithErrors: " + formWithErrors)
         BadRequest(html.study.ceventtype.add(formWithErrors, AddFormType(), studyId, studyName,
-          specimenGroupInfo(studyId)))
+          specimenGroupInfo(studyId), annotationTypeInfo(studyId)))
       },
       submittedForm => {
         Async {
@@ -120,7 +124,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
                     Messages("biobank.study.collection.event.type.form.error.name"))
                   Logger.debug("bad name: " + form)
                   BadRequest(html.study.ceventtype.add(form, AddFormType(),
-                    studyId, studyName, specimenGroupInfo(studyId)))
+                    studyId, studyName, specimenGroupInfo(studyId), annotationTypeInfo(studyId)))
                 } else {
                   throw new Error(x.head)
                 }
@@ -139,7 +143,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
           ceventType.description, ceventType.recurring, ceventType.specimenGroupData.toList,
           ceventType.annotationTypeData.toList))
         Ok(html.study.ceventtype.add(form, UpdateFormType(), studyId, studyName,
-          specimenGroupInfo(studyId)))
+          specimenGroupInfo(studyId), annotationTypeInfo(studyId)))
     }
   }
 
@@ -148,7 +152,8 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
       formWithErrors => {
         //Logger.debug("updateCeventTypeSubmit: formWithErrors: " + formWithErrors)
         BadRequest(html.study.ceventtype.add(
-          formWithErrors, UpdateFormType(), studyId, studyName, specimenGroupInfo(studyId)))
+          formWithErrors, UpdateFormType(), studyId, studyName, specimenGroupInfo(studyId),
+          annotationTypeInfo(studyId)))
       },
       submittedForm => {
         Async {
@@ -163,7 +168,8 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
                   val form = ceventTypeForm.fill(submittedForm).withError("name",
                     Messages("biobank.study.collection.event.type.form.error.name"))
                   BadRequest(html.study.ceventtype.add(
-                    form, UpdateFormType(), studyId, studyName, specimenGroupInfo(studyId)))
+                    form, UpdateFormType(), studyId, studyName, specimenGroupInfo(studyId),
+                    annotationTypeInfo(studyId)))
                 } else {
                   throw new Error(x.head)
                 }

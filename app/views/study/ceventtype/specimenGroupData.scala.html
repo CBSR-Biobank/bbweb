@@ -2,9 +2,9 @@
 * Specimen group map is a tuple where the first item is the ID, the second the name and the
 * third is the units.
 **@
-@(sgGroupField: Field,    
+@(sgDataField: Field,    
     specimenGroupMap: Seq[(String, String, String)],
-    className: String = "sgselection",
+    className: String = "sg_data",
     style: String = "")
 
 @import helper._
@@ -12,9 +12,9 @@
 
 <div class="well @className" style="@style">
     @input(
-        sgGroupField("specimenGrouId"), 
+        sgDataField("specimenGroupId"), 
         args = '_label -> Messages("biobank.study.collection.event.type.form.specimen.group")) { (id, name, value, htmlArgs) =>
-        <select id="@id" name="@name" @toHtmlArgs(htmlArgs)>
+        <select id="@id" name="@name">
             <option value="" >@Messages("biobank.form.selection.default")</option>
             @specimenGroupMap.map { v =>
                 <option value="@v._1" @(if(value == Some(v._1)) "selected" else "")>@v._2</option>
@@ -24,12 +24,12 @@
     }
     
     @inputText(
-        sgGroupField("specimenGroupCount"), 
+        sgDataField("specimenGroupCount"), 
         args = '_label -> Messages("biobank.study.collection.event.type.form.specimen.group.count")
     )
 
     @input(
-        sgGroupField("specimenGroupAmount"), 
+        sgDataField("specimenGroupAmount"), 
         '_label -> Messages("biobank.study.collection.event.type.form.specimen.group.amount")) { (id, name, value, _) =>
         <div class="input-append">
             <input type="text" name="@name" value="@value">

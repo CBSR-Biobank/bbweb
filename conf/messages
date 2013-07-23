@@ -96,6 +96,9 @@ biobank.study.collection.event.type.remove=Remove Collection Event Type
 biobank.study.collection.event.type.removed=Collection Event Type "{0}" removed.
 biobank.study.collection.event.field.specimen.groups=Specimen Groups
 biobank.study.collection.event.form.action.specimen.group.add=Add Specimen Group
+biobank.study.collection.event.form.action.annotation.type.add=Add Annotation Type
+biobank.study.collection.event.type.form.annotation.type=Annotation Type
+biobank.study.collection.event.type.form.annotation.type.required=Required
 
 # Value type enumeration
 biobank.enumaration.annotation.value.type.Text=Text

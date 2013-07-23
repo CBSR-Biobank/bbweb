@@ -2,7 +2,8 @@
         formType: FormType,
         studyId: String,
         studyName: String,
-        specimenGroupMap : Seq[(String,String,String)])(
+        specimenGroupMap : Seq[(String,String,String)],
+        annotationTypeMap : Seq[(String,String)])(
         implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
@@ -61,9 +62,6 @@
             '_help -> "")
             
         <div class="control-group sgSelectionGroup">
-            <label class="control-label">
-                @Messages("biobank.study.collection.event.field.specimen.groups")
-            </label>
             <div class="controls">
                 <a class="addSpecimenGroup btn success">
                     @Messages("biobank.study.collection.event.form.action.specimen.group.add")
@@ -73,14 +71,30 @@
 
         @repeat(cetForm("specimenGroupData"), 
             min = cetForm("specimenGroupData").indexes.size) { sgGroupData =>
-            @sgSelectionGroup(sgGroupData, specimenGroupMap)
+            @specimenGroupData(sgGroupData, specimenGroupMap)
+        }
+            
+        <div class="control-group sgSelectionGroup">
+            <div class="controls">
+                <a class="addAnnotationType btn success">
+                    @Messages("biobank.study.collection.event.form.action.annotation.type.add")
+                </a>
+            </div>
+        </div>
+
+        @repeat(cetForm("annotationTypeData"), 
+            min = cetForm("annotationTypeData").indexes.size) { atypeData =>
+            @annotationTypeData(atypeData, annotationTypeMap)
         }
 
         @**
         * This hidden block will be used as template for Javascript copy code
         **@
-        @sgSelectionGroup(cetForm("specimenGroupData[x]"), specimenGroupMap, 
-            className = "sg_selection_template", style="display: none;")
+        @specimenGroupData(cetForm("specimenGroupData[x]"), specimenGroupMap, 
+            className = "sg_data_template", style="display: none;")
+            
+        @annotationTypeData(cetForm("annotationTypeData[x]"), annotationTypeMap,
+            className = "at_data_template", style="display: block;")
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
@@ -90,7 +104,8 @@
 
     <script type="text/javascript" charset="utf-8">
         $(function() {
-        var sgTemplate = $('.sg_selection_template')
+        var sgTemplate = $('.sg_data_template')
+        var atTemplate = $('.at_data_template')
 
         var sgUnits={'': '@Messages("biobank.study.specimengroup.field.units")',
         @Html(specimenGroupMap.map(x => """'%s': '%s'""".format(x._1, x._3)).mkString(","))}
@@ -98,6 +113,12 @@
         var sgRenameElementAttr = function(element, id) {
             var namerepl = element.attr('name').replace(/specimenGroupData\[.+\]/g, "specimenGroupData[" + id + "]")
             element.attr('name', namerepl)
+        }
+        
+        var addOnUpdate = function(event) {
+            // updates the "units" on the amount field
+            var addOn = $(this).parent().parent().parent().find('.add-on')
+            addOn.text(sgUnits[$(this).val()])
         }
 
         var sgRenameGroup = function(sg, id) {
@@ -107,11 +128,7 @@
             })
 
             var select = sg.find('select')
-            select.bind('change', function(event) {
-                // updates the "units" on the amount field
-                var addOn = $(this).parent().parent().parent().find('.add-on')
-                addOn.text(sgUnits[$(this).val()])
-            })
+            select.bind('change', addOnUpdate)
             var selectLabel = select.parent().parent().find('label')
             //var newText =  selectLabel.text().replace(/[0-9]+/g, (id + 1))
             //selectLabel.text(newText)
@@ -121,6 +138,11 @@
         $('.add-on').each(function(i,v) {
             var select = $(this).parent().parent().parent().parent().find('select')
             $(this).text(sgUnits[select.val()])
+        })        
+        
+        // bind function to existing sg selects
+        $('select[id*="specimenGroupData"]').each(function(i,v) {
+            $(this).bind('change', addOnUpdate)
         })
 
         //
@@ -128,8 +150,8 @@
         // new input field has to be modified to contain the correct parameters
         //
         $(document).on('click', '.addSpecimenGroup', function() {
-            var i = $('.sgselection').size()
-            var newSg = sgTemplate.clone().removeClass('sg_selection_template').addClass('sgselection')
+            var i = $('.sg_data').size()
+            var newSg = sgTemplate.clone().removeClass('sg_data_template').addClass('sg_data')
             sgRenameGroup(newSg, i)
             newSg.show()
             sgTemplate.before(newSg)
@@ -139,7 +161,7 @@
         // removes a selection text entry field based on the button pressed
         //
         $(document).on('click', '.removeSpecimenGroup', function() {
-            var i = $('.sgselection').size()
+            var i = $('.sg_data').size()
             if (i > 0) {
                 $(this).parent().parent().parent().remove()
                 renumberSpecimenGroups()
@@ -149,7 +171,7 @@
         // -- renumber fields specimen groups
         //
         var renumberSpecimenGroups = function() {
-            $('.sgselection').each(function(i) {
+            $('.sg_data').each(function(i) {
                 sgRenameGroup($(this), i)
             })
         }

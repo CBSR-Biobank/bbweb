@@ -1,0 +1,28 @@
+@**
+* Annotation map is a tuple where the first item is the ID, and the second the name.
+**@
+@(atDataField: Field,    
+    annotationTypeMap: Seq[(String, String)],
+    className: String = "atselection",
+    style: String = "")
+
+@import helper._
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+
+<div class="well @className" style="@style">
+    @input(
+        atDataField("annotationTypeId"), 
+        args = '_label -> Messages("biobank.study.collection.event.type.form.annotation.type")) { (id, name, value, htmlArgs) =>
+        <select id="@id" name="@name">
+            <option value="" >@Messages("biobank.form.selection.default")</option>
+            @annotationTypeMap.map { v =>
+                <option value="@v._1" @(if(value == Some(v._1)) "selected" else "")>@v._2</option>
+            }
+        </select>
+        <a class="removeAnnotationType btn btn-warning">@Messages("biobank.common.action.remove")</a>
+    }
+
+    @checkbox(field = atDataField("required"),
+        args = '_label -> Messages("biobank.study.collection.event.type.form.annotation.type.required"),
+        '_help -> "")
+</div>
