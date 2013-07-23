@@ -7,24 +7,22 @@
 @import helper._
 @import controllers.study._
 
-    @implicitFieldConstructor = @{
-        FieldConstructor(twitterBootstrapInput.f)
-    }
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
 
-    @formInfo = @{
-        formType match {
-            case AddFormType() =>
-                FormInfo(Messages("biobank.study.collection.event.annotation.type.add"),
-                    routes.CeventAnnotTypeController.addAnnotationTypeSubmit(studyId, studyName))
-            case UpdateFormType() =>
-                FormInfo(Messages("biobank.study.collection.event.annotation.type.update"),
-                    routes.CeventAnnotTypeController.updateAnnotationTypeSubmit(studyId, studyName))
-        }
+@formInfo = @{ 
+    formType match {
+        case AddFormType() =>
+            FormInfo(Messages("biobank.study.collection.event.annotation.type.add"),
+                routes.CeventAnnotTypeController.addAnnotationTypeSubmit(studyId, studyName))
+        case UpdateFormType() =>
+            FormInfo(Messages("biobank.study.collection.event.annotation.type.update"),
+                routes.CeventAnnotTypeController.updateAnnotationTypeSubmit(studyId, studyName))
     }
+}
 
 @selectionField(field: Field,
     className: String = "selections",
-style: String = "")(implicit handler: FieldConstructor, lang: play.api.i18n.Lang) = {
+    style: String = "")(implicit handler: FieldConstructor, lang: play.api.i18n.Lang) = {
     @input(field,
         '_label -> "", // label is blank intentionally
         '_class -> className,
@@ -34,40 +32,40 @@ style: String = "")(implicit handler: FieldConstructor, lang: play.api.i18n.Lang
     }
 }
 
-    @selectionGroup(field: Field)(implicit handler: FieldConstructor, lang: play.api.i18n.Lang) = {
-        <div class="well selectionGroup" style="display:none;">
-            <fieldset>
-                <legend>@Messages("biobank.annotation.type.field.options")</legend>
+@selectionGroup(field: Field)(implicit handler: FieldConstructor, lang: play.api.i18n.Lang) = {
+    <div class="well selectionGroup" style="display:none;">
+        <fieldset>
+            <legend>@Messages("biobank.annotation.type.field.options")</legend>
 
-                @inputRadioGroup(
-                    attrTypeForm("maxValueCount"),
-                    options = Seq(
-                        "1" -> Messages("biobank.annotation.type.field.max.value.count.single.desc"),
-                        "2" -> Messages("biobank.annotation.type.field.max.value.count.multiple.desc")),
-                    '_label -> "", // label is blank intentionally
-                    '_help -> "", // label is blank intentionally
-                    '_class -> "radio",
-                    '_error -> attrTypeForm("maxValueCount").error.map(
-                        _.withMessage(Messages("biobank.annotation.type.form.max.value.count.error"))))
+            @inputRadioGroup(
+                attrTypeForm("maxValueCount"),
+                options = Seq(
+                    "1" -> Messages("biobank.annotation.type.field.max.value.count.single.desc"),
+                    "2" -> Messages("biobank.annotation.type.field.max.value.count.multiple.desc")),
+                '_label -> "", // label is blank intentionally
+                '_help -> "", // label is blank intentionally
+                '_class -> "radio",
+                '_error -> attrTypeForm("maxValueCount").error.map(
+                    _.withMessage(Messages("biobank.annotation.type.form.max.value.count.error"))))
 
-                @repeat(attrTypeForm("selections"), min = attrTypeForm("selections").indexes.size) { selection =>
-                    @selectionField(selection)
-                }
+            @repeat(attrTypeForm("selections"), min = attrTypeForm("selections").indexes.size) { selection =>
+                @selectionField(selection)
+            }
 
-                @**
-                * This hidden block will be used as template for Javascript copy code
-                **@
-                @selectionField(
-                    attrTypeForm("selections[x]"), className = "selection_template", style = "display:none;")
+            @**
+            * This hidden block will be used as template for Javascript copy code
+            **@
+            @selectionField(
+                attrTypeForm("selections[x]"), className = "selection_template", style = "display:none;")
 
-                <div class="control-group">
-                    <div class="controls">
-                        <a class="addSelection btn success">@Messages("biobank.annotation.type.form.selection.add")</a>
-                    </div>
+            <div class="control-group">
+                <div class="controls">
+                    <a class="addSelection btn success">@Messages("biobank.annotation.type.form.selection.add")</a>
                 </div>
-            </fieldset>
-        </div>
-    }
+            </div>
+        </fieldset>
+    </div>
+}
 
 @main(formInfo.title) {
     @breadcrumbs(Map(
@@ -105,11 +103,11 @@ style: String = "")(implicit handler: FieldConstructor, lang: play.api.i18n.Lang
 
         @formNameAndDescription(attrTypeForm("name"), attrTypeForm("description"))
 
-        @select (
-        field = attrTypeForm("valueType"),
-                options = CollectionEventAnnotationTypeSelections.annotationValueTypes,
-                args = '_label -> Messages("biobank.annotation.type.field.value.type")
-                )
+        @select(
+            field = attrTypeForm("valueType"),
+            options = CollectionEventAnnotationTypeSelections.annotationValueTypes,
+            args = '_label -> Messages("biobank.annotation.type.field.value.type")
+        )
 
         @selectionGroup(attrTypeForm("selectionGroup"))
 
@@ -137,7 +135,7 @@ style: String = "")(implicit handler: FieldConstructor, lang: play.api.i18n.Lang
         // Shows or hides the selection group based on the value type selected
         //
         $('#valueType').change(function() {
-            selectionsToggle()
+        selectionsToggle()
         })
 
         //
@@ -145,23 +143,23 @@ style: String = "")(implicit handler: FieldConstructor, lang: play.api.i18n.Lang
         // new input field has to be modified to contain the correct parameters
         //
         $(document).on('click', '.addSelection', function() {
-            var template = $('.selection_template', selectionGroup)
-            var newSelection = template.clone().removeClass('selection_template').addClass('selections')
-            var i = $('.selectionGroup .selections').size()
-            newSelection.find('input').attr('name', "selections[" + i + "]")
-            newSelection.show()
-            template.before(newSelection)
+        var template = $('.selection_template', selectionGroup)
+        var newSelection = template.clone().removeClass('selection_template').addClass('selections')
+        var i = $('.selectionGroup .selections').size()
+        newSelection.find('input').attr('name', "selections[" + i + "]")
+        newSelection.show()
+        template.before(newSelection)
         })
 
         //
         // removes a selection text entry field based on the button pressed
         //
         $(document).on('click', '.removeSelection', function() {
-            var i = $('.selectionGroup .selections').size()
-            if (i > 1) {
-                $(this).parent().parent().remove();
-                renumber()
-            }
+        var i = $('.selectionGroup .selections').size()
+        if (i > 1) {
+        $(this).parent().parent().remove();
+        renumber()
+        }
         })
 
         // -- renumber fields
@@ -172,12 +170,12 @@ style: String = "")(implicit handler: FieldConstructor, lang: play.api.i18n.Lang
         // selections[1]
         //
         var renumber = function() {
-            selectionGroup.each(function(i) {
-                $('.selections input', this).each(function(i) {
-                    var name = $(this).attr('name').replace(/selections\[.+\]/g, "selections[" + i + "]")
-                    $(this).attr('name', name)
-                })
-            })
+        selectionGroup.each(function(i) {
+        $('.selections input', this).each(function(i) {
+        var name = $(this).attr('name').replace(/selections\[.+\]/g, "selections[" + i + "]")
+        $(this).attr('name', name)
+        })
+        })
         }
 
         })

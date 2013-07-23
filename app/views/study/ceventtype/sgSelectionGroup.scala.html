@@ -2,40 +2,41 @@
 * Specimen group map is a tuple where the first item is the ID, the second the name and the
 * third is the units.
 **@
-@(sgGroupField: Field, specimenGroupMap: Seq[(String, String, String)])
+@(sgGroupField: Field,
+    
+    specimenGroupMap: Seq[(String, String, String)],
+    style: String = "")
 
 @import helper._
-@implicitFieldConstructor = @{
-    FieldConstructor(twitterBootstrapInput.f)
-}
-<div class="well sg_selection_template" style="display: none;">
-    <div class="control-group">
-        <label class="control-label" for="specimenGroupData_x__specimenGrouIds">
-            @Messages("biobank.study.collection.event.type.form.specimen.group") 0
-        </label>
-        <div class="controls">
-            <select class="input-xlarge" id="specimenGroupData_x__specimenGroupIds" name="specimenGroupData[x].specimenGroupIds" >
-                <option value="" >@Messages("biobank.form.selection.default")</option>
-                @Html(specimenGroupMap.map(x => """<option value="%s">%s</option>""".format(x._1, x._2)).mkString)
-            </select>
-            <a class="removeSpecimenGroup btn btn-warning">@Messages("biobank.common.action.remove")</a>
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+
+<div class="well sg_selection_template" style="@style">
+    @input(
+        sgGroupField("specimenGrouId"), 
+        args = '_label -> Messages("biobank.study.collection.event.type.form.specimen.group") + 
+        (sgGroupField("specimenGrouId").indexes.max + 1)) { (id, name, value, htmlArgs) =>
+        <select id="@id" name="@name" @toHtmlArgs(htmlArgs)>
+            <option value="" >@Messages("biobank.form.selection.default")</option>
+            @specimenGroupMap.map { v =>
+                <option value="@v._1" @(if(value == Some(v._1)) "selected" else "")>@v._2</option>
+            }
+        </select>
+        <a class="removeSpecimenGroup btn btn-warning">@Messages("biobank.common.action.remove")</a>
+    }
+    
+    @inputText(
+        sgGroupField("specimenGroupCount"), 
+        args = '_label -> Messages("biobank.study.collection.event.type.form.specimen.group.count")
+    )
+
+    @input(
+        sgGroupField("specimenGroupAmount"), 
+        '_label -> Messages("biobank.study.collection.event.type.form.specimen.group.amount")) { (id, name, value, _) =>
+        <div class="input-append">
+            <input type="text" name="@name" value="@value">
+            <span class="add-on">
+                @Messages("biobank.study.specimengroup.field.units")
+            </span>
         </div>
-    </div>
-    <div class="control-group">
-        <label class="control-label">@Messages("biobank.study.collection.event.type.form.specimen.group.count")</label>
-        <div class="controls">
-            <input class="input-medium" type="text" name="specimenGroupData[x].specimenGroupCount" id="specimenGroupData_x__specimenGroupCount" value="">
-        </div>
-    </div>
-    <div class="control-group">
-        <label class="control-label">@Messages("biobank.study.collection.event.type.form.specimen.group.amount")</label>
-        <div class="controls">
-            <div class="input-append">
-                <input class="input-medium"  type="text" name="specimenGroupData[x].specimenGroupAmount" id="specimenGroupData_x__specimenGroupAmount" value="">
-                <span class="add-on">
-                    @Messages("biobank.study.specimengroup.field.units")
-                </span>
-            </div>
-        </div>
-    </div>
+    }
 </div>

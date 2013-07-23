@@ -106,7 +106,7 @@ object SgController extends Controller with securesocial.core.SecureSocial {
   def updateSpecimenGroupSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
     specimenGroupForm.bindFromRequest.fold(
       formWithErrors => BadRequest(html.study.specimengroup.add(
-        formWithErrors, AddFormType(), studyId, studyName)),
+        formWithErrors, UpdateFormType(), studyId, studyName)),
       sgForm => {
         Async {
           implicit val userId = new UserId(request.user.id.id)

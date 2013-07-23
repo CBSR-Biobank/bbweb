@@ -67,7 +67,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
       "description" -> optional(text),
       "recurring" -> boolean,
       "specimenGroupData" -> list(mapping(
-        "specimenGrouIds" -> text,
+        "specimenGrouId" -> text,
         "specimenGroupCount" -> number,
         "specimenGroupAmount" -> bigDecimal)(
           SpecimenGroupCollectionEventType.apply)(SpecimenGroupCollectionEventType.unapply)),
@@ -133,9 +133,11 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
     studyService.getCollectionEventType(studyId, ceventTypeId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(ceventType) =>
+        Logger.info("*** " + ceventType)
         val form = ceventTypeForm.fill(CeventTypeFormObject(
           ceventType.id.id, ceventType.version, ceventType.studyId.id, ceventType.name,
-          ceventType.description, ceventType.recurring, List.empty, List.empty))
+          ceventType.description, ceventType.recurring, ceventType.specimenGroupData.toList,
+          ceventType.annotationTypeData.toList))
         Ok(html.study.ceventtype.add(form, UpdateFormType(), studyId, studyName,
           specimenGroupInfo(studyId)))
     }
@@ -144,9 +146,9 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
   def updateCeventTypeSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
     ceventTypeForm.bindFromRequest.fold(
       formWithErrors => {
-        Logger.debug("updateCeventTypeSubmit: formWithErrors: " + formWithErrors)
+        //Logger.debug("updateCeventTypeSubmit: formWithErrors: " + formWithErrors)
         BadRequest(html.study.ceventtype.add(
-          formWithErrors, AddFormType(), studyId, studyName, specimenGroupInfo(studyId)))
+          formWithErrors, UpdateFormType(), studyId, studyName, specimenGroupInfo(studyId)))
       },
       submittedForm => {
         Async {

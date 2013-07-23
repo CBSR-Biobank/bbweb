@@ -19,10 +19,10 @@ case class CollectionEventType(
   with HasName with HasDescriptionOption {
 
   val toStringFormat = """CollectionEventType:{ id: %s, version: %d, studyId: %s, name: %s, description: %s,""" +
-    """ recurring: %s }"""
+    """ recurring: %s, specimenGroupData: { %s },  annotationTypeData: { %s }}"""
 
   override def toString: String = {
-    toStringFormat.format(id, version, studyId, name, description, recurring)
+    toStringFormat.format(id, version, studyId, name, description, recurring, specimenGroupData, annotationTypeData)
   }
 }
 
