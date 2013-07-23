@@ -61,9 +61,10 @@
             args = '_label -> Messages("biobank.study.collection.event.type.field.recurring"),
             '_help -> "")
             
-        <div class="control-group sgSelectionGroup">
+        <div class="control-group">
             <div class="controls">
-                <a class="addSpecimenGroup btn success">
+                <a class="addSpecimenGroup btn btn-success">
+                    <i class="icon-plus-sign icon-white"></i>
                     @Messages("biobank.study.collection.event.form.action.specimen.group.add")
                 </a>
             </div>
@@ -73,10 +74,17 @@
             min = cetForm("specimenGroupData").indexes.size) { sgGroupData =>
             @specimenGroupData(sgGroupData, specimenGroupMap)
         }
+
+        @*
+        * This hidden block will be used as template for Javascript copy code
+        *@
+        @specimenGroupData(cetForm("specimenGroupData[x]"), specimenGroupMap, 
+            className = "sg_data_template", style="display: none;")
             
-        <div class="control-group sgSelectionGroup">
+        <div class="control-group">
             <div class="controls">
-                <a class="addAnnotationType btn success">
+                <a class="addAnnotationType btn btn-success">
+                    <i class="icon-plus-sign icon-white"></i>
                     @Messages("biobank.study.collection.event.form.action.annotation.type.add")
                 </a>
             </div>
@@ -86,15 +94,12 @@
             min = cetForm("annotationTypeData").indexes.size) { atypeData =>
             @annotationTypeData(atypeData, annotationTypeMap)
         }
-
-        @**
-        * This hidden block will be used as template for Javascript copy code
-        **@
-        @specimenGroupData(cetForm("specimenGroupData[x]"), specimenGroupMap, 
-            className = "sg_data_template", style="display: none;")
             
+        @*
+        * This hidden block will be used as template for Javascript copy code
+        *@
         @annotationTypeData(cetForm("annotationTypeData[x]"), annotationTypeMap,
-            className = "at_data_template", style="display: block;")
+            className = "at_data_template", style="display: none;")
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
@@ -120,19 +125,6 @@
             var addOn = $(this).parent().parent().parent().find('.add-on')
             addOn.text(sgUnits[$(this).val()])
         }
-
-        var sgRenameGroup = function(sg, id) {
-            sgRenameElementAttr(sg.find('select'), id)
-            sg.find('input').each(function() {
-                sgRenameElementAttr($(this), id)
-            })
-
-            var select = sg.find('select')
-            select.bind('change', addOnUpdate)
-            var selectLabel = select.parent().parent().find('label')
-            //var newText =  selectLabel.text().replace(/[0-9]+/g, (id + 1))
-            //selectLabel.text(newText)
-        }
         
         // update existing amount fields "units"
         $('.add-on').each(function(i,v) {
@@ -144,6 +136,19 @@
         $('select[id*="specimenGroupData"]').each(function(i,v) {
             $(this).bind('change', addOnUpdate)
         })
+
+        var sgRenameGroup = function(sg, id) {
+            sgRenameElementAttr(sg.find('select'), id)
+            sg.find('input').each(function() {
+                sgRenameElementAttr($(this), id)
+            })
+
+            var select = sg.find('select')
+            select.bind('change', addOnUpdate)
+            //var selectLabel = select.parent().parent().find('label')
+            //var newText =  selectLabel.text().replace(/[0-9]+/g, (id + 1))
+            //selectLabel.text(newText)
+        }
 
         //
         // creates a new selection text entry field based on the hidden template. The
@@ -173,6 +178,50 @@
         var renumberSpecimenGroups = function() {
             $('.sg_data').each(function(i) {
                 sgRenameGroup($(this), i)
+            })
+        }
+        
+        // annotation type rename
+        var atRenameElementAttr = function(element, id) {
+            var namerepl = element.attr('name').replace(/annotationTypeData\[.+\]/g, "annotationTypeData[" + id + "]")
+            element.attr('name', namerepl)
+        }
+
+        var atRenameGroup = function(sg, id) {
+            atRenameElementAttr(sg.find('select'), id)
+            sg.find('input').each(function() {
+                atRenameElementAttr($(this), id)
+            })
+        }
+
+        //
+        // creates a new selection text entry field based on the hidden template. The
+        // new input field has to be modified to contain the correct parameters
+        //
+        $(document).on('click', '.addAnnotationType', function() {
+            var i = $('.at_data').size()
+            var newAt = atTemplate.clone().removeClass('at_data_template').addClass('at_data')
+            atRenameGroup(newAt, i)
+            newAt.show()
+            atTemplate.before(newAt)
+        })
+
+        //
+        // removes a selection text entry field based on the button pressed
+        //
+        $(document).on('click', '.removeAnnotationType', function() {
+            var i = $('.at_data').size()
+            if (i > 0) {
+                $(this).parent().parent().parent().remove()
+                renumberAnnotationTypes()
+            }
+        })
+
+        // -- renumber fields specimen groups
+        //
+        var renumberAnnotationTypes = function() {
+            $('.at_data').each(function(i) {
+                atRenameGroup($(this), i)
             })
         }
 
