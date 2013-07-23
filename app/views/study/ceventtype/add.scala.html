@@ -80,20 +80,65 @@
 
     <script type="text/javascript" charset="utf-8">
         $(function() {
-        var sGSelectionGroup = $('.sgSelectionGroup')
+        var sgTemplate = $('.sg_selection_template')
+
+        var sgUnits={'': '@Messages("biobank.study.specimengroup.field.units")',
+            @Html(specimenGroupMap.map(x => """'%s': '%s'""".format(x._1, x._3)).mkString(","))}
+
+        var sgRenameElementAttr = function(element, id) {
+           var namerepl = element.attr('name').replace(/specimenGroupData\[.+\]/g, "specimenGroupData[" + id + "]")
+           var idrepl = element.attr('id').replace(/specimenGroupData_x__/g, "specimenGroupData_" + id + "__")
+
+            element.attr('name', namerepl)
+            element.attr('id', idrepl)
+        }
+
+        var sgRenameGroup = function(sg, id) {
+            sgRenameElementAttr(sg.find('select'), id)
+            sg.find('input').each(function() {
+                sgRenameElementAttr($(this), id)
+            })
+
+            var select = sg.find('select')
+            select.bind('change', function(event){
+                var addOn = $(this).parent().parent().parent().find('.add-on')
+                addOn.text(sgUnits[$(this).val()])
+            })
+            var selectLabel = select.parent().parent().find('label')
+            var newText =  selectLabel.text().replace(/[0-9]+/g, (id + 1))
+            selectLabel.text(newText)
+        }
 
         //
         // creates a new selection text entry field based on the hidden template. The
         // new input field has to be modified to contain the correct parameters
         //
         $(document).on('click', '.addSpecimenGroup', function() {
-            var template = $('.sg_selection_template', sGSelectionGroup)
-            var newSelection = template.clone().removeClass('sg_selection_template').addClass('sgselections')
-            var i = $('.sgSelectionGroup .sgSelections').size()
-            newSelection.find('input').attr('name', "specimenGroupData[" + i + "]")
-            newSelection.show()
-            template.before(newSelection)
+            var i = $('.sgselections').size()
+            var newSg = sgTemplate.clone().removeClass('sg_selection_template').addClass('sgselections')
+            sgRenameGroup(newSg, i)
+            newSg.show()
+            sgTemplate.before(newSg)
         })
+
+        //
+        // removes a selection text entry field based on the button pressed
+        //
+        $(document).on('click', '.removeSpecimenGroup', function() {
+            var i = $('.sgselections').size()
+            if (i > 0) {
+                $(this).parent().parent().parent().remove()
+                renumberSpecimenGroups()
+            }
+        })
+
+        // -- renumber fields specimen groups
+        //
+        var renumberSpecimenGroups = function() {
+            $('.sgselections').each(function(i) {
+                sgRenameGroup($(this), i)
+            })
+        }
 
         })
     </script>
