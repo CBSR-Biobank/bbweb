@@ -117,6 +117,10 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
         })
   }
 
+  /**
+   * FIXME: should not allow annotation type to be updated if it is used by one or more
+   * collection event types.
+   */
   def updateAnnotationType(studyId: String, studyName: String, annotationTypeId: String) = SecuredAction {
     implicit request =>
       studyService.getCollectionEventAnnotationType(studyId, annotationTypeId) match {
@@ -159,6 +163,10 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
         })
   }
 
+  /**
+   * FIXME: should not allow annotation type to be deleted if it is used by one or more
+   * collection event types.
+   */
   def removeAnnotationTypeConfirm(studyId: String,
     studyName: String,
     annotationTypeId: String) = SecuredAction {

@@ -83,6 +83,10 @@ biobank.study.collection.event.annotation.type.remove.confirm=Are you sure you w
 # Collection Event Types
 biobank.study.collection.event.type.show.none=No Collection Event Types have been added to this study.
 biobank.study.collection.event.type.field.recurring=Recurring
+biobank.study.collection.event.type.field.specimen.group.data=Specimen Group Info
+biobank.study.collection.event.type.field.specimen.group.data.desc=Name (Count - Amount)
+biobank.study.collection.event.type.field.annotation.type.data=Annotation Type Info
+biobank.study.collection.event.type.field.annotation.type.data.desc=Name (Required)
 biobank.study.collection.event.type.show.title=Collection Event Types
 biobank.study.collection.event.type.add=Add Collection Event Type
 biobank.study.collection.event.type.update=Update Collection Event Type

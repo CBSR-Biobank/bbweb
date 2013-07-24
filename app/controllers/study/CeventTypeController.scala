@@ -79,7 +79,8 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
 
   def index(studyId: String, studyName: String) = SecuredAction { implicit request =>
     val ceventTypes = studyService.getCollectionEventTypes(studyId)
-    Ok(html.study.ceventtype.show(studyId, studyName, ceventTypes))
+    Ok(html.study.ceventtype.show(studyId, studyName, ceventTypes, specimenGroupInfo(studyId),
+      annotationTypeInfo(studyId)))
   }
 
   private def specimenGroupInfo(studyId: String) = {

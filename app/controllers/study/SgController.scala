@@ -28,6 +28,10 @@ import securesocial.core.{ Identity, Authorization }
 import scalaz._
 import Scalaz._
 
+/**
+ * FIXME: should a specimen group not allow updates after it has been added to at least
+ * one collection event type?
+ */
 object SgController extends Controller with securesocial.core.SecureSocial {
 
   lazy val studyService = Global.services.studyService
@@ -91,6 +95,10 @@ object SgController extends Controller with securesocial.core.SecureSocial {
       })
   }
 
+  /**
+   * FIXME: should not allow specimen group to be updated if it is used by one or more
+   * collection event types.
+   */
   def updateSpecimenGroup(studyId: String, studyName: String, specimenGroupId: String) = SecuredAction { implicit request =>
     studyService.getSpecimenGroup(studyId, specimenGroupId) match {
       case Failure(x) => throw new Error(x.head)
@@ -128,6 +136,10 @@ object SgController extends Controller with securesocial.core.SecureSocial {
       })
   }
 
+  /**
+   * FIXME: should not allow specimen group to be deleted if it is used by one or more
+   * collection event types.
+   */
   def removeSpecimenGroupConfirm(studyId: String,
     studyName: String,
     specimenGroupId: String) = SecuredAction { implicit request =>
