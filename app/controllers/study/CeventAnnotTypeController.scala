@@ -71,7 +71,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
 
   def index(studyId: String, studyName: String) = SecuredAction {
     implicit request =>
-      val annotTypes = studyService.getCollectionEventAnnotationTypes(studyId)
+      val annotTypes = studyService.collectionEventAnnotationTypesForStudy(studyId)
       Ok(html.study.ceventannotationtype.show(studyId, studyName, annotTypes))
   }
 
@@ -123,7 +123,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
    */
   def updateAnnotationType(studyId: String, studyName: String, annotationTypeId: String) = SecuredAction {
     implicit request =>
-      studyService.getCollectionEventAnnotationType(studyId, annotationTypeId) match {
+      studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
         case Failure(x) => throw new Error(x.head)
         case Success(annotType) =>
           val form = annotationTypeForm.fill(AnnotationTypeFormObject(
@@ -171,7 +171,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
     studyName: String,
     annotationTypeId: String) = SecuredAction {
     implicit request =>
-      studyService.getCollectionEventAnnotationType(studyId, annotationTypeId) match {
+      studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
         case Failure(x) => throw new Error(x.head)
         case Success(annotType) =>
           var fields = ListMap(
@@ -201,7 +201,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
     studyName: String,
     annotationTypeId: String) = SecuredAction {
     implicit request =>
-      studyService.getCollectionEventAnnotationType(studyId, annotationTypeId) match {
+      studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
         case Failure(x) => throw new Error(x.head)
         case Success(annotType) =>
           Async {

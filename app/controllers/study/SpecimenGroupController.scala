@@ -81,7 +81,7 @@ object SpecimenGroupController extends Controller with securesocial.core.SecureS
           throw new Error(x.head)
         }
       case Success(study) =>
-        val specimenGroups = studyService.getSpecimenGroups(studyId)
+        val specimenGroups = studyService.specimenGroupsForStudy(studyId)
         Ok(html.study.specimengroup.show(studyId, studyName, specimenGroups))
     }
   }
@@ -159,7 +159,7 @@ object SpecimenGroupController extends Controller with securesocial.core.SecureS
         if (result) {
           badUpdateRequest(studyId, studyName, Messages("biobank.study.specimen.group.in.use.error.message"))
         } else {
-          studyService.getSpecimenGroup(studyId, specimenGroupId) match {
+          studyService.specimenGroupWithId(studyId, specimenGroupId) match {
             case Failure(x) => throw new Error(x.head)
             case Success(sg) =>
               val form = specimenGroupForm.fill(SpecimenGroupFormObject(
@@ -225,7 +225,7 @@ object SpecimenGroupController extends Controller with securesocial.core.SecureS
         if (result) {
           badUpdateRequest(studyId, studyName, Messages("biobank.study.specimen.group.in.use.error.message"))
         } else {
-          studyService.getSpecimenGroup(studyId, specimenGroupId) match {
+          studyService.specimenGroupWithId(studyId, specimenGroupId) match {
             case Failure(x) =>
               throw new Error(x.head)
             case Success(sg) =>
@@ -239,7 +239,7 @@ object SpecimenGroupController extends Controller with securesocial.core.SecureS
   def removeSpecimenGroup(studyId: String,
     studyName: String,
     specimenGroupId: String) = SecuredAction { implicit request =>
-    studyService.getSpecimenGroup(studyId, specimenGroupId) match {
+    studyService.specimenGroupWithId(studyId, specimenGroupId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(sg) =>
         Async {

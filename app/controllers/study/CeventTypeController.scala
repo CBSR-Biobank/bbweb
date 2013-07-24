@@ -78,17 +78,17 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
         CeventTypeFormObject.apply)(CeventTypeFormObject.unapply))
 
   def index(studyId: String, studyName: String) = SecuredAction { implicit request =>
-    val ceventTypes = studyService.getCollectionEventTypes(studyId)
+    val ceventTypes = studyService.collectionEventTypesForStudy(studyId)
     Ok(html.study.ceventtype.show(studyId, studyName, ceventTypes, specimenGroupInfo(studyId),
       annotationTypeInfo(studyId)))
   }
 
   private def specimenGroupInfo(studyId: String) = {
-    studyService.getSpecimenGroups(studyId).map(x => (x.id.id, x.name, x.units)).toSeq
+    studyService.specimenGroupsForStudy(studyId).map(x => (x.id.id, x.name, x.units)).toSeq
   }
 
   private def annotationTypeInfo(studyId: String) = {
-    studyService.getCollectionEventAnnotationTypes(studyId).map(x => (x.id.id, x.name)).toSeq
+    studyService.collectionEventAnnotationTypesForStudy(studyId).map(x => (x.id.id, x.name)).toSeq
   }
 
   /**
@@ -135,7 +135,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
   }
 
   def updateCeventType(studyId: String, studyName: String, ceventTypeId: String) = SecuredAction { implicit request =>
-    studyService.getCollectionEventType(studyId, ceventTypeId) match {
+    studyService.collectionEventTypeWithId(studyId, ceventTypeId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(ceventType) =>
         Logger.info("*** " + ceventType)
@@ -182,7 +182,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
   def removeCeventTypeConfirm(studyId: String,
     studyName: String,
     ceventTypeId: String) = SecuredAction { implicit request =>
-    studyService.getCollectionEventType(studyId, ceventTypeId) match {
+    studyService.collectionEventTypeWithId(studyId, ceventTypeId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(ceventType) =>
         Ok(html.study.ceventtype.removeConfirm(studyId, studyName, ceventType))
@@ -192,7 +192,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
   def removeCeventType(studyId: String,
     studyName: String,
     ceventTypeId: String) = SecuredAction { implicit request =>
-    studyService.getCollectionEventType(studyId, ceventTypeId) match {
+    studyService.collectionEventTypeWithId(studyId, ceventTypeId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(ceventType) =>
         Async {

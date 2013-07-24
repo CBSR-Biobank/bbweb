@@ -47,37 +47,33 @@ class StudyService(
     StudyRepository.studyWithId(new StudyId(id))
   }
 
-  def getSpecimenGroup(studyId: String, specimenGroupId: String): DomainValidation[SpecimenGroup] = {
+  def specimenGroupWithId(studyId: String, specimenGroupId: String): DomainValidation[SpecimenGroup] = {
     SpecimenGroupRepository.specimenGroupWithId(
       StudyId(studyId), SpecimenGroupId(specimenGroupId))
   }
 
-  def getSpecimenGroups(studyId: String): Set[SpecimenGroup] =
+  def specimenGroupsForStudy(studyId: String): Set[SpecimenGroup] =
     SpecimenGroupRepository.allSpecimenGroupsForStudy(StudyId(studyId))
 
-  // FIXME: rename to collectionEventAnnotationType
-  def getCollectionEventAnnotationType(
+  def collectionEventAnnotationTypeWithId(
     studyId: String,
     annotationTypeId: String): DomainValidation[CollectionEventAnnotationType] = {
     CollectionEventAnnotationTypeRepository.annotationTypeWithId(
       StudyId(studyId), AnnotationTypeId(annotationTypeId))
   }
 
-  // FIXME: rename to allCollectionEventAnnotationType
-  def getCollectionEventAnnotationTypes(id: String): Set[CollectionEventAnnotationType] = {
+  def collectionEventAnnotationTypesForStudy(id: String): Set[CollectionEventAnnotationType] = {
     CollectionEventAnnotationTypeRepository.allCollectionEventAnnotationTypesForStudy(StudyId(id))
   }
 
-  // FIXME: rename to collectionEventType
-  def getCollectionEventType(
+  def collectionEventTypeWithId(
     studyId: String,
     collectionEventTypeId: String): DomainValidation[CollectionEventType] = {
     CollectionEventTypeRepository.collectionEventTypeWithId(
       StudyId(studyId), CollectionEventTypeId(collectionEventTypeId))
   }
 
-  // FIXME: rename to allCollectionEventType
-  def getCollectionEventTypes(studyId: String): Set[CollectionEventType] = {
+  def collectionEventTypesForStudy(studyId: String): Set[CollectionEventType] = {
     CollectionEventTypeRepository.allCollectionEventTypesForStudy(StudyId(studyId))
   }
 
@@ -109,7 +105,7 @@ class StudyService(
 
   def specimenGroupInUse(studyId: String, specimenGroupId: String): DomainValidation[Boolean] = {
     for {
-      sg <- getSpecimenGroup(studyId, specimenGroupId)
+      sg <- specimenGroupWithId(studyId, specimenGroupId)
       canUpdate <- CollectionEventTypeRepository.specimenGroupInUse(sg).success
     } yield canUpdate
   }
@@ -147,7 +143,7 @@ class StudyService(
   def canUpdateCollectionEventAnnotationType(
     studyId: String, annotationTypeId: String): DomainValidation[Boolean] = {
     for {
-      at <- getCollectionEventAnnotationType(studyId, annotationTypeId)
+      at <- collectionEventAnnotationTypeWithId(studyId, annotationTypeId)
       canUpdate <- (!CollectionEventTypeRepository.annotationTypeInUse(at)).success
     } yield canUpdate
   }

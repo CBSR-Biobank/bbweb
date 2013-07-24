@@ -126,10 +126,10 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
         val counts = Map(
           ("participants" -> "<i>to be implemented</i>"),
           ("collection.events" -> "<i>to be implemented</i>"),
-          ("specimen.groups" -> studyService.getSpecimenGroups(id).size.toString),
+          ("specimen.groups" -> studyService.specimenGroupsForStudy(id).size.toString),
           ("collection.event.annotation.types" ->
-            studyService.getCollectionEventAnnotationTypes(id).size.toString),
-          ("collection.event.types" -> studyService.getCollectionEventTypes(id).size.toString))
+            studyService.collectionEventAnnotationTypesForStudy(id).size.toString),
+          ("collection.event.types" -> studyService.collectionEventTypesForStudy(id).size.toString))
         Ok(html.study.showStudy(study, counts))
     }
   }
