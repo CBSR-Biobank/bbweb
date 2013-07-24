@@ -1,9 +1,9 @@
 @(name: String, value: String)
   <div class="row-fluid">
-    <div class="span3 text-right">
-      <p><strong>@name</strong></p>
+    <div class="span3 text-right data-heading">
+      @name
     </div>
     <div class="span9 well well-tiny">
-      <p>@Html(value.replace("\n", "<br/>"))</p>
+      @Html(value.replace("\n", "<br/>"))
     </div>
   </div>
