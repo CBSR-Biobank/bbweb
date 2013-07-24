@@ -4,6 +4,6 @@
       <p><strong>@name</strong></p>
     </div>
     <div class="span9 well well-tiny">
-      <p>@Html(value)</p>
+      <p>@Html(value.replace("\n", "<br/>"))</p>
     </div>
   </div>
