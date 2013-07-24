@@ -33,8 +33,7 @@
         (formInfo.title -> null)
     ))
     <div class="page-header">
-        <h2>@Messages("biobank.study.singular"): @studyName</h2>
-        <h3>@formInfo.title</h3>
+        <h2>@studyName&nbsp;<small>@formInfo.title</small></h2>
     </div>
 
 
@@ -118,7 +117,7 @@
         var sgTemplate = $('.sg_data_template')
         var atTemplate = $('.at_data_template')
 
-        var sgUnits={'': '@Messages("biobank.study.specimengroup.field.units")',
+        var sgUnits={'': '@Messages("biobank.study.specimen.group.field.units")',
         @Html(specimenGroupMap.map(x => """'%s': '%s'""".format(x._1, x._3)).mkString(","))}
 
         var sgRenameElementAttr = function(element, id) {

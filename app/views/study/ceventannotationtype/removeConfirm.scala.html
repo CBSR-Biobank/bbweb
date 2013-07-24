@@ -11,15 +11,14 @@
 @import helper._
 @import controllers.study._
 
-@main(Messages("biobank.study.specimengroup.remove")) {
+@main(Messages("biobank.study.specimen.group.remove")) {
   @breadcrumbs(Map(
     (Messages("biobank.study.plural") -> routes.StudyController.index),
     (studyName -> routes.StudyController.showStudy(studyId)),
     (Messages("biobank.study.collection.event.annotation.type.remove") -> null)
   ))
   <div class="page-header">
-    <h2>@Messages("biobank.study.singular"): @studyName</h2>
-    <h4>@Messages("biobank.study.collection.event.annotation.type.remove")</h4>
+    <h2>@studyName <small>@Messages("biobank.study.collection.event.annotation.type.remove")</small></h2>
     <div class="alert alert-block">
      <h4>@Messages("biobank.common.warning")</h4>
      <p>

@@ -39,22 +39,26 @@ biobank.study.form.error.name=Study with this name already exists
 biobank.study.error=Study does not exist
 
 # Specimen Groups
-biobank.study.specimengroup.add=Add Specimen Group
-biobank.study.specimengroup.update=Update Specimen Group
-biobank.study.specimengroup.remove=Remove Specimen Group
-biobank.study.specimengroup.remove.confirm=Are you sure you want to remove Specimen Group "{0}"?
-biobank.study.specimengroup.removed=Specimen Group "{0}" removed.
-biobank.study.specimengroup.added=Specimen Group has been added: {0}.
-biobank.study.specimengroup.updated=Specimen Group has been updated: {0}.
-biobank.study.specimengroup.field.units=Units
-biobank.study.specimengroup.field.anatomicalsource=Anatomical Source
-biobank.study.specimengroup.field.preservation=Preservation Type
-biobank.study.specimengroup.field.preservationtemperature=Preservation Temperature
-biobank.study.specimengroup.field.specimentype=Specimen Type
-biobank.study.specimengroup.show.title=Specimen Groups
-biobank.study.specimengroup.show.none=No Specimen Groups have been added to this study.
-biobank.study.specimengroup.show.action.add=Add Specimen Group
-biobank.study.specimengroup.form.error.name=A Specimen Group with this name already exists
+biobank.study.specimen.group.add=Add Specimen Group
+biobank.study.specimen.group.update=Update Specimen Group
+biobank.study.specimen.group.remove=Remove Specimen Group
+biobank.study.specimen.group.remove.confirm=Are you sure you want to remove Specimen Group "{0}"?
+biobank.study.specimen.group.removed=Specimen Group "{0}" removed.
+biobank.study.specimen.group.added=Specimen Group has been added: {0}.
+biobank.study.specimen.group.updated=Specimen Group has been updated: {0}.
+biobank.study.specimen.group.field.units=Units
+biobank.study.specimen.group.field.anatomicalsource=Anatomical Source
+biobank.study.specimen.group.field.preservation=Preservation Type
+biobank.study.specimen.group.field.preservationtemperature=Preservation Temperature
+biobank.study.specimen.group.field.specimentype=Specimen Type
+biobank.study.specimen.group.show.title=Specimen Groups
+biobank.study.specimen.group.show.none=No Specimen Groups have been added to this study.
+biobank.study.specimen.group.show.action.add=Add Specimen Group
+biobank.study.specimen.group.form.error.name=A Specimen Group with this name already exists
+biobank.study.specimen.group.error.heading=Specimen Group Error
+biobank.study.specimen.group.add.error.heading=Specimen Group cannot be added
+biobank.study.specimen.group.in.use.error.message=Specimen Group is in use by Collection Event Types.
+biobank.study.specimen.group.invalid=Specimen Group invalid.
 
 # Annotation Types
 biobank.annotation.type.field.value.type=Value Type

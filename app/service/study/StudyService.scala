@@ -1,29 +1,21 @@
-package service
+package service.study
 
 import service.commands._
 import service.events._
-import domain.{
-  AnnotationTypeId,
-  ConcurrencySafeEntity,
-  DomainValidation,
-  DomainError,
-  Entity,
-  UserId
-}
+import service._
+import domain.{ AnnotationTypeId, DomainValidation, UserId }
 import domain._
 import domain.study._
-import service.study.{ SpecimenGroupService }
+
 import akka.actor._
 import akka.pattern.ask
-import akka.util.Timeout
 import scala.concurrent._
 import scala.concurrent.duration._
-import scala.concurrent.stm.Ref
-import scala.language.postfixOps
 import org.eligosource.eventsourced.core._
+import org.slf4j.LoggerFactory
+
 import scalaz._
-import Scalaz._
-import domain.AnnotationTypeId
+import scalaz.Scalaz._
 
 /**
  * This is the Study Aggregate Application Service.
@@ -42,6 +34,8 @@ class StudyService(
   extends ApplicationService {
   import system.dispatcher
 
+  val log = LoggerFactory.getLogger(this.getClass)
+
   /**
    * FIXME: use paging and sorting
    */
@@ -53,8 +47,7 @@ class StudyService(
     StudyRepository.studyWithId(new StudyId(id))
   }
 
-  def getSpecimenGroup(
-    studyId: String, specimenGroupId: String): DomainValidation[SpecimenGroup] = {
+  def getSpecimenGroup(studyId: String, specimenGroupId: String): DomainValidation[SpecimenGroup] = {
     SpecimenGroupRepository.specimenGroupWithId(
       StudyId(studyId), SpecimenGroupId(specimenGroupId))
   }
@@ -114,6 +107,13 @@ class StudyService(
         _.asInstanceOf[DomainValidation[SpecimenGroup]])
   }
 
+  def specimenGroupInUse(studyId: String, specimenGroupId: String): DomainValidation[Boolean] = {
+    for {
+      sg <- getSpecimenGroup(studyId, specimenGroupId)
+      canUpdate <- CollectionEventTypeRepository.specimenGroupInUse(sg).success
+    } yield canUpdate
+  }
+
   def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd)(implicit userId: UserId): Future[DomainValidation[SpecimenGroup]] =
     studyProcessor.ask(
       Message(ServiceMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[SpecimenGroup]])
@@ -142,6 +142,14 @@ class StudyService(
     studyProcessor.ask(
       Message(ServiceMsg(cmd, userId, Some(CollectionEventAnnotationTypeIdentityService.nextIdentity)))).map(
         _.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
+  }
+
+  def canUpdateCollectionEventAnnotationType(
+    studyId: String, annotationTypeId: String): DomainValidation[Boolean] = {
+    for {
+      at <- getCollectionEventAnnotationType(studyId, annotationTypeId)
+      canUpdate <- (!CollectionEventTypeRepository.annotationTypeInUse(at)).success
+    } yield canUpdate
   }
 
   def updateCollectionEventAnnotationType(cmd: UpdateCollectionEventAnnotationTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]] =

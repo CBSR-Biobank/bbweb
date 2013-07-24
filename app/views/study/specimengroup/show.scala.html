@@ -9,20 +9,22 @@
   @breadcrumbs(Map(
     (Messages("biobank.study.plural") -> routes.StudyController.index),
     (studyName -> routes.StudyController.showStudy(studyId)),
-    (Messages("biobank.study.specimengroup.show.title") -> null)
+    (Messages("biobank.study.specimen.group.show.title") -> null)
   ))
   <div class="page-header">
-    <h2>@Messages("biobank.study.singular"): @studyName</h2>
-    <h3>@Messages("biobank.study.specimengroup.show.title")
-    <a href="@routes.SgController.addSpecimenGroup(studyId)"
-        class="btn btn-small btn-primary" type="button"
-        data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
-        <i class="icon-plus-sign icon-white"></i></a>
-    </h3>
+    <h2>
+        @studyName&nbsp;
+        <small>@Messages("biobank.study.specimen.group.show.title")
+        <a href="@routes.SpecimenGroupController.addSpecimenGroup(studyId, studyName)"
+            class="btn btn-small btn-primary" type="button"
+            data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
+            <i class="icon-plus-sign icon-white"></i></a>
+        </small>
+    </h2>
   </div>
   <div class="clearfix">
     @if(specimenGroups.size <= 0) {
-      <p>@Messages("biobank.study.specimengroup.show.none")</p>
+      <p>@Messages("biobank.study.specimen.group.show.none")</p>
     } else {
       @flash.get("success").map { message =>
         <div class="alert alert-success">
@@ -34,11 +36,11 @@
         <thead>
           <th>@Messages("biobank.common.name")</th>
           <th>@Messages("biobank.common.description")</th>
-          <th>@Messages("biobank.study.specimengroup.field.units")</th>
-          <th>@Messages("biobank.study.specimengroup.field.anatomicalsource")</th>
-          <th>@Messages("biobank.study.specimengroup.field.preservation")</th>
-          <th>@Messages("biobank.study.specimengroup.field.preservationtemperature")</th>
-          <th>@Messages("biobank.study.specimengroup.field.specimentype")</th>
+          <th>@Messages("biobank.study.specimen.group.field.units")</th>
+          <th>@Messages("biobank.study.specimen.group.field.anatomicalsource")</th>
+          <th>@Messages("biobank.study.specimen.group.field.preservation")</th>
+          <th>@Messages("biobank.study.specimen.group.field.preservationtemperature")</th>
+          <th>@Messages("biobank.study.specimen.group.field.specimentype")</th>
           <th></th>
         </thead>
         <tbody>
@@ -53,8 +55,8 @@
               <td>@sg.specimenType</td>
               <td>
                 @updateRemoveButtons(
-                    routes.SgController.updateSpecimenGroup(studyId,studyName,sg.id.id),
-                    routes.SgController.removeSpecimenGroupConfirm(studyId,studyName,sg.id.id))
+                    routes.SpecimenGroupController.updateSpecimenGroup(studyId,studyName,sg.id.id),
+                    routes.SpecimenGroupController.removeSpecimenGroupConfirm(studyId,studyName,sg.id.id))
               </td>
             <tr>
           }

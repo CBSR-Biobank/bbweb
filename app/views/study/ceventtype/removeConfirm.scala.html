@@ -6,18 +6,19 @@
 @import helper._
 @import controllers.study._
 
-@main(Messages("biobank.study.specimengroup.remove")) {
+@main(Messages("biobank.study.specimen.group.remove")) {
   @breadcrumbs(Map(
     (Messages("biobank.study.plural") -> routes.StudyController.index),
     (studyName -> routes.StudyController.showStudy(studyId)),
     (Messages("biobank.study.collection.event.type.remove") -> null)
   ))
   <div class="page-header">
-    <h2>@Messages("biobank.study.singular"): @studyName</h2>
-    <h4>@Messages("biobank.study.collection.event.type.remove")</h4>
+    <h2>@studyName&nbsp
+        <small>@Messages("biobank.study.collection.event.type.remove")</small>
+    </h2>
     <div class="alert alert-block">
-     <h4>@Messages("biobank.common.warning")</h4>
-     @Messages("biobank.study.specimengroup.remove.confirm", ceventType.name)
+        <h4>@Messages("biobank.common.warning")</h4>
+        @Messages("biobank.study.specimen.group.remove.confirm", ceventType.name)
     </div>
   </div>
   <div class="clearfix">

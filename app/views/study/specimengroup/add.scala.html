@@ -1,7 +1,8 @@
 @(sgForm: Form[controllers.study.SpecimenGroupFormObject], 
     formType: FormType, 
     studyId: String, 
-    studyName: String)(
+    studyName: String,
+    breadcrumbMap: Map[String, Call])(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
@@ -11,22 +12,17 @@
 
 @formInfo = @{ formType match {
     case AddFormType() => 
-        FormInfo(Messages("biobank.study.specimengroup.add"), 
-            routes.SgController.addSpecimenGroupSubmit(studyId, studyName))
+        FormInfo(Messages("biobank.study.specimen.group.add"), 
+            routes.SpecimenGroupController.addSpecimenGroupSubmit(studyId, studyName))
     case UpdateFormType() => 
-        FormInfo(Messages("biobank.study.specimengroup.update"), 
-            routes.SgController.updateSpecimenGroupSubmit(studyId, studyName))  
+        FormInfo(Messages("biobank.study.specimen.group.update"), 
+            routes.SpecimenGroupController.updateSpecimenGroupSubmit(studyId, studyName))  
 }}
 
 @main(formInfo.title) {
-  @breadcrumbs(Map(
-    (Messages("biobank.study.plural") -> routes.StudyController.index),
-    (studyName -> routes.StudyController.showStudy(studyId)),
-    (formInfo.title -> null)
-  ))
+  @breadcrumbs(breadcrumbMap)
   <div class="page-header">
-    <h2>@Messages("biobank.study.singular"): @studyName</h2>
-    <h3>@formInfo.title</h3>
+    <h2>@studyName <small>@formInfo.title</small></h2>
   </div>
   
   <div class="clearfix">
@@ -49,7 +45,7 @@
       
       @inputText(
          field = sgForm("units"),
-         args = '_label -> Messages("biobank.study.specimengroup.field.units"), 
+         args = '_label -> Messages("biobank.study.specimen.group.field.units"), 
            'placeholder -> "the type of units the specimens are measured in (Eg. mL, cm, etc.)",
            'class -> "input-xxlarge"
          )
@@ -57,25 +53,25 @@
       @select(
          field = sgForm("anatomicalSourceType"),
          options = SpecimenGroupSelections.anatomicalSourceTypes,
-         args = '_label -> Messages("biobank.study.specimengroup.field.anatomicalsource")
+         args = '_label -> Messages("biobank.study.specimen.group.field.anatomicalsource")
       )
       
       @select(
          field = sgForm("preservationType"),
          options = SpecimenGroupSelections.preservationTypes,
-         args = '_label -> Messages("biobank.study.specimengroup.field.preservation")
+         args = '_label -> Messages("biobank.study.specimen.group.field.preservation")
       )
       
       @select(
          field = sgForm("preservationTemperatureType"),
          options = SpecimenGroupSelections.preservationTemperatureTypes,
-         args = '_label -> Messages("biobank.study.specimengroup.field.preservationtemperature")
+         args = '_label -> Messages("biobank.study.specimen.group.field.preservationtemperature")
       )
       
       @select(
          field = sgForm("specimenType"),
          options = SpecimenGroupSelections.specimenTypes,
-         args = '_label -> Messages("biobank.study.specimengroup.field.specimentype")
+         args = '_label -> Messages("biobank.study.specimen.group.field.specimentype")
       )
       
          

@@ -1,0 +1,11 @@
+@(heading: String,
+    message: String,
+    breadcrumbMap: Map[String, Call])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+
+@main("Biobank") {
+  @breadcrumbs(breadcrumbMap)
+  <div class="alert alert-block">
+    <h4>@heading</h4>
+    @message
+  </div>
+}

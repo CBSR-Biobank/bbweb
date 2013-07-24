@@ -4,7 +4,6 @@ import infrastructure._
 import service._
 import domain._
 import domain.study._
-
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
@@ -14,6 +13,7 @@ import org.eligosource.eventsourced.core._
 import org.eligosource.eventsourced.journal.mongodb.casbah.MongodbCasbahJournalProps
 import scalaz._
 import Scalaz._
+import service.study.StudyService
 
 abstract class StudyFixture extends AppFixture {
 

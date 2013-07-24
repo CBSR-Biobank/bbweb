@@ -464,7 +464,6 @@ class CollectionEventTypeSpec extends StudyFixture {
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
         case x =>
           x.annotationTypeData.size mustEqual 1
-        // FIXME: add test for values of the SpecimenGroupCollectionEventType
       }
 
       val cet2 = await(studyService.updateCollectionEventType(
@@ -522,7 +521,6 @@ class CollectionEventTypeSpec extends StudyFixture {
       CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
         case x =>
           x.annotationTypeData.size mustEqual 1
-        // FIXME: add test for values of the SpecimenGroupCollectionEventType
       }
 
       val cet2 = await(studyService.updateCollectionEventType(

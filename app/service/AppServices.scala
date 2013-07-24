@@ -2,7 +2,6 @@ package service
 
 import domain._
 import domain.study._
-
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
 import scala.language.postfixOps
@@ -16,6 +15,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
 import org.slf4j.LoggerFactory
+import service.study.StudyService
 
 trait AppServices {
   def studyService: StudyService

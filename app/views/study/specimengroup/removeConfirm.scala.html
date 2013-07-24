@@ -1,39 +1,38 @@
 @(studyId: String,
     studyName: String,
-    sg: domain.study.SpecimenGroup)(
+    sg: domain.study.SpecimenGroup,
+    breadcrumbMap: Map[String, Call])(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
 @import controllers.study._
 
-@main(Messages("biobank.study.specimengroup.remove")) {
-  @breadcrumbs(Map(
-    (Messages("biobank.study.plural") -> routes.StudyController.index),
-    (studyName -> routes.StudyController.showStudy(studyId)),
-    (Messages("biobank.study.specimengroup.remove") -> null)
-  ))
+@main(Messages("biobank.study.specimen.group.remove")) {
+  @breadcrumbs(breadcrumbMap)
   <div class="page-header">
-    <h2>@Messages("biobank.study.singular"): @studyName</h2>
-    <h4>@Messages("biobank.study.specimengroup.remove")</h4>
+    <h2>
+        @studyName&nbsp;
+        <small>@Messages("biobank.study.specimen.group.remove")</small>
+    </h2>
     <div class="alert alert-block">
-     <h4>@Messages("biobank.common.warning")</h4>
-     @Messages("biobank.study.specimengroup.remove.confirm", sg.name)
+        <h4>@Messages("biobank.common.warning")</h4>
+        @Messages("biobank.study.specimen.group.remove.confirm", sg.name)
     </div>
   </div>
   <div class="clearfix">
 
     @nameValueRow(Messages("biobank.common.name"), sg.name)
     @nameValueRow(Messages("biobank.common.description"), sg.description.getOrElse(""))
-    @nameValueRow(Messages("biobank.study.specimengroup.field.units"), sg.units)
-    @nameValueRow(Messages("biobank.study.specimengroup.field.anatomicalsource"), sg.anatomicalSourceType.toString)
-    @nameValueRow(Messages("biobank.study.specimengroup.field.preservation"), sg.preservationType.toString)
-    @nameValueRow(Messages("biobank.study.specimengroup.field.preservationtemperature"), sg.preservationTemperatureType.toString)
-    @nameValueRow(Messages("biobank.study.specimengroup.field.specimentype"), sg.specimenType.toString)
+    @nameValueRow(Messages("biobank.study.specimen.group.field.units"), sg.units)
+    @nameValueRow(Messages("biobank.study.specimen.group.field.anatomicalsource"), sg.anatomicalSourceType.toString)
+    @nameValueRow(Messages("biobank.study.specimen.group.field.preservation"), sg.preservationType.toString)
+    @nameValueRow(Messages("biobank.study.specimen.group.field.preservationtemperature"), sg.preservationTemperatureType.toString)
+    @nameValueRow(Messages("biobank.study.specimen.group.field.specimentype"), sg.specimenType.toString)
 
     <div class="form-actions">
-      <a href="@routes.SgController.index(studyId,studyName)" class="btn btn-small" type="button">
+      <a href="@routes.SpecimenGroupController.index(studyId,studyName)" class="btn btn-small" type="button">
       @Messages("biobank.common.cancel")</a>
-      <a href="@routes.SgController.removeSpecimenGroup(studyId,studyName,sg.id.id)"
+      <a href="@routes.SpecimenGroupController.removeSpecimenGroup(studyId,studyName,sg.id.id)"
       class="btn btn-small btn-warning" type="button">
       @Messages("biobank.common.confirm")</a>
     </div>
