@@ -29,13 +29,13 @@ case class StudySpecimenGroupRemovedEvent(studyId: StudyId, specimenGroupId: Spe
 case class CollectionEventTypeAddedEvent(
   studyId: StudyId, collectionEventTypeId: CollectionEventTypeId,
   name: String, description: Option[String], recurring: Boolean,
-  specimenGroupData: Set[SpecimenGroupCollectionEventType],
+  specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
   annotationTypeData: Set[CollectionEventTypeAnnotationType])
 
 case class CollectionEventTypeUpdatedEvent(
   studyId: StudyId, collectionEventTypeId: CollectionEventTypeId,
   name: String, description: Option[String], recurring: Boolean,
-  specimenGroupData: Set[SpecimenGroupCollectionEventType],
+  specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
   annotationTypeData: Set[CollectionEventTypeAnnotationType])
 
 case class CollectionEventTypeRemovedEvent(

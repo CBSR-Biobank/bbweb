@@ -9,6 +9,7 @@ import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
 import domain.study.{
+  CollectionEventTypeRepository,
   DisabledStudy,
   SpecimenGroup,
   SpecimenGroupId,
@@ -17,12 +18,11 @@ import domain.study.{
   StudyId
 }
 import domain.study.Study._
-
 import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
-
 import scalaz._
 import scalaz.Scalaz._
+import domain.study.CollectionEventTypeRepository
 
 /**
  * This is the Specimen Group Domain Service.
@@ -83,13 +83,23 @@ class SpecimenGroupService() extends CommandHandler {
     item
   }
 
+  private def checkNotInUse(specimenGroup: SpecimenGroup): DomainValidation[Boolean] = {
+    if (CollectionEventTypeRepository.specimenGroupInUse(specimenGroup)) {
+      DomainError("specimen group is in use by collection event type: " + specimenGroup.id).fail
+    } else {
+      true.success
+    }
+  }
+
   private def updateSpecimenGroup(
     cmd: UpdateSpecimenGroupCmd,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
+
     val item = for {
       oldItem <- SpecimenGroupRepository.specimenGroupWithId(
         StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
+      notInUse <- checkNotInUse(oldItem)
       newItem <- SpecimenGroupRepository.update(
         SpecimenGroup(oldItem.id, cmd.expectedVersion.getOrElse(-1), study.id, cmd.name, cmd.description,
           cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
@@ -111,6 +121,7 @@ class SpecimenGroupService() extends CommandHandler {
     val item = for {
       oldItem <- SpecimenGroupRepository.specimenGroupWithId(
         StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
+      notInUse <- checkNotInUse(oldItem)
       itemToRemove <- SpecimenGroup(oldItem.id, cmd.expectedVersion.getOrElse(-1),
         study.id, oldItem.name, oldItem.description, oldItem.units, oldItem.anatomicalSourceType,
         oldItem.preservationType, oldItem.preservationTemperatureType, oldItem.specimenType).success

@@ -64,14 +64,14 @@ trait CollectionEventTypeCommand extends StudyCommand with StudyIdentity
 
 case class AddCollectionEventTypeCmd(
   studyId: String, name: String, description: Option[String], recurring: Boolean,
-  specimenGroupData: Set[SpecimenGroupCollectionEventType],
+  specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
   annotationTypeData: Set[CollectionEventTypeAnnotationType])
   extends CollectionEventTypeCommand
 
 case class UpdateCollectionEventTypeCmd(
   id: String, expectedVersion: Option[Long], studyId: String, name: String,
   description: Option[String], recurring: Boolean,
-  specimenGroupData: Set[SpecimenGroupCollectionEventType],
+  specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
   annotationTypeData: Set[CollectionEventTypeAnnotationType])
   extends CollectionEventTypeCommand with HasExpectedVersion
 

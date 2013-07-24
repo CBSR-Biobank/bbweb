@@ -217,7 +217,7 @@ class CollectionEventTypeSpec extends StudyFixture {
 
   "Specimen group -> collection event type" can {
 
-    "can be added" in {
+    "be added" in {
       val name = nameGenerator.next[Study]
       val units = nameGenerator.next[String]
       val anatomicalSourceType = AnatomicalSourceType.Blood
@@ -235,8 +235,8 @@ class CollectionEventTypeSpec extends StudyFixture {
       val count2 = 5
       val amount2 = BigDecimal(0.1)
       val SpecimenGroupData = Set(
-        SpecimenGroupCollectionEventType(sg1.id.id, count, amount),
-        SpecimenGroupCollectionEventType(sg1.id.id, count2, amount2))
+        CollectionEventTypeSpecimenGroup(sg1.id.id, count, amount),
+        CollectionEventTypeSpecimenGroup(sg1.id.id, count2, amount2))
 
       val cet1 = await(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring = true,
@@ -256,7 +256,37 @@ class CollectionEventTypeSpec extends StudyFixture {
       }
     }
 
-    "can be removed" in {
+    "not be updated if used by collection event type" in {
+      val sgName = nameGenerator.next[SpecimenGroup]
+
+      val sg1 = await(studyService.addSpecimenGroup(
+        AddSpecimenGroupCmd(study.id.id, sgName, Some(sgName), "mL", AnatomicalSourceType.Blood,
+          PreservationType.FreshSpecimen, PreservationTemperatureType.Minus80celcius,
+          SpecimenType.BuffyCoat))) | null
+      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
+
+      val SpecimenGroupData = Set(
+        CollectionEventTypeSpecimenGroup(sg1.id.id, 1, BigDecimal(1.1)))
+
+      val cetName = nameGenerator.next[CollectionEventType]
+      val cet1 = await(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study.id.id, cetName, Some(cetName), recurring = true,
+          SpecimenGroupData, Set.empty))) | null
+
+      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
+
+      val sg2 = await(studyService.updateSpecimenGroup(
+        UpdateSpecimenGroupCmd(sg1.id.id, sg1.versionOption, study.id.id, sgName, Some(sgName),
+          "mL", AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
+          PreservationTemperatureType.Minus80celcius, SpecimenType.CdpaPlasma)))
+
+      sg2 must beFailing.like {
+        case msgs => msgs.head must contain(
+          "specimen group is in use by collection event type")
+      }
+    }
+
+    "be removed from collection event type" in {
       val name = nameGenerator.next[Study]
       val units = nameGenerator.next[String]
       val anatomicalSourceType = AnatomicalSourceType.Blood
@@ -273,8 +303,8 @@ class CollectionEventTypeSpec extends StudyFixture {
       val count2 = 5
       val amount2 = BigDecimal(0.1)
       val SpecimenGroupData = Set(
-        SpecimenGroupCollectionEventType(sg1.id.id, count, amount),
-        SpecimenGroupCollectionEventType(sg1.id.id, count2, amount2))
+        CollectionEventTypeSpecimenGroup(sg1.id.id, count, amount),
+        CollectionEventTypeSpecimenGroup(sg1.id.id, count2, amount2))
 
       val cet1 = await(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring = true,
@@ -295,7 +325,35 @@ class CollectionEventTypeSpec extends StudyFixture {
       }
     }
 
-    "can not be added if specimen group in wrong study" in {
+    "not be removed if used by collection event type" in {
+      val sgName = nameGenerator.next[SpecimenGroup]
+
+      val sg1 = await(studyService.addSpecimenGroup(
+        AddSpecimenGroupCmd(study.id.id, sgName, Some(sgName), "mL", AnatomicalSourceType.Blood,
+          PreservationType.FreshSpecimen, PreservationTemperatureType.Minus80celcius,
+          SpecimenType.BuffyCoat))) | null
+      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
+
+      val SpecimenGroupData = Set(
+        CollectionEventTypeSpecimenGroup(sg1.id.id, 1, BigDecimal(1.1)))
+
+      val cetName = nameGenerator.next[CollectionEventType]
+      val cet1 = await(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study.id.id, cetName, Some(cetName), recurring = true,
+          SpecimenGroupData, Set.empty))) | null
+
+      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
+
+      val sg2 = await(studyService.removeSpecimenGroup(
+        RemoveSpecimenGroupCmd(sg1.id.id, sg1.versionOption, study.id.id)))
+
+      sg2 must beFailing.like {
+        case msgs => msgs.head must contain(
+          "specimen group is in use by collection event type")
+      }
+    }
+
+    "not be added if specimen group in wrong study" in {
       val name2 = nameGenerator.next[Study]
       val study2 = await(studyService.addStudy(new AddStudyCmd(name2, Some(name2)))) | null
 
@@ -319,8 +377,8 @@ class CollectionEventTypeSpec extends StudyFixture {
       val count = 10
       val amount = BigDecimal(1.1)
       val SpecimenGroupData = Set(
-        SpecimenGroupCollectionEventType(sg1.id.id, count, amount),
-        SpecimenGroupCollectionEventType(sg2.id.id, count, amount))
+        CollectionEventTypeSpecimenGroup(sg1.id.id, count, amount),
+        CollectionEventTypeSpecimenGroup(sg2.id.id, count, amount))
 
       val name = nameGenerator.next[CollectionEventType]
       val cet1 = await(studyService.addCollectionEventType(
@@ -335,13 +393,15 @@ class CollectionEventTypeSpec extends StudyFixture {
 
   "Annotation type -> collection event type" can {
 
-    "can be added" in {
-      val name = nameGenerator.next[CollectionEventTypeAnnotationType]
+    "be added" in {
+      val name = nameGenerator.next[CollectionEventAnnotationType]
       val required = true
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
         new AddCollectionEventAnnotationTypeCmd(study.id.id, name, Some(name),
-          AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
+          AnnotationValueType.Date))) | null
+
+      CollectionEventAnnotationTypeRepository.annotationTypeWithId(study.id, at1.id) must beSuccessful
 
       val annotationTypeData = Set(
         CollectionEventTypeAnnotationType(at1.id.id, true))
@@ -359,7 +419,35 @@ class CollectionEventTypeSpec extends StudyFixture {
       }
     }
 
-    "can be removed" in {
+    "not be updated if used by collection event type" in {
+      val name = nameGenerator.next[CollectionEventAnnotationType]
+
+      val at1 = await(studyService.addCollectionEventAnnotationType(
+        AddCollectionEventAnnotationTypeCmd(study.id.id, name, Some(name),
+          AnnotationValueType.Date))) | null
+
+      CollectionEventAnnotationTypeRepository.annotationTypeWithId(study.id, at1.id) must beSuccessful
+
+      val annotationTypeData = Set(
+        CollectionEventTypeAnnotationType(at1.id.id, true))
+
+      val cet1 = await(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), true,
+          Set.empty, annotationTypeData))) | null
+
+      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
+
+      val at2 = await(studyService.updateCollectionEventAnnotationType(
+        UpdateCollectionEventAnnotationTypeCmd(at1.id.id, at1.versionOption, study.id.id,
+          name, Some(name), AnnotationValueType.Number)))
+
+      at2 must beFailing.like {
+        case msgs => msgs.head must contain(
+          "annotation type is in use by collection event type")
+      }
+    }
+
+    "be removed from collection event type" in {
       val name = nameGenerator.next[CollectionEventTypeAnnotationType]
 
       val at1 = await(studyService.addCollectionEventAnnotationType(
@@ -389,7 +477,65 @@ class CollectionEventTypeSpec extends StudyFixture {
       }
     }
 
-    "can not be added if annotation type in wrong study" in {
+    "not be removed if used by collection event type" in {
+      val name = nameGenerator.next[CollectionEventAnnotationType]
+
+      val at1 = await(studyService.addCollectionEventAnnotationType(
+        AddCollectionEventAnnotationTypeCmd(study.id.id, name, Some(name),
+          AnnotationValueType.Date))) | null
+
+      CollectionEventAnnotationTypeRepository.annotationTypeWithId(study.id, at1.id) must beSuccessful
+
+      val annotationTypeData = Set(
+        CollectionEventTypeAnnotationType(at1.id.id, true))
+
+      val cet1 = await(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), true,
+          Set.empty, annotationTypeData))) | null
+
+      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
+
+      val at2 = await(studyService.removeCollectionEventAnnotationType(
+        RemoveCollectionEventAnnotationTypeCmd(at1.id.id, at1.versionOption, study.id.id)))
+
+      at2 must beFailing.like {
+        case msgs => msgs.head must contain(
+          "annotation type is in use by collection event type")
+      }
+
+    }
+
+    "be removed from collection event type" in {
+      val name = nameGenerator.next[CollectionEventTypeAnnotationType]
+
+      val at1 = await(studyService.addCollectionEventAnnotationType(
+        new AddCollectionEventAnnotationTypeCmd(study.id.id, name, Some(name),
+          AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
+
+      val annotationTypeData = Set(
+        CollectionEventTypeAnnotationType(at1.id.id, true))
+
+      val cet1 = await(studyService.addCollectionEventType(
+        new AddCollectionEventTypeCmd(study.id.id, name, Some(name), true,
+          Set.empty, annotationTypeData))) | null
+
+      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
+        case x =>
+          x.annotationTypeData.size mustEqual 1
+        // FIXME: add test for values of the SpecimenGroupCollectionEventType
+      }
+
+      val cet2 = await(studyService.updateCollectionEventType(
+        new UpdateCollectionEventTypeCmd(cet1.id.id, cet1.versionOption, study.id.id,
+          name, Some(name), recurring = true, Set.empty, Set.empty))) | null
+
+      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
+        case x =>
+          x.annotationTypeData.size mustEqual 0
+      }
+    }
+
+    "not be added if annotation type in wrong study" in {
       val name2 = nameGenerator.next[Study]
       val study2 = await(studyService.addStudy(new AddStudyCmd(name2, Some(name2)))) | null
 

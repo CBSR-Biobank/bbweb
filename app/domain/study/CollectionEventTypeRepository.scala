@@ -46,16 +46,18 @@ object CollectionEventTypeRepository
       true.success
   }
 
-  /* collection event type can't have duplicate specimen groups in {@link specimenGroupData} */
-  private def validateSpecimenGroups(
-    ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {
-    ???
+  def specimenGroupInUse(specimenGroup: SpecimenGroup): Boolean = {
+    val studyCeventTypes = getValues.filter(cet => cet.studyId.equals(specimenGroup.studyId))
+    studyCeventTypes.exists(cet =>
+      cet.specimenGroupData.exists(sgd =>
+        sgd.specimenGroupId.equals(specimenGroup.id.id)))
   }
 
-  /* collection event type can't have duplicate specimen groups in {@link annotationTypeData} */
-  private def validateAnnotationTypes(
-    ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {
-    ???
+  def annotationTypeInUse(annotationType: CollectionEventAnnotationType): Boolean = {
+    val studyCeventTypes = getValues.filter(cet => cet.studyId.equals(annotationType.studyId))
+    studyCeventTypes.exists(cet =>
+      cet.annotationTypeData.exists(atd =>
+        atd.annotationTypeId.equals(annotationType.id.id)))
   }
 
   def add(ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {

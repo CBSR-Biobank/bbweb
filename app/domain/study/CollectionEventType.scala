@@ -13,7 +13,7 @@ case class CollectionEventType(
   name: String,
   description: Option[String],
   recurring: Boolean,
-  specimenGroupData: Set[SpecimenGroupCollectionEventType],
+  specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
   annotationTypeData: Set[CollectionEventTypeAnnotationType])
   extends ConcurrencySafeEntity[CollectionEventTypeId]
   with HasName with HasDescriptionOption {

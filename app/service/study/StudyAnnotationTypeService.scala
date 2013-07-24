@@ -7,6 +7,7 @@ import domain._
 import domain.study.{
   CollectionEventAnnotationType,
   CollectionEventAnnotationTypeRepository,
+  CollectionEventTypeRepository,
   DisabledStudy,
   Study,
   StudyAnnotationType
@@ -73,6 +74,14 @@ protected[service] class StudyAnnotationTypeService() extends CommandHandler {
     item
   }
 
+  private def checkNotInUse(annotationType: CollectionEventAnnotationType): DomainValidation[Boolean] = {
+    if (CollectionEventTypeRepository.annotationTypeInUse(annotationType)) {
+      DomainError("annotation type is in use by collection event type: " + annotationType.id).fail
+    } else {
+      true.success
+    }
+  }
+
   private def updateCollectionEventAnnotationType(
     cmd: UpdateCollectionEventAnnotationTypeCmd,
     study: DisabledStudy,
@@ -81,6 +90,7 @@ protected[service] class StudyAnnotationTypeService() extends CommandHandler {
     val item = for {
       oldItem <- CollectionEventAnnotationTypeRepository.annotationTypeWithId(
         study.id, AnnotationTypeId(cmd.id))
+      notInUse <- checkNotInUse(oldItem)
       newItem <- CollectionEventAnnotationTypeRepository.update(CollectionEventAnnotationType(
         oldItem.id, cmd.expectedVersion.getOrElse(-1), study.id, cmd.name, cmd.description,
         cmd.valueType, cmd.maxValueCount, cmd.options))
@@ -100,6 +110,7 @@ protected[service] class StudyAnnotationTypeService() extends CommandHandler {
     val item = for {
       oldItem <- CollectionEventAnnotationTypeRepository.annotationTypeWithId(
         study.id, AnnotationTypeId(cmd.id))
+      notInUse <- checkNotInUse(oldItem)
       itemToRemove <- CollectionEventAnnotationType(
         AnnotationTypeId(cmd.id), cmd.expectedVersion.getOrElse(-1), study.id,
         oldItem.name, oldItem.description, oldItem.valueType, oldItem.maxValueCount,

@@ -61,7 +61,7 @@ protected[service] class CollectionEventTypeService() extends CommandHandler {
    */
   private def validateSpecimenGroupData(
     study: DisabledStudy,
-    specimenGroupData: Set[SpecimenGroupCollectionEventType]): DomainValidation[Boolean] = {
+    specimenGroupData: Set[CollectionEventTypeSpecimenGroup]): DomainValidation[Boolean] = {
 
     val invalidSet = specimenGroupData.map(v => SpecimenGroupId(v.specimenGroupId)).map { id =>
       (id -> SpecimenGroupRepository.specimenGroupWithId(study.id, id).isSuccess)

@@ -33,7 +33,7 @@ import Scalaz._
 case class CeventTypeFormObject(
   collectionEventTypeId: String, version: Long, studyId: String, name: String,
   description: Option[String], recurring: Boolean,
-  specimenGroupData: List[SpecimenGroupCollectionEventType],
+  specimenGroupData: List[CollectionEventTypeSpecimenGroup],
   annotationTypeData: List[CollectionEventTypeAnnotationType]) {
 
   def getAddCmd: AddCollectionEventTypeCmd = {
@@ -70,7 +70,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
         "specimenGroupId" -> text,
         "specimenGroupCount" -> number,
         "specimenGroupAmount" -> bigDecimal)(
-          SpecimenGroupCollectionEventType.apply)(SpecimenGroupCollectionEventType.unapply)),
+          CollectionEventTypeSpecimenGroup.apply)(CollectionEventTypeSpecimenGroup.unapply)),
       "annotationTypeData" -> list(mapping(
         "annotationTypeId" -> text,
         "annotationTypeRequired" -> boolean)(
