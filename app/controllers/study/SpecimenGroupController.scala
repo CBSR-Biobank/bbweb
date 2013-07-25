@@ -232,25 +232,35 @@ object SpecimenGroupController extends Controller with securesocial.core.SecureS
     checkSpecimenGroupNotInUse(studyId, studyName, specimenGroupId)(action)
   }
 
+  val specimenGroupDeleteForm = Form(
+    tuple(
+      "studyId" -> text,
+      "studyName" -> text,
+      "specimenGroupId" -> text))
+
   def removeSpecimenGroup(studyId: String,
     studyName: String,
     specimenGroupId: String) = SecuredAction { implicit request =>
-    studyService.specimenGroupWithId(studyId, specimenGroupId) match {
-      case Failure(x) => throw new Error(x.head)
-      case Success(sg) =>
-        Async {
-          implicit val userId = new UserId(request.user.id.id)
-          studyService.removeSpecimenGroup(RemoveSpecimenGroupCmd(
-            sg.id.id, sg.versionOption, sg.studyId.id)).map(validation =>
-            validation match {
-              case Success(sg) =>
-                Redirect(routes.SpecimenGroupController.index(studyId, studyName)).flashing(
-                  "success" -> Messages("biobank.study.specimen.group.removed", sg.name))
-              case Failure(x) =>
-                throw new Error(x.head)
-            })
-        }
-    }
+
+    specimenGroupDeleteForm.bindFromRequest.fold(
+      formWithErrors => throw new Error(formWithErrors.globalError.toString),
+      sgForm =>
+        studyService.specimenGroupWithId(sgForm._1, sgForm._3) match {
+          case Failure(x) => throw new Error(x.head)
+          case Success(sg) =>
+            Async {
+              implicit val userId = new UserId(request.user.id.id)
+              studyService.removeSpecimenGroup(RemoveSpecimenGroupCmd(
+                sg.id.id, sg.versionOption, sg.studyId.id)).map(validation =>
+                validation match {
+                  case Success(sg) =>
+                    Redirect(routes.SpecimenGroupController.index(studyId, studyName)).flashing(
+                      "success" -> Messages("biobank.study.specimen.group.removed", sg.name))
+                  case Failure(x) =>
+                    throw new Error(x.head)
+                })
+            }
+        })
   }
 }
 

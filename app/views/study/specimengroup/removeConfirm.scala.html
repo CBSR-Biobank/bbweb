@@ -29,12 +29,17 @@
     @nameValueRow(Messages("biobank.study.specimen.group.field.preservationtemperature"), sg.preservationTemperatureType.toString)
     @nameValueRow(Messages("biobank.study.specimen.group.field.specimentype"), sg.specimenType.toString)
 
-    <div class="form-actions">
-      <a href="@routes.SpecimenGroupController.index(studyId,studyName)" class="btn btn-small" type="button">
-      @Messages("biobank.common.cancel")</a>
-      <a href="@routes.SpecimenGroupController.removeSpecimenGroup(studyId,studyName,sg.id.id)"
-      class="btn btn-small btn-warning" type="button">
-      @Messages("biobank.common.confirm")</a>
-    </div>
+    @form(routes.SpecimenGroupController.removeSpecimenGroup(studyId, studyName, sg.id.id), 
+        args = 'id -> "removeform", 'class -> "form-horizontal") {
+      
+        <input type="hidden" name="studyId" value="@studyId" >  
+        <input type="hidden" name="studyName" value="@studyName" >  
+        <input type="hidden" name="specimenGroupId" value="@sg.id.id" >  
+    
+        <div class="form-actions">
+            <button type="submit" value="cancel" class="btn">@Messages("biobank.common.cancel")</button>           
+            <button type="submit" value="confirm" class="btn btn-primary btn-warning">@Messages("biobank.common.confirm")</button>           
+        </div>
+    }
   </div>
 }
