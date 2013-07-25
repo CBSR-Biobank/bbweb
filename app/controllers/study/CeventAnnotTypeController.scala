@@ -22,7 +22,7 @@ import play.api.templates._
 import play.api.i18n.Messages
 import play.Logger
 import akka.util.Timeout
-import securesocial.core.{ Identity, Authorization }
+import securesocial.core.{ Authorization, Identity, SecuredRequest }
 
 import scalaz._
 import Scalaz._
@@ -69,6 +69,27 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
       "maxValueCount" -> optional(number),
       "selections" -> list(text))(AnnotationTypeFormObject.apply)(AnnotationTypeFormObject.unapply))
 
+  private def studyBreadcrumbs(studyId: String, studyName: String) = {
+    Map(
+      (Messages("biobank.study.plural") -> routes.StudyController.index),
+      (studyName -> routes.StudyController.showStudy(studyId)))
+  }
+
+  private def addBreadcrumbs(studyId: String, studyName: String) = {
+    studyBreadcrumbs(studyId, studyName) +
+      (Messages("biobank.study.collection.event.annotation.type.add") -> null)
+  }
+
+  private def updateBreadcrumbs(studyId: String, studyName: String) = {
+    studyBreadcrumbs(studyId, studyName) +
+      (Messages("biobank.study.collection.event.annotation.type.update") -> null)
+  }
+
+  private def removeBreadcrumbs(studyId: String, studyName: String) = {
+    studyBreadcrumbs(studyId, studyName) +
+      (Messages("biobank.study.collection.event.annotation.type.remove") -> null)
+  }
+
   def index(studyId: String, studyName: String) = SecuredAction {
     implicit request =>
       val annotTypes = studyService.collectionEventAnnotationTypesForStudy(studyId)
@@ -78,12 +99,22 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
   /**
    * Add an attribute type.
    */
-  def addAnnotationType(studyId: String) = SecuredAction {
+  def addAnnotationType(studyId: String, studyName: String) = SecuredAction {
     implicit request =>
       studyService.getStudy(studyId) match {
-        case Failure(x) => throw new Error(x.head)
+        case Failure(x) =>
+          if (x.head.contains("study does not exist")) {
+            BadRequest(html.serviceError(
+              Messages("biobank.annotation.type.add.error.heading"),
+              Messages("biobank.study.error"),
+              addBreadcrumbs(studyId, studyName)))
+          } else {
+            throw new Error(x.head)
+          }
         case Success(study) =>
-          Ok(html.study.ceventannotationtype.add(annotationTypeForm, AddFormType(), studyId, study.name))
+          Ok(html.study.ceventannotationtype.add(
+            annotationTypeForm, AddFormType(), studyId, study.name,
+            addBreadcrumbs(studyId, studyName)))
       }
   }
 
@@ -92,7 +123,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
       annotationTypeForm.bindFromRequest.fold(
         formWithErrors =>
           BadRequest(html.study.ceventannotationtype.add(
-            formWithErrors, AddFormType(), studyId, studyName)),
+            formWithErrors, AddFormType(), studyId, studyName, addBreadcrumbs(studyId, studyName))),
         annotTypeForm => {
           Async {
             Logger.debug("annotTypeForm: " + annotTypeForm)
@@ -106,9 +137,8 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
                   if (x.head.contains("name already exists")) {
                     val form = annotationTypeForm.fill(annotTypeForm).withError("name",
                       Messages("biobank.study.collection.event.annotation.type.form.error.name"))
-                    Logger.debug("bad name: " + form)
                     BadRequest(html.study.ceventannotationtype.add(form, AddFormType(),
-                      studyId, studyName))
+                      studyId, studyName, addBreadcrumbs(studyId, studyName)))
                   } else {
                     throw new Error(x.head)
                   }
@@ -117,12 +147,47 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
         })
   }
 
+  private def badActionRequest(
+    studyId: String,
+    studyName: String,
+    subheading: String)(implicit request: WrappedRequest[AnyContent]) = {
+    BadRequest(html.serviceError(
+      Messages("biobank.annotation.type.error.heading"),
+      subheading,
+      updateBreadcrumbs(studyId, studyName)))
+  }
+
   /**
-   * FIXME: should not allow annotation type to be updated if it is used by one or more
-   * collection event types.
+   * If the annotation type is not in use, the the {@link actionFunc} will be invoked.
    */
-  def updateAnnotationType(studyId: String, studyName: String, annotationTypeId: String) = SecuredAction {
-    implicit request =>
+  private def checkAnnotationTypeNotInUse(
+    studyId: String,
+    studyName: String,
+    annotationTypeId: String)(actionFunc: (String, String, String) => Result)(implicit request: WrappedRequest[AnyContent]) = {
+    studyService.collectionEventAnnotationTypeInUse(studyId, annotationTypeId) match {
+      case Failure(x) =>
+        if (x.head.contains("study does not have collection event annotation type")) {
+          badActionRequest(studyId, studyName, Messages("biobank.study.error"))
+        } else if (x.head.contains("annotation type does not exist")) {
+          badActionRequest(studyId, studyName, Messages("biobank.annotation.type.invalid"))
+        } else {
+          throw new Error(x.head)
+        }
+      case Success(result) =>
+        if (result) {
+          badActionRequest(studyId, studyName, Messages("biobank.study.specimen.group.in.use.error.message"))
+        } else {
+          actionFunc(studyId, studyName, annotationTypeId)
+        }
+    }
+  }
+
+  def updateAnnotationType(
+    studyId: String,
+    studyName: String,
+    annotationTypeId: String) = SecuredAction { implicit request =>
+
+    def action(studyId: String, studyName: String, annotationTypeId: String): Result = {
       studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
         case Failure(x) => throw new Error(x.head)
         case Success(annotType) =>
@@ -130,8 +195,12 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
             annotType.id.id, annotType.version, annotType.studyId.id, annotType.name, annotType.description,
             annotType.valueType.toString, annotType.maxValueCount,
             annotType.options.map(v => v.values.toList).getOrElse(List.empty)))
-          Ok(html.study.ceventannotationtype.add(form, UpdateFormType(), studyId, studyName))
+          Ok(html.study.ceventannotationtype.add(form, UpdateFormType(), studyId, studyName,
+            updateBreadcrumbs(studyId, studyName)))
       }
+    }
+
+    checkAnnotationTypeNotInUse(studyId, studyName, annotationTypeId)(action)
   }
 
   def updateAnnotationTypeSubmit(studyId: String, studyName: String) = SecuredAction {
@@ -139,7 +208,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
       annotationTypeForm.bindFromRequest.fold(
         formWithErrors => {
           BadRequest(html.study.ceventannotationtype.add(
-            formWithErrors, UpdateFormType(), studyId, studyName))
+            formWithErrors, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
         },
         annotTypeForm => {
           Async {
@@ -154,7 +223,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
                     val form = annotationTypeForm.fill(annotTypeForm).withError("name",
                       Messages("biobank.study.collection.event.annotation.type.form.error.name"))
                     BadRequest(html.study.ceventannotationtype.add(
-                      form, UpdateFormType(), studyId, studyName))
+                      form, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
                   } else {
                     throw new Error(x.head)
                   }
@@ -163,37 +232,39 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
         })
   }
 
-  /**
-   * FIXME: should not allow annotation type to be deleted if it is used by one or more
-   * collection event types.
-   */
   def removeAnnotationTypeConfirm(studyId: String,
     studyName: String,
     annotationTypeId: String) = SecuredAction {
     implicit request =>
-      studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
-        case Failure(x) => throw new Error(x.head)
-        case Success(annotType) =>
-          var fields = ListMap(
-            (Messages("biobank.common.name") -> annotType.name),
-            (Messages("biobank.common.description") -> annotType.name),
-            (Messages("biobank.annotation.type.field.value.type") -> annotType.valueType.toString))
 
-          if (annotType.valueType == domain.AnnotationValueType.Select) {
-            val value = if (annotType.maxValueCount.getOrElse(0) == 1) {
-              Messages("biobank.annotation.type.field.max.value.count.single")
-            } else if (annotType.maxValueCount.getOrElse(0) > 1) {
-              Messages("biobank.annotation.type.field.max.value.count.multiple")
-            } else {
-              "<span class='label label-warning'>ERROR: " + annotType.maxValueCount + "</span>"
+      def action(studyId: String, studyName: String, annotationTypeId: String): Result = {
+        studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
+          case Failure(x) => throw new Error(x.head)
+          case Success(annotType) =>
+            var fields = ListMap(
+              (Messages("biobank.common.name") -> annotType.name),
+              (Messages("biobank.common.description") -> annotType.name),
+              (Messages("biobank.annotation.type.field.value.type") -> annotType.valueType.toString))
+
+            if (annotType.valueType == domain.AnnotationValueType.Select) {
+              val value = if (annotType.maxValueCount.getOrElse(0) == 1) {
+                Messages("biobank.annotation.type.field.max.value.count.single")
+              } else if (annotType.maxValueCount.getOrElse(0) > 1) {
+                Messages("biobank.annotation.type.field.max.value.count.multiple")
+              } else {
+                "<span class='label label-warning'>ERROR: " + annotType.maxValueCount + "</span>"
+              }
+
+              fields += (Messages("biobank.annotation.type.field.max.value.count") -> value)
+              fields += (Messages("biobank.annotation.type.field.options") ->
+                annotType.options.map(m => m.values.mkString("<br>")).getOrElse(""))
             }
-
-            fields += (Messages("biobank.annotation.type.field.max.value.count") -> value)
-            fields += (Messages("biobank.annotation.type.field.options") ->
-              annotType.options.map(m => m.values.mkString("<br>")).getOrElse(""))
-          }
-          Ok(html.study.ceventannotationtype.removeConfirm(studyId, studyName, annotType, fields))
+            Ok(html.study.ceventannotationtype.removeConfirm(studyId, studyName, annotType, fields,
+              removeBreadcrumbs(studyId, studyName)))
+        }
       }
+
+      checkAnnotationTypeNotInUse(studyId, studyName, annotationTypeId)(action)
   }
 
   def removeAnnotationType(

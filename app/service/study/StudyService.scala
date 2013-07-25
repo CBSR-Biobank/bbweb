@@ -106,8 +106,8 @@ class StudyService(
   def specimenGroupInUse(studyId: String, specimenGroupId: String): DomainValidation[Boolean] = {
     for {
       sg <- specimenGroupWithId(studyId, specimenGroupId)
-      canUpdate <- CollectionEventTypeRepository.specimenGroupInUse(sg).success
-    } yield canUpdate
+      inUse <- CollectionEventTypeRepository.specimenGroupInUse(sg).success
+    } yield inUse
   }
 
   def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd)(implicit userId: UserId): Future[DomainValidation[SpecimenGroup]] =
@@ -140,12 +140,12 @@ class StudyService(
         _.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
   }
 
-  def canUpdateCollectionEventAnnotationType(
+  def collectionEventAnnotationTypeInUse(
     studyId: String, annotationTypeId: String): DomainValidation[Boolean] = {
     for {
       at <- collectionEventAnnotationTypeWithId(studyId, annotationTypeId)
-      canUpdate <- (!CollectionEventTypeRepository.annotationTypeInUse(at)).success
-    } yield canUpdate
+      inUse <- CollectionEventTypeRepository.annotationTypeInUse(at).success
+    } yield inUse
   }
 
   def updateCollectionEventAnnotationType(cmd: UpdateCollectionEventAnnotationTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]] =

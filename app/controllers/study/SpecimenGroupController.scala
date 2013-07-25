@@ -48,25 +48,25 @@ object SpecimenGroupController extends Controller with securesocial.core.SecureS
       "preservationTemperatureType" -> nonEmptyText,
       "specimenType" -> nonEmptyText)(SpecimenGroupFormObject.apply)(SpecimenGroupFormObject.unapply))
 
-  def addBreadcrumbs(studyId: String, studyName: String) = {
+  private def studyBreadcrumbs(studyId: String, studyName: String) = {
     Map(
       (Messages("biobank.study.plural") -> routes.StudyController.index),
-      (studyName -> routes.StudyController.showStudy(studyId)),
-      (Messages("biobank.study.specimen.group.add") -> null))
+      (studyName -> routes.StudyController.showStudy(studyId)))
   }
 
-  def updateBreadcrumbs(studyId: String, studyName: String) = {
-    Map(
-      (Messages("biobank.study.plural") -> routes.StudyController.index),
-      (studyName -> routes.StudyController.showStudy(studyId)),
-      (Messages("biobank.study.specimen.group.update") -> null))
+  private def addBreadcrumbs(studyId: String, studyName: String) = {
+    studyBreadcrumbs(studyId, studyName) +
+      (Messages("biobank.study.specimen.group.add") -> null)
   }
 
-  def removeBreadcrumbs(studyId: String, studyName: String) = {
-    Map(
-      (Messages("biobank.study.plural") -> routes.StudyController.index),
-      (studyName -> routes.StudyController.showStudy(studyId)),
-      (Messages("biobank.study.specimen.group.remove") -> null))
+  private def updateBreadcrumbs(studyId: String, studyName: String) = {
+    studyBreadcrumbs(studyId, studyName) +
+      (Messages("biobank.study.specimen.group.update") -> null)
+  }
+
+  private def removeBreadcrumbs(studyId: String, studyName: String) = {
+    studyBreadcrumbs(studyId, studyName) +
+      (Messages("biobank.study.specimen.group.remove") -> null)
   }
 
   def index(studyId: String, studyName: String) = SecuredAction { implicit request =>
@@ -132,7 +132,7 @@ object SpecimenGroupController extends Controller with securesocial.core.SecureS
       })
   }
 
-  private def badUpdateRequest(
+  private def badActionRequest(
     studyId: String,
     studyName: String,
     subheading: String)(implicit request: WrappedRequest[AnyContent]) = {
@@ -142,35 +142,50 @@ object SpecimenGroupController extends Controller with securesocial.core.SecureS
       updateBreadcrumbs(studyId, studyName)))
   }
 
-  def updateSpecimenGroup(
+  /**
+   * If the annotation type is not in use, the the {@link actionFunc} will be invoked.
+   */
+  private def checkSpecimenGroupNotInUse(
     studyId: String,
     studyName: String,
-    specimenGroupId: String) = SecuredAction { implicit request =>
+    specimenGroupId: String)(actionFunc: (String, String, String) => Result)(implicit request: WrappedRequest[AnyContent]) = {
     studyService.specimenGroupInUse(studyId, specimenGroupId) match {
       case Failure(x) =>
         if (x.head.contains("study does not have specimen group")) {
-          badUpdateRequest(studyId, studyName, Messages("biobank.study.error"))
+          badActionRequest(studyId, studyName, Messages("biobank.study.error"))
         } else if (x.head.contains("specimen group does not exist")) {
-          badUpdateRequest(studyId, studyName, Messages("biobank.study.specimen.group.invalid"))
+          badActionRequest(studyId, studyName, Messages("biobank.study.specimen.group.invalid"))
         } else {
           throw new Error(x.head)
         }
       case Success(result) =>
         if (result) {
-          badUpdateRequest(studyId, studyName, Messages("biobank.study.specimen.group.in.use.error.message"))
+          badActionRequest(studyId, studyName, Messages("biobank.study.specimen.group.in.use.error.message"))
         } else {
-          studyService.specimenGroupWithId(studyId, specimenGroupId) match {
-            case Failure(x) => throw new Error(x.head)
-            case Success(sg) =>
-              val form = specimenGroupForm.fill(SpecimenGroupFormObject(
-                sg.id.id, sg.version, sg.studyId.id, sg.name, sg.description, sg.units,
-                sg.anatomicalSourceType.toString, sg.preservationType.toString,
-                sg.preservationTemperatureType.toString, sg.specimenType.toString))
-              Ok(html.study.specimengroup.add(form, UpdateFormType(), studyId, studyName,
-                updateBreadcrumbs(studyId, studyName)))
-          }
+          actionFunc(studyId, studyName, specimenGroupId)
         }
     }
+  }
+
+  def updateSpecimenGroup(
+    studyId: String,
+    studyName: String,
+    specimenGroupId: String) = SecuredAction { implicit request =>
+
+    def action(studyId: String, studyName: String, specimenGroupId: String) = {
+      studyService.specimenGroupWithId(studyId, specimenGroupId) match {
+        case Failure(x) => throw new Error(x.head)
+        case Success(sg) =>
+          val form = specimenGroupForm.fill(SpecimenGroupFormObject(
+            sg.id.id, sg.version, sg.studyId.id, sg.name, sg.description, sg.units,
+            sg.anatomicalSourceType.toString, sg.preservationType.toString,
+            sg.preservationTemperatureType.toString, sg.specimenType.toString))
+          Ok(html.study.specimengroup.add(form, UpdateFormType(), studyId, studyName,
+            updateBreadcrumbs(studyId, studyName)))
+      }
+    }
+
+    checkSpecimenGroupNotInUse(studyId, studyName, specimenGroupId)(action)
   }
 
   def updateSpecimenGroupSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
@@ -199,41 +214,22 @@ object SpecimenGroupController extends Controller with securesocial.core.SecureS
       })
   }
 
-  private def badRemoveRequest(
+  def removeSpecimenGroupConfirm(
     studyId: String,
     studyName: String,
-    subheading: String)(implicit request: WrappedRequest[AnyContent]) = {
-    BadRequest(html.serviceError(
-      Messages("biobank.study.specimen.group.error.heading"),
-      subheading,
-      updateBreadcrumbs(studyId, studyName)))
-  }
-
-  def removeSpecimenGroupConfirm(studyId: String,
-    studyName: String,
     specimenGroupId: String) = SecuredAction { implicit request =>
-    studyService.specimenGroupInUse(studyId, specimenGroupId) match {
-      case Failure(x) =>
-        if (x.head.contains("study does not have specimen group")) {
-          badUpdateRequest(studyId, studyName, Messages("biobank.study.error"))
-        } else if (x.head.contains("specimen group does not exist")) {
-          badUpdateRequest(studyId, studyName, Messages("biobank.study.specimen.group.invalid"))
-        } else {
+
+    def action(studyId: String, studyName: String, specimenGroupId: String) = {
+      studyService.specimenGroupWithId(studyId, specimenGroupId) match {
+        case Failure(x) =>
           throw new Error(x.head)
-        }
-      case Success(result) =>
-        if (result) {
-          badUpdateRequest(studyId, studyName, Messages("biobank.study.specimen.group.in.use.error.message"))
-        } else {
-          studyService.specimenGroupWithId(studyId, specimenGroupId) match {
-            case Failure(x) =>
-              throw new Error(x.head)
-            case Success(sg) =>
-              Ok(views.html.study.specimengroup.removeConfirm(studyId, studyName, sg,
-                removeBreadcrumbs(studyId, studyName)))
-          }
-        }
+        case Success(sg) =>
+          Ok(views.html.study.specimengroup.removeConfirm(studyId, studyName, sg,
+            removeBreadcrumbs(studyId, studyName)))
+      }
     }
+
+    checkSpecimenGroupNotInUse(studyId, studyName, specimenGroupId)(action)
   }
 
   def removeSpecimenGroup(studyId: String,

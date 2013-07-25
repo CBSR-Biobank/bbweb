@@ -14,18 +14,20 @@
     @if(studies.size <= 0) {
       <p>@Messages("biobank.study.none")</p>
     } else {
-      <table class="table table-bordered table-hover table-condensed">
+      <table class="table table-bordered table-hover table-condensed" style="table-layout: fixed;">
         <thead>
           <th>@Messages("biobank.common.name")</th>
           <th>@Messages("biobank.study.field.status")</th>
-          <th>@Messages("biobank.common.description")</th>
+          <th style="width: 50%;">@Messages("biobank.common.description")</th>
         </thead>
         <tbody>
           @for(s <- studies) {
               <tr>
                 <td><a href="@routes.StudyController.showStudy(s.id.id)">@s.name</a></td>
                 <td>@s.status</td>
-                <td>@s.description</td>
+                <td style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                    @Html(s.description.map(v => v.replace("\n", "")).getOrElse(""))
+                </td>
               <tr>
           }
         </tbody>

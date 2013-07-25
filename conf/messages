@@ -73,6 +73,10 @@ biobank.annotation.type.added=Annotation Type has been added: {0}.
 biobank.annotation.type.updated=Annotation Type has been updated: {0}.
 biobank.annotation.type.form.selection.add=Add a selection
 biobank.annotation.type.form.max.value.count.error=Select a type
+biobank.annotation.type.error.heading=Specimen Group Error
+biobank.annotation.type.add.error.heading=Annotation Type cannot be added
+biobank.study.specimen.group.error.heading=Annotation Type Error
+biobank.annotation.type.invalid=Annotation Type invalid.
 
 # Collection Event Annotation Types
 biobank.study.collection.event.annotation.type.show.none=No Collection Event Annotation Types have been added to this study.

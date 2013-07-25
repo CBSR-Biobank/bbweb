@@ -5,7 +5,8 @@
 @(studyId: String,
     studyName: String,
     annotType: domain.study.CollectionEventAnnotationType,
-    fields: Map[String, String])(
+    fields: Map[String, String],
+    breadcrumbMap: Map[String, Call])(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._

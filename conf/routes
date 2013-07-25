@@ -25,8 +25,8 @@ GET     /study/sg/removeConfirm     controllers.study.SpecimenGroupController.re
 GET     /study/sg/remove            controllers.study.SpecimenGroupController.removeSpecimenGroup(studyId:String, studyName: String, sgId:String)
 
 # collection event annotation types
-GET     /study/cevent/annot                   controllers.study.CeventAnnotTypeController.index(studyId:String,studyName:String)
-GET     /study/cevent/annot/add/:studyId      controllers.study.CeventAnnotTypeController.addAnnotationType(studyId:String)
+GET     /study/cevent/annot                   controllers.study.CeventAnnotTypeController.index(studyId:String, studyName:String)
+GET     /study/cevent/annot/add               controllers.study.CeventAnnotTypeController.addAnnotationType(studyId:String, studyName:String)
 POST    /study/cevent/annot/addSubmit         controllers.study.CeventAnnotTypeController.addAnnotationTypeSubmit(studyId:String, studyName:String)
 GET     /study/cevent/annot/update            controllers.study.CeventAnnotTypeController.updateAnnotationType(studyId:String, studyName: String, annotId: String)
 POST    /study/cevent/annot/updateSubmit      controllers.study.CeventAnnotTypeController.updateAnnotationTypeSubmit(id:String, studyName:String)
