@@ -22,7 +22,7 @@ POST    /study/sg/add/:studyId/:studyName           controllers.study.SpecimenGr
 GET     /study/sg/update/:studyId/:studyName/:sgId  controllers.study.SpecimenGroupController.updateSpecimenGroup(studyId:String, studyName: String, sgId:String)
 POST    /study/sg/update/:studyId/:studyName        controllers.study.SpecimenGroupController.updateSpecimenGroupSubmit(studyId:String, studyName:String)
 GET     /study/sg/remove/:studyId/:studyName/:sgId  controllers.study.SpecimenGroupController.removeSpecimenGroupConfirm(studyId:String, studyName: String, sgId:String)
-POST    /study/sg/remove/:studyId/:studyName/:sgId  controllers.study.SpecimenGroupController.removeSpecimenGroup(studyId:String, studyName: String, sgId:String)
+POST    /study/sg/remove                            controllers.study.SpecimenGroupController.removeSpecimenGroup(studyId:String, studyName: String, sgId:String)
 
 # collection event annotation types
 GET     /study/cevent/annot                   controllers.study.CeventAnnotTypeController.index(studyId:String, studyName:String)
