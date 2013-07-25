@@ -13,7 +13,6 @@ import service.commands._
 
 import org.specs2.scalaz.ValidationMatchers._
 import org.slf4j.LoggerFactory
-//import scala.math.BigDecimal.double2bigDecimal
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 

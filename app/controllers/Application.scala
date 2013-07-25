@@ -3,8 +3,9 @@ package controllers
 import scala.language.postfixOps
 import play.api.mvc._
 import views._
+import securesocial.core.SecureSocial
 
-object Application extends Controller with securesocial.core.SecureSocial {
+object Application extends Controller with SecureSocial {
 
   lazy val userService = Global.services.userService
   lazy val studyService = Global.services.studyService

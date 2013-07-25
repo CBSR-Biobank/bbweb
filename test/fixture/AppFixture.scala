@@ -14,7 +14,6 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.util.Timeout
 import akka.testkit._
-//import java.util.concurrent.TimeUnit
 import org.specs2.mutable._
 import org.specs2.time.NoTimeConversions
 import org.slf4j.LoggerFactory
