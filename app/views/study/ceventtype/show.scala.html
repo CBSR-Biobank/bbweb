@@ -16,23 +16,22 @@
   ))
   <div class="page-header">
     <h2>@studyName<small> @Messages("biobank.study.collection.event.type.show.title")
-    <a href="@routes.CeventTypeController.addCeventType(studyId)" 
+    <a href="@routes.CeventTypeController.addCeventType(studyId, studyName)" 
         class="btn btn-small btn-primary" type="button"
         data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
         <i class="icon-plus-sign icon-white"></i></a>
     </small></h2>
   </div>
   <div class="clearfix">
-      @if(ceventTypes.size <= 0) {
-          <p>@Messages("biobank.study.collection.event.type.show.none")</p>
-      } else {
-
     @flash.get("success").map { message =>
       <div class="alert alert-success">
         @message
       </div>
     }
-
+    
+      @if(ceventTypes.size <= 0) {
+          <p>@Messages("biobank.study.collection.event.type.show.none")</p>
+      } else {
     <table class="table table-bordered table-hover table-condensed">
       <thead>
         <th>@Messages("biobank.common.name")</th>
@@ -74,7 +73,7 @@
             <td> 
               @updateRemoveButtons(
                   routes.CeventTypeController.updateCeventType(studyId,studyName,ceventtype.id.id),
-                  routes.CeventTypeController.removeCeventTypeConfirm(studyId,studyName,ceventtype.id.id)
+                  routes.CeventTypeController.removeCeventType(studyId,studyName,ceventtype.id.id)
               )
             </td>   
           <tr>

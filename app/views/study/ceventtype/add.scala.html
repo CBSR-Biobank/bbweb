@@ -20,10 +20,10 @@
     @formInfo = @{ formType match {
         case AddFormType() =>
             FormInfo(Messages("biobank.study.collection.event.type.add"),
-                routes.CeventTypeController.addCeventTypeSubmit(studyId, studyName))
+                routes.CeventTypeController.addCeventTypeSubmit)
         case UpdateFormType() =>
             FormInfo(Messages("biobank.study.collection.event.type.update"),
-                routes.CeventTypeController.updateCeventTypeSubmit(studyId, studyName))
+                routes.CeventTypeController.updateCeventTypeSubmit)
     }}
 
 @main(formInfo.title) {
@@ -59,6 +59,7 @@
         }
 
         <input type="hidden" name="studyId" value="@studyId" >
+        <input type="hidden" name="studyName" value="@studyName" >
 
         @formNameAndDescription(cetForm("name"), cetForm("description"))
 

@@ -255,7 +255,7 @@ object SpecimenGroupController extends Controller with securesocial.core.SecureS
       })
   }
 
-  def removeSpecimenGroupConfirm(
+  def removeSpecimenGroup(
     studyId: String,
     studyName: String,
     specimenGroupId: String) = SecuredAction { implicit request =>

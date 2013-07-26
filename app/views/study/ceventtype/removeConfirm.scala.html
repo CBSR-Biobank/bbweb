@@ -27,13 +27,18 @@
     @nameValueRow(Messages("biobank.common.description"), ceventType.description.getOrElse(""))
     @nameValueRow(Messages("biobank.study.collection.event.type.field.recurring"),
       if(ceventType.recurring) Messages("biobank.common.yes") else Messages("biobank.common.no"))
-
-    <div class="form-actions">
-      <a href="@routes.CeventTypeController.index(studyId,studyName)" class="btn btn-small" type="button">
-      @Messages("biobank.common.cancel")</a>
-      <a href="@routes.CeventTypeController.removeCeventType(studyId,studyName,ceventType.id.id)"
-      class="btn btn-small btn-warning" type="button">
-      @Messages("biobank.common.confirm")</a>
-    </div>
+    
+    @form(routes.CeventTypeController.removeCeventTypeSubmit, 
+        args = 'id -> "removeform", 'class -> "form-horizontal") {
+      
+        <input type="hidden" name="studyId" value="@studyId" >  
+        <input type="hidden" name="studyName" value="@studyName" >  
+        <input type="hidden" name="ceventTypeId" value="@ceventType.id.id" >  
+    
+        <div class="form-actions">
+            <button type="submit" value="cancel" class="btn">@Messages("biobank.common.cancel")</button>           
+            <button type="submit" value="confirm" class="btn btn-primary btn-warning">@Messages("biobank.common.confirm")</button>           
+        </div>
+    }
   </div>
 }

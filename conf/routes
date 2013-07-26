@@ -21,7 +21,7 @@ GET     /study/sg/add/:studyId/:studyName           controllers.study.SpecimenGr
 POST    /study/sg/add                               controllers.study.SpecimenGroupController.addSpecimenGroupSubmit
 GET     /study/sg/update/:studyId/:studyName/:sgId  controllers.study.SpecimenGroupController.updateSpecimenGroup(studyId:String, studyName: String, sgId:String)
 POST    /study/sg/update                            controllers.study.SpecimenGroupController.updateSpecimenGroupSubmit
-GET     /study/sg/remove/:studyId/:studyName/:sgId  controllers.study.SpecimenGroupController.removeSpecimenGroupConfirm(studyId:String, studyName: String, sgId:String)
+GET     /study/sg/remove/:studyId/:studyName/:sgId  controllers.study.SpecimenGroupController.removeSpecimenGroup(studyId:String, studyName: String, sgId:String)
 POST    /study/sg/remove                            controllers.study.SpecimenGroupController.removeSpecimenGroupSubmit
 
 # collection event annotation types
@@ -30,17 +30,17 @@ GET     /study/cevent/annot/add/:studyId/:studyName                 controllers.
 POST    /study/cevent/annot/add                                     controllers.study.CeventAnnotTypeController.addAnnotationTypeSubmit
 GET     /study/cevent/annot/update/:studyId/:studyName/:annotId     controllers.study.CeventAnnotTypeController.updateAnnotationType(studyId:String, studyName: String, annotId: String)
 POST    /study/cevent/annot/update                                  controllers.study.CeventAnnotTypeController.updateAnnotationTypeSubmit
-GET     /study/cevent/annot/remove/:studyId/:studyName/:annotId     controllers.study.CeventAnnotTypeController.removeAnnotationTypeConfirm(studyId:String, studyName: String, annotId: String)
+GET     /study/cevent/annot/remove/:studyId/:studyName/:annotId     controllers.study.CeventAnnotTypeController.removeAnnotationType(studyId:String, studyName: String, annotId: String)
 POST     /study/cevent/annot/remove                                 controllers.study.CeventAnnotTypeController.removeAnnotationTypeSubmit
 
 # collection event types
-GET     /study/cetype                   controllers.study.CeventTypeController.index(studyId:String,studyName:String)
-GET     /study/cetype/add/:studyId      controllers.study.CeventTypeController.addCeventType(studyId:String)
-POST    /study/cetype/addSubmit         controllers.study.CeventTypeController.addCeventTypeSubmit(studyId:String, studyName:String)
-GET     /study/cetype/update            controllers.study.CeventTypeController.updateCeventType(studyId:String, studyName: String, ceTypeId: String)
-POST    /study/cetype/updateSubmit      controllers.study.CeventTypeController.updateCeventTypeSubmit(id:String, studyName:String)
-GET     /study/cetype/removeConfirm     controllers.study.CeventTypeController.removeCeventTypeConfirm(studyId:String, studyName: String, ceTypeId: String)
-GET     /study/cetype/remove            controllers.study.CeventTypeController.removeCeventType(studyId:String, studyName: String, ceTypeId: String)
+GET     /study/cetype/show                              controllers.study.CeventTypeController.index(studyId:String,studyName:String)
+GET     /study/cetype/add/:studyId/:studyName           controllers.study.CeventTypeController.addCeventType(studyId:String, studyName:String)
+POST    /study/cetype/add                               controllers.study.CeventTypeController.addCeventTypeSubmit
+GET     /study/cetype/update/:studyId/:studyName/:cetId controllers.study.CeventTypeController.updateCeventType(studyId:String, studyName: String, cetId: String)
+POST    /study/cetype/update                            controllers.study.CeventTypeController.updateCeventTypeSubmit
+GET     /study/cetype/remove/:studyId/:studyName/:cetId controllers.study.CeventTypeController.removeCeventType(studyId:String, studyName: String, cetId: String)
+GET     /study/cetype/remove                            controllers.study.CeventTypeController.removeCeventTypeSubmit
 
 # user
 GET     /user/profile               controllers.UserController.profile

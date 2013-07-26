@@ -246,7 +246,8 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
       })
   }
 
-  def removeAnnotationTypeConfirm(studyId: String,
+  def removeAnnotationType(
+    studyId: String,
     studyName: String,
     annotationTypeId: String) = SecuredAction {
     implicit request =>
@@ -290,7 +291,6 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
   def removeAnnotationTypeSubmit = SecuredAction { implicit request =>
     annotTypeDeleteForm.bindFromRequest.fold(
       formWithErrors => {
-        Logger.error("**** " + formWithErrors)
         throw new Error(formWithErrors.globalErrors.mkString(","))
       },
       annotTypeForm => {

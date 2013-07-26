@@ -31,7 +31,7 @@ import Scalaz._
  * @param annotationTypeData
  */
 case class CeventTypeFormObject(
-  collectionEventTypeId: String, version: Long, studyId: String, name: String,
+  collectionEventTypeId: String, version: Long, studyId: String, studyName: String, name: String,
   description: Option[String], recurring: Boolean,
   specimenGroupData: List[CollectionEventTypeSpecimenGroup],
   annotationTypeData: List[CollectionEventTypeAnnotationType]) {
@@ -63,6 +63,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
       "collectionEventTypeId" -> text,
       "version" -> longNumber,
       "studyId" -> text,
+      "studyName" -> text,
       "name" -> nonEmptyText,
       "description" -> optional(text),
       "recurring" -> boolean,
@@ -94,7 +95,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
   /**
    * Add an attribute type.
    */
-  def addCeventType(studyId: String) = SecuredAction { implicit request =>
+  def addCeventType(studyId: String, studyName: String) = SecuredAction { implicit request =>
     studyService.getStudy(studyId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(study) =>
@@ -103,22 +104,24 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
     }
   }
 
-  def addCeventTypeSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
+  def addCeventTypeSubmit = SecuredAction { implicit request =>
     ceventTypeForm.bindFromRequest.fold(
       formWithErrors => {
-        Logger.debug("addCeventTypeSubmit: formWithErrors: " + formWithErrors)
+        // studyId and studyName are hidden values in the form, they should always be present
+        val studyId = formWithErrors("studyId").value.getOrElse("")
+        val studyName = formWithErrors("studyName").value.getOrElse("")
+
         BadRequest(html.study.ceventtype.add(formWithErrors, AddFormType(), studyId, studyName,
           specimenGroupInfo(studyId), annotationTypeInfo(studyId)))
       },
       submittedForm => {
+        implicit val userId = new UserId(request.user.id.id)
+        val studyId = submittedForm.studyId
+        val studyName = submittedForm.studyName
+
         Async {
-          Logger.debug("ceventTypeForm: " + ceventTypeForm)
-          implicit val userId = new UserId(request.user.id.id)
           studyService.addCollectionEventType(submittedForm.getAddCmd).map(validation =>
             validation match {
-              case Success(ceventType) =>
-                Redirect(routes.CeventTypeController.index(studyId, studyName)).flashing(
-                  "success" -> Messages("biobank.study.collection.event.type.added", ceventType.name))
               case Failure(x) =>
                 if (x.head.contains("name already exists")) {
                   val form = ceventTypeForm.fill(submittedForm).withError("name",
@@ -129,6 +132,9 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
                 } else {
                   throw new Error(x.head)
                 }
+              case Success(ceventType) =>
+                Redirect(routes.CeventTypeController.index(studyId, studyName)).flashing(
+                  "success" -> Messages("biobank.study.collection.event.type.added", ceventType.name))
             })
         }
       })
@@ -140,7 +146,7 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
       case Success(ceventType) =>
         Logger.info("*** " + ceventType)
         val form = ceventTypeForm.fill(CeventTypeFormObject(
-          ceventType.id.id, ceventType.version, ceventType.studyId.id, ceventType.name,
+          ceventType.id.id, ceventType.version, studyId, studyName, ceventType.name,
           ceventType.description, ceventType.recurring, ceventType.specimenGroupData.toList,
           ceventType.annotationTypeData.toList))
         Ok(html.study.ceventtype.add(form, UpdateFormType(), studyId, studyName,
@@ -148,22 +154,25 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
     }
   }
 
-  def updateCeventTypeSubmit(studyId: String, studyName: String) = SecuredAction { implicit request =>
+  def updateCeventTypeSubmit = SecuredAction { implicit request =>
     ceventTypeForm.bindFromRequest.fold(
       formWithErrors => {
-        //Logger.debug("updateCeventTypeSubmit: formWithErrors: " + formWithErrors)
+        // studyId and studyName are hidden values in the form, they should always be present
+        val studyId = formWithErrors("studyId").value.getOrElse("")
+        val studyName = formWithErrors("studyName").value.getOrElse("")
+
         BadRequest(html.study.ceventtype.add(
           formWithErrors, UpdateFormType(), studyId, studyName, specimenGroupInfo(studyId),
           annotationTypeInfo(studyId)))
       },
       submittedForm => {
+        implicit val userId = new UserId(request.user.id.id)
+        val studyId = submittedForm.studyId
+        val studyName = submittedForm.studyName
+
         Async {
-          implicit val userId = new UserId(request.user.id.id)
           studyService.updateCollectionEventType(submittedForm.getUpdateCmd).map(validation =>
             validation match {
-              case Success(ceventType) =>
-                Redirect(routes.CeventTypeController.index(studyId, studyName)).flashing(
-                  "success" -> Messages("biobank.study.collection.event.type.updated", ceventType.name))
               case Failure(x) =>
                 if (x.head.contains("name already exists")) {
                   val form = ceventTypeForm.fill(submittedForm).withError("name",
@@ -174,12 +183,15 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
                 } else {
                   throw new Error(x.head)
                 }
+              case Success(ceventType) =>
+                Redirect(routes.CeventTypeController.index(studyId, studyName)).flashing(
+                  "success" -> Messages("biobank.study.collection.event.type.updated", ceventType.name))
             })
         }
       })
   }
 
-  def removeCeventTypeConfirm(studyId: String,
+  def removeCeventType(studyId: String,
     studyName: String,
     ceventTypeId: String) = SecuredAction { implicit request =>
     studyService.collectionEventTypeWithId(studyId, ceventTypeId) match {
@@ -189,25 +201,40 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
     }
   }
 
-  def removeCeventType(studyId: String,
-    studyName: String,
-    ceventTypeId: String) = SecuredAction { implicit request =>
-    studyService.collectionEventTypeWithId(studyId, ceventTypeId) match {
-      case Failure(x) => throw new Error(x.head)
-      case Success(ceventType) =>
-        Async {
-          implicit val userId = new UserId(request.user.id.id)
-          studyService.removeCollectionEventType(
-            RemoveCollectionEventTypeCmd(
-              ceventType.id.id, ceventType.versionOption, ceventType.studyId.id)).map(validation =>
-              validation match {
-                case Success(ceventType) =>
-                  Redirect(routes.CeventTypeController.index(studyId, studyName)).flashing(
-                    "success" -> Messages("biobank.study.collection.event.type.removed", ceventType.name))
-                case Failure(x) =>
-                  throw new Error(x.head)
-              })
+  val ceventTypeDeleteForm = Form(
+    tuple(
+      "studyId" -> text,
+      "studyName" -> text,
+      "ceventTypeId" -> text))
+
+  def removeCeventTypeSubmit = SecuredAction { implicit request =>
+    ceventTypeDeleteForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error("**** " + formWithErrors)
+        throw new Error(formWithErrors.globalErrors.mkString(","))
+      },
+      submittedForm => {
+        val studyId = submittedForm._1
+        val studyName = submittedForm._2
+        val ceventTypeId = submittedForm._3
+
+        studyService.collectionEventTypeWithId(studyId, ceventTypeId) match {
+          case Failure(x) => throw new Error(x.head)
+          case Success(ceventType) =>
+            Async {
+              implicit val userId = new UserId(request.user.id.id)
+              studyService.removeCollectionEventType(
+                RemoveCollectionEventTypeCmd(
+                  ceventType.id.id, ceventType.versionOption, ceventType.studyId.id)).map(validation =>
+                  validation match {
+                    case Success(ceventType) =>
+                      Redirect(routes.CeventTypeController.index(studyId, studyName)).flashing(
+                        "success" -> Messages("biobank.study.collection.event.type.removed", ceventType.name))
+                    case Failure(x) =>
+                      throw new Error(x.head)
+                  })
+            }
         }
-    }
+      })
   }
 }
