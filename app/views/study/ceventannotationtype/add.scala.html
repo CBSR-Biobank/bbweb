@@ -13,10 +13,10 @@
   formType match {
     case AddFormType() =>
       FormInfo(Messages("biobank.study.collection.event.annotation.type.add"),
-        routes.CeventAnnotTypeController.addAnnotationTypeSubmit(studyId, studyName))
+        routes.CeventAnnotTypeController.addAnnotationTypeSubmit)
     case UpdateFormType() =>
       FormInfo(Messages("biobank.study.collection.event.annotation.type.update"),
-        routes.CeventAnnotTypeController.updateAnnotationTypeSubmit(studyId, studyName))
+        routes.CeventAnnotTypeController.updateAnnotationTypeSubmit)
   }
 }
 
@@ -93,8 +93,9 @@
         <input type="hidden" name="version" value="@attrTypeForm("version").value" >
       }
     }
-
-    <input type="hidden" name="studyId" value="@studyId" >
+      
+    <input type="hidden" name="studyId" value="@studyId" >  
+    <input type="hidden" name="studyName" value="@studyName" >    
 
     @formNameAndDescription(attrTypeForm("name"), attrTypeForm("description"))
 

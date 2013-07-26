@@ -145,7 +145,6 @@ object SpecimenGroupController extends Controller with securesocial.core.SecureS
         val studyName = sgForm.studyName
 
         Async {
-
           studyService.addSpecimenGroup(sgForm.getAddCmd).map(validation =>
             validation match {
               case Failure(x) =>
@@ -280,14 +279,17 @@ object SpecimenGroupController extends Controller with securesocial.core.SecureS
       "studyName" -> text,
       "specimenGroupId" -> text))
 
-  def removeSpecimenGroup(studyId: String,
-    studyName: String,
-    specimenGroupId: String) = SecuredAction { implicit request =>
-
+  def removeSpecimenGroupSubmit = SecuredAction { implicit request =>
     specimenGroupDeleteForm.bindFromRequest.fold(
-      formWithErrors => throw new Error(formWithErrors.globalError.toString),
-      sgForm =>
-        studyService.specimenGroupWithId(sgForm._1, sgForm._3) match {
+      formWithErrors =>
+        throw new Error(formWithErrors.globalError.toString),
+      sgForm => {
+        Logger.error("******" + sgForm)
+        val studyId = sgForm._1
+        val studyName = sgForm._2
+        val specimenGroupId = sgForm._3
+
+        studyService.specimenGroupWithId(studyId, specimenGroupId) match {
           case Failure(x) => throw new Error(x.head)
           case Success(sg) =>
             Async {
@@ -302,7 +304,8 @@ object SpecimenGroupController extends Controller with securesocial.core.SecureS
                     throw new Error(x.head)
                 })
             }
-        })
+        }
+      })
   }
 }
 

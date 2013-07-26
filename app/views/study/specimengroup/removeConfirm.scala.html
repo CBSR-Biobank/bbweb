@@ -29,7 +29,7 @@
     @nameValueRow(Messages("biobank.study.specimen.group.field.preservationtemperature"), sg.preservationTemperatureType.toString)
     @nameValueRow(Messages("biobank.study.specimen.group.field.specimentype"), sg.specimenType.toString)
 
-    @form(routes.SpecimenGroupController.removeSpecimenGroup(studyId, studyName, sg.id.id), 
+    @form(routes.SpecimenGroupController.removeSpecimenGroupSubmit, 
         args = 'id -> "removeform", 'class -> "form-horizontal") {
       
         <input type="hidden" name="studyId" value="@studyId" >  

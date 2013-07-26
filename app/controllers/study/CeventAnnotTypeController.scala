@@ -28,7 +28,7 @@ import scalaz._
 import Scalaz._
 
 case class AnnotationTypeFormObject(
-  annotationTypeId: String, version: Long, studyId: String, name: String,
+  annotationTypeId: String, version: Long, studyId: String, studyName: String, name: String,
   description: Option[String], valueType: String,
   maxValueCount: Option[Int] = None, selections: List[String]) {
 
@@ -63,6 +63,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
       "annotationTypeId" -> text,
       "version" -> longNumber,
       "studyId" -> text,
+      "studyName" -> text,
       "name" -> nonEmptyText,
       "description" -> optional(text),
       "valueType" -> nonEmptyText,
@@ -118,21 +119,25 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
       }
   }
 
-  def addAnnotationTypeSubmit(studyId: String, studyName: String) = SecuredAction {
+  def addAnnotationTypeSubmit = SecuredAction {
     implicit request =>
       annotationTypeForm.bindFromRequest.fold(
-        formWithErrors =>
+        formWithErrors => {
+          // studyId and studyName are hidden values in the form, they should always be present
+          val studyId = formWithErrors("studyId").value.getOrElse("")
+          val studyName = formWithErrors("studyName").value.getOrElse("")
+
           BadRequest(html.study.ceventannotationtype.add(
-            formWithErrors, AddFormType(), studyId, studyName, addBreadcrumbs(studyId, studyName))),
+            formWithErrors, AddFormType(), studyId, studyName, addBreadcrumbs(studyId, studyName)))
+        },
         annotTypeForm => {
+          implicit val userId = new UserId(request.user.id.id)
+          val studyId = annotTypeForm.studyId
+          val studyName = annotTypeForm.studyName
+
           Async {
-            Logger.debug("annotTypeForm: " + annotTypeForm)
-            implicit val userId = new UserId(request.user.id.id)
             studyService.addCollectionEventAnnotationType(annotTypeForm.getAddCmd).map(validation =>
               validation match {
-                case Success(annotType) =>
-                  Redirect(routes.CeventAnnotTypeController.index(studyId, studyName)).flashing(
-                    "success" -> Messages("biobank.annotation.type.added", annotType.name))
                 case Failure(x) =>
                   if (x.head.contains("name already exists")) {
                     val form = annotationTypeForm.fill(annotTypeForm).withError("name",
@@ -142,6 +147,9 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
                   } else {
                     throw new Error(x.head)
                   }
+                case Success(annotType) =>
+                  Redirect(routes.CeventAnnotTypeController.index(studyId, studyName)).flashing(
+                    "success" -> Messages("biobank.annotation.type.added", annotType.name))
               })
           }
         })
@@ -192,8 +200,8 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
         case Failure(x) => throw new Error(x.head)
         case Success(annotType) =>
           val form = annotationTypeForm.fill(AnnotationTypeFormObject(
-            annotType.id.id, annotType.version, annotType.studyId.id, annotType.name, annotType.description,
-            annotType.valueType.toString, annotType.maxValueCount,
+            annotType.id.id, annotType.version, studyId, studyName, annotType.name,
+            annotType.description, annotType.valueType.toString, annotType.maxValueCount,
             annotType.options.map(v => v.values.toList).getOrElse(List.empty)))
           Ok(html.study.ceventannotationtype.add(form, UpdateFormType(), studyId, studyName,
             updateBreadcrumbs(studyId, studyName)))
@@ -203,33 +211,39 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
     checkAnnotationTypeNotInUse(studyId, studyName, annotationTypeId)(action)
   }
 
-  def updateAnnotationTypeSubmit(studyId: String, studyName: String) = SecuredAction {
-    implicit request =>
-      annotationTypeForm.bindFromRequest.fold(
-        formWithErrors => {
-          BadRequest(html.study.ceventannotationtype.add(
-            formWithErrors, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
-        },
-        annotTypeForm => {
-          Async {
-            implicit val userId = new UserId(request.user.id.id)
-            studyService.updateCollectionEventAnnotationType(annotTypeForm.getUpdateCmd).map(validation =>
-              validation match {
-                case Success(annotType) =>
-                  Redirect(routes.CeventAnnotTypeController.index(studyId, studyName)).flashing(
-                    "success" -> Messages("biobank.annotation.type.updated", annotType.name))
-                case Failure(x) =>
-                  if (x.head.contains("name already exists")) {
-                    val form = annotationTypeForm.fill(annotTypeForm).withError("name",
-                      Messages("biobank.study.collection.event.annotation.type.form.error.name"))
-                    BadRequest(html.study.ceventannotationtype.add(
-                      form, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
-                  } else {
-                    throw new Error(x.head)
-                  }
-              })
-          }
-        })
+  def updateAnnotationTypeSubmit = SecuredAction { implicit request =>
+    annotationTypeForm.bindFromRequest.fold(
+      formWithErrors => {
+        // studyId and studyName are hidden values in the form, they should always be present
+        val studyId = formWithErrors("studyId").value.getOrElse("")
+        val studyName = formWithErrors("studyName").value.getOrElse("")
+
+        BadRequest(html.study.ceventannotationtype.add(
+          formWithErrors, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
+      },
+      annotTypeForm => {
+        implicit val userId = new UserId(request.user.id.id)
+        val studyId = annotTypeForm.studyId
+        val studyName = annotTypeForm.studyName
+
+        Async {
+          studyService.updateCollectionEventAnnotationType(annotTypeForm.getUpdateCmd).map(validation =>
+            validation match {
+              case Failure(x) =>
+                if (x.head.contains("name already exists")) {
+                  val form = annotationTypeForm.fill(annotTypeForm).withError("name",
+                    Messages("biobank.study.collection.event.annotation.type.form.error.name"))
+                  BadRequest(html.study.ceventannotationtype.add(
+                    form, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
+                } else {
+                  throw new Error(x.head)
+                }
+              case Success(annotType) =>
+                Redirect(routes.CeventAnnotTypeController.index(studyId, studyName)).flashing(
+                  "success" -> Messages("biobank.annotation.type.updated", annotType.name))
+            })
+        }
+      })
   }
 
   def removeAnnotationTypeConfirm(studyId: String,
@@ -243,7 +257,7 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
           case Success(annotType) =>
             var fields = ListMap(
               (Messages("biobank.common.name") -> annotType.name),
-              (Messages("biobank.common.description") -> annotType.name),
+              (Messages("biobank.common.description") -> annotType.description.getOrElse("")),
               (Messages("biobank.annotation.type.field.value.type") -> annotType.valueType.toString))
 
             if (annotType.valueType == domain.AnnotationValueType.Select) {
@@ -267,27 +281,40 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
       checkAnnotationTypeNotInUse(studyId, studyName, annotationTypeId)(action)
   }
 
-  def removeAnnotationType(
-    studyId: String,
-    studyName: String,
-    annotationTypeId: String) = SecuredAction {
-    implicit request =>
-      studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
-        case Failure(x) => throw new Error(x.head)
-        case Success(annotType) =>
-          Async {
-            implicit val userId = new UserId(request.user.id.id)
-            studyService.removeCollectionEventAnnotationType(
-              RemoveCollectionEventAnnotationTypeCmd(
-                annotType.id.id, annotType.versionOption, annotType.studyId.id)).map(validation =>
-                validation match {
-                  case Success(annotType) =>
-                    Redirect(routes.CeventAnnotTypeController.index(studyId, studyName)).flashing(
-                      "success" -> Messages("biobank.study.collection.event.annotation.type.removed", annotType.name))
-                  case Failure(x) =>
-                    throw new Error(x.head)
-                })
-          }
-      }
+  val annotTypeDeleteForm = Form(
+    tuple(
+      "studyId" -> text,
+      "studyName" -> text,
+      "annotationTypeId" -> text))
+
+  def removeAnnotationTypeSubmit = SecuredAction { implicit request =>
+    annotTypeDeleteForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error("**** " + formWithErrors)
+        throw new Error(formWithErrors.globalErrors.mkString(","))
+      },
+      annotTypeForm => {
+        val studyId = annotTypeForm._1
+        val studyName = annotTypeForm._2
+        val annotationTypeId = annotTypeForm._3
+
+        studyService.collectionEventAnnotationTypeWithId(annotTypeForm._1, annotTypeForm._3) match {
+          case Failure(x) => throw new Error(x.head)
+          case Success(annotType) =>
+            Async {
+              implicit val userId = new UserId(request.user.id.id)
+              studyService.removeCollectionEventAnnotationType(
+                RemoveCollectionEventAnnotationTypeCmd(
+                  annotType.id.id, annotType.versionOption, annotType.studyId.id)).map(validation =>
+                  validation match {
+                    case Success(annotType) =>
+                      Redirect(routes.CeventAnnotTypeController.index(studyId, studyName)).flashing(
+                        "success" -> Messages("biobank.study.collection.event.annotation.type.removed", annotType.name))
+                    case Failure(x) =>
+                      throw new Error(x.head)
+                  })
+            }
+        }
+      })
   }
 }

@@ -23,15 +23,15 @@
     </h2>
   </div>
   <div class="clearfix">
+    @flash.get("success").map { message =>
+      <div class="alert alert-success">
+        @message
+      </div>
+    }
+      
     @if(specimenGroups.size <= 0) {
       <p>@Messages("biobank.study.specimen.group.show.none")</p>
     } else {
-      @flash.get("success").map { message =>
-        <div class="alert alert-success">
-          @message
-        </div>
-      }
-
       <table class="table table-bordered table-hover table-condensed">
         <thead>
           <th>@Messages("biobank.common.name")</th>

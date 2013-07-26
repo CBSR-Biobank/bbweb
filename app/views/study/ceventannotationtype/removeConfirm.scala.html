@@ -33,12 +33,17 @@
         @nameValueRow(name, value)
     }
     
-    <div class="form-actions">
-      <a href="@routes.CeventAnnotTypeController.index(studyId,studyName)" class="btn btn-small" type="button">
-      @Messages("biobank.common.cancel")</a>
-      <a href="@routes.CeventAnnotTypeController.removeAnnotationType(studyId,studyName,annotType.id.id)"
-      class="btn btn-small btn-warning" type="button">
-      @Messages("biobank.common.confirm")</a>
-    </div>
+    @form(routes.CeventAnnotTypeController.removeAnnotationTypeSubmit, 
+        args = 'id -> "removeform", 'class -> "form-horizontal") {
+      
+        <input type="hidden" name="studyId" value="@studyId" >  
+        <input type="hidden" name="studyName" value="@studyName" >  
+        <input type="hidden" name="annotationTypeId" value="@annotType.id.id" >  
+    
+        <div class="form-actions">
+            <button type="submit" value="cancel" class="btn">@Messages("biobank.common.cancel")</button>           
+            <button type="submit" value="confirm" class="btn btn-primary btn-warning">@Messages("biobank.common.confirm")</button>           
+        </div>
+    }
   </div>
 }

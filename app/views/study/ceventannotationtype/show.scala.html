@@ -22,16 +22,15 @@
       </small></h2>
     </div>
     <div class="clearfix">
-        @if(annotationTypes.size <= 0) {
-            <p>@Messages("biobank.study.collection.event.annotation.type.show.none")</p>
-        } else {
-
       @flash.get("success").map { message =>
         <div class="alert alert-success">
           @message
         </div>
       }
-
+      
+        @if(annotationTypes.size <= 0) {
+            <p>@Messages("biobank.study.collection.event.annotation.type.show.none")</p>
+        } else {
       <table class="table table-bordered table-hover table-condensed">
         <thead>
           <th>@Messages("biobank.common.name")</th>

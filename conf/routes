@@ -22,16 +22,16 @@ POST    /study/sg/add                               controllers.study.SpecimenGr
 GET     /study/sg/update/:studyId/:studyName/:sgId  controllers.study.SpecimenGroupController.updateSpecimenGroup(studyId:String, studyName: String, sgId:String)
 POST    /study/sg/update                            controllers.study.SpecimenGroupController.updateSpecimenGroupSubmit
 GET     /study/sg/remove/:studyId/:studyName/:sgId  controllers.study.SpecimenGroupController.removeSpecimenGroupConfirm(studyId:String, studyName: String, sgId:String)
-POST    /study/sg/remove                            controllers.study.SpecimenGroupController.removeSpecimenGroup(studyId:String, studyName: String, sgId:String)
+POST    /study/sg/remove                            controllers.study.SpecimenGroupController.removeSpecimenGroupSubmit
 
 # collection event annotation types
-GET     /study/cevent/annot                   controllers.study.CeventAnnotTypeController.index(studyId:String, studyName:String)
-GET     /study/cevent/annot/add               controllers.study.CeventAnnotTypeController.addAnnotationType(studyId:String, studyName:String)
-POST    /study/cevent/annot/addSubmit         controllers.study.CeventAnnotTypeController.addAnnotationTypeSubmit(studyId:String, studyName:String)
-GET     /study/cevent/annot/update            controllers.study.CeventAnnotTypeController.updateAnnotationType(studyId:String, studyName: String, annotId: String)
-POST    /study/cevent/annot/updateSubmit      controllers.study.CeventAnnotTypeController.updateAnnotationTypeSubmit(id:String, studyName:String)
-GET     /study/cevent/annot/removeConfirm     controllers.study.CeventAnnotTypeController.removeAnnotationTypeConfirm(studyId:String, studyName: String, annotId: String)
-GET     /study/cevent/annot/remove            controllers.study.CeventAnnotTypeController.removeAnnotationType(studyId:String, studyName: String, annotId: String)
+GET     /study/cevent/annot/show/:studyId/:studyName                controllers.study.CeventAnnotTypeController.index(studyId:String, studyName:String)
+GET     /study/cevent/annot/add/:studyId/:studyName                 controllers.study.CeventAnnotTypeController.addAnnotationType(studyId:String, studyName:String)
+POST    /study/cevent/annot/add                                     controllers.study.CeventAnnotTypeController.addAnnotationTypeSubmit
+GET     /study/cevent/annot/update/:studyId/:studyName/:annotId     controllers.study.CeventAnnotTypeController.updateAnnotationType(studyId:String, studyName: String, annotId: String)
+POST    /study/cevent/annot/update                                  controllers.study.CeventAnnotTypeController.updateAnnotationTypeSubmit
+GET     /study/cevent/annot/remove/:studyId/:studyName/:annotId     controllers.study.CeventAnnotTypeController.removeAnnotationTypeConfirm(studyId:String, studyName: String, annotId: String)
+POST     /study/cevent/annot/remove                                 controllers.study.CeventAnnotTypeController.removeAnnotationTypeSubmit
 
 # collection event types
 GET     /study/cetype                   controllers.study.CeventTypeController.index(studyId:String,studyName:String)
