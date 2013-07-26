@@ -37,6 +37,10 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
       "name" -> nonEmptyText,
       "description" -> optional(text))(StudyFormObject.apply)(StudyFormObject.unapply))
 
+  private def studyBreadcrumbs = {
+    Map((Messages("biobank.study.plural") -> null))
+  }
+
   def index = SecuredAction { implicit request =>
     // get list of studies the user has access to
     //
@@ -45,14 +49,38 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
     Ok(views.html.study.index(studies))
   }
 
+  def showStudy(id: String) = SecuredAction { implicit request =>
+    studyService.getStudy(id) match {
+      case Failure(x) =>
+        if (x.head.contains("study does not exist")) {
+          BadRequest(html.serviceError(
+            Messages("biobank.study.error.heading"),
+            Messages("biobank.study.error"),
+            studyBreadcrumbs))
+        } else {
+          throw new Error(x.head)
+        }
+      case Success(study) =>
+        val counts = Map(
+          ("participants" -> "<i>to be implemented</i>"),
+          ("collection.events" -> "<i>to be implemented</i>"),
+          ("specimen.groups" -> studyService.specimenGroupsForStudy(id).size.toString),
+          ("collection.event.annotation.types" ->
+            studyService.collectionEventAnnotationTypesForStudy(id).size.toString),
+          ("collection.event.types" -> studyService.collectionEventTypesForStudy(id).size.toString))
+        Ok(html.study.showStudy(study, counts))
+    }
+  }
+
   /**
    * Add a study.
    */
-  def addStudy = SecuredAction { implicit request =>
+  def addStudy() = SecuredAction { implicit request =>
+    Logger.error("******* here")
     Ok(html.study.addStudy(studyForm, AddFormType(), ""))
   }
 
-  def addStudySubmit = SecuredAction { implicit request =>
+  def addStudySubmit() = SecuredAction { implicit request =>
     studyForm.bindFromRequest.fold(
       formWithErrors => {
         BadRequest(html.study.addStudy(formWithErrors, AddFormType(), ""))
@@ -117,21 +145,6 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
           }
         }
       })
-  }
-
-  def showStudy(id: String) = SecuredAction { implicit request =>
-    studyService.getStudy(id) match {
-      case Failure(x) => throw new Error(x.head)
-      case Success(study) =>
-        val counts = Map(
-          ("participants" -> "<i>to be implemented</i>"),
-          ("collection.events" -> "<i>to be implemented</i>"),
-          ("specimen.groups" -> studyService.specimenGroupsForStudy(id).size.toString),
-          ("collection.event.annotation.types" ->
-            studyService.collectionEventAnnotationTypesForStudy(id).size.toString),
-          ("collection.event.types" -> studyService.collectionEventTypesForStudy(id).size.toString))
-        Ok(html.study.showStudy(study, counts))
-    }
   }
 }
 

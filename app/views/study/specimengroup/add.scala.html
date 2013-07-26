@@ -13,10 +13,10 @@
 @formInfo = @{ formType match {
     case AddFormType() => 
         FormInfo(Messages("biobank.study.specimen.group.add"), 
-            routes.SpecimenGroupController.addSpecimenGroupSubmit(studyId, studyName))
+            routes.SpecimenGroupController.addSpecimenGroupSubmit)
     case UpdateFormType() => 
         FormInfo(Messages("biobank.study.specimen.group.update"), 
-            routes.SpecimenGroupController.updateSpecimenGroupSubmit(studyId, studyName))  
+            routes.SpecimenGroupController.updateSpecimenGroupSubmit)  
 }}
 
 @main(formInfo.title) {
@@ -39,7 +39,8 @@
               }
       }
       
-      <input type="hidden" name="studyId" value="@studyId" >  
+      <input type="hidden" name="studyId" value="@sgForm("studyId").value" >  
+      <input type="hidden" name="studyName2" value="@sgForm("studyName").value" >  
       
       @formNameAndDescription(sgForm("name"), sgForm("description")) 
       
