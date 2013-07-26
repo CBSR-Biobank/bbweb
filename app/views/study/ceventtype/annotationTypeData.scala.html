@@ -19,7 +19,10 @@
                 <option value="@v._1" @(if(value == Some(v._1)) "selected" else "")>@v._2</option>
             }
         </select>
-        <a class="removeAnnotationType btn btn-warning">@Messages("biobank.common.action.remove")</a>
+        <a class="removeAnnotationType btn btn-small btn-warning">
+            @Messages("biobank.common.action.remove")            
+            <i class="icon-remove-sign icon-white"></i>
+        </a>
     }
 
     @checkbox(field = atDataField("annotationTypeRequired"),

@@ -69,9 +69,9 @@
             
         <div class="control-group">
             <div class="controls">
-                <a class="addSpecimenGroup btn btn-success">
-                    <i class="icon-plus-sign icon-white"></i>
+                <a class="addSpecimenGroup btn btn-small btn-success">
                     @Messages("biobank.study.collection.event.form.action.specimen.group.add")
+                    <i class="icon-plus-sign icon-white"></i>
                 </a>
             </div>
         </div>
@@ -89,9 +89,9 @@
             
         <div class="control-group">
             <div class="controls">
-                <a class="addAnnotationType btn btn-success">
-                    <i class="icon-plus-sign icon-white"></i>
+                <a class="addAnnotationType btn btn-small btn-success">
                     @Messages("biobank.study.collection.event.form.action.annotation.type.add")
+                    <i class="icon-plus-sign icon-white"></i>
                 </a>
             </div>
         </div>
@@ -114,123 +114,12 @@
     </div>
 
     <script type="text/javascript" charset="utf-8">
-        $(function() {
-        var sgTemplate = $('.sg_data_template')
-        var atTemplate = $('.at_data_template')
-
-        var sgUnits={'': '@Messages("biobank.study.specimen.group.field.units")',
-        @Html(specimenGroupMap.map(x => """'%s': '%s'""".format(x._1, x._3)).mkString(","))}
-
-        var sgRenameElementAttr = function(element, id) {
-            var namerepl = element.attr('name').replace(/specimenGroupData\[.+\]/g, "specimenGroupData[" + id + "]")
-            element.attr('name', namerepl)
+        var sgUnits = {
+            '': '@Messages("biobank.study.specimen.group.field.units")',
+            @Html(specimenGroupMap.map(x => """'%s': '%s'""".format(x._1, x._3)).mkString(","))
         }
-        
-        var addOnUpdate = function(event) {
-            // updates the "units" on the amount field
-            var addOn = $(this).parent().parent().parent().find('.add-on')
-            addOn.text(sgUnits[$(this).val()])
-        }
-        
-        // update existing amount fields "units"
-        $('.add-on').each(function(i,v) {
-            var select = $(this).parent().parent().parent().parent().find('select')
-            $(this).text(sgUnits[select.val()])
-        })        
-        
-        // bind function to existing sg selects
-        $('select[id*="specimenGroupData"]').each(function(i,v) {
-            $(this).bind('change', addOnUpdate)
-        })
-
-        var sgRenameGroup = function(sg, id) {
-            sgRenameElementAttr(sg.find('select'), id)
-            sg.find('input').each(function() {
-                sgRenameElementAttr($(this), id)
-            })
-
-            var select = sg.find('select')
-            select.bind('change', addOnUpdate)
-            //var selectLabel = select.parent().parent().find('label')
-            //var newText =  selectLabel.text().replace(/[0-9]+/g, (id + 1))
-            //selectLabel.text(newText)
-        }
-
-        //
-        // creates a new selection text entry field based on the hidden template. The
-        // new input field has to be modified to contain the correct parameters
-        //
-        $(document).on('click', '.addSpecimenGroup', function() {
-            var i = $('.sg_data').size()
-            var newSg = sgTemplate.clone().removeClass('sg_data_template').addClass('sg_data')
-            sgRenameGroup(newSg, i)
-            newSg.show()
-            sgTemplate.before(newSg)
-        })
-
-        //
-        // removes a selection text entry field based on the button pressed
-        //
-        $(document).on('click', '.removeSpecimenGroup', function() {
-            var i = $('.sg_data').size()
-            if (i > 0) {
-                $(this).parent().parent().parent().remove()
-                renumberSpecimenGroups()
-            }
-        })
-
-        // -- renumber fields specimen groups
-        //
-        var renumberSpecimenGroups = function() {
-            $('.sg_data').each(function(i) {
-                sgRenameGroup($(this), i)
-            })
-        }
-        
-        // annotation type rename
-        var atRenameElementAttr = function(element, id) {
-            var namerepl = element.attr('name').replace(/annotationTypeData\[.+\]/g, "annotationTypeData[" + id + "]")
-            element.attr('name', namerepl)
-        }
-
-        var atRenameGroup = function(sg, id) {
-            atRenameElementAttr(sg.find('select'), id)
-            sg.find('input').each(function() {
-                atRenameElementAttr($(this), id)
-            })
-        }
-
-        //
-        // creates a new selection text entry field based on the hidden template. The
-        // new input field has to be modified to contain the correct parameters
-        //
-        $(document).on('click', '.addAnnotationType', function() {
-            var i = $('.at_data').size()
-            var newAt = atTemplate.clone().removeClass('at_data_template').addClass('at_data')
-            atRenameGroup(newAt, i)
-            newAt.show()
-            atTemplate.before(newAt)
-        })
-
-        //
-        // removes a selection text entry field based on the button pressed
-        //
-        $(document).on('click', '.removeAnnotationType', function() {
-            var i = $('.at_data').size()
-            if (i > 0) {
-                $(this).parent().parent().parent().remove()
-                renumberAnnotationTypes()
-            }
-        })
-
-        // -- renumber fields specimen groups
-        //
-        var renumberAnnotationTypes = function() {
-            $('.at_data').each(function(i) {
-                atRenameGroup($(this), i)
-            })
-        }
-
-        })
     </script>
+      
+    <script type="text/javascript" src="@controllers.routes.Assets.at("js/specimenGroupWidgets.js")"></script>
+    <script type="text/javascript" src="@controllers.routes.Assets.at("js/annotationTypeWidgets.js")"></script>
 }

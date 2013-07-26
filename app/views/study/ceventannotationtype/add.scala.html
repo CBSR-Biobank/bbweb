@@ -34,36 +34,35 @@
 
 @selectionGroup(field: Field)(implicit handler: FieldConstructor, lang: play.api.i18n.Lang) = {
   <div class="well selectionGroup" style="display:none;">
-  <fieldset>
-  <legend>@Messages("biobank.annotation.type.field.options")</legend>
+    @inputRadioGroupAligned(
+      attrTypeForm("maxValueCount"),
+      options = Seq(
+        "1" -> Messages("biobank.annotation.type.field.max.value.count.single.desc"),
+        "2" -> Messages("biobank.annotation.type.field.max.value.count.multiple.desc")),
+      '_label -> Messages("biobank.annotation.type.field.options"),
+      '_help -> "", // label is blank intentionally
+      //'_class -> "radio",
+      '_error -> attrTypeForm("maxValueCount").error.map(
+        _.withMessage(Messages("biobank.annotation.type.form.max.value.count.error"))))
+    
+    <div class="control-group">
+      <div class="controls">
+          <a class="addSelection btn btn-small btn-success">
+              @Messages("biobank.annotation.type.form.selection.add")
+              <i class="icon-plus-sign icon-white"></i>
+          </a>
+      </div>
+    </div>
 
-  @inputRadioGroup(
-    attrTypeForm("maxValueCount"),
-    options = Seq(
-      "1" -> Messages("biobank.annotation.type.field.max.value.count.single.desc"),
-      "2" -> Messages("biobank.annotation.type.field.max.value.count.multiple.desc")),
-    '_label -> "", // label is blank intentionally
-    '_help -> "", // label is blank intentionally
-    '_class -> "radio",
-    '_error -> attrTypeForm("maxValueCount").error.map(
-      _.withMessage(Messages("biobank.annotation.type.form.max.value.count.error"))))
-
-  @repeat(attrTypeForm("selections"), min = attrTypeForm("selections").indexes.size) { selection =>
-    @selectionField(selection)
-  }
-
-  @**
-  * This hidden block will be used as template for Javascript copy code
-  **@
-  @selectionField(
-    attrTypeForm("selections[x]"), className = "selection_template", style = "display:none;")
-
-  <div class="control-group">
-  <div class="controls">
-  <a class="addSelection btn success">@Messages("biobank.annotation.type.form.selection.add")</a>
-  </div>
-  </div>
-  </fieldset>
+    @repeat(attrTypeForm("selections"), min = attrTypeForm("selections").indexes.size) { selection =>
+      @selectionField(selection)
+    }
+    
+    @**
+    * This hidden block will be used as template for Javascript copy code
+    **@
+    @selectionField(attrTypeForm("selections[x]"), className = "selection_template", style = "display:none;")
+    
   </div>
 }
 
@@ -108,72 +107,10 @@
     @selectionGroup(attrTypeForm("selectionGroup"))
 
     <div class="form-actions">
-    <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
+      <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
     </div>
   }
   </div>
 
-  <script type="text/javascript" charset="utf-8">
-  $(function() {
-    var selectionGroup = $('.selectionGroup')
-
-    var selectionsToggle = function() {
-      if ($('#valueType').val() == "Select") {
-        $('.selectionGroup').show()
-      } else {
-        $('.selectionGroup').hide()
-      }
-    }
-
-    selectionsToggle()
-
-    //
-    // Shows or hides the selection group based on the value type selected
-    //
-    $('#valueType').change(function() {
-      selectionsToggle()
-    })
-
-    //
-    // creates a new selection text entry field based on the hidden template. The
-    // new input field has to be modified to contain the correct parameters
-    //
-    $(document).on('click', '.addSelection', function() {
-      var template = $('.selection_template', selectionGroup)
-      var newSelection = template.clone().removeClass('selection_template').addClass('selections')
-      var i = $('.selectionGroup .selections').size()
-      newSelection.find('input').attr('name', "selections[" + i + "]")
-      newSelection.show()
-      template.before(newSelection)
-    })
-
-    //
-    // removes a selection text entry field based on the button pressed
-    //
-    $(document).on('click', '.removeSelection', function() {
-      var i = $('.selectionGroup .selections').size()
-      if (i > 1) {
-        $(this).parent().parent().remove();
-        renumber()
-      }
-    })
-
-    // -- renumber fields
-    //
-    // Rename fields to have a coherent payload like:
-    //
-    // selections[0]
-    // selections[1]
-    //
-    var renumber = function() {
-      selectionGroup.each(function(i) {
-        $('.selections input', this).each(function(i) {
-          var name = $(this).attr('name').replace(/selections\[.+\]/g, "selections[" + i + "]")
-          $(this).attr('name', name)
-        })
-      })
-    }
-
-  })
-  </script>
+  <script type="text/javascript" src="@controllers.routes.Assets.at("js/annotationTypeSelect.js")"></script>
 }

@@ -1,0 +1,23 @@
+@**
+ * Generate an HTML radio group using Bootstrap with aligned labels.
+ *
+ * This is a slightly modified copy of Play's inputRadioGroup.scala.html.
+ *
+ * @param field The form field.
+ * @param args Set of extra HTML attributes.
+ * @param handler The field constructor.
+ *@
+@(field: play.api.data.Field, options: Seq[(String,String)], args: (Symbol,Any)*)(implicit handler: helper.FieldConstructor, lang: play.api.i18n.Lang)
+
+@import helper.input
+
+@input(field, args:_*) { (id, name, value, htmlArgs) =>
+  <span class="buttonset" id="@id">
+    @options.map { v =>
+      <label class="checkbox inline" for="@(id)_@v._1">
+          <input type="radio" id="@(id)_@v._1" name="@name" value="@v._1" @(if(value == Some(v._1)) "checked" else "") @toHtmlArgs(htmlArgs)>
+          @v._2
+      </label>
+    }
+  </span>
+}
