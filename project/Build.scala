@@ -47,6 +47,8 @@ object ApplicationBuild extends Build {
     
     javaOptions in Test += "-Dconfig.file=conf/test.conf",
 
+    javaOptions in Test += "-Dconfig.file=conf/test.conf",
+
     (testOptions in Test) += Tests.Argument(TestFrameworks.Specs2, "html", "console"),
 
     // in play 2.1.1 tests are run twice unless this option is defined

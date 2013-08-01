@@ -61,4 +61,3 @@ trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
     Await.result(f, timeout.duration)
   }
 }
-
