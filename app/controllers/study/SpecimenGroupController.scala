@@ -299,7 +299,6 @@ object SpecimenGroupController extends Controller with SecureSocial {
       formWithErrors =>
         throw new Error(formWithErrors.globalError.toString),
       sgForm => {
-        Logger.error("******" + sgForm)
         val studyId = sgForm._1
         val studyName = sgForm._2
         val specimenGroupId = sgForm._3

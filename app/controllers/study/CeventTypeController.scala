@@ -211,7 +211,6 @@ object CeventTypeController extends Controller with SecureSocial {
   def removeCeventTypeSubmit = SecuredAction { implicit request =>
     ceventTypeDeleteForm.bindFromRequest.fold(
       formWithErrors => {
-        Logger.error("**** " + formWithErrors)
         throw new Error(formWithErrors.globalErrors.mkString(","))
       },
       submittedForm => {

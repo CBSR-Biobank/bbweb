@@ -89,7 +89,6 @@ object StudyController extends Controller with SecureSocial {
    * Add a study.
    */
   def addStudy() = SecuredAction { implicit request =>
-    Logger.error("******* here")
     Ok(html.study.addStudy(studyForm, AddFormType(), ""))
   }
 
