@@ -2,6 +2,7 @@ package controllers.study
 
 import controllers._
 import service.commands._
+import service.{ ServiceComponent, TopComponentImpl }
 import domain._
 import domain.study._
 import views._
@@ -13,6 +14,7 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.i18n.Messages
 import play.Logger
+import securesocial.core.SecureSocial
 
 import scalaz._
 import Scalaz._
@@ -54,9 +56,9 @@ object CollectionEventTypeSelections {
       x.toString -> Messages("biobank.enumaration.annotation.value.type." + x.toString)).toSeq
 }
 
-object CeventTypeController extends Controller with securesocial.core.SecureSocial {
+object CeventTypeController extends Controller with SecureSocial {
 
-  lazy val studyService = Global.services.studyService
+  lazy val studyService = WebComponent.studyService
 
   val ceventTypeForm = Form(
     mapping(
@@ -144,7 +146,6 @@ object CeventTypeController extends Controller with securesocial.core.SecureSoci
     studyService.collectionEventTypeWithId(studyId, ceventTypeId) match {
       case Failure(x) => throw new Error(x.head)
       case Success(ceventType) =>
-        Logger.info("*** " + ceventType)
         val form = ceventTypeForm.fill(CeventTypeFormObject(
           ceventType.id.id, ceventType.version, studyId, studyName, ceventType.name,
           ceventType.description, ceventType.recurring, ceventType.specimenGroupData.toList,

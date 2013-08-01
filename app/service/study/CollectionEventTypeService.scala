@@ -5,11 +5,14 @@ import domain.study._
 import domain.study.Study._
 import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
-import scalaz._
-import scalaz.Scalaz._
 import service._
 import service.commands._
 import service.events._
+
+import scalaz._
+import scalaz.Scalaz._
+
+// FIXME: rename CollectionEventTypeService to CollectionEventTypeSubProcessor
 
 /**
  * This is the Collection Event Type Domain Service.
@@ -24,128 +27,133 @@ import service.events._
  * @param at2cetRepo The value object repository that associates a collection event annotation
  *         type to a collection event type.
  */
-protected[service] class CollectionEventTypeService() extends CommandHandler {
+trait CollectionEventTypeServiceComponent {
+  self: RepositoryComponent =>
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val collectionEventTypeService = new CollectionEventTypeService
 
-  /**
-   * This partial function handles each command. The command is contained within the
-   * StudyProcessorMsg.
-   *
-   *  If the command is invalid, then this method throws an Error exception.
-   */
-  def process = {
+  class CollectionEventTypeService() extends CommandHandler {
 
-    case msg: StudyProcessorMsg =>
-      msg.cmd match {
-        // collection event types
-        case cmd: AddCollectionEventTypeCmd =>
-          addCollectionEventType(cmd, msg.study, msg.listeners, msg.id)
-        case cmd: UpdateCollectionEventTypeCmd =>
-          updateCollectionEventType(cmd, msg.study, msg.listeners)
-        case cmd: RemoveCollectionEventTypeCmd =>
-          removeCollectionEventType(cmd, msg.study, msg.listeners)
+    val log = LoggerFactory.getLogger(this.getClass)
 
-        case _ =>
-          throw new Error("invalid command received")
-      }
+    /**
+     * This partial function handles each command. The command is contained within the
+     * StudyProcessorMsg.
+     *
+     *  If the command is invalid, then this method throws an Error exception.
+     */
+    def process = {
 
-    case _ =>
-      throw new Error("invalid message received")
-  }
+      case msg: StudyProcessorMsg =>
+        msg.cmd match {
+          // collection event types
+          case cmd: AddCollectionEventTypeCmd =>
+            addCollectionEventType(cmd, msg.study, msg.listeners, msg.id)
+          case cmd: UpdateCollectionEventTypeCmd =>
+            updateCollectionEventType(cmd, msg.study, msg.listeners)
+          case cmd: RemoveCollectionEventTypeCmd =>
+            removeCollectionEventType(cmd, msg.study, msg.listeners)
 
-  /**
-   * Checks that each specimen group belongs to the same study as the collection event type. If
-   * one or more specimen groups are found that belong to a different study, they are returned in
-   * the DomainError.
-   */
-  private def validateSpecimenGroupData(
-    study: DisabledStudy,
-    specimenGroupData: Set[CollectionEventTypeSpecimenGroup]): DomainValidation[Boolean] = {
+          case _ =>
+            throw new Error("invalid command received")
+        }
 
-    val invalidSet = specimenGroupData.map(v => SpecimenGroupId(v.specimenGroupId)).map { id =>
-      (id -> SpecimenGroupRepository.specimenGroupWithId(study.id, id).isSuccess)
-    }.filter(x => !x._2).map(_._1)
+      case _ =>
+        throw new Error("invalid message received")
+    }
 
-    if (invalidSet.isEmpty) true.success
-    else DomainError("specimen group(s) do not belong to study: " + invalidSet.mkString(", ")).fail
-  }
+    /**
+     * Checks that each specimen group belongs to the same study as the collection event type. If
+     * one or more specimen groups are found that belong to a different study, they are returned in
+     * the DomainError.
+     */
+    private def validateSpecimenGroupData(
+      study: DisabledStudy,
+      specimenGroupData: Set[CollectionEventTypeSpecimenGroup]): DomainValidation[Boolean] = {
 
-  /**
-   * Checks that each annotation type belongs to the same study as the collection event type. If
-   * one or more annotation types are found that belong to a different study, theyare returned in
-   * the DomainError.
-   */
-  private def validateAnnotationTypeData(
-    study: DisabledStudy,
-    annotationTypeData: Set[CollectionEventTypeAnnotationType]): DomainValidation[Boolean] = {
+      val invalidSet = specimenGroupData.map(v => SpecimenGroupId(v.specimenGroupId)).map { id =>
+        (id -> specimenGroupRepository.specimenGroupWithId(study.id, id).isSuccess)
+      }.filter(x => !x._2).map(_._1)
 
-    val invalidSet = annotationTypeData.map(v => AnnotationTypeId(v.annotationTypeId)).map { id =>
-      (id -> CollectionEventAnnotationTypeRepository.annotationTypeWithId(study.id, id).isSuccess)
-    }.filter(x => !x._2).map(_._1)
+      if (invalidSet.isEmpty) true.success
+      else DomainError("specimen group(s) do not belong to study: " + invalidSet.mkString(", ")).fail
+    }
 
-    if (invalidSet.isEmpty) true.success
-    else DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).fail
-  }
+    /**
+     * Checks that each annotation type belongs to the same study as the collection event type. If
+     * one or more annotation types are found that belong to a different study, theyare returned in
+     * the DomainError.
+     */
+    private def validateAnnotationTypeData(
+      study: DisabledStudy,
+      annotationTypeData: Set[CollectionEventTypeAnnotationType]): DomainValidation[Boolean] = {
 
-  private def addCollectionEventType(
-    cmd: AddCollectionEventTypeCmd,
-    study: DisabledStudy,
-    listeners: MessageEmitter,
-    id: Option[String]): DomainValidation[CollectionEventType] = {
+      val invalidSet = annotationTypeData.map(v => AnnotationTypeId(v.annotationTypeId)).map { id =>
+        (id -> collectionEventAnnotationTypeRepository.annotationTypeWithId(study.id, id).isSuccess)
+      }.filter(x => !x._2).map(_._1)
 
-    val item = for {
-      cetId <- id.toSuccess(DomainError("collection event type ID is missing"))
-      newItem <- CollectionEventType(
-        CollectionEventTypeId(cetId), 0L, study.id, cmd.name, cmd.description, cmd.recurring,
-        cmd.specimenGroupData, cmd.annotationTypeData).success
-      validSgData <- validateSpecimenGroupData(study, newItem.specimenGroupData)
-      validAtData <- validateAnnotationTypeData(study, newItem.annotationTypeData)
-      addItem <- CollectionEventTypeRepository.add(newItem)
-      event <- listeners.sendEvent(CollectionEventTypeAddedEvent(
-        study.id, newItem.id, newItem.name, newItem.description, newItem.recurring,
-        newItem.specimenGroupData, newItem.annotationTypeData)).success
-    } yield newItem
-    logMethod(log, "addCollectionEventType", cmd, item)
-    item
-  }
+      if (invalidSet.isEmpty) true.success
+      else DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).fail
+    }
 
-  private def updateCollectionEventType(
-    cmd: UpdateCollectionEventTypeCmd,
-    study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
+    private def addCollectionEventType(
+      cmd: AddCollectionEventTypeCmd,
+      study: DisabledStudy,
+      listeners: MessageEmitter,
+      id: Option[String]): DomainValidation[CollectionEventType] = {
 
-    val item = for {
-      oldItem <- CollectionEventTypeRepository.collectionEventTypeWithId(
-        study.id, CollectionEventTypeId(cmd.id))
-      newItem <- CollectionEventTypeRepository.update(CollectionEventType(
-        CollectionEventTypeId(cmd.id), cmd.expectedVersion.getOrElse(-1), study.id, cmd.name,
-        cmd.description, cmd.recurring, cmd.specimenGroupData, cmd.annotationTypeData))
-      event <- listeners.sendEvent(CollectionEventTypeUpdatedEvent(
-        study.id, newItem.id, newItem.name, newItem.description, newItem.recurring,
-        newItem.specimenGroupData, newItem.annotationTypeData)).success
-    } yield newItem
-    logMethod(log, "updateCollectionEventType", cmd, item)
-    item
-  }
+      val item = for {
+        cetId <- id.toSuccess(DomainError("collection event type ID is missing"))
+        newItem <- CollectionEventType(
+          CollectionEventTypeId(cetId), 0L, study.id, cmd.name, cmd.description, cmd.recurring,
+          cmd.specimenGroupData, cmd.annotationTypeData).success
+        validSgData <- validateSpecimenGroupData(study, newItem.specimenGroupData)
+        validAtData <- validateAnnotationTypeData(study, newItem.annotationTypeData)
+        addItem <- collectionEventTypeRepository.add(newItem)
+        event <- listeners.sendEvent(CollectionEventTypeAddedEvent(
+          study.id, newItem.id, newItem.name, newItem.description, newItem.recurring,
+          newItem.specimenGroupData, newItem.annotationTypeData)).success
+      } yield newItem
+      logMethod(log, "addCollectionEventType", cmd, item)
+      item
+    }
 
-  private def removeCollectionEventType(
-    cmd: RemoveCollectionEventTypeCmd,
-    study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
-    val item = for {
-      oldItem <- CollectionEventTypeRepository.collectionEventTypeWithId(
-        study.id, CollectionEventTypeId(cmd.id))
-      itemToRemove <- CollectionEventType(
-        CollectionEventTypeId(cmd.id), cmd.expectedVersion.getOrElse(-1), study.id,
-        oldItem.name, oldItem.description, oldItem.recurring, oldItem.specimenGroupData,
-        oldItem.annotationTypeData).success
-      removedItem <- CollectionEventTypeRepository.remove(itemToRemove)
-      event <- listeners.sendEvent(CollectionEventTypeRemovedEvent(
-        removedItem.studyId, removedItem.id)).success
-    } yield removedItem
-    logMethod(log, "removeCollectionEventType", cmd, item)
-    item
+    private def updateCollectionEventType(
+      cmd: UpdateCollectionEventTypeCmd,
+      study: DisabledStudy,
+      listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
+
+      val item = for {
+        oldItem <- collectionEventTypeRepository.collectionEventTypeWithId(
+          study.id, CollectionEventTypeId(cmd.id))
+        newItem <- collectionEventTypeRepository.update(CollectionEventType(
+          CollectionEventTypeId(cmd.id), cmd.expectedVersion.getOrElse(-1), study.id, cmd.name,
+          cmd.description, cmd.recurring, cmd.specimenGroupData, cmd.annotationTypeData))
+        event <- listeners.sendEvent(CollectionEventTypeUpdatedEvent(
+          study.id, newItem.id, newItem.name, newItem.description, newItem.recurring,
+          newItem.specimenGroupData, newItem.annotationTypeData)).success
+      } yield newItem
+      logMethod(log, "updateCollectionEventType", cmd, item)
+      item
+    }
+
+    private def removeCollectionEventType(
+      cmd: RemoveCollectionEventTypeCmd,
+      study: DisabledStudy,
+      listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
+      val item = for {
+        oldItem <- collectionEventTypeRepository.collectionEventTypeWithId(
+          study.id, CollectionEventTypeId(cmd.id))
+        itemToRemove <- CollectionEventType(
+          CollectionEventTypeId(cmd.id), cmd.expectedVersion.getOrElse(-1), study.id,
+          oldItem.name, oldItem.description, oldItem.recurring, oldItem.specimenGroupData,
+          oldItem.annotationTypeData).success
+        removedItem <- collectionEventTypeRepository.remove(itemToRemove)
+        event <- listeners.sendEvent(CollectionEventTypeRemovedEvent(
+          removedItem.studyId, removedItem.id)).success
+      } yield removedItem
+      logMethod(log, "removeCollectionEventType", cmd, item)
+      item
+    }
   }
 }
-

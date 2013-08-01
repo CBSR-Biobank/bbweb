@@ -7,9 +7,6 @@ import securesocial.core.SecureSocial
 
 object Application extends Controller with SecureSocial {
 
-  lazy val userService = Global.services.userService
-  lazy val studyService = Global.services.studyService
-
   def index = SecuredAction { implicit request =>
     Ok(html.index(request))
   }

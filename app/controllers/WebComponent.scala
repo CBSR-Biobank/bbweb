@@ -1,17 +1,14 @@
 package controllers
 
-import service.AppServices
-
 import play.api._
 import play.api.mvc.Results._
 import play.api.mvc.RequestHeader
 
-object Global extends GlobalSettings {
-
-  lazy val services: AppServices = AppServices.boot
+object WebComponent extends GlobalSettings with service.TopComponentImpl {
 
   override def beforeStart(app: Application) {
-    services
+    start
+    Logger.info("*** application started ***")
   }
 
   override def onBadRequest(request: RequestHeader, error: String) = {

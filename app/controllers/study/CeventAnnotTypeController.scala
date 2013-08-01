@@ -3,6 +3,7 @@ package controllers.study
 import controllers._
 import service._
 import infrastructure._
+import service.{ ServiceComponent, ServiceComponentImpl }
 import service.commands._
 import domain._
 import AnnotationValueType._
@@ -22,7 +23,7 @@ import play.api.templates._
 import play.api.i18n.Messages
 import play.Logger
 import akka.util.Timeout
-import securesocial.core.{ Authorization, Identity, SecuredRequest }
+import securesocial.core.{ Authorization, Identity, SecuredRequest, SecureSocial }
 
 import scalaz._
 import Scalaz._
@@ -54,9 +55,9 @@ object CollectionEventAnnotationTypeSelections {
       x.toString -> Messages("biobank.enumaration.annotation.value.type." + x.toString)).toSeq
 }
 
-object CeventAnnotTypeController extends Controller with securesocial.core.SecureSocial {
+object CeventAnnotTypeController extends Controller with SecureSocial {
 
-  lazy val studyService = Global.services.studyService
+  lazy val studyService = WebComponent.studyService
 
   val annotationTypeForm = Form(
     mapping(
@@ -91,32 +92,30 @@ object CeventAnnotTypeController extends Controller with securesocial.core.Secur
       (Messages("biobank.study.collection.event.annotation.type.remove") -> null)
   }
 
-  def index(studyId: String, studyName: String) = SecuredAction {
-    implicit request =>
-      val annotTypes = studyService.collectionEventAnnotationTypesForStudy(studyId)
-      Ok(html.study.ceventannotationtype.show(studyId, studyName, annotTypes))
+  def index(studyId: String, studyName: String) = SecuredAction { implicit request =>
+    val annotTypes = studyService.collectionEventAnnotationTypesForStudy(studyId)
+    Ok(html.study.ceventannotationtype.show(studyId, studyName, annotTypes))
   }
 
   /**
    * Add an attribute type.
    */
-  def addAnnotationType(studyId: String, studyName: String) = SecuredAction {
-    implicit request =>
-      studyService.getStudy(studyId) match {
-        case Failure(x) =>
-          if (x.head.contains("study does not exist")) {
-            BadRequest(html.serviceError(
-              Messages("biobank.annotation.type.add.error.heading"),
-              Messages("biobank.study.error"),
-              addBreadcrumbs(studyId, studyName)))
-          } else {
-            throw new Error(x.head)
-          }
-        case Success(study) =>
-          Ok(html.study.ceventannotationtype.add(
-            annotationTypeForm, AddFormType(), studyId, study.name,
+  def addAnnotationType(studyId: String, studyName: String) = SecuredAction { implicit request =>
+    studyService.getStudy(studyId) match {
+      case Failure(x) =>
+        if (x.head.contains("study does not exist")) {
+          BadRequest(html.serviceError(
+            Messages("biobank.annotation.type.add.error.heading"),
+            Messages("biobank.study.error"),
             addBreadcrumbs(studyId, studyName)))
-      }
+        } else {
+          throw new Error(x.head)
+        }
+      case Success(study) =>
+        Ok(html.study.ceventannotationtype.add(
+          annotationTypeForm, AddFormType(), studyId, study.name,
+          addBreadcrumbs(studyId, studyName)))
+    }
   }
 
   def addAnnotationTypeSubmit = SecuredAction {

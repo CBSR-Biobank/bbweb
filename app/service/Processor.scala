@@ -5,7 +5,7 @@ import akka.actor._
 import org.slf4j.Logger
 
 import scalaz._
-import scalaz.Scalaz._
+import Scalaz._
 
 trait Processor extends Actor with ActorLogging {
 

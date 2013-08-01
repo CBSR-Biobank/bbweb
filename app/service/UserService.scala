@@ -1,9 +1,8 @@
 package service
 
-import domain.{ DomainValidation, DomainError }
+import domain._
 import service.commands._
 import service.events._
-import domain._
 
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -15,74 +14,107 @@ import play.api.Logger
 import securesocial.core.{ Identity, SocialUser, PasswordInfo, AuthenticationMethod }
 import securesocial.core.providers.utils.PasswordHasher
 import org.eligosource.eventsourced.core._
+import org.slf4j.LoggerFactory
 
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 
-class UserService(userProcessor: ActorRef)(implicit system: ActorSystem)
-  extends ApplicationService {
-  import system.dispatcher
+trait UserServiceComponent {
 
-  //implicit val timeout = Timeout(5.seconds)
+  val userService: UserService
 
-  def find(id: securesocial.core.UserId): Option[securesocial.core.Identity] = {
-    UserRepository.userWithId(UserId(id.id)) match {
-      case Success(user) => some(toSecureSocialIdentity(user))
-      case Failure(x) => none
+  trait UserService extends ApplicationService {
+
+    def find(id: securesocial.core.UserId): Option[securesocial.core.Identity]
+
+    def findByEmailAndProvider(
+      email: String, providerId: String): Option[securesocial.core.Identity]
+
+    def getByEmail(email: String): Option[User]
+
+    def add(user: securesocial.core.Identity): securesocial.core.Identity
+
+  }
+}
+
+trait UserServiceComponentImpl extends UserServiceComponent {
+  self: RepositoryComponent =>
+
+  class UserServiceImpl(commandBus: ActorRef)(implicit system: ActorSystem) extends UserService {
+    import system.dispatcher
+
+    val log = LoggerFactory.getLogger(this.getClass)
+
+    def find(id: securesocial.core.UserId): Option[securesocial.core.Identity] = {
+      userRepository.userWithId(UserId(id.id)) match {
+        case Success(user) =>
+          some(toSecureSocialIdentity(user))
+        case Failure(x) => none
+      }
     }
-  }
 
-  def findByEmailAndProvider(
-    email: String, providerId: String): Option[securesocial.core.Identity] = {
-    UserRepository.userWithId(UserId(email)) match {
-      case Success(user) => some(toSecureSocialIdentity(user))
-      case Failure(x) => none
+    def findByEmailAndProvider(
+      email: String, providerId: String): Option[securesocial.core.Identity] = {
+      userRepository.userWithId(UserId(email)) match {
+        case Success(user) => some(toSecureSocialIdentity(user))
+        case Failure(x) => none
+      }
     }
-  }
 
-  def getByEmail(email: String): Option[User] = {
-    UserRepository.userWithId(UserId(email)).toOption
-  }
-
-  private def toSecureSocialIdentity(user: User): securesocial.core.Identity = {
-    SocialUser(securesocial.core.UserId(user.email, "userpass"),
-      user.email, user.email, user.email,
-      some(user.email), None, AuthenticationMethod.UserPassword, None, None,
-      some(PasswordInfo(PasswordHasher.BCryptHasher, user.password, None)))
-  }
-
-  def add(user: securesocial.core.Identity): securesocial.core.Identity = {
-    user.passwordInfo match {
-      case Some(passwordInfo) =>
-        val cmd = AddUserCmd(user.fullName, user.email.getOrElse(""),
-          passwordInfo.password, passwordInfo.hasher, passwordInfo.salt,
-          user.avatarUrl)
-        userProcessor ? Message(ServiceMsg(cmd, null)) map (_.asInstanceOf[DomainValidation[User]])
-        user
-      case None => null
+    def getByEmail(email: String): Option[User] = {
+      userRepository.userWithId(UserId(email)).toOption
     }
+
+    private def toSecureSocialIdentity(user: User): securesocial.core.Identity = {
+      SocialUser(securesocial.core.UserId(user.email, "userpass"),
+        user.email, user.email, user.email,
+        some(user.email), None, AuthenticationMethod.UserPassword, None, None,
+        some(PasswordInfo(PasswordHasher.BCryptHasher, user.password, None)))
+    }
+
+    def add(user: securesocial.core.Identity): securesocial.core.Identity = {
+      user.passwordInfo match {
+        case Some(passwordInfo) =>
+          val cmd = AddUserCmd(user.fullName, user.email.getOrElse(""),
+            passwordInfo.password, passwordInfo.hasher, passwordInfo.salt,
+            user.avatarUrl)
+          commandBus ? Message(ServiceMsg(cmd, null)) map (_.asInstanceOf[DomainValidation[User]])
+          user
+        case None => null
+      }
+    }
+
   }
+}
+
+trait UserProcessorComponent {
+
+  trait UserProcessor extends Processor
 
 }
 
-class UserProcessor() extends Processor {
-  this: Emitter =>
+trait UserProcessorComponentImpl extends UserProcessorComponent {
+  self: RepositoryComponent =>
 
-  def receive = {
-    case msg: ServiceMsg =>
-      msg.cmd match {
-        case cmd: AddUserCmd =>
-          process(addUser(cmd, emitter("listenter")))
+  class UserProcessorImpl extends UserProcessor {
+    self: Emitter =>
 
-        case other => // must be for another command handler
-      }
+    def receive = {
+      case msg: ServiceMsg =>
+        msg.cmd match {
+          case cmd: AddUserCmd =>
+            process(addUser(cmd, emitter("listenter")))
 
-    case x =>
-      throw new Error("invalid message received: " + x)
-  }
+          case other => // must be for another command handler
+        }
 
-  def addUser(cmd: AddUserCmd, listeners: MessageEmitter): DomainValidation[User] = {
-    UserRepository.add(RegisteredUser(UserId(cmd.email), 0L, cmd.name, cmd.email,
-      cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl))
+      case x =>
+        throw new Error("invalid message received: " + x)
+    }
+
+    def addUser(cmd: AddUserCmd, listeners: MessageEmitter): DomainValidation[User] = {
+      userRepository.add(RegisteredUser(UserId(cmd.email), 0L, cmd.name, cmd.email,
+        cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl))
+    }
   }
 }

@@ -44,6 +44,8 @@ object ApplicationBuild extends Build {
     ),
 
     scalacOptions ++= Seq("-feature"),
+    
+    javaOptions in Test += "-Dconfig.file=conf/test.conf",
 
     (testOptions in Test) += Tests.Argument(TestFrameworks.Specs2, "html", "console"),
 

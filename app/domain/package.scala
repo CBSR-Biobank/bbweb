@@ -1,7 +1,7 @@
 import domain.study._
 
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 
 package object domain {
 

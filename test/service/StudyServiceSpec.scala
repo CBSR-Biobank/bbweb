@@ -8,15 +8,16 @@ import domain.study._
 
 import org.specs2.scalaz.ValidationMatchers._
 import org.specs2.mutable._
+import org.specs2.time.NoTimeConversions
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.slf4j.LoggerFactory
 
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class StudyServiceSpec extends StudyFixture {
+class StudyServiceSpec extends Specification with NoTimeConversions with Tags with StudyFixture {
 
   args(
     //include = "tag1",
@@ -24,7 +25,7 @@ class StudyServiceSpec extends StudyFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  val nameGenerator = new NameGenerator(classOf[StudyServiceSpec].getName)
+  override val nameGenerator = new NameGenerator(classOf[StudyServiceSpec].getName)
 
   "Study" can {
 
@@ -37,7 +38,7 @@ class StudyServiceSpec extends StudyFixture {
           s.version must beEqualTo(0)
           s.name must be(name)
           s.description must beSome(name)
-          StudyRepository.studyWithId(s.id) must beSuccessful
+          studyRepository.studyWithId(s.id) must beSuccessful
       }
     }
 
@@ -63,7 +64,7 @@ class StudyServiceSpec extends StudyFixture {
           s.version must beEqualTo(study1.version + 1)
           s.name must be(name2)
           s.description must beNone
-          StudyRepository.studyWithId(s.id) must beSuccessful
+          studyRepository.studyWithId(s.id) must beSuccessful
 
           // update something other than the name
           val study3 = await(studyService.updateStudy(
@@ -110,15 +111,15 @@ class StudyServiceSpec extends StudyFixture {
       val specimenType = SpecimenType.FilteredUrine
 
       val study1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
-      StudyRepository.studyWithId(study1.id) must beSuccessful
+      studyRepository.studyWithId(study1.id) must beSuccessful
 
       val sg1 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study1.id.id, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
       sg1 must beSuccessful.like {
         case x =>
-          SpecimenGroupRepository.specimenGroupWithId(study1.id, x.id) must beSuccessful
-          SpecimenGroupRepository.allSpecimenGroupsForStudy(study1.id).size mustEqual 1
+          specimenGroupRepository.specimenGroupWithId(study1.id, x.id) must beSuccessful
+          specimenGroupRepository.allSpecimenGroupsForStudy(study1.id).size mustEqual 1
       }
 
       val cet1 = await(studyService.addCollectionEventType(
@@ -126,8 +127,8 @@ class StudyServiceSpec extends StudyFixture {
           Set.empty, Set.empty)))
       cet1 must beSuccessful.like {
         case x =>
-          CollectionEventTypeRepository.collectionEventTypeWithId(study1.id, x.id) must beSuccessful
-          CollectionEventTypeRepository.allCollectionEventTypesForStudy(study1.id).size mustEqual 1
+          collectionEventTypeRepository.collectionEventTypeWithId(study1.id, x.id) must beSuccessful
+          collectionEventTypeRepository.allCollectionEventTypesForStudy(study1.id).size mustEqual 1
       }
 
       val study2 = await(studyService.enableStudy(
@@ -138,7 +139,7 @@ class StudyServiceSpec extends StudyFixture {
           s must beAnInstanceOf[EnabledStudy]
       }
 
-      StudyRepository.studyWithId(study1.id) must beSuccessful
+      studyRepository.studyWithId(study1.id) must beSuccessful
     } tag ("tag1")
 
     "be disabled" in {
@@ -162,14 +163,14 @@ class StudyServiceSpec extends StudyFixture {
       val study2 = await(studyService.enableStudy(
         new EnableStudyCmd(study1.id.toString, study1.versionOption))) | null
 
-      StudyRepository.studyWithId(study2.id) must beSuccessful.like {
+      studyRepository.studyWithId(study2.id) must beSuccessful.like {
         case s => s must beAnInstanceOf[EnabledStudy]
       }
 
       await(studyService.disableStudy(
         new DisableStudyCmd(study2.id.toString, study2.versionOption)))
 
-      StudyRepository.studyWithId(study1.id) must beSuccessful.like {
+      studyRepository.studyWithId(study1.id) must beSuccessful.like {
         case s => s must beAnInstanceOf[DisabledStudy]
       }
     }

@@ -13,12 +13,16 @@ import org.eligosource.eventsourced.core._
 import org.eligosource.eventsourced.journal.mongodb.casbah.MongodbCasbahJournalProps
 import scalaz._
 import Scalaz._
-import service.study.StudyService
 
-abstract class StudyFixture extends AppFixture {
+trait StudyFixture extends TestComponentImpl {
 
-  lazy val studyProcessor = extension.processorOf(Props(
-    new StudyProcessor() with Emitter with Eventsourced { val id = 1 }))
+  val studyProcessor = system.actorOf(Props(new StudyProcessorImpl with Emitter))
+  val multicastTargets = List(studyProcessor)
 
-  lazy val studyService = new StudyService(studyProcessor)
+  val commandBus = extension.processorOf(
+    ProcessorProps(1, pid => new Multicast(multicastTargets, identity) with Confirm with Eventsourced { val id = pid }))
+
+  override val studyService = new StudyServiceImpl(commandBus)
+  override val userService = null
+
 }

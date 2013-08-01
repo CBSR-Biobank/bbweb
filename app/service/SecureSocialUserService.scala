@@ -9,15 +9,17 @@ import org.mindrot.jbcrypt.BCrypt
 /**
  *
  */
+
 class SecureSocialUserService(application: Application) extends UserServicePlugin(application) {
 
-  private lazy val userService = controllers.Global.services.userService
+  lazy val userService = controllers.WebComponent.userService
+
   private var tokens = Map[String, Token]()
 
   def find(id: UserId): Option[Identity] = {
     val user = userService.find(id)
-    if (Logger.isTraceEnabled) {
-      Logger.trace("find { user: %s }".format(user.getOrElse("")))
+    if (Logger.isDebugEnabled) {
+      Logger.debug("find { user: %s }".format(user.getOrElse("")))
     }
     user map { _.asInstanceOf[Identity] }
   }

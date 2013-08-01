@@ -22,6 +22,7 @@ import scala.concurrent.stm.Ref
 import org.specs2.specification.BeforeExample
 import org.specs2.scalaz.ValidationMatchers._
 import org.specs2.mutable._
+import org.specs2.time.NoTimeConversions
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.execute.Result
@@ -33,7 +34,7 @@ import scalaz._
 import Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class SpecimenGroupSpec extends StudyFixture with Tags {
+class SpecimenGroupSpec extends Specification with NoTimeConversions with Tags with StudyFixture {
 
   args(
     //include = "tag1",
@@ -67,8 +68,8 @@ class SpecimenGroupSpec extends StudyFixture with Tags {
           x.preservationType must be(preservationType)
           x.preservationTemperatureType must be(preservationTempType)
           x.specimenType must be(specimenType)
-          SpecimenGroupRepository.specimenGroupWithId(study.id, x.id) must beSuccessful
-          SpecimenGroupRepository.allSpecimenGroupsForStudy(study.id).size mustEqual 1
+          specimenGroupRepository.specimenGroupWithId(study.id, x.id) must beSuccessful
+          specimenGroupRepository.allSpecimenGroupsForStudy(study.id).size mustEqual 1
       }
 
       val name2 = nameGenerator.next[Study]
@@ -86,8 +87,8 @@ class SpecimenGroupSpec extends StudyFixture with Tags {
           x.preservationType must be(preservationType)
           x.preservationTemperatureType must be(preservationTempType)
           x.specimenType must be(specimenType)
-          SpecimenGroupRepository.specimenGroupWithId(study.id, x.id) must beSuccessful
-          SpecimenGroupRepository.allSpecimenGroupsForStudy(study.id).size mustEqual 2
+          specimenGroupRepository.specimenGroupWithId(study.id, x.id) must beSuccessful
+          specimenGroupRepository.allSpecimenGroupsForStudy(study.id).size mustEqual 2
       }
     }
 
@@ -168,7 +169,7 @@ class SpecimenGroupSpec extends StudyFixture with Tags {
       val sg1 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
-      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
+      specimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       val sg2 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
@@ -189,7 +190,7 @@ class SpecimenGroupSpec extends StudyFixture with Tags {
       val sg1 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
-      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
+      specimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       val name2 = nameGenerator.next[Study]
       val units2 = nameGenerator.next[String]
@@ -201,7 +202,7 @@ class SpecimenGroupSpec extends StudyFixture with Tags {
       val sg2 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name2, None, units2, anatomicalSourceType2,
           preservationType2, preservationTempType2, specimenType2))) | null
-      SpecimenGroupRepository.specimenGroupWithId(study.id, sg2.id) must beSuccessful
+      specimenGroupRepository.specimenGroupWithId(study.id, sg2.id) must beSuccessful
 
       val sg3 = await(studyService.updateSpecimenGroup(
         new UpdateSpecimenGroupCmd(sg2.id.toString, sg2.versionOption, study.id.toString, name,
@@ -223,7 +224,7 @@ class SpecimenGroupSpec extends StudyFixture with Tags {
       val sg1 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
-      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
+      specimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       val study2 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
 
@@ -247,11 +248,11 @@ class SpecimenGroupSpec extends StudyFixture with Tags {
       val sg1 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
-      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
+      specimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       await(studyService.removeSpecimenGroup(
         new RemoveSpecimenGroupCmd(sg1.id.toString, sg1.versionOption, study.id.toString)))
-      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beFailing
+      specimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beFailing
     }
 
     "not be removed with invalid version" in {
@@ -265,7 +266,7 @@ class SpecimenGroupSpec extends StudyFixture with Tags {
       val sg1 = await(studyService.addSpecimenGroup(
         new AddSpecimenGroupCmd(study.id.toString, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
-      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
+      specimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       val versionOption = Some(sg1.version + 1)
       val sg2 = await(studyService.removeSpecimenGroup(

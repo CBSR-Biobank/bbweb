@@ -1,21 +1,17 @@
 package controllers
 
-import service._
+import service.{ ServiceComponent, TopComponentImpl }
 
-import scala.concurrent._
-import scala.concurrent.duration._
 import play.api._
 import play.api.mvc._
-import play.api.data._
-import play.api.data.Forms._
-import securesocial.core.{ Identity, Authorization }
+import securesocial.core.SecureSocial
 
 import scalaz._
 import Scalaz._
 
-object UserController extends Controller with securesocial.core.SecureSocial {
+object UserController extends Controller with SecureSocial {
 
-  lazy val userService = Global.services.userService
+  lazy val userService = WebComponent.userService
 
   def profile = SecuredAction { implicit request =>
     userService.getByEmail(request.user.email.getOrElse("")) match {

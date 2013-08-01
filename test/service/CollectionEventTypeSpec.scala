@@ -12,12 +12,14 @@ import domain.study._
 import service.commands._
 
 import org.specs2.scalaz.ValidationMatchers._
+import org.specs2.mutable._
+import org.specs2.time.NoTimeConversions
 import org.slf4j.LoggerFactory
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class CollectionEventTypeSpec extends StudyFixture {
+class CollectionEventTypeSpec extends Specification with NoTimeConversions with Tags with StudyFixture {
 
   args(
     //include = "tag1",
@@ -44,11 +46,11 @@ class CollectionEventTypeSpec extends StudyFixture {
           x.name must be(name)
           x.description must beSome(name)
           x.recurring must beEqualTo(recurring)
-          CollectionEventTypeRepository.collectionEventTypeWithId(study.id, x.id) must beSuccessful.like {
+          collectionEventTypeRepository.collectionEventTypeWithId(study.id, x.id) must beSuccessful.like {
             case y =>
               y.version must beEqualTo(x.version)
           }
-          CollectionEventTypeRepository.allCollectionEventTypesForStudy(study.id).size mustEqual 1
+          collectionEventTypeRepository.allCollectionEventTypesForStudy(study.id).size mustEqual 1
       }
 
       val name2 = nameGenerator.next[Study]
@@ -63,11 +65,11 @@ class CollectionEventTypeSpec extends StudyFixture {
           x.name must be(name2)
           x.description must beNone
           x.recurring must beEqualTo(recurring2)
-          CollectionEventTypeRepository.collectionEventTypeWithId(study.id, x.id) must beSuccessful.like {
+          collectionEventTypeRepository.collectionEventTypeWithId(study.id, x.id) must beSuccessful.like {
             case y =>
               y.version must beEqualTo(x.version)
           }
-          CollectionEventTypeRepository.allCollectionEventTypesForStudy(study.id).size mustEqual 2
+          collectionEventTypeRepository.allCollectionEventTypesForStudy(study.id).size mustEqual 2
 
       }
     }
@@ -95,7 +97,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring,
           Set.empty, Set.empty))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
 
       val name2 = nameGenerator.next[Study]
       val recurring2 = false
@@ -111,7 +113,7 @@ class CollectionEventTypeSpec extends StudyFixture {
           x.description must beSome(name2)
           x.recurring must beEqualTo(recurring2)
 
-          CollectionEventTypeRepository.collectionEventTypeWithId(study.id, x.id) must beSuccessful.like {
+          collectionEventTypeRepository.collectionEventTypeWithId(study.id, x.id) must beSuccessful.like {
             case y =>
               y.version must beEqualTo(x.version)
           }
@@ -125,14 +127,14 @@ class CollectionEventTypeSpec extends StudyFixture {
       val cet1 = await(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring,
           Set.empty, Set.empty))) | null
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
 
       val name2 = nameGenerator.next[Study]
       val recurring2 = true
       val cet2 = await(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study.id.id, name2, Some(name2), recurring2,
           Set.empty, Set.empty))) | null
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet2.id) must beSuccessful
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet2.id) must beSuccessful
 
       val cet3 = await(studyService.updateCollectionEventType(
         new UpdateCollectionEventTypeCmd(cet2.id.id, cet2.versionOption, study.id.id,
@@ -167,7 +169,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring,
           Set.empty, Set.empty))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
 
       val name2 = nameGenerator.next[Study]
       val recurring2 = false
@@ -188,12 +190,12 @@ class CollectionEventTypeSpec extends StudyFixture {
       val cet1 = await(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study.id.id, name, None, recurring,
           Set.empty, Set.empty))) | null
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
 
       await(studyService.removeCollectionEventType(
         new RemoveCollectionEventTypeCmd(cet1.id.id, cet1.versionOption, study.id.id)))
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beFailing
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beFailing
     }
 
     "not be removed with invalid version" in {
@@ -203,7 +205,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       val cet1 = await(studyService.addCollectionEventType(
         new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring,
           Set.empty, Set.empty))) | null
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
 
       val versionOption = Some(cet1.version + 1)
       val cet2 = await(studyService.removeCollectionEventType(
@@ -227,7 +229,7 @@ class CollectionEventTypeSpec extends StudyFixture {
       val sg1 = await(studyService.addSpecimenGroup(
         AddSpecimenGroupCmd(study.id.id, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType))) | null
-      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
+      specimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       val count = 10
       val amount = BigDecimal(1.1)
@@ -241,7 +243,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring = true,
           SpecimenGroupData, Set.empty))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
         case cet =>
           cet.specimenGroupData.size mustEqual 2
           cet.specimenGroupData.exists(sgData =>
@@ -262,7 +264,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         AddSpecimenGroupCmd(study.id.id, sgName, Some(sgName), "mL", AnatomicalSourceType.Blood,
           PreservationType.FreshSpecimen, PreservationTemperatureType.Minus80celcius,
           SpecimenType.BuffyCoat))) | null
-      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
+      specimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       val SpecimenGroupData = Set(
         CollectionEventTypeSpecimenGroup(sg1.id.id, 1, BigDecimal(1.1)))
@@ -272,7 +274,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new AddCollectionEventTypeCmd(study.id.id, cetName, Some(cetName), recurring = true,
           SpecimenGroupData, Set.empty))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
 
       val sg2 = await(studyService.updateSpecimenGroup(
         UpdateSpecimenGroupCmd(sg1.id.id, sg1.versionOption, study.id.id, sgName, Some(sgName),
@@ -309,7 +311,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new AddCollectionEventTypeCmd(study.id.id, name, Some(name), recurring = true,
           SpecimenGroupData, Set.empty))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
         case x =>
           x.specimenGroupData.size mustEqual 2
       }
@@ -318,7 +320,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new UpdateCollectionEventTypeCmd(cet1.id.id, cet1.versionOption, study.id.id,
           name, Some(name), recurring = true, Set.empty, Set.empty))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
         case x =>
           x.specimenGroupData.size mustEqual 0
       }
@@ -331,7 +333,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         AddSpecimenGroupCmd(study.id.id, sgName, Some(sgName), "mL", AnatomicalSourceType.Blood,
           PreservationType.FreshSpecimen, PreservationTemperatureType.Minus80celcius,
           SpecimenType.BuffyCoat))) | null
-      SpecimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
+      specimenGroupRepository.specimenGroupWithId(study.id, sg1.id) must beSuccessful
 
       val SpecimenGroupData = Set(
         CollectionEventTypeSpecimenGroup(sg1.id.id, 1, BigDecimal(1.1)))
@@ -341,7 +343,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new AddCollectionEventTypeCmd(study.id.id, cetName, Some(cetName), recurring = true,
           SpecimenGroupData, Set.empty))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
 
       val sg2 = await(studyService.removeSpecimenGroup(
         RemoveSpecimenGroupCmd(sg1.id.id, sg1.versionOption, study.id.id)))
@@ -400,7 +402,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new AddCollectionEventAnnotationTypeCmd(study.id.id, name, Some(name),
           AnnotationValueType.Date))) | null
 
-      CollectionEventAnnotationTypeRepository.annotationTypeWithId(study.id, at1.id) must beSuccessful
+      collectionEventAnnotationTypeRepository.annotationTypeWithId(study.id, at1.id) must beSuccessful
 
       val annotationTypeData = Set(
         CollectionEventTypeAnnotationType(at1.id.id, true))
@@ -409,7 +411,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new AddCollectionEventTypeCmd(study.id.id, name, Some(name), true,
           Set.empty, annotationTypeData))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
         case x =>
           x.annotationTypeData.size mustEqual 1
           x.annotationTypeData.exists(atData =>
@@ -425,7 +427,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         AddCollectionEventAnnotationTypeCmd(study.id.id, name, Some(name),
           AnnotationValueType.Date))) | null
 
-      CollectionEventAnnotationTypeRepository.annotationTypeWithId(study.id, at1.id) must beSuccessful
+      collectionEventAnnotationTypeRepository.annotationTypeWithId(study.id, at1.id) must beSuccessful
 
       val annotationTypeData = Set(
         CollectionEventTypeAnnotationType(at1.id.id, true))
@@ -434,7 +436,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new AddCollectionEventTypeCmd(study.id.id, name, Some(name), true,
           Set.empty, annotationTypeData))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
 
       val at2 = await(studyService.updateCollectionEventAnnotationType(
         UpdateCollectionEventAnnotationTypeCmd(at1.id.id, at1.versionOption, study.id.id,
@@ -460,7 +462,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new AddCollectionEventTypeCmd(study.id.id, name, Some(name), true,
           Set.empty, annotationTypeData))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
         case x =>
           x.annotationTypeData.size mustEqual 1
       }
@@ -469,7 +471,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new UpdateCollectionEventTypeCmd(cet1.id.id, cet1.versionOption, study.id.id,
           name, Some(name), recurring = true, Set.empty, Set.empty))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
         case x =>
           x.annotationTypeData.size mustEqual 0
       }
@@ -482,7 +484,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         AddCollectionEventAnnotationTypeCmd(study.id.id, name, Some(name),
           AnnotationValueType.Date))) | null
 
-      CollectionEventAnnotationTypeRepository.annotationTypeWithId(study.id, at1.id) must beSuccessful
+      collectionEventAnnotationTypeRepository.annotationTypeWithId(study.id, at1.id) must beSuccessful
 
       val annotationTypeData = Set(
         CollectionEventTypeAnnotationType(at1.id.id, true))
@@ -491,7 +493,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new AddCollectionEventTypeCmd(study.id.id, name, Some(name), true,
           Set.empty, annotationTypeData))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful
 
       val at2 = await(studyService.removeCollectionEventAnnotationType(
         RemoveCollectionEventAnnotationTypeCmd(at1.id.id, at1.versionOption, study.id.id)))
@@ -517,7 +519,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new AddCollectionEventTypeCmd(study.id.id, name, Some(name), true,
           Set.empty, annotationTypeData))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
         case x =>
           x.annotationTypeData.size mustEqual 1
       }
@@ -526,7 +528,7 @@ class CollectionEventTypeSpec extends StudyFixture {
         new UpdateCollectionEventTypeCmd(cet1.id.id, cet1.versionOption, study.id.id,
           name, Some(name), recurring = true, Set.empty, Set.empty))) | null
 
-      CollectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
+      collectionEventTypeRepository.collectionEventTypeWithId(study.id, cet1.id) must beSuccessful.like {
         case x =>
           x.annotationTypeData.size mustEqual 0
       }

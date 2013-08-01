@@ -1,8 +1,10 @@
 package controllers.study
 
+import controllers._
 import service._
 import infrastructure._
 import service.commands._
+import service.{ ServiceComponent, TopComponentImpl }
 import domain._
 import domain.study._
 import views._
@@ -10,6 +12,7 @@ import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
+
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,16 +22,26 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.i18n.Messages
 import play.Logger
+import securesocial.core.SecureSocial
+
 import scalaz._
 import scalaz.Scalaz._
-import controllers._
 
-object StudyController extends Controller with securesocial.core.SecureSocial {
+case class StudyFormObject(
+  studyId: String, version: Long, name: String, description: Option[String]) {
 
-  //implicit val timeout = Timeout(10 seconds)
+  def getAddCmd: AddStudyCmd = {
+    AddStudyCmd(name, description)
+  }
 
-  lazy val userService = Global.services.userService
-  lazy val studyService = Global.services.studyService
+  def getUpdateCmd: UpdateStudyCmd = {
+    UpdateStudyCmd(studyId, some(version), name, description)
+  }
+}
+
+object StudyController extends Controller with SecureSocial {
+
+  lazy val studyService = WebComponent.studyService
 
   val studyForm = Form(
     mapping(
@@ -147,16 +160,3 @@ object StudyController extends Controller with securesocial.core.SecureSocial {
       })
   }
 }
-
-case class StudyFormObject(
-  studyId: String, version: Long, name: String, description: Option[String]) {
-
-  def getAddCmd: AddStudyCmd = {
-    AddStudyCmd(name, description)
-  }
-
-  def getUpdateCmd: UpdateStudyCmd = {
-    UpdateStudyCmd(studyId, some(version), name, description)
-  }
-}
-

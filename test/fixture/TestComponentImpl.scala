@@ -3,10 +3,11 @@ package fixture
 import service._
 import domain._
 
-import scala.util.{ Try, Success, Failure }
+//import scala.util.{ Try, Success, Failure }
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.postfixOps
 import org.eligosource.eventsourced.core._
 import org.eligosource.eventsourced.journal.mongodb.casbah.MongodbCasbahJournalProps
 import com.mongodb.casbah.Imports._
@@ -18,18 +19,10 @@ import org.specs2.mutable._
 import org.specs2.time.NoTimeConversions
 import org.slf4j.LoggerFactory
 
-/* A tiny class that can be used as a Specs2 'context'. */
-abstract class AkkaTestkitSupport extends TestKit(ActorSystem())
-  with After
-  with ImplicitSender {
-  // make sure we shut down the actor system after all tests have run
-  def after = {
-    system.shutdown()
-    //system.awaitTermination(timeout.duration)
-  }
-}
+import scalaz._
+import scalaz.Scalaz._
 
-abstract class AppFixture extends Specification with NoTimeConversions with Tags {
+trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
@@ -53,18 +46,7 @@ abstract class AppFixture extends Specification with NoTimeConversions with Tags
   lazy val journal = Journal(journalProps)
   lazy val extension = EventsourcingExtension(system, journal)
 
-  def boot {
-    // delete the journal contents
-    mongoColl.remove(MongoDBObject.empty)
-
-    val userProcessor = extension.processorOf(Props(
-      new UserProcessor() with Emitter with Eventsourced { val id = 2 }))
-
-    // for debug only - password is "administrator"
-    UserRepository.add(User.add(adminUserId, "admin", "admin@admin.com",
-      "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS",
-      "bcrypt", None, None) | null)
-
+  def start = {
     extension.recover()
     // wait for processor 1 to complete processing of replayed event messages
     // (ensures that recovery of externally visible state maintained by
@@ -76,12 +58,7 @@ abstract class AppFixture extends Specification with NoTimeConversions with Tags
 
   def await[T](f: Future[DomainValidation[T]]): DomainValidation[T] = {
     // use blocking for now so that tests can be run in parallel
-    val r = Await.result(f, timeout.duration)
-    r
-  }
-
-  step {
-    boot
+    Await.result(f, timeout.duration)
   }
 }
 
