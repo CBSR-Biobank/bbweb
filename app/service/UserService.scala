@@ -25,7 +25,7 @@ trait UserServiceComponent {
 
   trait UserService extends ApplicationService {
 
-    def find(id: securesocial.core.UserId): Option[securesocial.core.Identity]
+    def find(id: securesocial.core.IdentityId): Option[securesocial.core.Identity]
 
     def findByEmailAndProvider(
       email: String, providerId: String): Option[securesocial.core.Identity]
@@ -45,8 +45,8 @@ trait UserServiceComponentImpl extends UserServiceComponent {
 
     val log = LoggerFactory.getLogger(this.getClass)
 
-    def find(id: securesocial.core.UserId): Option[securesocial.core.Identity] = {
-      userRepository.userWithId(UserId(id.id)) match {
+    def find(id: securesocial.core.IdentityId): Option[securesocial.core.Identity] = {
+      userRepository.userWithId(UserId(id.userId)) match {
         case Success(user) =>
           some(toSecureSocialIdentity(user))
         case Failure(x) => none
@@ -66,7 +66,7 @@ trait UserServiceComponentImpl extends UserServiceComponent {
     }
 
     private def toSecureSocialIdentity(user: User): securesocial.core.Identity = {
-      SocialUser(securesocial.core.UserId(user.email, "userpass"),
+      SocialUser(securesocial.core.IdentityId(user.email, "userpass"),
         user.email, user.email, user.email,
         some(user.email), None, AuthenticationMethod.UserPassword, None, None,
         some(PasswordInfo(PasswordHasher.BCryptHasher, user.password, None)))

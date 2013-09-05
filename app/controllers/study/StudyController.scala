@@ -99,7 +99,7 @@ object StudyController extends Controller with SecureSocial {
       },
       formObj => {
         Async {
-          implicit val userId = UserId(request.user.id.id)
+          implicit val userId = UserId(request.user.identityId.userId)
           studyService.addStudy(formObj.getAddCmd).map(study => study match {
             case Success(study) =>
               Redirect(routes.StudyController.showStudy(study.id.id)).flashing(
@@ -139,7 +139,7 @@ object StudyController extends Controller with SecureSocial {
         formWithErrors, UpdateFormType(), studyId)), {
         case formObj => {
           Async {
-            implicit val userId = UserId(request.user.id.id)
+            implicit val userId = UserId(request.user.identityId.userId)
             studyService.updateStudy(formObj.getUpdateCmd).map(study =>
               study match {
                 case Failure(x) =>

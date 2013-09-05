@@ -130,7 +130,7 @@ object CeventAnnotTypeController extends Controller with SecureSocial {
             formWithErrors, AddFormType(), studyId, studyName, addBreadcrumbs(studyId, studyName)))
         },
         annotTypeForm => {
-          implicit val userId = new UserId(request.user.id.id)
+          implicit val userId = new UserId(request.user.identityId.userId)
           val studyId = annotTypeForm.studyId
           val studyName = annotTypeForm.studyName
 
@@ -221,7 +221,7 @@ object CeventAnnotTypeController extends Controller with SecureSocial {
           formWithErrors, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
       },
       annotTypeForm => {
-        implicit val userId = new UserId(request.user.id.id)
+        implicit val userId = new UserId(request.user.identityId.userId)
         val studyId = annotTypeForm.studyId
         val studyName = annotTypeForm.studyName
 
@@ -301,7 +301,7 @@ object CeventAnnotTypeController extends Controller with SecureSocial {
           case Failure(x) => throw new Error(x.head)
           case Success(annotType) =>
             Async {
-              implicit val userId = new UserId(request.user.id.id)
+              implicit val userId = new UserId(request.user.identityId.userId)
               studyService.removeCollectionEventAnnotationType(
                 RemoveCollectionEventAnnotationTypeCmd(
                   annotType.id.id, annotType.versionOption, annotType.studyId.id)).map(validation =>

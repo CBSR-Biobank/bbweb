@@ -3,7 +3,7 @@ package service
 import play.api.{ Logger, Application }
 import securesocial.core._
 import securesocial.core.providers.Token
-import securesocial.core.UserId
+import securesocial.core.IdentityId
 import org.mindrot.jbcrypt.BCrypt
 
 /**
@@ -16,7 +16,7 @@ class SecureSocialUserService(application: Application) extends UserServicePlugi
 
   private var tokens = Map[String, Token]()
 
-  def find(id: UserId): Option[Identity] = {
+  def find(id: IdentityId): Option[Identity] = {
     val user = userService.find(id)
     if (Logger.isDebugEnabled) {
       Logger.debug("find { user: %s }".format(user.getOrElse("")))

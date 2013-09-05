@@ -117,7 +117,7 @@ object CeventTypeController extends Controller with SecureSocial {
           specimenGroupInfo(studyId), annotationTypeInfo(studyId)))
       },
       submittedForm => {
-        implicit val userId = new UserId(request.user.id.id)
+        implicit val userId = new UserId(request.user.identityId.userId)
         val studyId = submittedForm.studyId
         val studyName = submittedForm.studyName
 
@@ -167,7 +167,7 @@ object CeventTypeController extends Controller with SecureSocial {
           annotationTypeInfo(studyId)))
       },
       submittedForm => {
-        implicit val userId = new UserId(request.user.id.id)
+        implicit val userId = new UserId(request.user.identityId.userId)
         val studyId = submittedForm.studyId
         val studyName = submittedForm.studyName
 
@@ -222,7 +222,7 @@ object CeventTypeController extends Controller with SecureSocial {
           case Failure(x) => throw new Error(x.head)
           case Success(ceventType) =>
             Async {
-              implicit val userId = new UserId(request.user.id.id)
+              implicit val userId = new UserId(request.user.identityId.userId)
               studyService.removeCollectionEventType(
                 RemoveCollectionEventTypeCmd(
                   ceventType.id.id, ceventType.versionOption, ceventType.studyId.id)).map(validation =>
