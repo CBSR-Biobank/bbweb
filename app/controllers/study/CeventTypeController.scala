@@ -80,9 +80,9 @@ object CeventTypeController extends Controller with SecureSocial {
           CollectionEventTypeAnnotationType.apply)(CollectionEventTypeAnnotationType.unapply)))(
         CeventTypeFormObject.apply)(CeventTypeFormObject.unapply))
 
-  def index(studyId: String, studyName: String) = SecuredAction { implicit request =>
+  def showAll(studyId: String, studyName: String) = SecuredAction { implicit request =>
     val ceventTypes = studyService.collectionEventTypesForStudy(studyId)
-    Ok(html.study.ceventtype.show(studyId, studyName, ceventTypes, specimenGroupInfo(studyId),
+    Ok(html.study.ceventtype.showAll(studyId, studyName, ceventTypes, specimenGroupInfo(studyId),
       annotationTypeInfo(studyId)))
   }
 
@@ -135,7 +135,7 @@ object CeventTypeController extends Controller with SecureSocial {
                   throw new Error(x.head)
                 }
               case Success(ceventType) =>
-                Redirect(routes.CeventTypeController.index(studyId, studyName)).flashing(
+                Redirect(routes.StudyController.showStudy(studyId, StudyTab.CollectionEvents.toString)).flashing(
                   "success" -> Messages("biobank.study.collection.event.type.added", ceventType.name))
             })
         }
@@ -185,7 +185,7 @@ object CeventTypeController extends Controller with SecureSocial {
                   throw new Error(x.head)
                 }
               case Success(ceventType) =>
-                Redirect(routes.CeventTypeController.index(studyId, studyName)).flashing(
+                Redirect(routes.StudyController.showStudy(studyId, StudyTab.CollectionEvents.toString)).flashing(
                   "success" -> Messages("biobank.study.collection.event.type.updated", ceventType.name))
             })
         }
@@ -228,7 +228,7 @@ object CeventTypeController extends Controller with SecureSocial {
                   ceventType.id.id, ceventType.versionOption, ceventType.studyId.id)).map(validation =>
                   validation match {
                     case Success(ceventType) =>
-                      Redirect(routes.CeventTypeController.index(studyId, studyName)).flashing(
+                      Redirect(routes.StudyController.showStudy(studyId, StudyTab.CollectionEvents.toString)).flashing(
                         "success" -> Messages("biobank.study.collection.event.type.removed", ceventType.name))
                     case Failure(x) =>
                       throw new Error(x.head)

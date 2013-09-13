@@ -1,49 +1,69 @@
 @(study: domain.study.Study,
-    counts: Map[String,String])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
+    counts: Map[String,String],
+    activeTab: controllers.study.StudyTab.Value)(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
     flash: play.api.mvc.Flash)
-    
-@import controllers.study._    
+
+@import controllers.study._
+@import StudyTab._
+
+@tabSummaryActive = @{ if (activeTab.equals(StudyTab.Summary)) "active" else "" }    
+@tabSpecimensActive = @{ if (activeTab.equals(StudyTab.Specimens)) "active" else "" }    
+@tabCollectionEventsActive = @{ if (activeTab.equals(StudyTab.CollectionEvents)) "active" else "" }    
 
 @main(Messages("biobank.study.singular") + " " + study.name) {
+  @helper.javascriptRouter("jsRoutes")(
+    routes.javascript.SpecimenGroupController.showAll,
+    routes.javascript.CeventTypeController.showAll,    
+    routes.javascript.CeventAnnotTypeController.showAll
+    )
+    
   @breadcrumbs(Map(
     (Messages("biobank.study.plural") -> routes.StudyController.index),
     (study.name -> null)
-  ))  
+  ))
   <div class="page-header">
-    <h2>@study.name                       
-      <a href="@routes.StudyController.updateStudy(study.id.id)" class="btn btn-mini btn-primary" 
+    <h2>@study.name
+      <a href="@routes.StudyController.updateStudy(study.id.id)" class="btn btn-mini btn-primary"
           type="button" data-toggle="tooltip" title="Update">
           <i class="icon-edit icon-white"></i></a></h2>
   </div>
   <div class="clearfix">
-  
+
+  <!-- use HTML data attributes to pass parameters to javascript -->
+  <div class="tabbable" data-study-id="@study.id.id" data-study-name="@study.name" data-active-tab="#@activeTab.toString">
+    <ul class="nav nav-tabs" id="study-tabs">
+      <li class="@tabSummaryActive"><a href="#tab-summary" data-toggle="tab">@Messages("biobank.study.tab.summary")</a></li>
+      <li class=""><a href="#tab-participants" data-toggle="tab">@Messages("biobank.study.tab.participants")</a></li>
+      <li class="@tabSpecimensActive"><a href="#tab-specimens" data-toggle="tab">@Messages("biobank.study.tab.specimens")</a></li>
+      <li class="@tabCollectionEventsActive"><a href="#tab-collection-events" data-toggle="tab">@Messages("biobank.study.tab.collection.events")</a></li>
+      <li class=""><a href="#tab-pevents" data-toggle="tab">@Messages("biobank.study.tab.processing.events")</a></li>
+    </ul>
+
     @flash.get("success").map { message =>
       <div class="alert alert-success">
         @message
       </div>
-    }
+    } 
     
-    @nameValueRow(Messages("biobank.common.name"), study.name)
-    @nameValueRow(Messages("biobank.study.field.status"), study.status)
-    @nameValueRow(Messages("biobank.common.description"), study.description.getOrElse(""))
-    @nameValueRow(Messages("biobank.study.field.participants"), counts("participants"))
-    @nameValueRow(Messages("biobank.study.field.collection.events"), counts("collection.events"))
-    @nameValueRow(Messages("biobank.study.field.specimengroups"), counts("specimen.groups"))
-    @nameValueRow(Messages("biobank.study.field.collection.event.annotation.types"),
-         counts("collection.event.annotation.types"))
-    @nameValueRow(Messages("biobank.study.field.collection.event.types"),
-         counts("collection.event.types"))
-        
-    <div class="form-actions"> 
-      <a href="@routes.SpecimenGroupController.index(study.id.id,study.name)" 
-         class="btn btn-small btn-primary" 
-         type="button">@Messages("biobank.study.field.specimengroups")</a>
-      <a href="@routes.CeventAnnotTypeController.index(study.id.id,study.name)" 
-          class="btn btn-small btn-primary" type="button">
-          @Messages("biobank.study.field.collection.event.annotation.types")</a>
-      <a href="@routes.CeventTypeController.index(study.id.id,study.name)" 
-          class="btn btn-small btn-primary" type="button">
-          @Messages("biobank.study.field.collection.event.types")</a>
+    <div class="tab-content">
+      <div class="tab-pane fade in @tabSummaryActive" id="tab-summary">
+        <h4>@study.name</h4>
+        <small class="muted">@Messages("biobank.study.field.status"): @study.status</small>
+        <p>@Html(study.description.getOrElse(Messages("biobank.description.none")).replace("\n", "<br/>"))</p>
+      </div>
+      <div class="tab-pane fade in" id="tab-participants">
+        <h4>@Messages("biobank.study.tab.subtitle.participants")</h4>
+        @nameValueRow(Messages("biobank.study.field.participants"), counts("participants"))
+        @nameValueRow(Messages("biobank.study.field.collection.events"), counts("collection.events"))
+        @nameValueRow(Messages("biobank.study.field.specimen.count"), counts("specimen.count"))
+      </div>
+      <div class="tab-pane fade in @tabSpecimensActive" id="tab-specimens"></div>
+      <div class="tab-pane fade in @tabCollectionEventsActive" id="tab-collection-events"></div>
+      <div class="tab-pane fade in" id="tab-pevents"></div>
     </div>
   </div>
+  </div>
+
+  <script type="text/javascript" src="@controllers.routes.Assets.at("js/studyShow.js")"></script>
+
   }

@@ -23,7 +23,7 @@
         <tbody>
           @for(s <- studies) {
               <tr>
-                <td><a href="@routes.StudyController.showStudy(s.id.id)">@s.name</a></td>
+                <td><a href="@routes.StudyController.showStudy(s.id.id, StudyTab.Summary.toString)">@s.name</a></td>
                 <td>@s.status</td>
                 <td style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
                     @Html(s.description.map(v => v.replace("\n", "")).getOrElse(""))

@@ -12,6 +12,7 @@ import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
+import StudyTab._
 
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -23,6 +24,7 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.i18n.Messages
 import play.Logger
+import play.api.libs.json._
 import akka.util.Timeout
 import securesocial.core.{ Identity, Authorization, SecureSocial }
 
@@ -70,9 +72,9 @@ object SpecimenGroupSelections {
  */
 object SpecimenGroupController extends Controller with SecureSocial {
 
-  lazy val studyService = WebComponent.studyService
+  private lazy val studyService = WebComponent.studyService
 
-  val specimenGroupForm = Form(
+  private val specimenGroupForm = Form(
     mapping(
       "specimenGroupId" -> text,
       "version" -> longNumber,
@@ -89,7 +91,7 @@ object SpecimenGroupController extends Controller with SecureSocial {
   private def studyBreadcrumbs(studyId: String, studyName: String) = {
     Map(
       (Messages("biobank.study.plural") -> routes.StudyController.index),
-      (studyName -> routes.StudyController.showStudy(studyId)))
+      (studyName -> routes.StudyController.showStudy(studyId, StudyTab.Specimens.toString)))
   }
 
   private def addBreadcrumbs(studyId: String, studyName: String) = {
@@ -107,7 +109,7 @@ object SpecimenGroupController extends Controller with SecureSocial {
       (Messages("biobank.study.specimen.group.remove") -> null)
   }
 
-  def index(studyId: String, studyName: String) = SecuredAction { implicit request =>
+  def showAll(studyId: String, studyName: String) = SecuredAction { implicit request =>
     studyService.getStudy(studyId) match {
       case Failure(x) =>
         if (x.head.contains("study does not exist")) {
@@ -120,7 +122,7 @@ object SpecimenGroupController extends Controller with SecureSocial {
         }
       case Success(study) =>
         val specimenGroups = studyService.specimenGroupsForStudy(studyId)
-        Ok(html.study.specimengroup.show(studyId, studyName, specimenGroups))
+        Ok(html.study.specimengroup.showAll(studyId, studyName, specimenGroups))
     }
   }
 
@@ -172,7 +174,7 @@ object SpecimenGroupController extends Controller with SecureSocial {
                   throw new Error(x.head)
                 }
               case Success(sg) =>
-                Redirect(routes.SpecimenGroupController.index(studyId, studyName)).flashing(
+                Redirect(routes.StudyController.showStudy(studyId, StudyTab.Specimens.toString)).flashing(
                   "success" -> Messages("biobank.study.specimen.group.added", sg.name))
             })
         }
@@ -263,8 +265,8 @@ object SpecimenGroupController extends Controller with SecureSocial {
                   throw new Error(x.head)
                 }
               case Success(sg) =>
-                Redirect(routes.SpecimenGroupController.index(studyId, studyName)).flashing(
-                  "success" -> Messages("biobank.study.specimen.group.added", sg.name))
+                Redirect(routes.StudyController.showStudy(studyId, StudyTab.Specimens.toString)).flashing(
+                  "success" -> Messages("biobank.study.specimen.group.updated", sg.name))
             })
         }
       })
@@ -312,7 +314,7 @@ object SpecimenGroupController extends Controller with SecureSocial {
                 sg.id.id, sg.versionOption, sg.studyId.id)).map(validation =>
                 validation match {
                   case Success(sg) =>
-                    Redirect(routes.SpecimenGroupController.index(studyId, studyName)).flashing(
+                    Redirect(routes.StudyController.showStudy(studyId, StudyTab.Specimens.toString)).flashing(
                       "success" -> Messages("biobank.study.specimen.group.removed", sg.name))
                   case Failure(x) =>
                     throw new Error(x.head)

@@ -3,57 +3,9 @@ import domain.study._
 import scalaz._
 import Scalaz._
 object test {
-  val x = Seq((1,2,3),(4,5,6),(7,8,9))
-  x.map(y => "%d-%d".format(y._1, y._2)).mkString("\n")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  val test = Seq("aa", "bb", "cc")                //> test  : Seq[String] = List(aa, bb, cc)
+  test.map(sg => "$(\"#" + sg +"\").popover();").mkString("\n")
+                                                  //> res0: String = $("#aa").popover();
+                                                  //| $("#bb").popover();
+                                                  //| $("#cc").popover();
 }

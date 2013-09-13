@@ -6,35 +6,20 @@
 @import controllers.study._
 @import domain.AnnotationValueType._
 
-@main(Messages("biobank.study.singular") + " " + studyName) {
-    @breadcrumbs(Map(
-      (Messages("biobank.study.plural") -> routes.StudyController.index),
-      (studyName -> routes.StudyController.showStudy(studyId)),
-      (Messages("biobank.study.collection.event.annotation.type.show.title") -> null)
-    ))
-    <div class="page-header">
-      <h2>@studyName&nbsp;
-      <small>@Messages("biobank.study.collection.event.annotation.type.show.title")
-      <a href="@routes.CeventAnnotTypeController.addAnnotationType(studyId, studyName)" 
-          class="btn btn-small btn-primary" type="button"
-          data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
-          <i class="icon-plus-sign icon-white"></i></a>
-      </small></h2>
-    </div>
-    <div class="clearfix">
-      @flash.get("success").map { message =>
-        <div class="alert alert-success">
-          @message
-        </div>
-      }
+<h4>
+@Messages("biobank.study.collection.event.annotation.type.show.title")
+<a href="@routes.CeventAnnotTypeController.addAnnotationType(studyId, studyName)" 
+    class="btn btn-small btn-primary" type="button"
+    data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
+    <i class="icon-plus-sign icon-white"></i></a>
+</h4>
       
-        @if(annotationTypes.size <= 0) {
-            <p>@Messages("biobank.study.collection.event.annotation.type.show.none")</p>
-        } else {
+@if(annotationTypes.size <= 0) {
+    <p>@Messages("biobank.study.collection.event.annotation.type.show.none")</p>
+} else {
       <table class="table table-bordered table-hover table-condensed">
         <thead>
           <th>@Messages("biobank.common.name")</th>
-          <th>@Messages("biobank.common.description")</th>
           <th>@Messages("biobank.annotation.type.field.value.type")</th>
           <th>@Messages("biobank.annotation.type.field.max.value.count")</th>
           <th>@Messages("biobank.annotation.type.field.options")</th>
@@ -43,8 +28,14 @@
         <tbody>
           @for(annotType <- annotationTypes) {
             <tr>
-              <td>@annotType.name</td>
-              <td>@annotType.description</td>
+              <td>
+              <a href="#" id="@annotType.id" class="btn btn-mini btn-success" rel="popover"
+                 data-html="true" data-placement="bottom" data-width="600px"
+                 data-content="@annotType.description.getOrElse("").replace("\n", "<br/>")" 
+                 data-original-title="<strong>@Messages("biobank.common.description")</strong>">
+                 @annotType.name
+                 </a>            
+              </td>
               <td><span class="label">@annotType.valueType</span></td>
               
               @if(annotType.valueType == domain.AnnotationValueType.Select) {
@@ -72,7 +63,9 @@
           }
         </tbody>
       </table>
-        } 
-    </div>    
+
+  <script type="text/javascript" charset="utf-8">
+      @Html(annotationTypes.map(sg => """$('#%s').popover();""".format(sg.id)).mkString("\n"))
+  </script>
 }
     

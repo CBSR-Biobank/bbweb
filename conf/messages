@@ -18,6 +18,7 @@ biobank.common.cancel=Cancel
 biobank.common.form.fix.errors=Please fix errors shown below
 biobank.common.name.help=short name
 biobank.common.description.help=describes the name
+biobank.description.none=No description yet.
 
 # Study
 biobank.study.singular=Study
@@ -29,11 +30,16 @@ biobank.study.added=Study has been added:  {0}.
 biobank.study.updated=Study has been updated: {0}.
 biobank.study.none=No studies have been added.
 biobank.study.field.status=Status
+biobank.study.tab.summary=Summary
+biobank.study.tab.participants=Participants
+biobank.study.tab.subtitle.participants=Participant Information
+biobank.study.tab.specimens=Specimens
+biobank.study.tab.collection.events=Collection Events
+biobank.study.tab.processing.events=Processing Events
 biobank.study.field.participants=Participants
 biobank.study.field.collection.events=Collection Events
-biobank.study.field.specimengroups=Specimen Groups
-biobank.study.field.collection.event.annotation.types=Collection Event Annotation Types
-biobank.study.field.collection.event.types=Collection Event Types
+biobank.study.field.processing.events=Processing Events
+biobank.study.field.specimen.count=Specimens in Inventory
 biobank.study.form.title=Add Study
 biobank.study.form.error.name=Study with this name already exists
 biobank.study.error.heading=Study Error

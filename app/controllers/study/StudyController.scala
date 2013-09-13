@@ -27,6 +27,17 @@ import securesocial.core.SecureSocial
 import scalaz._
 import scalaz.Scalaz._
 
+object StudyTab extends Enumeration {
+  type StudyTab = Value
+  val Summary = Value("tab-summary")
+  val Participants = Value("tab-participants")
+  val Specimens = Value("tab-specimens")
+  val CollectionEvents = Value("tab-collection-events")
+  val ProcessingEvents = Value("tab-processing-events")
+}
+
+import StudyTab._
+
 case class StudyFormObject(
   studyId: String, version: Long, name: String, description: Option[String]) {
 
@@ -41,9 +52,9 @@ case class StudyFormObject(
 
 object StudyController extends Controller with SecureSocial {
 
-  lazy val studyService = WebComponent.studyService
+  private lazy val studyService = WebComponent.studyService
 
-  val studyForm = Form(
+  private val studyForm = Form(
     mapping(
       "studyId" -> text,
       "version" -> longNumber,
@@ -62,7 +73,7 @@ object StudyController extends Controller with SecureSocial {
     Ok(views.html.study.index(studies))
   }
 
-  def showStudy(id: String) = SecuredAction { implicit request =>
+  def showStudy(id: String, tab: String) = SecuredAction { implicit request =>
     studyService.getStudy(id) match {
       case Failure(x) =>
         if (x.head.contains("study does not exist")) {
@@ -77,11 +88,8 @@ object StudyController extends Controller with SecureSocial {
         val counts = Map(
           ("participants" -> "<i>to be implemented</i>"),
           ("collection.events" -> "<i>to be implemented</i>"),
-          ("specimen.groups" -> studyService.specimenGroupsForStudy(id).size.toString),
-          ("collection.event.annotation.types" ->
-            studyService.collectionEventAnnotationTypesForStudy(id).size.toString),
-          ("collection.event.types" -> studyService.collectionEventTypesForStudy(id).size.toString))
-        Ok(html.study.showStudy(study, counts))
+          ("specimen.count" -> "<i>to be implemented</i>"))
+        Ok(html.study.showStudy(study, counts, StudyTab.withName(tab)))
     }
   }
 
@@ -102,7 +110,7 @@ object StudyController extends Controller with SecureSocial {
           implicit val userId = UserId(request.user.identityId.userId)
           studyService.addStudy(formObj.getAddCmd).map(study => study match {
             case Success(study) =>
-              Redirect(routes.StudyController.showStudy(study.id.id)).flashing(
+              Redirect(routes.StudyController.showStudy(study.id.id, StudyTab.Summary.toString)).flashing(
                 "success" -> Messages("biobank.study.added", study.name))
             case Failure(x) =>
               if (x.head.contains("study with name already exists")) {
@@ -151,7 +159,7 @@ object StudyController extends Controller with SecureSocial {
                     throw new Error(x.head)
                   }
                 case Success(study) =>
-                  Redirect(routes.StudyController.showStudy(study.id.id)).flashing(
+                  Redirect(routes.StudyController.showStudy(study.id.id, StudyTab.Summary.toString)).flashing(
                     "success" -> Messages("biobank.study.updated", study.name))
               })
           }

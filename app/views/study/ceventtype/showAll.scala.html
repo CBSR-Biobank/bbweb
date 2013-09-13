@@ -8,34 +8,20 @@
 @import controllers.study._
 @import domain.AnnotationValueType._
 
-@main(Messages("biobank.study.singular") + " " + studyName) {
-  @breadcrumbs(Map(
-    (Messages("biobank.study.plural") -> routes.StudyController.index),
-    (studyName -> routes.StudyController.showStudy(studyId)),
-    (Messages("biobank.study.collection.event.type.show.title") -> null)
-  ))
-  <div class="page-header">
-    <h2>@studyName<small> @Messages("biobank.study.collection.event.type.show.title")
-    <a href="@routes.CeventTypeController.addCeventType(studyId, studyName)" 
+<h4>
+  @Messages("biobank.study.collection.event.type.show.title")
+  <a href="@routes.CeventTypeController.addCeventType(studyId, studyName)" 
         class="btn btn-small btn-primary" type="button"
         data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
         <i class="icon-plus-sign icon-white"></i></a>
-    </small></h2>
-  </div>
-  <div class="clearfix">
-    @flash.get("success").map { message =>
-      <div class="alert alert-success">
-        @message
-      </div>
-    }
-    
-      @if(ceventTypes.size <= 0) {
-          <p>@Messages("biobank.study.collection.event.type.show.none")</p>
-      } else {
+</h4>
+
+@if(ceventTypes.size <= 0) {
+   <p>@Messages("biobank.study.collection.event.type.show.none")</p>
+} else {
     <table class="table table-bordered table-hover table-condensed">
       <thead>
         <th>@Messages("biobank.common.name")</th>
-        <th>@Messages("biobank.common.description")</th>
         <th>@Messages("biobank.study.collection.event.type.field.recurring")</th>
         <th>
             @Messages("biobank.study.collection.event.type.field.specimen.group.data")<br/>
@@ -50,8 +36,12 @@
       <tbody>
         @for(ceventtype <- ceventTypes) {
           <tr>
-            <td>@ceventtype.name</td>
-            <td>@ceventtype.description</td>
+            <td>
+              <a href="#" id="@ceventtype.id" class="btn btn-mini btn-success" rel="popover"
+                 data-html="true" data-placement="bottom" data-width="600px"
+                 data-content="@ceventtype.description.getOrElse("").replace("\n", "<br/>")" 
+                 data-original-title="<strong>@Messages("biobank.common.description")</strong>">@ceventtype.name</a>            
+            </td>
             <td>
               @if(ceventtype.recurring){ 
                 @Messages("biobank.common.yes")
@@ -80,8 +70,9 @@
         }
       </tbody>
     </table>
-      } 
-  
-  </div>    
+
+  <script type="text/javascript" charset="utf-8">
+      @Html(ceventTypes.map(sg => """$('#%s').popover();""".format(sg.id)).mkString("\n"))
+  </script>
 }
     

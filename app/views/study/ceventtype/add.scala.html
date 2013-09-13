@@ -29,7 +29,7 @@
 @main(formInfo.title) {
     @breadcrumbs(Map(
         (Messages("biobank.study.plural") -> routes.StudyController.index),
-        (studyName -> routes.StudyController.showStudy(studyId)),
+        (studyName -> routes.StudyController.showStudy(studyId, StudyTab.Summary.toString)),
         (formInfo.title -> null)
     ))
     <div class="page-header">
@@ -94,7 +94,7 @@
                     <i class="icon-plus-sign icon-white"></i>
                 </a>
             </div>
-        </div>
+        </div>   
 
         @repeat(cetForm("annotationTypeData"), 
             min = cetForm("annotationTypeData").indexes.size) { atypeData =>

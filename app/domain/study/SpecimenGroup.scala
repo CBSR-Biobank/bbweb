@@ -7,6 +7,7 @@ import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
 
+import play.api.libs.json._
 import scalaz._
 import Scalaz._
 
