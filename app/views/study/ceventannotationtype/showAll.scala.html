@@ -27,15 +27,8 @@
         </thead>
         <tbody>
           @for(annotType <- annotationTypes) {
-            <tr>
-              <td>
-              <a href="#" id="@annotType.id" class="btn btn-mini btn-success" rel="popover"
-                 data-html="true" data-placement="bottom" data-width="600px"
-                 data-content="@annotType.description.getOrElse("").replace("\n", "<br/>")" 
-                 data-original-title="<strong>@Messages("biobank.common.description")</strong>">
-                 @annotType.name
-                 </a>            
-              </td>
+            <tr>   
+              <td>@nameWithDescriptionPopup(annotType.id.id, annotType.name, annotType.description)</td>
               <td><span class="label">@annotType.valueType</span></td>
               
               @if(annotType.valueType == domain.AnnotationValueType.Select) {

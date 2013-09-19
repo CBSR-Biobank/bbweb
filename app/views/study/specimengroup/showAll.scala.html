@@ -15,7 +15,7 @@
 @if(specimenGroups.size <= 0) {
   <p>@Messages("biobank.study.specimen.group.show.none")</p>
 } else {
-  <table class="table table-bordered table-hover table-condensed">
+  <table class="table table-bordered table-hover table-condensed">   
   <thead>
     <th>@Messages("biobank.common.name")</th>
     <th>@Messages("biobank.study.specimen.group.field.units")</th>
@@ -24,16 +24,11 @@
     <th>@Messages("biobank.study.specimen.group.field.preservationtemperature")</th>
     <th>@Messages("biobank.study.specimen.group.field.specimentype")</th>
     <th></th>
-  </thead>
+  </thead>  
   <tbody>
   @for(sg <- specimenGroups) {
     <tr>    
-    <td>
-      <a href="#" id="@sg.id" class="btn btn-mini btn-success" rel="popover"
-         data-html="true" data-placement="bottom" data-width="600px"
-         data-content="@sg.description.getOrElse("").replace("\n", "<br/>")" 
-         data-original-title="<strong>@Messages("biobank.common.description")</strong>">@sg.name</a>
-    </td>
+    <td>@nameWithDescriptionPopup(sg.id.id, sg.name, sg.description)</td>
     <td>@sg.units</td>
     <td>@sg.anatomicalSourceType</td>
     <td>@sg.preservationType</td>

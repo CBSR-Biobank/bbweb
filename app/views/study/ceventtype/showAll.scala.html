@@ -35,13 +35,8 @@
       </thead>
       <tbody>
         @for(ceventtype <- ceventTypes) {
-          <tr>
-            <td>
-              <a href="#" id="@ceventtype.id" class="btn btn-mini btn-success" rel="popover"
-                 data-html="true" data-placement="bottom" data-width="600px"
-                 data-content="@ceventtype.description.getOrElse("").replace("\n", "<br/>")" 
-                 data-original-title="<strong>@Messages("biobank.common.description")</strong>">@ceventtype.name</a>            
-            </td>
+          <tr>    
+            <td>@nameWithDescriptionPopup(ceventtype.id.id, ceventtype.name, ceventtype.description)</td>
             <td>
               @if(ceventtype.recurring){ 
                 @Messages("biobank.common.yes")

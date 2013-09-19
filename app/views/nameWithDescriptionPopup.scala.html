@@ -1,0 +1,5 @@
+@(id: String, name: String, description: Option[String])
+<a href="#" id="@id" class="btn btn-mini btn-success" rel="popover"
+  data-html="true" data-placement="bottom"
+  data-content="@description.getOrElse("").replace("\n", "<br/>")" 
+  data-original-title="<strong>@Messages("biobank.common.description")</strong>">@name</a>

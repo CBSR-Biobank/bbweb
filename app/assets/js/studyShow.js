@@ -14,19 +14,22 @@ tab2JsRoutes["#tab-collection-events"] = [
 
 function getTabContent(tab, studyId, studyName) {
     if (tab in tab2JsRoutes) {
+        var ajaxCalls = [];
         $.each(tab2JsRoutes[tab], function(index, route) {
-            route(studyId, studyName).ajax({
-                success : function(data) {
-                    if (index == 0) {
-                        $(tab).html(data);
-                    } else {
-                        $(tab).append(data);
-                    }
-                },
-                error : function(err) {
-                    alert("Ajax Call error: " + err);
-                }
-            });
+            ajaxCalls.push(route(studyId, studyName).ajax());
+        });
+
+        $.when.apply($, ajaxCalls).done(function(){
+            if (ajaxCalls.length == 1) {
+                $(tab).html(arguments[0]);
+            } else {
+                // response has variable number of arguments
+                var responses = "";
+                $.each(arguments, function(index, responseData){
+                    responses += responseData[0];
+                });
+                $(tab).html(responses);
+            }
         });
     }
 }
