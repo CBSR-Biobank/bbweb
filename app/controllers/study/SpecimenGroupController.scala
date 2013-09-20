@@ -91,7 +91,7 @@ object SpecimenGroupController extends Controller with SecureSocial {
   private def studyBreadcrumbs(studyId: String, studyName: String) = {
     Map(
       (Messages("biobank.study.plural") -> routes.StudyController.index),
-      (studyName -> routes.StudyController.showStudy(studyId, StudyTab.Specimens.toString)))
+      (studyName -> routes.StudyController.showStudy(studyId)))
   }
 
   private def addBreadcrumbs(studyId: String, studyName: String) = {
@@ -109,41 +109,15 @@ object SpecimenGroupController extends Controller with SecureSocial {
       (Messages("biobank.study.specimen.group.remove") -> null)
   }
 
-  def showAll(studyId: String, studyName: String) = SecuredAction { implicit request =>
-    studyService.getStudy(studyId) match {
-      case Failure(x) =>
-        if (x.head.contains("study does not exist")) {
-          BadRequest(html.serviceError(
-            Messages("biobank.study.specimen.group.error.heading"),
-            Messages("biobank.study.error"),
-            addBreadcrumbs(studyId, studyName)))
-        } else {
-          throw new Error(x.head)
-        }
-      case Success(study) =>
-        val specimenGroups = studyService.specimenGroupsForStudy(studyId)
-        Ok(html.study.specimengroup.showAll(studyId, studyName, specimenGroups))
-    }
-  }
-
   /**
    * Add a specimen group.
    */
   def addSpecimenGroup(studyId: String, studyName: String) = SecuredAction { implicit request =>
-    studyService.getStudy(studyId) match {
-      case Failure(x) =>
-        if (x.head.contains("study does not exist")) {
-          BadRequest(html.serviceError(
-            Messages("biobank.study.specimen.group.add.error.heading"),
-            Messages("biobank.study.error"),
-            addBreadcrumbs(studyId, studyName)))
-        } else {
-          throw new Error(x.head)
-        }
-      case Success(study) =>
+    StudyController.validateStudy(studyId, Messages("biobank.study.specimen.group.add.error.heading"))(
+      study => {
         Ok(html.study.specimengroup.add(specimenGroupForm, AddFormType(), studyId, study.name,
           addBreadcrumbs(study.id.id, study.name)))
-    }
+      })
   }
 
   def addSpecimenGroupSubmit = SecuredAction { implicit request =>
@@ -174,7 +148,7 @@ object SpecimenGroupController extends Controller with SecureSocial {
                   throw new Error(x.head)
                 }
               case Success(sg) =>
-                Redirect(routes.StudyController.showStudy(studyId, StudyTab.Specimens.toString)).flashing(
+                Redirect(routes.StudyController.showStudy(studyId)).flashing(
                   "success" -> Messages("biobank.study.specimen.group.added", sg.name))
             })
         }
@@ -265,7 +239,7 @@ object SpecimenGroupController extends Controller with SecureSocial {
                   throw new Error(x.head)
                 }
               case Success(sg) =>
-                Redirect(routes.StudyController.showStudy(studyId, StudyTab.Specimens.toString)).flashing(
+                Redirect(routes.StudyController.showStudy(studyId)).flashing(
                   "success" -> Messages("biobank.study.specimen.group.updated", sg.name))
             })
         }
@@ -314,7 +288,7 @@ object SpecimenGroupController extends Controller with SecureSocial {
                 sg.id.id, sg.versionOption, sg.studyId.id)).map(validation =>
                 validation match {
                   case Success(sg) =>
-                    Redirect(routes.StudyController.showStudy(studyId, StudyTab.Specimens.toString)).flashing(
+                    Redirect(routes.StudyController.showStudy(studyId)).flashing(
                       "success" -> Messages("biobank.study.specimen.group.removed", sg.name))
                   case Failure(x) =>
                     throw new Error(x.head)

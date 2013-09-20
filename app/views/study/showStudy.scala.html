@@ -7,14 +7,18 @@
 @import StudyTab._
 
 @tabSummaryActive = @{ if (activeTab.equals(StudyTab.Summary)) "active" else "" }    
+@tabParticipantsActive = @{ if (activeTab.equals(StudyTab.Participants)) "active" else "" }    
 @tabSpecimensActive = @{ if (activeTab.equals(StudyTab.Specimens)) "active" else "" }    
 @tabCollectionEventsActive = @{ if (activeTab.equals(StudyTab.CollectionEvents)) "active" else "" }    
+@tabProcessingEventsActive = @{ if (activeTab.equals(StudyTab.ProcessingEvents)) "active" else "" }    
 
 @main(Messages("biobank.study.singular") + " " + study.name) {
   @helper.javascriptRouter("jsRoutes")(
-    routes.javascript.SpecimenGroupController.showAll,
-    routes.javascript.CeventTypeController.showAll,    
-    routes.javascript.CeventAnnotTypeController.showAll
+    routes.javascript.StudyController.summaryTab,
+    routes.javascript.StudyController.participantsTab,
+    routes.javascript.StudyController.specimensTab,
+    routes.javascript.StudyController.ceventsTab,
+    routes.javascript.StudyController.peventsTab
     )
     
   @breadcrumbs(Map(
@@ -33,10 +37,10 @@
   <div class="tabbable" data-study-id="@study.id.id" data-study-name="@study.name" data-active-tab="#@activeTab.toString">
     <ul class="nav nav-tabs" id="study-tabs">
       <li class="@tabSummaryActive"><a href="#tab-summary" data-toggle="tab">@Messages("biobank.study.tab.summary")</a></li>
-      <li class=""><a href="#tab-participants" data-toggle="tab">@Messages("biobank.study.tab.participants")</a></li>
+      <li class="@tabParticipantsActive"><a href="#tab-participants" data-toggle="tab">@Messages("biobank.study.tab.participants")</a></li>
       <li class="@tabSpecimensActive"><a href="#tab-specimens" data-toggle="tab">@Messages("biobank.study.tab.specimens")</a></li>
       <li class="@tabCollectionEventsActive"><a href="#tab-collection-events" data-toggle="tab">@Messages("biobank.study.tab.collection.events")</a></li>
-      <li class=""><a href="#tab-pevents" data-toggle="tab">@Messages("biobank.study.tab.processing.events")</a></li>
+      <li class="@tabProcessingEventsActive"><a href="#tab-processing-events" data-toggle="tab">@Messages("biobank.study.tab.processing.events")</a></li>
     </ul>
 
     @flash.get("success").map { message =>
@@ -51,7 +55,7 @@
         <small class="muted">@Messages("biobank.study.field.status"): @study.status</small>
         <p>@Html(study.description.getOrElse(Messages("biobank.description.none")).replace("\n", "<br/>"))</p>
       </div>
-      <div class="tab-pane fade in" id="tab-participants">
+      <div class="tab-pane fade in @tabParticipantsActive" id="tab-participants">
         <h4>@Messages("biobank.study.tab.subtitle.participants")</h4>
         @nameValueRow(Messages("biobank.study.field.participants"), counts("participants"))
         @nameValueRow(Messages("biobank.study.field.collection.events"), counts("collection.events"))
@@ -59,7 +63,7 @@
       </div>
       <div class="tab-pane fade in @tabSpecimensActive" id="tab-specimens"></div>
       <div class="tab-pane fade in @tabCollectionEventsActive" id="tab-collection-events"></div>
-      <div class="tab-pane fade in" id="tab-pevents"></div>
+      <div class="tab-pane fade in @tabProcessingEventsActive" id="tab-processing-events"></div>
     </div>
   </div>
   </div>

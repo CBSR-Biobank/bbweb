@@ -7,7 +7,12 @@
     (Messages("biobank.study.plural") -> null)
   ))  
   <div class="page-header">
-    <h2>@Messages("biobank.study.plural")</h2>
+    <h2>@Messages("biobank.study.plural")
+        <a href="@routes.StudyController.addStudy"
+            class="btn btn-small btn-primary" type="button"
+            data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
+            <i class="icon-plus-sign icon-white"></i></a>
+    </h2>
   </div>
   
   <div class="clearfix">
@@ -23,7 +28,7 @@
         <tbody>
           @for(s <- studies) {
               <tr>
-                <td><a href="@routes.StudyController.showStudy(s.id.id, StudyTab.Summary.toString)">@s.name</a></td>
+                <td><a href="@routes.StudyController.summary(s.id.id)">@s.name</a></td>
                 <td>@s.status</td>
                 <td style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
                     @Html(s.description.map(v => v.replace("\n", "")).getOrElse(""))
@@ -33,10 +38,5 @@
         </tbody>
       </table>
     }
-  
-    <div class="form-actions">
-      <a href="@routes.StudyController.addStudy" class="btn btn-small btn-primary" type="button">
-      @Messages("biobank.study.add")</a>
-    </div>
   </div>
 }

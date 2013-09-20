@@ -9,37 +9,42 @@ GET     /contact                    controllers.Application.contact
 
 # studies
 GET     /study                      controllers.study.StudyController.index
-GET     /study/show/:id/:tab        controllers.study.StudyController.showStudy(id:String, tab: String)
+GET     /study/summary/:id          controllers.study.StudyController.summary(id)
+GET     /study/show/:id             controllers.study.StudyController.showStudy(id)
 GET     /study/add                  controllers.study.StudyController.addStudy
 POST    /study/add                  controllers.study.StudyController.addStudySubmit
-GET     /study/update/:id           controllers.study.StudyController.updateStudy(id:String)
-POST    /study/update/:id           controllers.study.StudyController.updateStudySubmit(id:String)
+GET     /study/update/:id           controllers.study.StudyController.updateStudy(id)
+POST    /study/update/:id           controllers.study.StudyController.updateStudySubmit(id)
+
+# study Ajax calls
+GET     /study/summary/:studyId/:studyName         controllers.study.StudyController.summaryTab(studyId,studyName)
+GET     /study/participants/:studyId/:studyName    controllers.study.StudyController.participantsTab(studyId,studyName)
+GET     /study/specimens/:studyId/:studyName       controllers.study.StudyController.specimensTab(studyId, studyName)
+GET     /study/cevents/list/:studyId/:studyName    controllers.study.StudyController.ceventsTab(studyId,studyName)
+GET     /study/pevents/list/:studyId/:studyName    controllers.study.StudyController.peventsTab(studyId,studyName)
 
 # specimen groups
-GET     /study/sg/show/:studyId/:studyName             controllers.study.SpecimenGroupController.showAll(studyId:String, studyName:String)
-GET     /study/sg/add/:studyId/:studyName              controllers.study.SpecimenGroupController.addSpecimenGroup(studyId:String, studyName:String)
+GET     /study/sg/add/:studyId/:studyName              controllers.study.SpecimenGroupController.addSpecimenGroup(studyId, studyName)
 POST    /study/sg/add                         	       controllers.study.SpecimenGroupController.addSpecimenGroupSubmit
-GET     /study/sg/update/:studyId/:studyName/:sgId     controllers.study.SpecimenGroupController.updateSpecimenGroup(studyId:String, studyName: String, sgId:String)
+GET     /study/sg/update/:studyId/:studyName/:sgId     controllers.study.SpecimenGroupController.updateSpecimenGroup(studyId, studyName, sgId)
 POST    /study/sg/update                      	       controllers.study.SpecimenGroupController.updateSpecimenGroupSubmit
-GET     /study/sg/remove/:studyId/:studyName/:sgId     controllers.study.SpecimenGroupController.removeSpecimenGroup(studyId:String, studyName: String, sgId:String)
+GET     /study/sg/remove/:studyId/:studyName/:sgId     controllers.study.SpecimenGroupController.removeSpecimenGroup(studyId, studyName, sgId)
 POST    /study/sg/remove                      	       controllers.study.SpecimenGroupController.removeSpecimenGroupSubmit
 
 # collection event annotation types
-GET     /study/cevent/annot/show/:studyId/:studyName                controllers.study.CeventAnnotTypeController.showAll(studyId:String, studyName:String)
-GET     /study/cevent/annot/add/:studyId/:studyName                 controllers.study.CeventAnnotTypeController.addAnnotationType(studyId:String, studyName:String)
+GET     /study/cevent/annot/add/:studyId/:studyName                 controllers.study.CeventAnnotTypeController.addAnnotationType(studyId, studyName)
 POST    /study/cevent/annot/add                                     controllers.study.CeventAnnotTypeController.addAnnotationTypeSubmit
-GET     /study/cevent/annot/update/:studyId/:studyName/:annotId     controllers.study.CeventAnnotTypeController.updateAnnotationType(studyId:String, studyName: String, annotId: String)
+GET     /study/cevent/annot/update/:studyId/:studyName/:annotId     controllers.study.CeventAnnotTypeController.updateAnnotationType(studyId, studyName, annotId)
 POST    /study/cevent/annot/update                                  controllers.study.CeventAnnotTypeController.updateAnnotationTypeSubmit
-GET     /study/cevent/annot/remove/:studyId/:studyName/:annotId     controllers.study.CeventAnnotTypeController.removeAnnotationType(studyId:String, studyName: String, annotId: String)
+GET     /study/cevent/annot/remove/:studyId/:studyName/:annotId     controllers.study.CeventAnnotTypeController.removeAnnotationType(studyId, studyName, annotId)
 POST     /study/cevent/annot/remove                                 controllers.study.CeventAnnotTypeController.removeAnnotationTypeSubmit
 
 # collection event types
-GET     /study/cetype/show                                 controllers.study.CeventTypeController.showAll(studyId:String,studyName:String)
-GET     /study/cetype/add/:studyId/:studyName              controllers.study.CeventTypeController.addCeventType(studyId:String, studyName:String)
+GET     /study/cetype/add/:studyId/:studyName              controllers.study.CeventTypeController.addCeventType(studyId, studyName)
 POST    /study/cetype/add                                  controllers.study.CeventTypeController.addCeventTypeSubmit
-GET     /study/cetype/update/:studyId/:studyName/:cetId    controllers.study.CeventTypeController.updateCeventType(studyId:String, studyName: String, cetId: String)
+GET     /study/cetype/update/:studyId/:studyName/:cetId    controllers.study.CeventTypeController.updateCeventType(studyId, studyName, cetId)
 POST    /study/cetype/update                               controllers.study.CeventTypeController.updateCeventTypeSubmit
-GET     /study/cetype/remove/:studyId/:studyName/:cetId    controllers.study.CeventTypeController.removeCeventType(studyId:String, studyName: String, cetId: String)
+GET     /study/cetype/remove/:studyId/:studyName/:cetId    controllers.study.CeventTypeController.removeCeventType(studyId, studyName, cetId)
 GET     /study/cetype/remove                               controllers.study.CeventTypeController.removeCeventTypeSubmit
 
 # user

@@ -9,7 +9,7 @@
 @main(Messages("biobank.study.specimen.group.remove")) {
   @breadcrumbs(Map(
     (Messages("biobank.study.plural") -> routes.StudyController.index),
-    (studyName -> routes.StudyController.showStudy(studyId, StudyTab.Summary.toString)),
+    (studyName -> routes.StudyController.showStudy(studyId)),
     (Messages("biobank.study.collection.event.type.remove") -> null)
   ))
   <div class="page-header">

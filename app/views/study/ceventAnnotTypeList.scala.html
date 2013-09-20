@@ -1,7 +1,6 @@
 @(studyId: String, 
     studyName: String, 
-    annotationTypes: Set[domain.study.CollectionEventAnnotationType])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
-    flash: play.api.mvc.Flash)
+    annotationTypes: Set[domain.study.CollectionEventAnnotationType])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
     
 @import controllers.study._
 @import domain.AnnotationValueType._

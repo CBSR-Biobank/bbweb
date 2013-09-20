@@ -3,32 +3,21 @@
 //
 //
 var tab2JsRoutes = {};
-tab2JsRoutes["#tab-specimens"] = [
-    jsRoutes.controllers.study.SpecimenGroupController.showAll
-];
-
-tab2JsRoutes["#tab-collection-events"] = [
-    jsRoutes.controllers.study.CeventTypeController.showAll,
-    jsRoutes.controllers.study.CeventAnnotTypeController.showAll
-];
+tab2JsRoutes["#tab-summary"] = jsRoutes.controllers.study.StudyController.summaryTab;
+tab2JsRoutes["#tab-participants"] = jsRoutes.controllers.study.StudyController.participantsTab;
+tab2JsRoutes["#tab-specimens"] = jsRoutes.controllers.study.StudyController.specimensTab;
+tab2JsRoutes["#tab-collection-events"] = jsRoutes.controllers.study.StudyController.ceventsTab;
+tab2JsRoutes["#tab-processing-events"] = jsRoutes.controllers.study.StudyController.peventsTab;
 
 function getTabContent(tab, studyId, studyName) {
     if (tab in tab2JsRoutes) {
-        var ajaxCalls = [];
-        $.each(tab2JsRoutes[tab], function(index, route) {
-            ajaxCalls.push(route(studyId, studyName).ajax());
-        });
-
-        $.when.apply($, ajaxCalls).done(function(){
-            if (ajaxCalls.length == 1) {
-                $(tab).html(arguments[0]);
-            } else {
-                // response has variable number of arguments
-                var responses = "";
-                $.each(arguments, function(index, responseData){
-                    responses += responseData[0];
-                });
-                $(tab).html(responses);
+        tab2JsRoutes[tab](studyId, studyName).ajax({
+            success : function(data) {
+                console.log(data);
+                $(tab).html(data);
+            },
+            error : function(err) {
+                alert("An error occurred. Please reload this page.");
             }
         });
     }

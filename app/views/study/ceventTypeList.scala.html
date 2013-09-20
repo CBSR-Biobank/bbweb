@@ -2,8 +2,7 @@
     studyName: String, 
     ceventTypes: Set[domain.study.CollectionEventType],    
     specimenGroupMap: Seq[(String, String, String)],    
-    annotationTypeMap: Seq[(String, String)])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
-    flash: play.api.mvc.Flash)
+    annotationTypes: Set[domain.study.CollectionEventAnnotationType])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
     
 @import controllers.study._
 @import domain.AnnotationValueType._
@@ -52,7 +51,7 @@
             <td>          
                 @Html(ceventtype.annotationTypeData.map(atData =>
                     "%s (%s)".format(
-                    annotationTypeMap.find(x => x._1.equals(atData.annotationTypeId)).map(_._2).getOrElse(""),
+                    annotationTypes.find(x => x.equals(atData.annotationTypeId)).map(_.description).getOrElse(""),
                     if (atData.required) "Y" else "N")).mkString("<br/>"))
             </td>                
             <td> 
@@ -65,9 +64,11 @@
         }
       </tbody>
     </table>
+}
+
+@ceventAnnotTypeList(studyId, studyName, annotationTypes)
+
 
   <script type="text/javascript" charset="utf-8">
       @Html(ceventTypes.map(sg => """$('#%s').popover();""".format(sg.id)).mkString("\n"))
-  </script>
-}
-    
+  </script>    

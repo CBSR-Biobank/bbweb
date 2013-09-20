@@ -74,7 +74,7 @@ object CeventAnnotTypeController extends Controller with SecureSocial {
   private def studyBreadcrumbs(studyId: String, studyName: String) = {
     Map(
       (Messages("biobank.study.plural") -> routes.StudyController.index),
-      (studyName -> routes.StudyController.showStudy(studyId, StudyTab.CollectionEvents.toString)))
+      (studyName -> routes.StudyController.showStudy(studyId)))
   }
 
   private def addBreadcrumbs(studyId: String, studyName: String) = {
@@ -92,30 +92,16 @@ object CeventAnnotTypeController extends Controller with SecureSocial {
       (Messages("biobank.study.collection.event.annotation.type.remove") -> null)
   }
 
-  def showAll(studyId: String, studyName: String) = SecuredAction { implicit request =>
-    val annotTypes = studyService.collectionEventAnnotationTypesForStudy(studyId)
-    Ok(html.study.ceventannotationtype.showAll(studyId, studyName, annotTypes))
-  }
-
   /**
    * Add an attribute type.
    */
   def addAnnotationType(studyId: String, studyName: String) = SecuredAction { implicit request =>
-    studyService.getStudy(studyId) match {
-      case Failure(x) =>
-        if (x.head.contains("study does not exist")) {
-          BadRequest(html.serviceError(
-            Messages("biobank.annotation.type.add.error.heading"),
-            Messages("biobank.study.error"),
-            addBreadcrumbs(studyId, studyName)))
-        } else {
-          throw new Error(x.head)
-        }
-      case Success(study) =>
+    StudyController.validateStudy(studyId, Messages("biobank.annotation.type.add.error.heading"))(
+      study => {
         Ok(html.study.ceventannotationtype.add(
           annotationTypeForm, AddFormType(), studyId, study.name,
           addBreadcrumbs(studyId, studyName)))
-    }
+      })
   }
 
   def addAnnotationTypeSubmit = SecuredAction {
@@ -147,7 +133,7 @@ object CeventAnnotTypeController extends Controller with SecureSocial {
                     throw new Error(x.head)
                   }
                 case Success(annotType) =>
-                  Redirect(routes.StudyController.showStudy(studyId, StudyTab.CollectionEvents.toString)).flashing(
+                  Redirect(routes.StudyController.showStudy(studyId)).flashing(
                     "success" -> Messages("biobank.annotation.type.added", annotType.name))
               })
           }
@@ -238,7 +224,7 @@ object CeventAnnotTypeController extends Controller with SecureSocial {
                   throw new Error(x.head)
                 }
               case Success(annotType) =>
-                Redirect(routes.StudyController.showStudy(studyId, StudyTab.CollectionEvents.toString)).flashing(
+                Redirect(routes.StudyController.showStudy(studyId)).flashing(
                   "success" -> Messages("biobank.annotation.type.updated", annotType.name))
             })
         }
@@ -307,7 +293,7 @@ object CeventAnnotTypeController extends Controller with SecureSocial {
                   annotType.id.id, annotType.versionOption, annotType.studyId.id)).map(validation =>
                   validation match {
                     case Success(annotType) =>
-                      Redirect(routes.StudyController.showStudy(studyId, StudyTab.CollectionEvents.toString)).flashing(
+                      Redirect(routes.StudyController.showStudy(studyId)).flashing(
                         "success" -> Messages("biobank.study.collection.event.annotation.type.removed", annotType.name))
                     case Failure(x) =>
                       throw new Error(x.head)
