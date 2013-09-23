@@ -14,7 +14,9 @@
 </h4>
       
 @if(annotationTypes.size <= 0) {
+  <div class="alert alert-block">    
     <p>@Messages("biobank.study.collection.event.annotation.type.show.none")</p>
+  </div>
 } else {
       <table class="table table-bordered table-hover table-condensed">
         <thead>

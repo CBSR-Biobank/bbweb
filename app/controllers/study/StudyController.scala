@@ -198,7 +198,7 @@ object StudyController extends Controller with SecureSocial {
           implicit val userId = UserId(request.user.identityId.userId)
           studyService.addStudy(formObj.getAddCmd).map(study => study match {
             case Success(study) =>
-              Redirect(routes.StudyController.showStudy(study.id.id)).flashing(
+              Redirect(routes.StudyController.summary(study.id.id)).flashing(
                 "success" -> Messages("biobank.study.added", study.name))
             case Failure(x) =>
               if (x.head.contains("study with name already exists")) {
@@ -244,7 +244,7 @@ object StudyController extends Controller with SecureSocial {
                     throw new Error(x.head)
                   }
                 case Success(study) =>
-                  Redirect(routes.StudyController.showStudy(study.id.id)).flashing(
+                  Redirect(routes.StudyController.summary(study.id.id)).flashing(
                     "success" -> Messages("biobank.study.updated", study.name))
               })
           }

@@ -7,6 +7,8 @@
 @import controllers.study._
 @import domain.AnnotationValueType._
 
+@ceventAnnotTypeList(studyId, studyName, annotationTypes)
+
 <h4>
   @Messages("biobank.study.collection.event.type.show.title")
   <a href="@routes.CeventTypeController.addCeventType(studyId, studyName)" 
@@ -16,7 +18,9 @@
 </h4>
 
 @if(ceventTypes.size <= 0) {
-   <p>@Messages("biobank.study.collection.event.type.show.none")</p>
+  <div class="alert alert-block">    
+    <p>@Messages("biobank.study.collection.event.type.show.none")</p>
+  </div>
 } else {
     <table class="table table-bordered table-hover table-condensed">
       <thead>
@@ -65,8 +69,6 @@
       </tbody>
     </table>
 }
-
-@ceventAnnotTypeList(studyId, studyName, annotationTypes)
 
 
   <script type="text/javascript" charset="utf-8">

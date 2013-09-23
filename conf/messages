@@ -118,6 +118,8 @@ biobank.study.collection.event.form.action.specimen.group.add=Add Specimen Group
 biobank.study.collection.event.form.action.annotation.type.add=Add Annotation Type
 biobank.study.collection.event.type.form.annotation.type=Annotation Type
 biobank.study.collection.event.type.form.annotation.type.required=Required
+biobank.study.collection.event.form.specimen.group.none=No specimen groups have been defined. You cannot configure your collection events types to include specimen groups.
+biobank.study.collection.event.type.form.annotation.type.none=No collection event annotation types have been defined. You cannot configure your collection events types to include annotation types.
 
 # Value type enumeration
 biobank.enumaration.annotation.value.type.Text=Text

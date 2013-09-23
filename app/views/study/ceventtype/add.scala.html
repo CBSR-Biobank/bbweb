@@ -36,11 +36,22 @@
         <h2>@studyName&nbsp;<small>@formInfo.title</small></h2>
     </div>
 
-
     @if(cetForm.hasErrors) {
         <div class="alert">
             <p>@Messages("biobank.common.form.fix.errors")</p>
         </div>
+    }
+
+    @if((specimenGroupMap.size <= 0) || (annotationTypeMap.size <= 0)) {
+      <div class="alert alert-block">
+        <h4>@Messages("biobank.common.warning")</h4>
+        @if(specimenGroupMap.size <= 0) {
+          <p>@Messages("biobank.study.collection.event.form.specimen.group.none")</p>
+        }
+        @if(annotationTypeMap.size <= 0) {
+          <p>@Messages("biobank.study.collection.event.type.form.annotation.type.none")</p>
+        }
+      </div>
     }
 
     <div class="clearfix">
@@ -66,46 +77,49 @@
         @checkbox(field = cetForm("recurring"),
             args = '_label -> Messages("biobank.study.collection.event.type.field.recurring"),
             '_help -> "")
-            
-        <div class="control-group">
-            <div class="controls">
-                <a class="addSpecimenGroup btn btn-small btn-success">
-                    @Messages("biobank.study.collection.event.form.action.specimen.group.add")
-                    <i class="icon-plus-sign icon-white"></i>
-                </a>
-            </div>
-        </div>
-
-        @repeat(cetForm("specimenGroupData"), 
-            min = cetForm("specimenGroupData").indexes.size) { sgGroupData =>
-            @specimenGroupData(sgGroupData, specimenGroupMap)
+        
+        @if(specimenGroupMap.size > 0) {    
+          <div class="control-group">
+              <div class="controls">
+                  <a class="addSpecimenGroup btn btn-small btn-success">
+                      @Messages("biobank.study.collection.event.form.action.specimen.group.add")
+                      <i class="icon-plus-sign icon-white"></i>
+                  </a>
+              </div>
+          </div>
+  
+          @repeat(cetForm("specimenGroupData"), 
+              min = cetForm("specimenGroupData").indexes.size) { sgGroupData =>
+              @specimenGroupData(sgGroupData, specimenGroupMap)
+          }
+          @*
+          * This hidden block will be used as template for Javascript copy code
+          *@
+          @specimenGroupData(cetForm("specimenGroupData[x]"), specimenGroupMap, 
+              className = "sg_data_template", style="display: none;")
         }
 
-        @*
-        * This hidden block will be used as template for Javascript copy code
-        *@
-        @specimenGroupData(cetForm("specimenGroupData[x]"), specimenGroupMap, 
-            className = "sg_data_template", style="display: none;")
-            
-        <div class="control-group">
-            <div class="controls">
-                <a class="addAnnotationType btn btn-small btn-success">
-                    @Messages("biobank.study.collection.event.form.action.annotation.type.add")
-                    <i class="icon-plus-sign icon-white"></i>
-                </a>
-            </div>
-        </div>   
-
-        @repeat(cetForm("annotationTypeData"), 
-            min = cetForm("annotationTypeData").indexes.size) { atypeData =>
-            @annotationTypeData(atypeData, annotationTypeMap)
+        @if(annotationTypeMap.size > 0) {            
+          <div class="control-group">
+              <div class="controls">
+                  <a class="addAnnotationType btn btn-small btn-success">
+                      @Messages("biobank.study.collection.event.form.action.annotation.type.add")
+                      <i class="icon-plus-sign icon-white"></i>
+                  </a>
+              </div>
+          </div>   
+  
+          @repeat(cetForm("annotationTypeData"), 
+              min = cetForm("annotationTypeData").indexes.size) { atypeData =>
+              @annotationTypeData(atypeData, annotationTypeMap)
+          }
+              
+          @*
+          * This hidden block will be used as template for Javascript copy code
+          *@
+          @annotationTypeData(cetForm("annotationTypeData[x]"), annotationTypeMap,
+              className = "at_data_template", style="display: none;")
         }
-            
-        @*
-        * This hidden block will be used as template for Javascript copy code
-        *@
-        @annotationTypeData(cetForm("annotationTypeData[x]"), annotationTypeMap,
-            className = "at_data_template", style="display: none;")
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
