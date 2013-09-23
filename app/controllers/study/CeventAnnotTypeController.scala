@@ -104,6 +104,23 @@ object CeventAnnotTypeController extends Controller with SecureSocial {
       })
   }
 
+  private def validMaxValue(valueType: AnnotationValueType, maxValueCount: Option[Int]): Boolean = {
+    // if value type is "Select" the ensure max value count is valid          
+    if (valueType == AnnotationValueType.Select) {
+      maxValueCount match {
+        case None =>
+          Logger.info("checkMaxValue: nothing selected")
+          false
+        case Some(x) =>
+          Logger.info("checkMaxValue: selected: " + x)
+          if ((x < 1) || (x > 2)) {
+            false
+          }
+      }
+    }
+    true
+  }
+
   def addAnnotationTypeSubmit = SecuredAction {
     implicit request =>
       annotationTypeForm.bindFromRequest.fold(
@@ -115,27 +132,35 @@ object CeventAnnotTypeController extends Controller with SecureSocial {
           BadRequest(html.study.ceventannotationtype.add(
             formWithErrors, AddFormType(), studyId, studyName, addBreadcrumbs(studyId, studyName)))
         },
-        annotTypeForm => {
+        submittedForm => {
           implicit val userId = new UserId(request.user.identityId.userId)
-          val studyId = annotTypeForm.studyId
-          val studyName = annotTypeForm.studyName
+          val studyId = submittedForm.studyId
+          val studyName = submittedForm.studyName
 
-          Async {
-            studyService.addCollectionEventAnnotationType(annotTypeForm.getAddCmd).map(validation =>
-              validation match {
-                case Failure(x) =>
-                  if (x.head.contains("name already exists")) {
-                    val form = annotationTypeForm.fill(annotTypeForm).withError("name",
-                      Messages("biobank.study.collection.event.annotation.type.form.error.name"))
-                    BadRequest(html.study.ceventannotationtype.add(form, AddFormType(),
-                      studyId, studyName, addBreadcrumbs(studyId, studyName)))
-                  } else {
-                    throw new Error(x.head)
-                  }
-                case Success(annotType) =>
-                  Redirect(routes.StudyController.showStudy(studyId)).flashing(
-                    "success" -> Messages("biobank.annotation.type.added", annotType.name))
-              })
+          if (!validMaxValue(AnnotationValueType.withName(submittedForm.valueType),
+            submittedForm.maxValueCount)) {
+            val form = annotationTypeForm.fill(submittedForm).withError("maxValueCount",
+              Messages("biobank.annotation.type.form.max.value.count.error"))
+            BadRequest(html.study.ceventannotationtype.add(
+              form, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
+          } else {
+            Async {
+              studyService.addCollectionEventAnnotationType(submittedForm.getAddCmd).map(validation =>
+                validation match {
+                  case Failure(x) =>
+                    if (x.head.contains("name already exists")) {
+                      val form = annotationTypeForm.fill(submittedForm).withError("name",
+                        Messages("biobank.study.collection.event.annotation.type.form.error.name"))
+                      BadRequest(html.study.ceventannotationtype.add(form, AddFormType(),
+                        studyId, studyName, addBreadcrumbs(studyId, studyName)))
+                    } else {
+                      throw new Error(x.head)
+                    }
+                  case Success(annotType) =>
+                    Redirect(routes.StudyController.showStudy(studyId)).flashing(
+                      "success" -> Messages("biobank.annotation.type.added", annotType.name))
+                })
+            }
           }
         })
   }
@@ -206,27 +231,35 @@ object CeventAnnotTypeController extends Controller with SecureSocial {
         BadRequest(html.study.ceventannotationtype.add(
           formWithErrors, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
       },
-      annotTypeForm => {
+      submittedForm => {
         implicit val userId = new UserId(request.user.identityId.userId)
-        val studyId = annotTypeForm.studyId
-        val studyName = annotTypeForm.studyName
+        val studyId = submittedForm.studyId
+        val studyName = submittedForm.studyName
 
-        Async {
-          studyService.updateCollectionEventAnnotationType(annotTypeForm.getUpdateCmd).map(validation =>
-            validation match {
-              case Failure(x) =>
-                if (x.head.contains("name already exists")) {
-                  val form = annotationTypeForm.fill(annotTypeForm).withError("name",
-                    Messages("biobank.study.collection.event.annotation.type.form.error.name"))
-                  BadRequest(html.study.ceventannotationtype.add(
-                    form, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
-                } else {
-                  throw new Error(x.head)
-                }
-              case Success(annotType) =>
-                Redirect(routes.StudyController.showStudy(studyId)).flashing(
-                  "success" -> Messages("biobank.annotation.type.updated", annotType.name))
-            })
+        if (!validMaxValue(AnnotationValueType.withName(submittedForm.valueType),
+          submittedForm.maxValueCount)) {
+          val form = annotationTypeForm.fill(submittedForm).withError("maxValueCount",
+            Messages("biobank.annotation.type.form.max.value.count.error"))
+          BadRequest(html.study.ceventannotationtype.add(
+            form, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
+        } else {
+          Async {
+            studyService.updateCollectionEventAnnotationType(submittedForm.getUpdateCmd).map(validation =>
+              validation match {
+                case Failure(x) =>
+                  if (x.head.contains("name already exists")) {
+                    val form = annotationTypeForm.fill(submittedForm).withError("name",
+                      Messages("biobank.study.collection.event.annotation.type.form.error.name"))
+                    BadRequest(html.study.ceventannotationtype.add(
+                      form, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
+                  } else {
+                    throw new Error(x.head)
+                  }
+                case Success(annotType) =>
+                  Redirect(routes.StudyController.showStudy(studyId)).flashing(
+                    "success" -> Messages("biobank.annotation.type.updated", annotType.name))
+              })
+          }
         }
       })
   }

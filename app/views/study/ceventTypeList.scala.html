@@ -48,14 +48,16 @@
               }</td>        
             <td>
                 @Html(ceventtype.specimenGroupData.map(sgData =>
-                    "%s (%d - %.3f)".format(
+                    "%s (%d - %.3f %s)".format(
                     specimenGroupMap.find(x => x._1.equals(sgData.specimenGroupId)).map(_._2).getOrElse(""),
-                    sgData.count, sgData.amount)).mkString("<br/>"))
+                    sgData.count, 
+                    sgData.amount,
+                    specimenGroupMap.find(x => x._1.equals(sgData.specimenGroupId)).map(_._3).getOrElse(""))).mkString("<br/>"))
             </td> 
             <td>          
                 @Html(ceventtype.annotationTypeData.map(atData =>
                     "%s (%s)".format(
-                    annotationTypes.find(x => x.equals(atData.annotationTypeId)).map(_.description).getOrElse(""),
+                    annotationTypes.find(x => x.id.id.equals(atData.annotationTypeId)).map(_.name).getOrElse(""),
                     if (atData.required) "Y" else "N")).mkString("<br/>"))
             </td>                
             <td> 
