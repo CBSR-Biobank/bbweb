@@ -113,12 +113,11 @@ object CeventAnnotTypeController extends Controller with SecureSocial {
           false
         case Some(x) =>
           Logger.info("checkMaxValue: selected: " + x)
-          if ((x < 1) || (x > 2)) {
-            false
-          }
+          return ((x >= 1) || (x <= 2))
       }
+    } else {
+      true
     }
-    true
   }
 
   def addAnnotationTypeSubmit = SecuredAction {
@@ -142,7 +141,7 @@ object CeventAnnotTypeController extends Controller with SecureSocial {
             val form = annotationTypeForm.fill(submittedForm).withError("maxValueCount",
               Messages("biobank.annotation.type.form.max.value.count.error"))
             BadRequest(html.study.ceventannotationtype.add(
-              form, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
+              form, AddFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
           } else {
             Async {
               studyService.addCollectionEventAnnotationType(submittedForm.getAddCmd).map(validation =>
