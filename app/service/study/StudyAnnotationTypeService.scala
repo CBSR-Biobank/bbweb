@@ -20,105 +20,70 @@ import scalaz.Scalaz._
  *
  * @author Nelson Loyola
  */
-trait StudyAnnotationTypeServiceComponent {
-  self: RepositoryComponent =>
+abstract class StudyAnnotationTypeService[A <: StudyAnnotationType] extends CommandHandler {
 
-  val annotationTypeService = new StudyAnnotationTypeService
+  private val log = LoggerFactory.getLogger(this.getClass)
 
-  class StudyAnnotationTypeService() extends CommandHandler {
+  protected def createNewAnnotationType(cmd: StudyAnnotationTypeCommand, id: AnnotationTypeId): A
 
-    val log = LoggerFactory.getLogger(this.getClass)
+  protected def createUpdatedAnnotationType(oldAnnotationType: A, cmd: StudyAnnotationTypeCommand): A
 
-    /**
-     * This partial function handles each command. The command is contained within the
-     * StudyProcessorMsg.
-     *
-     *  If the command is invalid, then this method throws an Error exception.
-     */
-    def process = {
+  protected def createRemovalAnnotationType(oldAnnotationType: A, cmd: StudyAnnotationTypeCommand): A
 
-      case msg: StudyProcessorMsg =>
-        msg.cmd match {
-          case cmd: AddCollectionEventAnnotationTypeCmd =>
-            addCollectionEventAnnotationType(cmd, msg.study, msg.listeners, msg.id)
-          case cmd: UpdateCollectionEventAnnotationTypeCmd =>
-            updateCollectionEventAnnotationType(cmd, msg.study, msg.listeners)
-          case cmd: RemoveCollectionEventAnnotationTypeCmd =>
-            removeCollectionEventAnnotationType(cmd, msg.study, msg.listeners)
+  protected def createAnnotationTypeAddedEvent(newItem: A): Any
 
-          case _ =>
-            throw new Error("invalid command received")
-        }
+  protected def createAnnotationTypeUpdatedEvent(updatedItem: A): Any
 
-      case _ =>
-        throw new Error("invalid message received")
-    }
+  protected def createAnnotationTypeRemovedEvent(removedItem: A): Any
 
-    private def addCollectionEventAnnotationType(
-      cmd: AddCollectionEventAnnotationTypeCmd,
-      study: DisabledStudy,
-      listeners: MessageEmitter,
-      id: Option[String]): DomainValidation[CollectionEventAnnotationType] = {
-      val item = for {
-        atId <- id.toSuccess(DomainError("annotation type ID is missing"))
-        newItem <- collectionEventAnnotationTypeRepository.add(CollectionEventAnnotationType(
-          AnnotationTypeId(atId), 0L, study.id, cmd.name, cmd.description, cmd.valueType,
-          cmd.maxValueCount, cmd.options))
-        event <- listeners.sendEvent(CollectionEventAnnotationTypeAddedEvent(
-          newItem.studyId, newItem.id, newItem.name, newItem.description, newItem.valueType,
-          newItem.maxValueCount, newItem.options)).success
-      } yield newItem
-      logMethod(log, "addCollectionEventAnnotationType", cmd, item)
-      item
-    }
+  protected def checkNotInUse(annotationType: A): DomainValidation[Boolean]
 
-    private def checkNotInUse(annotationType: CollectionEventAnnotationType): DomainValidation[Boolean] = {
-      if (collectionEventTypeRepository.annotationTypeInUse(annotationType)) {
-        DomainError("annotation type is in use by collection event type: " + annotationType.id).fail
-      } else {
-        true.success
-      }
-    }
+  protected def addAnnotationType(
+    cmd: StudyAnnotationTypeCommand,
+    repository: StudyAnnotationTypeRepository[A],
+    study: DisabledStudy,
+    listeners: MessageEmitter,
+    id: Option[String]): DomainValidation[A] = {
+    val item = for {
+      atId <- id.toSuccess(DomainError("annotation type ID is missing"))
+      newItem <- repository.add(createNewAnnotationType(cmd, AnnotationTypeId(atId)))
+      event <- listeners.sendEvent(createAnnotationTypeAddedEvent(newItem)).success
+    } yield newItem
+    logMethod(log, "addAnnotationType", cmd, item)
+    item
+  }
 
-    private def updateCollectionEventAnnotationType(
-      cmd: UpdateCollectionEventAnnotationTypeCmd,
-      study: DisabledStudy,
-      listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
+  protected def updateAnnotationType(
+    cmd: StudyAnnotationTypeCommand,
+    repository: StudyAnnotationTypeRepository[A],
+    annotationTypeId: AnnotationTypeId,
+    study: DisabledStudy,
+    listeners: MessageEmitter): DomainValidation[A] = {
 
-      val item = for {
-        oldItem <- collectionEventAnnotationTypeRepository.annotationTypeWithId(
-          study.id, AnnotationTypeId(cmd.id))
-        notInUse <- checkNotInUse(oldItem)
-        newItem <- collectionEventAnnotationTypeRepository.update(CollectionEventAnnotationType(
-          oldItem.id, cmd.expectedVersion.getOrElse(-1), study.id, cmd.name, cmd.description,
-          cmd.valueType, cmd.maxValueCount, cmd.options))
-        event <- listeners.sendEvent(CollectionEventAnnotationTypeUpdatedEvent(
-          newItem.studyId, newItem.id, newItem.name, newItem.description, newItem.valueType,
-          newItem.maxValueCount, newItem.options)).success
-      } yield newItem
-      logMethod(log, "updateCollectionEventAnnotationType", cmd, item)
-      item
-    }
+    val item = for {
+      oldAnnotationType <- repository.annotationTypeWithId(study.id, annotationTypeId)
+      notInUse <- checkNotInUse(oldAnnotationType)
+      newItem <- repository.update(oldAnnotationType, createUpdatedAnnotationType(oldAnnotationType, cmd))
+      event <- listeners.sendEvent(createAnnotationTypeUpdatedEvent(newItem)).success
+    } yield newItem
+    logMethod(log, "updateAnnotationType", cmd, item)
+    item
+  }
 
-    private def removeCollectionEventAnnotationType(
-      cmd: RemoveCollectionEventAnnotationTypeCmd,
-      study: DisabledStudy,
-      listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] = {
-
-      val item = for {
-        oldItem <- collectionEventAnnotationTypeRepository.annotationTypeWithId(
-          study.id, AnnotationTypeId(cmd.id))
-        notInUse <- checkNotInUse(oldItem)
-        itemToRemove <- CollectionEventAnnotationType(
-          AnnotationTypeId(cmd.id), cmd.expectedVersion.getOrElse(-1), study.id,
-          oldItem.name, oldItem.description, oldItem.valueType, oldItem.maxValueCount,
-          oldItem.options).success
-        removedItem <- collectionEventAnnotationTypeRepository.remove(itemToRemove)
-        event <- listeners.sendEvent(CollectionEventAnnotationTypeRemovedEvent(
-          removedItem.studyId, removedItem.id)).success
-      } yield removedItem
-      logMethod(log, "removeCollectionEventAnnotationType", cmd, item)
-      item
-    }
+  protected def removeAnnotationType(
+    cmd: StudyAnnotationTypeCommand,
+    repository: StudyAnnotationTypeRepository[A],
+    annotationTypeId: AnnotationTypeId,
+    study: DisabledStudy,
+    listeners: MessageEmitter): DomainValidation[A] = {
+    val item = for {
+      oldItem <- repository.annotationTypeWithId(study.id, annotationTypeId)
+      notInUse <- checkNotInUse(oldItem)
+      itemToRemove <- createRemovalAnnotationType(oldItem, cmd).success
+      removedItem <- repository.remove(itemToRemove)
+      event <- listeners.sendEvent(createAnnotationTypeRemovedEvent(removedItem)).success
+    } yield removedItem
+    logMethod(log, "removeAnnotationType", cmd, item)
+    item
   }
 }

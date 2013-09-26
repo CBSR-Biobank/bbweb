@@ -59,7 +59,7 @@ trait StudyProcessorComponent {
  *         type to a collection event type.
  */
 trait StudyProcessorComponentImpl extends StudyProcessorComponent {
-  self: CollectionEventTypeServiceComponent with SpecimenGroupServiceComponent with StudyAnnotationTypeServiceComponent with RepositoryComponent =>
+  self: ProcessorComponentImpl with RepositoryComponent =>
 
   class StudyProcessorImpl extends StudyProcessor {
     self: Emitter =>
@@ -85,8 +85,11 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
           case cmd: CollectionEventTypeCommand =>
             processEntityMsg(cmd, cmd.studyId, serviceMsg.id, collectionEventTypeService.process)
 
-          case cmd: StudyAnnotationTypeCommand =>
-            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, annotationTypeService.process)
+          case cmd: CollectionEventAnnotationTypeCommand =>
+            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, ceventAnnotationTypeService.process)
+
+          case cmd: ParticipantAnnotationTypeCommand =>
+            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, participantAnnotationTypeService.process)
 
           case other => // must be for another command handler
         }

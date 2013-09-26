@@ -5,6 +5,8 @@ import domain.study.{
   CollectionEventAnnotationTypeRepositoryComponentImpl,
   CollectionEventTypeRepositoryComponent,
   CollectionEventTypeRepositoryComponentImpl,
+  ParticipantAnnotationTypeRepositoryComponent,
+  ParticipantAnnotationTypeRepositoryComponentImpl,
   StudyRepositoryComponent,
   StudyRepositoryComponentImpl,
   SpecimenGroupRepositoryComponent,
@@ -16,6 +18,7 @@ trait RepositoryComponent
   with SpecimenGroupRepositoryComponent
   with CollectionEventAnnotationTypeRepositoryComponent
   with CollectionEventTypeRepositoryComponent
+  with ParticipantAnnotationTypeRepositoryComponent
   with UserRepositoryComponent
 
 trait RepositoryComponentImpl
@@ -24,4 +27,5 @@ trait RepositoryComponentImpl
   with SpecimenGroupRepositoryComponentImpl
   with CollectionEventAnnotationTypeRepositoryComponentImpl
   with CollectionEventTypeRepositoryComponentImpl
+  with ParticipantAnnotationTypeRepositoryComponentImpl
   with UserRepositoryComponentImpl

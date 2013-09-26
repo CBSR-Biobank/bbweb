@@ -1,10 +1,9 @@
 package domain.study
 
-import infrastructure._
 import domain._
-import AnnotationValueType._
+import domain.AnnotationValueType._
 
-case class CollectionEventAnnotationType(
+case class ParticipantAnnotationType(
   id: AnnotationTypeId,
   version: Long = -1,
   studyId: StudyId,
@@ -15,7 +14,7 @@ case class CollectionEventAnnotationType(
   options: Option[Map[String, String]])
   extends StudyAnnotationType {
 
-  val toStringFormat = """CollectionEventAnnotationType:{ id: %s, version: %d, studyId: %s,""" +
+  val toStringFormat = """ParticipantAnnotationType:{ id: %s, version: %d, studyId: %s,""" +
     """  name: %s, description: %s, valueType: %s, maxValueCount: %d, options: %s }"""
 
   override def toString: String = {

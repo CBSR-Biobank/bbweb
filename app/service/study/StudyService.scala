@@ -22,9 +22,6 @@ trait StudyServiceComponent {
 
   trait StudyService extends ApplicationService {
 
-    /**
-     * FIXME: use paging and sorting
-     */
     def getAll: Set[Study]
 
     def getStudy(id: String): DomainValidation[Study]
@@ -71,14 +68,32 @@ trait StudyServiceComponent {
 
     // collection event annotation types
     def addCollectionEventAnnotationType(
-      cmd: AddCollectionEventAnnotationTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]]
+      cmd: AddCollectionEventAnnotationTypeCmd)(
+        implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]]
 
     def collectionEventAnnotationTypeInUse(
       studyId: String, annotationTypeId: String): DomainValidation[Boolean]
 
-    def updateCollectionEventAnnotationType(cmd: UpdateCollectionEventAnnotationTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]]
+    def updateCollectionEventAnnotationType(
+      cmd: UpdateCollectionEventAnnotationTypeCmd)(
+        implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]]
 
-    def removeCollectionEventAnnotationType(cmd: RemoveCollectionEventAnnotationTypeCmd)(implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]]
+    def removeCollectionEventAnnotationType(
+      cmd: RemoveCollectionEventAnnotationTypeCmd)(
+        implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]]
+
+    // participant annotation types
+    def addParticipantAnnotationType(
+      cmd: AddParticipantAnnotationTypeCmd)(
+        implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationType]]
+
+    def updateParticipantAnnotationType(
+      cmd: UpdateParticipantAnnotationTypeCmd)(
+        implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationType]]
+
+    def removeParticipantAnnotationType(
+      cmd: RemoveParticipantAnnotationTypeCmd)(
+        implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationType]]
   }
 
 }
@@ -130,7 +145,7 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
     }
 
     def collectionEventAnnotationTypesForStudy(id: String): Set[CollectionEventAnnotationType] = {
-      collectionEventAnnotationTypeRepository.allCollectionEventAnnotationTypesForStudy(StudyId(id))
+      collectionEventAnnotationTypeRepository.allAnnotationTypesForStudy(StudyId(id))
     }
 
     def collectionEventTypeWithId(
@@ -142,6 +157,13 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
 
     def collectionEventTypesForStudy(studyId: String): Set[CollectionEventType] = {
       collectionEventTypeRepository.allCollectionEventTypesForStudy(StudyId(studyId))
+    }
+
+    def participantAnnotationTypeWithId(
+      studyId: String,
+      annotationTypeId: String): DomainValidation[ParticipantAnnotationType] = {
+      participantAnnotationTypeRepository.annotationTypeWithId(
+        StudyId(studyId), AnnotationTypeId(annotationTypeId))
     }
 
     def addStudy(cmd: AddStudyCmd)(implicit userId: UserId): Future[DomainValidation[DisabledStudy]] = {
@@ -222,5 +244,21 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
       commandBus.ask(
         Message(ServiceMsg(cmd, userId))).map(
           _.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
+
+    // participant annotation types
+    def addParticipantAnnotationType(
+      cmd: AddParticipantAnnotationTypeCmd)(implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationType]] =
+      commandBus.ask(
+        Message(ServiceMsg(cmd, userId, Some(CollectionEventAnnotationTypeIdentityService.nextIdentity)))).map(
+          _.asInstanceOf[DomainValidation[ParticipantAnnotationType]])
+
+    def updateParticipantAnnotationType(cmd: UpdateParticipantAnnotationTypeCmd)(implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationType]] =
+      commandBus.ask(Message(ServiceMsg(cmd, userId))).map(
+        _.asInstanceOf[DomainValidation[ParticipantAnnotationType]])
+
+    def removeParticipantAnnotationType(cmd: RemoveParticipantAnnotationTypeCmd)(implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationType]] =
+      commandBus.ask(
+        Message(ServiceMsg(cmd, userId))).map(
+          _.asInstanceOf[DomainValidation[ParticipantAnnotationType]])
   }
 }

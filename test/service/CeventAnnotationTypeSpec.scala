@@ -17,12 +17,12 @@ import scalaz._
 import Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class StudyAnnotationTypeSpec extends Specification with NoTimeConversions with Tags with StudyFixture {
+class CeventAnnotationTypeSpec extends Specification with NoTimeConversions with Tags with StudyFixture {
   args(
     //include = "tag1",
     sequential = true) // forces all tests to be run sequentially
 
-  val nameGenerator = new NameGenerator(classOf[StudyAnnotationTypeSpec].getSimpleName)
+  val nameGenerator = new NameGenerator(classOf[CeventAnnotationTypeSpec].getSimpleName)
   val studyName = nameGenerator.next[Study]
   val study = await(studyService.addStudy(new AddStudyCmd(studyName, Some(studyName)))) | null
 
@@ -45,7 +45,7 @@ class StudyAnnotationTypeSpec extends Specification with NoTimeConversions with 
           x.options must beNone
           collectionEventAnnotationTypeRepository.annotationTypeWithId(
             study.id, x.id) must beSuccessful
-          collectionEventAnnotationTypeRepository.allCollectionEventAnnotationTypesForStudy(
+          collectionEventAnnotationTypeRepository.allAnnotationTypesForStudy(
             study.id).size mustEqual 1
       }
 
@@ -68,7 +68,7 @@ class StudyAnnotationTypeSpec extends Specification with NoTimeConversions with 
           x.options must be(options)
           collectionEventAnnotationTypeRepository.annotationTypeWithId(
             study.id, x.id) must beSuccessful
-          collectionEventAnnotationTypeRepository.allCollectionEventAnnotationTypesForStudy(
+          collectionEventAnnotationTypeRepository.allAnnotationTypesForStudy(
             study.id).size mustEqual 2
       }
     }
@@ -181,7 +181,7 @@ class StudyAnnotationTypeSpec extends Specification with NoTimeConversions with 
         new UpdateCollectionEventAnnotationTypeCmd(
           at1.id.toString, at1.versionOption, study2.id.toString, name2, None, valueType2,
           maxValueCount2, options)))
-      at2 must beFailing.like { case msgs => msgs.head must contain("study does not have collection event annotation type") }
+      at2 must beFailing.like { case msgs => msgs.head must contain("study does not have annotation type") }
     }
 
     "not be updated with invalid version" in {

@@ -1,14 +1,6 @@
 package domain.study
 
 import domain._
-import domain.AnatomicalSourceType._
-import domain.PreservationType._
-import domain.PreservationTemperatureType._
-import domain.SpecimenType._
-import domain.AnnotationValueType._
-
-import infrastructure._
-import service.commands._
 
 import scalaz._
 import scalaz.Scalaz._

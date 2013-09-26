@@ -7,7 +7,8 @@ import service.study.{
   StudyServiceComponentImpl,
   CollectionEventTypeServiceComponent,
   SpecimenGroupServiceComponent,
-  StudyAnnotationTypeServiceComponent
+  CeventAnnotationTypeServiceComponent,
+  ParticipantAnnotationTypeServiceComponent
 }
 import domain.{ RepositoryComponent, RepositoryComponentImpl }
 
@@ -20,7 +21,8 @@ trait ProcessorComponentImpl extends ProcessorComponent
   with UserProcessorComponentImpl
   with CollectionEventTypeServiceComponent
   with SpecimenGroupServiceComponent
-  with StudyAnnotationTypeServiceComponent
+  with CeventAnnotationTypeServiceComponent
+  with ParticipantAnnotationTypeServiceComponent
   with RepositoryComponentImpl
 
 trait ServiceComponent extends StudyServiceComponent with UserServiceComponent
