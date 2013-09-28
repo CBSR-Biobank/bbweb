@@ -109,21 +109,19 @@ trait CeventAnnotationTypeServiceComponent {
       study: DisabledStudy,
       listeners: MessageEmitter,
       id: Option[String]): DomainValidation[CollectionEventAnnotationType] =
-      addAnnotationType(cmd, collectionEventAnnotationTypeRepository, study, listeners, id)
+      addAnnotationType(collectionEventAnnotationTypeRepository, cmd, study, listeners, id)
 
     private def updateCollectionEventAnnotationType(
       cmd: UpdateCollectionEventAnnotationTypeCmd,
       study: DisabledStudy,
       listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] =
-      updateAnnotationType(cmd, collectionEventAnnotationTypeRepository, AnnotationTypeId(cmd.id),
-        study, listeners)
+      updateAnnotationType(collectionEventAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study, listeners)
 
     private def removeCollectionEventAnnotationType(
       cmd: RemoveCollectionEventAnnotationTypeCmd,
       study: DisabledStudy,
       listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] =
-      removeAnnotationType(cmd, collectionEventAnnotationTypeRepository, AnnotationTypeId(cmd.id),
-        study, listeners)
+      removeAnnotationType(collectionEventAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study, listeners)
   }
 
 }

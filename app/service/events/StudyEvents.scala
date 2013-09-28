@@ -70,6 +70,8 @@ case class AnnotationTypeRemovedFromCollectionEventTypeEvent(
   studyId: StudyId, collectionEventTypeAnnotationTypeId: String,
   collectionEventTypeId: CollectionEventTypeId, annotationTypeId: AnnotationTypeId)
 
+// participant annotation types  
+
 case class ParticipantAnnotationTypeAddedEvent(
   studyId: StudyId, annotationTypeId: AnnotationTypeId,
   name: String, description: Option[String], valueType: AnnotationValueType,
@@ -81,5 +83,20 @@ case class ParticipantAnnotationTypeUpdatedEvent(
   maxValueCount: Option[Int], options: Option[Map[String, String]])
 
 case class ParticipantAnnotationTypeRemovedEvent(
+  studyId: StudyId, annotationTypeId: AnnotationTypeId)
+
+// specimen link annotation types  
+
+case class SpecimenLinkAnnotationTypeAddedEvent(
+  studyId: StudyId, annotationTypeId: AnnotationTypeId,
+  name: String, description: Option[String], valueType: AnnotationValueType,
+  maxValueCount: Option[Int], options: Option[Map[String, String]])
+
+case class SpecimenLinkAnnotationTypeUpdatedEvent(
+  studyId: StudyId, annotationTypeId: AnnotationTypeId,
+  name: String, description: Option[String], valueType: AnnotationValueType,
+  maxValueCount: Option[Int], options: Option[Map[String, String]])
+
+case class SpecimenLinkAnnotationTypeRemovedEvent(
   studyId: StudyId, annotationTypeId: AnnotationTypeId)
 

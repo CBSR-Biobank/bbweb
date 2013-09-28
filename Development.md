@@ -53,7 +53,23 @@ Delete remote branch:
 git branch -d -r origin/__branch_name__
 ```
 
+## Squash Commits
+
+Using your own forked GitHub repository for the BBweb project. In this example the forked remote is
+named `nelson`, and the topic branch is named `nelson-dev`.
+
+```bash
+git rebase -i HEAD~6
+git push nelson +nelson-dev
+```
+
 ## GitHub Markdown
 
 * [Grip](https://github.com/joeyespo/grip) - Preview GitHub Markdown files like Readme locally before committing them
+
+## Logging
+
+* To enable logging at the Domain or Service layers, edit the file `conf/application.conf`.
+
+* To enable TEST logging at the Domain or Service layers, edit the file `conf/logback-test.xml`.
 

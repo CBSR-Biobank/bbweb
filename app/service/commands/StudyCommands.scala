@@ -99,3 +99,21 @@ case class UpdateParticipantAnnotationTypeCmd(id: String,
 case class RemoveParticipantAnnotationTypeCmd(id: String,
   expectedVersion: Option[Long], studyId: String)
   extends ParticipantAnnotationTypeCommand with HasExpectedVersion
+
+// specimen link annotation type
+trait SpecimenLinkAnnotationTypeCommand extends StudyAnnotationTypeCommand
+
+case class AddSpecimenLinkAnnotationTypeCmd(studyId: String,
+  name: String, description: Option[String], valueType: AnnotationValueType,
+  maxValueCount: Option[Int] = None, options: Option[Map[String, String]] = None)
+  extends SpecimenLinkAnnotationTypeCommand
+
+case class UpdateSpecimenLinkAnnotationTypeCmd(id: String,
+  expectedVersion: Option[Long], studyId: String, name: String,
+  description: Option[String], valueType: AnnotationValueType, maxValueCount: Option[Int] = None,
+  options: Option[Map[String, String]] = None)
+  extends SpecimenLinkAnnotationTypeCommand with HasExpectedVersion
+
+case class RemoveSpecimenLinkAnnotationTypeCmd(id: String,
+  expectedVersion: Option[Long], studyId: String)
+  extends SpecimenLinkAnnotationTypeCommand with HasExpectedVersion

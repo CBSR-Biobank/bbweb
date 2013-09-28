@@ -22,7 +22,7 @@ import scalaz.Scalaz._
  */
 abstract class StudyAnnotationTypeService[A <: StudyAnnotationType] extends CommandHandler {
 
-  private val log = LoggerFactory.getLogger(this.getClass)
+  protected val log = LoggerFactory.getLogger(this.getClass)
 
   protected def createNewAnnotationType(cmd: StudyAnnotationTypeCommand, id: AnnotationTypeId): A
 
@@ -39,8 +39,8 @@ abstract class StudyAnnotationTypeService[A <: StudyAnnotationType] extends Comm
   protected def checkNotInUse(annotationType: A): DomainValidation[Boolean]
 
   protected def addAnnotationType(
-    cmd: StudyAnnotationTypeCommand,
     repository: StudyAnnotationTypeRepository[A],
+    cmd: StudyAnnotationTypeCommand,
     study: DisabledStudy,
     listeners: MessageEmitter,
     id: Option[String]): DomainValidation[A] = {
@@ -54,8 +54,8 @@ abstract class StudyAnnotationTypeService[A <: StudyAnnotationType] extends Comm
   }
 
   protected def updateAnnotationType(
-    cmd: StudyAnnotationTypeCommand,
     repository: StudyAnnotationTypeRepository[A],
+    cmd: StudyAnnotationTypeCommand,
     annotationTypeId: AnnotationTypeId,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[A] = {
@@ -71,8 +71,8 @@ abstract class StudyAnnotationTypeService[A <: StudyAnnotationType] extends Comm
   }
 
   protected def removeAnnotationType(
-    cmd: StudyAnnotationTypeCommand,
     repository: StudyAnnotationTypeRepository[A],
+    cmd: StudyAnnotationTypeCommand,
     annotationTypeId: AnnotationTypeId,
     study: DisabledStudy,
     listeners: MessageEmitter): DomainValidation[A] = {

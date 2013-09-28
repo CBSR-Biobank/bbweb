@@ -60,7 +60,9 @@ package object service {
 
   object CollectionEventAnnotationTypeIdentityService extends IdentityService
 
-  object CollectionEventTypeAnnotationTypeIdentityService extends IdentityService
+  object ParticipantAnnotationTypeIdentityService extends IdentityService
+
+  object SpecimenLinkAnnotationTypeIdentityService extends IdentityService
 
   object UserIdentityService extends IdentityService
 

@@ -91,6 +91,9 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
           case cmd: ParticipantAnnotationTypeCommand =>
             processEntityMsg(cmd, cmd.studyId, serviceMsg.id, participantAnnotationTypeService.process)
 
+          case cmd: SpecimenLinkAnnotationTypeCommand =>
+            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, specimenLinkAnnotationTypeService.process)
+
           case other => // must be for another command handler
         }
 

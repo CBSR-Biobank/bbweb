@@ -22,8 +22,6 @@ trait ParticipantAnnotationTypeServiceComponent {
   class ParticipantAnnotationTypeService
     extends StudyAnnotationTypeService[ParticipantAnnotationType] {
 
-    private val log = LoggerFactory.getLogger(this.getClass)
-
     /**
      * This partial function handles each command. The command is contained within the
      * StudyProcessorMsg.
@@ -107,21 +105,19 @@ trait ParticipantAnnotationTypeServiceComponent {
       study: DisabledStudy,
       listeners: MessageEmitter,
       id: Option[String]): DomainValidation[ParticipantAnnotationType] =
-      addAnnotationType(cmd, participantAnnotationTypeRepository, study, listeners, id)
+      addAnnotationType(participantAnnotationTypeRepository, cmd, study, listeners, id)
 
     private def updateParticipantAnnotationType(
       cmd: UpdateParticipantAnnotationTypeCmd,
       study: DisabledStudy,
       listeners: MessageEmitter): DomainValidation[ParticipantAnnotationType] =
-      updateAnnotationType(cmd, participantAnnotationTypeRepository, AnnotationTypeId(cmd.id),
-        study, listeners)
+      updateAnnotationType(participantAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study, listeners)
 
     private def removeParticipantAnnotationType(
       cmd: RemoveParticipantAnnotationTypeCmd,
       study: DisabledStudy,
       listeners: MessageEmitter): DomainValidation[ParticipantAnnotationType] =
-      removeAnnotationType(cmd, participantAnnotationTypeRepository, AnnotationTypeId(cmd.id),
-        study, listeners)
+      removeAnnotationType(participantAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study, listeners)
   }
 
 }
