@@ -2,10 +2,11 @@
 
 @import controllers.study._
 
-@main("Biobank") {
-  @breadcrumbs(Map(
-    (Messages("biobank.study.plural") -> null)
-  ))  
+@breadcrumbs = @{ Map(
+  (Messages("biobank.study.plural") -> null)
+) }
+
+@main("Biobank", breadcrumbs) {
   <div class="page-header">
     <h2>@Messages("biobank.study.plural")
         <a href="@routes.StudyController.addStudy"

@@ -71,7 +71,7 @@ trait StudyServiceComponent {
       cmd: AddCollectionEventAnnotationTypeCmd)(
         implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]]
 
-    def collectionEventAnnotationTypeInUse(
+    def isCollectionEventAnnotationTypeInUse(
       studyId: String, annotationTypeId: String): DomainValidation[Boolean]
 
     def updateCollectionEventAnnotationType(
@@ -172,6 +172,9 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
       collectionEventTypeRepository.allCollectionEventTypesForStudy(StudyId(studyId))
     }
 
+    def participantAnnotationTypesForStudy(studyId: String): Set[ParticipantAnnotationType] =
+      participantAnnotationTypeRepository.allAnnotationTypesForStudy(StudyId(studyId))
+
     def participantAnnotationTypeWithId(
       studyId: String,
       annotationTypeId: String): DomainValidation[ParticipantAnnotationType] = {
@@ -243,20 +246,20 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
         Message(ServiceMsg(cmd, userId))).map(_.asInstanceOf[DomainValidation[CollectionEventType]])
 
     // collection event annotation types
+    def isCollectionEventAnnotationTypeInUse(
+      studyId: String, annotationTypeId: String): DomainValidation[Boolean] = {
+      for {
+        at <- collectionEventAnnotationTypeWithId(studyId, annotationTypeId)
+        inUse <- collectionEventTypeRepository.annotationTypeInUse(at).success
+      } yield inUse
+    }
+
     def addCollectionEventAnnotationType(
       cmd: AddCollectionEventAnnotationTypeCmd)(
         implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]] = {
       commandBus.ask(
         Message(ServiceMsg(cmd, userId, Some(CollectionEventAnnotationTypeIdentityService.nextIdentity)))).map(
           _.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
-    }
-
-    def collectionEventAnnotationTypeInUse(
-      studyId: String, annotationTypeId: String): DomainValidation[Boolean] = {
-      for {
-        at <- collectionEventAnnotationTypeWithId(studyId, annotationTypeId)
-        inUse <- collectionEventTypeRepository.annotationTypeInUse(at).success
-      } yield inUse
     }
 
     def updateCollectionEventAnnotationType(cmd: UpdateCollectionEventAnnotationTypeCmd)(
@@ -271,6 +274,14 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
           _.asInstanceOf[DomainValidation[CollectionEventAnnotationType]])
 
     // participant annotation types
+    def isParticipantAnnotationTypeInUse(
+      studyId: String, annotationTypeId: String): DomainValidation[Boolean] = {
+      // TODO: needs implementation
+      // 
+      // return true if used by any participants
+      false.success
+    }
+
     def addParticipantAnnotationType(
       cmd: AddParticipantAnnotationTypeCmd)(implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationType]] =
       commandBus.ask(

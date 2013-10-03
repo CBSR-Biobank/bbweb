@@ -1,5 +1,4 @@
 @(study: domain.study.Study,
-    counts: Map[String,String],
     activeTab: controllers.study.StudyTab.Value)(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
     flash: play.api.mvc.Flash)
 
@@ -10,9 +9,14 @@
 @tabParticipantsActive = @{ if (activeTab.equals(StudyTab.Participants)) "active" else "" }    
 @tabSpecimensActive = @{ if (activeTab.equals(StudyTab.Specimens)) "active" else "" }    
 @tabCollectionEventsActive = @{ if (activeTab.equals(StudyTab.CollectionEvents)) "active" else "" }    
-@tabProcessingEventsActive = @{ if (activeTab.equals(StudyTab.ProcessingEvents)) "active" else "" }    
+@tabProcessingEventsActive = @{ if (activeTab.equals(StudyTab.ProcessingEvents)) "active" else "" }
+    
+@breadcrumbs = @{ Map(
+  (Messages("biobank.study.plural") -> routes.StudyController.index),
+  (study.name -> null)
+) }
 
-@main(Messages("biobank.study.singular") + " " + study.name) {
+@main(Messages("biobank.study.singular") + " " + study.name, breadcrumbs) {
   @helper.javascriptRouter("jsRoutes")(
     routes.javascript.StudyController.summaryTab,
     routes.javascript.StudyController.participantsTab,
@@ -20,11 +24,6 @@
     routes.javascript.StudyController.ceventsTab,
     routes.javascript.StudyController.peventsTab
     )
-    
-  @breadcrumbs(Map(
-    (Messages("biobank.study.plural") -> routes.StudyController.index),
-    (study.name -> null)
-  ))
   <div class="page-header">
     <h2>@study.name
       <a href="@routes.StudyController.updateStudy(study.id.id)" class="btn btn-mini btn-primary"
@@ -55,12 +54,7 @@
         <small class="muted">@Messages("biobank.study.field.status"): @study.status</small>
         <p>@Html(study.description.getOrElse(Messages("biobank.description.none")).replace("\n", "<br/>"))</p>
       </div>
-      <div class="tab-pane fade in @tabParticipantsActive" id="tab-participants">
-        <h4>@Messages("biobank.study.tab.subtitle.participants")</h4>
-        @nameValueRow(Messages("biobank.study.field.participants"), counts("participants"))
-        @nameValueRow(Messages("biobank.study.field.collection.events"), counts("collection.events"))
-        @nameValueRow(Messages("biobank.study.field.specimen.count"), counts("specimen.count"))
-      </div>
+      <div class="tab-pane fade in @tabParticipantsActive" id="tab-participants"></div>
       <div class="tab-pane fade in @tabSpecimensActive" id="tab-specimens"></div>
       <div class="tab-pane fade in @tabCollectionEventsActive" id="tab-collection-events"></div>
       <div class="tab-pane fade in @tabProcessingEventsActive" id="tab-processing-events"></div>

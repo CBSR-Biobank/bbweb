@@ -3,7 +3,8 @@
     ceventTypes: Set[domain.study.CollectionEventType],    
     specimenGroupMap: Seq[(String, String, String)],    
     annotationTypes: Set[domain.study.CollectionEventAnnotationType])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
-    
+
+@import tags._
 @import controllers.study._
 @import domain.AnnotationValueType._
 
@@ -18,9 +19,9 @@
 </h4>
 
 @if(ceventTypes.size <= 0) {
-  <div class="alert alert-block">    
-    <p>@Messages("biobank.study.collection.event.type.show.none")</p>
-  </div>
+  @alertBlock{ }{   
+    @Messages("biobank.study.collection.event.type.show.none")
+  }
 } else {
     <table class="table table-bordered table-hover table-condensed">
       <thead>
@@ -41,11 +42,7 @@
           <tr>    
             <td>@nameWithDescriptionPopup(ceventtype.id.id, ceventtype.name, ceventtype.description)</td>
             <td>
-              @if(ceventtype.recurring){ 
-                @Messages("biobank.common.yes")
-              } else { 
-                @Messages("biobank.common.no")
-              }</td>        
+              @if(ceventtype.recurring){ @Messages("biobank.common.yes") } else { @Messages("biobank.common.no") }</td>        
             <td>
                 @Html(ceventtype.specimenGroupData.map(sgData =>
                     "%s (%d - %.3f %s)".format(

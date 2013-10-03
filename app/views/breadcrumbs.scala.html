@@ -1,8 +1,0 @@
-@(breadcrumbs: Map[String, Call])
-
-<ul class="breadcrumb">
-  @for(breadcrumb <- breadcrumbs.keys.dropRight(1)) {
-    <li><a href="@breadcrumbs.get(breadcrumb)">@breadcrumb</a> <span class="divider">/</span></li>
-  }
-  <li class="active">@breadcrumbs.keys.last</li>
-</ul>

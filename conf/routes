@@ -31,14 +31,6 @@ POST    /study/sg/update                      	       controllers.study.Specimen
 GET     /study/sg/remove/:studyId/:studyName/:sgId     controllers.study.SpecimenGroupController.removeSpecimenGroup(studyId, studyName, sgId)
 POST    /study/sg/remove                      	       controllers.study.SpecimenGroupController.removeSpecimenGroupSubmit
 
-# collection event annotation types
-GET     /study/cevent/annot/add/:studyId/:studyName                 controllers.study.CeventAnnotTypeController.addAnnotationType(studyId, studyName)
-POST    /study/cevent/annot/add                                     controllers.study.CeventAnnotTypeController.addAnnotationTypeSubmit
-GET     /study/cevent/annot/update/:studyId/:studyName/:annotId     controllers.study.CeventAnnotTypeController.updateAnnotationType(studyId, studyName, annotId)
-POST    /study/cevent/annot/update                                  controllers.study.CeventAnnotTypeController.updateAnnotationTypeSubmit
-GET     /study/cevent/annot/remove/:studyId/:studyName/:annotId     controllers.study.CeventAnnotTypeController.removeAnnotationType(studyId, studyName, annotId)
-POST     /study/cevent/annot/remove                                 controllers.study.CeventAnnotTypeController.removeAnnotationTypeSubmit
-
 # collection event types
 GET     /study/cetype/add/:studyId/:studyName              controllers.study.CeventTypeController.addCeventType(studyId, studyName)
 POST    /study/cetype/add                                  controllers.study.CeventTypeController.addCeventTypeSubmit
@@ -46,6 +38,22 @@ GET     /study/cetype/update/:studyId/:studyName/:cetId    controllers.study.Cev
 POST    /study/cetype/update                               controllers.study.CeventTypeController.updateCeventTypeSubmit
 GET     /study/cetype/remove/:studyId/:studyName/:cetId    controllers.study.CeventTypeController.removeCeventType(studyId, studyName, cetId)
 GET     /study/cetype/remove                               controllers.study.CeventTypeController.removeCeventTypeSubmit
+
+# collection event annotation types
+GET     /study/cevent/annot/add/:studyId/:studyName                 controllers.study.CeventAnnotTypeController.addAnnotationType(studyId, studyName)
+POST    /study/cevent/annot/add                                     controllers.study.CeventAnnotTypeController.addAnnotationTypeSubmit
+GET     /study/cevent/annot/update/:studyId/:studyName/:annotId     controllers.study.CeventAnnotTypeController.updateAnnotationType(studyId, studyName, annotId)
+POST    /study/cevent/annot/update                                  controllers.study.CeventAnnotTypeController.updateAnnotationTypeSubmit
+GET     /study/cevent/annot/remove/:studyId/:studyName/:annotId     controllers.study.CeventAnnotTypeController.removeAnnotationType(studyId, studyName, annotId)
+POST    /study/cevent/annot/remove                                  controllers.study.CeventAnnotTypeController.removeAnnotationTypeSubmit
+
+# participant annotation types
+GET     /study/participant/annot/add/:studyId/:studyName                 controllers.study.ParticipantAnnotTypeController.addAnnotationType(studyId, studyName)
+POST    /study/participant/annot/add                                     controllers.study.ParticipantAnnotTypeController.addAnnotationTypeSubmit
+GET     /study/participant/annot/update/:studyId/:studyName/:annotId     controllers.study.ParticipantAnnotTypeController.updateAnnotationType(studyId, studyName, annotId)
+POST    /study/participant/annot/update                                  controllers.study.ParticipantAnnotTypeController.updateAnnotationTypeSubmit
+GET     /study/participant/annot/remove/:studyId/:studyName/:annotId     controllers.study.ParticipantAnnotTypeController.removeAnnotationType(studyId, studyName, annotId)
+POST    /study/participant/annot/remove                                  controllers.study.ParticipantAnnotTypeController.removeAnnotationTypeSubmit
 
 # user
 GET     /user/profile               controllers.UserController.profile

@@ -14,24 +14,26 @@
 
 @import helper._
 @import controllers.study._
+@import tags._
 
-    @implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
 
-    @formInfo = @{ formType match {
-        case AddFormType() =>
-            FormInfo(Messages("biobank.study.collection.event.type.add"),
-                routes.CeventTypeController.addCeventTypeSubmit)
-        case UpdateFormType() =>
-            FormInfo(Messages("biobank.study.collection.event.type.update"),
-                routes.CeventTypeController.updateCeventTypeSubmit)
-    }}
+@formInfo = @{ formType match {
+    case AddFormType() =>
+        FormInfo(Messages("biobank.study.collection.event.type.add"),
+            routes.CeventTypeController.addCeventTypeSubmit)
+    case UpdateFormType() =>
+        FormInfo(Messages("biobank.study.collection.event.type.update"),
+            routes.CeventTypeController.updateCeventTypeSubmit)
+}}
+    
+@breadcrumbs = @{ Map(
+    (Messages("biobank.study.plural") -> routes.StudyController.index),
+    (studyName -> routes.StudyController.showStudy(studyId)),
+    (formInfo.title -> null)
+) }
 
-@main(formInfo.title) {
-    @breadcrumbs(Map(
-        (Messages("biobank.study.plural") -> routes.StudyController.index),
-        (studyName -> routes.StudyController.showStudy(studyId)),
-        (formInfo.title -> null)
-    ))
+@main(formInfo.title, breadcrumbs) {
     <div class="page-header">
         <h2>@studyName&nbsp;<small>@formInfo.title</small></h2>
     </div>
@@ -43,15 +45,14 @@
     }
 
     @if((specimenGroupMap.size <= 0) || (annotationTypeMap.size <= 0)) {
-      <div class="alert alert-block">
-        <h4>@Messages("biobank.common.warning")</h4>
+      @alertBlock{ @Messages("biobank.common.warning") }{
         @if(specimenGroupMap.size <= 0) {
           <p>@Messages("biobank.study.collection.event.form.specimen.group.none")</p>
         }
         @if(annotationTypeMap.size <= 0) {
           <p>@Messages("biobank.study.collection.event.type.form.annotation.type.none")</p>
         }
-      </div>
+      }
     }
 
     <div class="clearfix">

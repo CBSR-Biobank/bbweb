@@ -162,7 +162,8 @@ object SpecimenGroupController extends Controller with SecureSocial {
     BadRequest(html.serviceError(
       Messages("biobank.study.specimen.group.error.heading"),
       subheading,
-      updateBreadcrumbs(studyId, studyName)))
+      updateBreadcrumbs(studyId, studyName),
+      routes.StudyController.showStudy(studyId)))
   }
 
   /**

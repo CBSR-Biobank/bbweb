@@ -68,14 +68,18 @@ object StudyController extends Controller with SecureSocial {
     Map((Messages("biobank.study.plural") -> null))
   }
 
-  def validateStudy(id: String, errorHeading: String)(f: Study => Result)(implicit request: WrappedRequest[AnyContent]): Result = {
+  def validateStudy(
+    id: String,
+    errorHeading: String)(f: Study => Result)(
+      implicit request: WrappedRequest[AnyContent]): Result = {
     studyService.getStudy(id) match {
       case Failure(x) =>
         if (x.head.contains("study does not exist")) {
           BadRequest(html.serviceError(
             errorHeading,
             Messages("biobank.study.error"),
-            studyBreadcrumbs))
+            studyBreadcrumbs,
+            routes.StudyController.index))
         } else {
           throw new Error(x.head)
         }
@@ -116,11 +120,7 @@ object StudyController extends Controller with SecureSocial {
   // event type
   def showStudy(id: String) = SecuredAction { implicit request =>
     validateStudy(id)(study => {
-      val counts = Map(
-        ("participants" -> "<i>to be implemented</i>"),
-        ("collection.events" -> "<i>to be implemented</i>"),
-        ("specimen.count" -> "<i>to be implemented</i>"))
-      Ok(html.study.showStudy(study, counts, selectedStudyTab))
+      Ok(html.study.showStudy(study, selectedStudyTab))
     })
   }
 
@@ -142,7 +142,12 @@ object StudyController extends Controller with SecureSocial {
 
       // returns no content since we only want to update the cache with the selected tab
       selectedStudyTab(StudyTab.Participants)
-      NoContent
+      val counts = Map(
+        ("participants" -> "<i>to be implemented</i>"),
+        ("collection.events" -> "<i>to be implemented</i>"),
+        ("specimen.count" -> "<i>to be implemented</i>"))
+      val participantAnnotTypes = studyService.participantAnnotationTypesForStudy(studyId);
+      Ok(html.study.participantsTab(study, counts, participantAnnotTypes))
     })
   }
 
@@ -153,7 +158,7 @@ object StudyController extends Controller with SecureSocial {
 
       selectedStudyTab(StudyTab.Specimens)
       val specimenGroups = studyService.specimenGroupsForStudy(studyId)
-      Ok(html.study.specimenGroupList(studyId, studyName, specimenGroups))
+      Ok(html.study.specimensTab(studyId, studyName, specimenGroups))
     })
   }
 
@@ -167,7 +172,7 @@ object StudyController extends Controller with SecureSocial {
       val specimenGroups = studyService.specimenGroupsForStudy(studyId).map(
         x => (x.id.id, x.name, x.units)).toSeq
       val annotationTypes = studyService.collectionEventAnnotationTypesForStudy(studyId)
-      Ok(html.study.ceventTypeList(studyId, studyName, ceventTypes, specimenGroups,
+      Ok(html.study.ceventsTab(studyId, studyName, ceventTypes, specimenGroups,
         annotationTypes))
     })
   }

@@ -1,4 +1,4 @@
-@(title: String)(content: Html)(implicit request: RequestHeader)
+@(title: String, breadcrumbs: Map[String, Call] = Map.empty)(content: Html)(implicit request: RequestHeader)
 <!DOCTYPE html> 
 
 <html>
@@ -105,7 +105,15 @@
           </div>
         </div>
         <div class="container">
-            @content
+          @if(!breadcrumbs.isEmpty) {
+            <ul class="breadcrumb">
+              @for(breadcrumb <- breadcrumbs.keys.dropRight(1)) {
+                <li><a href="@breadcrumbs.get(breadcrumb)">@breadcrumb</a> <span class="divider">/</span></li>
+              }
+              <li class="active">@breadcrumbs.keys.last</li>
+            </ul>
+          }
+          @content
         </div>
       </body>
     </html>

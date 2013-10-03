@@ -3,6 +3,7 @@
     studyId: String)(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
+@import tags._    
 @import controllers.{FormType, AddFormType, UpdateFormType, FormInfo}
 @import controllers.study._
 
@@ -15,11 +16,12 @@
         FormInfo(Messages("biobank.study.update"), routes.StudyController.updateStudySubmit(studyId))  
 }}
 
-@main(formInfo.title) {
-  @breadcrumbs(Map(
+@breadcrumbs = @{ Map(
     (Messages("biobank.study.plural") -> routes.StudyController.index),
     (formInfo.title -> null)
-  ))
+  ) }
+
+@main(formInfo.title, breadcrumbs) {
   <div class="page-header">
       <h2>@formInfo.title</h2>
   </div>

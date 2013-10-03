@@ -13,11 +13,11 @@
 @formInfo = @{
   formType match {
     case AddFormType() =>
-      FormInfo(Messages("biobank.study.collection.event.annotation.type.add"),
-        routes.CeventAnnotTypeController.addAnnotationTypeSubmit)
+      FormInfo(Messages("biobank.study.participant.annotation.type.add"),
+        routes.ParticipantAnnotTypeController.addAnnotationTypeSubmit)
     case UpdateFormType() =>
-      FormInfo(Messages("biobank.study.collection.event.annotation.type.update"),
-        routes.CeventAnnotTypeController.updateAnnotationTypeSubmit)
+      FormInfo(Messages("biobank.study.participant.annotation.type.update"),
+        routes.ParticipantAnnotTypeController.updateAnnotationTypeSubmit)
   }
 }
 
@@ -45,7 +45,7 @@
       //'_class -> "radio",
       '_error -> attrTypeForm("maxValueCount").error.map(
         _.withMessage(Messages("biobank.annotation.type.form.max.value.count.error"))))
-    
+
     <div class="control-group">
       <div class="controls">
           <a class="addSelection btn btn-small btn-success">
@@ -58,12 +58,12 @@
     @repeat(attrTypeForm("selections"), min = attrTypeForm("selections").indexes.size) { selection =>
       @selectionField(selection)
     }
-    
+
     @**
     * This hidden block will be used as template for Javascript copy code
     **@
     @selectionField(attrTypeForm("selections[x]"), className = "selection_template", style = "display:none;")
-    
+
   </div>
 }
 
@@ -92,23 +92,27 @@
         <input type="hidden" name="version" value="@attrTypeForm("version").value" >
       }
     }
-      
-    <input type="hidden" name="studyId" value="@studyId" >  
-    <input type="hidden" name="studyName" value="@studyName" >    
+
+    <input type="hidden" name="studyId" value="@studyId" >
+    <input type="hidden" name="studyName" value="@studyName" >
 
     @formNameAndDescription(attrTypeForm("name"), attrTypeForm("description"))
 
     @select(
       field = attrTypeForm("valueType"),
-      options = CollectionEventAnnotationTypeSelections.annotationValueTypes,
+      options = ParticipantAnnotationTypeSelections.annotationValueTypes,
       args = '_label -> Messages("biobank.annotation.type.field.value.type")
     )
 
     @selectionGroup(attrTypeForm("selectionGroup"))
 
+    @checkbox(field = attrTypeForm("required"),
+        args = '_label -> Messages("biobank.study.participant.annotation.type.field.required"),
+        '_help -> "")
+
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
-      <a href="@routes.StudyController.showStudy(studyId)" class="btn">Cancel</a>     
+      <a href="@routes.StudyController.showStudy(studyId)" class="btn">Cancel</a>
     </div>
   }
   </div>

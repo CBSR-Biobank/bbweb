@@ -28,10 +28,7 @@ import securesocial.core.{ Authorization, Identity, SecuredRequest, SecureSocial
 import scalaz._
 import Scalaz._
 
-/**
- * Used to map the form inputs into an object that can be saved via a service call.
- */
-case class CeventAnnotationTypeMapper(
+case class ParticipantAnnotationTypeMapper(
   annotationTypeId: String,
   version: Long,
   studyId: String,
@@ -40,31 +37,32 @@ case class CeventAnnotationTypeMapper(
   description: Option[String],
   valueType: String,
   maxValueCount: Option[Int] = None,
-  selections: List[String])
+  selections: List[String],
+  required: Boolean)
   extends StudyAnnotationTypeMapper {
 
-  def getAddCmd: AddCollectionEventAnnotationTypeCmd = {
+  def getAddCmd: AddParticipantAnnotationTypeCmd = {
     val selectionMap = if (selections.size > 0) Some(selections.map(v => (v, v)).toMap) else None
-    AddCollectionEventAnnotationTypeCmd(studyId, name, description,
-      AnnotationValueType.withName(valueType), maxValueCount, selectionMap)
+    AddParticipantAnnotationTypeCmd(studyId, name, description,
+      AnnotationValueType.withName(valueType), maxValueCount, selectionMap, required)
   }
 
-  def getUpdateCmd: UpdateCollectionEventAnnotationTypeCmd = {
+  def getUpdateCmd: UpdateParticipantAnnotationTypeCmd = {
     val selectionMap = if (selections.size > 0) Some(selections.map(v => (v, v)).toMap) else None
-    UpdateCollectionEventAnnotationTypeCmd(
+    UpdateParticipantAnnotationTypeCmd(
       annotationTypeId, Some(version), studyId, name, description,
-      AnnotationValueType.withName(valueType), maxValueCount, selectionMap)
+      AnnotationValueType.withName(valueType), maxValueCount, selectionMap, required)
   }
 }
 
-object CollectionEventAnnotationTypeSelections {
+object ParticipantAnnotationTypeSelections {
   val annotationValueTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
     AnnotationValueType.values.map(x =>
       x.toString -> Messages("biobank.enumaration.annotation.value.type." + x.toString)).toSeq
 }
 
-object CeventAnnotTypeController
-  extends StudyAnnotationTypeController[CollectionEventAnnotationType] {
+object ParticipantAnnotTypeController
+  extends StudyAnnotationTypeController[ParticipantAnnotationType] {
 
   val annotationTypeForm = Form(
     mapping(
@@ -76,7 +74,8 @@ object CeventAnnotTypeController
       "description" -> optional(text),
       "valueType" -> nonEmptyText,
       "maxValueCount" -> optional(number),
-      "selections" -> list(text))(CeventAnnotationTypeMapper.apply)(CeventAnnotationTypeMapper.unapply))
+      "selections" -> list(text),
+      "required" -> boolean)(ParticipantAnnotationTypeMapper.apply)(ParticipantAnnotationTypeMapper.unapply))
 
   override protected def studyBreadcrumbs(studyId: String, studyName: String) = {
     Map(
@@ -86,27 +85,27 @@ object CeventAnnotTypeController
 
   override protected def addBreadcrumbs(studyId: String, studyName: String) = {
     studyBreadcrumbs(studyId, studyName) +
-      (Messages("biobank.study.collection.event.annotation.type.add") -> null)
+      (Messages("biobank.study.participant.annotation.type.add") -> null)
   }
 
   override protected def updateBreadcrumbs(studyId: String, studyName: String) = {
     studyBreadcrumbs(studyId, studyName) +
-      (Messages("biobank.study.collection.event.annotation.type.update") -> null)
+      (Messages("biobank.study.participant.annotation.type.update") -> null)
   }
 
   override protected def removeBreadcrumbs(studyId: String, studyName: String) = {
     studyBreadcrumbs(studyId, studyName) +
-      (Messages("biobank.study.collection.event.annotation.type.remove") -> null)
+      (Messages("biobank.study.participant.annotation.type.remove") -> null)
   }
 
   override protected def isAnnotationTypeInUse(
     studyId: String,
     annotationTypeId: String): DomainValidation[Boolean] = {
-    studyService.isCollectionEventAnnotationTypeInUse(studyId, annotationTypeId)
+    studyService.isParticipantAnnotationTypeInUse(studyId, annotationTypeId)
   }
 
   override protected def annotationTypeInUseErrorMsg(annotName: String): String =
-    Messages("biobank.study.collection.event.annotation.type.in.use.error.message", annotName)
+    Messages("biobank.study.participant.annotation.type.in.use.error.message", annotName)
 
   /**
    * Add an attribute type.
@@ -115,7 +114,7 @@ object CeventAnnotTypeController
     studyId: String,
     studyName: String) = SecuredAction { implicit request =>
     super.addAnnotationType(studyId, studyName)(study =>
-      Ok(html.study.ceventannotationtype.add(
+      Ok(html.study.participantannotationtype.add(
         annotationTypeForm, AddFormType(), studyId, study.name,
         addBreadcrumbs(studyId, studyName))))
   }
@@ -126,15 +125,14 @@ object CeventAnnotTypeController
       formObj =>
         val studyId = formObj.studyId
         val studyName = formObj.studyName
-
         Async {
-          studyService.addCollectionEventAnnotationType(formObj.getAddCmd).map(validation =>
+          studyService.addParticipantAnnotationType(formObj.getAddCmd).map(validation =>
             validation match {
               case Failure(x) =>
                 if (x.head.contains("name already exists")) {
                   val form = annotationTypeForm.fill(formObj).withError("name",
-                    Messages("biobank.study.collection.event.annotation.type.form.error.name"))
-                  BadRequest(html.study.ceventannotationtype.add(form, AddFormType(),
+                    Messages("biobank.study.participant.annotation.type.form.error.name"))
+                  BadRequest(html.study.participantannotationtype.add(form, AddFormType(),
                     studyId, studyName, addBreadcrumbs(studyId, studyName)))
                 } else {
                   throw new Error(x.head)
@@ -151,17 +149,18 @@ object CeventAnnotTypeController
     studyId: String,
     studyName: String,
     annotationTypeId: String) = SecuredAction { implicit request =>
-    val annotationType = studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId)
+    val annotationType = studyService.participantAnnotationTypeWithId(studyId, annotationTypeId)
     super.updateAnnotationType(studyId, studyName, annotationType) {
       (studyId, studyName, annotationType) =>
-        studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
+        studyService.participantAnnotationTypeWithId(studyId, annotationTypeId) match {
           case Failure(x) => throw new Error(x.head)
           case Success(annotType) =>
-            val form = annotationTypeForm.fill(CeventAnnotationTypeMapper(
+            val form = annotationTypeForm.fill(ParticipantAnnotationTypeMapper(
               annotType.id.id, annotType.version, studyId, studyName, annotType.name,
               annotType.description, annotType.valueType.toString, annotType.maxValueCount,
-              annotType.options.map(v => v.values.toList).getOrElse(List.empty)))
-            Ok(html.study.ceventannotationtype.add(form, UpdateFormType(), studyId, studyName,
+              annotType.options.map(v => v.values.toList).getOrElse(List.empty),
+              annotType.required))
+            Ok(html.study.participantannotationtype.add(form, UpdateFormType(), studyId, studyName,
               updateBreadcrumbs(studyId, studyName)))
         }
     }
@@ -173,15 +172,14 @@ object CeventAnnotTypeController
       submittedForm =>
         val studyId = submittedForm.studyId
         val studyName = submittedForm.studyName
-
         Async {
-          studyService.updateCollectionEventAnnotationType(submittedForm.getUpdateCmd).map(validation =>
+          studyService.updateParticipantAnnotationType(submittedForm.getUpdateCmd).map(validation =>
             validation match {
               case Failure(x) =>
                 if (x.head.contains("name already exists")) {
                   val form = annotationTypeForm.fill(submittedForm).withError("name",
-                    Messages("biobank.study.collection.event.annotation.type.form.error.name"))
-                  BadRequest(html.study.ceventannotationtype.add(
+                    Messages("biobank.study.participant.annotation.type.form.error.name"))
+                  BadRequest(html.study.participantannotationtype.add(
                     form, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
                 } else {
                   throw new Error(x.head)
@@ -199,15 +197,14 @@ object CeventAnnotTypeController
     studyName: String,
     annotationTypeId: String) = SecuredAction {
     implicit request =>
-      val annotationType = studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId)
+      val annotationType = studyService.participantAnnotationTypeWithId(studyId, annotationTypeId)
       super.removeAnnotationType(studyId, studyName, annotationType) {
         (studyId, studyName, annotationType) =>
-          studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
-            case Failure(x) => throw new Error(x.head)
-            case Success(annotType) =>
-              Ok(html.study.ceventannotationtype.removeConfirm(studyId, studyName, annotType,
-                annotationTypeFieldsMap(annotationType), removeBreadcrumbs(studyId, studyName)))
-          }
+          val requiredValue = if (annotationType.required) "Yes" else "No"
+          val fields = annotationTypeFieldsMap(annotationType) +
+            (Messages("biobank.study.participant.annotation.type.required") -> requiredValue)
+          Ok(html.study.participantannotationtype.removeConfirm(studyId, studyName,
+            annotationType, fields, removeBreadcrumbs(studyId, studyName)))
       }
   }
 
@@ -221,23 +218,22 @@ object CeventAnnotTypeController
     implicit val userId = new UserId(request.user.identityId.userId)
     super.removeAnnotationTypeSubmit {
       (studyId, studyName, annotationTypeId) =>
-        studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
+        studyService.participantAnnotationTypeWithId(studyId, annotationTypeId) match {
           case Failure(x) => throw new Error(x.head)
           case Success(annotType) =>
             Async {
-              studyService.removeCollectionEventAnnotationType(
-                RemoveCollectionEventAnnotationTypeCmd(
+              studyService.removeParticipantAnnotationType(
+                RemoveParticipantAnnotationTypeCmd(
                   annotType.id.id, annotType.versionOption, studyId)).map(validation =>
                   validation match {
                     case Success(annotType) =>
                       Redirect(routes.StudyController.showStudy(studyId)).flashing(
-                        "success" -> Messages("biobank.study.collection.event.annotation.type.removed", annotType.name))
+                        "success" -> Messages("biobank.study.participant.annotation.type.removed", annotType.name))
                     case Failure(x) =>
                       throw new Error(x.head)
                   })
             }
         }
     }
-
   }
 }

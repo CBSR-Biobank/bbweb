@@ -1,11 +1,17 @@
 @(heading: String,
     message: String,
-    breadcrumbMap: Map[String, Call])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+    breadcrumbMap: Map[String, Call],
+    backButtonRoute: Call)(
+    implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
-@main("Biobank") {
-  @breadcrumbs(breadcrumbMap)
-  <div class="alert alert-block">
-    <h4>@heading</h4>
-    @message
+@main("Biobank", breadcrumbMap) {
+  <div class="clearfix">
+    <div class="alert alert-block">
+      <h4>@heading</h4>
+      @message
+    </div>
+    <div class="form-actions">     
+      <a href="@backButtonRoute" class="btn">Back</a>           
+    </div> 
   </div>
 }

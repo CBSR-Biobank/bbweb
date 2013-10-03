@@ -1,0 +1,15 @@
+@(study: domain.study.Study,
+  counts: Map[String,String],
+  participantAnnotTypes: Set[domain.study.ParticipantAnnotationType])(
+  implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent], 
+  flash: play.api.mvc.Flash)
+
+@import tags._    
+@import controllers.study._
+
+<h4>@Messages("biobank.study.tab.subtitle.participants")</h4>
+@nameValueRow(Messages("biobank.study.field.participants"), counts("participants"))
+@nameValueRow(Messages("biobank.study.field.collection.events"), counts("collection.events"))
+@nameValueRow(Messages("biobank.study.field.specimen.count"), counts("specimen.count"))
+
+@participantAnnotTypeList(study.id.id, study.name, participantAnnotTypes)

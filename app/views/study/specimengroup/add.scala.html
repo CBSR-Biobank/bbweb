@@ -6,6 +6,7 @@
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
+@import tags._    
 @import controllers.study._
 
 @implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) } 
@@ -19,8 +20,7 @@
             routes.SpecimenGroupController.updateSpecimenGroupSubmit)  
 }}
 
-@main(formInfo.title) {
-  @breadcrumbs(breadcrumbMap)
+@main(formInfo.title, breadcrumbMap) {
   <div class="page-header">
     <h2>@studyName <small>@formInfo.title</small></h2>
   </div>

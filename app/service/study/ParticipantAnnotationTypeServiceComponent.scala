@@ -53,7 +53,7 @@ trait ParticipantAnnotationTypeServiceComponent {
         case cmd: AddParticipantAnnotationTypeCmd =>
           ParticipantAnnotationType(
             id, 0L, StudyId(cmd.studyId), cmd.name, cmd.description, cmd.valueType,
-            cmd.maxValueCount, cmd.options)
+            cmd.maxValueCount, cmd.options, cmd.required)
       }
     }
 
@@ -64,7 +64,7 @@ trait ParticipantAnnotationTypeServiceComponent {
         case cmd: UpdateParticipantAnnotationTypeCmd =>
           ParticipantAnnotationType(
             oldAnnotationType.id, cmd.expectedVersion.getOrElse(-1L) + 1L, StudyId(cmd.studyId),
-            cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options)
+            cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options, cmd.required)
       }
     }
 
@@ -76,7 +76,7 @@ trait ParticipantAnnotationTypeServiceComponent {
           ParticipantAnnotationType(
             AnnotationTypeId(cmd.id), cmd.expectedVersion.getOrElse(-1), StudyId(cmd.studyId),
             oldAnnotationType.name, oldAnnotationType.description, oldAnnotationType.valueType,
-            oldAnnotationType.maxValueCount, oldAnnotationType.options)
+            oldAnnotationType.maxValueCount, oldAnnotationType.options, oldAnnotationType.required)
       }
     }
 

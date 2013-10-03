@@ -8,4 +8,6 @@ object test {
                                                   //> res0: String = $("#aa").popover();
                                                   //| $("#bb").popover();
                                                   //| $("#cc").popover();
+  (1 to 2)                                        //> res1: scala.collection.immutable.Range.Inclusive = Range(1, 2)
+  (1 until 3)                                     //> res2: scala.collection.immutable.Range = Range(1, 2)
 }

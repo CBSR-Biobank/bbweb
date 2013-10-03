@@ -3,6 +3,7 @@
   specimenGroups: Set[domain.study.SpecimenGroup])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
     flash: play.api.mvc.Flash)
 
+@import tags._    
 @import controllers.study._
 
 <h4>
@@ -13,7 +14,7 @@
             <i class="icon-plus-sign icon-white"></i></a>
 </h4>
 @if(specimenGroups.size <= 0) {
-  <p>@Messages("biobank.study.specimen.group.show.none")</p>
+  @alertBlock{ }{ @Messages("biobank.study.specimen.group.show.none") }
 } else {
   <table class="table table-bordered table-hover table-condensed">   
   <thead>

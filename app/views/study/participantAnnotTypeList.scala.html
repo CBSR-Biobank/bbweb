@@ -1,24 +1,24 @@
-@(studyId: String, 
-    studyName: String, 
-    annotationTypes: Set[domain.study.CollectionEventAnnotationType])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+@(studyId: String,
+    studyName: String,
+    annotationTypes: Set[domain.study.ParticipantAnnotationType])(
+  implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import tags._    
 @import controllers.study._
 @import domain.AnnotationValueType._
 
 <h4>
-@Messages("biobank.study.collection.event.annotation.type.show.title")
-<a href="@routes.CeventAnnotTypeController.addAnnotationType(studyId, studyName)" 
+@Messages("biobank.study.participant.annotation.type.show.title")
+<a href="@routes.ParticipantAnnotTypeController.addAnnotationType(studyId, studyName)"
     class="btn btn-small btn-primary" type="button"
     data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
     <i class="icon-plus-sign icon-white"></i></a>
 </h4>
-      
+
 @if(annotationTypes.size <= 0) {
-  @alertBlock { }{
-    @Messages("biobank.study.collection.event.annotation.type.show.none")
+  @alertBlock{ }{
+    @Messages("biobank.study.participant.annotation.type.show.none")
   }
-  </div>
 } else {
       <table class="table table-bordered table-hover table-condensed">
         <thead>
@@ -26,20 +26,21 @@
           <th>@Messages("biobank.annotation.type.field.value.type")</th>
           <th>@Messages("biobank.annotation.type.field.max.value.count")</th>
           <th>@Messages("biobank.annotation.type.field.options")</th>
+          <th>@Messages("biobank.study.participant.annotation.type.field.required")</th>
           <th></th>
         </thead>
         <tbody>
           @for(annotType <- annotationTypes) {
-            <tr>   
+            <tr>
               <td>@nameWithDescriptionPopup(annotType.id.id, annotType.name, annotType.description)</td>
               <td><span class="label">@annotType.valueType</span></td>
-              
+
               @if(annotType.valueType == domain.AnnotationValueType.Select) {
                   @if(annotType.maxValueCount.getOrElse(0) == 1) {
                     <td>@Messages("biobank.annotation.type.field.max.value.count.single")</td>
                   } else {
                     @if(annotType.maxValueCount.getOrElse(0) > 1) {
-                      <td>@Messages("biobank.annotation.type.field.max.value.count.multiple")</td>                  
+                      <td>@Messages("biobank.annotation.type.field.max.value.count.multiple")</td>
                     } else {
                       <td><span class="label label-warning">ERROR: @@annotType.maxValueCount</span></td>
                     }
@@ -47,13 +48,14 @@
                 <td>@Html(annotType.options.map( m => m.values.mkString("<br/>")).getOrElse("") )</td>
               } else {
                 <td><span class="label">N/A</span></td>
-                <td><span class="label">N/A</span></td>              
+                <td><span class="label">N/A</span></td>
               }
-              
+
+              <td>@if(annotType.required) { @Messages("biobank.common.yes") } else { @Messages("biobank.common.no") }</td>
               <td>
                 @updateRemoveButtons(
-                    routes.CeventAnnotTypeController.updateAnnotationType(studyId,studyName,annotType.id.id),
-                    routes.CeventAnnotTypeController.removeAnnotationType(studyId,studyName,annotType.id.id))
+                    routes.ParticipantAnnotTypeController.updateAnnotationType(studyId,studyName,annotType.id.id),
+                    routes.ParticipantAnnotTypeController.removeAnnotationType(studyId,studyName,annotType.id.id))
               </td>
             <tr>
           }
@@ -64,4 +66,4 @@
       @Html(annotationTypes.map(sg => """$('#%s').popover();""".format(sg.id)).mkString("\n"))
   </script>
 }
-    
+

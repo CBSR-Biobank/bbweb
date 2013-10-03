@@ -2,8 +2,13 @@ package service
 
 import fixture._
 import service.commands._
-import domain.{ AnatomicalSourceType, PreservationType, PreservationTemperatureType, SpecimenType }
-//import domain.AnnotationValueType._
+import domain.{
+  AnatomicalSourceType,
+  AnnotationValueType,
+  PreservationType,
+  PreservationTemperatureType,
+  SpecimenType
+}
 import domain.study._
 
 import org.specs2.scalaz.ValidationMatchers._
