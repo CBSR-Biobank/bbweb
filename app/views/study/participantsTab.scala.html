@@ -12,4 +12,9 @@
 @nameValueRow(Messages("biobank.study.field.collection.events"), counts("collection.events"))
 @nameValueRow(Messages("biobank.study.field.specimen.count"), counts("specimen.count"))
 
-@participantAnnotTypeList(study.id.id, study.name, participantAnnotTypes)
+@studyAnnotTypeList(study.id.id, study.name, participantAnnotTypes,
+    Messages("biobank.study.participant.annotation.type.show.title"),
+    Messages("biobank.study.participant.annotation.type.show.none"),
+    routes.ParticipantAnnotTypeController.addAnnotationType(study.id.id, study.name),
+    routes.ParticipantAnnotTypeController.updateAnnotationType _,
+    routes.ParticipantAnnotTypeController.removeAnnotationType _)

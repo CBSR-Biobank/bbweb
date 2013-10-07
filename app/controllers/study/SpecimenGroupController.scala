@@ -166,14 +166,12 @@ object SpecimenGroupController extends Controller with SecureSocial {
       routes.StudyController.showStudy(studyId)))
   }
 
-  /**
-   * If the annotation type is not in use, the the {@link actionFunc} will be invoked.
-   */
-  private def checkSpecimenGroupNotInUse(
+  def validateSpecimenGroup(
     studyId: String,
     studyName: String,
-    specimenGroupId: String)(actionFunc: (String, String, String) => Result)(implicit request: WrappedRequest[AnyContent]) = {
-    studyService.specimenGroupInUse(studyId, specimenGroupId) match {
+    specimenGroup: DomainValidation[SpecimenGroup])(f: (String, String, SpecimenGroup) => Result)(
+      implicit request: WrappedRequest[AnyContent]): Result = {
+    specimenGroup match {
       case Failure(x) =>
         if (x.head.contains("study does not have specimen group")) {
           badActionRequest(studyId, studyName, Messages("biobank.study.error"))
@@ -182,34 +180,51 @@ object SpecimenGroupController extends Controller with SecureSocial {
         } else {
           throw new Error(x.head)
         }
-      case Success(result) =>
-        if (result) {
-          badActionRequest(studyId, studyName, Messages("biobank.study.specimen.group.in.use.error.message"))
-        } else {
-          actionFunc(studyId, studyName, specimenGroupId)
+      case Success(sg) =>
+        f(studyId, studyName, sg)
+    }
+  }
+
+  /**
+   * If the annotation type is not in use, the the {@link actionFunc} will be invoked.
+   */
+  private def checkSpecimenGroupNotInUse(
+    studyId: String,
+    studyName: String,
+    specimenGroup: DomainValidation[SpecimenGroup])(
+      actionFunc: (String, String, SpecimenGroup) => Result)(
+        implicit request: WrappedRequest[AnyContent]) = {
+    validateSpecimenGroup(studyId, studyName, specimenGroup) {
+      (studyId, studyName, specimenGroup) =>
+        studyService.specimenGroupInUse(studyId, specimenGroup.id.id) match {
+          case Failure(x) =>
+            throw new Error(x.head)
+          case Success(result) =>
+            if (result) {
+              badActionRequest(studyId, studyName,
+                Messages("biobank.study.specimen.group.in.use.error.message", specimenGroup.name))
+            } else {
+              actionFunc(studyId, studyName, specimenGroup)
+            }
         }
     }
+
   }
 
   def updateSpecimenGroup(
     studyId: String,
     studyName: String,
     specimenGroupId: String) = SecuredAction { implicit request =>
-
-    def action(studyId: String, studyName: String, specimenGroupId: String) = {
-      studyService.specimenGroupWithId(studyId, specimenGroupId) match {
-        case Failure(x) => throw new Error(x.head)
-        case Success(sg) =>
-          val form = specimenGroupForm.fill(SpecimenGroupFormObject(
-            sg.id.id, sg.version, studyId, studyName, sg.name, sg.description, sg.units,
-            sg.anatomicalSourceType.toString, sg.preservationType.toString,
-            sg.preservationTemperatureType.toString, sg.specimenType.toString))
-          Ok(html.study.specimengroup.add(form, UpdateFormType(), studyId, studyName,
-            updateBreadcrumbs(studyId, studyName)))
-      }
+    val specimenGroup = studyService.specimenGroupWithId(studyId, specimenGroupId)
+    checkSpecimenGroupNotInUse(studyId, studyName, specimenGroup) {
+      (studyId, studyName, sg) =>
+        val form = specimenGroupForm.fill(SpecimenGroupFormObject(
+          sg.id.id, sg.version, studyId, studyName, sg.name, sg.description, sg.units,
+          sg.anatomicalSourceType.toString, sg.preservationType.toString,
+          sg.preservationTemperatureType.toString, sg.specimenType.toString))
+        Ok(html.study.specimengroup.add(form, UpdateFormType(), studyId, studyName,
+          updateBreadcrumbs(studyId, studyName)))
     }
-
-    checkSpecimenGroupNotInUse(studyId, studyName, specimenGroupId)(action)
   }
 
   def updateSpecimenGroupSubmit = SecuredAction { implicit request =>
@@ -251,18 +266,12 @@ object SpecimenGroupController extends Controller with SecureSocial {
     studyId: String,
     studyName: String,
     specimenGroupId: String) = SecuredAction { implicit request =>
-
-    def action(studyId: String, studyName: String, specimenGroupId: String) = {
-      studyService.specimenGroupWithId(studyId, specimenGroupId) match {
-        case Failure(x) =>
-          throw new Error(x.head)
-        case Success(sg) =>
-          Ok(views.html.study.specimengroup.removeConfirm(studyId, studyName, sg,
-            removeBreadcrumbs(studyId, studyName)))
-      }
+    val specimenGroup = studyService.specimenGroupWithId(studyId, specimenGroupId)
+    checkSpecimenGroupNotInUse(studyId, studyName, specimenGroup) {
+      (studyId, studyName, sg) =>
+        Ok(views.html.study.specimengroup.removeConfirm(studyId, studyName, sg,
+          removeBreadcrumbs(studyId, studyName)))
     }
-
-    checkSpecimenGroupNotInUse(studyId, studyName, specimenGroupId)(action)
   }
 
   val specimenGroupDeleteForm = Form(

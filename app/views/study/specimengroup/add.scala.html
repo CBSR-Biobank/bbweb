@@ -75,11 +75,7 @@
          args = '_label -> Messages("biobank.study.specimen.group.field.specimentype")
       )
       
-         
-      <div class="form-actions">
-           <button type="submit" class="btn btn-primary">@Messages("biobank.form.submit")</button>
-           <a href="@routes.StudyController.showStudy(studyId)" class="btn">Cancel</a>        
-      </div>
+      @submitCancelFormButtons(routes.StudyController.showStudy(studyId))
     }
   </div>
 }

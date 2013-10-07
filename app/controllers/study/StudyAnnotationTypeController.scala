@@ -57,6 +57,10 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
 
   lazy val studyService = WebComponent.studyService
 
+  protected lazy val annotationValueTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
+    AnnotationValueType.values.map(x =>
+      x.toString -> Messages("biobank.enumaration.annotation.value.type." + x.toString)).toSeq
+
   private val studyNoAnnotationTypePattern = "study does not have .* annotation type".r
 
   protected def studyBreadcrumbs(studyId: String, studyName: String): Map[String, Call]
@@ -66,6 +70,14 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
   protected def updateBreadcrumbs(studyId: String, studyName: String): Map[String, Call]
 
   protected def removeBreadcrumbs(studyId: String, studyName: String): Map[String, Call]
+
+  protected def addTitle: String
+
+  protected def updateTitle: String
+
+  protected def addAction: Call
+
+  protected def updateAction: Call
 
   protected def isAnnotationTypeInUse(
     studyId: String,
@@ -188,8 +200,9 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
         val studyId = formWithErrors("studyId").value.getOrElse("")
         val studyName = formWithErrors("studyName").value.getOrElse("")
 
-        BadRequest(html.study.ceventannotationtype.add(
-          formWithErrors, AddFormType(), studyId, studyName, addBreadcrumbs(studyId, studyName)))
+        BadRequest(html.study.annotationtype.add(
+          formWithErrors, AddFormType(), studyId, studyName, addTitle, addAction,
+          annotationValueTypes, addBreadcrumbs(studyId, studyName)))
       },
       submittedForm => {
         val studyId = submittedForm.studyId
@@ -199,8 +212,9 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
           submittedForm.maxValueCount)) {
           val form = annotationTypeForm.fill(submittedForm).withError("maxValueCount",
             Messages("biobank.annotation.type.form.max.value.count.error"))
-          BadRequest(html.study.ceventannotationtype.add(
-            form, AddFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
+          BadRequest(html.study.annotationtype.add(
+            form, AddFormType(), studyId, studyName, addTitle, addAction,
+            annotationValueTypes, updateBreadcrumbs(studyId, studyName)))
         } else {
           f(submittedForm)
         }
@@ -229,8 +243,9 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
         val studyId = formWithErrors("studyId").value.getOrElse("")
         val studyName = formWithErrors("studyName").value.getOrElse("")
 
-        BadRequest(html.study.ceventannotationtype.add(
-          formWithErrors, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
+        BadRequest(html.study.annotationtype.add(
+          formWithErrors, UpdateFormType(), studyId, studyName, updateTitle, updateAction,
+          annotationValueTypes, updateBreadcrumbs(studyId, studyName)))
       },
       submittedForm => {
         val studyId = submittedForm.studyId
@@ -240,8 +255,9 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
           submittedForm.maxValueCount)) {
           val form = annotationTypeForm.fill(submittedForm).withError("maxValueCount",
             Messages("biobank.annotation.type.form.max.value.count.error"))
-          BadRequest(html.study.ceventannotationtype.add(
-            form, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
+          BadRequest(html.study.annotationtype.add(
+            form, UpdateFormType(), studyId, studyName, updateTitle, updateAction,
+            annotationValueTypes, updateBreadcrumbs(studyId, studyName)))
         } else {
           f(submittedForm)
         }

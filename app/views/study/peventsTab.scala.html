@@ -1,0 +1,14 @@
+@(studyId: String, 
+    studyName: String,    
+    annotationTypes: Set[domain.study.SpecimenLinkAnnotationType])(
+    implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+
+@import tags._
+@import controllers.study._
+
+@studyAnnotTypeList(studyId, studyName, annotationTypes,
+    Messages("biobank.study.specimen.link.annotation.type.show.title"),
+    Messages("biobank.study.specimen.link.annotation.type.show.none"),
+    routes.SpecimenLinkAnnotTypeController.addAnnotationType(studyId, studyName),
+    routes.SpecimenLinkAnnotTypeController.updateAnnotationType _,
+    routes.SpecimenLinkAnnotTypeController.removeAnnotationType _)

@@ -57,12 +57,6 @@ case class CeventAnnotationTypeMapper(
   }
 }
 
-object CollectionEventAnnotationTypeSelections {
-  val annotationValueTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
-    AnnotationValueType.values.map(x =>
-      x.toString -> Messages("biobank.enumaration.annotation.value.type." + x.toString)).toSeq
-}
-
 object CeventAnnotTypeController
   extends StudyAnnotationTypeController[CollectionEventAnnotationType] {
 
@@ -99,14 +93,26 @@ object CeventAnnotTypeController
       (Messages("biobank.study.collection.event.annotation.type.remove") -> null)
   }
 
+  override protected def addTitle: String =
+    Messages("biobank.study.collection.event.annotation.type.add")
+
+  override protected def updateTitle: String =
+    Messages("biobank.study.collection.event.annotation.type.update")
+
+  override protected def addAction: Call =
+    routes.CeventAnnotTypeController.addAnnotationTypeSubmit
+
+  override protected def updateAction: Call =
+    routes.CeventAnnotTypeController.updateAnnotationTypeSubmit
+
+  override protected def annotationTypeInUseErrorMsg(annotName: String): String =
+    Messages("biobank.study.collection.event.annotation.type.in.use.error.message", annotName)
+
   override protected def isAnnotationTypeInUse(
     studyId: String,
     annotationTypeId: String): DomainValidation[Boolean] = {
     studyService.isCollectionEventAnnotationTypeInUse(studyId, annotationTypeId)
   }
-
-  override protected def annotationTypeInUseErrorMsg(annotName: String): String =
-    Messages("biobank.study.collection.event.annotation.type.in.use.error.message", annotName)
 
   /**
    * Add an attribute type.
@@ -115,8 +121,11 @@ object CeventAnnotTypeController
     studyId: String,
     studyName: String) = SecuredAction { implicit request =>
     super.addAnnotationType(studyId, studyName)(study =>
-      Ok(html.study.ceventannotationtype.add(
+      Ok(html.study.annotationtype.add(
         annotationTypeForm, AddFormType(), studyId, study.name,
+        Messages("biobank.study.collection.event.annotation.type.add"),
+        routes.CeventAnnotTypeController.addAnnotationTypeSubmit,
+        annotationValueTypes,
         addBreadcrumbs(studyId, studyName))))
   }
 
@@ -134,8 +143,11 @@ object CeventAnnotTypeController
                 if (x.head.contains("name already exists")) {
                   val form = annotationTypeForm.fill(formObj).withError("name",
                     Messages("biobank.study.collection.event.annotation.type.form.error.name"))
-                  BadRequest(html.study.ceventannotationtype.add(form, AddFormType(),
-                    studyId, studyName, addBreadcrumbs(studyId, studyName)))
+                  BadRequest(html.study.annotationtype.add(form, AddFormType(), studyId, studyName,
+                    Messages("biobank.study.collection.event.annotation.type.add"),
+                    routes.CeventAnnotTypeController.addAnnotationTypeSubmit,
+                    annotationValueTypes,
+                    addBreadcrumbs(studyId, studyName)))
                 } else {
                   throw new Error(x.head)
                 }
@@ -161,7 +173,10 @@ object CeventAnnotTypeController
               annotType.id.id, annotType.version, studyId, studyName, annotType.name,
               annotType.description, annotType.valueType.toString, annotType.maxValueCount,
               annotType.options.map(v => v.values.toList).getOrElse(List.empty)))
-            Ok(html.study.ceventannotationtype.add(form, UpdateFormType(), studyId, studyName,
+            Ok(html.study.annotationtype.add(form, UpdateFormType(), studyId, studyName,
+              Messages("biobank.study.collection.event.annotation.type.update"),
+              routes.CeventAnnotTypeController.updateAnnotationTypeSubmit,
+              annotationValueTypes,
               updateBreadcrumbs(studyId, studyName)))
         }
     }
@@ -181,8 +196,12 @@ object CeventAnnotTypeController
                 if (x.head.contains("name already exists")) {
                   val form = annotationTypeForm.fill(submittedForm).withError("name",
                     Messages("biobank.study.collection.event.annotation.type.form.error.name"))
-                  BadRequest(html.study.ceventannotationtype.add(
-                    form, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
+                  BadRequest(html.study.annotationtype.add(
+                    form, UpdateFormType(), studyId, studyName,
+                    Messages("biobank.study.collection.event.annotation.type.update"),
+                    routes.CeventAnnotTypeController.updateAnnotationTypeSubmit,
+                    annotationValueTypes,
+                    updateBreadcrumbs(studyId, studyName)))
                 } else {
                   throw new Error(x.head)
                 }
@@ -205,17 +224,14 @@ object CeventAnnotTypeController
           studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
             case Failure(x) => throw new Error(x.head)
             case Success(annotType) =>
-              Ok(html.study.ceventannotationtype.removeConfirm(studyId, studyName, annotType,
+              Ok(html.study.annotationtype.removeConfirm(studyId, studyName,
+                Messages("biobank.study.collection.event.type.remove"),
+                Messages("biobank.study.collection.event.group.remove.confirm", annotType.name),
+                annotType,
                 annotationTypeFieldsMap(annotationType), removeBreadcrumbs(studyId, studyName)))
           }
       }
   }
-
-  val annotTypeDeleteForm = Form(
-    tuple(
-      "studyId" -> text,
-      "studyName" -> text,
-      "annotationTypeId" -> text))
 
   def removeAnnotationTypeSubmit = SecuredAction { implicit request =>
     implicit val userId = new UserId(request.user.identityId.userId)

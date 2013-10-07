@@ -1,0 +1,69 @@
+@(attrTypeForm: Form[_],
+  formType: FormType,
+  studyId: String,
+  studyName: String,
+  title: String,
+  submitAction: Call,
+  annotationValueTypes: Seq[(String, String)],
+  breadcrumbMap: Map[String, Call],
+  hasRequired: Boolean = false)(
+  implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+
+@import helper._
+@import tags._    
+@import controllers.study._
+@import domain.study.ParticipantAnnotationType
+
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+
+@main(title, breadcrumbMap) {
+  <div class="page-header">
+  <h2>@studyName <small>@title</small></h2>
+  </div>
+
+  @if(attrTypeForm.hasErrors) {
+    <div class="alert">
+    <p>@Messages("biobank.common.form.fix.errors")</p>
+    </div>
+  }
+
+  <div class="clearfix">
+  @form(submitAction, args = 'id -> "addform", 'class -> "form-horizontal") {
+
+    @formType match {
+      case AddFormType() => {
+        <input type="hidden" name="annotationTypeId" value="dont-care">
+        <input type="hidden" name="version" value="-1" >
+      }
+      case UpdateFormType() => {
+        <input type="hidden" name="annotationTypeId" value="@attrTypeForm("annotationTypeId").value" >
+        <input type="hidden" name="version" value="@attrTypeForm("version").value" >
+      }
+    }
+      
+    <input type="hidden" name="studyId" value="@studyId" >  
+    <input type="hidden" name="studyName" value="@studyName" >    
+    
+    @formNameAndDescription(attrTypeForm("name"), attrTypeForm("description"))
+    
+    @select(
+      field = attrTypeForm("valueType"),
+      options = annotationValueTypes,
+      args = '_label -> Messages("biobank.annotation.type.field.value.type")
+    )
+    
+    @annotTypeSelectionGroup(attrTypeForm("maxValueCount"), attrTypeForm("selections"),
+        attrTypeForm("selections[x]"))
+        
+    @if(hasRequired) {
+      @checkbox(field = attrTypeForm("required"),
+          args = '_label -> Messages("biobank.study.participant.annotation.type.field.required"),
+          '_help -> "")
+    }
+
+    @submitCancelFormButtons(routes.StudyController.showStudy(studyId))
+  }
+  </div>
+
+  <script type="text/javascript" src="@controllers.routes.Assets.at("js/annotationTypeSelect.js")"></script>
+}

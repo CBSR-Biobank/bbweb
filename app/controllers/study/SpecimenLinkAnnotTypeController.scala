@@ -28,7 +28,7 @@ import securesocial.core.{ Authorization, Identity, SecuredRequest, SecureSocial
 import scalaz._
 import Scalaz._
 
-case class ParticipantAnnotationTypeMapper(
+case class SpecimenLinkAnnotationTypeMapper(
   annotationTypeId: String,
   version: Long,
   studyId: String,
@@ -37,26 +37,25 @@ case class ParticipantAnnotationTypeMapper(
   description: Option[String],
   valueType: String,
   maxValueCount: Option[Int] = None,
-  selections: List[String],
-  required: Boolean)
+  selections: List[String])
   extends StudyAnnotationTypeMapper {
 
-  def getAddCmd: AddParticipantAnnotationTypeCmd = {
+  def getAddCmd: AddSpecimenLinkAnnotationTypeCmd = {
     val selectionMap = if (selections.size > 0) Some(selections.map(v => (v, v)).toMap) else None
-    AddParticipantAnnotationTypeCmd(studyId, name, description,
-      AnnotationValueType.withName(valueType), maxValueCount, selectionMap, required)
+    AddSpecimenLinkAnnotationTypeCmd(studyId, name, description,
+      AnnotationValueType.withName(valueType), maxValueCount, selectionMap)
   }
 
-  def getUpdateCmd: UpdateParticipantAnnotationTypeCmd = {
+  def getUpdateCmd: UpdateSpecimenLinkAnnotationTypeCmd = {
     val selectionMap = if (selections.size > 0) Some(selections.map(v => (v, v)).toMap) else None
-    UpdateParticipantAnnotationTypeCmd(
+    UpdateSpecimenLinkAnnotationTypeCmd(
       annotationTypeId, Some(version), studyId, name, description,
-      AnnotationValueType.withName(valueType), maxValueCount, selectionMap, required)
+      AnnotationValueType.withName(valueType), maxValueCount, selectionMap)
   }
 }
 
-object ParticipantAnnotTypeController
-  extends StudyAnnotationTypeController[ParticipantAnnotationType] {
+object SpecimenLinkAnnotTypeController
+  extends StudyAnnotationTypeController[SpecimenLinkAnnotationType] {
 
   val annotationTypeForm = Form(
     mapping(
@@ -68,8 +67,7 @@ object ParticipantAnnotTypeController
       "description" -> optional(text),
       "valueType" -> nonEmptyText,
       "maxValueCount" -> optional(number),
-      "selections" -> list(text),
-      "required" -> boolean)(ParticipantAnnotationTypeMapper.apply)(ParticipantAnnotationTypeMapper.unapply))
+      "selections" -> list(text))(SpecimenLinkAnnotationTypeMapper.apply)(SpecimenLinkAnnotationTypeMapper.unapply))
 
   override protected def studyBreadcrumbs(studyId: String, studyName: String) = {
     Map(
@@ -79,39 +77,39 @@ object ParticipantAnnotTypeController
 
   override protected def addBreadcrumbs(studyId: String, studyName: String) = {
     studyBreadcrumbs(studyId, studyName) +
-      (Messages("biobank.study.participant.annotation.type.add") -> null)
+      (Messages("biobank.study.specimen.link.annotation.type.add") -> null)
   }
 
   override protected def updateBreadcrumbs(studyId: String, studyName: String) = {
     studyBreadcrumbs(studyId, studyName) +
-      (Messages("biobank.study.participant.annotation.type.update") -> null)
+      (Messages("biobank.study.specimen.link.annotation.type.update") -> null)
   }
 
   override protected def removeBreadcrumbs(studyId: String, studyName: String) = {
     studyBreadcrumbs(studyId, studyName) +
-      (Messages("biobank.study.participant.annotation.type.remove") -> null)
+      (Messages("biobank.study.specimen.link.annotation.type.remove") -> null)
   }
 
   override protected def addTitle: String =
-    Messages("biobank.study.collection.event.annotation.type.add")
+    Messages("biobank.study.specimen.link.annotation.type.add")
 
   override protected def updateTitle: String =
-    Messages("biobank.study.participant.annotation.type.update")
+    Messages("biobank.study.specimen.link.annotation.type.update")
 
   override protected def addAction: Call =
-    routes.ParticipantAnnotTypeController.addAnnotationTypeSubmit
+    routes.SpecimenLinkAnnotTypeController.addAnnotationTypeSubmit
 
   override protected def updateAction: Call =
-    routes.ParticipantAnnotTypeController.updateAnnotationTypeSubmit
+    routes.SpecimenLinkAnnotTypeController.updateAnnotationTypeSubmit
 
   override protected def isAnnotationTypeInUse(
     studyId: String,
     annotationTypeId: String): DomainValidation[Boolean] = {
-    studyService.isParticipantAnnotationTypeInUse(studyId, annotationTypeId)
+    studyService.isSpecimenLinkAnnotationTypeInUse(studyId, annotationTypeId)
   }
 
   override protected def annotationTypeInUseErrorMsg(annotName: String): String =
-    Messages("biobank.study.participant.annotation.type.in.use.error.message", annotName)
+    Messages("biobank.study.specimen.link.annotation.type.in.use.error.message", annotName)
 
   /**
    * Add an attribute type.
@@ -122,10 +120,10 @@ object ParticipantAnnotTypeController
     super.addAnnotationType(studyId, studyName)(study =>
       Ok(html.study.annotationtype.add(
         annotationTypeForm, AddFormType(), studyId, study.name,
-        Messages("biobank.study.participant.annotation.type.add"),
-        routes.ParticipantAnnotTypeController.addAnnotationTypeSubmit,
+        Messages("biobank.study.specimen.link.annotation.type.add"),
+        routes.SpecimenLinkAnnotTypeController.addAnnotationTypeSubmit,
         annotationValueTypes,
-        addBreadcrumbs(studyId, studyName), hasRequired = true)))
+        addBreadcrumbs(studyId, studyName))))
   }
 
   def addAnnotationTypeSubmit = SecuredAction { implicit request =>
@@ -135,18 +133,17 @@ object ParticipantAnnotTypeController
         val studyId = formObj.studyId
         val studyName = formObj.studyName
         Async {
-          studyService.addParticipantAnnotationType(formObj.getAddCmd).map(validation =>
+          studyService.addSpecimenLinkAnnotationType(formObj.getAddCmd).map(validation =>
             validation match {
               case Failure(x) =>
                 if (x.head.contains("name already exists")) {
                   val form = annotationTypeForm.fill(formObj).withError("name",
-                    Messages("biobank.study.participant.annotation.type.form.error.name"))
+                    Messages("biobank.study.specimen.link.annotation.type.form.error.name"))
                   BadRequest(html.study.annotationtype.add(
                     form, AddFormType(), studyId, studyName,
-                    Messages("biobank.study.participant.annotation.type.add"),
-                    routes.ParticipantAnnotTypeController.addAnnotationTypeSubmit,
-                    annotationValueTypes,
-                    addBreadcrumbs(studyId, studyName), hasRequired = true))
+                    Messages("biobank.study.specimen.link.annotation.type.add"),
+                    routes.SpecimenLinkAnnotTypeController.addAnnotationTypeSubmit,
+                    annotationValueTypes, addBreadcrumbs(studyId, studyName)))
                 } else {
                   throw new Error(x.head)
                 }
@@ -162,23 +159,22 @@ object ParticipantAnnotTypeController
     studyId: String,
     studyName: String,
     annotationTypeId: String) = SecuredAction { implicit request =>
-    val annotationType = studyService.participantAnnotationTypeWithId(studyId, annotationTypeId)
+    val annotationType = studyService.specimenLinkAnnotationTypeWithId(studyId, annotationTypeId)
     super.updateAnnotationType(studyId, studyName, annotationType) {
       (studyId, studyName, annotationType) =>
-        studyService.participantAnnotationTypeWithId(studyId, annotationTypeId) match {
+        studyService.specimenLinkAnnotationTypeWithId(studyId, annotationTypeId) match {
           case Failure(x) => throw new Error(x.head)
           case Success(annotType) =>
-            val form = annotationTypeForm.fill(ParticipantAnnotationTypeMapper(
+            val form = annotationTypeForm.fill(SpecimenLinkAnnotationTypeMapper(
               annotType.id.id, annotType.version, studyId, studyName, annotType.name,
               annotType.description, annotType.valueType.toString, annotType.maxValueCount,
-              annotType.options.map(v => v.values.toList).getOrElse(List.empty),
-              annotType.required))
+              annotType.options.map(v => v.values.toList).getOrElse(List.empty)))
             Ok(html.study.annotationtype.add(
               form, UpdateFormType(), studyId, studyName,
-              Messages("biobank.study.participant.annotation.type.update"),
-              routes.ParticipantAnnotTypeController.updateAnnotationTypeSubmit,
+              Messages("biobank.study.specimen.link.annotation.type.update"),
+              routes.SpecimenLinkAnnotTypeController.updateAnnotationTypeSubmit,
               annotationValueTypes,
-              updateBreadcrumbs(studyId, studyName), hasRequired = true))
+              updateBreadcrumbs(studyId, studyName)))
         }
     }
   }
@@ -190,18 +186,17 @@ object ParticipantAnnotTypeController
         val studyId = submittedForm.studyId
         val studyName = submittedForm.studyName
         Async {
-          studyService.updateParticipantAnnotationType(submittedForm.getUpdateCmd).map(validation =>
+          studyService.updateSpecimenLinkAnnotationType(submittedForm.getUpdateCmd).map(validation =>
             validation match {
               case Failure(x) =>
                 if (x.head.contains("name already exists")) {
                   val form = annotationTypeForm.fill(submittedForm).withError("name",
-                    Messages("biobank.study.participant.annotation.type.form.error.name"))
+                    Messages("biobank.study.specimen.link.annotation.type.form.error.name"))
                   BadRequest(html.study.annotationtype.add(
                     form, UpdateFormType(), studyId, studyName,
-                    Messages("biobank.study.participant.annotation.type.update"),
-                    routes.ParticipantAnnotTypeController.updateAnnotationTypeSubmit,
-                    annotationValueTypes,
-                    updateBreadcrumbs(studyId, studyName), hasRequired = true))
+                    Messages("biobank.study.specimen.link.annotation.type.update"),
+                    routes.SpecimenLinkAnnotTypeController.updateAnnotationTypeSubmit,
+                    annotationValueTypes, updateBreadcrumbs(studyId, studyName)))
                 } else {
                   throw new Error(x.head)
                 }
@@ -218,16 +213,14 @@ object ParticipantAnnotTypeController
     studyName: String,
     annotationTypeId: String) = SecuredAction {
     implicit request =>
-      val annotationType = studyService.participantAnnotationTypeWithId(studyId, annotationTypeId)
+      val annotationType = studyService.specimenLinkAnnotationTypeWithId(studyId, annotationTypeId)
       super.removeAnnotationType(studyId, studyName, annotationType) {
         (studyId, studyName, annotationType) =>
-          val requiredValue = if (annotationType.required) "Yes" else "No"
-          val fields = annotationTypeFieldsMap(annotationType) +
-            (Messages("biobank.study.participant.annotation.type.required") -> requiredValue)
           Ok(html.study.annotationtype.removeConfirm(studyId, studyName,
-            Messages("biobank.study.participant.annotation.type.remove"),
-            Messages("biobank.study.participant.annotation.type.remove.confirm", annotationType.name),
-            annotationType, fields, removeBreadcrumbs(studyId, studyName)))
+            Messages("biobank.study.specimen.link.type.remove"),
+            Messages("biobank.study.specimen.link.group.remove.confirm", annotationType.name),
+            annotationType, annotationTypeFieldsMap(annotationType),
+            removeBreadcrumbs(studyId, studyName)))
       }
   }
 
@@ -235,17 +228,17 @@ object ParticipantAnnotTypeController
     implicit val userId = new UserId(request.user.identityId.userId)
     super.removeAnnotationTypeSubmit {
       (studyId, studyName, annotationTypeId) =>
-        studyService.participantAnnotationTypeWithId(studyId, annotationTypeId) match {
+        studyService.specimenLinkAnnotationTypeWithId(studyId, annotationTypeId) match {
           case Failure(x) => throw new Error(x.head)
           case Success(annotType) =>
             Async {
-              studyService.removeParticipantAnnotationType(
-                RemoveParticipantAnnotationTypeCmd(
+              studyService.removeSpecimenLinkAnnotationType(
+                RemoveSpecimenLinkAnnotationTypeCmd(
                   annotType.id.id, annotType.versionOption, studyId)).map(validation =>
                   validation match {
                     case Success(annotType) =>
                       Redirect(routes.StudyController.showStudy(studyId)).flashing(
-                        "success" -> Messages("biobank.study.participant.annotation.type.removed", annotType.name))
+                        "success" -> Messages("biobank.study.specimen.link.annotation.type.removed", annotType.name))
                     case Failure(x) =>
                       throw new Error(x.head)
                   })

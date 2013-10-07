@@ -6,9 +6,16 @@
 
 @import tags._
 @import controllers.study._
-@import domain.AnnotationValueType._
 
-@ceventAnnotTypeList(studyId, studyName, annotationTypes)
+@studyAnnotTypeList(
+    studyId, 
+    studyName, 
+    annotationTypes,
+    Messages("biobank.study.collection.event.annotation.type.show.title"),
+    Messages("biobank.study.collection.event.annotation.type.show.none"),
+    routes.CeventAnnotTypeController.addAnnotationType(studyId, studyName),
+    routes.SpecimenLinkAnnotTypeController.updateAnnotationType _,
+    routes.CeventAnnotTypeController.removeAnnotationType _)
 
 <h4>
   @Messages("biobank.study.collection.event.type.show.title")
@@ -69,7 +76,7 @@
     </table>
 }
 
-
-  <script type="text/javascript" charset="utf-8">
-      @Html(ceventTypes.map(sg => """$('#%s').popover();""".format(sg.id)).mkString("\n"))
-  </script>    
+<script type="text/javascript" charset="utf-8">
+    @Html(ceventTypes.map(sg => """$('#%s').popover();""".format(sg.id)).mkString("\n"))
+</script>
+    

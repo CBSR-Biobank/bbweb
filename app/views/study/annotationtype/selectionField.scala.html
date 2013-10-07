@@ -1,0 +1,16 @@
+@(field: Field,
+  className: String = "selections",
+  style: String = "")
+
+@import helper._
+@import tags._    
+
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+  
+@input(field,
+  '_label -> "", // label is blank intentionally
+  '_class -> className,
+  '_style -> style) { (id, name, value, _) =>
+  <input type="text" name="@name" value="@value">
+  <a class="removeSelection btn btn-warning">@Messages("biobank.common.action.remove")</a>
+}

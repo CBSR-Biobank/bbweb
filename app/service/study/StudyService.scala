@@ -83,6 +83,16 @@ trait StudyServiceComponent {
         implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationType]]
 
     // participant annotation types
+    def participantAnnotationTypeWithId(
+      studyId: String,
+      annotationTypeId: String): DomainValidation[ParticipantAnnotationType]
+
+    def isParticipantAnnotationTypeInUse(
+      studyId: String,
+      annotationTypeId: String): DomainValidation[Boolean]
+
+    def participantAnnotationTypesForStudy(studyId: String): Set[ParticipantAnnotationType]
+
     def addParticipantAnnotationType(
       cmd: AddParticipantAnnotationTypeCmd)(
         implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationType]]
@@ -96,6 +106,16 @@ trait StudyServiceComponent {
         implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationType]]
 
     // specimen link annotation types
+    def specimenLinkAnnotationTypeWithId(
+      studyId: String,
+      annotationTypeId: String): DomainValidation[SpecimenLinkAnnotationType]
+
+    def isSpecimenLinkAnnotationTypeInUse(
+      studyId: String,
+      annotationTypeId: String): DomainValidation[Boolean]
+
+    def specimenLinkAnnotationTypesForStudy(id: String): Set[SpecimenLinkAnnotationType]
+
     def addSpecimenLinkAnnotationType(
       cmd: AddSpecimenLinkAnnotationTypeCmd)(
         implicit userId: UserId): Future[DomainValidation[SpecimenLinkAnnotationType]]
@@ -179,6 +199,13 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
       studyId: String,
       annotationTypeId: String): DomainValidation[ParticipantAnnotationType] = {
       participantAnnotationTypeRepository.annotationTypeWithId(
+        StudyId(studyId), AnnotationTypeId(annotationTypeId))
+    }
+
+    def specimenLinkAnnotationTypeWithId(
+      studyId: String,
+      annotationTypeId: String): DomainValidation[SpecimenLinkAnnotationType] = {
+      specimenLinkAnnotationTypeRepository.annotationTypeWithId(
         StudyId(studyId), AnnotationTypeId(annotationTypeId))
     }
 
@@ -275,7 +302,8 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
 
     // participant annotation types
     def isParticipantAnnotationTypeInUse(
-      studyId: String, annotationTypeId: String): DomainValidation[Boolean] = {
+      studyId: String,
+      annotationTypeId: String): DomainValidation[Boolean] = {
       // TODO: needs implementation
       // 
       // return true if used by any participants
@@ -300,12 +328,23 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
           _.asInstanceOf[DomainValidation[ParticipantAnnotationType]])
 
     // specimen link annotation types
+    def isSpecimenLinkAnnotationTypeInUse(
+      studyId: String, annotationTypeId: String): DomainValidation[Boolean] = {
+      // TODO: needs implementation
+      // 
+      // return true if used by any participants
+      false.success
+    }
+
     def addSpecimenLinkAnnotationType(
       cmd: AddSpecimenLinkAnnotationTypeCmd)(
         implicit userId: UserId): Future[DomainValidation[SpecimenLinkAnnotationType]] =
       commandBus.ask(
         Message(ServiceMsg(cmd, userId, Some(SpecimenLinkAnnotationTypeIdentityService.nextIdentity)))).map(
           _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationType]])
+
+    def specimenLinkAnnotationTypesForStudy(studyId: String): Set[SpecimenLinkAnnotationType] =
+      specimenLinkAnnotationTypeRepository.allAnnotationTypesForStudy(StudyId(studyId))
 
     def updateSpecimenLinkAnnotationType(cmd: UpdateSpecimenLinkAnnotationTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[SpecimenLinkAnnotationType]] =

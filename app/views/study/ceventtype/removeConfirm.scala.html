@@ -37,10 +37,7 @@
         <input type="hidden" name="studyName" value="@studyName" >  
         <input type="hidden" name="ceventTypeId" value="@ceventType.id.id" >  
     
-        <div class="form-actions">           
-            <button type="submit" value="confirm" class="btn btn-primary btn-warning">@Messages("biobank.common.confirm")</button> 
-            <a href="@routes.StudyController.showStudy(studyId)" class="btn">Cancel</a>          
-        </div>
+        @submitCancelFormButtons(routes.StudyController.showStudy(studyId))
     }
   </div>
 }

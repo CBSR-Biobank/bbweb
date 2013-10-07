@@ -15,6 +15,7 @@ biobank.common.action.remove=Remove
 biobank.common.warning=Warning
 biobank.common.confirm=Confirm
 biobank.common.cancel=Cancel
+biobank.common.back=Back
 biobank.common.form.fix.errors=Please fix errors shown below
 biobank.common.name.help=short name
 biobank.common.description.help=describes the name
@@ -125,7 +126,7 @@ biobank.study.collection.event.annotation.type.in.use.error.message=Cannot modif
 # Participant Annotation Types
 biobank.study.participant.annotation.type.field.required=Required
 biobank.study.participant.annotation.type.show.none=No Participant Annotation Types have been added to this study.
-biobank.study.participant.annotation.type.show.title=Participant  Annotation Types
+biobank.study.participant.annotation.type.show.title=Participant Annotation Types
 biobank.study.participant.annotation.type.add=Add Participant Annotation Type
 biobank.study.participant.annotation.type.update=Update Participant  Annotation Type
 biobank.study.participant.annotation.type.form.error.name=A Participant  Annotation Type with this name already exists
@@ -134,6 +135,18 @@ biobank.study.participant.annotation.type.removed=Participant  Annotation Type "
 biobank.study.participant.annotation.type.remove.confirm=Are you sure you want to remove Participant  Annotation Type "{0}"?
 biobank.study.participant.annotation.type.required=Required
 biobank.study.participant.annotation.type.in.use.error.message=Cannot modify Annotation type "{0}" since it is in use by participants.
+
+# Specimen Link Annotation Types
+biobank.study.specimen.link.annotation.type.field.required=Required
+biobank.study.specimen.link.annotation.type.show.none=No Specimen Link Annotation Types have been added to this study.
+biobank.study.specimen.link.annotation.type.show.title=Specimen Link Annotation Types
+biobank.study.specimen.link.annotation.type.add=Add Specimen Link Annotation Type
+biobank.study.specimen.link.annotation.type.update=Update Specimen Link Annotation Type
+biobank.study.specimen.link.annotation.type.form.error.name=A Specimen Link Annotation Type with this name already exists
+biobank.study.specimen.link.annotation.type.remove=Remove Specimen Link Annotation Type
+biobank.study.specimen.link.annotation.type.removed=Specimen Link Annotation Type "{0}" removed.
+biobank.study.specimen.link.annotation.type.remove.confirm=Are you sure you want to remove Specimen Link Annotation Type "{0}"?
+biobank.study.specimen.link.annotation.type.in.use.error.message=Cannot modify Annotation type "{0}" since it is in use by specimen links.
 
 # Value type enumeration
 biobank.enumaration.annotation.value.type.Text=Text

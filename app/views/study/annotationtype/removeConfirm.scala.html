@@ -4,7 +4,9 @@
  *@
 @(studyId: String,
     studyName: String,
-    annotType: domain.study.CollectionEventAnnotationType,
+    removeMsg: String,
+    removeConfirmMsg: String,
+    annotType: domain.study.StudyAnnotationType,
     fields: Map[String, String],
     breadcrumbMap: Map[String, Call])(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
@@ -13,18 +15,12 @@
 @import helper._
 @import controllers.study._
 
-@breadcrumbs = @{ Map(
-  (Messages("biobank.study.plural") -> routes.StudyController.index),
-  (studyName -> routes.StudyController.showStudy(studyId)),
-  (Messages("biobank.study.collection.event.annotation.type.remove") -> null)
-) }
-
-@main(Messages("biobank.study.specimen.group.remove"), breadcrumbs) {
+@main(removeMsg, breadcrumbMap) {
   <div class="page-header">
-    <h2>@studyName <small>@Messages("biobank.study.collection.event.annotation.type.remove")</small></h2>
+    <h2>@studyName <small>@removeMsg</small></h2>
     
     @alertBlock{ @Messages("biobank.common.warning") } {
-       @Messages("biobank.study.collection.event.annotation.type.remove.confirm", annotType.name)
+       @removeConfirmMsg
     }
   </div>
   <div class="clearfix">
@@ -40,10 +36,7 @@
         <input type="hidden" name="studyName" value="@studyName" >  
         <input type="hidden" name="annotationTypeId" value="@annotType.id.id" >  
     
-        <div class="form-actions">           
-            <button type="submit" value="confirm" class="btn btn-primary btn-warning">@Messages("biobank.common.confirm")</button>
-            <a href="@routes.StudyController.showStudy(studyId)" class="btn">Cancel</a>           
-        </div>
+        @submitCancelFormButtons(routes.StudyController.showStudy(studyId))
     }
   </div>
 }

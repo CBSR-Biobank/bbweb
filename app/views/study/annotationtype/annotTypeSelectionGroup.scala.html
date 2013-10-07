@@ -1,0 +1,41 @@
+@(maxValueCountField: Field,
+    selectionsField: Field,
+    selectionsTemplateField: Field)
+
+@import helper._
+@import tags._    
+
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+
+<div class="well selectionGroup" style="display:none;">
+  @inputRadioGroupAligned(
+    maxValueCountField,
+    options = Seq(
+      "1" -> Messages("biobank.annotation.type.field.max.value.count.single.desc"),
+      "2" -> Messages("biobank.annotation.type.field.max.value.count.multiple.desc")),
+    '_label -> Messages("biobank.annotation.type.field.options"),
+    '_help -> "", // label is blank intentionally
+    //'_class -> "radio",
+    '_error -> maxValueCountField.error.map(
+      _.withMessage(Messages("biobank.annotation.type.form.max.value.count.error"))))
+  
+  <div class="control-group">
+    <div class="controls">
+        <a class="addSelection btn btn-small btn-success">
+            @Messages("biobank.annotation.type.form.selection.add")
+            <i class="icon-plus-sign icon-white"></i>
+        </a>
+    </div>
+  </div>
+
+  @repeat(selectionsField, min = selectionsField.indexes.size) { selection =>
+    @selectionField(selection)
+  }
+  
+  @**
+  * This hidden block will be used as template for Javascript copy code
+  **@
+  @selectionField(selectionsTemplateField, className = "selection_template", style = "display:none;")
+  
+
+</div>

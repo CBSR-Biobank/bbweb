@@ -55,6 +55,14 @@ POST    /study/participant/annot/update                                  control
 GET     /study/participant/annot/remove/:studyId/:studyName/:annotId     controllers.study.ParticipantAnnotTypeController.removeAnnotationType(studyId, studyName, annotId)
 POST    /study/participant/annot/remove                                  controllers.study.ParticipantAnnotTypeController.removeAnnotationTypeSubmit
 
+# specimenlink annotation types
+GET     /study/spclink/annot/add/:studyId/:studyName                 controllers.study.SpecimenLinkAnnotTypeController.addAnnotationType(studyId, studyName)
+POST    /study/spclink/annot/add                                     controllers.study.SpecimenLinkAnnotTypeController.addAnnotationTypeSubmit
+GET     /study/spclink/annot/update/:studyId/:studyName/:annotId     controllers.study.SpecimenLinkAnnotTypeController.updateAnnotationType(studyId, studyName, annotId)
+POST    /study/spclink/annot/update                                  controllers.study.SpecimenLinkAnnotTypeController.updateAnnotationTypeSubmit
+GET     /study/spclink/annot/remove/:studyId/:studyName/:annotId     controllers.study.SpecimenLinkAnnotTypeController.removeAnnotationType(studyId, studyName, annotId)
+POST    /study/spclink/annot/remove                                  controllers.study.SpecimenLinkAnnotTypeController.removeAnnotationTypeSubmit
+
 # user
 GET     /user/profile               controllers.UserController.profile
 

@@ -182,7 +182,8 @@ object StudyController extends Controller with SecureSocial {
     validateStudy(studyId)(study => {
       Logger.debug("peventsTab: ajax call")
       selectedStudyTab(StudyTab.ProcessingEvents)
-      Ok("<h4>to be completed.</h4>")
+      val annotationTypes = studyService.specimenLinkAnnotationTypesForStudy(studyId)
+      Ok(html.study.peventsTab(studyId, studyName, annotationTypes))
     })
   }
 
