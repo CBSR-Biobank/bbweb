@@ -39,7 +39,7 @@ case class CeventAnnotationTypeMapper(
   name: String,
   description: Option[String],
   valueType: String,
-  maxValueCount: Option[Int] = None,
+  maxValueCount: Option[Int],
   selections: List[String])
   extends StudyAnnotationTypeMapper {
 

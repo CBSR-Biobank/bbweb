@@ -39,7 +39,7 @@ trait StudyAnnotationTypeMapper {
   val name: String
   val description: Option[String]
   val valueType: String
-  val maxValueCount: Option[Int] = None
+  val maxValueCount: Option[Int]
   val selections: List[String]
 
   /**
