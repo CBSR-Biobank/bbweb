@@ -2,6 +2,13 @@
 
 ## Required Software and Packages
 
+### Play Framework
+
+Intalling the Play Framework standalone distribution is optional. It is not required since
+all commands can be done through SBT.
+
+See [Installing Play](http://www.playframework.com/documentation/2.2.x/Installing).
+
 ### SBT
 
 Install SBT on Ubuntu:
@@ -25,3 +32,15 @@ sudo apt-get update
 sudo apt-get install mongodb-10gen
 ```
 
+### To Start the Application
+
+```bash
+play clean stage
+target/universal/stage/bin/bbweb
+```
+
+To use an HTTPS:
+
+```bash
+target/universal/stage/bin/bbweb -Dhttps.port=9443 -Dhttp.port=disabled
+```

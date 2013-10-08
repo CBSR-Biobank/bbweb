@@ -19,18 +19,18 @@ class LoginSpec extends Specification {
 
   val nameGenerator = new NameGenerator(classOf[LoginSpec].getName)
 
-  "Application" should {
+  //  "Application" should {
 
-    // this compiles fine
-    "show the login page" in {
-      running(FakeApplication()) {
-        //val result = route(FakeRequest(GET, "/")).get
-        //val result = controllers.Application.index process FakeRequest()
+  // this compiles fine
+  //    "show the login page" in {
+  //running(FakeApplication()) {
+  //val result = route(FakeRequest(GET, "/")).get
+  //val result = controllers.Application.index process FakeRequest()
 
-        //status(result) must equalTo(SEE_OTHER)
-        //header("Location", result) must beSome(securesocial.controllers.LoginPage.login.toString)
-      }
-    }
+  //status(result) must equalTo(SEE_OTHER)
+  //header("Location", result) must beSome(securesocial.controllers.LoginPage.login.toString)
+  //    }
+  //    }
 
-  }
+  //}
 }

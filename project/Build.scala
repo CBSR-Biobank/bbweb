@@ -11,9 +11,12 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       jdbc,
+      anorm,
       cache,
 
       "securesocial" %% "securesocial" % "master-SNAPSHOT",
+
+      "com.typesafe.play" %% "play-slick" % "0.5.0.8",
 
       // in play 2.1.1 tests are run twice unless dependency is added
       "com.novocode" % "junit-interface" % "0.10-M2"
@@ -38,17 +41,17 @@ object ApplicationBuild extends Build {
     libraryDependencies ++= Seq(
       "org.eligosource" %% "eventsourced-core" % "0.6.0",
       "org.eligosource" %% "eventsourced-journal-mongodb-casbah" % "0.6.0",
-      "org.scala-stm" %% "scala-stm" % "0.7" % "compile",
-      "org.scalaz" %% "scalaz-core" % "6.0.4" % "compile",
+      "org.scala-stm" %% "scala-stm" % "0.7"  % "compile",
+      "org.scalaz" %% "scalaz-core" % "7.0.4"  % "compile",
 
       //"com.typesafe.akka" % "akka-testkit" % "2.0.3" % "test",
       "junit" % "junit" % "4.11" % "test",
-      "org.typelevel" %% "scalaz6-specs2" % "0.1" % "test",
+      "org.typelevel" %% "scalaz-specs2" % "0.1" % "test",
       "org.pegdown" % "pegdown" % "1.2.1" // specs2 html output
     ),
 
     scalacOptions ++= Seq("-feature"),
-    
+
     javaOptions in Test += "-Dconfig.file=conf/test.conf",
 
     javaOptions in Test += "-Dconfig.file=conf/test.conf",

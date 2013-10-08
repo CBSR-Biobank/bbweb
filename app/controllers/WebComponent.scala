@@ -1,14 +1,83 @@
 package controllers
 
-import play.api._
 import play.api.mvc.Results._
 import play.api.mvc.RequestHeader
+import java.io.File
+import play.api.db.slick.plugin.TableScanner
+import play.api.libs.Files
+import play.api.{ Configuration, GlobalSettings, Logger, Mode }
+import play.api.Play.current
+import play.api.db.slick._
+import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
+import scala.slick.session.Database
+import scala.slick.jdbc.meta._
 
 object WebComponent extends GlobalSettings with service.TopComponentImpl {
 
-  override def beforeStart(app: Application) {
+  private val configKey = "slick"
+  private val ScriptDirectory = "conf/evolutions/"
+  private val CreateScript = "create-database.sql"
+  private val DropScript = "drop-database.sql"
+  private val ScriptHeader = "-- SQL DDL script\n-- Generated file - do not edit\n\n"
+
+  /**
+   * Creates SQL DDL scripts on application start-up.
+   */
+  override def onStart(app: play.api.Application) {
+    truncateTables(app)
     start
+
+    if (app.mode != Mode.Prod) {
+      app.configuration.getConfig(configKey).foreach { configuration =>
+        configuration.keys.foreach { database =>
+          val databaseConfiguration = configuration.getString(database).getOrElse {
+            throw configuration.reportError(database, "No config: key " + database, None)
+          }
+          val packageNames = databaseConfiguration.split(",").toSet
+          val classloader = app.classloader
+          val ddls = TableScanner.reflectAllDDLMethods(packageNames, classloader)
+
+          val scriptDirectory = app.getFile(ScriptDirectory + database)
+          Files.createDirectory(scriptDirectory)
+
+          writeScript(ddls.map(_.createStatements), scriptDirectory, CreateScript)
+          writeScript(ddls.map(_.dropStatements), scriptDirectory, DropScript)
+        }
+      }
+    }
     Logger.info("*** application started ***")
   }
 
+  /**
+   * Writes the given DDL statements to a file.
+   */
+  private def writeScript(ddlStatements: Seq[Iterator[String]], directory: File,
+    fileName: String): Unit = {
+    val createScript = new File(directory, fileName)
+    val createSql = ddlStatements.flatten.mkString("\n\n")
+    Files.writeFileIfChanged(createScript, ScriptHeader + createSql)
+  }
+
+  /**
+   * Delete the query side database.
+   */
+  private def truncateTables(app: play.api.Application) {
+    //app.configuration.getConfig(configKey).foreach { configuration =>
+    //  configuration.keys.foreach { database =>
+    //    val databaseConfiguration = configuration.getString(database).getOrElse {
+    //      throw configuration.reportError(database, "No config: key " + database, None)
+    //    }
+    //    val packageNames = databaseConfiguration.split(",").toSet
+    //    val classloader = app.classloader
+    //    val ddls = TableScanner.reflectAllDDLMethods(packageNames, classloader)
+    //
+    //  }
+    //}
+
+    DB.withSession { implicit s: Session =>
+      //Logger.info("************* " + MTable.getTables.list)
+      //Q.updateNA("truncate table study").execute
+      //Logger.info("*** tables trucated ***")
+    }
+  }
 }

@@ -68,16 +68,16 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       case serviceMsg: ServiceMsg =>
         serviceMsg.cmd match {
           case cmd: AddStudyCmd =>
-            process(addStudy(cmd, emitter("listeners"), serviceMsg.id))
+            process(addStudy(cmd, emitter("eventBus"), serviceMsg.id))
 
           case cmd: UpdateStudyCmd =>
-            process(updateStudy(cmd, emitter("listeners")))
+            process(updateStudy(cmd, emitter("eventBus")))
 
           case cmd: EnableStudyCmd =>
-            process(enableStudy(cmd, emitter("listeners")))
+            process(enableStudy(cmd, emitter("eventBus")))
 
           case cmd: DisableStudyCmd =>
-            process(disableStudy(cmd, emitter("listeners")))
+            process(disableStudy(cmd, emitter("eventBus")))
 
           case cmd: SpecimenGroupCommand =>
             processEntityMsg(cmd, cmd.studyId, serviceMsg.id, specimenGroupService.process)
@@ -97,7 +97,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
           case other => // must be for another command handler
         }
 
-      case _ =>
+      case msg =>
         throw new Error("invalid message received: ")
     }
 
@@ -117,7 +117,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       processFunc: StudyProcessorMsg => DomainValidation[T]) = {
       val updatedItem = for {
         study <- validateStudy(new StudyId(studyId))
-        item <- processFunc(StudyProcessorMsg(cmd, study, emitter("listeners"), id))
+        item <- processFunc(StudyProcessorMsg(cmd, study, emitter("eventBus"), id))
       } yield item
       process(updatedItem)
     }
@@ -141,7 +141,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
         studyId <- id.toSuccess(DomainError("study ID is missing"))
         newItem <- studyRepository.add(
           DisabledStudy(new StudyId(studyId), version = 0L, cmd.name, cmd.description))
-        event <- listeners.sendEvent(StudyAddedEvent(
+        event <- (listeners sendEvent StudyAddedEvent(
           newItem.id, newItem.name, newItem.description)).success
       } yield newItem
 

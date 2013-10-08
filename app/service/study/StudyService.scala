@@ -210,8 +210,8 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
     }
 
     def addStudy(cmd: AddStudyCmd)(implicit userId: UserId): Future[DomainValidation[DisabledStudy]] = {
-      commandBus.ask(
-        Message(ServiceMsg(cmd, userId, Some(StudyIdentityService.nextIdentity)))).map(
+      commandBus ?
+        Message(ServiceMsg(cmd, userId, Some(StudyIdentityService.nextIdentity))) map (
           _.asInstanceOf[DomainValidation[DisabledStudy]])
     }
 

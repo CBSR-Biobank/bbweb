@@ -3,6 +3,7 @@ package service
 import domain._
 import akka.actor._
 import org.slf4j.Logger
+import org.eligosource.eventsourced.core.Message
 
 import scalaz._
 import Scalaz._

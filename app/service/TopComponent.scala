@@ -26,7 +26,7 @@ trait TopComponent extends ServiceComponent {
 
 trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
 
-  implicit val system = ActorSystem("eventsourced")
+  implicit val system = ActorSystem("bbweb")
   implicit val timeout = Timeout(5 seconds)
 
   val MongoDbName = "biobank-web"
@@ -36,22 +36,28 @@ trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
   val mongoDB = mongoClient(MongoDbName)
   val mongoColl = mongoClient(MongoDbName)(MongoCollName)
 
-  val journalProps = MongodbCasbahJournalProps(mongoClient, MongoDbName, MongoCollName)
-
-  val journal = Journal(journalProps)
+  val journal = MongodbCasbahJournalProps(mongoClient, MongoDbName, MongoCollName).createJournal
   val extension = EventsourcingExtension(system, journal)
 
+  // the command bus
   val studyProcessor = system.actorOf(Props(new StudyProcessorImpl with Emitter))
   val userProcessor = system.actorOf(Props(new UserProcessorImpl with Emitter))
+  val commandBusProcessors = List(studyProcessor, userProcessor)
 
-  val multicastTargets = List(studyProcessor, userProcessor)
+  //val commandProcessor = extension.processorOf(ProcessorProps(1, pid => new Multicast(
+  //  commandBusProcessors, identity) with Emitter with Eventsourced { val id = pid }))
 
-  // this is the command bus
-  val commandBus = extension.processorOf(
-    ProcessorProps(1, pid => new Multicast(multicastTargets, identity) with Confirm with Eventsourced { val id = pid }))
+  val commandProcessor = extension.processorOf(Props(multicast(1, commandBusProcessors)))
 
-  override val studyService = new StudyServiceImpl(commandBus)
-  override val userService = new UserServiceImpl(commandBus)
+  // the event bus
+  val studyEventProcessor = system.actorOf(Props(new StudyEventProcessorImpl with Receiver))
+  val eventBusProcessors = List(studyEventProcessor)
+  val eventProcessor = extension.processorOf(ProcessorProps(2, pid => new Multicast(
+    eventBusProcessors, identity) with Confirm with Eventsourced { val id = pid }))
+  val eventBusChannel = extension.channelOf(ReliableChannelProps(2, eventProcessor).withName("eventBus"))
+
+  override val studyService = new StudyServiceImpl(commandProcessor)
+  override val userService = new UserServiceImpl(commandProcessor)
 
   def start: Unit = {
     // for debug only - password is "administrator"
@@ -59,7 +65,10 @@ trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
       "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS",
       "bcrypt", None, None) | null)
 
-    extension.recover()
+    // only recover the command bus processor
+    extension.recover(Seq(ReplayParams(1)))
+    //extension.recover
+
     // wait for processor 1 to complete processing of replayed event messages
     // (ensures that recovery of externally visible state maintained by
     //  memory image is completed when awaitProcessing returns)

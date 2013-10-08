@@ -69,7 +69,10 @@ git push nelson +nelson-dev
 
 ## Logging
 
-* To enable logging at the Domain or Service layers, edit the file `conf/application.conf`.
+* To enable logging at the Domain or Service layers, edit the file `conf/logger.xml`.
 
 * To enable TEST logging at the Domain or Service layers, edit the file `conf/logback-test.xml`.
 
+## In Memory Database
+
+Use the `h2-browser` sbt command to connect to the H2 in memory database.

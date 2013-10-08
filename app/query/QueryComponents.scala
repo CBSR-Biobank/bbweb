@@ -1,0 +1,5 @@
+package query
+
+trait QueryComponent extends StudyEventProcessorComponent
+
+trait QueryComponentImpl extends StudyEventProcessorComponentImpl

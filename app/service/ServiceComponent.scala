@@ -27,10 +27,15 @@ trait ProcessorComponentImpl extends ProcessorComponent
   with SpecimenLinkAnnotationTypeServiceComponent
   with RepositoryComponentImpl
 
-trait ServiceComponent extends StudyServiceComponent with UserServiceComponent
+trait ServiceComponent
+  extends StudyServiceComponent
+  with UserServiceComponent
   with ProcessorComponent
+  with query.QueryComponent
 
-trait ServiceComponentImpl extends ServiceComponent
+trait ServiceComponentImpl
+  extends ServiceComponent
   with StudyServiceComponentImpl
   with UserServiceComponentImpl
   with ProcessorComponentImpl
+  with query.QueryComponentImpl

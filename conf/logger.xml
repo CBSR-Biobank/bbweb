@@ -24,6 +24,8 @@
   <logger name="play" level="INFO" />  
   <logger name="domain" level="INFO" />  
   <logger name="service" level="DEBUG" />
+  <logger name="query" level="INFO" />
+  <logger name="com.jolbox" level="INFO" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />
