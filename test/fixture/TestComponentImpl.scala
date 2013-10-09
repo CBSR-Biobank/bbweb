@@ -14,7 +14,6 @@ import com.mongodb.casbah.Imports._
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.util.Timeout
-import akka.testkit._
 import org.specs2.mutable._
 import org.specs2.time.NoTimeConversions
 import org.slf4j.LoggerFactory
@@ -40,10 +39,7 @@ trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
 
   implicit val adminUserId = new UserId("admin@admin.com")
 
-  def journalProps: JournalProps =
-    MongodbCasbahJournalProps(mongoClient, mongoDbName, mongoCollName)
-
-  lazy val journal = Journal(journalProps)
+  lazy val journal = MongodbCasbahJournalProps(mongoClient, mongoDbName, mongoCollName).createJournal
   lazy val extension = EventsourcingExtension(system, journal)
 
   def start = {

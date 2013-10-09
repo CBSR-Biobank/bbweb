@@ -11,8 +11,4 @@ object WebComponent extends GlobalSettings with service.TopComponentImpl {
     Logger.info("*** application started ***")
   }
 
-  override def onBadRequest(request: RequestHeader, error: String) = {
-    BadRequest("Bad Request: " + error)
-  }
-
 }
