@@ -11,7 +11,6 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       jdbc,
-      anorm,
       cache,
 
       "securesocial" %% "securesocial" % "master-SNAPSHOT",

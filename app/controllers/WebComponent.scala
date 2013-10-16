@@ -21,12 +21,17 @@ object WebComponent extends GlobalSettings with service.TopComponentImpl {
   private val ScriptHeader = "-- SQL DDL script\n-- Generated file - do not edit\n\n"
 
   /**
-   * Creates SQL DDL scripts on application start-up.
+   * On application startup, also start the Eventsourced framework.
    */
   override def onStart(app: play.api.Application) {
-    truncateTables(app)
-    start
+    startEventsourced
+    createSqlDdlScripts(app)
+  }
 
+  /**
+   * Creates SQL DDL scripts on application start-up.
+   */
+  private def createSqlDdlScripts(app: play.api.Application) {
     if (app.mode != Mode.Prod) {
       app.configuration.getConfig(configKey).foreach { configuration =>
         configuration.keys.foreach { database =>
@@ -56,28 +61,5 @@ object WebComponent extends GlobalSettings with service.TopComponentImpl {
     val createScript = new File(directory, fileName)
     val createSql = ddlStatements.flatten.mkString("\n\n")
     Files.writeFileIfChanged(createScript, ScriptHeader + createSql)
-  }
-
-  /**
-   * Delete the query side database.
-   */
-  private def truncateTables(app: play.api.Application) {
-    //app.configuration.getConfig(configKey).foreach { configuration =>
-    //  configuration.keys.foreach { database =>
-    //    val databaseConfiguration = configuration.getString(database).getOrElse {
-    //      throw configuration.reportError(database, "No config: key " + database, None)
-    //    }
-    //    val packageNames = databaseConfiguration.split(",").toSet
-    //    val classloader = app.classloader
-    //    val ddls = TableScanner.reflectAllDDLMethods(packageNames, classloader)
-    //
-    //  }
-    //}
-
-    DB.withSession { implicit s: Session =>
-      //Logger.info("************* " + MTable.getTables.list)
-      //Q.updateNA("truncate table study").execute
-      //Logger.info("*** tables trucated ***")
-    }
   }
 }

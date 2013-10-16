@@ -73,6 +73,13 @@ git push nelson +nelson-dev
 
 * To enable TEST logging at the Domain or Service layers, edit the file `conf/logback-test.xml`.
 
-## In Memory Database
+## H2 in Memory Database
 
-Use the `h2-browser` sbt command to connect to the H2 in memory database.
+Use the `h2-browser` sbt command to create and connect to the H2 database prior to starting the
+web application.
+
+Use `run -Dbbweb.query.db.load=true` sbt command to reload an empty query database.
+
+Use `run -Dbbweb.query.db.load=false` sbt command to use an already loaded query database.
+
+

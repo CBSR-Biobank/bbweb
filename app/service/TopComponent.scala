@@ -20,7 +20,7 @@ import play.api.Logger
 
 trait TopComponent extends ServiceComponent {
 
-  def start: Unit
+  def startEventsourced: Unit
 
 }
 
@@ -59,15 +59,21 @@ trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
   override val studyService = new StudyServiceImpl(commandProcessor)
   override val userService = new UserServiceImpl(commandProcessor)
 
-  def start: Unit = {
+  def startEventsourced: Unit = {
     // for debug only - password is "administrator"
     userRepository.add(User.add(UserId("admin@admin.com"), "admin", "admin@admin.com",
       "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS",
       "bcrypt", None, None) | null)
 
-    // only recover the command bus processor
-    extension.recover(Seq(ReplayParams(1)))
-    //extension.recover
+    val httpPort = Option(System.getProperty("bbweb.query.db.load"))
+
+    if (httpPort.exists(_ == "true")) {
+      // recover the command bus processor and the event bus
+      extension.recover(Seq(ReplayParams(1), ReplayParams(2)))
+    } else {
+      // only recover the command bus 
+      extension.recover(Seq(ReplayParams(1)))
+    }
 
     // wait for processor 1 to complete processing of replayed event messages
     // (ensures that recovery of externally visible state maintained by

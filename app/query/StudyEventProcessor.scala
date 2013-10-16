@@ -30,8 +30,8 @@ trait StudyEventProcessorComponentImpl extends StudyEventProcessorComponent {
           Studies.update(Study(event.id.id, event.name, event.description, false))
           log.debug("study updated with event %s" format event)
         }
-      case event =>
-        log.debug("received event %s" format event)
+      case msg =>
+        log.debug("received event %s" format msg)
     }
   }
 }
