@@ -17,14 +17,15 @@ import scalaz._
 import Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions with Tags with StudyFixture {
+class ParticipantAnnotationTypeSpec extends StudyFixture {
   args(
     //include = "tag1",
     sequential = true) // forces all tests to be run sequentially
 
   val nameGenerator = new NameGenerator(classOf[ParticipantAnnotationTypeSpec].getSimpleName)
   val studyName = nameGenerator.next[Study]
-  val study = await(studyService.addStudy(new AddStudyCmd(studyName, Some(studyName)))) | null
+  val studyEvent = await(studyService.addStudy(new AddStudyCmd(studyName, Some(studyName)))) | null
+  val studyId = StudyId(studyEvent.id)
 
   "Participant annotation type" can {
 
@@ -33,7 +34,7 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
       val valueType = AnnotationValueType.Text
 
       val at1 = await(studyService.addParticipantAnnotationType(
-        new AddParticipantAnnotationTypeCmd(study.id.toString, name, Some(name), valueType)))
+        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name), valueType)))
 
       at1 must beSuccessful.like {
         case x =>
@@ -44,9 +45,9 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
           x.maxValueCount must beNone
           x.options must beNone
           participantAnnotationTypeRepository.annotationTypeWithId(
-            study.id, x.id) must beSuccessful
+            studyId, x.annotationTypeId) must beSuccessful
           participantAnnotationTypeRepository.allAnnotationTypesForStudy(
-            study.id).size mustEqual 1
+            studyId).size mustEqual 1
       }
 
       val name2 = nameGenerator.next[AnnotationType]
@@ -55,7 +56,7 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
       val options = Some(Map("1" -> "a", "2" -> "b"))
 
       val at2 = await(studyService.addParticipantAnnotationType(
-        new AddParticipantAnnotationTypeCmd(study.id.toString, name2, None,
+        new AddParticipantAnnotationTypeCmd(studyId.id, name2, None,
           valueType2, maxValueCount2, options)))
 
       at2 must beSuccessful.like {
@@ -67,9 +68,9 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
           x.maxValueCount must be(maxValueCount2)
           x.options must be(options)
           participantAnnotationTypeRepository.annotationTypeWithId(
-            study.id, x.id) must beSuccessful
+            studyId, x.annotationTypeId) must beSuccessful
           participantAnnotationTypeRepository.allAnnotationTypesForStudy(
-            study.id).size mustEqual 2
+            studyId).size mustEqual 2
       }
     } tag ("tag1")
 
@@ -79,18 +80,18 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
       val maxValueCount = None
 
       val at1 = await(studyService.addParticipantAnnotationType(
-        new AddParticipantAnnotationTypeCmd(study.id.toString, name, Some(name),
+        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name),
           valueType, maxValueCount, None))) | null
 
       participantAnnotationTypeRepository.annotationTypeWithId(
-        study.id, at1.id) must beSuccessful
+        studyId, at1.annotationTypeId) must beSuccessful
 
       val valueType2 = AnnotationValueType.Select
       val maxValueCount2 = Some(2)
       val options = Some(Map("1" -> "a", "2" -> "b"))
 
       val at2 = await(studyService.addParticipantAnnotationType(
-        new AddParticipantAnnotationTypeCmd(study.id.toString, name, Some(name),
+        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name),
           valueType2, maxValueCount2, options)))
 
       at2 must beFailing.like {
@@ -103,7 +104,7 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
       val valueType = AnnotationValueType.Text
 
       val at1 = await(studyService.addParticipantAnnotationType(
-        new AddParticipantAnnotationTypeCmd(study.id.toString, name, Some(name),
+        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name),
           valueType))) | null
 
       val name2 = nameGenerator.next[Study]
@@ -113,7 +114,7 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
 
       val at2 = await(studyService.updateParticipantAnnotationType(
         new UpdateParticipantAnnotationTypeCmd(
-          at1.id.toString, at1.versionOption, study.id.toString, name2, None, valueType2,
+          at1.annotationTypeId, Some(at1.version), studyId.id, name2, None, valueType2,
           maxValueCount2, options)))
 
       at2 must beSuccessful.like {
@@ -125,7 +126,7 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
           x.maxValueCount must be(maxValueCount2)
           x.options must be(options)
           participantAnnotationTypeRepository.annotationTypeWithId(
-            study.id, x.id) must beSuccessful
+            studyId, x.annotationTypeId) must beSuccessful
       }
     }
 
@@ -135,10 +136,10 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
       val maxValueCount = None
 
       val at1 = await(studyService.addParticipantAnnotationType(
-        new AddParticipantAnnotationTypeCmd(study.id.toString, name, Some(name),
+        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name),
           valueType, maxValueCount, None))) | null
       participantAnnotationTypeRepository.annotationTypeWithId(
-        study.id, at1.id) must beSuccessful
+        studyId, at1.annotationTypeId) must beSuccessful
 
       val name2 = nameGenerator.next[AnnotationType]
       val valueType2 = AnnotationValueType.Select
@@ -146,15 +147,15 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
       val options = Some(Map("1" -> "a", "2" -> "b"))
 
       val at2 = await(studyService.addParticipantAnnotationType(
-        new AddParticipantAnnotationTypeCmd(study.id.toString, name2, None,
+        new AddParticipantAnnotationTypeCmd(studyId.id, name2, None,
           valueType2, maxValueCount2, options))) | null
 
       participantAnnotationTypeRepository.annotationTypeWithId(
-        study.id, at2.id) must beSuccessful
+        studyId, at2.annotationTypeId) must beSuccessful
 
       val at3 = await(studyService.updateParticipantAnnotationType(
         new UpdateParticipantAnnotationTypeCmd(
-          at2.id.toString, at2.versionOption, study.id.toString, name, Some(name), valueType,
+          at2.annotationTypeId, Some(at2.version), studyId.id, name, Some(name), valueType,
           maxValueCount, options)))
       at3 must beFailing.like {
         case msgs => msgs.head must contain("name already exists")
@@ -167,7 +168,7 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
       val maxValueCount = 0
 
       val at1 = await(studyService.addParticipantAnnotationType(
-        new AddParticipantAnnotationTypeCmd(study.id.toString, name, Some(name),
+        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name),
           valueType, None, None))) | null
 
       val name2 = nameGenerator.next[Study]
@@ -179,7 +180,7 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
 
       val at2 = await(studyService.updateParticipantAnnotationType(
         new UpdateParticipantAnnotationTypeCmd(
-          at1.id.toString, at1.versionOption, study2.id.toString, name2, None, valueType2,
+          at1.annotationTypeId, Some(at1.version), study2.id, name2, None, valueType2,
           maxValueCount2, options)))
       at2 must beFailing.like { case msgs => msgs.head must contain("study does not have annotation type") }
     }
@@ -189,7 +190,7 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
       val valueType = AnnotationValueType.Text
 
       val at1 = await(studyService.addParticipantAnnotationType(
-        new AddParticipantAnnotationTypeCmd(study.id.toString, name, Some(name),
+        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name),
           valueType, None, None))) | null
 
       val name2 = nameGenerator.next[Study]
@@ -200,7 +201,7 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
 
       val at2 = await(studyService.updateParticipantAnnotationType(
         new UpdateParticipantAnnotationTypeCmd(
-          at1.id.toString, versionOption, study.id.toString, name2, None, valueType2,
+          at1.annotationTypeId, versionOption, studyId.id, name2, None, valueType2,
           maxValueCount2, options)))
       at2 must beFailing.like {
         case msgs => msgs.head must contain("doesn't match current version")
@@ -213,24 +214,18 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
 
       val at1 = await(studyService.addParticipantAnnotationType(
         new AddParticipantAnnotationTypeCmd(
-          study.id.toString, name, Some(name), valueType))) | null
+          studyId.id, name, Some(name), valueType))) | null
       participantAnnotationTypeRepository.annotationTypeWithId(
-        study.id, at1.id) must beSuccessful
+        studyId, at1.annotationTypeId) must beSuccessful
 
       val at2 = await(studyService.removeParticipantAnnotationType(
         new RemoveParticipantAnnotationTypeCmd(
-          at1.id.toString, at1.versionOption, study.id.toString)))
+          at1.annotationTypeId, Some(at1.version), studyId.id)))
 
       at2 must beSuccessful.like {
         case x =>
-          x.version must beEqualTo(at1.version)
-          x.name must be(name)
-          x.description must beSome(name)
-          x.valueType must beEqualTo(valueType)
-          x.maxValueCount must beNone
-          x.options must beNone
           participantAnnotationTypeRepository.annotationTypeWithId(
-            study.id, x.id) must beFailing
+            studyId, x.annotationTypeId) must beFailing
       }
     }
 
@@ -240,14 +235,14 @@ class ParticipantAnnotationTypeSpec extends Specification with NoTimeConversions
 
       val at1 = await(studyService.addParticipantAnnotationType(
         new AddParticipantAnnotationTypeCmd(
-          study.id.toString, name, Some(name), valueType))) | null
+          studyId.id, name, Some(name), valueType))) | null
       participantAnnotationTypeRepository.annotationTypeWithId(
-        study.id, at1.id) must beSuccessful
+        studyId, at1.annotationTypeId) must beSuccessful
 
       val versionOption = Some(at1.version + 1)
       val at2 = await(studyService.removeParticipantAnnotationType(
         new RemoveParticipantAnnotationTypeCmd(
-          at1.id.toString, versionOption, study.id.toString)))
+          at1.annotationTypeId, versionOption, studyId.id)))
       at2 must beFailing.like {
         case msgs => msgs.head must contain("doesn't match current version")
       }

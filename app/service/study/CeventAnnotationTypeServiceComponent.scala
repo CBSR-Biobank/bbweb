@@ -33,11 +33,11 @@ trait CeventAnnotationTypeServiceComponent {
       case msg: StudyProcessorMsg =>
         msg.cmd match {
           case cmd: AddCollectionEventAnnotationTypeCmd =>
-            addCollectionEventAnnotationType(cmd, msg.study, msg.listeners, msg.id)
+            addCollectionEventAnnotationType(cmd, msg.study, msg.id)
           case cmd: UpdateCollectionEventAnnotationTypeCmd =>
-            updateCollectionEventAnnotationType(cmd, msg.study, msg.listeners)
+            updateCollectionEventAnnotationType(cmd, msg.study)
           case cmd: RemoveCollectionEventAnnotationTypeCmd =>
-            removeCollectionEventAnnotationType(cmd, msg.study, msg.listeners)
+            removeCollectionEventAnnotationType(cmd, msg.study)
 
           case _ =>
             throw new Error("invalid command received")
@@ -80,22 +80,6 @@ trait CeventAnnotationTypeServiceComponent {
       }
     }
 
-    override def createAnnotationTypeAddedEvent(
-      newItem: CollectionEventAnnotationType): CollectionEventAnnotationTypeAddedEvent =
-      CollectionEventAnnotationTypeAddedEvent(
-        newItem.studyId, newItem.id, newItem.name, newItem.description, newItem.valueType,
-        newItem.maxValueCount, newItem.options)
-
-    override def createAnnotationTypeUpdatedEvent(
-      updatedItem: CollectionEventAnnotationType): CollectionEventAnnotationTypeUpdatedEvent =
-      CollectionEventAnnotationTypeUpdatedEvent(
-        updatedItem.studyId, updatedItem.id, updatedItem.name, updatedItem.description,
-        updatedItem.valueType, updatedItem.maxValueCount, updatedItem.options)
-
-    override def createAnnotationTypeRemovedEvent(
-      removedItem: CollectionEventAnnotationType): CollectionEventAnnotationTypeRemovedEvent =
-      CollectionEventAnnotationTypeRemovedEvent(removedItem.studyId, removedItem.id)
-
     override def checkNotInUse(annotationType: CollectionEventAnnotationType): DomainValidation[Boolean] = {
       if (collectionEventTypeRepository.annotationTypeInUse(annotationType)) {
         DomainError("annotation type is in use by collection event type: " + annotationType.id).fail
@@ -107,21 +91,36 @@ trait CeventAnnotationTypeServiceComponent {
     private def addCollectionEventAnnotationType(
       cmd: AddCollectionEventAnnotationTypeCmd,
       study: DisabledStudy,
-      listeners: MessageEmitter,
-      id: Option[String]): DomainValidation[CollectionEventAnnotationType] =
-      addAnnotationType(collectionEventAnnotationTypeRepository, cmd, study, listeners, id)
+      id: Option[String]): DomainValidation[CollectionEventAnnotationTypeAddedEvent] = {
+      for {
+        newItem <- addAnnotationType(collectionEventAnnotationTypeRepository, cmd, study, id)
+        event <- CollectionEventAnnotationTypeAddedEvent(
+          newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
+          newItem.valueType, newItem.maxValueCount, newItem.options).success
+      } yield event
+    }
 
     private def updateCollectionEventAnnotationType(
       cmd: UpdateCollectionEventAnnotationTypeCmd,
-      study: DisabledStudy,
-      listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] =
-      updateAnnotationType(collectionEventAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study, listeners)
+      study: DisabledStudy): DomainValidation[CollectionEventAnnotationTypeUpdatedEvent] = {
+      for {
+        updatedItem <- updateAnnotationType(collectionEventAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study)
+        event <- CollectionEventAnnotationTypeUpdatedEvent(
+          updatedItem.studyId.id, updatedItem.id.id, updatedItem.version, updatedItem.name,
+          updatedItem.description, updatedItem.valueType, updatedItem.maxValueCount,
+          updatedItem.options).success
+      } yield event
+    }
 
     private def removeCollectionEventAnnotationType(
       cmd: RemoveCollectionEventAnnotationTypeCmd,
-      study: DisabledStudy,
-      listeners: MessageEmitter): DomainValidation[CollectionEventAnnotationType] =
-      removeAnnotationType(collectionEventAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study, listeners)
+      study: DisabledStudy): DomainValidation[CollectionEventAnnotationTypeRemovedEvent] = {
+      for {
+        removedItem <- removeAnnotationType(collectionEventAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study)
+        event <- CollectionEventAnnotationTypeRemovedEvent(
+          removedItem.studyId.id, removedItem.id.id).success
+      } yield event
+    }
   }
 
 }

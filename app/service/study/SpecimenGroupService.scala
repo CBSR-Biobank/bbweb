@@ -46,11 +46,11 @@ trait SpecimenGroupServiceComponent {
       case msg: StudyProcessorMsg =>
         msg.cmd match {
           case cmd: AddSpecimenGroupCmd =>
-            addSpecimenGroup(cmd, msg.study, msg.listeners, msg.id)
+            addSpecimenGroup(cmd, msg.study, msg.id)
           case cmd: UpdateSpecimenGroupCmd =>
-            updateSpecimenGroup(cmd, msg.study, msg.listeners)
+            updateSpecimenGroup(cmd, msg.study)
           case cmd: RemoveSpecimenGroupCmd =>
-            removeSpecimenGroup(cmd, msg.study, msg.listeners)
+            removeSpecimenGroup(cmd, msg.study)
           case _ =>
             throw new Error("invalid command received")
         }
@@ -63,22 +63,19 @@ trait SpecimenGroupServiceComponent {
     private def addSpecimenGroup(
       cmd: AddSpecimenGroupCmd,
       study: DisabledStudy,
-      listeners: MessageEmitter,
-      id: Option[String]): DomainValidation[SpecimenGroup] = {
+      id: Option[String]): DomainValidation[SpecimenGroupAddedEvent] = {
 
-      val item = for {
+      for {
         sgId <- id.toSuccess(DomainError("specimen group ID is missing"))
         newItem <- specimenGroupRepository.add(
           SpecimenGroup(new SpecimenGroupId(sgId), 0, study.id, cmd.name, cmd.description,
             cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
             cmd.preservationTemperatureType, cmd.specimenType))
-        event <- listeners.sendEvent(StudySpecimenGroupAddedEvent(
-          newItem.studyId, newItem.id, newItem.name, newItem.description, newItem.units,
-          newItem.anatomicalSourceType, newItem.preservationType, newItem.preservationTemperatureType,
-          newItem.specimenType)).success
-      } yield newItem
-      logMethod(log, "addSpecimenGroup", cmd, item)
-      item
+        newEvent <- SpecimenGroupAddedEvent(
+          newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
+          newItem.units, newItem.anatomicalSourceType, newItem.preservationType,
+          newItem.preservationTemperatureType, newItem.specimenType).success
+      } yield newEvent
     }
 
     private def checkNotInUse(specimenGroup: SpecimenGroup): DomainValidation[Boolean] = {
@@ -91,10 +88,9 @@ trait SpecimenGroupServiceComponent {
 
     private def updateSpecimenGroup(
       cmd: UpdateSpecimenGroupCmd,
-      study: DisabledStudy,
-      listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
+      study: DisabledStudy): DomainValidation[SpecimenGroupUpdatedEvent] = {
 
-      val item = for {
+      for {
         oldItem <- specimenGroupRepository.specimenGroupWithId(
           StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
         notInUse <- checkNotInUse(oldItem)
@@ -102,21 +98,18 @@ trait SpecimenGroupServiceComponent {
           SpecimenGroup(oldItem.id, cmd.expectedVersion.getOrElse(-1), study.id, cmd.name, cmd.description,
             cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
             cmd.preservationTemperatureType, cmd.specimenType))
-        event <- listeners.sendEvent(StudySpecimenGroupUpdatedEvent(
-          study.id, newItem.id, newItem.name, newItem.description, newItem.units,
+        newEvent <- SpecimenGroupUpdatedEvent(
+          study.id.id, newItem.id.id, newItem.version, newItem.name, newItem.description, newItem.units,
           newItem.anatomicalSourceType, newItem.preservationType, newItem.preservationTemperatureType,
-          newItem.specimenType)).success
-      } yield newItem
-      logMethod(log, "updateSpecimenGroup", cmd, item)
-      item
+          newItem.specimenType).success
+      } yield newEvent
     }
 
     private def removeSpecimenGroup(
       cmd: RemoveSpecimenGroupCmd,
-      study: DisabledStudy,
-      listeners: MessageEmitter): DomainValidation[SpecimenGroup] = {
+      study: DisabledStudy): DomainValidation[SpecimenGroupRemovedEvent] = {
 
-      val item = for {
+      for {
         oldItem <- specimenGroupRepository.specimenGroupWithId(
           StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
         notInUse <- checkNotInUse(oldItem)
@@ -124,12 +117,9 @@ trait SpecimenGroupServiceComponent {
           study.id, oldItem.name, oldItem.description, oldItem.units, oldItem.anatomicalSourceType,
           oldItem.preservationType, oldItem.preservationTemperatureType, oldItem.specimenType).success
         removedItem <- specimenGroupRepository.remove(itemToRemove)
-        event <- listeners.sendEvent(StudySpecimenGroupRemovedEvent(
-          removedItem.studyId, removedItem.id)).success
-      } yield oldItem
-
-      logMethod(log, "removeSpecimenGroup", cmd, item)
-      item
+        newEvent <- SpecimenGroupRemovedEvent(
+          removedItem.studyId.id, removedItem.id.id).success
+      } yield newEvent
     }
   }
 }

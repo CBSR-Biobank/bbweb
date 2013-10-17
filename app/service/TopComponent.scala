@@ -3,6 +3,8 @@ package service
 import domain._
 import domain.study._
 
+import play.api.Mode
+import play.api.Mode._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
 import scala.language.postfixOps
@@ -15,15 +17,23 @@ import akka.pattern.ask
 import akka.util.Timeout
 import akka.actor.Props
 import java.util.concurrent.TimeUnit
+import play.api.Logger
 
 import play.api.Logger
+
+object Configuration {
+  val EventBusChannelId = 1
+}
 
 /**
  * Uses the Scala Cake Pattern to configure the application.
  */
 trait TopComponent extends ServiceComponent {
 
-  def startEventsourced: Unit
+  val studyService: StudyService
+  val userService: UserService
+
+  def startEventsourced(appMode: Mode): Unit
 
 }
 
@@ -64,17 +74,19 @@ trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
   private val extension = EventsourcingExtension(system, journal)
 
   // the command bus
-  private val studyProcessor = system.actorOf(Props(new StudyProcessorImpl with Emitter))
-  private val userProcessor = system.actorOf(Props(new UserProcessorImpl with Emitter))
+  private val studyProcessor = system.actorOf(Props(new StudyProcessorImpl with Emitter), "study")
+  private val userProcessor = system.actorOf(Props(new UserProcessorImpl with Emitter), "user")
   private val commandBusProcessors = List(studyProcessor, userProcessor)
   private val commandProcessor = extension.processorOf(Props(multicast(1, commandBusProcessors)))
 
   // the event bus
-  private val studyEventProcessor = system.actorOf(Props(new StudyEventProcessorImpl with Receiver))
+  private val studyEventProcessor = system.actorOf(
+    Props(new StudyEventProcessorImpl with Receiver), "studyevent")
   private val eventBusProcessors = List(studyEventProcessor)
   private val eventProcessor = extension.processorOf(ProcessorProps(2, pid => new Multicast(
     eventBusProcessors, identity) with Confirm with Eventsourced { val id = pid }))
-  private val eventBusChannel = extension.channelOf(ReliableChannelProps(2, eventProcessor).withName("eventBus"))
+  private val eventBusChannel = extension.channelOf(
+    ReliableChannelProps(Configuration.EventBusChannelId, eventProcessor).withName("eventBus"))
 
   override val studyService = new StudyServiceImpl(commandProcessor)
   override val userService = new UserServiceImpl(commandProcessor)
@@ -84,25 +96,31 @@ trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
    *
    * The
    */
-  def startEventsourced: Unit = {
-    // for debug only - password is "administrator"
-    userRepository.add(User.add(UserId("admin@admin.com"), "admin", "admin@admin.com",
-      "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS",
-      "bcrypt", None, None) | null)
+  def startEventsourced(appMode: Mode = Mode.Dev): Unit = {
+    if (appMode != Mode.Prod) {
+      // add default user for debug only - password is "administrator"
+      userRepository.add(User.add(UserId("admin@admin.com"), "admin", "admin@admin.com",
+        "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS",
+        "bcrypt", None, None) | null)
+    }
 
-    val httpPort = Option(System.getProperty("bbweb.query.db.load"))
+    val optionLoadQueryDatabase = Option(System.getProperty("bbweb.query.db.load"))
 
-    if (httpPort.exists(_ == "true")) {
+    val recoverParams = if (optionLoadQueryDatabase.exists(_ == "true")) {
       // recover the command bus processor and the event bus
-      extension.recover(Seq(ReplayParams(1), ReplayParams(2)))
+      Logger.info("recovering command and event bus")
+      ((Seq(ReplayParams(1), ReplayParams(2))), Set(1, 2))
     } else {
       // only recover the command bus
-      extension.recover(Seq(ReplayParams(1)))
+      Logger.info("recovering command bus")
+      ((Seq(ReplayParams(1))), Set(1))
     }
+
+    extension.recover(recoverParams._1)
 
     // wait for processor 1 to complete processing of replayed event messages
     // (ensures that recovery of externally visible state maintained by
     //  memory image is completed when awaitProcessing returns)
-    extension.awaitProcessing(Set(1))
+    extension.awaitProcessing(recoverParams._2)
   }
 }

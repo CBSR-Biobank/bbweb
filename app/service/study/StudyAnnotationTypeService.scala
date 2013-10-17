@@ -30,60 +30,42 @@ abstract class StudyAnnotationTypeService[A <: StudyAnnotationType] extends Comm
 
   protected def createRemovalAnnotationType(oldAnnotationType: A, cmd: StudyAnnotationTypeCommand): A
 
-  protected def createAnnotationTypeAddedEvent(newItem: A): Any
-
-  protected def createAnnotationTypeUpdatedEvent(updatedItem: A): Any
-
-  protected def createAnnotationTypeRemovedEvent(removedItem: A): Any
-
   protected def checkNotInUse(annotationType: A): DomainValidation[Boolean]
 
   protected def addAnnotationType(
     repository: StudyAnnotationTypeRepository[A],
     cmd: StudyAnnotationTypeCommand,
     study: DisabledStudy,
-    listeners: MessageEmitter,
     id: Option[String]): DomainValidation[A] = {
-    val item = for {
+    for {
       atId <- id.toSuccess(DomainError("annotation type ID is missing"))
       newItem <- repository.add(createNewAnnotationType(cmd, AnnotationTypeId(atId)))
-      event <- listeners.sendEvent(createAnnotationTypeAddedEvent(newItem)).success
     } yield newItem
-    logMethod(log, "addAnnotationType", cmd, item)
-    item
   }
 
   protected def updateAnnotationType(
     repository: StudyAnnotationTypeRepository[A],
     cmd: StudyAnnotationTypeCommand,
     annotationTypeId: AnnotationTypeId,
-    study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[A] = {
+    study: DisabledStudy): DomainValidation[A] = {
 
-    val item = for {
+    for {
       oldAnnotationType <- repository.annotationTypeWithId(study.id, annotationTypeId)
       notInUse <- checkNotInUse(oldAnnotationType)
       newItem <- repository.update(oldAnnotationType, createUpdatedAnnotationType(oldAnnotationType, cmd))
-      event <- listeners.sendEvent(createAnnotationTypeUpdatedEvent(newItem)).success
     } yield newItem
-    logMethod(log, "updateAnnotationType", cmd, item)
-    item
   }
 
   protected def removeAnnotationType(
     repository: StudyAnnotationTypeRepository[A],
     cmd: StudyAnnotationTypeCommand,
     annotationTypeId: AnnotationTypeId,
-    study: DisabledStudy,
-    listeners: MessageEmitter): DomainValidation[A] = {
-    val item = for {
+    study: DisabledStudy): DomainValidation[A] = {
+    for {
       oldItem <- repository.annotationTypeWithId(study.id, annotationTypeId)
       notInUse <- checkNotInUse(oldItem)
       itemToRemove <- createRemovalAnnotationType(oldItem, cmd).success
       removedItem <- repository.remove(itemToRemove)
-      event <- listeners.sendEvent(createAnnotationTypeRemovedEvent(removedItem)).success
     } yield removedItem
-    logMethod(log, "removeAnnotationType", cmd, item)
-    item
   }
 }

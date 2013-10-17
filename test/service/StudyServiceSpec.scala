@@ -2,6 +2,7 @@ package service
 
 import fixture._
 import service.commands._
+import service.events._
 import domain.{
   AnatomicalSourceType,
   AnnotationValueType,
@@ -11,6 +12,7 @@ import domain.{
 }
 import domain.study._
 
+import org.specs2.specification.BeforeExample
 import org.specs2.scalaz.ValidationMatchers._
 import org.specs2.mutable._
 import org.specs2.time.NoTimeConversions
@@ -22,7 +24,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class StudyServiceSpec extends Specification with NoTimeConversions with Tags with StudyFixture {
+class StudyServiceSpec extends StudyFixture {
 
   args(
     //include = "tag1",
@@ -36,14 +38,16 @@ class StudyServiceSpec extends Specification with NoTimeConversions with Tags wi
 
     "be added" in {
       val name = nameGenerator.next[Study]
-      val study = await(studyService.addStudy(new AddStudyCmd(name, Some(name))))
+      val event = await(studyService.addStudy(new AddStudyCmd(name, Some(name))))
 
-      study must beSuccessful.like {
-        case s =>
-          s.version must beEqualTo(0)
-          s.name must be(name)
-          s.description must beSome(name)
-          studyRepository.studyWithId(s.id) must beSuccessful
+      event must beSuccessful.like {
+        case e: StudyAddedEvent =>
+          e.name must be(name)
+          e.description must beSome(name)
+          studyRepository.studyWithId(StudyId(e.id)) must beSuccessful.like {
+            case s: DisabledStudy =>
+              s.version must beEqualTo(e.version)
+          }
       }
     }
 
@@ -58,22 +62,24 @@ class StudyServiceSpec extends Specification with NoTimeConversions with Tags wi
 
     "be updated" in {
       val name = nameGenerator.next[Study]
-      val study1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
+      val event1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
 
       val name2 = nameGenerator.next[Study]
       val study2 = await(studyService.updateStudy(
-        new UpdateStudyCmd(study1.id.toString, study1.versionOption, name2, None)))
+        new UpdateStudyCmd(event1.id, Some(0), name2, None)))
 
       study2 must beSuccessful.like {
         case s =>
-          s.version must beEqualTo(study1.version + 1)
           s.name must be(name2)
           s.description must beNone
-          studyRepository.studyWithId(s.id) must beSuccessful
+          studyRepository.studyWithId(StudyId(s.id)) must beSuccessful.like {
+            case s =>
+              s.version must beEqualTo(event1.version + 1)
+          }
 
           // update something other than the name
           val study3 = await(studyService.updateStudy(
-            new UpdateStudyCmd(study1.id.toString, Some(s.version), name2)))
+            new UpdateStudyCmd(event1.id, Some(1), name2)))
           study3 must beSuccessful
       }
     }
@@ -86,7 +92,7 @@ class StudyServiceSpec extends Specification with NoTimeConversions with Tags wi
       val study2 = await(studyService.addStudy(new AddStudyCmd(name2, Some(name2)))) | null
 
       val study3 = await(studyService.updateStudy(
-        new UpdateStudyCmd(study2.id.toString, study2.versionOption, name, Some(name))))
+        new UpdateStudyCmd(study2.id, Some(0), name, Some(name))))
       study3 must beFailing.like {
         case msgs => msgs.head must contain("name already exists")
       }
@@ -100,7 +106,7 @@ class StudyServiceSpec extends Specification with NoTimeConversions with Tags wi
       val name2 = nameGenerator.next[Study]
       val versionOption = Some(study1.version + 1)
       val study2 = await(studyService.updateStudy(
-        new UpdateStudyCmd(study1.id.toString, versionOption, name2, None)))
+        new UpdateStudyCmd(study1.id, versionOption, name2, None)))
 
       study2 must beFailing.like {
         case msgs => msgs.head must contain("doesn't match current version")
@@ -115,36 +121,36 @@ class StudyServiceSpec extends Specification with NoTimeConversions with Tags wi
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
-      val study1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
-      studyRepository.studyWithId(study1.id) must beSuccessful
+      val event1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
+      studyRepository.studyWithId(StudyId(event1.id)) must beSuccessful
 
       val sg1 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study1.id.id, name, Some(name), units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(event1.id, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
       sg1 must beSuccessful.like {
         case x =>
-          specimenGroupRepository.specimenGroupWithId(study1.id, x.id) must beSuccessful
-          specimenGroupRepository.allSpecimenGroupsForStudy(study1.id).size mustEqual 1
+          specimenGroupRepository.specimenGroupWithId(StudyId(event1.id), x.specimenGroupId) must beSuccessful
+          specimenGroupRepository.allSpecimenGroupsForStudy(StudyId(event1.id)).size mustEqual 1
       }
 
       val cet1 = await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study1.id.id, name, Some(name), true,
+        new AddCollectionEventTypeCmd(event1.id, name, Some(name), true,
           Set.empty, Set.empty)))
       cet1 must beSuccessful.like {
         case x =>
-          collectionEventTypeRepository.collectionEventTypeWithId(study1.id, x.id) must beSuccessful
-          collectionEventTypeRepository.allCollectionEventTypesForStudy(study1.id).size mustEqual 1
+          collectionEventTypeRepository.collectionEventTypeWithId(
+            StudyId(event1.id), x.collectionEventTypeId) must beSuccessful
+          collectionEventTypeRepository.allCollectionEventTypesForStudy(
+            StudyId(event1.id)).size mustEqual 1
       }
 
-      val study2 = await(studyService.enableStudy(
-        new EnableStudyCmd(study1.id.toString, study1.versionOption)))
-
-      study2 must beSuccessful.like {
-        case s =>
-          s must beAnInstanceOf[EnabledStudy]
+      val event2 = await(studyService.enableStudy(new EnableStudyCmd(event1.id, Some(1L))))
+      event2 must beSuccessful.like {
+        case e =>
+          studyRepository.studyWithId(StudyId(e.id)) must beSuccessful.like {
+            case s => s must beAnInstanceOf[EnabledStudy]
+          }
       }
-
-      studyRepository.studyWithId(study1.id) must beSuccessful
     } tag ("tag1")
 
     "be disabled" in {
@@ -155,28 +161,31 @@ class StudyServiceSpec extends Specification with NoTimeConversions with Tags wi
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
-      val study1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
+      val event1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
 
       await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(study1.id.toString, name, Some(name), units, anatomicalSourceType,
+        new AddSpecimenGroupCmd(event1.id, name, Some(name), units, anatomicalSourceType,
           preservationType, preservationTempType, specimenType)))
 
       await(studyService.addCollectionEventType(
-        new AddCollectionEventTypeCmd(study1.id.toString, name, Some(name), true,
+        new AddCollectionEventTypeCmd(event1.id, name, Some(name), true,
           Set.empty, Set.empty)))
 
-      val study2 = await(studyService.enableStudy(
-        new EnableStudyCmd(study1.id.toString, study1.versionOption))) | null
+      val event2 = await(studyService.enableStudy(
+        new EnableStudyCmd(event1.id, Some(1L)))) | null
 
-      studyRepository.studyWithId(study2.id) must beSuccessful.like {
-        case s => s must beAnInstanceOf[EnabledStudy]
+      studyRepository.studyWithId(StudyId(event2.id)) must beSuccessful.like {
+        case e => e must beAnInstanceOf[EnabledStudy]
       }
 
-      await(studyService.disableStudy(
-        new DisableStudyCmd(study2.id.toString, study2.versionOption)))
+      val event3 = await(studyService.disableStudy(
+        new DisableStudyCmd(event2.id, Some(2L))))
 
-      studyRepository.studyWithId(study1.id) must beSuccessful.like {
-        case s => s must beAnInstanceOf[DisabledStudy]
+      event3 must beSuccessful.like {
+        case e =>
+          studyRepository.studyWithId(StudyId(e.id)) must beSuccessful.like {
+            case s => s must beAnInstanceOf[DisabledStudy]
+          }
       }
     }
   }

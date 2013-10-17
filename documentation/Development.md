@@ -1,24 +1,11 @@
 # Development
 
 ## MongoDB
-
-Drops the Evensourced Journal databse:
-
-```bash
-mongo biobank-web --eval "db.dropDatabase()"
-```
-
-Dump the Biobank database:
-
-```bash
-mongodump --db biobank-web --out ~/tmp
-```
-
-Restores the Biobank database:
-
-```bash
-mongorestore ~/tmp/biobank-web/bbweb.bson
-```
+                                      | shell command
+--------------------------------------|----------------------------------------------
+Drop the Evensourced Journal databse: | `mongo biobank-web --eval "db.dropDatabase()`
+Dump the Biobank database:            | `mongodump --db biobank-web --out ~/tmp`
+Restore the Biobank database:         | `mongorestore ~/tmp/biobank-web/bbweb.bson`
 
 ## Eclipse
 
@@ -42,8 +29,8 @@ SBT command to create Eclipse IDE project files:
 ## Debug
 
 To prevent users being logged out when the application is restarted, EHCACHE is configured to cache
-to disk. This must be disabled for the production server (see
-`conf/ehcache.xml/defaultCache/diskPersistent`).
+to disk. This must be disabled for the production server (see [conf/ehcache.xml]
+(../conf/ehcache.xml), tags: `defaultCache -> diskPersistent`).
 
 ## Git
 
@@ -65,13 +52,20 @@ git push nelson +nelson-dev
 
 ## GitHub Markdown
 
-* [Grip](https://github.com/joeyespo/grip) - Preview GitHub Markdown files like Readme locally before committing them
+*  [Grip]  (https://github.com/joeyespo/grip) - Preview GitHub Markdown files like Readme.md locally
+   before committing them
 
 ## Logging
 
-* To enable logging at the Domain or Service layers, edit the file `conf/logger.xml`.
+* To enable logging at the Domain or Service layers, edit the file [conf/logger.xml]
+  (../conf/logger.xml).
 
-* To enable TEST logging at the Domain or Service layers, edit the file `conf/logback-test.xml`.
+* To enable TEST logging at the Domain or Service layers, edit the file [conf/logback-test.xml]
+  (../conf/logback-test.xml).
+
+* The Akka logging configuration for the web application is in [conf/application.conf]
+  (../conf/application.conf). It is in [conf/reference.conf] (../conf/reference.conf) for the testing
+  environment.
 
 ## H2 in Memory Database
 

@@ -236,7 +236,7 @@ object SpecimenLinkAnnotTypeController
                 RemoveSpecimenLinkAnnotationTypeCmd(
                   annotType.id.id, annotType.versionOption, studyId)).map(validation =>
                   validation match {
-                    case Success(annotType) =>
+                    case Success(at) =>
                       Redirect(routes.StudyController.showStudy(studyId)).flashing(
                         "success" -> Messages("biobank.study.specimen.link.annotation.type.removed", annotType.name))
                     case Failure(x) =>

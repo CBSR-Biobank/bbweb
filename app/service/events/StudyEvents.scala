@@ -9,94 +9,202 @@ import domain.PreservationTemperatureType._
 import domain.SpecimenType._
 
 // study events
-//
-// FIXME: need a base class here
-case class StudyAddedEvent(id: StudyId, name: String, description: Option[String])
-case class StudyUpdatedEvent(id: StudyId, name: String, description: Option[String])
-case class StudyEnabledEvent(id: StudyId)
-case class StudyDisabledEvent(id: StudyId)
+trait StudyEvent
+
+case class StudyAddedEvent(
+  id: String,
+  version: Long,
+  name: String,
+  description: Option[String])
+  extends StudyEvent
+
+case class StudyUpdatedEvent(
+  id: String,
+  version: Long,
+  name: String,
+  description: Option[String])
+  extends StudyEvent
+
+case class StudyEnabledEvent(
+  id: String,
+  version: Long)
+  extends StudyEvent
+
+case class StudyDisabledEvent(
+  id: String,
+  version: Long)
+  extends StudyEvent
 
 // specimen group events
-case class StudySpecimenGroupAddedEvent(studyId: StudyId, specimenGroupId: SpecimenGroupId,
-  name: String, description: Option[String], units: String, anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
-  preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
-case class StudySpecimenGroupUpdatedEvent(studyId: StudyId, specimenGroupId: SpecimenGroupId,
-  name: String, description: Option[String], units: String, anatomicalSourceType: AnatomicalSourceType, preservationType: PreservationType,
-  preservationTemperatureType: PreservationTemperatureType, specimenType: SpecimenType)
-case class StudySpecimenGroupRemovedEvent(studyId: StudyId, specimenGroupId: SpecimenGroupId)
+case class SpecimenGroupAddedEvent(
+  studyid: String,
+  specimenGroupId: String,
+  version: Long,
+  name: String,
+  description: Option[String],
+  units: String,
+  anatomicalSourceType: AnatomicalSourceType,
+  preservationType: PreservationType,
+  preservationTemperatureType: PreservationTemperatureType,
+  specimenType: SpecimenType)
+  extends StudyEvent
+
+case class SpecimenGroupUpdatedEvent(
+  studyid: String,
+  specimenGroupId: String,
+  version: Long,
+  name: String,
+  description: Option[String],
+  units: String,
+  anatomicalSourceType: AnatomicalSourceType,
+  preservationType: PreservationType,
+  preservationTemperatureType: PreservationTemperatureType,
+  specimenType: SpecimenType)
+
+case class SpecimenGroupRemovedEvent(
+  studyid: String,
+  specimenGroupId: String)
+  extends StudyEvent
 
 // collection event events
 case class CollectionEventTypeAddedEvent(
-  studyId: StudyId, collectionEventTypeId: CollectionEventTypeId,
-  name: String, description: Option[String], recurring: Boolean,
+  studyid: String,
+  collectionEventTypeId: String,
+  version: Long,
+  name: String,
+  description: Option[String],
+  recurring: Boolean,
   specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
   annotationTypeData: Set[CollectionEventTypeAnnotationType])
+  extends StudyEvent
 
 case class CollectionEventTypeUpdatedEvent(
-  studyId: StudyId, collectionEventTypeId: CollectionEventTypeId,
-  name: String, description: Option[String], recurring: Boolean,
+  studyid: String,
+  collectionEventTypeId: String,
+  version: Long,
+  name: String,
+  description: Option[String],
+  recurring: Boolean,
   specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
   annotationTypeData: Set[CollectionEventTypeAnnotationType])
+  extends StudyEvent
 
 case class CollectionEventTypeRemovedEvent(
-  studyId: StudyId, collectionEventTypeId: CollectionEventTypeId)
+  studyid: String,
+  collectionEventTypeId: String)
+  extends StudyEvent
 
 case class SpecimenGroupAddedToCollectionEventTypeEvent(
-  studyId: StudyId, sg2cetId: String, collectionEventTypeId: CollectionEventTypeId,
-  specimenGroupId: SpecimenGroupId, ount: Int, amount: BigDecimal)
+  studyid: String,
+  sg2cetId: String,
+  collectionEventTypeId: String,
+  specimenGroupId: String,
+  ount: Int,
+  amount: BigDecimal)
+  extends StudyEvent
 
 case class SpecimenGroupRemovedFromCollectionEventTypeEvent(
-  studyId: StudyId, sg2cetId: String,
-  collectionEventTypeId: CollectionEventTypeId, specimenGroupId: SpecimenGroupId)
+  studyid: String,
+  sg2cetId: String,
+  collectionEventTypeId: String,
+  specimenGroupId: String)
+  extends StudyEvent
 
 case class CollectionEventAnnotationTypeAddedEvent(
-  studyId: StudyId, annotationTypeId: AnnotationTypeId,
-  name: String, description: Option[String], valueType: AnnotationValueType,
-  maxValueCount: Option[Int], options: Option[Map[String, String]])
+  studyid: String,
+  annotationTypeId: String,
+  version: Long,
+  name: String,
+  description: Option[String],
+  valueType: AnnotationValueType,
+  maxValueCount: Option[Int],
+  options: Option[Map[String, String]])
+  extends StudyEvent
 
 case class CollectionEventAnnotationTypeUpdatedEvent(
-  studyId: StudyId, annotationTypeId: AnnotationTypeId,
-  name: String, description: Option[String], valueType: AnnotationValueType,
-  maxValueCount: Option[Int], options: Option[Map[String, String]])
+  studyid: String,
+  annotationTypeId: String,
+  version: Long,
+  name: String,
+  description: Option[String],
+  valueType: AnnotationValueType,
+  maxValueCount: Option[Int],
+  options: Option[Map[String, String]])
+  extends StudyEvent
 
 case class CollectionEventAnnotationTypeRemovedEvent(
-  studyId: StudyId, annotationTypeId: AnnotationTypeId)
+  studyid: String,
+  annotationTypeId: String)
 
 case class AnnotationTypeAddedToCollectionEventTypeEvent(
-  studyId: StudyId, collectionEventTypeAnnotationTypeId: String,
-  collectionEventTypeId: CollectionEventTypeId, annotationTypeId: AnnotationTypeId)
+  studyid: String,
+  collectionEventTypeAnnotationTypeId: String,
+  collectionEventTypeId: String,
+  annotationTypeId: String)
+  extends StudyEvent
 
 case class AnnotationTypeRemovedFromCollectionEventTypeEvent(
-  studyId: StudyId, collectionEventTypeAnnotationTypeId: String,
-  collectionEventTypeId: CollectionEventTypeId, annotationTypeId: AnnotationTypeId)
+  studyid: String,
+  collectionEventTypeAnnotationTypeId: String,
+  collectionEventTypeId: String,
+  annotationTypeId: String)
+  extends StudyEvent
 
-// participant annotation types  
+// participant annotation types
 
 case class ParticipantAnnotationTypeAddedEvent(
-  studyId: StudyId, annotationTypeId: AnnotationTypeId,
-  name: String, description: Option[String], valueType: AnnotationValueType,
-  maxValueCount: Option[Int], options: Option[Map[String, String]])
+  studyid: String,
+  annotationTypeId: String,
+  version: Long,
+  name: String,
+  description: Option[String],
+  valueType: AnnotationValueType,
+  maxValueCount: Option[Int],
+  options: Option[Map[String, String]])
+  extends StudyEvent
 
 case class ParticipantAnnotationTypeUpdatedEvent(
-  studyId: StudyId, annotationTypeId: AnnotationTypeId,
-  name: String, description: Option[String], valueType: AnnotationValueType,
-  maxValueCount: Option[Int], options: Option[Map[String, String]])
+  studyid: String,
+  annotationTypeId: String,
+  version: Long,
+  name: String,
+  description: Option[String],
+  valueType: AnnotationValueType,
+  maxValueCount: Option[Int],
+  options: Option[Map[String, String]])
+  extends StudyEvent
 
 case class ParticipantAnnotationTypeRemovedEvent(
-  studyId: StudyId, annotationTypeId: AnnotationTypeId)
+  studyid: String,
+  annotationTypeId: String)
+  extends StudyEvent
 
-// specimen link annotation types  
+// specimen link annotation types
 
 case class SpecimenLinkAnnotationTypeAddedEvent(
-  studyId: StudyId, annotationTypeId: AnnotationTypeId,
-  name: String, description: Option[String], valueType: AnnotationValueType,
-  maxValueCount: Option[Int], options: Option[Map[String, String]])
+  studyid: String,
+  annotationTypeId: String,
+  version: Long,
+  name: String,
+  description: Option[String],
+  valueType: AnnotationValueType,
+  maxValueCount: Option[Int],
+  options: Option[Map[String, String]])
+  extends StudyEvent
 
 case class SpecimenLinkAnnotationTypeUpdatedEvent(
-  studyId: StudyId, annotationTypeId: AnnotationTypeId,
-  name: String, description: Option[String], valueType: AnnotationValueType,
-  maxValueCount: Option[Int], options: Option[Map[String, String]])
+  studyid: String,
+  annotationTypeId: String,
+  version: Long,
+  name: String,
+  description: Option[String],
+  valueType: AnnotationValueType,
+  maxValueCount: Option[Int],
+  options: Option[Map[String, String]])
+  extends StudyEvent
 
 case class SpecimenLinkAnnotationTypeRemovedEvent(
-  studyId: StudyId, annotationTypeId: AnnotationTypeId)
+  studyid: String,
+  annotationTypeId: String)
+  extends StudyEvent
 

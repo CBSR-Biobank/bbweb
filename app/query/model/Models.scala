@@ -19,14 +19,15 @@ private[model] trait DAO {
   val Studies = new Studies
 }
 
-case class Study(id: String, name: String, description: Option[String], enabled: Boolean)
+case class Study(id: String, version: Long, name: String, description: Option[String], enabled: Boolean)
 
 class Studies extends Table[Study]("STUDY") {
   def id = column[String]("id", O.PrimaryKey)
+  def version = column[Long]("version", O.NotNull)
   def name = column[String]("name", O.NotNull)
   def description = column[Option[String]]("description", O.Nullable, O.DBType("text"))
   def enabled = column[Boolean]("enabled", O.NotNull, O.DBType("bit(1)"))
-  def * = id ~ name ~ description ~ enabled <> (Study.apply _, Study.unapply _)
+  def * = id ~ version ~ name ~ description ~ enabled <> (Study.apply _, Study.unapply _)
 
   val byId = createFinderBy(_.id)
 }

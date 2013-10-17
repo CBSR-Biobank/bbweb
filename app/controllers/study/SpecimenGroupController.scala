@@ -289,21 +289,21 @@ object SpecimenGroupController extends Controller with SecureSocial {
         val studyName = sgForm._2
         val specimenGroupId = sgForm._3
 
-        studyService.specimenGroupWithId(studyId, specimenGroupId) match {
-          case Failure(x) => throw new Error(x.head)
-          case Success(sg) =>
-            Async {
+        Async {
+          studyService.specimenGroupWithId(studyId, specimenGroupId) match {
+            case Failure(x) => throw new Error(x.head)
+            case Success(sg) =>
               implicit val userId = new UserId(request.user.identityId.userId)
               studyService.removeSpecimenGroup(RemoveSpecimenGroupCmd(
                 sg.id.id, sg.versionOption, sg.studyId.id)).map(validation =>
                 validation match {
-                  case Success(sg) =>
+                  case Success(sgRemoved) =>
                     Redirect(routes.StudyController.showStudy(studyId)).flashing(
                       "success" -> Messages("biobank.study.specimen.group.removed", sg.name))
                   case Failure(x) =>
                     throw new Error(x.head)
                 })
-            }
+          }
         }
       })
   }

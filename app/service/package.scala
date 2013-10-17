@@ -39,23 +39,6 @@ package object service {
      */
     def process: ProcessResult
 
-    /* Used to log the results of processing a command */
-    protected def logMethod(
-      log: Logger,
-      methodName: String,
-      cmd: Any,
-      validation: DomainValidation[Any]) {
-      if (log.isDebugEnabled) {
-        log.debug("%s: %s".format(methodName, cmd))
-        validation match {
-          case Success(item) =>
-            log.debug("%s: %s".format(methodName, item))
-          case Failure(msglist) =>
-            log.debug("%s: { msg: %s }".format(methodName, msglist.head))
-        }
-      }
-    }
-
   }
 
   trait IdentityService {

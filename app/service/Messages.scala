@@ -19,13 +19,11 @@ case class ServiceMsg(
 case class ProcessorMsg(
   cmd: Command,
   userId: UserId,
-  listeners: MessageEmitter,
   id: Option[String] = None)
   extends CommandMsg with HasIdentityOption
 
 case class StudyProcessorMsg(
   cmd: Command,
   study: DisabledStudy,
-  listeners: MessageEmitter,
   id: Option[String] = None)
   extends CommandMsg with HasIdentityOption

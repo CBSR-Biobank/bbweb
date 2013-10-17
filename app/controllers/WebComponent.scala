@@ -35,7 +35,7 @@ object WebComponent extends GlobalSettings with service.TopComponentImpl {
    * must already be initialized before Eventsourced starts.
    */
   override def onStart(app: play.api.Application) {
-    startEventsourced
+    startEventsourced(app.mode)
     createSqlDdlScripts(app)
   }
 

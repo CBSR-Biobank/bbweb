@@ -243,7 +243,7 @@ object ParticipantAnnotTypeController
                 RemoveParticipantAnnotationTypeCmd(
                   annotType.id.id, annotType.versionOption, studyId)).map(validation =>
                   validation match {
-                    case Success(annotType) =>
+                    case Success(at) =>
                       Redirect(routes.StudyController.showStudy(studyId)).flashing(
                         "success" -> Messages("biobank.study.participant.annotation.type.removed", annotType.name))
                     case Failure(x) =>

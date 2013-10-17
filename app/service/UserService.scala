@@ -103,7 +103,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       case msg: ServiceMsg =>
         msg.cmd match {
           case cmd: AddUserCmd =>
-            process(addUser(cmd, emitter("eventBus")))
+            process(msg, addUser(cmd), emitter("eventBus"))
 
           case other => // must be for another command handler
         }
@@ -112,12 +112,11 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
         log.info("invalid message received: " + msg)
     }
 
-    def addUser(cmd: AddUserCmd, listeners: MessageEmitter): DomainValidation[User] = {
+    def addUser(cmd: AddUserCmd): DomainValidation[User] = {
       val item = for {
         newItem <- userRepository.add(RegisteredUser(UserId(cmd.email), 0L, cmd.name, cmd.email,
           cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl))
-        event <- (listeners sendEvent UserAddedEvent(
-          newItem.id, newItem.name, newItem.email)).success
+        event <- UserAddedEvent(newItem.id, newItem.name, newItem.email).success
       } yield newItem
       item
     }

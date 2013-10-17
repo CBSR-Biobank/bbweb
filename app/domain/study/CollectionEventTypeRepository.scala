@@ -17,6 +17,10 @@ trait CollectionEventTypeRepositoryComponent {
       studyId: StudyId,
       ceventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType]
 
+    def collectionEventTypeWithId(
+      studyId: StudyId,
+      ceventTypeId: String): DomainValidation[CollectionEventType]
+
     def allCollectionEventTypesForStudy(studyId: StudyId): Set[CollectionEventType]
 
     def specimenGroupInUse(specimenGroup: SpecimenGroup): Boolean
@@ -57,6 +61,12 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
             "study does not have collection event type: { studyId: %s, ceventTypeId: %s }".format(
               studyId, ceventTypeId)).fail
       }
+    }
+
+    def collectionEventTypeWithId(
+      studyId: StudyId,
+      ceventTypeId: String): DomainValidation[CollectionEventType] = {
+      collectionEventTypeWithId(studyId, CollectionEventTypeId(ceventTypeId))
     }
 
     def allCollectionEventTypesForStudy(studyId: StudyId): Set[CollectionEventType] = {

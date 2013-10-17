@@ -36,11 +36,11 @@ trait SpecimenLinkAnnotationTypeServiceComponent {
         msg.cmd match {
           case cmd: AddSpecimenLinkAnnotationTypeCmd =>
             log.debug("repsitory is: {}", specimenLinkAnnotationTypeRepository)
-            addSpecimenLinkAnnotationType(cmd, msg.study, msg.listeners, msg.id)
+            addSpecimenLinkAnnotationType(cmd, msg.study, msg.id)
           case cmd: UpdateSpecimenLinkAnnotationTypeCmd =>
-            updateSpecimenLinkAnnotationType(cmd, msg.study, msg.listeners)
+            updateSpecimenLinkAnnotationType(cmd, msg.study)
           case cmd: RemoveSpecimenLinkAnnotationTypeCmd =>
-            removeSpecimenLinkAnnotationType(cmd, msg.study, msg.listeners)
+            removeSpecimenLinkAnnotationType(cmd, msg.study)
 
           case _ =>
             throw new Error("invalid command received")
@@ -83,22 +83,6 @@ trait SpecimenLinkAnnotationTypeServiceComponent {
       }
     }
 
-    override def createAnnotationTypeAddedEvent(
-      newItem: SpecimenLinkAnnotationType): SpecimenLinkAnnotationTypeAddedEvent =
-      SpecimenLinkAnnotationTypeAddedEvent(
-        newItem.studyId, newItem.id, newItem.name, newItem.description, newItem.valueType,
-        newItem.maxValueCount, newItem.options)
-
-    override def createAnnotationTypeUpdatedEvent(
-      updatedItem: SpecimenLinkAnnotationType): SpecimenLinkAnnotationTypeUpdatedEvent =
-      SpecimenLinkAnnotationTypeUpdatedEvent(
-        updatedItem.studyId, updatedItem.id, updatedItem.name, updatedItem.description,
-        updatedItem.valueType, updatedItem.maxValueCount, updatedItem.options)
-
-    override def createAnnotationTypeRemovedEvent(
-      removedItem: SpecimenLinkAnnotationType): SpecimenLinkAnnotationTypeRemovedEvent =
-      SpecimenLinkAnnotationTypeRemovedEvent(removedItem.studyId, removedItem.id)
-
     override def checkNotInUse(annotationType: SpecimenLinkAnnotationType): DomainValidation[Boolean] = {
       true.success
     }
@@ -106,21 +90,36 @@ trait SpecimenLinkAnnotationTypeServiceComponent {
     private def addSpecimenLinkAnnotationType(
       cmd: AddSpecimenLinkAnnotationTypeCmd,
       study: DisabledStudy,
-      listeners: MessageEmitter,
-      id: Option[String]): DomainValidation[SpecimenLinkAnnotationType] =
-      addAnnotationType(specimenLinkAnnotationTypeRepository, cmd, study, listeners, id)
+      id: Option[String]): DomainValidation[SpecimenLinkAnnotationTypeAddedEvent] = {
+      for {
+        newItem <- addAnnotationType(specimenLinkAnnotationTypeRepository, cmd, study, id)
+        event <- SpecimenLinkAnnotationTypeAddedEvent(
+          newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
+          newItem.valueType, newItem.maxValueCount, newItem.options).success
+      } yield event
+    }
 
     private def updateSpecimenLinkAnnotationType(
       cmd: UpdateSpecimenLinkAnnotationTypeCmd,
-      study: DisabledStudy,
-      listeners: MessageEmitter): DomainValidation[SpecimenLinkAnnotationType] =
-      updateAnnotationType(specimenLinkAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study, listeners)
+      study: DisabledStudy): DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent] = {
+      for {
+        updatedItem <- updateAnnotationType(specimenLinkAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study)
+        event <- SpecimenLinkAnnotationTypeUpdatedEvent(
+          updatedItem.studyId.id, updatedItem.id.id, updatedItem.version, updatedItem.name,
+          updatedItem.description, updatedItem.valueType, updatedItem.maxValueCount,
+          updatedItem.options).success
+      } yield event
+    }
 
     private def removeSpecimenLinkAnnotationType(
       cmd: RemoveSpecimenLinkAnnotationTypeCmd,
-      study: DisabledStudy,
-      listeners: MessageEmitter): DomainValidation[SpecimenLinkAnnotationType] =
-      removeAnnotationType(specimenLinkAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study, listeners)
+      study: DisabledStudy): DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent] = {
+      for {
+        removedItem <- removeAnnotationType(specimenLinkAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study)
+        event <- SpecimenLinkAnnotationTypeRemovedEvent(
+          removedItem.studyId.id, removedItem.id.id).success
+      } yield event
+    }
   }
 
 }

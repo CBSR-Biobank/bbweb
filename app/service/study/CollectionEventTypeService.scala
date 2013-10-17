@@ -48,11 +48,11 @@ trait CollectionEventTypeServiceComponent {
         msg.cmd match {
           // collection event types
           case cmd: AddCollectionEventTypeCmd =>
-            addCollectionEventType(cmd, msg.study, msg.listeners, msg.id)
+            addCollectionEventType(cmd, msg.study, msg.id)
           case cmd: UpdateCollectionEventTypeCmd =>
-            updateCollectionEventType(cmd, msg.study, msg.listeners)
+            updateCollectionEventType(cmd, msg.study)
           case cmd: RemoveCollectionEventTypeCmd =>
-            removeCollectionEventType(cmd, msg.study, msg.listeners)
+            removeCollectionEventType(cmd, msg.study)
 
           case _ =>
             throw new Error("invalid command received")
@@ -99,10 +99,9 @@ trait CollectionEventTypeServiceComponent {
     private def addCollectionEventType(
       cmd: AddCollectionEventTypeCmd,
       study: DisabledStudy,
-      listeners: MessageEmitter,
-      id: Option[String]): DomainValidation[CollectionEventType] = {
+      id: Option[String]): DomainValidation[CollectionEventTypeAddedEvent] = {
 
-      val item = for {
+      for {
         cetId <- id.toSuccess(DomainError("collection event type ID is missing"))
         newItem <- CollectionEventType(
           CollectionEventTypeId(cetId), 0L, study.id, cmd.name, cmd.description, cmd.recurring,
@@ -110,38 +109,32 @@ trait CollectionEventTypeServiceComponent {
         validSgData <- validateSpecimenGroupData(study, newItem.specimenGroupData)
         validAtData <- validateAnnotationTypeData(study, newItem.annotationTypeData)
         addItem <- collectionEventTypeRepository.add(newItem)
-        event <- listeners.sendEvent(CollectionEventTypeAddedEvent(
-          study.id, newItem.id, newItem.name, newItem.description, newItem.recurring,
-          newItem.specimenGroupData, newItem.annotationTypeData)).success
-      } yield newItem
-      logMethod(log, "addCollectionEventType", cmd, item)
-      item
+        newEvent <- CollectionEventTypeAddedEvent(
+          study.id.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
+          newItem.recurring, newItem.specimenGroupData, newItem.annotationTypeData).success
+      } yield newEvent
     }
 
     private def updateCollectionEventType(
       cmd: UpdateCollectionEventTypeCmd,
-      study: DisabledStudy,
-      listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
+      study: DisabledStudy): DomainValidation[CollectionEventTypeUpdatedEvent] = {
 
-      val item = for {
+      for {
         oldItem <- collectionEventTypeRepository.collectionEventTypeWithId(
           study.id, CollectionEventTypeId(cmd.id))
         newItem <- collectionEventTypeRepository.update(CollectionEventType(
           CollectionEventTypeId(cmd.id), cmd.expectedVersion.getOrElse(-1), study.id, cmd.name,
           cmd.description, cmd.recurring, cmd.specimenGroupData, cmd.annotationTypeData))
-        event <- listeners.sendEvent(CollectionEventTypeUpdatedEvent(
-          study.id, newItem.id, newItem.name, newItem.description, newItem.recurring,
-          newItem.specimenGroupData, newItem.annotationTypeData)).success
-      } yield newItem
-      logMethod(log, "updateCollectionEventType", cmd, item)
-      item
+        newEvent <- CollectionEventTypeUpdatedEvent(
+          study.id.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
+          newItem.recurring, newItem.specimenGroupData, newItem.annotationTypeData).success
+      } yield newEvent
     }
 
     private def removeCollectionEventType(
       cmd: RemoveCollectionEventTypeCmd,
-      study: DisabledStudy,
-      listeners: MessageEmitter): DomainValidation[CollectionEventType] = {
-      val item = for {
+      study: DisabledStudy): DomainValidation[CollectionEventTypeRemovedEvent] = {
+      for {
         oldItem <- collectionEventTypeRepository.collectionEventTypeWithId(
           study.id, CollectionEventTypeId(cmd.id))
         itemToRemove <- CollectionEventType(
@@ -149,11 +142,9 @@ trait CollectionEventTypeServiceComponent {
           oldItem.name, oldItem.description, oldItem.recurring, oldItem.specimenGroupData,
           oldItem.annotationTypeData).success
         removedItem <- collectionEventTypeRepository.remove(itemToRemove)
-        event <- listeners.sendEvent(CollectionEventTypeRemovedEvent(
-          removedItem.studyId, removedItem.id)).success
-      } yield removedItem
-      logMethod(log, "removeCollectionEventType", cmd, item)
-      item
+        newEvent <- CollectionEventTypeRemovedEvent(
+          removedItem.studyId.id, removedItem.id.id).success
+      } yield newEvent
     }
   }
 }

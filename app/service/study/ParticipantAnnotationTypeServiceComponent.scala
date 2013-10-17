@@ -33,11 +33,11 @@ trait ParticipantAnnotationTypeServiceComponent {
       case msg: StudyProcessorMsg =>
         msg.cmd match {
           case cmd: AddParticipantAnnotationTypeCmd =>
-            addParticipantAnnotationType(cmd, msg.study, msg.listeners, msg.id)
+            addParticipantAnnotationType(cmd, msg.study, msg.id)
           case cmd: UpdateParticipantAnnotationTypeCmd =>
-            updateParticipantAnnotationType(cmd, msg.study, msg.listeners)
+            updateParticipantAnnotationType(cmd, msg.study)
           case cmd: RemoveParticipantAnnotationTypeCmd =>
-            removeParticipantAnnotationType(cmd, msg.study, msg.listeners)
+            removeParticipantAnnotationType(cmd, msg.study)
 
           case _ =>
             throw new Error("invalid command received")
@@ -80,22 +80,6 @@ trait ParticipantAnnotationTypeServiceComponent {
       }
     }
 
-    override def createAnnotationTypeAddedEvent(
-      newItem: ParticipantAnnotationType): ParticipantAnnotationTypeAddedEvent =
-      ParticipantAnnotationTypeAddedEvent(
-        newItem.studyId, newItem.id, newItem.name, newItem.description, newItem.valueType,
-        newItem.maxValueCount, newItem.options)
-
-    override def createAnnotationTypeUpdatedEvent(
-      updatedItem: ParticipantAnnotationType): ParticipantAnnotationTypeUpdatedEvent =
-      ParticipantAnnotationTypeUpdatedEvent(
-        updatedItem.studyId, updatedItem.id, updatedItem.name, updatedItem.description,
-        updatedItem.valueType, updatedItem.maxValueCount, updatedItem.options)
-
-    override def createAnnotationTypeRemovedEvent(
-      removedItem: ParticipantAnnotationType): ParticipantAnnotationTypeRemovedEvent =
-      ParticipantAnnotationTypeRemovedEvent(removedItem.studyId, removedItem.id)
-
     override def checkNotInUse(annotationType: ParticipantAnnotationType): DomainValidation[Boolean] = {
       true.success
     }
@@ -103,21 +87,36 @@ trait ParticipantAnnotationTypeServiceComponent {
     private def addParticipantAnnotationType(
       cmd: AddParticipantAnnotationTypeCmd,
       study: DisabledStudy,
-      listeners: MessageEmitter,
-      id: Option[String]): DomainValidation[ParticipantAnnotationType] =
-      addAnnotationType(participantAnnotationTypeRepository, cmd, study, listeners, id)
+      id: Option[String]): DomainValidation[ParticipantAnnotationTypeAddedEvent] = {
+      for {
+        newItem <- addAnnotationType(participantAnnotationTypeRepository, cmd, study, id)
+        event <- ParticipantAnnotationTypeAddedEvent(
+          newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
+          newItem.valueType, newItem.maxValueCount, newItem.options).success
+      } yield event
+    }
 
     private def updateParticipantAnnotationType(
       cmd: UpdateParticipantAnnotationTypeCmd,
-      study: DisabledStudy,
-      listeners: MessageEmitter): DomainValidation[ParticipantAnnotationType] =
-      updateAnnotationType(participantAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study, listeners)
+      study: DisabledStudy): DomainValidation[ParticipantAnnotationTypeUpdatedEvent] = {
+      for {
+        updatedItem <- updateAnnotationType(participantAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study)
+        event <- ParticipantAnnotationTypeUpdatedEvent(
+          updatedItem.studyId.id, updatedItem.id.id, updatedItem.version, updatedItem.name,
+          updatedItem.description, updatedItem.valueType, updatedItem.maxValueCount,
+          updatedItem.options).success
+      } yield event
+    }
 
     private def removeParticipantAnnotationType(
       cmd: RemoveParticipantAnnotationTypeCmd,
-      study: DisabledStudy,
-      listeners: MessageEmitter): DomainValidation[ParticipantAnnotationType] =
-      removeAnnotationType(participantAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study, listeners)
+      study: DisabledStudy): DomainValidation[ParticipantAnnotationTypeRemovedEvent] = {
+      for {
+        removedItem <- removeAnnotationType(participantAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study)
+        event <- ParticipantAnnotationTypeRemovedEvent(
+          removedItem.studyId.id, removedItem.id.id).success
+      } yield event
+    }
   }
 
 }

@@ -29,6 +29,7 @@ class SecureSocialUserService(application: Application) extends UserServicePlugi
   }
 
   def save(newUser: Identity): Identity = {
+    // FIXME: use a future value here
     userService.add(newUser)
   }
 

@@ -9,6 +9,8 @@ trait StudyAnnotationTypeRepository[A <: StudyAnnotationType] {
 
   def annotationTypeWithId(studyId: StudyId, annotationTypeId: AnnotationTypeId): DomainValidation[A]
 
+  def annotationTypeWithId(studyId: StudyId, annotationTypeId: String): DomainValidation[A]
+
   def allAnnotationTypesForStudy(studyId: StudyId): Set[A]
 
   def add(annotationType: A): DomainValidation[A]
@@ -36,6 +38,12 @@ trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
           "study does not have annotation type: { studyId: %s, annotationTypeId: %s }".format(
             studyId, annotationTypeId)).fail
     }
+  }
+
+  def annotationTypeWithId(
+    studyId: StudyId,
+    annotationTypeId: String): DomainValidation[A] = {
+    annotationTypeWithId(studyId, AnnotationTypeId(annotationTypeId))
   }
 
   def allAnnotationTypesForStudy(studyId: StudyId): Set[A] = {

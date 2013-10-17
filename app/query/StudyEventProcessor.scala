@@ -22,12 +22,12 @@ trait StudyEventProcessorComponentImpl extends StudyEventProcessorComponent {
     def receive = {
       case event: StudyAddedEvent =>
         DB.withSession { implicit s: Session =>
-          Studies.insert(Study(event.id.id, event.name, event.description, false))
+          Studies.insert(Study(event.id, 0L, event.name, event.description, false))
           log.debug("study added with event %s" format event)
         }
       case event: StudyUpdatedEvent =>
         DB.withSession { implicit s: Session =>
-          Studies.update(Study(event.id.id, event.name, event.description, false))
+          Studies.update(Study(event.id, event.version, event.name, event.description, false))
           log.debug("study updated with event %s" format event)
         }
       case msg =>

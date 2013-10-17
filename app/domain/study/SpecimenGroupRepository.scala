@@ -17,6 +17,10 @@ trait SpecimenGroupRepositoryComponent {
       studyId: StudyId,
       specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup]
 
+    def specimenGroupWithId(
+      studyId: StudyId,
+      specimenGroupId: String): DomainValidation[SpecimenGroup]
+
     def allSpecimenGroupsForStudy(studyId: StudyId): Set[SpecimenGroup]
 
     def add(specimenGroup: SpecimenGroup): DomainValidation[SpecimenGroup]
@@ -51,7 +55,12 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
             "study does not have specimen group: { studyId: %s, specimenGroupId: %s }".format(
               studyId, specimenGroupId)).fail
       }
+    }
 
+    def specimenGroupWithId(
+      studyId: StudyId,
+      specimenGroupId: String): DomainValidation[SpecimenGroup] = {
+      specimenGroupWithId(studyId, SpecimenGroupId(specimenGroupId))
     }
 
     def allSpecimenGroupsForStudy(studyId: StudyId): Set[SpecimenGroup] = {

@@ -219,7 +219,7 @@ object CeventTypeController extends Controller with SecureSocial {
                 RemoveCollectionEventTypeCmd(
                   ceventType.id.id, ceventType.versionOption, ceventType.studyId.id)).map(validation =>
                   validation match {
-                    case Success(ceventType) =>
+                    case Success(cet) =>
                       Redirect(routes.StudyController.showStudy(studyId)).flashing(
                         "success" -> Messages("biobank.study.collection.event.type.removed", ceventType.name))
                     case Failure(x) =>
