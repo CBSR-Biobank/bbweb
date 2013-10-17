@@ -42,7 +42,7 @@ trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
   lazy val journal = MongodbCasbahJournalProps(mongoClient, mongoDbName, mongoCollName).createJournal
   lazy val extension = EventsourcingExtension(system, journal)
 
-  def start = {
+  def startEventsourced = {
     extension.recover()
     // wait for processor 1 to complete processing of replayed event messages
     // (ensures that recovery of externally visible state maintained by

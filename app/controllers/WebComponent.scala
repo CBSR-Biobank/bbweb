@@ -12,6 +12,14 @@ import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
 import scala.slick.session.Database
 import scala.slick.jdbc.meta._
 
+/**
+ * Global settings for the web application.
+ *
+ * On application start, [[onStart]], the Eventsourced application is started.
+ *
+ * If the application is running in '''development''' mode, the query side DDL database scritps are
+ * also generated.
+ */
 object WebComponent extends GlobalSettings with service.TopComponentImpl {
 
   private val configKey = "slick"
@@ -22,6 +30,9 @@ object WebComponent extends GlobalSettings with service.TopComponentImpl {
 
   /**
    * On application startup, also start the Eventsourced framework.
+   *
+   * It is important to do it at this stage of initialization since the query side database session
+   * must already be initialized before Eventsourced starts.
    */
   override def onStart(app: play.api.Application) {
     startEventsourced

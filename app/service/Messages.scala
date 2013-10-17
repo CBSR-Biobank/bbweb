@@ -6,16 +6,26 @@ import domain.study.DisabledStudy
 
 import org.eligosource.eventsourced.core.MessageEmitter
 
-trait HasCommand { val cmd: Command }
+trait CommandMsg { val cmd: Command }
 trait HasIdentityOption { val id: Option[String] }
 trait HasUserId { val userId: UserId }
 
-case class ServiceMsg(cmd: Command, userId: UserId, id: Option[String] = None)
-  extends HasCommand with HasIdentityOption
+case class ServiceMsg(
+  cmd: Command,
+  userId: UserId,
+  id: Option[String] = None)
+  extends CommandMsg with HasIdentityOption
 
-case class ProcessorMsg(cmd: Command, listeners: MessageEmitter, id: Option[String] = None)
-  extends HasCommand with HasIdentityOption
+case class ProcessorMsg(
+  cmd: Command,
+  userId: UserId,
+  listeners: MessageEmitter,
+  id: Option[String] = None)
+  extends CommandMsg with HasIdentityOption
 
-case class StudyProcessorMsg(cmd: Command, study: DisabledStudy,
-  listeners: MessageEmitter, id: Option[String] = None)
-  extends HasCommand with HasIdentityOption
+case class StudyProcessorMsg(
+  cmd: Command,
+  study: DisabledStudy,
+  listeners: MessageEmitter,
+  id: Option[String] = None)
+  extends CommandMsg with HasIdentityOption

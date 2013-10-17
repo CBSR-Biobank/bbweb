@@ -44,3 +44,7 @@ To use an HTTPS:
 ```bash
 target/universal/stage/bin/bbweb -Dhttps.port=9443 -Dhttp.port=disabled
 ```
+
+---
+
+[Back to top](../README.md)

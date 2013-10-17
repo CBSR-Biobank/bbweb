@@ -5,6 +5,9 @@ import play.api.mvc._
 import views._
 import securesocial.core.SecureSocial
 
+/**
+ * Controller for the main page, and also the about and contact us pages.
+ */
 object Application extends Controller with SecureSocial {
 
   def index = SecuredAction { implicit request =>

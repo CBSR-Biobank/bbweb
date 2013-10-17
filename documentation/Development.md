@@ -82,4 +82,6 @@ Use `run -Dbbweb.query.db.load=true` sbt command to reload an empty query databa
 
 Use `run -Dbbweb.query.db.load=false` sbt command to use an already loaded query database.
 
+---
 
+[Back to top](../README.md)

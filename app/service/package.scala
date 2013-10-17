@@ -7,26 +7,40 @@ import org.slf4j.Logger
 import scalaz._
 import scalaz.Scalaz._
 
+/**
+ * The service layer.
+ *
+ * Provides the API to the web application.
+ */
 package object service {
+
   /**
    * All Domain Services extend this trait.
+   *
+   * Aggregate roots can delegate commands to domain services. A domain service extends
+   * this trait so that it can receive commands.
    */
   trait CommandHandler {
 
-    type ProcessResult = PartialFunction[Any, DomainValidation[Any]]
+    /**
+     * A partial function to handle a command. The input is a [[service.CommandMsg]]. If the
+     * command is successful, an event is sent to the event bus and also returned as a
+     * [[domain.DomainValidation]] object. If the command is invalid, then the error message
+     * is returned in a [[domain.DomainValidation]] object.
+     */
+    type ProcessResult = PartialFunction[CommandMsg, DomainValidation[Any]]
 
     /**
-     * A partial function to handle each command. The input is a Tuple3 consisting of:
+     * The partial function that receives the event.
      *
-     *  1. The command to handle.
-     *  2. The study entity the command is associated with,
-     *  3. The event message listener to be notified if the command is successful.
+     * @return a [[domain.DomainValidation]] object.
      *
-     *  If the command is invalid, then the method throws an Error exception.
+     * @see [ProcessResult]
      */
     def process: ProcessResult
 
-    def logMethod(
+    /* Used to log the results of processing a command */
+    protected def logMethod(
       log: Logger,
       methodName: String,
       cmd: Any,
