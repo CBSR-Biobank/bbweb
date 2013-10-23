@@ -23,15 +23,6 @@ import akka.actor._
 import scalaz._
 import scalaz.Scalaz._
 
-class DummyEventProcessor extends Actor with ActorLogging {
-
-  def receive = {
-    case msg =>
-      log.debug("received event %s" format msg)
-  }
-
-}
-
 trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
 
   private val log = LoggerFactory.getLogger(this.getClass)
@@ -52,27 +43,30 @@ trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
   private val journal = MongodbCasbahJournalProps(mongoClient, mongoDbName, mongoCollName).createJournal
   private val extension = EventsourcingExtension(system, journal)
 
+  // the command bus
+  private val commandBusProcessors = getCommandProcessors
+  private val commandProcessor = extension.processorOf(
+    Props(multicast(1, commandBusProcessors)))
+
   // the event bus
-  private val dummyEventProcessor = system.actorOf(
-    Props(new DummyEventProcessor with Receiver), "dummyevent")
-  private val eventBusProcessors = List(dummyEventProcessor)
+  private val eventBusProcessors = getEventProcessors
   private val eventProcessor = extension.processorOf(ProcessorProps(3, pid => new Multicast(
     eventBusProcessors, identity) with Confirm with Eventsourced { val id = pid }))
   private val eventBusChannel = extension.channelOf(
     ReliableChannelProps(Configuration.EventBusChannelId, eventProcessor).withName("eventBus"))
 
-  // the command bus
-  private val commandBusProcessors = getProcessors
-  private val commandProcessor = extension.processorOf(
-    Props(multicast(1, commandBusProcessors)))
-
   override val studyService = new StudyServiceImpl(commandProcessor)
   override val userService = null
 
   /**
-   * Returns the list of processors to be used in this test fixture.
+   * Returns the list of command processors to be used in this test fixture.
    */
-  protected def getProcessors: List[ActorRef]
+  protected def getCommandProcessors: List[ActorRef]
+
+  /**
+   * Returns the list of event processors to be used in this test fixture.
+   */
+  protected def getEventProcessors: List[ActorRef]
 
   def startEventsourced(appMode: Mode) = {
     // delete the journal contents

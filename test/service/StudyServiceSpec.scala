@@ -24,7 +24,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class StudyServiceSpec extends StudyFixture {
+class StudyServiceSpec extends StudyCommandFixture {
 
   args(
     //include = "tag1",

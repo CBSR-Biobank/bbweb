@@ -17,7 +17,7 @@ import scalaz._
 import Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class SpecimenLinkAnnotationTypeSpec extends StudyFixture {
+class SpecimenLinkAnnotationTypeSpec extends StudyCommandFixture {
   args(
     //include = "tag1",
     sequential = true) // forces all tests to be run sequentially
