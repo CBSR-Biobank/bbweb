@@ -76,6 +76,8 @@ Use `run -Dbbweb.query.db.load=true` sbt command to reload an empty query databa
 
 Use `run -Dbbweb.query.db.load=false` sbt command to use an already loaded query database.
 
+Use `run -DapplyEvolutions.default=true` sbt command to automatically apply database evolutions.
+
 ---
 
 [Back to top](../README.md)
