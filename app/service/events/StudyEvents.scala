@@ -99,7 +99,7 @@ case class SpecimenGroupAddedToCollectionEventTypeEvent(
   sg2cetId: String,
   collectionEventTypeId: String,
   specimenGroupId: String,
-  ount: Int,
+  maxCount: Int,
   amount: BigDecimal)
   extends StudyEvent
 

@@ -7,6 +7,6 @@ import domain._
  */
 case class CollectionEventTypeSpecimenGroup(
   specimenGroupId: String,
-  count: Int,
+  maxCount: Int,
   amount: BigDecimal) {
 }
