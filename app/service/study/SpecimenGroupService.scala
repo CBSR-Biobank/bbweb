@@ -1,8 +1,8 @@
 package service.study
 
 import service._
-import service.commands._
-import service.events._
+import service.commands.StudyCommands._
+import service.events.StudyEvents._
 import domain._
 import domain.AnatomicalSourceType._
 import domain.PreservationType._

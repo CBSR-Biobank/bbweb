@@ -1,7 +1,7 @@
 package query
 
 import query.model._
-import service.events._
+import service.events.StudyEvents._
 
 import play.api.db.slick._
 import play.api.Play.current

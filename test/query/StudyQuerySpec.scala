@@ -2,7 +2,7 @@ package query
 
 import query.model._
 import fixture._
-import service.events._
+import service.events.StudyEvents._
 
 import java.util.UUID
 import org.eligosource.eventsourced.core.Message

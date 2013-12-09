@@ -4,10 +4,10 @@ import controllers._
 import service._
 import infrastructure._
 import service.{ ServiceComponent, ServiceComponentImpl }
-import service.commands._
+import service.commands.StudyCommands._
 import domain._
-import AnnotationValueType._
 import domain.study._
+import AnnotationValueType._
 import views._
 
 import collection.immutable.ListMap

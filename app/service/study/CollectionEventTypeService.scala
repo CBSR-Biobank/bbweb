@@ -6,8 +6,8 @@ import domain.study.Study._
 import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
 import service._
-import service.commands._
-import service.events._
+import service.commands.StudyCommands._
+import service.events.StudyEvents._
 
 import scalaz._
 import scalaz.Scalaz._

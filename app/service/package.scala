@@ -19,6 +19,9 @@ package object service {
    *
    * Aggregate roots can delegate commands to domain services. A domain service extends
    * this trait so that it can receive commands.
+   *
+   * FIXME: make this an actor
+   *
    */
   trait CommandHandler {
 

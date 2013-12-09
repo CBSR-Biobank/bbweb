@@ -10,7 +10,7 @@ import domain.{
   SpecimenType
 }
 import domain.study._
-import service.commands._
+import service.commands.StudyCommands._
 
 import org.specs2.scalaz.ValidationMatchers._
 import org.specs2.mutable._
@@ -263,11 +263,11 @@ class CollectionEventTypeSpec extends StudyCommandFixture {
             cet.specimenGroupData.size mustEqual 2
             cet.specimenGroupData.exists(sgData =>
               sgData.specimenGroupId.equals(sg1.specimenGroupId)
-                && sgData.count.equals(count)
+                && sgData.maxCount.equals(count)
                 && sgData.amount.equals(amount)) mustEqual true
             cet.specimenGroupData.exists(sgData =>
               sgData.specimenGroupId.equals(sg1.specimenGroupId)
-                && sgData.count.equals(count2)
+                && sgData.maxCount.equals(count2)
                 && sgData.amount.equals(amount2)) mustEqual true
         }
     }

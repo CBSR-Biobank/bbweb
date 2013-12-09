@@ -1,7 +1,7 @@
 package controllers.study
 
 import controllers._
-import service.commands._
+import service.commands.StudyCommands._
 import service.{ ServiceComponent, TopComponentImpl }
 import domain._
 import domain.study._

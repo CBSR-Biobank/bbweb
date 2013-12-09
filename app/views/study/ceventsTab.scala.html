@@ -54,7 +54,7 @@
                 @Html(ceventtype.specimenGroupData.map(sgData =>
                     "%s (%d - %.3f %s)".format(
                     specimenGroupMap.find(x => x._1.equals(sgData.specimenGroupId)).map(_._2).getOrElse(""),
-                    sgData.count, 
+                    sgData.maxCount, 
                     sgData.amount,
                     specimenGroupMap.find(x => x._1.equals(sgData.specimenGroupId)).map(_._3).getOrElse(""))).mkString("<br/>"))
             </td> 

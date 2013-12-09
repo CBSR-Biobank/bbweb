@@ -1,8 +1,8 @@
 package service
 
 import domain._
-import service.commands._
-import service.events._
+import service.commands.UserCommands._
+import service.events.UserEvents._
 
 import scala.concurrent._
 import scala.concurrent.duration._
