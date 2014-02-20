@@ -7,6 +7,8 @@
 @import securesocial.core.providers.utils.RoutesHelper
 @import play.api.Logger
 @import helper._
+@import play.api.Play
+
 @implicitFieldConstructor = @{ FieldConstructor(views.html.custom.inputFieldConstructor.f) }
 
 @Registry.providers.get(providerId).map { provider =>
@@ -47,9 +49,11 @@
                         <div class="clearfix">
                             <a href="@securesocial.core.providers.utils.RoutesHelper.startResetPassword()"><p>@Messages("biobank.login.forgotPassword") </a></p>
                         </div>
+                        @if(Play.current.configuration.getBoolean("securesocial.registrationEnabled").getOrElse(true) ){
                             <div class="clearfix">
                                 <p>@Messages("biobank.login.signUp") <a href="@securesocial.core.providers.utils.RoutesHelper.startSignUp()">@Messages("biobank.login.here")</a></p>
                             </div>
+                            }
                     </fieldset>
                 </form>
             }
