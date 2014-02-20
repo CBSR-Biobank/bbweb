@@ -70,7 +70,7 @@ GET     /user/profile               controllers.UserController.profile
 GET     /login                      securesocial.controllers.LoginPage.login
 GET     /logout                     securesocial.controllers.LoginPage.logout
 
-# User Registration and password handling (only needed if you are using UsernamePasswordProvider)
+# User Registration and password handling 
 GET     /signup                     securesocial.controllers.Registration.startSignUp
 POST    /signup                     securesocial.controllers.Registration.handleStartSignUp
 GET     /signup/:token              securesocial.controllers.Registration.signUp(token)
@@ -81,7 +81,6 @@ GET     /reset/:token               securesocial.controllers.Registration.resetP
 POST    /reset/:token               securesocial.controllers.Registration.handleResetPassword(token)
 GET     /password                   securesocial.controllers.PasswordChange.page
 POST    /password                   securesocial.controllers.PasswordChange.handlePasswordChange
-
 
 # Providers entry points
 GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider)

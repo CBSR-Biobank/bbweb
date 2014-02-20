@@ -13,7 +13,7 @@ object ApplicationBuild extends Build {
       jdbc,
       cache,
 
-      "securesocial" %% "securesocial" % "master-SNAPSHOT",
+      "ws.securesocial" %% "securesocial" % "2.1.3",
 
       "com.typesafe.play" %% "play-slick" % "0.5.0.8",
 
@@ -21,10 +21,9 @@ object ApplicationBuild extends Build {
       "com.novocode" % "junit-interface" % "0.10-M2"
     )
 
-  val main = play.Project(
-    appName, appVersion, appDependencies).settings(
+  val main = play.Project(appName, appVersion, appDependencies).settings(
 
-    scalaVersion := "2.10.2",
+    //scalaVersion := "2.10.2",
 
     autoScalaLibrary := false,
 
@@ -36,8 +35,11 @@ object ApplicationBuild extends Build {
     ),
 
     resolvers += Resolver.url("sbt-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns),
+    
+    resolvers += Resolver.sonatypeRepo("snapshots"),
 
     libraryDependencies ++= Seq(
+      "ws.securesocial" %% "securesocial" % "2.1.3",
       "org.eligosource" %% "eventsourced-core" % "0.6.0",
       "org.eligosource" %% "eventsourced-journal-mongodb-casbah" % "0.6.0",
       "org.scala-stm" %% "scala-stm" % "0.7"  % "compile",
