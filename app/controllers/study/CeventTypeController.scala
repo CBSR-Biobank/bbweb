@@ -8,6 +8,7 @@ import domain.study._
 import views._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.language.postfixOps
 import play.api.mvc._
 import play.api.data._
@@ -98,39 +99,37 @@ object CeventTypeController extends Controller with SecureSocial {
     })
   }
 
-  def addCeventTypeSubmit = SecuredAction { implicit request =>
+  def addCeventTypeSubmit = SecuredAction.async { implicit request =>
     ceventTypeForm.bindFromRequest.fold(
       formWithErrors => {
         // studyId and studyName are hidden values in the form, they should always be present
         val studyId = formWithErrors("studyId").value.getOrElse("")
         val studyName = formWithErrors("studyName").value.getOrElse("")
 
-        BadRequest(html.study.ceventtype.add(formWithErrors, AddFormType(), studyId, studyName,
-          specimenGroupInfo(studyId), annotationTypeInfo(studyId)))
+        Future(BadRequest(html.study.ceventtype.add(formWithErrors, AddFormType(), studyId, studyName,
+          specimenGroupInfo(studyId), annotationTypeInfo(studyId))))
       },
       submittedForm => {
         implicit val userId = new UserId(request.user.identityId.userId)
         val studyId = submittedForm.studyId
         val studyName = submittedForm.studyName
 
-        Async {
-          studyService.addCollectionEventType(submittedForm.getAddCmd).map(validation =>
-            validation match {
-              case Failure(x) =>
-                if (x.head.contains("name already exists")) {
-                  val form = ceventTypeForm.fill(submittedForm).withError("name",
-                    Messages("biobank.study.collection.event.type.form.error.name"))
-                  Logger.debug("bad name: " + form)
-                  BadRequest(html.study.ceventtype.add(form, AddFormType(),
-                    studyId, studyName, specimenGroupInfo(studyId), annotationTypeInfo(studyId)))
-                } else {
-                  throw new Error(x.head)
-                }
-              case Success(ceventType) =>
-                Redirect(routes.StudyController.showStudy(studyId)).flashing(
-                  "success" -> Messages("biobank.study.collection.event.type.added", ceventType.name))
-            })
-        }
+        studyService.addCollectionEventType(submittedForm.getAddCmd).map(validation =>
+          validation match {
+            case Failure(x) =>
+              if (x.head.contains("name already exists")) {
+                val form = ceventTypeForm.fill(submittedForm).withError("name",
+                  Messages("biobank.study.collection.event.type.form.error.name"))
+                Logger.debug("bad name: " + form)
+                BadRequest(html.study.ceventtype.add(form, AddFormType(),
+                  studyId, studyName, specimenGroupInfo(studyId), annotationTypeInfo(studyId)))
+              } else {
+                throw new Error(x.head)
+              }
+            case Success(ceventType) =>
+              Redirect(routes.StudyController.showStudy(studyId)).flashing(
+                "success" -> Messages("biobank.study.collection.event.type.added", ceventType.name))
+          })
       })
   }
 
@@ -147,40 +146,38 @@ object CeventTypeController extends Controller with SecureSocial {
     }
   }
 
-  def updateCeventTypeSubmit = SecuredAction { implicit request =>
+  def updateCeventTypeSubmit = SecuredAction.async { implicit request =>
     ceventTypeForm.bindFromRequest.fold(
       formWithErrors => {
         // studyId and studyName are hidden values in the form, they should always be present
         val studyId = formWithErrors("studyId").value.getOrElse("")
         val studyName = formWithErrors("studyName").value.getOrElse("")
 
-        BadRequest(html.study.ceventtype.add(
+        Future(BadRequest(html.study.ceventtype.add(
           formWithErrors, UpdateFormType(), studyId, studyName, specimenGroupInfo(studyId),
-          annotationTypeInfo(studyId)))
+          annotationTypeInfo(studyId))))
       },
       submittedForm => {
         implicit val userId = new UserId(request.user.identityId.userId)
         val studyId = submittedForm.studyId
         val studyName = submittedForm.studyName
 
-        Async {
-          studyService.updateCollectionEventType(submittedForm.getUpdateCmd).map(validation =>
-            validation match {
-              case Failure(x) =>
-                if (x.head.contains("name already exists")) {
-                  val form = ceventTypeForm.fill(submittedForm).withError("name",
-                    Messages("biobank.study.collection.event.type.form.error.name"))
-                  BadRequest(html.study.ceventtype.add(
-                    form, UpdateFormType(), studyId, studyName, specimenGroupInfo(studyId),
-                    annotationTypeInfo(studyId)))
-                } else {
-                  throw new Error(x.head)
-                }
-              case Success(ceventType) =>
-                Redirect(routes.StudyController.showStudy(studyId)).flashing(
-                  "success" -> Messages("biobank.study.collection.event.type.updated", ceventType.name))
-            })
-        }
+        studyService.updateCollectionEventType(submittedForm.getUpdateCmd).map(validation =>
+          validation match {
+            case Failure(x) =>
+              if (x.head.contains("name already exists")) {
+                val form = ceventTypeForm.fill(submittedForm).withError("name",
+                  Messages("biobank.study.collection.event.type.form.error.name"))
+                BadRequest(html.study.ceventtype.add(
+                  form, UpdateFormType(), studyId, studyName, specimenGroupInfo(studyId),
+                  annotationTypeInfo(studyId)))
+              } else {
+                throw new Error(x.head)
+              }
+            case Success(ceventType) =>
+              Redirect(routes.StudyController.showStudy(studyId)).flashing(
+                "success" -> Messages("biobank.study.collection.event.type.updated", ceventType.name))
+          })
       })
   }
 
@@ -200,7 +197,7 @@ object CeventTypeController extends Controller with SecureSocial {
       "studyName" -> text,
       "ceventTypeId" -> text))
 
-  def removeCeventTypeSubmit = SecuredAction { implicit request =>
+  def removeCeventTypeSubmit = SecuredAction.async { implicit request =>
     ceventTypeDeleteForm.bindFromRequest.fold(
       formWithErrors => {
         throw new Error(formWithErrors.globalErrors.mkString(","))
@@ -213,19 +210,17 @@ object CeventTypeController extends Controller with SecureSocial {
         studyService.collectionEventTypeWithId(studyId, ceventTypeId) match {
           case Failure(x) => throw new Error(x.head)
           case Success(ceventType) =>
-            Async {
-              implicit val userId = new UserId(request.user.identityId.userId)
-              studyService.removeCollectionEventType(
-                RemoveCollectionEventTypeCmd(
-                  ceventType.id.id, ceventType.versionOption, ceventType.studyId.id)).map(validation =>
-                  validation match {
-                    case Success(cet) =>
-                      Redirect(routes.StudyController.showStudy(studyId)).flashing(
-                        "success" -> Messages("biobank.study.collection.event.type.removed", ceventType.name))
-                    case Failure(x) =>
-                      throw new Error(x.head)
-                  })
-            }
+            implicit val userId = new UserId(request.user.identityId.userId)
+            studyService.removeCollectionEventType(
+              RemoveCollectionEventTypeCmd(
+                ceventType.id.id, ceventType.versionOption, ceventType.studyId.id)).map(validation =>
+                validation match {
+                  case Success(cet) =>
+                    Redirect(routes.StudyController.showStudy(studyId)).flashing(
+                      "success" -> Messages("biobank.study.collection.event.type.removed", ceventType.name))
+                  case Failure(x) =>
+                    throw new Error(x.head)
+                })
         }
       })
   }

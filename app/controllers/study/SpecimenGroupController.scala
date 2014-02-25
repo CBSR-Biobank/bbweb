@@ -120,38 +120,36 @@ object SpecimenGroupController extends Controller with SecureSocial {
       })
   }
 
-  def addSpecimenGroupSubmit = SecuredAction { implicit request =>
+  def addSpecimenGroupSubmit = SecuredAction.async { implicit request =>
     specimenGroupForm.bindFromRequest.fold(
       formWithErrors => {
         // studyId and studyName are hidden values in the form, they should always be present
         val studyId = formWithErrors("studyId").value.getOrElse("")
         val studyName = formWithErrors("studyName").value.getOrElse("")
 
-        BadRequest(html.study.specimengroup.add(
-          formWithErrors, AddFormType(), studyId, studyName, addBreadcrumbs(studyId, studyName)))
+        Future(BadRequest(html.study.specimengroup.add(
+          formWithErrors, AddFormType(), studyId, studyName, addBreadcrumbs(studyId, studyName))))
       },
       sgForm => {
         implicit val userId = new UserId(request.user.identityId.userId)
         val studyId = sgForm.studyId
         val studyName = sgForm.studyName
 
-        Async {
-          studyService.addSpecimenGroup(sgForm.getAddCmd).map(validation =>
-            validation match {
-              case Failure(x) =>
-                if (x.head.contains("name already exists")) {
-                  val form = specimenGroupForm.fill(sgForm).withError("name",
-                    Messages("biobank.study.specimen.group.form.error.name"))
-                  BadRequest(html.study.specimengroup.add(form, AddFormType(), studyId, studyName,
-                    addBreadcrumbs(studyId, studyName)))
-                } else {
-                  throw new Error(x.head)
-                }
-              case Success(sg) =>
-                Redirect(routes.StudyController.showStudy(studyId)).flashing(
-                  "success" -> Messages("biobank.study.specimen.group.added", sg.name))
-            })
-        }
+        studyService.addSpecimenGroup(sgForm.getAddCmd).map(validation =>
+          validation match {
+            case Failure(x) =>
+              if (x.head.contains("name already exists")) {
+                val form = specimenGroupForm.fill(sgForm).withError("name",
+                  Messages("biobank.study.specimen.group.form.error.name"))
+                BadRequest(html.study.specimengroup.add(form, AddFormType(), studyId, studyName,
+                  addBreadcrumbs(studyId, studyName)))
+              } else {
+                throw new Error(x.head)
+              }
+            case Success(sg) =>
+              Redirect(routes.StudyController.showStudy(studyId)).flashing(
+                "success" -> Messages("biobank.study.specimen.group.added", sg.name))
+          })
       })
   }
 
@@ -227,38 +225,40 @@ object SpecimenGroupController extends Controller with SecureSocial {
     }
   }
 
-  def updateSpecimenGroupSubmit = SecuredAction { implicit request =>
+  def updateSpecimenGroupSubmit = SecuredAction.async { implicit request =>
     specimenGroupForm.bindFromRequest.fold(
       formWithErrors => {
         // studyId and studyName are hidden values in the form, they should always be present
         val studyId = formWithErrors("studyId").value.getOrElse("")
         val studyName = formWithErrors("studyName").value.getOrElse("")
 
-        BadRequest(html.study.specimengroup.add(
-          formWithErrors, UpdateFormType(), studyId, studyName, updateBreadcrumbs(studyId, studyName)))
+        Future(BadRequest(html.study.specimengroup.add(
+          formWithErrors,
+          UpdateFormType(),
+          studyId,
+          studyName,
+          updateBreadcrumbs(studyId, studyName))))
       },
       sgForm => {
         implicit val userId = new UserId(request.user.identityId.userId)
         val studyId = sgForm.studyId
         val studyName = sgForm.studyName
 
-        Async {
-          studyService.updateSpecimenGroup(sgForm.getUpdateCmd).map(validation =>
-            validation match {
-              case Failure(x) =>
-                if (x.head.contains("name already exists")) {
-                  val form = specimenGroupForm.fill(sgForm).withError("name",
-                    Messages("biobank.study.specimen.group.form.error.name"))
-                  BadRequest(html.study.specimengroup.add(form, UpdateFormType(), studyId, studyName,
-                    updateBreadcrumbs(studyId, studyName)))
-                } else {
-                  throw new Error(x.head)
-                }
-              case Success(sg) =>
-                Redirect(routes.StudyController.showStudy(studyId)).flashing(
-                  "success" -> Messages("biobank.study.specimen.group.updated", sg.name))
-            })
-        }
+        studyService.updateSpecimenGroup(sgForm.getUpdateCmd).map(validation =>
+          validation match {
+            case Failure(x) =>
+              if (x.head.contains("name already exists")) {
+                val form = specimenGroupForm.fill(sgForm).withError("name",
+                  Messages("biobank.study.specimen.group.form.error.name"))
+                BadRequest(html.study.specimengroup.add(form, UpdateFormType(), studyId, studyName,
+                  updateBreadcrumbs(studyId, studyName)))
+              } else {
+                throw new Error(x.head)
+              }
+            case Success(sg) =>
+              Redirect(routes.StudyController.showStudy(studyId)).flashing(
+                "success" -> Messages("biobank.study.specimen.group.updated", sg.name))
+          })
       })
   }
 
@@ -280,7 +280,7 @@ object SpecimenGroupController extends Controller with SecureSocial {
       "studyName" -> text,
       "specimenGroupId" -> text))
 
-  def removeSpecimenGroupSubmit = SecuredAction { implicit request =>
+  def removeSpecimenGroupSubmit = SecuredAction.async { implicit request =>
     specimenGroupDeleteForm.bindFromRequest.fold(
       formWithErrors =>
         throw new Error(formWithErrors.globalError.toString),
@@ -289,21 +289,19 @@ object SpecimenGroupController extends Controller with SecureSocial {
         val studyName = sgForm._2
         val specimenGroupId = sgForm._3
 
-        Async {
-          studyService.specimenGroupWithId(studyId, specimenGroupId) match {
-            case Failure(x) => throw new Error(x.head)
-            case Success(sg) =>
-              implicit val userId = new UserId(request.user.identityId.userId)
-              studyService.removeSpecimenGroup(RemoveSpecimenGroupCmd(
-                sg.id.id, sg.versionOption, sg.studyId.id)).map(validation =>
-                validation match {
-                  case Success(sgRemoved) =>
-                    Redirect(routes.StudyController.showStudy(studyId)).flashing(
-                      "success" -> Messages("biobank.study.specimen.group.removed", sg.name))
-                  case Failure(x) =>
-                    throw new Error(x.head)
-                })
-          }
+        studyService.specimenGroupWithId(studyId, specimenGroupId) match {
+          case Failure(x) => throw new Error(x.head)
+          case Success(sg) =>
+            implicit val userId = new UserId(request.user.identityId.userId)
+            studyService.removeSpecimenGroup(RemoveSpecimenGroupCmd(
+              sg.id.id, sg.versionOption, sg.studyId.id)).map(validation =>
+              validation match {
+                case Success(sgRemoved) =>
+                  Redirect(routes.StudyController.showStudy(studyId)).flashing(
+                    "success" -> Messages("biobank.study.specimen.group.removed", sg.name))
+                case Failure(x) =>
+                  throw new Error(x.head)
+              })
         }
       })
   }

@@ -3,7 +3,7 @@
 ## MongoDB
                                       | shell command
 --------------------------------------|----------------------------------------------
-Drop the Evensourced Journal databse: | `mongo biobank-web --eval "db.dropDatabase()`
+Drop the Evensourced Journal databse: | `mongo biobank-web --eval "db.dropDatabase()"`
 Dump the Biobank database:            | `mongodump --db biobank-web --out ~/tmp`
 Restore the Biobank database:         | `mongorestore ~/tmp/biobank-web/bbweb.bson`
 

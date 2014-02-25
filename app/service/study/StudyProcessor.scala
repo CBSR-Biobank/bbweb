@@ -5,19 +5,11 @@ import service.commands.StudyCommands._
 import service.events.StudyEvents._
 
 import domain.{
-  AnnotationTypeId,
-  ConcurrencySafeEntity,
   DomainValidation,
   DomainError,
-  Entity,
   RepositoryComponent,
   UserId
 }
-import domain.AnatomicalSourceType._
-import domain.PreservationType._
-import domain.PreservationTemperatureType._
-import domain.SpecimenType._
-import domain.AnnotationValueType._
 
 import domain.study._
 import Study._

@@ -192,17 +192,17 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
 
   protected def addAnnotationTypeSubmit[T <: StudyAnnotationTypeMapper](
     annotationTypeForm: Form[T])(
-      f: T => Result)(
-        implicit request: WrappedRequest[AnyContent]): Result = {
+      f: T => Future[SimpleResult])(
+        implicit request: WrappedRequest[AnyContent]): Future[SimpleResult] = {
     annotationTypeForm.bindFromRequest.fold(
       formWithErrors => {
         // studyId and studyName are hidden values in the form, they should always be present
         val studyId = formWithErrors("studyId").value.getOrElse("")
         val studyName = formWithErrors("studyName").value.getOrElse("")
 
-        BadRequest(html.study.annotationtype.add(
+        Future(BadRequest(html.study.annotationtype.add(
           formWithErrors, AddFormType(), studyId, studyName, addTitle, addAction,
-          annotationValueTypes, addBreadcrumbs(studyId, studyName)))
+          annotationValueTypes, addBreadcrumbs(studyId, studyName))))
       },
       submittedForm => {
         val studyId = submittedForm.studyId
@@ -212,9 +212,9 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
           submittedForm.maxValueCount)) {
           val form = annotationTypeForm.fill(submittedForm).withError("maxValueCount",
             Messages("biobank.annotation.type.form.max.value.count.error"))
-          BadRequest(html.study.annotationtype.add(
+          Future(BadRequest(html.study.annotationtype.add(
             form, AddFormType(), studyId, studyName, addTitle, addAction,
-            annotationValueTypes, updateBreadcrumbs(studyId, studyName)))
+            annotationValueTypes, updateBreadcrumbs(studyId, studyName))))
         } else {
           f(submittedForm)
         }
@@ -235,17 +235,17 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
   }
 
   protected def updateAnnotationTypeSubmit[T <: StudyAnnotationTypeMapper](
-    annotationTypeForm: Form[T])(f: T => Result)(
-      implicit request: WrappedRequest[AnyContent]): Result = {
+    annotationTypeForm: Form[T])(f: T => Future[SimpleResult])(
+      implicit request: WrappedRequest[AnyContent]): Future[SimpleResult] = {
     annotationTypeForm.bindFromRequest.fold(
       formWithErrors => {
         // studyId and studyName are hidden values in the form, they should always be present
         val studyId = formWithErrors("studyId").value.getOrElse("")
         val studyName = formWithErrors("studyName").value.getOrElse("")
 
-        BadRequest(html.study.annotationtype.add(
+        Future(BadRequest(html.study.annotationtype.add(
           formWithErrors, UpdateFormType(), studyId, studyName, updateTitle, updateAction,
-          annotationValueTypes, updateBreadcrumbs(studyId, studyName)))
+          annotationValueTypes, updateBreadcrumbs(studyId, studyName))))
       },
       submittedForm => {
         val studyId = submittedForm.studyId
@@ -255,9 +255,9 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
           submittedForm.maxValueCount)) {
           val form = annotationTypeForm.fill(submittedForm).withError("maxValueCount",
             Messages("biobank.annotation.type.form.max.value.count.error"))
-          BadRequest(html.study.annotationtype.add(
+          Future(BadRequest(html.study.annotationtype.add(
             form, UpdateFormType(), studyId, studyName, updateTitle, updateAction,
-            annotationValueTypes, updateBreadcrumbs(studyId, studyName)))
+            annotationValueTypes, updateBreadcrumbs(studyId, studyName))))
         } else {
           f(submittedForm)
         }
@@ -284,8 +284,8 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
       "studyName" -> text,
       "annotationTypeId" -> text))
 
-  protected def removeAnnotationTypeSubmit(f: (String, String, String) => Result)(
-    implicit request: WrappedRequest[AnyContent]): Result = {
+  protected def removeAnnotationTypeSubmit(f: (String, String, String) => Future[SimpleResult])(
+    implicit request: WrappedRequest[AnyContent]): Future[SimpleResult] = {
     annotTypeDeleteForm.bindFromRequest.fold(
       formWithErrors => {
         throw new Error(formWithErrors.globalErrors.mkString(","))

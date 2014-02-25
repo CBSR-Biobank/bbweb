@@ -194,28 +194,26 @@ object StudyController extends Controller with SecureSocial {
     Ok(html.study.addStudy(studyForm, AddFormType(), ""))
   }
 
-  def addStudySubmit() = SecuredAction { implicit request =>
+  def addStudySubmit() = SecuredAction.async { implicit request =>
     studyForm.bindFromRequest.fold(
       formWithErrors => {
-        BadRequest(html.study.addStudy(formWithErrors, AddFormType(), ""))
+        Future(BadRequest(html.study.addStudy(formWithErrors, AddFormType(), "")))
       },
       formObj => {
-        Async {
-          implicit val userId = UserId(request.user.identityId.userId)
-          studyService.addStudy(formObj.getAddCmd).map(study => study match {
-            case Success(study) =>
-              Redirect(routes.StudyController.summary(study.id)).flashing(
-                "success" -> Messages("biobank.study.added", study.name))
-            case Failure(x) =>
-              if (x.head.contains("study with name already exists")) {
-                val form = studyForm.fill(formObj).withError("name",
-                  Messages("biobank.study.form.error.name"))
-                BadRequest(html.study.addStudy(form, AddFormType(), ""))
-              } else {
-                throw new Error(x.head)
-              }
-          })
-        }
+        implicit val userId = UserId(request.user.identityId.userId)
+        studyService.addStudy(formObj.getAddCmd).map(study => study match {
+          case Success(study) =>
+            Redirect(routes.StudyController.summary(study.id)).flashing(
+              "success" -> Messages("biobank.study.added", study.name))
+          case Failure(x) =>
+            if (x.head.contains("study with name already exists")) {
+              val form = studyForm.fill(formObj).withError("name",
+                Messages("biobank.study.form.error.name"))
+              BadRequest(html.study.addStudy(form, AddFormType(), ""))
+            } else {
+              throw new Error(x.head)
+            }
+        })
       })
   }
 
@@ -232,28 +230,27 @@ object StudyController extends Controller with SecureSocial {
     })
   }
 
-  def updateStudySubmit(studyId: String) = SecuredAction { implicit request =>
+  def updateStudySubmit(studyId: String) = SecuredAction.async { implicit request =>
     studyForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.study.addStudy(
-        formWithErrors, UpdateFormType(), studyId)), {
+      formWithErrors =>
+        Future(BadRequest(html.study.addStudy(
+          formWithErrors, UpdateFormType(), studyId))), {
         case formObj => {
-          Async {
-            implicit val userId = UserId(request.user.identityId.userId)
-            studyService.updateStudy(formObj.getUpdateCmd).map(study =>
-              study match {
-                case Failure(x) =>
-                  if (x.head.contains("study with name already exists")) {
-                    val form = studyForm.fill(formObj).withError("name",
-                      Messages("biobank.study.form.error.name"))
-                    BadRequest(html.study.addStudy(form, UpdateFormType(), studyId))
-                  } else {
-                    throw new Error(x.head)
-                  }
-                case Success(study) =>
-                  Redirect(routes.StudyController.summary(study.id)).flashing(
-                    "success" -> Messages("biobank.study.updated", study.name))
-              })
-          }
+          implicit val userId = UserId(request.user.identityId.userId)
+          studyService.updateStudy(formObj.getUpdateCmd).map(study =>
+            study match {
+              case Failure(x) =>
+                if (x.head.contains("study with name already exists")) {
+                  val form = studyForm.fill(formObj).withError("name",
+                    Messages("biobank.study.form.error.name"))
+                  BadRequest(html.study.addStudy(form, UpdateFormType(), studyId))
+                } else {
+                  throw new Error(x.head)
+                }
+              case Success(study) =>
+                Redirect(routes.StudyController.summary(study.id)).flashing(
+                  "success" -> Messages("biobank.study.updated", study.name))
+            })
         }
       })
   }
