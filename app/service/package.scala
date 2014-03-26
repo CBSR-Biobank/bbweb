@@ -1,6 +1,7 @@
 import infrastructure._
 import domain._
 import domain.study._
+import service.Messages._
 
 import org.slf4j.Logger
 

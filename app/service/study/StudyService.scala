@@ -3,7 +3,7 @@ package study
 
 import service.commands.StudyCommands._
 import service.events.StudyEvents._
-import service._
+import service.Messages._
 import domain._
 import domain.study._
 
@@ -11,7 +11,6 @@ import akka.actor._
 import akka.pattern.ask
 import scala.concurrent._
 import scala.concurrent.duration._
-import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
 
 import scalaz._
@@ -150,16 +149,16 @@ trait StudyServiceComponent {
  * Handles the commands to configure studies. the commands are forwarded to the Study Aggregate
  * Processor.
  *
- * @param studyRepository The repository for study entities.
- * @param specimenGroupRepository The repository for specimen group entities.
- * @param cetRepo The repository for Container Event Type entities.
- * @param The study aggregate processor that command messages should be forwarded to.
+ * @param studyProcessor
  *
  */
 trait StudyServiceComponentImpl extends StudyServiceComponent {
   self: RepositoryComponent =>
 
-  class StudyServiceImpl(commandBus: ActorRef)(implicit system: ActorSystem) extends StudyService {
+  class StudyServiceImpl(
+    studyProcessor: ActorRef)(
+      implicit system: ActorSystem)
+    extends StudyService {
     import system.dispatcher
 
     val log = LoggerFactory.getLogger(this.getClass)
@@ -224,25 +223,23 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
 
     def addStudy(cmd: AddStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyAddedEvent]] = {
-      commandBus ?
-        Message(ServiceMsg(cmd, userId, Some(StudyIdentityService.nextIdentity))) map (
-          _.asInstanceOf[DomainValidation[StudyAddedEvent]])
+      studyProcessor ? ServiceMsg(cmd, userId, Some(StudyIdentityService.nextIdentity)) map (
+        _.asInstanceOf[DomainValidation[StudyAddedEvent]])
     }
 
     def updateStudy(cmd: UpdateStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyUpdatedEvent]] =
-      commandBus ?
-        Message(ServiceMsg(cmd, userId)) map (
-          _.asInstanceOf[DomainValidation[StudyUpdatedEvent]])
+      studyProcessor ? ServiceMsg(cmd, userId) map (
+        _.asInstanceOf[DomainValidation[StudyUpdatedEvent]])
 
     def enableStudy(cmd: EnableStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyEnabledEvent]] =
-      commandBus ? Message(ServiceMsg(cmd, userId)) map (
+      studyProcessor ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[StudyEnabledEvent]])
 
     def disableStudy(cmd: DisableStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyDisabledEvent]] =
-      commandBus ? Message(ServiceMsg(cmd, userId)) map (
+      studyProcessor ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[StudyDisabledEvent]])
 
     // specimen groups
@@ -257,37 +254,35 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
 
     def addSpecimenGroup(cmd: AddSpecimenGroupCmd)(
       implicit userId: UserId): Future[DomainValidation[SpecimenGroupAddedEvent]] = {
-      commandBus ?
-        Message(ServiceMsg(cmd, userId, Some(SpecimenGroupIdentityService.nextIdentity))) map (
-          _.asInstanceOf[DomainValidation[SpecimenGroupAddedEvent]])
+      studyProcessor ? ServiceMsg(cmd, userId, Some(SpecimenGroupIdentityService.nextIdentity)) map (
+        _.asInstanceOf[DomainValidation[SpecimenGroupAddedEvent]])
     }
 
     def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd)(
       implicit userId: UserId): Future[DomainValidation[SpecimenGroupUpdatedEvent]] =
-      commandBus ?
-        Message(ServiceMsg(cmd, userId)) map (_.asInstanceOf[DomainValidation[SpecimenGroupUpdatedEvent]])
+      studyProcessor ? ServiceMsg(cmd, userId) map (
+        _.asInstanceOf[DomainValidation[SpecimenGroupUpdatedEvent]])
 
     def removeSpecimenGroup(cmd: RemoveSpecimenGroupCmd)(
       implicit userId: UserId): Future[DomainValidation[SpecimenGroupRemovedEvent]] =
-      commandBus ?
-        Message(ServiceMsg(cmd, userId)) map (_.asInstanceOf[DomainValidation[SpecimenGroupRemovedEvent]])
+      studyProcessor ? ServiceMsg(cmd, userId) map (
+        _.asInstanceOf[DomainValidation[SpecimenGroupRemovedEvent]])
 
     // collection event types
     def addCollectionEventType(cmd: AddCollectionEventTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[CollectionEventTypeAddedEvent]] = {
-      commandBus ?
-        Message(ServiceMsg(cmd, userId, Some(CollectionEventTypeIdentityService.nextIdentity))) map (
-          _.asInstanceOf[DomainValidation[CollectionEventTypeAddedEvent]])
+      studyProcessor ? ServiceMsg(cmd, userId, Some(CollectionEventTypeIdentityService.nextIdentity)) map (
+        _.asInstanceOf[DomainValidation[CollectionEventTypeAddedEvent]])
     }
 
     def updateCollectionEventType(cmd: UpdateCollectionEventTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[CollectionEventTypeUpdatedEvent]] =
-      commandBus ? Message(ServiceMsg(cmd, userId)) map (
+      studyProcessor ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[CollectionEventTypeUpdatedEvent]])
 
     def removeCollectionEventType(cmd: RemoveCollectionEventTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[CollectionEventTypeRemovedEvent]] =
-      commandBus ? Message(ServiceMsg(cmd, userId)) map (
+      studyProcessor ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[CollectionEventTypeRemovedEvent]])
 
     // collection event annotation types
@@ -304,21 +299,19 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
     def addCollectionEventAnnotationType(
       cmd: AddCollectionEventAnnotationTypeCmd)(
         implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationTypeAddedEvent]] = {
-      commandBus ?
-        Message(ServiceMsg(cmd, userId, Some(CollectionEventAnnotationTypeIdentityService.nextIdentity))) map (
-          _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeAddedEvent]])
+      studyProcessor ? ServiceMsg(cmd, userId, Some(CollectionEventAnnotationTypeIdentityService.nextIdentity)) map (
+        _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeAddedEvent]])
     }
 
     def updateCollectionEventAnnotationType(cmd: UpdateCollectionEventAnnotationTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]] =
-      commandBus ? Message(ServiceMsg(cmd, userId)) map (
+      studyProcessor ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]])
 
     def removeCollectionEventAnnotationType(cmd: RemoveCollectionEventAnnotationTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]] =
-      commandBus ?
-        Message(ServiceMsg(cmd, userId)) map (
-          _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]])
+      studyProcessor ? ServiceMsg(cmd, userId) map (
+        _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]])
 
     // participant annotation types
     //
@@ -335,20 +328,18 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
     def addParticipantAnnotationType(
       cmd: AddParticipantAnnotationTypeCmd)(
         implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationTypeAddedEvent]] =
-      commandBus ?
-        Message(ServiceMsg(cmd, userId, Some(ParticipantAnnotationTypeIdentityService.nextIdentity))) map (
-          _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeAddedEvent]])
+      studyProcessor ? ServiceMsg(cmd, userId, Some(ParticipantAnnotationTypeIdentityService.nextIdentity)) map (
+        _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeAddedEvent]])
 
     def updateParticipantAnnotationType(cmd: UpdateParticipantAnnotationTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]] =
-      commandBus ? Message(ServiceMsg(cmd, userId)) map (
+      studyProcessor ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]])
 
     def removeParticipantAnnotationType(cmd: RemoveParticipantAnnotationTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationTypeRemovedEvent]] =
-      commandBus ?
-        Message(ServiceMsg(cmd, userId)) map (
-          _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeRemovedEvent]])
+      studyProcessor ? ServiceMsg(cmd, userId) map (
+        _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeRemovedEvent]])
 
     // specimen link annotation types
     //
@@ -367,19 +358,17 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
     def addSpecimenLinkAnnotationType(
       cmd: AddSpecimenLinkAnnotationTypeCmd)(
         implicit userId: UserId): Future[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]] =
-      commandBus ?
-        Message(ServiceMsg(cmd, userId, Some(SpecimenLinkAnnotationTypeIdentityService.nextIdentity))) map (
-          _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]])
+      studyProcessor ? ServiceMsg(cmd, userId, Some(SpecimenLinkAnnotationTypeIdentityService.nextIdentity)) map (
+        _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]])
 
     def updateSpecimenLinkAnnotationType(cmd: UpdateSpecimenLinkAnnotationTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]] =
-      commandBus ? Message(ServiceMsg(cmd, userId)) map (
+      studyProcessor ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]])
 
     def removeSpecimenLinkAnnotationType(cmd: RemoveSpecimenLinkAnnotationTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]] =
-      commandBus ?
-        Message(ServiceMsg(cmd, userId)) map (
-          _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]])
+      studyProcessor ? ServiceMsg(cmd, userId) map (
+        _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]])
   }
 }

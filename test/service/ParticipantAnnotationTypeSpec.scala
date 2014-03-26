@@ -12,7 +12,6 @@ import org.specs2.time.NoTimeConversions
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import akka.actor._
-import org.eligosource.eventsourced.core._
 import scalaz._
 import Scalaz._
 

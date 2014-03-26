@@ -28,10 +28,7 @@ object ApplicationBuild extends Build {
     autoScalaLibrary := false,
 
     resolvers ++= Seq(
-      "Eligosource Releases Repo" at "http://repo.eligotech.com/nexus/content/repositories/eligosource-releases/"
-
       //Resolver.url("sbt-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns)
-
     ),
 
     resolvers += Resolver.url("sbt-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns),
@@ -40,8 +37,7 @@ object ApplicationBuild extends Build {
 
     libraryDependencies ++= Seq(
       "ws.securesocial" %% "securesocial" % "2.1.3",
-      "org.eligosource" %% "eventsourced-core" % "0.6.0",
-      "org.eligosource" %% "eventsourced-journal-mongodb-casbah" % "0.6.0",
+      "com.typesafe.akka" % "akka-persistence-experimental_2.10" % "2.3-M2",
       "org.scala-stm" %% "scala-stm" % "0.7"  % "compile",
       "org.scalaz" %% "scalaz-core" % "7.0.4"  % "compile",
 

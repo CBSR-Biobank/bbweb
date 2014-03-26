@@ -3,6 +3,7 @@ package service
 import domain._
 import service.commands.UserCommands._
 import service.events.UserEvents._
+import service.Messages._
 
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -13,7 +14,6 @@ import akka.util.Timeout
 import play.api.Logger
 import securesocial.core.{ Identity, SocialUser, PasswordInfo, AuthenticationMethod }
 import securesocial.core.providers.utils.PasswordHasher
-import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
 
 import scalaz._
@@ -78,7 +78,8 @@ trait UserServiceComponentImpl extends UserServiceComponent {
           val cmd = AddUserCmd(user.fullName, user.email.getOrElse(""),
             passwordInfo.password, passwordInfo.hasher, passwordInfo.salt,
             user.avatarUrl)
-          commandBus ? Message(ServiceMsg(cmd, null)) map (_.asInstanceOf[DomainValidation[User]])
+          commandBus ? ServiceMsg(cmd, null) map (
+            _.asInstanceOf[DomainValidation[User]])
           user
         case None => null
       }
@@ -97,13 +98,13 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
   self: RepositoryComponent =>
 
   class UserProcessorImpl extends UserProcessor {
-    self: Emitter =>
 
     def receive = {
       case msg: ServiceMsg =>
         msg.cmd match {
           case cmd: AddUserCmd =>
-            process(msg, addUser(cmd), emitter("eventBus"))
+            // FIXME: what if this user already exists?
+            process(msg, addUser(cmd))
 
           case other => // must be for another command handler
         }

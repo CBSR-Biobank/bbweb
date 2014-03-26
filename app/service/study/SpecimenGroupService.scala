@@ -10,7 +10,6 @@ import domain.PreservationTemperatureType._
 import domain.SpecimenType._
 import domain.study._
 import domain.study.Study._
-import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
 
 import scalaz._

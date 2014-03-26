@@ -5,18 +5,11 @@ import domain.study._
 
 import play.api.Mode
 import play.api.Mode._
-import scala.concurrent.duration._
-import scala.concurrent.stm.Ref
-import scala.language.postfixOps
-import org.eligosource.eventsourced.core._
-import org.eligosource.eventsourced.journal.mongodb.casbah.MongodbCasbahJournalProps
-import com.mongodb.casbah.Imports._
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
-import akka.pattern.ask
 import akka.util.Timeout
 import akka.actor.Props
-import java.util.concurrent.TimeUnit
+import akka.persistence._
 import play.api.Logger
 
 import play.api.Logger
@@ -40,18 +33,12 @@ trait TopComponent extends ServiceComponent {
 /**
  * Web Application Eventsourced configuration
  *
- * ==Eventsourced config==
+ * ==Akka-Persistence configuration==
  *
- * Two processors and one channel. One processor handles commands and the other events. The command
- * processor, {@link commandProcessor}, is a multicast processor that forwards messages to aggregate
- * roots: {@link studyProcessor} and {@link userProcessor}.
- *
- * Aggregate root processors generate events to the {@link eventBusChannel}. All events received
- * on the event bus are confirmed by default.
  *
  * ==Recovery==
  *
- * By default, recovery is only done on the Journal associated withe the command processor to only
+ * By default, recovery is only done on the Journal associated with the command processor to only
  * rebuild the ''In Memory Image''. To rebuild the ''query database'', the application can be run
  * with the `bbweb.query.db.load` system property set to `true` and the event processor will also
  * be recovered.
@@ -61,66 +48,16 @@ trait TopComponent extends ServiceComponent {
 trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
 
   private implicit val system = ActorSystem("bbweb")
-  private implicit val timeout = Timeout(5 seconds)
-
-  private val MongoDbName = "biobank-web"
-  private val MongoCollName = "bbweb"
-
-  private val mongoClient = MongoClient()
-  private val mongoDB = mongoClient(MongoDbName)
-  private val mongoColl = mongoClient(MongoDbName)(MongoCollName)
-
-  private val journal = MongodbCasbahJournalProps(mongoClient, MongoDbName, MongoCollName).createJournal
-  private val extension = EventsourcingExtension(system, journal)
-
-  // the command bus
-  private val studyProcessor = system.actorOf(Props(new StudyProcessorImpl with Emitter), "study")
-  private val userProcessor = system.actorOf(Props(new UserProcessorImpl with Emitter), "user")
-  private val commandBusProcessors = List(studyProcessor, userProcessor)
-  private val commandProcessor = extension.processorOf(Props(multicast(1, commandBusProcessors)))
 
   // the event bus
-  private val studyEventProcessor = system.actorOf(
-    Props(new StudyEventProcessorImpl with Receiver), "studyevent")
-  private val eventBusProcessors = List(studyEventProcessor)
-  private val eventProcessor = extension.processorOf(ProcessorProps(2, pid => new Multicast(
-    eventBusProcessors, identity) with Confirm with Eventsourced { val id = pid }))
-  private val eventBusChannel = extension.channelOf(
-    ReliableChannelProps(Configuration.EventBusChannelId, eventProcessor).withName("eventBus"))
+  val eventBus = system.actorOf(Channel.props, "event-bus")
 
-  override val studyService = new StudyServiceImpl(commandProcessor)
-  override val userService = new UserServiceImpl(commandProcessor)
+  // the command bus
+  private val studyCommandProcessor = system.actorOf(Props(
+    new StudyProcessorImpl(eventBus)), "study-proc")
+  private val userCommandProcessor = system.actorOf(Props(
+    new UserProcessorImpl(eventBus)), "user-proc")
 
-  /**
-   * Starts the recovery stage for the Eventsourced framework.
-   *
-   * The
-   */
-  def startEventsourced(appMode: Mode = Mode.Dev): Unit = {
-    if (appMode != Mode.Prod) {
-      // add default user for debug only - password is "administrator"
-      userRepository.add(User.add(UserId("admin@admin.com"), "admin", "admin@admin.com",
-        "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS",
-        "bcrypt", None, None) | null)
-    }
-
-    val optionLoadQueryDatabase = Option(System.getProperty("bbweb.query.db.load"))
-
-    val recoverParams = if (optionLoadQueryDatabase.exists(_ == "true")) {
-      // recover the command bus processor and the event bus
-      Logger.info("recovering command and event bus")
-      ((Seq(ReplayParams(1), ReplayParams(2))), Set(1, 2))
-    } else {
-      // only recover the command bus
-      Logger.info("recovering command bus")
-      ((Seq(ReplayParams(1))), Set(1))
-    }
-
-    extension.recover(recoverParams._1)
-
-    // wait for processor 1 to complete processing of replayed event messages
-    // (ensures that recovery of externally visible state maintained by
-    //  memory image is completed when awaitProcessing returns)
-    extension.awaitProcessing(recoverParams._2)
-  }
+  override val studyService = new StudyServiceImpl(studyCommandProcessor)
+  override val userService = new UserServiceImpl(userCommandProcessor)
 }

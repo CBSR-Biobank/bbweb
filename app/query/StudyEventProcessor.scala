@@ -8,7 +8,6 @@ import play.api.Play.current
 import akka.actor.Actor
 import akka.actor.ActorLogging
 import org.slf4j.Logger
-import org.eligosource.eventsourced.core._
 
 trait StudyEventProcessorComponent {
 

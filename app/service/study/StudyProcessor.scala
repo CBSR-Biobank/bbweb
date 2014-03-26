@@ -3,6 +3,7 @@ package service.study
 import service._
 import service.commands.StudyCommands._
 import service.events.StudyEvents._
+import service.Messages._
 
 import domain.{
   DomainValidation,
@@ -23,17 +24,17 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
 import scala.language.postfixOps
-import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
+import akka.persistence._
 
 import scalaz._
 import scalaz.Scalaz._
 
-case class StudyMessage(cmd: Any, userId: UserId, time: Long, listeners: MessageEmitter)
+case class StudyMessage(cmd: Any, userId: UserId, time: Long)
 
 trait StudyProcessorComponent {
 
-  trait StudyProcessor extends Processor
+  trait StudyProcessor extends EventsourcedProcessor
 
 }
 
@@ -55,13 +56,12 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
   self: ProcessorComponentImpl with RepositoryComponent =>
 
   class StudyProcessorImpl extends StudyProcessor {
-    self: Emitter =>
 
     def receive = {
       case serviceMsg: ServiceMsg =>
         serviceMsg.cmd match {
           case cmd: AddStudyCmd =>
-            process(serviceMsg, addStudy(cmd, serviceMsg.id), emitter(Configuration.EventBusChannelId))
+            addStudy(cmd, serviceMsg.id)
 
           case cmd: UpdateStudyCmd =>
             process(serviceMsg, updateStudy(cmd), emitter(Configuration.EventBusChannelId))
@@ -133,12 +133,28 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       cmd: AddStudyCmd,
       id: Option[String]): DomainValidation[StudyAddedEvent] = {
 
-      for {
+      val e = for {
         studyId <- id.toSuccess(DomainError("study ID is missing"))
-        newItem <- studyRepository.add(
-          DisabledStudy(new StudyId(studyId), version = 0L, cmd.name, cmd.description))
-        event <- StudyAddedEvent(newItem.id.id, newItem.version, newItem.name, newItem.description).success
+        newStudy <- DisabledStudy(
+          new StudyId(studyId),
+          version = 0L,
+          cmd.name,
+          cmd.description).success
+        nameAvailable <- studyRepository.nameAvailable(newStudy)
+        event <- StudyAddedEvent(
+          newStudy.id.id,
+          newStudy.version,
+          newStudy.name,
+          newStudy.description).success
+
       } yield event
+
+      e.map(event =>
+        persist(event) { e =>
+          context.system.eventStream.publish(e)
+        })
+      studyRepository.add()
+      e
     }
 
     private def updateStudy(cmd: UpdateStudyCmd): DomainValidation[StudyUpdatedEvent] = {

@@ -12,7 +12,6 @@ import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
 import akka.actor._
 import akka.util.Timeout
-import org.eligosource.eventsourced.core._
 import org.specs2.mutable._
 import org.specs2.time._
 

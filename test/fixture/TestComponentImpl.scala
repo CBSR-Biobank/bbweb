@@ -9,8 +9,6 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
-import org.eligosource.eventsourced.core._
-import org.eligosource.eventsourced.journal.mongodb.casbah.MongodbCasbahJournalProps
 import com.mongodb.casbah.Imports._
 import akka.actor.ActorSystem
 import akka.actor.Props

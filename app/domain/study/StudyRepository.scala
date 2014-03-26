@@ -55,10 +55,11 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
         item.name.equals(study.name) && !item.id.equals(study.id)
       }
 
-      if (exists)
+      if (exists) {
         DomainError("study with name already exists: %s" format study.name).fail
-      else
+      } else {
         true.success
+      }
     }
 
     def add(study: DisabledStudy): DomainValidation[DisabledStudy] = {

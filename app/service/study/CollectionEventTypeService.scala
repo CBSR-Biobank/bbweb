@@ -3,7 +3,6 @@ package service.study
 import domain._
 import domain.study._
 import domain.study.Study._
-import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
 import service._
 import service.commands.StudyCommands._

@@ -8,7 +8,6 @@ import domain.study._
 import domain.study.Study._
 import domain.AnnotationValueType._
 
-import org.eligosource.eventsourced.core._
 import org.slf4j.LoggerFactory
 
 import scalaz._

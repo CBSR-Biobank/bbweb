@@ -13,7 +13,7 @@ import domain.SpecimenType._
  */
 object StudyEvents {
 
-  trait StudyEvent
+  sealed trait StudyEvent
 
   case class StudyAddedEvent(
     id: String,

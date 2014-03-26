@@ -5,7 +5,6 @@ import fixture._
 import service.events.StudyEvents._
 
 import java.util.UUID
-import org.eligosource.eventsourced.core.Message
 import org.junit.runner.RunWith
 import org.slf4j.LoggerFactory
 import org.specs2.runner.JUnitRunner
