@@ -155,11 +155,7 @@ trait StudyServiceComponent {
 trait StudyServiceComponentImpl extends StudyServiceComponent {
   self: RepositoryComponent =>
 
-  class StudyServiceImpl(
-    studyProcessor: ActorRef)(
-      implicit system: ActorSystem)
-    extends StudyService {
-    import system.dispatcher
+  class StudyServiceImpl() extends StudyService {
 
     val log = LoggerFactory.getLogger(this.getClass)
 

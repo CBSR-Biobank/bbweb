@@ -40,8 +40,7 @@ trait UserServiceComponent {
 trait UserServiceComponentImpl extends UserServiceComponent {
   self: RepositoryComponent =>
 
-  class UserServiceImpl(commandBus: ActorRef)(implicit system: ActorSystem) extends UserService {
-    import system.dispatcher
+  class UserServiceImpl extends UserService {
 
     val log = LoggerFactory.getLogger(this.getClass)
 

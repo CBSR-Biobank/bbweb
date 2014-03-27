@@ -47,17 +47,11 @@ trait TopComponent extends ServiceComponent {
  */
 trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
 
-  private implicit val system = ActorSystem("bbweb")
+  private val model = DomainModel("bbweb")
 
-  // the event bus
-  val eventBus = system.actorOf(Channel.props, "event-bus")
+  model.registerAggregateType("domain.study.Study")
+  model.registerAggregateType("domain.study.User")
 
-  // the command bus
-  private val studyCommandProcessor = system.actorOf(Props(
-    new StudyProcessorImpl(eventBus)), "study-proc")
-  private val userCommandProcessor = system.actorOf(Props(
-    new UserProcessorImpl(eventBus)), "user-proc")
-
-  override val studyService = new StudyServiceImpl(studyCommandProcessor)
-  override val userService = new UserServiceImpl(userCommandProcessor)
+  override val studyService = new StudyServiceImpl()
+  override val userService = new UserServiceImpl()
 }

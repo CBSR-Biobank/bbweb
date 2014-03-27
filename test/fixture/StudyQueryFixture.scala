@@ -43,12 +43,6 @@ trait StudyQueryFixture
 
   protected val DB = Database.forURL("jdbc:h2:mem:bbweb-test;MODE=MYSQL", driver = "org.h2.Driver")
 
-  val studyEventProcessor = system.actorOf(
-    Props(new StudyEventProcessorImpl with Receiver), "studyevent")
-
-  override protected def getCommandProcessors =
-    List(system.actorOf(Props(new DummyCommandProcessor with Emitter), "dummycommand"))
-
   override protected def getEventProcessors = List(studyEventProcessor)
 
 }

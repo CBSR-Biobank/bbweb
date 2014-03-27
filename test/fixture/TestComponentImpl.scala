@@ -9,7 +9,6 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
-import com.mongodb.casbah.Imports._
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.util.Timeout
@@ -31,29 +30,7 @@ trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
 
   protected implicit val adminUserId = new UserId("admin@admin.com")
 
-  private val mongoDbName = "biobank-test"
-  private val mongoCollName = "bbweb"
-
-  private val mongoClient = MongoClient()
-  private val mongoDB = mongoClient(mongoDbName)
-  private val mongoColl = mongoClient(mongoDbName)(mongoCollName)
-
-  private val journal = MongodbCasbahJournalProps(mongoClient, mongoDbName, mongoCollName).createJournal
-  private val extension = EventsourcingExtension(system, journal)
-
-  // the command bus
-  private val commandBusProcessors = getCommandProcessors
-  private val commandProcessor = extension.processorOf(
-    Props(multicast(1, commandBusProcessors)))
-
-  // the event bus
-  private val eventBusProcessors = getEventProcessors
-  private val eventProcessor = extension.processorOf(ProcessorProps(3, pid => new Multicast(
-    eventBusProcessors, identity) with Confirm with Eventsourced { val id = pid }))
-  private val eventBusChannel = extension.channelOf(
-    ReliableChannelProps(Configuration.EventBusChannelId, eventProcessor).withName("eventBus"))
-
-  override val studyService = new StudyServiceImpl(commandProcessor)
+  override val studyService = new StudyServiceImpl()
   override val userService = null
 
   /**
@@ -65,20 +42,6 @@ trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
    * Returns the list of event processors to be used in this test fixture.
    */
   protected def getEventProcessors: List[ActorRef]
-
-  def startEventsourced(appMode: Mode) = {
-    // delete the journal contents
-    mongoColl.remove(MongoDBObject.empty)
-
-    extension.recover(Seq(ReplayParams(1)))
-    //extension.recover
-
-    // wait for processor 1 to complete processing of replayed event messages
-    // (ensures that recovery of externally visible state maintained by
-    //  studiesRef is completed when awaitProcessing returns)
-    extension.awaitProcessing(Set(1))
-    log.debug("system initialized")
-  }
 
   def await[T](f: Future[DomainValidation[T]]): DomainValidation[T] = {
     // use blocking for now so that tests can be run in parallel
