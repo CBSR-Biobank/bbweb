@@ -37,7 +37,7 @@ object ApplicationBuild extends Build {
 
     libraryDependencies ++= Seq(
       "ws.securesocial" %% "securesocial" % "2.1.3",
-      "com.typesafe.akka" % "akka-persistence-experimental_2.10" % "2.3-M2",
+      "com.typesafe.akka" % "akka-persistence-experimental_2.10" % "2.3.0",
       "org.scala-stm" %% "scala-stm" % "0.7"  % "compile",
       "org.scalaz" %% "scalaz-core" % "7.0.4"  % "compile",
 

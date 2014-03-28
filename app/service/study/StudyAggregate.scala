@@ -32,9 +32,9 @@ import scalaz.Scalaz._
 
 case class StudyMessage(cmd: Any, userId: UserId, time: Long)
 
-trait StudyProcessorComponent {
+trait StudyAggregateComponent {
 
-  trait StudyProcessor extends EventsourcedProcessor
+  trait StudyAggregate extends EventsourcedProcessor
 
 }
 
@@ -52,10 +52,10 @@ trait StudyProcessorComponent {
  * @param at2cetRepo The value object repository that associates a collection event annotation
  *         type to a collection event type.
  */
-trait StudyProcessorComponentImpl extends StudyProcessorComponent {
+trait StudyAggregateComponentImpl extends StudyAggregateComponent {
   self: ProcessorComponentImpl with RepositoryComponent =>
 
-  class StudyProcessorImpl extends StudyProcessor {
+  class StudyAggregateImpl extends StudyAggregate {
 
     def receive = {
       case serviceMsg: ServiceMsg =>
@@ -122,10 +122,10 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       cmd: StudyCommand,
       studyId: String,
       id: Option[String],
-      processFunc: StudyProcessorMsg => DomainValidation[T]): DomainValidation[T] = {
+      processFunc: StudyAggregateMsg => DomainValidation[T]): DomainValidation[T] = {
       for {
         study <- validateStudy(new StudyId(studyId))
-        event <- processFunc(StudyProcessorMsg(cmd, study, id))
+        event <- processFunc(StudyAggregateMsg(cmd, study, id))
       } yield event
     }
 

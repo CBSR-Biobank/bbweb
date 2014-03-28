@@ -87,16 +87,16 @@ trait UserServiceComponentImpl extends UserServiceComponent {
   }
 }
 
-trait UserProcessorComponent {
+trait UserAggregateComponent {
 
-  trait UserProcessor extends Processor
+  trait UserAggregate extends Processor
 
 }
 
-trait UserProcessorComponentImpl extends UserProcessorComponent {
+trait UserAggregateComponentImpl extends UserAggregateComponent {
   self: RepositoryComponent =>
 
-  class UserProcessorImpl extends UserProcessor {
+  class UserAggregateImpl extends UserAggregate {
 
     def receive = {
       case msg: ServiceMsg =>

@@ -4,6 +4,7 @@ import Messages._
 import domain._
 import akka.actor._
 import org.slf4j.Logger
+import Messages._
 
 import scalaz._
 import Scalaz._

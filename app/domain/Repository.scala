@@ -9,7 +9,7 @@ import Scalaz._
 
 /**
  * A Wrapper around an STM Ref of a Map.
- * To be used by the "Service" class and the "Processor" classes only
+ * To be used by the "Service" class
  */
 private[domain] class ReadRepository[K, A](keyGetter: (A) => K) {
 

@@ -39,7 +39,7 @@ trait StudyCommandFixture
   val context = startEventsourced(Mode.Test)
 
   override protected def getCommandProcessors =
-    List(system.actorOf(Props(new StudyProcessorImpl with Emitter), "study"))
+    List(system.actorOf(Props(new StudyAggregateImpl with Emitter), "study"))
 
   override protected def getEventProcessors =
     List(system.actorOf(Props(new DummyEventProcessor with Receiver), "dummyevent"))

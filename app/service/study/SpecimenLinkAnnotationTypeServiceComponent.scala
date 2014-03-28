@@ -25,13 +25,13 @@ trait SpecimenLinkAnnotationTypeServiceComponent {
 
     /**
      * This partial function handles each command. The command is contained within the
-     * StudyProcessorMsg.
+     * StudyAggregateMsg.
      *
      *  If the command is invalid, then this method throws an Error exception.
      */
     def process = {
 
-      case msg: StudyProcessorMsg =>
+      case msg: StudyAggregateMsg =>
         msg.cmd match {
           case cmd: AddSpecimenLinkAnnotationTypeCmd =>
             log.debug("repsitory is: {}", specimenLinkAnnotationTypeRepository)
