@@ -32,7 +32,7 @@ object ApplicationBuild extends Build {
     ),
 
     resolvers += Resolver.url("sbt-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns),
-    
+
     resolvers += Resolver.sonatypeRepo("snapshots"),
 
     libraryDependencies ++= Seq(
@@ -47,9 +47,19 @@ object ApplicationBuild extends Build {
       "org.pegdown" % "pegdown" % "1.2.1" // specs2 html output
     ),
 
-    scalacOptions ++= Seq("-feature"),
+    scalacOptions ++= Seq(
+      "deprecation",
+      "-feature",
+      "-language:implicitConversions",
+      "-language:higherKinds",
+      "-language:existentials",
+      "-language:postfixOps",
+      "-Ywarn-adapted-args",
+      "-Ywarn-dead-code",
+      "-Ywarn-inaccessible",
+      "-unchecked"),
 
-    javaOptions in Test += "-Dconfig.file=conf/test.conf",
+    javaOptions ++= Seq("-Xmx1024M", "-XX:MaxPermSize=512m"),
 
     javaOptions in Test += "-Dconfig.file=conf/test.conf",
 

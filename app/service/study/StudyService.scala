@@ -155,7 +155,7 @@ trait StudyServiceComponent {
 trait StudyServiceComponentImpl extends StudyServiceComponent {
   self: RepositoryComponent =>
 
-  class StudyServiceImpl() extends StudyService {
+  class StudyServiceImpl(domainModel: DomainModel) extends StudyService {
 
     val log = LoggerFactory.getLogger(this.getClass)
 
@@ -217,25 +217,31 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
         StudyId(studyId), AnnotationTypeId(annotationTypeId))
     }
 
+    // FIXME: only commands should be sent to an aggregate
+
     def addStudy(cmd: AddStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyAddedEvent]] = {
-      studyProcessor ? ServiceMsg(cmd, userId, Some(StudyIdentityService.nextIdentity)) map (
+      val id = studyRepository.nextIdentity
+
+      val aggregate = domainModel.aggregateOf("domain.study.Study", id.toString)
+
+      aggregate ? ServiceMsg(cmd, userId, Some(StudyIdentityService.nextIdentity)) map (
         _.asInstanceOf[DomainValidation[StudyAddedEvent]])
     }
 
     def updateStudy(cmd: UpdateStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyUpdatedEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId) map (
+      aggregate ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[StudyUpdatedEvent]])
 
     def enableStudy(cmd: EnableStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyEnabledEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId) map (
+      aggregate ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[StudyEnabledEvent]])
 
     def disableStudy(cmd: DisableStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyDisabledEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId) map (
+      aggregate ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[StudyDisabledEvent]])
 
     // specimen groups
@@ -250,35 +256,35 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
 
     def addSpecimenGroup(cmd: AddSpecimenGroupCmd)(
       implicit userId: UserId): Future[DomainValidation[SpecimenGroupAddedEvent]] = {
-      studyProcessor ? ServiceMsg(cmd, userId, Some(SpecimenGroupIdentityService.nextIdentity)) map (
+      aggregate ? ServiceMsg(cmd, userId, Some(SpecimenGroupIdentityService.nextIdentity)) map (
         _.asInstanceOf[DomainValidation[SpecimenGroupAddedEvent]])
     }
 
     def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd)(
       implicit userId: UserId): Future[DomainValidation[SpecimenGroupUpdatedEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId) map (
+      aggregate ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[SpecimenGroupUpdatedEvent]])
 
     def removeSpecimenGroup(cmd: RemoveSpecimenGroupCmd)(
       implicit userId: UserId): Future[DomainValidation[SpecimenGroupRemovedEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId) map (
+      aggregate ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[SpecimenGroupRemovedEvent]])
 
     // collection event types
     def addCollectionEventType(cmd: AddCollectionEventTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[CollectionEventTypeAddedEvent]] = {
-      studyProcessor ? ServiceMsg(cmd, userId, Some(CollectionEventTypeIdentityService.nextIdentity)) map (
+      aggregate ? ServiceMsg(cmd, userId, Some(CollectionEventTypeIdentityService.nextIdentity)) map (
         _.asInstanceOf[DomainValidation[CollectionEventTypeAddedEvent]])
     }
 
     def updateCollectionEventType(cmd: UpdateCollectionEventTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[CollectionEventTypeUpdatedEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId) map (
+      aggregate ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[CollectionEventTypeUpdatedEvent]])
 
     def removeCollectionEventType(cmd: RemoveCollectionEventTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[CollectionEventTypeRemovedEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId) map (
+      aggregate ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[CollectionEventTypeRemovedEvent]])
 
     // collection event annotation types
@@ -295,18 +301,18 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
     def addCollectionEventAnnotationType(
       cmd: AddCollectionEventAnnotationTypeCmd)(
         implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationTypeAddedEvent]] = {
-      studyProcessor ? ServiceMsg(cmd, userId, Some(CollectionEventAnnotationTypeIdentityService.nextIdentity)) map (
+      aggregate ? ServiceMsg(cmd, userId, Some(CollectionEventAnnotationTypeIdentityService.nextIdentity)) map (
         _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeAddedEvent]])
     }
 
     def updateCollectionEventAnnotationType(cmd: UpdateCollectionEventAnnotationTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId) map (
+      aggregate ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]])
 
     def removeCollectionEventAnnotationType(cmd: RemoveCollectionEventAnnotationTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId) map (
+      aggregate ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]])
 
     // participant annotation types
@@ -324,17 +330,17 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
     def addParticipantAnnotationType(
       cmd: AddParticipantAnnotationTypeCmd)(
         implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationTypeAddedEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId, Some(ParticipantAnnotationTypeIdentityService.nextIdentity)) map (
+      aggregate ? ServiceMsg(cmd, userId, Some(ParticipantAnnotationTypeIdentityService.nextIdentity)) map (
         _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeAddedEvent]])
 
     def updateParticipantAnnotationType(cmd: UpdateParticipantAnnotationTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId) map (
+      aggregate ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]])
 
     def removeParticipantAnnotationType(cmd: RemoveParticipantAnnotationTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[ParticipantAnnotationTypeRemovedEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId) map (
+      aggregate ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeRemovedEvent]])
 
     // specimen link annotation types
@@ -354,17 +360,17 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
     def addSpecimenLinkAnnotationType(
       cmd: AddSpecimenLinkAnnotationTypeCmd)(
         implicit userId: UserId): Future[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId, Some(SpecimenLinkAnnotationTypeIdentityService.nextIdentity)) map (
+      aggregate ? ServiceMsg(cmd, userId, Some(SpecimenLinkAnnotationTypeIdentityService.nextIdentity)) map (
         _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]])
 
     def updateSpecimenLinkAnnotationType(cmd: UpdateSpecimenLinkAnnotationTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId) map (
+      aggregate ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]])
 
     def removeSpecimenLinkAnnotationType(cmd: RemoveSpecimenLinkAnnotationTypeCmd)(
       implicit userId: UserId): Future[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]] =
-      studyProcessor ? ServiceMsg(cmd, userId) map (
+      aggregate ? ServiceMsg(cmd, userId) map (
         _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]])
   }
 }

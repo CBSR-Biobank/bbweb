@@ -57,6 +57,8 @@ trait StudyAggregateComponentImpl extends StudyAggregateComponent {
 
   class StudyAggregateImpl extends StudyAggregate {
 
+    // FIXME: this class should implement the Study domain model class and should replace it
+
     def receive = {
       case serviceMsg: ServiceMsg =>
         serviceMsg.cmd match {

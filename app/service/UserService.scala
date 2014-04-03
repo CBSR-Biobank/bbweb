@@ -40,7 +40,7 @@ trait UserServiceComponent {
 trait UserServiceComponentImpl extends UserServiceComponent {
   self: RepositoryComponent =>
 
-  class UserServiceImpl extends UserService {
+  class UserServiceImpl(domainModel: DomainModel) extends UserService {
 
     val log = LoggerFactory.getLogger(this.getClass)
 
@@ -77,8 +77,7 @@ trait UserServiceComponentImpl extends UserServiceComponent {
           val cmd = AddUserCmd(user.fullName, user.email.getOrElse(""),
             passwordInfo.password, passwordInfo.hasher, passwordInfo.salt,
             user.avatarUrl)
-          commandBus ? ServiceMsg(cmd, null) map (
-            _.asInstanceOf[DomainValidation[User]])
+          // FIXME: send command to aggregate root
           user
         case None => null
       }

@@ -13,6 +13,8 @@ trait StudyRepositoryComponent {
 
   trait StudyRepository {
 
+    def nextIdentity: StudyId
+
     def allStudies(): Set[Study]
 
     def studyWithId(studyId: StudyId): DomainValidation[Study]
@@ -27,7 +29,6 @@ trait StudyRepositoryComponent {
       collectionEventTypecount: Int): DomainValidation[EnabledStudy]
 
     def disable(studyId: StudyId): DomainValidation[DisabledStudy]
-
   }
 }
 
@@ -38,6 +39,8 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
   class StudyRepositoryImpl extends ReadWriteRepository[StudyId, Study](v => v.id) with StudyRepository {
 
     val log = LoggerFactory.getLogger(this.getClass)
+
+    def nextIdentity: StudyId = new StudyId(java.util.UUID.randomUUID.toString.toUpperCase)
 
     def allStudies(): Set[Study] = {
       getValues.toSet
@@ -91,6 +94,8 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
       collectionEventTypecount: Int): DomainValidation[EnabledStudy] = {
 
       def doEnable(prevStudy: Study) = {
+        throw new Error("this functionality should not be here")
+
         prevStudy match {
           case es: EnabledStudy =>
             DomainError("study is already enabled: {id: %s}".format(es.id)).fail
@@ -114,6 +119,7 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
     }
 
     def disable(studyId: StudyId): DomainValidation[DisabledStudy] = {
+      throw new Error("this functionality should not be here")
 
       def doDisable(prevStudy: Study) = {
         prevStudy match {

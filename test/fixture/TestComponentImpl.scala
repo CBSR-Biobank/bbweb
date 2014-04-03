@@ -30,7 +30,9 @@ trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
 
   protected implicit val adminUserId = new UserId("admin@admin.com")
 
-  override val studyService = new StudyServiceImpl()
+  override val domainModel = DomainModel("bbweb-test")
+
+  override val studyService = new StudyServiceImpl(domainModel)
   override val userService = null
 
   /**

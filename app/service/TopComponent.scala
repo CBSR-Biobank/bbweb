@@ -23,6 +23,7 @@ object Configuration {
  */
 trait TopComponent extends ServiceComponent {
 
+  val domainModel: DomainModel
   val studyService: StudyService
   val userService: UserService
 
@@ -47,11 +48,11 @@ trait TopComponent extends ServiceComponent {
  */
 trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
 
-  private val model = DomainModel("bbweb")
+  override val domainModel = DomainModel("bbweb")
 
-  model.registerAggregateType("domain.study.Study")
-  model.registerAggregateType("domain.study.User")
+  domainModel.registerAggregateType("domain.study.Study")
+  domainModel.registerAggregateType("domain.study.User")
 
-  override val studyService = new StudyServiceImpl()
-  override val userService = new UserServiceImpl()
+  override val studyService = new StudyServiceImpl(domainModel)
+  override val userService = new UserServiceImpl(domainModel)
 }
