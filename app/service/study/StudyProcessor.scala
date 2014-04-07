@@ -55,10 +55,6 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
   class StudyProcessorImpl extends StudyProcessor {
 
-    val receiveReplay: Receive = {
-      case _ =>
-    }
-
     val receiveRecover: Receive = {
       case _ =>
     }

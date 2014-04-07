@@ -16,6 +16,7 @@ import securesocial.core.{ Identity, SocialUser, PasswordInfo, AuthenticationMet
 import securesocial.core.providers.utils.PasswordHasher
 import org.slf4j.LoggerFactory
 import akka.persistence.EventsourcedProcessor
+import akka.persistence.SnapshotOffer
 import akka.actor.ActorLogging
 
 import scalaz._
@@ -97,37 +98,48 @@ trait UserProcessorComponent {
 trait UserProcessorComponentImpl extends UserProcessorComponent {
   self: RepositoryComponent =>
 
+  case class SnapshotState(users: Set[User]) {
+
+  }
+
   class UserProcessorImpl extends UserProcessor {
 
-    val receiveReplay: Receive = {
-      case _ =>
+    def updateState(event: UserEvent) {
+      event match {
+        case event: UserAddedEvent =>
+          userRepository.add(RegisteredUser(UserId(event.email), 0L, event.name, event.email,
+            event.password, event.hasher, event.salt, event.avatarUrl))
+        case event: UserAuthenticatedEvent =>
+        // do nothing
+      }
     }
 
     val receiveRecover: Receive = {
-      case _ =>
+      case event: UserEvent => updateState(event)
+      case SnapshotOffer(_, snapshot: SnapshotState) =>
+        snapshot.users.foreach(i => userRepository.update(i))
     }
 
     val receiveCommand: Receive = {
       case msg: ServiceMsg =>
         msg.cmd match {
           case cmd: AddUserCmd =>
-            // FIXME: what if this user already exists?
             addUser(cmd)
-
-          case other => // must be for another command handler
         }
 
-      case msg =>
-      // log.info("invalid message received: " + msg)
+      case "snap" =>
+        saveSnapshot(SnapshotState(userRepository.allUsers))
+        stash()
     }
 
-    def addUser(cmd: AddUserCmd): DomainValidation[User] = {
-      val item = for {
-        newItem <- userRepository.add(RegisteredUser(UserId(cmd.email), 0L, cmd.name, cmd.email,
-          cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl))
-        event <- UserAddedEvent(newItem.id, newItem.name, newItem.email).success
-      } yield newItem
-      item
+    def addUser(cmd: AddUserCmd): DomainValidation[UserAddedEvent] = {
+      val evt = for {
+        available <- userRepository.emailAvailable(cmd.email)
+        event <- UserAddedEvent(new UserId(cmd.email), cmd.name, cmd.email, cmd.password,
+          cmd.hasher, cmd.salt, cmd.avatarUrl).success
+        save <- persist(event)(e => updateState(e)).success
+      } yield event
+      evt
     }
   }
 }
