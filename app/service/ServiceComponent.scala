@@ -14,12 +14,12 @@ import service.study.{
 import domain.{ RepositoryComponent, RepositoryComponentImpl }
 
 trait ProcessorComponent extends StudyProcessorComponent
-  with UserAggregateComponent
+  with UserProcessorComponent
   with RepositoryComponent
 
 trait ProcessorComponentImpl extends ProcessorComponent
   with StudyProcessorComponentImpl
-  with UserAggregateComponentImpl
+  with UserProcessorComponentImpl
   with CollectionEventTypeServiceComponent
   with SpecimenGroupServiceComponent
   with CeventAnnotationTypeServiceComponent

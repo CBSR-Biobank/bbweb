@@ -18,8 +18,6 @@ import Study._
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import akka.event.Logging
-import akka.actor.ActorLogging
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref

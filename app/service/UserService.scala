@@ -15,6 +15,8 @@ import play.api.Logger
 import securesocial.core.{ Identity, SocialUser, PasswordInfo, AuthenticationMethod }
 import securesocial.core.providers.utils.PasswordHasher
 import org.slf4j.LoggerFactory
+import akka.persistence.EventsourcedProcessor
+import akka.actor.ActorLogging
 
 import scalaz._
 import scalaz.Scalaz._
@@ -86,29 +88,37 @@ trait UserServiceComponentImpl extends UserServiceComponent {
   }
 }
 
-trait UserAggregateComponent {
+trait UserProcessorComponent {
 
-  trait UserAggregate extends Processor
+  trait UserProcessor extends EventsourcedProcessor
 
 }
 
-trait UserAggregateComponentImpl extends UserAggregateComponent {
+trait UserProcessorComponentImpl extends UserProcessorComponent {
   self: RepositoryComponent =>
 
-  class UserAggregateImpl extends UserAggregate {
+  class UserProcessorImpl extends UserProcessor {
 
-    def receive = {
+    val receiveReplay: Receive = {
+      case _ =>
+    }
+
+    val receiveRecover: Receive = {
+      case _ =>
+    }
+
+    val receiveCommand: Receive = {
       case msg: ServiceMsg =>
         msg.cmd match {
           case cmd: AddUserCmd =>
             // FIXME: what if this user already exists?
-            process(msg, addUser(cmd))
+            addUser(cmd)
 
           case other => // must be for another command handler
         }
 
       case msg =>
-        log.info("invalid message received: " + msg)
+      // log.info("invalid message received: " + msg)
     }
 
     def addUser(cmd: AddUserCmd): DomainValidation[User] = {
