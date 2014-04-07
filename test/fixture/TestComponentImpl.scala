@@ -29,7 +29,6 @@ trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
   private implicit val timeout = Timeout(5 seconds)
 
   protected implicit val adminUserId = new UserId("admin@admin.com")
-  override val userService = null
 
   def await[T](f: Future[DomainValidation[T]]): DomainValidation[T] = {
     // use blocking for now so that tests can be run in parallel

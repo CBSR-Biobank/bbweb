@@ -21,15 +21,6 @@ import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
 import scalaz._
 import Scalaz._
 
-class DummyCommandProcessor extends Processor {
-
-  def receive = {
-    case msg =>
-      log.debug("received event %s" format msg)
-  }
-
-}
-
 /**
  * Used to test the study query model.
  */
@@ -41,7 +32,8 @@ trait StudyQueryFixture
 
   protected val DB = Database.forURL("jdbc:h2:mem:bbweb-test;MODE=MYSQL", driver = "org.h2.Driver")
 
-  val studyView = system.actorOf(Props[StudyViewImpl], "studyview")
+  val studyView = system.actorOf(Props(new StudyViewImpl), "studyview")
 
-  val studyService = null
+  override val studyService = null
+  override val userService = null
 }

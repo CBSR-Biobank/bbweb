@@ -50,7 +50,7 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
 
     def studyWithId(studyId: StudyId): DomainValidation[Study] = {
       getByKey(studyId) match {
-        case Failure(x) => DomainError("study does not exist: { studyId: %s }".format(studyId)).fail
+        case Failure(x) => DomainError(s"study does not exist: { studyId: $studyId }").fail
         case Success(study) => study.success
       }
     }

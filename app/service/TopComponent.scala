@@ -46,8 +46,10 @@ trait TopComponent extends ServiceComponent {
 trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
 
   private implicit val system = ActorSystem("bbweb")
+
   private val studyProcessor = system.actorOf(Props[StudyProcessor], "studyproc")
+  private val userProcessor = system.actorOf(Props[UserProcessor], "userproc")
 
   override val studyService = new StudyServiceImpl(studyProcessor)
-  override val userService = new UserServiceImpl()
+  override val userService = new UserServiceImpl(userProcessor)
 }

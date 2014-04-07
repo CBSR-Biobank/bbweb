@@ -24,7 +24,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class StudyServiceSpec extends StudyCommandFixture {
+class StudyServiceSpec extends StudyServiceFixture {
 
   args(
     //include = "tag1",
@@ -32,7 +32,7 @@ class StudyServiceSpec extends StudyCommandFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  override val nameGenerator = new NameGenerator(classOf[StudyServiceSpec].getName)
+  override val nameGenerator = new NameGenerator(this.getClass.getName)
 
   "Study" can {
 

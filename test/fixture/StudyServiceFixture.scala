@@ -22,7 +22,7 @@ import Scalaz._
 /**
  * Used to test the study service.
  */
-trait StudyCommandFixture
+trait StudyServiceFixture
   extends Specification
   with NoTimeConversions
   with Tags
@@ -31,4 +31,5 @@ trait StudyCommandFixture
   private val studyProcessor = system.actorOf(Props[StudyProcessorImpl], "studyproc")
 
   override val studyService = new StudyServiceImpl(studyProcessor)
+  override val userService = null
 }

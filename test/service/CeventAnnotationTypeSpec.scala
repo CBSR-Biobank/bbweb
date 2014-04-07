@@ -16,7 +16,7 @@ import scalaz._
 import Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class CeventAnnotationTypeSpec extends StudyCommandFixture {
+class CeventAnnotationTypeSpec extends StudyServiceFixture {
   args(
     //include = "tag1",
     sequential = true) // forces all tests to be run sequentially

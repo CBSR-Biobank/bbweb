@@ -1,10 +1,14 @@
 package service
 
+import service.commands.UserCommands._
+
 import play.api.{ Logger, Application }
 import securesocial.core._
 import securesocial.core.providers.Token
 import securesocial.core.IdentityId
 import org.mindrot.jbcrypt.BCrypt
+import scala.util.{ Failure, Success }
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  *
@@ -29,8 +33,16 @@ class SecureSocialUserService(application: Application) extends UserServicePlugi
   }
 
   def save(newUser: Identity): Identity = {
-    // FIXME: use a future value here
-    userService.add(newUser)
+    newUser.passwordInfo match {
+      case Some(passwordInfo) =>
+        val cmd = AddUserCommand(newUser.fullName, newUser.email.getOrElse(""),
+          passwordInfo.password, passwordInfo.hasher, passwordInfo.salt,
+          newUser.avatarUrl)
+        userService.add(cmd)
+        newUser
+      case None =>
+        null
+    }
   }
 
   def save(token: Token) {

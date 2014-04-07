@@ -15,9 +15,9 @@ import play.api.Logger
 import securesocial.core.{ Identity, SocialUser, PasswordInfo, AuthenticationMethod }
 import securesocial.core.providers.utils.PasswordHasher
 import org.slf4j.LoggerFactory
-import akka.persistence.EventsourcedProcessor
 import akka.persistence.SnapshotOffer
 import akka.actor.ActorLogging
+import ExecutionContext.Implicits.global
 
 import scalaz._
 import scalaz.Scalaz._
@@ -35,7 +35,7 @@ trait UserServiceComponent {
 
     def getByEmail(email: String): Option[User]
 
-    def add(user: securesocial.core.Identity): securesocial.core.Identity
+    def add(cmd: AddUserCommand): Future[DomainValidation[UserAddedEvent]]
 
   }
 }
@@ -43,7 +43,7 @@ trait UserServiceComponent {
 trait UserServiceComponentImpl extends UserServiceComponent {
   self: RepositoryComponent =>
 
-  class UserServiceImpl() extends UserService {
+  class UserServiceImpl(userProcessor: ActorRef)(implicit system: ActorSystem) extends UserService {
 
     val log = LoggerFactory.getLogger(this.getClass)
 
@@ -74,16 +74,9 @@ trait UserServiceComponentImpl extends UserServiceComponent {
         some(PasswordInfo(PasswordHasher.BCryptHasher, user.password, None)))
     }
 
-    def add(user: securesocial.core.Identity): securesocial.core.Identity = {
-      user.passwordInfo match {
-        case Some(passwordInfo) =>
-          val cmd = AddUserCmd(user.fullName, user.email.getOrElse(""),
-            passwordInfo.password, passwordInfo.hasher, passwordInfo.salt,
-            user.avatarUrl)
-          // FIXME: send command to aggregate root
-          user
-        case None => null
-      }
+    def add(cmd: AddUserCommand): Future[DomainValidation[UserAddedEvent]] = {
+      log.info(s"add: $cmd")
+      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserAddedEvent]])
     }
 
   }
@@ -91,16 +84,14 @@ trait UserServiceComponentImpl extends UserServiceComponent {
 
 trait UserProcessorComponent {
 
-  trait UserProcessor extends EventsourcedProcessor
+  trait UserProcessor extends Processor
 
 }
 
+case class SnapshotState(users: Set[User])
+
 trait UserProcessorComponentImpl extends UserProcessorComponent {
   self: RepositoryComponent =>
-
-  case class SnapshotState(users: Set[User]) {
-
-  }
 
   class UserProcessorImpl extends UserProcessor {
 
@@ -121,25 +112,23 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     }
 
     val receiveCommand: Receive = {
-      case msg: ServiceMsg =>
-        msg.cmd match {
-          case cmd: AddUserCmd =>
-            addUser(cmd)
-        }
+      case cmd: AddUserCommand =>
+        addUser(cmd)
 
       case "snap" =>
         saveSnapshot(SnapshotState(userRepository.allUsers))
         stash()
     }
 
-    def addUser(cmd: AddUserCmd): DomainValidation[UserAddedEvent] = {
+    def addUser(cmd: AddUserCommand) = {
       val evt = for {
         available <- userRepository.emailAvailable(cmd.email)
         event <- UserAddedEvent(new UserId(cmd.email), cmd.name, cmd.email, cmd.password,
           cmd.hasher, cmd.salt, cmd.avatarUrl).success
         save <- persist(event)(e => updateState(e)).success
       } yield event
-      evt
+      logEvent(evt)
+      sender ! evt
     }
   }
 }
