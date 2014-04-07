@@ -39,10 +39,9 @@ trait StudyQueryFixture
   with Tags
   with TestComponentImpl {
 
-  protected val context = startEventsourced(Mode.Test)
-
   protected val DB = Database.forURL("jdbc:h2:mem:bbweb-test;MODE=MYSQL", driver = "org.h2.Driver")
 
-  override protected def getEventProcessors = List(studyEventProcessor)
+  val studyView = system.actorOf(Props[StudyViewImpl], "studyview")
 
+  val studyService = null
 }

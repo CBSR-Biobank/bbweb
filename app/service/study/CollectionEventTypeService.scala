@@ -1,5 +1,6 @@
 package service.study
 
+import service.Messages._
 import domain._
 import domain.study._
 import domain.study.Study._
@@ -37,13 +38,13 @@ trait CollectionEventTypeServiceComponent {
 
     /**
      * This partial function handles each command. The command is contained within the
-     * StudyAggregateMsg.
+     * StudyProcessorMsg.
      *
      *  If the command is invalid, then this method throws an Error exception.
      */
     def process = {
 
-      case msg: StudyAggregateMsg =>
+      case msg: StudyProcessorMsg =>
         msg.cmd match {
           // collection event types
           case cmd: AddCollectionEventTypeCmd =>

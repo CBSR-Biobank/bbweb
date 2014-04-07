@@ -23,11 +23,8 @@ object Configuration {
  */
 trait TopComponent extends ServiceComponent {
 
-  val domainModel: DomainModel
   val studyService: StudyService
   val userService: UserService
-
-  def startEventsourced(appMode: Mode): Unit
 
 }
 
@@ -48,11 +45,9 @@ trait TopComponent extends ServiceComponent {
  */
 trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
 
-  override val domainModel = DomainModel("bbweb")
+  private implicit val system = ActorSystem("bbweb")
+  private val studyProcessor = system.actorOf(Props[StudyProcessor], "studyproc")
 
-  domainModel.registerAggregateType("domain.study.Study")
-  domainModel.registerAggregateType("domain.study.User")
-
-  override val studyService = new StudyServiceImpl(domainModel)
-  override val userService = new UserServiceImpl(domainModel)
+  override val studyService = new StudyServiceImpl(studyProcessor)
+  override val userService = new UserServiceImpl()
 }

@@ -1,6 +1,7 @@
 package service.study
 
 import service._
+import service.Messages._
 import service.commands.StudyCommands._
 import service.events.StudyEvents._
 import domain._
@@ -36,13 +37,13 @@ trait SpecimenGroupServiceComponent {
 
     /**
      * This partial function handles each command. The command is contained within the
-     * StudyAggregateMsg.
+     * StudyProcessorMsg.
      *
      *  If the command is invalid, then this method throws an Error exception.
      */
     def process = {
 
-      case msg: StudyAggregateMsg =>
+      case msg: StudyProcessorMsg =>
         msg.cmd match {
           case cmd: AddSpecimenGroupCmd =>
             addSpecimenGroup(cmd, msg.study, msg.id)

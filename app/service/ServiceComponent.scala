@@ -1,8 +1,8 @@
 package service
 
 import service.study.{
-  StudyAggregateComponent,
-  StudyAggregateComponentImpl,
+  StudyProcessorComponent,
+  StudyProcessorComponentImpl,
   StudyServiceComponent,
   StudyServiceComponentImpl,
   CollectionEventTypeServiceComponent,
@@ -13,12 +13,12 @@ import service.study.{
 }
 import domain.{ RepositoryComponent, RepositoryComponentImpl }
 
-trait ProcessorComponent extends StudyAggregateComponent
+trait ProcessorComponent extends StudyProcessorComponent
   with UserAggregateComponent
   with RepositoryComponent
 
 trait ProcessorComponentImpl extends ProcessorComponent
-  with StudyAggregateComponentImpl
+  with StudyProcessorComponentImpl
   with UserAggregateComponentImpl
   with CollectionEventTypeServiceComponent
   with SpecimenGroupServiceComponent

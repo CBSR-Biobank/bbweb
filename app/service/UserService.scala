@@ -40,7 +40,7 @@ trait UserServiceComponent {
 trait UserServiceComponentImpl extends UserServiceComponent {
   self: RepositoryComponent =>
 
-  class UserServiceImpl(domainModel: DomainModel) extends UserService {
+  class UserServiceImpl() extends UserService {
 
     val log = LoggerFactory.getLogger(this.getClass)
 

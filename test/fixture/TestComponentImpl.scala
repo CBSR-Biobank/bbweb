@@ -29,21 +29,7 @@ trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
   private implicit val timeout = Timeout(5 seconds)
 
   protected implicit val adminUserId = new UserId("admin@admin.com")
-
-  override val domainModel = DomainModel("bbweb-test")
-
-  override val studyService = new StudyServiceImpl(domainModel)
   override val userService = null
-
-  /**
-   * Returns the list of command processors to be used in this test fixture.
-   */
-  protected def getCommandProcessors: List[ActorRef]
-
-  /**
-   * Returns the list of event processors to be used in this test fixture.
-   */
-  protected def getEventProcessors: List[ActorRef]
 
   def await[T](f: Future[DomainValidation[T]]): DomainValidation[T] = {
     // use blocking for now so that tests can be run in parallel

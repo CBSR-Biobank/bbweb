@@ -32,9 +32,9 @@ import scalaz.Scalaz._
 
 case class StudyMessage(cmd: Any, userId: UserId, time: Long)
 
-trait StudyAggregateComponent {
+trait StudyProcessorComponent {
 
-  trait StudyAggregate extends EventsourcedProcessor
+  trait StudyProcessor extends EventsourcedProcessor
 
 }
 
@@ -52,57 +52,45 @@ trait StudyAggregateComponent {
  * @param at2cetRepo The value object repository that associates a collection event annotation
  *         type to a collection event type.
  */
-trait StudyAggregateComponentImpl extends StudyAggregateComponent {
+trait StudyProcessorComponentImpl extends StudyProcessorComponent {
   self: ProcessorComponentImpl with RepositoryComponent =>
 
-  class StudyAggregateImpl extends StudyAggregate {
+  class StudyProcessorImpl extends StudyProcessor {
 
-    // FIXME: this class should implement the Study domain model class and should replace it
+    val receiveReplay: Receive = {
+      case _ =>
+    }
 
-    def receive = {
+    val receiveRecover: Receive = {
+      case _ =>
+    }
+
+    val receiveCommand: Receive = {
       case serviceMsg: ServiceMsg =>
         serviceMsg.cmd match {
           case cmd: AddStudyCmd =>
             addStudy(cmd, serviceMsg.id)
 
-          case cmd: UpdateStudyCmd =>
-            process(serviceMsg, updateStudy(cmd), emitter(Configuration.EventBusChannelId))
+          case cmd: UpdateStudyCmd => updateStudy(cmd)
 
-          case cmd: EnableStudyCmd =>
-            process(serviceMsg, enableStudy(cmd), emitter(Configuration.EventBusChannelId))
+          case cmd: EnableStudyCmd => enableStudy(cmd)
 
-          case cmd: DisableStudyCmd =>
-            process(serviceMsg, disableStudy(cmd), emitter(Configuration.EventBusChannelId))
+          case cmd: DisableStudyCmd => disableStudy(cmd)
 
           case cmd: SpecimenGroupCommand =>
-            process(
-              serviceMsg,
-              processEntityMsg(cmd, cmd.studyId, serviceMsg.id, specimenGroupService.process),
-              emitter(Configuration.EventBusChannelId))
+            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, specimenGroupService.process)
 
           case cmd: CollectionEventTypeCommand =>
-            process(
-              serviceMsg,
-              processEntityMsg(cmd, cmd.studyId, serviceMsg.id, collectionEventTypeService.process),
-              emitter(Configuration.EventBusChannelId))
+            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, collectionEventTypeService.process)
 
           case cmd: CollectionEventAnnotationTypeCommand =>
-            process(
-              serviceMsg,
-              processEntityMsg(cmd, cmd.studyId, serviceMsg.id, ceventAnnotationTypeService.process),
-              emitter(Configuration.EventBusChannelId))
+            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, ceventAnnotationTypeService.process)
 
           case cmd: ParticipantAnnotationTypeCommand =>
-            process(
-              serviceMsg,
-              processEntityMsg(cmd, cmd.studyId, serviceMsg.id, participantAnnotationTypeService.process),
-              emitter(Configuration.EventBusChannelId))
+            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, participantAnnotationTypeService.process)
 
           case cmd: SpecimenLinkAnnotationTypeCommand =>
-            process(
-              serviceMsg,
-              processEntityMsg(cmd, cmd.studyId, serviceMsg.id, specimenLinkAnnotationTypeService.process),
-              emitter(Configuration.EventBusChannelId))
+            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, specimenLinkAnnotationTypeService.process)
 
           case other => // must be for another command handler
         }
@@ -124,10 +112,10 @@ trait StudyAggregateComponentImpl extends StudyAggregateComponent {
       cmd: StudyCommand,
       studyId: String,
       id: Option[String],
-      processFunc: StudyAggregateMsg => DomainValidation[T]): DomainValidation[T] = {
+      processFunc: StudyProcessorMsg => DomainValidation[T]): DomainValidation[T] = {
       for {
         study <- validateStudy(new StudyId(studyId))
-        event <- processFunc(StudyAggregateMsg(cmd, study, id))
+        event <- processFunc(StudyProcessorMsg(cmd, study, id))
       } yield event
     }
 
@@ -155,7 +143,6 @@ trait StudyAggregateComponentImpl extends StudyAggregateComponent {
         persist(event) { e =>
           context.system.eventStream.publish(e)
         })
-      studyRepository.add()
       e
     }
 

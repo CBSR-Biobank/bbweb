@@ -1,8 +1,10 @@
 package query
 
+import domain.UserId
 import query.model._
 import fixture._
 import service.events.StudyEvents._
+import service.Messages._
 
 import java.util.UUID
 import org.junit.runner.RunWith
@@ -28,7 +30,7 @@ class StudyQuerySpec extends StudyQueryFixture {
         val version = 0L
         val name = nameGenerator.next[String]
         val description = Some(nameGenerator.next[String])
-        studyEventProcessor ! Message(StudyAddedEvent(id, version, name, description))
+        studyView ! StudyAddedEvent(id, version, name, description)
 
         implicit val getStudyResult = GetResult(r => Study(r.<<, r.<<, r.<<, r.<<, r.<<))
 

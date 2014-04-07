@@ -15,6 +15,8 @@ trait StudyRepositoryComponent {
 
     def nextIdentity: StudyId
 
+    def nameAvailable(study: DisabledStudy): DomainValidation[Boolean]
+
     def allStudies(): Set[Study]
 
     def studyWithId(studyId: StudyId): DomainValidation[Study]
@@ -53,7 +55,7 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
       }
     }
 
-    private def nameAvailable(study: DisabledStudy): DomainValidation[Boolean] = {
+    def nameAvailable(study: DisabledStudy): DomainValidation[Boolean] = {
       val exists = getValues.exists { item =>
         item.name.equals(study.name) && !item.id.equals(study.id)
       }

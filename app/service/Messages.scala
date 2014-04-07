@@ -22,7 +22,7 @@ object Messages {
     id: Option[String] = None)
     extends CommandMsg with HasIdentityOption
 
-  case class StudyAggregateMsg(
+  case class StudyProcessorMsg(
     cmd: Command,
     study: DisabledStudy,
     id: Option[String] = None)

@@ -9,14 +9,14 @@ import akka.actor.Actor
 import akka.actor.ActorLogging
 import org.slf4j.Logger
 
-trait StudyEventProcessorComponent {
+trait StudyViewComponent {
 
-  trait StudyEventProcessor extends Actor with ActorLogging
+  trait StudyView extends Actor with ActorLogging
 }
 
-trait StudyEventProcessorComponentImpl extends StudyEventProcessorComponent {
+trait StudyViewComponentImpl extends StudyViewComponent {
 
-  class StudyEventProcessorImpl extends StudyEventProcessor {
+  class StudyViewImpl extends StudyView {
 
     def receive = {
       case event: StudyAddedEvent =>
