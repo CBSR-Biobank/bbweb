@@ -49,9 +49,10 @@ class UserServiceSpec extends UserServiceFixture {
           e.hasher must be(hasher)
           e.salt must be(salt)
           e.avatarUrl must be(avatarUrl)
-          userRepository.userWithId(e.id) must beSuccessful.like {
+
+          userRepository.userWithId(e.id) must beSome.like {
             case u: User =>
-              u.version must beEqualTo(u.version)
+              u.version mustEqual 0L
           }
       }
 

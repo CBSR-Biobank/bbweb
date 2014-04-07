@@ -49,22 +49,21 @@ trait UserServiceComponentImpl extends UserServiceComponent {
 
     def find(id: securesocial.core.IdentityId): Option[securesocial.core.Identity] = {
       userRepository.userWithId(UserId(id.userId)) match {
-        case Success(user) =>
-          some(toSecureSocialIdentity(user))
-        case Failure(x) => none
+        case Some(user) => Some(toSecureSocialIdentity(user))
+        case None => none
       }
     }
 
     def findByEmailAndProvider(
       email: String, providerId: String): Option[securesocial.core.Identity] = {
       userRepository.userWithId(UserId(email)) match {
-        case Success(user) => some(toSecureSocialIdentity(user))
-        case Failure(x) => none
+        case Some(user) => some(toSecureSocialIdentity(user))
+        case None => none
       }
     }
 
     def getByEmail(email: String): Option[User] = {
-      userRepository.userWithId(UserId(email)).toOption
+      userRepository.userWithId(UserId(email))
     }
 
     private def toSecureSocialIdentity(user: User): securesocial.core.Identity = {
@@ -95,11 +94,12 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
 
   class UserProcessorImpl extends UserProcessor {
 
-    def updateState(event: UserEvent) {
+    def updateState(event: UserEvent) = {
       event match {
         case event: UserAddedEvent =>
           userRepository.add(RegisteredUser(UserId(event.email), 0L, event.name, event.email,
             event.password, event.hasher, event.salt, event.avatarUrl))
+          log.info(s"updateState: $event")
         case event: UserAuthenticatedEvent =>
         // do nothing
       }
@@ -121,14 +121,14 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     }
 
     def addUser(cmd: AddUserCommand) = {
-      val evt = for {
-        available <- userRepository.emailAvailable(cmd.email)
-        event <- UserAddedEvent(new UserId(cmd.email), cmd.name, cmd.email, cmd.password,
-          cmd.hasher, cmd.salt, cmd.avatarUrl).success
-        save <- persist(event)(e => updateState(e)).success
-      } yield event
-      logEvent(evt)
-      sender ! evt
+      if (userRepository.emailAvailable(cmd.email)) {
+        throw new IllegalArgumentException(s"user already exists: { userId: ${cmd.email} }")
+      }
+
+      val event = UserAddedEvent(new UserId(cmd.email), cmd.name, cmd.email, cmd.password,
+        cmd.hasher, cmd.salt, cmd.avatarUrl)
+      persist(event)(e => updateState(e))
+      sender ! event.success
     }
   }
 }

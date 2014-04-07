@@ -50,8 +50,8 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
 
     def studyWithId(studyId: StudyId): DomainValidation[Study] = {
       getByKey(studyId) match {
-        case Failure(x) => DomainError(s"study does not exist: { studyId: $studyId }").fail
-        case Success(study) => study.success
+        case None => DomainError(s"study does not exist: { studyId: $studyId }").fail
+        case Some(study) => study.success
       }
     }
 
@@ -69,9 +69,9 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
 
     def add(study: DisabledStudy): DomainValidation[DisabledStudy] = {
       getByKey(study.id) match {
-        case Success(prevItem) =>
+        case Some(prevItem) =>
           DomainError("study with ID already exists: %s" format study.id).fail
-        case Failure(x) =>
+        case None =>
           for {
             nameValid <- nameAvailable(study)
             item <- updateMap(study).success

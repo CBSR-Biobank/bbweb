@@ -50,11 +50,11 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
       studyId: StudyId,
       ceventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType] = {
       getByKey(ceventTypeId) match {
-        case Failure(x) =>
+        case None =>
           DomainError(
             "collection event type does not exist: { studyId: %s, ceventTypeId: %s }".format(
               studyId, ceventTypeId)).fail
-        case Success(cet) =>
+        case Some(cet) =>
           if (cet.studyId.equals(studyId))
             cet.success
           else DomainError(

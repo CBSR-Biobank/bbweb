@@ -46,10 +46,10 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
       studyId: StudyId,
       specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
       getByKey(specimenGroupId) match {
-        case Failure(x) =>
+        case None =>
           DomainError("specimen group does not exist: { studyId: %s, specimenGroupId: %s }".format(
             studyId, specimenGroupId)).fail
-        case Success(sg) =>
+        case Some(sg) =>
           if (sg.studyId.equals(studyId)) sg.success
           else DomainError(
             "study does not have specimen group: { studyId: %s, specimenGroupId: %s }".format(

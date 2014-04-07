@@ -13,11 +13,11 @@ trait UserRepositoryComponent {
 
     def allUsers(): Set[User]
 
-    def userWithId(userId: UserId): DomainValidation[User]
+    def userWithId(userId: UserId): Option[User]
 
-    def emailAvailable(email: String): DomainValidation[Boolean]
+    def emailAvailable(email: String): Boolean
 
-    def add(user: RegisteredUser): DomainValidation[RegisteredUser]
+    def add(user: RegisteredUser): RegisteredUser
 
     def update(user: User): DomainValidation[User]
 
@@ -36,38 +36,36 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
       getValues.toSet
     }
 
-    def userWithId(userId: UserId): DomainValidation[User] = {
-      getByKey(userId) match {
-        case Failure(x) => DomainError("user does not exist: { userId: %s}".format(userId)).fail
-        case Success(user) =>
-          user.success
-      }
-    }
+    def userWithId(userId: UserId): Option[User] = getByKey(userId)
 
-    def emailAvailable(email: String): DomainValidation[Boolean] = {
+    def emailAvailable(email: String): Boolean = {
       getByKey(new UserId(email)) match {
-        case Failure(x) => true.success
-        case Success(user) =>
-          DomainError("email address already registered: %s" format email).fail
+        case None => true
+        case Some(user) => false
       }
     }
 
-    def add(user: RegisteredUser): DomainValidation[RegisteredUser] = {
+    def add(user: RegisteredUser): RegisteredUser = {
       getByKey(user.id) match {
-        case Success(prevItem) =>
-          DomainError("user with ID already exists: %s" format user.id).fail
-        case Failure(x) =>
+        case Some(prevItem) =>
+          throw new IllegalArgumentException(s"user with ID already exists: ${user.id}")
+
+        case None =>
           updateMap(user)
-          user.success
+          user
       }
     }
 
     def update(user: User): DomainValidation[User] = {
-      for {
-        prevUser <- userWithId(user.id)
-        validVersion <- prevUser.requireVersion(Some(user.version))
-        updatedItem <- updateMap(user).success
-      } yield user
+      getByKey(user.id) match {
+        case None =>
+          throw new IllegalArgumentException(s"user does not exist: { userId: ${user.id} }")
+        case Some(prevUser) =>
+          for {
+            validVersion <- prevUser.requireVersion(Some(user.version))
+            updatedItem <- updateMap(user).success
+          } yield user
+      }
     }
   }
 }

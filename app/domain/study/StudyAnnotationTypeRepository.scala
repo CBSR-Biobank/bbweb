@@ -28,11 +28,10 @@ trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
     studyId: StudyId,
     annotationTypeId: AnnotationTypeId): DomainValidation[A] = {
     getByKey(annotationTypeId) match {
-      case Failure(x) =>
+      case None =>
         DomainError(
-          "annotation type does not exist: { studyId: %s, annotationTypeId: %s }".format(
-            studyId, annotationTypeId)).fail
-      case Success(annotType) =>
+          s"annotation type does not exist: { studyId: $studyId, annotationTypeId: $annotationTypeId }").fail
+      case Some(annotType) =>
         if (annotType.studyId.equals(studyId)) annotType.success
         else DomainError(
           "study does not have annotation type: { studyId: %s, annotationTypeId: %s }".format(
