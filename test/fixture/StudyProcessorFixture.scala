@@ -22,14 +22,11 @@ import Scalaz._
 /**
  * Used to test the study service.
  */
-trait StudyServiceFixture
-  extends Specification
-  with NoTimeConversions
-  with Tags
-  with TestComponentImpl {
+trait StudyProcessorFixture extends TestFixture {
 
-  private val studyProcessor = system.actorOf(Props[StudyProcessorImpl], "studyproc")
+  override val studyProcessor = system.actorOf(Props[StudyProcessorImpl], "studyproc")
+  override val userProcessor = null
 
-  override val studyService = new StudyServiceImpl(studyProcessor)
+  override val studyService = null
   override val userService = null
 }

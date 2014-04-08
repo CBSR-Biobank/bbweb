@@ -43,7 +43,8 @@ object ApplicationBuild extends Build {
 
       //"com.typesafe.akka" % "akka-testkit" % "2.0.3" % "test",
       "junit" % "junit" % "4.11" % "test",
-      "org.typelevel" %% "scalaz-specs2" % "0.1" % "test",
+      "org.scalatest" %% "scalatest" % "2.1.2" % "test",
+      "com.typesafe.akka" %% "akka-testkit" % "2.3.1" % "test",
       "org.pegdown" % "pegdown" % "1.2.1" // specs2 html output
     ),
 
@@ -66,7 +67,7 @@ object ApplicationBuild extends Build {
     (testOptions in Test) += Tests.Argument(TestFrameworks.Specs2, "html", "console"),
 
     // in play 2.1.1 tests are run twice unless this option is defined
-    testOptions += Tests.Argument(TestFrameworks.JUnit, "--ignore-runners=org.specs2.runner.JUnitRunner"),
+    testOptions += Tests.Argument(TestFrameworks.JUnit, "--ignore-runners=org.scalatest.junit.JUnitRunner"),
 
     lessEntryPoints <<= baseDirectory(customLessEntryPoints)
 

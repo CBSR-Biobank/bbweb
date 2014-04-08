@@ -22,16 +22,11 @@ import scalaz.Scalaz._
 
 trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
 
-  private val log = LoggerFactory.getLogger(this.getClass)
   protected val nameGenerator: NameGenerator
 
-  protected implicit val system = ActorSystem("bbweb-test")
-  private implicit val timeout = Timeout(5 seconds)
+  implicit val system = ActorSystem("bbweb-test")
+  implicit val timeout = Timeout(5 seconds)
 
   protected implicit val adminUserId = new UserId("admin@admin.com")
 
-  def await[T](f: Future[DomainValidation[T]]): DomainValidation[T] = {
-    // use blocking for now so that tests can be run in parallel
-    Await.result(f, timeout.duration)
-  }
 }

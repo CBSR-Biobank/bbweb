@@ -24,15 +24,14 @@ import Scalaz._
 /**
  * Used to test the study query model.
  */
-trait StudyQueryFixture
-  extends Specification
-  with NoTimeConversions
-  with Tags
-  with TestComponentImpl {
+trait StudyQueryFixture extends TestFixture {
 
   protected val DB = Database.forURL("jdbc:h2:mem:bbweb-test;MODE=MYSQL", driver = "org.h2.Driver")
 
   val studyView = system.actorOf(Props(new StudyViewImpl), "studyview")
+
+  override val studyProcessor = null
+  override val userProcessor = null
 
   override val studyService = null
   override val userService = null
