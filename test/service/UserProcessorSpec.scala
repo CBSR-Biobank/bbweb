@@ -4,7 +4,6 @@ import fixture._
 import service.commands.UserCommands._
 import service.events.UserEvents._
 import domain._
-
 import akka.actor.ActorSystem
 import akka.actor.Actor
 import akka.actor.Props
@@ -19,12 +18,15 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 import scalaz._
 import scalaz.Scalaz._
 
-@RunWith(classOf[JUnitRunner])
+//@RunWith(classOf[JUnitRunner])
 class UserProcessorSpec extends UserProcessorFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
@@ -42,21 +44,22 @@ class UserProcessorSpec extends UserProcessorFixture {
       val avatarUrl = Some(nameGenerator.next[User])
 
       val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      val future = userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserAddedEvent]])
+      val result = await(userProcessor ? cmd).asInstanceOf[DomainValidation[UserAddedEvent]]
 
-      future.value.get.map(e => e match {
-        case Success(event) =>
-          event.name should be(name)
-          event.email should be(email)
-          event.password should be(password)
-          event.hasher should be(hasher)
-          event.salt should be(salt)
-          event.avatarUrl should be(avatarUrl)
+      result.map { event =>
+        log.debug(s"event: $event")
 
-          val Some(user: User) = userRepository.userWithId(event.id)
-          user.version should be(0L)
-        case Failure(x) =>
-      })
+        event.name should be(name)
+        event.email should be(email)
+        event.password should be(password)
+        event.hasher should be(hasher)
+        event.salt should be(salt)
+        event.avatarUrl should be(avatarUrl)
+
+        userRepository.userWithId(event.id).map { u =>
+          u.version should be(0L)
+        }
+      }
     }
   }
 }

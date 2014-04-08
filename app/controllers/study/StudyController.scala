@@ -15,7 +15,7 @@ import domain.SpecimenType._
 
 import scala.concurrent._
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api._
 import play.api.cache.Cache
 import play.api.Play.current
@@ -200,6 +200,12 @@ object StudyController extends Controller with SecureSocial {
         Future(BadRequest(html.study.addStudy(formWithErrors, AddFormType(), "")))
       },
       formObj => {
+        // FIXME: handle timeout here
+        //
+        // see http://www.playframework.com/documentation/2.2.x/ScalaAsync
+        // "Handling time-outs"
+        //
+
         implicit val userId = UserId(request.user.identityId.userId)
         studyService.addStudy(formObj.getAddCmd).map(study => study match {
           case Success(study) =>
@@ -236,6 +242,12 @@ object StudyController extends Controller with SecureSocial {
         Future(BadRequest(html.study.addStudy(
           formWithErrors, UpdateFormType(), studyId))), {
         case formObj => {
+          // FIXME: handle timeout here
+          //
+          // see http://www.playframework.com/documentation/2.2.x/ScalaAsync
+          // "Handling time-outs"
+          //
+
           implicit val userId = UserId(request.user.identityId.userId)
           studyService.updateStudy(formObj.getUpdateCmd).map(study =>
             study match {

@@ -16,7 +16,7 @@
    </appender>
   
   <logger name="domain" level="INFO" />   
-  <logger name="service" level="INFO" />
+  <logger name="service" level="DEBUG" />
   <logger name="service.study.StudyProcessorImpl" level="DEBUG" /> 
 
   <root level="INFO">

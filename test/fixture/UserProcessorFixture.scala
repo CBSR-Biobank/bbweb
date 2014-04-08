@@ -2,7 +2,7 @@ package fixture
 
 import service._
 
-import akka.actor._
+import akka.actor.Props
 
 trait UserProcessorFixture extends TestFixture {
 

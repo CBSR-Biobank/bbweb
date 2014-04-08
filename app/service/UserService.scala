@@ -99,21 +99,24 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
         case event: UserAddedEvent =>
           userRepository.add(RegisteredUser(UserId(event.email), 0L, event.name, event.email,
             event.password, event.hasher, event.salt, event.avatarUrl))
-          log.info(s"updateState: $event")
+          log.debug(s"updateState: $event")
         case event: UserAuthenticatedEvent =>
         // do nothing
       }
     }
 
     val receiveRecover: Receive = {
-      case event: UserEvent => updateState(event)
+      case event: UserEvent =>
+        log.debug(s"receiveRecover: $event")
+        updateState(event)
+
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.users.foreach(i => userRepository.update(i))
     }
 
     val receiveCommand: Receive = {
       case cmd: AddUserCommand =>
-        addUser(cmd)
+        sender() ! addUser(cmd)
 
       case "snap" =>
         saveSnapshot(SnapshotState(userRepository.allUsers))
@@ -121,14 +124,16 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     }
 
     def addUser(cmd: AddUserCommand) = {
-      if (userRepository.emailAvailable(cmd.email)) {
-        throw new IllegalArgumentException(s"user already exists: { userId: ${cmd.email} }")
+      if (!userRepository.emailAvailable(cmd.email)) {
+        DomainError(s"user already exists: { userId: ${cmd.email} }").fail
+      } else {
+        val event = UserAddedEvent(new UserId(cmd.email), cmd.name, cmd.email, cmd.password,
+          cmd.hasher, cmd.salt, cmd.avatarUrl)
+        persist(event) { e =>
+          updateState(e)
+        }
+        event.success
       }
-
-      val event = UserAddedEvent(new UserId(cmd.email), cmd.name, cmd.email, cmd.password,
-        cmd.hasher, cmd.salt, cmd.avatarUrl)
-      persist(event)(e => updateState(e))
-      sender ! event.success
     }
   }
 }
