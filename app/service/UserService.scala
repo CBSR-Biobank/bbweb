@@ -17,7 +17,7 @@ import securesocial.core.providers.utils.PasswordHasher
 import org.slf4j.LoggerFactory
 import akka.persistence.SnapshotOffer
 import akka.actor.ActorLogging
-import ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scalaz._
 import scalaz.Scalaz._
@@ -99,7 +99,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
         case event: UserAddedEvent =>
           userRepository.add(RegisteredUser(UserId(event.email), 0L, event.name, event.email,
             event.password, event.hasher, event.salt, event.avatarUrl))
-          log.debug(s"updateState: $event")
+          log.info(s"updateState: $event")
         case event: UserAuthenticatedEvent =>
         // do nothing
       }
@@ -116,6 +116,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
 
     val receiveCommand: Receive = {
       case cmd: AddUserCommand =>
+        log.info(s"receiveCommand: $cmd")
         sender() ! addUser(cmd)
 
       case "snap" =>
