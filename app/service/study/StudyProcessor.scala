@@ -1,8 +1,8 @@
 package service.study
 
 import service._
-import service.commands.StudyCommands._
-import service.events.StudyEvents._
+import infrastructure.command.StudyCommands._
+import infrastructure.event.StudyEvents._
 import service.Messages._
 
 import domain.{

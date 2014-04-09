@@ -1,13 +1,12 @@
-package service
-package commands
+package infrastructure.command
 
 import domain.study._
-import domain.study.CollectionEventId
 import domain.AnatomicalSourceType._
 import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
 import domain.AnnotationValueType._
+import infrastructure.command.Commands._
 
 object StudyCommands {
   // study commands

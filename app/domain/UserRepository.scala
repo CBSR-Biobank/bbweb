@@ -15,7 +15,7 @@ trait UserRepositoryComponent {
 
     def userWithId(userId: UserId): Option[User]
 
-    def emailAvailable(email: String): Boolean
+    def emailAvailable(email: String): DomainValidation[Boolean]
 
     def add(user: RegisteredUser): RegisteredUser
 
@@ -38,10 +38,10 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
 
     def userWithId(userId: UserId): Option[User] = getByKey(userId)
 
-    def emailAvailable(email: String): Boolean = {
+    def emailAvailable(email: String): DomainValidation[Boolean] = {
       getByKey(new UserId(email)) match {
-        case None => true
-        case Some(user) => false
+        case None => true.success
+        case Some(user) => DomainError(s"user already exists: $email").fail
       }
     }
 

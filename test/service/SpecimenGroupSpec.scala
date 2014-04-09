@@ -14,7 +14,7 @@ import domain.{
 import AnnotationValueType._
 import domain.study._
 import infrastructure._
-import service.commands.StudyCommands._
+import infrastructure.command.StudyCommands._
 
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

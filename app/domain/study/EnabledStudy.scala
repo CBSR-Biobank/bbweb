@@ -1,7 +1,7 @@
 package domain.study
 
 import domain.{ DomainError, DomainValidation }
-import service.commands._
+import infrastructure.command._
 import domain._
 
 import scalaz._

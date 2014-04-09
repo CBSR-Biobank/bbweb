@@ -1,33 +1,31 @@
 package service
 
 import fixture._
-import service.commands.UserCommands._
-import service.events.UserEvents._
+import infrastructure.command.UserCommands._
+import infrastructure.event.UserEvents._
 import domain._
+
 import akka.actor.ActorSystem
 import akka.actor.Actor
 import akka.actor.Props
 import akka.pattern.ask
-import akka.testkit.TestKit
-import akka.testkit.ImplicitSender
-import akka.testkit.TestProbe
-import org.scalatest.WordSpecLike
-import org.scalatest.Matchers
-import org.scalatest.BeforeAndAfterAll
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import scala.concurrent.Await
 import scala.concurrent.Future
-//import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.{ Success, Failure }
 
 import scalaz._
 import scalaz.Scalaz._
 
+/**
+ * Note: to run from Eclipse uncomment the @RunWith line. To run from SBT the line should be
+ * commented out.
+ *
+ */
 //@RunWith(classOf[JUnitRunner])
 class UserProcessorSpec extends UserProcessorFixture {
 
@@ -35,40 +33,64 @@ class UserProcessorSpec extends UserProcessorFixture {
 
   override val nameGenerator = new NameGenerator(this.getClass.getName)
 
-  "User" must {
+  "A user processor" should {
 
-    "be added" in {
+    "add a user" in {
       val name = nameGenerator.next[User]
-      val email = java.util.UUID.randomUUID.toString.toUpperCase
+      val email = java.util.UUID.randomUUID.toString.toUpperCase + "@test.com"
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some(nameGenerator.next[User])
 
       val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-
       val future = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
 
-      //whenReady(future, timeout(5 seconds), interval(500 millis)) { r =>
-      whenReady(future, timeout(5 seconds)) { r =>
-          log.debug(s"result: $r")
+      waitNonBlocking(future) { r =>
+        r match {
+          case Success(event) =>
+            event.name should be(name)
+            event.email should be(email)
+            event.password should be(password)
+            event.hasher should be(hasher)
+            event.salt should be(salt)
+            event.avatarUrl should be(avatarUrl)
+
+            userRepository.userWithId(UserId(event.id)).map { u =>
+              u.version should be(0L)
+            }
+
+          case Failure(msg) =>
+            fail(msg.head)
+        }
+      }
+    }
+
+    "not add a user with an already registered email address" in {
+      val name = nameGenerator.next[User]
+      val email = java.util.UUID.randomUUID.toString.toUpperCase + "@test.com"
+      val password = nameGenerator.next[User]
+      val hasher = nameGenerator.next[User]
+      val salt = Some(nameGenerator.next[User])
+      val avatarUrl = Some(nameGenerator.next[User])
+
+      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
+      val future = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
+
+      waitBlocking(future) match {
+        case Failure(msg) =>
+          fail(msg.head)
+        case Success(event) =>
       }
 
-      //val result = await(userProcessor ? cmd).asInstanceOf[DomainValidation[UserAddedEvent]]
-      //      result.map { event =>
-      //        log.debug(s"event: $event")
-      //
-      //        event.name should be(name)
-      //        event.email should be(email)
-      //        event.password should be(password)
-      //        event.hasher should be(hasher)
-      //        event.salt should be(salt)
-      //        event.avatarUrl should be(avatarUrl)
-      //
-      //        userRepository.userWithId(event.id).map { u =>
-      //          u.version should be(0L)
-      //        }
-      //      }
+      val future2 = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
+      waitBlocking(future2) match {
+        case Success(event) =>
+          fail
+
+        case Failure(msg) =>
+          msg.head should startWith("user already exists")
+      }
     }
   }
 }

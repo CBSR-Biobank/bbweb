@@ -1,6 +1,6 @@
 package domain
 
-import infrastructure._
+import infrastructure.command.UserCommands._
 
 import scalaz._
 import scalaz.Scalaz._
@@ -22,6 +22,11 @@ sealed abstract class User extends ConcurrencySafeEntity[UserId] {
 }
 
 object User {
+
+  def apply(cmd: AddUserCommand): RegisteredUser = {
+    RegisteredUser(UserId(cmd.email), -1L, cmd.name, cmd.email, cmd.password, cmd.hasher, cmd.salt,
+      cmd.avatarUrl)
+  }
 
   def add(
     id: UserId,

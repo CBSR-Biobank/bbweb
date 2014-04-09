@@ -3,7 +3,7 @@ package service
 import fixture._
 import domain._
 import domain.study._
-import service.commands.StudyCommands._
+import infrastructure.command.StudyCommands._
 import scala.concurrent._
 import scala.concurrent.duration._
 import org.junit.runner.RunWith

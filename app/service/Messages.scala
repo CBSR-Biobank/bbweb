@@ -1,6 +1,6 @@
 package service
 
-import service.commands._
+import infrastructure.command.Commands._
 import domain.UserId
 import domain.study.DisabledStudy
 

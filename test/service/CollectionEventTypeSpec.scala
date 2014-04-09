@@ -10,7 +10,7 @@ import domain.{
   SpecimenType
 }
 import domain.study._
-import service.commands.StudyCommands._
+import infrastructure.command.StudyCommands._
 
 import org.slf4j.LoggerFactory
 import org.junit.runner.RunWith

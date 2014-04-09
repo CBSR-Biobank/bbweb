@@ -1,6 +1,6 @@
 package service
 
-import service.commands.UserCommands._
+import infrastructure.command.UserCommands._
 
 import play.api.{ Logger, Application }
 import securesocial.core._

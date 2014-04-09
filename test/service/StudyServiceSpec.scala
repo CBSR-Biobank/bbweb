@@ -1,8 +1,8 @@
 package service
 
 import fixture._
-import service.commands.StudyCommands._
-import service.events.StudyEvents._
+import infrastructure.command.StudyCommands._
+import infrastructure.event.StudyEvents._
 import domain.{
   AnatomicalSourceType,
   AnnotationValueType,

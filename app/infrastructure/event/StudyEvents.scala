@@ -1,7 +1,6 @@
-package service.events
+package infrastructure.event
 
 import domain.study._
-import domain.AnnotationTypeId
 import domain.AnatomicalSourceType._
 import domain.AnnotationValueType._
 import domain.PreservationType._

@@ -1,4 +1,6 @@
-package service.commands
+package infrastructure.command
+
+import infrastructure.command.Commands._
 
 object UserCommands {
 

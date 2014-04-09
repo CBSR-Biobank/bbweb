@@ -2,8 +2,8 @@ package service.study
 
 import domain.study.ParticipantAnnotationType
 
-import service.commands._
-import service.events._
+import infrastructure.command._
+import infrastructure.event._
 import service._
 import domain._
 import domain.participant._

@@ -4,7 +4,7 @@ import controllers._
 import service._
 import infrastructure._
 import service.{ ServiceComponent, ServiceComponentImpl }
-import service.commands.StudyCommands._
+import infrastructure.command.StudyCommands._
 import domain._
 import AnnotationValueType._
 import domain.study._

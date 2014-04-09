@@ -3,7 +3,7 @@ package query
 import domain.UserId
 import query.model._
 import fixture._
-import service.events.StudyEvents._
+import infrastructure.event.StudyEvents._
 import service.Messages._
 
 import java.util.UUID

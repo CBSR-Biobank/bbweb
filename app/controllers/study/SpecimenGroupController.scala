@@ -3,7 +3,7 @@ package controllers.study
 import controllers._
 import service._
 import infrastructure._
-import service.commands.StudyCommands._
+import infrastructure.command.StudyCommands._
 import service.{ ServiceComponent, TopComponentImpl }
 import domain._
 import domain.study._

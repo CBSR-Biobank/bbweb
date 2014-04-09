@@ -1,8 +1,9 @@
 package service
 
 import domain._
-import service.commands.UserCommands._
-import service.events.UserEvents._
+import domain.validator.UserValidator
+import infrastructure.command.UserCommands._
+import infrastructure.event.UserEvents._
 import service.Messages._
 
 import scala.concurrent._
@@ -99,7 +100,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
         case event: UserAddedEvent =>
           userRepository.add(RegisteredUser(UserId(event.email), 0L, event.name, event.email,
             event.password, event.hasher, event.salt, event.avatarUrl))
-          log.info(s"updateState: $event")
+          log.debug(s"updateState: $event")
         case event: UserAuthenticatedEvent =>
         // do nothing
       }
@@ -116,7 +117,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
 
     val receiveCommand: Receive = {
       case cmd: AddUserCommand =>
-        log.info(s"receiveCommand: $cmd")
+        log.debug(s"receiveCommand: $cmd")
         sender() ! addUser(cmd)
 
       case "snap" =>
@@ -125,16 +126,12 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     }
 
     def addUser(cmd: AddUserCommand) = {
-      if (!userRepository.emailAvailable(cmd.email)) {
-        DomainError(s"user already exists: { userId: ${cmd.email} }").fail
-      } else {
-        val event = UserAddedEvent(new UserId(cmd.email), cmd.name, cmd.email, cmd.password,
-          cmd.hasher, cmd.salt, cmd.avatarUrl)
-        persist(event) { e =>
-          updateState(e)
-        }
-        event.success
-      }
+      for {
+        emailAvailable <- userRepository.emailAvailable(cmd.email)
+        valid <- UserValidator(User(cmd))
+        event <- UserAddedEvent(cmd).success
+        p <- persist(event) { e => updateState(e) }.success
+      } yield event
     }
   }
 }
