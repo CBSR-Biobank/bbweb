@@ -8,18 +8,18 @@ import akka.testkit.TestKitBase
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
 import org.scalatest.BeforeAndAfterAll
+import org.scalatest.concurrent.ScalaFutures
 import akka.testkit.ImplicitSender
 
 trait TestFixture
-  extends TestComponentImpl
-  with TestKitBase
-  with ImplicitSender
-  with WordSpecLike
-  with Matchers
-  with BeforeAndAfterAll {
+    extends TestComponentImpl
+    with ScalaFutures
+    with WordSpecLike
+    with Matchers
+    with BeforeAndAfterAll {
 
   override def afterAll(): Unit = {
-    shutdown(system)
+    system.shutdown
   }
 
   def await[T](f: Future[T]): T = {

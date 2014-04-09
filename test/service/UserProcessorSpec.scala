@@ -20,7 +20,7 @@ import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import scala.concurrent.Await
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+//import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.{ Success, Failure }
@@ -46,17 +46,15 @@ class UserProcessorSpec extends UserProcessorFixture {
       val avatarUrl = Some(nameGenerator.next[User])
 
       val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      //val result = await(userProcessor ? cmd).asInstanceOf[DomainValidation[UserAddedEvent]]
 
       val future = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
 
-      future onComplete {
-        case Success(result) =>
-          log.debug(s"result: $result")
-        case Failure(failure) =>
-          log.debug(s"failure: $failure")
+      //whenReady(future, timeout(5 seconds), interval(500 millis)) { r =>
+      whenReady(future, timeout(5 seconds)) { r =>
+          log.debug(s"result: $r")
       }
 
+      //val result = await(userProcessor ? cmd).asInstanceOf[DomainValidation[UserAddedEvent]]
       //      result.map { event =>
       //        log.debug(s"event: $event")
       //

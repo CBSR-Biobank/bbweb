@@ -23,6 +23,8 @@ object Configuration {
  */
 trait TopComponent extends ServiceComponent {
 
+  implicit val system: ActorSystem
+
   val studyProcessor: ActorRef
   val userProcessor: ActorRef
 
@@ -48,10 +50,10 @@ trait TopComponent extends ServiceComponent {
  */
 trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
 
-  private implicit val system = ActorSystem("bbweb")
+  override implicit val system = ActorSystem("bbweb")
 
-  val studyProcessor = system.actorOf(Props[StudyProcessor], "studyproc")
-  val userProcessor = system.actorOf(Props[UserProcessor], "userproc")
+  override val studyProcessor = system.actorOf(Props[StudyProcessor], "studyproc")
+  override val userProcessor = system.actorOf(Props[UserProcessor], "userproc")
 
   override val studyService = new StudyServiceImpl(studyProcessor)
   override val userService = new UserServiceImpl(userProcessor)
