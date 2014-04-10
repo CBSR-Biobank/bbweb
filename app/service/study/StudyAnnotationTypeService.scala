@@ -34,11 +34,10 @@ abstract class StudyAnnotationTypeService[A <: StudyAnnotationType] extends Comm
   protected def addAnnotationType(
     repository: StudyAnnotationTypeRepository[A],
     cmd: StudyAnnotationTypeCommand,
-    study: DisabledStudy,
-    id: Option[String]): DomainValidation[A] = {
+    study: DisabledStudy): DomainValidation[A] = {
+    val atId = repository.nextIdentity
     for {
-      atId <- id.toSuccess(DomainError("annotation type ID is missing"))
-      newItem <- repository.add(createNewAnnotationType(cmd, AnnotationTypeId(atId)))
+      newItem <- repository.add(createNewAnnotationType(cmd, atId))
     } yield newItem
   }
 

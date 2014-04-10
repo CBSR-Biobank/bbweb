@@ -18,7 +18,7 @@ sealed abstract class User extends ConcurrencySafeEntity[UserId] {
    */
   def authenticate(email: String, password: String): DomainValidation[User] =
     if (this.password.equals(password)) this.success
-    else DomainError("authentication failure").fail
+    else DomainError("authentication failure").failNel
 }
 
 object User {

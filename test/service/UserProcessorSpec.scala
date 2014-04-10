@@ -41,7 +41,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
-      val avatarUrl = Some(nameGenerator.next[User])
+      val avatarUrl = Some("http://test.com/")
 
       val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
       val future = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
@@ -61,7 +61,8 @@ class UserProcessorSpec extends UserProcessorFixture {
             }
 
           case Failure(msg) =>
-            fail(msg.head)
+            val errors = msg.list.mkString(", ")
+            fail(s"Error: $errors")
         }
       }
     }
@@ -72,14 +73,14 @@ class UserProcessorSpec extends UserProcessorFixture {
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
-      val avatarUrl = Some(nameGenerator.next[User])
+      val avatarUrl = Some("http://test.com/")
 
       val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
       val future = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
 
       waitBlocking(future) match {
         case Failure(msg) =>
-          fail(msg.head)
+          fail(msg.list.mkString(", "))
         case Success(event) =>
       }
 
@@ -89,7 +90,7 @@ class UserProcessorSpec extends UserProcessorFixture {
           fail
 
         case Failure(msg) =>
-          msg.head should startWith("user already exists")
+          msg.list.mkString(",") should startWith("user already exists")
       }
     }
   }

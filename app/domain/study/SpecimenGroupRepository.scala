@@ -13,6 +13,8 @@ trait SpecimenGroupRepositoryComponent {
 
   trait SpecimenGroupRepository {
 
+    def nextIdentity: SpecimenGroupId
+
     def specimenGroupWithId(
       studyId: StudyId,
       specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup]
@@ -42,18 +44,21 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
 
     val log = LoggerFactory.getLogger(this.getClass)
 
+    def nextIdentity: SpecimenGroupId =
+      new SpecimenGroupId(java.util.UUID.randomUUID.toString.toUpperCase)
+
     def specimenGroupWithId(
       studyId: StudyId,
       specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
       getByKey(specimenGroupId) match {
         case None =>
           DomainError("specimen group does not exist: { studyId: %s, specimenGroupId: %s }".format(
-            studyId, specimenGroupId)).fail
+            studyId, specimenGroupId)).failNel
         case Some(sg) =>
           if (sg.studyId.equals(studyId)) sg.success
           else DomainError(
             "study does not have specimen group: { studyId: %s, specimenGroupId: %s }".format(
-              studyId, specimenGroupId)).fail
+              studyId, specimenGroupId)).failNel
       }
     }
 
@@ -75,7 +80,7 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
       }
 
       if (exists)
-        DomainError("specimen group with name already exists: %s" format specimenGroup.name).fail
+        DomainError("specimen group with name already exists: %s" format specimenGroup.name).failNel
       else
         true.success
     }
@@ -83,7 +88,7 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
     def add(specimenGroup: SpecimenGroup): DomainValidation[SpecimenGroup] = {
       specimenGroupWithId(specimenGroup.studyId, specimenGroup.id) match {
         case Success(prevItem) =>
-          DomainError("specimen group with ID already exists: %s" format specimenGroup.id).fail
+          DomainError("specimen group with ID already exists: %s" format specimenGroup.id).failNel
         case Failure(x) =>
           for {
             nameValid <- nameAvailable(specimenGroup)

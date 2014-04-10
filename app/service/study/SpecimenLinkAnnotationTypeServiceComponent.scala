@@ -36,7 +36,7 @@ trait SpecimenLinkAnnotationTypeServiceComponent {
         msg.cmd match {
           case cmd: AddSpecimenLinkAnnotationTypeCmd =>
             log.debug("repsitory is: {}", specimenLinkAnnotationTypeRepository)
-            addSpecimenLinkAnnotationType(cmd, msg.study, msg.id)
+            addSpecimenLinkAnnotationType(cmd, msg.study)
           case cmd: UpdateSpecimenLinkAnnotationTypeCmd =>
             updateSpecimenLinkAnnotationType(cmd, msg.study)
           case cmd: RemoveSpecimenLinkAnnotationTypeCmd =>
@@ -89,10 +89,9 @@ trait SpecimenLinkAnnotationTypeServiceComponent {
 
     private def addSpecimenLinkAnnotationType(
       cmd: AddSpecimenLinkAnnotationTypeCmd,
-      study: DisabledStudy,
-      id: Option[String]): DomainValidation[SpecimenLinkAnnotationTypeAddedEvent] = {
+      study: DisabledStudy): DomainValidation[SpecimenLinkAnnotationTypeAddedEvent] = {
       for {
-        newItem <- addAnnotationType(specimenLinkAnnotationTypeRepository, cmd, study, id)
+        newItem <- addAnnotationType(specimenLinkAnnotationTypeRepository, cmd, study)
         event <- SpecimenLinkAnnotationTypeAddedEvent(
           newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
           newItem.valueType, newItem.maxValueCount, newItem.options).success

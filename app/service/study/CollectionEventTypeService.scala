@@ -48,7 +48,7 @@ trait CollectionEventTypeServiceComponent {
         msg.cmd match {
           // collection event types
           case cmd: AddCollectionEventTypeCmd =>
-            addCollectionEventType(cmd, msg.study, msg.id)
+            addCollectionEventType(cmd, msg.study)
           case cmd: UpdateCollectionEventTypeCmd =>
             updateCollectionEventType(cmd, msg.study)
           case cmd: RemoveCollectionEventTypeCmd =>
@@ -76,7 +76,7 @@ trait CollectionEventTypeServiceComponent {
       }.filter(x => !x._2).map(_._1)
 
       if (invalidSet.isEmpty) true.success
-      else DomainError("specimen group(s) do not belong to study: " + invalidSet.mkString(", ")).fail
+      else DomainError("specimen group(s) do not belong to study: " + invalidSet.mkString(", ")).failNel
     }
 
     /**
@@ -93,18 +93,18 @@ trait CollectionEventTypeServiceComponent {
       }.filter(x => !x._2).map(_._1)
 
       if (invalidSet.isEmpty) true.success
-      else DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).fail
+      else DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).failNel
     }
 
     private def addCollectionEventType(
       cmd: AddCollectionEventTypeCmd,
-      study: DisabledStudy,
-      id: Option[String]): DomainValidation[CollectionEventTypeAddedEvent] = {
+      study: DisabledStudy): DomainValidation[CollectionEventTypeAddedEvent] = {
+
+      val id = collectionEventTypeRepository.nextIdentity
 
       for {
-        cetId <- id.toSuccess(DomainError("collection event type ID is missing"))
         newItem <- CollectionEventType(
-          CollectionEventTypeId(cetId), 0L, study.id, cmd.name, cmd.description, cmd.recurring,
+          id, 0L, study.id, cmd.name, cmd.description, cmd.recurring,
           cmd.specimenGroupData, cmd.annotationTypeData).success
         validSgData <- validateSpecimenGroupData(study, newItem.specimenGroupData)
         validAtData <- validateAnnotationTypeData(study, newItem.annotationTypeData)

@@ -3,7 +3,7 @@ package domain
 import org.slf4j.LoggerFactory
 
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 
 trait UserRepositoryComponent {
 
@@ -41,7 +41,7 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
     def emailAvailable(email: String): DomainValidation[Boolean] = {
       getByKey(new UserId(email)) match {
         case None => true.success
-        case Some(user) => DomainError(s"user already exists: $email").fail
+        case Some(user) => DomainError(s"user already exists: $email").failNel
       }
     }
 

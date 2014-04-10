@@ -13,6 +13,8 @@ trait CollectionEventTypeRepositoryComponent {
 
   trait CollectionEventTypeRepository {
 
+    def nextIdentity: CollectionEventTypeId
+
     def collectionEventTypeWithId(
       studyId: StudyId,
       ceventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType]
@@ -46,6 +48,9 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
 
     val log = LoggerFactory.getLogger(this.getClass)
 
+    def nextIdentity: CollectionEventTypeId =
+      new CollectionEventTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
+
     def collectionEventTypeWithId(
       studyId: StudyId,
       ceventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType] = {
@@ -53,13 +58,13 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
         case None =>
           DomainError(
             "collection event type does not exist: { studyId: %s, ceventTypeId: %s }".format(
-              studyId, ceventTypeId)).fail
+              studyId, ceventTypeId)).failNel
         case Some(cet) =>
           if (cet.studyId.equals(studyId))
             cet.success
           else DomainError(
             "study does not have collection event type: { studyId: %s, ceventTypeId: %s }".format(
-              studyId, ceventTypeId)).fail
+              studyId, ceventTypeId)).failNel
       }
     }
 
@@ -81,7 +86,7 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
       }
 
       if (exists)
-        DomainError("collection event type with name already exists: %s" format ceventType.name).fail
+        DomainError("collection event type with name already exists: %s" format ceventType.name).failNel
       else
         true.success
     }
@@ -103,7 +108,7 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
     def add(ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {
       collectionEventTypeWithId(ceventType.studyId, ceventType.id) match {
         case Success(prevItem) =>
-          DomainError("collection event type with ID already exists: %s" format ceventType.id).fail
+          DomainError("collection event type with ID already exists: %s" format ceventType.id).failNel
         case Failure(x) =>
           for {
             nameValid <- nameAvailable(ceventType)

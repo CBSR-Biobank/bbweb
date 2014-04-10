@@ -15,7 +15,7 @@ trait StudyRepositoryComponent {
 
     def nextIdentity: StudyId
 
-    def nameAvailable(study: DisabledStudy): DomainValidation[Boolean]
+    def nameAvailable(name: String): DomainValidation[Boolean]
 
     def allStudies(): Set[Study]
 
@@ -50,30 +50,30 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
 
     def studyWithId(studyId: StudyId): DomainValidation[Study] = {
       getByKey(studyId) match {
-        case None => DomainError(s"study does not exist: { studyId: $studyId }").fail
+        case None => DomainError(s"study does not exist: { studyId: $studyId }").failNel
         case Some(study) => study.success
       }
     }
 
-    def nameAvailable(study: DisabledStudy): DomainValidation[Boolean] = {
+    def nameAvailable(name: String): DomainValidation[Boolean] = {
       val exists = getValues.exists { item =>
-        item.name.equals(study.name) && !item.id.equals(study.id)
+        item.name.equals(name)
       }
 
       if (exists) {
-        DomainError("study with name already exists: %s" format study.name).fail
+        DomainError(s"study with name already exists: $name").failNel
       } else {
-        true.success
+        true.successNel
       }
     }
 
     def add(study: DisabledStudy): DomainValidation[DisabledStudy] = {
       getByKey(study.id) match {
         case Some(prevItem) =>
-          DomainError("study with ID already exists: %s" format study.id).fail
+          DomainError("study with ID already exists: %s" format study.id).failNel
         case None =>
           for {
-            nameValid <- nameAvailable(study)
+            nameValid <- nameAvailable(study.name)
             item <- updateMap(study).success
           } yield study
       }
@@ -83,7 +83,7 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
       for {
         prevStudy <- studyWithId(study.id)
         validVersion <- prevStudy.requireVersion(Some(study.version))
-        nameValid <- nameAvailable(study)
+        nameValid <- nameAvailable(study.name)
         updatedItem <- DisabledStudy(
           study.id, prevStudy.version + 1, study.name, study.description).success
         repoItem <- updateMap(updatedItem).success
@@ -100,10 +100,10 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
 
         prevStudy match {
           case es: EnabledStudy =>
-            DomainError("study is already enabled: {id: %s}".format(es.id)).fail
+            DomainError("study is already enabled: {id: %s}".format(es.id)).failNel
           case ds: DisabledStudy =>
             if ((specimenGroupCount == 0) || (collectionEventTypecount == 0))
-              DomainError("study has no specimen groups and / or no collection event types").fail
+              DomainError("study has no specimen groups and / or no collection event types").failNel
             else {
               EnabledStudy(ds.id, ds.version + 1, ds.name, ds.description).success
             }
@@ -126,7 +126,7 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
       def doDisable(prevStudy: Study) = {
         prevStudy match {
           case ds: DisabledStudy =>
-            DomainError("study is already disabled: {id: %s}".format(ds.id)).fail
+            DomainError("study is already disabled: {id: %s}".format(ds.id)).failNel
           case es: EnabledStudy =>
             val study = DisabledStudy(es.id, es.version + 1, es.name, es.description)
             updateMap(study)

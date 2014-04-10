@@ -65,10 +65,11 @@ trait SpecimenGroupServiceComponent {
       study: DisabledStudy,
       id: Option[String]): DomainValidation[SpecimenGroupAddedEvent] = {
 
+      val sgId = specimenGroupRepository.nextIdentity
+
       for {
-        sgId <- id.toSuccess(DomainError("specimen group ID is missing"))
         newItem <- specimenGroupRepository.add(
-          SpecimenGroup(new SpecimenGroupId(sgId), 0, study.id, cmd.name, cmd.description,
+          SpecimenGroup(sgId, 0, study.id, cmd.name, cmd.description,
             cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
             cmd.preservationTemperatureType, cmd.specimenType))
         newEvent <- SpecimenGroupAddedEvent(
@@ -80,7 +81,7 @@ trait SpecimenGroupServiceComponent {
 
     private def checkNotInUse(specimenGroup: SpecimenGroup): DomainValidation[Boolean] = {
       if (collectionEventTypeRepository.specimenGroupInUse(specimenGroup)) {
-        DomainError("specimen group is in use by collection event type: " + specimenGroup.id).fail
+        DomainError("specimen group is in use by collection event type: " + specimenGroup.id).failNel
       } else {
         true.success
       }

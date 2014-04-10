@@ -5,11 +5,11 @@ import scalaz.Scalaz._
 
 package object domain {
 
-  type DomainValidation[A] = Validation[DomainError, A]
-  type DomainError = List[String]
+  type DomainValidation[A] = ValidationNel[DomainError, A]
+  type DomainError = String
 
   object DomainError {
-    def apply(msg: String): DomainError = List(msg)
+    def apply(msg: String): DomainError = msg
   }
 
   trait HasName { val name: String }

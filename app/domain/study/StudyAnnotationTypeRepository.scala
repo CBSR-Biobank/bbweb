@@ -7,6 +7,8 @@ import scalaz.Scalaz._
 
 trait StudyAnnotationTypeRepository[A <: StudyAnnotationType] {
 
+  def nextIdentity: AnnotationTypeId
+
   def annotationTypeWithId(studyId: StudyId, annotationTypeId: AnnotationTypeId): DomainValidation[A]
 
   def annotationTypeWithId(studyId: StudyId, annotationTypeId: String): DomainValidation[A]
@@ -24,18 +26,21 @@ trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
   extends ReadWriteRepository[AnnotationTypeId, A]
   with StudyAnnotationTypeRepository[A] {
 
+  def nextIdentity: AnnotationTypeId =
+    new AnnotationTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
+
   def annotationTypeWithId(
     studyId: StudyId,
     annotationTypeId: AnnotationTypeId): DomainValidation[A] = {
     getByKey(annotationTypeId) match {
       case None =>
         DomainError(
-          s"annotation type does not exist: { studyId: $studyId, annotationTypeId: $annotationTypeId }").fail
+          s"annotation type does not exist: { studyId: $studyId, annotationTypeId: $annotationTypeId }").failNel
       case Some(annotType) =>
         if (annotType.studyId.equals(studyId)) annotType.success
         else DomainError(
           "study does not have annotation type: { studyId: %s, annotationTypeId: %s }".format(
-            studyId, annotationTypeId)).fail
+            studyId, annotationTypeId)).failNel
     }
   }
 
@@ -57,7 +62,7 @@ trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
     }
 
     if (exists)
-      DomainError("annotation type with name already exists: %s" format annotationType.name).fail
+      DomainError("annotation type with name already exists: %s" format annotationType.name).failNel
     else
       true.success
   }
@@ -65,7 +70,7 @@ trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
   def add(annotationType: A): DomainValidation[A] = {
     annotationTypeWithId(annotationType.studyId, annotationType.id) match {
       case Success(prevItem) =>
-        DomainError("annotation type with ID already exists: %s" format annotationType.id).fail
+        DomainError("annotation type with ID already exists: %s" format annotationType.id).failNel
       case Failure(x) =>
         for {
           nameValid <- nameAvailable(annotationType)

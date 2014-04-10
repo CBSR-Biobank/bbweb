@@ -33,7 +33,7 @@ trait ParticipantAnnotationTypeServiceComponent {
       case msg: StudyProcessorMsg =>
         msg.cmd match {
           case cmd: AddParticipantAnnotationTypeCmd =>
-            addParticipantAnnotationType(cmd, msg.study, msg.id)
+            addParticipantAnnotationType(cmd, msg.study)
           case cmd: UpdateParticipantAnnotationTypeCmd =>
             updateParticipantAnnotationType(cmd, msg.study)
           case cmd: RemoveParticipantAnnotationTypeCmd =>
@@ -86,10 +86,9 @@ trait ParticipantAnnotationTypeServiceComponent {
 
     private def addParticipantAnnotationType(
       cmd: AddParticipantAnnotationTypeCmd,
-      study: DisabledStudy,
-      id: Option[String]): DomainValidation[ParticipantAnnotationTypeAddedEvent] = {
+      study: DisabledStudy): DomainValidation[ParticipantAnnotationTypeAddedEvent] = {
       for {
-        newItem <- addAnnotationType(participantAnnotationTypeRepository, cmd, study, id)
+        newItem <- addAnnotationType(participantAnnotationTypeRepository, cmd, study)
         event <- ParticipantAnnotationTypeAddedEvent(
           newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
           newItem.valueType, newItem.maxValueCount, newItem.options).success

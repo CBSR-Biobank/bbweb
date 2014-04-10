@@ -33,7 +33,7 @@ trait CeventAnnotationTypeServiceComponent {
       case msg: StudyProcessorMsg =>
         msg.cmd match {
           case cmd: AddCollectionEventAnnotationTypeCmd =>
-            addCollectionEventAnnotationType(cmd, msg.study, msg.id)
+            addCollectionEventAnnotationType(cmd, msg.study)
           case cmd: UpdateCollectionEventAnnotationTypeCmd =>
             updateCollectionEventAnnotationType(cmd, msg.study)
           case cmd: RemoveCollectionEventAnnotationTypeCmd =>
@@ -82,7 +82,7 @@ trait CeventAnnotationTypeServiceComponent {
 
     override def checkNotInUse(annotationType: CollectionEventAnnotationType): DomainValidation[Boolean] = {
       if (collectionEventTypeRepository.annotationTypeInUse(annotationType)) {
-        DomainError("annotation type is in use by collection event type: " + annotationType.id).fail
+        DomainError("annotation type is in use by collection event type: " + annotationType.id).failNel
       } else {
         true.success
       }
@@ -90,10 +90,9 @@ trait CeventAnnotationTypeServiceComponent {
 
     private def addCollectionEventAnnotationType(
       cmd: AddCollectionEventAnnotationTypeCmd,
-      study: DisabledStudy,
-      id: Option[String]): DomainValidation[CollectionEventAnnotationTypeAddedEvent] = {
+      study: DisabledStudy): DomainValidation[CollectionEventAnnotationTypeAddedEvent] = {
       for {
-        newItem <- addAnnotationType(collectionEventAnnotationTypeRepository, cmd, study, id)
+        newItem <- addAnnotationType(collectionEventAnnotationTypeRepository, cmd, study)
         event <- CollectionEventAnnotationTypeAddedEvent(
           newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
           newItem.valueType, newItem.maxValueCount, newItem.options).success

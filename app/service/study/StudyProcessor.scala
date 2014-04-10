@@ -63,7 +63,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       case serviceMsg: ServiceMsg =>
         serviceMsg.cmd match {
           case cmd: AddStudyCmd =>
-            addStudy(cmd, serviceMsg.id)
+            addStudy(cmd)
 
           case cmd: UpdateStudyCmd => updateStudy(cmd)
 
@@ -95,9 +95,9 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
     private def validateStudy(studyId: StudyId): DomainValidation[DisabledStudy] =
       studyRepository.studyWithId(studyId) match {
-        case Failure(msglist) => noSuchStudy(studyId).fail
+        case Failure(msglist) => noSuchStudy(studyId).failNel
         case Success(study) => study match {
-          case _: EnabledStudy => notDisabledError(study.name).fail
+          case _: EnabledStudy => notDisabledError(study.name).failNel
           case dstudy: DisabledStudy => dstudy.success
         }
       }
@@ -113,24 +113,22 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       } yield event
     }
 
-    private def addStudy(
-      cmd: AddStudyCmd,
-      id: Option[String]): DomainValidation[StudyAddedEvent] = {
+    private def addStudy(cmd: AddStudyCmd): DomainValidation[StudyAddedEvent] = {
+
+      val studyId = studyRepository.nextIdentity
 
       val e = for {
-        studyId <- id.toSuccess(DomainError("study ID is missing"))
+        nameAvailable <- studyRepository.nameAvailable(cmd.name)
         newStudy <- DisabledStudy(
-          new StudyId(studyId),
+          studyId,
           version = 0L,
           cmd.name,
-          cmd.description).success
-        nameAvailable <- studyRepository.nameAvailable(newStudy)
+          cmd.description).successNel
         event <- StudyAddedEvent(
           newStudy.id.id,
           newStudy.version,
           newStudy.name,
-          newStudy.description).success
-
+          newStudy.description).successNel
       } yield event
 
       e.map(event =>

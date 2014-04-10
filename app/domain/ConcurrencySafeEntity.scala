@@ -24,7 +24,7 @@ abstract class ConcurrencySafeEntity[T]
 
   def requireVersion(expectedVersion: Option[Long]): DomainValidation[ConcurrencySafeEntity[T]] = {
     expectedVersion match {
-      case Some(expected) if (version != expected) => invalidVersion(expected).fail
+      case Some(expected) if (version != expected) => invalidVersion(expected).failNel
       case Some(expected) if (version == expected) => this.success
       case None => this.success
     }
@@ -36,7 +36,7 @@ object Entity {
   def update[S <: ConcurrencySafeEntity[_], T <: ConcurrencySafeEntity[_]](entity: DomainValidation[S],
     id: IdentifiedDomainObject[_], expectedVersion: Option[Long])(f: S => DomainValidation[T]): DomainValidation[T] =
     entity match {
-      case Failure(x) => DomainError("no entity with id: %s" format id).fail
+      case Failure(x) => DomainError("no entity with id: %s" format id).failNel
       case Success(entity) => for {
         current <- entity.requireVersion(expectedVersion)
         updated <- f(entity)

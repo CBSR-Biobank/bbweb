@@ -18,9 +18,9 @@ abstract class AnnotationType
 
   private def validateValueType: DomainValidation[Boolean] = {
     if (valueType.equals(AnnotationValueType.Select)) {
-      if (options.isEmpty) ("select annotation type with no values to select").fail
+      if (options.isEmpty) ("select annotation type with no values to select").failNel
     } else {
-      if (!options.isEmpty) ("non select annotation type with values to select").fail
+      if (!options.isEmpty) ("non select annotation type with values to select").failNel
     }
     true.success
   }
