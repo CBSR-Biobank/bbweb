@@ -6,7 +6,7 @@ object UserEvents {
 
   sealed trait UserEvent
 
-  case class UserAddedEvent(
+  case class UserAddedEvent private (
     id: String,
     name: String,
     email: String,
@@ -14,12 +14,6 @@ object UserEvents {
     hasher: String,
     salt: Option[String],
     avatarUrl: Option[String])
-    extends UserEvent
-
-  case class UserAuthenticatedEvent(
-    id: String,
-    name: String,
-    email: String)
     extends UserEvent
 
   object UserAddedEvent {

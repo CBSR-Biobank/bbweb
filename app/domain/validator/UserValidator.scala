@@ -6,34 +6,35 @@ import domain.User
 import scalaz._
 import scalaz.Scalaz._
 
-object UserValidator extends Validator {
+trait UserValidator extends Validator {
 
   val emailRegex = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?".r
   val urlRegex = "^((https?|ftp)://|(www|ftp)\\.)[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$".r
 
-  def apply(user: User): DomainValidation[User] = {
-    (validateNonEmpty("name", user.name) |@|
-      validateEmail(user) |@|
-      validateNonEmpty("password", user.password) |@|
-      validateAvatarUrl(user)) { case (_, _, _, v) => v }
+  def validateId(id: UserId): Validation[String, UserId] = {
+    val idString = id.toString
+    if ((idString == null) || idString.isEmpty()) {
+      s"id is null or empty".failNel
+    }
+    id.success
   }
 
-  private def validateEmail(user: User): DomainValidation[User] = {
-    emailRegex.findFirstIn(user.email) match {
-      case Some(e) => user.success
-      case None => s"Invalid email address: ${user.email}".failNel
+  def validateEmail(email: String): Validation[String, String] = {
+    emailRegex.findFirstIn(email) match {
+      case Some(e) => email.success
+      case None => s"Invalid email address: $email".fail
     }
   }
 
-  private def validateAvatarUrl(user: User): DomainValidation[User] = {
-    user.avatarUrl match {
+  def validateAvatarUrl(url: Option[String]): Validation[String, Option[String]] = {
+    url match {
       case Some(url) =>
         urlRegex.findFirstIn(url) match {
-          case Some(e) => user.success
-          case None => s"invalid avatar url: ${user.avatarUrl}".failNel
+          case Some(e) => some(url).success
+          case None => s"invalid avatar url: $url".fail
         }
       case None =>
-        user.success
+        none.success
     }
   }
 }

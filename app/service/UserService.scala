@@ -98,11 +98,18 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     def updateState(event: UserEvent) = {
       event match {
         case event: UserAddedEvent =>
-          userRepository.add(RegisteredUser(UserId(event.email), 0L, event.name, event.email,
-            event.password, event.hasher, event.salt, event.avatarUrl))
+          val validation = RegisteredUser.create(
+            UserId(event.email), 0L, event.name, event.email,
+            event.password, event.hasher, event.salt, event.avatarUrl)
+          validation match {
+            case Success(user) =>
+              userRepository.add(user)
+            case Failure(x) =>
+              // this should never happen because the only way to get here is if the
+              // command passed validation
+              throw new IllegalStateException("creating user from event failed")
+          }
           log.debug(s"updateState: $event")
-        case event: UserAuthenticatedEvent =>
-        // do nothing
       }
     }
 
@@ -128,7 +135,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     def addUser(cmd: AddUserCommand) = {
       for {
         emailAvailable <- userRepository.emailAvailable(cmd.email)
-        valid <- UserValidator(User(cmd))
+        user <- RegisteredUser.create(cmd)
         event <- UserAddedEvent(cmd).success
         p <- persist(event) { e => updateState(e) }.success
       } yield event

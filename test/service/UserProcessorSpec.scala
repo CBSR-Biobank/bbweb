@@ -37,7 +37,7 @@ class UserProcessorSpec extends UserProcessorFixture {
 
     "add a user" in {
       val name = nameGenerator.next[User]
-      val email = java.util.UUID.randomUUID.toString.toUpperCase + "@test.com"
+      val email = "user1@test.com"
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
@@ -69,7 +69,7 @@ class UserProcessorSpec extends UserProcessorFixture {
 
     "not add a user with an already registered email address" in {
       val name = nameGenerator.next[User]
-      val email = java.util.UUID.randomUUID.toString.toUpperCase + "@test.com"
+      val email = "user2@test.com"
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
