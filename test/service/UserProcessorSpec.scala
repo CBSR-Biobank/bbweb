@@ -33,6 +33,10 @@ class UserProcessorSpec extends UserProcessorFixture {
 
   override val nameGenerator = new NameGenerator(this.getClass.getName)
 
+  override def beforeAll: Unit = {
+    super.beforeAll
+  }
+
   "A user processor" should {
 
     "add a user" in {

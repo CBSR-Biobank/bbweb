@@ -26,26 +26,18 @@ object ApplicationBuild extends Build {
     //scalaVersion := "2.10.2",
 
     autoScalaLibrary := false,
-
-    resolvers ++= Seq(
-      //Resolver.url("sbt-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns)
-    ),
-
-    resolvers += Resolver.url("sbt-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns),
-
-    resolvers += Resolver.sonatypeRepo("snapshots"),
+    
+    resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
 
     libraryDependencies ++= Seq(
       "ws.securesocial" %% "securesocial" % "2.1.3",
       "com.typesafe.akka" % "akka-persistence-experimental_2.10" % "2.3.0",
       "org.scala-stm" %% "scala-stm" % "0.7"  % "compile",
       "org.scalaz" %% "scalaz-core" % "7.0.6"  % "compile",
-
-      //"com.typesafe.akka" % "akka-testkit" % "2.0.3" % "test",
       "junit" % "junit" % "4.11" % "test",
       "org.scalatest" %% "scalatest" % "2.1.2" % "test",
       "com.typesafe.akka" %% "akka-testkit" % "2.3.1" % "test",
-      "org.pegdown" % "pegdown" % "1.2.1" // specs2 html output
+      "com.github.ddevore" %% "akka-persistence-mongo-casbah"  % "0.6-SNAPSHOT" % "compile"
     ),
 
     scalacOptions ++= Seq(

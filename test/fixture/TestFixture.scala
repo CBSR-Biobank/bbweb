@@ -24,11 +24,16 @@ trait TestFixture
   with Matchers
   with BeforeAndAfterAll {
 
+  override def beforeAll: Unit = {
+  }
+
   /**
    * Shuts down the actor system.
    */
-  override def afterAll(): Unit = {
-    system.shutdown
+  override def afterAll: Unit = {
+    // Cleanup
+    system.shutdown()
+    system.awaitTermination(10 seconds)
   }
 
   /**
