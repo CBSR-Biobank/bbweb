@@ -3,6 +3,7 @@ package domain
 import domain.validator.UserValidator
 import infrastructure.command.UserCommands._
 
+import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
 
@@ -17,13 +18,10 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
   /**
    * Authenticate a User.
    */
-  def authenticate(email: String, password: String): DomainValidation[User] =
+  def authenticate(email: String, password: String): DomainValidation[User] = {
     if (this.password.equals(password)) this.success
     else DomainError("authentication failure").failNel
-}
-
-object User {
-
+  }
 }
 
 case class RegisteredUser private (
@@ -36,9 +34,14 @@ case class RegisteredUser private (
   salt: Option[String],
   avatarUrl: Option[String]) extends User {
 
+  def activate: DomainValidation[ActiveUser] = {
+    ActiveUser.create(this)
+  }
 }
 
 object RegisteredUser extends UserValidator {
+
+  override val log = LoggerFactory.getLogger(this.getClass)
 
   def create(
     id: UserId,
@@ -62,7 +65,7 @@ object RegisteredUser extends UserValidator {
   }
 
   def create(cmd: AddUserCommand): DomainValidation[RegisteredUser] = {
-    create(UserId(cmd.email), 0L, cmd.name, cmd.email, cmd.password, cmd.hasher, cmd.salt,
+    create(UserId(cmd.email), -1L, cmd.name, cmd.email, cmd.password, cmd.hasher, cmd.salt,
       cmd.avatarUrl)
   }
 
@@ -78,39 +81,22 @@ case class ActiveUser private (
   salt: Option[String],
   avatarUrl: Option[String]) extends User {
 
-  def lock(
-    id: UserId,
-    version: Long,
-    name: String,
-    email: String,
-    password: String,
-    hasher: String,
-    salt: Option[String],
-    avatarUrl: Option[String]): DomainValidation[LockedUser] = {
-    LockedUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
+  def lock: DomainValidation[LockedUser] = {
+    LockedUser.create(this)
   }
-
 }
 
 object ActiveUser extends UserValidator {
 
-  def create(
-    id: UserId,
-    version: Long,
-    name: String,
-    email: String,
-    password: String,
-    hasher: String,
-    salt: Option[String],
-    avatarUrl: Option[String]): DomainValidation[ActiveUser] = {
-    (validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty("name", name).toValidationNel |@|
-      validateEmail(email).toValidationNel |@|
-      validateNonEmpty("password", password).toValidationNel |@|
-      validateNonEmpty("hasher", hasher).toValidationNel |@|
-      validateNonEmptyOption("salt", salt).toValidationNel |@|
-      validateAvatarUrl(avatarUrl).toValidationNel) {
+  def create[T <: User](user: T): DomainValidation[ActiveUser] = {
+    (validateId(user.id).toValidationNel |@|
+      validateAndIncrementVersion(user.version).toValidationNel |@|
+      validateNonEmpty("name", user.name).toValidationNel |@|
+      validateEmail(user.email).toValidationNel |@|
+      validateNonEmpty("password", user.password).toValidationNel |@|
+      validateNonEmpty("hasher", user.hasher).toValidationNel |@|
+      validateNonEmptyOption("salt", user.salt).toValidationNel |@|
+      validateAvatarUrl(user.avatarUrl).toValidationNel) {
         ActiveUser(_, _, _, _, _, _, _, _)
       }
   }
@@ -127,39 +113,23 @@ case class LockedUser private (
   salt: Option[String],
   avatarUrl: Option[String]) extends User {
 
-  def unlock(
-    id: UserId,
-    version: Long,
-    name: String,
-    email: String,
-    password: String,
-    hasher: String,
-    salt: Option[String],
-    avatarUrl: Option[String]): DomainValidation[ActiveUser] = {
-    ActiveUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
+  def unlock: DomainValidation[ActiveUser] = {
+    ActiveUser.create(this)
   }
 
 }
 
 object LockedUser extends UserValidator {
 
-  def create(
-    id: UserId,
-    version: Long,
-    name: String,
-    email: String,
-    password: String,
-    hasher: String,
-    salt: Option[String],
-    avatarUrl: Option[String]): DomainValidation[LockedUser] = {
-    (validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty("name", name).toValidationNel |@|
-      validateEmail(email).toValidationNel |@|
-      validateNonEmpty("password", password).toValidationNel |@|
-      validateNonEmpty("hasher", hasher).toValidationNel |@|
-      validateNonEmptyOption("salt", salt).toValidationNel |@|
-      validateAvatarUrl(avatarUrl).toValidationNel) {
+  def create(user: ActiveUser): DomainValidation[LockedUser] = {
+    (validateId(user.id).toValidationNel |@|
+      validateAndIncrementVersion(user.version).toValidationNel |@|
+      validateNonEmpty("name", user.name).toValidationNel |@|
+      validateEmail(user.email).toValidationNel |@|
+      validateNonEmpty("password", user.password).toValidationNel |@|
+      validateNonEmpty("hasher", user.hasher).toValidationNel |@|
+      validateNonEmptyOption("salt", user.salt).toValidationNel |@|
+      validateAvatarUrl(user.avatarUrl).toValidationNel) {
         LockedUser(_, _, _, _, _, _, _, _)
       }
   }

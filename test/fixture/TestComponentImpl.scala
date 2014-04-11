@@ -7,12 +7,9 @@ import play.api.Mode
 import play.api.Mode._
 import scala.concurrent._
 import scala.concurrent.duration._
-//import scala.concurrent.ExecutionContext.Implicits.global
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.util.Timeout
-import org.specs2.mutable._
-import org.specs2.time.NoTimeConversions
 import org.slf4j.LoggerFactory
 import akka.actor._
 import com.typesafe.config.ConfigFactory
@@ -26,11 +23,12 @@ trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
 
   protected val nameGenerator: NameGenerator
 
-  implicit override val system = ActorSystem("bbweb-test", TestComponentImpl.config())
+  implicit override val system: ActorSystem = ActorSystem("bbweb-test", TestComponentImpl.config())
   implicit val timeout = Timeout(5 seconds)
 
   // clear the event store
   MongoConnection()("bbweb-test")("messages").drop
+  MongoConnection()("bbweb-test")("snapshots").drop
 
 }
 

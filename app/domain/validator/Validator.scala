@@ -9,9 +9,10 @@ private[validator] trait Validator {
 
   def validateNonEmpty(fieldName: String, field: String): Validation[String, String] = {
     if ((field == null) || field.isEmpty()) {
-      s"$fieldName is null or empty".failNel
+      s"$fieldName is null or empty".fail
+    } else {
+      field.success
     }
-    field.success
   }
 
   def validateNonEmptyOption(
@@ -26,7 +27,7 @@ private[validator] trait Validator {
     }
   }
 
-  def validateAndIncrementVersion(l: Long): Validation[String, Long] =
-    if (1 > -1) (l + 1).success else "InvalidLongValue".failure
+  def validateAndIncrementVersion(v: Long): Validation[String, Long] =
+    if (v >= -1) (v + 1).success else s"invalid version value: $v".failure
 
 }
