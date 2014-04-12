@@ -1,7 +1,6 @@
 package org.biobank.domain
 
 import fixture.NameGenerator
-import org.biobank.infrastructure.event.UserEvents._
 
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
@@ -26,7 +25,7 @@ class UserSpec extends WordSpecLike with Matchers {
 
   "A user" can {
 
-    "can be created" in {
+    "be created" in {
       val version = -1L
       val name = nameGenerator.next[User]
       val email = "user1@test.com"
@@ -40,6 +39,7 @@ class UserSpec extends WordSpecLike with Matchers {
       val user = v.getOrElse(fail("could not create user"))
       user shouldBe a[RegisteredUser]
 
+
       user.id should be(id)
       user.version should be(0L)
       user.name should be(name)
@@ -50,7 +50,7 @@ class UserSpec extends WordSpecLike with Matchers {
       user.avatarUrl should be(avatarUrl)
     }
 
-    "activate, lock, and unlock a new user" in {
+    "can be activated, locked, and unlocked" in {
       val version = -1L
       val name = nameGenerator.next[User]
       val email = "user1@test.com"
@@ -91,7 +91,7 @@ class UserSpec extends WordSpecLike with Matchers {
       val avatarUrl = Some("http://test.com/")
 
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail("user id validation failed")
+        case Success(user) => fail("id validation failed")
         case Failure(err) =>
           err.list.mkString(",") should include("id is null or empty")
       }
@@ -108,7 +108,7 @@ class UserSpec extends WordSpecLike with Matchers {
       val avatarUrl = Some("http://test.com/")
 
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail("user version validation failed")
+        case Success(user) => fail("version validation failed")
         case Failure(err) =>
           err.list.mkString(",") should include("invalid version value")
       }
@@ -125,7 +125,7 @@ class UserSpec extends WordSpecLike with Matchers {
       val avatarUrl = Some("http://test.com/")
 
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail("user name validation failed")
+        case Success(user) => fail("name validation failed")
         case Failure(err) =>
           err.list.mkString(",") should include("name is null or empty")
       }
