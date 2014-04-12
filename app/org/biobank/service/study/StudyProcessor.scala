@@ -36,23 +36,12 @@ trait StudyProcessorComponent {
 
 }
 
-/**
- * This is the Study Aggregate Processor.
- *
- * It handles the commands to configure studies.
- *
- * @param studyRepository The repository for study entities.
- * @param specimenGroupRepository The repository for specimen group entities.
- * @param cetRepo The repository for Container Event Type entities.
- * @param annotationTypeRepo The repository for Collection Event Annotation Type entities.
- * @param sg2cetRepo The value object repository that associates a specimen group to a
- *         collection event type.
- * @param at2cetRepo The value object repository that associates a collection event annotation
- *         type to a collection event type.
- */
 trait StudyProcessorComponentImpl extends StudyProcessorComponent {
   self: ProcessorComponentImpl with RepositoryComponent =>
 
+  /**
+   * Handles the commands to configure studies.
+   */
   class StudyProcessorImpl extends StudyProcessor {
 
     val receiveRecover: Receive = {

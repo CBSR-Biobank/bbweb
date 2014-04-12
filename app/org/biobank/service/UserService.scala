@@ -97,6 +97,9 @@ case class SnapshotState(users: Set[User])
 trait UserProcessorComponentImpl extends UserProcessorComponent {
   self: RepositoryComponent =>
 
+  /**
+   * Handles the commands to configure users.
+   */
   class UserProcessorImpl extends UserProcessor {
 
     def updateState(event: UserEvent) = {

@@ -29,10 +29,7 @@ object WebComponent extends GlobalSettings with org.biobank.service.TopComponent
   private val ScriptHeader = "-- SQL DDL script\n-- Generated file - do not edit\n\n"
 
   /**
-   * On application startup, also start the Eventsourced framework.
    *
-   * It is important to do it at this stage of initialization since the query side database session
-   * must already be initialized before Eventsourced starts.
    */
   override def onStart(app: play.api.Application) {
     createSqlDdlScripts(app)
