@@ -1,7 +1,7 @@
 package fixture
 
-import service._
-import domain._
+import org.biobank.service._
+import org.biobank.domain._
 
 import play.api.Mode
 import play.api.Mode._

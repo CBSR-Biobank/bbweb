@@ -1,11 +1,11 @@
 @(studyId: String,
     studyName: String,
-    annotationTypes: Set[domain.study.ParticipantAnnotationType])(
+    annotationTypes: Set[org.biobank.domain.study.ParticipantAnnotationType])(
   implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
-@import tags._    
+@import tags._
 @import controllers.study._
-@import domain.AnnotationValueType._
+@import org.biobank.domain.AnnotationValueType._
 
 <h4>
 @Messages("biobank.study.participant.annotation.type.show.title")
@@ -36,7 +36,7 @@
               <td><span class="label">@annotType.valueType</span></td>
               <td>@if(annotType.required) { @Messages("biobank.common.yes") } else { @Messages("biobank.common.no") }</td>
 
-              @if(annotType.valueType == domain.AnnotationValueType.Select) {
+              @if(annotType.valueType == org.biobank.domain.AnnotationValueType.Select) {
                   @if(annotType.maxValueCount.getOrElse(0) == 1) {
                     <td>@Messages("biobank.annotation.type.field.max.value.count.single")</td>
                   } else {

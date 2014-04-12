@@ -20,7 +20,7 @@ import scala.slick.jdbc.meta._
  * If the application is running in '''development''' mode, the query side DDL database scritps are
  * also generated.
  */
-object WebComponent extends GlobalSettings with service.TopComponentImpl {
+object WebComponent extends GlobalSettings with org.biobank.service.TopComponentImpl {
 
   private val configKey = "slick"
   private val ScriptDirectory = "conf/evolutions/"

@@ -1,13 +1,13 @@
 package controllers.study
 
 import controllers._
-import service._
-import infrastructure._
-import service.{ ServiceComponent, ServiceComponentImpl }
-import infrastructure.command.StudyCommands._
-import domain._
+import org.biobank.service._
+import org.biobank.infrastructure._
+import org.biobank.service.{ ServiceComponent, ServiceComponentImpl }
+import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.domain._
 import AnnotationValueType._
-import domain.study._
+import org.biobank.domain.study._
 import views._
 
 import collection.immutable.ListMap
@@ -86,7 +86,7 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
   protected def annotationTypeInUseErrorMsg(annotName: String): String
 
   protected def validMaxValue(valueType: AnnotationValueType, maxValueCount: Option[Int]): Boolean = {
-    // if value type is "Select" the ensure max value count is valid          
+    // if value type is "Select" the ensure max value count is valid
     if (valueType == AnnotationValueType.Select) {
       maxValueCount match {
         case None => false
@@ -149,7 +149,7 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
       (Messages("biobank.common.description") -> annotationType.description.getOrElse("")),
       (Messages("biobank.annotation.type.field.value.type") -> annotationType.valueType.toString))
 
-    if (annotationType.valueType == domain.AnnotationValueType.Select) {
+    if (annotationType.valueType == org.biobank.domain.AnnotationValueType.Select) {
       val value = if (annotationType.maxValueCount.getOrElse(0) == 1) {
         Messages("biobank.annotation.type.field.max.value.count.single")
       } else if (annotationType.maxValueCount.getOrElse(0) > 1) {

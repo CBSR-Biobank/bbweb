@@ -1,10 +1,10 @@
 package query
 
-import domain.UserId
-import query.model._
+import org.biobank.domain.UserId
+import org.biobank.query.model._
 import fixture._
-import infrastructure.event.StudyEvents._
-import service.Messages._
+import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.service.Messages._
 
 import java.util.UUID
 import org.junit.runner.RunWith

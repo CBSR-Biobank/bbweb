@@ -1,17 +1,17 @@
 package controllers.study
 
 import controllers._
-import service._
-import infrastructure._
-import infrastructure.command.StudyCommands._
-import service.{ ServiceComponent, TopComponentImpl }
-import domain._
-import domain.study._
+import org.biobank.service._
+import org.biobank.infrastructure._
+import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.service.{ ServiceComponent, TopComponentImpl }
+import org.biobank.domain._
+import org.biobank.domain.study._
 import views._
-import domain.AnatomicalSourceType._
-import domain.PreservationType._
-import domain.PreservationTemperatureType._
-import domain.SpecimenType._
+import org.biobank.domain.AnatomicalSourceType._
+import org.biobank.domain.PreservationType._
+import org.biobank.domain.PreservationTemperatureType._
+import org.biobank.domain.SpecimenType._
 import StudyTab._
 
 import scala.concurrent._

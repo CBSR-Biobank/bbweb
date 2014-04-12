@@ -1,7 +1,7 @@
 package domain
 
 import fixture.NameGenerator
-import infrastructure.event.UserEvents._
+import org.biobank.infrastructure.event.UserEvents._
 
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers

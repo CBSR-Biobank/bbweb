@@ -1,16 +1,16 @@
-@(study: domain.study.Study,
+@(study: org.biobank.domain.study.Study,
     activeTab: controllers.study.StudyTab.Value)(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
     flash: play.api.mvc.Flash)
 
 @import controllers.study._
 @import StudyTab._
 
-@tabSummaryActive = @{ if (activeTab.equals(StudyTab.Summary)) "active" else "" }    
-@tabParticipantsActive = @{ if (activeTab.equals(StudyTab.Participants)) "active" else "" }    
-@tabSpecimensActive = @{ if (activeTab.equals(StudyTab.Specimens)) "active" else "" }    
-@tabCollectionEventsActive = @{ if (activeTab.equals(StudyTab.CollectionEvents)) "active" else "" }    
+@tabSummaryActive = @{ if (activeTab.equals(StudyTab.Summary)) "active" else "" }
+@tabParticipantsActive = @{ if (activeTab.equals(StudyTab.Participants)) "active" else "" }
+@tabSpecimensActive = @{ if (activeTab.equals(StudyTab.Specimens)) "active" else "" }
+@tabCollectionEventsActive = @{ if (activeTab.equals(StudyTab.CollectionEvents)) "active" else "" }
 @tabProcessingEventsActive = @{ if (activeTab.equals(StudyTab.ProcessingEvents)) "active" else "" }
-    
+
 @breadcrumbs = @{ Map(
   (Messages("biobank.study.plural") -> routes.StudyController.index),
   (study.name -> null)
@@ -46,8 +46,8 @@
       <div class="alert alert-success">
         @message
       </div>
-    } 
-    
+    }
+
     <div class="tab-content">
       <div class="tab-pane fade in @tabSummaryActive" id="tab-summary">
         <h4>@study.name</h4>

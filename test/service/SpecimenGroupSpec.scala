@@ -1,8 +1,8 @@
 package service
 
 import fixture._
-import infrastructure._
-import domain.{
+import org.biobank.infrastructure._
+import org.biobank.domain.{
   AnatomicalSourceType,
   AnnotationTypeId,
   AnnotationValueType,
@@ -12,9 +12,9 @@ import domain.{
   SpecimenType
 }
 import AnnotationValueType._
-import domain.study._
-import infrastructure._
-import infrastructure.command.StudyCommands._
+import org.biobank.domain.study._
+import org.biobank.infrastructure._
+import org.biobank.infrastructure.command.StudyCommands._
 
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

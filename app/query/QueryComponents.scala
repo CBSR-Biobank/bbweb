@@ -1,5 +1,0 @@
-package query
-
-trait QueryComponent extends StudyViewComponent
-
-trait QueryComponentImpl extends StudyViewComponentImpl

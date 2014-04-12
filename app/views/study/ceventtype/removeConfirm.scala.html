@@ -1,9 +1,9 @@
 @(studyId: String,
     studyName: String,
-    ceventType: domain.study.CollectionEventType)(
+    ceventType: org.biobank.domain.study.CollectionEventType)(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
-@import tags._    
+@import tags._
 @import helper._
 @import controllers.study._
 
@@ -18,7 +18,7 @@
     <h2>@studyName&nbsp
         <small>@Messages("biobank.study.collection.event.type.remove")</small>
     </h2>
-    
+
     @alertBlock{ @Messages("biobank.common.warning") } {
         @Messages("biobank.study.specimen.group.remove.confirm", ceventType.name)
     }
@@ -29,14 +29,14 @@
     @nameValueRow(Messages("biobank.common.description"), ceventType.description.getOrElse(""))
     @nameValueRow(Messages("biobank.study.collection.event.type.field.recurring"),
       if(ceventType.recurring) Messages("biobank.common.yes") else Messages("biobank.common.no"))
-    
-    @form(routes.CeventTypeController.removeCeventTypeSubmit, 
+
+    @form(routes.CeventTypeController.removeCeventTypeSubmit,
         args = 'id -> "removeform", 'class -> "form-horizontal") {
-      
-        <input type="hidden" name="studyId" value="@studyId" >  
-        <input type="hidden" name="studyName" value="@studyName" >  
-        <input type="hidden" name="ceventTypeId" value="@ceventType.id.id" >  
-    
+
+        <input type="hidden" name="studyId" value="@studyId" >
+        <input type="hidden" name="studyName" value="@studyName" >
+        <input type="hidden" name="ceventTypeId" value="@ceventType.id.id" >
+
         @submitCancelFormButtons(routes.StudyController.showStudy(studyId))
     }
   </div>

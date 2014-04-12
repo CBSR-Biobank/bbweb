@@ -1,9 +1,9 @@
 package service
 
 import fixture._
-import infrastructure.command.UserCommands._
-import infrastructure.event.UserEvents._
-import domain._
+import org.biobank.infrastructure.command.UserCommands._
+import org.biobank.infrastructure.event.UserEvents._
+import org.biobank.domain._
 
 import akka.actor.ActorSystem
 import akka.actor.Actor

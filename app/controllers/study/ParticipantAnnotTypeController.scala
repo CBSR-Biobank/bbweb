@@ -1,13 +1,13 @@
 package controllers.study
 
 import controllers._
-import service._
-import infrastructure._
-import service.{ ServiceComponent, ServiceComponentImpl }
-import infrastructure.command.StudyCommands._
-import domain._
+import org.biobank.service._
+import org.biobank.infrastructure._
+import org.biobank.service.{ ServiceComponent, ServiceComponentImpl }
+import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.domain._
 import AnnotationValueType._
-import domain.study._
+import org.biobank.domain.study._
 import views._
 
 import collection.immutable.ListMap

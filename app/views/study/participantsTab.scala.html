@@ -1,10 +1,10 @@
-@(study: domain.study.Study,
+@(study: org.biobank.domain.study.Study,
   counts: Map[String,String],
-  participantAnnotTypes: Set[domain.study.ParticipantAnnotationType])(
-  implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent], 
+  participantAnnotTypes: Set[org.biobank.domain.study.ParticipantAnnotationType])(
+  implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
   flash: play.api.mvc.Flash)
 
-@import tags._    
+@import tags._
 @import controllers.study._
 
 <h4>@Messages("biobank.study.tab.subtitle.participants")</h4>

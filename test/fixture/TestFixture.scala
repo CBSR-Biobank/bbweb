@@ -1,6 +1,6 @@
 package fixture
 
-import domain._
+import org.biobank.domain._
 
 import scala.concurrent.Await
 import scala.concurrent.Future

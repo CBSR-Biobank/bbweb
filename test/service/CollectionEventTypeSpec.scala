@@ -1,7 +1,7 @@
 package service
 
 import fixture._
-import domain.{
+import org.biobank.domain.{
   AnatomicalSourceType,
   AnnotationTypeId,
   AnnotationValueType,
@@ -9,8 +9,8 @@ import domain.{
   PreservationTemperatureType,
   SpecimenType
 }
-import domain.study._
-import infrastructure.command.StudyCommands._
+import org.biobank.domain.study._
+import org.biobank.infrastructure.command.StudyCommands._
 
 import org.slf4j.LoggerFactory
 import org.junit.runner.RunWith

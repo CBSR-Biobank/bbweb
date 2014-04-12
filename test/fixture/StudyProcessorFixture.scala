@@ -1,9 +1,9 @@
 package fixture
 
-import infrastructure._
-import service._
-import domain._
-import domain.study._
+import org.biobank.infrastructure._
+import org.biobank.service._
+import org.biobank.domain._
+import org.biobank.domain.study._
 
 import play.api.Mode
 import play.api.Mode._

@@ -6,19 +6,19 @@
     studyName: String,
     removeMsg: String,
     removeConfirmMsg: String,
-    annotType: domain.study.StudyAnnotationType,
+    annotType: org.biobank.domain.study.StudyAnnotationType,
     fields: Map[String, String],
     breadcrumbMap: Map[String, Call])(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
-@import tags._    
+@import tags._
 @import helper._
 @import controllers.study._
 
 @main(removeMsg, breadcrumbMap) {
   <div class="page-header">
     <h2>@studyName <small>@removeMsg</small></h2>
-    
+
     @alertBlock{ @Messages("biobank.common.warning") } {
        @removeConfirmMsg
     }
@@ -28,14 +28,14 @@
     @for((name,value) <- fields) {
         @nameValueRow(name, value)
     }
-    
-    @form(routes.CeventAnnotTypeController.removeAnnotationTypeSubmit, 
+
+    @form(routes.CeventAnnotTypeController.removeAnnotationTypeSubmit,
         args = 'id -> "removeform", 'class -> "form-horizontal") {
-      
-        <input type="hidden" name="studyId" value="@studyId" >  
-        <input type="hidden" name="studyName" value="@studyName" >  
-        <input type="hidden" name="annotationTypeId" value="@annotType.id.id" >  
-    
+
+        <input type="hidden" name="studyId" value="@studyId" >
+        <input type="hidden" name="studyName" value="@studyName" >
+        <input type="hidden" name="annotationTypeId" value="@annotType.id.id" >
+
         @submitCancelFormButtons(routes.StudyController.showStudy(studyId))
     }
   </div>

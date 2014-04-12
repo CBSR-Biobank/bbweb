@@ -1,6 +1,6 @@
-@(studyId: String, 
-    studyName: String, 
-    annotationTypes: Set[_ <: domain.study.StudyAnnotationType],
+@(studyId: String,
+    studyName: String,
+    annotationTypes: Set[_ <: org.biobank.domain.study.StudyAnnotationType],
     headingMsg: String,
     noneMsg: String,
     addAction: Call,
@@ -8,19 +8,19 @@
     removeAction: (String, String, String) => Call)(
     implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
-@import tags._    
+@import tags._
 @import controllers.study._
-@import domain.AnnotationValueType._
-@import domain.study.ParticipantAnnotationType
+@import org.biobank.domain.AnnotationValueType._
+@import org.biobank.domain.study.ParticipantAnnotationType
 
 <h4>
   @headingMsg
-  <a href="@addAction" 
+  <a href="@addAction"
     class="btn btn-small btn-primary" type="button"
     data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
     <i class="icon-plus-sign icon-white"></i></a>
 </h4>
-      
+
 @if(annotationTypes.isEmpty) {
   @alertBlock { }{
     @Messages("biobank.study.specimen.link.annotation.type.show.none")
@@ -31,37 +31,37 @@
         <thead>
           <th>@Messages("biobank.common.name")</th>
           <th>@Messages("biobank.annotation.type.field.value.type")</th>
-          
+
           @annotationTypes.head match {
             case at : ParticipantAnnotationType => {
               <th>@Messages("biobank.study.participant.annotation.type.field.required")</th>
             }
             case _ => { }
           }
-          
+
           <th>@Messages("biobank.annotation.type.field.max.value.count")</th>
           <th>@Messages("biobank.annotation.type.field.options")</th>
           <th></th>
         </thead>
         <tbody>
-          @for(annotType <- annotationTypes) {              
-            <tr>   
+          @for(annotType <- annotationTypes) {
+            <tr>
               <td>@nameWithDescriptionPopup(annotType.id.id, annotType.name, annotType.description)</td>
               <td><span class="label">@annotType.valueType</span></td>
-          
+
               @annotType match {
                 case at: ParticipantAnnotationType => {
                   <td>@if(at.required) { @Messages("biobank.common.yes") } else { @Messages("biobank.common.no") }</td>
                 }
                 case _ => { }
               }
-              
-              @if(annotType.valueType == domain.AnnotationValueType.Select) {
+
+              @if(annotType.valueType == org.biobank.domain.AnnotationValueType.Select) {
                   @if(annotType.maxValueCount.getOrElse(0) == 1) {
                     <td>@Messages("biobank.annotation.type.field.max.value.count.single")</td>
                   } else {
                     @if(annotType.maxValueCount.getOrElse(0) > 1) {
-                      <td>@Messages("biobank.annotation.type.field.max.value.count.multiple")</td>                  
+                      <td>@Messages("biobank.annotation.type.field.max.value.count.multiple")</td>
                     } else {
                       <td><span class="label label-warning">ERROR: @@annotType.maxValueCount</span></td>
                     }
@@ -69,12 +69,12 @@
                 <td>@Html(annotType.options.map( m => m.values.mkString("<br/>")).getOrElse("") )</td>
               } else {
                 <td><span class="label">N/A</span></td>
-                <td><span class="label">N/A</span></td>              
+                <td><span class="label">N/A</span></td>
               }
-              
+
               <td>
                 @updateRemoveButtons(
-                    updateAction(studyId, studyName, annotType.id.id), 
+                    updateAction(studyId, studyName, annotType.id.id),
                     removeAction(studyId, studyName, annotType.id.id))
               </td>
             <tr>
@@ -86,4 +86,4 @@
       @Html(annotationTypes.map(sg => """$('#%s').popover();""".format(sg.id)).mkString("\n"))
   </script>
 }
-    
+

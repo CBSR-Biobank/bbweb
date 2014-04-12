@@ -1,6 +1,6 @@
 package fixture
 
-import service._
+import org.biobank.service._
 
 import akka.actor.Props
 

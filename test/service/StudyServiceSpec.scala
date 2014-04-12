@@ -1,16 +1,16 @@
 package service
 
 import fixture._
-import infrastructure.command.StudyCommands._
-import infrastructure.event.StudyEvents._
-import domain.{
+import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.domain.{
   AnatomicalSourceType,
   AnnotationValueType,
   PreservationType,
   PreservationTemperatureType,
   SpecimenType
 }
-import domain.study._
+import org.biobank.domain.study._
 
 import akka.actor._
 import akka.pattern.ask

@@ -1,15 +1,15 @@
-@(studyId: String, 
-    studyName: String, 
-    ceventTypes: Set[domain.study.CollectionEventType],    
-    specimenGroupMap: Seq[(String, String, String)],    
-    annotationTypes: Set[domain.study.CollectionEventAnnotationType])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+@(studyId: String,
+    studyName: String,
+    ceventTypes: Set[org.biobank.domain.study.CollectionEventType],
+    specimenGroupMap: Seq[(String, String, String)],
+    annotationTypes: Set[org.biobank.domain.study.CollectionEventAnnotationType])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import tags._
 @import controllers.study._
 
 @studyAnnotTypeList(
-    studyId, 
-    studyName, 
+    studyId,
+    studyName,
     annotationTypes,
     Messages("biobank.study.collection.event.annotation.type.show.title"),
     Messages("biobank.study.collection.event.annotation.type.show.none"),
@@ -19,14 +19,14 @@
 
 <h4>
   @Messages("biobank.study.collection.event.type.show.title")
-  <a href="@routes.CeventTypeController.addCeventType(studyId, studyName)" 
+  <a href="@routes.CeventTypeController.addCeventType(studyId, studyName)"
         class="btn btn-small btn-primary" type="button"
         data-toggle="tooltip" title="@Messages("biobank.common.action.add")">
         <i class="icon-plus-sign icon-white"></i></a>
 </h4>
 
 @if(ceventTypes.size <= 0) {
-  @alertBlock{ }{   
+  @alertBlock{ }{
     @Messages("biobank.study.collection.event.type.show.none")
   }
 } else {
@@ -46,30 +46,30 @@
       </thead>
       <tbody>
         @for(ceventtype <- ceventTypes) {
-          <tr>    
+          <tr>
             <td>@nameWithDescriptionPopup(ceventtype.id.id, ceventtype.name, ceventtype.description)</td>
             <td>
-              @if(ceventtype.recurring){ @Messages("biobank.common.yes") } else { @Messages("biobank.common.no") }</td>        
+              @if(ceventtype.recurring){ @Messages("biobank.common.yes") } else { @Messages("biobank.common.no") }</td>
             <td>
                 @Html(ceventtype.specimenGroupData.map(sgData =>
                     "%s (%d - %.3f %s)".format(
                     specimenGroupMap.find(x => x._1.equals(sgData.specimenGroupId)).map(_._2).getOrElse(""),
-                    sgData.maxCount, 
+                    sgData.maxCount,
                     sgData.amount,
                     specimenGroupMap.find(x => x._1.equals(sgData.specimenGroupId)).map(_._3).getOrElse(""))).mkString("<br/>"))
-            </td> 
-            <td>          
+            </td>
+            <td>
                 @Html(ceventtype.annotationTypeData.map(atData =>
                     "%s (%s)".format(
                     annotationTypes.find(x => x.id.id.equals(atData.annotationTypeId)).map(_.name).getOrElse(""),
                     if (atData.required) "Y" else "N")).mkString("<br/>"))
-            </td>                
-            <td> 
+            </td>
+            <td>
               @updateRemoveButtons(
                   routes.CeventTypeController.updateCeventType(studyId,studyName,ceventtype.id.id),
                   routes.CeventTypeController.removeCeventType(studyId,studyName,ceventtype.id.id)
               )
-            </td>   
+            </td>
           <tr>
         }
       </tbody>
@@ -79,4 +79,4 @@
 <script type="text/javascript" charset="utf-8">
     @Html(ceventTypes.map(sg => """$('#%s').popover();""".format(sg.id)).mkString("\n"))
 </script>
-    
+

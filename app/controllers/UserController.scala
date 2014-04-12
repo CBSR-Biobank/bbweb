@@ -1,6 +1,6 @@
 package controllers
 
-import service.{ ServiceComponent, TopComponentImpl }
+import org.biobank.service.{ ServiceComponent, TopComponentImpl }
 
 import play.api._
 import play.api.mvc._

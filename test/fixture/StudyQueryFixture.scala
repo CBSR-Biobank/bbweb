@@ -1,11 +1,11 @@
 package fixture
 
-import infrastructure._
-import service._
-import service.study._
-import domain._
-import domain.study._
-import query.model._
+import org.biobank.infrastructure._
+import org.biobank.service._
+import org.biobank.service.study._
+import org.biobank.domain._
+import org.biobank.domain.study._
+import org.biobank.query.model._
 
 import play.api.Mode
 import play.api.Mode._

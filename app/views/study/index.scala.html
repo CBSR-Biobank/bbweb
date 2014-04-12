@@ -1,4 +1,4 @@
-@(studies: Set[domain.study.Study])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+@(studies: Set[org.biobank.domain.study.Study])(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import controllers.study._
 
@@ -15,7 +15,7 @@
             <i class="icon-plus-sign icon-white"></i></a>
     </h2>
   </div>
-  
+
   <div class="clearfix">
     @if(studies.size <= 0) {
       <p>@Messages("biobank.study.none")</p>
