@@ -1,4 +1,4 @@
-package controllers
+package org.biobank.controllers
 
 import org.biobank.service.{ ServiceComponent, TopComponentImpl }
 

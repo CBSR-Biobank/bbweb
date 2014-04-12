@@ -2,10 +2,10 @@
 *
 * FIXME: should annotation types be filtered once user has selected one? E.g. if there are
 * 3 annotation types, and the user adds one, should the next one allow only the remaining 2 to
-* be added? 
+* be added?
 **@
-@(cetForm: Form[controllers.study.CeventTypeFormObject],
-        formType: FormType,
+@(cetForm: Form[org.biobank.controllers.study.CeventTypeFormObject],
+        formType: org.biobank.controllers.FormType,
         studyId: String,
         studyName: String,
         specimenGroupMap : Seq[(String,String,String)],
@@ -13,20 +13,20 @@
         implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
-@import controllers.study._
+@import org.biobank.controllers.study._
 @import tags._
 
 @implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
 
 @formInfo = @{ formType match {
-    case AddFormType() =>
-        FormInfo(Messages("biobank.study.collection.event.type.add"),
+    case org.biobank.controllers.AddFormType() =>
+        org.biobank.controllers.FormInfo(Messages("biobank.study.collection.event.type.add"),
             routes.CeventTypeController.addCeventTypeSubmit)
-    case UpdateFormType() =>
-        FormInfo(Messages("biobank.study.collection.event.type.update"),
+    case org.biobank.controllers.UpdateFormType() =>
+        org.biobank.controllers.FormInfo(Messages("biobank.study.collection.event.type.update"),
             routes.CeventTypeController.updateCeventTypeSubmit)
 }}
-    
+
 @breadcrumbs = @{ Map(
     (Messages("biobank.study.plural") -> routes.StudyController.index),
     (studyName -> routes.StudyController.showStudy(studyId)),
@@ -59,11 +59,11 @@
     @form(formInfo.action, args = 'id -> "addform", 'class -> "form-horizontal") {
 
         @formType match {
-            case AddFormType() => {
+            case org.biobank.controllers.AddFormType() => {
                 <input type="hidden" name="collectionEventTypeId" value="dont-care">
                 <input type="hidden" name="version" value="-1" >
             }
-            case UpdateFormType() => {
+            case org.biobank.controllers.UpdateFormType() => {
                 <input type="hidden" name="collectionEventTypeId"
                 value="@cetForm("collectionEventTypeId").value" >
                 <input type="hidden" name="version" value="@cetForm("version").value" >
@@ -78,8 +78,8 @@
         @checkbox(field = cetForm("recurring"),
             args = '_label -> Messages("biobank.study.collection.event.type.field.recurring"),
             '_help -> "")
-        
-        @if(specimenGroupMap.size > 0) {    
+
+        @if(specimenGroupMap.size > 0) {
           <div class="control-group">
               <div class="controls">
                   <a class="addSpecimenGroup btn btn-small btn-success">
@@ -88,19 +88,19 @@
                   </a>
               </div>
           </div>
-  
-          @repeat(cetForm("specimenGroupData"), 
+
+          @repeat(cetForm("specimenGroupData"),
               min = cetForm("specimenGroupData").indexes.size) { sgGroupData =>
               @specimenGroupData(sgGroupData, specimenGroupMap)
           }
           @*
           * This hidden block will be used as template for Javascript copy code
           *@
-          @specimenGroupData(cetForm("specimenGroupData[x]"), specimenGroupMap, 
+          @specimenGroupData(cetForm("specimenGroupData[x]"), specimenGroupMap,
               className = "sg_data_template", style="display: none;")
         }
 
-        @if(annotationTypeMap.size > 0) {            
+        @if(annotationTypeMap.size > 0) {
           <div class="control-group">
               <div class="controls">
                   <a class="addAnnotationType btn btn-small btn-success">
@@ -108,13 +108,13 @@
                       <i class="icon-plus-sign icon-white"></i>
                   </a>
               </div>
-          </div>   
-  
-          @repeat(cetForm("annotationTypeData"), 
+          </div>
+
+          @repeat(cetForm("annotationTypeData"),
               min = cetForm("annotationTypeData").indexes.size) { atypeData =>
               @annotationTypeData(atypeData, annotationTypeMap)
           }
-              
+
           @*
           * This hidden block will be used as template for Javascript copy code
           *@
@@ -132,7 +132,7 @@
             @Html(specimenGroupMap.map(x => """'%s': '%s'""".format(x._1, x._3)).mkString(","))
         }
     </script>
-      
+
     <script type="text/javascript" src="@controllers.routes.Assets.at("js/specimenGroupWidgets.js")"></script>
     <script type="text/javascript" src="@controllers.routes.Assets.at("js/annotationTypeWidgets.js")"></script>
 }

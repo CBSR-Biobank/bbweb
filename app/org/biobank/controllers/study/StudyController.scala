@@ -1,6 +1,6 @@
-package controllers.study
+package org.biobank.controllers.study
 
-import controllers._
+import org.biobank.controllers._
 import org.biobank.service._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
@@ -73,15 +73,15 @@ object StudyController extends Controller with SecureSocial {
     errorHeading: String)(f: Study => Result)(
       implicit request: WrappedRequest[AnyContent]): Result = {
     studyService.getStudy(id) match {
-      case Failure(x) =>
-        if (x.head.contains("study does not exist")) {
+      case Failure(err) =>
+        if (err.list.mkString(", ").contains("study does not exist")) {
           BadRequest(html.serviceError(
             errorHeading,
             Messages("biobank.study.error"),
             studyBreadcrumbs,
             routes.StudyController.index))
         } else {
-          throw new Error(x.head)
+          throw new Error(err.list.mkString(", "))
         }
       case Success(study) => f(study)
     }

@@ -16,7 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class SecureSocialUserService(application: Application) extends UserServicePlugin(application) {
 
-  lazy val userService = controllers.WebComponent.userService
+  lazy val userService = org.biobank.controllers.WebComponent.userService
 
   private var tokens = Map[String, Token]()
 

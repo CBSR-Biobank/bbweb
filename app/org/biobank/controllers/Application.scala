@@ -1,4 +1,4 @@
-package controllers
+package org.biobank.controllers
 
 import scala.language.postfixOps
 import play.api.mvc._

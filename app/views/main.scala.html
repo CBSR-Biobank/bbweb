@@ -1,5 +1,5 @@
 @(title: String, breadcrumbs: Map[String, Call] = Map.empty)(content: Html)(implicit request: RequestHeader)
-<!DOCTYPE html> 
+<!DOCTYPE html>
 
 <html>
   <head>
@@ -70,16 +70,16 @@
             <div class="navbar-inner">
               <div class="container">
                 <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                  <span class="icon-bar"></span> 
-                  <span class="icon-bar"></span> 
                   <span class="icon-bar"></span>
-                </a> 
-                <a class="brand" href="@routes.Application.index">Biobank</a>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </a>
+                <a class="brand" href="@org.biobank.controllers.routes.Application.index">Biobank</a>
                 <div class="nav-collapse collapse">
                   <ul class="nav">
-                    <li class="active"><a href="@routes.Application.index">Home</a></li>
-                    <li><a href="@routes.Application.about">About</a></li>
-                    <li><a href="@routes.Application.contact">Contact</a></li>
+                    <li class="active"><a href="@org.biobank.controllers.routes.Application.index">Home</a></li>
+                    <li><a href="@org.biobank.controllers.routes.Application.about">About</a></li>
+                    <li><a href="@org.biobank.controllers.routes.Application.contact">Contact</a></li>
                   </ul>
                 </div>
                 @request match {
@@ -90,7 +90,9 @@
                                 <a class="dropdown-toggle" id="drop1" role="button" data-toggle="dropdown" href="#">
                                 <strong>@req.user.email</strong> <span class="caret"></span></a>
                                 <ul class="dropdown-menu" role="menu"  aria-labelledby="drop1">
-                                  <li role="presentation"><a role="menuitem" tabindex="-1" href="@routes.UserController.profile">My Profile</a></li>
+                                  <li role="presentation">
+				    <a role="menuitem" tabindex="-1"
+				       href="@org.biobank.controllers.routes.UserController.profile">My Profile</a></li>
                                 </ul>
                               </li>
                               <li><a href="@securesocial.controllers.routes.LoginPage.logout()">Log out</a></li>

@@ -1,8 +1,8 @@
 @(study: org.biobank.domain.study.Study,
-    activeTab: controllers.study.StudyTab.Value)(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
+    activeTab: org.biobank.controllers.study.StudyTab.Value)(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
     flash: play.api.mvc.Flash)
 
-@import controllers.study._
+@import org.biobank.controllers.study._
 @import StudyTab._
 
 @tabSummaryActive = @{ if (activeTab.equals(StudyTab.Summary)) "active" else "" }

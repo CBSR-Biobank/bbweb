@@ -1,6 +1,6 @@
-package controllers.study
+package org.biobank.controllers.study
 
-import controllers._
+import org.biobank.controllers._
 import org.biobank.service._
 import org.biobank.infrastructure._
 import org.biobank.service.{ ServiceComponent, ServiceComponentImpl }
@@ -161,7 +161,7 @@ object SpecimenLinkAnnotTypeController
     super.updateAnnotationType(studyId, studyName, annotationType) {
       (studyId, studyName, annotationType) =>
         studyService.specimenLinkAnnotationTypeWithId(studyId, annotationTypeId) match {
-          case Failure(x) => throw new Error(x.head)
+          case Failure(err) => throw new Error(err.list.mkString(", "))
           case Success(annotType) =>
             val form = annotationTypeForm.fill(SpecimenLinkAnnotationTypeMapper(
               annotType.id.id, annotType.version, studyId, studyName, annotType.name,
@@ -225,7 +225,7 @@ object SpecimenLinkAnnotTypeController
     super.removeAnnotationTypeSubmit {
       (studyId, studyName, annotationTypeId) =>
         studyService.specimenLinkAnnotationTypeWithId(studyId, annotationTypeId) match {
-          case Failure(x) => throw new Error(x.head)
+          case Failure(err) => throw new Error(err.list.mkString(", "))
           case Success(annotType) =>
             studyService.removeSpecimenLinkAnnotationType(
               RemoveSpecimenLinkAnnotationTypeCmd(

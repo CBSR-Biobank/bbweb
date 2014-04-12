@@ -1,5 +1,5 @@
 @(attrTypeForm: Form[_],
-  formType: FormType,
+  formType: org.biobank.controllers.FormType,
   studyId: String,
   studyName: String,
   title: String,
@@ -10,9 +10,9 @@
   implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
 
 @import helper._
-@import tags._    
+@import tags._
 @import views.html.study.annotationtype._
-@import controllers.study._
+@import org.biobank.controllers.study._
 @import org.biobank.domain.study.ParticipantAnnotationType
 
 @implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
@@ -32,30 +32,30 @@
   @form(submitAction, args = 'id -> "addform", 'class -> "form-horizontal") {
 
     @formType match {
-      case AddFormType() => {
+      case org.biobank.controllers.AddFormType() => {
         <input type="hidden" name="annotationTypeId" value="dont-care">
         <input type="hidden" name="version" value="-1" >
       }
-      case UpdateFormType() => {
+      case org.biobank.controllers.UpdateFormType() => {
         <input type="hidden" name="annotationTypeId" value="@attrTypeForm("annotationTypeId").value" >
         <input type="hidden" name="version" value="@attrTypeForm("version").value" >
       }
     }
-      
-    <input type="hidden" name="studyId" value="@studyId" >  
-    <input type="hidden" name="studyName" value="@studyName" >    
-    
+
+    <input type="hidden" name="studyId" value="@studyId" >
+    <input type="hidden" name="studyName" value="@studyName" >
+
     @formNameAndDescription(attrTypeForm("name"), attrTypeForm("description"))
-    
+
     @select(
       field = attrTypeForm("valueType"),
       options = annotationValueTypes,
       args = '_label -> Messages("biobank.annotation.type.field.value.type")
     )
-    
+
     @annotTypeSelectionGroup(attrTypeForm("maxValueCount"), attrTypeForm("selections"),
         attrTypeForm("selections[x]"))
-        
+
     @if(hasRequired) {
       @checkbox(field = attrTypeForm("required"),
           args = '_label -> Messages("biobank.study.participant.annotation.type.field.required"),

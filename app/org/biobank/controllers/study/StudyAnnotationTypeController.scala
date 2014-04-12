@@ -1,6 +1,6 @@
-package controllers.study
+package org.biobank.controllers.study
 
-import controllers._
+import org.biobank.controllers._
 import org.biobank.service._
 import org.biobank.infrastructure._
 import org.biobank.service.{ ServiceComponent, ServiceComponentImpl }

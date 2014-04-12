@@ -1,6 +1,6 @@
-package controllers.study
+package org.biobank.controllers.study
 
-import controllers._
+import org.biobank.controllers._
 import org.biobank.service._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
@@ -195,8 +195,7 @@ object SpecimenGroupController extends Controller with SecureSocial {
     validateSpecimenGroup(studyId, studyName, specimenGroup) {
       (studyId, studyName, specimenGroup) =>
         studyService.specimenGroupInUse(studyId, specimenGroup.id.id) match {
-          case Failure(x) =>
-            throw new Error(x.head)
+          case Failure(err) => throw new Error(err.list.mkString(", "))
           case Success(result) =>
             if (result) {
               badActionRequest(studyId, studyName,
@@ -290,7 +289,7 @@ object SpecimenGroupController extends Controller with SecureSocial {
         val specimenGroupId = sgForm._3
 
         studyService.specimenGroupWithId(studyId, specimenGroupId) match {
-          case Failure(x) => throw new Error(x.head)
+          case Failure(err) => throw new Error(err.list.mkString(", "))
           case Success(sg) =>
             implicit val userId = new UserId(request.user.identityId.userId)
             studyService.removeSpecimenGroup(RemoveSpecimenGroupCmd(

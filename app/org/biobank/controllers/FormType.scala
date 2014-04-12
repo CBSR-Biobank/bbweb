@@ -1,4 +1,4 @@
-package controllers
+package org.biobank.controllers
 
 /**
  * An input to a view containing a form that renders the form to either '''add'' or '''update'''

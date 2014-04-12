@@ -1,4 +1,4 @@
-package controllers
+package org.biobank.controllers
 
 import securesocial.controllers.TemplatesPlugin
 import securesocial.core.{ Identity, SecuredRequest, SocialUser }

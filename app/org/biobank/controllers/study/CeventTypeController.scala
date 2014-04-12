@@ -1,6 +1,6 @@
-package controllers.study
+package org.biobank.controllers.study
 
-import controllers._
+import org.biobank.controllers._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.{ ServiceComponent, TopComponentImpl }
 import org.biobank.domain._
@@ -135,7 +135,7 @@ object CeventTypeController extends Controller with SecureSocial {
 
   def updateCeventType(studyId: String, studyName: String, ceventTypeId: String) = SecuredAction { implicit request =>
     studyService.collectionEventTypeWithId(studyId, ceventTypeId) match {
-      case Failure(x) => throw new Error(x.head)
+      case Failure(err) => throw new Error(err.list.mkString(", "))
       case Success(ceventType) =>
         val form = ceventTypeForm.fill(CeventTypeFormObject(
           ceventType.id.id, ceventType.version, studyId, studyName, ceventType.name,
@@ -185,7 +185,7 @@ object CeventTypeController extends Controller with SecureSocial {
     studyName: String,
     ceventTypeId: String) = SecuredAction { implicit request =>
     studyService.collectionEventTypeWithId(studyId, ceventTypeId) match {
-      case Failure(x) => throw new Error(x.head)
+      case Failure(err) => throw new Error(err.list.mkString(", "))
       case Success(ceventType) =>
         Ok(html.study.ceventtype.removeConfirm(studyId, studyName, ceventType))
     }
@@ -208,7 +208,7 @@ object CeventTypeController extends Controller with SecureSocial {
         val ceventTypeId = submittedForm._3
 
         studyService.collectionEventTypeWithId(studyId, ceventTypeId) match {
-          case Failure(x) => throw new Error(x.head)
+          case Failure(err) => throw new Error(err.list.mkString(", "))
           case Success(ceventType) =>
             implicit val userId = new UserId(request.user.identityId.userId)
             studyService.removeCollectionEventType(

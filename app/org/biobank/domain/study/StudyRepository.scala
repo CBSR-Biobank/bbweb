@@ -91,50 +91,50 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
       studyId: StudyId,
       specimenGroupCount: Int,
       collectionEventTypecount: Int): DomainValidation[EnabledStudy] = {
-
-      def doEnable(prevStudy: Study) = {
         throw new Error("this functionality should not be here")
 
-        prevStudy match {
-          case es: EnabledStudy =>
-            DomainError("study is already enabled: {id: %s}".format(es.id)).failNel
-          case ds: DisabledStudy =>
-            if ((specimenGroupCount == 0) || (collectionEventTypecount == 0))
-              DomainError("study has no specimen groups and / or no collection event types").failNel
-            else {
-              EnabledStudy(ds.id, ds.version + 1, ds.name, ds.description).success
-            }
-        }
-      }
+      // def doEnable(prevStudy: Study) = {
 
-      log.debug("enableStudy: { sgCount: %d, cetCount: %d }".format(
-        specimenGroupCount, collectionEventTypecount))
+        // prevStudy match {
+        //   case es: EnabledStudy =>
+        //     DomainError("study is already enabled: {id: %s}".format(es.id)).failNel
+        //   case ds: DisabledStudy =>
+        //     if ((specimenGroupCount == 0) || (collectionEventTypecount == 0))
+        //       DomainError("study has no specimen groups and / or no collection event types").failNel
+        //     else {
+        //       EnabledStudy(ds.id, ds.version + 1, ds.name, ds.description).success
+        //     }
+        // }
+       // }
 
-      for {
-        prevStudy <- studyWithId(studyId)
-        enabledStudy <- doEnable(prevStudy)
-        repoItem <- updateMap(enabledStudy).success
-      } yield enabledStudy
+      // log.debug("enableStudy: { sgCount: %d, cetCount: %d }".format(
+      //   specimenGroupCount, collectionEventTypecount))
+
+      // for {
+      //   prevStudy <- studyWithId(studyId)
+      //   enabledStudy <- doEnable(prevStudy)
+      //   repoItem <- updateMap(enabledStudy).success
+      // } yield enabledStudy
     }
 
     def disable(studyId: StudyId): DomainValidation[DisabledStudy] = {
       throw new Error("this functionality should not be here")
 
-      def doDisable(prevStudy: Study) = {
-        prevStudy match {
-          case ds: DisabledStudy =>
-            DomainError("study is already disabled: {id: %s}".format(ds.id)).failNel
-          case es: EnabledStudy =>
-            val study = DisabledStudy(es.id, es.version + 1, es.name, es.description)
-            updateMap(study)
-            study.success
-        }
-      }
+      // def doDisable(prevStudy: Study) = {
+      //   prevStudy match {
+      //     case ds: DisabledStudy =>
+      //       DomainError("study is already disabled: {id: %s}".format(ds.id)).failNel
+      //     case es: EnabledStudy =>
+      //       val study = DisabledStudy(es.id, es.version + 1, es.name, es.description)
+      //       updateMap(study)
+      //       study.success
+      //   }
+      // }
 
-      for {
-        prevStudy <- studyWithId(studyId)
-        disabledStudy <- doDisable(prevStudy)
-      } yield disabledStudy
+      // for {
+      //   prevStudy <- studyWithId(studyId)
+      //   disabledStudy <- doDisable(prevStudy)
+      // } yield disabledStudy
     }
 
   }

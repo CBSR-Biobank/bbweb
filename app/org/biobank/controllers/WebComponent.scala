@@ -1,4 +1,4 @@
-package controllers
+package org.biobank.controllers
 
 import play.api.mvc.Results._
 import play.api.mvc.RequestHeader

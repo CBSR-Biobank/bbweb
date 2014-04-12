@@ -26,7 +26,7 @@ object ApplicationBuild extends Build {
     //scalaVersion := "2.10.2",
 
     autoScalaLibrary := false,
-    
+
     resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
 
     libraryDependencies ++= Seq(
@@ -62,6 +62,8 @@ object ApplicationBuild extends Build {
     testOptions += Tests.Argument(TestFrameworks.JUnit, "--ignore-runners=org.scalatest.junit.JUnitRunner"),
 
     lessEntryPoints <<= baseDirectory(customLessEntryPoints)
+
+    //templatesImport += "org.biobank.controllers._"
 
     //ensimeConfig := sexp(
     //    key(":only-include-in-index"), sexp(

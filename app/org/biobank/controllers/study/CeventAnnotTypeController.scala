@@ -1,6 +1,6 @@
-package controllers.study
+package org.biobank.controllers.study
 
-import controllers._
+import org.biobank.controllers._
 import org.biobank.service._
 import org.biobank.infrastructure._
 import org.biobank.service.{ ServiceComponent, ServiceComponentImpl }
@@ -169,7 +169,7 @@ object CeventAnnotTypeController
     super.updateAnnotationType(studyId, studyName, annotationType) {
       (studyId, studyName, annotationType) =>
         studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
-          case Failure(x) => throw new Error(x.head)
+          case Failure(err) => throw new Error(err.list.mkString(", "))
           case Success(annotType) =>
             val form = annotationTypeForm.fill(CeventAnnotationTypeMapper(
               annotType.id.id, annotType.version, studyId, studyName, annotType.name,
@@ -222,7 +222,7 @@ object CeventAnnotTypeController
       super.removeAnnotationType(studyId, studyName, annotationType) {
         (studyId, studyName, annotationType) =>
           studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
-            case Failure(x) => throw new Error(x.head)
+            case Failure(err) => throw new Error(err.list.mkString(", "))
             case Success(annotType) =>
               Ok(html.study.annotationtype.removeConfirm(studyId, studyName,
                 Messages("biobank.study.collection.event.type.remove"),
@@ -238,7 +238,7 @@ object CeventAnnotTypeController
     super.removeAnnotationTypeSubmit {
       (studyId, studyName, annotationTypeId) =>
         studyService.collectionEventAnnotationTypeWithId(studyId, annotationTypeId) match {
-          case Failure(x) => throw new Error(x.head)
+          case Failure(err) => throw new Error(err.list.mkString(", "))
           case Success(annotType) =>
             studyService.removeCollectionEventAnnotationType(
               RemoveCollectionEventAnnotationTypeCmd(
