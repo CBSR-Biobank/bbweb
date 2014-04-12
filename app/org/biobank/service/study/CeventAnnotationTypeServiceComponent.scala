@@ -30,21 +30,15 @@ trait CeventAnnotationTypeServiceComponent {
      */
     def process = {
 
-      case msg: StudyProcessorMsg =>
-        msg.cmd match {
-          case cmd: AddCollectionEventAnnotationTypeCmd =>
-            addCollectionEventAnnotationType(cmd, msg.study)
-          case cmd: UpdateCollectionEventAnnotationTypeCmd =>
-            updateCollectionEventAnnotationType(cmd, msg.study)
-          case cmd: RemoveCollectionEventAnnotationTypeCmd =>
-            removeCollectionEventAnnotationType(cmd, msg.study)
-
-          case _ =>
-            throw new Error("invalid command received")
-        }
+      case cmd: AddCollectionEventAnnotationTypeCmd =>
+        addCollectionEventAnnotationType(cmd, msg.study)
+      case cmd: UpdateCollectionEventAnnotationTypeCmd =>
+        updateCollectionEventAnnotationType(cmd, msg.study)
+      case cmd: RemoveCollectionEventAnnotationTypeCmd =>
+        removeCollectionEventAnnotationType(cmd, msg.study)
 
       case _ =>
-        throw new Error("invalid message received")
+        throw new Error("invalid command received")
     }
 
     override def createNewAnnotationType(

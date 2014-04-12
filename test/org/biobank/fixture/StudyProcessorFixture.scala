@@ -24,7 +24,7 @@ import Scalaz._
  */
 trait StudyProcessorFixture extends TestFixture {
 
-  override val studyProcessor = system.actorOf(Props[StudyProcessorImpl], "studyproc")
+  override val studyProcessor = system.actorOf(Props(new StudyProcessorImpl), "studyproc")
   override val userProcessor = null
 
   override val studyService = null

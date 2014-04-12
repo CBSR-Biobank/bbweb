@@ -10,13 +10,6 @@ object Messages {
   trait HasIdentityOption { val id: Option[String] }
   trait HasUserId { val userId: UserId }
 
-  // FIXME: remove this
-  case class ServiceMsg(
-    cmd: Command,
-    userId: UserId,
-    id: Option[String] = None)
-    extends CommandMsg with HasIdentityOption
-
   case class ProcessorMsg(
     cmd: Command,
     userId: UserId,

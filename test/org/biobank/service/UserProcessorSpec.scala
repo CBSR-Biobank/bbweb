@@ -53,6 +53,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       waitNonBlocking(future) { r =>
         r match {
           case Success(event) =>
+            event shouldBe a [UserAddedEvent]
             event.id.toString should be(email)
             event.name should be(name)
             event.email should be(email)
@@ -62,7 +63,7 @@ class UserProcessorSpec extends UserProcessorFixture {
             event.avatarUrl should be(avatarUrl)
 
             userRepository.userWithId(UserId(event.id)).map { user =>
-              user.email should be(email)
+              user shouldBe a[RegisteredUser]
             }
 
           case Failure(msg) =>

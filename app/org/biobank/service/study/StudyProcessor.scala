@@ -36,6 +36,8 @@ trait StudyProcessorComponent {
 
 }
 
+case class SnapshotState(studies: Set[Study])
+
 trait StudyProcessorComponentImpl extends StudyProcessorComponent {
   self: ProcessorComponentImpl with RepositoryComponent =>
 
@@ -46,40 +48,45 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
     val receiveRecover: Receive = {
       case _ =>
+
+      case SnapshotOffer(_, snapshot: SnapshotState) =>
+        snapshot.studies.foreach{ i =>
+	  i match {
+	    case study: DisabledStudy =>
+	      studyRepository.update(study)
+	    case study: EnabledStudy =>
+	      studyRepository.update(study)
+	    case study: RetiredStudy =>
+	      studyRepository.update(study)
+	  }
+	}
     }
 
     val receiveCommand: Receive = {
-      case serviceMsg: ServiceMsg =>
-        serviceMsg.cmd match {
-          case cmd: AddStudyCmd =>
-            addStudy(cmd)
+      case cmd: AddStudyCmd => addStudy(cmd)
 
-          case cmd: UpdateStudyCmd => updateStudy(cmd)
+      case cmd: UpdateStudyCmd => updateStudy(cmd)
 
-          case cmd: EnableStudyCmd => enableStudy(cmd)
+      case cmd: EnableStudyCmd => enableStudy(cmd)
 
-          case cmd: DisableStudyCmd => disableStudy(cmd)
+      case cmd: DisableStudyCmd => disableStudy(cmd)
 
-          case cmd: SpecimenGroupCommand =>
-            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, specimenGroupService.process)
+      case cmd: SpecimenGroupCommand =>
+        processEntityMsg(cmd, cmd.studyId, specimenGroupService.process)
 
-          case cmd: CollectionEventTypeCommand =>
-            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, collectionEventTypeService.process)
+      case cmd: CollectionEventTypeCommand =>
+        processEntityMsg(cmd, cmd.studyId, collectionEventTypeService.process)
 
-          case cmd: CollectionEventAnnotationTypeCommand =>
-            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, ceventAnnotationTypeService.process)
+      case cmd: CollectionEventAnnotationTypeCommand =>
+        processEntityMsg(cmd, cmd.studyId, ceventAnnotationTypeService.process)
 
-          case cmd: ParticipantAnnotationTypeCommand =>
-            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, participantAnnotationTypeService.process)
+      case cmd: ParticipantAnnotationTypeCommand =>
+        processEntityMsg(cmd, cmd.studyId, participantAnnotationTypeService.process)
 
-          case cmd: SpecimenLinkAnnotationTypeCommand =>
-            processEntityMsg(cmd, cmd.studyId, serviceMsg.id, specimenLinkAnnotationTypeService.process)
+      case cmd: SpecimenLinkAnnotationTypeCommand =>
+        processEntityMsg(cmd, cmd.studyId, specimenLinkAnnotationTypeService.process)
 
-          case other => // must be for another command handler
-        }
-
-      case msg =>
-        throw new Error("invalid message received: ")
+      case other => // must be for another command handler
     }
 
     private def validateStudy(studyId: StudyId): DomainValidation[DisabledStudy] =
@@ -94,11 +101,10 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
     private def processEntityMsg[T](
       cmd: StudyCommand,
       studyId: String,
-      id: Option[String],
       processFunc: StudyProcessorMsg => DomainValidation[T]): DomainValidation[T] = {
       for {
         study <- validateStudy(new StudyId(studyId))
-        event <- processFunc(StudyProcessorMsg(cmd, study, id))
+        event <- processFunc(StudyProcessorMsg(cmd, study))
       } yield event
     }
 
