@@ -1,4 +1,4 @@
-package domain
+package org.biobank.domain
 
 import fixture.NameGenerator
 import org.biobank.infrastructure.event.UserEvents._

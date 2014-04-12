@@ -1,4 +1,4 @@
-package service
+package org.biobank.service
 
 import fixture._
 import org.biobank.domain.{

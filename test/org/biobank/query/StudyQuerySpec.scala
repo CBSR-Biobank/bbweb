@@ -1,4 +1,4 @@
-package query
+package org.biobank.query
 
 import org.biobank.domain.UserId
 import org.biobank.query.model._

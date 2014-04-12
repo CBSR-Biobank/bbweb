@@ -1,4 +1,4 @@
-package service
+package org.biobank.service
 
 import fixture._
 import org.biobank.domain._
@@ -13,24 +13,24 @@ import scalaz._
 import Scalaz._
 
 @RunWith(classOf[JUnitRunner])
-class SpecimenLinkAnnotationTypeSpec {
+class ParticipantAnnotationTypeSpec {
   //  args(
   //    //include = "tag1",
   //    sequential = true) // forces all tests to be run sequentially
   //
-  //  val nameGenerator = new NameGenerator(classOf[SpecimenLinkAnnotationTypeSpec].getSimpleName)
+  //  val nameGenerator = new NameGenerator(classOf[ParticipantAnnotationTypeSpec].getSimpleName)
   //  val studyName = nameGenerator.next[Study]
   //  val studyEvent = await(studyService.addStudy(new AddStudyCmd(studyName, Some(studyName)))) | null
   //  val studyId = StudyId(studyEvent.id)
   //
-  //  "SpecimenLink annotation type" can {
+  //  "Participant annotation type" can {
   //
   //    "be added" in {
   //      val name = nameGenerator.next[AnnotationType]
   //      val valueType = AnnotationValueType.Text
   //
-  //      val at1 = await(studyService.addSpecimenLinkAnnotationType(
-  //        new AddSpecimenLinkAnnotationTypeCmd(studyId.id, name, Some(name), valueType)))
+  //      val at1 = await(studyService.addParticipantAnnotationType(
+  //        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name), valueType)))
   //
   //      at1 must beSuccessful.like {
   //        case x =>
@@ -40,9 +40,9 @@ class SpecimenLinkAnnotationTypeSpec {
   //          x.valueType must beEqualTo(valueType)
   //          x.maxValueCount must beNone
   //          x.options must beNone
-  //          specimenLinkAnnotationTypeRepository.annotationTypeWithId(
+  //          participantAnnotationTypeRepository.annotationTypeWithId(
   //            studyId, x.annotationTypeId) must beSuccessful
-  //          specimenLinkAnnotationTypeRepository.allAnnotationTypesForStudy(
+  //          participantAnnotationTypeRepository.allAnnotationTypesForStudy(
   //            studyId).size mustEqual 1
   //      }
   //
@@ -51,8 +51,8 @@ class SpecimenLinkAnnotationTypeSpec {
   //      val maxValueCount2 = Some(2)
   //      val options = Some(Map("1" -> "a", "2" -> "b"))
   //
-  //      val at2 = await(studyService.addSpecimenLinkAnnotationType(
-  //        new AddSpecimenLinkAnnotationTypeCmd(studyId.id, name2, None,
+  //      val at2 = await(studyService.addParticipantAnnotationType(
+  //        new AddParticipantAnnotationTypeCmd(studyId.id, name2, None,
   //          valueType2, maxValueCount2, options)))
   //
   //      at2 must beSuccessful.like {
@@ -63,9 +63,9 @@ class SpecimenLinkAnnotationTypeSpec {
   //          x.valueType must beEqualTo(valueType2)
   //          x.maxValueCount must be(maxValueCount2)
   //          x.options must be(options)
-  //          specimenLinkAnnotationTypeRepository.annotationTypeWithId(
+  //          participantAnnotationTypeRepository.annotationTypeWithId(
   //            studyId, x.annotationTypeId) must beSuccessful
-  //          specimenLinkAnnotationTypeRepository.allAnnotationTypesForStudy(
+  //          participantAnnotationTypeRepository.allAnnotationTypesForStudy(
   //            studyId).size mustEqual 2
   //      }
   //    } tag ("tag1")
@@ -75,19 +75,19 @@ class SpecimenLinkAnnotationTypeSpec {
   //      val valueType = AnnotationValueType.Text
   //      val maxValueCount = None
   //
-  //      val at1 = await(studyService.addSpecimenLinkAnnotationType(
-  //        new AddSpecimenLinkAnnotationTypeCmd(studyId.id, name, Some(name),
+  //      val at1 = await(studyService.addParticipantAnnotationType(
+  //        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name),
   //          valueType, maxValueCount, None))) | null
   //
-  //      specimenLinkAnnotationTypeRepository.annotationTypeWithId(
+  //      participantAnnotationTypeRepository.annotationTypeWithId(
   //        studyId, at1.annotationTypeId) must beSuccessful
   //
   //      val valueType2 = AnnotationValueType.Select
   //      val maxValueCount2 = Some(2)
   //      val options = Some(Map("1" -> "a", "2" -> "b"))
   //
-  //      val at2 = await(studyService.addSpecimenLinkAnnotationType(
-  //        new AddSpecimenLinkAnnotationTypeCmd(studyId.id, name, Some(name),
+  //      val at2 = await(studyService.addParticipantAnnotationType(
+  //        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name),
   //          valueType2, maxValueCount2, options)))
   //
   //      at2 must beFailing.like {
@@ -99,8 +99,8 @@ class SpecimenLinkAnnotationTypeSpec {
   //      val name = nameGenerator.next[AnnotationType]
   //      val valueType = AnnotationValueType.Text
   //
-  //      val at1 = await(studyService.addSpecimenLinkAnnotationType(
-  //        new AddSpecimenLinkAnnotationTypeCmd(studyId.id, name, Some(name),
+  //      val at1 = await(studyService.addParticipantAnnotationType(
+  //        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name),
   //          valueType))) | null
   //
   //      val name2 = nameGenerator.next[Study]
@@ -108,9 +108,9 @@ class SpecimenLinkAnnotationTypeSpec {
   //      val maxValueCount2 = Some(2)
   //      val options = Some(Map("1" -> "a", "2" -> "b"))
   //
-  //      val at2 = await(studyService.updateSpecimenLinkAnnotationType(
-  //        new UpdateSpecimenLinkAnnotationTypeCmd(
-  //          at1.annotationTypeId.toString, Some(at1.version), studyId.id, name2, None, valueType2,
+  //      val at2 = await(studyService.updateParticipantAnnotationType(
+  //        new UpdateParticipantAnnotationTypeCmd(
+  //          at1.annotationTypeId, Some(at1.version), studyId.id, name2, None, valueType2,
   //          maxValueCount2, options)))
   //
   //      at2 must beSuccessful.like {
@@ -121,7 +121,7 @@ class SpecimenLinkAnnotationTypeSpec {
   //          x.valueType must beEqualTo(valueType2)
   //          x.maxValueCount must be(maxValueCount2)
   //          x.options must be(options)
-  //          specimenLinkAnnotationTypeRepository.annotationTypeWithId(
+  //          participantAnnotationTypeRepository.annotationTypeWithId(
   //            studyId, x.annotationTypeId) must beSuccessful
   //      }
   //    }
@@ -131,10 +131,10 @@ class SpecimenLinkAnnotationTypeSpec {
   //      val valueType = AnnotationValueType.Text
   //      val maxValueCount = None
   //
-  //      val at1 = await(studyService.addSpecimenLinkAnnotationType(
-  //        new AddSpecimenLinkAnnotationTypeCmd(studyId.id, name, Some(name),
+  //      val at1 = await(studyService.addParticipantAnnotationType(
+  //        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name),
   //          valueType, maxValueCount, None))) | null
-  //      specimenLinkAnnotationTypeRepository.annotationTypeWithId(
+  //      participantAnnotationTypeRepository.annotationTypeWithId(
   //        studyId, at1.annotationTypeId) must beSuccessful
   //
   //      val name2 = nameGenerator.next[AnnotationType]
@@ -142,16 +142,16 @@ class SpecimenLinkAnnotationTypeSpec {
   //      val maxValueCount2 = Some(2)
   //      val options = Some(Map("1" -> "a", "2" -> "b"))
   //
-  //      val at2 = await(studyService.addSpecimenLinkAnnotationType(
-  //        new AddSpecimenLinkAnnotationTypeCmd(studyId.id, name2, None,
+  //      val at2 = await(studyService.addParticipantAnnotationType(
+  //        new AddParticipantAnnotationTypeCmd(studyId.id, name2, None,
   //          valueType2, maxValueCount2, options))) | null
   //
-  //      specimenLinkAnnotationTypeRepository.annotationTypeWithId(
+  //      participantAnnotationTypeRepository.annotationTypeWithId(
   //        studyId, at2.annotationTypeId) must beSuccessful
   //
-  //      val at3 = await(studyService.updateSpecimenLinkAnnotationType(
-  //        new UpdateSpecimenLinkAnnotationTypeCmd(
-  //          at2.annotationTypeId.toString, Some(at2.version), studyId.id, name, Some(name), valueType,
+  //      val at3 = await(studyService.updateParticipantAnnotationType(
+  //        new UpdateParticipantAnnotationTypeCmd(
+  //          at2.annotationTypeId, Some(at2.version), studyId.id, name, Some(name), valueType,
   //          maxValueCount, options)))
   //      at3 must beFailing.like {
   //        case msgs => msgs.head must contain("name already exists")
@@ -163,8 +163,8 @@ class SpecimenLinkAnnotationTypeSpec {
   //      val valueType = AnnotationValueType.Text
   //      val maxValueCount = 0
   //
-  //      val at1 = await(studyService.addSpecimenLinkAnnotationType(
-  //        new AddSpecimenLinkAnnotationTypeCmd(studyId.id, name, Some(name),
+  //      val at1 = await(studyService.addParticipantAnnotationType(
+  //        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name),
   //          valueType, None, None))) | null
   //
   //      val name2 = nameGenerator.next[Study]
@@ -174,9 +174,9 @@ class SpecimenLinkAnnotationTypeSpec {
   //
   //      val study2 = await(studyService.addStudy(new AddStudyCmd(name2, None))) | null
   //
-  //      val at2 = await(studyService.updateSpecimenLinkAnnotationType(
-  //        new UpdateSpecimenLinkAnnotationTypeCmd(
-  //          at1.annotationTypeId.toString, Some(at1.version), study2.id.toString, name2, None, valueType2,
+  //      val at2 = await(studyService.updateParticipantAnnotationType(
+  //        new UpdateParticipantAnnotationTypeCmd(
+  //          at1.annotationTypeId, Some(at1.version), study2.id, name2, None, valueType2,
   //          maxValueCount2, options)))
   //      at2 must beFailing.like { case msgs => msgs.head must contain("study does not have annotation type") }
   //    }
@@ -185,8 +185,8 @@ class SpecimenLinkAnnotationTypeSpec {
   //      val name = nameGenerator.next[AnnotationType]
   //      val valueType = AnnotationValueType.Text
   //
-  //      val at1 = await(studyService.addSpecimenLinkAnnotationType(
-  //        new AddSpecimenLinkAnnotationTypeCmd(studyId.id, name, Some(name),
+  //      val at1 = await(studyService.addParticipantAnnotationType(
+  //        new AddParticipantAnnotationTypeCmd(studyId.id, name, Some(name),
   //          valueType, None, None))) | null
   //
   //      val name2 = nameGenerator.next[Study]
@@ -195,9 +195,9 @@ class SpecimenLinkAnnotationTypeSpec {
   //      val options = Some(Map("1" -> "a", "2" -> "b"))
   //      val versionOption = Some(at1.version + 1)
   //
-  //      val at2 = await(studyService.updateSpecimenLinkAnnotationType(
-  //        new UpdateSpecimenLinkAnnotationTypeCmd(
-  //          at1.annotationTypeId.toString, versionOption, studyId.id, name2, None, valueType2,
+  //      val at2 = await(studyService.updateParticipantAnnotationType(
+  //        new UpdateParticipantAnnotationTypeCmd(
+  //          at1.annotationTypeId, versionOption, studyId.id, name2, None, valueType2,
   //          maxValueCount2, options)))
   //      at2 must beFailing.like {
   //        case msgs => msgs.head must contain("doesn't match current version")
@@ -208,19 +208,19 @@ class SpecimenLinkAnnotationTypeSpec {
   //      val name = nameGenerator.next[AnnotationType]
   //      val valueType = AnnotationValueType.Text
   //
-  //      val at1 = await(studyService.addSpecimenLinkAnnotationType(
-  //        new AddSpecimenLinkAnnotationTypeCmd(
+  //      val at1 = await(studyService.addParticipantAnnotationType(
+  //        new AddParticipantAnnotationTypeCmd(
   //          studyId.id, name, Some(name), valueType))) | null
-  //      specimenLinkAnnotationTypeRepository.annotationTypeWithId(
+  //      participantAnnotationTypeRepository.annotationTypeWithId(
   //        studyId, at1.annotationTypeId) must beSuccessful
   //
-  //      val at2 = await(studyService.removeSpecimenLinkAnnotationType(
-  //        new RemoveSpecimenLinkAnnotationTypeCmd(
-  //          at1.annotationTypeId.toString, Some(at1.version), studyId.id)))
+  //      val at2 = await(studyService.removeParticipantAnnotationType(
+  //        new RemoveParticipantAnnotationTypeCmd(
+  //          at1.annotationTypeId, Some(at1.version), studyId.id)))
   //
   //      at2 must beSuccessful.like {
   //        case x =>
-  //          specimenLinkAnnotationTypeRepository.annotationTypeWithId(
+  //          participantAnnotationTypeRepository.annotationTypeWithId(
   //            studyId, x.annotationTypeId) must beFailing
   //      }
   //    }
@@ -229,20 +229,20 @@ class SpecimenLinkAnnotationTypeSpec {
   //      val name = nameGenerator.next[AnnotationType]
   //      val valueType = AnnotationValueType.Text
   //
-  //      val at1 = await(studyService.addSpecimenLinkAnnotationType(
-  //        new AddSpecimenLinkAnnotationTypeCmd(
+  //      val at1 = await(studyService.addParticipantAnnotationType(
+  //        new AddParticipantAnnotationTypeCmd(
   //          studyId.id, name, Some(name), valueType))) | null
-  //      specimenLinkAnnotationTypeRepository.annotationTypeWithId(
+  //      participantAnnotationTypeRepository.annotationTypeWithId(
   //        studyId, at1.annotationTypeId) must beSuccessful
   //
   //      val versionOption = Some(at1.version + 1)
-  //      val at2 = await(studyService.removeSpecimenLinkAnnotationType(
-  //        new RemoveSpecimenLinkAnnotationTypeCmd(
-  //          at1.annotationTypeId.toString, versionOption, studyId.id)))
+  //      val at2 = await(studyService.removeParticipantAnnotationType(
+  //        new RemoveParticipantAnnotationTypeCmd(
+  //          at1.annotationTypeId, versionOption, studyId.id)))
   //      at2 must beFailing.like {
   //        case msgs => msgs.head must contain("doesn't match current version")
   //      }
   //    }
   //  }
-
+  //
 }
