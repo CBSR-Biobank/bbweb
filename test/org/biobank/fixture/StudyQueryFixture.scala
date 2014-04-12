@@ -5,7 +5,7 @@ import org.biobank.service._
 import org.biobank.service.study._
 import org.biobank.domain._
 import org.biobank.domain.study._
-import org.biobank.query.model._
+//import org.biobank.query.model._
 
 import play.api.Mode
 import play.api.Mode._
