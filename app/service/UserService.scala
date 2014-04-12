@@ -34,7 +34,7 @@ trait UserServiceComponent {
     def findByEmailAndProvider(
       email: String, providerId: String): Option[securesocial.core.Identity]
 
-    def getByEmail(email: String): Option[User]
+    def getByEmail(email: String): DomainValidation[User]
 
     def add(cmd: AddUserCommand): Future[DomainValidation[UserAddedEvent]]
 
@@ -50,20 +50,24 @@ trait UserServiceComponentImpl extends UserServiceComponent {
 
     def find(id: securesocial.core.IdentityId): Option[securesocial.core.Identity] = {
       userRepository.userWithId(UserId(id.userId)) match {
-        case Some(user) => Some(toSecureSocialIdentity(user))
-        case None => none
+        case Success(user) => Some(toSecureSocialIdentity(user))
+        case Failure(err) =>
+          log.error(err.list.mkString(","))
+          none
       }
     }
 
     def findByEmailAndProvider(
       email: String, providerId: String): Option[securesocial.core.Identity] = {
       userRepository.userWithId(UserId(email)) match {
-        case Some(user) => some(toSecureSocialIdentity(user))
-        case None => none
+        case Success(user) => some(toSecureSocialIdentity(user))
+        case Failure(err) =>
+          log.error(err.list.mkString(","))
+          none
       }
     }
 
-    def getByEmail(email: String): Option[User] = {
+    def getByEmail(email: String): DomainValidation[User] = {
       userRepository.userWithId(UserId(email))
     }
 
@@ -75,7 +79,7 @@ trait UserServiceComponentImpl extends UserServiceComponent {
     }
 
     def add(cmd: AddUserCommand): Future[DomainValidation[UserAddedEvent]] = {
-      log.info(s"add: $cmd")
+      log.debug(s"add: $cmd")
       userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserAddedEvent]])
     }
 
@@ -104,12 +108,15 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
           validation match {
             case Success(user) =>
               userRepository.add(user)
+              log.info(s"updateState: user added to repository: ${user.email}")
             case Failure(x) =>
               // this should never happen because the only way to get here is if the
               // command passed validation
               throw new IllegalStateException("creating user from event failed")
           }
-          log.debug(s"updateState: $event")
+
+        case eventUserActivatedEvent =>
+
       }
     }
 
@@ -125,20 +132,53 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     val receiveCommand: Receive = {
       case cmd: AddUserCommand =>
         log.debug(s"receiveCommand: $cmd")
-        sender() ! addUser(cmd)
+        addUser(cmd)
+
+      case cmd: ActivateUserCommand =>
+        activateUser(cmd)
 
       case "snap" =>
         saveSnapshot(SnapshotState(userRepository.allUsers))
         stash()
     }
 
-    def addUser(cmd: AddUserCommand) = {
-      for {
+    def addUser(cmd: AddUserCommand): DomainValidation[UserAddedEvent] = {
+      val validation = for {
         emailAvailable <- userRepository.emailAvailable(cmd.email)
-        user <- RegisteredUser.create(cmd)
-        event <- UserAddedEvent(cmd).success
-        p <- persist(event) { e => updateState(e) }.success
-      } yield event
+        user <- RegisteredUser.create(UserId(cmd.email), -1L, cmd.name, cmd.email,
+          cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl)
+        event <- UserAddedEvent(user.id.toString, user.version, user.name, user.email,
+          user.password, user.hasher, user.salt, user.avatarUrl).success
+      } yield {
+        persist(event) { e => userRepository.add(user) }
+        event
+      }
+
+      sender ! validation
+      validation
+    }
+
+    def activateUser(cmd: ActivateUserCommand): DomainValidation[UserActivatedEvent] = {
+      val validation = for {
+        user <- userRepository.userWithId(UserId(cmd.email))
+        registeredUser <- isRegisteredUser(user)
+        validVersion <- registeredUser.requireVersion(cmd.expectedVersion)
+        activatedUser <- registeredUser.activate
+        event <- UserActivatedEvent(activatedUser.id.toString).success
+      } yield {
+        persist(event) { e => userRepository.update(activatedUser) }
+        event
+      }
+
+      sender ! validation
+      validation
+    }
+
+    def isRegisteredUser(user: User): DomainValidation[RegisteredUser] = {
+      user match {
+        case registeredUser: RegisteredUser => registeredUser.success
+        case _ => DomainError(s"the user is not registered").failNel
+      }
     }
   }
 }

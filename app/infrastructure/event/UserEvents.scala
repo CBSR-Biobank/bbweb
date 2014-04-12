@@ -1,13 +1,15 @@
 package infrastructure.event
 
-import infrastructure.command.UserCommands._
+import infrastructure._
+import infrastructure.event.Events._
 
 object UserEvents {
 
-  sealed trait UserEvent
+  sealed trait UserEvent //extends Event
 
-  case class UserAddedEvent private (
+  case class UserAddedEvent(
     id: String,
+    version: Long,
     name: String,
     email: String,
     password: String,
@@ -15,14 +17,9 @@ object UserEvents {
     salt: Option[String],
     avatarUrl: Option[String])
     extends UserEvent
+  with Identity
 
-  object UserAddedEvent {
-
-    def apply(cmd: AddUserCommand): UserAddedEvent = {
-      UserAddedEvent(cmd.email, cmd.name, cmd.email, cmd.password, cmd.hasher, cmd.salt,
-        cmd.avatarUrl)
-    }
-
-  }
+  case class UserActivatedEvent(id: String) extends UserEvent
+  with Identity
 
 }

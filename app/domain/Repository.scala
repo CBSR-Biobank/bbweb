@@ -1,11 +1,9 @@
 package domain
 
 import scala.concurrent.stm.Ref
-import scala.reflect.ClassTag
-import org.slf4j.LoggerFactory
 
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 
 /**
  * A Wrapper around an STM Ref of a Map.
@@ -16,7 +14,12 @@ private[domain] class ReadRepository[K, A](keyGetter: (A) => K) {
   protected val internalMap: Ref[Map[K, A]] = Ref(Map.empty[K, A])
 
   protected def getMap = internalMap.single.get
-  protected def getByKey(key: K): Option[A] = getMap.get(key)
+  protected def getByKey(key: K): DomainValidation[A] = {
+    getMap.get(key) match {
+      case Some(value) => value.success
+      case None => DomainError(s"value with key $key not found").failNel
+    }
+  }
   protected def getValues: Iterable[A] = getMap.values
   protected def getKeys: Iterable[K] = getMap.keys
 

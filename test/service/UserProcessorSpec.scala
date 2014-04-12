@@ -53,6 +53,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       waitNonBlocking(future) { r =>
         r match {
           case Success(event) =>
+            event.id.toString should be(email)
             event.name should be(name)
             event.email should be(email)
             event.password should be(password)
@@ -60,8 +61,8 @@ class UserProcessorSpec extends UserProcessorFixture {
             event.salt should be(salt)
             event.avatarUrl should be(avatarUrl)
 
-            userRepository.userWithId(UserId(event.id)).map { u =>
-              u.version should be(0L)
+            userRepository.userWithId(UserId(event.id)).map { user =>
+              user.email should be(email)
             }
 
           case Failure(msg) =>
@@ -80,22 +81,41 @@ class UserProcessorSpec extends UserProcessorFixture {
       val avatarUrl = Some("http://test.com/")
 
       val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      val future = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
+      val r = waitBlocking(ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]])
 
-      waitBlocking(future) match {
-        case Failure(msg) =>
-          fail(msg.list.mkString(", "))
-        case Success(event) =>
-      }
+      val user = r.getOrElse(fail("failure response from processor"))
+      user.email should be(email)
 
-      val future2 = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
-      waitBlocking(future2) match {
-        case Success(event) =>
-          fail
+      waitBlocking(ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]) match {
+        case Success(event) => fail
 
         case Failure(msg) =>
           msg.list.mkString(",") should startWith("user already exists")
       }
+    }
+
+    "activate a user" in {
+      val name = nameGenerator.next[User]
+      val email = "user3@test.com"
+      val password = nameGenerator.next[User]
+      val hasher = nameGenerator.next[User]
+      val salt = Some(nameGenerator.next[User])
+      val avatarUrl = Some("http://test.com/")
+
+      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
+      val r = waitBlocking(ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]])
+
+      val event = r.getOrElse(fail("failure response from processor"))
+
+      waitBlocking(ask(userProcessor, ActivateUserCommand(event.email, Some(event.version)))
+        .mapTo[DomainValidation[UserActivatedEvent]]) match {
+        case Success(event) =>
+          event.id should be(email)
+
+        case Failure(msg) =>
+          fail(msg.list.mkString(","))
+      }
+
     }
   }
 }

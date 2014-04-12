@@ -13,7 +13,7 @@ trait UserRepositoryComponent {
 
     def allUsers(): Set[User]
 
-    def userWithId(userId: UserId): Option[User]
+    def userWithId(userId: UserId): DomainValidation[User]
 
     def emailAvailable(email: String): DomainValidation[Boolean]
 
@@ -36,21 +36,21 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
       getValues.toSet
     }
 
-    def userWithId(userId: UserId): Option[User] = getByKey(userId)
+    def userWithId(userId: UserId): DomainValidation[User] = getByKey(userId)
 
     def emailAvailable(email: String): DomainValidation[Boolean] = {
       getByKey(new UserId(email)) match {
-        case None => true.success
-        case Some(user) => DomainError(s"user already exists: $email").failNel
+        case Failure(err) => true.success
+        case Success(user) => DomainError(s"user already exists: $email").failNel
       }
     }
 
     def add(user: RegisteredUser): RegisteredUser = {
       getByKey(user.id) match {
-        case Some(prevItem) =>
+        case Success(prevItem) =>
           throw new IllegalArgumentException(s"user with ID already exists: ${user.id}")
 
-        case None =>
+        case Failure(err) =>
           updateMap(user)
           user
       }
@@ -58,9 +58,9 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
 
     def update(user: User): DomainValidation[User] = {
       getByKey(user.id) match {
-        case None =>
+        case Failure(err) =>
           throw new IllegalArgumentException(s"user does not exist: { userId: ${user.id} }")
-        case Some(prevUser) =>
+        case Success(prevUser) =>
           for {
             validVersion <- prevUser.requireVersion(Some(user.version))
             updatedItem <- updateMap(user).success

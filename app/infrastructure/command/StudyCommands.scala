@@ -6,6 +6,7 @@ import domain.PreservationType._
 import domain.PreservationTemperatureType._
 import domain.SpecimenType._
 import domain.AnnotationValueType._
+import infrastructure._
 import infrastructure.command.Commands._
 
 object StudyCommands {
@@ -23,17 +24,23 @@ object StudyCommands {
     expectedVersion: Option[Long],
     name: String,
     description: Option[String] = None)
-    extends StudyCommand with HasExpectedVersion
+    extends StudyCommand
+    with Identity 
+    with HasExpectedVersion
 
   case class EnableStudyCmd(
     id: String,
     expectedVersion: Option[Long])
-    extends StudyCommand with HasExpectedVersion
+    extends StudyCommand
+    with Identity 
+    with HasExpectedVersion
 
   case class DisableStudyCmd(
     id: String,
     expectedVersion: Option[Long])
-    extends StudyCommand with HasExpectedVersion
+    extends StudyCommand
+    with Identity 
+    with HasExpectedVersion
 
   // specimen group commands
   trait SpecimenGroupCommand extends StudyCommand with StudyIdentity
@@ -47,7 +54,7 @@ object StudyCommands {
     preservationType: PreservationType,
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType)
-    extends SpecimenGroupCommand
+    extends SpecimenGroupCommand with StudyIdentity
 
   case class UpdateSpecimenGroupCmd(
     id: String,
@@ -60,13 +67,17 @@ object StudyCommands {
     preservationType: PreservationType,
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType)
-    extends SpecimenGroupCommand with HasExpectedVersion
+    extends SpecimenGroupCommand
+    with Identity 
+    with StudyIdentity with HasExpectedVersion
 
   case class RemoveSpecimenGroupCmd(
     id: String,
     expectedVersion: Option[Long],
     studyId: String)
-    extends SpecimenGroupCommand with HasExpectedVersion
+    extends SpecimenGroupCommand
+    with Identity 
+    with HasExpectedVersion
 
   // collection event commands
   trait CollectionEventTypeCommand extends StudyCommand with StudyIdentity
@@ -78,7 +89,7 @@ object StudyCommands {
     recurring: Boolean,
     specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
     annotationTypeData: Set[CollectionEventTypeAnnotationType])
-    extends CollectionEventTypeCommand
+    extends CollectionEventTypeCommand with StudyIdentity
 
   case class UpdateCollectionEventTypeCmd(
     id: String,
@@ -89,13 +100,17 @@ object StudyCommands {
     recurring: Boolean,
     specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
     annotationTypeData: Set[CollectionEventTypeAnnotationType])
-    extends CollectionEventTypeCommand with HasExpectedVersion
+    extends CollectionEventTypeCommand
+    with Identity
+    with HasExpectedVersion
 
   case class RemoveCollectionEventTypeCmd(
     id: String,
     expectedVersion: Option[Long],
     studyId: String)
-    extends CollectionEventTypeCommand with HasExpectedVersion
+    extends CollectionEventTypeCommand
+    with Identity 
+    with HasExpectedVersion
 
   // study annotation type commands
   trait StudyAnnotationTypeCommand extends StudyCommand with StudyIdentity
@@ -120,13 +135,19 @@ object StudyCommands {
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
     options: Option[Map[String, String]] = None)
-    extends CollectionEventAnnotationTypeCommand with HasExpectedVersion
+    extends CollectionEventAnnotationTypeCommand
+    with Identity
+    with StudyIdentity
+    with HasExpectedVersion
 
   case class RemoveCollectionEventAnnotationTypeCmd(
     id: String,
     expectedVersion: Option[Long],
     studyId: String)
-    extends CollectionEventAnnotationTypeCommand with HasExpectedVersion
+    extends CollectionEventAnnotationTypeCommand
+    with Identity
+    with StudyIdentity
+    with HasExpectedVersion
 
   // participant annotation type
   trait ParticipantAnnotationTypeCommand extends StudyAnnotationTypeCommand
@@ -140,6 +161,7 @@ object StudyCommands {
     options: Option[Map[String, String]] = None,
     required: Boolean = false)
     extends ParticipantAnnotationTypeCommand
+    with StudyIdentity
 
   case class UpdateParticipantAnnotationTypeCmd(
     id: String,
@@ -151,13 +173,18 @@ object StudyCommands {
     maxValueCount: Option[Int] = None,
     options: Option[Map[String, String]] = None,
     required: Boolean = false)
-    extends ParticipantAnnotationTypeCommand with HasExpectedVersion
+    extends ParticipantAnnotationTypeCommand
+    with Identity
+    with StudyIdentity
+    with HasExpectedVersion
 
   case class RemoveParticipantAnnotationTypeCmd(
     id: String,
     expectedVersion: Option[Long],
     studyId: String)
-    extends ParticipantAnnotationTypeCommand with HasExpectedVersion
+    extends ParticipantAnnotationTypeCommand
+    with Identity
+    with HasExpectedVersion
 
   // specimen link annotation type
   trait SpecimenLinkAnnotationTypeCommand extends StudyAnnotationTypeCommand
@@ -170,6 +197,7 @@ object StudyCommands {
     maxValueCount: Option[Int] = None,
     options: Option[Map[String, String]] = None)
     extends SpecimenLinkAnnotationTypeCommand
+    with StudyIdentity
 
   case class UpdateSpecimenLinkAnnotationTypeCmd(
     id: String,
@@ -180,12 +208,18 @@ object StudyCommands {
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
     options: Option[Map[String, String]] = None)
-    extends SpecimenLinkAnnotationTypeCommand with HasExpectedVersion
+    extends SpecimenLinkAnnotationTypeCommand
+    with Identity
+    with StudyIdentity
+    with HasExpectedVersion
 
   case class RemoveSpecimenLinkAnnotationTypeCmd(
     id: String,
     expectedVersion: Option[Long],
     studyId: String)
-    extends SpecimenLinkAnnotationTypeCommand with HasExpectedVersion
+    extends SpecimenLinkAnnotationTypeCommand
+    with Identity
+    with StudyIdentity
+    with HasExpectedVersion
 
 }

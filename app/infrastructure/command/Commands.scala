@@ -1,5 +1,7 @@
 package infrastructure.command
 
+import infrastructure._
+
 object Commands {
 
   trait Command
@@ -7,3 +9,4 @@ object Commands {
   trait HasExpectedVersion { val expectedVersion: Option[Long] }
 
 }
+

@@ -1,7 +1,7 @@
 package domain
 
 import domain.validator.UserValidator
-import infrastructure.command.UserCommands._
+import infrastructure.event.UserEvents._
 
 import org.slf4j.LoggerFactory
 import scalaz._
@@ -62,11 +62,6 @@ object RegisteredUser extends UserValidator {
       validateAvatarUrl(avatarUrl).toValidationNel) {
         RegisteredUser(_, _, _, _, _, _, _, _)
       }
-  }
-
-  def create(cmd: AddUserCommand): DomainValidation[RegisteredUser] = {
-    create(UserId(cmd.email), -1L, cmd.name, cmd.email, cmd.password, cmd.hasher, cmd.salt,
-      cmd.avatarUrl)
   }
 
 }

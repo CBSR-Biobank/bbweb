@@ -15,4 +15,9 @@ object UserCommands {
     avatarUrl: Option[String])
     extends UserCommand
 
+  case class ActivateUserCommand(
+    email: String,
+    expectedVersion: Option[Long])
+    extends UserCommand
+
 }

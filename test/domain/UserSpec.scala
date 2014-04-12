@@ -1,7 +1,7 @@
 package domain
 
 import fixture.NameGenerator
-import infrastructure.command.UserCommands._
+import infrastructure.event.UserEvents._
 
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
@@ -75,29 +75,6 @@ class UserSpec extends WordSpecLike with Matchers {
       val unlockedUser = lockedUser.unlock.getOrElse(fail("could not unlock user"))
       unlockedUser shouldBe a[ActiveUser]
       unlockedUser.version should be(lockedUser.version + 1)
-    }
-
-    "can be created from a command" in {
-      val name = nameGenerator.next[User]
-      val email = "user1@test.com"
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
-      val avatarUrl = Some("http://test.com/")
-
-      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      val v = RegisteredUser.create(cmd)
-      val user = v.getOrElse(fail("could not create user"))
-      user shouldBe a[RegisteredUser]
-
-      user.id.toString should be(email)
-      user.version should be(0L)
-      user.name should be(name)
-      user.email should be(email)
-      user.password should be(password)
-      user.hasher should be(hasher)
-      user.salt should be(salt)
-      user.avatarUrl should be(avatarUrl)
     }
   }
 
