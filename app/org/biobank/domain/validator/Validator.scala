@@ -5,7 +5,7 @@ import org.biobank.domain._
 import scalaz._
 import scalaz.Scalaz._
 
-private[validator] trait Validator {
+private[domain] trait Validator {
 
   def validateNonEmpty(fieldName: String, field: String): Validation[String, String] = {
     if ((field == null) || field.isEmpty()) {

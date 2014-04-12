@@ -13,7 +13,7 @@ import org.biobank.domain.{
 }
 
 import org.biobank.domain.study._
-import Study._
+import org.biobank.domain.study.Study
 
 import akka.actor._
 import akka.pattern.ask
@@ -84,10 +84,10 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
     private def validateStudy(studyId: StudyId): DomainValidation[DisabledStudy] =
       studyRepository.studyWithId(studyId) match {
-        case Failure(msglist) => noSuchStudy(studyId).failNel
+        case Failure(msglist) => DomainError(s"no study with id: $studyId").failNel
         case Success(study) => study match {
-          case _: EnabledStudy => notDisabledError(study.name).failNel
           case dstudy: DisabledStudy => dstudy.success
+          case _ => DomainError("study is not disabled: ${study.name}").failNel
         }
       }
 
@@ -108,29 +108,28 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
       val e = for {
         nameAvailable <- studyRepository.nameAvailable(cmd.name)
-        newStudy <- DisabledStudy(
+        newStudy <- DisabledStudy.create(
           studyId,
           version = 0L,
           cmd.name,
-          cmd.description).successNel
+          cmd.description)
         event <- StudyAddedEvent(
-          newStudy.id.id,
+          newStudy.id.toString,
           newStudy.version,
           newStudy.name,
           newStudy.description).successNel
-      } yield event
-
-      e.map(event =>
-        persist(event) { e =>
-          context.system.eventStream.publish(e)
-        })
+      } yield {
+        persist(event) { e => context.system.eventStream.publish(e) }
+        event
+      }
       e
     }
 
     private def updateStudy(cmd: UpdateStudyCmd): DomainValidation[StudyUpdatedEvent] = {
       for {
-        newItem <- studyRepository.update(DisabledStudy(
-          new StudyId(cmd.id), cmd.expectedVersion.getOrElse(-1), cmd.name, cmd.description))
+        study <- DisabledStudy.create(
+          new StudyId(cmd.id), cmd.expectedVersion.getOrElse(-1), cmd.name, cmd.description)
+        newItem <- studyRepository.update(study)
         event <- StudyUpdatedEvent(newItem.id.id, newItem.version, newItem.name, newItem.description).success
       } yield event
     }

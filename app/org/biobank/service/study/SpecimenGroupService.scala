@@ -10,7 +10,7 @@ import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
 import org.biobank.domain.study._
-import org.biobank.domain.study.Study._
+import org.biobank.domain.study.Study
 import org.slf4j.LoggerFactory
 
 import scalaz._

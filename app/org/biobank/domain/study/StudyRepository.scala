@@ -81,8 +81,8 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
         prevStudy <- studyWithId(study.id)
         validVersion <- prevStudy.requireVersion(Some(study.version))
         nameValid <- nameAvailable(study.name)
-        updatedItem <- DisabledStudy(
-          study.id, prevStudy.version + 1, study.name, study.description).success
+        updatedItem <- DisabledStudy.create(
+          study.id, prevStudy.version + 1, study.name, study.description)
         repoItem <- updateMap(updatedItem).success
       } yield updatedItem
     }

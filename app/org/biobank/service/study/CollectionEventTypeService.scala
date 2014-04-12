@@ -3,7 +3,7 @@ package org.biobank.service.study
 import org.biobank.service.Messages._
 import org.biobank.domain._
 import org.biobank.domain.study._
-import org.biobank.domain.study.Study._
+import org.biobank.domain.study.Study
 import org.slf4j.LoggerFactory
 import org.biobank.service._
 import org.biobank.infrastructure.command.StudyCommands._

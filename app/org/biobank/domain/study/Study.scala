@@ -1,7 +1,7 @@
 package org.biobank.domain.study
 
 import org.biobank.domain._
-import org.biobank.domain.validator._
+import org.biobank.domain.validator.StudyValidator
 
 import scalaz._
 import scalaz.Scalaz._
@@ -12,10 +12,11 @@ sealed trait Study
     with HasDescriptionOption {
   val name: String
   val description: Option[String]
+  val status: String
 
   override def toString =
     s"""
-       | id: $di,
+       | id: $id,
        | version: $version,
        | name: $name,
        | description: $description
@@ -30,51 +31,55 @@ case class DisabledStudy private (
   description: Option[String])
   extends Study {
 
-}
+  override val status: String = "Disabled"
 
-object DisabledStudy {
-
-  def create(
-  id: StudyId,
-  version: Long = -1,
-  name: String,
-  description: Option[String]): DomainValidation[DisabledStudy] = {
-    (validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty("name", name).toValidationNel |@|
-      validateNonEmptyOption("description", salt).toValidationNel {
-        DisabledStudy(_, _, _, _)
-      }
-  }
-
-  def enable(study: DiabledStudy): DomainValidation[EnabledStudy] = {
+  def enable: DomainValidation[EnabledStudy] = {
     EnabledStudy.create(this)
   }
 
-  def retire(study: DisabledStudy): DomainValidation[RetiredStudy] = {
+  def retire: DomainValidation[RetiredStudy] = {
     RetiredStudy.create(this)
+  }
+
+}
+
+object DisabledStudy extends StudyValidator {
+
+  def create(
+    id: StudyId,
+    version: Long,
+    name: String,
+    description: Option[String]): DomainValidation[DisabledStudy] = {
+    (validateId(id).toValidationNel |@|
+      validateAndIncrementVersion(version).toValidationNel |@|
+      validateNonEmpty("name", name).toValidationNel |@|
+      validateNonEmptyOption("description", description).toValidationNel) {
+        DisabledStudy(_, _, _, _)
+      }
   }
 }
 
 
 case class EnabledStudy private (
   id: StudyId,
-  version: Long = -1,
+  version: Long,
   name: String,
   description: Option[String])
   extends Study {
 
+  override val status: String = "Enabled"
+
   def disable: DomainValidation[DisabledStudy] =
-    DisabledStudy(id, version + 1, name, description).success
+    DisabledStudy.create(this.id, this.version, this.name, this.description)
 }
 
-object EnabledStudy {
+object EnabledStudy extends StudyValidator {
 
   def create(study: DisabledStudy): DomainValidation[EnabledStudy] = {
-    (validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty("name", name).toValidationNel |@|
-      validateNonEmptyOption("description", salt).toValidationNel {
+    (validateId(study.id).toValidationNel |@|
+      validateAndIncrementVersion(study.version).toValidationNel |@|
+      validateNonEmpty("name", study.name).toValidationNel |@|
+      validateNonEmptyOption("description", study.description).toValidationNel) {
         EnabledStudy(_, _, _, _)
       }
   }
@@ -82,23 +87,25 @@ object EnabledStudy {
 
 case class RetiredStudy private (
   id: StudyId,
-  version: Long = -1,
+  version: Long,
   name: String,
   description: Option[String])
   extends Study {
 
-  def unretire: DomainValidation[RetiredStudy]: DomainValidation[DisabledStudy] = {
-    DisabledStudy.create(this)
+  override val status: String = "Retired"
+
+  def unretire: DomainValidation[DisabledStudy] = {
+    DisabledStudy.create(this.id, this.version, this.name, this.description)
   }
 }
 
-object RetiredStudy {
+object RetiredStudy extends StudyValidator {
 
-  def create(study: DiabledStudy): DomainValidation[RetiredStudy] = {
-    (validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty("name", name).toValidationNel |@|
-      validateNonEmptyOption("description", salt).toValidationNel {
+  def create(study: DisabledStudy): DomainValidation[RetiredStudy] = {
+    (validateId(study.id).toValidationNel |@|
+      validateAndIncrementVersion(study.version).toValidationNel |@|
+      validateNonEmpty("name", study.name).toValidationNel |@|
+      validateNonEmptyOption("description", study.description).toValidationNel) {
         RetiredStudy(_, _, _, _)
       }
   }

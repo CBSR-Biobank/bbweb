@@ -6,7 +6,7 @@ import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service._
 import org.biobank.domain._
 import org.biobank.domain.study._
-import org.biobank.domain.study.Study._
+import org.biobank.domain.study.Study
 import org.biobank.domain.AnnotationValueType._
 
 import org.slf4j.LoggerFactory
