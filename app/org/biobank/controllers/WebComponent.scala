@@ -7,7 +7,7 @@ import play.api.db.slick.plugin.TableScanner
 import play.api.libs.Files
 import play.api.{ Configuration, GlobalSettings, Logger, Mode }
 import play.api.Play.current
-import play.api.db.slick._
+//import play.api.db.slick._
 import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
 import scala.slick.session.Database
 import scala.slick.jdbc.meta._

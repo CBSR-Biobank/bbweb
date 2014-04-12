@@ -12,18 +12,13 @@ object ApplicationBuild extends Build {
     val appDependencies = Seq(
       jdbc,
       cache,
-
       "ws.securesocial" %% "securesocial" % "2.1.3",
-
-      "com.typesafe.play" %% "play-slick" % "0.5.0.8",
-
-      // in play 2.1.1 tests are run twice unless dependency is added
-      "com.novocode" % "junit-interface" % "0.10-M2"
+      "com.typesafe.play" %% "play-slick" % "0.6.0.1"
     )
 
-  val main = play.Project(appName, appVersion, appDependencies).settings(
+  val main = Project(appName, file(".")).addPlugins(play.PlayScala).settings(
 
-    //scalaVersion := "2.10.2",
+    version := appVersion,
 
     autoScalaLibrary := false,
 
@@ -56,12 +51,8 @@ object ApplicationBuild extends Build {
 
     javaOptions in Test += "-Dconfig.file=conf/test.conf",
 
-    (testOptions in Test) += Tests.Argument(TestFrameworks.Specs2, "html", "console"),
-
     // in play 2.1.1 tests are run twice unless this option is defined
-    testOptions += Tests.Argument(TestFrameworks.JUnit, "--ignore-runners=org.scalatest.junit.JUnitRunner"),
-
-    lessEntryPoints <<= baseDirectory(customLessEntryPoints)
+    testOptions += Tests.Argument(TestFrameworks.JUnit, "--ignore-runners=org.scalatest.junit.JUnitRunner")
 
     //templatesImport += "org.biobank.controllers._"
 
@@ -77,10 +68,4 @@ object ApplicationBuild extends Build {
     //    )
     //  )
   )
-
-  // Only compile the bootstrap bootstrap.less file and any other *.less file in the stylesheets directory
-  def customLessEntryPoints(base: File): PathFinder = (
-    (base / "app" / "assets" / "stylesheets" / "bootstrap" * "bootstrap.less")
-    +++ (base / "app" / "assets" / "stylesheets" / "bootstrap" * "responsive.less")
-    +++ (base / "app" / "assets" / "stylesheets" * "*.less") )
 }
