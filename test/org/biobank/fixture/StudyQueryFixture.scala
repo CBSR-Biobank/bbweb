@@ -11,12 +11,13 @@ import play.api.Mode
 import play.api.Mode._
 import akka.actor._
 import scala.concurrent._
-import scala.slick.session.Database
 import org.specs2.mutable._
 import org.specs2.time._
-import scala.slick.session.Database
-import Database.threadLocalSession
-import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
+
+//import scala.slick.session.Database
+//import scala.slick.session.Database
+//import Database.threadLocalSession
+//import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
 
 import scalaz._
 import Scalaz._
@@ -26,9 +27,9 @@ import Scalaz._
  */
 trait StudyQueryFixture extends TestFixture {
 
-  protected val DB = Database.forURL("jdbc:h2:mem:bbweb-test;MODE=MYSQL", driver = "org.h2.Driver")
-
-  val studyView = system.actorOf(Props(new StudyViewImpl), "studyview")
+  //  protected val DB = Database.forURL("jdbc:h2:mem:bbweb-test;MODE=MYSQL", driver = "org.h2.Driver")
+  //
+  //  val studyView = system.actorOf(Props(new StudyViewImpl), "studyview")
 
   override val studyProcessor = null
   override val userProcessor = null

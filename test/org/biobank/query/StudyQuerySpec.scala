@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory
 import org.scalatest.junit.JUnitRunner
 import play.api.test.FakeApplication
 import play.api.test.Helpers._
-import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
-import scala.slick.session.Session
+//import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
+//import scala.slick.session.Session
 
 @RunWith(classOf[JUnitRunner])
 class StudyQuerySpec {

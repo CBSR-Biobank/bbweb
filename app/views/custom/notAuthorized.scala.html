@@ -1,11 +1,10 @@
-@()(implicit request: RequestHeader)
-
-@main(Messages("biobank.notAuthorized.title")) {
+@()(implicit lang: Lang)
+@main(Messages("securesocial.notAuthorized.title")) {
     <div class="page-header">
-        <h1>@Messages("biobank.notAuthorized.title")</h1>
+        <h1>@Messages("securesocial.notAuthorized.title")</h1>
     </div>
 
     <div class="alert alert-error">
-        @Messages("biobank.notAuthorized.message")
+        @Messages("securesocial.notAuthorized.message")
     </div>
 }

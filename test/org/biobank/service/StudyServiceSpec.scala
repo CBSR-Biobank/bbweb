@@ -14,8 +14,6 @@ import org.biobank.domain.study._
 
 import akka.actor._
 import akka.pattern.ask
-import akka.testkit.TestKitBase
-import akka.testkit.ImplicitSender
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
 import org.scalatest.BeforeAndAfterAll

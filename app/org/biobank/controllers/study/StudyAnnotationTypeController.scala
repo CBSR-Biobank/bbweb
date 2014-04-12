@@ -192,8 +192,8 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
 
   protected def addAnnotationTypeSubmit[T <: StudyAnnotationTypeMapper](
     annotationTypeForm: Form[T])(
-      f: T => Future[SimpleResult])(
-        implicit request: WrappedRequest[AnyContent]): Future[SimpleResult] = {
+      f: T => Future[Result])(
+        implicit request: WrappedRequest[AnyContent]): Future[Result] = {
     annotationTypeForm.bindFromRequest.fold(
       formWithErrors => {
         // studyId and studyName are hidden values in the form, they should always be present
@@ -235,8 +235,8 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
   }
 
   protected def updateAnnotationTypeSubmit[T <: StudyAnnotationTypeMapper](
-    annotationTypeForm: Form[T])(f: T => Future[SimpleResult])(
-      implicit request: WrappedRequest[AnyContent]): Future[SimpleResult] = {
+    annotationTypeForm: Form[T])(f: T => Future[Result])(
+      implicit request: WrappedRequest[AnyContent]): Future[Result] = {
     annotationTypeForm.bindFromRequest.fold(
       formWithErrors => {
         // studyId and studyName are hidden values in the form, they should always be present
@@ -284,8 +284,8 @@ trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller
       "studyName" -> text,
       "annotationTypeId" -> text))
 
-  protected def removeAnnotationTypeSubmit(f: (String, String, String) => Future[SimpleResult])(
-    implicit request: WrappedRequest[AnyContent]): Future[SimpleResult] = {
+  protected def removeAnnotationTypeSubmit(f: (String, String, String) => Future[Result])(
+    implicit request: WrappedRequest[AnyContent]): Future[Result] = {
     annotTypeDeleteForm.bindFromRequest.fold(
       formWithErrors => {
         throw new Error(formWithErrors.globalErrors.mkString(","))

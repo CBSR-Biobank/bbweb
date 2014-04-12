@@ -1,15 +1,15 @@
-@(providerId: String, loginForm: Option[Form[(String, String)]] = None)(implicit request: RequestHeader)
+@(providerId: String, loginForm: Option[Form[(String, String)]] = None)(implicit request: RequestHeader, lang: Lang)
 
 @import securesocial.core.Registry
 @import securesocial.core.IdentityProvider
 @import securesocial.core.providers.UsernamePasswordProvider
 @import securesocial.core.AuthenticationMethod._
 @import securesocial.core.providers.utils.RoutesHelper
-@import play.api.Logger
+@import play.api.{Logger, Play}
 @import helper._
 @import play.api.Play
 
-@implicitFieldConstructor = @{ FieldConstructor(views.html.custom.inputFieldConstructor.f) }
+@implicitFieldConstructor = @{ FieldConstructor(securesocial.views.html.inputFieldConstructor.f) }
 
 @Registry.providers.get(providerId).map { provider =>
             @if( provider.authMethod == OAuth1 || provider.authMethod == OAuth2 ) {
@@ -20,39 +20,39 @@
 
             @if( provider.authMethod == UserPassword ) {
                 <form action = "@securesocial.core.providers.utils.RoutesHelper.authenticateByPost("userpass").absoluteURL(IdentityProvider.sslEnabled)"
-                      class="form-horizontal" autocomplete="on" method="POST">
+                      class="form-horizontal" autocomplete="off" method="POST">
                     <fieldset>
 
                         @if( UsernamePasswordProvider.withUserNameSupport ) {
                             @helper.inputText(
                                 loginForm.get("username"),
-                                '_label -> Messages("biobank.signup.username"),
+                                '_label -> Messages("securesocial.signup.username"),
                                 'class -> "input-xlarge"
                             )
                         } else {
                             @helper.inputText(
                                 loginForm.get("username"),
-                                '_label -> Messages("biobank.signup.email1"),
+                                '_label -> Messages("securesocial.signup.email1"),
                                 'class -> "input-xlarge"
                             )
                         }
 
                         @helper.inputPassword(
                             loginForm.get("password"),
-                            '_label -> Messages("biobank.signup.password1"),
+                            '_label -> Messages("securesocial.signup.password1"),
                             'class -> "input-xlarge"
                         )
 
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">@Messages("biobank.login.title")</button>
+                            <button type="submit" class="btn btn-primary">@Messages("securesocial.login.title")</button>
                         </div>
                         <div class="clearfix">
-                            <a href="@securesocial.core.providers.utils.RoutesHelper.startResetPassword()"><p>@Messages("biobank.login.forgotPassword") </a></p>
+                            <a href="@securesocial.core.providers.utils.RoutesHelper.startResetPassword()"><p>@Messages("securesocial.login.forgotPassword") </a></p>
                         </div>
                         @if(Play.current.configuration.getBoolean("securesocial.registrationEnabled").getOrElse(true) ){
-                            <div class="clearfix">
-                                <p>@Messages("biobank.login.signUp") <a href="@securesocial.core.providers.utils.RoutesHelper.startSignUp()">@Messages("biobank.login.here")</a></p>
-                            </div>
+                             <div class="clearfix">
+                                 <p>@Messages("securesocial.login.signUp") <a href="@securesocial.core.providers.utils.RoutesHelper.startSignUp()">@Messages("securesocial.login.here")</a></p>
+                              </div>
                             }
                     </fieldset>
                 </form>

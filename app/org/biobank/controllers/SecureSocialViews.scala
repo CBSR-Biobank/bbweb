@@ -4,104 +4,55 @@ import securesocial.controllers.TemplatesPlugin
 import securesocial.core.{ Identity, SecuredRequest, SocialUser }
 import securesocial.core.SocialUser
 import play.api.templates.{ Html, Txt }
-import play.api.mvc.{ RequestHeader, Request }
+import play.api.mvc.{AnyContent, Controller, RequestHeader, Request}
 import play.api.data.Form
 import securesocial.controllers.PasswordChange.ChangeInfo
 import securesocial.controllers.Registration.RegistrationInfo
 
 /**
- * Overrides the default SecureSocial views.
- */
+  * Overrides the default SecureSocial views.
+  *
+  *  method defs come from securesocial.controllers.DefaultTemplatesPlugin
+  */
 class SecureSocialViews(application: play.api.Application) extends TemplatesPlugin {
-  /**
-   * Returns the html for the login page
-   * @param request
-   * @tparam A
-   * @return
-   */
-  override def getLoginPage[A](implicit request: Request[A], form: Form[(String, String)],
-    msg: Option[String] = None): Html = {
+  override def getLoginPage(
+    form: Form[(String, String)],
+    msg: Option[String] = None)(implicit request: Request[AnyContent]): Html = {
     views.html.custom.login(form, msg)
   }
 
-  /**
-   * Returns the html for the signup page
-   *
-   * @param request
-   * @tparam A
-   * @return
-   */
-  override def getSignUpPage[A](implicit request: Request[A], form: Form[RegistrationInfo], token: String): Html = {
+  override def getSignUpPage(
+    form: Form[RegistrationInfo],
+    token: String)(implicit request: Request[AnyContent]): Html = {
     views.html.custom.Registration.signUp(form, token)
   }
 
-  /**
-   * Returns the html for the start signup page
-   *
-   * @param request
-   * @tparam A
-   * @return
-   */
-  override def getStartSignUpPage[A](implicit request: Request[A], form: Form[String]): Html = {
+  override def getStartSignUpPage(form: Form[String])(implicit request: Request[AnyContent]): Html = {
     views.html.custom.Registration.startSignUp(form)
   }
 
-  /**
-   * Returns the html for the reset password page
-   *
-   * @param request
-   * @tparam A
-   * @return
-   */
-  override def getStartResetPasswordPage[A](implicit request: Request[A], form: Form[String]): Html = {
+  override def getStartResetPasswordPage(form: Form[String])(implicit request: Request[AnyContent]): Html = {
     views.html.custom.Registration.startResetPassword(form)
   }
 
-  /**
-   * Returns the html for the start reset page
-   *
-   * @param request
-   * @tparam A
-   * @return
-   */
-  def getResetPasswordPage[A](implicit request: Request[A], form: Form[(String, String)], token: String): Html = {
+  override def getResetPasswordPage(
+    form: Form[(String, String)],
+    token: String)(implicit request: Request[AnyContent]): Html = {
     views.html.custom.Registration.resetPasswordPage(form, token)
   }
 
-  /**
-   * Returns the html for the change password page
-   *
-   * @param request
-   * @param form
-   * @tparam A
-   * @return
-   */
-  def getPasswordChangePage[A](implicit request: SecuredRequest[A], form: Form[ChangeInfo]): Html = {
+  override def getPasswordChangePage(form: Form[ChangeInfo])(implicit request: SecuredRequest[AnyContent]):Html = {
     views.html.custom.passwordChange(form)
   }
 
-  def getNotAuthorizedPage[A](implicit request: Request[A]): Html = {
+  def getNotAuthorizedPage(implicit request: Request[AnyContent]): Html = {
     views.html.custom.notAuthorized()
   }
 
-  /**
-   * Returns the email sent when a user starts the sign up process
-   *
-   * @param token the token used to identify the request
-   * @param request the current http request
-   * @return a String with the html code for the email
-   */
   def getSignUpEmail(token: String)(implicit request: RequestHeader): (Option[Txt], Option[Html]) = {
     (None, Some(views.html.custom.mails.signUpEmail(token)))
   }
 
-  /**
-   * Returns the email sent when the user is already registered
-   *
-   * @param user the user
-   * @param request the current request
-   * @return a String with the html code for the email
-   */
   def getAlreadyRegisteredEmail(user: Identity)(implicit request: RequestHeader): (Option[Txt], Option[Html]) = {
     (None, Some(views.html.custom.mails.alreadyRegisteredEmail(user)))
   }
@@ -124,7 +75,7 @@ class SecureSocialViews(application: play.api.Application) extends TemplatesPlug
    * @return a String with the html code for the email
    */
   def getUnknownEmailNotice()(implicit request: RequestHeader): (Option[Txt], Option[Html]) = {
-    (None, Some(views.html.custom.mails.unknownEmailNotice(request)))
+    (None, Some(views.html.custom.mails.unknownEmailNotice()))
   }
 
   /**

@@ -1,16 +1,20 @@
 package org.biobank.controllers
 
+// Upgraded to Play 2.3-M1 and it does not yet have a Slick plugin.
+//
+// Commenting out code for now
+// import play.api.db.slick.plugin.TableScanner
+// import play.api.db.slick._
+// import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
+// import scala.slick.session.Database
+// import scala.slick.jdbc.meta._
+
 import play.api.mvc.Results._
 import play.api.mvc.RequestHeader
 import java.io.File
-import play.api.db.slick.plugin.TableScanner
 import play.api.libs.Files
 import play.api.{ Configuration, GlobalSettings, Logger, Mode }
 import play.api.Play.current
-//import play.api.db.slick._
-import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
-import scala.slick.session.Database
-import scala.slick.jdbc.meta._
 
 /**
  * Global settings for the web application.
@@ -39,34 +43,36 @@ object WebComponent extends GlobalSettings with org.biobank.service.TopComponent
    * Creates SQL DDL scripts on application start-up.
    */
   private def createSqlDdlScripts(app: play.api.Application) {
-    if (app.mode != Mode.Prod) {
-      app.configuration.getConfig(configKey).foreach { configuration =>
-        configuration.keys.foreach { database =>
-          val databaseConfiguration = configuration.getString(database).getOrElse {
-            throw configuration.reportError(database, "No config: key " + database, None)
-          }
-          val packageNames = databaseConfiguration.split(",").toSet
-          val classloader = app.classloader
-          val ddls = TableScanner.reflectAllDDLMethods(packageNames, classloader)
+    // if (app.mode != Mode.Prod) {
+    //   app.configuration.getConfig(configKey).foreach { configuration =>
+    //     configuration.keys.foreach { database =>
+    //       val databaseConfiguration = configuration.getString(database).getOrElse {
+    //         throw configuration.reportError(database, "No config: key " + database, None)
+    //       }
+    //       val packageNames = databaseConfiguration.split(",").toSet
+    //       val classloader = app.classloader
+    //       val ddls = TableScanner.reflectAllDDLMethods(packageNames, classloader)
 
-          val scriptDirectory = app.getFile(ScriptDirectory + database)
-          Files.createDirectory(scriptDirectory)
+    //       val scriptDirectory = app.getFile(ScriptDirectory + database)
+    //       Files.createDirectory(scriptDirectory)
 
-          writeScript(ddls.map(_.createStatements), scriptDirectory, CreateScript)
-          writeScript(ddls.map(_.dropStatements), scriptDirectory, DropScript)
-        }
-      }
-    }
+    //       writeScript(ddls.map(_.createStatements), scriptDirectory, CreateScript)
+    //       writeScript(ddls.map(_.dropStatements), scriptDirectory, DropScript)
+    //     }
+    //   }
+    // }
     Logger.info("*** application started ***")
   }
 
   /**
    * Writes the given DDL statements to a file.
    */
-  private def writeScript(ddlStatements: Seq[Iterator[String]], directory: File,
+  private def writeScript(
+    ddlStatements: Seq[Iterator[String]],
+    directory: File,
     fileName: String): Unit = {
-    val createScript = new File(directory, fileName)
-    val createSql = ddlStatements.flatten.mkString("\n\n")
-    Files.writeFileIfChanged(createScript, ScriptHeader + createSql)
+    // val createScript = new File(directory, fileName)
+    // val createSql = ddlStatements.flatten.mkString("\n\n")
+    // Files.writeFileIfChanged(createScript, ScriptHeader + createSql)
   }
 }

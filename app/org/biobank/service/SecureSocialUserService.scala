@@ -49,6 +49,16 @@ class SecureSocialUserService(application: Application) extends UserServicePlugi
     tokens += (token.uuid -> token)
   }
 
+  /**
+   * Links the current user Identity to another
+   *
+   * @param current The Identity of the current user
+   * @param to The Identity that needs to be linked to the current user
+   */
+  def link(current: Identity, to: Identity) {
+
+  }
+
   def findToken(token: String): Option[Token] = {
     tokens.get(token)
   }

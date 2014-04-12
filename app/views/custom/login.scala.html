@@ -1,13 +1,15 @@
-@(loginForm: Form[(String,String)], errorMsg: Option[String] = None)(implicit request: RequestHeader)
+@(loginForm: Form[(String,String)], errorMsg: Option[String] = None)(implicit request: RequestHeader, lang: Lang)
 
 @import helper._
 @import securesocial.core.Registry
 @import securesocial.core.AuthenticationMethod._
 @import securesocial.core.providers.UsernamePasswordProvider.UsernamePassword
 
-@main(Messages("biobank.login.title")) {
+
+
+@main(Messages("securesocial.login.title")) {
     <div class="page-header">
-        <h1>@Messages("biobank.login.title")</h1>
+        <h1>@Messages("securesocial.login.title")</h1>
     </div>
 
     @errorMsg.map { msg =>
@@ -33,7 +35,7 @@
 
         @if( externalProviders.size > 0 ) {
             <div class="clearfix">
-                <p>@Messages("biobank.login.instructions")</p>
+                <p>@Messages("securesocial.login.instructions")</p>
                 <p>
                     @for(p <- externalProviders) {
                         @provider(p.id)
@@ -45,9 +47,9 @@
         @Registry.providers.get(UsernamePassword).map { up =>
             <div class="clearfix">
                 @if( externalProviders.size > 0 ) {
-                    <p>@Messages("biobank.login.useEmailAndPassword")</p>
+                    <p>@Messages("securesocial.login.useEmailAndPassword")</p>
                 } else {
-                    <p>@Messages("biobank.login.useEmailAndPasswordOnly")</p>
+                    <p>@Messages("securesocial.login.useEmailAndPasswordOnly")</p>
                 }
 
                @provider("userpass", Some(loginForm))
