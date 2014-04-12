@@ -25,8 +25,8 @@ object ApplicationBuild extends Build {
     resolvers += Resolver.sonatypeRepo("releases"),
 
     libraryDependencies ++= Seq(
-      "ws.securesocial" %% "securesocial" % "play-2.3-SNAPSHOT",,
-      "com.typesafe.play" %% "play-slick" % "0.6.0.1"
+      "ws.securesocial" %% "securesocial" % "play-2.3-SNAPSHOT",
+      //"com.typesafe.play" %% "play-slick" % "0.6.0.1",
       "com.typesafe.akka" % "akka-persistence-experimental_2.10" % "2.3.0",
       "org.scala-stm" %% "scala-stm" % "0.7"  % "compile",
       "org.scalaz" %% "scalaz-core" % "7.0.6"  % "compile",
