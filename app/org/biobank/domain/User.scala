@@ -13,7 +13,7 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
   val password: String
   val hasher: String
   val salt: Option[String]
-  val avatarUrl: Option[String]
+  val avatarUrl: Option[String
 
   /**
    * Authenticate a User.
@@ -28,7 +28,7 @@ case class RegisteredUser private (
   id: UserId,
   version: Long = -1,
   name: String,
-  email: String,
+  email: Strin,g
   password: String,
   hasher: String,
   salt: Option[String],
