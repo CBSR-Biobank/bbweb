@@ -11,14 +11,7 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       jdbc,
-      cache,
-
-      "ws.securesocial" %% "securesocial" % "2.1.3",
-
-      "com.typesafe.play" %% "play-slick" % "0.5.0.8",
-
-      // in play 2.1.1 tests are run twice unless dependency is added
-      "com.novocode" % "junit-interface" % "0.10-M2"
+      cache
     )
 
   val main = play.Project(appName, appVersion, appDependencies).settings(
@@ -29,8 +22,11 @@ object ApplicationBuild extends Build {
 
     resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
 
+    resolvers += Resolver.sonatypeRepo("releases"),
+
     libraryDependencies ++= Seq(
       "ws.securesocial" %% "securesocial" % "2.1.3",
+      "com.typesafe.play" %% "play-slick" % "0.5.0.8",
       "com.typesafe.akka" % "akka-persistence-experimental_2.10" % "2.3.0",
       "org.scala-stm" %% "scala-stm" % "0.7"  % "compile",
       "org.scalaz" %% "scalaz-core" % "7.0.6"  % "compile",
@@ -55,11 +51,6 @@ object ApplicationBuild extends Build {
     javaOptions ++= Seq("-Xmx1024M", "-XX:MaxPermSize=512m"),
 
     javaOptions in Test += "-Dconfig.file=conf/test.conf",
-
-    (testOptions in Test) += Tests.Argument(TestFrameworks.Specs2, "html", "console"),
-
-    // in play 2.1.1 tests are run twice unless this option is defined
-    testOptions += Tests.Argument(TestFrameworks.JUnit, "--ignore-runners=org.scalatest.junit.JUnitRunner"),
 
     lessEntryPoints <<= baseDirectory(customLessEntryPoints)
 
