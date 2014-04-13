@@ -19,51 +19,51 @@ import scalaz.Scalaz._
  *
  * @author Nelson Loyola
  */
-abstract class StudyAnnotationTypeService[A <: StudyAnnotationType] extends CommandHandler {
+// abstract class StudyAnnotationTypeService[A <: StudyAnnotationType] extends CommandHandler {
 
-  protected val log = LoggerFactory.getLogger(this.getClass)
+//   protected val log = LoggerFactory.getLogger(this.getClass)
 
-  protected def createNewAnnotationType(cmd: StudyAnnotationTypeCommand, id: AnnotationTypeId): A
+//   protected def createNewAnnotationType(cmd: StudyAnnotationTypeCommand, id: AnnotationTypeId): A
 
-  protected def createUpdatedAnnotationType(oldAnnotationType: A, cmd: StudyAnnotationTypeCommand): A
+//   protected def createUpdatedAnnotationType(oldAnnotationType: A, cmd: StudyAnnotationTypeCommand): A
 
-  protected def createRemovalAnnotationType(oldAnnotationType: A, cmd: StudyAnnotationTypeCommand): A
+//   protected def createRemovalAnnotationType(oldAnnotationType: A, cmd: StudyAnnotationTypeCommand): A
 
-  protected def checkNotInUse(annotationType: A): DomainValidation[Boolean]
+//   protected def checkNotInUse(annotationType: A): DomainValidation[Boolean]
 
-  protected def addAnnotationType(
-    repository: StudyAnnotationTypeRepository[A],
-    cmd: StudyAnnotationTypeCommand,
-    study: DisabledStudy): DomainValidation[A] = {
-    val atId = repository.nextIdentity
-    for {
-      newItem <- repository.add(createNewAnnotationType(cmd, atId))
-    } yield newItem
-  }
+//   protected def addAnnotationType(
+//     repository: StudyAnnotationTypeRepository[A],
+//     cmd: StudyAnnotationTypeCommand,
+//     study: DisabledStudy): DomainValidation[A] = {
+//     val atId = repository.nextIdentity
+//     for {
+//       newItem <- repository.add(createNewAnnotationType(cmd, atId))
+//     } yield newItem
+//   }
 
-  protected def updateAnnotationType(
-    repository: StudyAnnotationTypeRepository[A],
-    cmd: StudyAnnotationTypeCommand,
-    annotationTypeId: AnnotationTypeId,
-    study: DisabledStudy): DomainValidation[A] = {
+//   protected def updateAnnotationType(
+//     repository: StudyAnnotationTypeRepository[A],
+//     cmd: StudyAnnotationTypeCommand,
+//     annotationTypeId: AnnotationTypeId,
+//     study: DisabledStudy): DomainValidation[A] = {
 
-    for {
-      oldAnnotationType <- repository.annotationTypeWithId(study.id, annotationTypeId)
-      notInUse <- checkNotInUse(oldAnnotationType)
-      newItem <- repository.update(oldAnnotationType, createUpdatedAnnotationType(oldAnnotationType, cmd))
-    } yield newItem
-  }
+//     for {
+//       oldAnnotationType <- repository.annotationTypeWithId(study.id, annotationTypeId)
+//       notInUse <- checkNotInUse(oldAnnotationType)
+//       newItem <- repository.update(oldAnnotationType, createUpdatedAnnotationType(oldAnnotationType, cmd))
+//     } yield newItem
+//   }
 
-  protected def removeAnnotationType(
-    repository: StudyAnnotationTypeRepository[A],
-    cmd: StudyAnnotationTypeCommand,
-    annotationTypeId: AnnotationTypeId,
-    study: DisabledStudy): DomainValidation[A] = {
-    for {
-      oldItem <- repository.annotationTypeWithId(study.id, annotationTypeId)
-      notInUse <- checkNotInUse(oldItem)
-      itemToRemove <- createRemovalAnnotationType(oldItem, cmd).success
-      removedItem <- repository.remove(itemToRemove)
-    } yield removedItem
-  }
-}
+//   protected def removeAnnotationType(
+//     repository: StudyAnnotationTypeRepository[A],
+//     cmd: StudyAnnotationTypeCommand,
+//     annotationTypeId: AnnotationTypeId,
+//     study: DisabledStudy): DomainValidation[A] = {
+//     for {
+//       oldItem <- repository.annotationTypeWithId(study.id, annotationTypeId)
+//       notInUse <- checkNotInUse(oldItem)
+//       itemToRemove <- createRemovalAnnotationType(oldItem, cmd).success
+//       removedItem <- repository.remove(itemToRemove)
+//     } yield removedItem
+//   }
+// }

@@ -1,6 +1,6 @@
 package org.biobank.service.study
 
-import org.biobank.service._
+import org.biobank.service.Processor
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service.Messages._
@@ -32,14 +32,14 @@ case class StudyMessage(cmd: Any, userId: UserId, time: Long)
 
 trait StudyProcessorComponent {
 
-  trait StudyProcessor extends EventsourcedProcessor
+  trait StudyProcessor extends Processor
 
 }
 
 case class SnapshotState(studies: Set[Study])
 
 trait StudyProcessorComponentImpl extends StudyProcessorComponent {
-  self: ProcessorComponentImpl with RepositoryComponent =>
+  self: RepositoryComponent =>
 
   /**
    * Handles the commands to configure studies.
@@ -47,19 +47,11 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
   class StudyProcessorImpl extends StudyProcessor {
 
     val receiveRecover: Receive = {
-      case _ =>
+      case event: StudyEvent =>
+        updateState(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
-        snapshot.studies.foreach{ i =>
-	  i match {
-	    case study: DisabledStudy =>
-	      studyRepository.update(study)
-	    case study: EnabledStudy =>
-	      studyRepository.update(study)
-	    case study: RetiredStudy =>
-	      studyRepository.update(study)
-	  }
-	}
+        snapshot.studies.foreach{ study => studyRepository.update(study) }
     }
 
     val receiveCommand: Receive = {
@@ -71,22 +63,53 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
       case cmd: DisableStudyCmd => disableStudy(cmd)
 
-      case cmd: SpecimenGroupCommand =>
-        processEntityMsg(cmd, cmd.studyId, specimenGroupService.process)
+      // case cmd: SpecimenGroupCommand =>
+      //   processEntityMsg(cmd, cmd.studyId, specimenGroupService.process)
 
-      case cmd: CollectionEventTypeCommand =>
-        processEntityMsg(cmd, cmd.studyId, collectionEventTypeService.process)
+      // case cmd: CollectionEventTypeCommand =>
+      //   processEntityMsg(cmd, cmd.studyId, collectionEventTypeService.process)
 
-      case cmd: CollectionEventAnnotationTypeCommand =>
-        processEntityMsg(cmd, cmd.studyId, ceventAnnotationTypeService.process)
+      // case cmd: CollectionEventAnnotationTypeCommand =>
+      //   processEntityMsg(cmd, cmd.studyId, ceventAnnotationTypeService.process)
 
-      case cmd: ParticipantAnnotationTypeCommand =>
-        processEntityMsg(cmd, cmd.studyId, participantAnnotationTypeService.process)
+      // case cmd: ParticipantAnnotationTypeCommand =>
+      //   processEntityMsg(cmd, cmd.studyId, participantAnnotationTypeService.process)
 
-      case cmd: SpecimenLinkAnnotationTypeCommand =>
-        processEntityMsg(cmd, cmd.studyId, specimenLinkAnnotationTypeService.process)
+      // case cmd: SpecimenLinkAnnotationTypeCommand =>
+      //   processEntityMsg(cmd, cmd.studyId, specimenLinkAnnotationTypeService.process)
 
       case other => // must be for another command handler
+    }
+
+    def updateState(event: StudyEvent) = {
+      event match {
+        case event: StudyAddedEvent =>
+	  DisabledStudy.create(StudyId(event.id), -1L, event.name, event.description) match {
+            case Success(study) =>
+              studyRepository.add(study)
+              log.info(s"updateState: study added to repository: ${study.name}")
+
+            case Failure(x) =>
+              // this should never happen because the event gets generated after all
+	      // validation passes
+              throw new IllegalStateException("adding study from event failed")
+	  }
+
+        case event: StudyUpdatedEvent =>
+	  DisabledStudy.create(StudyId(event.id), event.version, event.name, event.description) match {
+            case Success(study) =>
+              studyRepository.update(study)
+              log.info(s"updateState: study updated in repository: ${study.name}")
+
+            case Failure(x) =>
+              // this should never happen because the event gets generated after all
+	      // validation passes
+              throw new IllegalStateException("updating study from event failed")
+	  }
+
+	case _ =>
+	  log.error(s"updateState: event not handled yet: $event")
+      }
     }
 
     private def validateStudy(studyId: StudyId): DomainValidation[DisabledStudy] =
@@ -112,23 +135,16 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
       val studyId = studyRepository.nextIdentity
 
-      val e = for {
+      val validation = for {
         nameAvailable <- studyRepository.nameAvailable(cmd.name)
-        newStudy <- DisabledStudy.create(
-          studyId,
-          version = 0L,
-          cmd.name,
-          cmd.description)
-        event <- StudyAddedEvent(
-          newStudy.id.toString,
-          newStudy.version,
-          newStudy.name,
-          newStudy.description).successNel
+        newStudy <- DisabledStudy.create(studyId, -1L, cmd.name, cmd.description)
+        event <- StudyAddedEvent(newStudy.id.toString, newStudy.name, newStudy.description).successNel
       } yield {
         persist(event) { e => context.system.eventStream.publish(e) }
         event
       }
-      e
+      sender ! validation
+      validation
     }
 
     private def updateStudy(cmd: UpdateStudyCmd): DomainValidation[StudyUpdatedEvent] = {

@@ -23,7 +23,7 @@ trait StudyRepositoryComponent {
 
     def add(study: DisabledStudy): DomainValidation[DisabledStudy]
 
-    def update(study: DisabledStudy): DomainValidation[DisabledStudy]
+    def update(study: Study): DomainValidation[Study]
 
     def enable(
       studyId: StudyId,
@@ -76,7 +76,7 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
       }
     }
 
-    def update(study: DisabledStudy): DomainValidation[DisabledStudy] = {
+    def update(study: Study): DomainValidation[Study] = {
       for {
         prevStudy <- studyWithId(study.id)
         validVersion <- prevStudy.requireVersion(Some(study.version))

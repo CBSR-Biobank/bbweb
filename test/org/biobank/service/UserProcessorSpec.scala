@@ -108,7 +108,7 @@ class UserProcessorSpec extends UserProcessorFixture {
 
       val event = r.getOrElse(fail("failure response from processor"))
 
-      waitBlocking(ask(userProcessor, ActivateUserCommand(event.email, Some(event.version)))
+      waitBlocking(ask(userProcessor, ActivateUserCommand(event.email, Some(1L)))
         .mapTo[DomainValidation[UserActivatedEvent]]) match {
         case Success(event) =>
           event.id should be(email)

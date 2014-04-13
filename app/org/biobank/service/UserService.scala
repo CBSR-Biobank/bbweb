@@ -102,27 +102,6 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
    */
   class UserProcessorImpl extends UserProcessor {
 
-    def updateState(event: UserEvent) = {
-      event match {
-        case event: UserAddedEvent =>
-          val validation = RegisteredUser.create(
-            UserId(event.email), 0L, event.name, event.email,
-            event.password, event.hasher, event.salt, event.avatarUrl)
-          validation match {
-            case Success(user) =>
-              userRepository.add(user)
-              log.info(s"updateState: user added to repository: ${user.email}")
-            case Failure(x) =>
-              // this should never happen because the only way to get here is if the
-              // command passed validation
-              throw new IllegalStateException("creating user from event failed")
-          }
-
-        case eventUserActivatedEvent =>
-
-      }
-    }
-
     val receiveRecover: Receive = {
       case event: UserEvent =>
         log.debug(s"receiveRecover: $event")
@@ -145,12 +124,32 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
         stash()
     }
 
+    def updateState(event: UserEvent) = {
+      event match {
+        case event: UserAddedEvent =>
+          RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
+	    event.password, event.hasher, event.salt, event.avatarUrl) match {
+            case Success(user) =>
+              userRepository.add(user)
+              log.info(s"updateState: user added to repository: ${user.email}")
+
+            case Failure(x) =>
+              // this should never happen because the only way to get here is if the
+              // command passed validation
+              throw new IllegalStateException("creating user from event failed")
+          }
+
+        case eventUserActivatedEvent =>
+
+      }
+    }
+
     def addUser(cmd: AddUserCommand): DomainValidation[UserAddedEvent] = {
       val validation = for {
         emailAvailable <- userRepository.emailAvailable(cmd.email)
         user <- RegisteredUser.create(UserId(cmd.email), -1L, cmd.name, cmd.email,
           cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl)
-        event <- UserAddedEvent(user.id.toString, user.version, user.name, user.email,
+        event <- UserAddedEvent(user.id.toString, user.name, user.email,
           user.password, user.hasher, user.salt, user.avatarUrl).success
       } yield {
         persist(event) { e => userRepository.add(user) }

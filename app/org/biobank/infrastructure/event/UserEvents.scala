@@ -9,7 +9,6 @@ object UserEvents {
 
   case class UserAddedEvent(
     id: String,
-    version: Long,
     name: String,
     email: String,
     password: String,

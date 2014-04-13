@@ -16,7 +16,6 @@ object StudyEvents {
 
   case class StudyAddedEvent(
     id: String,
-    version: Long,
     name: String,
     description: Option[String])
     extends StudyEvent
