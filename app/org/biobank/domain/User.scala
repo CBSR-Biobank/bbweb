@@ -22,6 +22,12 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
     if (this.password.equals(password)) this.success
     else DomainError("authentication failure").failNel
   }
+
+  override def toString =
+    s"""User: {
+       | name: $name,
+       | email: $email
+       |}""".stripMargin
 }
 
 case class RegisteredUser private (

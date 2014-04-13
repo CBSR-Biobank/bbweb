@@ -1,6 +1,12 @@
 package org.biobank.domain.study
 
-import org.biobank.domain._
+import org.biobank.domain.{
+  AnnotationTypeId,
+  ConcurrencySafeEntity,
+  DomainValidation,
+  HasName,
+  HasDescriptionOption }
+import org.biobank.domain.AnnotationValueType._
 import org.biobank.domain.validator.StudyValidator
 
 import scalaz._
@@ -15,13 +21,12 @@ sealed trait Study
   val status: String
 
   override def toString =
-    s"""
+    s"""Study: {
        | id: $id,
        | version: $version,
        | name: $name,
        | description: $description
-       |}
-    """.stripMargin
+       |}""".stripMargin
 }
 
 case class DisabledStudy private (
@@ -39,6 +44,23 @@ case class DisabledStudy private (
 
   def retire: DomainValidation[RetiredStudy] = {
     RetiredStudy.create(this)
+  }
+
+  def addParticipantAnnotationType(
+    id: AnnotationTypeId,
+    version: Long,
+    studyId: StudyId,
+    name: String,
+    description: Option[String],
+    valueType: AnnotationValueType,
+    maxValueCount: Option[Int],
+    options: Option[Map[String, String]],
+    required: Boolean): DomainValidation[ParticipantAnnotationType] = {
+    if (studyId != this.id) {
+      throw new IllegalArgumentException("studyId does not match")
+    }
+    ParticipantAnnotationType.create(id, version, studyId, name, description,
+      valueType, maxValueCount, options, required)
   }
 
 }

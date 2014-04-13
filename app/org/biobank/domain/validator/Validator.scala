@@ -7,6 +7,14 @@ import scalaz.Scalaz._
 
 private[domain] trait Validator {
 
+  def validateStringId(id: String): Validation[String, String] = {
+    if ((id == null) || id.isEmpty()) {
+      "id is null or empty".failure
+    } else {
+      id.success
+    }
+  }
+
   def validateNonEmpty(fieldName: String, field: String): Validation[String, String] = {
     if ((field == null) || field.isEmpty()) {
       s"$fieldName is null or empty".fail

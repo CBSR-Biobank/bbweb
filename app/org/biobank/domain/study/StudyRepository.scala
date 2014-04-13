@@ -24,13 +24,6 @@ trait StudyRepositoryComponent {
     def add(study: DisabledStudy): DomainValidation[DisabledStudy]
 
     def update(study: Study): DomainValidation[Study]
-
-    def enable(
-      studyId: StudyId,
-      specimenGroupCount: Int,
-      collectionEventTypecount: Int): DomainValidation[EnabledStudy]
-
-    def disable(studyId: StudyId): DomainValidation[DisabledStudy]
   }
 }
 
@@ -86,56 +79,6 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
         repoItem <- updateMap(updatedItem).success
       } yield updatedItem
     }
-
-    def enable(
-      studyId: StudyId,
-      specimenGroupCount: Int,
-      collectionEventTypecount: Int): DomainValidation[EnabledStudy] = {
-        throw new Error("this functionality should not be here")
-
-      // def doEnable(prevStudy: Study) = {
-
-        // prevStudy match {
-        //   case es: EnabledStudy =>
-        //     DomainError("study is already enabled: {id: %s}".format(es.id)).failNel
-        //   case ds: DisabledStudy =>
-        //     if ((specimenGroupCount == 0) || (collectionEventTypecount == 0))
-        //       DomainError("study has no specimen groups and / or no collection event types").failNel
-        //     else {
-        //       EnabledStudy(ds.id, ds.version + 1, ds.name, ds.description).success
-        //     }
-        // }
-       // }
-
-      // log.debug("enableStudy: { sgCount: %d, cetCount: %d }".format(
-      //   specimenGroupCount, collectionEventTypecount))
-
-      // for {
-      //   prevStudy <- studyWithId(studyId)
-      //   enabledStudy <- doEnable(prevStudy)
-      //   repoItem <- updateMap(enabledStudy).success
-      // } yield enabledStudy
-    }
-
-    def disable(studyId: StudyId): DomainValidation[DisabledStudy] = {
-      throw new Error("this functionality should not be here")
-
-      // def doDisable(prevStudy: Study) = {
-      //   prevStudy match {
-      //     case ds: DisabledStudy =>
-      //       DomainError("study is already disabled: {id: %s}".format(ds.id)).failNel
-      //     case es: EnabledStudy =>
-      //       val study = DisabledStudy(es.id, es.version + 1, es.name, es.description)
-      //       updateMap(study)
-      //       study.success
-      //   }
-      // }
-
-      // for {
-      //   prevStudy <- studyWithId(studyId)
-      //   disabledStudy <- doDisable(prevStudy)
-      // } yield disabledStudy
-    }
-
   }
+
 }
