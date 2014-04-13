@@ -4,27 +4,18 @@ import org.biobank.service.Processor
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service.Messages._
-
 import org.biobank.domain.{
   DomainValidation,
   DomainError,
   RepositoryComponent,
   UserId
 }
-
 import org.biobank.domain.study._
 import org.biobank.domain.study.Study
 
-import akka.actor._
 import akka.pattern.ask
-import akka.util.Timeout
-import scala.concurrent._
-import scala.concurrent.duration._
-import scala.concurrent.stm.Ref
-import scala.language.postfixOps
 import org.slf4j.LoggerFactory
-import akka.persistence._
-
+import akka.persistence.SnapshotOffer
 import scalaz._
 import scalaz.Scalaz._
 
@@ -112,24 +103,24 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       }
     }
 
-    private def validateStudy(studyId: StudyId): DomainValidation[DisabledStudy] =
-      studyRepository.studyWithId(studyId) match {
-        case Failure(msglist) => DomainError(s"no study with id: $studyId").failNel
-        case Success(study) => study match {
-          case dstudy: DisabledStudy => dstudy.success
-          case _ => DomainError("study is not disabled: ${study.name}").failNel
-        }
-      }
+    // private def validateStudy(studyId: StudyId): DomainValidation[DisabledStudy] =
+    //   studyRepository.studyWithId(studyId) match {
+    //     case Failure(msglist) => DomainError(s"no study with id: $studyId").failNel
+    //     case Success(study) => study match {
+    //       case dstudy: DisabledStudy => dstudy.success
+    //       case _ => DomainError("study is not disabled: ${study.name}").failNel
+    //     }
+    //   }
 
-    private def processEntityMsg[T](
-      cmd: StudyCommand,
-      studyId: String,
-      processFunc: StudyProcessorMsg => DomainValidation[T]): DomainValidation[T] = {
-      for {
-        study <- validateStudy(new StudyId(studyId))
-        event <- processFunc(StudyProcessorMsg(cmd, study))
-      } yield event
-    }
+    // private def processEntityMsg[T](
+    //   cmd: StudyCommand,
+    //   studyId: String,
+    //   processFunc: StudyProcessorMsg => DomainValidation[T]): DomainValidation[T] = {
+    //   for {
+    //     study <- validateStudy(new StudyId(studyId))
+    //     event <- processFunc(StudyProcessorMsg(cmd, study))
+    //   } yield event
+    // }
 
     private def addStudy(cmd: AddStudyCmd): DomainValidation[StudyAddedEvent] = {
 
@@ -140,7 +131,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
         newStudy <- DisabledStudy.create(studyId, -1L, cmd.name, cmd.description)
         event <- StudyAddedEvent(newStudy.id.toString, newStudy.name, newStudy.description).successNel
       } yield {
-        persist(event) { e => context.system.eventStream.publish(e) }
+        persist(event) { e => updateState(e) }
         event
       }
       sender ! validation
