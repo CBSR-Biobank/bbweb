@@ -102,10 +102,10 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
         prevItem <- specimenGroupWithId(specimenGroup.studyId, specimenGroup.id)
         validVersion <- prevItem.requireVersion(Some(specimenGroup.version))
         nameValid <- nameAvailable(specimenGroup)
-        updatedItem <- SpecimenGroup(specimenGroup.id, specimenGroup.version + 1, specimenGroup.studyId,
+        updatedItem <- SpecimenGroup.create(specimenGroup.id, specimenGroup.version + 1, specimenGroup.studyId,
           specimenGroup.name, specimenGroup.description, specimenGroup.units,
           specimenGroup.anatomicalSourceType, specimenGroup.preservationType,
-          specimenGroup.preservationTemperatureType, specimenGroup.specimenType).success
+          specimenGroup.preservationTemperatureType, specimenGroup.specimenType)
         repoItem <- updateMap(updatedItem).success
       } yield updatedItem
     }

@@ -1,11 +1,11 @@
-package org.biobank.domain.validator
+package org.biobank.domain.validation
 
 import org.biobank.domain._
 
 import scalaz._
 import scalaz.Scalaz._
 
-private[domain] trait Validator {
+private[domain] trait ValidationHelper {
 
   def validateStringId(id: String): Validation[String, String] = {
     if ((id == null) || id.isEmpty()) {

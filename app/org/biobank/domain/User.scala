@@ -1,6 +1,6 @@
 package org.biobank.domain
 
-import org.biobank.domain.validator.UserValidator
+import org.biobank.domain.validation.UserValidationHelper
 import org.biobank.infrastructure.event.UserEvents._
 
 import org.slf4j.LoggerFactory
@@ -24,10 +24,10 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
   }
 
   override def toString =
-    s"""User: {
-       | name: $name,
-       | email: $email
-       |}""".stripMargin
+    s"""|User: {
+        |  name: $name,
+        |  email: $email
+        |}""".stripMargin
 }
 
 case class RegisteredUser private (
@@ -45,7 +45,7 @@ case class RegisteredUser private (
   }
 }
 
-object RegisteredUser extends UserValidator {
+object RegisteredUser extends UserValidationHelper {
 
   override val log = LoggerFactory.getLogger(this.getClass)
 
@@ -87,7 +87,7 @@ case class ActiveUser private (
   }
 }
 
-object ActiveUser extends UserValidator {
+object ActiveUser extends UserValidationHelper {
 
   def create[T <: User](user: T): DomainValidation[ActiveUser] = {
     (validateId(user.id).toValidationNel |@|
@@ -120,7 +120,7 @@ case class LockedUser private (
 
 }
 
-object LockedUser extends UserValidator {
+object LockedUser extends UserValidationHelper {
 
   def create(user: ActiveUser): DomainValidation[LockedUser] = {
     (validateId(user.id).toValidationNel |@|

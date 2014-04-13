@@ -1,7 +1,7 @@
 package org.biobank.domain.study
 
 import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
-import org.biobank.domain.validator.StudyValidator
+import org.biobank.domain.validation.StudyValidationHelper
 import org.biobank.domain.AnnotationValueType._
 
 import scalaz._
@@ -20,21 +20,21 @@ case class ParticipantAnnotationType private (
   extends StudyAnnotationType {
 
   override def toString: String =
-    s"""ParticipantAnnotationType: {
-        | id: %s,
-        | version: %d,
-        | studyId: %s,
-        | name: %s,
-        | description: %s,
-        | valueType: %s,
-        | maxValueCount: %d,
-        | options: %s,
-        | required: %b
-        }""".stripMargin
+    s"""|ParticipantAnnotationType: {
+        |  id: %s,
+        |  version: %d,
+        |  studyId: %s,
+        |  name: %s,
+        |  description: %s,
+        |  valueType: %s,
+        |  maxValueCount: %d,
+        |  options: %s,
+        |  required: %b
+        |}""".stripMargin
 
 }
 
-object ParticipantAnnotationType extends StudyValidator {
+object ParticipantAnnotationType extends StudyValidationHelper {
 
   def validateId(id: AnnotationTypeId): Validation[String, AnnotationTypeId] = {
     validateStringId(id.toString) match {

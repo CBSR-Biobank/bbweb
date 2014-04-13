@@ -1,11 +1,11 @@
-package org.biobank.domain.validator
+package org.biobank.domain.validation
 
 import org.biobank.domain.study.StudyId
 
 import scalaz._
 import scalaz.Scalaz._
 
-trait StudyValidator extends Validator {
+trait StudyValidationHelper extends ValidationHelper {
 
   def validateId(id: StudyId): Validation[String, StudyId] = {
     validateStringId(id.toString) match {

@@ -7,11 +7,14 @@ import org.biobank.domain.{
   HasName,
   HasDescriptionOption }
 import org.biobank.domain.AnnotationValueType._
-import org.biobank.domain.validator.StudyValidator
+import org.biobank.domain.validation.StudyValidationHelper
 
 import scalaz._
 import scalaz.Scalaz._
 
+/**
+  * This is an aggregate root.
+  */
 sealed trait Study
     extends ConcurrencySafeEntity[StudyId]
     with HasName
@@ -21,14 +24,19 @@ sealed trait Study
   val status: String
 
   override def toString =
-    s"""Study: {
-       | id: $id,
-       | version: $version,
-       | name: $name,
-       | description: $description
-       |}""".stripMargin
+    s"""|Study: {
+        |  id: $id,
+        |  version: $version,
+        |  name: $name,
+        |  description: $description
+        |}""".stripMargin
 }
 
+/*
+ *  This is the initial state for a study.  In this state collection and processing of specimens is not
+ *  allowed.
+ *
+ */
 case class DisabledStudy private (
   id: StudyId,
   version: Long = -1,
@@ -65,7 +73,7 @@ case class DisabledStudy private (
 
 }
 
-object DisabledStudy extends StudyValidator {
+object DisabledStudy extends StudyValidationHelper {
 
   def create(
     id: StudyId,
@@ -81,7 +89,9 @@ object DisabledStudy extends StudyValidator {
   }
 }
 
-
+/*
+ * In this state collection and processing of specimens can take place.
+ */
 case class EnabledStudy private (
   id: StudyId,
   version: Long,
@@ -95,7 +105,7 @@ case class EnabledStudy private (
     DisabledStudy.create(this.id, this.version, this.name, this.description)
 }
 
-object EnabledStudy extends StudyValidator {
+object EnabledStudy extends StudyValidationHelper {
 
   def create(study: DisabledStudy): DomainValidation[EnabledStudy] = {
     (validateId(study.id).toValidationNel |@|
@@ -107,6 +117,9 @@ object EnabledStudy extends StudyValidator {
   }
 }
 
+/*
+ *  In this state the study cannot be modified and collection and processing of specimens is not allowed.
+ */
 case class RetiredStudy private (
   id: StudyId,
   version: Long,
@@ -121,7 +134,7 @@ case class RetiredStudy private (
   }
 }
 
-object RetiredStudy extends StudyValidator {
+object RetiredStudy extends StudyValidationHelper {
 
   def create(study: DisabledStudy): DomainValidation[RetiredStudy] = {
     (validateId(study.id).toValidationNel |@|
