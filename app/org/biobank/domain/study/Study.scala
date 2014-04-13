@@ -6,7 +6,11 @@ import org.biobank.domain.{
   DomainValidation,
   HasName,
   HasDescriptionOption }
+import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.AnnotationValueType._
+import org.biobank.domain.PreservationType._
+import org.biobank.domain.PreservationTemperatureType._
+import org.biobank.domain.SpecimenType._
 import org.biobank.domain.validation.StudyValidationHelper
 
 import scalaz._
@@ -57,18 +61,29 @@ case class DisabledStudy private (
   def addParticipantAnnotationType(
     id: AnnotationTypeId,
     version: Long,
-    studyId: StudyId,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
     options: Option[Map[String, String]],
     required: Boolean): DomainValidation[ParticipantAnnotationType] = {
-    if (studyId != this.id) {
-      throw new IllegalArgumentException("studyId does not match")
-    }
-    ParticipantAnnotationType.create(id, version, studyId, name, description,
+    ParticipantAnnotationType.create(this.id, id, version, name, description,
       valueType, maxValueCount, options, required)
+  }
+
+
+  def addSpecimenGropu(
+    id: SpecimenGroupId,
+    version: Long = -1,
+    name: String,
+    description: Option[String],
+    units: String,
+    anatomicalSourceType: AnatomicalSourceType,
+    preservationType: PreservationType,
+    preservationTemperatureType: PreservationTemperatureType,
+    specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
+    SpecimenGroup.create(this.id, id, version, name, description, units,
+    anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
   }
 
 }

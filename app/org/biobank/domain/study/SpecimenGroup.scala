@@ -18,9 +18,9 @@ import scalaz._
 import Scalaz._
 
 case class SpecimenGroup private (
+  studyId: StudyId,
   id: SpecimenGroupId,
   version: Long = -1,
-  studyId: StudyId,
   name: String,
   description: Option[String],
   units: String,
@@ -58,19 +58,19 @@ object SpecimenGroup extends StudyValidationHelper {
   }
 
   def create(
-  id: SpecimenGroupId,
-  version: Long = -1,
-  studyId: StudyId,
-  name: String,
-  description: Option[String],
-  units: String,
-  anatomicalSourceType: AnatomicalSourceType,
-  preservationType: PreservationType,
-  preservationTemperatureType: PreservationTemperatureType,
-  specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
-    (validateId(id).toValidationNel |@|
+    studyId: StudyId,
+    id: SpecimenGroupId,
+    version: Long = -1,
+    name: String,
+    description: Option[String],
+    units: String,
+    anatomicalSourceType: AnatomicalSourceType,
+    preservationType: PreservationType,
+    preservationTemperatureType: PreservationTemperatureType,
+    specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
+    (validateId(studyId).toValidationNel |@|
+      validateId(id).toValidationNel |@|
       validateAndIncrementVersion(version).toValidationNel |@|
-      validateId(studyId).toValidationNel |@|
       validateNonEmpty("name", name).toValidationNel |@|
       validateNonEmptyOption("description", description).toValidationNel |@|
       validateNonEmpty("units", units).toValidationNel) {

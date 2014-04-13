@@ -8,9 +8,9 @@ import scalaz._
 import scalaz.Scalaz._
 
 case class ParticipantAnnotationType private (
+   studyId: StudyId,
    id: AnnotationTypeId,
    version: Long,
-   studyId: StudyId,
    name: String,
    description: Option[String],
    valueType: AnnotationValueType,
@@ -52,18 +52,18 @@ object ParticipantAnnotationType extends StudyValidationHelper {
     }
 
   def create(
+    studyId: StudyId,
     id: AnnotationTypeId,
     version: Long,
-    studyId: StudyId,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
     options: Option[Map[String, String]],
     required: Boolean): DomainValidation[ParticipantAnnotationType] = {
-    (validateId(id).toValidationNel |@|
+    (validateId(studyId).toValidationNel |@|
+      validateId(id).toValidationNel |@|
       validateAndIncrementVersion(version).toValidationNel |@|
-      validateId(studyId).toValidationNel |@|
       validateNonEmpty("name", name).toValidationNel |@|
       validateNonEmptyOption("description", description).toValidationNel |@|
       validateMaxValueCount(maxValueCount).toValidationNel) {
