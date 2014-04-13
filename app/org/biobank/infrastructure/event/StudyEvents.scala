@@ -37,6 +37,16 @@ object StudyEvents {
     version: Long)
     extends StudyEvent
 
+  case class StudyRetiredEvent(
+    id: String,
+    version: Long)
+    extends StudyEvent
+
+  case class StudyUnretiredEvent(
+    id: String,
+    version: Long)
+    extends StudyEvent
+
   // specimen group events
   case class SpecimenGroupAddedEvent(
     studyid: String,

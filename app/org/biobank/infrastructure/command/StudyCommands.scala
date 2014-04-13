@@ -25,21 +25,35 @@ object StudyCommands {
     name: String,
     description: Option[String] = None)
     extends StudyCommand
-    with Identity 
+    with Identity
     with HasExpectedVersion
 
   case class EnableStudyCmd(
     id: String,
     expectedVersion: Option[Long])
     extends StudyCommand
-    with Identity 
+    with Identity
     with HasExpectedVersion
 
   case class DisableStudyCmd(
     id: String,
     expectedVersion: Option[Long])
     extends StudyCommand
-    with Identity 
+    with Identity
+    with HasExpectedVersion
+
+  case class RetireStudyCmd(
+    id: String,
+    expectedVersion: Option[Long])
+    extends StudyCommand
+    with Identity
+    with HasExpectedVersion
+
+  case class UnetireStudyCmd(
+    id: String,
+    expectedVersion: Option[Long])
+    extends StudyCommand
+    with Identity
     with HasExpectedVersion
 
   // specimen group commands
@@ -68,7 +82,7 @@ object StudyCommands {
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType)
     extends SpecimenGroupCommand
-    with Identity 
+    with Identity
     with StudyIdentity with HasExpectedVersion
 
   case class RemoveSpecimenGroupCmd(
@@ -76,7 +90,7 @@ object StudyCommands {
     expectedVersion: Option[Long],
     studyId: String)
     extends SpecimenGroupCommand
-    with Identity 
+    with Identity
     with HasExpectedVersion
 
   // collection event commands
@@ -109,7 +123,7 @@ object StudyCommands {
     expectedVersion: Option[Long],
     studyId: String)
     extends CollectionEventTypeCommand
-    with Identity 
+    with Identity
     with HasExpectedVersion
 
   // study annotation type commands
