@@ -40,6 +40,14 @@ case class CollectionEventType private (
 
 object CollectionEventType extends StudyValidationHelper {
 
+  def validateSpecimenGroupItem(
+    pecimenGroupItem: CollectionEventTypeSpecimenGroup): DomainValidation[CollectionEventTypeSpecimenGroup] = {
+  }
+
+  def validateSpecimenGroupData(
+    specimenGroupData: Set[CollectionEventTypeSpecimenGroup]): DomainValidation[Set[CollectionEventTypeSpecimenGroup]] = {
+  }
+
   def create(
   studyId: StudyId,
   id: CollectionEventTypeId,
