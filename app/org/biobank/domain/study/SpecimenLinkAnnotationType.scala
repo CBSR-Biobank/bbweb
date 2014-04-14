@@ -1,12 +1,16 @@
 package org.biobank.domain.study
 
-import org.biobank.domain._
+import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
+import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
 import org.biobank.domain.AnnotationValueType._
 
-case class SpecimenLinkAnnotationType(
+import scalaz._
+import scalaz.Scalaz._
+
+case class SpecimenLinkAnnotationType private (
+  studyId: StudyId,
   id: AnnotationTypeId,
   version: Long = -1,
-  studyId: StudyId,
   name: String,
   description: Option[String],
   valueType: AnnotationValueType,
@@ -14,13 +18,39 @@ case class SpecimenLinkAnnotationType(
   options: Option[Map[String, String]])
   extends StudyAnnotationType {
 
-  val toStringFormat = """SpecimenLinkAnnotationType:{ id: %s, version: %d, studyId: %s,""" +
-    """  name: %s, description: %s, valueType: %s, maxValueCount: %d, options: %s }"""
+  override def toString: String =
+    s"""|SpecimenLinkAnnotationType:{
+        |  id: %s,
+        |  version: %d,
+        |  studyId: %s,
+        |  name: %s,
+        |  description: %s,
+        |  valueType: %s,
+        |  maxValueCount: %d,
+        |  options: %s
+        }""".stripMargin
 
-  override def toString: String = {
-    toStringFormat.format(
-      id, version, studyId, name, description, valueType, maxValueCount.getOrElse(-1),
-      options.getOrElse("None"))
+}
+
+object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidationHelper {
+
+  def create(
+    studyId: StudyId,
+    id: AnnotationTypeId,
+    version: Long,
+    name: String,
+    description: Option[String],
+    valueType: AnnotationValueType,
+    maxValueCount: Option[Int],
+    options: Option[Map[String, String]]): DomainValidation[SpecimenLinkAnnotationType] = {
+    (validateId(studyId).toValidationNel |@|
+      validateId(id).toValidationNel |@|
+      validateAndIncrementVersion(version).toValidationNel |@|
+      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
+      validateNonEmptyOption(description, "description is null or empty").toValidationNel |@|
+      validateMaxValueCount(maxValueCount).toValidationNel) {
+        SpecimenLinkAnnotationType(_, _, _, _, _, valueType, _, options)
+      }
   }
 
 }

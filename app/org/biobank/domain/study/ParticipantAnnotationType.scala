@@ -1,7 +1,7 @@
 package org.biobank.domain.study
 
 import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
-import org.biobank.domain.validation.StudyValidationHelper
+import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
 import org.biobank.domain.AnnotationValueType._
 
 import scalaz._
@@ -20,7 +20,7 @@ case class ParticipantAnnotationType private (
   extends StudyAnnotationType {
 
   override def toString: String =
-    s"""|ParticipantAnnotationType: {
+    s"""|ParticipantAnnotationTypex: {
         |  id: %s,
         |  version: %d,
         |  studyId: %s,
@@ -34,22 +34,7 @@ case class ParticipantAnnotationType private (
 
 }
 
-object ParticipantAnnotationType extends StudyValidationHelper {
-
-  def validateId(id: AnnotationTypeId): Validation[String, AnnotationTypeId] = {
-    validateStringId(id.toString) match {
-      case Success(idString) => id.success
-      case Failure(err) => err.fail
-    }
-  }
-
-  def validateMaxValueCount(option: Option[Int]): Validation[String, Option[Int]] =
-    option match {
-      case Some(n) =>
-	if (n > -1) option.success else s"max value count is not a positive number".failure
-      case None =>
-        none.success
-    }
+object ParticipantAnnotationType extends StudyAnnotationTypeValidationHelper {
 
   def create(
     studyId: StudyId,
@@ -64,8 +49,8 @@ object ParticipantAnnotationType extends StudyValidationHelper {
     (validateId(studyId).toValidationNel |@|
       validateId(id).toValidationNel |@|
       validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty("name", name).toValidationNel |@|
-      validateNonEmptyOption("description", description).toValidationNel |@|
+      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
+      validateNonEmptyOption(description, "description is null or empty").toValidationNel |@|
       validateMaxValueCount(maxValueCount).toValidationNel) {
         ParticipantAnnotationType(_, _, _, _, _, valueType, _, options, required)
       }

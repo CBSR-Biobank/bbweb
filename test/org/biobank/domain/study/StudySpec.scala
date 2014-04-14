@@ -112,7 +112,7 @@ class StudySpec extends WordSpecLike with Matchers {
       DisabledStudy.create(id, version, name, description) match {
         case Success(user) => fail("id validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("id is null or empty")
+          err.list.mkString(",") should include("study id is null or empty")
       }
     }
 
@@ -151,7 +151,7 @@ class StudySpec extends WordSpecLike with Matchers {
       DisabledStudy.create(id, version, name, description) match {
         case Success(user) => fail("description validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("description is empty")
+          err.list.mkString(",") should include("description is null or empty")
       }
     }
 

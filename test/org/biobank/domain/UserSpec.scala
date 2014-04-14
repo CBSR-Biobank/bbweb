@@ -178,7 +178,7 @@ class UserSpec extends WordSpecLike with Matchers {
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
         case Success(user) => fail("user salt validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("salt is empty")
+          err.list.mkString(",") should include("salt is null or empty")
       }
     }
 

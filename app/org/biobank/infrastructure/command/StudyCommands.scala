@@ -1,5 +1,6 @@
 package org.biobank.infrastructure.command
 
+import org.biobank.infrastructure._
 import org.biobank.domain.study._
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._

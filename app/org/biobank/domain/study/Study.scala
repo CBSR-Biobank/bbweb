@@ -34,6 +34,7 @@ sealed trait Study
         |  name: $name,
         |  description: $description
         |}""".stripMargin
+
 }
 
 /*
@@ -86,6 +87,8 @@ case class DisabledStudy private (
     anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
   }
 
+
+
 }
 
 object DisabledStudy extends StudyValidationHelper {
@@ -97,8 +100,8 @@ object DisabledStudy extends StudyValidationHelper {
     description: Option[String]): DomainValidation[DisabledStudy] = {
     (validateId(id).toValidationNel |@|
       validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty("name", name).toValidationNel |@|
-      validateNonEmptyOption("description", description).toValidationNel) {
+      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
+      validateNonEmptyOption(description, "description is null or empty").toValidationNel) {
         DisabledStudy(_, _, _, _)
       }
   }
@@ -125,8 +128,8 @@ object EnabledStudy extends StudyValidationHelper {
   def create(study: DisabledStudy): DomainValidation[EnabledStudy] = {
     (validateId(study.id).toValidationNel |@|
       validateAndIncrementVersion(study.version).toValidationNel |@|
-      validateNonEmpty("name", study.name).toValidationNel |@|
-      validateNonEmptyOption("description", study.description).toValidationNel) {
+      validateNonEmpty(study.name, "name is null or empty").toValidationNel |@|
+      validateNonEmptyOption(study.description, "description is null or empty").toValidationNel) {
         EnabledStudy(_, _, _, _)
       }
   }
@@ -154,8 +157,8 @@ object RetiredStudy extends StudyValidationHelper {
   def create(study: DisabledStudy): DomainValidation[RetiredStudy] = {
     (validateId(study.id).toValidationNel |@|
       validateAndIncrementVersion(study.version).toValidationNel |@|
-      validateNonEmpty("name", study.name).toValidationNel |@|
-      validateNonEmptyOption("description", study.description).toValidationNel) {
+      validateNonEmpty(study.name, "name is null or empty").toValidationNel |@|
+      validateNonEmptyOption(study.description, "description is null or empty").toValidationNel) {
         RetiredStudy(_, _, _, _)
       }
   }

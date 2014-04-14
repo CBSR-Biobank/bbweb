@@ -7,28 +7,28 @@ import scalaz.Scalaz._
 
 private[domain] trait ValidationHelper {
 
-  def validateStringId(id: String): Validation[String, String] = {
+  def validateStringId(id: String, errmsg: String): Validation[String, String] = {
     if ((id == null) || id.isEmpty()) {
-      "id is null or empty".failure
+      errmsg.fail
     } else {
       id.success
     }
   }
 
-  def validateNonEmpty(fieldName: String, field: String): Validation[String, String] = {
+  def validateNonEmpty(field: String, errmsg: String): Validation[String, String] = {
     if ((field == null) || field.isEmpty()) {
-      s"$fieldName is null or empty".fail
+      errmsg.fail
     } else {
       field.success
     }
   }
 
   def validateNonEmptyOption(
-    fieldName: String,
-    option: Option[String]): Validation[String, Option[String]] = {
+    option: Option[String],
+    errmsg: String): Validation[String, Option[String]] = {
     option match {
       case Some(value) =>
-        if (value.isEmpty()) s"option $fieldName is empty".fail
+        if (value.isEmpty()) errmsg.fail
         else option.success
       case None =>
         none.success

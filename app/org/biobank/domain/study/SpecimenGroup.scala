@@ -51,7 +51,7 @@ case class SpecimenGroup private (
 object SpecimenGroup extends StudyValidationHelper {
 
   def validateId(id: SpecimenGroupId): Validation[String, SpecimenGroupId] = {
-    validateStringId(id.toString) match {
+    validateStringId(id.toString, "specimen group id is null or empty") match {
       case Success(idString) => id.success
       case Failure(err) => err.fail
     }
@@ -71,9 +71,9 @@ object SpecimenGroup extends StudyValidationHelper {
     (validateId(studyId).toValidationNel |@|
       validateId(id).toValidationNel |@|
       validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty("name", name).toValidationNel |@|
-      validateNonEmptyOption("description", description).toValidationNel |@|
-      validateNonEmpty("units", units).toValidationNel) {
+      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
+      validateNonEmptyOption(description, "description is null or empty").toValidationNel |@|
+      validateNonEmpty(units, "units is null or empty").toValidationNel) {
       SpecimenGroup(_, _, _, _, _, _, anatomicalSourceType, preservationType,
 	preservationTemperatureType, specimenType)
     }

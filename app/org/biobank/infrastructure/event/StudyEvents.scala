@@ -1,5 +1,6 @@
 package org.biobank.infrastructure.event
 
+import org.biobank.infrastructure._
 import org.biobank.domain.study._
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.AnnotationValueType._

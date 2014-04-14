@@ -122,10 +122,10 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
         prevItem <- collectionEventTypeWithId(ceventType.studyId, ceventType.id)
         validVersion <- prevItem.requireVersion(Some(ceventType.version))
         nameValid <- nameAvailable(ceventType)
-        updatedItem <- CollectionEventType(
-          ceventType.id, ceventType.version + 1, ceventType.studyId,
+        updatedItem <- CollectionEventType.create(
+          ceventType.studyId, ceventType.id, ceventType.version + 1,
           ceventType.name, ceventType.description, ceventType.recurring, ceventType.specimenGroupData,
-          ceventType.annotationTypeData).success
+          ceventType.annotationTypeData)
         updatedItem <- updateMap(updatedItem).success
       } yield updatedItem
     }
