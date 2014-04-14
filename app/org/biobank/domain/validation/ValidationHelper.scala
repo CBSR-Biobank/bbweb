@@ -23,6 +23,23 @@ private[domain] trait ValidationHelper {
     }
   }
 
+  def validatePositiveNumber(number: Int, errmsg: String): Validation[String, Int] = {
+    if (number < 0) {
+      errmsg.fail
+    } else {
+      number.success
+    }
+  }
+
+  def validatePositiveNumber(number: BigDecimal, errmsg: String): Validation[String, BigDecimal] = {
+    if (number < 0) {
+      errmsg.fail
+    } else {
+      number.success
+    }
+  }
+
+
   def validateNonEmptyOption(
     option: Option[String],
     errmsg: String): Validation[String, Option[String]] = {

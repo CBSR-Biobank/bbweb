@@ -42,6 +42,11 @@ object CollectionEventType extends StudyValidationHelper {
 
   def validateSpecimenGroupItem(
     pecimenGroupItem: CollectionEventTypeSpecimenGroup): DomainValidation[CollectionEventTypeSpecimenGroup] = {
+    (validateStringId(pecimenGroupItem.specimenGroupId, "specimen group id is null or empty").toValidationNel |@|
+      validatePositiveNumber(pecimenGroupItem.maxCount, "max count not a positive number").toValidationNel |@|
+      validatePositiveNumber(pecimenGroupItem.amount, "amount not a positive number").toValidationNel) {
+        CollectionEventTypeSpecimenGroup(_, _, _)
+      }
   }
 
   def validateSpecimenGroupData(
