@@ -6,7 +6,8 @@ import org.biobank.domain.{
   ConcurrencySafeEntity,
   DomainValidation,
   HasName,
-  HasDescriptionOption }
+  HasDescriptionOption
+}
 import org.biobank.domain.validation.StudyValidationHelper
 
 import scalaz._
@@ -19,11 +20,11 @@ case class CollectionEventType private (
   name: String,
   description: Option[String],
   recurring: Boolean,
-  specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
-  annotationTypeData: Set[CollectionEventTypeAnnotationType])
-    extends ConcurrencySafeEntity[CollectionEventTypeId]
-    with HasName
-    with HasDescriptionOption {
+  specimenGroupData: List[CollectionEventTypeSpecimenGroup],
+  annotationTypeData: List[CollectionEventTypeAnnotationType])
+  extends ConcurrencySafeEntity[CollectionEventTypeId]
+  with HasName
+  with HasDescriptionOption {
 
   override def toString: String =
     s"""|CollectionEventType:{
@@ -40,30 +41,68 @@ case class CollectionEventType private (
 
 object CollectionEventType extends StudyValidationHelper {
 
-  def validateSpecimenGroupItem(
-    pecimenGroupItem: CollectionEventTypeSpecimenGroup): DomainValidation[CollectionEventTypeSpecimenGroup] = {
-    (validateStringId(pecimenGroupItem.specimenGroupId, "specimen group id is null or empty").toValidationNel |@|
-      validatePositiveNumber(pecimenGroupItem.maxCount, "max count not a positive number").toValidationNel |@|
-      validatePositiveNumber(pecimenGroupItem.amount, "amount not a positive number").toValidationNel) {
-        CollectionEventTypeSpecimenGroup(_, _, _)
-      }
+    def validateId(id: CollectionEventTypeId): Validation[String, CollectionEventTypeId] = {
+    validateStringId(id.toString, "collection event type id is null or empty") match {
+      case Success(idString) => id.success
+      case Failure(err) => err.fail
+    }
   }
 
+  /**
+    *  Validates each item in the set and returns all failures.
+    */
   def validateSpecimenGroupData(
-    specimenGroupData: Set[CollectionEventTypeSpecimenGroup]): DomainValidation[Set[CollectionEventTypeSpecimenGroup]] = {
+    specimenGroupData: List[CollectionEventTypeSpecimenGroup]): DomainValidation[List[CollectionEventTypeSpecimenGroup]] = {
+
+    def validateSpecimenGroupItem(
+      specimenGroupItem: CollectionEventTypeSpecimenGroup): DomainValidation[CollectionEventTypeSpecimenGroup] = {
+      (validateStringId(specimenGroupItem.specimenGroupId, "specimen group id is null or empty").toValidationNel |@|
+	validatePositiveNumber(specimenGroupItem.maxCount, "max count is not a positive number").toValidationNel |@|
+	validatePositiveNumber(specimenGroupItem.amount, "amount not is a positive number").toValidationNel) {
+        CollectionEventTypeSpecimenGroup(_, _, _)
+      }
+    }
+
+    specimenGroupData.map(validateSpecimenGroupItem).sequenceU
+  }
+
+  /**
+    *  Validates each item in the set and returns all failures.
+    */
+  def validateAnnotationTypeData(
+    annotationTypeData: List[CollectionEventTypeAnnotationType]): DomainValidation[List[CollectionEventTypeAnnotationType]] = {
+
+    def validateAnnotationTypeItem(
+      annotationTypeItem: CollectionEventTypeAnnotationType): DomainValidation[CollectionEventTypeAnnotationType] = {
+      validateStringId(
+	annotationTypeItem.annotationTypeId,
+	"specimen group id is null or empty") match {
+	case Success(id) => CollectionEventTypeAnnotationType(id, annotationTypeItem.required).success
+	case Failure(err) => err.failNel
+      }
+    }
+
+    annotationTypeData.map(validateAnnotationTypeItem).sequenceU
   }
 
   def create(
-  studyId: StudyId,
-  id: CollectionEventTypeId,
-  version: Long = -1,
-  name: String,
-  description: Option[String],
-  recurring: Boolean,
-  specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
-  annotationTypeData: Set[CollectionEventTypeAnnotationType]): DomainValidation[CollectionEventType] = {
-    // TODO: complete this function
-    null
+    studyId: StudyId,
+    id: CollectionEventTypeId,
+    version: Long = -1,
+    name: String,
+    description: Option[String],
+    recurring: Boolean,
+    specimenGroupData: List[CollectionEventTypeSpecimenGroup],
+    annotationTypeData: List[CollectionEventTypeAnnotationType]): DomainValidation[CollectionEventType] = {
+    (validateId(studyId).toValidationNel |@|
+      validateId(id).toValidationNel |@|
+      validateAndIncrementVersion(version).toValidationNel |@|
+      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
+      validateNonEmptyOption(description, "description is null or empty").toValidationNel |@|
+      validateSpecimenGroupData(specimenGroupData) |@|
+      validateAnnotationTypeData(annotationTypeData)) {
+      CollectionEventType(_, _, _, _, _, recurring, _, _)
+    }
   }
 
 }

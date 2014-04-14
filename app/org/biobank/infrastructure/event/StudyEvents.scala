@@ -8,6 +8,8 @@ import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
 
+import scala.collection.immutable
+
 /**
  * Events used by the Study Aggregate.
  */
@@ -87,8 +89,8 @@ object StudyEvents {
     name: String,
     description: Option[String],
     recurring: Boolean,
-    specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
-    annotationTypeData: Set[CollectionEventTypeAnnotationType])
+    specimenGroupData: List[CollectionEventTypeSpecimenGroup],
+    annotationTypeData: List[CollectionEventTypeAnnotationType])
     extends StudyEvent
 
   case class CollectionEventTypeUpdatedEvent(
@@ -98,8 +100,8 @@ object StudyEvents {
     name: String,
     description: Option[String],
     recurring: Boolean,
-    specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
-    annotationTypeData: Set[CollectionEventTypeAnnotationType])
+    specimenGroupData: List[CollectionEventTypeSpecimenGroup],
+    annotationTypeData: List[CollectionEventTypeAnnotationType])
     extends StudyEvent
 
   case class CollectionEventTypeRemovedEvent(

@@ -10,6 +10,8 @@ import org.biobank.domain.AnnotationValueType._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.Commands._
 
+import scala.collection.immutable
+
 object StudyCommands {
   // study commands
   trait StudyCommand extends Command
@@ -102,8 +104,8 @@ object StudyCommands {
     name: String,
     description: Option[String],
     recurring: Boolean,
-    specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
-    annotationTypeData: Set[CollectionEventTypeAnnotationType])
+    specimenGroupData: List[CollectionEventTypeSpecimenGroup],
+    annotationTypeData: List[CollectionEventTypeAnnotationType])
     extends CollectionEventTypeCommand with StudyIdentity
 
   case class UpdateCollectionEventTypeCmd(
@@ -113,8 +115,8 @@ object StudyCommands {
     name: String,
     description: Option[String],
     recurring: Boolean,
-    specimenGroupData: Set[CollectionEventTypeSpecimenGroup],
-    annotationTypeData: Set[CollectionEventTypeAnnotationType])
+    specimenGroupData: List[CollectionEventTypeSpecimenGroup],
+    annotationTypeData: List[CollectionEventTypeAnnotationType])
     extends CollectionEventTypeCommand
     with Identity
     with HasExpectedVersion
