@@ -36,30 +36,6 @@ case class ParticipantAnnotationType private (
 
 object ParticipantAnnotationType extends StudyAnnotationTypeValidationHelper {
 
-  /**
-    *  Validates each item in the map and returns all failures.
-    */
-  def validateOptions(
-    options: Option[Map[String, String]]): DomainValidation[Option[Map[String, String]]] = {
-
-    def validateOtionItem(
-      item: (String, String)): DomainValidation[(String, String)] = {
-      (validateNonEmpty(item._1, "option key is null or empty").toValidationNel |@|
-	validateNonEmpty(item._2, "option value is null or empty").toValidationNel) {
-        (_, _)
-      }
-    }
-
-    options match {
-      case Some(optionsMap) =>
-	optionsMap.toList.map(validateOtionItem).sequenceU match {
-	  case Success(list) => Some(list.toMap).success
-	  case Failure(err) => err.fail
-	}
-      case None => none.success
-    }
-  }
-
   def create(
     studyId: StudyId,
     id: AnnotationTypeId,

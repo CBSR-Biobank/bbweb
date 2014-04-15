@@ -6,7 +6,7 @@ import org.biobank.infrastructure._
 import scalaz._
 import Scalaz._
 
-abstract class AnnotationType
+trait AnnotationType
   extends ConcurrencySafeEntity[AnnotationTypeId]
   with HasName with HasDescriptionOption {
 

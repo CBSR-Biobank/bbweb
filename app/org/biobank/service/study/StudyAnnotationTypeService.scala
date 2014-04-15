@@ -19,7 +19,7 @@ import scalaz.Scalaz._
  *
  * @author Nelson Loyola
  */
-// abstract class StudyAnnotationTypeService[A <: StudyAnnotationType] extends CommandHandler {
+// trait StudyAnnotationTypeService[A <: StudyAnnotationType] extends CommandHandler {
 
 //   protected val log = LoggerFactory.getLogger(this.getClass)
 

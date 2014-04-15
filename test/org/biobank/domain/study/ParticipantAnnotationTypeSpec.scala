@@ -165,6 +165,25 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
       val name = nameGenerator.next[ParticipantAnnotationType]
       val description = some(nameGenerator.next[ParticipantAnnotationType])
       val valueType = AnnotationValueType.Number
+      val maxValueCount = Some(-1)
+      var options = Some(Map("1" -> "a"))
+      val required = true
+
+      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+	maxValueCount, options, required) match {
+        case Success(user) => fail
+        case Failure(err) =>
+          err.list.mkString(",") should include("max value count is not a positive number")
+      }
+    }
+
+    "not be created with an invalid options" in {
+      val studyId = StudyId(nameGenerator.next[ParticipantAnnotationType])
+      val id = AnnotationTypeId(nameGenerator.next[ParticipantAnnotationType])
+      val version = -1L
+      val name = nameGenerator.next[ParticipantAnnotationType]
+      val description = some(nameGenerator.next[ParticipantAnnotationType])
+      val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
       var options = Some(Map("" -> "a"))
       val required = true

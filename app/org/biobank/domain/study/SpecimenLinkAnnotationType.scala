@@ -48,8 +48,9 @@ object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidationHelper {
       validateAndIncrementVersion(version).toValidationNel |@|
       validateNonEmpty(name, "name is null or empty").toValidationNel |@|
       validateNonEmptyOption(description, "description is null or empty").toValidationNel |@|
-      validateMaxValueCount(maxValueCount).toValidationNel) {
-        SpecimenLinkAnnotationType(_, _, _, _, _, valueType, _, options)
+      validateMaxValueCount(maxValueCount).toValidationNel |@|
+      validateOptions(options)) {
+        SpecimenLinkAnnotationType(_, _, _, _, _, valueType, _, _)
       }
   }
 

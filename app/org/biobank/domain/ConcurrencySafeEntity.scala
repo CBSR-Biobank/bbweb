@@ -5,7 +5,7 @@ import org.biobank.infrastructure._
 import scalaz._
 import scalaz.Scalaz._
 
-abstract class ConcurrencySafeEntity[T]
+trait ConcurrencySafeEntity[T]
   extends IdentifiedDomainObject[T] {
 
   val version: Long
