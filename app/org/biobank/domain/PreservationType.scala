@@ -1,5 +1,8 @@
 package org.biobank.domain
 
+/** Describes how a [[Specimen]] should be preserved/stored by describing a preservation method. Also see
+  * [[PreservationTemperatureType]]).
+  */
 object PreservationType extends Enumeration {
   type PreservationType = Value
   val FrozenSpecimen = Value("Frozen Specimen")
@@ -8,6 +11,10 @@ object PreservationType extends Enumeration {
   val Slide = Value("Slide")
 }
 
+/** Describes how a [[Specimen]] should be preserved/stored by describing temperature requirements (degrees
+  * Celcius), as well as a preservation method (see [[PreservationType]]).
+  *
+  */
 object PreservationTemperatureType extends Enumeration {
   type PreservationTemperatureType = Value
   val Plus4celcius = Value("4 C")

@@ -7,7 +7,7 @@ import scalaz.Scalaz._
 
 private[domain] trait ValidationHelper {
 
-  def validateStringId(id: String, errmsg: String): Validation[String, String] = {
+  protected def validateStringId(id: String, errmsg: String): Validation[String, String] = {
     if ((id == null) || id.isEmpty()) {
       errmsg.fail
     } else {
@@ -15,7 +15,7 @@ private[domain] trait ValidationHelper {
     }
   }
 
-  def validateNonEmpty(value: String, errmsg: String): Validation[String, String] = {
+  protected def validateNonEmpty(value: String, errmsg: String): Validation[String, String] = {
     if ((value == null) || value.isEmpty()) {
       errmsg.fail
     } else {
@@ -23,7 +23,7 @@ private[domain] trait ValidationHelper {
     }
   }
 
-  def validatePositiveNumber(number: Int, errmsg: String): Validation[String, Int] = {
+  protected def validatePositiveNumber(number: Int, errmsg: String): Validation[String, Int] = {
     if (number < 0) {
       errmsg.fail
     } else {
@@ -31,28 +31,29 @@ private[domain] trait ValidationHelper {
     }
   }
 
-  def validatePositiveNumber(number: BigDecimal, errmsg: String): Validation[String, BigDecimal] = {
-    if (number < 0) {
-      errmsg.fail
-    } else {
-      number.success
+  protected def validatePositiveNumber(
+    number: BigDecimal, errmsg: String): Validation[String, BigDecimal] = {
+    if (number < 0) errmsg.fail else number.success
+  }
+
+  protected def validatePositiveNumberOption(
+    option: Option[BigDecimal], errmsg: String): Validation[String, Option[BigDecimal]] = {
+    option match {
+      case Some(number) if (number < 0) => errmsg.fail
+      case _ => option.success
     }
   }
 
-
-  def validateNonEmptyOption(
+  protected def validateNonEmptyOption(
     option: Option[String],
     errmsg: String): Validation[String, Option[String]] = {
     option match {
-      case Some(value) =>
-        if ((value == null) || value.isEmpty()) errmsg.fail
-        else option.success
-      case None =>
-        none.success
+      case Some(value) if ((value == null) || value.isEmpty()) => errmsg.fail
+      case _ => option.success
     }
   }
 
-  def validateAndIncrementVersion(v: Long): Validation[String, Long] =
+  protected def validateAndIncrementVersion(v: Long): Validation[String, Long] =
     if (v >= -1) (v + 1).success else s"invalid version value: $v".failure
 
 }

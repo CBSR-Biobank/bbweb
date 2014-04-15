@@ -2,7 +2,10 @@ package org.biobank.domain.study
 
 import org.biobank.domain.AnnotationTypeId
 import org.biobank.fixture.NameGenerator
-import org.biobank.domain.AnnotationValueType
+import org.biobank.domain.AnatomicalSourceType
+import org.biobank.domain.PreservationType
+import org.biobank.domain.PreservationTemperatureType
+import org.biobank.domain.SpecimenType
 
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
@@ -17,6 +20,21 @@ class SpecimenGroupSpec extends WordSpecLike with Matchers {
   "A specimen group type" can {
 
     "be created" in {
+      val studyId = StudyId(nameGenerator.next[SpecimenGroup])
+      val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
+      val version = -1L
+      val name = nameGenerator.next[SpecimenGroup]
+      val description = some(nameGenerator.next[SpecimenGroup])
+      val units = nameGenerator.next[SpecimenGroup]
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FrozenSpecimen
+      val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.BuffyCoat
+
+      val v = SpecimenGroup.create(studyId, id, version, name, description, units,
+	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
+      val cet = v.getOrElse(fail)
+      cet shouldBe a[SpecimenGroup]
     }
 
   }

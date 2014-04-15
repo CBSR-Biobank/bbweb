@@ -21,15 +21,15 @@ case class ParticipantAnnotationType private (
 
   override def toString: String =
     s"""|ParticipantAnnotationTypex: {
-        |  id: %s,
-        |  version: %d,
-        |  studyId: %s,
-        |  name: %s,
-        |  description: %s,
-        |  valueType: %s,
-        |  maxValueCount: %d,
-        |  options: %s,
-        |  required: %b
+        |  studyId: $studyId,
+        |  id: $id,
+        |  version: $version,
+        |  name: $name,
+        |  description: $description,
+        |  valueType: $valueType,
+        |  maxValueCount: $maxValueCount,
+        |  options: { $options }
+        |  required: $required
         |}""".stripMargin
 
 }

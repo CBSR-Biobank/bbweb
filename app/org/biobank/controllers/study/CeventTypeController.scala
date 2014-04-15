@@ -74,7 +74,7 @@ object CeventTypeController extends Controller with SecureSocial {
       "specimenGroupData" -> list(mapping(
         "specimenGroupId" -> text,
         "specimenGroupCount" -> number,
-        "specimenGroupAmount" -> bigDecimal)(
+        "specimenGroupAmount" -> optional(bigDecimal))(
           CollectionEventTypeSpecimenGroup.apply)(CollectionEventTypeSpecimenGroup.unapply)),
       "annotationTypeData" -> list(mapping(
         "annotationTypeId" -> text,

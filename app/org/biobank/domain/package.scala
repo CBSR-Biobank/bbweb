@@ -14,9 +14,32 @@ package object domain {
     def apply(msg: String): DomainError = msg
   }
 
-  trait HasName { val name: String }
-  trait HasDescription { val description: String }
-  trait HasDescriptionOption { val description: Option[String] }
+  trait HasName {
+    /** A short identifying name. */
+    val name: String
+
+  }
+
+  trait HasUniqueName {
+    /** A short identifying name that is unique. */
+    val name: String
+  }
+
+  trait HasDescription {
+
+    /** An description that can provide additional details on the name. */
+    val description: String
+
+  }
+
+  /** A trait that can be used to define the properties for an entity.
+    */
+  trait HasDescriptionOption {
+
+    /** An optional description that can provide additional details on the name. */
+    val description: Option[String]
+
+  }
 
   //trait HasAddedBy { val addedBy: UserId }
   //trait HasTimeAdded { val timeAdded: Long }

@@ -13,6 +13,25 @@ import org.biobank.domain.validation.StudyValidationHelper
 import scalaz._
 import scalaz.Scalaz._
 
+/**
+  * Defines a classification name, unique to the Study, to a participant visit.
+  *
+  * A participant visit is a record of when specimens were collected from a
+  * [[org.biobank.domain.participant.Participant]] at a collection [[Centre]]. Each collection event type is
+  * assigned one or more [[SpecimenGroup]]s to specify the specimen types that are collected.
+  *
+  * A study can have one or more collection event types defined. For specimen collection to be allowed on a
+  * study, at least one collection event type must be defined.
+  *
+  * @param recurring Set to true when the collection event type occurs more than once during the
+  *        lifetime of the study. False otherwise.
+
+  * @param specimenGroupData One or more [[SpecimenGroup]]s that need to be collected with this
+  *        type of collection event. See [[CollectionEventTypeSpecimenGroup]].
+
+  * @param annotationTypeData The [[AnnotationType]]s for a collection event type.
+  *
+  */
 case class CollectionEventType private (
   studyId: StudyId,
   id: CollectionEventTypeId,
@@ -28,14 +47,14 @@ case class CollectionEventType private (
 
   override def toString: String =
     s"""|CollectionEventType:{
-        |  id: %s,
-        |  version: %d,
-        |  studyId: %s,
-        |  name: %s,
-        |  description: %s,
-        |  recurring: %s,
-        |  specimenGroupData: { %s },
-        |  annotationTypeData: { %s }
+        |  studyId: $studyId,
+        |  id: $id,
+        |  version: $version,
+        |  name: $name,
+        |  description: $description,
+        |  recurring: $recurring,
+        |  specimenGroupData: { $specimenGroupData },
+        |  annotationTypeData: { $annotationTypeData }
         |}""".stripMargin
 }
 
@@ -58,7 +77,7 @@ object CollectionEventType extends StudyValidationHelper {
       specimenGroupItem: CollectionEventTypeSpecimenGroup): DomainValidation[CollectionEventTypeSpecimenGroup] = {
       (validateStringId(specimenGroupItem.specimenGroupId, "specimen group id is null or empty").toValidationNel |@|
 	validatePositiveNumber(specimenGroupItem.maxCount, "max count is not a positive number").toValidationNel |@|
-	validatePositiveNumber(specimenGroupItem.amount, "amount not is a positive number").toValidationNel) {
+	validatePositiveNumberOption(specimenGroupItem.amount, "amount not is a positive number").toValidationNel) {
         CollectionEventTypeSpecimenGroup(_, _, _)
       }
     }

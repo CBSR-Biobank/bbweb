@@ -20,14 +20,14 @@ case class CollectionEventAnnotationType(
 
   override def toString: String =
     s"""|CollectionEventAnnotationType:{
-        |  id: %s,
-        |  version: %d,
-        |  studyId: %s,
-        |  name: %s,
-        |  description: %s,
-        |  valueType: %s,
-        |  maxValueCount: %d,
-        |  options: %s
+        |  studyId: $studyId,
+        |  id: $id,
+        |  version: $version,
+        |  name: $name,
+        |  description: $description,
+        |  valueType: $valueType,
+        |  maxValueCount: $maxValueCount,
+        |  options: { $options }
         }""".stripMargin
 }
 

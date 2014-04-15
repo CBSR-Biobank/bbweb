@@ -48,6 +48,8 @@ object ApplicationBuild extends Build {
       "-Ywarn-inaccessible",
       "-unchecked"),
 
+    scalacOptions in (Compile,doc) := Seq("-groups", "-implicits", "-deprecation"),
+
     javaOptions ++= Seq("-Xmx1024M", "-XX:MaxPermSize=512m"),
 
     javaOptions in Test += "-Dconfig.file=conf/test.conf",

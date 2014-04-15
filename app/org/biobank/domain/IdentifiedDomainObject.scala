@@ -1,6 +1,11 @@
 package org.biobank.domain
 
+/**
+  * An object with a unique id.
+  */
 trait IdentifiedDomainObject[T] {
+
+  /** The unique ID for this object. */
   val id: T
 
   override def equals(that: Any) = that match {

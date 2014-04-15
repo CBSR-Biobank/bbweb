@@ -4,7 +4,7 @@ import org.biobank.domain.{
   AnnotationTypeId,
   ConcurrencySafeEntity,
   DomainValidation,
-  HasName,
+  HasUniqueName,
   HasDescriptionOption }
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.AnnotationValueType._
@@ -17,14 +17,19 @@ import scalaz._
 import scalaz.Scalaz._
 
 /**
-  * This is an aggregate root.
+  * A Study represents a collection of participants and specimens collected for a particular
+  * research study. This is an aggregate root.
+  *
+  * A study can be in one of 3 states: diabled, enabled, or retired. These are represented by
+  * the sub classes.
+  *
   */
 sealed trait Study
     extends ConcurrencySafeEntity[StudyId]
-    with HasName
+    with HasUniqueName
     with HasDescriptionOption {
-  val name: String
-  val description: Option[String]
+
+  /** Contains the current state of the object, one of: Disabled, Enalbed, or Retired. */
   val status: String
 
   override def toString =
@@ -37,11 +42,13 @@ sealed trait Study
 
 }
 
-/*
- *  This is the initial state for a study.  In this state collection and processing of specimens is not
- *  allowed.
- *
- */
+/**
+  * This is the initial state for a study.  In this state, only configuration changes are allowed.
+  * Collection and processing of specimens cannot be recorded.
+  *
+  * This class has a private constructor and instances of this class can only be created using
+  * the [[DisabledStudy.create]] method on the factory object.
+  */
 case class DisabledStudy private (
   id: StudyId,
   version: Long = -1,
@@ -51,14 +58,19 @@ case class DisabledStudy private (
 
   override val status: String = "Disabled"
 
+  /** Used to enable a study after the study has been configured, or had configuration changes made on it. */
   def enable: DomainValidation[EnabledStudy] = {
     EnabledStudy.create(this)
   }
 
+  /** When a study will no longer collect specimens from participants it can be retired. */
   def retire: DomainValidation[RetiredStudy] = {
     RetiredStudy.create(this)
   }
 
+  /**
+    * Adds a [[ParticipantAnnotationType]] to this study.
+    */
   def addParticipantAnnotationType(
     id: AnnotationTypeId,
     version: Long,
@@ -72,7 +84,9 @@ case class DisabledStudy private (
       valueType, maxValueCount, options, required)
   }
 
-
+  /**
+    * Adds a [[SpecimenGroup]] to this study.
+    */
   def addSpecimenGropu(
     id: SpecimenGroupId,
     version: Long = -1,
@@ -87,12 +101,18 @@ case class DisabledStudy private (
     anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
   }
 
-
-
 }
 
+/**
+  * Factory object used to create a study.
+  */
 object DisabledStudy extends StudyValidationHelper {
 
+  /**
+    * The factory method to create a study.
+    *
+    * Performs validation on fields.
+    */
   def create(
     id: StudyId,
     version: Long,
@@ -107,9 +127,12 @@ object DisabledStudy extends StudyValidationHelper {
   }
 }
 
-/*
- * In this state collection and processing of specimens can take place.
- */
+/**
+  * When a study is in this state, collection and processing of specimens can be recorded.
+  *
+  * This class has a private constructor and instances of this class can only be created using
+  * the [[EnabledStudy.create]] method on the factory object.
+  */
 case class EnabledStudy private (
   id: StudyId,
   version: Long,
@@ -123,8 +146,12 @@ case class EnabledStudy private (
     DisabledStudy.create(this.id, this.version, this.name, this.description)
 }
 
+/**
+  * Factory object used to enable a study.
+  */
 object EnabledStudy extends StudyValidationHelper {
 
+  /** A study must be in a disabled state before it can be enabled. */
   def create(study: DisabledStudy): DomainValidation[EnabledStudy] = {
     (validateId(study.id).toValidationNel |@|
       validateAndIncrementVersion(study.version).toValidationNel |@|
@@ -137,6 +164,9 @@ object EnabledStudy extends StudyValidationHelper {
 
 /*
  *  In this state the study cannot be modified and collection and processing of specimens is not allowed.
+  *
+  * This class has a private constructor and instances of this class can only be created using
+  * the [[RetiredStudy.create]] method on the factory object.
  */
 case class RetiredStudy private (
   id: StudyId,
@@ -152,8 +182,12 @@ case class RetiredStudy private (
   }
 }
 
+/**
+  * Factory object used to retire a study.
+  */
 object RetiredStudy extends StudyValidationHelper {
 
+  /** A study must be in a disabled state before it can be retired. */
   def create(study: DisabledStudy): DomainValidation[RetiredStudy] = {
     (validateId(study.id).toValidationNel |@|
       validateAndIncrementVersion(study.version).toValidationNel |@|

@@ -8,7 +8,7 @@ import scalaz.Scalaz._
 
 trait StudyValidationHelper extends ValidationHelper {
 
-  def validateId(id: StudyId): Validation[String, StudyId] = {
+  protected def validateId(id: StudyId): Validation[String, StudyId] = {
     validateStringId(id.toString, "study id is null or empty") match {
       case Success(idString) => id.success
       case Failure(err) => err.fail
