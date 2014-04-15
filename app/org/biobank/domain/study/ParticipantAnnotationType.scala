@@ -36,6 +36,25 @@ case class ParticipantAnnotationType private (
 
 object ParticipantAnnotationType extends StudyAnnotationTypeValidationHelper {
 
+  /**
+    *  Validates each item in the map and returns all failures.
+    */
+  def validateSpecimenGroupData(
+    options: Map[String, String]): DomainValidation[Map[String, String]] = {
+
+    def validateOtionItem(
+      item: (String, String)): DomainValidation[(String, String)] = {
+      (validateNonEmpty(item._1, "option key is null or empty").toValidationNel |@|
+	validateNonEmpty(item._2, "option value is null or empty").toValidationNel) {
+        (_, _)
+      }
+    }
+
+    // FIXME convert to list?
+
+    options.map(validateOtionItem).sequenceU
+  }
+
   def create(
     studyId: StudyId,
     id: AnnotationTypeId,
