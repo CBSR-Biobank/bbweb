@@ -1,6 +1,6 @@
 package org.biobank.domain
 
-import fixture.NameGenerator
+import org.biobank.fixture.NameGenerator
 
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers

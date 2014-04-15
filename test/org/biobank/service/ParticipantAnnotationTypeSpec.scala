@@ -1,6 +1,6 @@
 package org.biobank.service
 
-import fixture._
+import org.biobank.fixture._
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._

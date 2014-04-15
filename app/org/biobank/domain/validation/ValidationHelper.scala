@@ -15,11 +15,11 @@ private[domain] trait ValidationHelper {
     }
   }
 
-  def validateNonEmpty(field: String, errmsg: String): Validation[String, String] = {
-    if ((field == null) || field.isEmpty()) {
+  def validateNonEmpty(value: String, errmsg: String): Validation[String, String] = {
+    if ((value == null) || value.isEmpty()) {
       errmsg.fail
     } else {
-      field.success
+      value.success
     }
   }
 
@@ -45,7 +45,7 @@ private[domain] trait ValidationHelper {
     errmsg: String): Validation[String, Option[String]] = {
     option match {
       case Some(value) =>
-        if (value.isEmpty()) errmsg.fail
+        if ((value == null) || value.isEmpty()) errmsg.fail
         else option.success
       case None =>
         none.success

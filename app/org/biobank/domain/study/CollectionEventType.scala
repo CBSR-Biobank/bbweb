@@ -16,7 +16,7 @@ import scalaz.Scalaz._
 case class CollectionEventType private (
   studyId: StudyId,
   id: CollectionEventTypeId,
-  version: Long = -1,
+  version: Long,
   name: String,
   description: Option[String],
   recurring: Boolean,
@@ -76,7 +76,7 @@ object CollectionEventType extends StudyValidationHelper {
       annotationTypeItem: CollectionEventTypeAnnotationType): DomainValidation[CollectionEventTypeAnnotationType] = {
       validateStringId(
 	annotationTypeItem.annotationTypeId,
-	"specimen group id is null or empty") match {
+	"annotation type id is null or empty") match {
 	case Success(id) => CollectionEventTypeAnnotationType(id, annotationTypeItem.required).success
 	case Failure(err) => err.failNel
       }

@@ -1,4 +1,4 @@
-package fixture
+package org.biobank.fixture
 
 import scala.reflect.ClassTag
 import scala.reflect._

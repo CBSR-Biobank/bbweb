@@ -1,6 +1,6 @@
 package org.biobank.domain.study
 
-import fixture.NameGenerator
+import org.biobank.fixture.NameGenerator
 
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
@@ -129,10 +129,10 @@ class StudySpec extends WordSpecLike with Matchers {
       }
     }
 
-    "not be created with an empty name" in {
+    "not be created with an null or empty name" in {
       val id = StudyId(nameGenerator.next[Study])
       val version = -1L
-      val name = ""
+      var name: String = null
       val description = some(nameGenerator.next[Study])
 
       DisabledStudy.create(id, version, name, description) match {
@@ -140,14 +140,28 @@ class StudySpec extends WordSpecLike with Matchers {
         case Failure(err) =>
           err.list.mkString(",") should include("name is null or empty")
       }
+
+      name = ""
+      DisabledStudy.create(id, version, name, description) match {
+        case Success(user) => fail("name validation failed")
+        case Failure(err) =>
+          err.list.mkString(",") should include("name is null or empty")
+      }
     }
 
-    "not be created with an empty descriptioin option" in {
+    "not be created with an empty description option" in {
       val id = StudyId(nameGenerator.next[Study])
       val version = -1L
       val name = nameGenerator.next[Study]
-      val description = some("")
+      var description: Option[String] = Some(null)
 
+      DisabledStudy.create(id, version, name, description) match {
+        case Success(user) => fail("description validation failed")
+        case Failure(err) =>
+          err.list.mkString(",") should include("description is null or empty")
+      }
+
+      description = Some("")
       DisabledStudy.create(id, version, name, description) match {
         case Success(user) => fail("description validation failed")
         case Failure(err) =>

@@ -1,4 +1,4 @@
-package fixture
+package org.biobank.fixture
 
 import org.biobank.service._
 
