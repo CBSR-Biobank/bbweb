@@ -39,8 +39,8 @@ object ParticipantAnnotationType extends StudyAnnotationTypeValidationHelper {
   /**
     *  Validates each item in the map and returns all failures.
     */
-  def validateSpecimenGroupData(
-    options: Map[String, String]): DomainValidation[Map[String, String]] = {
+  def validateOptions(
+    options: Option[Map[String, String]]): DomainValidation[Option[Map[String, String]]] = {
 
     def validateOtionItem(
       item: (String, String)): DomainValidation[(String, String)] = {
@@ -50,9 +50,14 @@ object ParticipantAnnotationType extends StudyAnnotationTypeValidationHelper {
       }
     }
 
-    // FIXME convert to list?
-
-    options.map(validateOtionItem).sequenceU
+    options match {
+      case Some(optionsMap) =>
+	optionsMap.toList.map(validateOtionItem).sequenceU match {
+	  case Success(list) => Some(list.toMap).success
+	  case Failure(err) => err.fail
+	}
+      case None => none.success
+    }
   }
 
   def create(
@@ -70,8 +75,9 @@ object ParticipantAnnotationType extends StudyAnnotationTypeValidationHelper {
       validateAndIncrementVersion(version).toValidationNel |@|
       validateNonEmpty(name, "name is null or empty").toValidationNel |@|
       validateNonEmptyOption(description, "description is null or empty").toValidationNel |@|
-      validateMaxValueCount(maxValueCount).toValidationNel) {
-        ParticipantAnnotationType(_, _, _, _, _, valueType, _, options, required)
+      validateMaxValueCount(maxValueCount).toValidationNel |@|
+      validateOptions(options)) {
+        ParticipantAnnotationType(_, _, _, _, _, valueType, _, _, required)
       }
   }
 

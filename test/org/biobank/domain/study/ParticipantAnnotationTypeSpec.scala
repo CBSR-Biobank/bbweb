@@ -173,7 +173,7 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("max value count is not a positive number")
+          err.list.mkString(",") should include("option key is null or empty")
       }
 
       options = Some(Map("1" -> ""))
@@ -181,7 +181,15 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("max value count is not a positive number")
+          err.list.mkString(",") should include("option value is null or empty")
+      }
+
+      options = Some(Map("1" -> null))
+      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+	maxValueCount, options, required) match {
+        case Success(user) => fail
+        case Failure(err) =>
+          err.list.mkString(",") should include("option value is null or empty")
       }
     }
 
