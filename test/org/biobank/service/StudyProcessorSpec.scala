@@ -14,13 +14,12 @@ import org.biobank.domain.{
 }
 import org.biobank.domain.study._
 
-import akka.pattern.ask
-import org.scalatest.WordSpecLike
-import org.scalatest.Matchers
-import org.scalatest.BeforeAndAfterAll
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.Tag
+import scala.concurrent.duration._
+import scala.language.postfixOps
+import scala.concurrent.Await
+import akka.pattern.{ ask, gracefulStop }
+import akka.actor.{ Props, PoisonPill }
+import org.scalatest.{ WordSpecLike, Matchers, BeforeAndAfterAll, Tag }
 import org.slf4j.LoggerFactory
 
 import scalaz._
@@ -33,9 +32,9 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
   override val nameGenerator = new NameGenerator(this.getClass.getName)
 
-  "Study" can {
+  "A study processor" can {
 
-    "be added" in {
+    "add a study" in {
       val name = nameGenerator.next[Study]
       val description = some(nameGenerator.next[Study])
 
@@ -62,6 +61,33 @@ class StudyProcessorSpec extends StudyProcessorFixture {
             fail(s"Error: $errors")
         }
       }
+    }
+
+    "be recovered from journal" ignore {
+      /*
+       * Not sure if this is a good test, or how to do it correctly - ignoring it for now
+       */
+      val name = nameGenerator.next[Study]
+      val description = some(nameGenerator.next[Study])
+
+      var cmd: StudyCommand = AddStudyCmd(name, description)
+      val event1 = waitBlocking(ask(studyProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]])
+	.getOrElse(fail)
+      event1 shouldBe a [StudyAddedEvent]
+
+      Await.result(gracefulStop(studyProcessor, 5 seconds, PoisonPill), 6 seconds)
+
+      // restart
+      val newStudyProcessor = system.actorOf(Props(new StudyProcessorImpl), "studyproc")
+
+      val newName = nameGenerator.next[Study]
+      val newDescription = some(nameGenerator.next[Study])
+
+      cmd = UpdateStudyCmd(event1.id, Some(0), newName, newDescription)
+      val event2 = waitBlocking(ask(newStudyProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]])
+	.getOrElse(fail)
+      event2 shouldBe a [StudyUpdatedEvent]
+
     }
 
     //    "not be added if same name exists" in {

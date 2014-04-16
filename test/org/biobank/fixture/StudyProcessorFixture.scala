@@ -10,7 +10,7 @@ import play.api.Mode._
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.stm.Ref
-import akka.actor._
+import akka.actor.Props
 import akka.persistence.View
 import akka.util.Timeout
 import org.specs2.mutable._
