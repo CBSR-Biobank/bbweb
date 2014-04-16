@@ -62,7 +62,7 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("study id is null or empty")
+          err.list should (have length 1 and contain("study id is null or empty"))
       }
     }
 
@@ -81,7 +81,7 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("id is null or empty")
+          err.list should (have length 1 and contain("annotation type id is null or empty"))
       }
     }
 
@@ -100,14 +100,14 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("invalid version value")
+          err.list should (have length 1 and contain("invalid version value: -2"))
       }
     }
 
     "not be created with an null or empty name" in {
       val studyId = StudyId(nameGenerator.next[ParticipantAnnotationType])
       val id = AnnotationTypeId(nameGenerator.next[ParticipantAnnotationType])
-      val version = -2L
+      val version = -1L
       var name: String = null
       val description = some(nameGenerator.next[ParticipantAnnotationType])
       val valueType = AnnotationValueType.Number
@@ -119,7 +119,7 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("name is null or empty")
+          err.list should (have length 1 and contain("name is null or empty"))
       }
 
       name = ""
@@ -127,14 +127,14 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("name is null or empty")
+          err.list should (have length 1 and contain("name is null or empty"))
       }
     }
 
     "not be created with an empty description option" in {
       val studyId = StudyId(nameGenerator.next[ParticipantAnnotationType])
       val id = AnnotationTypeId(nameGenerator.next[ParticipantAnnotationType])
-      val version = -2L
+      val version = -1L
       val name = nameGenerator.next[ParticipantAnnotationType]
       var description: Option[String] = Some(null)
       val valueType = AnnotationValueType.Number
@@ -146,7 +146,7 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("description is null or empty")
+          err.list should (have length 1 and contain("description is null or empty"))
       }
 
       description = Some("")
@@ -154,7 +154,7 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("description is null or empty")
+          err.list should (have length 1 and contain("description is null or empty"))
       }
     }
 
@@ -173,7 +173,7 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("max value count is not a positive number")
+          err.list should (have length 1 and contain("max value count is not a positive number"))
       }
     }
 
@@ -192,7 +192,7 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("option key is null or empty")
+          err.list should (have length 1 and contain("option key is null or empty"))
       }
 
       options = Some(Map("1" -> ""))
@@ -200,7 +200,7 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("option value is null or empty")
+          err.list should (have length 1 and contain("option value is null or empty"))
       }
 
       options = Some(Map("1" -> null))
@@ -208,8 +208,12 @@ class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("option value is null or empty")
+          err.list should (have length 1 and contain("option value is null or empty"))
       }
+    }
+
+    "have more than one validation fail" in {
+      fail
     }
 
   }

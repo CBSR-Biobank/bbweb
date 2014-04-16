@@ -112,7 +112,7 @@ class StudySpec extends WordSpecLike with Matchers {
       DisabledStudy.create(id, version, name, description) match {
         case Success(user) => fail("id validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("study id is null or empty")
+          err.list should (have length 1 and contain("study id is null or empty"))
       }
     }
 
@@ -125,7 +125,7 @@ class StudySpec extends WordSpecLike with Matchers {
       DisabledStudy.create(id, version, name, description) match {
         case Success(user) => fail("version validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("invalid version value")
+          err.list should (have length 1 and contain("invalid version value: -2"))
       }
     }
 
@@ -138,14 +138,14 @@ class StudySpec extends WordSpecLike with Matchers {
       DisabledStudy.create(id, version, name, description) match {
         case Success(user) => fail("name validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("name is null or empty")
+          err.list should (have length 1 and contain("name is null or empty"))
       }
 
       name = ""
       DisabledStudy.create(id, version, name, description) match {
         case Success(user) => fail("name validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("name is null or empty")
+          err.list should (have length 1 and contain("name is null or empty"))
       }
     }
 
@@ -158,15 +158,19 @@ class StudySpec extends WordSpecLike with Matchers {
       DisabledStudy.create(id, version, name, description) match {
         case Success(user) => fail("description validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("description is null or empty")
+          err.list should (have length 1 and contain("description is null or empty"))
       }
 
       description = Some("")
       DisabledStudy.create(id, version, name, description) match {
         case Success(user) => fail("description validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("description is null or empty")
+          err.list should (have length 1 and contain("description is null or empty"))
       }
+    }
+
+    "have more than one validation fail" in {
+      fail
     }
 
   }

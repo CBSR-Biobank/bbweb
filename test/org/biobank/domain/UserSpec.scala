@@ -93,7 +93,7 @@ class UserSpec extends WordSpecLike with Matchers {
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
         case Success(user) => fail("id validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("id is null or empty")
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
@@ -110,7 +110,7 @@ class UserSpec extends WordSpecLike with Matchers {
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
         case Success(user) => fail("version validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("invalid version value")
+          err.list should (have length 1 and contain("invalid version value: -2"))
       }
     }
 
@@ -127,7 +127,7 @@ class UserSpec extends WordSpecLike with Matchers {
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
         case Success(user) => fail("name validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("name is null or empty")
+          err.list should (have length 1 and contain("name is null or empty"))
       }
     }
 
@@ -144,7 +144,7 @@ class UserSpec extends WordSpecLike with Matchers {
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
         case Success(user) => fail("user password validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("password is null or empty")
+          err.list should (have length 1 and contain("password is null or empty"))
       }
     }
 
@@ -161,7 +161,7 @@ class UserSpec extends WordSpecLike with Matchers {
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
         case Success(user) => fail("user hasher validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("hasher is null or empty")
+          err.list should (have length 1 and contain("hasher is null or empty"))
       }
     }
 
@@ -178,7 +178,7 @@ class UserSpec extends WordSpecLike with Matchers {
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
         case Success(user) => fail("user salt validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("salt is null or empty")
+          err.list should (have length 1 and contain("salt is null or empty"))
       }
     }
 
@@ -195,7 +195,8 @@ class UserSpec extends WordSpecLike with Matchers {
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
         case Success(user) => fail("user avaltar url validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("invalid avatar url")
+          err.list should have length 1
+	  err.list.head should include("invalid avatar url")
       }
     }
 
@@ -232,8 +233,12 @@ class UserSpec extends WordSpecLike with Matchers {
       user.authenticate(email, badPassword) match {
         case Success(x) => fail("authentication should fail")
         case Failure(err) =>
-          err.list.mkString(",") should include("authentication failure")
+          err.list should (have length 1 and contain("authentication failure"))
       }
+    }
+
+    "have more than one validation fail" in {
+      fail
     }
 
   }

@@ -59,7 +59,7 @@ class CollectionEventAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("study id is null or empty")
+          err.list should (have length 1 and contain("study id is null or empty"))
       }
     }
 
@@ -77,7 +77,7 @@ class CollectionEventAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("id is null or empty")
+          err.list should (have length 1 and contain("annotation type id is null or empty"))
       }
     }
 
@@ -95,7 +95,7 @@ class CollectionEventAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("invalid version value")
+          err.list should (have length 1 and contain("invalid version value: -2"))
       }
     }
 
@@ -113,7 +113,7 @@ class CollectionEventAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("name is null or empty")
+          err.list should (have length 1 and contain("name is null or empty"))
       }
 
       name = ""
@@ -121,7 +121,7 @@ class CollectionEventAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("name is null or empty")
+          err.list should (have length 1 and contain("name is null or empty"))
       }
     }
 
@@ -139,7 +139,7 @@ class CollectionEventAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("description is null or empty")
+          err.list should (have length 1 and contain("description is null or empty"))
       }
 
       description = Some("")
@@ -147,7 +147,7 @@ class CollectionEventAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("description is null or empty")
+          err.list should (have length 1 and contain("description is null or empty"))
       }
     }
 
@@ -165,7 +165,7 @@ class CollectionEventAnnotationTypeSpec extends WordSpecLike with Matchers {
 	maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("max value count is not a positive number")
+          err.list should (have length 1 and contain("max value count is not a positive number"))
       }
     }
 
@@ -184,7 +184,7 @@ class CollectionEventAnnotationTypeSpec extends WordSpecLike with Matchers {
 	studyId, id, version, name, description, valueType, maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("option key is null or empty")
+          err.list should (have length 1 and contain("option key is null or empty"))
       }
 
       options = Some(Map("1" -> ""))
@@ -192,7 +192,7 @@ class CollectionEventAnnotationTypeSpec extends WordSpecLike with Matchers {
 	studyId, id, version, name, description, valueType, maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("option value is null or empty")
+          err.list should (have length 1 and contain("option value is null or empty"))
       }
 
       options = Some(Map("1" -> null))
@@ -200,8 +200,12 @@ class CollectionEventAnnotationTypeSpec extends WordSpecLike with Matchers {
 	studyId, id, version, name, description, valueType, maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list.mkString(",") should include("option value is null or empty")
+          err.list should (have length 1 and contain("option value is null or empty"))
       }
+    }
+
+    "have more than one validation fail" in {
+      fail
     }
 
   }
