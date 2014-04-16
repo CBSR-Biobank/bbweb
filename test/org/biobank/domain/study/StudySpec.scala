@@ -110,7 +110,7 @@ class StudySpec extends WordSpecLike with Matchers {
       val description = some(nameGenerator.next[Study])
 
       DisabledStudy.create(id, version, name, description) match {
-        case Success(user) => fail("id validation failed")
+        case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("study id is null or empty"))
       }
@@ -123,7 +123,7 @@ class StudySpec extends WordSpecLike with Matchers {
       val description = some(nameGenerator.next[Study])
 
       DisabledStudy.create(id, version, name, description) match {
-        case Success(user) => fail("version validation failed")
+        case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("invalid version value: -2"))
       }
@@ -136,14 +136,14 @@ class StudySpec extends WordSpecLike with Matchers {
       val description = some(nameGenerator.next[Study])
 
       DisabledStudy.create(id, version, name, description) match {
-        case Success(user) => fail("name validation failed")
+        case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("name is null or empty"))
       }
 
       name = ""
       DisabledStudy.create(id, version, name, description) match {
-        case Success(user) => fail("name validation failed")
+        case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("name is null or empty"))
       }
@@ -156,21 +156,32 @@ class StudySpec extends WordSpecLike with Matchers {
       var description: Option[String] = Some(null)
 
       DisabledStudy.create(id, version, name, description) match {
-        case Success(user) => fail("description validation failed")
+        case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("description is null or empty"))
       }
 
       description = Some("")
       DisabledStudy.create(id, version, name, description) match {
-        case Success(user) => fail("description validation failed")
+        case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("description is null or empty"))
       }
     }
 
     "have more than one validation fail" in {
-      fail
+      val id = StudyId(nameGenerator.next[Study])
+      val version = -2L
+      val name = ""
+      var description: Option[String] = Some(nameGenerator.next[Study])
+
+      DisabledStudy.create(id, version, name, description) match {
+        case Success(user) => fail
+        case Failure(err) =>
+          err.list should have length 2
+	  err.list.head should be ("invalid version value: -2")
+	  err.list.tail.head should be ("name is null or empty")
+      }
     }
 
   }

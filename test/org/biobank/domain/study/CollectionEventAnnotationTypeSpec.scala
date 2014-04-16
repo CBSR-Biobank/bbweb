@@ -205,7 +205,23 @@ class CollectionEventAnnotationTypeSpec extends WordSpecLike with Matchers {
     }
 
     "have more than one validation fail" in {
-      fail
+      val studyId = StudyId(nameGenerator.next[CollectionEventAnnotationType])
+      val id = AnnotationTypeId(nameGenerator.next[CollectionEventAnnotationType])
+      val version = -2L
+      val name = ""
+      val description = some(nameGenerator.next[CollectionEventAnnotationType])
+      val valueType = AnnotationValueType.Number
+      val maxValueCount = Some(1)
+      val options = Some(Map("1" -> "a"))
+
+      CollectionEventAnnotationType.create(
+	studyId, id, version, name, description, valueType, maxValueCount, options) match {
+        case Success(user) => fail
+        case Failure(err) =>
+          err.list should have length 2
+	  err.list.head should be ("invalid version value: -2")
+	  err.list.tail.head should be ("name is null or empty")
+      }
     }
 
   }

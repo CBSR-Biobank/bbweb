@@ -204,7 +204,23 @@ class SpecimenLinkAnnotationTypeSpec extends WordSpecLike with Matchers {
     }
 
     "have more than one validation fail" in {
-      fail
+      val studyId = StudyId(nameGenerator.next[SpecimenLinkAnnotationType])
+      val id = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType])
+      val version = -2L
+      val name = ""
+      val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
+      val valueType = AnnotationValueType.Number
+      val maxValueCount = Some(1)
+      val options = Some(Map("1" -> "a"))
+
+      SpecimenLinkAnnotationType.create(
+	studyId, id, version, name, description, valueType, maxValueCount, options) match {
+        case Success(user) => fail
+        case Failure(err) =>
+          err.list should have length 2
+	  err.list.head should be ("invalid version value: -2")
+	  err.list.tail.head should be ("name is null or empty")
+      }
     }
   }
 

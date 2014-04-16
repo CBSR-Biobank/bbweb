@@ -1,5 +1,8 @@
 package org.biobank.domain.study
 
+import org.biobank.infrastructure.{
+  CollectionEventTypeSpecimenGroup,
+  CollectionEventTypeAnnotationType}
 import org.biobank.domain.{
   AnnotationTypeId,
   ConcurrencySafeEntity,
@@ -87,7 +90,7 @@ case class DisabledStudy private (
   /**
     * Adds a [[SpecimenGroup]] to this study.
     */
-  def addSpecimenGropu(
+  def addSpecimenGroup(
     id: SpecimenGroupId,
     version: Long = -1,
     name: String,
@@ -99,6 +102,42 @@ case class DisabledStudy private (
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
     SpecimenGroup.create(this.id, id, version, name, description, units,
     anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
+  }
+
+  def addColletionEventType(
+    id: CollectionEventTypeId,
+    version: Long = -1,
+    name: String,
+    description: Option[String],
+    recurring: Boolean,
+    specimenGroupData: List[CollectionEventTypeSpecimenGroup],
+    annotationTypeData: List[CollectionEventTypeAnnotationType]): DomainValidation[CollectionEventType] =  {
+    CollectionEventType.create(this.id, id, version, name, description, recurring, specimenGroupData,
+      annotationTypeData)
+  }
+
+  def addColletionEventAnnotationType(
+    id: AnnotationTypeId,
+    version: Long = -1,
+    name: String,
+    description: Option[String],
+    valueType: AnnotationValueType,
+    maxValueCount: Option[Int],
+    options: Option[Map[String, String]]): DomainValidation[CollectionEventAnnotationType] =  {
+    CollectionEventAnnotationType.create(this.id, id, version, name, description, valueType,
+      maxValueCount, options)
+  }
+
+  def addSpecimenLinkAnnotationType(
+    id: AnnotationTypeId,
+    version: Long = -1,
+    name: String,
+    description: Option[String],
+    valueType: AnnotationValueType,
+    maxValueCount: Option[Int],
+    options: Option[Map[String, String]]): DomainValidation[SpecimenLinkAnnotationType] =  {
+    SpecimenLinkAnnotationType.create(this.id, id, version, name, description, valueType,
+      maxValueCount, options)
   }
 
 }

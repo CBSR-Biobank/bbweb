@@ -1,6 +1,8 @@
 package org.biobank.domain.study
 
-import org.biobank.infrastructure._
+import org.biobank.infrastructure.{
+  CollectionEventTypeSpecimenGroup,
+  CollectionEventTypeAnnotationType}
 import org.biobank.domain.{
   AnnotationTypeId,
   ConcurrencySafeEntity,
@@ -60,50 +62,6 @@ case class CollectionEventType private (
 
 object CollectionEventType extends StudyValidationHelper {
 
-    def validateId(id: CollectionEventTypeId): Validation[String, CollectionEventTypeId] = {
-    validateStringId(id.toString, "collection event type id is null or empty") match {
-      case Success(idString) => id.success
-      case Failure(err) => err.fail
-    }
-  }
-
-  /**
-    *  Validates each item in the set and returns all failures.
-    */
-  def validateSpecimenGroupData(
-    specimenGroupData: List[CollectionEventTypeSpecimenGroup]): DomainValidation[List[CollectionEventTypeSpecimenGroup]] = {
-
-    def validateSpecimenGroupItem(
-      specimenGroupItem: CollectionEventTypeSpecimenGroup): DomainValidation[CollectionEventTypeSpecimenGroup] = {
-      (validateStringId(specimenGroupItem.specimenGroupId, "specimen group id is null or empty").toValidationNel |@|
-	validatePositiveNumber(specimenGroupItem.maxCount, "max count is not a positive number").toValidationNel |@|
-	validatePositiveNumberOption(specimenGroupItem.amount, "amount not is a positive number").toValidationNel) {
-        CollectionEventTypeSpecimenGroup(_, _, _)
-      }
-    }
-
-    specimenGroupData.map(validateSpecimenGroupItem).sequenceU
-  }
-
-  /**
-    *  Validates each item in the set and returns all failures.
-    */
-  def validateAnnotationTypeData(
-    annotationTypeData: List[CollectionEventTypeAnnotationType]): DomainValidation[List[CollectionEventTypeAnnotationType]] = {
-
-    def validateAnnotationTypeItem(
-      annotationTypeItem: CollectionEventTypeAnnotationType): DomainValidation[CollectionEventTypeAnnotationType] = {
-      validateStringId(
-	annotationTypeItem.annotationTypeId,
-	"annotation type id is null or empty") match {
-	case Success(id) => CollectionEventTypeAnnotationType(id, annotationTypeItem.required).success
-	case Failure(err) => err.failNel
-      }
-    }
-
-    annotationTypeData.map(validateAnnotationTypeItem).sequenceU
-  }
-
   def create(
     studyId: StudyId,
     id: CollectionEventTypeId,
@@ -124,5 +82,49 @@ object CollectionEventType extends StudyValidationHelper {
     }
   }
 
+
+  protected def validateId(id: CollectionEventTypeId): Validation[String, CollectionEventTypeId] = {
+    validateStringId(id.toString, "collection event type id is null or empty") match {
+      case Success(idString) => id.success
+      case Failure(err) => err.fail
+    }
+  }
+
+  /**
+    *  Validates each item in the set and returns all failures.
+    */
+  protected def validateSpecimenGroupData(
+    specimenGroupData: List[CollectionEventTypeSpecimenGroup]): DomainValidation[List[CollectionEventTypeSpecimenGroup]] = {
+
+    def validateSpecimenGroupItem(
+      specimenGroupItem: CollectionEventTypeSpecimenGroup): DomainValidation[CollectionEventTypeSpecimenGroup] = {
+      (validateStringId(specimenGroupItem.specimenGroupId, "specimen group id is null or empty").toValidationNel |@|
+	validatePositiveNumber(specimenGroupItem.maxCount, "max count is not a positive number").toValidationNel |@|
+	validatePositiveNumberOption(specimenGroupItem.amount, "amount not is a positive number").toValidationNel) {
+        CollectionEventTypeSpecimenGroup(_, _, _)
+      }
+    }
+
+    specimenGroupData.map(validateSpecimenGroupItem).sequenceU
+  }
+
+  /**
+    *  Validates each item in the set and returns all failures.
+    */
+  protected def validateAnnotationTypeData(
+    annotationTypeData: List[CollectionEventTypeAnnotationType]): DomainValidation[List[CollectionEventTypeAnnotationType]] = {
+
+    def validateAnnotationTypeItem(
+      annotationTypeItem: CollectionEventTypeAnnotationType): DomainValidation[CollectionEventTypeAnnotationType] = {
+      validateStringId(
+	annotationTypeItem.annotationTypeId,
+	"annotation type id is null or empty") match {
+	case Success(id) => CollectionEventTypeAnnotationType(id, annotationTypeItem.required).success
+	case Failure(err) => err.failNel
+      }
+    }
+
+    annotationTypeData.map(validateAnnotationTypeItem).sequenceU
+  }
 }
 

@@ -238,7 +238,24 @@ class UserSpec extends WordSpecLike with Matchers {
     }
 
     "have more than one validation fail" in {
-      fail
+      val id = UserId(nameGenerator.next[User])
+      val version = -2L
+      val name = ""
+      val email = "user1@test.com"
+      val password = nameGenerator.next[User]
+      val hasher = nameGenerator.next[User]
+      val salt = Some(nameGenerator.next[User])
+      val avatarUrl = Some("http://test.com/")
+
+      val badPassword = nameGenerator.next[User]
+
+      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
+        case Success(user) => fail
+        case Failure(err) =>
+          err.list should have length 2
+	  err.list.head should be ("invalid version value: -2")
+	  err.list.tail.head should be ("name is null or empty")
+      }
     }
 
   }
