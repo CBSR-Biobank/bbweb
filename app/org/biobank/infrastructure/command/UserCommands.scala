@@ -20,4 +20,9 @@ object UserCommands {
     expectedVersion: Option[Long])
     extends UserCommand
 
+  case class LockUserCommand(
+    email: String,
+    expectedVersion: Option[Long])
+    extends UserCommand
+
 }

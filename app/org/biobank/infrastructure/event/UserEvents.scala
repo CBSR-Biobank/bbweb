@@ -18,7 +18,14 @@ object UserEvents {
     extends UserEvent
   with Identity
 
-  case class UserActivatedEvent(id: String) extends UserEvent
-  with Identity
+  case class UserActivatedEvent(
+    id: String,
+    version: Long)
+      extends UserEvent with Identity
+
+  case class UserLockedEvent(
+    id: String,
+    version: Long)
+      extends UserEvent with Identity
 
 }

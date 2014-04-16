@@ -37,7 +37,7 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
   }
 
   override def toString =
-    s"""|User: {
+    s"""|${this.getClass.getSimpleName}: {
         |  name: $name,
         |  email: $email
         |}""".stripMargin
@@ -57,9 +57,7 @@ case class RegisteredUser private (
   avatarUrl: Option[String]) extends User {
 
   /* Activates a registered user. */
-  def activate: DomainValidation[ActiveUser] = {
-    ActiveUser.create(this)
-  }
+  def activate: DomainValidation[ActiveUser] = ActiveUser.create(this)
 }
 
 /** Factory object. */
@@ -101,9 +99,7 @@ case class ActiveUser private (
   avatarUrl: Option[String]) extends User {
 
   /** Locks an active user. */
-  def lock: DomainValidation[LockedUser] = {
-    LockedUser.create(this)
-  }
+  def lock: DomainValidation[LockedUser] = LockedUser.create(this)
 }
 
 /** Factory object. */

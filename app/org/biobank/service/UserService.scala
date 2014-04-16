@@ -105,7 +105,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     val receiveRecover: Receive = {
       case event: UserAddedEvent =>
         log.debug(s"receiveRecover: $event")
-	recoverUser(event)
+        recoverUser(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.users.foreach(i => userRepository.update(i))
@@ -113,11 +113,13 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
 
     val receiveCommand: Receive = {
       case cmd: AddUserCommand =>
-        log.debug(s"receiveCommand: $cmd")
         addUser(cmd)
 
       case cmd: ActivateUserCommand =>
         activateUser(cmd)
+
+      case cmd: LockUserCommand =>
+	lockUser(cmd)
 
       case "snap" =>
         saveSnapshot(SnapshotState(userRepository.allUsers))
@@ -126,7 +128,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
 
     def recoverUser(event: UserAddedEvent) = {
       RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
-	event.password, event.hasher, event.salt, event.avatarUrl) match {
+        event.password, event.hasher, event.salt, event.avatarUrl) match {
         case Success(user) =>
           userRepository.add(user)
           log.info(s"updateState: user added to repository: ${user.email}")
@@ -138,7 +140,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       }
     }
 
-    def addUser(cmd: AddUserCommand): DomainValidation[UserAddedEvent] = {
+    def addUser(cmd: AddUserCommand) = {
       val validation = for {
         emailAvailable <- userRepository.emailAvailable(cmd.email)
         user <- RegisteredUser.create(UserId(cmd.email), -1L, cmd.name, cmd.email,
@@ -146,34 +148,74 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
         event <- UserAddedEvent(user.id.toString, user.name, user.email,
           user.password, user.hasher, user.salt, user.avatarUrl).success
       } yield {
-        persist(event) { e => userRepository.add(user) }
+        persist(event) { e =>
+          userRepository.add(user)
+          sender ! e.success
+        }
         event
       }
 
-      sender ! validation
-      validation
+      if (validation.isFailure) {
+        sender ! validation
+      }
     }
 
-    def activateUser(cmd: ActivateUserCommand): DomainValidation[UserActivatedEvent] = {
+    def activateUser(cmd: ActivateUserCommand) = {
       val validation = for {
         user <- userRepository.userWithId(UserId(cmd.email))
-        registeredUser <- isRegisteredUser(user)
+        registeredUser <- isUserRegistered(user)
         validVersion <- registeredUser.requireVersion(cmd.expectedVersion)
         activatedUser <- registeredUser.activate
-        event <- UserActivatedEvent(activatedUser.id.toString).success
+        event <- UserActivatedEvent(activatedUser.id.toString, activatedUser.version).success
       } yield {
-        persist(event) { e => userRepository.update(activatedUser) }
+        persist(event) { e =>
+	  updateUser(activatedUser, e)
+	}
         event
       }
 
-      sender ! validation
-      validation
+      if (validation.isFailure) {
+        sender ! validation
+      }
     }
 
-    def isRegisteredUser(user: User): DomainValidation[RegisteredUser] = {
+    def lockUser(cmd: LockUserCommand) = {
+      val validation = for {
+        user <- userRepository.userWithId(UserId(cmd.email))
+        activeUser <- isUserActive(user)
+        validVersion <- activeUser.requireVersion(cmd.expectedVersion)
+        lockedUser <- activeUser.lock
+        event <- UserLockedEvent(lockedUser.id.toString, lockedUser.version).success
+      } yield {
+        persist(event) { e =>
+	  updateUser(lockedUser, e)
+	}
+        event
+      }
+
+      if (validation.isFailure) {
+        sender ! validation
+      }
+    }
+
+    private def updateUser[T <: User](user: T, event: UserEvent) = {
+      log.info(s"updateUser: $user")
+      userRepository.update(user)
+      sender ! event.success
+    }
+
+    private def isUserRegistered(user: User): DomainValidation[RegisteredUser] = {
       user match {
         case registeredUser: RegisteredUser => registeredUser.success
         case _ => DomainError(s"the user is not registered").failNel
+      }
+    }
+
+    private def isUserActive(user: User): DomainValidation[ActiveUser] = {
+      log.info(s"isUserActive: $user")
+      user match {
+        case activeUser: ActiveUser => activeUser.success
+        case _ => DomainError(s"the user is not active").failNel
       }
     }
   }

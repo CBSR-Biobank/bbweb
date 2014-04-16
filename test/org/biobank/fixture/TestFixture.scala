@@ -8,6 +8,10 @@ import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.PatienceConfiguration
+import org.scalatest.time.Span
+import org.scalatest.time.Seconds
+import org.scalatest.time.Millis
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import org.scalatest.time._
@@ -22,6 +26,10 @@ trait TestFixture
   with Matchers
   with BeforeAndAfterAll {
 
+  // need to configure scalatest to have more patience when waiting for future results
+  implicit val defaultPatience =
+    PatienceConfig(timeout = Span(2, Seconds), interval = Span(5, Millis))
+
   override def beforeAll: Unit = {
   }
 
@@ -34,20 +42,4 @@ trait TestFixture
     system.awaitTermination(10 seconds)
   }
 
-  /**
-   * Awaits the completion of a future in a non-blocking fashion. When the future completes
-   * {@link fun} is executed. Note that the future may have timed out instead.
-   */
-  def waitNonBlocking[T, U](future: Future[T])(fun: T => U): U = {
-    // use blocking for now so that tests can be run in parallel
-    whenReady(future, timeout(timeout.duration))(fun)
-  }
-
-  /**
-   * Blocks until the future completes or times out.
-   */
-  def waitBlocking[T](f: Future[T]): T = {
-    // use blocking for now so that tests can be run in parallel
-    Await.result(f, timeout.duration)
-  }
 }

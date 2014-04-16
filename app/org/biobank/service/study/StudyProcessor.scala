@@ -78,7 +78,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val validation = for {
         nameAvailable <- studyRepository.nameAvailable(cmd.name)
         newStudy <- DisabledStudy.create(studyId, -1L, cmd.name, cmd.description)
-        event <- StudyAddedEvent(newStudy.id.toString, newStudy.name, newStudy.description).successNel
+        event <- StudyAddedEvent(newStudy.id.toString, newStudy.name, newStudy.description).success
       } yield {
         persist(event) { e => studyRepository.add(newStudy) }
         event

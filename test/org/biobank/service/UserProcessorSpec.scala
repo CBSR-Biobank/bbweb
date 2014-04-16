@@ -5,18 +5,9 @@ import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.domain._
 
-import akka.actor.ActorSystem
-import akka.actor.Actor
-import akka.actor.Props
 import akka.pattern.ask
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
-import scala.concurrent.Await
-import scala.concurrent.Future
-import scala.concurrent.duration._
-import scala.language.postfixOps
 
 import scalaz._
 import scalaz.Scalaz._
@@ -33,10 +24,6 @@ class UserProcessorSpec extends UserProcessorFixture {
 
   override val nameGenerator = new NameGenerator(this.getClass.getName)
 
-  override def beforeAll: Unit = {
-    super.beforeAll
-  }
-
   "A user processor" should {
 
     "add a user" in {
@@ -48,32 +35,26 @@ class UserProcessorSpec extends UserProcessorFixture {
       val avatarUrl = Some("http://test.com/")
 
       val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      val future = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
+      ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]].futureValue match {
+        case Success(event) =>
+          event shouldBe a [UserAddedEvent]
+          event.id.toString should be(email)
+          event.name should be(name)
+          event.email should be(email)
+          event.password should be(password)
+          event.hasher should be(hasher)
+          event.salt should be(salt)
+          event.avatarUrl should be(avatarUrl)
 
-      waitNonBlocking(future) { r =>
-        r match {
-          case Success(event) =>
-            event shouldBe a [UserAddedEvent]
-            event.id.toString should be(email)
-            event.name should be(name)
-            event.email should be(email)
-            event.password should be(password)
-            event.hasher should be(hasher)
-            event.salt should be(salt)
-            event.avatarUrl should be(avatarUrl)
+          val user = userRepository.userWithId(UserId(event.id)).getOrElse(fail)
+          user shouldBe a[RegisteredUser]
 
-            userRepository.userWithId(UserId(event.id)).map { user =>
-              user shouldBe a[RegisteredUser]
-            }
-
-          case Failure(msg) =>
-            val errors = msg.list.mkString(", ")
-            fail(s"Error: $errors")
-        }
+        case Failure(msg) =>
+          fail(msg.list.mkString(", "))
       }
     }
 
-    "not add a user with an already registered email address" in {
+  "not add a user with an already registered email address" in {
       val name = nameGenerator.next[User]
       val email = "user2@test.com"
       val password = nameGenerator.next[User]
@@ -82,16 +63,15 @@ class UserProcessorSpec extends UserProcessorFixture {
       val avatarUrl = Some("http://test.com/")
 
       val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      val r = waitBlocking(ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]])
+      val event = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
+	.futureValue.getOrElse(fail)
+      event.email should be(email)
 
-      val user = r.getOrElse(fail("failure response from processor"))
-      user.email should be(email)
-
-      waitBlocking(ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]) match {
+      ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]].futureValue match {
         case Success(event) => fail
-
-        case Failure(msg) =>
-          msg.list.mkString(",") should startWith("user already exists")
+        case Failure(err) =>
+          err.list should have length 1
+	  err.list.head should include ("user already exists")
       }
     }
 
@@ -104,19 +84,48 @@ class UserProcessorSpec extends UserProcessorFixture {
       val avatarUrl = Some("http://test.com/")
 
       val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      val r = waitBlocking(ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]])
+      val event = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
+	.futureValue.getOrElse(fail)
 
-      val event = r.getOrElse(fail("failure response from processor"))
-
-      waitBlocking(ask(userProcessor, ActivateUserCommand(event.email, Some(1L)))
-        .mapTo[DomainValidation[UserActivatedEvent]]) match {
-        case Success(event) =>
-          event.id should be(email)
-
-        case Failure(msg) =>
-          fail(msg.list.mkString(","))
+      ask(userProcessor, ActivateUserCommand(event.email, Some(0L)))
+        .mapTo[DomainValidation[UserActivatedEvent]].futureValue match {
+        case Success(event) => event.id should be(email)
+        case Failure(err) => fail(err.list.mkString(","))
       }
-
     }
+
+    "lock an activated a user" in {
+      val name = nameGenerator.next[User]
+      val email = "user4@test.com"
+      val password = nameGenerator.next[User]
+      val hasher = nameGenerator.next[User]
+      val salt = Some(nameGenerator.next[User])
+      val avatarUrl = Some("http://test.com/")
+
+      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
+      ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]].futureValue.getOrElse(fail)
+
+      ask(userProcessor, ActivateUserCommand(email, Some(0L)))
+        .mapTo[DomainValidation[UserActivatedEvent]].futureValue.getOrElse(fail)
+
+      ask(userProcessor, LockUserCommand(email, Some(1L)))
+        .mapTo[DomainValidation[UserLockedEvent]].futureValue match {
+        case Success(event) => event.id should be(email)
+        case Failure(err) => fail(err.list.mkString(","))
+      }
+    }
+  }
+
+  "A user processor" can {
+
+    "not lock a registered user" ignore {
+      fail
+    }
+
+    "not unlock a registered user" ignore {
+      fail
+    }
+
+
   }
 }

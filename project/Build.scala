@@ -31,7 +31,7 @@ object ApplicationBuild extends Build {
       "org.scala-stm" %% "scala-stm" % "0.7"  % "compile",
       "org.scalaz" %% "scalaz-core" % "7.0.6"  % "compile",
       "junit" % "junit" % "4.11" % "test",
-      "org.scalatest" %% "scalatest" % "2.1.2" % "test",
+      "org.scalatest" %% "scalatest" % "2.1.3" % "test",
       //"com.typesafe.akka" %% "akka-testkit" % "2.3.1" % "test",
       "com.github.ddevore" %% "akka-persistence-mongo-casbah"  % "0.6-SNAPSHOT" % "compile"
     ),

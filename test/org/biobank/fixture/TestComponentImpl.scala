@@ -1,23 +1,15 @@
 package org.biobank.fixture
 
 import org.biobank.service._
-import org.biobank.domain._
 
-import play.api.Mode
-import play.api.Mode._
 import scala.concurrent._
 import scala.concurrent.duration._
 import akka.actor.ActorSystem
-import akka.actor.Props
 import akka.util.Timeout
-import org.slf4j.LoggerFactory
 import akka.actor._
 import com.typesafe.config.ConfigFactory
 import com.mongodb.casbah.Imports._
 import scala.language.postfixOps
-
-import scalaz._
-import scalaz.Scalaz._
 
 trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
 

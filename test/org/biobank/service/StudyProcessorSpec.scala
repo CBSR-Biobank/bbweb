@@ -39,27 +39,25 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val description = some(nameGenerator.next[Study])
 
       val cmd = AddStudyCmd(name, description)
-      val future = ask(studyProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
+      val future = ask(studyProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]].futureValue
 
-      waitNonBlocking(future) { r =>
-        r match {
-          case Success(event) =>
-            event shouldBe a [StudyAddedEvent]
-            //event.id.toString should be > 0
+      future match {
+        case Success(event) =>
+          event shouldBe a [StudyAddedEvent]
+          //event.id.toString should be > 0
 
-            event should have (
-              'name (name),
-              'description (description)
-            )
+          event should have (
+            'name (name),
+            'description (description)
+          )
 
-            studyRepository.studyWithId(StudyId(event.id)) map { study =>
-              study shouldBe a[DisabledStudy]
-            }
+          studyRepository.studyWithId(StudyId(event.id)) map { study =>
+            study shouldBe a[DisabledStudy]
+          }
 
-          case Failure(msg) =>
-            val errors = msg.list.mkString(", ")
-            fail(s"Error: $errors")
-        }
+        case Failure(msg) =>
+          val errors = msg.list.mkString(", ")
+          fail(s"Error: $errors")
       }
     }
 
@@ -71,34 +69,47 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val description = some(nameGenerator.next[Study])
 
       var cmd: StudyCommand = AddStudyCmd(name, description)
-      val event1 = waitBlocking(ask(studyProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]])
-	.getOrElse(fail)
+      val event1 = ask(studyProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
+	.futureValue.getOrElse(fail)
       event1 shouldBe a [StudyAddedEvent]
+
+      Thread.sleep(10)
 
       Await.result(gracefulStop(studyProcessor, 5 seconds, PoisonPill), 6 seconds)
 
       // restart
       val newStudyProcessor = system.actorOf(Props(new StudyProcessorImpl), "studyproc")
 
+      Thread.sleep(10)
+
       val newName = nameGenerator.next[Study]
       val newDescription = some(nameGenerator.next[Study])
 
       cmd = UpdateStudyCmd(event1.id, Some(0), newName, newDescription)
-      val event2 = waitBlocking(ask(newStudyProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]])
-	.getOrElse(fail)
+      val event2 = ask(newStudyProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]]
+	.futureValue.getOrElse(fail)
       event2 shouldBe a [StudyUpdatedEvent]
 
     }
+  }
 
-    //    "not be added if same name exists" in {
-    //      val name = nameGenerator.next[Study]
-    //      await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) must beSuccessful
-    //
-    //      await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) must beFailing.like {
-    //        case msgs => msgs.head must contain("name already exists")
-    //      }
-    //    }
-    //
+  "A study processor" should {
+
+    "not add add a new study with a name that exists" in {
+      val name = nameGenerator.next[Study]
+      val cmd = AddStudyCmd(name, None)
+
+      val f = ask(studyProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
+      f.futureValue should be success
+
+      ask(studyProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]].futureValue match {
+	case Success(study) => fail
+	case Failure(err) =>
+          err.list should have length 1
+	  err.list.head should include ("study with name already exists")
+      }
+    }
+
     //    "be updated" in {
     //      val name = nameGenerator.next[Study]
     //      val event1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
