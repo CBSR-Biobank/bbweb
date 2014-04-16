@@ -6,9 +6,8 @@ import scalaz._
 import scalaz.Scalaz._
 
 /**
- * A Wrapper around an STM Ref of a Map.
- * To be used by the "Service" class
- */
+  * A read-only wrapper around an STM Ref of a Map.
+  */
 private[domain] class ReadRepository[K, A](keyGetter: (A) => K) {
 
   protected val internalMap: Ref[Map[K, A]] = Ref(Map.empty[K, A])
@@ -25,6 +24,10 @@ private[domain] class ReadRepository[K, A](keyGetter: (A) => K) {
 
 }
 
+/** A read/write wrapper around an STM Ref of a map.
+  *
+  * Used by processor actors.
+  */
 class ReadWriteRepository[K, A](keyGetter: (A) => K) extends ReadRepository[K, A](keyGetter) {
 
   protected def updateMap(value: A) = {

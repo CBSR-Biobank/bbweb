@@ -32,11 +32,14 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
 	|  expectedVersion: $expected
 	|}""".stripMargin)
 
+  /** Used for optimistic concurrency versioning.
+    *
+    * Fails if the expected version does not match the current version of the object.
+    */
   def requireVersion(expectedVersion: Option[Long]): DomainValidation[ConcurrencySafeEntity[T]] = {
     expectedVersion match {
       case Some(expected) if (version != expected) => invalidVersion(expected).failNel
-      case Some(expected) if (version == expected) => this.success
-      case None => this.success
+      case _ => this.success
     }
   }
 }

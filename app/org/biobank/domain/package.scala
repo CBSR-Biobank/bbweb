@@ -7,9 +7,13 @@ import scalaz.Scalaz._
 
 package object domain {
 
+  /** Used to validate commands received by the system that act on the domain model. */
   type DomainValidation[A] = ValidationNel[DomainError, A]
+
+  /** Contains an error messsage when a command fails validation. */
   type DomainError = String
 
+  /** Factory object to create a domain error. */
   object DomainError {
     def apply(msg: String): DomainError = msg
   }
@@ -45,9 +49,5 @@ package object domain {
   //trait HasTimeAdded { val timeAdded: Long }
   //trait HasUpdatedBy { val updatedBy: Option[UserId] }
   //trait HasTimeUpdated { val timeUpdated: Option[Long] }
-
-  type UserReadRepository = ReadRepository[UserId, User]
-
-  type UserReadWriteRepository = ReadWriteRepository[UserId, User]
 
 }

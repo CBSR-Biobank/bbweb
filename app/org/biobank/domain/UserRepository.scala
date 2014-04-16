@@ -9,6 +9,7 @@ trait UserRepositoryComponent {
 
   val userRepository: UserRepository
 
+  /** A repository that stores [[Users]]. */
   trait UserRepository {
 
     def allUsers(): Set[User]
@@ -28,6 +29,10 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
 
   val userRepository: UserRepository = new UserRepositoryImpl
 
+  /** An implementation of repository that stores [[Users]].
+    *
+    * This repository uses the [[ReadWriteRepository]] implementation.
+    */
   class UserRepositoryImpl extends ReadWriteRepository[UserId, User](v => v.id) with UserRepository {
 
     val log = LoggerFactory.getLogger(this.getClass)

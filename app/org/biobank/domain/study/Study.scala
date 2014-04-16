@@ -201,7 +201,7 @@ object EnabledStudy extends StudyValidationHelper {
   }
 }
 
-/*
+/**
  *  In this state the study cannot be modified and collection and processing of specimens is not allowed.
   *
   * This class has a private constructor and instances of this class can only be created using

@@ -3,20 +3,33 @@ package org.biobank.domain
 import org.biobank.domain.validation.UserValidationHelper
 import org.biobank.infrastructure.event.UserEvents._
 
-import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
 
+/** A user of the system.
+  */
 sealed trait User extends ConcurrencySafeEntity[UserId] {
+
+  /** The user's full name. */
   val name: String
+
+  /** The user's email. Must be unique to the system. */
   val email: String
+
+  /** The user's password */
   val password: String
+
+  /** The string used to hash the password. */
   val hasher: String
+
+  /** The string used to salt the password. */
   val salt: Option[String]
+
+  /** An optional URL to the user's avatar icon. */
   val avatarUrl: Option[String]
 
   /**
-   * Authenticate a User.
+   * Authenticate a user.
    */
   def authenticate(email: String, password: String): DomainValidation[User] = {
     if (this.password.equals(password)) this.success
@@ -30,6 +43,9 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
         |}""".stripMargin
 }
 
+/** A user that just registered with the system. This user does not yet have full access
+  * the system.
+  */
 case class RegisteredUser private (
   id: UserId,
   version: Long,
@@ -40,15 +56,16 @@ case class RegisteredUser private (
   salt: Option[String],
   avatarUrl: Option[String]) extends User {
 
+  /* Activates a registered user. */
   def activate: DomainValidation[ActiveUser] = {
     ActiveUser.create(this)
   }
 }
 
+/** Factory object. */
 object RegisteredUser extends UserValidationHelper {
 
-  override val log = LoggerFactory.getLogger(this.getClass)
-
+  /** Creates a registered user. */
   def create(
     id: UserId,
     version: Long,
@@ -72,6 +89,7 @@ object RegisteredUser extends UserValidationHelper {
 
 }
 
+/** A user that has access to the system. */
 case class ActiveUser private (
   id: UserId,
   version: Long = -1,
@@ -82,13 +100,16 @@ case class ActiveUser private (
   salt: Option[String],
   avatarUrl: Option[String]) extends User {
 
+  /** Locks an active user. */
   def lock: DomainValidation[LockedUser] = {
     LockedUser.create(this)
   }
 }
 
+/** Factory object. */
 object ActiveUser extends UserValidationHelper {
 
+  /** Creates an active user from a registered user. */
   def create[T <: User](user: T): DomainValidation[ActiveUser] = {
     (validateId(user.id).toValidationNel |@|
       validateAndIncrementVersion(user.version).toValidationNel |@|
@@ -104,6 +125,7 @@ object ActiveUser extends UserValidationHelper {
 
 }
 
+/** A user who no longer has access to the system. */
 case class LockedUser private (
   id: UserId,
   version: Long = -1,
@@ -114,14 +136,17 @@ case class LockedUser private (
   salt: Option[String],
   avatarUrl: Option[String]) extends User {
 
+  /** Unlocks a locked user. */
   def unlock: DomainValidation[ActiveUser] = {
     ActiveUser.create(this)
   }
 
 }
 
+/** Factory object. */
 object LockedUser extends UserValidationHelper {
 
+  /** Creates an active user from a locked user. */
   def create(user: ActiveUser): DomainValidation[LockedUser] = {
     (validateId(user.id).toValidationNel |@|
       validateAndIncrementVersion(user.version).toValidationNel |@|
