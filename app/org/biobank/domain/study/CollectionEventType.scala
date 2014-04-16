@@ -18,10 +18,9 @@ import scalaz.Scalaz._
   *
   * A participant visit is a record of when specimens were collected from a
   * [[org.biobank.domain.participant.Participant]] at a collection [[Centre]]. Each collection event type is
-  * assigned one or more [[SpecimenGroup]]s to specify the specimen types that are collected.
+  * assigned one or more [[SpecimenGroup]]s to specify the [[SpecimenType]]s that are collected.
   *
-  * A study can have one or more collection event types defined. For specimen collection to be allowed on a
-  * study, at least one collection event type must be defined.
+  * A study must have at least one collection event type defined in order to record collected specimens.
   *
   * @param recurring Set to true when the collection event type occurs more than once during the
   *        lifetime of the study. False otherwise.
@@ -41,9 +40,10 @@ case class CollectionEventType private (
   recurring: Boolean,
   specimenGroupData: List[CollectionEventTypeSpecimenGroup],
   annotationTypeData: List[CollectionEventTypeAnnotationType])
-  extends ConcurrencySafeEntity[CollectionEventTypeId]
-  with HasName
-  with HasDescriptionOption {
+    extends ConcurrencySafeEntity[CollectionEventTypeId]
+    with HasName
+    with HasDescriptionOption
+    with HasStudyId {
 
   override def toString: String =
     s"""|CollectionEventType:{

@@ -26,9 +26,8 @@ import Scalaz._
   * This class has a private constructor and instances of this class can only be created using the
   * [[SpecimenGroup.create]] method on the factory object.
   *
-  * @param studyId The ID of the study this specimen group belongs to.
-  * @param units Specifies how the specimen amount is measured (e.g. volume, weight, length, etc.).
   * @param name A short identifying name that is unique to the study.
+  * @param units Specifies how the specimen amount is measured (e.g. volume, weight, length, etc.).
   * @param anatomicalSourceType see [[AnatomicalSourceType]].
   * @param preservationType see [[PreservationType]].
   * @param preservationTemperatureType see [[PreservationTemperatureType]].
@@ -47,7 +46,8 @@ case class SpecimenGroup private (
   specimenType: SpecimenType)
     extends ConcurrencySafeEntity[SpecimenGroupId]
     with HasUniqueName
-    with HasDescriptionOption {
+    with HasDescriptionOption
+    with HasStudyId {
 
   override def toString: String =
     s"""|SpecimenGroup:{

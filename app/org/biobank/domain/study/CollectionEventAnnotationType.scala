@@ -7,6 +7,9 @@ import org.biobank.domain.AnnotationValueType._
 import scalaz._
 import scalaz.Scalaz._
 
+/** Used to add custom annotations to collection events. The study can define multiple
+  * annotation types on collection events to store different types of data.
+  */
 case class CollectionEventAnnotationType(
   studyId: StudyId,
   id: AnnotationTypeId,

@@ -1,6 +1,6 @@
 package org.biobank.domain.study
 
-import org.biobank.domain._
+import org.biobank.domain.AnnotationType
 import org.biobank.domain.AnnotationValueType._
 
 /**
@@ -8,9 +8,5 @@ import org.biobank.domain.AnnotationValueType._
   * [[CollectionEvent]]s, [[ProcessingEvent]]s, and [[Participant]]s. Annotations are
   * optional and are not a requirement for specimen collection or processing.
   */
-trait StudyAnnotationType extends AnnotationType {
-
-  val studyId: StudyId
-
-}
+trait StudyAnnotationType extends AnnotationType with HasStudyId
 

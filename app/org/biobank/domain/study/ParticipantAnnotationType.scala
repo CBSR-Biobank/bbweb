@@ -7,6 +7,9 @@ import org.biobank.domain.AnnotationValueType._
 import scalaz._
 import scalaz.Scalaz._
 
+/** Used to add custom annotations to participants. The study can define multiple
+  * annotation types on participants to store different types of data.
+  */
 case class ParticipantAnnotationType private (
    studyId: StudyId,
    id: AnnotationTypeId,
