@@ -20,7 +20,7 @@ class StudyQuerySpec {
 
   //  val log = LoggerFactory.getLogger(this.getClass)
   //
-  //  val nameGenerator = new NameGenerator(classOf[StudyQuerySpec].getName)
+  //  val nameGenerator = new NameGenerator[this.getClass]
   //
   //  "Study" can {
   //

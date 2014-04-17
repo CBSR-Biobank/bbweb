@@ -39,7 +39,7 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
   override val specimenGroupRepository: SpecimenGroupRepository = new SpecimenGroupRepositoryImpl
 
   class SpecimenGroupRepositoryImpl
-    extends ReadWriteRepository[SpecimenGroupId, SpecimenGroup](v => v.id)
+    extends ReadWriteRepositoryRefImpl[SpecimenGroupId, SpecimenGroup](v => v.id)
     with SpecimenGroupRepository {
 
     val log = LoggerFactory.getLogger(this.getClass)
@@ -92,7 +92,7 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
         case Failure(x) =>
           for {
             nameValid <- nameAvailable(specimenGroup)
-            item <- updateMap(specimenGroup).success
+            item <- put(specimenGroup).success
           } yield item
       }
     }
@@ -107,7 +107,7 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
           specimenGroup.name, specimenGroup.description, specimenGroup.units,
           specimenGroup.anatomicalSourceType, specimenGroup.preservationType,
           specimenGroup.preservationTemperatureType, specimenGroup.specimenType)
-        repoItem <- updateMap(updatedItem).success
+        repoItem <- put(updatedItem).success
       } yield updatedItem
     }
 
@@ -115,7 +115,7 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
       for {
         item <- specimenGroupWithId(specimenGroup.studyId, specimenGroup.id)
         validVersion <- item.requireVersion(Some(specimenGroup.version))
-        removedItem <- removeFromMap(item).success
+        removedItem <- remove(item).success
       } yield removedItem
 
     }

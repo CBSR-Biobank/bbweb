@@ -30,7 +30,7 @@ class SpecimenGroupSpec {
   //    //include = "tag1",
   //    sequential = true) // forces all tests to be run sequentially
   //
-  //  val nameGenerator = new NameGenerator(classOf[SpecimenGroupSpec].getName)
+  //  val nameGenerator = new NameGenerator[this.getClass]
   //  val studyName = nameGenerator.next[Study]
   //  val studyEvent = await(studyService.addStudy(new AddStudyCmd(studyName, Some(studyName)))) | null
   //  val studyId = StudyId(studyEvent.id)

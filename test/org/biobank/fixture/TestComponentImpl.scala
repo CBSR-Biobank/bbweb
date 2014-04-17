@@ -13,8 +13,6 @@ import scala.language.postfixOps
 
 trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
 
-  protected val nameGenerator: NameGenerator
-
   implicit override val system: ActorSystem = ActorSystem("bbweb-test", TestComponentImpl.config())
   implicit val timeout = Timeout(5 seconds)
 

@@ -43,7 +43,7 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
   override val collectionEventTypeRepository: CollectionEventTypeRepository = new CollectionEventTypeRepositoryImpl
 
   class CollectionEventTypeRepositoryImpl
-    extends ReadWriteRepository[CollectionEventTypeId, CollectionEventType](v => v.id)
+    extends ReadWriteRepositoryRefImpl[CollectionEventTypeId, CollectionEventType](v => v.id)
     with CollectionEventTypeRepository {
 
     val log = LoggerFactory.getLogger(this.getClass)
@@ -112,7 +112,7 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
         case Failure(x) =>
           for {
             nameValid <- nameAvailable(ceventType)
-            item <- updateMap(ceventType).success
+            item <- put(ceventType).success
           } yield item
       }
     }
@@ -126,7 +126,7 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
           ceventType.studyId, ceventType.id, ceventType.version + 1,
           ceventType.name, ceventType.description, ceventType.recurring, ceventType.specimenGroupData,
           ceventType.annotationTypeData)
-        updatedItem <- updateMap(updatedItem).success
+        updatedItem <- put(updatedItem).success
       } yield updatedItem
     }
 
@@ -134,7 +134,7 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
       for {
         item <- collectionEventTypeWithId(ceventType.studyId, ceventType.id)
         validVersion <- item.requireVersion(Some(ceventType.version))
-        removedItem <- removeFromMap(item).success
+        removedItem <- remove(item).success
       } yield removedItem
     }
   }

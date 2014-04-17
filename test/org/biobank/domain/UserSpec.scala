@@ -21,7 +21,7 @@ class UserSpec extends WordSpecLike with Matchers {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  val nameGenerator = new NameGenerator(this.getClass.getName)
+  val nameGenerator = new NameGenerator(this.getClass)
 
   "A user" can {
 
@@ -60,8 +60,8 @@ class UserSpec extends WordSpecLike with Matchers {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      val v = RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
-      val user = v.getOrElse(fail("could not create user"))
+      val user = RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
+	.getOrElse(fail("could not create user"))
       user shouldBe a[RegisteredUser]
 
       val activeUser = user.activate.getOrElse(fail("could not activate user"))

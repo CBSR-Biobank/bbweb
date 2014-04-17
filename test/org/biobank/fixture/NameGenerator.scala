@@ -11,7 +11,11 @@ import scala.collection.mutable.HashMap
  *
  * Code borrowed from the class UniqueNames in the Specs2 project.
  */
-class NameGenerator(rootName: String) {
+class NameGenerator(klass: Class[_]) {
+
+  val rootName = klass.getName
+
+  val rootSimpleName = klass.getSimpleName
 
   val delimiter: String = "_"
 
@@ -44,7 +48,14 @@ class NameGenerator(rootName: String) {
     result
   }
 
-  def next[T: ClassTag]: String =
-    uniqueName(s"$rootName-${classTag[T].getClass.getSimpleName}")
+  def next[T: ClassTag]: String = {
+    val className = implicitly[ClassTag[T]].runtimeClass.getSimpleName
+    uniqueName(s"$rootName-$className")
+  }
+
+  def nextEmail[T: ClassTag]: String = {
+    val className = implicitly[ClassTag[T]].runtimeClass.getSimpleName
+    uniqueName(s"$rootSimpleName-${className}") + "@test.com"
+  }
 
 }

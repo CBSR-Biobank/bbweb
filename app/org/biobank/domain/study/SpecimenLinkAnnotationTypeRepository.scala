@@ -21,7 +21,7 @@ trait SpecimenLinkAnnotationTypeRepositoryComponentImpl
     new SpecimenLinkAnnotationTypeRepositoryImpl
 
   class SpecimenLinkAnnotationTypeRepositoryImpl
-    extends ReadWriteRepository[AnnotationTypeId, SpecimenLinkAnnotationType](v => v.id)
+    extends ReadWriteRepositoryRefImpl[AnnotationTypeId, SpecimenLinkAnnotationType](v => v.id)
     with StudyAnnotationTypeRepositoryImpl[SpecimenLinkAnnotationType]
     with SpecimenLinkAnnotationTypeRepository {
   }

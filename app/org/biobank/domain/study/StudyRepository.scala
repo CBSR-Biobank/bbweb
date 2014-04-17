@@ -11,7 +11,7 @@ trait StudyRepositoryComponent {
 
   val studyRepository: StudyRepository
 
-  trait StudyRepository {
+  trait StudyRepository extends ReadWriteRepository[StudyId, Study] {
 
     def nextIdentity: StudyId
 
@@ -20,10 +20,6 @@ trait StudyRepositoryComponent {
     def allStudies(): Set[Study]
 
     def studyWithId(studyId: StudyId): DomainValidation[Study]
-
-    def add(study: DisabledStudy): DomainValidation[DisabledStudy]
-
-    def update(study: Study): DomainValidation[Study]
   }
 }
 
@@ -31,7 +27,7 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
 
   override val studyRepository: StudyRepository = new StudyRepositoryImpl
 
-  class StudyRepositoryImpl extends ReadWriteRepository[StudyId, Study](v => v.id) with StudyRepository {
+  class StudyRepositoryImpl extends ReadWriteRepositoryRefImpl[StudyId, Study](v => v.id) with StudyRepository {
 
     val log = LoggerFactory.getLogger(this.getClass)
 
@@ -57,28 +53,6 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
       }
     }
 
-    def add(study: DisabledStudy): DomainValidation[DisabledStudy] = {
-      getByKey(study.id) match {
-        case Success(prevItem) =>
-          DomainError("study with ID already exists: %s" format study.id).failNel
-        case Failure(err) =>
-          for {
-            nameValid <- nameAvailable(study.name)
-            item <- updateMap(study).success
-          } yield study
-      }
-    }
-
-    def update(study: Study): DomainValidation[Study] = {
-      for {
-        prevStudy <- studyWithId(study.id)
-        validVersion <- prevStudy.requireVersion(Some(study.version))
-        nameValid <- nameAvailable(study.name)
-        updatedItem <- DisabledStudy.create(
-          study.id, prevStudy.version + 1, study.name, study.description)
-        repoItem <- updateMap(updatedItem).success
-      } yield updatedItem
-    }
   }
 
 }

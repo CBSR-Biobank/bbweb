@@ -38,6 +38,8 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
 
   override def toString =
     s"""|${this.getClass.getSimpleName}: {
+        |  id: $id,
+        |  version: $version,
         |  name: $name,
         |  email: $email
         |}""".stripMargin

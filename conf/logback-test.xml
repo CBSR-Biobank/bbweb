@@ -7,17 +7,17 @@
       <pattern>%d{HH:mm:ss.SSS} %-5level %c{1}:%L - %msg%n</pattern>
     </encoder>
   </appender>
-  
+
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
      <file>logs/tests.log</file>
      <encoder>
        <pattern>%date - [%level] - from %logger in %thread %n%message%n%xException%n</pattern>
      </encoder>
    </appender>
-  
-  <logger name="domain" level="INFO" />   
-  <logger name="service" level="DEBUG" />
-  <logger name="service.study.StudyProcessorImpl" level="DEBUG" /> 
+
+  <logger name="or.biobank.domain" level="INFO" />
+  <logger name="or.biobank.service" level="DEBUG" />
+  <logger name="or.biobank.service.study.StudyProcessorImpl" level="DEBUG" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />

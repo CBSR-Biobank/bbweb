@@ -30,7 +30,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  override val nameGenerator = new NameGenerator(this.getClass.getName)
+  val nameGenerator = new NameGenerator(this.getClass)
 
   "A study processor" can {
 

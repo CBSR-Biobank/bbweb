@@ -25,7 +25,7 @@ class CollectionEventTypeSpec {
   //
   //  private val log = LoggerFactory.getLogger(this.getClass)
   //
-  //  val nameGenerator = new NameGenerator(classOf[CollectionEventTypeSpec].getName)
+  //  val nameGenerator = new NameGenerator[this.getClass]
   //  val studyName = nameGenerator.next[Study]
   //  val studyEvent = await(studyService.addStudy(new AddStudyCmd(studyName, Some(studyName)))) | null
   //  val studyId = StudyId(studyEvent.id)

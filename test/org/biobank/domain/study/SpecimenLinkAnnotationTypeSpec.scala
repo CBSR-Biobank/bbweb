@@ -11,7 +11,7 @@ import scalaz.Scalaz._
 
 class SpecimenLinkAnnotationTypeSpec extends WordSpecLike with Matchers {
 
-  val nameGenerator = new NameGenerator(this.getClass.getName)
+  val nameGenerator = new NameGenerator(this.getClass)
 
   "A specimen link annotation type" can {
 

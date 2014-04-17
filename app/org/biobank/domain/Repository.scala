@@ -6,21 +6,47 @@ import scalaz._
 import scalaz.Scalaz._
 
 /**
+  * A read-only repository.
+  */
+trait  ReadRepository[K, A] {
+
+  protected def getByKey(key: K): DomainValidation[A]
+
+  protected def getValues: Iterable[A]
+
+  protected def getKeys: Iterable[K]
+
+}
+
+/** A read/write repository.
+  */
+private [domain] trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
+
+  def put(value: A): A
+
+  def remove(value: A): A
+
+}
+
+/**
   * A read-only wrapper around an STM Ref of a Map.
   */
-private[domain] class ReadRepository[K, A](keyGetter: (A) => K) {
+class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepository[K, A] {
 
   protected val internalMap: Ref[Map[K, A]] = Ref(Map.empty[K, A])
 
   protected def getMap = internalMap.single.get
-  protected def getByKey(key: K): DomainValidation[A] = {
+
+  def getByKey(key: K): DomainValidation[A] = {
     getMap.get(key) match {
       case Some(value) => value.success
       case None => DomainError(s"value with key $key not found").failNel
     }
   }
-  protected def getValues: Iterable[A] = getMap.values
-  protected def getKeys: Iterable[K] = getMap.keys
+
+  def getValues: Iterable[A] = getMap.values
+
+  def getKeys: Iterable[K] = getMap.keys
 
 }
 
@@ -28,14 +54,16 @@ private[domain] class ReadRepository[K, A](keyGetter: (A) => K) {
   *
   * Used by processor actors.
   */
-class ReadWriteRepository[K, A](keyGetter: (A) => K) extends ReadRepository[K, A](keyGetter) {
+private [domain] class ReadWriteRepositoryRefImpl[K, A](keyGetter: (A) => K)
+    extends ReadRepositoryRefImpl[K, A](keyGetter)
+    with ReadWriteRepository[K, A] {
 
-  protected def updateMap(value: A) = {
+  def put(value: A): A = {
     internalMap.single.transform(map => map + (keyGetter(value) -> value))
     value
   }
 
-  protected def removeFromMap(value: A) = {
+  def remove(value: A): A = {
     internalMap.single.transform(map => map - keyGetter(value))
     value
   }

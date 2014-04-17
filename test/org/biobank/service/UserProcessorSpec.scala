@@ -22,13 +22,13 @@ class UserProcessorSpec extends UserProcessorFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  override val nameGenerator = new NameGenerator(this.getClass.getName)
+  val nameGenerator = new NameGenerator(this.getClass)
 
   "A user processor" should {
 
     "add a user" in {
       val name = nameGenerator.next[User]
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
@@ -56,7 +56,7 @@ class UserProcessorSpec extends UserProcessorFixture {
 
   "not add a user with an already registered email address" in {
       val name = nameGenerator.next[User]
-      val email = "user2@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
@@ -77,7 +77,7 @@ class UserProcessorSpec extends UserProcessorFixture {
 
     "activate a user" in {
       val name = nameGenerator.next[User]
-      val email = "user3@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
@@ -96,7 +96,7 @@ class UserProcessorSpec extends UserProcessorFixture {
 
     "lock an activated a user" in {
       val name = nameGenerator.next[User]
-      val email = "user4@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])

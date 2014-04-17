@@ -12,7 +12,7 @@ import scalaz.Scalaz._
 
 class ParticipantAnnotationTypeSpec extends WordSpecLike with Matchers {
 
-  val nameGenerator = new NameGenerator(this.getClass.getName)
+  val nameGenerator = new NameGenerator(this.getClass)
 
   "A participant annotation type" can {
 

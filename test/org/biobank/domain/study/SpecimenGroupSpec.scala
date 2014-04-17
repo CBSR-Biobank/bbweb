@@ -15,7 +15,7 @@ import scalaz.Scalaz._
 
 class SpecimenGroupSpec extends WordSpecLike with Matchers {
 
-  val nameGenerator = new NameGenerator(this.getClass.getName)
+  val nameGenerator = new NameGenerator(this.getClass)
 
   "A specimen group type" can {
 

@@ -79,7 +79,6 @@ trait UserServiceComponentImpl extends UserServiceComponent {
     }
 
     def add(cmd: AddUserCommand): Future[DomainValidation[UserAddedEvent]] = {
-      log.debug(s"add: $cmd")
       userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserAddedEvent]])
     }
 
@@ -108,7 +107,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
         recoverUser(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
-        snapshot.users.foreach(i => userRepository.update(i))
+        snapshot.users.foreach(i => userRepository.put(i))
     }
 
     val receiveCommand: Receive = {
@@ -130,8 +129,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
         event.password, event.hasher, event.salt, event.avatarUrl) match {
         case Success(user) =>
-          userRepository.add(user)
-          log.info(s"updateState: user added to repository: ${user.email}")
+          userRepository.put(user)
 
         case Failure(err) =>
           // this should never happen because the only way to get here is that the
@@ -149,7 +147,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
           user.password, user.hasher, user.salt, user.avatarUrl).success
       } yield {
         persist(event) { e =>
-          userRepository.add(user)
+          userRepository.put(user)
           sender ! e.success
         }
         event
@@ -198,9 +196,8 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       }
     }
 
-    private def updateUser[T <: User](user: T, event: UserEvent) = {
-      log.info(s"updateUser: $user")
-      userRepository.update(user)
+    private def updateUser(user: User, event: UserEvent) = {
+      userRepository.put(user)
       sender ! event.success
     }
 
@@ -212,7 +209,6 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     }
 
     private def isUserActive(user: User): DomainValidation[ActiveUser] = {
-      log.info(s"isUserActive: $user")
       user match {
         case activeUser: ActiveUser => activeUser.success
         case _ => DomainError(s"the user is not active").failNel

@@ -36,7 +36,7 @@ sealed trait Study
   val status: String
 
   override def toString =
-    s"""|Study: {
+    s"""|${this.getClass.getSimpleName}: {
         |  id: $id,
         |  version: $version,
         |  name: $name,

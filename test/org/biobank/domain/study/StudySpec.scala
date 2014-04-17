@@ -21,7 +21,7 @@ class StudySpec extends WordSpecLike with Matchers {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  val nameGenerator = new NameGenerator(this.getClass.getName)
+  val nameGenerator = new NameGenerator(this.getClass)
 
   "A study" can {
 
