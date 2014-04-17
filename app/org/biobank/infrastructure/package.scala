@@ -2,7 +2,12 @@ package org.biobank
 
 package object infrastructure {
 
-  trait Identity { val id: String }
+  trait HasIdentity {
+
+    /** An event that includes the ID of the object it references. */
+    val id: String
+
+   }
 
 
   /** Used to define annotation types to be used by the [[org.biobank.domain.study.CollectionEvent]].

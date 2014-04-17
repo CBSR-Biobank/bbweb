@@ -18,11 +18,19 @@ object UserCommands {
   case class ActivateUserCommand(
     email: String,
     expectedVersion: Option[Long])
-    extends UserCommand
+      extends UserCommand
+      with HasExpectedVersion
 
   case class LockUserCommand(
     email: String,
     expectedVersion: Option[Long])
-    extends UserCommand
+      extends UserCommand
+      with HasExpectedVersion
+
+  case class UnlockUserCommand(
+    email: String,
+    expectedVersion: Option[Long])
+      extends UserCommand
+      with HasExpectedVersion
 
 }

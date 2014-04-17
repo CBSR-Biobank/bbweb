@@ -87,7 +87,7 @@ trait UserServiceComponentImpl extends UserServiceComponent {
 
 trait UserProcessorComponent {
 
-  trait UserProcessor extends Processor
+  trait UserProcessor extends Processor[UserId, User]
 
 }
 
@@ -97,9 +97,11 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
   self: RepositoryComponent =>
 
   /**
-   * Handles the commands to configure users.
-   */
+    * Handles the commands to configure users.
+    */
   class UserProcessorImpl extends UserProcessor {
+
+    override val repository = userRepository
 
     val receiveRecover: Receive = {
       case event: UserAddedEvent =>
@@ -108,21 +110,31 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.users.foreach(i => userRepository.put(i))
+
+      case _ =>
+	throw new IllegalStateException("message not handled")
     }
 
     val receiveCommand: Receive = {
       case cmd: AddUserCommand =>
-        addUser(cmd)
+      process(addUser(cmd))
+
 
       case cmd: ActivateUserCommand =>
         activateUser(cmd)
 
       case cmd: LockUserCommand =>
-	lockUser(cmd)
+        lockUser(cmd)
+
+      case cmd: UnlockUserCommand =>
+        unlockUser(cmd)
 
       case "snap" =>
         saveSnapshot(SnapshotState(userRepository.allUsers))
         stash()
+
+      case _ =>
+	throw new IllegalStateException("message not handled")
     }
 
     def recoverUser(event: UserAddedEvent) = {
@@ -138,23 +150,20 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       }
     }
 
-    def addUser(cmd: AddUserCommand) = {
-      val validation = for {
+    private def updateUser(user: User, event: UserEvent) = {
+      userRepository.put(user)
+      sender ! event.success
+    }
+
+    def addUser(cmd: AddUserCommand): DomainValidation[(UserEvent, User)] = {
+      for {
         emailAvailable <- userRepository.emailAvailable(cmd.email)
         user <- RegisteredUser.create(UserId(cmd.email), -1L, cmd.name, cmd.email,
           cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl)
         event <- UserAddedEvent(user.id.toString, user.name, user.email,
           user.password, user.hasher, user.salt, user.avatarUrl).success
       } yield {
-        persist(event) { e =>
-          userRepository.put(user)
-          sender ! e.success
-        }
-        event
-      }
-
-      if (validation.isFailure) {
-        sender ! validation
+        (event, user)
       }
     }
 
@@ -166,8 +175,8 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
         event <- UserActivatedEvent(activatedUser.id.toString, activatedUser.version).success
       } yield {
         persist(event) { e =>
-	  updateUser(activatedUser, e)
-	}
+          updateUser(activatedUser, e)
+        }
         event
       }
 
@@ -184,8 +193,8 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
         event <- UserLockedEvent(lockedUser.id.toString, lockedUser.version).success
       } yield {
         persist(event) { e =>
-	  updateUser(lockedUser, e)
-	}
+          updateUser(lockedUser, e)
+        }
         event
       }
 
@@ -194,9 +203,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       }
     }
 
-    private def updateUser(user: User, event: UserEvent) = {
-      userRepository.put(user)
-      sender ! event.success
+    def unlockUser(cmd: UnlockUserCommand) = {
     }
 
     private def isUserRegistered(user: User): DomainValidation[RegisteredUser] = {

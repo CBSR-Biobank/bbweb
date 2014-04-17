@@ -13,10 +13,10 @@ import scalaz._
 import scalaz.Scalaz._
 
 /**
- * Note: to run from Eclipse uncomment the @RunWith line. To run from SBT the line should be
- * commented out.
- *
- */
+  * Note: to run from Eclipse uncomment the @RunWith line. To run from SBT the line should be
+  * commented out.
+  *
+  */
 //@RunWith(classOf[JUnitRunner])
 class UserProcessorSpec extends UserProcessorFixture {
 
@@ -54,7 +54,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       }
     }
 
-  "not add a user with an already registered email address" in {
+    "not add a user with an already registered email address" in {
       val name = nameGenerator.next[User]
       val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
@@ -64,14 +64,14 @@ class UserProcessorSpec extends UserProcessorFixture {
 
       val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
       val event = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
-	.futureValue.getOrElse(fail)
+        .futureValue.getOrElse(fail)
       event.email should be(email)
 
       ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]].futureValue match {
         case Success(event) => fail
         case Failure(err) =>
           err.list should have length 1
-	  err.list.head should include ("user already exists")
+          err.list.head should include ("user already exists")
       }
     }
 
@@ -85,7 +85,7 @@ class UserProcessorSpec extends UserProcessorFixture {
 
       val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
       val event = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
-	.futureValue.getOrElse(fail)
+        .futureValue.getOrElse(fail)
 
       ask(userProcessor, ActivateUserCommand(event.email, Some(0L)))
         .mapTo[DomainValidation[UserActivatedEvent]].futureValue match {
@@ -118,14 +118,46 @@ class UserProcessorSpec extends UserProcessorFixture {
 
   "A user processor" can {
 
-    "not lock a registered user" ignore {
-      fail
+    "not lock a registered user" in {
+      val name = nameGenerator.next[User]
+      val email = nameGenerator.nextEmail[User]
+      val password = nameGenerator.next[User]
+      val hasher = nameGenerator.next[User]
+      val salt = Some(nameGenerator.next[User])
+      val avatarUrl = Some("http://test.com/")
+
+      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
+      ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]].futureValue.getOrElse(fail)
+
+      ask(userProcessor, LockUserCommand(email, Some(0L)))
+        .mapTo[DomainValidation[UserLockedEvent]].futureValue match {
+        case Success(event) => fail
+        case Failure(err) =>
+          err.list should have length 1
+          err.list.head should include ("the user is not active")
+      }
     }
 
-    "not unlock a registered user" ignore {
-      fail
-    }
+    "not unlock a registered user" taggedAs(Tag("SingleTest")) in {
+      val name = nameGenerator.next[User]
+      val email = nameGenerator.nextEmail[User]
+      val password = nameGenerator.next[User]
+      val hasher = nameGenerator.next[User]
+      val salt = Some(nameGenerator.next[User])
+      val avatarUrl = Some("http://test.com/")
 
+      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
+      ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]].futureValue.getOrElse(fail)
+
+      ask(userProcessor, UnlockUserCommand(email, Some(0L)))
+        .mapTo[DomainValidation[UserLockedEvent]].futureValue match {
+        case Success(event) => fail
+        case Failure(err) =>
+          err.list should have length 1
+          err.list.head should include ("the user is not active")
+      }
+    }
 
   }
+
 }

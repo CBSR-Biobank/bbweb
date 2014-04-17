@@ -20,7 +20,7 @@ trait  ReadRepository[K, A] {
 
 /** A read/write repository.
   */
-private [domain] trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
+trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
 
   def put(value: A): A
 

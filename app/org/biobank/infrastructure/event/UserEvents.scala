@@ -15,17 +15,21 @@ object UserEvents {
     hasher: String,
     salt: Option[String],
     avatarUrl: Option[String])
-    extends UserEvent
-  with Identity
+      extends UserEvent
+      with HasIdentity
 
   case class UserActivatedEvent(
     id: String,
     version: Long)
-      extends UserEvent with Identity
+      extends UserEvent
+      with HasIdentity
+      with HasVersion
 
   case class UserLockedEvent(
     id: String,
     version: Long)
-      extends UserEvent with Identity
+      extends UserEvent
+      with HasIdentity
+      with HasVersion
 
 }
