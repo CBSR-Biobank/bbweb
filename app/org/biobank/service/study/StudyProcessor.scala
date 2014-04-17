@@ -72,7 +72,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       case other => // must be for another command handler
     }
 
-    private def addStudy(cmd: AddStudyCmd): DomainValidation[StudyAddedEvent] = {
+    private def addStudy(cmd: AddStudyCmd): Unit = {
       val studyId = studyRepository.nextIdentity
 
       val validation = for {
@@ -82,7 +82,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
        } yield {
         persist(event) { e =>
 	  studyRepository.put(newStudy)
-	  sender ! e
+	  sender ! e.success
 	}
         event
       }
@@ -97,8 +97,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(cmd.id)
       for {
 	prevStudy <- isStudyDisabled(studyId)
-        updatedStudy <- prevStudy.update(
-          cmd.expectedVersion.getOrElse(-1), cmd.name, cmd.description)
+        updatedStudy <- prevStudy.update(cmd.expectedVersion, cmd.name, cmd.description)
         event <- StudyUpdatedEvent(cmd.id, updatedStudy.version, updatedStudy.name, updatedStudy.description).success
       } yield {
         persist(event) { e => studyRepository.put(updatedStudy) }
@@ -110,7 +109,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(cmd.id)
       for {
 	disabledStudy <- isStudyDisabled(studyId)
-        enabledStudy <- disabledStudy.enable
+        enabledStudy <- disabledStudy.enable(cmd.expectedVersion)
         event <- StudyEnabledEvent(studyId.id, enabledStudy.version).success
       } yield {
         persist(event) { e => studyRepository.put(enabledStudy) }
@@ -122,7 +121,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(cmd.id)
       for {
 	enabledStudy <- isStudyEnabled(studyId)
-        disabledStudy <- enabledStudy.disable
+        disabledStudy <- enabledStudy.disable(cmd.expectedVersion)
         event <- StudyDisabledEvent(cmd.id, disabledStudy.version).success
       } yield {
         persist(event) { e => studyRepository.put(disabledStudy) }
@@ -134,7 +133,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(cmd.id)
       for {
 	disabledStudy <- isStudyDisabled(studyId)
-        retiredStudy <- disabledStudy.retire
+        retiredStudy <- disabledStudy.retire(cmd.expectedVersion)
         event <- StudyRetiredEvent(cmd.id, retiredStudy.version).success
       } yield {
         persist(event) { e => studyRepository.put(retiredStudy) }
@@ -146,7 +145,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(cmd.id)
       for {
 	retiredStudy <- isStudyRetired(studyId)
-        disabledStudy <- retiredStudy.unretire
+        disabledStudy <- retiredStudy.unretire(cmd.expectedVersion)
         event <- StudyUnretiredEvent(studyId.id, disabledStudy.version).success
       } yield {
         persist(event) { e => studyRepository.put(disabledStudy) }
@@ -184,7 +183,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(event.id)
       val validation = for {
 	disabledStudy <- isStudyDisabled(studyId)
-	enabledStudy <- disabledStudy.enable
+	enabledStudy <- disabledStudy.enable(disabledStudy.versionOption)
       } yield {
 	studyRepository.put(enabledStudy)
       }
@@ -200,7 +199,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(event.id)
       val validation = for {
 	enabledStudy <- isStudyEnabled(studyId)
-	diabledStudy <- enabledStudy.disable
+	diabledStudy <- enabledStudy.disable(enabledStudy.versionOption)
       } yield {
 	studyRepository.put(diabledStudy)
       }
@@ -216,7 +215,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(event.id)
       val validation = for {
 	disabledStudy <- isStudyDisabled(studyId)
-	retiredStudy <- disabledStudy.retire
+	retiredStudy <- disabledStudy.retire(disabledStudy.versionOption)
       } yield {
 	studyRepository.put(retiredStudy)
       }
@@ -232,7 +231,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(event.id)
       val validation = for {
 	retiredStudy <- isStudyRetired(studyId)
-	diabledStudy <- retiredStudy.unretire
+	diabledStudy <- retiredStudy.unretire(retiredStudy.versionOption)
       } yield {
 	studyRepository.put(diabledStudy)
       }

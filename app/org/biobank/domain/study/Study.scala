@@ -61,26 +61,27 @@ case class DisabledStudy private (
 
   override val status: String = "Disabled"
 
+  /** Used to change the name or the description. */
   def update(
-    expectedVersion: Long,
+    expectedVersion: Option[Long],
     name: String,
-    description: String): DomainValidation[DisabledStudy] = {
+    description: Option[String]): DomainValidation[DisabledStudy] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      updatedStudy <- create(this.id, expectedVersion, name, description).success
+      updatedStudy <- DisabledStudy.create(id, version, name, description)
     } yield updatedStudy
   }
 
   /** Used to enable a study after the study has been configured, or had configuration changes made on it. */
-  def enable: DomainValidation[EnabledStudy] = {
+  def enable(expectedVersion: Option[Long]): DomainValidation[EnabledStudy] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      enabledStudy <- EnabledStudy.create(this).success
+      enabledStudy <- EnabledStudy.create(this)
     } yield enabledStudy
   }
 
   /** When a study will no longer collect specimens from participants it can be retired. */
-  def retire: DomainValidation[RetiredStudy] = {
+  def retire(expectedVersion: Option[Long]): DomainValidation[RetiredStudy] = {
     for {
       validVersion <- requireVersion(expectedVersion)
       retiredStudy <- RetiredStudy.create(this)
@@ -197,11 +198,12 @@ case class EnabledStudy private (
 
   override val status: String = "Enabled"
 
-  def disable: DomainValidation[DisabledStudy] = {
+  def disable(expectedVersion: Option[Long]): DomainValidation[DisabledStudy] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      disabledStudy <- DisabledStudy.create(id, version, name, description).success
+      disabledStudy <- DisabledStudy.create(id, version, name, description)
     } yield disabledStudy
+  }
 }
 
 /**
@@ -235,10 +237,10 @@ case class RetiredStudy private (
 
   override val status: String = "Retired"
 
-  def unretire: DomainValidation[DisabledStudy] = {
+  def unretire(expectedVersion: Option[Long]): DomainValidation[DisabledStudy] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      disabledStudy <- DisabledStudy.create(id, version, name, description).succes
+      disabledStudy <- DisabledStudy.create(id, version, name, description)
     } yield disabledStudy
   }
 }
