@@ -29,11 +29,11 @@ trait CollectionEventTypeRepositoryComponent {
 
     def annotationTypeInUse(annotationType: CollectionEventAnnotationType): Boolean
 
-    def add(ceventType: CollectionEventType): DomainValidation[CollectionEventType]
+    // def add(ceventType: CollectionEventType): DomainValidation[CollectionEventType]
 
-    def update(ceventType: CollectionEventType): DomainValidation[CollectionEventType]
+    // def update(ceventType: CollectionEventType): DomainValidation[CollectionEventType]
 
-    def remove(ceventType: CollectionEventType): DomainValidation[CollectionEventType]
+    // def remove(ceventType: CollectionEventType): DomainValidation[CollectionEventType]
 
   }
 }
@@ -105,37 +105,37 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
           atd.annotationTypeId.equals(annotationType.id.id)))
     }
 
-    def add(ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {
-      collectionEventTypeWithId(ceventType.studyId, ceventType.id) match {
-        case Success(prevItem) =>
-          DomainError("collection event type with ID already exists: %s" format ceventType.id).failNel
-        case Failure(x) =>
-          for {
-            nameValid <- nameAvailable(ceventType)
-            item <- put(ceventType).success
-          } yield item
-      }
-    }
+    // def add(ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {
+    //   collectionEventTypeWithId(ceventType.studyId, ceventType.id) match {
+    //     case Success(prevItem) =>
+    //       DomainError("collection event type with ID already exists: %s" format ceventType.id).failNel
+    //     case Failure(x) =>
+    //       for {
+    //         nameValid <- nameAvailable(ceventType)
+    //         item <- put(ceventType).success
+    //       } yield item
+    //   }
+    // }
 
-    def update(ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {
-      for {
-        prevItem <- collectionEventTypeWithId(ceventType.studyId, ceventType.id)
-        validVersion <- prevItem.requireVersion(Some(ceventType.version))
-        nameValid <- nameAvailable(ceventType)
-        updatedItem <- CollectionEventType.create(
-          ceventType.studyId, ceventType.id, ceventType.version + 1,
-          ceventType.name, ceventType.description, ceventType.recurring, ceventType.specimenGroupData,
-          ceventType.annotationTypeData)
-        updatedItem <- put(updatedItem).success
-      } yield updatedItem
-    }
+    // def update(ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {
+    //   for {
+    //     prevItem <- collectionEventTypeWithId(ceventType.studyId, ceventType.id)
+    //     validVersion <- prevItem.requireVersion(Some(ceventType.version))
+    //     nameValid <- nameAvailable(ceventType)
+    //     updatedItem <- CollectionEventType.create(
+    //       ceventType.studyId, ceventType.id, ceventType.version + 1,
+    //       ceventType.name, ceventType.description, ceventType.recurring, ceventType.specimenGroupData,
+    //       ceventType.annotationTypeData)
+    //     updatedItem <- put(updatedItem).success
+    //   } yield updatedItem
+    // }
 
-    def remove(ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {
-      for {
-        item <- collectionEventTypeWithId(ceventType.studyId, ceventType.id)
-        validVersion <- item.requireVersion(Some(ceventType.version))
-        removedItem <- remove(item).success
-      } yield removedItem
-    }
+    // def remove(ceventType: CollectionEventType): DomainValidation[CollectionEventType] = {
+    //   for {
+    //     item <- collectionEventTypeWithId(ceventType.studyId, ceventType.id)
+    //     validVersion <- item.requireVersion(Some(ceventType.version))
+    //     removedItem <- remove(item).success
+    //   } yield removedItem
+    // }
   }
 }

@@ -61,14 +61,30 @@ case class DisabledStudy private (
 
   override val status: String = "Disabled"
 
+  def update(
+    expectedVersion: Long,
+    name: String,
+    description: String): DomainValidation[DisabledStudy] = {
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      updatedStudy <- create(this.id, expectedVersion, name, description).success
+    } yield updatedStudy
+  }
+
   /** Used to enable a study after the study has been configured, or had configuration changes made on it. */
   def enable: DomainValidation[EnabledStudy] = {
-    EnabledStudy.create(this)
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      enabledStudy <- EnabledStudy.create(this).success
+    } yield enabledStudy
   }
 
   /** When a study will no longer collect specimens from participants it can be retired. */
   def retire: DomainValidation[RetiredStudy] = {
-    RetiredStudy.create(this)
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      retiredStudy <- RetiredStudy.create(this)
+    } yield retiredStudy
   }
 
   /**
@@ -181,8 +197,11 @@ case class EnabledStudy private (
 
   override val status: String = "Enabled"
 
-  def disable: DomainValidation[DisabledStudy] =
-    DisabledStudy.create(this.id, this.version, this.name, this.description)
+  def disable: DomainValidation[DisabledStudy] = {
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      disabledStudy <- DisabledStudy.create(id, version, name, description).success
+    } yield disabledStudy
 }
 
 /**
@@ -217,7 +236,10 @@ case class RetiredStudy private (
   override val status: String = "Retired"
 
   def unretire: DomainValidation[DisabledStudy] = {
-    DisabledStudy.create(this.id, this.version, this.name, this.description)
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      disabledStudy <- DisabledStudy.create(id, version, name, description).succes
+    } yield disabledStudy
   }
 }
 

@@ -36,7 +36,7 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
     *
     * Fails if the expected version does not match the current version of the object.
     */
-  def requireVersion(expectedVersion: Option[Long]): DomainValidation[ConcurrencySafeEntity[T]] = {
+  protected def requireVersion(expectedVersion: Option[Long]): DomainValidation[ConcurrencySafeEntity[T]] = {
     expectedVersion match {
       case Some(expected) if (version != expected) => invalidVersion(expected).failNel
       case _ => this.success

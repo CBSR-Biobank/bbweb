@@ -15,12 +15,12 @@ trait StudyAnnotationTypeRepository[A <: StudyAnnotationType] {
 
   def allAnnotationTypesForStudy(studyId: StudyId): Set[A]
 
-  def add(annotationType: A): DomainValidation[A]
+ //  def add(annotationType: A): DomainValidation[A]
 
-  def update(oldAnnotationType: A, newAnnotationType: A): DomainValidation[A]
+//   def update(oldAnnotationType: A, newAnnotationType: A): DomainValidation[A]
 
-  def remove(annotationType: A): DomainValidation[A]
-}
+//   def remove(annotationType: A): DomainValidation[A]
+ }
 
 trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
   extends ReadWriteRepository[AnnotationTypeId, A]
@@ -67,34 +67,34 @@ trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
       true.success
   }
 
-  def add(annotationType: A): DomainValidation[A] = {
-    annotationTypeWithId(annotationType.studyId, annotationType.id) match {
-      case Success(prevItem) =>
-        DomainError("annotation type with ID already exists: %s" format annotationType.id).failNel
-      case Failure(x) =>
-        for {
-          nameValid <- nameAvailable(annotationType)
-          item <- updateMap(annotationType).success
-        } yield item
-    }
-  }
+  // def add(annotationType: A): DomainValidation[A] = {
+  //   annotationTypeWithId(annotationType.studyId, annotationType.id) match {
+  //     case Success(prevItem) =>
+  //       DomainError("annotation type with ID already exists: %s" format annotationType.id).failNel
+  //     case Failure(x) =>
+  //       for {
+  //         nameValid <- nameAvailable(annotationType)
+  //         item <- updateMap(annotationType).success
+  //       } yield item
+  //   }
+  // }
 
-  def update(oldAnnotationType: A, newAnnotationType: A): DomainValidation[A] = {
-    for {
-      prevItem <- annotationTypeWithId(oldAnnotationType.studyId, oldAnnotationType.id)
-      validVersion <- prevItem.requireVersion(Some(newAnnotationType.version - 1L))
-      nameValid <- nameAvailable(newAnnotationType)
-      repoItem <- updateMap(newAnnotationType).success
-    } yield repoItem
-  }
+  // def update(oldAnnotationType: A, newAnnotationType: A): DomainValidation[A] = {
+  //   for {
+  //     prevItem <- annotationTypeWithId(oldAnnotationType.studyId, oldAnnotationType.id)
+  //     validVersion <- prevItem.requireVersion(Some(newAnnotationType.version - 1L))
+  //     nameValid <- nameAvailable(newAnnotationType)
+  //     repoItem <- updateMap(newAnnotationType).success
+  //   } yield repoItem
+  // }
 
-  def remove(annotationType: A): DomainValidation[A] = {
-    for {
-      item <- annotationTypeWithId(annotationType.studyId, annotationType.id)
-      validVersion <- item.requireVersion(Some(annotationType.version))
-      removedItem <- removeFromMap(item).success
-    } yield removedItem
+  // def remove(annotationType: A): DomainValidation[A] = {
+  //   for {
+  //     item <- annotationTypeWithId(annotationType.studyId, annotationType.id)
+  //     validVersion <- item.requireVersion(Some(annotationType.version))
+  //     removedItem <- removeFromMap(item).success
+  //   } yield removedItem
 
-  }
+  // }
 
 }

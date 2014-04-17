@@ -42,7 +42,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
         recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
-        snapshot.studies.foreach{ study => studyRepository.update(study) }
+        snapshot.studies.foreach{ study => studyRepository.put(study) }
     }
 
     val receiveCommand: Receive = {
@@ -79,12 +79,17 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
         nameAvailable <- studyRepository.nameAvailable(cmd.name)
         newStudy <- DisabledStudy.create(studyId, -1L, cmd.name, cmd.description)
         event <- StudyAddedEvent(newStudy.id.toString, newStudy.name, newStudy.description).success
-      } yield {
-        persist(event) { e => studyRepository.add(newStudy) }
+       } yield {
+        persist(event) { e =>
+	  studyRepository.put(newStudy)
+	  sender ! e
+	}
         event
       }
-      sender ! validation
-      validation
+
+      if (validation.isFailure) {
+	sender ! validation
+      }
     }
 
 
@@ -92,12 +97,11 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(cmd.id)
       for {
 	prevStudy <- isStudyDisabled(studyId)
-        validVersion <- prevStudy.requireVersion(cmd.expectedVersion)
-        updatedStudy <- DisabledStudy.create(
-          new StudyId(cmd.id), cmd.expectedVersion.getOrElse(-1), cmd.name, cmd.description)
+        updatedStudy <- prevStudy.update(
+          cmd.expectedVersion.getOrElse(-1), cmd.name, cmd.description)
         event <- StudyUpdatedEvent(cmd.id, updatedStudy.version, updatedStudy.name, updatedStudy.description).success
       } yield {
-        persist(event) { e => studyRepository.update(updatedStudy) }
+        persist(event) { e => studyRepository.put(updatedStudy) }
 	event
       }
     }
@@ -106,11 +110,10 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(cmd.id)
       for {
 	disabledStudy <- isStudyDisabled(studyId)
-        validVersion <- disabledStudy.requireVersion(cmd.expectedVersion)
         enabledStudy <- disabledStudy.enable
         event <- StudyEnabledEvent(studyId.id, enabledStudy.version).success
       } yield {
-        persist(event) { e => studyRepository.update(enabledStudy) }
+        persist(event) { e => studyRepository.put(enabledStudy) }
 	event
       }
     }
@@ -119,11 +122,10 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(cmd.id)
       for {
 	enabledStudy <- isStudyEnabled(studyId)
-        validVersion <- enabledStudy.requireVersion(cmd.expectedVersion)
         disabledStudy <- enabledStudy.disable
         event <- StudyDisabledEvent(cmd.id, disabledStudy.version).success
       } yield {
-        persist(event) { e => studyRepository.update(disabledStudy) }
+        persist(event) { e => studyRepository.put(disabledStudy) }
 	event
       }
     }
@@ -132,11 +134,10 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(cmd.id)
       for {
 	disabledStudy <- isStudyDisabled(studyId)
-        validVersion <- disabledStudy.requireVersion(cmd.expectedVersion)
         retiredStudy <- disabledStudy.retire
         event <- StudyRetiredEvent(cmd.id, retiredStudy.version).success
       } yield {
-        persist(event) { e => studyRepository.update(retiredStudy) }
+        persist(event) { e => studyRepository.put(retiredStudy) }
 	event
       }
     }
@@ -145,11 +146,10 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(cmd.id)
       for {
 	retiredStudy <- isStudyRetired(studyId)
-        validVersion <- retiredStudy.requireVersion(cmd.expectedVersion)
         disabledStudy <- retiredStudy.unretire
         event <- StudyUnretiredEvent(studyId.id, disabledStudy.version).success
       } yield {
-        persist(event) { e => studyRepository.update(disabledStudy) }
+        persist(event) { e => studyRepository.put(disabledStudy) }
 	event
       }
     }
@@ -158,7 +158,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(event.id)
       DisabledStudy.create(studyId, -1L, event.name, event.description) match {
         case Success(study) =>
-	  studyRepository.add(study)
+	  studyRepository.put(study)
 
         case Failure(err) =>
           // this should never happen because the only way to get here is that the
@@ -171,7 +171,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(event.id)
       DisabledStudy.create(studyId, -1L, event.name, event.description) match {
         case Success(study) =>
-	  studyRepository.update(study)
+	  studyRepository.put(study)
 
         case Failure(err) =>
           // this should never happen because the only way to get here is that the
@@ -186,7 +186,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 	disabledStudy <- isStudyDisabled(studyId)
 	enabledStudy <- disabledStudy.enable
       } yield {
-	studyRepository.update(enabledStudy)
+	studyRepository.put(enabledStudy)
       }
 
       if (validation.isFailure) {
@@ -202,7 +202,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 	enabledStudy <- isStudyEnabled(studyId)
 	diabledStudy <- enabledStudy.disable
       } yield {
-	studyRepository.update(diabledStudy)
+	studyRepository.put(diabledStudy)
       }
 
       if (validation.isFailure) {
@@ -218,7 +218,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 	disabledStudy <- isStudyDisabled(studyId)
 	retiredStudy <- disabledStudy.retire
       } yield {
-	studyRepository.update(retiredStudy)
+	studyRepository.put(retiredStudy)
       }
 
       if (validation.isFailure) {
@@ -234,7 +234,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 	retiredStudy <- isStudyRetired(studyId)
 	diabledStudy <- retiredStudy.unretire
       } yield {
-	studyRepository.update(diabledStudy)
+	studyRepository.put(diabledStudy)
       }
 
       if (validation.isFailure) {
