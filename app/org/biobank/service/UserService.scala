@@ -162,8 +162,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       val validation = for {
         user <- userRepository.userWithId(UserId(cmd.email))
         registeredUser <- isUserRegistered(user)
-        validVersion <- registeredUser.requireVersion(cmd.expectedVersion)
-        activatedUser <- registeredUser.activate
+        activatedUser <- registeredUser.activate(cmd.expectedVersion)
         event <- UserActivatedEvent(activatedUser.id.toString, activatedUser.version).success
       } yield {
         persist(event) { e =>
@@ -181,8 +180,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       val validation = for {
         user <- userRepository.userWithId(UserId(cmd.email))
         activeUser <- isUserActive(user)
-        validVersion <- activeUser.requireVersion(cmd.expectedVersion)
-        lockedUser <- activeUser.lock
+        lockedUser <- activeUser.lock(cmd.expectedVersion)
         event <- UserLockedEvent(lockedUser.id.toString, lockedUser.version).success
       } yield {
         persist(event) { e =>

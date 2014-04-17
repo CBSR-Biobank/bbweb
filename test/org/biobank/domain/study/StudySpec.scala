@@ -51,7 +51,7 @@ class StudySpec extends WordSpecLike with Matchers {
       val disabledStudy = v.getOrElse(fail("could not create study"))
       disabledStudy shouldBe a[DisabledStudy]
 
-      val enabledStudy = disabledStudy.enable.getOrElse(fail("could not enable study"))
+      val enabledStudy = disabledStudy.enable(Some(0L)).getOrElse(fail("could not enable study"))
       enabledStudy shouldBe a[EnabledStudy]
     }
 
@@ -65,8 +65,8 @@ class StudySpec extends WordSpecLike with Matchers {
       val disabledStudy = v.getOrElse(fail("could not create study"))
       disabledStudy shouldBe a[DisabledStudy]
 
-      val enabledStudy = disabledStudy.enable.getOrElse(fail("could not enable study"))
-      val disabledStudy2 = enabledStudy.disable.getOrElse(fail("could not disable study"))
+      val enabledStudy = disabledStudy.enable(Some(0L)).getOrElse(fail("could not enable study"))
+      val disabledStudy2 = enabledStudy.disable(Some(1L)).getOrElse(fail("could not disable study"))
       disabledStudy2 shouldBe a[DisabledStudy]
     }
 
@@ -80,7 +80,7 @@ class StudySpec extends WordSpecLike with Matchers {
       val disabledStudy = v.getOrElse(fail("could not create study"))
       disabledStudy shouldBe a[DisabledStudy]
 
-      val retiredStudy = disabledStudy.retire.getOrElse(fail("could not retire study"))
+      val retiredStudy = disabledStudy.retire(Some(0L)).getOrElse(fail("could not retire study"))
       retiredStudy shouldBe a[RetiredStudy]
     }
 
@@ -94,8 +94,8 @@ class StudySpec extends WordSpecLike with Matchers {
       val disabledStudy = v.getOrElse(fail("could not create study"))
       disabledStudy shouldBe a[DisabledStudy]
 
-      val retiredStudy = disabledStudy.retire.getOrElse(fail("could not retire study"))
-      val disabledStudy2 =retiredStudy.unretire.getOrElse(fail("could not disable study"))
+      val retiredStudy = disabledStudy.retire(Some(0L)).getOrElse(fail("could not retire study"))
+      val disabledStudy2 =retiredStudy.unretire(Some(1L)).getOrElse(fail("could not disable study"))
       disabledStudy2 shouldBe a[DisabledStudy]
     }
 

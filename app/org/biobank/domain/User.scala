@@ -59,7 +59,12 @@ case class RegisteredUser private (
   avatarUrl: Option[String]) extends User {
 
   /* Activates a registered user. */
-  def activate: DomainValidation[ActiveUser] = ActiveUser.create(this)
+  def activate(expectedVersion: Option[Long]): DomainValidation[ActiveUser] = {
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      activatedUser <- ActiveUser.create(this)
+    } yield activatedUser
+  }
 }
 
 /** Factory object. */
@@ -101,7 +106,12 @@ case class ActiveUser private (
   avatarUrl: Option[String]) extends User {
 
   /** Locks an active user. */
-  def lock: DomainValidation[LockedUser] = LockedUser.create(this)
+  def lock(expectedVersion: Option[Long]): DomainValidation[LockedUser] = {
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      lockedUser <- LockedUser.create(this)
+    } yield lockedUser
+  }
 }
 
 /** Factory object. */
@@ -135,8 +145,11 @@ case class LockedUser private (
   avatarUrl: Option[String]) extends User {
 
   /** Unlocks a locked user. */
-  def unlock: DomainValidation[ActiveUser] = {
-    ActiveUser.create(this)
+  def unlock(expectedVersion: Option[Long]): DomainValidation[ActiveUser] = {
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      activeUser <- ActiveUser.create(this)
+    } yield activeUser
   }
 
 }

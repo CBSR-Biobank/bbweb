@@ -64,15 +64,15 @@ class UserSpec extends WordSpecLike with Matchers {
 	.getOrElse(fail("could not create user"))
       user shouldBe a[RegisteredUser]
 
-      val activeUser = user.activate.getOrElse(fail("could not activate user"))
+      val activeUser = user.activate(Some(0L)).getOrElse(fail("could not activate user"))
       activeUser shouldBe a[ActiveUser]
       activeUser.version should be(user.version + 1)
 
-      val lockedUser = activeUser.lock.getOrElse(fail("could not lock user"))
+      val lockedUser = activeUser.lock(Some(1l)).getOrElse(fail("could not lock user"))
       lockedUser shouldBe a[LockedUser]
       lockedUser.version should be(activeUser.version + 1)
 
-      val unlockedUser = lockedUser.unlock.getOrElse(fail("could not unlock user"))
+      val unlockedUser = lockedUser.unlock(Some(2L)).getOrElse(fail("could not unlock user"))
       unlockedUser shouldBe a[ActiveUser]
       unlockedUser.version should be(lockedUser.version + 1)
     }
