@@ -23,7 +23,7 @@ case class StudyMessage(cmd: Any, userId: UserId, time: Long)
 
 trait StudyProcessorComponent {
 
-  trait StudyProcessor extends Processor[StudyId, Study]
+  trait StudyProcessor extends Processor
 
 }
 
@@ -36,8 +36,6 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
    * Handles the commands to configure studies.
    */
   class StudyProcessorImpl extends StudyProcessor {
-
-    override val repository = studyRepository
 
     val receiveRecover: Receive = {
       case event: StudyAddedEvent =>

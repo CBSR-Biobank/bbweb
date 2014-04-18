@@ -87,7 +87,7 @@ trait UserServiceComponentImpl extends UserServiceComponent {
 
 trait UserProcessorComponent {
 
-  trait UserProcessor extends Processor[UserId, User]
+  trait UserProcessor extends Processor
 
 }
 
@@ -100,8 +100,6 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     * Handles the commands to configure users.
     */
   class UserProcessorImpl extends UserProcessor {
-
-    override val repository = userRepository
 
     val receiveRecover: Receive = {
       case event: UserRegisterdEvent => recoverUser(event)
@@ -138,7 +136,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
 
     def validateCmd(cmd: RegisterUserCommand): DomainValidation[UserRegisterdEvent] = {
       for {
-        emailAvailable <- repository.emailAvailable(cmd.email)
+        emailAvailable <- userRepository.emailAvailable(cmd.email)
         user <- RegisteredUser.create(UserId(cmd.email), -1L, cmd.name, cmd.email,
           cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl)
         event <- UserRegisterdEvent(user.id.toString, user.name, user.email,
@@ -186,7 +184,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       val validation = for {
 	registeredUser <- RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
           event.password, event.hasher, event.salt, event.avatarUrl)
-	savedUser <- repository.put(registeredUser).success
+	savedUser <- userRepository.put(registeredUser).success
       } yield savedUser
 
       if (validation.isFailure) {
@@ -200,10 +198,10 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       log.debug(s"recoverUser: $event")
 
       val validation = for {
-	user <- repository.getByKey(UserId(event.id))
+	user <- userRepository.getByKey(UserId(event.id))
 	registeredUser <- isUserRegistered(user)
 	activatedUser <- registeredUser.activate(Some(registeredUser.version))
-	savedUser <- repository.put(activatedUser).success
+	savedUser <- userRepository.put(activatedUser).success
       } yield savedUser
 
       if (validation.isFailure) {
@@ -217,10 +215,10 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       log.debug(s"recoverUser: $event")
 
       val validation = for {
-	user <- repository.getByKey(UserId(event.id))
+	user <- userRepository.getByKey(UserId(event.id))
 	activeUser <- isUserActive(user)
 	lockedUser <- activeUser.lock(Some(activeUser.version))
-	savedUser <- repository.put(lockedUser).success
+	savedUser <- userRepository.put(lockedUser).success
       } yield savedUser
 
       if (validation.isFailure) {
@@ -234,10 +232,10 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       log.debug(s"recoverUser: $event")
 
       val validation = for {
-	user <- repository.getByKey(UserId(event.id))
+	user <- userRepository.getByKey(UserId(event.id))
 	lockedUser <- isUserLocked(user)
 	unlockedUser <- lockedUser.unlock(Some(lockedUser.version))
-	savedUser <- repository.put(unlockedUser).success
+	savedUser <- userRepository.put(unlockedUser).success
       } yield savedUser
 
       if (validation.isFailure) {
