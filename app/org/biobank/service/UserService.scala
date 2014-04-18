@@ -102,13 +102,13 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
   class UserProcessorImpl extends UserProcessor {
 
     val receiveRecover: Receive = {
-      case event: UserRegisterdEvent => recoverUser(event)
+      case event: UserRegisterdEvent => recoverEvent(event)
 
-      case event: UserActivatedEvent => recoverUser(event)
+      case event: UserActivatedEvent => recoverEvent(event)
 
-      case event: UserLockedEvent => recoverUser(event)
+      case event: UserLockedEvent => recoverEvent(event)
 
-      case event: UserUnlockedEvent => recoverUser(event)
+      case event: UserUnlockedEvent => recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.users.foreach(i => userRepository.put(i))
@@ -118,13 +118,13 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     }
 
     val receiveCommand: Receive = {
-      case cmd: RegisterUserCommand => process(validateCmd(cmd)){ event => recoverUser(event) }
+      case cmd: RegisterUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: ActivateUserCommand => process(validateCmd(cmd)){ event => recoverUser(event) }
+      case cmd: ActivateUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: LockUserCommand => process(validateCmd(cmd)){ event => recoverUser(event) }
+      case cmd: LockUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: UnlockUserCommand => process(validateCmd(cmd)){ event => recoverUser(event) }
+      case cmd: UnlockUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
       case "snap" =>
         saveSnapshot(SnapshotState(userRepository.allUsers))
@@ -179,8 +179,8 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       }
     }
 
-    def recoverUser(event: UserRegisterdEvent) = {
-      log.debug(s"recoverUser: $event")
+    def recoverEvent(event: UserRegisterdEvent) = {
+      log.debug(s"recoverEvent: $event")
       val validation = for {
 	registeredUser <- RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
           event.password, event.hasher, event.salt, event.avatarUrl)
@@ -194,8 +194,8 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       }
     }
 
-    def recoverUser(event: UserActivatedEvent): Unit = {
-      log.debug(s"recoverUser: $event")
+    def recoverEvent(event: UserActivatedEvent): Unit = {
+      log.debug(s"recoverEvent: $event")
 
       val validation = for {
 	user <- userRepository.getByKey(UserId(event.id))
@@ -211,8 +211,8 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       }
     }
 
-    def recoverUser(event: UserLockedEvent): Unit = {
-      log.debug(s"recoverUser: $event")
+    def recoverEvent(event: UserLockedEvent): Unit = {
+      log.debug(s"recoverEvent: $event")
 
       val validation = for {
 	user <- userRepository.getByKey(UserId(event.id))
@@ -228,8 +228,8 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       }
     }
 
-    def recoverUser(event: UserUnlockedEvent): Unit = {
-      log.debug(s"recoverUser: $event")
+    def recoverEvent(event: UserUnlockedEvent): Unit = {
+      log.debug(s"recoverEvent: $event")
 
       val validation = for {
 	user <- userRepository.getByKey(UserId(event.id))

@@ -38,21 +38,20 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
   class StudyProcessorImpl extends StudyProcessor {
 
     val receiveRecover: Receive = {
-      case event: StudyAddedEvent =>
-        recoverEvent(event)
+      case event: StudyAddedEvent => recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.studies.foreach{ study => studyRepository.put(study) }
     }
 
     val receiveCommand: Receive = {
-      case cmd: AddStudyCmd => addStudy(cmd)
+      case cmd: AddStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: UpdateStudyCmd => updateStudy(cmd)
+      case cmd: UpdateStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: EnableStudyCmd => enableStudy(cmd)
+      case cmd: EnableStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: DisableStudyCmd => disableStudy(cmd)
+      case cmd: DisableStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
       // case cmd: SpecimenGroupCommand =>
       //   processEntityMsg(cmd, cmd.studyId, specimenGroupService.process)
@@ -72,110 +71,88 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       case other => // must be for another command handler
     }
 
-    private def addStudy(cmd: AddStudyCmd): Unit = {
+    private def validateCmd(cmd: AddStudyCmd): DomainValidation[StudyAddedEvent] = {
       val studyId = studyRepository.nextIdentity
 
-      val validation = for {
+      for {
         nameAvailable <- studyRepository.nameAvailable(cmd.name)
         newStudy <- DisabledStudy.create(studyId, -1L, cmd.name, cmd.description)
         event <- StudyAddedEvent(newStudy.id.toString, newStudy.name, newStudy.description).success
-       } yield {
-        persist(event) { e =>
-	  studyRepository.put(newStudy)
-	  sender ! e.success
-	}
-        event
-      }
-
-      if (validation.isFailure) {
-	sender ! validation
-      }
+       } yield event
     }
 
 
-    private def updateStudy(cmd: UpdateStudyCmd): DomainValidation[StudyUpdatedEvent] = {
+    private def validateCmd(cmd: UpdateStudyCmd): DomainValidation[StudyUpdatedEvent] = {
       val studyId = StudyId(cmd.id)
       for {
 	prevStudy <- isStudyDisabled(studyId)
         updatedStudy <- prevStudy.update(cmd.expectedVersion, cmd.name, cmd.description)
         event <- StudyUpdatedEvent(cmd.id, updatedStudy.version, updatedStudy.name, updatedStudy.description).success
-      } yield {
-        persist(event) { e => studyRepository.put(updatedStudy) }
-	event
-      }
+      } yield event
     }
 
-    private def enableStudy(cmd: EnableStudyCmd): DomainValidation[StudyEnabledEvent] = {
+    private def validateCmd(cmd: EnableStudyCmd): DomainValidation[StudyEnabledEvent] = {
       val studyId = StudyId(cmd.id)
       for {
 	disabledStudy <- isStudyDisabled(studyId)
         enabledStudy <- disabledStudy.enable(cmd.expectedVersion)
         event <- StudyEnabledEvent(studyId.id, enabledStudy.version).success
-      } yield {
-        persist(event) { e => studyRepository.put(enabledStudy) }
-	event
-      }
+      } yield event
     }
 
-    private def disableStudy(cmd: DisableStudyCmd): DomainValidation[StudyDisabledEvent] = {
+    private def validateCmd(cmd: DisableStudyCmd): DomainValidation[StudyDisabledEvent] = {
       val studyId = StudyId(cmd.id)
       for {
 	enabledStudy <- isStudyEnabled(studyId)
         disabledStudy <- enabledStudy.disable(cmd.expectedVersion)
         event <- StudyDisabledEvent(cmd.id, disabledStudy.version).success
-      } yield {
-        persist(event) { e => studyRepository.put(disabledStudy) }
-	event
-      }
+      } yield event
     }
 
-    private def retireStudy(cmd: RetireStudyCmd): DomainValidation[StudyRetiredEvent] = {
+    private def validateCmd(cmd: RetireStudyCmd): DomainValidation[StudyRetiredEvent] = {
       val studyId = StudyId(cmd.id)
       for {
 	disabledStudy <- isStudyDisabled(studyId)
         retiredStudy <- disabledStudy.retire(cmd.expectedVersion)
         event <- StudyRetiredEvent(cmd.id, retiredStudy.version).success
-      } yield {
-        persist(event) { e => studyRepository.put(retiredStudy) }
-	event
-      }
+      } yield event
     }
 
-    private def unretireStudy(cmd: UnetireStudyCmd): DomainValidation[StudyUnretiredEvent] = {
+    private def validateCmd(cmd: UnetireStudyCmd): DomainValidation[StudyUnretiredEvent] = {
       val studyId = StudyId(cmd.id)
       for {
 	retiredStudy <- isStudyRetired(studyId)
         disabledStudy <- retiredStudy.unretire(cmd.expectedVersion)
         event <- StudyUnretiredEvent(studyId.id, disabledStudy.version).success
-      } yield {
-        persist(event) { e => studyRepository.put(disabledStudy) }
-	event
-      }
+      } yield event
     }
 
     private def recoverEvent(event: StudyAddedEvent) {
       val studyId = StudyId(event.id)
-      DisabledStudy.create(studyId, -1L, event.name, event.description) match {
-        case Success(study) =>
-	  studyRepository.put(study)
+      val validation = for {
+	study <- DisabledStudy.create(studyId, -1L, event.name, event.description)
+	savedStudy <- studyRepository.put(study).success
+      } yield study
 
-        case Failure(err) =>
-          // this should never happen because the only way to get here is that the
-          // command passed validation
-          throw new IllegalStateException("recovering study from event failed")
+      if (validation.isFailure) {
+        // this should never happen because the only way to get here is that the
+        // command passed validation
+        throw new IllegalStateException("recovering study from event failed")
       }
     }
 
     private def recoverEvent(event: StudyUpdatedEvent) {
       val studyId = StudyId(event.id)
-      DisabledStudy.create(studyId, -1L, event.name, event.description) match {
-        case Success(study) =>
-	  studyRepository.put(study)
 
-        case Failure(err) =>
-          // this should never happen because the only way to get here is that the
-          // command passed validation
-          throw new IllegalStateException("recovering study from event failed")
+      val validation = for {
+	study <- DisabledStudy.create(studyId, -1L, event.name, event.description)
+	savedStudy <- studyRepository.put(study).success
+      } yield study
+
+      if (validation.isFailure) {
+	// this should never happen because the only way to get here is that the
+	// command passed validation
+	throw new IllegalStateException("recovering study from event failed")
       }
     }
 
@@ -184,9 +161,8 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val validation = for {
 	disabledStudy <- isStudyDisabled(studyId)
 	enabledStudy <- disabledStudy.enable(disabledStudy.versionOption)
-      } yield {
-	studyRepository.put(enabledStudy)
-      }
+	savedStudy <- studyRepository.put(enabledStudy).success
+      } yield  enabledStudy
 
       if (validation.isFailure) {
         // this should never happen because the only way to get here is that the
@@ -199,10 +175,9 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(event.id)
       val validation = for {
 	enabledStudy <- isStudyEnabled(studyId)
-	diabledStudy <- enabledStudy.disable(enabledStudy.versionOption)
-      } yield {
-	studyRepository.put(diabledStudy)
-      }
+	disabledStudy <- enabledStudy.disable(enabledStudy.versionOption)
+	savedStudy <- studyRepository.put(disabledStudy).success
+      } yield disabledStudy
 
       if (validation.isFailure) {
         // this should never happen because the only way to get here is that the
@@ -216,9 +191,8 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val validation = for {
 	disabledStudy <- isStudyDisabled(studyId)
 	retiredStudy <- disabledStudy.retire(disabledStudy.versionOption)
-      } yield {
-	studyRepository.put(retiredStudy)
-      }
+	savedStudy <- studyRepository.put(retiredStudy).success
+      } yield retiredStudy
 
       if (validation.isFailure) {
         // this should never happen because the only way to get here is that the
@@ -231,10 +205,9 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(event.id)
       val validation = for {
 	retiredStudy <- isStudyRetired(studyId)
-	diabledStudy <- retiredStudy.unretire(retiredStudy.versionOption)
-      } yield {
-	studyRepository.put(diabledStudy)
-      }
+	disabledStudy <- retiredStudy.unretire(retiredStudy.versionOption)
+	savedstudy <- studyRepository.put(disabledStudy).success
+      } yield disabledStudy
 
       if (validation.isFailure) {
         // this should never happen because the only way to get here is that the
