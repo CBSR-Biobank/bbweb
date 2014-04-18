@@ -34,10 +34,10 @@ class UserProcessorSpec extends UserProcessorFixture {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]].futureValue match {
+      val cmd = RegisterUserCommand(name, email, password, hasher, salt, avatarUrl)
+      ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]].futureValue match {
         case Success(event) =>
-          event shouldBe a [UserAddedEvent]
+          event shouldBe a [UserRegisterdEvent]
           event.id.toString should be(email)
           event.name should be(name)
           event.email should be(email)
@@ -62,12 +62,12 @@ class UserProcessorSpec extends UserProcessorFixture {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      val event = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
+      val cmd = RegisterUserCommand(name, email, password, hasher, salt, avatarUrl)
+      val event = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
         .futureValue.getOrElse(fail)
       event.email should be(email)
 
-      ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]].futureValue match {
+      ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]].futureValue match {
         case Success(event) => fail
         case Failure(err) =>
           err.list should have length 1
@@ -83,8 +83,8 @@ class UserProcessorSpec extends UserProcessorFixture {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      val event = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
+      val cmd = RegisterUserCommand(name, email, password, hasher, salt, avatarUrl)
+      val event = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
         .futureValue.getOrElse(fail)
 
       ask(userProcessor, ActivateUserCommand(event.email, Some(0L)))
@@ -102,8 +102,8 @@ class UserProcessorSpec extends UserProcessorFixture {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]].futureValue.getOrElse(fail)
+      val cmd = RegisterUserCommand(name, email, password, hasher, salt, avatarUrl)
+      ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]].futureValue.getOrElse(fail)
 
       ask(userProcessor, ActivateUserCommand(email, Some(0L)))
         .mapTo[DomainValidation[UserActivatedEvent]].futureValue.getOrElse(fail)
@@ -126,8 +126,8 @@ class UserProcessorSpec extends UserProcessorFixture {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]].futureValue.getOrElse(fail)
+      val cmd = RegisterUserCommand(name, email, password, hasher, salt, avatarUrl)
+      ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]].futureValue.getOrElse(fail)
 
       ask(userProcessor, LockUserCommand(email, Some(0L)))
         .mapTo[DomainValidation[UserLockedEvent]].futureValue match {
@@ -146,8 +146,8 @@ class UserProcessorSpec extends UserProcessorFixture {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]].futureValue.getOrElse(fail)
+      val cmd = RegisterUserCommand(name, email, password, hasher, salt, avatarUrl)
+      ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]].futureValue.getOrElse(fail)
 
       ask(userProcessor, UnlockUserCommand(email, Some(0L)))
         .mapTo[DomainValidation[UserLockedEvent]].futureValue match {

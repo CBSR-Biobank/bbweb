@@ -6,7 +6,7 @@ object UserCommands {
 
   sealed trait UserCommand extends Command
 
-  case class AddUserCommand(
+  case class RegisterUserCommand(
     name: String,
     email: String,
     password: String,

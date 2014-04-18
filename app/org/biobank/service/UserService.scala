@@ -36,7 +36,7 @@ trait UserServiceComponent {
 
     def getByEmail(email: String): DomainValidation[User]
 
-    def add(cmd: AddUserCommand): Future[DomainValidation[UserAddedEvent]]
+    def add(cmd: RegisterUserCommand): Future[DomainValidation[UserRegisterdEvent]]
 
   }
 }
@@ -78,8 +78,8 @@ trait UserServiceComponentImpl extends UserServiceComponent {
         some(PasswordInfo(PasswordHasher.BCryptHasher, user.password, None)))
     }
 
-    def add(cmd: AddUserCommand): Future[DomainValidation[UserAddedEvent]] = {
-      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserAddedEvent]])
+    def add(cmd: RegisterUserCommand): Future[DomainValidation[UserRegisterdEvent]] = {
+      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserRegisterdEvent]])
     }
 
   }
@@ -104,7 +104,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     override val repository = userRepository
 
     val receiveRecover: Receive = {
-      case event: UserAddedEvent => recoverUser(event)
+      case event: UserRegisterdEvent => recoverUser(event)
 
       case event: UserActivatedEvent => recoverUser(event)
 
@@ -120,7 +120,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     }
 
     val receiveCommand: Receive = {
-      case cmd: AddUserCommand => process(validateCmd(cmd)){ event => recoverUser(event) }
+      case cmd: RegisterUserCommand => process(validateCmd(cmd)){ event => recoverUser(event) }
 
       case cmd: ActivateUserCommand => process(validateCmd(cmd)){ event => recoverUser(event) }
 
@@ -136,12 +136,12 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
 	throw new IllegalStateException("message not handled")
     }
 
-    def validateCmd(cmd: AddUserCommand): DomainValidation[UserAddedEvent] = {
+    def validateCmd(cmd: RegisterUserCommand): DomainValidation[UserRegisterdEvent] = {
       for {
         emailAvailable <- repository.emailAvailable(cmd.email)
         user <- RegisteredUser.create(UserId(cmd.email), -1L, cmd.name, cmd.email,
           cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl)
-        event <- UserAddedEvent(user.id.toString, user.name, user.email,
+        event <- UserRegisterdEvent(user.id.toString, user.name, user.email,
           user.password, user.hasher, user.salt, user.avatarUrl).success
       } yield {
         event
@@ -181,7 +181,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       }
     }
 
-    def recoverUser(event: UserAddedEvent) = {
+    def recoverUser(event: UserRegisterdEvent) = {
       log.debug(s"recoverUser: $event")
       val validation = for {
 	registeredUser <- RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,

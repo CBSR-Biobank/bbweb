@@ -7,7 +7,7 @@ object UserEvents {
 
   sealed trait UserEvent //extends Event
 
-  case class UserAddedEvent(
+  case class UserRegisterdEvent(
     id: String,
     name: String,
     email: String,
