@@ -10,11 +10,11 @@ import scalaz.Scalaz._
   */
 trait  ReadRepository[K, A] {
 
-  protected def getByKey(key: K): DomainValidation[A]
+  def getByKey(key: K): DomainValidation[A]
 
-  protected def getValues: Iterable[A]
+  def getValues: Iterable[A]
 
-  protected def getKeys: Iterable[K]
+  def getKeys: Iterable[K]
 
 }
 
@@ -22,9 +22,9 @@ trait  ReadRepository[K, A] {
   */
 trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
 
-  def put(value: B): A
+  def put(value: A): A
 
-  def remove(value: B): A
+  def remove(value: A): A
 
 }
 

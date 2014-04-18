@@ -115,19 +115,13 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     }
 
     val receiveCommand: Receive = {
-      case cmd: AddUserCommand =>
-	process(validateCmd(cmd)){ event =>
-	  recoverUser(event)
-	}
+      case cmd: AddUserCommand => process(validateCmd(cmd)){ event => recoverUser(event) }
 
-      case cmd: ActivateUserCommand =>
-        activateUser(cmd)
+      case cmd: ActivateUserCommand => process(validateCmd(cmd)){ event => recoverUser(event) }
 
-      case cmd: LockUserCommand =>
-        lockUser(cmd)
+      case cmd: LockUserCommand => process(validateCmd(cmd)){ event => recoverUser(event) }
 
-      case cmd: UnlockUserCommand =>
-        unlockUser(cmd)
+      case cmd: UnlockUserCommand => process(validateCmd(cmd)){ event => recoverUser(event) }
 
       case "snap" =>
         saveSnapshot(SnapshotState(userRepository.allUsers))
@@ -135,26 +129,6 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
 
       case _ =>
 	throw new IllegalStateException("message not handled")
-    }
-
-    def recoverUser(event: UserAddedEvent) = {
-      log.debug(s"recoverUser: $event")
-      val validation = for {
-	user <- RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
-          event.password, event.hasher, event.salt, event.avatarUrl)
-	savedUser <- repository.put(user)
-      } yield savedUser
-
-      if (validation.isFailure) {
-          // this should never happen because the only way to get here is that the
-          // command passed validation
-          throw new IllegalStateException("creating user from event failed")
-      }
-    }
-
-    private def updateUser(user: User, event: UserEvent) = {
-      userRepository.put(user)
-      sender ! event.success
     }
 
     def validateCmd(cmd: AddUserCommand): DomainValidation[UserAddedEvent] = {
@@ -169,43 +143,57 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       }
     }
 
-    def activateUser(cmd: ActivateUserCommand) = {
-      val validation = for {
+    def validateCmd(cmd: ActivateUserCommand): DomainValidation[UserActivatedEvent] = {
+      for {
         user <- userRepository.userWithId(UserId(cmd.email))
         registeredUser <- isUserRegistered(user)
         activatedUser <- registeredUser.activate(cmd.expectedVersion)
         event <- UserActivatedEvent(activatedUser.id.toString, activatedUser.version).success
       } yield {
-        persist(event) { e =>
-          updateUser(activatedUser, e)
-        }
         event
-      }
-
-      if (validation.isFailure) {
-        sender ! validation
       }
     }
 
-    def lockUser(cmd: LockUserCommand) = {
-      val validation = for {
+    def validateCmd(cmd: LockUserCommand): DomainValidation[UserLockedEvent] = {
+      for {
         user <- userRepository.userWithId(UserId(cmd.email))
         activeUser <- isUserActive(user)
         lockedUser <- activeUser.lock(cmd.expectedVersion)
         event <- UserLockedEvent(lockedUser.id.toString, lockedUser.version).success
       } yield {
-        persist(event) { e =>
-          updateUser(lockedUser, e)
-        }
         event
-      }
-
-      if (validation.isFailure) {
-        sender ! validation
       }
     }
 
     def unlockUser(cmd: UnlockUserCommand) = {
+    }
+
+    def recoverUser(event: UserAddedEvent) = {
+      log.debug(s"recoverUser: $event")
+      val validation = RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
+        event.password, event.hasher, event.salt, event.avatarUrl)
+
+      if (validation.isFailure) {
+          // this should never happen because the only way to get here is that the
+          // command passed validation
+          throw new IllegalStateException("creating user from event failed")
+      } else {
+	repository.put(validation.getOrElse(null))
+      }
+    }
+
+    def recoverUser(event: UserActivatedEvent) = {
+      log.debug(s"recoverUser: $event")
+      val validation = repository.getByKey(UserId(event.id))
+
+      if (validation.isFailure) {
+          // this should never happen because the only way to get here is that the
+          // command passed validation
+          throw new IllegalStateException("creating user from event failed")
+      } else {
+	val user = validation.getOrElse(null)
+	repository.put(user.activate)
+      }
     }
 
     private def isUserRegistered(user: User): DomainValidation[RegisteredUser] = {

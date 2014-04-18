@@ -32,12 +32,12 @@ case class SnapshotState(studies: Set[Study])
 trait StudyProcessorComponentImpl extends StudyProcessorComponent {
   self: RepositoryComponent =>
 
-  override val repository = studyRepository
-
   /**
    * Handles the commands to configure studies.
    */
   class StudyProcessorImpl extends StudyProcessor {
+
+    override val repository = studyRepository
 
     val receiveRecover: Receive = {
       case event: StudyAddedEvent =>
