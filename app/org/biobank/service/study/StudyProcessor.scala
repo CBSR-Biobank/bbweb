@@ -23,7 +23,7 @@ case class StudyMessage(cmd: Any, userId: UserId, time: Long)
 
 trait StudyProcessorComponent {
 
-  trait StudyProcessor extends Processor
+  trait StudyProcessor extends Processor[StudyId, Study]
 
 }
 
@@ -31,6 +31,8 @@ case class SnapshotState(studies: Set[Study])
 
 trait StudyProcessorComponentImpl extends StudyProcessorComponent {
   self: RepositoryComponent =>
+
+  override val repository = studyRepository
 
   /**
    * Handles the commands to configure studies.

@@ -10,23 +10,22 @@ import akka.persistence.EventsourcedProcessor
 import scalaz._
 import Scalaz._
 
-trait Processor[K, A] extends EventsourcedProcessor with ActorLogging {
+trait Processor[K, A <: ConcurrencySafeEntity[K]] extends EventsourcedProcessor with ActorLogging {
 
   protected val repository: ReadWriteRepository[K, A]
 
-  protected def process[_](validation: DomainValidation[_]) {
-      validation foreach { v =>
-	val (event, obj) = v
-	persist(event) { e =>
-	  repository.put(obj)
-	  sender ! event.success
-	}
-      }
-
-      if (validation.isFailure) {
-        sender ! validation
+  protected def process[T](validation: DomainValidation[T])(onSuccess: T => Unit) {
+    validation foreach { event =>
+      persist(event) { e =>
+	onSuccess(e)
+	sender ! e.success
       }
     }
+
+    if (validation.isFailure) {
+      sender ! validation
+    }
+  }
 
   protected def logEvent[T](validation: DomainValidation[T]) {
     if (log.isDebugEnabled) {

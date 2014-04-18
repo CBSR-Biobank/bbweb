@@ -105,7 +105,6 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
 
     val receiveRecover: Receive = {
       case event: UserAddedEvent =>
-        log.debug(s"receiveRecover: $event")
         recoverUser(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -117,8 +116,9 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
 
     val receiveCommand: Receive = {
       case cmd: AddUserCommand =>
-      process(addUser(cmd))
-
+	process(validateCmd(cmd)){ event =>
+	  recoverUser(event)
+	}
 
       case cmd: ActivateUserCommand =>
         activateUser(cmd)
@@ -138,12 +138,14 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     }
 
     def recoverUser(event: UserAddedEvent) = {
-      RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
-        event.password, event.hasher, event.salt, event.avatarUrl) match {
-        case Success(user) =>
-          userRepository.put(user)
+      log.debug(s"recoverUser: $event")
+      val validation = for {
+	user <- RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
+          event.password, event.hasher, event.salt, event.avatarUrl)
+	savedUser <- repository.put(user)
+      } yield savedUser
 
-        case Failure(err) =>
+      if (validation.isFailure) {
           // this should never happen because the only way to get here is that the
           // command passed validation
           throw new IllegalStateException("creating user from event failed")
@@ -155,15 +157,15 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       sender ! event.success
     }
 
-    def addUser(cmd: AddUserCommand): DomainValidation[(UserEvent, User)] = {
+    def validateCmd(cmd: AddUserCommand): DomainValidation[UserAddedEvent] = {
       for {
-        emailAvailable <- userRepository.emailAvailable(cmd.email)
+        emailAvailable <- repository.emailAvailable(cmd.email)
         user <- RegisteredUser.create(UserId(cmd.email), -1L, cmd.name, cmd.email,
           cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl)
         event <- UserAddedEvent(user.id.toString, user.name, user.email,
           user.password, user.hasher, user.salt, user.avatarUrl).success
       } yield {
-        (event, user)
+        event
       }
     }
 

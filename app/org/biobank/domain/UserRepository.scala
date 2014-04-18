@@ -29,9 +29,9 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
     *
     * This repository uses the [[ReadWriteRepository]] implementation.
     */
-  class UserRepositoryImpl extends ReadWriteRepositoryRefImpl[UserId, User](v => v.id) with UserRepository {
-
-    val log = LoggerFactory.getLogger(this.getClass)
+  class UserRepositoryImpl
+      extends ReadWriteRepositoryRefImpl[UserId, User](v => v.id)
+      with UserRepository {
 
     def allUsers(): Set[User] = {
       getValues.toSet

@@ -22,9 +22,9 @@ trait  ReadRepository[K, A] {
   */
 trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
 
-  def put(value: A): A
+  def put(value: B): A
 
-  def remove(value: A): A
+  def remove(value: B): A
 
 }
 
