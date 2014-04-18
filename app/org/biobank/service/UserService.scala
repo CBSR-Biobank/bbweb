@@ -104,8 +104,13 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     override val repository = userRepository
 
     val receiveRecover: Receive = {
-      case event: UserAddedEvent =>
-        recoverUser(event)
+      case event: UserAddedEvent => recoverUser(event)
+
+      case event: UserActivatedEvent => recoverUser(event)
+
+      case event: UserLockedEvent => recoverUser(event)
+
+      case event: UserUnlockedEvent => recoverUser(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.users.foreach(i => userRepository.put(i))
@@ -165,34 +170,80 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       }
     }
 
-    def unlockUser(cmd: UnlockUserCommand) = {
+    def validateCmd(cmd: UnlockUserCommand): DomainValidation[UserUnlockedEvent] = {
+      for {
+        user <- userRepository.userWithId(UserId(cmd.email))
+        lockedUser <- isUserLocked(user)
+        unlockedUser <- lockedUser.unlock(cmd.expectedVersion)
+        event <- UserUnlockedEvent(lockedUser.id.toString, lockedUser.version).success
+      } yield {
+        event
+      }
     }
 
     def recoverUser(event: UserAddedEvent) = {
       log.debug(s"recoverUser: $event")
-      val validation = RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
-        event.password, event.hasher, event.salt, event.avatarUrl)
+      val validation = for {
+	registeredUser <- RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
+          event.password, event.hasher, event.salt, event.avatarUrl)
+	savedUser <- repository.put(registeredUser).success
+      } yield savedUser
 
       if (validation.isFailure) {
           // this should never happen because the only way to get here is that the
           // command passed validation
           throw new IllegalStateException("creating user from event failed")
-      } else {
-	repository.put(validation.getOrElse(null))
       }
     }
 
-    def recoverUser(event: UserActivatedEvent) = {
+    def recoverUser(event: UserActivatedEvent): Unit = {
       log.debug(s"recoverUser: $event")
-      val validation = repository.getByKey(UserId(event.id))
+
+      val validation = for {
+	user <- repository.getByKey(UserId(event.id))
+	registeredUser <- isUserRegistered(user)
+	activatedUser <- registeredUser.activate(Some(registeredUser.version))
+	savedUser <- repository.put(activatedUser).success
+      } yield savedUser
 
       if (validation.isFailure) {
           // this should never happen because the only way to get here is that the
           // command passed validation
-          throw new IllegalStateException("creating user from event failed")
-      } else {
-	val user = validation.getOrElse(null)
-	repository.put(user.activate)
+          throw new IllegalStateException("activating user from event failed")
+      }
+    }
+
+    def recoverUser(event: UserLockedEvent): Unit = {
+      log.debug(s"recoverUser: $event")
+
+      val validation = for {
+	user <- repository.getByKey(UserId(event.id))
+	activeUser <- isUserActive(user)
+	lockedUser <- activeUser.lock(Some(activeUser.version))
+	savedUser <- repository.put(lockedUser).success
+      } yield savedUser
+
+      if (validation.isFailure) {
+          // this should never happen because the only way to get here is that the
+          // command passed validation
+          throw new IllegalStateException("locking user from event failed")
+      }
+    }
+
+    def recoverUser(event: UserUnlockedEvent): Unit = {
+      log.debug(s"recoverUser: $event")
+
+      val validation = for {
+	user <- repository.getByKey(UserId(event.id))
+	lockedUser <- isUserLocked(user)
+	unlockedUser <- lockedUser.unlock(Some(lockedUser.version))
+	savedUser <- repository.put(unlockedUser).success
+      } yield savedUser
+
+      if (validation.isFailure) {
+          // this should never happen because the only way to get here is that the
+          // command passed validation
+          throw new IllegalStateException("unlocking user from event failed")
       }
     }
 
@@ -206,6 +257,13 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
     private def isUserActive(user: User): DomainValidation[ActiveUser] = {
       user match {
         case activeUser: ActiveUser => activeUser.success
+        case _ => DomainError(s"the user is not active").failNel
+      }
+    }
+
+    private def isUserLocked(user: User): DomainValidation[LockedUser] = {
+      user match {
+        case lockedUser: LockedUser => lockedUser.success
         case _ => DomainError(s"the user is not active").failNel
       }
     }

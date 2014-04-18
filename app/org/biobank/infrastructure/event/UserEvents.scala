@@ -32,4 +32,11 @@ object UserEvents {
       with HasIdentity
       with HasVersion
 
+  case class UserUnlockedEvent(
+    id: String,
+    version: Long)
+      extends UserEvent
+      with HasIdentity
+      with HasVersion
+
 }
