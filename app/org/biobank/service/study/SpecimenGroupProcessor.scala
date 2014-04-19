@@ -13,52 +13,38 @@ import org.biobank.domain.study._
 import org.biobank.domain.study.Study
 import org.slf4j.LoggerFactory
 
+import akka.persistence.SnapshotOffer
 import scalaz._
 import scalaz.Scalaz._
 
 /**
- * This is the Specimen Group Domain Service.
+ * This is the Specimen Group processor. It is a child actor of [[StudyProcessor]].
  *
  * It handles commands that deal with a Specimen Group.
  *
- * @param studyRepository The repository for study entities. This repository is only used for
- *        reading.
- * @param specimenGroupRepository The repository for specimen group entities.
  */
+class SpecimenGroupProcessor(
+  specimenGroupRepository: SpecimenGroupRepositoryComponent#SpecimenGroupRepository)
+    extends Processor {
 
-trait SpecimenGroupServiceComponent {
-  self: RepositoryComponent =>
+  case class SnapshotState(specimenGroups: Set[SpecimenGroup])
 
-  // val specimenGroupService: SpecimenGroupService = new SpecimenGroupService
+  val receiveRecover: Receive = {
+    case event: SpecimenGroupEvent => recoverEvent(event)
 
-  // class SpecimenGroupService extends CommandHandler {
+    case SnapshotOffer(_, snapshot: SnapshotState) =>
+      snapshot.specimenGroups.foreach{ specimenGroup => specimenGroupRepository.put(specimenGroup) }
+  }
 
-  //   val log = LoggerFactory.getLogger(this.getClass)
+  val receiveCommand: Receive = {
+    case cmd: AddSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-  //   /**
-  //    * This partial function handles each command. The command is contained within the
-  //    * StudyProcessorMsg.
-  //    *
-  //    *  If the command is invalid, then this method throws an Error exception.
-  //    */
-  //   def process = {
+    case cmd: UpdateSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-  //     case msg: StudyProcessorMsg =>
-  //       msg.cmd match {
-  //         case cmd: AddSpecimenGroupCmd =>
-  //           addSpecimenGroup(cmd, msg.study, msg.id)
-  //         case cmd: UpdateSpecimenGroupCmd =>
-  //           updateSpecimenGroup(cmd, msg.study)
-  //         case cmd: RemoveSpecimenGroupCmd =>
-  //           removeSpecimenGroup(cmd, msg.study)
-  //         case _ =>
-  //           throw new Error("invalid command received")
-  //       }
+    case cmd: RemoveSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-  //     case _ =>
-  //       throw new Error("invalid message received")
-
-  //   }
+    case _ => throw new IllegalStateException("invalid command received")
+  }
 
   //   private def addSpecimenGroup(
   //     cmd: AddSpecimenGroupCmd,

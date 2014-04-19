@@ -51,6 +51,8 @@ object StudyEvents {
     extends StudyEvent
 
   // specimen group events
+  trait SpecimenGroupEvent extends StudyEvent
+
   case class SpecimenGroupAddedEvent(
     studyid: String,
     specimenGroupId: String,
@@ -62,7 +64,7 @@ object StudyEvents {
     preservationType: PreservationType,
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType)
-    extends StudyEvent
+    extends SpecimenGroupEvent
 
   case class SpecimenGroupUpdatedEvent(
     studyid: String,
@@ -75,11 +77,12 @@ object StudyEvents {
     preservationType: PreservationType,
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType)
+    extends SpecimenGroupEvent
 
   case class SpecimenGroupRemovedEvent(
     studyid: String,
     specimenGroupId: String)
-    extends StudyEvent
+    extends SpecimenGroupEvent
 
   // collection event events
   case class CollectionEventTypeAddedEvent(

@@ -11,7 +11,7 @@ trait SpecimenGroupRepositoryComponent {
 
   val specimenGroupRepository: SpecimenGroupRepository
 
-  trait SpecimenGroupRepository {
+  trait SpecimenGroupRepository extends ReadWriteRepository[SpecimenGroupId, SpecimenGroup] {
 
     def nextIdentity: SpecimenGroupId
 

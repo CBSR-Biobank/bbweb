@@ -4,12 +4,7 @@ import org.biobank.service.study.{
   StudyProcessorComponent,
   StudyProcessorComponentImpl,
   StudyServiceComponent,
-  StudyServiceComponentImpl,
-  CollectionEventTypeServiceComponent,
-  SpecimenGroupServiceComponent,
-  CeventAnnotationTypeServiceComponent,
-  ParticipantAnnotationTypeServiceComponent,
-  SpecimenLinkAnnotationTypeServiceComponent
+  StudyServiceComponentImpl
 }
 import org.biobank.domain.{ RepositoryComponent, RepositoryComponentImpl }
 import org.biobank.query.{ QueryComponent, QueryComponentImpl }
@@ -21,12 +16,6 @@ trait ProcessorComponent extends StudyProcessorComponent
 trait ProcessorComponentImpl extends ProcessorComponent
   with StudyProcessorComponentImpl
   with UserProcessorComponentImpl
-  with CollectionEventTypeServiceComponent
-  with SpecimenGroupServiceComponent
-  with CeventAnnotationTypeServiceComponent
-  with ParticipantAnnotationTypeServiceComponent
-  with SpecimenLinkAnnotationTypeServiceComponent
-  with RepositoryComponentImpl
 
 trait ServiceComponent
   extends StudyServiceComponent

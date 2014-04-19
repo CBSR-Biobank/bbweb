@@ -13,6 +13,7 @@ import org.biobank.domain.{
 import org.biobank.domain.study._
 import org.biobank.domain.study.Study
 
+import akka.actor.Props
 import akka.pattern.ask
 import org.slf4j.LoggerFactory
 import akka.persistence.SnapshotOffer
@@ -27,8 +28,6 @@ trait StudyProcessorComponent {
 
 }
 
-case class SnapshotState(studies: Set[Study])
-
 trait StudyProcessorComponentImpl extends StudyProcessorComponent {
   self: RepositoryComponent =>
 
@@ -36,6 +35,11 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
    * Handles the commands to configure studies.
    */
   class StudyProcessorImpl extends StudyProcessor {
+
+    case class SnapshotState(studies: Set[Study])
+
+    val specimenGroupProcessor = context.system.actorOf(Props(
+      new SpecimenGroupProcessor(specimenGroupRepository)), "sgproc")
 
     val receiveRecover: Receive = {
       case event: StudyAddedEvent => recoverEvent(event)
@@ -53,8 +57,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
       case cmd: DisableStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      // case cmd: SpecimenGroupCommand =>
-      //   processEntityMsg(cmd, cmd.studyId, specimenGroupService.process)
+       case cmd: SpecimenGroupCommand => specimenGroupProcessor ! cmd
 
       // case cmd: CollectionEventTypeCommand =>
       //   processEntityMsg(cmd, cmd.studyId, collectionEventTypeService.process)
