@@ -83,11 +83,11 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
 
     private def validateCmd(cmd: UpdateStudyCmd): DomainValidation[StudyUpdatedEvent] = {
-      val studyId = StudyId(cmd.id)
       for {
-	prevStudy <- isStudyDisabled(studyId)
+	prevStudy <- isStudyDisabled(StudyId(cmd.id))
         updatedStudy <- prevStudy.update(cmd.expectedVersion, cmd.name, cmd.description)
-        event <- StudyUpdatedEvent(cmd.id, updatedStudy.version, updatedStudy.name, updatedStudy.description).success
+        event <- StudyUpdatedEvent(cmd.id, updatedStudy.version, updatedStudy.name,
+          updatedStudy.description).success
       } yield event
     }
 
@@ -142,12 +142,12 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
     }
 
     private def recoverEvent(event: StudyUpdatedEvent) {
-      val studyId = StudyId(event.id)
-
       val validation = for {
-	study <- DisabledStudy.create(studyId, -1L, event.name, event.description)
-	savedStudy <- studyRepository.put(study).success
-      } yield study
+	disabledStudy <- isStudyDisabled(StudyId(event.id))
+	updatedStudy <- disabledStudy.update(disabledStudy.versionOption, event.name,
+          event.description)
+	savedStudy <- studyRepository.put(updatedStudy).success
+      } yield savedStudy
 
       if (validation.isFailure) {
 	// this should never happen because the only way to get here is that the

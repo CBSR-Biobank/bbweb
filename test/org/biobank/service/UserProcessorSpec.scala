@@ -35,8 +35,11 @@ class UserProcessorSpec extends UserProcessorFixture {
       val avatarUrl = Some("http://test.com/")
 
       val cmd = RegisterUserCommand(name, email, password, hasher, salt, avatarUrl)
-      ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]].futureValue match {
-        case Success(event) =>
+      val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
+	.futureValue
+      validation should be success
+
+      validation map { event =>
           event shouldBe a [UserRegisterdEvent]
           event.id.toString should be(email)
           event.name should be(name)
@@ -48,9 +51,6 @@ class UserProcessorSpec extends UserProcessorFixture {
 
           val user = userRepository.userWithId(UserId(event.id)).getOrElse(fail)
           user shouldBe a[RegisteredUser]
-
-        case Failure(msg) =>
-          fail(msg.list.mkString(", "))
       }
     }
 
@@ -63,15 +63,21 @@ class UserProcessorSpec extends UserProcessorFixture {
       val avatarUrl = Some("http://test.com/")
 
       val cmd = RegisterUserCommand(name, email, password, hasher, salt, avatarUrl)
-      val event = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
-        .futureValue.getOrElse(fail)
-      event.email should be(email)
+      val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
+        .futureValue
+      validation should be success
 
-      ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]].futureValue match {
-        case Success(event) => fail
-        case Failure(err) =>
-          err.list should have length 1
-          err.list.head should include ("user already exists")
+      validation map { event =>
+	event.email should be(email)
+      }
+
+      val validation2 = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
+	.futureValue
+      validation2 should be failure
+
+      validation2.swap.map { err =>
+        err.list should have length 1
+        err.list.head should include ("user already exists")
       }
     }
 
@@ -84,13 +90,19 @@ class UserProcessorSpec extends UserProcessorFixture {
       val avatarUrl = Some("http://test.com/")
 
       val cmd = RegisterUserCommand(name, email, password, hasher, salt, avatarUrl)
-      val event = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
-        .futureValue.getOrElse(fail)
+      val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
+        .futureValue
+      validation should be success
 
-      ask(userProcessor, ActivateUserCommand(event.email, Some(0L)))
-        .mapTo[DomainValidation[UserActivatedEvent]].futureValue match {
-        case Success(event) => event.id should be(email)
-        case Failure(err) => fail(err.list.mkString(","))
+      val event = validation.getOrElse(fail)
+
+      val validation2 = ask(userProcessor, ActivateUserCommand(event.email, Some(0L)))
+        .mapTo[DomainValidation[UserActivatedEvent]]
+	.futureValue
+      validation2 should be success
+
+      validation2 map { event =>
+	event.id should be(email)
       }
     }
 
@@ -103,20 +115,20 @@ class UserProcessorSpec extends UserProcessorFixture {
       val avatarUrl = Some("http://test.com/")
 
       val cmd = RegisterUserCommand(name, email, password, hasher, salt, avatarUrl)
-      ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]].futureValue.getOrElse(fail)
+      ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
+	.futureValue should be success
 
       ask(userProcessor, ActivateUserCommand(email, Some(0L)))
-        .mapTo[DomainValidation[UserActivatedEvent]].futureValue.getOrElse(fail)
+        .mapTo[DomainValidation[UserActivatedEvent]]
+	.futureValue should be success
 
-      ask(userProcessor, LockUserCommand(email, Some(1L)))
-        .mapTo[DomainValidation[UserLockedEvent]].futureValue match {
-        case Success(event) => event.id should be(email)
-        case Failure(err) => fail(err.list.mkString(","))
-      }
+      val validation = ask(userProcessor, LockUserCommand(email, Some(1L)))
+        .mapTo[DomainValidation[UserLockedEvent]]
+	.futureValue
+      validation should be success
+
+      validation map { event => event.id should be(email) }
     }
-  }
-
-  "A user processor" can {
 
     "not lock a registered user" in {
       val name = nameGenerator.next[User]
@@ -127,14 +139,17 @@ class UserProcessorSpec extends UserProcessorFixture {
       val avatarUrl = Some("http://test.com/")
 
       val cmd = RegisterUserCommand(name, email, password, hasher, salt, avatarUrl)
-      ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]].futureValue.getOrElse(fail)
+      ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
+	.futureValue should be success
 
-      ask(userProcessor, LockUserCommand(email, Some(0L)))
-        .mapTo[DomainValidation[UserLockedEvent]].futureValue match {
-        case Success(event) => fail
-        case Failure(err) =>
-          err.list should have length 1
-          err.list.head should include ("the user is not active")
+      val validation2 = ask(userProcessor, LockUserCommand(email, Some(0L)))
+        .mapTo[DomainValidation[UserLockedEvent]]
+	.futureValue
+      validation2 should be failure
+
+      validation2.swap map { err =>
+        err.list should have length 1
+        err.list.head should include ("the user is not active")
       }
     }
 
@@ -147,14 +162,18 @@ class UserProcessorSpec extends UserProcessorFixture {
       val avatarUrl = Some("http://test.com/")
 
       val cmd = RegisterUserCommand(name, email, password, hasher, salt, avatarUrl)
-      ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]].futureValue.getOrElse(fail)
+      val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
+	.futureValue
+      validation should be success
 
-      ask(userProcessor, UnlockUserCommand(email, Some(0L)))
-        .mapTo[DomainValidation[UserLockedEvent]].futureValue match {
-        case Success(event) => fail
-        case Failure(err) =>
-          err.list should have length 1
-          err.list.head should include ("the user is not active")
+      val validation2 = ask(userProcessor, UnlockUserCommand(email, Some(0L)))
+        .mapTo[DomainValidation[UserLockedEvent]]
+	.futureValue
+      validation2 should be success
+
+      validation2.swap map { err =>
+        err.list should have length 1
+        err.list.head should include ("the user is not active")
       }
     }
 

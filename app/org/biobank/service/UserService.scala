@@ -6,18 +6,13 @@ import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.service.Messages._
 
-import scala.concurrent._
-import scala.concurrent.duration._
-import scala.concurrent.stm.Ref
-import akka.actor._
+import akka.actor.{ ActorSystem, ActorRef }
+import scala.concurrent.Future
 import akka.pattern.ask
-import akka.util.Timeout
-import play.api.Logger
 import securesocial.core.{ Identity, SocialUser, PasswordInfo, AuthenticationMethod }
 import securesocial.core.providers.utils.PasswordHasher
 import org.slf4j.LoggerFactory
 import akka.persistence.SnapshotOffer
-import akka.actor.ActorLogging
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import scalaz._
