@@ -173,94 +173,111 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       }
     }
 
-    //    "not be updated with invalid version" in {
-    //      val name = nameGenerator.next[Study]
-    //      val study1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
-    //
-    //      val name2 = nameGenerator.next[Study]
-    //      val versionOption = Some(study1.version + 1)
-    //      val study2 = await(studyService.updateStudy(
-    //        new UpdateStudyCmd(study1.id, versionOption, name2, None)))
-    //
-    //      study2 must beFailing.like {
-    //        case msgs => msgs.head must contain("doesn't match current version")
-    //      }
-    //    }
-    //
-    //    "be enabled" in {
-    //      val name = nameGenerator.next[Study]
-    //      val units = nameGenerator.next[String]
-    //      val anatomicalSourceType = AnatomicalSourceType.Blood
-    //      val preservationType = PreservationType.FreshSpecimen
-    //      val preservationTempType = PreservationTemperatureType.Minus80celcius
-    //      val specimenType = SpecimenType.FilteredUrine
-    //
-    //      val event1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
-    //      studyRepository.studyWithId(StudyId(event1.id)) must beSuccessful
-    //
-    //      val sg1 = await(studyService.addSpecimenGroup(
-    //        new AddSpecimenGroupCmd(event1.id, name, Some(name), units, anatomicalSourceType,
-    //          preservationType, preservationTempType, specimenType)))
-    //      sg1 must beSuccessful.like {
-    //        case x =>
-    //          specimenGroupRepository.specimenGroupWithId(StudyId(event1.id), x.specimenGroupId) must beSuccessful
-    //          specimenGroupRepository.allSpecimenGroupsForStudy(StudyId(event1.id)).size mustEqual 1
-    //      }
-    //
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(event1.id, name, Some(name), true,
-    //          Set.empty, Set.empty)))
-    //      cet1 must beSuccessful.like {
-    //        case x =>
-    //          collectionEventTypeRepository.collectionEventTypeWithId(
-    //            StudyId(event1.id), x.collectionEventTypeId) must beSuccessful
-    //          collectionEventTypeRepository.allCollectionEventTypesForStudy(
-    //            StudyId(event1.id)).size mustEqual 1
-    //      }
-    //
-    //      val event2 = await(studyService.enableStudy(new EnableStudyCmd(event1.id, Some(1L))))
-    //      event2 must beSuccessful.like {
-    //        case e =>
-    //          studyRepository.studyWithId(StudyId(e.id)) must beSuccessful.like {
-    //            case s => s must beAnInstanceOf[EnabledStudy]
-    //          }
-    //      }
-    //    } tag ("tag1")
-    //
-    //    "be disabled" in {
-    //      val name = nameGenerator.next[Study]
-    //      val units = nameGenerator.next[String]
-    //      val anatomicalSourceType = AnatomicalSourceType.Blood
-    //      val preservationType = PreservationType.FreshSpecimen
-    //      val preservationTempType = PreservationTemperatureType.Minus80celcius
-    //      val specimenType = SpecimenType.FilteredUrine
-    //
-    //      val event1 = await(studyService.addStudy(new AddStudyCmd(name, Some(name)))) | null
-    //
-    //      await(studyService.addSpecimenGroup(
-    //        new AddSpecimenGroupCmd(event1.id, name, Some(name), units, anatomicalSourceType,
-    //          preservationType, preservationTempType, specimenType)))
-    //
-    //      await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(event1.id, name, Some(name), true,
-    //          Set.empty, Set.empty)))
-    //
-    //      val event2 = await(studyService.enableStudy(
-    //        new EnableStudyCmd(event1.id, Some(1L)))) | null
-    //
-    //      studyRepository.studyWithId(StudyId(event2.id)) must beSuccessful.like {
-    //        case e => e must beAnInstanceOf[EnabledStudy]
-    //      }
-    //
-    //      val event3 = await(studyService.disableStudy(
-    //        new DisableStudyCmd(event2.id, Some(2L))))
-    //
-    //      event3 must beSuccessful.like {
-    //        case e =>
-    //          studyRepository.studyWithId(StudyId(e.id)) must beSuccessful.like {
-    //            case s => s must beAnInstanceOf[DisabledStudy]
-    //          }
-    //      }
-    //    }
+    "not be updated with invalid version" in {
+      val name = nameGenerator.next[Study]
+
+      val validation = ask(studyProcessor, AddStudyCmd(name, None))
+	.mapTo[DomainValidation[StudyAddedEvent]]
+	.futureValue
+      validation should be success
+
+      val event = validation | fail
+      val name2 = nameGenerator.next[Study]
+
+      val cmd = UpdateStudyCmd(event.id, Some(10L), name2, None)
+      val validation2 = ask(studyProcessor, cmd)
+	.mapTo[DomainValidation[StudyUpdatedEvent]]
+	.futureValue
+
+      validation2 should be failure
+
+      validation2.swap map { err =>
+        err.list should have length 1
+        err.list.head should include ("doesn't match current version")
+      }
+    }
+
+    "enable a study" in {
+      val name = nameGenerator.next[Study]
+      val units = nameGenerator.next[String]
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
+
+      val validation = ask(studyProcessor, AddStudyCmd(name, None))
+	.mapTo[DomainValidation[StudyAddedEvent]]
+	.futureValue
+      validation should be success
+
+      val studyAddedEvent = validation | fail
+
+      val cmd = AddSpecimenGroupCmd(studyAddedEvent.id, name, None, units,
+	anatomicalSourceType, preservationType, preservationTempType, specimenType)
+      val validation2 = ask(studyProcessor, AddStudyCmd(name, None))
+	.mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+	.futureValue
+      validation2 should be success
+
+      val cmd2 = AddCollectionEventTypeCmd(studyAddedEvent.id, name, None, true, List.empty, List.empty)
+      val validation3 = ask(studyProcessor, cmd2)
+	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
+	.futureValue
+      validation3 should be success
+
+      val validation4 = ask(studyProcessor, EnableStudyCmd(studyAddedEvent.id, Some(0L)))
+	.mapTo[DomainValidation[StudyAddedEvent]]
+	.futureValue
+      validation4 should be success
+
+      validation4 map { event =>
+        val study = studyRepository.studyWithId(StudyId(event.id)) | fail
+        study shouldBe a[EnabledStudy]
+      }
+    }
+
+    "disable a study" in {
+      val name = nameGenerator.next[Study]
+      val units = nameGenerator.next[String]
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
+
+      val validation = ask(studyProcessor, AddStudyCmd(name, None))
+	.mapTo[DomainValidation[StudyAddedEvent]]
+	.futureValue
+      validation should be success
+
+      val studyAddedEvent = validation | fail
+
+      val cmd = AddSpecimenGroupCmd(studyAddedEvent.id, name, None, units,
+	anatomicalSourceType, preservationType, preservationTempType, specimenType)
+      val validation2 = ask(studyProcessor, AddStudyCmd(name, None))
+	.mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+	.futureValue
+      validation2 should be success
+
+      val cmd2 = AddCollectionEventTypeCmd(studyAddedEvent.id, name, None, true, List.empty, List.empty)
+      val validation3 = ask(studyProcessor, cmd2)
+	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
+	.futureValue
+      validation3 should be success
+
+      val validation4 = ask(studyProcessor, EnableStudyCmd(studyAddedEvent.id, Some(0L)))
+	.mapTo[DomainValidation[StudyEnabledEvent]]
+	.futureValue
+      validation4 should be success
+
+      val validation5 = ask(studyProcessor, DisableStudyCmd(studyAddedEvent.id, Some(0L)))
+	.mapTo[DomainValidation[StudyDisabledEvent]]
+	.futureValue
+      validation4 should be success
+
+      validation4 map { event =>
+        val study = studyRepository.studyWithId(StudyId(event.id)) | fail
+        study shouldBe a[DisabledStudy]
+      }
+    }
   }
 }
