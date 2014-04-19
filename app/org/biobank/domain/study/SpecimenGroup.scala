@@ -63,6 +63,22 @@ case class SpecimenGroup private (
         |  specimenType: $specimenType
         |}""".stripMargin
 
+  def update(
+    expectedVersion: Option[Long],
+    name: String,
+    description: Option[String],
+    units: String,
+    anatomicalSourceType: AnatomicalSourceType,
+    preservationType: PreservationType,
+    preservationTemperatureType: PreservationTemperatureType,
+    specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      updatedStudy <- SpecimenGroup.create(studyId, id, version, name, description,
+	units, anatomicalSourceType, preservationType, preservationTemperatureType,
+	specimenType)
+    } yield updatedStudy
+  }
 }
 
 /**
@@ -78,14 +94,18 @@ object SpecimenGroup extends StudyValidationHelper {
   }
 
   /**
-    * The factory method to create a specimen group.
+    * The factory method to create a specimen group. Note that it increments the version number
+    * by one.
     *
     * Performs validation on fields.
+    *
+    * @param version the previous version number for the specimen group. If the specimen group is
+    * new then this value should be -1L.
     */
   def create(
     studyId: StudyId,
     id: SpecimenGroupId,
-    version: Long = -1,
+    version: Long,
     name: String,
     description: Option[String],
     units: String,

@@ -12,12 +12,6 @@ import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
 
-/**
-  * Note: to run from Eclipse uncomment the @RunWith line. To run from SBT the line should be
-  * commented out.
-  *
-  */
-//@RunWith(classOf[JUnitRunner])
 class UserProcessorSpec extends UserProcessorFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)

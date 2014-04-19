@@ -54,7 +54,7 @@ sealed trait Study
   */
 case class DisabledStudy private (
   id: StudyId,
-  version: Long = -1,
+  version: Long,
   name: String,
   description: Option[String])
   extends Study {

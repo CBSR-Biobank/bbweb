@@ -41,6 +41,26 @@ class StudySpec extends WordSpecLike with Matchers {
       study.description should be(description)
     }
 
+    "be updated" in {
+      val id = StudyId(nameGenerator.next[Study])
+      val version = -1L
+      val name = nameGenerator.next[Study]
+      val description = some(nameGenerator.next[Study])
+
+      val study = DisabledStudy.create(id, version, name, description) | fail
+      study shouldBe a[DisabledStudy]
+
+      val name2 = nameGenerator.next[Study]
+      val description2 = some(nameGenerator.next[Study])
+
+      val updatedStudy = study.update(Some(0L), name2, description2) | fail
+
+      updatedStudy.id should be(id)
+      updatedStudy.version should be(1L)
+      updatedStudy.name should be(name2)
+      updatedStudy.description should be(description2)
+    }
+
     "be enabled" in {
       val id = StudyId(nameGenerator.next[Study])
       val version = -1L
@@ -169,11 +189,32 @@ class StudySpec extends WordSpecLike with Matchers {
       }
     }
 
+    "be updated with an invalid version" in {
+      val id = StudyId(nameGenerator.next[Study])
+      val version = -1L
+      val name = nameGenerator.next[Study]
+      val description = some(nameGenerator.next[Study])
+
+      val study = DisabledStudy.create(id, version, name, description) | fail
+      study shouldBe a[DisabledStudy]
+
+      val name2 = nameGenerator.next[Study]
+      val description2 = some(nameGenerator.next[Study])
+
+      val validation = study.update(Some(10L), name2, description2)
+      validation should be failure
+
+      validation.swap map { err =>
+        err.list should have length 1
+	err.list.head should include ("expected version doesn't match current version")
+      }
+    }
+
     "have more than one validation fail" in {
       val id = StudyId(nameGenerator.next[Study])
       val version = -2L
       val name = ""
-      var description: Option[String] = Some(nameGenerator.next[Study])
+      val description = Some(nameGenerator.next[Study])
 
       DisabledStudy.create(id, version, name, description) match {
         case Success(user) => fail
