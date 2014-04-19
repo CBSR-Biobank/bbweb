@@ -205,27 +205,18 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
-      val validation = ask(studyProcessor, AddStudyCmd(name, None))
-	.mapTo[DomainValidation[StudyAddedEvent]]
-	.futureValue
-      validation should be success
+      val disabledStudy = DiabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
+      studyRepository.put(disabledStudy)
 
-      val studyAddedEvent = validation | fail
+      val sg = SpecimenGroup.create(disabledStudy.id, specimenGroupRepository.nextIdentity, -1L,
+	name, None, units, anatomicalSourceType, preservationType, preservationTempType,
+	specimenType) | fail
 
-      val cmd = AddSpecimenGroupCmd(studyAddedEvent.id, name, None, units,
-	anatomicalSourceType, preservationType, preservationTempType, specimenType)
-      val validation2 = ask(studyProcessor, AddStudyCmd(name, None))
-	.mapTo[DomainValidation[SpecimenGroupAddedEvent]]
-	.futureValue
-      validation2 should be success
+      val cet = ACollectionEventType.create(disabledStudy.id,
+	collectionEventTypeRepository.nextIdentity, -1L, name, None, true,
+	List.empty, List.empty) | fail
 
-      val cmd2 = AddCollectionEventTypeCmd(studyAddedEvent.id, name, None, true, List.empty, List.empty)
-      val validation3 = ask(studyProcessor, cmd2)
-	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
-	.futureValue
-      validation3 should be success
-
-      val validation4 = ask(studyProcessor, EnableStudyCmd(studyAddedEvent.id, Some(0L)))
+      val validation4 = ask(studyProcessor, EnableStudyCmd(disabledStudy.id, Some(0L)))
 	.mapTo[DomainValidation[StudyAddedEvent]]
 	.futureValue
       validation4 should be success
@@ -238,43 +229,18 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
     "disable a study" in {
       val name = nameGenerator.next[Study]
-      val units = nameGenerator.next[String]
-      val anatomicalSourceType = AnatomicalSourceType.Blood
-      val preservationType = PreservationType.FreshSpecimen
-      val preservationTempType = PreservationTemperatureType.Minus80celcius
-      val specimenType = SpecimenType.FilteredUrine
 
-      val validation = ask(studyProcessor, AddStudyCmd(name, None))
-	.mapTo[DomainValidation[StudyAddedEvent]]
+      val disabledStudy = DiabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
+      studyRepository.put(disabledStudy)
+
+      val enabledStudy = disabledStudy.enable(0L, 1, 1) | fail
+
+      val validation = ask(studyProcessor, DisableStudyCmd(studyAddedEvent.id, Some(0L)))
+	.mapTo[DomainValidation[StudyDisabledEvent]]
 	.futureValue
       validation should be success
 
-      val studyAddedEvent = validation | fail
-
-      val cmd = AddSpecimenGroupCmd(studyAddedEvent.id, name, None, units,
-	anatomicalSourceType, preservationType, preservationTempType, specimenType)
-      val validation2 = ask(studyProcessor, AddStudyCmd(name, None))
-	.mapTo[DomainValidation[SpecimenGroupAddedEvent]]
-	.futureValue
-      validation2 should be success
-
-      val cmd2 = AddCollectionEventTypeCmd(studyAddedEvent.id, name, None, true, List.empty, List.empty)
-      val validation3 = ask(studyProcessor, cmd2)
-	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
-	.futureValue
-      validation3 should be success
-
-      val validation4 = ask(studyProcessor, EnableStudyCmd(studyAddedEvent.id, Some(0L)))
-	.mapTo[DomainValidation[StudyEnabledEvent]]
-	.futureValue
-      validation4 should be success
-
-      val validation5 = ask(studyProcessor, DisableStudyCmd(studyAddedEvent.id, Some(0L)))
-	.mapTo[DomainValidation[StudyDisabledEvent]]
-	.futureValue
-      validation4 should be success
-
-      validation4 map { event =>
+      validation map { event =>
         val study = studyRepository.studyWithId(StudyId(event.id)) | fail
         study shouldBe a[DisabledStudy]
       }

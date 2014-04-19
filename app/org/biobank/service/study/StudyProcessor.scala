@@ -96,9 +96,14 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
     private def validateCmd(cmd: EnableStudyCmd): DomainValidation[StudyEnabledEvent] = {
       val studyId = StudyId(cmd.id)
+      val specimenGroupCount = specimenGroupRepository.allSpecimenGroupsForStudy(studyId).size
+      val collectionEventtypeCount = collectionEventTypeRepository
+	.allCollectionEventTypesForStudy(studyId).size
+
       for {
 	disabledStudy <- isStudyDisabled(studyId)
-        enabledStudy <- disabledStudy.enable(cmd.expectedVersion)
+        enabledStudy <- disabledStudy.enable(cmd.expectedVersion, specimenGroupCount,
+	  collectionEventtypeCount)
         event <- StudyEnabledEvent(studyId.id, enabledStudy.version).success
       } yield event
     }
@@ -163,7 +168,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       val studyId = StudyId(event.id)
       val validation = for {
 	disabledStudy <- isStudyDisabled(studyId)
-	enabledStudy <- disabledStudy.enable(disabledStudy.versionOption)
+	enabledStudy <- disabledStudy.enable(disabledStudy.versionOption, 1, 1)
 	savedStudy <- studyRepository.put(enabledStudy).success
       } yield  enabledStudy
 

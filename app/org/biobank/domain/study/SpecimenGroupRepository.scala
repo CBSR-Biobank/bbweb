@@ -84,40 +84,5 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
       else
         true.success
     }
-
-    // def add(specimenGroup: SpecimenGroup): DomainValidation[SpecimenGroup] = {
-    //   specimenGroupWithId(specimenGroup.studyId, specimenGroup.id) match {
-    //     case Success(prevItem) =>
-    //       DomainError("specimen group with ID already exists: %s" format specimenGroup.id).failNel
-    //     case Failure(x) =>
-    //       for {
-    //         nameValid <- nameAvailable(specimenGroup)
-    //         item <- put(specimenGroup).success
-    //       } yield item
-    //   }
-    // }
-
-    // def update(specimenGroup: SpecimenGroup): DomainValidation[SpecimenGroup] = {
-    //   for {
-    //     prevItem <- specimenGroupWithId(specimenGroup.studyId, specimenGroup.id)
-    //     validVersion <- prevItem.requireVersion(Some(specimenGroup.version))
-    //     nameValid <- nameAvailable(specimenGroup)
-    //     updatedItem <- SpecimenGroup.create(
-    // 	   specimenGroup.studyId, specimenGroup.id, specimenGroup.version + 1,
-    //       specimenGroup.name, specimenGroup.description, specimenGroup.units,
-    //       specimenGroup.anatomicalSourceType, specimenGroup.preservationType,
-    //       specimenGroup.preservationTemperatureType, specimenGroup.specimenType)
-    //     repoItem <- put(updatedItem).success
-    //   } yield updatedItem
-    // }
-
-    // def remove(specimenGroup: SpecimenGroup): DomainValidation[SpecimenGroup] = {
-    //   for {
-    //     item <- specimenGroupWithId(specimenGroup.studyId, specimenGroup.id)
-    //     validVersion <- item.requireVersion(Some(specimenGroup.version))
-    //     removedItem <- remove(item).success
-    //   } yield removedItem
-
-    // }
   }
 }

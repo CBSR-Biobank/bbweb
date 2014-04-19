@@ -39,31 +39,27 @@ class SpecimenGroupProcessor(
   val receiveCommand: Receive = {
     case cmd: AddSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-    case cmd: UpdateSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+    //case cmd: UpdateSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-    case cmd: RemoveSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+    //case cmd: RemoveSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
     case _ => throw new IllegalStateException("invalid command received")
   }
 
-  //   private def addSpecimenGroup(
-  //     cmd: AddSpecimenGroupCmd,
-  //     study: DisabledStudy,
-  //     id: Option[String]): DomainValidation[SpecimenGroupAddedEvent] = {
+    private def validateCmd(cmd: AddSpecimenGroupCmd): DomainValidation[SpecimenGroupAddedEvent] = {
+      val sgId = specimenGroupRepository.nextIdentity
 
-  //     val sgId = specimenGroupRepository.nextIdentity
-
-  //     for {
-  //       newItem <- specimenGroupRepository.add(
-  //         SpecimenGroup(sgId, 0, study.id, cmd.name, cmd.description,
-  //           cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
-  //           cmd.preservationTemperatureType, cmd.specimenType))
-  //       newEvent <- SpecimenGroupAddedEvent(
-  //         newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
-  //         newItem.units, newItem.anatomicalSourceType, newItem.preservationType,
-  //         newItem.preservationTemperatureType, newItem.specimenType).success
-  //     } yield newEvent
-  //   }
+      for {
+        newItem <- specimenGroupRepository.add(
+          SpecimenGroup(sgId, 0, study.id, cmd.name, cmd.description,
+            cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
+            cmd.preservationTemperatureType, cmd.specimenType))
+        newEvent <- SpecimenGroupAddedEvent(
+          newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
+          newItem.units, newItem.anatomicalSourceType, newItem.preservationType,
+          newItem.preservationTemperatureType, newItem.specimenType).success
+      } yield newEvent
+    }
 
   //   private def checkNotInUse(specimenGroup: SpecimenGroup): DomainValidation[Boolean] = {
   //     if (collectionEventTypeRepository.specimenGroupInUse(specimenGroup)) {

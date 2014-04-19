@@ -1,5 +1,6 @@
 package org.biobank.domain.study
 
+import org.biobank.domain.DomainError
 import org.biobank.infrastructure.{
   CollectionEventTypeSpecimenGroup,
   CollectionEventTypeAnnotationType}
@@ -73,11 +74,21 @@ case class DisabledStudy private (
   }
 
   /** Used to enable a study after the study has been configured, or had configuration changes made on it. */
-  def enable(expectedVersion: Option[Long]): DomainValidation[EnabledStudy] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      enabledStudy <- EnabledStudy.create(this)
-    } yield enabledStudy
+  def enable(
+    expectedVersion: Option[Long],
+    specimenGroupCount: Int,
+    collectionEventtypeCount: Int): DomainValidation[EnabledStudy] = {
+
+    if (specimenGroupCount <= 0) {
+      DomainError("no specimen groups").failNel
+    } else if (collectionEventtypeCount <= 0) {
+      DomainError("no collection event types").failNel
+    } else {
+      for {
+	validVersion <- requireVersion(expectedVersion)
+	enabledStudy <- EnabledStudy.create(this)
+      } yield enabledStudy
+    }
   }
 
   /** When a study will no longer collect specimens from participants it can be retired. */
