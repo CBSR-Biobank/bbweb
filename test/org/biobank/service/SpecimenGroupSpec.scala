@@ -16,15 +16,12 @@ import org.biobank.domain.study._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import akka.actor._
 
 import scalaz._
 import Scalaz._
 
-@RunWith(classOf[JUnitRunner])
-class SpecimenGroupSpec {
+class SpecimenGroupSpec extends StudyProcessorFixture {
   //
   //  args(
   //    //include = "tag1",

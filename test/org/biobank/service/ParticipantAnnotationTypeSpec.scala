@@ -6,14 +6,11 @@ import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
 import scala.concurrent._
 import scala.concurrent.duration._
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import akka.actor._
 import scalaz._
 import Scalaz._
 
-@RunWith(classOf[JUnitRunner])
-class ParticipantAnnotationTypeSpec {
+class ParticipantAnnotationTypeSpec extends StudyProcessorFixture {
   //  args(
   //    //include = "tag1",
   //    sequential = true) // forces all tests to be run sequentially

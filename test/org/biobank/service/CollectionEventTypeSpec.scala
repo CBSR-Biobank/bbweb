@@ -16,8 +16,7 @@ import org.slf4j.LoggerFactory
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
-class CollectionEventTypeSpec {
+class CollectionEventTypeSpec extends StudyProcessorFixture {
 
   //  args(
   //    //include = "tag1",

@@ -9,14 +9,12 @@ import org.biobank.service.Messages._
 import java.util.UUID
 import org.junit.runner.RunWith
 import org.slf4j.LoggerFactory
-import org.scalatest.junit.JUnitRunner
-import play.api.test.FakeApplication
-import play.api.test.Helpers._
-import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
-import scala.slick.session.Session
+import org.scalatest.WordSpecLike
+import org.scalatest.Matchers
+//import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
+//import scala.slick.session.Session
 
-@RunWith(classOf[JUnitRunner])
-class StudyQuerySpec {
+class StudyQuerySp extends WordSpecLike with Matchers {
 
   //  val log = LoggerFactory.getLogger(this.getClass)
   //
