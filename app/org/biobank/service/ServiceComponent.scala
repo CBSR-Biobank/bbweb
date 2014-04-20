@@ -16,6 +16,7 @@ trait ProcessorComponent extends StudyProcessorComponent
 trait ProcessorComponentImpl extends ProcessorComponent
   with StudyProcessorComponentImpl
   with UserProcessorComponentImpl
+  with RepositoryComponentImpl
 
 trait ServiceComponent
   extends StudyServiceComponent
