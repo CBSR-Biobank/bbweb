@@ -216,15 +216,31 @@ class StudySpec extends WordSpecLike with Matchers {
       val name = ""
       val description = Some(nameGenerator.next[Study])
 
-      DisabledStudy.create(id, version, name, description) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should have length 2
-	  err.list.head should be ("invalid version value: -2")
-	  err.list.tail.head should be ("name is null or empty")
+      val validation = DisabledStudy.create(id, version, name, description)
+      validation should be failure
+
+      validation.swap.map { err =>
+        err.list should have length 2
+	err.list.head should be ("invalid version value: -2")
+	err.list.tail.head should be ("name is null or empty")
       }
     }
 
+    "cannot be enabled without configuration" in {
+      val id = StudyId(nameGenerator.next[Study])
+      val name = nameGenerator.next[Study]
+      val validation = DidabledStudy.create(id, -1L, name None)
+      validation should be success
+
+      val study = validation | fail
+      val validaton2 = study.enable(Some(0L), 0, 0)
+      validation2 should fail
+
+      validation2.swap.map { err =>
+        err.list should have length 1
+	err.list.head should include ("expected version doesn't match current version")
+      }
+    }
   }
 
 }

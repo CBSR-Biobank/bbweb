@@ -18,11 +18,11 @@ import scalaz._
 import scalaz.Scalaz._
 
 /**
- * This is the Specimen Group processor. It is a child actor of [[StudyProcessor]].
- *
- * It handles commands that deal with a Specimen Group.
- *
- */
+  * This is the Specimen Group processor. It is a child actor of [[StudyProcessor]].
+  *
+  * It handles commands that deal with a Specimen Group.
+  *
+  */
 class SpecimenGroupProcessor(
   specimenGroupRepository: SpecimenGroupRepositoryComponent#SpecimenGroupRepository)
     extends Processor {
@@ -30,7 +30,7 @@ class SpecimenGroupProcessor(
   case class SnapshotState(specimenGroups: Set[SpecimenGroup])
 
   val receiveRecover: Receive = {
-    case event: SpecimenGroupEvent => recoverEvent(event)
+    case event: SpecimenGroupAddedEvent => recoverEvent(event)
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
       snapshot.specimenGroups.foreach{ specimenGroup => specimenGroupRepository.put(specimenGroup) }
@@ -39,32 +39,31 @@ class SpecimenGroupProcessor(
   val receiveCommand: Receive = {
     case cmd: AddSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-    //case cmd: UpdateSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      //case cmd: UpdateSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-    //case cmd: RemoveSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      //case cmd: RemoveSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
     case _ => throw new IllegalStateException("invalid command received")
   }
 
-    private def validateCmd(cmd: AddSpecimenGroupCmd): DomainValidation[SpecimenGroupAddedEvent] = {
-      val sgId = specimenGroupRepository.nextIdentity
+  private def validateCmd(cmd: AddSpecimenGroupCmd): DomainValidation[SpecimenGroupAddedEvent] = {
+    val sgId = specimenGroupRepository.nextIdentity
 
-      if (specimenGroupRepository.getByKey(sgId).isSuccess) {
-	throw new IllegalStateException(s"specimen group with id already exsits: $id")
-      }
-
-      for {
-	nameValid <- nameAvailable(specimenGroup)
-        newItem <- specimenGroupRepository.add(
-          SpecimenGroup(sgId, 0, study.id, cmd.name, cmd.description,
-            cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
-            cmd.preservationTemperatureType, cmd.specimenType))
-        newEvent <- SpecimenGroupAddedEvent(
-          newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
-          newItem.units, newItem.anatomicalSourceType, newItem.preservationType,
-          newItem.preservationTemperatureType, newItem.specimenType).success
-      } yield newEvent
+    if (specimenGroupRepository.getByKey(sgId).isSuccess) {
+      throw new IllegalStateException(s"specimen group with id already exsits: $id")
     }
+
+    for {
+      nameValid <- nameAvailable(cmd.name)
+      newItem <-SpecimenGroup.create(StudyId(cmd.studyId), sgId, 0, cmd.name, cmd.description,
+        cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
+        cmd.preservationTemperatureType, cmd.specimenType)
+      newEvent <- SpecimenGroupAddedEvent(
+        newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
+        newItem.units, newItem.anatomicalSourceType, newItem.preservationType,
+        newItem.preservationTemperatureType, newItem.specimenType).success
+    } yield newEvent
+  }
 
   //   private def checkNotInUse(specimenGroup: SpecimenGroup): DomainValidation[Boolean] = {
   //     if (collectionEventTypeRepository.specimenGroupInUse(specimenGroup)) {
@@ -111,15 +110,19 @@ class SpecimenGroupProcessor(
   //   }
   // }
 
-    private def nameAvailable(specimenGroupName: String): DomainValidation[Boolean] = {
-      val exists = getValues.exists { item =>
-          item.name.equals(specimenGroup.name)
-      }
+  def recoverEvent(event: SpecimenGroupAddedEvent): Unit = {
+  }
 
-      if (exists)
-        DomainError("specimen group with name already exists: %s" format specimenGroup.name).failNel
-      else
-        true.success
+  private def nameAvailable(specimenGroupName: String): DomainValidation[Boolean] = {
+    val exists = specimenGroupRepository.getValues.exists { item =>
+      item.name.equals(specimenGroupName)
+    }
+
+    if (exists) {
+      DomainError(s"specimen group with name already exists: $specimenGroupName").failNel
+    } else {
+      true.success
     }
   }
 }
+
