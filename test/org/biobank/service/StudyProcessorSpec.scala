@@ -205,18 +205,21 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
-      val disabledStudy = DiabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
+      val disabledStudy = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
       studyRepository.put(disabledStudy)
 
       val sg = SpecimenGroup.create(disabledStudy.id, specimenGroupRepository.nextIdentity, -1L,
 	name, None, units, anatomicalSourceType, preservationType, preservationTempType,
 	specimenType) | fail
+      specimenGroupRepository.put(sg)
 
-      val cet = ACollectionEventType.create(disabledStudy.id,
+      val cet = CollectionEventType.create(disabledStudy.id,
 	collectionEventTypeRepository.nextIdentity, -1L, name, None, true,
 	List.empty, List.empty) | fail
+      collectionEventTypeRepository.put(cet)
 
-      val validation4 = ask(studyProcessor, EnableStudyCmd(disabledStudy.id, Some(0L)))
+      val validation4 = ask(studyProcessor,
+	EnableStudyCmd(disabledStudy.id.toString, Some(0L)))
 	.mapTo[DomainValidation[StudyAddedEvent]]
 	.futureValue
       validation4 should be success
@@ -230,12 +233,12 @@ class StudyProcessorSpec extends StudyProcessorFixture {
     "disable a study" in {
       val name = nameGenerator.next[Study]
 
-      val disabledStudy = DiabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
-      studyRepository.put(disabledStudy)
+      val disabledStudy = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
+      val enabledStudy = disabledStudy.enable(Some(0L), 1, 1) | fail
+      studyRepository.put(enabledStudy)
 
-      val enabledStudy = disabledStudy.enable(0L, 1, 1) | fail
-
-      val validation = ask(studyProcessor, DisableStudyCmd(studyAddedEvent.id, Some(0L)))
+      val validation = ask(studyProcessor,
+	DisableStudyCmd(enabledStudy.id.toString, Some(0L)))
 	.mapTo[DomainValidation[StudyDisabledEvent]]
 	.futureValue
       validation should be success

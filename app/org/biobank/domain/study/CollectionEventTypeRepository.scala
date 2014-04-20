@@ -11,7 +11,8 @@ trait CollectionEventTypeRepositoryComponent {
 
   val collectionEventTypeRepository: CollectionEventTypeRepository
 
-  trait CollectionEventTypeRepository {
+  trait CollectionEventTypeRepository
+      extends ReadWriteRepository [CollectionEventTypeId, CollectionEventType] {
 
     def nextIdentity: CollectionEventTypeId
 
@@ -28,12 +29,6 @@ trait CollectionEventTypeRepositoryComponent {
     def specimenGroupInUse(specimenGroup: SpecimenGroup): Boolean
 
     def annotationTypeInUse(annotationType: CollectionEventAnnotationType): Boolean
-
-    // def add(ceventType: CollectionEventType): DomainValidation[CollectionEventType]
-
-    // def update(ceventType: CollectionEventType): DomainValidation[CollectionEventType]
-
-    // def remove(ceventType: CollectionEventType): DomainValidation[CollectionEventType]
 
   }
 }

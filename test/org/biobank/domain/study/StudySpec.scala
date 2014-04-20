@@ -71,7 +71,7 @@ class StudySpec extends WordSpecLike with Matchers {
       val disabledStudy = v.getOrElse(fail("could not create study"))
       disabledStudy shouldBe a[DisabledStudy]
 
-      val enabledStudy = disabledStudy.enable(Some(0L)).getOrElse(fail("could not enable study"))
+      val enabledStudy = disabledStudy.enable(Some(0L), 1, 1) | fail
       enabledStudy shouldBe a[EnabledStudy]
     }
 
@@ -85,8 +85,8 @@ class StudySpec extends WordSpecLike with Matchers {
       val disabledStudy = v.getOrElse(fail("could not create study"))
       disabledStudy shouldBe a[DisabledStudy]
 
-      val enabledStudy = disabledStudy.enable(Some(0L)).getOrElse(fail("could not enable study"))
-      val disabledStudy2 = enabledStudy.disable(Some(1L)).getOrElse(fail("could not disable study"))
+      val enabledStudy = disabledStudy.enable(Some(0L), 1, 1) | fail
+      val disabledStudy2 = enabledStudy.disable(Some(1L)) | fail
       disabledStudy2 shouldBe a[DisabledStudy]
     }
 
@@ -226,19 +226,19 @@ class StudySpec extends WordSpecLike with Matchers {
       }
     }
 
-    "cannot be enabled without configuration" in {
+    "no be enabled without prior configuration" in {
       val id = StudyId(nameGenerator.next[Study])
       val name = nameGenerator.next[Study]
-      val validation = DidabledStudy.create(id, -1L, name None)
+      val validation = DisabledStudy.create(id, -1L, name, None)
       validation should be success
 
       val study = validation | fail
-      val validaton2 = study.enable(Some(0L), 0, 0)
-      validation2 should fail
+      val validation2 = study.enable(Some(0L), 0, 0)
+      validation2 should be failure
 
       validation2.swap.map { err =>
         err.list should have length 1
-	err.list.head should include ("expected version doesn't match current version")
+	err.list.head should include ("no specimen groups")
       }
     }
   }
