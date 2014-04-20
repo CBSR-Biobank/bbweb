@@ -54,7 +54,7 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
         case Failure(err) =>
           DomainError("specimen group does not exist: { studyId: %s, specimenGroupId: %s }".format(
             studyId, specimenGroupId)).failNel
-        case Success(sg) =>
+        case Success(sg) >=
           if (sg.studyId.equals(studyId)) sg.success
           else DomainError(
             "study does not have specimen group: { studyId: %s, specimenGroupId: %s }".format(
@@ -71,18 +71,4 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
     def allSpecimenGroupsForStudy(studyId: StudyId): Set[SpecimenGroup] = {
       getValues.filter(x => x.studyId.equals(studyId)).toSet
     }
-
-    private def nameAvailable(specimenGroup: SpecimenGroup): DomainValidation[Boolean] = {
-      val exists = getValues.exists { item =>
-        item.studyId.equals(specimenGroup.studyId) &&
-          item.name.equals(specimenGroup.name) &&
-          !item.id.equals(specimenGroup.id)
-      }
-
-      if (exists)
-        DomainError("specimen group with name already exists: %s" format specimenGroup.name).failNel
-      else
-        true.success
-    }
-  }
 }

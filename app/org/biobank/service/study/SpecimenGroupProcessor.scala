@@ -49,7 +49,12 @@ class SpecimenGroupProcessor(
     private def validateCmd(cmd: AddSpecimenGroupCmd): DomainValidation[SpecimenGroupAddedEvent] = {
       val sgId = specimenGroupRepository.nextIdentity
 
+      if (specimenGroupRepository.getByKey(sgId).isSuccess) {
+	throw new IllegalStateException(s"specimen group with id already exsits: $id")
+      }
+
       for {
+	nameValid <- nameAvailable(specimenGroup)
         newItem <- specimenGroupRepository.add(
           SpecimenGroup(sgId, 0, study.id, cmd.name, cmd.description,
             cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
@@ -105,4 +110,16 @@ class SpecimenGroupProcessor(
   //     } yield newEvent
   //   }
   // }
+
+    private def nameAvailable(specimenGroupName: String): DomainValidation[Boolean] = {
+      val exists = getValues.exists { item =>
+          item.name.equals(specimenGroup.name)
+      }
+
+      if (exists)
+        DomainError("specimen group with name already exists: %s" format specimenGroup.name).failNel
+      else
+        true.success
+    }
+  }
 }

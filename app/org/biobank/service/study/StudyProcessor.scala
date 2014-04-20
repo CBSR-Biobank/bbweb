@@ -77,6 +77,10 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
     private def validateCmd(cmd: AddStudyCmd): DomainValidation[StudyAddedEvent] = {
       val studyId = studyRepository.nextIdentity
 
+      if (studyRepository.getByKey(studyId).isSuccess) {
+	throw new IllegalStateException(s"study with id already exsits: $id")
+      }
+
       for {
         nameAvailable <- studyRepository.nameAvailable(cmd.name)
         newStudy <- DisabledStudy.create(studyId, -1L, cmd.name, cmd.description)
