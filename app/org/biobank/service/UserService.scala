@@ -183,7 +183,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       } yield savedUser
 
       if (validation.isFailure) {
-          // this should never happen because the only way to get here is that the
+          // this should never happen because the only way to get here is when the
           // command passed validation
           throw new IllegalStateException("creating user from event failed")
       }
@@ -200,7 +200,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       } yield savedUser
 
       if (validation.isFailure) {
-          // this should never happen because the only way to get here is that the
+          // this should never happen because the only way to get here is when the
           // command passed validation
           throw new IllegalStateException("activating user from event failed")
       }
@@ -217,7 +217,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       } yield savedUser
 
       if (validation.isFailure) {
-          // this should never happen because the only way to get here is that the
+          // this should never happen because the only way to get here is when the
           // command passed validation
           throw new IllegalStateException("locking user from event failed")
       }
@@ -234,7 +234,7 @@ trait UserProcessorComponentImpl extends UserProcessorComponent {
       } yield savedUser
 
       if (validation.isFailure) {
-          // this should never happen because the only way to get here is that the
+          // this should never happen because the only way to get here is when the
           // command passed validation
           throw new IllegalStateException("unlocking user from event failed")
       }

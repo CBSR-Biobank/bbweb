@@ -111,7 +111,7 @@ class SpecimenGroupProcessor(
     } yield newItem
 
     if (validation.isFailure) {
-      // this should never happen because the only way to get here is that the
+      // this should never happen because the only way to get here is when the
       // command passed validation
       throw new IllegalStateException("recovering specimen group from event failed")
     }
@@ -126,7 +126,7 @@ class SpecimenGroupProcessor(
     } yield updatedItem
 
     if (validation.isFailure) {
-      // this should never happen because the only way to get here is that the
+      // this should never happen because the only way to get here is when the
       // command passed validation
       throw new IllegalStateException("recovering specimen group update from event failed")
     }
@@ -139,7 +139,7 @@ class SpecimenGroupProcessor(
     } yield removedItem
 
     if (validation.isFailure) {
-      // this should never happen because the only way to get here is that the
+      // this should never happen because the only way to get here is when the
       // command passed validation
       throw new IllegalStateException("recovering specimen group remove from event failed")
     }

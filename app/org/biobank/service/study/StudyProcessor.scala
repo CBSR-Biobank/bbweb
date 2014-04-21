@@ -147,7 +147,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       } yield study
 
       if (validation.isFailure) {
-        // this should never happen because the only way to get here is that the
+        // this should never happen because the only way to get here is when the
         // command passed validation
         throw new IllegalStateException("recovering study from event failed")
       }
@@ -162,7 +162,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       } yield savedStudy
 
       if (validation.isFailure) {
-	// this should never happen because the only way to get here is that the
+	// this should never happen because the only way to get here is when the
 	// command passed validation
 	throw new IllegalStateException("recovering study from event failed")
       }
@@ -177,7 +177,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       } yield  enabledStudy
 
       if (validation.isFailure) {
-        // this should never happen because the only way to get here is that the
+        // this should never happen because the only way to get here is when the
         // command passed validation
         throw new IllegalStateException("recovering study from event failed")
       }
@@ -192,7 +192,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       } yield disabledStudy
 
       if (validation.isFailure) {
-        // this should never happen because the only way to get here is that the
+        // this should never happen because the only way to get here is when the
         // command passed validation
         throw new IllegalStateException("recovering study from event failed")
       }
@@ -207,7 +207,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       } yield retiredStudy
 
       if (validation.isFailure) {
-        // this should never happen because the only way to get here is that the
+        // this should never happen because the only way to get here is when the
         // command passed validation
         throw new IllegalStateException("recovering study from event failed")
       }
@@ -222,7 +222,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       } yield disabledStudy
 
       if (validation.isFailure) {
-        // this should never happen because the only way to get here is that the
+        // this should never happen because the only way to get here is when the
         // command passed validation
         throw new IllegalStateException("recovering study from event failed")
       }
