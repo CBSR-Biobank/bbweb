@@ -19,3 +19,9 @@ evolutions
 
 # IntelliJ
 .idea*
+.classpath
+.ensime
+.ensime_lucene/
+.project
+.settings/
+.worksheet/
