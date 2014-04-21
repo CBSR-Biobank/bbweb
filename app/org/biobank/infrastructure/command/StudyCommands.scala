@@ -74,9 +74,9 @@ object StudyCommands {
       extends SpecimenGroupCommand with HasStudyIdentity
 
   case class UpdateSpecimenGroupCmd(
+    studyId: String,
     id: String,
     expectedVersion: Option[Long],
-    studyId: String,
     name: String,
     description: Option[String],
     units: String,
@@ -89,9 +89,9 @@ object StudyCommands {
       with HasStudyIdentity with HasExpectedVersion
 
   case class RemoveSpecimenGroupCmd(
+    studyId: String,
     id: String,
-    expectedVersion: Option[Long],
-    studyId: String)
+    expectedVersion: Option[Long])
       extends SpecimenGroupCommand
       with HasIdentity
       with HasExpectedVersion

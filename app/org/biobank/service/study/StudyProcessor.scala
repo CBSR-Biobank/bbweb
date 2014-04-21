@@ -83,7 +83,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       }
 
       for {
-        nameAvailable <- studyRepository.nameAvailable(cmd.name)
+        nameAvailable <- nameAvailable(cmd.name)
         newStudy <- DisabledStudy.create(studyId, -1L, cmd.name, cmd.description)
         event <- StudyAddedEvent(newStudy.id.toString, newStudy.name, newStudy.description).success
        } yield event
@@ -91,8 +91,10 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
 
     private def validateCmd(cmd: UpdateStudyCmd): DomainValidation[StudyUpdatedEvent] = {
+      val studyId = StudyId(cmd.id)
       for {
-	prevStudy <- isStudyDisabled(StudyId(cmd.id))
+        nameAvailable <- nameAvailable(cmd.name, studyId)
+	prevStudy <- isStudyDisabled(studyId)
         updatedStudy <- prevStudy.update(cmd.expectedVersion, cmd.name, cmd.description)
         event <- StudyUpdatedEvent(cmd.id, updatedStudy.version, updatedStudy.name,
           updatedStudy.description).success
@@ -256,7 +258,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
     /**
       * Utility method to validiate state of a study
       */
-    private def isStudyRetired(studyId: StudyId): DomainValidation[RetiredStudy] =
+    private def isStudyRetired(studyId: StudyId): DomainValidation[RetiredStudy] = {
       studyRepository.studyWithId(studyId) match {
         case Failure(msglist) => DomainError(s"no study with id: $studyId").failNel
         case Success(study) => study match {
@@ -264,5 +266,30 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
           case _ => DomainError("study is not retired: ${study.name}").failNel
         }
       }
+    }
+
+    private def nameAvailable(name: String): DomainValidation[Boolean] = {
+      val exists = studyRepository.getValues.exists { item =>
+        item.name.equals(name)
+      }
+
+      if (exists) {
+        DomainError(s"study with name already exists: $name").failNel
+      } else {
+        true.successNel
+      }
+    }
+
+    private def nameAvailable(name: String, excludeStudyId: StudyId): DomainValidation[Boolean] = {
+      val exists = studyRepository.getValues.exists { item =>
+        item.name.equals(name) && (item.id != excludeStudyId)
+      }
+
+      if (exists) {
+        DomainError(s"study with name already exists: $name").failNel
+      } else {
+        true.successNel
+      }
+    }
   }
 }

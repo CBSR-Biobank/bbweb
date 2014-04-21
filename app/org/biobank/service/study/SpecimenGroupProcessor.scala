@@ -73,18 +73,19 @@ class SpecimenGroupProcessor(
   private def validateCmd(
     cmd: UpdateSpecimenGroupCmd): DomainValidation[SpecimenGroupUpdatedEvent] = {
     val studyId = StudyId(cmd.studyId)
+    val specimenGroupId = SpecimenGroupId(cmd.id)
 
     for {
-      nameValid <- nameAvailable(cmd.name)
-      oldItem <- specimenGroupRepository.specimenGroupWithId(studyId, SpecimenGroupId(cmd.id))
+      nameValid <- nameAvailable(cmd.name, specimenGroupId)
+      oldItem <- specimenGroupRepository.specimenGroupWithId(studyId, specimenGroupId)
       notInUse <- checkNotInUse(studyId, oldItem.id)
       newItem <- oldItem.update(cmd.expectedVersion, cmd.name, cmd.description, cmd.units,
 	cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
 	cmd.specimenType)
       newEvent <- SpecimenGroupUpdatedEvent(
-        cmd.studyId, newItem.id.id, newItem.version, newItem.name, newItem.description, newItem.units,
-        newItem.anatomicalSourceType, newItem.preservationType, newItem.preservationTemperatureType,
-        newItem.specimenType).success
+        cmd.studyId, newItem.id.id, newItem.version, cmd.name, cmd.description,
+	cmd.units, cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
+	cmd.specimenType).success
     } yield newEvent
   }
 
@@ -120,15 +121,18 @@ class SpecimenGroupProcessor(
   private def recoverEvent(event: SpecimenGroupUpdatedEvent): Unit = {
     val validation = for {
       item <- specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId))
-      updatedItem <- item.update(Some(event.version), event.name,
+      updatedItem <- item.update(item.versionOption, event.name,
 	event.description, event.units, event.anatomicalSourceType, event.preservationType,
         event.preservationTemperatureType, event.specimenType)
+      savedItem <- specimenGroupRepository.put(updatedItem).success
     } yield updatedItem
 
     if (validation.isFailure) {
       // this should never happen because the only way to get here is when the
       // command passed validation
-      throw new IllegalStateException("recovering specimen group update from event failed")
+      val err = validation.swap.getOrElse(List.empty)
+      throw new IllegalStateException("recovering specimen group update from event failed:"
+      + err)
     }
   }
 
@@ -148,6 +152,20 @@ class SpecimenGroupProcessor(
   private def nameAvailable(specimenGroupName: String): DomainValidation[Boolean] = {
     val exists = specimenGroupRepository.getValues.exists { item =>
       item.name.equals(specimenGroupName)
+    }
+
+    if (exists) {
+      DomainError(s"specimen group with name already exists: $specimenGroupName").failNel
+    } else {
+      true.success
+    }
+  }
+
+  private def nameAvailable(
+    specimenGroupName: String,
+    id: SpecimenGroupId): DomainValidation[Boolean] = {
+    val exists = specimenGroupRepository.getValues.exists { item =>
+      item.name.equals(specimenGroupName) && (item.id != id)
     }
 
     if (exists) {

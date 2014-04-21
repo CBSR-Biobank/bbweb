@@ -106,6 +106,27 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       }
     }
 
+    "be able to update a study with the same name" in {
+      val name = nameGenerator.next[Study]
+      val description = Some(nameGenerator.next[Study])
+
+      val disabledStudy = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
+      studyRepository.put(disabledStudy)
+
+      val description2 = Some(nameGenerator.next[Study])
+
+      val validation2 = ask(studyProcessor,
+	UpdateStudyCmd(disabledStudy.id.toString, Some(0), name, description2))
+	.mapTo[DomainValidation[StudyUpdatedEvent]]
+	.futureValue
+      validation2 should be success
+
+      validation2 map { event =>
+	event.name should be (name)
+	event.description should be (description2)
+      }
+    }
+
     "be able to update a study with new a name or description" in {
       val name = nameGenerator.next[Study]
       val description = Some(nameGenerator.next[Study])
@@ -132,7 +153,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
       // update something other than the name
       val validation3 = ask(studyProcessor,
-	UpdateStudyCmd(disabledStudy.id.toString, Some(0), name2, none))
+	UpdateStudyCmd(disabledStudy.id.toString, Some(0), name2, None))
 	.mapTo[DomainValidation[StudyUpdatedEvent]]
 	.futureValue
       validation3 should be success
@@ -147,14 +168,13 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val name = nameGenerator.next[Study]
       val name2 = nameGenerator.next[Study]
 
-      val disabledStudy1 = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
-      studyRepository.put(disabledStudy1)
+      val study1 = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
+      studyRepository.put(study1)
 
-      val disabledStudy2 = DisabledStudy.create(studyRepository.nextIdentity, -1, name2, None) | fail
-      studyRepository.put(disabledStudy2)
+      val study2 = DisabledStudy.create(studyRepository.nextIdentity, -1, name2, None) | fail
+      studyRepository.put(study2)
 
-      val validation = ask(studyProcessor,
-	UpdateStudyCmd(disabledStudy2.id.toString, Some(0L), name2, None))
+      val validation = ask(studyProcessor, UpdateStudyCmd(study2.id.id, Some(0L), name, None))
 	.mapTo[DomainValidation[StudyAddedEvent]]
 	.futureValue
       validation should be failure

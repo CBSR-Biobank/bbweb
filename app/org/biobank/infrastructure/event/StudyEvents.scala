@@ -67,7 +67,7 @@ object StudyEvents {
     extends SpecimenGroupEvent
 
   case class SpecimenGroupUpdatedEvent(
-    studyid: String,
+    studyId: String,
     specimenGroupId: String,
     version: Long,
     name: String,
@@ -80,13 +80,13 @@ object StudyEvents {
     extends SpecimenGroupEvent
 
   case class SpecimenGroupRemovedEvent(
-    studyid: String,
+    studyId: String,
     specimenGroupId: String)
     extends SpecimenGroupEvent
 
   // collection event events
   case class CollectionEventTypeAddedEvent(
-    studyid: String,
+    studyId: String,
     collectionEventTypeId: String,
     version: Long,
     name: String,
@@ -97,7 +97,7 @@ object StudyEvents {
     extends StudyEvent
 
   case class CollectionEventTypeUpdatedEvent(
-    studyid: String,
+    studyId: String,
     collectionEventTypeId: String,
     version: Long,
     name: String,
@@ -108,12 +108,12 @@ object StudyEvents {
     extends StudyEvent
 
   case class CollectionEventTypeRemovedEvent(
-    studyid: String,
+    studyId: String,
     collectionEventTypeId: String)
     extends StudyEvent
 
   case class SpecimenGroupAddedToCollectionEventTypeEvent(
-    studyid: String,
+    studyId: String,
     sg2cetId: String,
     collectionEventTypeId: String,
     specimenGroupId: String,
@@ -122,14 +122,14 @@ object StudyEvents {
     extends StudyEvent
 
   case class SpecimenGroupRemovedFromCollectionEventTypeEvent(
-    studyid: String,
+    studyId: String,
     sg2cetId: String,
     collectionEventTypeId: String,
     specimenGroupId: String)
     extends StudyEvent
 
   case class CollectionEventAnnotationTypeAddedEvent(
-    studyid: String,
+    studyId: String,
     annotationTypeId: String,
     version: Long,
     name: String,
@@ -140,7 +140,7 @@ object StudyEvents {
     extends StudyEvent
 
   case class CollectionEventAnnotationTypeUpdatedEvent(
-    studyid: String,
+    studyId: String,
     annotationTypeId: String,
     version: Long,
     name: String,
@@ -151,18 +151,18 @@ object StudyEvents {
     extends StudyEvent
 
   case class CollectionEventAnnotationTypeRemovedEvent(
-    studyid: String,
+    studyId: String,
     annotationTypeId: String)
 
   case class AnnotationTypeAddedToCollectionEventTypeEvent(
-    studyid: String,
+    studyId: String,
     collectionEventTypeAnnotationTypeId: String,
     collectionEventTypeId: String,
     annotationTypeId: String)
     extends StudyEvent
 
   case class AnnotationTypeRemovedFromCollectionEventTypeEvent(
-    studyid: String,
+    studyId: String,
     collectionEventTypeAnnotationTypeId: String,
     collectionEventTypeId: String,
     annotationTypeId: String)
@@ -171,7 +171,7 @@ object StudyEvents {
   // participant annotation types
 
   case class ParticipantAnnotationTypeAddedEvent(
-    studyid: String,
+    studyId: String,
     annotationTypeId: String,
     version: Long,
     name: String,
@@ -182,7 +182,7 @@ object StudyEvents {
     extends StudyEvent
 
   case class ParticipantAnnotationTypeUpdatedEvent(
-    studyid: String,
+    studyId: String,
     annotationTypeId: String,
     version: Long,
     name: String,
@@ -193,14 +193,14 @@ object StudyEvents {
     extends StudyEvent
 
   case class ParticipantAnnotationTypeRemovedEvent(
-    studyid: String,
+    studyId: String,
     annotationTypeId: String)
     extends StudyEvent
 
   // specimen link annotation types
 
   case class SpecimenLinkAnnotationTypeAddedEvent(
-    studyid: String,
+    studyId: String,
     annotationTypeId: String,
     version: Long,
     name: String,
@@ -211,7 +211,7 @@ object StudyEvents {
     extends StudyEvent
 
   case class SpecimenLinkAnnotationTypeUpdatedEvent(
-    studyid: String,
+    studyId: String,
     annotationTypeId: String,
     version: Long,
     name: String,
@@ -222,7 +222,7 @@ object StudyEvents {
     extends StudyEvent
 
   case class SpecimenLinkAnnotationTypeRemovedEvent(
-    studyid: String,
+    studyId: String,
     annotationTypeId: String)
     extends StudyEvent
 
