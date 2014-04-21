@@ -263,44 +263,53 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       }
     }
 
-    //    "be removed" in {
-    //      val name = nameGenerator.next[Study]
-    //      val units = nameGenerator.next[String]
-    //      val anatomicalSourceType = AnatomicalSourceType.Blood
-    //      val preservationType = PreservationType.FreshSpecimen
-    //      val preservationTempType = PreservationTemperatureType.Minus80celcius
-    //      val specimenType = SpecimenType.FilteredUrine
-    //
-    //      val sg1 = await(studyService.addSpecimenGroup(
-    //        new AddSpecimenGroupCmd(studyId.id, name, Some(name), units, anatomicalSourceType,
-    //          preservationType, preservationTempType, specimenType))) | null
-    //      specimenGroupRepository.specimenGroupWithId(studyId, sg1.specimenGroupId) must beSuccessful
-    //
-    //      await(studyService.removeSpecimenGroup(
-    //        new RemoveSpecimenGroupCmd(sg1.specimenGroupId, Some(sg1.version), studyId.id)))
-    //      specimenGroupRepository.specimenGroupWithId(studyId, sg1.specimenGroupId) must beFailing
-    //    }
-    //
-    //    "not be removed with invalid version" in {
-    //      val name = nameGenerator.next[Study]
-    //      val units = nameGenerator.next[String]
-    //      val anatomicalSourceType = AnatomicalSourceType.Blood
-    //      val preservationType = PreservationType.FreshSpecimen
-    //      val preservationTempType = PreservationTemperatureType.Minus80celcius
-    //      val specimenType = SpecimenType.FilteredUrine
-    //
-    //      val sg1 = await(studyService.addSpecimenGroup(
-    //        new AddSpecimenGroupCmd(studyId.id, name, Some(name), units, anatomicalSourceType,
-    //          preservationType, preservationTempType, specimenType))) | null
-    //      specimenGroupRepository.specimenGroupWithId(studyId, sg1.specimenGroupId) must beSuccessful
-    //
-    //      val versionOption = Some(1L)
-    //      val sg2 = await(studyService.removeSpecimenGroup(
-    //        new RemoveSpecimenGroupCmd(sg1.specimenGroupId, versionOption, studyId.id)))
-    //      sg2 must beFailing.like {
-    //        case msgs => msgs.head must contain("doesn't match current version")
-    //      }
-    //    }
+    "can remove a specimen group" in {
+      val sgId = specimenGroupRepository.nextIdentity
+      val name = nameGenerator.next[Study]
+      val description = Some(nameGenerator.next[Study])
+      val units = nameGenerator.next[String]
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
+
+      val item = SpecimenGroup.create(disabledStudy.id, sgId, -1L, name, description, units,
+	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
+      specimenGroupRepository.put(item)
+
+      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id,
+	Some(item.version))
+      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
+	.futureValue
+      validation should be success
+
+    }
+
+    "not be removed with invalid version" in {
+      val sgId = specimenGroupRepository.nextIdentity
+      val name = nameGenerator.next[Study]
+      val description = Some(nameGenerator.next[Study])
+      val units = nameGenerator.next[String]
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
+
+      val item = SpecimenGroup.create(disabledStudy.id, sgId, -1L, name, description, units,
+	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
+      specimenGroupRepository.put(item)
+
+      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id,
+	Some(item.version))
+      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
+	.futureValue
+      validation should be failure
+
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include ("doesn't match current version")
+      }
+    }
 
   }
 }

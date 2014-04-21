@@ -97,8 +97,7 @@ class SpecimenGroupProcessor(
       item <- specimenGroupRepository.specimenGroupWithId(studyId, SpecimenGroupId(cmd.id))
       notInUse <- checkNotInUse(studyId, item.id)
       validVersion <- validateVersion(item, cmd.expectedVersion)
-      removedItem <- specimenGroupRepository.remove(item).success
-      newEvent <- SpecimenGroupRemovedEvent(removedItem.studyId.id, removedItem.id.id).success
+      newEvent <- SpecimenGroupRemovedEvent(item.studyId.id, item.id.id).success
     } yield newEvent
   }
 
@@ -131,8 +130,8 @@ class SpecimenGroupProcessor(
       // this should never happen because the only way to get here is when the
       // command passed validation
       val err = validation.swap.getOrElse(List.empty)
-      throw new IllegalStateException("recovering specimen group update from event failed:"
-      + err)
+      throw new IllegalStateException(
+	s"recovering specimen group update from event failed: $err")
     }
   }
 
@@ -145,7 +144,9 @@ class SpecimenGroupProcessor(
     if (validation.isFailure) {
       // this should never happen because the only way to get here is when the
       // command passed validation
-      throw new IllegalStateException("recovering specimen group remove from event failed")
+      val err = validation.swap.getOrElse(List.empty)
+      throw new IllegalStateException(
+	s"recovering specimen group remove from event failed: $err")
     }
   }
 
