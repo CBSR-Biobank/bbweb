@@ -15,15 +15,11 @@ trait SpecimenGroupRepositoryComponent {
 
     def nextIdentity: SpecimenGroupId
 
+    def allSpecimenGroupsForStudy(studyId: StudyId): Set[SpecimenGroup]
+
     def specimenGroupWithId(
       studyId: StudyId,
       specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup]
-
-    def specimenGroupWithId(
-      studyId: StudyId,
-      specimenGroupId: String): DomainValidation[SpecimenGroup]
-
-    def allSpecimenGroupsForStudy(studyId: StudyId): Set[SpecimenGroup]
 
   }
 }
@@ -41,29 +37,22 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
     def nextIdentity: SpecimenGroupId =
       new SpecimenGroupId(java.util.UUID.randomUUID.toString.toUpperCase)
 
-    def specimenGroupWithId(
-      studyId: StudyId,
-      specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
-      getByKey(specimenGroupId) match {
-        case Failure(err) =>
-          DomainError("specimen group does not exist: { studyId: %s, specimenGroupId: %s }".format(
-            studyId, specimenGroupId)).failNel
-        case Success(sg) =>
-          if (sg.studyId.equals(studyId)) sg.success
-          else DomainError(
-            "study does not have specimen group: { studyId: %s, specimenGroupId: %s }".format(
-              studyId, specimenGroupId)).failNel
-      }
-    }
-
-    def specimenGroupWithId(
-      studyId: StudyId,
-      specimenGroupId: String): DomainValidation[SpecimenGroup] = {
-      specimenGroupWithId(studyId, SpecimenGroupId(specimenGroupId))
-    }
-
     def allSpecimenGroupsForStudy(studyId: StudyId): Set[SpecimenGroup] = {
       getValues.filter(x => x.studyId.equals(studyId)).toSet
     }
+
+  def specimenGroupWithId(
+    studyId: StudyId,
+    specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
+    getByKey(specimenGroupId) match {
+      case Failure(err) => DomainError(
+	s"specimen group does not exist: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
+	  .failNel
+      case Success(sg) if (sg.studyId.equals(studyId)) => sg.success
+      case _ => DomainError(
+        s"study does not have specimen group: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
+	  .failNel
+    }
+  }
   }
 }

@@ -54,7 +54,7 @@ object StudyEvents {
   trait SpecimenGroupEvent extends StudyEvent
 
   case class SpecimenGroupAddedEvent(
-    studyid: String,
+    studyId: String,
     specimenGroupId: String,
     version: Long,
     name: String,

@@ -26,7 +26,7 @@ trait CollectionEventTypeRepositoryComponent {
 
     def allCollectionEventTypesForStudy(studyId: StudyId): Set[CollectionEventType]
 
-    def specimenGroupInUse(specimenGroup: SpecimenGroup): Boolean
+    def specimenGroupInUse(studyId: StudyId, specimenGroupId: SpecimenGroupId): Boolean
 
     def annotationTypeInUse(annotationType: CollectionEventAnnotationType): Boolean
 
@@ -86,11 +86,11 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
         true.success
     }
 
-    def specimenGroupInUse(specimenGroup: SpecimenGroup): Boolean = {
-      val studyCeventTypes = getValues.filter(cet => cet.studyId.equals(specimenGroup.studyId))
+    def specimenGroupInUse(studyId: StudyId, specimenGroupId: SpecimenGroupId): Boolean = {
+      val sgId = specimenGroupId.toString
+      val studyCeventTypes = getValues.filter(cet => cet.studyId.equals(studyId))
       studyCeventTypes.exists(cet =>
-        cet.specimenGroupData.exists(sgd =>
-          sgd.specimenGroupId.equals(specimenGroup.id.id)))
+        cet.specimenGroupData.exists(sgd => sgd.specimenGroupId.equals(sgId)))
     }
 
     def annotationTypeInUse(annotationType: CollectionEventAnnotationType): Boolean = {

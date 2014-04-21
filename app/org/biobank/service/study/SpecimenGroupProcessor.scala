@@ -1,16 +1,20 @@
 package org.biobank.service.study
 
-import org.biobank.service._
-import org.biobank.service.Messages._
+import org.biobank.service.Processor
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.domain._
+import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
-import org.biobank.domain.study._
-import org.biobank.domain.study.Study
+import org.biobank.domain.study.{
+  CollectionEventTypeRepositoryComponent,
+  SpecimenGroup,
+  SpecimenGroupId,
+  SpecimenGroupRepositoryComponent,
+  Study,
+  StudyId }
 import org.slf4j.LoggerFactory
 
 import akka.persistence.SnapshotOffer
@@ -24,7 +28,8 @@ import scalaz.Scalaz._
   *
   */
 class SpecimenGroupProcessor(
-  specimenGroupRepository: SpecimenGroupRepositoryComponent#SpecimenGroupRepository)
+  specimenGroupRepository: SpecimenGroupRepositoryComponent#SpecimenGroupRepository,
+  collectionEventTypeRepository: CollectionEventTypeRepositoryComponent#CollectionEventTypeRepository)
     extends Processor {
 
   case class SnapshotState(specimenGroups: Set[SpecimenGroup])
@@ -39,9 +44,9 @@ class SpecimenGroupProcessor(
   val receiveCommand: Receive = {
     case cmd: AddSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      //case cmd: UpdateSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+    case cmd: UpdateSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      //case cmd: RemoveSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+    case cmd: RemoveSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
     case _ => throw new IllegalStateException("invalid command received")
   }
@@ -65,52 +70,79 @@ class SpecimenGroupProcessor(
     } yield newEvent
   }
 
-  //   private def checkNotInUse(specimenGroup: SpecimenGroup): DomainValidation[Boolean] = {
-  //     if (collectionEventTypeRepository.specimenGroupInUse(specimenGroup)) {
-  //       DomainError("specimen group is in use by collection event type: " + specimenGroup.id).failNel
-  //     } else {
-  //       true.success
-  //     }
-  //   }
+  private def validateCmd(
+    cmd: UpdateSpecimenGroupCmd): DomainValidation[SpecimenGroupUpdatedEvent] = {
+    val studyId = StudyId(cmd.studyId)
 
-  //   private def updateSpecimenGroup(
-  //     cmd: UpdateSpecimenGroupCmd,
-  //     study: DisabledStudy): DomainValidation[SpecimenGroupUpdatedEvent] = {
+    for {
+      nameValid <- nameAvailable(cmd.name)
+      oldItem <- specimenGroupRepository.specimenGroupWithId(studyId, SpecimenGroupId(cmd.id))
+      notInUse <- checkNotInUse(studyId, oldItem.id)
+      newItem <- oldItem.update(cmd.expectedVersion, cmd.name, cmd.description, cmd.units,
+	cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
+	cmd.specimenType)
+      newEvent <- SpecimenGroupUpdatedEvent(
+        cmd.studyId, newItem.id.id, newItem.version, newItem.name, newItem.description, newItem.units,
+        newItem.anatomicalSourceType, newItem.preservationType, newItem.preservationTemperatureType,
+        newItem.specimenType).success
+    } yield newEvent
+  }
 
-  //     for {
-  //       oldItem <- specimenGroupRepository.specimenGroupWithId(
-  //         StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
-  //       notInUse <- checkNotInUse(oldItem)
-  //       newItem <- specimenGroupRepository.update(
-  //         SpecimenGroup(oldItem.id, cmd.expectedVersion.getOrElse(-1), study.id, cmd.name, cmd.description,
-  //           cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
-  //           cmd.preservationTemperatureType, cmd.specimenType))
-  //       newEvent <- SpecimenGroupUpdatedEvent(
-  //         study.id.id, newItem.id.id, newItem.version, newItem.name, newItem.description, newItem.units,
-  //         newItem.anatomicalSourceType, newItem.preservationType, newItem.preservationTemperatureType,
-  //         newItem.specimenType).success
-  //     } yield newEvent
-  //   }
+  private def validateCmd(
+    cmd: RemoveSpecimenGroupCmd): DomainValidation[SpecimenGroupRemovedEvent] = {
+    val studyId = StudyId(cmd.studyId)
 
-  //   private def removeSpecimenGroup(
-  //     cmd: RemoveSpecimenGroupCmd,
-  //     study: DisabledStudy): DomainValidation[SpecimenGroupRemovedEvent] = {
+    for {
+      item <- specimenGroupRepository.specimenGroupWithId(studyId, SpecimenGroupId(cmd.id))
+      notInUse <- checkNotInUse(studyId, item.id)
+      validVersion <- validateVersion(item, cmd.expectedVersion)
+      removedItem <- specimenGroupRepository.remove(item).success
+      newEvent <- SpecimenGroupRemovedEvent(removedItem.studyId.id, removedItem.id.id).success
+    } yield newEvent
+  }
 
-  //     for {
-  //       oldItem <- specimenGroupRepository.specimenGroupWithId(
-  //         StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
-  //       notInUse <- checkNotInUse(oldItem)
-  //       itemToRemove <- SpecimenGroup(oldItem.id, cmd.expectedVersion.getOrElse(-1),
-  //         study.id, oldItem.name, oldItem.description, oldItem.units, oldItem.anatomicalSourceType,
-  //         oldItem.preservationType, oldItem.preservationTemperatureType, oldItem.specimenType).success
-  //       removedItem <- specimenGroupRepository.remove(itemToRemove)
-  //       newEvent <- SpecimenGroupRemovedEvent(
-  //         removedItem.studyId.id, removedItem.id.id).success
-  //     } yield newEvent
-  //   }
-  // }
+  private def recoverEvent(event: SpecimenGroupAddedEvent): Unit = {
+    val studyId = StudyId(event.studyId)
+    val validation = for {
+      newItem <-SpecimenGroup.create(studyId, SpecimenGroupId(event.specimenGroupId), -1, event.name,
+	event.description, event.units, event.anatomicalSourceType, event.preservationType,
+        event.preservationTemperatureType, event.specimenType)
+      savedItem <- specimenGroupRepository.put(newItem).success
+    } yield newItem
 
-  def recoverEvent(event: SpecimenGroupAddedEvent): Unit = {
+    if (validation.isFailure) {
+      // this should never happen because the only way to get here is that the
+      // command passed validation
+      throw new IllegalStateException("recovering specimen group from event failed")
+    }
+  }
+
+  private def recoverEvent(event: SpecimenGroupUpdatedEvent): Unit = {
+    val validation = for {
+      item <- specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId))
+      updatedItem <- item.update(Some(event.version), event.name,
+	event.description, event.units, event.anatomicalSourceType, event.preservationType,
+        event.preservationTemperatureType, event.specimenType)
+    } yield updatedItem
+
+    if (validation.isFailure) {
+      // this should never happen because the only way to get here is that the
+      // command passed validation
+      throw new IllegalStateException("recovering specimen group update from event failed")
+    }
+  }
+
+  private def recoverEvent(event: SpecimenGroupRemovedEvent): Unit = {
+    val validation = for {
+      item <- specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId))
+      removedItem <- specimenGroupRepository.remove(item).success
+    } yield removedItem
+
+    if (validation.isFailure) {
+      // this should never happen because the only way to get here is that the
+      // command passed validation
+      throw new IllegalStateException("recovering specimen group remove from event failed")
+    }
   }
 
   private def nameAvailable(specimenGroupName: String): DomainValidation[Boolean] = {
@@ -124,5 +156,23 @@ class SpecimenGroupProcessor(
       true.success
     }
   }
+
+  private def checkNotInUse(
+    studyId: StudyId,
+    specimenGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
+    if (collectionEventTypeRepository.specimenGroupInUse(studyId, specimenGroupId)) {
+      DomainError(s"specimen group is in use by collection event type: $specimenGroupId").failNel
+    } else {
+      true.success
+    }
+  }
+
+  private def validateVersion(
+    specimenGroup: SpecimenGroup,
+    expectedVersion: Option[Long]): DomainValidation[Boolean] = {
+    if (specimenGroup.versionOption == expectedVersion) true.success
+    else DomainError(s"version mismatch").failNel
+  }
+
 }
 

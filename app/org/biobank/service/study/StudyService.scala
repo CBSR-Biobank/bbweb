@@ -249,7 +249,7 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
     def specimenGroupInUse(studyId: String, specimenGroupId: String): DomainValidation[Boolean] = {
       for {
         sg <- specimenGroupWithId(studyId, specimenGroupId)
-        inUse <- collectionEventTypeRepository.specimenGroupInUse(sg).success
+        inUse <- collectionEventTypeRepository.specimenGroupInUse(sg.studyId, sg.id).success
       } yield inUse
     }
 
