@@ -189,7 +189,7 @@ class StudySpec extends WordSpecLike with Matchers {
       }
     }
 
-    "be updated with an invalid version" in {
+    "not be updated with an invalid version" in {
       val id = StudyId(nameGenerator.next[Study])
       val version = -1L
       val name = nameGenerator.next[Study]

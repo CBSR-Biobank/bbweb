@@ -112,6 +112,8 @@ case class ActiveUser private (
       lockedUser <- LockedUser.create(this)
     } yield lockedUser
   }
+
+  // FIXME: add update method
 }
 
 /** Factory object. */

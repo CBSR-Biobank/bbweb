@@ -39,7 +39,6 @@ class UserSpec extends WordSpecLike with Matchers {
       val user = v.getOrElse(fail("could not create user"))
       user shouldBe a[RegisteredUser]
 
-
       user.id should be(id)
       user.version should be(0L)
       user.name should be(name)
@@ -112,6 +111,29 @@ class UserSpec extends WordSpecLike with Matchers {
         case Failure(err) =>
           err.list should (have length 1 and contain("invalid version value: -2"))
       }
+    }
+
+    "not be updated with an invalid version" ignore {
+      val id = UserId(nameGenerator.next[User])
+      val version = -1L
+      val name = nameGenerator.next[User]
+      val email = "user1@test.com"
+      val password = nameGenerator.next[User]
+      val hasher = nameGenerator.next[User]
+      val salt = Some(nameGenerator.next[User])
+      val avatarUrl = Some("http://test.com/")
+
+      val user = RegisteredUser.create(id, version, name, email, password, hasher, salt,
+	avatarUrl) | fail
+
+      // val validation = user.update(id, Some(-1L), name, email, password, hasher, salt,
+      // 	avatarUrl)
+      // validation should be Failure
+
+      // validation.swap.map { err =>
+      //   err.list should have length 1
+      // 	err.list.head should include ("expected version doesn't match current version")
+      // }
     }
 
     "not be created with an empty name" in {
