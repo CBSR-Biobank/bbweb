@@ -20,13 +20,13 @@ trait Processor extends EventsourcedProcessor with ActorLogging {
       persist(event) { e =>
 	onSuccess(e)
 	// inform the sender of the successful command with the event
-	sender ! e.success
+	context.sender ! e.success
       }
     }
 
     if (validation.isFailure) {
       // inform the sender of the failure
-      sender ! validation
+      context.sender ! validation
     }
   }
 

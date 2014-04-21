@@ -1,12 +1,14 @@
 package org.biobank.service
 
 import org.biobank.fixture._
-import org.biobank.infrastructure._
+import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
   AnatomicalSourceType,
   AnnotationTypeId,
   AnnotationValueType,
   ConcurrencySafeEntity,
+  DomainError,
+  DomainValidation,
   PreservationType,
   PreservationTemperatureType,
   SpecimenType
@@ -16,12 +18,11 @@ import org.biobank.domain.study._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 
-import akka.actor._
-
+import akka.pattern.ask
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 
-class SpecimenGroupSpec extends StudyProcessorFixture {
+class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -35,55 +36,65 @@ class SpecimenGroupSpec extends StudyProcessorFixture {
   }
 
 
-  "A specimen group processor" can {
+  "A study processor" can {
 
     "add a specimen group" in {
       val name = nameGenerator.next[Study]
+      val description = Some(nameGenerator.next[Study])
       val units = nameGenerator.next[String]
       val anatomicalSourceType = AnatomicalSourceType.Blood
       val preservationType = PreservationType.FreshSpecimen
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
-      val sg1 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(studyId.id, name, Some(name), units, anatomicalSourceType,
-          preservationType, preservationTempType, specimenType)))
+      var cmd = AddSpecimenGroupCmd(disabledStudy.id.id, name, description, units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType)
 
-      sg1 must beSuccessful.like {
-        case x =>
-          x.name must be(name)
-          x.description must beSome(name)
-          x.units must be(units)
-          x.anatomicalSourceType must be(anatomicalSourceType)
-          x.preservationType must be(preservationType)
-          x.preservationTemperatureType must be(preservationTempType)
-          x.specimenType must be(specimenType)
-          specimenGroupRepository.specimenGroupWithId(studyId, x.specimenGroupId) must beSuccessful.like {
-            case s =>
-              s.version must beEqualTo(x.version)
-          }
-          specimenGroupRepository.allSpecimenGroupsForStudy(studyId).size mustEqual 1
+      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+	.futureValue
+      validation should be success
+
+      validation map { event =>
+	event should have (
+          'name                        (name),
+          'description                 (description),
+          'units                       (units),
+          'anatomicalSourceType        (anatomicalSourceType),
+          'preservationType            (preservationType),
+          'preservationTemperatureType (preservationTempType),
+          'specimenType                (specimenType)
+	)
+
+        val sg = specimenGroupRepository.specimenGroupWithId(
+	  disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) | fail
+        sg.version should be (0)
+        specimenGroupRepository.allSpecimenGroupsForStudy(disabledStudy.id) should have size 1
       }
 
       val name2 = nameGenerator.next[Study]
-      val sg2 = await(studyService.addSpecimenGroup(
-        new AddSpecimenGroupCmd(studyId.id, name2, None, units, anatomicalSourceType,
-          preservationType, preservationTempType, specimenType)))
 
-      sg2 must beSuccessful.like {
-        case x =>
-          x.name must be(name2)
-          x.description must beNone
-          x.units must be(units)
-          x.anatomicalSourceType must be(anatomicalSourceType)
-          x.preservationType must be(preservationType)
-          x.preservationTemperatureType must be(preservationTempType)
-          x.specimenType must be(specimenType)
-          specimenGroupRepository.specimenGroupWithId(studyId, x.specimenGroupId) must beSuccessful.like {
-            case s =>
-              s.version must beEqualTo(x.version)
-          }
-          specimenGroupRepository.allSpecimenGroupsForStudy(studyId).size mustEqual 2
+     cmd = AddSpecimenGroupCmd(disabledStudy.id.id, name2, None, units, anatomicalSourceType,
+          preservationType, preservationTempType, specimenType)
+
+      val validation2 = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+	.futureValue
+      validation2 should be success
+
+      validation2 map { event =>
+	event should have (
+          'name                        (name2),
+          'description                 (None),
+          'units                       (units),
+          'anatomicalSourceType        (anatomicalSourceType),
+          'preservationType            (preservationType),
+          'preservationTemperatureType (preservationTempType),
+          'specimenType                (specimenType)
+	)
+
+        val sg = specimenGroupRepository.specimenGroupWithId(
+	  disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) | fail
+        sg.version should be (0)
+        specimenGroupRepository.allSpecimenGroupsForStudy(disabledStudy.id) should have size 2
       }
     }
 

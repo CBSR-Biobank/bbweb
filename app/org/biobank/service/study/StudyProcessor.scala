@@ -39,7 +39,8 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
     case class SnapshotState(studies: Set[Study])
 
     val specimenGroupProcessor = context.system.actorOf(Props(
-      new SpecimenGroupProcessor(specimenGroupRepository, collectionEventTypeRepository)), "sgproc")
+      new SpecimenGroupProcessor(specimenGroupRepository, collectionEventTypeRepository)),
+      "sgproc")
 
     val receiveRecover: Receive = {
       case event: StudyAddedEvent => recoverEvent(event)
@@ -57,7 +58,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
       case cmd: DisableStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-       case cmd: SpecimenGroupCommand => specimenGroupProcessor ! cmd
+       case cmd: SpecimenGroupCommand => specimenGroupProcessor forward cmd
 
       // case cmd: CollectionEventTypeCommand =>
       //   processEntityMsg(cmd, cmd.studyId, collectionEventTypeService.process)
