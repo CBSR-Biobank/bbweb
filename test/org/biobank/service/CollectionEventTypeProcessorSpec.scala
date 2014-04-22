@@ -170,83 +170,98 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       }
     }
 
-    //    "not be updated to wrong study" in {
-    //      val name = nameGenerator.next[Study]
-    //      val name2 = nameGenerator.next[Study]
-    //      val recurring = true
-    //
-    //      val study2 = await(studyService.addStudy(new AddStudyCmd(name2, Some(name2)))) | null
-    //
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, name, Some(name), recurring,
-    //          Set.empty, Set.empty))) | null
-    //
-    //      val cet2 = await(studyService.updateCollectionEventType(
-    //        new UpdateCollectionEventTypeCmd(
-    //          cet1.collectionEventTypeId, Some(cet1.version), study2.id,
-    //          name2, Some(name2), recurring, Set.empty, Set.empty)))
-    //      cet2 must beFailing.like { case msgs => msgs.head must contain("study does not have collection event type") }
-    //    }
-    //
-    //    "not be updated with invalid version" in {
-    //      val name = nameGenerator.next[Study]
-    //      val recurring = true
-    //
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, name, Some(name), recurring,
-    //          Set.empty, Set.empty))) | null
-    //
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful
-    //
-    //      val name2 = nameGenerator.next[Study]
-    //      val recurring2 = false
-    //      val versionOption = Some(cet1.version + 1)
-    //
-    //      val cet2 = await(studyService.updateCollectionEventType(
-    //        new UpdateCollectionEventTypeCmd(cet1.collectionEventTypeId, versionOption, studyId.id,
-    //          name2, Some(name2), recurring2, Set.empty, Set.empty)))
-    //      cet2 must beFailing.like {
-    //        case msgs => msgs.head must contain("doesn't match current version")
-    //      }
-    //    }
-    //
-    //    "be removed" in {
-    //      val name = nameGenerator.next[Study]
-    //      val recurring = true
-    //
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, name, None, recurring,
-    //          Set.empty, Set.empty))) | null
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful
-    //
-    //      await(studyService.removeCollectionEventType(
-    //        new RemoveCollectionEventTypeCmd(cet1.collectionEventTypeId, Some(cet1.version), studyId.id)))
-    //
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beFailing
-    //    }
-    //
-    //    "not be removed with invalid version" in {
-    //      val name = nameGenerator.next[Study]
-    //      val recurring = true
-    //
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, name, Some(name), recurring,
-    //          Set.empty, Set.empty))) | null
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful
-    //
-    //      val versionOption = Some(cet1.version + 1)
-    //      val cet2 = await(studyService.removeCollectionEventType(
-    //        new RemoveCollectionEventTypeCmd(cet1.collectionEventTypeId, versionOption, studyId.id)))
-    //      cet2 must beFailing.like {
-    //        case msgs => msgs.head must contain("doesn't match current version")
-    //      }
-    //    }
-    //  }
-    //
+    "not be update a collection event type to wrong study" in {
+      val id = collectionEventTypeRepository.nextIdentity
+      val name = nameGenerator.next[Study]
+      val description = Some(nameGenerator.next[Study])
+      val recurring = true
+
+      val cet = CollectionEventType.create(disabledStudy.id, id, -1L, name, description,
+	recurring, List.empty, List.empty) | fail
+      collectionEventTypeRepository.put(cet)
+
+      val studyName = nameGenerator.next[Study]
+      val study2 = DisabledStudy.create(studyRepository.nextIdentity, -1, studyName, None) | fail
+      studyRepository.put(study2)
+
+      val cmd = UpdateCollectionEventTypeCmd(
+	study2.id.id, id.id, Some(0L), name, description, recurring, List.empty, List.empty)
+      val validation = ask(studyProcessor, cmd)
+	.mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+	.futureValue
+
+      validation should be ('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include ("study does not have collection event type")
+      }
+    }
+
+    "not update a collection event type with an invalid version" in {
+      val id = collectionEventTypeRepository.nextIdentity
+      val name = nameGenerator.next[Study]
+      val description = Some(nameGenerator.next[Study])
+      val recurring = true
+
+      val cet = CollectionEventType.create(disabledStudy.id, id, -1L, name, description,
+	recurring, List.empty, List.empty) | fail
+      collectionEventTypeRepository.put(cet)
+
+      val cmd = UpdateCollectionEventTypeCmd(
+	disabledStudy.id.id, id.id, Some(-1L), name, description, recurring, List.empty, List.empty)
+      val validation = ask(studyProcessor, cmd)
+	.mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+	.futureValue
+
+      validation should be ('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include ("doesn't match current version")
+      }
+    }
+
+    "can remove a collection event type" in {
+      val id = collectionEventTypeRepository.nextIdentity
+      val name = nameGenerator.next[Study]
+      val description = Some(nameGenerator.next[Study])
+      val recurring = true
+
+      val cet = CollectionEventType.create(disabledStudy.id, id, -1L, name, description,
+	recurring, List.empty, List.empty) | fail
+      collectionEventTypeRepository.put(cet)
+
+      val cmd = RemoveCollectionEventTypeCmd(disabledStudy.id.id, id.id, Some(0L))
+      val validation = ask(studyProcessor, cmd)
+	.mapTo[DomainValidation[CollectionEventTypeRemovedEvent]]
+	.futureValue
+
+      validation should be ('success)
+      validation map { event => event shouldBe a[CollectionEventTypeRemovedEvent] }
+    }
+
+    "not remove a collection event type  with an invalid version" in {
+      val id = collectionEventTypeRepository.nextIdentity
+      val name = nameGenerator.next[Study]
+      val description = Some(nameGenerator.next[Study])
+      val recurring = true
+
+      val cet = CollectionEventType.create(disabledStudy.id, id, -1L, name, description,
+	recurring, List.empty, List.empty) | fail
+      collectionEventTypeRepository.put(cet)
+
+      val cmd = RemoveCollectionEventTypeCmd(disabledStudy.id.id, id.id, Some(-1L))
+      val validation = ask(studyProcessor, cmd)
+	.mapTo[DomainValidation[CollectionEventTypeRemovedEvent]]
+	.futureValue
+
+      validation should be ('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include ("version mismatch")
+      }
+   }
+
+
     //  "Specimen group -> collection event type" can {
     //
     //    "be added" in {

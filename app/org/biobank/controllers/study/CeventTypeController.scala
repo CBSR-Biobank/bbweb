@@ -214,7 +214,7 @@ object CeventTypeController extends Controller with SecureSocial {
             implicit val userId = new UserId(request.user.identityId.userId)
             studyService.removeCollectionEventType(
               RemoveCollectionEventTypeCmd(
-                ceventType.id.id, ceventType.versionOption, ceventType.studyId.id)).map(validation =>
+                ceventType.studyId.id, ceventType.id.id, ceventType.versionOption)).map(validation =>
                 validation match {
                   case Success(cet) =>
                     Redirect(routes.StudyController.showStudy(studyId)).flashing(

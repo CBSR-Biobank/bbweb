@@ -122,9 +122,9 @@ object StudyCommands {
       with HasExpectedVersion
 
   case class RemoveCollectionEventTypeCmd(
+    studyId: String,
     id: String,
-    expectedVersion: Option[Long],
-    studyId: String)
+    expectedVersion: Option[Long])
       extends CollectionEventTypeCommand
       with HasIdentity
       with HasExpectedVersion

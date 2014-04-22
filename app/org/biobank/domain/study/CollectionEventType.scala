@@ -54,8 +54,11 @@ case class CollectionEventType private (
     recurring: Boolean,
     specimenGroupData: List[CollectionEventTypeSpecimenGroup],
     annotationTypeData: List[CollectionEventTypeAnnotationType]): DomainValidation[CollectionEventType] = {
-    CollectionEventType.create(studyId, id, version, name, description, recurring, specimenGroupData,
-      annotationTypeData)
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      newItem <- CollectionEventType.create(studyId, id, version, name, description, recurring,
+	specimenGroupData, annotationTypeData)
+    } yield newItem
   }
 
   override def toString: String =
