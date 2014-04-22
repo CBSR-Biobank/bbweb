@@ -31,7 +31,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val cmd = RegisterUserCommand(name, email, password, hasher, salt, avatarUrl)
       val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
 	.futureValue
-      validation should be success
+      validation should be ('success)
 
       validation map { event =>
           event shouldBe a [UserRegisterdEvent]
@@ -86,7 +86,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val validation2 = ask(userProcessor, ActivateUserCommand(user.email, Some(0L)))
         .mapTo[DomainValidation[UserActivatedEvent]]
 	.futureValue
-      validation2 should be success
+      validation2 should be ('success)
 
       validation2 map { event =>
 	event.id should be(email)
@@ -109,7 +109,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val validation = ask(userProcessor, LockUserCommand(activeUser.email, Some(1L)))
         .mapTo[DomainValidation[UserLockedEvent]]
 	.futureValue
-      validation should be success
+      validation should be ('success)
 
       validation map { event => event.id should be(email) }
     }
@@ -152,7 +152,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val validation2 = ask(userProcessor, UnlockUserCommand(email, Some(0L)))
         .mapTo[DomainValidation[UserLockedEvent]]
 	.futureValue
-      validation2 should be success
+      validation2 should be ('failure)
 
       validation2.swap map { err =>
         err.list should have length 1

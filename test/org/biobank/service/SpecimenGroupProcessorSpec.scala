@@ -52,7 +52,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
 
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
 	.futureValue
-      validation should be success
+      validation should be ('success)
 
       validation map { event =>
 	event should have (
@@ -77,7 +77,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
           preservationType, preservationTempType, specimenType)
       val validation2 = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
 	.futureValue
-      validation2 should be success
+      validation2 should be ('success)
 
       validation2 map { event =>
 	event should have (
@@ -123,7 +123,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
 	preservationTempType2, specimenType2)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
 	.futureValue
-      validation should be success
+      validation should be ('success)
 
       validation map { event =>
 	event should have (
@@ -281,7 +281,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
 	Some(item.version))
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
 	.futureValue
-      validation should be success
+      validation should be ('success)
 
     }
 

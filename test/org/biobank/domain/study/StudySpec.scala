@@ -230,7 +230,7 @@ class StudySpec extends WordSpecLike with Matchers {
       val id = StudyId(nameGenerator.next[Study])
       val name = nameGenerator.next[Study]
       val validation = DisabledStudy.create(id, -1L, name, None)
-      validation should be success
+      validation should be ('success)
 
       val study = validation | fail
       val validation2 = study.enable(Some(0L), 0, 0)

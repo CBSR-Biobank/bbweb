@@ -48,7 +48,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       val validation = ask(studyProcessor, cmd)
 	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
 	.futureValue
-      validation should be success
+      validation should be ('success)
 
       validation map { event =>
 	event should have (
@@ -71,7 +71,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       val validation2 = ask(studyProcessor, cmd)
 	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
 	.futureValue
-      validation2 should be success
+      validation2 should be ('success)
 
       validation2 map { event =>
 	event should have (
@@ -103,8 +103,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
 	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
 	.futureValue
 
-      validation should be failNel
-
+      validation should be ('failure)
       validation.swap map { err =>
         err.list should have length 1
         err.list.head should include ("name already exists")
@@ -119,6 +118,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
 
       val cet = CollectionEventType.create(disabledStudy.id, id, -1L, name, description,
 	recurring, List.empty, List.empty) | fail
+      collectionEventTypeRepository.put(cet)
 
       val name2 = nameGenerator.next[Study]
       val description2 = None
@@ -129,7 +129,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       val validation = ask(studyProcessor, cmd)
 	.mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
 	.futureValue
-      validation should be success
+      validation should be ('success)
 
       validation map { event =>
 	event should have (
@@ -148,20 +148,22 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
 
       val cet = CollectionEventType.create(disabledStudy.id, id, -1L, name, description,
 	recurring, List.empty, List.empty) | fail
+      collectionEventTypeRepository.put(cet)
 
       val id2 = collectionEventTypeRepository.nextIdentity
       val name2= nameGenerator.next[Study]
 
       val cet2 = CollectionEventType.create(disabledStudy.id, id2, -1L, name2, description,
 	recurring, List.empty, List.empty) | fail
+      collectionEventTypeRepository.put(cet2)
 
       val cmd = UpdateCollectionEventTypeCmd(
 	disabledStudy.id.id, id2.id, Some(0L), name, description, recurring, List.empty, List.empty)
       val validation = ask(studyProcessor, cmd)
 	.mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
 	.futureValue
-      validation should be failure
 
+      validation should be ('failure)
       validation.swap map { err =>
         err.list should have length 1
         err.list.head should include ("name already exists")
