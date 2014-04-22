@@ -14,8 +14,6 @@ import akka.persistence.SnapshotOffer
 import scalaz._
 import scalaz.Scalaz._
 
-// FIXME: rename CollectionEventTypeService to CollectionEventTypeSubProcessor
-
 /**
   * This is the Collection Event Type processor. It is a child actor of [[StudyProcessor]].
   *
