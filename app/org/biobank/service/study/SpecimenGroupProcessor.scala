@@ -15,7 +15,6 @@ import org.biobank.domain.study.{
   SpecimenGroupRepositoryComponent,
   Study,
   StudyId }
-import org.slf4j.LoggerFactory
 
 import akka.persistence.SnapshotOffer
 import scalaz._
@@ -36,6 +35,10 @@ class SpecimenGroupProcessor(
 
   val receiveRecover: Receive = {
     case event: SpecimenGroupAddedEvent => recoverEvent(event)
+
+    case event: SpecimenGroupUpdatedEvent => recoverEvent(event)
+
+    case event: SpecimenGroupRemovedEvent => recoverEvent(event)
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
       snapshot.specimenGroups.foreach{ specimenGroup => specimenGroupRepository.put(specimenGroup) }
@@ -104,7 +107,7 @@ class SpecimenGroupProcessor(
   private def recoverEvent(event: SpecimenGroupAddedEvent): Unit = {
     val studyId = StudyId(event.studyId)
     val validation = for {
-      newItem <-SpecimenGroup.create(studyId, SpecimenGroupId(event.specimenGroupId), -1, event.name,
+      newItem <- SpecimenGroup.create(studyId, SpecimenGroupId(event.specimenGroupId), -1, event.name,
 	event.description, event.units, event.anatomicalSourceType, event.preservationType,
         event.preservationTemperatureType, event.specimenType)
       savedItem <- specimenGroupRepository.put(newItem).success

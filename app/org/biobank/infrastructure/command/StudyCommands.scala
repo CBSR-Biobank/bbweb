@@ -109,9 +109,9 @@ object StudyCommands {
       extends CollectionEventTypeCommand with HasStudyIdentity
 
   case class UpdateCollectionEventTypeCmd(
+    studyId: String,
     id: String,
     expectedVersion: Option[Long],
-    studyId: String,
     name: String,
     description: Option[String],
     recurring: Boolean,

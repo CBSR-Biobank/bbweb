@@ -47,6 +47,17 @@ case class CollectionEventType private (
     with HasDescriptionOption
     with HasStudyId {
 
+  def update(
+    expectedVersion: Option[Long],
+    name: String,
+    description: Option[String],
+    recurring: Boolean,
+    specimenGroupData: List[CollectionEventTypeSpecimenGroup],
+    annotationTypeData: List[CollectionEventTypeAnnotationType]): DomainValidation[CollectionEventType] = {
+    CollectionEventType.create(studyId, id, version, name, description, recurring, specimenGroupData,
+      annotationTypeData)
+  }
+
   override def toString: String =
     s"""|CollectionEventType:{
         |  studyId: $studyId,
@@ -65,7 +76,7 @@ object CollectionEventType extends StudyValidationHelper {
   def create(
     studyId: StudyId,
     id: CollectionEventTypeId,
-    version: Long = -1,
+    version: Long,
     name: String,
     description: Option[String],
     recurring: Boolean,
@@ -81,7 +92,6 @@ object CollectionEventType extends StudyValidationHelper {
       CollectionEventType(_, _, _, _, _, recurring, _, _)
     }
   }
-
 
   protected def validateId(id: CollectionEventTypeId): Validation[String, CollectionEventTypeId] = {
     validateStringId(id.toString, "collection event type id is null or empty") match {

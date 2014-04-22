@@ -47,7 +47,7 @@ case class CeventTypeFormObject(
 
   def getUpdateCmd: UpdateCollectionEventTypeCmd = {
     UpdateCollectionEventTypeCmd(
-      collectionEventTypeId, Some(version), studyId, name, description, recurring,
+      studyId, collectionEventTypeId, Some(version), name, description, recurring,
       specimenGroupData, annotationTypeData)
   }
 }

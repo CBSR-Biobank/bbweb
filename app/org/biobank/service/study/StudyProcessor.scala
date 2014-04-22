@@ -42,6 +42,13 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       new SpecimenGroupProcessor(specimenGroupRepository, collectionEventTypeRepository)),
       "sgproc")
 
+    val collectionEventTypeProcessor = context.system.actorOf(Props(
+      new CollectionEventTypeProcessor(
+	collectionEventTypeRepository,
+	collectionEventAnnotationTypeRepository,
+	specimenGroupRepository)),
+      "cetproc")
+
     val receiveRecover: Receive = {
       case event: StudyAddedEvent => recoverEvent(event)
 
@@ -60,8 +67,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
        case cmd: SpecimenGroupCommand => specimenGroupProcessor forward cmd
 
-      // case cmd: CollectionEventTypeCommand =>
-      //   processEntityMsg(cmd, cmd.studyId, collectionEventTypeService.process)
+      case cmd: CollectionEventTypeCommand => collectionEventTypeProcessor forward cmd
 
       // case cmd: CollectionEventAnnotationTypeCommand =>
       //   processEntityMsg(cmd, cmd.studyId, ceventAnnotationTypeService.process)
