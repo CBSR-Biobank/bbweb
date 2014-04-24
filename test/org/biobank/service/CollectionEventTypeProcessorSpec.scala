@@ -471,15 +471,31 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
         err.list should have length 1
         err.list.head should include ("specimen group(s) do not belong to study")
       }
+    }
 
-      // try updating a study with a specimen group from a different study
+
+    "not update a collection event type with a specimen group from a different study" in {
+      val studyName = nameGenerator.next[Study]
+      val study2 = DisabledStudy.create(studyRepository.nextIdentity, -1, studyName, None) | fail
+      studyRepository.put(study2)
+
+      val sgId = specimenGroupRepository.nextIdentity
+      val sgName = nameGenerator.next[SpecimenGroup]
+
+      val sg = SpecimenGroup.create(study2.id, sgId, -1L, sgName, None, "mL",
+	AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
+	PreservationTemperatureType.Minus80celcius, SpecimenType.BuffyCoat) | fail
+      specimenGroupRepository.put(sg)
+
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroup(sg.id.id, 2, Some(BigDecimal(1.1))))
+
       val cetId2 = collectionEventTypeRepository.nextIdentity
       val cetName2 = nameGenerator.next[CollectionEventType]
       val cet = CollectionEventType.create(disabledStudy.id, cetId2, -1L, cetName2, None,
 	recurring = true, specimenGroupData, List.empty) | fail
       collectionEventTypeRepository.put(cet)
 
-      cmd = UpdateCollectionEventTypeCmd(
+      val cmd = UpdateCollectionEventTypeCmd(
 	disabledStudy.id.id, cetId2.id, Some(0L), cetName2, None, recurring = true,
 	specimenGroupData, List.empty)
       val validation2 = ask(studyProcessor, cmd)
