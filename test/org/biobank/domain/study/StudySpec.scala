@@ -202,7 +202,7 @@ class StudySpec extends WordSpecLike with Matchers {
       val description2 = some(nameGenerator.next[Study])
 
       val validation = study.update(Some(10L), name2, description2)
-      validation should be failure
+      validation should be ('failure)
 
       validation.swap map { err =>
         err.list should have length 1
@@ -217,7 +217,7 @@ class StudySpec extends WordSpecLike with Matchers {
       val description = Some(nameGenerator.next[Study])
 
       val validation = DisabledStudy.create(id, version, name, description)
-      validation should be failure
+      validation should be ('failure)
 
       validation.swap.map { err =>
         err.list should have length 2
@@ -234,7 +234,7 @@ class StudySpec extends WordSpecLike with Matchers {
 
       val study = validation | fail
       val validation2 = study.enable(Some(0L), 0, 0)
-      validation2 should be failure
+      validation2 should be ('failure)
 
       validation2.swap.map { err =>
         err.list should have length 1

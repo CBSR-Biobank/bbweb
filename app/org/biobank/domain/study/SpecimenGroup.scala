@@ -74,10 +74,10 @@ case class SpecimenGroup private (
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
     for {
       validVersion <- requireVersion(expectedVersion)
-      updatedStudy <- SpecimenGroup.create(studyId, id, version, name, description,
+      updatedSpecimenGroup <- SpecimenGroup.create(studyId, id, version, name, description,
 	units, anatomicalSourceType, preservationType, preservationTemperatureType,
 	specimenType)
-    } yield updatedStudy
+    } yield updatedSpecimenGroup
   }
 }
 

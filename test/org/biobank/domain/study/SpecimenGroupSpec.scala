@@ -147,7 +147,7 @@ class SpecimenGroupSpec extends WordSpecLike with Matchers {
 
        val validation = SpecimenGroup.create(studyId, id, version, name, description, units,
 	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
-      validation should be failure
+      validation should be ('failure)
 
       validation.swap.map { err =>
           err.list should (have length 1 and contain("invalid version value: -2"))
@@ -171,7 +171,7 @@ class SpecimenGroupSpec extends WordSpecLike with Matchers {
 
       val validation = sg.update(Some(10L), name, description, units,
 	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
-      validation should be failure
+      validation should be ('failure)
 
       validation.swap.map { err =>
         err.list should have length 1

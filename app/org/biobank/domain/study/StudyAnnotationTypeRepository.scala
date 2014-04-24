@@ -5,7 +5,8 @@ import org.biobank.domain._
 import scalaz._
 import scalaz.Scalaz._
 
-trait StudyAnnotationTypeRepository[A <: StudyAnnotationType] {
+trait StudyAnnotationTypeRepository[A <: StudyAnnotationType]
+    extends ReadWriteRepository [AnnotationTypeId, A] {
 
   def nextIdentity: AnnotationTypeId
 
@@ -14,12 +15,6 @@ trait StudyAnnotationTypeRepository[A <: StudyAnnotationType] {
   def annotationTypeWithId(studyId: StudyId, annotationTypeId: String): DomainValidation[A]
 
   def allAnnotationTypesForStudy(studyId: StudyId): Set[A]
-
- //  def add(annotationType: A): DomainValidation[A]
-
-//   def update(oldAnnotationType: A, newAnnotationType: A): DomainValidation[A]
-
-//   def remove(annotationType: A): DomainValidation[A]
  }
 
 trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]

@@ -32,6 +32,20 @@ case class CollectionEventAnnotationType(
         |  maxValueCount: $maxValueCount,
         |  options: { $options }
         }""".stripMargin
+
+  def update(
+    expectedVersion: Option[Long],
+    name: String,
+    description: Option[String],
+    valueType: AnnotationValueType,
+    maxValueCount: Option[Int] = None,
+    options: Option[Map[String, String]] = None): DomainValidation[CollectionEventAnnotationType] = {
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      updatedAnnotationType <- CollectionEventAnnotationType.create(studyId, id, version,
+	name, description, valueType, maxValueCount, options)
+    } yield updatedAnnotationType
+  }
 }
 
 
@@ -44,8 +58,8 @@ object CollectionEventAnnotationType extends StudyAnnotationTypeValidationHelper
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
-    maxValueCount: Option[Int],
-    options: Option[Map[String, String]]): DomainValidation[CollectionEventAnnotationType] = {
+    maxValueCount: Option[Int] = None,
+    options: Option[Map[String, String]] = None): DomainValidation[CollectionEventAnnotationType] = {
     (validateId(studyId).toValidationNel |@|
       validateId(id).toValidationNel |@|
       validateAndIncrementVersion(version).toValidationNel |@|

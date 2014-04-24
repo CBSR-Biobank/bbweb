@@ -55,6 +55,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       validation should be ('success)
 
       validation map { event =>
+	event shouldBe a[SpecimenGroupAddedEvent]
 	event should have (
           'name                        (name),
           'description                 (description),
@@ -80,6 +81,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       validation2 should be ('success)
 
       validation2 map { event =>
+	event shouldBe a[SpecimenGroupAddedEvent]
 	event should have (
           'name                        (name2),
           'description                 (None),
@@ -126,6 +128,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       validation should be ('success)
 
       validation map { event =>
+	event shouldBe a[SpecimenGroupUpdatedEvent]
 	event should have (
 	  'studyId                     (disabledStudy.id.id),
 	  'specimenGroupId             (item.id.id),
@@ -165,7 +168,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
 
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
 	.futureValue
-      validation should be failure
+      validation should be ('failure)
 
       validation.swap map { err =>
         err.list should have length 1
@@ -191,7 +194,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
         preservationType, preservationTempType, specimenType)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
 	.futureValue
-      validation should be failure
+      validation should be ('failure)
 
       validation.swap map { err =>
         err.list should have length 1
@@ -209,9 +212,15 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       val preservationTempType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.FilteredUrine
 
-      val item = SpecimenGroup.create(disabledStudy.id, sgId, -1L, name, description, units,
+      val sg1 = SpecimenGroup.create(disabledStudy.id, sgId, -1L, name, description, units,
 	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
-      specimenGroupRepository.put(item)
+      specimenGroupRepository.put(sg1)
+
+      val sgId2 = specimenGroupRepository.nextIdentity
+      val name2 = nameGenerator.next[Study]
+      val sg2 = SpecimenGroup.create(disabledStudy.id, sgId2, -1L, name2, description, units,
+	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
+      specimenGroupRepository.put(sg2)
 
       val units2 = nameGenerator.next[String]
       val anatomicalSourceType2 = AnatomicalSourceType.Brain
@@ -219,13 +228,13 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       val preservationTempType2 = PreservationTemperatureType.Minus180celcius
       val specimenType2 = SpecimenType.DnaBlood
 
-      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, item.id.id,
-	Some(item.version), name, None, units2, anatomicalSourceType2, preservationType2,
+      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sg2.id.id,
+	Some(sg2.version), name, None, units2, anatomicalSourceType2, preservationType2,
 	preservationTempType2, specimenType2)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
 	.futureValue
-      validation should be failure
 
+      validation should be ('failure)
       validation.swap map { err =>
         err.list should have length 1
         err.list.head should include ("name already exists")
@@ -255,7 +264,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
 	preservationTempType, specimenType)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
 	.futureValue
-      validation should be failure
+      validation should be ('failure)
 
       validation.swap map { err =>
         err.list should have length 1
@@ -277,11 +286,14 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
 	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
       specimenGroupRepository.put(item)
 
-      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id,
-	Some(item.version))
+      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id, Some(item.version))
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
 	.futureValue
+
       validation should be ('success)
+      validation map { event =>
+	event shouldBe a[SpecimenGroupRemovedEvent]
+      }
 
     }
 
@@ -299,15 +311,14 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
 	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
       specimenGroupRepository.put(item)
 
-      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id,
-	Some(item.version))
+      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id, Some(item.version - 10))
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
 	.futureValue
-      validation should be failure
 
+      validation should be ('failure)
       validation.swap map { err =>
         err.list should have length 1
-        err.list.head should include ("doesn't match current version")
+        err.list.head should include ("version mismatch")
       }
     }
 

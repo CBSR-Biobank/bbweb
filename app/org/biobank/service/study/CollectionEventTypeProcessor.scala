@@ -77,6 +77,8 @@ class CollectionEventTypeProcessor(
       nameValid <- nameAvailable(cmd.name, id)
       newItem <- oldItem.update(cmd.expectedVersion, cmd.name,
         cmd.description, cmd.recurring, cmd.specimenGroupData, cmd.annotationTypeData)
+      validSgData <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
+      validAtData <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
       event <- CollectionEventTypeUpdatedEvent(
         cmd.studyId, newItem.id.id, newItem.version, newItem.name, newItem.description,
         newItem.recurring, newItem.specimenGroupData, newItem.annotationTypeData).success

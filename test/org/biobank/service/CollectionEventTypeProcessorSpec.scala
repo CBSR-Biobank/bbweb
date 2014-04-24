@@ -1,6 +1,8 @@
 package org.biobank.service
 
 import org.biobank.fixture._
+import org.biobank.infrastructure.CollectionEventTypeAnnotationType
+import org.biobank.infrastructure.CollectionEventTypeSpecimenGroup
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
   AnatomicalSourceType,
@@ -43,6 +45,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       val description = Some(nameGenerator.next[Study])
       val recurring = true
 
+      // specimen groups and annotation types tested separately below
       var cmd = AddCollectionEventTypeCmd(
 	disabledStudy.id.id, name, description, recurring, List.empty, List.empty)
       val validation = ask(studyProcessor, cmd)
@@ -51,6 +54,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       validation should be ('success)
 
       validation map { event =>
+	event shouldBe a[CollectionEventTypeAddedEvent]
 	event should have (
           'name        (name),
           'description (description),
@@ -74,6 +78,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       validation2 should be ('success)
 
       validation2 map { event =>
+	event shouldBe a[CollectionEventTypeAddedEvent]
 	event should have (
           'name        (name2),
           'description (None),
@@ -129,9 +134,10 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       val validation = ask(studyProcessor, cmd)
 	.mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
 	.futureValue
-      validation should be ('success)
 
+      validation should be ('success)
       validation map { event =>
+	event shouldBe a[CollectionEventTypeUpdatedEvent]
 	event should have (
           'name        (name2),
           'description (description2),
@@ -259,224 +265,263 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
         err.list should have length 1
         err.list.head should include ("version mismatch")
       }
-   }
+    }
 
+    "add a specimen group to a collection event type" in {
+      val sgId = specimenGroupRepository.nextIdentity
+      val name = nameGenerator.next[Study]
+      val units = nameGenerator.next[String]
+      val anatomicalSourceType = AnatomicalSourceType.Blood
+      val preservationType = PreservationType.FreshSpecimen
+      val preservationTempType = PreservationTemperatureType.Minus80celcius
+      val specimenType = SpecimenType.FilteredUrine
 
-    //  "Specimen group -> collection event type" can {
-    //
-    //    "be added" in {
-    //      val name = nameGenerator.next[Study]
-    //      val units = nameGenerator.next[String]
-    //      val anatomicalSourceType = AnatomicalSourceType.Blood
-    //      val preservationType = PreservationType.FreshSpecimen
-    //      val preservationTempType = PreservationTemperatureType.Minus80celcius
-    //      val specimenType = SpecimenType.FilteredUrine
-    //
-    //      val sg1 = await(studyService.addSpecimenGroup(
-    //        AddSpecimenGroupCmd(studyId.id, name, Some(name), units, anatomicalSourceType,
-    //          preservationType, preservationTempType, specimenType))) | null
-    //      specimenGroupRepository.specimenGroupWithId(
-    //        studyId, sg1.specimenGroupId) must beSuccessful
-    //
-    //      val count = 10
-    //      val amount = BigDecimal(1.1)
-    //      val count2 = 5
-    //      val amount2 = BigDecimal(0.1)
-    //      val SpecimenGroupData = Set(
-    //        CollectionEventTypeSpecimenGroup(sg1.specimenGroupId, count, amount),
-    //        CollectionEventTypeSpecimenGroup(sg1.specimenGroupId, count2, amount2))
-    //
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, name, Some(name), recurring = true,
-    //          SpecimenGroupData, Set.empty))) | null
-    //
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful.like {
-    //          case cet =>
-    //            cet.specimenGroupData.size mustEqual 2
-    //            cet.specimenGroupData.exists(sgData =>
-    //              sgData.specimenGroupId.equals(sg1.specimenGroupId)
-    //                && sgData.maxCount.equals(count)
-    //                && sgData.amount.equals(amount)) mustEqual true
-    //            cet.specimenGroupData.exists(sgData =>
-    //              sgData.specimenGroupId.equals(sg1.specimenGroupId)
-    //                && sgData.maxCount.equals(count2)
-    //                && sgData.amount.equals(amount2)) mustEqual true
-    //        }
-    //    }
-    //
-    //    "not be updated if used by collection event type" in {
-    //      val sgName = nameGenerator.next[SpecimenGroup]
-    //
-    //      val sg1 = await(studyService.addSpecimenGroup(
-    //        AddSpecimenGroupCmd(studyId.id, sgName, Some(sgName), "mL", AnatomicalSourceType.Blood,
-    //          PreservationType.FreshSpecimen, PreservationTemperatureType.Minus80celcius,
-    //          SpecimenType.BuffyCoat))) | null
-    //      specimenGroupRepository.specimenGroupWithId(
-    //        studyId, sg1.specimenGroupId) must beSuccessful
-    //
-    //      val SpecimenGroupData = Set(
-    //        CollectionEventTypeSpecimenGroup(sg1.specimenGroupId, 1, BigDecimal(1.1)))
-    //
-    //      val cetName = nameGenerator.next[CollectionEventType]
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, cetName, Some(cetName), recurring = true,
-    //          SpecimenGroupData, Set.empty))) | null
-    //
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful
-    //
-    //      val sg2 = await(studyService.updateSpecimenGroup(
-    //        UpdateSpecimenGroupCmd(sg1.specimenGroupId, Some(cet1.version), studyId.id, sgName, Some(sgName),
-    //          "mL", AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
-    //          PreservationTemperatureType.Minus80celcius, SpecimenType.CdpaPlasma)))
-    //
-    //      sg2 must beFailing.like {
-    //        case msgs => msgs.head must contain(
-    //          "specimen group is in use by collection event type")
-    //      }
-    //    }
-    //
-    //    "be removed from collection event type" in {
-    //      val name = nameGenerator.next[Study]
-    //      val units = nameGenerator.next[String]
-    //      val anatomicalSourceType = AnatomicalSourceType.Blood
-    //      val preservationType = PreservationType.FreshSpecimen
-    //      val preservationTempType = PreservationTemperatureType.Minus80celcius
-    //      val specimenType = SpecimenType.FilteredUrine
-    //
-    //      val sg1 = await(studyService.addSpecimenGroup(
-    //        AddSpecimenGroupCmd(studyId.id, name, Some(name), units, anatomicalSourceType,
-    //          preservationType, preservationTempType, specimenType))) | null
-    //
-    //      val count = 10
-    //      val amount = BigDecimal(1.1)
-    //      val count2 = 5
-    //      val amount2 = BigDecimal(0.1)
-    //      val SpecimenGroupData = Set(
-    //        CollectionEventTypeSpecimenGroup(sg1.specimenGroupId, count, amount),
-    //        CollectionEventTypeSpecimenGroup(sg1.specimenGroupId, count2, amount2))
-    //
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, name, Some(name), recurring = true,
-    //          SpecimenGroupData, Set.empty))) | null
-    //
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful.like {
-    //          case x =>
-    //            x.specimenGroupData.size mustEqual 2
-    //        }
-    //
-    //      val cet2 = await(studyService.updateCollectionEventType(
-    //        new UpdateCollectionEventTypeCmd(
-    //          cet1.collectionEventTypeId, Some(cet1.version), studyId.id,
-    //          name, Some(name), recurring = true, Set.empty, Set.empty))) | null
-    //
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful.like {
-    //          case x =>
-    //            x.specimenGroupData.size mustEqual 0
-    //        }
-    //    }
-    //
-    //    "not be removed if used by collection event type" in {
-    //      val sgName = nameGenerator.next[SpecimenGroup]
-    //
-    //      val sg1 = await(studyService.addSpecimenGroup(
-    //        AddSpecimenGroupCmd(studyId.id, sgName, Some(sgName), "mL", AnatomicalSourceType.Blood,
-    //          PreservationType.FreshSpecimen, PreservationTemperatureType.Minus80celcius,
-    //          SpecimenType.BuffyCoat))) | null
-    //      specimenGroupRepository.specimenGroupWithId(
-    //        studyId, sg1.specimenGroupId) must beSuccessful
-    //
-    //      val SpecimenGroupData = Set(
-    //        CollectionEventTypeSpecimenGroup(sg1.specimenGroupId, 1, BigDecimal(1.1)))
-    //
-    //      val cetName = nameGenerator.next[CollectionEventType]
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, cetName, Some(cetName), recurring = true,
-    //          SpecimenGroupData, Set.empty))) | null
-    //
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful
-    //
-    //      val sg2 = await(studyService.removeSpecimenGroup(
-    //        RemoveSpecimenGroupCmd(sg1.specimenGroupId, Some(sg1.version), studyId.id)))
-    //
-    //      sg2 must beFailing.like {
-    //        case msgs => msgs.head must contain(
-    //          "specimen group is in use by collection event type")
-    //      }
-    //    }
-    //
-    //    "not be added if specimen group in wrong study" in {
-    //      val name2 = nameGenerator.next[Study]
-    //      val study2 = await(studyService.addStudy(new AddStudyCmd(name2, Some(name2)))) | null
-    //
-    //      val name3 = nameGenerator.next[SpecimenGroup]
-    //      val units = nameGenerator.next[String]
-    //      val anatomicalSourceType = AnatomicalSourceType.Blood
-    //      val preservationType = PreservationType.FreshSpecimen
-    //      val preservationTempType = PreservationTemperatureType.Minus80celcius
-    //      val specimenType = SpecimenType.FilteredUrine
-    //
-    //      // this one is in correct study
-    //      val sg1 = await(studyService.addSpecimenGroup(
-    //        AddSpecimenGroupCmd(studyId.id, name3, Some(name3), units, anatomicalSourceType,
-    //          preservationType, preservationTempType, specimenType))) | null
-    //
-    //      // this one is in wrong study
-    //      val sg2 = await(studyService.addSpecimenGroup(
-    //        AddSpecimenGroupCmd(study2.id, name3, Some(name3), units, anatomicalSourceType,
-    //          preservationType, preservationTempType, specimenType))) | null
-    //
-    //      val count = 10
-    //      val amount = BigDecimal(1.1)
-    //      val SpecimenGroupData = Set(
-    //        CollectionEventTypeSpecimenGroup(sg1.specimenGroupId, count, amount),
-    //        CollectionEventTypeSpecimenGroup(sg2.specimenGroupId, count, amount))
-    //
-    //      val name = nameGenerator.next[CollectionEventType]
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, name, Some(name), true,
-    //          SpecimenGroupData, Set.empty)))
-    //
-    //      cet1 must beFailing.like {
-    //        case msgs => msgs.head must contain("specimen group(s) do not belong to study")
-    //      }
-    //    }
-    //  }
-    //
-    //  "Annotation type -> collection event type" can {
-    //
-    //    "be added" in {
-    //      val name = nameGenerator.next[CollectionEventAnnotationType]
-    //      val required = true
-    //
-    //      val at1 = await(studyService.addCollectionEventAnnotationType(
-    //        new AddCollectionEventAnnotationTypeCmd(studyId.id, name, Some(name),
-    //          AnnotationValueType.Date))) | null
-    //
-    //      collectionEventAnnotationTypeRepository.annotationTypeWithId(
-    //        studyId, AnnotationTypeId(at1.annotationTypeId)) must beSuccessful
-    //
-    //      val annotationTypeData = Set(
-    //        CollectionEventTypeAnnotationType(at1.annotationTypeId, true))
-    //
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, name, Some(name), true,
-    //          Set.empty, annotationTypeData))) | null
-    //
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful.like {
-    //          case x =>
-    //            x.annotationTypeData.size mustEqual 1
-    //            x.annotationTypeData.exists(atData =>
-    //              atData.annotationTypeId.equals(at1.annotationTypeId)
-    //                && atData.required.equals(required)) mustEqual true
-    //        }
-    //    }
-    //
+      val sg = SpecimenGroup.create(disabledStudy.id, sgId, -1L, name, None, units,
+	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
+      specimenGroupRepository.put(sg)
+
+      val maxCount = 10
+      val amount = Some(BigDecimal(1.1))
+      val maxCount2 = 5
+      val amount2 = None
+      val specimenGroupData = List(
+	CollectionEventTypeSpecimenGroup(sg.id.id, maxCount, amount),
+	CollectionEventTypeSpecimenGroup(sg.id.id, maxCount2, amount2))
+
+      val cmd = AddCollectionEventTypeCmd(
+	disabledStudy.id.id, name, None, recurring = true, specimenGroupData, List.empty)
+      val validation = ask(studyProcessor, cmd)
+	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
+	.futureValue
+
+      validation should be ('success)
+      validation map { event =>
+	event shouldBe a[CollectionEventTypeAddedEvent]
+        event.specimenGroupData should have length (2)
+
+	event.specimenGroupData(0) should have (
+	  'specimenGroupId (sgId.id),
+	  'maxCount (maxCount),
+	  'amount (amount)
+	)
+
+	event.specimenGroupData(1) should have (
+	  'specimenGroupId (sgId.id),
+	  'maxCount (maxCount2),
+	  'amount (amount2)
+	)
+      }
+    }
+
+    "update a collection event type and add specimen groups" in {
+      val sgId = specimenGroupRepository.nextIdentity
+      val sgName = nameGenerator.next[Study]
+      val sg = SpecimenGroup.create(disabledStudy.id, sgId, -1L, sgName, None, "mL",
+	AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
+	PreservationTemperatureType.Minus80celcius, SpecimenType.BuffyCoat) | fail
+      specimenGroupRepository.put(sg)
+
+      val cetId2 = collectionEventTypeRepository.nextIdentity
+      val cetName2 = nameGenerator.next[CollectionEventType]
+      val cet = CollectionEventType.create(disabledStudy.id, cetId2, -1L, cetName2, None,
+	recurring = true, List.empty, List.empty) | fail
+      collectionEventTypeRepository.put(cet)
+
+      val maxCount = 10
+      val amount = Some(BigDecimal(1.1))
+      val specimenGroupData = List(
+	CollectionEventTypeSpecimenGroup(sg.id.id, maxCount, amount))
+
+      val name = nameGenerator.next[Study]
+      val cmd = AddCollectionEventTypeCmd(
+	disabledStudy.id.id, name, None, recurring = true, specimenGroupData, List.empty)
+      val validation = ask(studyProcessor, cmd)
+	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
+	.futureValue
+
+      validation should be ('success)
+      validation map { event =>
+	event shouldBe a[CollectionEventTypeAddedEvent]
+        event.specimenGroupData should have length (1)
+
+	event.specimenGroupData(0) should have (
+	  'specimenGroupId (sgId.id),
+	  'maxCount (maxCount),
+	  'amount (amount)
+	)
+      }
+    }
+
+    "not update a specimen group if it used by collection event type" in {
+      val sgId = specimenGroupRepository.nextIdentity
+      val sgName = nameGenerator.next[SpecimenGroup]
+
+      val sg = SpecimenGroup.create(disabledStudy.id, sgId, -1L, sgName, None, "mL",
+	AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
+	PreservationTemperatureType.Minus80celcius, SpecimenType.BuffyCoat) | fail
+      specimenGroupRepository.put(sg)
+
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroup(sg.id.id, 1, Some(BigDecimal(1.1))))
+
+      val cetId = collectionEventTypeRepository.nextIdentity
+      val cetName = nameGenerator.next[CollectionEventType]
+      val cet = CollectionEventType.create(disabledStudy.id, cetId, -1L, cetName, None,
+	recurring = true, specimenGroupData, List.empty) | fail
+      collectionEventTypeRepository.put(cet)
+
+      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sgId.id,
+	Some(sg.version), sgName, None, "mL", AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
+          PreservationTemperatureType.Minus80celcius, SpecimenType.CdpaPlasma)
+      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+	.futureValue
+      validation should be ('failure)
+
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include ("specimen group is in use by collection event type")
+      }
+    }
+
+    "remove a specimen group from collection event type" in {
+      val sgId = specimenGroupRepository.nextIdentity
+      val sgName = nameGenerator.next[SpecimenGroup]
+
+      val sg = SpecimenGroup.create(disabledStudy.id, sgId, -1L, sgName, None, "mL",
+	AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
+	PreservationTemperatureType.Minus80celcius, SpecimenType.BuffyCoat) | fail
+      specimenGroupRepository.put(sg)
+
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroup(sg.id.id, 1, Some(BigDecimal(1.1))))
+
+      val cetId = collectionEventTypeRepository.nextIdentity
+      val cetName = nameGenerator.next[CollectionEventType]
+      val cet = CollectionEventType.create(disabledStudy.id, cetId, -1L, cetName, None,
+	recurring = true, specimenGroupData, List.empty) | fail
+      collectionEventTypeRepository.put(cet)
+
+      val cmd = UpdateCollectionEventTypeCmd(
+	disabledStudy.id.id, cetId.id, Some(0L), cetName, None, recurring = true,
+	List.empty, List.empty)
+      val validation = ask(studyProcessor, cmd)
+	.mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+	.futureValue
+
+      validation should be ('success)
+      validation map { event =>
+	event shouldBe a[CollectionEventTypeUpdatedEvent]
+        event.specimenGroupData should have length (0)
+      }
+    }
+
+    "not remove a specimen group if used by collection event type" in {
+      val sgId = specimenGroupRepository.nextIdentity
+      val sgName = nameGenerator.next[SpecimenGroup]
+
+      val sg = SpecimenGroup.create(disabledStudy.id, sgId, -1L, sgName, None, "mL",
+	AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
+	PreservationTemperatureType.Minus80celcius, SpecimenType.BuffyCoat) | fail
+      specimenGroupRepository.put(sg)
+
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroup(sg.id.id, 1, Some(BigDecimal(1.1))))
+
+      val cetId = collectionEventTypeRepository.nextIdentity
+      val cetName = nameGenerator.next[CollectionEventType]
+      val cet = CollectionEventType.create(disabledStudy.id, cetId, -1L, cetName, None,
+	recurring = true, specimenGroupData, List.empty) | fail
+      collectionEventTypeRepository.put(cet)
+
+      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, sg.id.id, Some(sg.version))
+      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
+	.futureValue
+
+      validation should be ('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include ("specimen group is in use by collection event type")
+      }
+    }
+
+    "not add a specimen group from a different study" in {
+      val studyName = nameGenerator.next[Study]
+      val study2 = DisabledStudy.create(studyRepository.nextIdentity, -1, studyName, None) | fail
+      studyRepository.put(study2)
+
+      val sgId = specimenGroupRepository.nextIdentity
+      val sgName = nameGenerator.next[SpecimenGroup]
+
+      val sg = SpecimenGroup.create(study2.id, sgId, -1L, sgName, None, "mL",
+	AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
+	PreservationTemperatureType.Minus80celcius, SpecimenType.BuffyCoat) | fail
+      specimenGroupRepository.put(sg)
+
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroup(sg.id.id, 2, Some(BigDecimal(1.1))))
+
+      val cetName = nameGenerator.next[CollectionEventType]
+      var cmd: CollectionEventTypeCommand = AddCollectionEventTypeCmd(
+	disabledStudy.id.id, cetName, None, recurring = true, specimenGroupData, List.empty)
+      val validation = ask(studyProcessor, cmd)
+	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
+	.futureValue
+
+      validation should be ('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include ("specimen group(s) do not belong to study")
+      }
+
+      // try updating a study with a specimen group from a different study
+      val cetId2 = collectionEventTypeRepository.nextIdentity
+      val cetName2 = nameGenerator.next[CollectionEventType]
+      val cet = CollectionEventType.create(disabledStudy.id, cetId2, -1L, cetName2, None,
+	recurring = true, specimenGroupData, List.empty) | fail
+      collectionEventTypeRepository.put(cet)
+
+      cmd = UpdateCollectionEventTypeCmd(
+	disabledStudy.id.id, cetId2.id, Some(0L), cetName2, None, recurring = true,
+	specimenGroupData, List.empty)
+      val validation2 = ask(studyProcessor, cmd)
+	.mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+	.futureValue
+
+      validation2 should be ('failure)
+      validation2.swap map { err =>
+        err.list should have length 1
+        err.list.head should include ("specimen group(s) do not belong to study")
+      }
+    }
+
+    "add an annotation type to a colleciton event" in {
+      val annotId = collectionEventAnnotationTypeRepository.nextIdentity
+      val name = nameGenerator.next[CollectionEventAnnotationType]
+      val required = true
+
+      val annotType = CollectionEventAnnotationType.create(disabledStudy.id, annotId, -1L, name, None,
+      AnnotationValueType.Date) | fail
+      collectionEventAnnotationTypeRepository.put(annotType)
+
+      val annotTypeData = List(CollectionEventTypeAnnotationType(annotType.id.id, required))
+
+      var cmd = AddCollectionEventTypeCmd(
+	disabledStudy.id.id, name, None, recurring = true, List.empty, annotTypeData)
+      val validation = ask(studyProcessor, cmd)
+	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
+	.futureValue
+
+      validation should be ('success)
+      validation map { event =>
+	event shouldBe a[CollectionEventTypeAddedEvent]
+        event.annotationTypeData should have length (1)
+
+	event.annotationTypeData(0) should have (
+	  'annotationTypeId (annotType.id.id),
+	  'required         (required)
+	)
+      }
+    }
+
     //    "not be updated if used by collection event type" in {
     //      val name = nameGenerator.next[CollectionEventAnnotationType]
     //
@@ -627,8 +672,6 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
     //
     //      cet1 must beFailing.like {
     //        case msgs => msgs.head must contain("annotation type(s) do not belong to study")
-    //      }
-    //    }
 
   }
 }
