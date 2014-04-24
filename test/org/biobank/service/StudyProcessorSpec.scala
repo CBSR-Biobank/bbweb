@@ -11,6 +11,8 @@ import org.biobank.domain.{
   Factory,
   PreservationType,
   PreservationTemperatureType,
+  RepositoryComponent,
+  RepositoryComponentImpl,
   SpecimenType
 }
 import org.biobank.domain.study._
@@ -32,7 +34,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  val factory = new Factory(nameGenerator)
+  val factory = new Factory(nameGenerator) with RepositoryComponentImpl
 
   "A study processor" should {
 
@@ -105,32 +107,27 @@ class StudyProcessorSpec extends StudyProcessorFixture {
     }
 
     "be able to update a study with the same name" in {
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-
-      val disabledStudy = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
+      val disabledStudy = factory.createDisabledStudy
       studyRepository.put(disabledStudy)
 
       val description2 = Some(nameGenerator.next[Study])
 
-      val validation2 = ask(studyProcessor,
-	UpdateStudyCmd(disabledStudy.id.toString, Some(0), name, description2))
+      val validation2 = ask(
+	studyProcessor,
+	UpdateStudyCmd(disabledStudy.id.toString, Some(0), disabledStudy.name, description2))
 	.mapTo[DomainValidation[StudyUpdatedEvent]]
 	.futureValue
       validation2 should be ('success)
 
       validation2 map { event =>
 	event shouldBe a[StudyUpdatedEvent]
-	event.name should be (name)
+	event.name should be (disabledStudy.name)
 	event.description should be (description2)
       }
     }
 
     "be able to update a study with new a name or description" in {
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-
-      val disabledStudy = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
+      val disabledStudy = factory.createDisabledStudy
       studyRepository.put(disabledStudy)
 
       val name2 = nameGenerator.next[Study]
@@ -165,16 +162,15 @@ class StudyProcessorSpec extends StudyProcessorFixture {
     }
 
     "not update a study to name that is used by another study" in {
-      val name = nameGenerator.next[Study]
-      val name2 = nameGenerator.next[Study]
-
-      val study1 = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
+      val study1 = factory.createDisabledStudy
       studyRepository.put(study1)
 
-      val study2 = DisabledStudy.create(studyRepository.nextIdentity, -1, name2, None) | fail
+      val study2 = factory.createDisabledStudy
       studyRepository.put(study2)
 
-      val validation = ask(studyProcessor, UpdateStudyCmd(study2.id.id, Some(0L), name, None))
+      val validation = ask(
+	studyProcessor,
+	UpdateStudyCmd(study2.id.id, Some(0L), study1.name, None))
 	.mapTo[DomainValidation[StudyAddedEvent]]
 	.futureValue
       validation should be ('failure)
@@ -186,13 +182,10 @@ class StudyProcessorSpec extends StudyProcessorFixture {
     }
 
     "not be updated with invalid version" in {
-      val name = nameGenerator.next[Study]
-      val name2 = nameGenerator.next[Study]
-
-      val disabledStudy = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
+      val disabledStudy = factory.createDisabledStudy
       studyRepository.put(disabledStudy)
 
-      val cmd = UpdateStudyCmd(disabledStudy.id.toString, Some(10L), name2, None)
+      val cmd = UpdateStudyCmd(disabledStudy.id.toString, Some(10L), disabledStudy.name, None)
       val validation2 = ask(studyProcessor, cmd)
 	.mapTo[DomainValidation[StudyUpdatedEvent]]
 	.futureValue
@@ -206,44 +199,30 @@ class StudyProcessorSpec extends StudyProcessorFixture {
     }
 
     "enable a study" in {
-      val name = nameGenerator.next[Study]
-      val units = nameGenerator.next[String]
-      val anatomicalSourceType = AnatomicalSourceType.Blood
-      val preservationType = PreservationType.FreshSpecimen
-      val preservationTempType = PreservationTemperatureType.Minus80celcius
-      val specimenType = SpecimenType.FilteredUrine
-
-      val disabledStudy = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
+      val disabledStudy = factory.createDisabledStudy
       studyRepository.put(disabledStudy)
 
-      val sg = SpecimenGroup.create(disabledStudy.id, specimenGroupRepository.nextIdentity, -1L,
-	name, None, units, anatomicalSourceType, preservationType, preservationTempType,
-	specimenType) | fail
+      val sg = factory.createSpecimenGroup
       specimenGroupRepository.put(sg)
 
-      val cet = CollectionEventType.create(disabledStudy.id,
-	collectionEventTypeRepository.nextIdentity, -1L, name, None, true,
-	List.empty, List.empty) | fail
+      val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val validation4 = ask(studyProcessor,
-	EnableStudyCmd(disabledStudy.id.toString, Some(0L)))
-	.mapTo[DomainValidation[StudyEnabledEvent]]
-	.futureValue
-      validation4 should be ('success)
+      val validation = ask(studyProcessor,
+      	EnableStudyCmd(disabledStudy.id.toString, Some(0L)))
+      	.mapTo[DomainValidation[StudyEnabledEvent]]
+      	.futureValue
+      validation should be ('success)
 
-      validation4 map { event =>
-	event shouldBe a[StudyEnabledEvent]
+      validation map { event =>
+      	event shouldBe a[StudyEnabledEvent]
         val study = studyRepository.studyWithId(StudyId(event.id)) | fail
         study shouldBe a[EnabledStudy]
       }
     }
 
     "disable a study" in {
-      val name = nameGenerator.next[Study]
-
-      val disabledStudy = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
-      val enabledStudy = disabledStudy.enable(Some(0L), 1, 1) | fail
+      val enabledStudy = factory.createEnabledStudy
       studyRepository.put(enabledStudy)
 
       val validation = ask(studyProcessor,
