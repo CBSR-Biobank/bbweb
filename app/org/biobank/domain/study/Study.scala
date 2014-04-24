@@ -28,7 +28,7 @@ import scalaz.Scalaz._
   * the sub classes.
   *
   */
-sealed trait Study
+trait Study
     extends ConcurrencySafeEntity[StudyId]
     with HasUniqueName
     with HasDescriptionOption {

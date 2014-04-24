@@ -8,6 +8,7 @@ import org.biobank.domain.{
   AnnotationValueType,
   DomainError,
   DomainValidation,
+  Factory,
   PreservationType,
   PreservationTemperatureType,
   SpecimenType
@@ -31,13 +32,14 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
+  val factory = new Factory(nameGenerator)
+
   "A study processor" should {
 
     "add a study" in {
-      val name = nameGenerator.next[Study]
-      val description = some(nameGenerator.next[Study])
+      val study = factory.createDisabledStudy
 
-      val cmd = AddStudyCmd(name, description)
+      val cmd = AddStudyCmd(study.name, study.description)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
 	.futureValue
 
@@ -45,8 +47,8 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       validation map { event =>
         event shouldBe a [StudyAddedEvent]
         event should have (
-          'name (name),
-          'description (description)
+          'name (study.name),
+          'description (study.description)
         )
 
         studyRepository.studyWithId(StudyId(event.id)) map { study =>
@@ -59,10 +61,9 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       /*
        * Not sure if this is a good test, or how to do it correctly - ignoring it for now
        */
-      val name = nameGenerator.next[Study]
-      val description = some(nameGenerator.next[Study])
+      val study = factory.createDisabledStudy
 
-      var cmd: StudyCommand = AddStudyCmd(name, description)
+      var cmd: StudyCommand = AddStudyCmd(study.name, study.description)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
 	.futureValue
 
@@ -90,12 +91,10 @@ class StudyProcessorSpec extends StudyProcessorFixture {
     }
 
     "not add add a new study with a duplicate name" in {
-      val name = nameGenerator.next[Study]
+      val study = factory.createDisabledStudy
+      studyRepository.put(study)
 
-      val disabledStudy1 = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
-      studyRepository.put(disabledStudy1)
-
-      val validation = ask(studyProcessor, AddStudyCmd(name, None))
+      val validation = ask(studyProcessor, AddStudyCmd(study.name, study.description))
 	.mapTo[DomainValidation[StudyAddedEvent]].futureValue
       validation should be ('failure)
 
