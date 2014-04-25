@@ -9,8 +9,10 @@ import org.biobank.domain.{
   ConcurrencySafeEntity,
   DomainError,
   DomainValidation,
+  Factory,
   PreservationType,
   PreservationTemperatureType,
+  RepositoryComponentImpl,
   SpecimenType
 }
 import AnnotationValueType._
@@ -19,19 +21,21 @@ import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 
 import akka.pattern.ask
+import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
-class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
+class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
 
   val nameGenerator = new NameGenerator(this.getClass)
+
+  val factory = new Factory(nameGenerator) with RepositoryComponentImpl
 
   var disabledStudy: DisabledStudy = null
 
   // create the study to be used for tests
-  override def beforeAll: Unit = {
-    val name = nameGenerator.next[Study]
-    disabledStudy = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
+  override def beforeEach: Unit = {
+    disabledStudy = factory.createDisabledStudy
     studyRepository.put(disabledStudy)
   }
 
@@ -39,135 +43,110 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
   "A study processor" can {
 
     "add a specimen group" in {
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val units = nameGenerator.next[String]
-      val anatomicalSourceType = AnatomicalSourceType.Blood
-      val preservationType = PreservationType.FreshSpecimen
-      val preservationTempType = PreservationTemperatureType.Minus80celcius
-      val specimenType = SpecimenType.FilteredUrine
+      val sg = factory.createSpecimenGroup
 
-      var cmd = AddSpecimenGroupCmd(disabledStudy.id.id, name, description, units, anatomicalSourceType,
-          preservationType, preservationTempType, specimenType)
+      var cmd = AddSpecimenGroupCmd(disabledStudy.id.id, sg.name, sg.description, sg.units,
+        sg.anatomicalSourceType, sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
 
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
-	.futureValue
+        .futureValue
       validation should be ('success)
 
       validation map { event =>
-	event shouldBe a[SpecimenGroupAddedEvent]
-	event should have (
-          'name                        (name),
-          'description                 (description),
-          'units                       (units),
-          'anatomicalSourceType        (anatomicalSourceType),
-          'preservationType            (preservationType),
-          'preservationTemperatureType (preservationTempType),
-          'specimenType                (specimenType)
-	)
+        event shouldBe a[SpecimenGroupAddedEvent]
+        event should have (
+          'name                        (sg.name),
+          'description                 (sg.description),
+          'units                       (sg.units),
+          'anatomicalSourceType        (sg.anatomicalSourceType),
+          'preservationType            (sg.preservationType),
+          'preservationTemperatureType (sg.preservationTemperatureType),
+          'specimenType                (sg.specimenType)
+        )
 
-        val sg = specimenGroupRepository.specimenGroupWithId(
-	  disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) | fail
-        sg.version should be (0)
-        specimenGroupRepository.allSpecimenGroupsForStudy(disabledStudy.id) should have size 1
+        val validation2 = specimenGroupRepository.specimenGroupWithId(
+          disabledStudy.id, SpecimenGroupId(event.specimenGroupId))
+        validation2 should be ('success)
+        validation2 map { sg =>
+          sg.version should be (0)
+          specimenGroupRepository.allSpecimenGroupsForStudy(disabledStudy.id) should have size 1
+        }
       }
 
       val name2 = nameGenerator.next[Study]
 
-     cmd = AddSpecimenGroupCmd(disabledStudy.id.id, name2, None, units, anatomicalSourceType,
-          preservationType, preservationTempType, specimenType)
+      cmd = AddSpecimenGroupCmd(disabledStudy.id.id, name2, None, sg.units, sg.anatomicalSourceType,
+        sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
       val validation2 = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
-	.futureValue
+        .futureValue
       validation2 should be ('success)
 
       validation2 map { event =>
-	event shouldBe a[SpecimenGroupAddedEvent]
-	event should have (
+        event shouldBe a[SpecimenGroupAddedEvent]
+        event should have (
           'name                        (name2),
           'description                 (None),
-          'units                       (units),
-          'anatomicalSourceType        (anatomicalSourceType),
-          'preservationType            (preservationType),
-          'preservationTemperatureType (preservationTempType),
-          'specimenType                (specimenType)
-	)
+          'units                       (sg.units),
+          'anatomicalSourceType        (sg.anatomicalSourceType),
+          'preservationType            (sg.preservationType),
+          'preservationTemperatureType (sg.preservationTemperatureType),
+          'specimenType                (sg.specimenType)
+        )
 
-        val sg = specimenGroupRepository.specimenGroupWithId(
-	  disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) | fail
-        sg.version should be (0)
-        specimenGroupRepository.allSpecimenGroupsForStudy(disabledStudy.id) should have size 2
+        val validation3 = specimenGroupRepository.specimenGroupWithId(
+          disabledStudy.id, SpecimenGroupId(event.specimenGroupId))
+        validation3 should be ('success)
+        validation3 map { sg  =>
+          sg.version should be (0)
+          specimenGroupRepository.allSpecimenGroupsForStudy(disabledStudy.id) should have size 2
+        }
       }
     }
 
     "update a specimen group" in {
-      val sgId = specimenGroupRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val units = nameGenerator.next[String]
-      val anatomicalSourceType = AnatomicalSourceType.Blood
-      val preservationType = PreservationType.FreshSpecimen
-      val preservationTempType = PreservationTemperatureType.Minus80celcius
-      val specimenType = SpecimenType.FilteredUrine
+      val sg = factory.createSpecimenGroup
+      specimenGroupRepository.put(sg)
 
-      val item = SpecimenGroup.create(disabledStudy.id, sgId, -1L, name, description, units,
-	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
-      specimenGroupRepository.put(item)
+      val sg2 = factory.createSpecimenGroup
 
-      val name2 = nameGenerator.next[Study]
-      val units2 = nameGenerator.next[String]
-      val anatomicalSourceType2 = AnatomicalSourceType.Brain
-      val preservationType2 = PreservationType.FrozenSpecimen
-      val preservationTempType2 = PreservationTemperatureType.Minus180celcius
-      val specimenType2 = SpecimenType.DnaBlood
-
-      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, item.id.id,
-	Some(item.version), name2, None, units2, anatomicalSourceType2, preservationType2,
-	preservationTempType2, specimenType2)
+      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sg.id.id, Some(sg.version),
+        sg2.name, sg2.description, sg2.units, sg2.anatomicalSourceType, sg2.preservationType,
+        sg2.preservationTemperatureType, sg2.specimenType)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
-	.futureValue
+        .futureValue
       validation should be ('success)
 
       validation map { event =>
-	event shouldBe a[SpecimenGroupUpdatedEvent]
-	event should have (
-	  'studyId                     (disabledStudy.id.id),
-	  'specimenGroupId             (item.id.id),
-	  'version                     (item.version + 1),
-          'name                        (name2),
-          'description                 (None),
-          'units                       (units2),
-          'anatomicalSourceType        (anatomicalSourceType2),
-          'preservationType            (preservationType2),
-          'preservationTemperatureType (preservationTempType2),
-          'specimenType                (specimenType2)
-	)
+        event shouldBe a[SpecimenGroupUpdatedEvent]
+        event should have (
+          'studyId                     (disabledStudy.id.id),
+          'specimenGroupId             (sg.id.id),
+          'version                     (sg.version + 1),
+          'name                        (sg2.name),
+          'description                 (sg2.description),
+          'units                       (sg2.units),
+          'anatomicalSourceType        (sg2.anatomicalSourceType),
+          'preservationType            (sg2.preservationType),
+          'preservationTemperatureType (sg2.preservationTemperatureType),
+          'specimenType                (sg2.specimenType)
+        )
 
-        val sg = specimenGroupRepository.specimenGroupWithId(
-	  disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) | fail
-        sg.version should be (item.version + 1)
+        val sg3 = specimenGroupRepository.specimenGroupWithId(
+          disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) | fail
+        sg3.version should be (sg.version + 1)
       }
     }
 
     "not update a specimen group with an invalid version" in {
-      val sgId = specimenGroupRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val units = nameGenerator.next[String]
-      val anatomicalSourceType = AnatomicalSourceType.Blood
-      val preservationType = PreservationType.FreshSpecimen
-      val preservationTempType = PreservationTemperatureType.Minus80celcius
-      val specimenType = SpecimenType.FilteredUrine
-
-      val item = SpecimenGroup.create(disabledStudy.id, sgId, -1L, name, description, units,
-	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
+      val item = factory.createSpecimenGroup
       specimenGroupRepository.put(item)
 
-      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, item.id.id,
-	Some(-1L), name, None, units, anatomicalSourceType, preservationType,
-	preservationTempType, specimenType)
+      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, item.id.id, Some(-1L), item.name,
+        item.description, item.units, item.anatomicalSourceType, item.preservationType,
+        item.preservationTemperatureType, item.specimenType)
 
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
-	.futureValue
+        .futureValue
       validation should be ('failure)
 
       validation.swap map { err =>
@@ -177,23 +156,14 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
     }
 
     "not be added if the name already exists" in {
-      val sgId = specimenGroupRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val units = nameGenerator.next[String]
-      val anatomicalSourceType = AnatomicalSourceType.Blood
-      val preservationType = PreservationType.FreshSpecimen
-      val preservationTempType = PreservationTemperatureType.Minus80celcius
-      val specimenType = SpecimenType.FilteredUrine
-
-      val item = SpecimenGroup.create(disabledStudy.id, sgId, -1L, name, description, units,
-	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
+      val item = factory.createSpecimenGroup
       specimenGroupRepository.put(item)
 
-      val cmd = AddSpecimenGroupCmd(disabledStudy.id.id, name, None, units, anatomicalSourceType,
-        preservationType, preservationTempType, specimenType)
+      val cmd = AddSpecimenGroupCmd(disabledStudy.id.id, item.name,
+        item.description, item.units, item.anatomicalSourceType, item.preservationType,
+        item.preservationTemperatureType, item.specimenType)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
-	.futureValue
+        .futureValue
       validation should be ('failure)
 
       validation.swap map { err =>
@@ -203,36 +173,19 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
     }
 
     "not be updated to name that already exists" in {
-      val sgId = specimenGroupRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val units = nameGenerator.next[String]
-      val anatomicalSourceType = AnatomicalSourceType.Blood
-      val preservationType = PreservationType.FreshSpecimen
-      val preservationTempType = PreservationTemperatureType.Minus80celcius
-      val specimenType = SpecimenType.FilteredUrine
-
-      val sg1 = SpecimenGroup.create(disabledStudy.id, sgId, -1L, name, description, units,
-	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
+      val sg1 = factory.createSpecimenGroup
       specimenGroupRepository.put(sg1)
 
-      val sgId2 = specimenGroupRepository.nextIdentity
-      val name2 = nameGenerator.next[Study]
-      val sg2 = SpecimenGroup.create(disabledStudy.id, sgId2, -1L, name2, description, units,
-	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
+      val sg2 = factory.createSpecimenGroup
       specimenGroupRepository.put(sg2)
 
-      val units2 = nameGenerator.next[String]
-      val anatomicalSourceType2 = AnatomicalSourceType.Brain
-      val preservationType2 = PreservationType.FrozenSpecimen
-      val preservationTempType2 = PreservationTemperatureType.Minus180celcius
-      val specimenType2 = SpecimenType.DnaBlood
+      val sg3 = factory.createSpecimenGroup
 
-      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sg2.id.id,
-	Some(sg2.version), name, None, units2, anatomicalSourceType2, preservationType2,
-	preservationTempType2, specimenType2)
+      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sg2.id.id, Some(sg2.version),
+        sg1.name, sg1.description, sg1.units, sg1.anatomicalSourceType, sg1.preservationType,
+        sg1.preservationTemperatureType, sg1.specimenType)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
-	.futureValue
+        .futureValue
 
       validation should be ('failure)
       validation.swap map { err =>
@@ -242,28 +195,17 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
     }
 
     "not be updated to wrong study" in {
-      val sgId = specimenGroupRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val units = nameGenerator.next[String]
-      val anatomicalSourceType = AnatomicalSourceType.Blood
-      val preservationType = PreservationType.FreshSpecimen
-      val preservationTempType = PreservationTemperatureType.Minus80celcius
-      val specimenType = SpecimenType.FilteredUrine
-
-      val item = SpecimenGroup.create(disabledStudy.id, sgId, -1L, name, description, units,
-	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
+      val item = factory.createSpecimenGroup
       specimenGroupRepository.put(item)
 
-      val studyName = nameGenerator.next[Study]
-      val study2 = DisabledStudy.create(studyRepository.nextIdentity, -1, studyName, None) | fail
+      val study2 = factory.createDisabledStudy
       studyRepository.put(study2)
 
-      val cmd = new UpdateSpecimenGroupCmd(study2.id.id, item.id.id,
-	Some(item.version), name, description, units, anatomicalSourceType, preservationType,
-	preservationTempType, specimenType)
+      val cmd = new UpdateSpecimenGroupCmd(study2.id.id, item.id.id, item.versionOption, item.name,
+        item.description, item.units, item.anatomicalSourceType, item.preservationType,
+        item.preservationTemperatureType, item.specimenType)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
-	.futureValue
+        .futureValue
       validation should be ('failure)
 
       validation.swap map { err =>
@@ -273,47 +215,26 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
     }
 
     "can remove a specimen group" in {
-      val sgId = specimenGroupRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val units = nameGenerator.next[String]
-      val anatomicalSourceType = AnatomicalSourceType.Blood
-      val preservationType = PreservationType.FreshSpecimen
-      val preservationTempType = PreservationTemperatureType.Minus80celcius
-      val specimenType = SpecimenType.FilteredUrine
-
-      val item = SpecimenGroup.create(disabledStudy.id, sgId, -1L, name, description, units,
-	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
+      val item = factory.createSpecimenGroup
       specimenGroupRepository.put(item)
 
-      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id, Some(item.version))
+      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id, item.versionOption)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
-	.futureValue
+        .futureValue
 
       validation should be ('success)
       validation map { event =>
-	event shouldBe a[SpecimenGroupRemovedEvent]
+        event shouldBe a[SpecimenGroupRemovedEvent]
       }
-
     }
 
     "not be removed with invalid version" in {
-      val sgId = specimenGroupRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val units = nameGenerator.next[String]
-      val anatomicalSourceType = AnatomicalSourceType.Blood
-      val preservationType = PreservationType.FreshSpecimen
-      val preservationTempType = PreservationTemperatureType.Minus80celcius
-      val specimenType = SpecimenType.FilteredUrine
-
-      val item = SpecimenGroup.create(disabledStudy.id, sgId, -1L, name, description, units,
-	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
+      val item = factory.createSpecimenGroup
       specimenGroupRepository.put(item)
 
       val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id, Some(item.version - 10))
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
-	.futureValue
+        .futureValue
 
       validation should be ('failure)
       validation.swap map { err =>

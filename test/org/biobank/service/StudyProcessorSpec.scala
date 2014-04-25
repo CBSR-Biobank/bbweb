@@ -11,7 +11,6 @@ import org.biobank.domain.{
   Factory,
   PreservationType,
   PreservationTemperatureType,
-  RepositoryComponent,
   RepositoryComponentImpl,
   SpecimenType
 }
