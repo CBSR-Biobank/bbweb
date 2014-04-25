@@ -3,6 +3,10 @@ package org.biobank.domain
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.study._
+import org.biobank.infrastructure.{
+  CollectionEventTypeAnnotationType,
+  CollectionEventTypeSpecimenGroup
+}
 import org.slf4j.LoggerFactory
 import scala.reflect.ClassTag
 import scala.reflect._
@@ -14,7 +18,7 @@ class Factory(nameGenerator: NameGenerator) {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  var domainObjects: Map[Class[_ <: ConcurrencySafeEntity[_]], ConcurrencySafeEntity[_]] = Map.empty
+  var domainObjects: Map[Class[_], _] = Map.empty
 
   def createRegisteredUser: RegisteredUser = {
     val version = -1L
@@ -112,14 +116,36 @@ class Factory(nameGenerator: NameGenerator) {
     ceventType
   }
 
-  /** Retrieves the class from the map, or calls 'create' if value does not exist
-    */
-  private def defaultObject[T <: org.biobank.domain.ConcurrencySafeEntity[_]](
-    key: Class[T], create: => T): T = {
-    domainObjects get key match {
-      case Some(obj) => key.cast(obj)
-      case None => create
+  def createCollectionEventAnnotationType: CollectionEventAnnotationType = {
+    val id = collectionEventAnnotationTypeRepository.nextIdentity
+    val name = nameGenerator.next[CollectionEventAnnotationType]
+    val description = Some(nameGenerator.next[CollectionEventAnnotationType])
+
+    val disabledStudy = defaultDisabledStudy
+    val validation = CollectionEventAnnotationType.create(disabledStudy.id, id, -1L, name,
+      description, AnnotationValueType.Date)
+    if (validation.isFailure) {
+      throw new Error
     }
+
+    val annotationType = validation | null
+    domainObjects = domainObjects + (classOf[CollectionEventAnnotationType] -> annotationType)
+    annotationType
+  }
+
+  def createCollectionEventTypeSpecimenGroup: CollectionEventTypeSpecimenGroup = {
+    val sg = defaultSpecimenGroup
+    val ceventTypeSpecimenGroup = CollectionEventTypeSpecimenGroup(sg.id.id, 1, Some(BigDecimal(1.0)))
+    domainObjects = domainObjects + (classOf[CollectionEventTypeSpecimenGroup] -> ceventTypeSpecimenGroup)
+    ceventTypeSpecimenGroup
+  }
+
+  def createCollectionEventTypeAnnotationType: CollectionEventTypeAnnotationType = {
+    val annotationType = defaultCollectionEventAnnotationType
+    val ceventTypeAnnotationType = CollectionEventTypeAnnotationType(annotationType.id.id, true)
+    domainObjects = domainObjects +
+    (classOf[CollectionEventTypeAnnotationType] -> ceventTypeAnnotationType)
+    ceventTypeAnnotationType
   }
 
   def defaultRegisteredUser: RegisteredUser = {
@@ -144,6 +170,29 @@ class Factory(nameGenerator: NameGenerator) {
 
   def defaultCollectionEventType: CollectionEventType = {
     defaultObject(classOf[CollectionEventType], createCollectionEventType)
+  }
+
+  def defaultCollectionEventAnnotationType: CollectionEventAnnotationType = {
+    defaultObject(classOf[CollectionEventAnnotationType], createCollectionEventAnnotationType)
+  }
+
+  def defaultCollectionEventTypeSpecimenGroup: CollectionEventTypeSpecimenGroup = {
+    defaultObject(classOf[CollectionEventTypeSpecimenGroup], createCollectionEventTypeSpecimenGroup)
+  }
+
+  def defaultCollectionEventTypeAnnotationType: CollectionEventTypeAnnotationType = {
+    defaultObject(
+      classOf[CollectionEventTypeAnnotationType],
+      createCollectionEventTypeAnnotationType)
+  }
+
+  /** Retrieves the class from the map, or calls 'create' if value does not exist
+    */
+  private def defaultObject[T](key: Class[T], create: => T): T = {
+    domainObjects get key match {
+      case Some(obj) => key.cast(obj)
+      case None => create
+    }
   }
 
 }

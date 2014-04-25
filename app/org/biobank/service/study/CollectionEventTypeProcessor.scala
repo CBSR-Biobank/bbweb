@@ -188,7 +188,7 @@ class CollectionEventTypeProcessor(
 
   /**
     * Checks that each annotation type belongs to the same study as the collection event type. If
-    * one or more annotation types are found that belong to a different study, theyare returned in
+    * one or more annotation types are found that belong to a different study, they are returned in
     * the DomainError.
     */
   private def validateAnnotationTypeData(

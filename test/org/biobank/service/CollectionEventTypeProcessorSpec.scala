@@ -10,8 +10,10 @@ import org.biobank.domain.{
   AnnotationValueType,
   DomainError,
   DomainValidation,
+  Factory,
   PreservationType,
   PreservationTemperatureType,
+  RepositoryComponentImpl,
   SpecimenType
 }
 import org.biobank.domain.study._
@@ -20,93 +22,64 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.slf4j.LoggerFactory
 
 import akka.pattern.ask
+import org.scalatest.Tag
+import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
-class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
+class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
 
+  val factory = new Factory(nameGenerator) with RepositoryComponentImpl
+
   var disabledStudy: DisabledStudy = null
 
-  // create the study to be used for tests
-  override def beforeAll: Unit = {
-    val name = nameGenerator.next[Study]
-    disabledStudy = DisabledStudy.create(studyRepository.nextIdentity, -1, name, None) | fail
+  // create the study to be used for each tests*
+  override def beforeEach: Unit = {
+    disabledStudy = factory.createDisabledStudy
     studyRepository.put(disabledStudy)
   }
 
   "A study processor" can {
 
     "add a collection event type" in {
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val recurring = true
+      val cet = factory.createCollectionEventType
 
       // specimen groups and annotation types tested separately below
       var cmd = AddCollectionEventTypeCmd(
-	disabledStudy.id.id, name, description, recurring, List.empty, List.empty)
+        disabledStudy.id.id, cet.name, cet.description, cet.recurring, List.empty, List.empty)
       val validation = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
+        .futureValue
+
       validation should be ('success)
-
       validation map { event =>
-	event shouldBe a[CollectionEventTypeAddedEvent]
-	event should have (
-          'name        (name),
-          'description (description),
-	  'recurring   (recurring)
-	)
+        event shouldBe a[CollectionEventTypeAddedEvent]
+        event should have (
+          'name        (cet.name),
+          'description (cet.description),
+          'recurring   (cet.recurring)
+        )
 
-        val cet = collectionEventTypeRepository.collectionEventTypeWithId(
+        val cet2 = collectionEventTypeRepository.collectionEventTypeWithId(
           disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) | fail
-	cet.version should be (0)
+        cet2.version should be (0)
         collectionEventTypeRepository.allCollectionEventTypesForStudy(disabledStudy.id) should have size 1
-      }
-
-      val name2 = nameGenerator.next[Study]
-      val recurring2 = false
-
-      cmd = AddCollectionEventTypeCmd(
-	disabledStudy.id.id, name2, None, recurring2, List.empty, List.empty)
-      val validation2 = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
-	.futureValue
-      validation2 should be ('success)
-
-      validation2 map { event =>
-	event shouldBe a[CollectionEventTypeAddedEvent]
-	event should have (
-          'name        (name2),
-          'description (None),
-	  'recurring   (recurring2)
-	)
-
-        val cet = collectionEventTypeRepository.collectionEventTypeWithId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) | fail
-	cet.version should be (0)
-        collectionEventTypeRepository.allCollectionEventTypesForStudy(disabledStudy.id) should have size 2
       }
     }
 
     "not add a collection event type with a name that already exists" in {
-      val id = collectionEventTypeRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val recurring = true
-
-      val cet = CollectionEventType.create(disabledStudy.id, id, -1L, name, description,
-	recurring, List.empty, List.empty) | fail
+      val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
       val cmd = AddCollectionEventTypeCmd(
-	disabledStudy.id.id, name, description, recurring, List.empty, List.empty)
+        disabledStudy.id.id, cet.name, cet.description, cet.recurring, List.empty, List.empty)
       val validation = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
+        .futureValue
 
       validation should be ('failure)
       validation.swap map { err =>
@@ -116,58 +89,42 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "update a collection event type" in {
-      val id = collectionEventTypeRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val recurring = true
-
-      val cet = CollectionEventType.create(disabledStudy.id, id, -1L, name, description,
-	recurring, List.empty, List.empty) | fail
+      val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val name2 = nameGenerator.next[Study]
-      val description2 = None
-      val recurring2 = false
+      val cet2 = factory.createCollectionEventType
 
       val cmd = UpdateCollectionEventTypeCmd(
-	disabledStudy.id.id, id.id, Some(0L), name2, description2, recurring2, List.empty, List.empty)
+        disabledStudy.id.id, cet.id.id, cet2.versionOption, cet2.name, cet2.description, cet2.recurring,
+        List.empty, List.empty)
       val validation = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+        .futureValue
 
       validation should be ('success)
       validation map { event =>
-	event shouldBe a[CollectionEventTypeUpdatedEvent]
-	event should have (
-          'name        (name2),
-          'description (description2),
-	  'recurring   (recurring2)
-	)
+        event shouldBe a[CollectionEventTypeUpdatedEvent]
+        event should have (
+          'name        (cet2.name),
+          'description (cet2.description),
+          'recurring   (cet2.recurring)
+        )
       }
     }
 
     "not update a collection event type to name that already exists" in {
-      val id = collectionEventTypeRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val recurring = true
+      val cet1 = factory.createCollectionEventType
+      collectionEventTypeRepository.put(cet1)
 
-      val cet = CollectionEventType.create(disabledStudy.id, id, -1L, name, description,
-	recurring, List.empty, List.empty) | fail
-      collectionEventTypeRepository.put(cet)
-
-      val id2 = collectionEventTypeRepository.nextIdentity
-      val name2= nameGenerator.next[Study]
-
-      val cet2 = CollectionEventType.create(disabledStudy.id, id2, -1L, name2, description,
-	recurring, List.empty, List.empty) | fail
+      val cet2 = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet2)
 
       val cmd = UpdateCollectionEventTypeCmd(
-	disabledStudy.id.id, id2.id, Some(0L), name, description, recurring, List.empty, List.empty)
+        disabledStudy.id.id, cet2.id.id, cet2.versionOption, cet1.name, cet2.description,
+        cet2.recurring, List.empty, List.empty)
       val validation = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+        .futureValue
 
       validation should be ('failure)
       validation.swap map { err =>
@@ -177,24 +134,18 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "not be update a collection event type to wrong study" in {
-      val id = collectionEventTypeRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val recurring = true
-
-      val cet = CollectionEventType.create(disabledStudy.id, id, -1L, name, description,
-	recurring, List.empty, List.empty) | fail
+      val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val studyName = nameGenerator.next[Study]
-      val study2 = DisabledStudy.create(studyRepository.nextIdentity, -1, studyName, None) | fail
+      val study2 = factory.createDisabledStudy
       studyRepository.put(study2)
 
       val cmd = UpdateCollectionEventTypeCmd(
-	study2.id.id, id.id, Some(0L), name, description, recurring, List.empty, List.empty)
+        study2.id.id, cet.id.id, cet.versionOption, cet.name, cet.description, cet.recurring,
+        List.empty, List.empty)
       val validation = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+        .futureValue
 
       validation should be ('failure)
       validation.swap map { err =>
@@ -204,20 +155,15 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "not update a collection event type with an invalid version" in {
-      val id = collectionEventTypeRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val recurring = true
-
-      val cet = CollectionEventType.create(disabledStudy.id, id, -1L, name, description,
-	recurring, List.empty, List.empty) | fail
+      val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
       val cmd = UpdateCollectionEventTypeCmd(
-	disabledStudy.id.id, id.id, Some(-1L), name, description, recurring, List.empty, List.empty)
+        disabledStudy.id.id, cet.id.id, Some(cet.version + 1), cet.name, cet.description,
+        cet.recurring, List.empty, List.empty)
       val validation = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+        .futureValue
 
       validation should be ('failure)
       validation.swap map { err =>
@@ -227,38 +173,26 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "can remove a collection event type" in {
-      val id = collectionEventTypeRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val recurring = true
-
-      val cet = CollectionEventType.create(disabledStudy.id, id, -1L, name, description,
-	recurring, List.empty, List.empty) | fail
+      val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val cmd = RemoveCollectionEventTypeCmd(disabledStudy.id.id, id.id, Some(0L))
+      val cmd = RemoveCollectionEventTypeCmd(disabledStudy.id.id, cet.id.id, cet.versionOption)
       val validation = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeRemovedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeRemovedEvent]]
+        .futureValue
 
       validation should be ('success)
       validation map { event => event shouldBe a[CollectionEventTypeRemovedEvent] }
     }
 
     "not remove a collection event type  with an invalid version" in {
-      val id = collectionEventTypeRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val description = Some(nameGenerator.next[Study])
-      val recurring = true
-
-      val cet = CollectionEventType.create(disabledStudy.id, id, -1L, name, description,
-	recurring, List.empty, List.empty) | fail
+      val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val cmd = RemoveCollectionEventTypeCmd(disabledStudy.id.id, id.id, Some(-1L))
+      val cmd = RemoveCollectionEventTypeCmd(disabledStudy.id.id, cet.id.id, Some(cet.version + 1))
       val validation = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeRemovedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeRemovedEvent]]
+        .futureValue
 
       validation should be ('failure)
       validation.swap map { err =>
@@ -268,113 +202,82 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "add a specimen group to a collection event type" in {
-      val sgId = specimenGroupRepository.nextIdentity
-      val name = nameGenerator.next[Study]
-      val units = nameGenerator.next[String]
-      val anatomicalSourceType = AnatomicalSourceType.Blood
-      val preservationType = PreservationType.FreshSpecimen
-      val preservationTempType = PreservationTemperatureType.Minus80celcius
-      val specimenType = SpecimenType.FilteredUrine
-
-      val sg = SpecimenGroup.create(disabledStudy.id, sgId, -1L, name, None, units,
-	anatomicalSourceType, preservationType, preservationTempType, specimenType) | fail
+      val sg = factory.createSpecimenGroup
       specimenGroupRepository.put(sg)
 
-      val maxCount = 10
-      val amount = Some(BigDecimal(1.1))
-      val maxCount2 = 5
-      val amount2 = None
       val specimenGroupData = List(
-	CollectionEventTypeSpecimenGroup(sg.id.id, maxCount, amount),
-	CollectionEventTypeSpecimenGroup(sg.id.id, maxCount2, amount2))
+        factory.createCollectionEventTypeSpecimenGroup,
+        factory.createCollectionEventTypeSpecimenGroup)
 
+      val cet = factory.createCollectionEventType
       val cmd = AddCollectionEventTypeCmd(
-	disabledStudy.id.id, name, None, recurring = true, specimenGroupData, List.empty)
+        disabledStudy.id.id, cet.name, cet.description, cet.recurring, specimenGroupData, List.empty)
       val validation = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
+        .futureValue
 
       validation should be ('success)
       validation map { event =>
-	event shouldBe a[CollectionEventTypeAddedEvent]
+        event shouldBe a[CollectionEventTypeAddedEvent]
         event.specimenGroupData should have length (2)
 
-	event.specimenGroupData(0) should have (
-	  'specimenGroupId (sgId.id),
-	  'maxCount (maxCount),
-	  'amount (amount)
-	)
+        event.specimenGroupData(0) should have (
+          'specimenGroupId (sg.id.id),
+          'maxCount (specimenGroupData(0).maxCount),
+          'amount (specimenGroupData(0).amount)
+        )
 
-	event.specimenGroupData(1) should have (
-	  'specimenGroupId (sgId.id),
-	  'maxCount (maxCount2),
-	  'amount (amount2)
-	)
+        event.specimenGroupData(1) should have (
+          'specimenGroupId (sg.id.id),
+          'maxCount (specimenGroupData(1).maxCount),
+          'amount (specimenGroupData(1).amount)
+        )
       }
     }
 
     "update a collection event type and add specimen groups" in {
-      val sgId = specimenGroupRepository.nextIdentity
-      val sgName = nameGenerator.next[Study]
-      val sg = SpecimenGroup.create(disabledStudy.id, sgId, -1L, sgName, None, "mL",
-	AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
-	PreservationTemperatureType.Minus80celcius, SpecimenType.BuffyCoat) | fail
+      val sg = factory.createSpecimenGroup
       specimenGroupRepository.put(sg)
 
-      val cetId2 = collectionEventTypeRepository.nextIdentity
-      val cetName2 = nameGenerator.next[CollectionEventType]
-      val cet = CollectionEventType.create(disabledStudy.id, cetId2, -1L, cetName2, None,
-	recurring = true, List.empty, List.empty) | fail
+      val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val maxCount = 10
-      val amount = Some(BigDecimal(1.1))
-      val specimenGroupData = List(
-	CollectionEventTypeSpecimenGroup(sg.id.id, maxCount, amount))
+      val specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroup)
 
-      val name = nameGenerator.next[Study]
-      val cmd = AddCollectionEventTypeCmd(
-	disabledStudy.id.id, name, None, recurring = true, specimenGroupData, List.empty)
+      val cmd = UpdateCollectionEventTypeCmd(
+        cet.studyId.id, cet.id.id, cet.versionOption, cet.name, cet.description, cet.recurring,
+	specimenGroupData, List.empty)
       val validation = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+        .futureValue
 
       validation should be ('success)
       validation map { event =>
-	event shouldBe a[CollectionEventTypeAddedEvent]
+        event shouldBe a[CollectionEventTypeUpdatedEvent]
         event.specimenGroupData should have length (1)
 
-	event.specimenGroupData(0) should have (
-	  'specimenGroupId (sgId.id),
-	  'maxCount (maxCount),
-	  'amount (amount)
-	)
+        event.specimenGroupData(0) should have (
+          'specimenGroupId (sg.id.id),
+          'maxCount (specimenGroupData(0).maxCount),
+          'amount (specimenGroupData(0).amount)
+        )
       }
     }
 
     "not update a specimen group if it used by collection event type" in {
-      val sgId = specimenGroupRepository.nextIdentity
-      val sgName = nameGenerator.next[SpecimenGroup]
-
-      val sg = SpecimenGroup.create(disabledStudy.id, sgId, -1L, sgName, None, "mL",
-	AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
-	PreservationTemperatureType.Minus80celcius, SpecimenType.BuffyCoat) | fail
+      val sg = factory.createSpecimenGroup
       specimenGroupRepository.put(sg)
 
-      val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroup(sg.id.id, 1, Some(BigDecimal(1.1))))
-
-      val cetId = collectionEventTypeRepository.nextIdentity
-      val cetName = nameGenerator.next[CollectionEventType]
-      val cet = CollectionEventType.create(disabledStudy.id, cetId, -1L, cetName, None,
-	recurring = true, specimenGroupData, List.empty) | fail
+      var cet = factory.createCollectionEventType
+      cet = cet.update(cet.versionOption, cet.name, cet.description, cet.recurring,
+	List(factory.createCollectionEventTypeSpecimenGroup), List.empty) | fail
       collectionEventTypeRepository.put(cet)
 
-      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sgId.id,
-	Some(sg.version), sgName, None, "mL", AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
-          PreservationTemperatureType.Minus80celcius, SpecimenType.CdpaPlasma)
+      val cmd = new UpdateSpecimenGroupCmd(sg.studyId.id, sg.id.id,
+        sg.versionOption, sg.name, sg.description, sg.units, sg.anatomicalSourceType,
+	sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
-	.futureValue
+        .futureValue
       validation should be ('failure)
 
       validation.swap map { err =>
@@ -384,58 +287,42 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "remove a specimen group from collection event type" in {
-      val sgId = specimenGroupRepository.nextIdentity
-      val sgName = nameGenerator.next[SpecimenGroup]
-
-      val sg = SpecimenGroup.create(disabledStudy.id, sgId, -1L, sgName, None, "mL",
-	AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
-	PreservationTemperatureType.Minus80celcius, SpecimenType.BuffyCoat) | fail
+      val sg = factory.createSpecimenGroup
       specimenGroupRepository.put(sg)
 
-      val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroup(sg.id.id, 1, Some(BigDecimal(1.1))))
-
-      val cetId = collectionEventTypeRepository.nextIdentity
-      val cetName = nameGenerator.next[CollectionEventType]
-      val cet = CollectionEventType.create(disabledStudy.id, cetId, -1L, cetName, None,
-	recurring = true, specimenGroupData, List.empty) | fail
+      var cet = factory.createCollectionEventType
+      cet = cet.update(cet.versionOption, cet.name, cet.description, cet.recurring,
+	List(factory.createCollectionEventTypeSpecimenGroup), List.empty) | fail
       collectionEventTypeRepository.put(cet)
 
       val cmd = UpdateCollectionEventTypeCmd(
-	disabledStudy.id.id, cetId.id, Some(0L), cetName, None, recurring = true,
-	List.empty, List.empty)
+        cet.studyId.id, cet.id.id, cet.versionOption, cet.name, cet.description, cet.recurring,
+        List.empty, List.empty)
       val validation = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+        .futureValue
 
       validation should be ('success)
       validation map { event =>
-	event shouldBe a[CollectionEventTypeUpdatedEvent]
+        event shouldBe a[CollectionEventTypeUpdatedEvent]
         event.specimenGroupData should have length (0)
       }
     }
 
     "not remove a specimen group if used by collection event type" in {
-      val sgId = specimenGroupRepository.nextIdentity
-      val sgName = nameGenerator.next[SpecimenGroup]
-
-      val sg = SpecimenGroup.create(disabledStudy.id, sgId, -1L, sgName, None, "mL",
-	AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
-	PreservationTemperatureType.Minus80celcius, SpecimenType.BuffyCoat) | fail
+      val sg = factory.createSpecimenGroup
       specimenGroupRepository.put(sg)
 
-      val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroup(sg.id.id, 1, Some(BigDecimal(1.1))))
+      val specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroup)
 
-      val cetId = collectionEventTypeRepository.nextIdentity
-      val cetName = nameGenerator.next[CollectionEventType]
-      val cet = CollectionEventType.create(disabledStudy.id, cetId, -1L, cetName, None,
-	recurring = true, specimenGroupData, List.empty) | fail
+      var cet = factory.createCollectionEventType
+      cet = cet.update(cet.versionOption, cet.name, cet.description, cet.recurring,
+	specimenGroupData, List.empty) | fail
       collectionEventTypeRepository.put(cet)
 
-      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, sg.id.id, Some(sg.version))
+      val cmd = new RemoveSpecimenGroupCmd(sg.studyId.id, sg.id.id, sg.versionOption)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
-	.futureValue
+        .futureValue
 
       validation should be ('failure)
       validation.swap map { err =>
@@ -445,26 +332,17 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "not add a specimen group from a different study" in {
-      val studyName = nameGenerator.next[Study]
-      val study2 = DisabledStudy.create(studyRepository.nextIdentity, -1, studyName, None) | fail
+      val specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroup)
+
+      val study2 = factory.createDisabledStudy
       studyRepository.put(study2)
 
-      val sgId = specimenGroupRepository.nextIdentity
-      val sgName = nameGenerator.next[SpecimenGroup]
-
-      val sg = SpecimenGroup.create(study2.id, sgId, -1L, sgName, None, "mL",
-	AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
-	PreservationTemperatureType.Minus80celcius, SpecimenType.BuffyCoat) | fail
-      specimenGroupRepository.put(sg)
-
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroup(sg.id.id, 2, Some(BigDecimal(1.1))))
-
-      val cetName = nameGenerator.next[CollectionEventType]
-      var cmd: CollectionEventTypeCommand = AddCollectionEventTypeCmd(
-	disabledStudy.id.id, cetName, None, recurring = true, specimenGroupData, List.empty)
+      val cet = factory.createCollectionEventType
+      val cmd = AddCollectionEventTypeCmd(
+        cet.studyId.id, cet.name, cet.description, cet.recurring, specimenGroupData, List.empty)
       val validation = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
+        .futureValue
 
       validation should be ('failure)
       validation.swap map { err =>
@@ -475,32 +353,20 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
 
 
     "not update a collection event type with a specimen group from a different study" in {
-      val studyName = nameGenerator.next[Study]
-      val study2 = DisabledStudy.create(studyRepository.nextIdentity, -1, studyName, None) | fail
+      val specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroup)
+
+      val study2 = factory.createDisabledStudy
       studyRepository.put(study2)
 
-      val sgId = specimenGroupRepository.nextIdentity
-      val sgName = nameGenerator.next[SpecimenGroup]
-
-      val sg = SpecimenGroup.create(study2.id, sgId, -1L, sgName, None, "mL",
-	AnatomicalSourceType.Blood, PreservationType.FreshSpecimen,
-	PreservationTemperatureType.Minus80celcius, SpecimenType.BuffyCoat) | fail
-      specimenGroupRepository.put(sg)
-
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroup(sg.id.id, 2, Some(BigDecimal(1.1))))
-
-      val cetId2 = collectionEventTypeRepository.nextIdentity
-      val cetName2 = nameGenerator.next[CollectionEventType]
-      val cet = CollectionEventType.create(disabledStudy.id, cetId2, -1L, cetName2, None,
-	recurring = true, specimenGroupData, List.empty) | fail
+      val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
       val cmd = UpdateCollectionEventTypeCmd(
-	disabledStudy.id.id, cetId2.id, Some(0L), cetName2, None, recurring = true,
-	specimenGroupData, List.empty)
+        cet.studyId.id, cet.id.id, cet.versionOption, cet.name, cet.description, cet.recurring,
+        specimenGroupData, List.empty)
       val validation2 = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+        .futureValue
 
       validation2 should be ('failure)
       validation2.swap map { err =>
@@ -509,32 +375,27 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       }
     }
 
-    "add an annotation type to a colleciton event" in {
-      val annotId = collectionEventAnnotationTypeRepository.nextIdentity
-      val name = nameGenerator.next[CollectionEventAnnotationType]
-      val required = true
+    "add an annotation type to a colleciton event" taggedAs(Tag("single")) in {
+      val annotationType = factory.defaultCollectionEventAnnotationType
+      collectionEventAnnotationTypeRepository.put(annotationType)
+      val annotTypeData = List(factory.createCollectionEventTypeAnnotationType)
 
-      val annotType = CollectionEventAnnotationType.create(disabledStudy.id, annotId, -1L, name, None,
-      AnnotationValueType.Date) | fail
-      collectionEventAnnotationTypeRepository.put(annotType)
-
-      val annotTypeData = List(CollectionEventTypeAnnotationType(annotType.id.id, required))
-
+      val cet = factory.createCollectionEventType
       var cmd = AddCollectionEventTypeCmd(
-	disabledStudy.id.id, name, None, recurring = true, List.empty, annotTypeData)
+        annotationType.studyId.id, cet.name, cet.description, cet.recurring, List.empty, annotTypeData)
       val validation = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
+        .futureValue
 
       validation should be ('success)
       validation map { event =>
-	event shouldBe a[CollectionEventTypeAddedEvent]
+        event shouldBe a[CollectionEventTypeAddedEvent]
         event.annotationTypeData should have length (1)
 
-	event.annotationTypeData(0) should have (
-	  'annotationTypeId (annotType.id.id),
-	  'required         (required)
-	)
+        event.annotationTypeData(0) should have (
+          'annotationTypeId (annotTypeData(0).annotationTypeId),
+          'required         (annotTypeData(0).required)
+        )
       }
     }
 

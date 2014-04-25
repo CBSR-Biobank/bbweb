@@ -228,7 +228,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAft
       }
     }
 
-    "not be removed with invalid version" in {
+    "not remove a specimen group with an invalid version" in {
       val item = factory.createSpecimenGroup
       specimenGroupRepository.put(item)
 
@@ -242,6 +242,5 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAft
         err.list.head should include ("version mismatch")
       }
     }
-
   }
 }
