@@ -4,6 +4,8 @@ import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.slf4j.LoggerFactory
+import scala.reflect.ClassTag
+import scala.reflect._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -13,6 +15,39 @@ class Factory(nameGenerator: NameGenerator) {
   val log = LoggerFactory.getLogger(this.getClass)
 
   var domainObjects: Map[Class[_ <: ConcurrencySafeEntity[_]], ConcurrencySafeEntity[_]] = Map.empty
+
+  def createRegisteredUser: RegisteredUser = {
+    val version = -1L
+    val name = nameGenerator.next[User]
+    val email = "user1@test.com"
+    val id = UserId(email)
+    val password = nameGenerator.next[User]
+    val hasher = nameGenerator.next[User]
+    val salt = Some(nameGenerator.next[User])
+    val avatarUrl = Some("http://test.com/")
+
+    val validation = RegisteredUser.create(
+      id, version, name, email, password, hasher, salt, avatarUrl)
+    if (validation.isFailure) {
+      throw new Error
+    }
+
+    val user = validation | null
+    domainObjects = domainObjects + (classOf[RegisteredUser] -> user)
+    user
+  }
+
+  def createActiveUser: ActiveUser = {
+    val registeredUser = defaultRegisteredUser
+    val validation = registeredUser.activate(registeredUser.versionOption)
+    if (validation.isFailure) {
+      throw new Error
+    }
+
+    val user = validation | null
+    domainObjects = domainObjects + (classOf[ActiveUser] -> user)
+    user
+  }
 
   def createDisabledStudy: DisabledStudy = {
     val id = studyRepository.nextIdentity
@@ -77,45 +112,38 @@ class Factory(nameGenerator: NameGenerator) {
     ceventType
   }
 
-  def defaultDisabledStudy: DisabledStudy = {
-    domainObjects get classOf[DisabledStudy] match {
-      case Some(obj) => obj match {
-	case study: DisabledStudy =>
-	  study
-	case _ => throw new Error
-      }
-      case None => createDisabledStudy
+  /** Retrieves the class from the map, or calls 'creator' if value does not exist
+    */
+  private def defaultObject[T <: org.biobank.domain.ConcurrencySafeEntity[_]](
+    key: Class[T], creator: => T): T = {
+    domainObjects get key match {
+      case Some(obj) => key.cast(obj)
+      case None => creator
     }
+  }
+
+  def defaultRegisteredUser: RegisteredUser = {
+    defaultObject(classOf[RegisteredUser], createRegisteredUser)
+  }
+
+  def defaultActivUser: ActiveUser = {
+    defaultObject(classOf[ActiveUser], createActiveUser)
+  }
+
+  def defaultDisabledStudy: DisabledStudy = {
+    defaultObject(classOf[DisabledStudy], createDisabledStudy)
   }
 
   def defaultEnabledStudy: EnabledStudy = {
-    domainObjects get classOf[EnabledStudy] match {
-      case Some(obj) => obj match {
-	case study: EnabledStudy => study
-	case _ => throw new Error
-      }
-      case None => createEnabledStudy
-    }
+    defaultObject(classOf[EnabledStudy], createEnabledStudy)
   }
 
   def defaultSpecimenGroup: SpecimenGroup = {
-    domainObjects get classOf[SpecimenGroup] match {
-      case Some(obj) => obj match {
-	case sg: SpecimenGroup => sg
-	case _ => throw new Error
-      }
-      case None => createSpecimenGroup
-    }
+    defaultObject(classOf[SpecimenGroup], createSpecimenGroup)
   }
 
   def defaultCollectionEventType: CollectionEventType = {
-    domainObjects get classOf[CollectionEventType] match {
-      case Some(obj) => obj match {
-	case sg: CollectionEventType => sg
-	case _ => throw new Error
-      }
-      case None => createCollectionEventType
-    }
+    defaultObject(classOf[CollectionEventType], createCollectionEventType)
   }
 
 }
