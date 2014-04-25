@@ -112,13 +112,13 @@ class Factory(nameGenerator: NameGenerator) {
     ceventType
   }
 
-  /** Retrieves the class from the map, or calls 'creator' if value does not exist
+  /** Retrieves the class from the map, or calls 'create' if value does not exist
     */
   private def defaultObject[T <: org.biobank.domain.ConcurrencySafeEntity[_]](
-    key: Class[T], creator: => T): T = {
+    key: Class[T], create: => T): T = {
     domainObjects get key match {
       case Some(obj) => key.cast(obj)
-      case None => creator
+      case None => create
     }
   }
 
