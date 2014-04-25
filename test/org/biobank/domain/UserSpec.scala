@@ -35,18 +35,22 @@ class UserSpec extends WordSpecLike with Matchers {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      val v = RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
-      val user = v.getOrElse(fail("could not create user"))
-      user shouldBe a[RegisteredUser]
+      val validation = RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
 
-      user.id should be(id)
-      user.version should be(0L)
-      user.name should be(name)
-      user.email should be(email)
-      user.password should be(password)
-      user.hasher should be(hasher)
-      user.salt should be(salt)
-      user.avatarUrl should be(avatarUrl)
+      validation should be ('success)
+      validation map { user =>
+	user shouldBe a[RegisteredUser]
+        user should have (
+	  'id (id),
+	  'version (0L),
+	  'name (name),
+	  'email (email),
+	  'password (password),
+	  'hasher (hasher),
+	  'salt (salt),
+	  'avatarUrl (avatarUrl)
+	)
+      }
     }
 
     "can be activated, locked, and unlocked" in {
