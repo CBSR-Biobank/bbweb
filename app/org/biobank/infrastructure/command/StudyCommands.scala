@@ -144,9 +144,9 @@ object StudyCommands {
       extends CollectionEventAnnotationTypeCommand
 
   case class UpdateCollectionEventAnnotationTypeCmd(
+    studyId: String,
     id: String,
     expectedVersion: Option[Long],
-    studyId: String,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,

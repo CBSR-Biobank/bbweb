@@ -8,6 +8,7 @@ import org.biobank.domain.{
   DomainValidation,
   DomainError,
   RepositoryComponent,
+  RepositoryComponentImpl,
   UserId
 }
 import org.biobank.domain.study._

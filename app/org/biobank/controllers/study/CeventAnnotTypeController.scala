@@ -52,7 +52,7 @@ case class CeventAnnotationTypeMapper(
   def getUpdateCmd: UpdateCollectionEventAnnotationTypeCmd = {
     val selectionMap = if (selections.size > 0) Some(selections.map(v => (v, v)).toMap) else None
     UpdateCollectionEventAnnotationTypeCmd(
-      annotationTypeId, Some(version), studyId, name, description,
+      studyId, annotationTypeId, Some(version), name, description,
       AnnotationValueType.withName(valueType), maxValueCount, selectionMap)
   }
 }
