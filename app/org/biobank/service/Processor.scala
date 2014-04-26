@@ -30,7 +30,7 @@ trait Processor extends EventsourcedProcessor with ActorLogging {
     }
   }
 
-  /**
+  /** Searches the repository for a matching item.
     */
   protected  def nameAvailableMatcher[T <: ConcurrencySafeEntity[_]](
     name: String,
@@ -46,6 +46,8 @@ trait Processor extends EventsourcedProcessor with ActorLogging {
     }
   }
 
+  /** Checks that the domain objects version matches the expected one.
+    */
   protected  def validateVersion[T <: ConcurrencySafeEntity[_]](
     item: T,
     expectedVersion: Option[Long]): DomainValidation[Boolean] = {

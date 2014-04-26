@@ -67,6 +67,7 @@ class CeventAnnotationTypeProcessor(
     val id = AnnotationTypeId(cmd.id)
     for {
       oldItem <- annotationTypeRepository.annotationTypeWithId(StudyId(cmd.studyId), id)
+      notUsed <- checkNotInUse(oldItem)
       nameValid <- nameAvailable(cmd.name, id)
       newItem <- oldItem.update(cmd.expectedVersion, cmd.name, cmd.description, cmd.valueType,
 	cmd.maxValueCount, cmd.options)
@@ -81,6 +82,7 @@ class CeventAnnotationTypeProcessor(
     val id = AnnotationTypeId(cmd.id)
     for {
       item <- annotationTypeRepository.annotationTypeWithId(StudyId(cmd.studyId), id)
+      notUsed <- checkNotInUse(item)
       validVersion <- validateVersion(item, cmd.expectedVersion)
       event <- CollectionEventAnnotationTypeRemovedEvent(item.studyId.id, item.id.id).success
     } yield event
@@ -140,5 +142,13 @@ class CeventAnnotationTypeProcessor(
 
   private def nameAvailable(name: String, excludeId: AnnotationTypeId): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, annotationTypeRepository)(item => item.name.equals(name) && (item.id != excludeId))
+  }
+
+  def checkNotInUse(annotationType: CollectionEventAnnotationType): DomainValidation[Boolean] = {
+    if (collectionEventTypeRepository.annotationTypeInUse(annotationType)) {
+      DomainError(s"annotation type is in use by collection event type: ${annotationType.id}").failNel
+    } else {
+      true.success
+    }
   }
 }
