@@ -30,4 +30,27 @@ trait Processor extends EventsourcedProcessor with ActorLogging {
     }
   }
 
+  /**
+    */
+  protected  def nameAvailableMatcher[T <: ConcurrencySafeEntity[_]](
+    name: String,
+    repository: ReadRepository[_, T])(
+    matcher: T => Boolean): DomainValidation[Boolean] = {
+    val exists = repository.getValues.exists { item =>
+      matcher(item)
+    }
+    if (exists) {
+      DomainError(s"item with name already exists: $name").failNel
+    } else {
+      true.success
+    }
+  }
+
+  protected  def validateVersion[T <: ConcurrencySafeEntity[_]](
+    item: T,
+    expectedVersion: Option[Long]): DomainValidation[Boolean] = {
+    if (item.versionOption == expectedVersion) true.success
+    else DomainError(s"version mismatch").failNel
+  }
+
 }

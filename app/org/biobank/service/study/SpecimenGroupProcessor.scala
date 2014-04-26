@@ -157,28 +157,16 @@ class SpecimenGroupProcessor(
   }
 
   private def nameAvailable(specimenGroupName: String): DomainValidation[Boolean] = {
-    val exists = specimenGroupRepository.getValues.exists { item =>
+    nameAvailableMatcher(specimenGroupName, specimenGroupRepository) { item =>
       item.name.equals(specimenGroupName)
-    }
-
-    if (exists) {
-      DomainError(s"specimen group with name already exists: $specimenGroupName").failNel
-    } else {
-      true.success
     }
   }
 
   private def nameAvailable(
     specimenGroupName: String,
     id: SpecimenGroupId): DomainValidation[Boolean] = {
-    val exists = specimenGroupRepository.getValues.exists { item =>
+    nameAvailableMatcher(specimenGroupName, specimenGroupRepository) { item =>
       item.name.equals(specimenGroupName) && (item.id != id)
-    }
-
-    if (exists) {
-      DomainError(s"specimen group with name already exists: $specimenGroupName").failNel
-    } else {
-      true.success
     }
   }
 
@@ -190,13 +178,6 @@ class SpecimenGroupProcessor(
     } else {
       true.success
     }
-  }
-
-  private def validateVersion(
-    specimenGroup: SpecimenGroup,
-    expectedVersion: Option[Long]): DomainValidation[Boolean] = {
-    if (specimenGroup.versionOption == expectedVersion) true.success
-    else DomainError(s"version mismatch").failNel
   }
 
 }

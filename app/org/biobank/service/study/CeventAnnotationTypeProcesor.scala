@@ -15,7 +15,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 class CeventAnnotationTypeProcessor(
-  collectionEventAnnotationTypeRepository: CollectionEventAnnotationTypeRepositoryComponent#CollectionEventAnnotationTypeRepository,
+  annotationTypeRepository: CollectionEventAnnotationTypeRepositoryComponent#CollectionEventAnnotationTypeRepository,
   collectionEventTypeRepository: CollectionEventTypeRepositoryComponent#CollectionEventTypeRepository)
     extends Processor {
 
@@ -30,7 +30,7 @@ class CeventAnnotationTypeProcessor(
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
       snapshot.ceventAnnotationTypes.foreach{ annotType =>
-	collectionEventAnnotationTypeRepository.put(annotType) }
+	annotationTypeRepository.put(annotType) }
   }
 
 
@@ -49,8 +49,9 @@ class CeventAnnotationTypeProcessor(
 
   def validateCmd(cmd: AddCollectionEventAnnotationTypeCmd):
       DomainValidation[CollectionEventAnnotationTypeAddedEvent] = {
-    val id = collectionEventAnnotationTypeRepository.nextIdentity
+    val id = annotationTypeRepository.nextIdentity
     for {
+      nameValid <- nameAvailable(cmd.name)
       newItem <- CollectionEventAnnotationType.create(
 	StudyId(cmd.studyId), id, -1L, cmd.name, cmd.description, cmd.valueType,
 	cmd.maxValueCount, cmd.options)
@@ -63,63 +64,81 @@ class CeventAnnotationTypeProcessor(
 
   def validateCmd(cmd: UpdateCollectionEventAnnotationTypeCmd):
       DomainValidation[CollectionEventAnnotationTypeUpdatedEvent] = {
-    null
-    //     cmd match {
-    //       case cmd: UpdateCollectionEventAnnotationTypeCmd =>
-    //         CollectionEventAnnotationType(
-    //           oldAnnotationType.id, cmd.expectedVersion.getOrElse(-1L) + 1L, StudyId(cmd.studyId),
-    //           cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options)
-    //     }
+    val id = AnnotationTypeId(cmd.id)
+    for {
+      oldItem <- annotationTypeRepository.annotationTypeWithId(StudyId(cmd.studyId), id)
+      nameValid <- nameAvailable(cmd.name, id)
+      newItem <- oldItem.update(cmd.expectedVersion, cmd.name, cmd.description, cmd.valueType,
+	cmd.maxValueCount, cmd.options)
+      event <- CollectionEventAnnotationTypeUpdatedEvent(
+        newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
+	newItem.valueType, newItem.maxValueCount, newItem.options).success
+    } yield event
   }
-
-  //   private def updateCollectionEventAnnotationType(
-  //     cmd: UpdateCollectionEventAnnotationTypeCmd,
-  //     study: DisabledStudy): DomainValidation[CollectionEventAnnotationTypeUpdatedEvent] = {
-  //     for {
-  //       updatedItem <- updateAnnotationType(collectionEventAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study)
-  //       event <- CollectionEventAnnotationTypeUpdatedEvent(
-  //         updatedItem.studyId.id, updatedItem.id.id, updatedItem.version, updatedItem.name,
-  //         updatedItem.description, updatedItem.valueType, updatedItem.maxValueCount,
-  //         updatedItem.options).success
-  //     } yield event
-  //   }
 
   def validateCmd(cmd: RemoveCollectionEventAnnotationTypeCmd):
-      DomainValidation[CollectionEventAnnotationTypeAddedEvent] = {
-    null
-    //     cmd match {
-    //       case cmd: RemoveCollectionEventAnnotationTypeCmd =>
-    //         CollectionEventAnnotationType(
-    //           AnnotationTypeId(cmd.id), cmd.expectedVersion.getOrElse(-1), StudyId(cmd.studyId),
-    //           oldAnnotationType.name, oldAnnotationType.description, oldAnnotationType.valueType,
-    //           oldAnnotationType.maxValueCount, oldAnnotationType.options)
-    //     }
-  }
-
-  //   private def removeCollectionEventAnnotationType(
-  //     cmd: RemoveCollectionEventAnnotationTypeCmd,
-  //     study: DisabledStudy): DomainValidation[CollectionEventAnnotationTypeRemovedEvent] = {
-  //     for {
-  //       removedItem <- removeAnnotationType(collectionEventAnnotationTypeRepository, cmd, AnnotationTypeId(cmd.id), study)
-  //       event <- CollectionEventAnnotationTypeRemovedEvent(
-  //         removedItem.studyId.id, removedItem.id.id).success
-  //     } yield event
-  //   }
-
-  def checkNotInUse(annotationType: CollectionEventAnnotationType): DomainValidation[Boolean] = {
-    if (collectionEventTypeRepository.annotationTypeInUse(annotationType)) {
-      DomainError(s"annotation type is in use by collection event type: ${annotationType.id}").failNel
-    } else {
-      true.success
-    }
+      DomainValidation[CollectionEventAnnotationTypeRemovedEvent] = {
+    val id = AnnotationTypeId(cmd.id)
+    for {
+      item <- annotationTypeRepository.annotationTypeWithId(StudyId(cmd.studyId), id)
+      validVersion <- validateVersion(item, cmd.expectedVersion)
+      event <- CollectionEventAnnotationTypeRemovedEvent(item.studyId.id, item.id.id).success
+    } yield event
   }
 
   private def recoverEvent(event: CollectionEventAnnotationTypeAddedEvent): Unit = {
+    val studyId = StudyId(event.studyId)
+    val id = AnnotationTypeId(event.annotationTypeId)
+    val validation = for {
+      newItem <- CollectionEventAnnotationType.create(studyId, id, -1L, event.name,
+	event.description, event.valueType, event.maxValueCount, event.options)
+      savedItem <- annotationTypeRepository.put(newItem).success
+    } yield newItem
+
+    if (validation.isFailure) {
+      // this should never happen because the only way to get here is when the
+      // command passed validation
+      throw new IllegalStateException("recovering collection event type from event failed")
+    }
   }
 
   private def recoverEvent(event: CollectionEventAnnotationTypeUpdatedEvent): Unit = {
+    val validation = for {
+      item <- annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId))
+      updatedItem <- item.update(item.versionOption, event.name,
+	event.description, event.valueType, event.maxValueCount, event.options)
+      savedItem <- annotationTypeRepository.put(updatedItem).success
+    } yield updatedItem
+
+    if (validation.isFailure) {
+      // this should never happen because the only way to get here is when the
+      // command passed validation
+      val err = validation.swap.getOrElse(List.empty)
+      throw new IllegalStateException(
+	s"recovering collection event type update from event failed: $err")
+    }
   }
 
   private def recoverEvent(event: CollectionEventAnnotationTypeRemovedEvent): Unit = {
+    val validation = for {
+      item <- annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId))
+      removedItem <- annotationTypeRepository.remove(item).success
+    } yield removedItem
+
+    if (validation.isFailure) {
+      // this should never happen because the only way to get here is when the
+      // command passed validation
+      val err = validation.swap.getOrElse(List.empty)
+      throw new IllegalStateException(
+	s"recovering collection event type remove from event failed: $err")
+    }
+  }
+
+  private def nameAvailable(name: String): DomainValidation[Boolean] = {
+    nameAvailableMatcher(name, annotationTypeRepository)(item => item.name.equals(name))
+  }
+
+  private def nameAvailable(name: String, excludeId: AnnotationTypeId): DomainValidation[Boolean] = {
+    nameAvailableMatcher(name, annotationTypeRepository)(item => item.name.equals(name) && (item.id != excludeId))
   }
 }

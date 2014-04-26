@@ -151,26 +151,12 @@ class CollectionEventTypeProcessor(
   }
 
   private def nameAvailable(name: String): DomainValidation[Boolean] = {
-    val exists = collectionEventTypeRepository.getValues.exists { item =>
-      item.name.equals(name)
-    }
-
-    if (exists) {
-      DomainError(s"collection event type with name already exists: $name").failNel
-    } else {
-      true.success
-    }
+    nameAvailableMatcher(name, collectionEventTypeRepository)(item => item.name.equals(name))
   }
 
   private def nameAvailable(name: String, excludeId: CollectionEventTypeId): DomainValidation[Boolean] = {
-    val exists = collectionEventTypeRepository.getValues.exists { item =>
+    nameAvailableMatcher(name, collectionEventTypeRepository){ item =>
       item.name.equals(name) && (item.id != excludeId)
-    }
-
-    if (exists) {
-      DomainError(s"collection event type with name already exists: $name").failNel
-    } else {
-      true.success
     }
   }
 
@@ -208,10 +194,4 @@ class CollectionEventTypeProcessor(
     else DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).failNel
   }
 
-  private def validateVersion(
-    collectionEventType: CollectionEventType,
-    expectedVersion: Option[Long]): DomainValidation[Boolean] = {
-    if (collectionEventType.versionOption == expectedVersion) true.success
-    else DomainError(s"version mismatch").failNel
-  }
 }
