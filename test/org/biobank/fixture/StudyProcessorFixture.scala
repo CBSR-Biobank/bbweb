@@ -2,6 +2,7 @@ package org.biobank.fixture
 
 import org.biobank.service._
 import org.biobank.service.study._
+import org.biobank.domain.RepositoryComponentImpl
 
 import akka.actor.Props
 import akka.util.Timeout
@@ -10,6 +11,7 @@ import akka.util.Timeout
  * Used to test the study service.
  */
 trait StudyProcessorFixture extends TestFixture {
+  this: ProcessorComponentImpl =>
 
   override val studyProcessor = system.actorOf(Props(new StudyProcessorImpl), "studyproc")
   override val userProcessor = null

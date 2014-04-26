@@ -28,6 +28,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
+  this: ProcessorComponentImpl with RepositoryComponentImpl =>
 
   private val log = LoggerFactory.getLogger(this.getClass)
 

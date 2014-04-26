@@ -10,7 +10,7 @@ import akka.actor._
 import scalaz._
 import Scalaz._
 
-class CeventAnnotationTypeSpec extends StudyProcessorFixture {
+class CeventAnnotationTypeSpec { // extends StudyProcessorFixture {
   //  args(
   //    //include = "tag1",
   //    sequential = true) // forces all tests to be run sequentially

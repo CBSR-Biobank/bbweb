@@ -13,6 +13,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 class UserProcessorSpec extends UserProcessorFixture {
+  this: ProcessorComponentImpl =>
 
   val log = LoggerFactory.getLogger(this.getClass)
 

@@ -39,6 +39,8 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
 
     val log = LoggerFactory.getLogger(this.getClass)
 
+    log.info(s"*** here $this ***")
+
     def nextIdentity: CollectionEventTypeId =
       new CollectionEventTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
 

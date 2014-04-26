@@ -7,13 +7,8 @@ import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.query.model._
 
-import play.api.Mode
-import play.api.Mode._
 import akka.actor._
 import scala.concurrent._
-import scala.slick.session.Database
-import org.specs2.mutable._
-import org.specs2.time._
 import scala.slick.session.Database
 import Database.threadLocalSession
 import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
@@ -25,6 +20,7 @@ import Scalaz._
  * Used to test the study query model.
  */
 trait StudyQueryFixture extends TestFixture {
+  this: ServiceComponentImpl =>
 
   protected val DB = Database.forURL("jdbc:h2:mem:bbweb-test;MODE=MYSQL", driver = "org.h2.Driver")
 

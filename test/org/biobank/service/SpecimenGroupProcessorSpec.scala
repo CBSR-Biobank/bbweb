@@ -26,6 +26,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
+  this: ProcessorComponentImpl =>
 
   val nameGenerator = new NameGenerator(this.getClass)
 

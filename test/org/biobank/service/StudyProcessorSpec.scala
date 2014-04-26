@@ -28,6 +28,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 class StudyProcessorSpec extends StudyProcessorFixture {
+  this: ProcessorComponentImpl =>
 
   val log = LoggerFactory.getLogger(this.getClass)
 
