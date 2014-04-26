@@ -19,10 +19,11 @@ import scalaz.Scalaz._
   *
   * It handles commands that deal with a Collection Event Type.
   */
-class CollectionEventTypeProcessor extends Processor {
-  this: CollectionEventTypeRepositoryComponent
-      with CollectionEventAnnotationTypeRepositoryComponent
-      with SpecimenGroupRepositoryComponent =>
+class CollectionEventTypeProcessor(
+  collectionEventTypeRepository: CollectionEventTypeRepositoryComponent#CollectionEventTypeRepository,
+  collectionEventAnnotationTypeRepository: CollectionEventAnnotationTypeRepositoryComponent#CollectionEventAnnotationTypeRepository,
+  specimenGroupRepository: SpecimenGroupRepositoryComponent#SpecimenGroupRepository)
+    extends Processor {
 
 
   case class SnapshotState(collectionEventTypes: Set[CollectionEventType])

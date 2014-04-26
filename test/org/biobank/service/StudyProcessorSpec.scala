@@ -28,13 +28,17 @@ import scalaz._
 import scalaz.Scalaz._
 
 class StudyProcessorSpec extends StudyProcessorFixture {
-  this: ProcessorComponentImpl =>
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  val factory = new Factory(nameGenerator) with RepositoryComponentImpl
+  val factory = new Factory(
+    nameGenerator,
+    studyRepository,
+    collectionEventTypeRepository,
+    collectionEventAnnotationTypeRepository,
+    specimenGroupRepository)
 
   "A study processor" should {
 

@@ -26,11 +26,15 @@ import scalaz._
 import scalaz.Scalaz._
 
 class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
-  this: ProcessorComponentImpl =>
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  val factory = new Factory(nameGenerator) with RepositoryComponentImpl
+  val factory = new Factory(
+    nameGenerator,
+    studyRepository,
+    collectionEventTypeRepository,
+    collectionEventAnnotationTypeRepository,
+    specimenGroupRepository)
 
   var disabledStudy: DisabledStudy = null
 

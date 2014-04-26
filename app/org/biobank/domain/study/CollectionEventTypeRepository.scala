@@ -39,22 +39,18 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
 
     val log = LoggerFactory.getLogger(this.getClass)
 
-    log.info(s"*** here $this ***")
-
     def nextIdentity: CollectionEventTypeId =
       new CollectionEventTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
 
     def collectionEventTypeWithId(
       studyId: StudyId,
       ceventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType] = {
-      log.info(s"collectionEventTypeWithId: $this")
       getByKey(ceventTypeId) match {
         case Failure(err) =>
           DomainError(
             s"collection event type does not exist: { studyId: $studyId, ceventTypeId: $ceventTypeId }")
 	    .failNel
         case Success(cet) =>
-	  log.info(s"collectionEventTypeWithId: $studyId")
           if (cet.studyId.equals(studyId))
             cet.success
           else DomainError(
@@ -92,12 +88,6 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
       studyCeventTypes.exists(cet =>
         cet.annotationTypeData.exists(atd =>
           atd.annotationTypeId.equals(annotationType.id.id)))
-    }
-
-
-    override def put(value: CollectionEventType): CollectionEventType = {
-      log.info(s"put: $this -- $value")
-      super.put(value)
     }
   }
 }

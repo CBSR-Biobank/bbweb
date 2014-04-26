@@ -29,8 +29,10 @@ import scalaz.Scalaz._
   * It handles commands that deal with a Specimen Group.
   *
   */
-class SpecimenGroupProcessor extends Processor {
-  this: SpecimenGroupRepositoryComponent with CollectionEventTypeRepositoryComponent =>
+class SpecimenGroupProcessor(
+  specimenGroupRepository: SpecimenGroupRepositoryComponent#SpecimenGroupRepository,
+  collectionEventTypeRepository: CollectionEventTypeRepositoryComponent#CollectionEventTypeRepository)
+    extends Processor {
 
   case class SnapshotState(specimenGroups: Set[SpecimenGroup])
 

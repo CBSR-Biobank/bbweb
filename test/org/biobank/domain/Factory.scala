@@ -13,8 +13,12 @@ import scala.reflect._
 import scalaz._
 import scalaz.Scalaz._
 
-class Factory(nameGenerator: NameGenerator) {
-  this: RepositoryComponent =>
+class Factory(
+  nameGenerator: NameGenerator,
+  studyRepository: StudyRepositoryComponent#StudyRepository,
+  collectionEventTypeRepository: CollectionEventTypeRepositoryComponent#CollectionEventTypeRepository,
+  collectionEventAnnotationTypeRepository: CollectionEventAnnotationTypeRepositoryComponent#CollectionEventAnnotationTypeRepository,
+  specimenGroupRepository: SpecimenGroupRepositoryComponent#SpecimenGroupRepository) {
 
   val log = LoggerFactory.getLogger(this.getClass)
 

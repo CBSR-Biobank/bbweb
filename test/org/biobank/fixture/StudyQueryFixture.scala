@@ -20,7 +20,6 @@ import Scalaz._
  * Used to test the study query model.
  */
 trait StudyQueryFixture extends TestFixture {
-  this: ServiceComponentImpl =>
 
   protected val DB = Database.forURL("jdbc:h2:mem:bbweb-test;MODE=MYSQL", driver = "org.h2.Driver")
 
