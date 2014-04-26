@@ -40,14 +40,16 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
     case class SnapshotState(studies: Set[Study])
 
     val specimenGroupProcessor = context.system.actorOf(Props(
-      new SpecimenGroupProcessor(specimenGroupRepository, collectionEventTypeRepository)),
+      new SpecimenGroupProcessor
+	  with SpecimenGroupRepositoryComponentImpl
+	  with CollectionEventTypeRepositoryComponentImpl),
       "sgproc")
 
     val collectionEventTypeProcessor = context.system.actorOf(Props(
-      new CollectionEventTypeProcessor(
-	collectionEventTypeRepository,
-	collectionEventAnnotationTypeRepository,
-	specimenGroupRepository)),
+      new CollectionEventTypeProcessor
+	  with SpecimenGroupRepositoryComponentImpl
+	  with CollectionEventTypeRepositoryComponentImpl
+	  with CollectionEventAnnotationTypeRepositoryComponentImpl),
       "cetproc")
 
     val receiveRecover: Receive = {

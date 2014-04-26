@@ -3,20 +3,11 @@ package org.biobank.service
 import org.biobank.domain._
 import org.biobank.domain.study._
 
-import play.api.Mode
-import play.api.Mode._
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.util.Timeout
 import akka.actor.Props
 import akka.persistence._
-import play.api.Logger
-
-import play.api.Logger
-
-object Configuration {
-  val EventBusChannelId = 1
-}
 
 /**
  * Uses the Scala Cake Pattern to configure the application.

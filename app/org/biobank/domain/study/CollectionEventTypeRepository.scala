@@ -20,10 +20,6 @@ trait CollectionEventTypeRepositoryComponent {
       studyId: StudyId,
       ceventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType]
 
-    def collectionEventTypeWithId(
-      studyId: StudyId,
-      ceventTypeId: String): DomainValidation[CollectionEventType]
-
     def allCollectionEventTypesForStudy(studyId: StudyId): Set[CollectionEventType]
 
     def specimenGroupInUse(studyId: StudyId, specimenGroupId: SpecimenGroupId): Boolean
@@ -49,24 +45,20 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
     def collectionEventTypeWithId(
       studyId: StudyId,
       ceventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType] = {
+      log.info(s"collectionEventTypeWithId: $this")
       getByKey(ceventTypeId) match {
         case Failure(err) =>
           DomainError(
-            "collection event type does not exist: { studyId: %s, ceventTypeId: %s }".format(
-              studyId, ceventTypeId)).failNel
+            s"collection event type does not exist: { studyId: $studyId, ceventTypeId: $ceventTypeId }")
+	    .failNel
         case Success(cet) =>
+	  log.info(s"collectionEventTypeWithId: $studyId")
           if (cet.studyId.equals(studyId))
             cet.success
           else DomainError(
-            "study does not have collection event type: { studyId: %s, ceventTypeId: %s }".format(
-              studyId, ceventTypeId)).failNel
+            "study does not have collection event type:{ studyId: $studyId, ceventTypeId: $ceventTypeId }")
+              .failNel
       }
-    }
-
-    def collectionEventTypeWithId(
-      studyId: StudyId,
-      ceventTypeId: String): DomainValidation[CollectionEventType] = {
-      collectionEventTypeWithId(studyId, CollectionEventTypeId(ceventTypeId))
     }
 
     def allCollectionEventTypesForStudy(studyId: StudyId): Set[CollectionEventType] = {
@@ -98,6 +90,12 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
       studyCeventTypes.exists(cet =>
         cet.annotationTypeData.exists(atd =>
           atd.annotationTypeId.equals(annotationType.id.id)))
+    }
+
+
+    override def put(value: CollectionEventType): CollectionEventType = {
+      log.info(s"put: $this -- $value")
+      super.put(value)
     }
   }
 }

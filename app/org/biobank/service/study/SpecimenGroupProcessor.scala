@@ -3,7 +3,10 @@ package org.biobank.service.study
 import org.biobank.service.Processor
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.domain.{ DomainValidation, DomainError }
+import org.biobank.domain.{
+  DomainValidation,
+  DomainError
+}
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
@@ -26,10 +29,8 @@ import scalaz.Scalaz._
   * It handles commands that deal with a Specimen Group.
   *
   */
-class SpecimenGroupProcessor(
-  specimenGroupRepository: SpecimenGroupRepositoryComponent#SpecimenGroupRepository,
-  collectionEventTypeRepository: CollectionEventTypeRepositoryComponent#CollectionEventTypeRepository)
-    extends Processor {
+class SpecimenGroupProcessor extends Processor {
+  this: SpecimenGroupRepositoryComponent with CollectionEventTypeRepositoryComponent =>
 
   case class SnapshotState(specimenGroups: Set[SpecimenGroup])
 
