@@ -50,6 +50,12 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 	specimenGroupRepository)),
       "cetproc")
 
+    val ceventAnnotationTypeProcessor = context.system.actorOf(Props(
+      new CeventAnnotationTypeProcessor(
+	collectionEventAnnotationTypeRepository,
+	collectionEventTypeRepository)),
+      "ceatproc")
+
     val receiveRecover: Receive = {
       case event: StudyAddedEvent => recoverEvent(event)
 
@@ -66,12 +72,11 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
 
       case cmd: DisableStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-       case cmd: SpecimenGroupCommand => specimenGroupProcessor forward cmd
+      case cmd: SpecimenGroupCommand => specimenGroupProcessor forward cmd
 
       case cmd: CollectionEventTypeCommand => collectionEventTypeProcessor forward cmd
 
-      // case cmd: CollectionEventAnnotationTypeCommand =>
-      //   processEntityMsg(cmd, cmd.studyId, ceventAnnotationTypeService.process)
+      case cmd: CollectionEventAnnotationTypeCommand => ceventAnnotationTypeProcessor forward cmd
 
       // case cmd: ParticipantAnnotationTypeCommand =>
       //   processEntityMsg(cmd, cmd.studyId, participantAnnotationTypeService.process)

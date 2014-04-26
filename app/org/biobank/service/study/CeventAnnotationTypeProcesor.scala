@@ -108,7 +108,7 @@ class CeventAnnotationTypeProcessor(
 
   def checkNotInUse(annotationType: CollectionEventAnnotationType): DomainValidation[Boolean] = {
     if (collectionEventTypeRepository.annotationTypeInUse(annotationType)) {
-      DomainError("annotation type is in use by collection event type: " + annotationType.id).failNel
+      DomainError(s"annotation type is in use by collection event type: ${annotationType.id}").failNel
     } else {
       true.success
     }
