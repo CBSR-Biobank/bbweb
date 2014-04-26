@@ -31,6 +31,10 @@ class CollectionEventTypeProcessor(
   val receiveRecover: Receive = {
     case event: CollectionEventTypeAddedEvent => recoverEvent(event)
 
+    case event: CollectionEventTypeUpdatedEvent => recoverEvent(event)
+
+    case event: CollectionEventTypeRemovedEvent => recoverEvent(event)
+
     case SnapshotOffer(_, snapshot: SnapshotState) =>
       snapshot.collectionEventTypes.foreach{ ceType =>
 	collectionEventTypeRepository.put(ceType) }
