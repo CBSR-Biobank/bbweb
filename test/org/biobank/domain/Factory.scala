@@ -124,10 +124,13 @@ class Factory(
     val id = collectionEventAnnotationTypeRepository.nextIdentity
     val name = nameGenerator.next[CollectionEventAnnotationType]
     val description = Some(nameGenerator.next[CollectionEventAnnotationType])
+    val options = Some(Map(
+      nameGenerator.next[String] -> nameGenerator.next[String],
+      nameGenerator.next[String] -> nameGenerator.next[String]))
 
     val disabledStudy = defaultDisabledStudy
     val validation = CollectionEventAnnotationType.create(disabledStudy.id, id, -1L, name,
-      description, AnnotationValueType.Date)
+      description, AnnotationValueType.Select, Some(1), options)
     if (validation.isFailure) {
       throw new Error
     }

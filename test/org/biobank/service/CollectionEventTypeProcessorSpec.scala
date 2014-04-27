@@ -64,11 +64,9 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
       validation map { event =>
         event shouldBe a[CollectionEventTypeAddedEvent]
         event should have(
-          'name(cet.name),
-          'description(cet.description),
-          'recurring(cet.recurring))
-
-        log.info(s"event: $event")
+          'name (cet.name),
+          'description (cet.description),
+          'recurring (cet.recurring))
 
         val cet2 = collectionEventTypeRepository.collectionEventTypeWithId(
           disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) | fail
@@ -177,7 +175,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
       }
     }
 
-    "can remove a collection event type" in {
+    "remove a collection event type" in {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 

@@ -4,17 +4,35 @@ import org.biobank.fixture._
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
-import scala.concurrent._
-import scala.concurrent.duration._
-import akka.actor._
+
+import org.slf4j.LoggerFactory
+import akka.pattern.ask
+import org.scalatest.Tag
+import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import Scalaz._
 
-class ParticipantAnnotationTypeSpec { // extends StudyProcessorFixture {
-  //  args(
-  //    //include = "tag1",
-  //    sequential = true) // forces all tests to be run sequentially
-  //
+class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
+
+  private val log = LoggerFactory.getLogger(this.getClass)
+
+  val nameGenerator = new NameGenerator(this.getClass)
+
+  val factory = new Factory(
+    nameGenerator,
+    studyRepository,
+    collectionEventTypeRepository,
+    collectionEventAnnotationTypeRepository,
+    specimenGroupRepository)
+
+  var disabledStudy: DisabledStudy = null
+
+  // create the study to be used for each tests*
+  override def beforeEach: Unit = {
+    disabledStudy = factory.createDisabledStudy
+    studyRepository.put(disabledStudy)
+  }
+
   //  val nameGenerator = new NameGenerator[this.getClass]
   //  val studyName = nameGenerator.next[Study]
   //  val studyEvent = await(studyService.addStudy(new AddStudyCmd(studyName, Some(studyName)))) | null
