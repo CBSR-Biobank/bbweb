@@ -11,9 +11,9 @@ import akka.pattern.ask
 import org.scalatest.Tag
 import org.scalatest.BeforeAndAfterEach
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 
-class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
+class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
@@ -38,19 +38,19 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
 
   "A study processor" can {
 
-    "add a participant annotation type" in {
-      val annotType = factory.createParticipantAnnotationType
+    "add a specimen link annotation type" in {
+      val annotType = factory.createSpecimenLinkAnnotationType
 
-      val cmd = AddParticipantAnnotationTypeCmd(
+      val cmd = AddSpecimenLinkAnnotationTypeCmd(
 	annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
 	annotType.maxValueCount, annotType.options)
       val validation = ask(studyProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
+        .mapTo[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]]
         .futureValue
 
       validation should be('success)
       validation map { event =>
-        event shouldBe a[ParticipantAnnotationTypeAddedEvent]
+        event shouldBe a[SpecimenLinkAnnotationTypeAddedEvent]
         event should have(
 	  'studyId (annotType.studyId.id),
           'name (annotType.name),
@@ -68,22 +68,22 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
 	  }
 	}
 
-        val at = participantAnnotationTypeRepository.annotationTypeWithId(
+        val at = specimenLinkAnnotationTypeRepository.annotationTypeWithId(
           disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
         at.version should be(0)
-        participantAnnotationTypeRepository.allAnnotationTypesForStudy(disabledStudy.id) should have size 1
+        specimenLinkAnnotationTypeRepository.allAnnotationTypesForStudy(disabledStudy.id) should have size 1
       }
     }
 
-    "not add a participant annotation type if the name already exists" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
+    "not add a specimen link annotation type if the name already exists" in {
+      val annotType = factory.createSpecimenLinkAnnotationType
+      specimenLinkAnnotationTypeRepository.put(annotType)
 
-      val cmd = AddParticipantAnnotationTypeCmd(
+      val cmd = AddSpecimenLinkAnnotationTypeCmd(
 	annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
 	annotType.maxValueCount, annotType.options)
       val validation = ask(studyProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
+        .mapTo[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]]
         .futureValue
 
       validation should be('failure)
@@ -93,22 +93,22 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
       }
     }
 
-    "update a participant annotation type" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
+    "update a specimen link annotation type" in {
+      val annotType = factory.createSpecimenLinkAnnotationType
+      specimenLinkAnnotationTypeRepository.put(annotType)
 
-      val annotType2 = factory.createParticipantAnnotationType
+      val annotType2 = factory.createSpecimenLinkAnnotationType
 
-      val cmd = UpdateParticipantAnnotationTypeCmd(
+      val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
 	annotType.studyId.id, annotType.id.id, annotType.versionOption, annotType2.name,
 	annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
       val validation = ask(studyProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
+        .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
 
       validation should be('success)
       validation map { event =>
-        event shouldBe a[ParticipantAnnotationTypeUpdatedEvent]
+        event shouldBe a[SpecimenLinkAnnotationTypeUpdatedEvent]
         event should have(
 	  'studyId (annotType.studyId.id),
 	  'version (annotType.version + 1),
@@ -127,27 +127,27 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
 	  }
 	}
 
-        val at = participantAnnotationTypeRepository.annotationTypeWithId(
+        val at = specimenLinkAnnotationTypeRepository.annotationTypeWithId(
           disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
         at.version should be(1)
-        participantAnnotationTypeRepository.allAnnotationTypesForStudy(disabledStudy.id) should have size 1
+        specimenLinkAnnotationTypeRepository.allAnnotationTypesForStudy(disabledStudy.id) should have size 1
       }
     }
 
-    "not update a participant annotation type to name that already exists" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
+    "not update a specimen link annotation type to name that already exists" in {
+      val annotType = factory.createSpecimenLinkAnnotationType
+      specimenLinkAnnotationTypeRepository.put(annotType)
 
-      val annotType2 = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType2)
+      val annotType2 = factory.createSpecimenLinkAnnotationType
+      specimenLinkAnnotationTypeRepository.put(annotType2)
 
       val dupliacteName = annotType.name
 
-      val cmd = UpdateParticipantAnnotationTypeCmd(
+      val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
 	annotType2.studyId.id, annotType2.id.id, annotType2.versionOption, dupliacteName,
 	annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
       val validation = ask(studyProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
+        .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
 
       validation should be('failure)
@@ -157,18 +157,18 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
       }
     }
 
-    "not update a participant annotation type to the wrong study" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
+    "not update a specimen link annotation type to the wrong study" in {
+      val annotType = factory.createSpecimenLinkAnnotationType
+      specimenLinkAnnotationTypeRepository.put(annotType)
 
       val study2 = factory.createDisabledStudy
       studyRepository.put(study2)
 
-      val cmd = UpdateParticipantAnnotationTypeCmd(
+      val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
 	study2.id.id, annotType.id.id, annotType.versionOption, annotType.name,
 	annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
       val validation = ask(studyProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
+        .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
 
       validation should be('failure)
@@ -177,15 +177,15 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
         err.list.head should include("study does not have annotation type") }
     }
 
-    "not update a participant annotation type with an invalid version" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
+    "not update a specimen link annotation type with an invalid version" in {
+      val annotType = factory.createSpecimenLinkAnnotationType
+      specimenLinkAnnotationTypeRepository.put(annotType)
 
-      val cmd = UpdateParticipantAnnotationTypeCmd(
+      val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
 	annotType.studyId.id, annotType.id.id, Some(annotType.version - 1), annotType.name,
 	annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
       val validation = ask(studyProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
+        .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
 
       validation should be('failure)
@@ -195,28 +195,28 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
       }
     }
 
-    "remove a participant annotation type" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
+    "remove a specimen link annotation type" in {
+      val annotType = factory.createSpecimenLinkAnnotationType
+      specimenLinkAnnotationTypeRepository.put(annotType)
 
-      val cmd = RemoveParticipantAnnotationTypeCmd(
+      val cmd = RemoveSpecimenLinkAnnotationTypeCmd(
 	annotType.studyId.id, annotType.id.id, annotType.versionOption)
       val validation = ask(studyProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
+        .mapTo[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
         .futureValue
 
       validation should be('success)
-      validation map { event => event shouldBe a[ParticipantAnnotationTypeRemovedEvent] }
+      validation map { event => event shouldBe a[SpecimenLinkAnnotationTypeRemovedEvent] }
     }
 
-    "not remove a participant annotation type with invalid version" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
+    "not remove a specimen link annotation type with invalid version" in {
+      val annotType = factory.createSpecimenLinkAnnotationType
+      specimenLinkAnnotationTypeRepository.put(annotType)
 
-      val cmd = RemoveParticipantAnnotationTypeCmd(
+      val cmd = RemoveSpecimenLinkAnnotationTypeCmd(
 	annotType.studyId.id, annotType.id.id, Some(annotType.version - 1))
       val validation = ask(studyProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
+        .mapTo[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
         .futureValue
 
       validation should be('failure)

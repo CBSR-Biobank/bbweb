@@ -217,9 +217,9 @@ object StudyCommands {
       with HasStudyIdentity
 
   case class UpdateSpecimenLinkAnnotationTypeCmd(
+    studyId: String,
     id: String,
     expectedVersion: Option[Long],
-    studyId: String,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -231,9 +231,9 @@ object StudyCommands {
       with HasExpectedVersion
 
   case class RemoveSpecimenLinkAnnotationTypeCmd(
+    studyId: String,
     id: String,
-    expectedVersion: Option[Long],
-    studyId: String)
+    expectedVersion: Option[Long])
       extends SpecimenLinkAnnotationTypeCommand
       with HasIdentity
       with HasStudyIdentity

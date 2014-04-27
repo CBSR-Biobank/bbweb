@@ -11,7 +11,7 @@ import akka.pattern.ask
 import org.scalatest.Tag
 import org.scalatest.BeforeAndAfterEach
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 
 class CeventAnnotationTypeProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
 
@@ -25,7 +25,8 @@ class CeventAnnotationTypeProcessorSpec extends StudyProcessorFixture with Befor
     collectionEventTypeRepository,
     collectionEventAnnotationTypeRepository,
     participantAnnotationTypeRepository,
-    specimenGroupRepository)
+    specimenGroupRepository,
+    specimenLinkAnnotationTypeRepository)
 
   var disabledStudy: DisabledStudy = null
 

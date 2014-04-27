@@ -39,7 +39,8 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
     collectionEventTypeRepository,
     collectionEventAnnotationTypeRepository,
     participantAnnotationTypeRepository,
-    specimenGroupRepository)
+    specimenGroupRepository,
+    specimenLinkAnnotationTypeRepository)
 
   var disabledStudy: DisabledStudy = null
 

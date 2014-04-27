@@ -19,7 +19,8 @@ class Factory(
   collectionEventTypeRepository: CollectionEventTypeRepositoryComponent#CollectionEventTypeRepository,
   collectionEventAnnotationTypeRepository: CollectionEventAnnotationTypeRepositoryComponent#CollectionEventAnnotationTypeRepository,
   participantAnnotationTypeRepository: ParticipantAnnotationTypeRepositoryComponent#ParticipantAnnotationTypeRepository,
-  specimenGroupRepository: SpecimenGroupRepositoryComponent#SpecimenGroupRepository) {
+  specimenGroupRepository: SpecimenGroupRepositoryComponent#SpecimenGroupRepository,
+  specimenLinkAnnotationTypeRepository: SpecimenLinkAnnotationTypeRepositoryComponent#SpecimenLinkAnnotationTypeRepository) {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -176,6 +177,26 @@ class Factory(
     annotationType
   }
 
+  def createSpecimenLinkAnnotationType: SpecimenLinkAnnotationType = {
+    val id = specimenLinkAnnotationTypeRepository.nextIdentity
+    val name = nameGenerator.next[SpecimenLinkAnnotationType]
+    val description = Some(nameGenerator.next[SpecimenLinkAnnotationType])
+    val options = Some(Map(
+      nameGenerator.next[String] -> nameGenerator.next[String],
+      nameGenerator.next[String] -> nameGenerator.next[String]))
+
+    val disabledStudy = defaultDisabledStudy
+    val validation = SpecimenLinkAnnotationType.create(disabledStudy.id, id, -1L, name,
+      description, AnnotationValueType.Select, Some(1), options)
+    if (validation.isFailure) {
+      throw new Error
+    }
+
+    val annotationType = validation | null
+    domainObjects = domainObjects + (classOf[SpecimenLinkAnnotationType] -> annotationType)
+    annotationType
+  }
+
   def defaultRegisteredUser: RegisteredUser = {
     defaultObject(classOf[RegisteredUser], createRegisteredUser)
   }
@@ -212,6 +233,18 @@ class Factory(
     defaultObject(
       classOf[CollectionEventTypeAnnotationType],
       createCollectionEventTypeAnnotationType)
+  }
+
+  def defaultParticipantAnnotationType: ParticipantAnnotationType = {
+    defaultObject(
+      classOf[ParticipantAnnotationType],
+      createParticipantAnnotationType)
+  }
+
+  def defaultSpecimenLinkAnnotationType: SpecimenLinkAnnotationType = {
+    defaultObject(
+      classOf[SpecimenLinkAnnotationType],
+      createSpecimenLinkAnnotationType)
   }
 
   /** Retrieves the class from the map, or calls 'create' if value does not exist
