@@ -33,6 +33,20 @@ case class SpecimenLinkAnnotationType private (
         |  options: { $options }
         }""".stripMargin
 
+  def update(
+    expectedVersion: Option[Long],
+    name: String,
+    description: Option[String],
+    valueType: AnnotationValueType,
+    maxValueCount: Option[Int] = None,
+    options: Option[Map[String, String]] = None): DomainValidation[SpecimenLinkAnnotationType] = {
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      updatedAnnotationType <- SpecimenLinkAnnotationType.create(studyId, id, version,
+	name, description, valueType, maxValueCount, options)
+    } yield updatedAnnotationType
+  }
+
 }
 
 object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidationHelper {
