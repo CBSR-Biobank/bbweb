@@ -35,6 +35,21 @@ case class ParticipantAnnotationType private (
         |  required: $required
         |}""".stripMargin
 
+  def update(
+    expectedVersion: Option[Long],
+    name: String,
+    description: Option[String],
+    valueType: AnnotationValueType,
+    maxValueCount: Option[Int] = None,
+    options: Option[Map[String, String]] = None,
+    required: Boolean = false): DomainValidation[ParticipantAnnotationType] = {
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      updatedAnnotationType <- ParticipantAnnotationType.create(studyId, id, version,
+	name, description, valueType, maxValueCount, options, required)
+    } yield updatedAnnotationType
+  }
+
 }
 
 object ParticipantAnnotationType extends StudyAnnotationTypeValidationHelper {

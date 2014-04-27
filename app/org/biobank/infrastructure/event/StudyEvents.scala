@@ -178,7 +178,8 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]])
+    options: Option[Map[String, String]],
+    required: Boolean = false)
     extends StudyEvent
 
   case class ParticipantAnnotationTypeUpdatedEvent(
@@ -189,7 +190,8 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]])
+    options: Option[Map[String, String]],
+    required: Boolean = false)
     extends StudyEvent
 
   case class ParticipantAnnotationTypeRemovedEvent(
