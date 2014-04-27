@@ -38,6 +38,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
     studyRepository,
     collectionEventTypeRepository,
     collectionEventAnnotationTypeRepository,
+    participantAnnotationTypeRepository,
     specimenGroupRepository)
 
   var disabledStudy: DisabledStudy = null
@@ -136,7 +137,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
       }
     }
 
-    "not be update a collection event type to wrong study" in {
+    "not update a collection event type to wrong study" in {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 

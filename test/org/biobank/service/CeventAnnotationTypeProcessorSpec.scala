@@ -24,6 +24,7 @@ class CeventAnnotationTypeProcessorSpec extends StudyProcessorFixture with Befor
     studyRepository,
     collectionEventTypeRepository,
     collectionEventAnnotationTypeRepository,
+    participantAnnotationTypeRepository,
     specimenGroupRepository)
 
   var disabledStudy: DisabledStudy = null
@@ -175,7 +176,7 @@ class CeventAnnotationTypeProcessorSpec extends StudyProcessorFixture with Befor
         err.list.head should include("study does not have annotation type") }
     }
 
-    "no update a cevent annotation type with an invalid version" in {
+    "not update a cevent annotation type with an invalid version" in {
       val annotType = factory.createCollectionEventAnnotationType
       collectionEventAnnotationTypeRepository.put(annotType)
 
@@ -198,7 +199,7 @@ class CeventAnnotationTypeProcessorSpec extends StudyProcessorFixture with Befor
       collectionEventAnnotationTypeRepository.put(annotType)
 
       val cmd = RemoveCollectionEventAnnotationTypeCmd(
-	annotType.studyId.id, annotType.id.id, Some(annotType.version - 1))
+	annotType.studyId.id, annotType.id.id, annotType.versionOption)
       val validation = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
         .futureValue
@@ -207,24 +208,22 @@ class CeventAnnotationTypeProcessorSpec extends StudyProcessorFixture with Befor
       validation map { event => event shouldBe a[CollectionEventAnnotationTypeRemovedEvent] }
     }
 
-  //    "not be removed with invalid version" in {
-  //      val name = nameGenerator.next[AnnotationType]
-  //      val valueType = AnnotationValueType.Text
-  //
-  //      val at1 = await(studyService.addCollectionEventAnnotationType(
-  //        new AddCollectionEventAnnotationTypeCmd(
-  //          studyId.id, name, Some(name), valueType))) | null
-  //      collectionEventAnnotationTypeRepository.annotationTypeWithId(
-  //        studyId, at1.annotationTypeId) must beSuccessful
-  //
-  //      val versionOption = Some(at1.version + 1)
-  //      val at2 = await(studyService.removeCollectionEventAnnotationType(
-  //        new RemoveCollectionEventAnnotationTypeCmd(
-  //          at1.annotationTypeId, versionOption, studyId.id)))
-  //      at2 must beFailing.like {
-  //        case msgs => msgs.head must contain("doesn't match current version")
-  //      }
-  //    }
+    "not remove a cevent annotation type with invalid version" in {
+      val annotType = factory.createCollectionEventAnnotationType
+      collectionEventAnnotationTypeRepository.put(annotType)
+
+      val cmd = RemoveCollectionEventAnnotationTypeCmd(
+	annotType.studyId.id, annotType.id.id, Some(annotType.version - 1))
+      val validation = ask(studyProcessor, cmd)
+        .mapTo[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
+        .futureValue
+
+      validation should be('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include("version mismatch")
+      }
+    }
 
   }
 

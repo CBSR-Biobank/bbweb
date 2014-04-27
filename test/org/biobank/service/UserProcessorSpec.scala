@@ -23,6 +23,7 @@ class UserProcessorSpec extends UserProcessorFixture {
     studyRepository,
     collectionEventTypeRepository,
     collectionEventAnnotationTypeRepository,
+    participantAnnotationTypeRepository,
     specimenGroupRepository)
 
   "A user processor" should {

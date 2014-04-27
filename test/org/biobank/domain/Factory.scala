@@ -18,6 +18,7 @@ class Factory(
   studyRepository: StudyRepositoryComponent#StudyRepository,
   collectionEventTypeRepository: CollectionEventTypeRepositoryComponent#CollectionEventTypeRepository,
   collectionEventAnnotationTypeRepository: CollectionEventAnnotationTypeRepositoryComponent#CollectionEventAnnotationTypeRepository,
+  participantAnnotationTypeRepository: ParticipantAnnotationTypeRepositoryComponent#ParticipantAnnotationTypeRepository,
   specimenGroupRepository: SpecimenGroupRepositoryComponent#SpecimenGroupRepository) {
 
   val log = LoggerFactory.getLogger(this.getClass)
@@ -153,6 +154,26 @@ class Factory(
     domainObjects = domainObjects +
     (classOf[CollectionEventTypeAnnotationType] -> ceventTypeAnnotationType)
     ceventTypeAnnotationType
+  }
+
+  def createParticipantAnnotationType: ParticipantAnnotationType = {
+    val id = participantAnnotationTypeRepository.nextIdentity
+    val name = nameGenerator.next[ParticipantAnnotationType]
+    val description = Some(nameGenerator.next[ParticipantAnnotationType])
+    val options = Some(Map(
+      nameGenerator.next[String] -> nameGenerator.next[String],
+      nameGenerator.next[String] -> nameGenerator.next[String]))
+
+    val disabledStudy = defaultDisabledStudy
+    val validation = ParticipantAnnotationType.create(disabledStudy.id, id, -1L, name,
+      description, AnnotationValueType.Select, Some(1), options, required = true)
+    if (validation.isFailure) {
+      throw new Error
+    }
+
+    val annotationType = validation | null
+    domainObjects = domainObjects + (classOf[ParticipantAnnotationType] -> annotationType)
+    annotationType
   }
 
   def defaultRegisteredUser: RegisteredUser = {

@@ -34,6 +34,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAft
     studyRepository,
     collectionEventTypeRepository,
     collectionEventAnnotationTypeRepository,
+    participantAnnotationTypeRepository,
     specimenGroupRepository)
 
   var disabledStudy: DisabledStudy = null

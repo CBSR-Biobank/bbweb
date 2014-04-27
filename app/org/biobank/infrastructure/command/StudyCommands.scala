@@ -181,9 +181,9 @@ object StudyCommands {
       with HasStudyIdentity
 
   case class UpdateParticipantAnnotationTypeCmd(
+    studyId: String,
     id: String,
     expectedVersion: Option[Long],
-    studyId: String,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -196,9 +196,9 @@ object StudyCommands {
       with HasExpectedVersion
 
   case class RemoveParticipantAnnotationTypeCmd(
+    studyId: String,
     id: String,
-    expectedVersion: Option[Long],
-    studyId: String)
+    expectedVersion: Option[Long])
       extends ParticipantAnnotationTypeCommand
       with HasIdentity
       with HasExpectedVersion

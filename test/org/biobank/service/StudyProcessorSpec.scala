@@ -38,6 +38,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
     studyRepository,
     collectionEventTypeRepository,
     collectionEventAnnotationTypeRepository,
+    participantAnnotationTypeRepository,
     specimenGroupRepository)
 
   "A study processor" should {
