@@ -158,9 +158,9 @@ object StudyCommands {
       with HasExpectedVersion
 
   case class RemoveCollectionEventAnnotationTypeCmd(
+    studyId: String,
     id: String,
-    expectedVersion: Option[Long],
-    studyId: String)
+    expectedVersion: Option[Long])
       extends CollectionEventAnnotationTypeCommand
       with HasIdentity
       with HasStudyIdentity

@@ -29,16 +29,19 @@ class CollectionEventAnnotationTypeSpec extends WordSpecLike with Matchers {
       val v = CollectionEventAnnotationType.create(studyId, id, version, name, description, valueType,
 	maxValueCount, options)
       val annotType = v.getOrElse(fail)
+
       annotType shouldBe a[CollectionEventAnnotationType]
 
-      annotType.studyId should be(studyId)
-      annotType.id should be(id)
-      annotType.version should be(0L)
-      annotType.name should be(name)
-      annotType.description should be(description)
-      annotType.valueType should be (valueType)
-      annotType.maxValueCount should be (maxValueCount)
-      annotType.options should be(options)
+      annotType should have (
+	'studyId (studyId),
+	'id (id),
+	'version (0L),
+	'name (name),
+	'description (description),
+	'valueType (valueType),
+	'maxValueCount (maxValueCount),
+	'options (options)
+      )
     }
 
   }

@@ -242,7 +242,7 @@ object CeventAnnotTypeController
           case Success(annotType) =>
             studyService.removeCollectionEventAnnotationType(
               RemoveCollectionEventAnnotationTypeCmd(
-                annotType.id.id, annotType.versionOption, studyId)).map(validation =>
+                studyId, annotType.id.id, annotType.versionOption)).map(validation =>
                 validation match {
                   case Success(at) =>
                     Redirect(routes.StudyController.showStudy(studyId)).flashing(

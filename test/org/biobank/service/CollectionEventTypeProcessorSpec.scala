@@ -399,7 +399,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
       }
     }
 
-    "not be updated if used by collection event type" in {
+    "not update an annotation type if used by collection event type" in {
       val annotationType = factory.defaultCollectionEventAnnotationType
       collectionEventAnnotationTypeRepository.put(annotationType)
 
@@ -422,126 +422,74 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
       }
     }
 
-    //    "be removed from collection event type" in {
-    //      val name = nameGenerator.next[CollectionEventTypeAnnotationType]
-    //
-    //      val at1 = await(studyService.addCollectionEventAnnotationType(
-    //        new AddCollectionEventAnnotationTypeCmd(studyId.id, name, Some(name),
-    //          AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
-    //
-    //      val annotationTypeData = Set(
-    //        CollectionEventTypeAnnotationType(at1.annotationTypeId, true))
-    //
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, name, Some(name), true,
-    //          Set.empty, annotationTypeData))) | null
-    //
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful.like {
-    //          case x =>
-    //            x.annotationTypeData.size mustEqual 1
-    //        }
-    //
-    //      val cet2 = await(studyService.updateCollectionEventType(
-    //        new UpdateCollectionEventTypeCmd(
-    //          cet1.collectionEventTypeId, Some(cet1.version), studyId.id,
-    //          name, Some(name), recurring = true, Set.empty, Set.empty))) | null
-    //
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful.like {
-    //          case x =>
-    //            x.annotationTypeData.size mustEqual 0
-    //        }
-    //    }
-    //
-    //    "not be removed if used by collection event type" in {
-    //      val name = nameGenerator.next[CollectionEventAnnotationType]
-    //
-    //      val at1 = await(studyService.addCollectionEventAnnotationType(
-    //        AddCollectionEventAnnotationTypeCmd(studyId.id, name, Some(name),
-    //          AnnotationValueType.Date))) | null
-    //
-    //      collectionEventAnnotationTypeRepository.annotationTypeWithId(studyId,
-    //        AnnotationTypeId(at1.annotationTypeId)) must beSuccessful
-    //
-    //      val annotationTypeData = Set(
-    //        CollectionEventTypeAnnotationType(at1.annotationTypeId, true))
-    //
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, name, Some(name), true,
-    //          Set.empty, annotationTypeData))) | null
-    //
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful
-    //
-    //      val at2 = await(studyService.removeCollectionEventAnnotationType(
-    //        RemoveCollectionEventAnnotationTypeCmd(at1.annotationTypeId, Some(at1.version), studyId.id)))
-    //
-    //      at2 must beFailing.like {
-    //        case msgs => msgs.head must contain(
-    //          "annotation type is in use by collection event type")
-    //      }
-    //
-    //    }
-    //
-    //    "be removed from collection event type" in {
-    //      val name = nameGenerator.next[CollectionEventTypeAnnotationType]
-    //
-    //      val at1 = await(studyService.addCollectionEventAnnotationType(
-    //        new AddCollectionEventAnnotationTypeCmd(studyId.id, name, Some(name),
-    //          AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
-    //
-    //      val annotationTypeData = Set(
-    //        CollectionEventTypeAnnotationType(at1.annotationTypeId, true))
-    //
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, name, Some(name), true,
-    //          Set.empty, annotationTypeData))) | null
-    //
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful.like {
-    //          case x =>
-    //            x.annotationTypeData.size mustEqual 1
-    //        }
-    //
-    //      val cet2 = await(studyService.updateCollectionEventType(
-    //        new UpdateCollectionEventTypeCmd(cet1.collectionEventTypeId, Some(cet1.version), studyId.id,
-    //          name, Some(name), recurring = true, Set.empty, Set.empty))) | null
-    //
-    //      collectionEventTypeRepository.collectionEventTypeWithId(
-    //        studyId, cet1.collectionEventTypeId) must beSuccessful.like {
-    //          case x =>
-    //            x.annotationTypeData.size mustEqual 0
-    //        }
-    //    }
-    //
-    //    "not be added if annotation type in wrong study" in {
-    //      val name2 = nameGenerator.next[Study]
-    //      val study2 = await(studyService.addStudy(new AddStudyCmd(name2, Some(name2)))) | null
-    //
-    //      // this one is in correct study
-    //      val at1 = await(studyService.addCollectionEventAnnotationType(
-    //        new AddCollectionEventAnnotationTypeCmd(studyId.id,
-    //          nameGenerator.next[CollectionEventTypeAnnotationType], None,
-    //          AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
-    //
-    //      // this one is in other study
-    //      val at2 = await(studyService.addCollectionEventAnnotationType(
-    //        new AddCollectionEventAnnotationTypeCmd(study2.id,
-    //          nameGenerator.next[CollectionEventTypeAnnotationType], None,
-    //          AnnotationValueType.Date, Some(0), Some(Map.empty[String, String])))) | null
-    //
-    //      val annotationTypeData = Set(
-    //        CollectionEventTypeAnnotationType(at1.annotationTypeId, true),
-    //        CollectionEventTypeAnnotationType(at2.annotationTypeId, true))
-    //
-    //      val name = nameGenerator.next[CollectionEventType]
-    //      val cet1 = await(studyService.addCollectionEventType(
-    //        new AddCollectionEventTypeCmd(studyId.id, name, Some(name), true,
-    //          Set.empty, annotationTypeData)))
-    //
-    //      cet1 must beFailing.like {
-    //        case msgs => msgs.head must contain("annotation type(s) do not belong to study")
+    "remove an annotation type from collection event type" in {
+      val annotationType = factory.defaultCollectionEventAnnotationType
+      collectionEventAnnotationTypeRepository.put(annotationType)
 
+      var cet = factory.createCollectionEventType
+      cet = cet.update(cet.versionOption, cet.name, cet.description, cet.recurring,
+        List.empty, List(factory.createCollectionEventTypeAnnotationType)) | fail
+      collectionEventTypeRepository.put(cet)
+
+      val cmd = UpdateCollectionEventTypeCmd(
+        cet.studyId.id, cet.id.id, cet.versionOption, cet.name, cet.description, cet.recurring,
+        List.empty, List.empty)
+      val validation = ask(studyProcessor, cmd)
+        .mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+        .futureValue
+
+      validation should be('success)
+      validation map { event =>
+	event.annotationTypeData should have length 0
+      }
+    }
+
+    "not remove an annotation type if it is used by collection event type" in {
+      val annotationType = factory.defaultCollectionEventAnnotationType
+      collectionEventAnnotationTypeRepository.put(annotationType)
+
+      var cet = factory.createCollectionEventType
+      cet = cet.update(cet.versionOption, cet.name, cet.description, cet.recurring,
+        List.empty, List(factory.createCollectionEventTypeAnnotationType)) | fail
+      collectionEventTypeRepository.put(cet)
+
+      val cmd = RemoveCollectionEventAnnotationTypeCmd(
+        annotationType.studyId.id, annotationType.id.id, annotationType.versionOption)
+      val validation = ask(studyProcessor, cmd)
+        .mapTo[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
+        .futureValue
+
+      validation should be('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include("annotation type is in use by collection event type")
+      }
+
+    }
+
+    "not add an annotation type if it is in wrong study" in {
+      val annotationType = factory.defaultCollectionEventAnnotationType
+      collectionEventAnnotationTypeRepository.put(annotationType)
+
+       val study2 = factory.createDisabledStudy
+      studyRepository.put(study2)
+
+      val cet = factory.createCollectionEventType
+      collectionEventTypeRepository.put(cet)
+
+      val cmd = UpdateCollectionEventTypeCmd(
+        cet.studyId.id, cet.id.id, cet.versionOption, cet.name, cet.description, cet.recurring,
+        List.empty, List(factory.createCollectionEventTypeAnnotationType))
+      val validation2 = ask(studyProcessor, cmd)
+        .mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+        .futureValue
+
+      validation2 should be('failure)
+      validation2.swap map { err =>
+        err.list should have length 1
+        err.list.head should include("annotation type(s) do not belong to study")
+
+      }
+    }
   }
 }
