@@ -86,13 +86,6 @@ case class SpecimenGroup private (
   */
 object SpecimenGroup extends StudyValidationHelper {
 
-  protected def validateId(id: SpecimenGroupId): Validation[String, SpecimenGroupId] = {
-    validateStringId(id.toString, "specimen group id is null or empty") match {
-      case Success(idString) => id.success
-      case Failure(err) => err.fail
-    }
-  }
-
   /**
     * The factory method to create a specimen group. Note that it increments the version number
     * by one.

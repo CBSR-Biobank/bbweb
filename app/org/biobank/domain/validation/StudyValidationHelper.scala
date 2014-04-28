@@ -1,6 +1,10 @@
 package org.biobank.domain.validation
 
-import org.biobank.domain.study.StudyId
+import org.biobank.domain.study.{
+  ProcessingTypeId,
+  SpecimenGroupId,
+  StudyId
+}
 import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
 
 import scalaz._
@@ -10,6 +14,20 @@ trait StudyValidationHelper extends ValidationHelper {
 
   protected def validateId(id: StudyId): Validation[String, StudyId] = {
     validateStringId(id.toString, "study id is null or empty") match {
+      case Success(idString) => id.success
+      case Failure(err) => err.fail
+    }
+  }
+
+  protected def validateId(id: SpecimenGroupId): Validation[String, SpecimenGroupId] = {
+    validateStringId(id.toString, "specimen group id is null or empty") match {
+      case Success(idString) => id.success
+      case Failure(err) => err.fail
+    }
+  }
+
+  protected def validateId(id: ProcessingTypeId): Validation[String, ProcessingTypeId] = {
+    validateStringId(id.toString, "collection event type id is null or empty") match {
       case Success(idString) => id.success
       case Failure(err) => err.fail
     }

@@ -16,6 +16,30 @@ import scalaz.Scalaz._
 /** [[SpecimenLinkType]]s are assigned to a [[ProcessingType]], and are used to represent a regularly
   * performed processing procedure involving two [[Specimen]]s: an input, which must be in a specific
   * [[SpecimenGroup]], and an output, which must also be in another specific [[SpecimenGroup]].
+  *
+  * To avoid redundancy, each combination of inputGroup and outputGroup) may exist only once per
+  * ProcessingType.
+  *
+  * @param expectedInputChange the expected amount to be removed from each input. If the value is
+  *        not required then use a value of zero.
+  *
+  * @param expectedOutputChange the expected amount to be added to each output. If the value is
+  *        not required then use a value of zero.
+  *
+  * @param inputCount the number of expected specimens when the processing is carried out.
+  *
+  * @param outputCount are the number of resulting specimens when the processing is carried out.
+  *        A value of zero for output count implies that the count is the same as the input count.
+  *
+  * @param inputGroupId The [[SpecimenGroup]] the input specimens are from.
+  *
+  * @param outputGroupId The [[SpecimenGroup]] the output specimens are from.
+  *
+  * @param inputContainerType The specimen container type that holds the input specimens. This is
+  *        an optional field.
+  *
+  * @param outputContainerTypeId The specimen container type that the output specimens are stored
+  *        into. This is an optional field.
   */
 case class SpecimenLinkType private (
   procesingTypeId: ProcessingTypeId,
@@ -29,8 +53,7 @@ case class SpecimenLinkType private (
   outputGroupId: SpecimenGroupId,
   inputContainerTypeId: Option[ContainerTypeId],
   outputContainerTypeId: Option[ContainerTypeId])
-    extends ConcurrencySafeEntity[CollectionEventTypeId]
-    with HasStudyId {
+    extends ConcurrencySafeEntity[SpecimenLinkTypeId] {
 
   def update(
     expectedVersion: Option[Long],
@@ -40,8 +63,8 @@ case class SpecimenLinkType private (
     for {
       validVersion <- requireVersion(expectedVersion)
       newItem <- SpecimenLinkType.create(procesingTypeId, id, version,  expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, inputGroupId, outputGroupId,
-	inputContainerTypeId, outputContainerTypeId)
+        expectedOutputChange, inputCount, outputCount, inputGroupId, outputGroupId,
+        inputContainerTypeId, outputContainerTypeId)
     } yield newItem
   }
 
@@ -50,9 +73,14 @@ case class SpecimenLinkType private (
         |  procesingTypeId: $procesingTypeId,
         |  id: $id,
         |  version: $version,
-        |  name: $name,
-        |  description: $description,
-        |  enabled: $enabled
+        |  expectedInputChange, $expectedInputChange,
+        |  expectedOutputChange, $expectedOutputChange,
+        |  inputCount, $inputCount,
+        |  outputCount, $outputCount,
+        |  inputGroupId, $inputGroupId,
+        |  outputGroupId, $outputGroupId,
+        |  inputContainerTypeId, $inputContainerTypeId,
+        |  outputContainerTypeId, $outputContainerTypeId
         |}""".stripMargin
 }
 
@@ -70,12 +98,29 @@ object SpecimenLinkType extends StudyValidationHelper {
     outputGroupId: SpecimenGroupId,
     inputContainerTypeId: Option[ContainerTypeId],
     outputContainerTypeId: Option[ContainerTypeId]): DomainValidation[SpecimenLinkType] = {
+
     (validateId(procesingTypeId).toValidationNel |@|
       validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel) {
-
-      SpecimenLinkType(_, _, _, _, _, enabled)
+      validateAndIncrementVersion(version).toValidationNel |@|
+      validatePositiveNumber(
+	expectedInputChange,
+	"expected input change is not a positive number").toValidationNel |@|
+      validatePositiveNumber(
+	expectedOutputChange,
+	"expected output change is not a positive number").toValidationNel |@|
+      validatePositiveNumber(
+	inputCount,
+	"input count is not a positive number").toValidationNel |@|
+      validatePositiveNumber(
+	outputCount,
+	"output count is not a positive number").toValidationNel |@|
+      validateId(inputGroupId).toValidationNel |@|
+      validateId(outputGroupId).toValidationNel |@|
+      validateId(inputContainerTypeId).toValidationNel |@|
+      validateId(outputContainerTypeId).toValidationNel) {
+      SpecimenLinkType(_, _, _, _, _, _, _, _, _, _, _)
     }
+
   }
 
   protected def validateId(id: SpecimenLinkTypeId): Validation[String, SpecimenLinkTypeId] = {

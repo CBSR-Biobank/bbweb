@@ -21,7 +21,7 @@ import scalaz.Scalaz._
   *  @param enabled A processing type should have enabled set to true when processing of the
   *         contained specimen types is taking place. However, throughout the lifetime of the study, it may be
   *         decided to stop a processing type in favour of another.  In this case enabled is set to false.
-
+  *
   */
 case class ProcessingType private (
   studyId: StudyId,
@@ -30,7 +30,7 @@ case class ProcessingType private (
   name: String,
   description: Option[String],
   enabled: Boolean)
-    extends ConcurrencySafeEntity[CollectionEventTypeId]
+    extends ConcurrencySafeEntity[ProcessingTypeId]
     with HasUniqueName
     with HasDescriptionOption
     with HasStudyId {
@@ -72,13 +72,6 @@ object ProcessingType extends StudyValidationHelper {
       validateNonEmpty(name, "name is null or empty").toValidationNel |@|
       validateNonEmptyOption(description, "description is null or empty").toValidationNel) {
       ProcessingType(_, _, _, _, _, enabled)
-    }
-  }
-
-  protected def validateId(id: ProcessingTypeId): Validation[String, ProcessingTypeId] = {
-    validateStringId(id.toString, "collection event type id is null or empty") match {
-      case Success(idString) => id.success
-      case Failure(err) => err.fail
     }
   }
 }
