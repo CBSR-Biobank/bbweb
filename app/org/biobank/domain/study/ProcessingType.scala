@@ -1,6 +1,16 @@
 package org.biobank.domain.study
 
+import org.biobank.domain.{
+  ConcurrencySafeEntity,
+  DomainError,
+  DomainValidation,
+  HasUniqueName,
+  HasDescriptionOption
+}
 import org.biobank.domain.validation.StudyValidationHelper
+
+import scalaz._
+import scalaz.Scalaz._
 
 /** Records a regularly preformed specimen processing procedure. There are one or more associated
   * [[SpecimenLinkType]]s that further define legal procedures, and allow recording of procedures
@@ -15,13 +25,13 @@ import org.biobank.domain.validation.StudyValidationHelper
   */
 case class ProcessingType private (
   studyId: StudyId,
-  id: CollectionEventTypeId,
+  id: ProcessingTypeId,
   version: Long,
   name: String,
   description: Option[String],
   enabled: Boolean)
     extends ConcurrencySafeEntity[CollectionEventTypeId]
-    with HasName
+    with HasUniqueName
     with HasDescriptionOption
     with HasStudyId {
 

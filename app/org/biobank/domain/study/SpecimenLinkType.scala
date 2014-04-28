@@ -1,6 +1,17 @@
 package org.biobank.domain.study
 
+import org.biobank.domain.{
+  ConcurrencySafeEntity,
+  ContainerTypeId,
+  DomainError,
+  DomainValidation,
+  HasUniqueName,
+  HasDescriptionOption
+}
 import org.biobank.domain.validation.StudyValidationHelper
+
+import scalaz._
+import scalaz.Scalaz._
 
 /** [[SpecimenLinkType]]s are assigned to a [[ProcessingType]], and are used to represent a regularly
   * performed processing procedure involving two [[Specimen]]s: an input, which must be in a specific
@@ -16,11 +27,9 @@ case class SpecimenLinkType private (
   outputCount: Int,
   inputGroupId: SpecimenGroupId,
   outputGroupId: SpecimenGroupId,
-  inputContainerTypeId: ContainerTypeId,
-  outputContainerTypeId: ContainerTypeId)
+  inputContainerTypeId: Option[ContainerTypeId],
+  outputContainerTypeId: Option[ContainerTypeId])
     extends ConcurrencySafeEntity[CollectionEventTypeId]
-    with HasName
-    with HasDescriptionOption
     with HasStudyId {
 
   def update(
@@ -30,13 +39,15 @@ case class SpecimenLinkType private (
     enaled: Boolean): DomainValidation[SpecimenLinkType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      newItem <- SpecimenLinkType.create(studyId, id, version, name, description, enabled)
+      newItem <- SpecimenLinkType.create(procesingTypeId, id, version,  expectedInputChange,
+	expectedOutputChange, inputCount, outputCount, inputGroupId, outputGroupId,
+	inputContainerTypeId, outputContainerTypeId)
     } yield newItem
   }
 
   override def toString: String =
     s"""|CollectionEventType:{
-        |  studyId: $studyId,
+        |  procesingTypeId: $procesingTypeId,
         |  id: $id,
         |  version: $version,
         |  name: $name,
@@ -48,17 +59,21 @@ case class SpecimenLinkType private (
 object SpecimenLinkType extends StudyValidationHelper {
 
   def create(
-    studyId: StudyId,
+    procesingTypeId: ProcessingTypeId,
     id: SpecimenLinkTypeId,
     version: Long,
-    name: String,
-    description: Option[String],
-    enabled: Boolean): DomainValidation[SpecimenLinkType] = {
-    (validateId(studyId).toValidationNel |@|
+    expectedInputChange: BigDecimal,
+    expectedOutputChange: BigDecimal,
+    inputCount: Int,
+    outputCount: Int,
+    inputGroupId: SpecimenGroupId,
+    outputGroupId: SpecimenGroupId,
+    inputContainerTypeId: Option[ContainerTypeId],
+    outputContainerTypeId: Option[ContainerTypeId]): DomainValidation[SpecimenLinkType] = {
+    (validateId(procesingTypeId).toValidationNel |@|
       validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
-      validateNonEmptyOption(description, "description is null or empty").toValidationNel) {
+      validateAndIncrementVersion(version).toValidationNel) {
+
       SpecimenLinkType(_, _, _, _, _, enabled)
     }
   }

@@ -1,12 +1,12 @@
 package org.biobank.domain.study
 
-import org.biobank.domain.DomainError
 import org.biobank.infrastructure.{
   CollectionEventTypeSpecimenGroup,
   CollectionEventTypeAnnotationType}
 import org.biobank.domain.{
   AnnotationTypeId,
   ConcurrencySafeEntity,
+  DomainError,
   DomainValidation,
   HasUniqueName,
   HasDescriptionOption }
