@@ -40,9 +40,9 @@ trait TopComponent extends ServiceComponent {
  */
 trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
 
-  override val studyProcessor = system.actorOf(Props(new StudyProcessorImpl), "studyproc")
-  override val userProcessor = system.actorOf(Props(new UserProcessorImpl), "userproc")
+  override val studyProcessor = system.actorOf(Props(new StudyProcessor), "studyproc")
+  override val userProcessor = system.actorOf(Props(new UserProcessor), "userproc")
 
   override val studyService = new StudyServiceImpl(studyProcessor)
-  override val userService = new UserServiceImpl(userProcessor)
+  override val userService = new UserService(userProcessor)
 }

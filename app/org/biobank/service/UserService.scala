@@ -19,27 +19,9 @@ import scalaz._
 import scalaz.Scalaz._
 
 trait UserServiceComponent {
-
-  val userService: UserService
-
-  trait UserService extends ApplicationService {
-
-    def find(id: securesocial.core.IdentityId): Option[securesocial.core.Identity]
-
-    def findByEmailAndProvider(
-      email: String, providerId: String): Option[securesocial.core.Identity]
-
-    def getByEmail(email: String): DomainValidation[User]
-
-    def add(cmd: RegisterUserCommand): Future[DomainValidation[UserRegisterdEvent]]
-
-  }
-}
-
-trait UserServiceComponentImpl extends UserServiceComponent {
   self: RepositoryComponent =>
 
-  class UserServiceImpl(userProcessor: ActorRef)(implicit system: ActorSystem) extends UserService {
+  class UserService(userProcessor: ActorRef)(implicit system: ActorSystem) extends ApplicationService {
 
     val log = LoggerFactory.getLogger(this.getClass)
 
@@ -81,20 +63,14 @@ trait UserServiceComponentImpl extends UserServiceComponent {
 }
 
 trait UserProcessorComponent {
-
-  trait UserProcessor extends Processor
-
-}
-
-case class SnapshotState(users: Set[User])
-
-trait UserProcessorComponentImpl extends UserProcessorComponent {
   self: RepositoryComponent =>
+
+  case class SnapshotState(users: Set[User])
 
   /**
     * Handles the commands to configure users.
     */
-  class UserProcessorImpl extends UserProcessor {
+  class UserProcessor extends Processor {
 
     val receiveRecover: Receive = {
       case event: UserRegisterdEvent => recoverEvent(event)

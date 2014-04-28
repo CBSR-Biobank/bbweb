@@ -23,15 +23,12 @@ import scalaz.Scalaz._
 
 case class StudyMessage(cmd: Any, userId: UserId, time: Long)
 
-trait StudyProcessorComponent {
-
-  /** An actor that processes commands related to the [[org.biobank.domain.study.Study]] aggregate root.
-    */
-  trait StudyProcessor extends Processor
-
-}
-
-trait StudyProcessorComponentImpl extends StudyProcessorComponent {
+trait StudyProcessorComponent
+    extends CollectionEventTypeProcessorComponent
+    with CeventAnnotationTypeProcessorComponent
+    with SpecimenGroupProcessorComponent
+    with ParticipantAnnotationTypeProcessorComponent
+    with SpecimenLinkAnnotationTypeProcessorComponent{
   self: RepositoryComponent =>
 
   /**
@@ -39,36 +36,24 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
     *
     * This implementation uses Akka persistence.
     */
-  sealed class StudyProcessorImpl extends StudyProcessor {
+  sealed class StudyProcessor extends Processor {
 
     case class SnapshotState(studies: Set[Study])
 
-    val specimenGroupProcessor = context.system.actorOf(Props(
-      new SpecimenGroupProcessor(specimenGroupRepository, collectionEventTypeRepository)),
-      "sgproc")
+    val specimenGroupProcessor = context.system.actorOf(
+      Props(new SpecimenGroupProcessor), "sgproc")
 
-    val collectionEventTypeProcessor = context.actorOf(Props(
-      new CollectionEventTypeProcessor(
-	collectionEventTypeRepository,
-	collectionEventAnnotationTypeRepository,
-	specimenGroupRepository)),
-      "cetproc")
+    val collectionEventTypeProcessor = context.actorOf(
+      Props(new CollectionEventTypeProcessor), "cetproc")
 
-    val ceventAnnotationTypeProcessor = context.actorOf(Props(
-      new CeventAnnotationTypeProcessor(
-	collectionEventAnnotationTypeRepository,
-	collectionEventTypeRepository)),
-      "ceatproc")
+    val ceventAnnotationTypeProcessor = context.actorOf(
+      Props(new CeventAnnotationTypeProcessor), "ceatproc")
 
-    val participantAnnotationTypeProcessor = context.actorOf(Props(
-      new ParticipantAnnotationTypeProcessor(
-	participantAnnotationTypeRepository)),
-      "participantproc")
+    val participantAnnotationTypeProcessor = context.actorOf(
+      Props(new ParticipantAnnotationTypeProcessor), "partAnnotTypeProc")
 
-    val specimenLinkAnnotationTypeProcessor = context.actorOf(Props(
-      new SpecimenLinkAnnotationTypeProcessor(
-	specimenLinkAnnotationTypeRepository)),
-      "specimenLinkproc")
+    val specimenLinkAnnotationTypeProcessor = context.actorOf(
+      Props(new SpecimenLinkAnnotationTypeProcessor), "specimenLinkProc")
 
     val receiveRecover: Receive = {
       case event: StudyAddedEvent => recoverEvent(event)

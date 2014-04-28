@@ -73,7 +73,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       Await.result(gracefulStop(studyProcessor, 5 seconds, PoisonPill), 6 seconds)
 
       // restart
-      val newStudyProcessor = system.actorOf(Props(new StudyProcessorImpl), "studyproc")
+      val newStudyProcessor = system.actorOf(Props(new StudyProcessor), "studyproc")
 
       Thread.sleep(10)
 
