@@ -17,8 +17,10 @@ import scalaz.Scalaz._
   * performed processing procedure involving two [[Specimen]]s: an input, which must be in a specific
   * [[SpecimenGroup]], and an output, which must also be in another specific [[SpecimenGroup]].
   *
-  * To avoid redundancy, each combination of inputGroup and outputGroup) may exist only once per
+  * To avoid redundancy, each combination of inputGroup and outputGroup may exist only once per
   * ProcessingType.
+  *
+  * @param procesingTypeId the [[ProcessingType]] this specimen link belongs to.
   *
   * @param expectedInputChange the expected amount to be removed from each input. If the value is
   *        not required then use a value of zero.
@@ -35,7 +37,7 @@ import scalaz.Scalaz._
   *
   * @param outputGroupId The [[SpecimenGroup]] the output specimens are from.
   *
-  * @param inputContainerType The specimen container type that holds the input specimens. This is
+  * @param inputContainerTypeId The specimen container type that holds the input specimens. This is
   *        an optional field.
   *
   * @param outputContainerTypeId The specimen container type that the output specimens are stored
@@ -55,11 +57,18 @@ case class SpecimenLinkType private (
   outputContainerTypeId: Option[ContainerTypeId])
     extends ConcurrencySafeEntity[SpecimenLinkTypeId] {
 
+  /** Updates a specimen link type with one or more new values.
+    */
   def update(
     expectedVersion: Option[Long],
-    name: String,
-    description: Option[String],
-    enaled: Boolean): DomainValidation[SpecimenLinkType] = {
+    expectedInputChange: BigDecimal,
+    expectedOutputChange: BigDecimal,
+    inputCount: Int,
+    outputCount: Int,
+    inputGroupId: SpecimenGroupId,
+    outputGroupId: SpecimenGroupId,
+    inputContainerTypeId: Option[ContainerTypeId],
+    outputContainerTypeId: Option[ContainerTypeId]): DomainValidation[SpecimenLinkType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
       newItem <- SpecimenLinkType.create(procesingTypeId, id, version,  expectedInputChange,

@@ -15,7 +15,8 @@ import scalaz._
 import scalaz.Scalaz._
 
 /**
-  * This is the Collection Event Type processor. It is a child actor of [[StudyProcessor]].
+  * This is the Collection Event Type processor. It is a child actor of
+  * [[org.biobank.service.study.StudyProcessorComponent.StudyProcessor]].
   *
   * It handles commands that deal with a Collection Event Type.
   */

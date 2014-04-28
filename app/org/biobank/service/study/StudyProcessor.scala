@@ -25,6 +25,8 @@ case class StudyMessage(cmd: Any, userId: UserId, time: Long)
 
 trait StudyProcessorComponent {
 
+  /** An actor that processes commands related to the [[org.biobank.domain.study.Study]] aggregate root.
+    */
   trait StudyProcessor extends Processor
 
 }
@@ -33,8 +35,10 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
   self: RepositoryComponent =>
 
   /**
-   * Handles the commands to configure studies.
-   */
+    * An actor that processes commands related to the [[org.biobank.domain.study.Study]] aggregate root.
+    *
+    * This implementation uses Akka persistence.
+    */
   class StudyProcessorImpl extends StudyProcessor {
 
     case class SnapshotState(studies: Set[Study])

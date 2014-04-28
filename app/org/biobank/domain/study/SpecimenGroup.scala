@@ -17,7 +17,7 @@ import org.biobank.domain.SpecimenType._
 import scalaz._
 import Scalaz._
 
-/** Used to configure a [[SpecimenType]] used by the [[Study]].
+/** Used to configure a [[SpecimenType]] used by a [[Study]].
   *
   * It records ownership, summary, storage, and classification information that applies to an entire group or
   * collection of [[Specimen]]s. A specimen group is defined either for specimen types collected from

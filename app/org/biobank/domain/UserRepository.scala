@@ -9,7 +9,7 @@ trait UserRepositoryComponent {
 
   val userRepository: UserRepository
 
-  /** A repository that stores [[Users]]. */
+  /** A repository that stores [[User]]s. */
   trait UserRepository extends ReadWriteRepository[UserId, User] {
 
     def allUsers(): Set[User]
@@ -25,7 +25,7 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
 
   val userRepository: UserRepository = new UserRepositoryImpl
 
-  /** An implementation of repository that stores [[Users]].
+  /** An implementation of repository that stores [[User]]s.
     *
     * This repository uses the [[ReadWriteRepository]] implementation.
     */

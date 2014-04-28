@@ -6,7 +6,9 @@ import org.biobank.infrastructure._
 import scalaz._
 import Scalaz._
 
-/** Annotations allow sub classes to collect custom named and defined pieces of data.
+/** Annotation types define an [[Annotation]].
+  *
+  * Annotations allow sub classes to collect custom named and defined pieces of data.
   */
 trait AnnotationType
   extends ConcurrencySafeEntity[AnnotationTypeId]

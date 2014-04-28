@@ -26,7 +26,7 @@ package object infrastructure {
     * be collected with this type of collection event. A single specimen group can be used in multiple
     * collection event types.
     *
-    * @param specimenGroupId The ID associated with the [[SpecimenGroup]].
+    * @param specimenGroupId The ID associated with the [[org.biobank.domain.study.SpecimenGroup]].
 
     * @param maxCount The number of specimens required to be collected.
 

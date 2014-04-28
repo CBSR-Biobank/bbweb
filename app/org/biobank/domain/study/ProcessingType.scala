@@ -35,6 +35,8 @@ case class ProcessingType private (
     with HasDescriptionOption
     with HasStudyId {
 
+  /** Updates a processing type with new values.
+    */
   def update(
     expectedVersion: Option[Long],
     name: String,
