@@ -3,8 +3,7 @@ package org.biobank.service
 import org.biobank.domain._
 import org.biobank.domain.study._
 
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.util.Timeout
 import akka.actor.Props
 import akka.persistence._

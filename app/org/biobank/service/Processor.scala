@@ -13,20 +13,23 @@ import Scalaz._
 trait Processor extends EventsourcedProcessor with ActorLogging {
 
   /** Persists the event passed in the validation if it is successful. In either case
-    *  the sender is sent either the success or failure validation.
+    * the sender is sent either the success or failure validation.
+    *
+    * @see http://helenaedelson.com/?p=879
     */
   protected def process[T](validation: DomainValidation[T])(onSuccess: T => Unit) {
+    val originalSender = context.sender
     validation map { event =>
       persist(event) { e =>
 	onSuccess(e)
 	// inform the sender of the successful command with the event
-	context.sender ! e.success
+	originalSender ! e.success
       }
     }
 
     if (validation.isFailure) {
       // inform the sender of the failure
-      context.sender ! validation
+      originalSender ! validation
     }
   }
 

@@ -47,25 +47,25 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
       new SpecimenGroupProcessor(specimenGroupRepository, collectionEventTypeRepository)),
       "sgproc")
 
-    val collectionEventTypeProcessor = context.system.actorOf(Props(
+    val collectionEventTypeProcessor = context.actorOf(Props(
       new CollectionEventTypeProcessor(
 	collectionEventTypeRepository,
 	collectionEventAnnotationTypeRepository,
 	specimenGroupRepository)),
       "cetproc")
 
-    val ceventAnnotationTypeProcessor = context.system.actorOf(Props(
+    val ceventAnnotationTypeProcessor = context.actorOf(Props(
       new CeventAnnotationTypeProcessor(
 	collectionEventAnnotationTypeRepository,
 	collectionEventTypeRepository)),
       "ceatproc")
 
-    val participantAnnotationTypeProcessor = context.system.actorOf(Props(
+    val participantAnnotationTypeProcessor = context.actorOf(Props(
       new ParticipantAnnotationTypeProcessor(
 	participantAnnotationTypeRepository)),
       "participantproc")
 
-    val specimenLinkAnnotationTypeProcessor = context.system.actorOf(Props(
+    val specimenLinkAnnotationTypeProcessor = context.actorOf(Props(
       new SpecimenLinkAnnotationTypeProcessor(
 	specimenLinkAnnotationTypeRepository)),
       "specimenLinkproc")
