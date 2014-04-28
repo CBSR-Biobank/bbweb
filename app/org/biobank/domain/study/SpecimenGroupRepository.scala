@@ -15,9 +15,9 @@ trait SpecimenGroupRepositoryComponent {
 
     def nextIdentity: SpecimenGroupId
 
-    def allSpecimenGroupsForStudy(studyId: StudyId): Set[SpecimenGroup]
+    def allForStudy(studyId: StudyId): Set[SpecimenGroup]
 
-    def specimenGroupWithId(
+    def withId(
       studyId: StudyId,
       specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup]
 
@@ -37,22 +37,22 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
     def nextIdentity: SpecimenGroupId =
       new SpecimenGroupId(java.util.UUID.randomUUID.toString.toUpperCase)
 
-    def allSpecimenGroupsForStudy(studyId: StudyId): Set[SpecimenGroup] = {
+    def allForStudy(studyId: StudyId): Set[SpecimenGroup] = {
       getValues.filter(x => x.studyId.equals(studyId)).toSet
     }
 
-  def specimenGroupWithId(
-    studyId: StudyId,
-    specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
-    getByKey(specimenGroupId) match {
-      case Failure(err) => DomainError(
-	s"specimen group does not exist: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
-	  .failNel
-      case Success(sg) if (sg.studyId.equals(studyId)) => sg.success
-      case _ => DomainError(
-        s"study does not have specimen group: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
-	  .failNel
+    def withId(
+      studyId: StudyId,
+      specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
+      getByKey(specimenGroupId) match {
+	case Failure(err) => DomainError(
+	  s"specimen group does not exist: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
+	    .failNel
+	case Success(sg) if (sg.studyId.equals(studyId)) => sg.success
+	case _ => DomainError(
+          s"study does not have specimen group: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
+	    .failNel
+      }
     }
-  }
   }
 }

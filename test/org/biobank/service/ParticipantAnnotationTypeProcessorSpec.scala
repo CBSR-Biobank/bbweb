@@ -59,10 +59,10 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
 	  }
 	}
 
-        val at = participantAnnotationTypeRepository.annotationTypeWithId(
+        val at = participantAnnotationTypeRepository.withId(
           disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
         at.version should be(0)
-        participantAnnotationTypeRepository.allAnnotationTypesForStudy(disabledStudy.id) should have size 1
+        participantAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
       }
     }
 
@@ -118,10 +118,10 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
 	  }
 	}
 
-        val at = participantAnnotationTypeRepository.annotationTypeWithId(
+        val at = participantAnnotationTypeRepository.withId(
           disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
         at.version should be(1)
-        participantAnnotationTypeRepository.allAnnotationTypesForStudy(disabledStudy.id) should have size 1
+        participantAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
       }
     }
 

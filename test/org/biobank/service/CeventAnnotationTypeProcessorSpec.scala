@@ -58,10 +58,10 @@ class CeventAnnotationTypeProcessorSpec extends StudyProcessorFixture {
 	  }
 	}
 
-        val at = collectionEventAnnotationTypeRepository.annotationTypeWithId(
+        val at = collectionEventAnnotationTypeRepository.withId(
           disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
         at.version should be(0)
-        collectionEventAnnotationTypeRepository.allAnnotationTypesForStudy(disabledStudy.id) should have size 1
+        collectionEventAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
       }
     }
 
@@ -117,10 +117,10 @@ class CeventAnnotationTypeProcessorSpec extends StudyProcessorFixture {
 	  }
 	}
 
-        val at = collectionEventAnnotationTypeRepository.annotationTypeWithId(
+        val at = collectionEventAnnotationTypeRepository.withId(
           disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
         at.version should be(1)
-        collectionEventAnnotationTypeRepository.allAnnotationTypesForStudy(disabledStudy.id) should have size 1
+        collectionEventAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
       }
     }
 

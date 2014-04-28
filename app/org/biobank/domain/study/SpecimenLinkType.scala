@@ -21,7 +21,7 @@ import scalaz.Scalaz._
   * To avoid redundancy, each combination of inputGroup and outputGroup may exist only once per
   * ProcessingType.
   *
-  * @param procesingTypeId the [[ProcessingType]] this specimen link belongs to.
+  * @param processingTypeId the [[ProcessingType]] this specimen link belongs to.
   *
   * @param expectedInputChange the expected amount to be removed from each input. If the value is
   *        not required then use a value of zero.
@@ -45,7 +45,7 @@ import scalaz.Scalaz._
   *        into. This is an optional field.
   */
 case class SpecimenLinkType private (
-  procesingTypeId: ProcessingTypeId,
+  processingTypeId: ProcessingTypeId,
   id: SpecimenLinkTypeId,
   version: Long,
   expectedInputChange: BigDecimal,
@@ -74,7 +74,7 @@ case class SpecimenLinkType private (
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData]): DomainValidation[SpecimenLinkType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      newItem <- SpecimenLinkType.create(procesingTypeId, id, version,  expectedInputChange,
+      newItem <- SpecimenLinkType.create(processingTypeId, id, version,  expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputGroupId, outputGroupId,
         inputContainerTypeId, outputContainerTypeId, annotationTypeData)
     } yield newItem
@@ -82,7 +82,7 @@ case class SpecimenLinkType private (
 
   override def toString: String =
     s"""|CollectionEventType:{
-        |  procesingTypeId: $procesingTypeId,
+        |  processingTypeId: $processingTypeId,
         |  id: $id,
         |  version: $version,
         |  expectedInputChange: $expectedInputChange,
@@ -100,7 +100,7 @@ case class SpecimenLinkType private (
 object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
 
   def create(
-    procesingTypeId: ProcessingTypeId,
+    processingTypeId: ProcessingTypeId,
     id: SpecimenLinkTypeId,
     version: Long,
     expectedInputChange: BigDecimal,
@@ -113,7 +113,7 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
     outputContainerTypeId: Option[ContainerTypeId],
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData]): DomainValidation[SpecimenLinkType] = {
 
-    (validateId(procesingTypeId).toValidationNel |@|
+    (validateId(processingTypeId).toValidationNel |@|
       validateId(id).toValidationNel |@|
       validateAndIncrementVersion(version).toValidationNel |@|
       validatePositiveNumber(

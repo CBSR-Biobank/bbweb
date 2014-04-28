@@ -112,9 +112,8 @@ trait StudyProcessorComponent
 
     private def validateCmd(cmd: EnableStudyCmd): DomainValidation[StudyEnabledEvent] = {
       val studyId = StudyId(cmd.id)
-      val specimenGroupCount = specimenGroupRepository.allSpecimenGroupsForStudy(studyId).size
-      val collectionEventtypeCount = collectionEventTypeRepository
-	.allCollectionEventTypesForStudy(studyId).size
+      val specimenGroupCount = specimenGroupRepository.allForStudy(studyId).size
+      val collectionEventtypeCount = collectionEventTypeRepository.allForStudy(studyId).size
 
       for {
 	disabledStudy <- isStudyDisabled(studyId)
@@ -244,7 +243,7 @@ trait StudyProcessorComponent
       * Utility method to validiate state of a study
       */
     private def isStudyDisabled(studyId: StudyId): DomainValidation[DisabledStudy] =
-      studyRepository.studyWithId(studyId) match {
+      studyRepository.getByKey(studyId) match {
         case Failure(msglist) => DomainError(s"no study with id: $studyId").failNel
         case Success(study) => study match {
           case dstudy: DisabledStudy => dstudy.success
@@ -256,7 +255,7 @@ trait StudyProcessorComponent
       * Utility method to validiate state of a study
       */
     private def isStudyEnabled(studyId: StudyId): DomainValidation[EnabledStudy] =
-      studyRepository.studyWithId(studyId) match {
+      studyRepository.getByKey(studyId) match {
         case Failure(msglist) => DomainError(s"no study with id: $studyId").failNel
         case Success(study) => study match {
           case enabledStudy: EnabledStudy => enabledStudy.success
@@ -268,7 +267,7 @@ trait StudyProcessorComponent
       * Utility method to validiate state of a study
       */
     private def isStudyRetired(studyId: StudyId): DomainValidation[RetiredStudy] = {
-      studyRepository.studyWithId(studyId) match {
+      studyRepository.getByKey(studyId) match {
         case Failure(msglist) => DomainError(s"no study with id: $studyId").failNel
         case Success(study) => study match {
           case retiredStudy: RetiredStudy => retiredStudy.success

@@ -59,10 +59,10 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
 	  }
 	}
 
-        val at = specimenLinkAnnotationTypeRepository.annotationTypeWithId(
+        val at = specimenLinkAnnotationTypeRepository.withId(
           disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
         at.version should be(0)
-        specimenLinkAnnotationTypeRepository.allAnnotationTypesForStudy(disabledStudy.id) should have size 1
+        specimenLinkAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
       }
     }
 
@@ -118,10 +118,10 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
 	  }
 	}
 
-        val at = specimenLinkAnnotationTypeRepository.annotationTypeWithId(
+        val at = specimenLinkAnnotationTypeRepository.withId(
           disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
         at.version should be(1)
-        specimenLinkAnnotationTypeRepository.allAnnotationTypesForStudy(disabledStudy.id) should have size 1
+        specimenLinkAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
       }
     }
 

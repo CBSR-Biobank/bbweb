@@ -14,8 +14,6 @@ trait StudyRepositoryComponent {
     def nextIdentity: StudyId
 
     def allStudies(): Set[Study]
-
-    def studyWithId(studyId: StudyId): DomainValidation[Study]
   }
 }
 
@@ -29,10 +27,6 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
 
     def allStudies(): Set[Study] = {
       getValues.toSet
-    }
-
-    def studyWithId(studyId: StudyId): DomainValidation[Study] = {
-      getByKey(studyId)
     }
 
   }

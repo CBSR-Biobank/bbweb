@@ -65,7 +65,7 @@ trait ParticipantAnnotationTypeProcessorComponent {
 	DomainValidation[ParticipantAnnotationTypeUpdatedEvent] = {
       val id = AnnotationTypeId(cmd.id)
       for {
-	oldItem <- annotationTypeRepository.annotationTypeWithId(StudyId(cmd.studyId), id)
+	oldItem <- annotationTypeRepository.withId(StudyId(cmd.studyId), id)
 	notUsed <- checkNotInUse(oldItem)
 	nameValid <- nameAvailable(cmd.name, id)
 	newItem <- oldItem.update(cmd.expectedVersion, cmd.name, cmd.description, cmd.valueType,
@@ -80,7 +80,7 @@ trait ParticipantAnnotationTypeProcessorComponent {
 	DomainValidation[ParticipantAnnotationTypeRemovedEvent] = {
       val id = AnnotationTypeId(cmd.id)
       for {
-	item <- annotationTypeRepository.annotationTypeWithId(StudyId(cmd.studyId), id)
+	item <- annotationTypeRepository.withId(StudyId(cmd.studyId), id)
 	notUsed <- checkNotInUse(item)
 	validVersion <- validateVersion(item, cmd.expectedVersion)
 	event <- ParticipantAnnotationTypeRemovedEvent(item.studyId.id, item.id.id).success

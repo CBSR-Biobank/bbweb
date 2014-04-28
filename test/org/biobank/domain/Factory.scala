@@ -198,21 +198,20 @@ trait FactoryComponent {
     }
 
     def createProcessingType: ProcessingType = {
-      null
-      // val processingTypeId = processingTypeRepository.nextIdentity
-      // val name = nameGenerator.next[ProcessingType]
-      // val description = Some(nameGenerator.next[ProcessingType])
+      val processingTypeId = processingTypeRepository.nextIdentity
+      val name = nameGenerator.next[ProcessingType]
+      val description = Some(nameGenerator.next[ProcessingType])
 
-      // val disabledStudy = defaultDisabledStudy
-      // val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-      // 	description, true, List.empty, List.empty)
-      // if (validation.isFailure) {
-      // 	throw new Error
-      // }
+      val disabledStudy = defaultDisabledStudy
+      val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
+      	description, enabled = true)
+      if (validation.isFailure) {
+      	throw new Error
+      }
 
-      // val processingType = validation | null
-      // domainObjects = domainObjects + (classOf[ProcessingType] -> processingType)
-      // processingType
+      val processingType = validation | null
+      domainObjects = domainObjects + (classOf[ProcessingType] -> processingType)
+      processingType
     }
 
     def defaultRegisteredUser: RegisteredUser = {

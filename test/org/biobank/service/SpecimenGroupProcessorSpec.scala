@@ -61,12 +61,12 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAft
           'specimenType                (sg.specimenType)
         )
 
-        val validation2 = specimenGroupRepository.specimenGroupWithId(
+        val validation2 = specimenGroupRepository.withId(
           disabledStudy.id, SpecimenGroupId(event.specimenGroupId))
         validation2 should be ('success)
         validation2 map { sg =>
           sg.version should be (0)
-          specimenGroupRepository.allSpecimenGroupsForStudy(disabledStudy.id) should have size 1
+          specimenGroupRepository.allForStudy(disabledStudy.id) should have size 1
         }
       }
 
@@ -90,12 +90,12 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAft
           'specimenType                (sg.specimenType)
         )
 
-        val validation3 = specimenGroupRepository.specimenGroupWithId(
+        val validation3 = specimenGroupRepository.withId(
           disabledStudy.id, SpecimenGroupId(event.specimenGroupId))
         validation3 should be ('success)
         validation3 map { sg  =>
           sg.version should be (0)
-          specimenGroupRepository.allSpecimenGroupsForStudy(disabledStudy.id) should have size 2
+          specimenGroupRepository.allForStudy(disabledStudy.id) should have size 2
         }
       }
     }
@@ -128,7 +128,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAft
           'specimenType                (sg2.specimenType)
         )
 
-        val sg3 = specimenGroupRepository.specimenGroupWithId(
+        val sg3 = specimenGroupRepository.withId(
           disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) | fail
         sg3.version should be (sg.version + 1)
       }

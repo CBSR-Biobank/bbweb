@@ -7,6 +7,8 @@ import org.biobank.domain.study.{
   CollectionEventTypeRepositoryComponentImpl,
   ParticipantAnnotationTypeRepositoryComponent,
   ParticipantAnnotationTypeRepositoryComponentImpl,
+  ProcessingTypeRepositoryComponent,
+  ProcessingTypeRepositoryComponentImpl,
   StudyRepositoryComponent,
   StudyRepositoryComponentImpl,
   SpecimenGroupRepositoryComponent,
@@ -21,6 +23,7 @@ trait RepositoryComponent
   with CollectionEventAnnotationTypeRepositoryComponent
   with CollectionEventTypeRepositoryComponent
   with ParticipantAnnotationTypeRepositoryComponent
+  with ProcessingTypeRepositoryComponent
   with SpecimenLinkAnnotationTypeRepositoryComponent
   with UserRepositoryComponent
 
@@ -31,5 +34,6 @@ trait RepositoryComponentImpl
   with CollectionEventAnnotationTypeRepositoryComponentImpl
   with CollectionEventTypeRepositoryComponentImpl
   with ParticipantAnnotationTypeRepositoryComponentImpl
+  with ProcessingTypeRepositoryComponentImpl
   with SpecimenLinkAnnotationTypeRepositoryComponentImpl
   with UserRepositoryComponentImpl

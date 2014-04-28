@@ -60,10 +60,10 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
           'description (cet.description),
           'recurring (cet.recurring))
 
-        val cet2 = collectionEventTypeRepository.collectionEventTypeWithId(
+        val cet2 = collectionEventTypeRepository.withId(
           disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) | fail
         cet2.version should be(0)
-        collectionEventTypeRepository.allCollectionEventTypesForStudy(disabledStudy.id) should have size 1
+        collectionEventTypeRepository.allForStudy(disabledStudy.id) should have size 1
       }
     }
 

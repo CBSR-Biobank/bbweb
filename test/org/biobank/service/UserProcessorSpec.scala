@@ -41,7 +41,7 @@ class UserProcessorSpec extends UserProcessorFixture {
           'avatarUrl (user.avatarUrl)
 	)
 
-        userRepository.userWithId(UserId(event.id)) map { user =>
+        userRepository.getByKey(UserId(event.id)) map { user =>
           user shouldBe a[RegisteredUser]
 	}
       }

@@ -26,7 +26,7 @@ trait UserServiceComponent {
     val log = LoggerFactory.getLogger(this.getClass)
 
     def find(id: securesocial.core.IdentityId): Option[securesocial.core.Identity] = {
-      userRepository.userWithId(UserId(id.userId)) match {
+      userRepository.getByKey(UserId(id.userId)) match {
         case Success(user) => Some(toSecureSocialIdentity(user))
         case Failure(err) =>
           log.error(err.list.mkString(","))
@@ -36,7 +36,7 @@ trait UserServiceComponent {
 
     def findByEmailAndProvider(
       email: String, providerId: String): Option[securesocial.core.Identity] = {
-      userRepository.userWithId(UserId(email)) match {
+      userRepository.getByKey(UserId(email)) match {
         case Success(user) => some(toSecureSocialIdentity(user))
         case Failure(err) =>
           log.error(err.list.mkString(","))
@@ -45,7 +45,7 @@ trait UserServiceComponent {
     }
 
     def getByEmail(email: String): DomainValidation[User] = {
-      userRepository.userWithId(UserId(email))
+      userRepository.getByKey(UserId(email))
     }
 
     private def toSecureSocialIdentity(user: User): securesocial.core.Identity = {
@@ -119,7 +119,7 @@ trait UserProcessorComponent {
 
     def validateCmd(cmd: ActivateUserCommand): DomainValidation[UserActivatedEvent] = {
       for {
-        user <- userRepository.userWithId(UserId(cmd.email))
+        user <- userRepository.getByKey(UserId(cmd.email))
         registeredUser <- isUserRegistered(user)
         activatedUser <- registeredUser.activate(cmd.expectedVersion)
         event <- UserActivatedEvent(activatedUser.id.toString, activatedUser.version).success
@@ -130,7 +130,7 @@ trait UserProcessorComponent {
 
     def validateCmd(cmd: LockUserCommand): DomainValidation[UserLockedEvent] = {
       for {
-        user <- userRepository.userWithId(UserId(cmd.email))
+        user <- userRepository.getByKey(UserId(cmd.email))
         activeUser <- isUserActive(user)
         lockedUser <- activeUser.lock(cmd.expectedVersion)
         event <- UserLockedEvent(lockedUser.id.toString, lockedUser.version).success
@@ -141,7 +141,7 @@ trait UserProcessorComponent {
 
     def validateCmd(cmd: UnlockUserCommand): DomainValidation[UserUnlockedEvent] = {
       for {
-        user <- userRepository.userWithId(UserId(cmd.email))
+        user <- userRepository.getByKey(UserId(cmd.email))
         lockedUser <- isUserLocked(user)
         unlockedUser <- lockedUser.unlock(cmd.expectedVersion)
         event <- UserUnlockedEvent(lockedUser.id.toString, lockedUser.version).success

@@ -49,7 +49,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
           'description (study.description)
         )
 
-        studyRepository.studyWithId(StudyId(event.id)) map { study =>
+        studyRepository.getByKey(StudyId(event.id)) map { study =>
           study shouldBe a[DisabledStudy]
         }
       }
@@ -141,7 +141,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 	event.description should be (description2)
       }
 
-      val study = studyRepository.studyWithId(disabledStudy.id) | fail
+      val study = studyRepository.getByKey(disabledStudy.id) | fail
       study.version should be (1L)
 
       // update something other than the name
@@ -212,7 +212,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
       validation map { event =>
       	event shouldBe a[StudyEnabledEvent]
-        val study = studyRepository.studyWithId(StudyId(event.id)) | fail
+        val study = studyRepository.withId(StudyId(event.id)) | fail
         study shouldBe a[EnabledStudy]
       }
     }
@@ -229,7 +229,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       validation should be ('success)
       validation map { event =>
 	event shouldBe a[StudyDisabledEvent]
-        val study = studyRepository.studyWithId(StudyId(event.id)) | fail
+        val study = studyRepository.withId(StudyId(event.id)) | fail
         study shouldBe a[DisabledStudy]
       }
     }

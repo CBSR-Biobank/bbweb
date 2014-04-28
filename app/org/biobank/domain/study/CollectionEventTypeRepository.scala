@@ -16,11 +16,11 @@ trait CollectionEventTypeRepositoryComponent {
 
     def nextIdentity: CollectionEventTypeId
 
-    def collectionEventTypeWithId(
+    def withId(
       studyId: StudyId,
       ceventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType]
 
-    def allCollectionEventTypesForStudy(studyId: StudyId): Set[CollectionEventType]
+    def allForStudy(studyId: StudyId): Set[CollectionEventType]
 
     def specimenGroupInUse(studyId: StudyId, specimenGroupId: SpecimenGroupId): Boolean
 
@@ -42,7 +42,7 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
     def nextIdentity: CollectionEventTypeId =
       new CollectionEventTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
 
-    def collectionEventTypeWithId(
+    def withId(
       studyId: StudyId,
       ceventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType] = {
       getByKey(ceventTypeId) match {
@@ -59,21 +59,8 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
       }
     }
 
-    def allCollectionEventTypesForStudy(studyId: StudyId): Set[CollectionEventType] = {
+    def allForStudy(studyId: StudyId): Set[CollectionEventType] = {
       getValues.filter(x => x.studyId.equals(studyId)).toSet
-    }
-
-    private def nameAvailable(ceventType: CollectionEventType): DomainValidation[Boolean] = {
-      val exists = getValues.exists { item =>
-        item.studyId.equals(ceventType.studyId) &&
-          item.name.equals(ceventType.name) &&
-          !item.id.equals(ceventType.id)
-      }
-
-      if (exists)
-        DomainError("collection event type with name already exists: %s" format ceventType.name).failNel
-      else
-        true.success
     }
 
     def specimenGroupInUse(studyId: StudyId, specimenGroupId: SpecimenGroupId): Boolean = {

@@ -10,11 +10,11 @@ trait StudyAnnotationTypeRepository[A <: StudyAnnotationType]
 
   def nextIdentity: AnnotationTypeId
 
-  def annotationTypeWithId(studyId: StudyId, annotationTypeId: AnnotationTypeId): DomainValidation[A]
+  def withId(studyId: StudyId, annotationTypeId: AnnotationTypeId): DomainValidation[A]
 
-  def annotationTypeWithId(studyId: StudyId, annotationTypeId: String): DomainValidation[A]
+  def withId(studyId: StudyId, annotationTypeId: String): DomainValidation[A]
 
-  def allAnnotationTypesForStudy(studyId: StudyId): Set[A]
+  def allForStudy(studyId: StudyId): Set[A]
  }
 
 trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
@@ -24,7 +24,7 @@ trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
   def nextIdentity: AnnotationTypeId =
     new AnnotationTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
 
-  def annotationTypeWithId(
+  def withId(
     studyId: StudyId,
     annotationTypeId: AnnotationTypeId): DomainValidation[A] = {
     getByKey(annotationTypeId) match {
@@ -39,13 +39,13 @@ trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
     }
   }
 
-  def annotationTypeWithId(
+  def withId(
     studyId: StudyId,
     annotationTypeId: String): DomainValidation[A] = {
-    annotationTypeWithId(studyId, AnnotationTypeId(annotationTypeId))
+    withId(studyId, AnnotationTypeId(annotationTypeId))
   }
 
-  def allAnnotationTypesForStudy(studyId: StudyId): Set[A] = {
+  def allForStudy(studyId: StudyId): Set[A] = {
     getValues.filter(x => x.studyId.equals(studyId)).toSet
   }
 

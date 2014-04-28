@@ -168,53 +168,53 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
     }
 
     def getStudy(id: String): DomainValidation[Study] = {
-      studyRepository.studyWithId(new StudyId(id))
+      studyRepository.getByKey(new StudyId(id))
     }
 
     def specimenGroupWithId(studyId: String, specimenGroupId: String): DomainValidation[SpecimenGroup] = {
-      specimenGroupRepository.specimenGroupWithId(
+      specimenGroupRepository.withId(
         StudyId(studyId), SpecimenGroupId(specimenGroupId))
     }
 
     def specimenGroupsForStudy(studyId: String): Set[SpecimenGroup] =
-      specimenGroupRepository.allSpecimenGroupsForStudy(StudyId(studyId))
+      specimenGroupRepository.allForStudy(StudyId(studyId))
 
     def collectionEventAnnotationTypeWithId(
       studyId: String,
       annotationTypeId: String): DomainValidation[CollectionEventAnnotationType] = {
-      collectionEventAnnotationTypeRepository.annotationTypeWithId(
+      collectionEventAnnotationTypeRepository.withId(
         StudyId(studyId), AnnotationTypeId(annotationTypeId))
     }
 
     def collectionEventAnnotationTypesForStudy(id: String): Set[CollectionEventAnnotationType] = {
-      collectionEventAnnotationTypeRepository.allAnnotationTypesForStudy(StudyId(id))
+      collectionEventAnnotationTypeRepository.allForStudy(StudyId(id))
     }
 
     def collectionEventTypeWithId(
       studyId: String,
       collectionEventTypeId: String): DomainValidation[CollectionEventType] = {
-      collectionEventTypeRepository.collectionEventTypeWithId(
+      collectionEventTypeRepository.withId(
         StudyId(studyId), CollectionEventTypeId(collectionEventTypeId))
     }
 
     def collectionEventTypesForStudy(studyId: String): Set[CollectionEventType] = {
-      collectionEventTypeRepository.allCollectionEventTypesForStudy(StudyId(studyId))
+      collectionEventTypeRepository.allForStudy(StudyId(studyId))
     }
 
     def participantAnnotationTypesForStudy(studyId: String): Set[ParticipantAnnotationType] =
-      participantAnnotationTypeRepository.allAnnotationTypesForStudy(StudyId(studyId))
+      participantAnnotationTypeRepository.allForStudy(StudyId(studyId))
 
     def participantAnnotationTypeWithId(
       studyId: String,
       annotationTypeId: String): DomainValidation[ParticipantAnnotationType] = {
-      participantAnnotationTypeRepository.annotationTypeWithId(
+      participantAnnotationTypeRepository.withId(
         StudyId(studyId), AnnotationTypeId(annotationTypeId))
     }
 
     def specimenLinkAnnotationTypeWithId(
       studyId: String,
       annotationTypeId: String): DomainValidation[SpecimenLinkAnnotationType] = {
-      specimenLinkAnnotationTypeRepository.annotationTypeWithId(
+      specimenLinkAnnotationTypeRepository.withId(
         StudyId(studyId), AnnotationTypeId(annotationTypeId))
     }
 
@@ -354,7 +354,7 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
     }
 
     def specimenLinkAnnotationTypesForStudy(studyId: String): Set[SpecimenLinkAnnotationType] =
-      specimenLinkAnnotationTypeRepository.allAnnotationTypesForStudy(StudyId(studyId))
+      specimenLinkAnnotationTypeRepository.allForStudy(StudyId(studyId))
 
     def addSpecimenLinkAnnotationType(
       cmd: AddSpecimenLinkAnnotationTypeCmd)(

@@ -85,7 +85,7 @@ trait SpecimenGroupProcessorComponent {
 
       for {
 	nameValid <- nameAvailable(cmd.name, specimenGroupId)
-	oldItem <- specimenGroupRepository.specimenGroupWithId(studyId, specimenGroupId)
+	oldItem <- specimenGroupRepository.withId(studyId, specimenGroupId)
 	notInUse <- checkNotInUse(studyId, oldItem.id)
 	newItem <- oldItem.update(cmd.expectedVersion, cmd.name, cmd.description, cmd.units,
 	  cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
@@ -102,7 +102,7 @@ trait SpecimenGroupProcessorComponent {
       val studyId = StudyId(cmd.studyId)
 
       for {
-	item <- specimenGroupRepository.specimenGroupWithId(studyId, SpecimenGroupId(cmd.id))
+	item <- specimenGroupRepository.withId(studyId, SpecimenGroupId(cmd.id))
 	notInUse <- checkNotInUse(studyId, item.id)
 	validVersion <- validateVersion(item, cmd.expectedVersion)
 	newEvent <- SpecimenGroupRemovedEvent(item.studyId.id, item.id.id).success

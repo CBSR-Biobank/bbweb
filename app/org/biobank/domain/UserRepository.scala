@@ -14,8 +14,6 @@ trait UserRepositoryComponent {
 
     def allUsers(): Set[User]
 
-    def userWithId(userId: UserId): DomainValidation[User]
-
     def emailAvailable(email: String): DomainValidation[Boolean]
 
   }
@@ -36,8 +34,6 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
     def allUsers(): Set[User] = {
       getValues.toSet
     }
-
-    def userWithId(userId: UserId): DomainValidation[User] = getByKey(userId)
 
     def emailAvailable(email: String): DomainValidation[Boolean] = {
       getByKey(new UserId(email)) match {

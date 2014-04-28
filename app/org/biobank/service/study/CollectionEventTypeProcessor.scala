@@ -87,7 +87,7 @@ trait CollectionEventTypeProcessorComponent {
       val id = CollectionEventTypeId(cmd.id)
 
       for {
-	oldItem <- collectionEventTypeRepository.collectionEventTypeWithId(studyId,id)
+	oldItem <- collectionEventTypeRepository.withId(studyId,id)
 	nameValid <- nameAvailable(cmd.name, id)
 	newItem <- oldItem.update(cmd.expectedVersion, cmd.name,
           cmd.description, cmd.recurring, cmd.specimenGroupData, cmd.annotationTypeData)
@@ -105,7 +105,7 @@ trait CollectionEventTypeProcessorComponent {
       val id = CollectionEventTypeId(cmd.id)
 
       for {
-	item <- collectionEventTypeRepository.collectionEventTypeWithId(studyId, id)
+	item <- collectionEventTypeRepository.withId(studyId, id)
 	validVersion <- validateVersion(item, cmd.expectedVersion)
 	event <- CollectionEventTypeRemovedEvent(cmd.studyId, cmd.id).success
       } yield event
@@ -179,7 +179,7 @@ trait CollectionEventTypeProcessorComponent {
       specimenGroupData: List[CollectionEventTypeSpecimenGroupData]): DomainValidation[Boolean] = {
 
       val invalidSet = specimenGroupData.map(v => SpecimenGroupId(v.specimenGroupId)).map { id =>
-	(id -> specimenGroupRepository.specimenGroupWithId(studyId, id).isSuccess)
+	(id -> specimenGroupRepository.withId(studyId, id).isSuccess)
       }.filter(x => !x._2).map(_._1)
 
       if (invalidSet.isEmpty) true.success
@@ -196,7 +196,7 @@ trait CollectionEventTypeProcessorComponent {
       annotationTypeData: List[CollectionEventTypeAnnotationTypeData]): DomainValidation[Boolean] = {
 
       val invalidSet = annotationTypeData.map(v => AnnotationTypeId(v.annotationTypeId)).map { id =>
-	(id -> collectionEventAnnotationTypeRepository.annotationTypeWithId(studyId, id).isSuccess)
+	(id -> collectionEventAnnotationTypeRepository.withId(studyId, id).isSuccess)
       }.filter(x => !x._2).map(_._1)
 
       if (invalidSet.isEmpty) true.success
