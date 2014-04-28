@@ -1,8 +1,8 @@
 package org.biobank.service
 
 import org.biobank.fixture._
-import org.biobank.infrastructure.CollectionEventTypeAnnotationType
-import org.biobank.infrastructure.CollectionEventTypeSpecimenGroup
+import org.biobank.infrastructure.CollectionEventTypeAnnotationTypeData
+import org.biobank.infrastructure.CollectionEventTypeSpecimenGroupData
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
   AnatomicalSourceType,
@@ -211,8 +211,8 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
       specimenGroupRepository.put(sg)
 
       val specimenGroupData = List(
-        factory.createCollectionEventTypeSpecimenGroup,
-        factory.createCollectionEventTypeSpecimenGroup)
+        factory.createCollectionEventTypeSpecimenGroupData,
+        factory.createCollectionEventTypeSpecimenGroupData)
 
       val cet = factory.createCollectionEventType
       val cmd = AddCollectionEventTypeCmd(
@@ -245,7 +245,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroup)
+      val specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData)
 
       val cmd = UpdateCollectionEventTypeCmd(
         cet.studyId.id, cet.id.id, cet.versionOption, cet.name, cet.description, cet.recurring,
@@ -272,7 +272,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
 
       var cet = factory.createCollectionEventType
       cet = cet.update(cet.versionOption, cet.name, cet.description, cet.recurring,
-        List(factory.createCollectionEventTypeSpecimenGroup), List.empty) | fail
+        List(factory.createCollectionEventTypeSpecimenGroupData), List.empty) | fail
       collectionEventTypeRepository.put(cet)
 
       val cmd = new UpdateSpecimenGroupCmd(sg.studyId.id, sg.id.id,
@@ -294,7 +294,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
 
       var cet = factory.createCollectionEventType
       cet = cet.update(cet.versionOption, cet.name, cet.description, cet.recurring,
-        List(factory.createCollectionEventTypeSpecimenGroup), List.empty) | fail
+        List(factory.createCollectionEventTypeSpecimenGroupData), List.empty) | fail
       collectionEventTypeRepository.put(cet)
 
       val cmd = UpdateCollectionEventTypeCmd(
@@ -315,7 +315,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
       val sg = factory.createSpecimenGroup
       specimenGroupRepository.put(sg)
 
-      val specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroup)
+      val specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData)
 
       var cet = factory.createCollectionEventType
       cet = cet.update(cet.versionOption, cet.name, cet.description, cet.recurring,
@@ -334,7 +334,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
     }
 
     "not add a specimen group from a different study" in {
-      val specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroup)
+      val specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData)
 
       val study2 = factory.createDisabledStudy
       studyRepository.put(study2)
@@ -354,7 +354,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
     }
 
     "not update a collection event type with a specimen group from a different study" in {
-      val specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroup)
+      val specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData)
 
       val study2 = factory.createDisabledStudy
       studyRepository.put(study2)
@@ -379,7 +379,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
     "add an annotation type to a colleciton event" in {
       val annotationType = factory.defaultCollectionEventAnnotationType
       collectionEventAnnotationTypeRepository.put(annotationType)
-      val annotTypeData = List(factory.createCollectionEventTypeAnnotationType)
+      val annotTypeData = List(factory.createCollectionEventTypeAnnotationTypeData)
 
       val cet = factory.createCollectionEventType
       var cmd = AddCollectionEventTypeCmd(
@@ -405,7 +405,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
 
       var cet = factory.createCollectionEventType
       cet = cet.update(cet.versionOption, cet.name, cet.description, cet.recurring,
-        List.empty, List(factory.createCollectionEventTypeAnnotationType)) | fail
+        List.empty, List(factory.createCollectionEventTypeAnnotationTypeData)) | fail
       collectionEventTypeRepository.put(cet)
 
       val cmd = UpdateCollectionEventAnnotationTypeCmd(
@@ -428,7 +428,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
 
       var cet = factory.createCollectionEventType
       cet = cet.update(cet.versionOption, cet.name, cet.description, cet.recurring,
-        List.empty, List(factory.createCollectionEventTypeAnnotationType)) | fail
+        List.empty, List(factory.createCollectionEventTypeAnnotationTypeData)) | fail
       collectionEventTypeRepository.put(cet)
 
       val cmd = UpdateCollectionEventTypeCmd(
@@ -450,7 +450,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
 
       var cet = factory.createCollectionEventType
       cet = cet.update(cet.versionOption, cet.name, cet.description, cet.recurring,
-        List.empty, List(factory.createCollectionEventTypeAnnotationType)) | fail
+        List.empty, List(factory.createCollectionEventTypeAnnotationTypeData)) | fail
       collectionEventTypeRepository.put(cet)
 
       val cmd = RemoveCollectionEventAnnotationTypeCmd(
@@ -479,7 +479,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
 
       val cmd = UpdateCollectionEventTypeCmd(
         cet.studyId.id, cet.id.id, cet.versionOption, cet.name, cet.description, cet.recurring,
-        List.empty, List(factory.createCollectionEventTypeAnnotationType))
+        List.empty, List(factory.createCollectionEventTypeAnnotationTypeData))
       val validation2 = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
         .futureValue

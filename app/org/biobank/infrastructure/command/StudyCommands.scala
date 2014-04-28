@@ -104,8 +104,8 @@ object StudyCommands {
     name: String,
     description: Option[String],
     recurring: Boolean,
-    specimenGroupData: List[CollectionEventTypeSpecimenGroup],
-    annotationTypeData: List[CollectionEventTypeAnnotationType])
+    specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
+    annotationTypeData: List[CollectionEventTypeAnnotationTypeData])
       extends CollectionEventTypeCommand with HasStudyIdentity
 
   case class UpdateCollectionEventTypeCmd(
@@ -115,8 +115,8 @@ object StudyCommands {
     name: String,
     description: Option[String],
     recurring: Boolean,
-    specimenGroupData: List[CollectionEventTypeSpecimenGroup],
-    annotationTypeData: List[CollectionEventTypeAnnotationType])
+    specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
+    annotationTypeData: List[CollectionEventTypeAnnotationTypeData])
       extends CollectionEventTypeCommand
       with HasIdentity
       with HasExpectedVersion

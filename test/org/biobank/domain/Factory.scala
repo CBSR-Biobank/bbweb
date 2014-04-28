@@ -4,8 +4,8 @@ import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.{
-  CollectionEventTypeAnnotationType,
-  CollectionEventTypeSpecimenGroup
+  CollectionEventTypeAnnotationTypeData,
+  CollectionEventTypeSpecimenGroupData
 }
 import org.slf4j.LoggerFactory
 import scala.reflect.ClassTag
@@ -142,18 +142,18 @@ class Factory(
     annotationType
   }
 
-  def createCollectionEventTypeSpecimenGroup: CollectionEventTypeSpecimenGroup = {
+  def createCollectionEventTypeSpecimenGroupData: CollectionEventTypeSpecimenGroupData = {
     val sg = defaultSpecimenGroup
-    val ceventTypeSpecimenGroup = CollectionEventTypeSpecimenGroup(sg.id.id, 1, Some(BigDecimal(1.0)))
-    domainObjects = domainObjects + (classOf[CollectionEventTypeSpecimenGroup] -> ceventTypeSpecimenGroup)
+    val ceventTypeSpecimenGroup = CollectionEventTypeSpecimenGroupData(sg.id.id, 1, Some(BigDecimal(1.0)))
+    domainObjects = domainObjects + (classOf[CollectionEventTypeSpecimenGroupData] -> ceventTypeSpecimenGroup)
     ceventTypeSpecimenGroup
   }
 
-  def createCollectionEventTypeAnnotationType: CollectionEventTypeAnnotationType = {
+  def createCollectionEventTypeAnnotationTypeData: CollectionEventTypeAnnotationTypeData = {
     val annotationType = defaultCollectionEventAnnotationType
-    val ceventTypeAnnotationType = CollectionEventTypeAnnotationType(annotationType.id.id, true)
+    val ceventTypeAnnotationType = CollectionEventTypeAnnotationTypeData(annotationType.id.id, true)
     domainObjects = domainObjects +
-    (classOf[CollectionEventTypeAnnotationType] -> ceventTypeAnnotationType)
+    (classOf[CollectionEventTypeAnnotationTypeData] -> ceventTypeAnnotationType)
     ceventTypeAnnotationType
   }
 
@@ -225,14 +225,14 @@ class Factory(
     defaultObject(classOf[CollectionEventAnnotationType], createCollectionEventAnnotationType)
   }
 
-  def defaultCollectionEventTypeSpecimenGroup: CollectionEventTypeSpecimenGroup = {
-    defaultObject(classOf[CollectionEventTypeSpecimenGroup], createCollectionEventTypeSpecimenGroup)
+  def defaultCollectionEventTypeSpecimenGroupData: CollectionEventTypeSpecimenGroupData = {
+    defaultObject(classOf[CollectionEventTypeSpecimenGroupData], createCollectionEventTypeSpecimenGroupData)
   }
 
-  def defaultCollectionEventTypeAnnotationType: CollectionEventTypeAnnotationType = {
+  def defaultCollectionEventTypeAnnotationTypeData: CollectionEventTypeAnnotationTypeData = {
     defaultObject(
-      classOf[CollectionEventTypeAnnotationType],
-      createCollectionEventTypeAnnotationType)
+      classOf[CollectionEventTypeAnnotationTypeData],
+      createCollectionEventTypeAnnotationTypeData)
   }
 
   def defaultParticipantAnnotationType: ParticipantAnnotationType = {

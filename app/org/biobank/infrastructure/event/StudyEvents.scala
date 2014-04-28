@@ -92,8 +92,8 @@ object StudyEvents {
     name: String,
     description: Option[String],
     recurring: Boolean,
-    specimenGroupData: List[CollectionEventTypeSpecimenGroup],
-    annotationTypeData: List[CollectionEventTypeAnnotationType])
+    specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
+    annotationTypeData: List[CollectionEventTypeAnnotationTypeData])
     extends StudyEvent
 
   case class CollectionEventTypeUpdatedEvent(
@@ -103,8 +103,8 @@ object StudyEvents {
     name: String,
     description: Option[String],
     recurring: Boolean,
-    specimenGroupData: List[CollectionEventTypeSpecimenGroup],
-    annotationTypeData: List[CollectionEventTypeAnnotationType])
+    specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
+    annotationTypeData: List[CollectionEventTypeAnnotationTypeData])
     extends StudyEvent
 
   case class CollectionEventTypeRemovedEvent(

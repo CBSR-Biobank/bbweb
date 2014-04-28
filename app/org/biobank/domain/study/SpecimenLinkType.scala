@@ -8,7 +8,8 @@ import org.biobank.domain.{
   HasUniqueName,
   HasDescriptionOption
 }
-import org.biobank.domain.validation.StudyValidationHelper
+import org.biobank.infrastructure._
+import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
 
 import scalaz._
 import scalaz.Scalaz._
@@ -54,7 +55,8 @@ case class SpecimenLinkType private (
   inputGroupId: SpecimenGroupId,
   outputGroupId: SpecimenGroupId,
   inputContainerTypeId: Option[ContainerTypeId],
-  outputContainerTypeId: Option[ContainerTypeId])
+  outputContainerTypeId: Option[ContainerTypeId],
+  annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
     extends ConcurrencySafeEntity[SpecimenLinkTypeId] {
 
   /** Updates a specimen link type with one or more new values.
@@ -68,12 +70,13 @@ case class SpecimenLinkType private (
     inputGroupId: SpecimenGroupId,
     outputGroupId: SpecimenGroupId,
     inputContainerTypeId: Option[ContainerTypeId],
-    outputContainerTypeId: Option[ContainerTypeId]): DomainValidation[SpecimenLinkType] = {
+    outputContainerTypeId: Option[ContainerTypeId],
+    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData]): DomainValidation[SpecimenLinkType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
       newItem <- SpecimenLinkType.create(procesingTypeId, id, version,  expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputGroupId, outputGroupId,
-        inputContainerTypeId, outputContainerTypeId)
+        inputContainerTypeId, outputContainerTypeId, annotationTypeData)
     } yield newItem
   }
 
@@ -82,18 +85,19 @@ case class SpecimenLinkType private (
         |  procesingTypeId: $procesingTypeId,
         |  id: $id,
         |  version: $version,
-        |  expectedInputChange, $expectedInputChange,
-        |  expectedOutputChange, $expectedOutputChange,
-        |  inputCount, $inputCount,
-        |  outputCount, $outputCount,
-        |  inputGroupId, $inputGroupId,
-        |  outputGroupId, $outputGroupId,
-        |  inputContainerTypeId, $inputContainerTypeId,
-        |  outputContainerTypeId, $outputContainerTypeId
+        |  expectedInputChange: $expectedInputChange,
+        |  expectedOutputChange: $expectedOutputChange,
+        |  inputCount: $inputCount,
+        |  outputCount: $outputCount,
+        |  inputGroupId: $inputGroupId,
+        |  outputGroupId: $outputGroupId,
+        |  inputContainerTypeId: $inputContainerTypeId,
+        |  outputContainerTypeId: $outputContainerTypeId
+        |  annotationTypeData: $annotationTypeData
         |}""".stripMargin
 }
 
-object SpecimenLinkType extends StudyValidationHelper {
+object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
 
   def create(
     procesingTypeId: ProcessingTypeId,
@@ -106,7 +110,8 @@ object SpecimenLinkType extends StudyValidationHelper {
     inputGroupId: SpecimenGroupId,
     outputGroupId: SpecimenGroupId,
     inputContainerTypeId: Option[ContainerTypeId],
-    outputContainerTypeId: Option[ContainerTypeId]): DomainValidation[SpecimenLinkType] = {
+    outputContainerTypeId: Option[ContainerTypeId],
+    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData]): DomainValidation[SpecimenLinkType] = {
 
     (validateId(procesingTypeId).toValidationNel |@|
       validateId(id).toValidationNel |@|
@@ -126,8 +131,9 @@ object SpecimenLinkType extends StudyValidationHelper {
       validateId(inputGroupId).toValidationNel |@|
       validateId(outputGroupId).toValidationNel |@|
       validateId(inputContainerTypeId).toValidationNel |@|
-      validateId(outputContainerTypeId).toValidationNel) {
-      SpecimenLinkType(_, _, _, _, _, _, _, _, _, _, _)
+      validateId(outputContainerTypeId).toValidationNel |@|
+      validateAnnotationTypeData(annotationTypeData)) {
+      SpecimenLinkType(_, _, _, _, _, _, _, _, _, _, _, _)
     }
 
   }

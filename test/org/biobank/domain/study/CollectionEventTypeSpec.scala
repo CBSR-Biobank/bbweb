@@ -24,8 +24,8 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroup("x", 1, Option(1)))
-      val annotationTypeData = List(CollectionEventTypeAnnotationType("x", false))
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val v = CollectionEventType.create(studyId, id, version, name, description, recurring,
 	specimenGroupData, annotationTypeData)
@@ -52,8 +52,8 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroup("x", 1, Option(1)))
-      val annotationTypeData = List(CollectionEventTypeAnnotationType("x", false))
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       CollectionEventType.create(studyId, id, version, name, description, recurring,
 	specimenGroupData, annotationTypeData) match {
@@ -70,8 +70,8 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroup("x", 1, Option(1)))
-      val annotationTypeData = List(CollectionEventTypeAnnotationType("x", false))
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       CollectionEventType.create(studyId, id, version, name, description, recurring,
 	specimenGroupData, annotationTypeData) match {
@@ -88,8 +88,8 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroup("x", 1, Option(1)))
-      val annotationTypeData = List(CollectionEventTypeAnnotationType("x", false))
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       CollectionEventType.create(studyId, id, version, name, description, recurring,
 	specimenGroupData, annotationTypeData) match {
@@ -106,8 +106,8 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       var name: String = null
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroup("x", 1, Option(1)))
-      val annotationTypeData = List(CollectionEventTypeAnnotationType("x", false))
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       CollectionEventType.create(studyId, id, version, name, description, recurring,
 	specimenGroupData, annotationTypeData) match {
@@ -132,8 +132,8 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val name = nameGenerator.next[CollectionEventType]
       var description: Option[String] = Some(null)
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroup("x", 1, Option(1)))
-      val annotationTypeData = List(CollectionEventTypeAnnotationType("x", false))
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       CollectionEventType.create(studyId, id, version, name, description, recurring,
 	specimenGroupData, annotationTypeData) match {
@@ -158,8 +158,8 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroup("", 1, Option(1)))
-      val annotationTypeData = List(CollectionEventTypeAnnotationType("x", false))
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("", 1, Option(1)))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       CollectionEventType.create(studyId, id, version, name, description, recurring,
 	specimenGroupData, annotationTypeData) match {
@@ -176,8 +176,8 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroup("x", -1, Option(1)))
-      val annotationTypeData = List(CollectionEventTypeAnnotationType("x", false))
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", -1, Option(1)))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       CollectionEventType.create(studyId, id, version, name, description, recurring,
 	specimenGroupData, annotationTypeData) match {
@@ -194,8 +194,8 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroup("x", 1, Option(-1)))
-      val annotationTypeData = List(CollectionEventTypeAnnotationType("x", false))
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(-1)))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       CollectionEventType.create(studyId, id, version, name, description, recurring,
 	specimenGroupData, annotationTypeData) match {
@@ -212,8 +212,8 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroup("x", 1, Option(1)))
-      val annotationTypeData = List(CollectionEventTypeAnnotationType("", false))
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("", false))
 
       CollectionEventType.create(studyId, id, version, name, description, recurring,
 	specimenGroupData, annotationTypeData) match {
@@ -230,8 +230,8 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val name = ""
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroup("x", 1, Option(1)))
-      val annotationTypeData = List(CollectionEventTypeAnnotationType("1", false))
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("1", false))
 
       CollectionEventType.create(studyId, id, version, name, description, recurring,
 	specimenGroupData, annotationTypeData) match {

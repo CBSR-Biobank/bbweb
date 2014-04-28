@@ -1,8 +1,8 @@
 package org.biobank.domain.study
 
 import org.biobank.infrastructure.{
-  CollectionEventTypeSpecimenGroup,
-  CollectionEventTypeAnnotationType}
+  CollectionEventTypeSpecimenGroupData,
+  CollectionEventTypeAnnotationTypeData}
 import org.biobank.domain.{
   AnnotationTypeId,
   ConcurrencySafeEntity,
@@ -138,8 +138,8 @@ case class DisabledStudy private (
     name: String,
     description: Option[String],
     recurring: Boolean,
-    specimenGroupData: List[CollectionEventTypeSpecimenGroup],
-    annotationTypeData: List[CollectionEventTypeAnnotationType]): DomainValidation[CollectionEventType] =  {
+    specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
+    annotationTypeData: List[CollectionEventTypeAnnotationTypeData]): DomainValidation[CollectionEventType] =  {
     CollectionEventType.create(this.id, id, version, name, description, recurring, specimenGroupData,
       annotationTypeData)
   }

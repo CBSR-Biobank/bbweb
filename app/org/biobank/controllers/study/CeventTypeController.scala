@@ -37,8 +37,8 @@ import Scalaz._
 case class CeventTypeFormObject(
   collectionEventTypeId: String, version: Long, studyId: String, studyName: String, name: String,
   description: Option[String], recurring: Boolean,
-  specimenGroupData: List[CollectionEventTypeSpecimenGroup],
-  annotationTypeData: List[CollectionEventTypeAnnotationType]) {
+  specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
+  annotationTypeData: List[CollectionEventTypeAnnotationTypeData]) {
 
   def getAddCmd: AddCollectionEventTypeCmd = {
     AddCollectionEventTypeCmd(studyId, name, description, recurring,
@@ -75,11 +75,11 @@ object CeventTypeController extends Controller with SecureSocial {
         "specimenGroupId" -> text,
         "specimenGroupCount" -> number,
         "specimenGroupAmount" -> optional(bigDecimal))(
-          CollectionEventTypeSpecimenGroup.apply)(CollectionEventTypeSpecimenGroup.unapply)),
+          CollectionEventTypeSpecimenGroupData.apply)(CollectionEventTypeSpecimenGroupData.unapply)),
       "annotationTypeData" -> list(mapping(
         "annotationTypeId" -> text,
         "annotationTypeRequired" -> boolean)(
-          CollectionEventTypeAnnotationType.apply)(CollectionEventTypeAnnotationType.unapply)))(
+          CollectionEventTypeAnnotationTypeData.apply)(CollectionEventTypeAnnotationTypeData.unapply)))(
         CeventTypeFormObject.apply)(CeventTypeFormObject.unapply))
 
   private def specimenGroupInfo(studyId: String) = {

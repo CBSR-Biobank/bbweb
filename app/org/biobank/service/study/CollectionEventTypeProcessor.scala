@@ -168,7 +168,7 @@ class CollectionEventTypeProcessor(
     */
   private def validateSpecimenGroupData(
     studyId: StudyId,
-    specimenGroupData: List[CollectionEventTypeSpecimenGroup]): DomainValidation[Boolean] = {
+    specimenGroupData: List[CollectionEventTypeSpecimenGroupData]): DomainValidation[Boolean] = {
 
     val invalidSet = specimenGroupData.map(v => SpecimenGroupId(v.specimenGroupId)).map { id =>
       (id -> specimenGroupRepository.specimenGroupWithId(studyId, id).isSuccess)
@@ -185,7 +185,7 @@ class CollectionEventTypeProcessor(
     */
   private def validateAnnotationTypeData(
     studyId: StudyId,
-    annotationTypeData: List[CollectionEventTypeAnnotationType]): DomainValidation[Boolean] = {
+    annotationTypeData: List[CollectionEventTypeAnnotationTypeData]): DomainValidation[Boolean] = {
 
     val invalidSet = annotationTypeData.map(v => AnnotationTypeId(v.annotationTypeId)).map { id =>
       (id -> collectionEventAnnotationTypeRepository.annotationTypeWithId(studyId, id).isSuccess)

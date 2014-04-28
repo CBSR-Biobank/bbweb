@@ -6,6 +6,7 @@ import org.biobank.domain.study.{
   StudyId
 }
 import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
+import org.biobank.infrastructure.AnnotationTypeData
 
 import scalaz._
 import scalaz.Scalaz._
@@ -73,5 +74,23 @@ trait StudyAnnotationTypeValidationHelper extends StudyValidationHelper {
 	}
       case None => none.success
     }
+  }
+
+  /**
+    *  Validates each item in the list and returns all failures if they exist.
+    */
+  protected def validateAnnotationTypeData[T <: AnnotationTypeData](
+    annotationTypeData: List[T]): DomainValidation[List[T]] = {
+
+    def validateAnnotationTypeItem(annotationTypeItem: T): DomainValidation[T] = {
+      validateStringId(
+	annotationTypeItem.annotationTypeId,
+	"annotation type id is null or empty") match {
+	case Success(id) => annotationTypeItem.success
+	case Failure(err) => err.failNel
+      }
+    }
+
+    annotationTypeData.map(validateAnnotationTypeItem).sequenceU
   }
 }
