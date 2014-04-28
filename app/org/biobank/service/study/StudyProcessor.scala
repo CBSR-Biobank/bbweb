@@ -39,7 +39,7 @@ trait StudyProcessorComponentImpl extends StudyProcessorComponent {
     *
     * This implementation uses Akka persistence.
     */
-  class StudyProcessorImpl extends StudyProcessor {
+  sealed class StudyProcessorImpl extends StudyProcessor {
 
     case class SnapshotState(studies: Set[Study])
 

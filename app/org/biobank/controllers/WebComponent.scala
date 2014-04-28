@@ -8,6 +8,7 @@ import play.api.libs.Files
 import play.api.{ Configuration, GlobalSettings, Logger, Mode }
 import play.api.Play.current
 import play.api.db.slick._
+import play.libs.Akka
 import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
 import scala.slick.session.Database
 import scala.slick.jdbc.meta._
@@ -21,6 +22,9 @@ import scala.slick.jdbc.meta._
  * also generated.
  */
 object WebComponent extends GlobalSettings with org.biobank.service.TopComponentImpl {
+
+  // ensure only one actor system is created
+  override implicit val system = Akka.system()
 
   private val configKey = "slick"
   private val ScriptDirectory = "conf/evolutions/"
