@@ -18,15 +18,6 @@ class UserProcessorSpec extends UserProcessorFixture {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  val factory = new Factory(
-    nameGenerator,
-    studyRepository,
-    collectionEventTypeRepository,
-    collectionEventAnnotationTypeRepository,
-    participantAnnotationTypeRepository,
-    specimenGroupRepository,
-    specimenLinkAnnotationTypeRepository)
-
   "A user processor" should {
 
     "add a user" in {

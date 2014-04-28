@@ -19,15 +19,6 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  val factory = new Factory(
-    nameGenerator,
-    studyRepository,
-    collectionEventTypeRepository,
-    collectionEventAnnotationTypeRepository,
-    participantAnnotationTypeRepository,
-    specimenGroupRepository,
-    specimenLinkAnnotationTypeRepository)
-
   var disabledStudy: DisabledStudy = null
 
   // create the study to be used for each tests*

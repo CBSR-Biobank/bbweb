@@ -8,7 +8,6 @@ import org.biobank.domain.{
   AnnotationValueType,
   DomainError,
   DomainValidation,
-  Factory,
   PreservationType,
   PreservationTemperatureType,
   RepositoryComponentImpl,
@@ -32,15 +31,6 @@ class StudyProcessorSpec extends StudyProcessorFixture {
   val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
-
-  val factory = new Factory(
-    nameGenerator,
-    studyRepository,
-    collectionEventTypeRepository,
-    collectionEventAnnotationTypeRepository,
-    participantAnnotationTypeRepository,
-    specimenGroupRepository,
-    specimenLinkAnnotationTypeRepository)
 
   "A study processor" should {
 

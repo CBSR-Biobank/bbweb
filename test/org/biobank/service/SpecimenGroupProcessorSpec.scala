@@ -9,7 +9,6 @@ import org.biobank.domain.{
   ConcurrencySafeEntity,
   DomainError,
   DomainValidation,
-  Factory,
   PreservationType,
   PreservationTemperatureType,
   RepositoryComponentImpl,
@@ -28,15 +27,6 @@ import scalaz.Scalaz._
 class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
 
   val nameGenerator = new NameGenerator(this.getClass)
-
-  val factory = new Factory(
-    nameGenerator,
-    studyRepository,
-    collectionEventTypeRepository,
-    collectionEventAnnotationTypeRepository,
-    participantAnnotationTypeRepository,
-    specimenGroupRepository,
-    specimenLinkAnnotationTypeRepository)
 
   var disabledStudy: DisabledStudy = null
 

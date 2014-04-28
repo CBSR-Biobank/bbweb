@@ -13,20 +13,11 @@ import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
-class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
+class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
-
-  val factory = new Factory(
-    nameGenerator,
-    studyRepository,
-    collectionEventTypeRepository,
-    collectionEventAnnotationTypeRepository,
-    participantAnnotationTypeRepository,
-    specimenGroupRepository,
-    specimenLinkAnnotationTypeRepository)
 
   var disabledStudy: DisabledStudy = null
 

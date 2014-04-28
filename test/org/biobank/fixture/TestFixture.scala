@@ -7,6 +7,7 @@ import scala.concurrent.Future
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
 import org.scalatest.BeforeAndAfterAll
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.time.Span
@@ -20,11 +21,13 @@ import org.scalatest.time._
  * Test fixture to make it easier to write specifications.
  */
 trait TestFixture
-  extends TestComponentImpl
-  with ScalaFutures
-  with WordSpecLike
-  with Matchers
-  with BeforeAndAfterAll {
+    extends TestComponentImpl
+    with FactoryComponent
+    with ScalaFutures
+    with WordSpecLike
+    with Matchers
+    with BeforeAndAfterAll
+    with BeforeAndAfterEach {
 
   // need to configure scalatest to have more patience when waiting for future results
   implicit val defaultPatience =

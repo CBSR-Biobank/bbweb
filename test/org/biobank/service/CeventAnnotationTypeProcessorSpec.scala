@@ -9,28 +9,18 @@ import org.biobank.infrastructure.event.StudyEvents._
 import org.slf4j.LoggerFactory
 import akka.pattern.ask
 import org.scalatest.Tag
-import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
-class CeventAnnotationTypeProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
+class CeventAnnotationTypeProcessorSpec extends StudyProcessorFixture {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  val factory = new Factory(
-    nameGenerator,
-    studyRepository,
-    collectionEventTypeRepository,
-    collectionEventAnnotationTypeRepository,
-    participantAnnotationTypeRepository,
-    specimenGroupRepository,
-    specimenLinkAnnotationTypeRepository)
-
   var disabledStudy: DisabledStudy = null
 
-  // create the study to be used for each tests*
+  // create the study to be used for each tests
   override def beforeEach: Unit = {
     disabledStudy = factory.createDisabledStudy
     studyRepository.put(disabledStudy)

@@ -10,7 +10,6 @@ import org.biobank.domain.{
   AnnotationValueType,
   DomainError,
   DomainValidation,
-  Factory,
   PreservationType,
   PreservationTemperatureType,
   RepositoryComponent,
@@ -32,15 +31,6 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
   private val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
-
-  val factory = new Factory(
-    nameGenerator,
-    studyRepository,
-    collectionEventTypeRepository,
-    collectionEventAnnotationTypeRepository,
-    participantAnnotationTypeRepository,
-    specimenGroupRepository,
-    specimenLinkAnnotationTypeRepository)
 
   var disabledStudy: DisabledStudy = null
 

@@ -2,8 +2,6 @@ package org.biobank.domain.study
 
 import org.biobank.domain._
 
-import org.slf4j.LoggerFactory
-
 import scalaz._
 import Scalaz._
 
@@ -26,8 +24,6 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
   override val studyRepository: StudyRepository = new StudyRepositoryImpl
 
   class StudyRepositoryImpl extends ReadWriteRepositoryRefImpl[StudyId, Study](v => v.id) with StudyRepository {
-
-    val log = LoggerFactory.getLogger(this.getClass)
 
     def nextIdentity: StudyId = new StudyId(java.util.UUID.randomUUID.toString.toUpperCase)
 
