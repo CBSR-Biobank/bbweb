@@ -31,18 +31,8 @@ trait TopComponent extends ServiceComponent {
  *
  * ==Recovery==
  *
- * By default, recovery is only done on the Journal associated with the command processor to only
- * rebuild the ''In Memory Image''. To rebuild the ''query database'', the application can be run
- * with the `bbweb.query.db.load` system property set to `true` and the event processor will also
- * be recovered.
- *
  * @author Nelson Loyola
  */
 trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
 
-  override val studyProcessor = system.actorOf(Props(new StudyProcessor), "studyproc")
-  override val userProcessor = system.actorOf(Props(new UserProcessor), "userproc")
-
-  override val studyService = new StudyServiceImpl(studyProcessor)
-  override val userService = new UserService(userProcessor)
 }

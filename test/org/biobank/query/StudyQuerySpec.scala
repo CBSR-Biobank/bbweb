@@ -1,7 +1,6 @@
 package org.biobank.query
 
 import org.biobank.domain.UserId
-import org.biobank.query.model._
 import org.biobank.fixture._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service.Messages._

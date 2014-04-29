@@ -4,7 +4,6 @@ import org.biobank.domain._
 
 import scala.concurrent.Await
 import scala.concurrent.Future
-import akka.testkit.TestKitBase
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
 import org.scalatest.BeforeAndAfterAll

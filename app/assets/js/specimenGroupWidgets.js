@@ -41,7 +41,7 @@ var sgRenameGroup = function(sg, id) {
     //var selectLabel = select.parent().parent().find('label');
     //var newText =  selectLabel.text().replace(/[0-9]+/g, (id + 1));
     //selectLabel.text(newText);
-}
+};
 
 //
 // creates a new selection text entry field based on the hidden template. The
