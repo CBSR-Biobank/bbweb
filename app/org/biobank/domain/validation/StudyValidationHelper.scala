@@ -28,7 +28,7 @@ trait StudyValidationHelper extends ValidationHelper {
   }
 
   protected def validateId(id: ProcessingTypeId): Validation[String, ProcessingTypeId] = {
-    validateStringId(id.toString, "collection event type id is null or empty") match {
+    validateStringId(id.toString, "processing type id is null or empty") match {
       case Success(idString) => id.success
       case Failure(err) => err.fail
     }

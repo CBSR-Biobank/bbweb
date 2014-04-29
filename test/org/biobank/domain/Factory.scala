@@ -5,7 +5,8 @@ import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.{
   CollectionEventTypeAnnotationTypeData,
-  CollectionEventTypeSpecimenGroupData
+  CollectionEventTypeSpecimenGroupData,
+  SpecimenLinkTypeAnnotationTypeData
 }
 import org.slf4j.LoggerFactory
 import scala.reflect.ClassTag
@@ -214,7 +215,6 @@ trait FactoryComponent {
       processingType
     }
 
-
     def createSpecimenLinkType: SpecimenLinkType = {
       val processingType = defaultProcessingType
       val specimenGroup = defaultSpecimenGroup
@@ -226,11 +226,9 @@ trait FactoryComponent {
 
       val disabledStudy = defaultDisabledStudy
 
-      // FIXME: populate annotationTypeData with fake data
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
 	expectedOutpuChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
 	annotationTypeData = List.empty)
-
 
       if (validation.isFailure) {
 	throw new Error
@@ -239,6 +237,14 @@ trait FactoryComponent {
       val annotationType = validation | null
       domainObjects = domainObjects + (classOf[SpecimenLinkType] -> annotationType)
       annotationType
+    }
+
+    def createSpecimenLinkTypeAnnotationTypeData: SpecimenLinkTypeAnnotationTypeData = {
+      val annotationType = defaultSpecimenLinkAnnotationType
+      val specimenLinkTypeAnnotationType = SpecimenLinkTypeAnnotationTypeData(annotationType.id.id, true)
+      domainObjects = domainObjects +
+      (classOf[SpecimenLinkTypeAnnotationTypeData] -> specimenLinkTypeAnnotationType)
+      specimenLinkTypeAnnotationType
     }
 
     def defaultRegisteredUser: RegisteredUser = {
@@ -297,6 +303,12 @@ trait FactoryComponent {
 
     def defaultSpecimenLinkType: SpecimenLinkType = {
       defaultObject(classOf[SpecimenLinkType], createSpecimenLinkType)
+    }
+
+    def defaultSpecimenLinkTypeAnnotationTypeData: SpecimenLinkTypeAnnotationTypeData = {
+      defaultObject(
+	classOf[SpecimenLinkTypeAnnotationTypeData],
+	createSpecimenLinkTypeAnnotationTypeData)
     }
 
     /** Retrieves the class from the map, or calls 'create' if value does not exist

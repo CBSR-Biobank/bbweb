@@ -1,5 +1,6 @@
 package org.biobank.domain.study
 
+import org.biobank.domain.DomainSpec
 import org.biobank.domain.AnnotationTypeId
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain.AnatomicalSourceType
@@ -7,13 +8,11 @@ import org.biobank.domain.PreservationType
 import org.biobank.domain.PreservationTemperatureType
 import org.biobank.domain.SpecimenType
 
-import org.scalatest.WordSpecLike
-import org.scalatest.Matchers
 import scalaz._
 import scalaz.Scalaz._
 
 
-class SpecimenGroupSpec extends WordSpecLike with Matchers {
+class SpecimenGroupSpec extends DomainSpec {
 
   val nameGenerator = new NameGenerator(this.getClass)
 

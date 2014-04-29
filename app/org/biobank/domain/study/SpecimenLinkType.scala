@@ -139,7 +139,7 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
   }
 
   protected def validateId(id: SpecimenLinkTypeId): Validation[String, SpecimenLinkTypeId] = {
-    validateStringId(id.toString, "collection event type id is null or empty") match {
+    validateStringId(id.toString, "specimen link type id is null or empty") match {
       case Success(idString) => id.success
       case Failure(err) => err.fail
     }

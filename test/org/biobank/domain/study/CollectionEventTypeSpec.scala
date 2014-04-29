@@ -1,15 +1,14 @@
 package org.biobank.domain.study
 
+import org.biobank.domain.DomainSpec
 import org.biobank.infrastructure._
 import org.biobank.fixture.NameGenerator
 
-import org.scalatest.WordSpecLike
-import org.scalatest.Matchers
 import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
 
-class CollectionEventTypeSpec extends WordSpecLike with Matchers {
+class CollectionEventTypeSpec extends DomainSpec {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -27,19 +26,25 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      val v = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
 	specimenGroupData, annotationTypeData)
-      val cet = v.getOrElse(fail)
-      cet shouldBe a[CollectionEventType]
 
-      cet.studyId should be(studyId)
-      cet.id should be(id)
-      cet.version should be(0L)
-      cet.name should be(name)
-      cet.description should be(description)
-      cet.recurring should be(recurring)
-      cet.specimenGroupData should have length 1
-      cet.annotationTypeData should have length 1
+      validation should be ('success)
+      validation map { cet =>
+	cet shouldBe a[CollectionEventType]
+
+	cet should have (
+	'studyId (studyId),
+	'id (id),
+	'version (0L),
+	'name (name),
+	'description (description),
+	'recurring (recurring)
+	)
+
+	cet.specimenGroupData should have length 1
+	cet.annotationTypeData should have length 1
+      }
     }
   }
 
@@ -55,10 +60,10 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData) match {
-        case Success(user) => fail
-        case Failure(err) =>
+      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+	specimenGroupData, annotationTypeData)
+      validation should be ('failure)
+      validation.swap.map { err =>
           err.list should (have length 1 and contain("study id is null or empty"))
       }
     }
@@ -73,10 +78,10 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData) match {
-        case Success(user) => fail
-        case Failure(err) =>
+      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+	specimenGroupData, annotationTypeData)
+      validation should be ('failure)
+      validation.swap.map { err =>
           err.list should (have length 1 and contain("collection event type id is null or empty"))
       }
     }
@@ -91,10 +96,10 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData) match {
-        case Success(user) => fail
-        case Failure(err) =>
+      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+	specimenGroupData, annotationTypeData)
+      validation should be ('failure)
+      validation.swap.map { err =>
           err.list should (have length 1 and contain("invalid version value: -2"))
       }
     }
@@ -109,18 +114,18 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData) match {
-        case Success(user) => fail
-        case Failure(err) =>
+      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+	specimenGroupData, annotationTypeData)
+      validation should be ('failure)
+      validation.swap.map { err =>
           err.list should (have length 1 and contain("name is null or empty"))
       }
 
       name = ""
-      CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData) match {
-        case Success(user) => fail
-        case Failure(err) =>
+      val validation2 = CollectionEventType.create(studyId, id, version, name, description, recurring,
+	specimenGroupData, annotationTypeData)
+      validation2 should be ('failure)
+      validation2.swap.map { err =>
           err.list should (have length 1 and contain("name is null or empty"))
       }
     }
@@ -135,18 +140,18 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData) match {
-        case Success(user) => fail
-        case Failure(err) =>
+      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+	specimenGroupData, annotationTypeData)
+      validation should be ('failure)
+      validation.swap.map { err =>
           err.list should (have length 1 and contain("description is null or empty"))
       }
 
       description = Some("")
-      CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData) match {
-        case Success(user) => fail
-        case Failure(err) =>
+      val validation2 = CollectionEventType.create(studyId, id, version, name, description, recurring,
+	specimenGroupData, annotationTypeData)
+      validation2 should be ('failure)
+      validation2.swap.map { err =>
           err.list should (have length 1 and contain("description is null or empty"))
       }
     }
@@ -161,10 +166,10 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData) match {
-        case Success(user) => fail
-        case Failure(err) =>
+      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+	specimenGroupData, annotationTypeData)
+      validation should be ('failure)
+      validation.swap.map { err =>
           err.list should (have length 1 and contain("specimen group id is null or empty"))
       }
     }
@@ -179,10 +184,10 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", -1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData) match {
-        case Success(user) => fail
-        case Failure(err) =>
+      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+	specimenGroupData, annotationTypeData)
+      validation should be ('failure)
+      validation.swap.map { err =>
           err.list should (have length 1 and contain("max count is not a positive number"))
       }
     }
@@ -197,15 +202,15 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(-1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData) match {
-        case Success(user) => fail
-        case Failure(err) =>
+      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+	specimenGroupData, annotationTypeData)
+      validation should be ('failure)
+      validation.swap.map { err =>
           err.list should (have length 1 and contain("amount not is a positive number"))
       }
     }
 
-    "not be created with an negative annotation type id" in {
+    "not be created with an invalid annotation type id" in {
       val studyId = StudyId(nameGenerator.next[CollectionEventType])
       val id = CollectionEventTypeId(nameGenerator.next[CollectionEventType])
       val version = -1L
@@ -215,10 +220,10 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("", false))
 
-      CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData) match {
-        case Success(user) => fail
-        case Failure(err) =>
+      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+	specimenGroupData, annotationTypeData)
+      validation should be ('failure)
+      validation.swap.map { err =>
           err.list should (have length 1 and contain("annotation type id is null or empty"))
       }
     }
@@ -233,10 +238,10 @@ class CollectionEventTypeSpec extends WordSpecLike with Matchers {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("1", false))
 
-      CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData) match {
-        case Success(user) => fail
-        case Failure(err) =>
+      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+	specimenGroupData, annotationTypeData)
+      validation should be ('failure)
+      validation.swap.map { err =>
           err.list should have length 2
 	  err.list.head should be ("invalid version value: -2")
 	  err.list.tail.head should be ("name is null or empty")

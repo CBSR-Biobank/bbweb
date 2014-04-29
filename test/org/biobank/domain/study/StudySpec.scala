@@ -1,23 +1,14 @@
 package org.biobank.domain.study
 
+import org.biobank.domain.DomainSpec
 import org.biobank.fixture.NameGenerator
 
-import org.scalatest.WordSpecLike
-import org.scalatest.Matchers
 import org.scalatest.OptionValues._
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
 
-/**
- * Note: to run from Eclipse uncomment the @RunWith line. To run from SBT the line should be
- * commented out.
- *
- */
-//@RunWith(classOf[JUnitRunner])
-class StudySpec extends WordSpecLike with Matchers {
+class StudySpec extends DomainSpec {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
