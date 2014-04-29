@@ -78,6 +78,34 @@ Use `run -Dbbweb.query.db.load=false` sbt command to use an already loaded query
 
 Use `run -DapplyEvolutions.default=true` sbt command to automatically apply database evolutions.
 
+## Scalatest
+
+Tag a test by adding the following import:
+
+```scala
+import org.scalatest.Tag
+```
+
+and the tag declaration to the test(s):
+
+```scala
+ "add a user" taggedAs(Tag("MyTag")) in {
+```
+
+Use the following sbt command to run tagged tests:
+
+```sbt
+test-only *__CLASS_NAME__ -- -n MyTag
+```
+To tag multiple tests, create a tag object and tag the tests using the object:
+
+```scala
+object MyTag extends Tag("MyTag")
+...
+ "add a user" taggedAs(MyTag) in {
+...
+```
+
 ---
 
 [Back to top](../README.md)

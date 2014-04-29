@@ -6,7 +6,11 @@ object Commands {
 
   trait Command
 
-  trait HasExpectedVersion { val expectedVersion: Option[Long] }
+  trait HasExpectedVersion {
+
+    /** A command that must include the version of the object the command applies to. */
+    val expectedVersion: Option[Long]
+  }
 
 }
 

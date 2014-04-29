@@ -23,7 +23,7 @@ trait ParticipantAnnotationTypeRepositoryComponentImpl
     new ParticipantAnnotationTypeRepositoryImpl
 
   class ParticipantAnnotationTypeRepositoryImpl
-    extends ReadWriteRepository[AnnotationTypeId, ParticipantAnnotationType](v => v.id)
+    extends ReadWriteRepositoryRefImpl[AnnotationTypeId, ParticipantAnnotationType](v => v.id)
     with StudyAnnotationTypeRepositoryImpl[ParticipantAnnotationType]
     with ParticipantAnnotationTypeRepository {
 

@@ -50,7 +50,7 @@ case class ParticipantAnnotationTypeMapper(
   def getUpdateCmd: UpdateParticipantAnnotationTypeCmd = {
     val selectionMap = if (selections.size > 0) Some(selections.map(v => (v, v)).toMap) else None
     UpdateParticipantAnnotationTypeCmd(
-      annotationTypeId, Some(version), studyId, name, description,
+      studyId, annotationTypeId, Some(version), name, description,
       AnnotationValueType.withName(valueType), maxValueCount, selectionMap, required)
   }
 }
@@ -237,7 +237,7 @@ object ParticipantAnnotTypeController
           case Success(annotType) =>
             studyService.removeParticipantAnnotationType(
               RemoveParticipantAnnotationTypeCmd(
-                annotType.id.id, annotType.versionOption, studyId)).map(validation =>
+                studyId, annotType.id.id, annotType.versionOption)).map(validation =>
                 validation match {
                   case Success(at) =>
                     Redirect(routes.StudyController.showStudy(studyId)).flashing(

@@ -1,26 +1,24 @@
 package org.biobank.query
 
 import org.biobank.domain.UserId
-//import org.biobank.query.model._
-import fixture._
+import org.biobank.query.model._
+import org.biobank.fixture._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service.Messages._
 
 import java.util.UUID
 import org.junit.runner.RunWith
 import org.slf4j.LoggerFactory
-import org.scalatest.junit.JUnitRunner
-import play.api.test.FakeApplication
-import play.api.test.Helpers._
+import org.scalatest.WordSpecLike
+import org.scalatest.Matchers
 //import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
 //import scala.slick.session.Session
 
-@RunWith(classOf[JUnitRunner])
-class StudyQuerySpec {
+class StudyQuerySp extends WordSpecLike with Matchers {
 
   //  val log = LoggerFactory.getLogger(this.getClass)
   //
-  //  val nameGenerator = new NameGenerator(classOf[StudyQuerySpec].getName)
+  //  val nameGenerator = new NameGenerator[this.getClass]
   //
   //  "Study" can {
   //

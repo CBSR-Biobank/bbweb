@@ -1,5 +1,7 @@
 package org.biobank.domain
 
+/** A standardized set of classifications that describe what a [[Specimen]] is.
+  */
 object SpecimenType extends Enumeration {
   type SpecimenType = Value
   val BuffyCoat = Value("Buffy coat")

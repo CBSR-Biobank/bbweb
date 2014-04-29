@@ -1,7 +1,6 @@
 package org.biobank.domain
 
-import fixture.NameGenerator
-import org.biobank.infrastructure.event.UserEvents._
+import org.biobank.fixture.NameGenerator
 
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
@@ -22,11 +21,11 @@ class UserSpec extends WordSpecLike with Matchers {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  val nameGenerator = new NameGenerator(this.getClass.getName)
+  val nameGenerator = new NameGenerator(this.getClass)
 
   "A user" can {
 
-    "can be created" in {
+    "be created" in {
       val version = -1L
       val name = nameGenerator.next[User]
       val email = "user1@test.com"
@@ -36,21 +35,25 @@ class UserSpec extends WordSpecLike with Matchers {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      val v = RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
-      val user = v.getOrElse(fail("could not create user"))
-      user shouldBe a[RegisteredUser]
+      val validation = RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
 
-      user.id should be(id)
-      user.version should be(0L)
-      user.name should be(name)
-      user.email should be(email)
-      user.password should be(password)
-      user.hasher should be(hasher)
-      user.salt should be(salt)
-      user.avatarUrl should be(avatarUrl)
+      validation should be ('success)
+      validation map { user =>
+	user shouldBe a[RegisteredUser]
+        user should have (
+	  'id (id),
+	  'version (0L),
+	  'name (name),
+	  'email (email),
+	  'password (password),
+	  'hasher (hasher),
+	  'salt (salt),
+	  'avatarUrl (avatarUrl)
+	)
+      }
     }
 
-    "activate, lock, and unlock a new user" in {
+    "can be activated, locked, and unlocked" in {
       val version = -1L
       val name = nameGenerator.next[User]
       val email = "user1@test.com"
@@ -60,19 +63,19 @@ class UserSpec extends WordSpecLike with Matchers {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      val v = RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
-      val user = v.getOrElse(fail("could not create user"))
+      val user = RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
+	.getOrElse(fail("could not create user"))
       user shouldBe a[RegisteredUser]
 
-      val activeUser = user.activate.getOrElse(fail("could not activate user"))
+      val activeUser = user.activate(Some(0L)).getOrElse(fail("could not activate user"))
       activeUser shouldBe a[ActiveUser]
       activeUser.version should be(user.version + 1)
 
-      val lockedUser = activeUser.lock.getOrElse(fail("could not lock user"))
+      val lockedUser = activeUser.lock(Some(1l)).getOrElse(fail("could not lock user"))
       lockedUser shouldBe a[LockedUser]
       lockedUser.version should be(activeUser.version + 1)
 
-      val unlockedUser = lockedUser.unlock.getOrElse(fail("could not unlock user"))
+      val unlockedUser = lockedUser.unlock(Some(2L)).getOrElse(fail("could not unlock user"))
       unlockedUser shouldBe a[ActiveUser]
       unlockedUser.version should be(lockedUser.version + 1)
     }
@@ -91,9 +94,9 @@ class UserSpec extends WordSpecLike with Matchers {
       val avatarUrl = Some("http://test.com/")
 
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail("user id validation failed")
+        case Success(user) => fail("id validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("id is null or empty")
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
@@ -108,10 +111,33 @@ class UserSpec extends WordSpecLike with Matchers {
       val avatarUrl = Some("http://test.com/")
 
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail("user version validation failed")
+        case Success(user) => fail("version validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("invalid version value")
+          err.list should (have length 1 and contain("invalid version value: -2"))
       }
+    }
+
+    "not be updated with an invalid version" ignore {
+      val id = UserId(nameGenerator.next[User])
+      val version = -1L
+      val name = nameGenerator.next[User]
+      val email = "user1@test.com"
+      val password = nameGenerator.next[User]
+      val hasher = nameGenerator.next[User]
+      val salt = Some(nameGenerator.next[User])
+      val avatarUrl = Some("http://test.com/")
+
+      val user = RegisteredUser.create(id, version, name, email, password, hasher, salt,
+	avatarUrl) | fail
+
+      // val validation = user.update(id, Some(-1L), name, email, password, hasher, salt,
+      // 	avatarUrl)
+      // validation should be Failure
+
+      // validation.swap.map { err =>
+      //   err.list should have length 1
+      // 	err.list.head should include ("expected version doesn't match current version")
+      // }
     }
 
     "not be created with an empty name" in {
@@ -125,9 +151,9 @@ class UserSpec extends WordSpecLike with Matchers {
       val avatarUrl = Some("http://test.com/")
 
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail("user name validation failed")
+        case Success(user) => fail("name validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("name is null or empty")
+          err.list should (have length 1 and contain("name is null or empty"))
       }
     }
 
@@ -144,7 +170,7 @@ class UserSpec extends WordSpecLike with Matchers {
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
         case Success(user) => fail("user password validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("password is null or empty")
+          err.list should (have length 1 and contain("password is null or empty"))
       }
     }
 
@@ -161,7 +187,7 @@ class UserSpec extends WordSpecLike with Matchers {
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
         case Success(user) => fail("user hasher validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("hasher is null or empty")
+          err.list should (have length 1 and contain("hasher is null or empty"))
       }
     }
 
@@ -178,7 +204,7 @@ class UserSpec extends WordSpecLike with Matchers {
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
         case Success(user) => fail("user salt validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("salt is empty")
+          err.list should (have length 1 and contain("salt is null or empty"))
       }
     }
 
@@ -195,7 +221,8 @@ class UserSpec extends WordSpecLike with Matchers {
       RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
         case Success(user) => fail("user avaltar url validation failed")
         case Failure(err) =>
-          err.list.mkString(",") should include("invalid avatar url")
+          err.list should have length 1
+	  err.list.head should include("invalid avatar url")
       }
     }
 
@@ -232,7 +259,28 @@ class UserSpec extends WordSpecLike with Matchers {
       user.authenticate(email, badPassword) match {
         case Success(x) => fail("authentication should fail")
         case Failure(err) =>
-          err.list.mkString(",") should include("authentication failure")
+          err.list should (have length 1 and contain("authentication failure"))
+      }
+    }
+
+    "have more than one validation fail" in {
+      val id = UserId(nameGenerator.next[User])
+      val version = -2L
+      val name = ""
+      val email = "user1@test.com"
+      val password = nameGenerator.next[User]
+      val hasher = nameGenerator.next[User]
+      val salt = Some(nameGenerator.next[User])
+      val avatarUrl = Some("http://test.com/")
+
+      val badPassword = nameGenerator.next[User]
+
+      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
+        case Success(user) => fail
+        case Failure(err) =>
+          err.list should have length 2
+	  err.list.head should be ("invalid version value: -2")
+	  err.list.tail.head should be ("name is null or empty")
       }
     }
 

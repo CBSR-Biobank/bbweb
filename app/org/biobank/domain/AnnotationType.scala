@@ -6,14 +6,32 @@ import org.biobank.infrastructure._
 import scalaz._
 import Scalaz._
 
-abstract class AnnotationType
+/** Annotation types define an [[Annotation]].
+  *
+  * Annotations allow sub classes to collect custom named and defined pieces of data.
+  */
+trait AnnotationType
   extends ConcurrencySafeEntity[AnnotationTypeId]
-  with HasName with HasDescriptionOption {
+    with HasUniqueName
+    with HasDescriptionOption {
 
-  val name: String
-  val description: Option[String]
+  /** The type of information stored by the annotation. I.e. text, number, date, or an item from a drop down
+    * list. See [[AnnotationValueType]].
+    */
   val valueType: AnnotationValueType
+
+
+  /** When valueType is [[AnnotationValueType.Select]] (i.e. a drop down list), this is the number of items
+    * allowed to be selected. If the value is 0 then any number of values can be selected.
+    */
   val maxValueCount: Option[Int]
+
+
+  /** When valueType is [[AnnotationValueType.Select]], these are the list of options allowed to
+    * be selected.
+    *
+    * @todo describe why this is a map.
+    */
   val options: Option[Map[String, String]]
 
   private def validateValueType: DomainValidation[Boolean] = {

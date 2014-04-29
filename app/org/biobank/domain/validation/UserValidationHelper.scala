@@ -1,4 +1,4 @@
-package org.biobank.domain.validator
+package org.biobank.domain.validation
 
 import org.biobank.domain._
 import org.biobank.domain.User
@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
 
-trait UserValidator extends Validator {
+trait UserValidationHelper extends ValidationHelper {
 
   val log = LoggerFactory.getLogger(this.getClass)
 

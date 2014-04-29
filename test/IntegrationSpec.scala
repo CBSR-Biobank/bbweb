@@ -22,7 +22,7 @@ class IntegrationSpec extends Specification {
         browser.$("h1").first.getText.contains("Configure your 'Hello world':")
 
         browser.$("#name").text("Bob")
-        browser.$("#submit").click()
+       browser.$("#submit").click()
 
         browser.$("dl.error").size must equalTo(1)
         browser.$("dl#repeat_field dd.error").first.getText must equalTo("Numeric value expected")

@@ -35,7 +35,7 @@ class SecureSocialUserService(application: Application) extends UserServicePlugi
   def save(newUser: Identity): Identity = {
     newUser.passwordInfo match {
       case Some(passwordInfo) =>
-        val cmd = AddUserCommand(newUser.fullName, newUser.email.getOrElse(""),
+        val cmd = RegisterUserCommand(newUser.fullName, newUser.email.getOrElse(""),
           passwordInfo.password, passwordInfo.hasher, passwordInfo.salt,
           newUser.avatarUrl)
         userService.add(cmd)

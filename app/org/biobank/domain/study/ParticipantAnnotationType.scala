@@ -1,27 +1,78 @@
 package org.biobank.domain.study
 
-import org.biobank.domain._
+import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
+import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
 import org.biobank.domain.AnnotationValueType._
 
-case class ParticipantAnnotationType(
-  id: AnnotationTypeId,
-  version: Long = -1,
-  studyId: StudyId,
-  name: String,
-  description: Option[String],
-  valueType: AnnotationValueType,
-  maxValueCount: Option[Int],
-  options: Option[Map[String, String]],
-  required: Boolean)
+import scalaz._
+import scalaz.Scalaz._
+
+/** Used to add custom annotations to participants. The study can define multiple
+  * annotation types on participants to store different types of data.
+  */
+case class ParticipantAnnotationType private (
+   studyId: StudyId,
+   id: AnnotationTypeId,
+   version: Long,
+   name: String,
+   description: Option[String],
+   valueType: AnnotationValueType,
+   maxValueCount: Option[Int],
+   options: Option[Map[String, String]],
+   required: Boolean)
   extends StudyAnnotationType {
 
-  val toStringFormat = """ParticipantAnnotationType:{ id: %s, version: %d, studyId: %s,""" +
-    """  name: %s, description: %s, valueType: %s, maxValueCount: %d, options: %s, required: %b }"""
+  override def toString: String =
+    s"""|ParticipantAnnotationTypex: {
+        |  studyId: $studyId,
+        |  id: $id,
+        |  version: $version,
+        |  name: $name,
+        |  description: $description,
+        |  valueType: $valueType,
+        |  maxValueCount: $maxValueCount,
+        |  options: { $options }
+        |  required: $required
+        |}""".stripMargin
 
-  override def toString: String = {
-    toStringFormat.format(
-      id, version, studyId, name, description, valueType, maxValueCount.getOrElse(-1),
-      options.getOrElse("None"), required)
+  def update(
+    expectedVersion: Option[Long],
+    name: String,
+    description: Option[String],
+    valueType: AnnotationValueType,
+    maxValueCount: Option[Int] = None,
+    options: Option[Map[String, String]] = None,
+    required: Boolean = false): DomainValidation[ParticipantAnnotationType] = {
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      updatedAnnotationType <- ParticipantAnnotationType.create(studyId, id, version,
+	name, description, valueType, maxValueCount, options, required)
+    } yield updatedAnnotationType
+  }
+
+}
+
+object ParticipantAnnotationType extends StudyAnnotationTypeValidationHelper {
+
+  def create(
+    studyId: StudyId,
+    id: AnnotationTypeId,
+    version: Long,
+    name: String,
+    description: Option[String],
+    valueType: AnnotationValueType,
+    maxValueCount: Option[Int],
+    options: Option[Map[String, String]],
+    required: Boolean): DomainValidation[ParticipantAnnotationType] = {
+    (validateId(studyId).toValidationNel |@|
+      validateId(id).toValidationNel |@|
+      validateAndIncrementVersion(version).toValidationNel |@|
+      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
+      validateNonEmptyOption(description, "description is null or empty").toValidationNel |@|
+      validateMaxValueCount(maxValueCount).toValidationNel |@|
+      validateOptions(options)) {
+        ParticipantAnnotationType(_, _, _, _, _, valueType, _, _, required)
+      }
   }
 
 }

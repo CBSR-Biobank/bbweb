@@ -1,6 +1,6 @@
 package controllers
 
-import fixture._
+import org.biobank.fixture._
 
 import scala.concurrent._
 import play.api.mvc._

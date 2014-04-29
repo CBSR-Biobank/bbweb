@@ -1,55 +1,32 @@
 package org.biobank.service
 
 import org.biobank.domain._
-import org.biobank.domain.validator.UserValidator
+import org.biobank.domain.validation.UserValidationHelper
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.service.Messages._
 
-import scala.concurrent._
-import scala.concurrent.duration._
-import scala.concurrent.stm.Ref
-import akka.actor._
+import akka.actor.{ ActorSystem, ActorRef }
+import scala.concurrent.Future
 import akka.pattern.ask
-import akka.util.Timeout
-import play.api.Logger
 import securesocial.core.{ Identity, SocialUser, PasswordInfo, AuthenticationMethod }
 import securesocial.core.providers.utils.PasswordHasher
 import org.slf4j.LoggerFactory
 import akka.persistence.SnapshotOffer
-import akka.actor.ActorLogging
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import scalaz._
 import scalaz.Scalaz._
 
 trait UserServiceComponent {
-
-  val userService: UserService
-
-  trait UserService extends ApplicationService {
-
-    def find(id: securesocial.core.IdentityId): Option[securesocial.core.Identity]
-
-    def findByEmailAndProvider(
-      email: String, providerId: String): Option[securesocial.core.Identity]
-
-    def getByEmail(email: String): DomainValidation[User]
-
-    def add(cmd: AddUserCommand): Future[DomainValidation[UserAddedEvent]]
-
-  }
-}
-
-trait UserServiceComponentImpl extends UserServiceComponent {
   self: RepositoryComponent =>
 
-  class UserServiceImpl(userProcessor: ActorRef)(implicit system: ActorSystem) extends UserService {
+  class UserService(userProcessor: ActorRef)(implicit system: ActorSystem) extends ApplicationService {
 
     val log = LoggerFactory.getLogger(this.getClass)
 
     def find(id: securesocial.core.IdentityId): Option[securesocial.core.Identity] = {
-      userRepository.userWithId(UserId(id.userId)) match {
+      userRepository.getByKey(UserId(id.userId)) match {
         case Success(user) => Some(toSecureSocialIdentity(user))
         case Failure(err) =>
           log.error(err.list.mkString(","))
@@ -59,7 +36,7 @@ trait UserServiceComponentImpl extends UserServiceComponent {
 
     def findByEmailAndProvider(
       email: String, providerId: String): Option[securesocial.core.Identity] = {
-      userRepository.userWithId(UserId(email)) match {
+      userRepository.getByKey(UserId(email)) match {
         case Success(user) => some(toSecureSocialIdentity(user))
         case Failure(err) =>
           log.error(err.list.mkString(","))
@@ -68,7 +45,7 @@ trait UserServiceComponentImpl extends UserServiceComponent {
     }
 
     def getByEmail(email: String): DomainValidation[User] = {
-      userRepository.userWithId(UserId(email))
+      userRepository.getByKey(UserId(email))
     }
 
     private def toSecureSocialIdentity(user: User): securesocial.core.Identity = {
@@ -78,109 +55,185 @@ trait UserServiceComponentImpl extends UserServiceComponent {
         some(PasswordInfo(PasswordHasher.BCryptHasher, user.password, None)))
     }
 
-    def add(cmd: AddUserCommand): Future[DomainValidation[UserAddedEvent]] = {
-      log.debug(s"add: $cmd")
-      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserAddedEvent]])
+    def add(cmd: RegisterUserCommand): Future[DomainValidation[UserRegisterdEvent]] = {
+      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserRegisterdEvent]])
     }
 
   }
 }
 
 trait UserProcessorComponent {
-
-  trait UserProcessor extends Processor
-
-}
-
-case class SnapshotState(users: Set[User])
-
-trait UserProcessorComponentImpl extends UserProcessorComponent {
   self: RepositoryComponent =>
 
+  case class SnapshotState(users: Set[User])
+
   /**
-   * Handles the commands to configure users.
-   */
-  class UserProcessorImpl extends UserProcessor {
-
-    def updateState(event: UserEvent) = {
-      event match {
-        case event: UserAddedEvent =>
-          val validation = RegisteredUser.create(
-            UserId(event.email), 0L, event.name, event.email,
-            event.password, event.hasher, event.salt, event.avatarUrl)
-          validation match {
-            case Success(user) =>
-              userRepository.add(user)
-              log.info(s"updateState: user added to repository: ${user.email}")
-            case Failure(x) =>
-              // this should never happen because the only way to get here is if the
-              // command passed validation
-              throw new IllegalStateException("creating user from event failed")
-          }
-
-        case eventUserActivatedEvent =>
-
-      }
-    }
+    * Handles the commands to configure users.
+    */
+  class UserProcessor extends Processor {
 
     val receiveRecover: Receive = {
-      case event: UserEvent =>
-        log.debug(s"receiveRecover: $event")
-        updateState(event)
+      case event: UserRegisterdEvent => recoverEvent(event)
+
+      case event: UserActivatedEvent => recoverEvent(event)
+
+      case event: UserLockedEvent => recoverEvent(event)
+
+      case event: UserUnlockedEvent => recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
-        snapshot.users.foreach(i => userRepository.update(i))
+        snapshot.users.foreach(i => userRepository.put(i))
+
+      case _ =>
+	throw new IllegalStateException("message not handled")
     }
 
     val receiveCommand: Receive = {
-      case cmd: AddUserCommand =>
-        log.debug(s"receiveCommand: $cmd")
-        addUser(cmd)
+      case cmd: RegisterUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: ActivateUserCommand =>
-        activateUser(cmd)
+      case cmd: ActivateUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
+
+      case cmd: LockUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
+
+      case cmd: UnlockUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
       case "snap" =>
         saveSnapshot(SnapshotState(userRepository.allUsers))
         stash()
+
+      case _ =>
+	throw new IllegalStateException("message not handled")
     }
 
-    def addUser(cmd: AddUserCommand): DomainValidation[UserAddedEvent] = {
-      val validation = for {
+    def validateCmd(cmd: RegisterUserCommand): DomainValidation[UserRegisterdEvent] = {
+      for {
         emailAvailable <- userRepository.emailAvailable(cmd.email)
         user <- RegisteredUser.create(UserId(cmd.email), -1L, cmd.name, cmd.email,
           cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl)
-        event <- UserAddedEvent(user.id.toString, user.version, user.name, user.email,
+        event <- UserRegisterdEvent(user.id.toString, user.name, user.email,
           user.password, user.hasher, user.salt, user.avatarUrl).success
       } yield {
-        persist(event) { e => userRepository.add(user) }
         event
       }
-
-      sender ! validation
-      validation
     }
 
-    def activateUser(cmd: ActivateUserCommand): DomainValidation[UserActivatedEvent] = {
-      val validation = for {
-        user <- userRepository.userWithId(UserId(cmd.email))
-        registeredUser <- isRegisteredUser(user)
-        validVersion <- registeredUser.requireVersion(cmd.expectedVersion)
-        activatedUser <- registeredUser.activate
-        event <- UserActivatedEvent(activatedUser.id.toString).success
+    def validateCmd(cmd: ActivateUserCommand): DomainValidation[UserActivatedEvent] = {
+      for {
+        user <- userRepository.getByKey(UserId(cmd.email))
+        registeredUser <- isUserRegistered(user)
+        activatedUser <- registeredUser.activate(cmd.expectedVersion)
+        event <- UserActivatedEvent(activatedUser.id.toString, activatedUser.version).success
       } yield {
-        persist(event) { e => userRepository.update(activatedUser) }
         event
       }
-
-      sender ! validation
-      validation
     }
 
-    def isRegisteredUser(user: User): DomainValidation[RegisteredUser] = {
+    def validateCmd(cmd: LockUserCommand): DomainValidation[UserLockedEvent] = {
+      for {
+        user <- userRepository.getByKey(UserId(cmd.email))
+        activeUser <- isUserActive(user)
+        lockedUser <- activeUser.lock(cmd.expectedVersion)
+        event <- UserLockedEvent(lockedUser.id.toString, lockedUser.version).success
+      } yield {
+        event
+      }
+    }
+
+    def validateCmd(cmd: UnlockUserCommand): DomainValidation[UserUnlockedEvent] = {
+      for {
+        user <- userRepository.getByKey(UserId(cmd.email))
+        lockedUser <- isUserLocked(user)
+        unlockedUser <- lockedUser.unlock(cmd.expectedVersion)
+        event <- UserUnlockedEvent(lockedUser.id.toString, lockedUser.version).success
+      } yield {
+        event
+      }
+    }
+
+    def recoverEvent(event: UserRegisterdEvent) = {
+      log.debug(s"recoverEvent: $event")
+      val validation = for {
+	registeredUser <- RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
+          event.password, event.hasher, event.salt, event.avatarUrl)
+	savedUser <- userRepository.put(registeredUser).success
+      } yield savedUser
+
+      if (validation.isFailure) {
+          // this should never happen because the only way to get here is when the
+          // command passed validation
+          throw new IllegalStateException("creating user from event failed")
+      }
+    }
+
+    def recoverEvent(event: UserActivatedEvent): Unit = {
+      log.debug(s"recoverEvent: $event")
+
+      val validation = for {
+	user <- userRepository.getByKey(UserId(event.id))
+	registeredUser <- isUserRegistered(user)
+	activatedUser <- registeredUser.activate(Some(registeredUser.version))
+	savedUser <- userRepository.put(activatedUser).success
+      } yield savedUser
+
+      if (validation.isFailure) {
+          // this should never happen because the only way to get here is when the
+          // command passed validation
+          throw new IllegalStateException("activating user from event failed")
+      }
+    }
+
+    def recoverEvent(event: UserLockedEvent): Unit = {
+      log.debug(s"recoverEvent: $event")
+
+      val validation = for {
+	user <- userRepository.getByKey(UserId(event.id))
+	activeUser <- isUserActive(user)
+	lockedUser <- activeUser.lock(Some(activeUser.version))
+	savedUser <- userRepository.put(lockedUser).success
+      } yield savedUser
+
+      if (validation.isFailure) {
+          // this should never happen because the only way to get here is when the
+          // command passed validation
+          throw new IllegalStateException("locking user from event failed")
+      }
+    }
+
+    def recoverEvent(event: UserUnlockedEvent): Unit = {
+      log.debug(s"recoverEvent: $event")
+
+      val validation = for {
+	user <- userRepository.getByKey(UserId(event.id))
+	lockedUser <- isUserLocked(user)
+	unlockedUser <- lockedUser.unlock(Some(lockedUser.version))
+	savedUser <- userRepository.put(unlockedUser).success
+      } yield savedUser
+
+      if (validation.isFailure) {
+          // this should never happen because the only way to get here is when the
+          // command passed validation
+          throw new IllegalStateException("unlocking user from event failed")
+      }
+    }
+
+    private def isUserRegistered(user: User): DomainValidation[RegisteredUser] = {
       user match {
         case registeredUser: RegisteredUser => registeredUser.success
         case _ => DomainError(s"the user is not registered").failNel
+      }
+    }
+
+    private def isUserActive(user: User): DomainValidation[ActiveUser] = {
+      user match {
+        case activeUser: ActiveUser => activeUser.success
+        case _ => DomainError(s"the user is not active").failNel
+      }
+    }
+
+    private def isUserLocked(user: User): DomainValidation[LockedUser] = {
+      user match {
+        case lockedUser: LockedUser => lockedUser.success
+        case _ => DomainError(s"the user is not active").failNel
       }
     }
   }

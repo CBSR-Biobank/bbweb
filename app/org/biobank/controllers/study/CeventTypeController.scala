@@ -1,6 +1,7 @@
 package org.biobank.controllers.study
 
 import org.biobank.controllers._
+import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.{ ServiceComponent, TopComponentImpl }
 import org.biobank.domain._
@@ -36,18 +37,18 @@ import Scalaz._
 case class CeventTypeFormObject(
   collectionEventTypeId: String, version: Long, studyId: String, studyName: String, name: String,
   description: Option[String], recurring: Boolean,
-  specimenGroupData: List[CollectionEventTypeSpecimenGroup],
-  annotationTypeData: List[CollectionEventTypeAnnotationType]) {
+  specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
+  annotationTypeData: List[CollectionEventTypeAnnotationTypeData]) {
 
   def getAddCmd: AddCollectionEventTypeCmd = {
     AddCollectionEventTypeCmd(studyId, name, description, recurring,
-      specimenGroupData.toSet, annotationTypeData.toSet)
+      specimenGroupData, annotationTypeData)
   }
 
   def getUpdateCmd: UpdateCollectionEventTypeCmd = {
     UpdateCollectionEventTypeCmd(
-      collectionEventTypeId, Some(version), studyId, name, description, recurring,
-      specimenGroupData.toSet, annotationTypeData.toSet)
+      studyId, collectionEventTypeId, Some(version), name, description, recurring,
+      specimenGroupData, annotationTypeData)
   }
 }
 
@@ -73,12 +74,12 @@ object CeventTypeController extends Controller with SecureSocial {
       "specimenGroupData" -> list(mapping(
         "specimenGroupId" -> text,
         "specimenGroupCount" -> number,
-        "specimenGroupAmount" -> bigDecimal)(
-          CollectionEventTypeSpecimenGroup.apply)(CollectionEventTypeSpecimenGroup.unapply)),
+        "specimenGroupAmount" -> optional(bigDecimal))(
+          CollectionEventTypeSpecimenGroupData.apply)(CollectionEventTypeSpecimenGroupData.unapply)),
       "annotationTypeData" -> list(mapping(
         "annotationTypeId" -> text,
         "annotationTypeRequired" -> boolean)(
-          CollectionEventTypeAnnotationType.apply)(CollectionEventTypeAnnotationType.unapply)))(
+          CollectionEventTypeAnnotationTypeData.apply)(CollectionEventTypeAnnotationTypeData.unapply)))(
         CeventTypeFormObject.apply)(CeventTypeFormObject.unapply))
 
   private def specimenGroupInfo(studyId: String) = {
@@ -213,7 +214,7 @@ object CeventTypeController extends Controller with SecureSocial {
             implicit val userId = new UserId(request.user.identityId.userId)
             studyService.removeCollectionEventType(
               RemoveCollectionEventTypeCmd(
-                ceventType.id.id, ceventType.versionOption, ceventType.studyId.id)).map(validation =>
+                ceventType.studyId.id, ceventType.id.id, ceventType.versionOption)).map(validation =>
                 validation match {
                   case Success(cet) =>
                     Redirect(routes.StudyController.showStudy(studyId)).flashing(

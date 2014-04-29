@@ -7,19 +7,36 @@ object UserEvents {
 
   sealed trait UserEvent //extends Event
 
-  case class UserAddedEvent(
+  case class UserRegisterdEvent(
     id: String,
-    version: Long,
     name: String,
     email: String,
     password: String,
     hasher: String,
     salt: Option[String],
     avatarUrl: Option[String])
-    extends UserEvent
-  with Identity
+      extends UserEvent
+      with HasIdentity
 
-  case class UserActivatedEvent(id: String) extends UserEvent
-  with Identity
+  case class UserActivatedEvent(
+    id: String,
+    version: Long)
+      extends UserEvent
+      with HasIdentity
+      with HasVersion
+
+  case class UserLockedEvent(
+    id: String,
+    version: Long)
+      extends UserEvent
+      with HasIdentity
+      with HasVersion
+
+  case class UserUnlockedEvent(
+    id: String,
+    version: Long)
+      extends UserEvent
+      with HasIdentity
+      with HasVersion
 
 }

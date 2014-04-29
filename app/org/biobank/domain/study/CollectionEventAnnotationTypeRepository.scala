@@ -21,7 +21,7 @@ trait CollectionEventAnnotationTypeRepositoryComponentImpl
     new CollectionEventAnnotationTypeRepositoryImpl
 
   class CollectionEventAnnotationTypeRepositoryImpl
-    extends ReadWriteRepository[AnnotationTypeId, CollectionEventAnnotationType](v => v.id)
+    extends ReadWriteRepositoryRefImpl[AnnotationTypeId, CollectionEventAnnotationType](v => v.id)
     with StudyAnnotationTypeRepositoryImpl[CollectionEventAnnotationType]
     with CollectionEventAnnotationTypeRepository {
   }

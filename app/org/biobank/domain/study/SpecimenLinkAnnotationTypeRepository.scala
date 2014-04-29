@@ -17,11 +17,10 @@ trait SpecimenLinkAnnotationTypeRepositoryComponent {
 trait SpecimenLinkAnnotationTypeRepositoryComponentImpl
   extends SpecimenLinkAnnotationTypeRepositoryComponent {
 
-  override val specimenLinkAnnotationTypeRepository: SpecimenLinkAnnotationTypeRepository =
-    new SpecimenLinkAnnotationTypeRepositoryImpl
+  override val specimenLinkAnnotationTypeRepository = new SpecimenLinkAnnotationTypeRepositoryImpl
 
   class SpecimenLinkAnnotationTypeRepositoryImpl
-    extends ReadWriteRepository[AnnotationTypeId, SpecimenLinkAnnotationType](v => v.id)
+    extends ReadWriteRepositoryRefImpl[AnnotationTypeId, SpecimenLinkAnnotationType](v => v.id)
     with StudyAnnotationTypeRepositoryImpl[SpecimenLinkAnnotationType]
     with SpecimenLinkAnnotationTypeRepository {
   }

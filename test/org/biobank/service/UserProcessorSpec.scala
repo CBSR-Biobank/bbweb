@@ -1,121 +1,128 @@
 package org.biobank.service
 
-import fixture._
+import org.biobank.fixture._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.domain._
 
-import akka.actor.ActorSystem
-import akka.actor.Actor
-import akka.actor.Props
 import akka.pattern.ask
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
-import scala.concurrent.Await
-import scala.concurrent.Future
-import scala.concurrent.duration._
-import scala.language.postfixOps
 
 import scalaz._
 import scalaz.Scalaz._
 
-/**
- * Note: to run from Eclipse uncomment the @RunWith line. To run from SBT the line should be
- * commented out.
- *
- */
-//@RunWith(classOf[JUnitRunner])
 class UserProcessorSpec extends UserProcessorFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  override val nameGenerator = new NameGenerator(this.getClass.getName)
-
-  override def beforeAll: Unit = {
-    super.beforeAll
-  }
+  val nameGenerator = new NameGenerator(this.getClass)
 
   "A user processor" should {
 
     "add a user" in {
-      val name = nameGenerator.next[User]
-      val email = "user1@test.com"
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
-      val avatarUrl = Some("http://test.com/")
+      val user = factory.createRegisteredUser
 
-      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      val future = ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]
+      val cmd = RegisterUserCommand(user.name, user.email, user.password, user.hasher,
+	user.salt, user.avatarUrl)
+      val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
+	.futureValue
 
-      waitNonBlocking(future) { r =>
-        r match {
-          case Success(event) =>
-            event.id.toString should be(email)
-            event.name should be(name)
-            event.email should be(email)
-            event.password should be(password)
-            event.hasher should be(hasher)
-            event.salt should be(salt)
-            event.avatarUrl should be(avatarUrl)
+      validation should be ('success)
+      validation map { event =>
+        event shouldBe a [UserRegisterdEvent]
+	event should have (
+          'id (user.email),
+          'name (user.name),
+          'email (user.email),
+          'password (user.password),
+          'hasher (user.hasher),
+          'salt (user.salt),
+          'avatarUrl (user.avatarUrl)
+	)
 
-            userRepository.userWithId(UserId(event.id)).map { user =>
-              user.email should be(email)
-            }
-
-          case Failure(msg) =>
-            val errors = msg.list.mkString(", ")
-            fail(s"Error: $errors")
-        }
+        userRepository.getByKey(UserId(event.id)) map { user =>
+          user shouldBe a[RegisteredUser]
+	}
       }
     }
 
     "not add a user with an already registered email address" in {
-      val name = nameGenerator.next[User]
-      val email = "user2@test.com"
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
-      val avatarUrl = Some("http://test.com/")
+      val user = factory.createRegisteredUser
+      userRepository.put(user)
 
-      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      val r = waitBlocking(ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]])
+      val cmd = RegisterUserCommand(user.name, user.email, user.password, user.hasher,
+	user.salt, user.avatarUrl)
+      val validation2 = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
+	.futureValue
+      validation2 should be ('failure)
 
-      val user = r.getOrElse(fail("failure response from processor"))
-      user.email should be(email)
-
-      waitBlocking(ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]]) match {
-        case Success(event) => fail
-
-        case Failure(msg) =>
-          msg.list.mkString(",") should startWith("user already exists")
+      validation2.swap.map { err =>
+        err.list should have length 1
+        err.list.head should include ("user already exists")
       }
     }
 
     "activate a user" in {
-      val name = nameGenerator.next[User]
-      val email = "user3@test.com"
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
-      val avatarUrl = Some("http://test.com/")
+      val user = factory.createRegisteredUser
+      userRepository.put(user)
 
-      val cmd = AddUserCommand(name, email, password, hasher, salt, avatarUrl)
-      val r = waitBlocking(ask(userProcessor, cmd).mapTo[DomainValidation[UserAddedEvent]])
+      val validation2 = ask(userProcessor, ActivateUserCommand(user.email, Some(0L)))
+        .mapTo[DomainValidation[UserActivatedEvent]]
+	.futureValue
 
-      val event = r.getOrElse(fail("failure response from processor"))
-
-      waitBlocking(ask(userProcessor, ActivateUserCommand(event.email, Some(event.version)))
-        .mapTo[DomainValidation[UserActivatedEvent]]) match {
-        case Success(event) =>
-          event.id should be(email)
-
-        case Failure(msg) =>
-          fail(msg.list.mkString(","))
+      validation2 should be ('success)
+      validation2 map { event =>
+	event shouldBe a[UserActivatedEvent]
+	event.id should be(user.email)
       }
-
     }
+
+    "lock an activated a user" in {
+      val activeUser = factory.createActiveUser
+      userRepository.put(activeUser)
+
+      val validation = ask(userProcessor, LockUserCommand(activeUser.email, Some(1L)))
+        .mapTo[DomainValidation[UserLockedEvent]]
+	.futureValue
+
+      validation should be ('success)
+      validation map { event =>
+	event shouldBe a[UserLockedEvent]
+	event.id should be(activeUser.email)
+      }
+    }
+
+    "not lock a registered user" in {
+      val user = factory.createRegisteredUser
+      userRepository.put(user)
+
+      val validation2 = ask(userProcessor, LockUserCommand(user.email, Some(0L)))
+        .mapTo[DomainValidation[UserLockedEvent]]
+	.futureValue
+      validation2 should be ('failure)
+
+      validation2.swap map { err =>
+        err.list should have length 1
+        err.list.head should include ("the user is not active")
+      }
+    }
+
+    "not unlock a registered user" taggedAs(Tag("SingleTest")) in {
+      val user = factory.createRegisteredUser
+      userRepository.put(user)
+
+      val validation2 = ask(userProcessor, UnlockUserCommand(user.email, Some(0L)))
+        .mapTo[DomainValidation[UserLockedEvent]]
+	.futureValue
+      validation2 should be ('failure)
+
+      validation2.swap map { err =>
+        err.list should have length 1
+        err.list.head should include ("the user is not active")
+      }
+    }
+
   }
+
 }

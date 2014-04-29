@@ -52,7 +52,7 @@ case class CeventAnnotationTypeMapper(
   def getUpdateCmd: UpdateCollectionEventAnnotationTypeCmd = {
     val selectionMap = if (selections.size > 0) Some(selections.map(v => (v, v)).toMap) else None
     UpdateCollectionEventAnnotationTypeCmd(
-      annotationTypeId, Some(version), studyId, name, description,
+      studyId, annotationTypeId, Some(version), name, description,
       AnnotationValueType.withName(valueType), maxValueCount, selectionMap)
   }
 }
@@ -242,7 +242,7 @@ object CeventAnnotTypeController
           case Success(annotType) =>
             studyService.removeCollectionEventAnnotationType(
               RemoveCollectionEventAnnotationTypeCmd(
-                annotType.id.id, annotType.versionOption, studyId)).map(validation =>
+                studyId, annotType.id.id, annotType.versionOption)).map(validation =>
                 validation match {
                   case Success(at) =>
                     Redirect(routes.StudyController.showStudy(studyId)).flashing(

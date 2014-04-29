@@ -1,10 +1,12 @@
 package org.biobank.domain.study
 
-import org.biobank.domain._
+import org.biobank.domain.AnnotationType
 import org.biobank.domain.AnnotationValueType._
 
-abstract class StudyAnnotationType extends AnnotationType {
+/**
+  * StudyAnnotationTypes allow a study to collect custom named and defined pieces of data on
+  * [[CollectionEvent]]s, [[ProcessingEvent]]s, and [[Participant]]s. Annotations are
+  * optional and are not a requirement for specimen collection or processing.
+  */
+trait StudyAnnotationType extends AnnotationType with HasStudyId
 
-  val studyId: StudyId
-
-}

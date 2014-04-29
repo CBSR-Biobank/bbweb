@@ -45,7 +45,7 @@ case class SpecimenGroupFormObject(
   }
 
   def getUpdateCmd: UpdateSpecimenGroupCmd = {
-    UpdateSpecimenGroupCmd(specimenGroupId, some(version), studyId, name, description, units,
+    UpdateSpecimenGroupCmd(studyId, specimenGroupId, some(version), name, description, units,
       AnatomicalSourceType.withName(anatomicalSourceType),
       PreservationType.withName(preservationType),
       PreservationTemperatureType.withName(preservationTemperatureType),
@@ -293,7 +293,7 @@ object SpecimenGroupController extends Controller with SecureSocial {
           case Success(sg) =>
             implicit val userId = new UserId(request.user.identityId.userId)
             studyService.removeSpecimenGroup(RemoveSpecimenGroupCmd(
-              sg.id.id, sg.versionOption, sg.studyId.id)).map(validation =>
+              sg.studyId.id, sg.id.id, sg.versionOption)).map(validation =>
               validation match {
                 case Success(sgRemoved) =>
                   Redirect(routes.StudyController.showStudy(studyId)).flashing(

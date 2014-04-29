@@ -1,5 +1,9 @@
 package org.biobank.domain
 
+/**
+  * A standardized set of regions from a [[org.biobank.domain.participant.Participant]] where a [[Specimen]]
+  * is collected from.
+  */
 object AnatomicalSourceType extends Enumeration {
   type AnatomicalSourceType = Value
   val Blood = Value("Blood")
