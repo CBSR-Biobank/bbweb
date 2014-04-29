@@ -28,7 +28,7 @@ trait StudyProcessorComponent
     with CeventAnnotationTypeProcessorComponent
     with SpecimenGroupProcessorComponent
     with ParticipantAnnotationTypeProcessorComponent
-    with SpecimenLinkAnnotationTypeProcessorComponent{
+    with SpecimenLinkAnnotationTypeProcessorComponent {
   self: RepositoryComponent =>
 
   /**

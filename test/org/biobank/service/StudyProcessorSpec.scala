@@ -212,7 +212,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
       validation map { event =>
       	event shouldBe a[StudyEnabledEvent]
-        val study = studyRepository.withId(StudyId(event.id)) | fail
+        val study = studyRepository.getByKey(StudyId(event.id)) | fail
         study shouldBe a[EnabledStudy]
       }
     }
@@ -229,7 +229,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       validation should be ('success)
       validation map { event =>
 	event shouldBe a[StudyDisabledEvent]
-        val study = studyRepository.withId(StudyId(event.id)) | fail
+        val study = studyRepository.getByKey(StudyId(event.id)) | fail
         study shouldBe a[DisabledStudy]
       }
     }

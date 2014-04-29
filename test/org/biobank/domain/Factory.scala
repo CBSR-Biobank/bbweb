@@ -214,6 +214,33 @@ trait FactoryComponent {
       processingType
     }
 
+
+    def createSpecimenLinkType: SpecimenLinkType = {
+      val processingType = defaultProcessingType
+      val specimenGroup = defaultSpecimenGroup
+      val id = specimenLinkTypeRepository.nextIdentity
+      val expectedInputChange = BigDecimal(1.0)
+      val expectedOutpuChange = BigDecimal(1.0)
+      val inputCount = 1
+      val outputCount = 1
+
+      val disabledStudy = defaultDisabledStudy
+
+      // FIXME: populate annotationTypeData with fake data
+      val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
+	expectedOutpuChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	annotationTypeData = List.empty)
+
+
+      if (validation.isFailure) {
+	throw new Error
+      }
+
+      val annotationType = validation | null
+      domainObjects = domainObjects + (classOf[SpecimenLinkType] -> annotationType)
+      annotationType
+    }
+
     def defaultRegisteredUser: RegisteredUser = {
       defaultObject(classOf[RegisteredUser], createRegisteredUser)
     }
@@ -262,6 +289,14 @@ trait FactoryComponent {
       defaultObject(
 	classOf[SpecimenLinkAnnotationType],
 	createSpecimenLinkAnnotationType)
+    }
+
+    def defaultProcessingType: ProcessingType = {
+      defaultObject(classOf[ProcessingType], createProcessingType)
+    }
+
+    def defaultSpecimenLinkType: SpecimenLinkType = {
+      defaultObject(classOf[SpecimenLinkType], createSpecimenLinkType)
     }
 
     /** Retrieves the class from the map, or calls 'create' if value does not exist

@@ -109,9 +109,9 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
     outputCount: Int,
     inputGroupId: SpecimenGroupId,
     outputGroupId: SpecimenGroupId,
-    inputContainerTypeId: Option[ContainerTypeId],
-    outputContainerTypeId: Option[ContainerTypeId],
-    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData]): DomainValidation[SpecimenLinkType] = {
+    inputContainerTypeId: Option[ContainerTypeId] = None,
+    outputContainerTypeId: Option[ContainerTypeId] = None,
+    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData] = List.empty): DomainValidation[SpecimenLinkType] = {
 
     (validateId(processingTypeId).toValidationNel |@|
       validateId(id).toValidationNel |@|

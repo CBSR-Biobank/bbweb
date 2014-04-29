@@ -14,26 +14,30 @@ import org.biobank.domain.study.{
   SpecimenGroupRepositoryComponent,
   SpecimenGroupRepositoryComponentImpl,
   SpecimenLinkAnnotationTypeRepositoryComponent,
-  SpecimenLinkAnnotationTypeRepositoryComponentImpl
+  SpecimenLinkAnnotationTypeRepositoryComponentImpl,
+  SpecimenLinkTypeRepositoryComponent,
+  SpecimenLinkTypeRepositoryComponentImpl
 }
 
 trait RepositoryComponent
-  extends StudyRepositoryComponent
-  with SpecimenGroupRepositoryComponent
-  with CollectionEventAnnotationTypeRepositoryComponent
-  with CollectionEventTypeRepositoryComponent
-  with ParticipantAnnotationTypeRepositoryComponent
-  with ProcessingTypeRepositoryComponent
-  with SpecimenLinkAnnotationTypeRepositoryComponent
-  with UserRepositoryComponent
+    extends StudyRepositoryComponent
+    with SpecimenGroupRepositoryComponent
+    with CollectionEventAnnotationTypeRepositoryComponent
+    with CollectionEventTypeRepositoryComponent
+    with ParticipantAnnotationTypeRepositoryComponent
+    with ProcessingTypeRepositoryComponent
+    with SpecimenLinkAnnotationTypeRepositoryComponent
+    with SpecimenLinkTypeRepositoryComponent
+    with UserRepositoryComponent
 
 trait RepositoryComponentImpl
-  extends RepositoryComponent
-  with StudyRepositoryComponentImpl
-  with SpecimenGroupRepositoryComponentImpl
-  with CollectionEventAnnotationTypeRepositoryComponentImpl
-  with CollectionEventTypeRepositoryComponentImpl
-  with ParticipantAnnotationTypeRepositoryComponentImpl
-  with ProcessingTypeRepositoryComponentImpl
-  with SpecimenLinkAnnotationTypeRepositoryComponentImpl
-  with UserRepositoryComponentImpl
+    extends RepositoryComponent
+    with StudyRepositoryComponentImpl
+    with SpecimenGroupRepositoryComponentImpl
+    with CollectionEventAnnotationTypeRepositoryComponentImpl
+    with CollectionEventTypeRepositoryComponentImpl
+    with ParticipantAnnotationTypeRepositoryComponentImpl
+    with ProcessingTypeRepositoryComponentImpl
+    with SpecimenLinkAnnotationTypeRepositoryComponentImpl
+    with SpecimenLinkTypeRepositoryComponentImpl
+    with UserRepositoryComponentImpl
