@@ -17,12 +17,14 @@ trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
   implicit val timeout = Timeout(5 seconds)
 
   // clear the event store
-  MongoConnection()("bbweb-test")("messages").drop
-  MongoConnection()("bbweb-test")("snapshots").drop
+  MongoConnection()(TestComponentImpl.dbName)("messages").drop
+  MongoConnection()(TestComponentImpl.dbName)("snapshots").drop
 
 }
 
 object TestComponentImpl {
+
+  val dbName = "bbweb-test"
 
   def config() = ConfigFactory.parseString(
     s"""
@@ -31,10 +33,10 @@ object TestComponentImpl {
       |akka.persistence.journal.max-deletion-batch-size = 3
       |akka.persistence.publish-plugin-commands = on
       |akka.persistence.publish-confirmations = on
-      |casbah-journal.mongo-journal-url = "mongodb://localhost/bbweb-test.messages"
+      |casbah-journal.mongo-journal-url = "mongodb://localhost/$dbName.messages"
       |casbah-journal.mongo-journal-write-concern = "acknowledged"
       |casbah-journal.mongo-journal-write-concern-timeout = 10000
-      |casbah-snapshot-store.mongo-snapshot-url = "mongodb://localhost/bbweb-test.snapshots"
+      |casbah-snapshot-store.mongo-snapshot-url = "mongodb://localhost/$dbName.snapshots"
       |casbah-snapshot-store.mongo-snapshot-write-concern = "acknowledged"
       |casbah-snapshot-store.mongo-snapshot-write-concern-timeout = 10000
     """.stripMargin)

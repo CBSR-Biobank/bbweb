@@ -5,7 +5,7 @@ package org.biobank.query
 // Commenting out code for now
 //import play.api.db.slick._
 
-import org.biobank.query.model._
+//import org.biobank.query.model._
 import org.biobank.infrastructure.event.StudyEvents._
 
 import play.api.Play.current

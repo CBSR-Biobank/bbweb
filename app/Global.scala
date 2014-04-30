@@ -7,7 +7,8 @@
 // import scala.slick.session.Database
 // import scala.slick.jdbc.meta._
 
-import org.biobank.service.TopComponentImpl
+import org.biobank.controllers.ApplicationComponent
+import org.biobank.domain.{ RegisteredUser, UserId }
 
 //import play.api.mvc.Results._
 //import play.api.mvc.RequestHeader
@@ -21,7 +22,7 @@ import play.api.{ Configuration, GlobalSettings, Logger, Mode }
  * If the application is running in '''development''' mode, the query side DDL database scritps are
  * also generated.
  */
-object WebComponent extends GlobalSettings {
+object Global extends GlobalSettings {
 
   private val configKey = "slick"
   private val ScriptDirectory = "conf/evolutions/"
@@ -34,6 +35,14 @@ object WebComponent extends GlobalSettings {
    */
   override def onStart(app: play.api.Application) {
     createSqlDdlScripts(app)
+
+    if (app.mode.equals("Dev")) {
+      // for debug only - password is "administrator"
+      val email = "admin@admin.com"
+      ApplicationComponent.userRepository.put(RegisteredUser.create(
+	UserId(email), -1L, "admin", email,
+	"$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS", "bcrypt", None, None) | null)
+    }
   }
 
   /**
