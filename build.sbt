@@ -23,7 +23,7 @@ resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repos
 libraryDependencies ++= Seq(
   "org.webjars" % "angularjs" % "1.2.16",
   "org.webjars" % "requirejs" % "2.1.11",
-  "org.webjars" % "webjars-play" % "2.1.0-1",
+  "org.webjars" % "webjars-play_2.10" % "2.3-M1",
   "org.webjars" % "bootstrap" % "3.1.1",
   "com.typesafe" %% "webdriver" % "1.0.0-M2",
   "com.typesafe" %% "jse" % "1.0.0-M2",
