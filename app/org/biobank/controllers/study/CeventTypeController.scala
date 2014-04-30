@@ -60,7 +60,7 @@ object CollectionEventTypeSelections {
 
 object CeventTypeController extends Controller with SecureSocial {
 
-  lazy val studyService = WebComponent.studyService
+  lazy val studyService = ApplicationComponent.studyService
 
   val ceventTypeForm = Form(
     mapping(

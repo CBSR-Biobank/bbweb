@@ -3,12 +3,12 @@ package org.biobank.service
 import org.biobank.infrastructure.event.Events._
 import org.biobank.domain._
 
-import akka.actor._
+import akka.actor.ActorLogging
 import org.slf4j.Logger
 import akka.persistence.EventsourcedProcessor
 
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 
 trait Processor extends EventsourcedProcessor with ActorLogging {
 

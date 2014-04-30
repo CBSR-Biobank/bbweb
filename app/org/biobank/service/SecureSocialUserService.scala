@@ -1,5 +1,6 @@
 package org.biobank.service
 
+import org.biobank.controllers.ApplicationComponent
 import org.biobank.infrastructure.command.UserCommands._
 
 import play.api.{ Logger, Application }
@@ -16,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class SecureSocialUserService(application: Application) extends UserServicePlugin(application) {
 
-  lazy val userService = org.biobank.controllers.WebComponent.userService
+  lazy val userService = ApplicationComponent.userService
 
   private var tokens = Map[String, Token]()
 

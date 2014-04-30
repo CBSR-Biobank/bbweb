@@ -55,7 +55,7 @@ trait StudyAnnotationTypeMapper {
 
 trait StudyAnnotationTypeController[A <: StudyAnnotationType] extends Controller with SecureSocial {
 
-  lazy val studyService = WebComponent.studyService
+  lazy val studyService = ApplicationComponent.studyService
 
   protected lazy val annotationValueTypes = Seq("" -> Messages("biobank.form.selection.default")) ++
     AnnotationValueType.values.map(x =>

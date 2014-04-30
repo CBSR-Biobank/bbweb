@@ -1,5 +1,3 @@
-package org.biobank.controllers
-
 // Upgraded to Play 2.3-M1 and it does not yet have a Slick plugin.
 //
 // Commenting out code for now
@@ -9,33 +7,21 @@ package org.biobank.controllers
 // import scala.slick.session.Database
 // import scala.slick.jdbc.meta._
 
-import play.api.mvc.Results._
-import play.api.mvc.RequestHeader
+import org.biobank.service.TopComponentImpl
+
+//import play.api.mvc.Results._
+//import play.api.mvc.RequestHeader
 import java.io.File
 import play.api.libs.Files
 import play.api.{ Configuration, GlobalSettings, Logger, Mode }
-import play.api.Play.current
-import play.libs.Akka
-import akka.actor.ActorSystem
-import akka.actor.Props
 
 /**
  * Global settings for the web application.
  *
- * On application start, [[onStart]], the Eventsourced application is started.
- *
  * If the application is running in '''development''' mode, the query side DDL database scritps are
  * also generated.
  */
-object WebComponent extends GlobalSettings with org.biobank.service.TopComponentImpl {
-
-  override implicit val system: akka.actor.ActorSystem = Akka.system
-
-  override val studyProcessor = system.actorOf(Props(new StudyProcessor), "studyproc")
-  override val userProcessor = system.actorOf(Props(new UserProcessor), "userproc")
-
-  override val studyService = new StudyServiceImpl(studyProcessor)
-  override val userService = new UserService(userProcessor)
+object WebComponent extends GlobalSettings {
 
   private val configKey = "slick"
   private val ScriptDirectory = "conf/evolutions/"

@@ -83,8 +83,8 @@ GET     /password                   securesocial.controllers.PasswordChange.page
 POST    /password                   securesocial.controllers.PasswordChange.handlePasswordChange
 
 # Providers entry points
-GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider)
-POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider)
+GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider, redirectTo:Option[String])
+POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider, redirectTo:Option[String])
 GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
 
 GET     /assets/stylesheets/img/glyphicons-halflings-white.png      controllers.Assets.at(path="/public", file="/images/glyphicons-halflings-white.png")

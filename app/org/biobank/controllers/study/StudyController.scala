@@ -55,7 +55,7 @@ case class StudyFormObject(
 
 object StudyController extends Controller with SecureSocial {
 
-  private lazy val studyService = WebComponent.studyService
+  private lazy val studyService = ApplicationComponent.studyService
 
   private val studyForm = Form(
     mapping(

@@ -9,8 +9,9 @@ import securesocial.core.SecureSocial
 import scalaz._
 import Scalaz._
 
-object UserController extends Controller with SecureSocial with WebComponent {
-  self: ServiceComponent =>
+object UserController extends Controller with SecureSocial {
+
+  lazy val userService = ApplicationComponent.userService
 
   def profile = SecuredAction { implicit request =>
     userService.getByEmail(request.user.email.getOrElse("")) match {

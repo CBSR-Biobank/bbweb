@@ -72,7 +72,7 @@ object SpecimenGroupSelections {
  */
 object SpecimenGroupController extends Controller with SecureSocial {
 
-  private lazy val studyService = WebComponent.studyService
+  private lazy val studyService = ApplicationComponent.studyService
 
   private val specimenGroupForm = Form(
     mapping(
