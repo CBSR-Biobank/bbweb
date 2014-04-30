@@ -15,6 +15,7 @@ import org.biobank.domain.{ RegisteredUser, UserId }
 import java.io.File
 import play.api.libs.Files
 import play.api.{ Configuration, GlobalSettings, Logger, Mode }
+import org.slf4j.LoggerFactory
 
 /**
  * Global settings for the web application.
@@ -23,6 +24,8 @@ import play.api.{ Configuration, GlobalSettings, Logger, Mode }
  * also generated.
  */
 object Global extends GlobalSettings {
+
+  val log = LoggerFactory.getLogger(this.getClass)
 
   private val configKey = "slick"
   private val ScriptDirectory = "conf/evolutions/"
@@ -36,7 +39,7 @@ object Global extends GlobalSettings {
   override def onStart(app: play.api.Application) {
     createSqlDdlScripts(app)
 
-    if (app.mode.equals("Dev")) {
+    if (app.mode == Mode.Dev) {
       // for debug only - password is "administrator"
       val email = "admin@admin.com"
       ApplicationComponent.userRepository.put(RegisteredUser.create(
