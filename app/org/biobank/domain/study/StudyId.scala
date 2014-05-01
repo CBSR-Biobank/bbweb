@@ -6,4 +6,4 @@ import org.biobank.domain.IdentifiedValueObject
   *
   * Used as a value object to maintain associations to with objects in the system.
   */
-case class StudyId(val id: String) extends IdentifiedValueObject[String] {}
+case class StudyId(id: String) extends IdentifiedValueObject[String]

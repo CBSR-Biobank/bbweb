@@ -8,6 +8,11 @@ GET     /about                      org.biobank.controllers.Application.about
 GET     /contact                    org.biobank.controllers.Application.contact
 
 # studies
+GET     /studies                    org.biobank.controllers.study.StudyController.list
+#POST    /studies                    org.biobank.controllers.study.StudyController.createStudy
+#GET     /studies/:id                org.biobank.controllers.study.StudyController.showStudy(id)
+#PUT     /studies/:id                org.biobank.controllers.study.StudyController.updateStudy(id)
+
 GET     /study                      org.biobank.controllers.study.StudyController.index
 GET     /study/summary/:id          org.biobank.controllers.study.StudyController.summary(id)
 GET     /study/show/:id             org.biobank.controllers.study.StudyController.showStudy(id)

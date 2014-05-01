@@ -6,12 +6,12 @@ import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.{ ServiceComponent, TopComponentImpl }
 import org.biobank.domain._
-import org.biobank.domain.study._
-import views._
+import org.biobank.domain.study.{ Study, StudyId, DisabledStudy }
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
+import views._
 
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -20,6 +20,8 @@ import play.api._
 import play.api.cache.Cache
 import play.api.Play.current
 import play.api.mvc._
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import play.api.data._
 import play.api.data.Forms._
 import play.api.i18n.Messages
@@ -94,6 +96,27 @@ object StudyController extends Controller with SecureSocial {
   def selectedStudyTab(tab: StudyTab): Unit = {
     Cache.set("study.tab", tab)
     Logger.debug("selected tab: " + Cache.get("study.tab"))
+  }
+
+  implicit val studyWrites = new Writes[Study] {
+    def writes(study: Study) = Json.obj(
+      "id" -> study.id.id,
+      "version" -> study.version,
+      "name" -> study.name,
+      "description" -> study.description
+    )
+
+    def writes(study: DisabledStudy) = Json.obj(
+      "id" -> study.id.id,
+      "version" -> study.version,
+      "name" -> study.name,
+      "description" -> study.description
+    )
+  }
+
+  def list = Action {
+    val json = Json.toJson(studyService.getAll.toList)
+    Ok(json)
   }
 
   def selectedStudyTab: StudyTab = {
