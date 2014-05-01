@@ -15,7 +15,7 @@ trait ProcessingTypeRepositoryComponent {
 
     def nextIdentity: ProcessingTypeId
 
-    def processingTypeWithId(
+    def withId(
       studyId: StudyId,
       processingTypeId: ProcessingTypeId): DomainValidation[ProcessingType]
 
@@ -37,7 +37,7 @@ trait ProcessingTypeRepositoryComponentImpl extends ProcessingTypeRepositoryComp
     def nextIdentity: ProcessingTypeId =
       new ProcessingTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
 
-    def processingTypeWithId(
+    def withId(
       studyId: StudyId,
       processingTypeId: ProcessingTypeId): DomainValidation[ProcessingType] = {
       getByKey(processingTypeId) match {

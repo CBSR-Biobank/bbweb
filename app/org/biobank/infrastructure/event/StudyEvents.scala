@@ -2,6 +2,7 @@ package org.biobank.infrastructure.event
 
 import org.biobank.infrastructure._
 import org.biobank.domain.study._
+import org.biobank.domain.ContainerTypeId
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.AnnotationValueType._
 import org.biobank.domain.PreservationType._
@@ -112,22 +113,6 @@ object StudyEvents {
     collectionEventTypeId: String)
     extends StudyEvent
 
-  case class SpecimenGroupAddedToCollectionEventTypeEvent(
-    studyId: String,
-    sg2cetId: String,
-    collectionEventTypeId: String,
-    specimenGroupId: String,
-    maxCount: Int,
-    amount: BigDecimal)
-    extends StudyEvent
-
-  case class SpecimenGroupRemovedFromCollectionEventTypeEvent(
-    studyId: String,
-    sg2cetId: String,
-    collectionEventTypeId: String,
-    specimenGroupId: String)
-    extends StudyEvent
-
   case class CollectionEventAnnotationTypeAddedEvent(
     studyId: String,
     annotationTypeId: String,
@@ -153,20 +138,6 @@ object StudyEvents {
   case class CollectionEventAnnotationTypeRemovedEvent(
     studyId: String,
     annotationTypeId: String)
-
-  case class AnnotationTypeAddedToCollectionEventTypeEvent(
-    studyId: String,
-    collectionEventTypeAnnotationTypeId: String,
-    collectionEventTypeId: String,
-    annotationTypeId: String)
-    extends StudyEvent
-
-  case class AnnotationTypeRemovedFromCollectionEventTypeEvent(
-    studyId: String,
-    collectionEventTypeAnnotationTypeId: String,
-    collectionEventTypeId: String,
-    annotationTypeId: String)
-    extends StudyEvent
 
   // participant annotation types
 
@@ -199,8 +170,67 @@ object StudyEvents {
     annotationTypeId: String)
     extends StudyEvent
 
-  // specimen link annotation types
+  // procesing type events
+  case class ProcessingTypeAddedEvent(
+    studyId: String,
+    processingTypeId: String,
+    version: Long,
+    name: String,
+    description: Option[String],
+    enabled: Boolean)
+    extends StudyEvent
 
+  case class ProcessingTypeUpdatedEvent(
+    studyId: String,
+    processingTypeId: String,
+    version: Long,
+    name: String,
+    description: Option[String],
+    enabled: Boolean)
+    extends StudyEvent
+
+  case class ProcessingTypeRemovedEvent(
+    studyId: String,
+    processingTypeId: String)
+    extends StudyEvent
+
+  // specimen link type
+  case class SpecimenLinkTypeAddedEvent(
+    studyId: String,
+    specimenLinkTypeId: String,
+    version: Long,
+    expectedInputChange: BigDecimal,
+    expectedOutputChange: BigDecimal,
+    inputCount: Int,
+    outputCount: Int,
+    inputGroupId: SpecimenGroupId,
+    outputGroupId: SpecimenGroupId,
+    inputContainerTypeId: Option[ContainerTypeId],
+    outputContainerTypeId: Option[ContainerTypeId],
+    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
+    extends StudyEvent
+
+  case class SpecimenLinkTypeUpdatedEvent(
+    studyId: String,
+    specimenLinkTypeId: String,
+    version: Long,
+    expectedInputChange: BigDecimal,
+    expectedOutputChange: BigDecimal,
+    inputCount: Int,
+    outputCount: Int,
+    inputGroupId: SpecimenGroupId,
+    outputGroupId: SpecimenGroupId,
+    inputContainerTypeId: Option[ContainerTypeId],
+    outputContainerTypeId: Option[ContainerTypeId],
+    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
+    extends StudyEvent
+
+  case class SpecimenLinkTypeRemovedEvent(
+    studyId: String,
+    specimenLinkTypeId: String)
+    extends StudyEvent
+
+  // specimen link annotation types
   case class SpecimenLinkAnnotationTypeAddedEvent(
     studyId: String,
     annotationTypeId: String,

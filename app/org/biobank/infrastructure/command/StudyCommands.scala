@@ -2,6 +2,7 @@ package org.biobank.infrastructure.command
 
 import org.biobank.infrastructure._
 import org.biobank.domain.study._
+import org.biobank.domain.ContainerTypeId
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
@@ -16,6 +17,7 @@ object StudyCommands {
   // study commands
   trait StudyCommand extends Command
   trait HasStudyIdentity { val studyId: String }
+  trait HasProcessingTypeIdentity { val processingTypeId: String }
 
   case class AddStudyCmd(
     name: String,
@@ -96,7 +98,7 @@ object StudyCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  // collection event commands
+  // collection event type commands
   trait CollectionEventTypeCommand extends StudyCommand with HasStudyIdentity
 
   case class AddCollectionEventTypeCmd(
@@ -238,5 +240,77 @@ object StudyCommands {
       with HasIdentity
       with HasStudyIdentity
       with HasExpectedVersion
+
+  // processing type commands
+  trait ProcessingTypeCommand extends StudyCommand with HasStudyIdentity
+
+  case class AddProcessingTypeCmd(
+    studyId: String,
+    name: String,
+    description: Option[String],
+    enabled: Boolean)
+      extends ProcessingTypeCommand with HasStudyIdentity
+
+  case class UpdateProcessingTypeCmd(
+    studyId: String,
+    id: String,
+    expectedVersion: Option[Long],
+    name: String,
+    description: Option[String],
+    enabled: Boolean)
+      extends ProcessingTypeCommand
+      with HasIdentity
+      with HasExpectedVersion
+
+  case class RemoveProcessingTypeCmd(
+    studyId: String,
+    id: String,
+    expectedVersion: Option[Long])
+      extends ProcessingTypeCommand
+      with HasIdentity
+      with HasExpectedVersion
+
+  // specimen link type commands
+  trait SpecimenLinkTypeCommand extends StudyCommand with HasProcessingTypeIdentity
+
+  case class AddSpecimenLinkTypeCmd(
+    processingTypeId: String,
+    expectedInputChange: BigDecimal,
+    expectedOutputChange: BigDecimal,
+    inputCount: Int,
+    outputCount: Int,
+    inputGroupId: SpecimenGroupId,
+    outputGroupId: SpecimenGroupId,
+    inputContainerTypeId: Option[ContainerTypeId],
+    outputContainerTypeId: Option[ContainerTypeId],
+    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
+      extends SpecimenLinkTypeCommand
+      with HasProcessingTypeIdentity
+
+  case class UpdateSpecimenLinkTypeCmd(
+    processingTypeId: String,
+    id: String,
+    expectedVersion: Option[Long],
+    expectedInputChange: BigDecimal,
+    expectedOutputChange: BigDecimal,
+    inputCount: Int,
+    outputCount: Int,
+    inputGroupId: SpecimenGroupId,
+    outputGroupId: SpecimenGroupId,
+    inputContainerTypeId: Option[ContainerTypeId],
+    outputContainerTypeId: Option[ContainerTypeId],
+    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
+      extends SpecimenLinkTypeCommand
+      with HasIdentity
+      with HasExpectedVersion
+
+  case class RemoveSpecimenLinkTypeCmd(
+    processingTypeId: String,
+    id: String,
+    expectedVersion: Option[Long])
+      extends SpecimenLinkTypeCommand
+      with HasIdentity
+      with HasExpectedVersion
+
 
 }
