@@ -65,55 +65,49 @@
 	<body>
           <div id="navbar">
             <div class="navbar navbar-inverse navbar-fixed-top">
-              <div class="navbar-inner">
-		<div class="container">
-                  <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                  </a>
-                  <a class="brand" href="@org.biobank.controllers.routes.Application.index">Biobank</a>
-                  <div class="nav-collapse collapse">
-                    <ul class="nav">
-                      <li class="active"><a href="@org.biobank.controllers.routes.Application.index">Home</a></li>
-                      <li><a href="@org.biobank.controllers.routes.Application.about">About</a></li>
-                      <li><a href="@org.biobank.controllers.routes.Application.contact">Contact</a></li>
-                    </ul>
-                  </div>
+	      <div class="navbar-header">
+                <a class="navbar-brand" href="@org.biobank.controllers.routes.Application.index">Biobank</a>
+		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+		  <span class="icon-bar"></span>
+		  <span class="icon-bar"></span>
+		  <span class="icon-bar"></span>
+		</button>
+	      </div>
+	      <div class="navbar-header navbar-right">
+  		<p class="navbar-text">
                   @request match {
                   case req : securesocial.core.SecuredRequest[_]  => {
-                  <div class="nav-collapse collapse navbar-responsive-collapse">
-                    <ul class="nav navbar-nav pull-right">
-                      <li class="dropdown">
-                        <a class="dropdown-toggle" id="drop1" role="button" data-toggle="dropdown" href="#">
-                        <strong>@req.user.email</strong> <span class="caret"></span></a>
-                        <ul class="dropdown-menu" role="menu"  aria-labelledby="drop1">
-                          <li role="presentation">
-			    <a role="menuitem" tabindex="-1"
-			       href="@org.biobank.controllers.routes.UserController.profile">My Profile</a></li>
-                        </ul>
-                      </li>
-                      <li><a href="@securesocial.controllers.routes.LoginPage.logout()">Log out</a></li>
-                    </ul>
-                  </div>
-                  }
-                  case _ => { }
-                  }
-                  <!--/.nav-collapse -->
-		</div>
+                  <a href="#"><strong>@req.user.email</strong> <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu"  aria-labelledby="drop1">
+                    <li role="presentation">
+		      <a role="menuitem" tabindex="-1"
+			 href="@org.biobank.controllers.routes.UserController.profile">My Profile</a></li>
+                  </ul>
+		  }
+		  case _ => { }
+		  }
+  		</p>
+	      </div>
+              <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                  <li class="active"><a href="@org.biobank.controllers.routes.Application.index">Home</a></li>
+                  <li><a href="@org.biobank.controllers.routes.Application.about">About</a></li>
+                  <li><a href="@org.biobank.controllers.routes.Application.contact">Contact</a></li>
+                </ul>
               </div>
-            </div>
+	    </div>
           </div>
-          <div class="container">
-            @if(!breadcrumbs.isEmpty) {
-            <ul class="breadcrumb">
-              @for(breadcrumb <- breadcrumbs.keys.dropRight(1)) {
-              <li><a href="@breadcrumbs.get(breadcrumb)">@breadcrumb</a> <span class="divider">/</span></li>
-              }
-              <li class="active">@breadcrumbs.keys.last</li>
-            </ul>
+        </div>
+        <div class="container">
+          @if(!breadcrumbs.isEmpty) {
+          <ul class="breadcrumb">
+            @for(breadcrumb <- breadcrumbs.keys.dropRight(1)) {
+            <li><a href="@breadcrumbs.get(breadcrumb)">@breadcrumb</a> <span class="divider">/</span></li>
             }
-            @content
-          </div>
-	</body>
-      </html>
+            <li class="active">@breadcrumbs.keys.last</li>
+          </ul>
+          }
+          @content
+        </div>
+      </body>
+    </html>
