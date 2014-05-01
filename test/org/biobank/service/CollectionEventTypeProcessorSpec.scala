@@ -26,7 +26,7 @@ import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
-class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
+class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
@@ -366,7 +366,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
       }
     }
 
-    "add an annotation type to a colleciton event" in {
+    "add an annotation type to a collection event" in {
       val annotationType = factory.defaultCollectionEventAnnotationType
       collectionEventAnnotationTypeRepository.put(annotationType)
       val annotTypeData = List(factory.createCollectionEventTypeAnnotationTypeData)

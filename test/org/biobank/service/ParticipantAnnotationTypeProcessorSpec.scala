@@ -13,7 +13,7 @@ import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import Scalaz._
 
-class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
+class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 

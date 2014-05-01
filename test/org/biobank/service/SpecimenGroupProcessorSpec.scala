@@ -24,7 +24,7 @@ import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
-class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
+class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
 
   val nameGenerator = new NameGenerator(this.getClass)
 

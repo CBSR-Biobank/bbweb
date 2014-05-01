@@ -24,7 +24,7 @@ import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
-class ProcessingTypeProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
+class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
