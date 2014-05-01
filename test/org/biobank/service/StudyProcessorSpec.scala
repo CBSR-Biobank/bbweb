@@ -34,7 +34,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
   "A study processor" should {
 
-    "add a study" taggedAs(Tag("single")) in {
+    "add a study" in {
       val study = factory.createDisabledStudy
 
       val cmd = AddStudyCmd(study.name, study.description)

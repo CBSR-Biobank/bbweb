@@ -47,7 +47,7 @@ trait SpecimenLinkTypeRepositoryComponentImpl extends SpecimenLinkTypeRepository
           if (slt.processingTypeId.equals(processingTypeId))
             slt.success
           else DomainError(
-            "study does not have collection event type:{ processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
+            "study does not have specimen link type:{ processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
               .failNel
       }
     }

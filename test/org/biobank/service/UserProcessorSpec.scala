@@ -108,7 +108,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       }
     }
 
-    "not unlock a registered user" taggedAs(Tag("SingleTest")) in {
+    "not unlock a registered user" in {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 

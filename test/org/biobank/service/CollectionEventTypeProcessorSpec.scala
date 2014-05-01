@@ -42,7 +42,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture with Before
 
   "A study processor" can {
 
-    "add a collection event type" taggedAs (Tag("single")) in {
+    "add a collection event type" in {
       val cet = factory.createCollectionEventType
 
       // specimen groups and annotation types tested separately below

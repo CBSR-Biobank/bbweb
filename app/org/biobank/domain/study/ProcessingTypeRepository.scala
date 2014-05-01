@@ -49,7 +49,7 @@ trait ProcessingTypeRepositoryComponentImpl extends ProcessingTypeRepositoryComp
           if (cet.studyId.equals(studyId))
             cet.success
           else DomainError(
-            "study does not have collection event type:{ studyId: $studyId, processingTypeId: $processingTypeId }")
+            "study does not have processing type:{ studyId: $studyId, processingTypeId: $processingTypeId }")
               .failNel
       }
     }
