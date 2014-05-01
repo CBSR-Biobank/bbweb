@@ -3,11 +3,11 @@
 //
 //
 var tab2JsRoutes = {};
-tab2JsRoutes["#tab-summary"] = jsRoutes.controllers.study.StudyController.summaryTab;
-tab2JsRoutes["#tab-participants"] = jsRoutes.controllers.study.StudyController.participantsTab;
-tab2JsRoutes["#tab-specimens"] = jsRoutes.controllers.study.StudyController.specimensTab;
-tab2JsRoutes["#tab-collection-events"] = jsRoutes.controllers.study.StudyController.ceventsTab;
-tab2JsRoutes["#tab-processing-events"] = jsRoutes.controllers.study.StudyController.peventsTab;
+tab2JsRoutes["#tab-summary"] = jsRoutes.org.biobank.controllers.study.StudyController.summaryTab;
+tab2JsRoutes["#tab-participants"] = jsRoutes.org.biobank.controllers.study.StudyController.participantsTab;
+tab2JsRoutes["#tab-specimens"] = jsRoutes.org.biobank.controllers.study.StudyController.specimensTab;
+tab2JsRoutes["#tab-collection-events"] = jsRoutes.org.biobank.controllers.study.StudyController.ceventsTab;
+tab2JsRoutes["#tab-processing-events"] = jsRoutes.org.biobank.controllers.study.StudyController.peventsTab;
 
 function getTabContent(tab, studyId, studyName) {
     if (tab in tab2JsRoutes) {
