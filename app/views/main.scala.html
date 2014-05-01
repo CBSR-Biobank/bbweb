@@ -7,6 +7,7 @@
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
       <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.css"))'>
 	<script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery.min.js"))'></script>
+	<script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.js"))'></script>
 	<link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
 	  <style>
             body {
@@ -77,12 +78,17 @@
   		<p class="navbar-text">
                   @request match {
                   case req : securesocial.core.SecuredRequest[_]  => {
-                  <a href="#"><strong>@req.user.email</strong> <span class="caret"></span></a>
-                  <ul class="dropdown-menu" role="menu"  aria-labelledby="drop1">
-                    <li role="presentation">
-		      <a role="menuitem" tabindex="-1"
-			 href="@org.biobank.controllers.routes.UserController.profile">My Profile</a></li>
-                  </ul>
+		  <div class="dropdown">
+		    <button class="btn dropdown-toggle sr-only" type="button" id="dropdownMenu1" data-toggle="dropdown">
+                      <a href="#"><strong>@req.user.email</strong> <span class="caret"></span></a>
+		      <span class="caret"></span>
+		    </button>
+                    <ul class="dropdown-menu" role="menu"  aria-labelledby="dropdownMenu1">
+                      <li role="presentation">
+			<a role="menuitem" tabindex="-1"
+			   href="@org.biobank.controllers.routes.UserController.profile">My Profile</a></li>
+                    </ul>
+		  </div>
 		  }
 		  case _ => { }
 		  }
