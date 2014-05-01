@@ -196,7 +196,7 @@ object StudyEvents {
 
   // specimen link type
   case class SpecimenLinkTypeAddedEvent(
-    studyId: String,
+    processingTypeId: String,
     specimenLinkTypeId: String,
     version: Long,
     expectedInputChange: BigDecimal,
@@ -211,7 +211,7 @@ object StudyEvents {
     extends StudyEvent
 
   case class SpecimenLinkTypeUpdatedEvent(
-    studyId: String,
+    processingTypeId: String,
     specimenLinkTypeId: String,
     version: Long,
     expectedInputChange: BigDecimal,

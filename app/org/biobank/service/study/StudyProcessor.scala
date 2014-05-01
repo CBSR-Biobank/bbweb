@@ -28,6 +28,8 @@ trait StudyProcessorComponent
     with CeventAnnotationTypeProcessorComponent
     with SpecimenGroupProcessorComponent
     with ParticipantAnnotationTypeProcessorComponent
+    with ProcessingTypeProcessorComponent
+    with SpecimenLinkTypeProcessorComponent
     with SpecimenLinkAnnotationTypeProcessorComponent {
   self: RepositoryComponent =>
 
@@ -52,8 +54,14 @@ trait StudyProcessorComponent
     val participantAnnotationTypeProcessor = context.actorOf(
       Props(new ParticipantAnnotationTypeProcessor), "partAnnotTypeProc")
 
+    val processingTypeProcessor = context.actorOf(
+      Props(new ProcessingTypeProcessor), "processingProc")
+
+    val specimenLinkTypeProcessor = context.actorOf(
+      Props(new SpecimenLinkTypeProcessor), "spcLinkTypeProc")
+
     val specimenLinkAnnotationTypeProcessor = context.actorOf(
-      Props(new SpecimenLinkAnnotationTypeProcessor), "specimenLinkProc")
+      Props(new SpecimenLinkAnnotationTypeProcessor), "spcLinkAnnotTypeProc")
 
     val receiveRecover: Receive = {
       case event: StudyAddedEvent => recoverEvent(event)
@@ -78,6 +86,10 @@ trait StudyProcessorComponent
       case cmd: CollectionEventAnnotationTypeCommand => ceventAnnotationTypeProcessor forward cmd
 
       case cmd: ParticipantAnnotationTypeCommand => participantAnnotationTypeProcessor forward cmd
+
+      case cmd: ProcessingTypeCommand => processingTypeProcessor forward cmd
+
+      case cmd: SpecimenLinkTypeCommand => specimenLinkTypeProcessor forward cmd
 
       case cmd: SpecimenLinkAnnotationTypeCommand => specimenLinkAnnotationTypeProcessor forward cmd
 
