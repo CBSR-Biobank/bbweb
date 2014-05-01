@@ -75,24 +75,20 @@
 		</button>
 	      </div>
 	      <div class="navbar-header navbar-right">
-  		<p class="navbar-text">
+		<ul class="nav navbar-nav">
                   @request match {
                   case req : securesocial.core.SecuredRequest[_]  => {
-		  <div class="dropdown">
-		    <button class="btn dropdown-toggle sr-only" type="button" id="dropdownMenu1" data-toggle="dropdown">
-                      <a href="#"><strong>@req.user.email</strong> <span class="caret"></span></a>
-		      <span class="caret"></span>
-		    </button>
-                    <ul class="dropdown-menu" role="menu"  aria-labelledby="dropdownMenu1">
-                      <li role="presentation">
-			<a role="menuitem" tabindex="-1"
-			   href="@org.biobank.controllers.routes.UserController.profile">My Profile</a></li>
-                    </ul>
-		  </div>
+  		  <li class="dropdown">
+		    <a id="drop-user" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown"><strong>@req.user.email</strong> <b class="caret"></b></a>
+		    <ul class="dropdown-menu" role="menu" aria-labelledby="drop-user">
+                      <li role="presentation"><a role="menuitem" tabindex="-1" href="@org.biobank.controllers.routes.UserController.profile">My Profile</a></li>
+                      <li role="presentation"><a role="menuitem" tabindex="-1" href="@securesocial.controllers.routes.LoginPage.logout">Logout</a></li>
+		    </ul>
+		  </li>
 		  }
 		  case _ => { }
 		  }
-  		</p>
+		</ul>
 	      </div>
               <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
