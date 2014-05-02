@@ -114,7 +114,7 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData] = List.empty): DomainValidation[SpecimenLinkType] = {
 
 
-    def create =  (validateId(processingTypeId).toValidationNel |@|
+    (validateId(processingTypeId).toValidationNel |@|
       validateId(id).toValidationNel |@|
       validateAndIncrementVersion(version).toValidationNel |@|
       validatePositiveNumber(
@@ -133,14 +133,10 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
       validateId(outputGroupId).toValidationNel |@|
       validateId(inputContainerTypeId).toValidationNel |@|
       validateId(outputContainerTypeId).toValidationNel |@|
-      validateAnnotationTypeData(annotationTypeData).toValidationNel) {
-      SpecimenLinkType(_, _, _, _, _, _, _, _, _, _, _, _)
+      validateAnnotationTypeData(annotationTypeData).toValidationNel |@|
+      validateSpecimenGroups(inputGroupId, outputGroupId)) { case(a, b, c, d, e, f, g, h, i, j, k, l, m) =>
+      SpecimenLinkType(a, b, c, d, e, f, g, h, i, j, k, l)
     }
-
-    for {
-      item <- create
-      inputOutputSgDifferent <- validateSpecimenGroups(inputGroupId, outputGroupId)
-    } yield item
   }
 
   private def validateSpecimenGroups(

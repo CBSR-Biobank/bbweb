@@ -225,11 +225,13 @@ trait FactoryComponent {
 
       val disabledStudy = defaultDisabledStudy
 
-      val intputSpecimenGroup = createSpecimenGroup
+      val inputSpecimenGroup = createSpecimenGroup
+      specimenGroupRepository.put(inputSpecimenGroup)
       val outputSpecimenGroup = createSpecimenGroup
+      specimenGroupRepository.put(outputSpecimenGroup)
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutpuChange, inputCount, outputCount, intputSpecimenGroup.id, outputSpecimenGroup.id,
+	expectedOutpuChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
 	annotationTypeData = List.empty)
 
       if (validation.isFailure) {
