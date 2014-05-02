@@ -41,13 +41,13 @@ trait SpecimenLinkTypeRepositoryComponentImpl extends SpecimenLinkTypeRepository
       getByKey(specimenLinkTypeId) match {
         case Failure(err) =>
           DomainError(
-            s"collection event type does not exist: { processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
+            s"specimen link type does not exist: { processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
 	    .failNel
         case Success(slt) =>
           if (slt.processingTypeId.equals(processingTypeId))
             slt.success
           else DomainError(
-            "study does not have specimen link type:{ processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
+            s"processing type does not have specimen link type:{ processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
               .failNel
       }
     }

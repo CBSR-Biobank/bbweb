@@ -43,7 +43,7 @@ trait ProcessingTypeRepositoryComponentImpl extends ProcessingTypeRepositoryComp
       getByKey(processingTypeId) match {
         case Failure(err) =>
           DomainError(
-            s"collection event type does not exist: { studyId: $studyId, processingTypeId: $processingTypeId }")
+            s"processing type does not exist: { studyId: $studyId, processingTypeId: $processingTypeId }")
 	    .failNel
         case Success(cet) =>
           if (cet.studyId.equals(studyId))

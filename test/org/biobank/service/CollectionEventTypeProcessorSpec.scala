@@ -54,6 +54,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       validation map { event =>
         event shouldBe a[CollectionEventTypeAddedEvent]
         event should have(
+	  'version (0),
           'name (cet.name),
           'description (cet.description),
           'recurring (cet.recurring))
@@ -99,9 +100,10 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       validation map { event =>
         event shouldBe a[CollectionEventTypeUpdatedEvent]
         event should have(
-          'name(cet2.name),
-          'description(cet2.description),
-          'recurring(cet2.recurring))
+	  'version (cet.version + 1),
+          'name (cet2.name),
+          'description (cet2.description),
+          'recurring (cet2.recurring))
       }
     }
 

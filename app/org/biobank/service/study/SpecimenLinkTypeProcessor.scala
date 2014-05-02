@@ -90,7 +90,8 @@ trait SpecimenLinkTypeProcessorComponent {
 	validAnnotData <- validateAnnotationTypeData(processingTypeId, cmd.annotationTypeData)
 	event <- SpecimenLinkTypeAddedEvent(
           cmd.processingTypeId,
-	  id.id, newItem.version,
+	  id.id,
+	  newItem.version,
 	  newItem.expectedInputChange,
 	  newItem.expectedOutputChange,
 	  newItem.inputCount,
