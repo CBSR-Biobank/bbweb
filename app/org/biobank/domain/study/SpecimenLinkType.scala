@@ -114,9 +114,7 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData] = List.empty): DomainValidation[SpecimenLinkType] = {
 
 
-    validateSpecimenGroups(inputGroupId, outputGroupId)
-
-    (validateId(processingTypeId).toValidationNel |@|
+    def create =  (validateId(processingTypeId).toValidationNel |@|
       validateId(id).toValidationNel |@|
       validateAndIncrementVersion(version).toValidationNel |@|
       validatePositiveNumber(
@@ -139,13 +137,17 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
       SpecimenLinkType(_, _, _, _, _, _, _, _, _, _, _, _)
     }
 
+    for {
+      item <- create
+      validSg <- validateSpecimenGroups(inputGroupId, outputGroupId)
+    } yield item
   }
 
   private def validateSpecimenGroups(
     inputGroupId: SpecimenGroupId,
-    outputGroupId: SpecimenGroupId): Validation[String, Boolean] = {
+    outputGroupId: SpecimenGroupId): ValidationNel[String, Boolean] = {
     if (inputGroupId.equals(outputGroupId)) {
-      DomainError("input and output specimen groups are the same").fail
+      DomainError("input and output specimen groups are the same").failNel
     } else {
       true.success
     }
