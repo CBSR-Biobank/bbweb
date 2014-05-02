@@ -59,6 +59,19 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
     resultFunc(validation)
   }
 
+  private def askRemoveCommand(
+    procType: ProcessingType)(
+    resultFunc: DomainValidation[ProcessingTypeRemovedEvent] => Unit): Unit = {
+    val cmd = RemoveProcessingTypeCmd(
+      procType.studyId.id,
+      procType.id.id,
+      procType.versionOption)
+    val validation = ask(studyProcessor, cmd)
+      .mapTo[DomainValidation[ProcessingTypeRemovedEvent]]
+      .futureValue
+    resultFunc(validation)
+  }
+
   // create the study to be used for each tests*
   override def beforeEach: Unit = {
     disabledStudy = factory.createDisabledStudy
@@ -154,50 +167,45 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       }
     }
 
-    "not update a processing type with an invalid version" taggedAs(Tag("single")) in {
+    "not update a processing type with an invalid version" in {
       val procType = factory.createProcessingType
       processingTypeRepository.put(procType)
 
       val procTypeBadVersion = procType.copy(version = procType.version - 2)
 
       askUpdateCommand(procTypeBadVersion) { validation =>
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include("doesn't match current version")
-      }
+	validation should be('failure)
+	validation.swap map { err =>
+          err.list should have length 1
+          err.list.head should include("doesn't match current version")
+	}
       }
     }
 
     "remove a processing type" in {
       val procType = factory.createProcessingType
-	processingTypeRepository.put(procType)
+      processingTypeRepository.put(procType)
 
-      val cmd = RemoveProcessingTypeCmd(disabledStudy.id.id, procType.id.id, procType.versionOption)
-      val validation = ask(studyProcessor, cmd)
-        .mapTo[DomainValidation[ProcessingTypeRemovedEvent]]
-        .futureValue
-
-      validation should be('success)
+      askRemoveCommand(procType){ validation =>
+	validation should be('success)
 	validation map { event => event shouldBe a[ProcessingTypeRemovedEvent] }
+      }
     }
 
     "not remove a processing type  with an invalid version" in {
       val procType = factory.createProcessingType
-	processingTypeRepository.put(procType)
+      processingTypeRepository.put(procType)
 
-      val cmd = RemoveProcessingTypeCmd(disabledStudy.id.id, procType.id.id, Some(procType.version + 1))
-      val validation = ask(studyProcessor, cmd)
-        .mapTo[DomainValidation[ProcessingTypeRemovedEvent]]
-        .futureValue
+      val procTypeBadVersion = procType.copy(version = procType.version - 2)
 
-      validation should be('failure)
+      askRemoveCommand(procTypeBadVersion){ validation =>
+	validation should be('failure)
 	validation.swap map { err =>
           err.list should have length 1
-            err.list.head should include("version mismatch")
+          err.list.head should include("version mismatch")
 	}
+      }
     }
-
 
   }
 }
