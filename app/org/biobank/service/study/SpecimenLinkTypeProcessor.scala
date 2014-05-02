@@ -83,6 +83,9 @@ trait SpecimenLinkTypeProcessorComponent {
 	  cmd.inputContainerTypeId,
 	  cmd.outputContainerTypeId,
 	  cmd.annotationTypeData)
+	inputSgExists <- specimenGroupRepository.getByKey(newItem.inputGroupId)
+	outputSgExists <- specimenGroupRepository.getByKey(newItem.outputGroupId)
+	// FIXME: check that container types are valid
 	validSpecimenGroups <- validateSpecimenGroups(newItem.inputGroupId, newItem.outputGroupId)
 	validAnnotData <- validateAnnotationTypeData(processingTypeId, cmd.annotationTypeData)
 	event <- SpecimenLinkTypeAddedEvent(
@@ -118,6 +121,9 @@ trait SpecimenLinkTypeProcessorComponent {
 	  cmd.inputContainerTypeId,
 	  cmd.outputContainerTypeId,
 	  cmd.annotationTypeData)
+	inputSgExists <- specimenGroupRepository.getByKey(newItem.inputGroupId)
+	outputSgExists <- specimenGroupRepository.getByKey(newItem.outputGroupId)
+	// FIXME: check that container types are valid
 	validSpecimenGroups <- validateSpecimenGroups(newItem.inputGroupId, newItem.outputGroupId, newItem.id)
 	validAtData <- validateAnnotationTypeData(processingTypeId, cmd.annotationTypeData)
 	event <- SpecimenLinkTypeUpdatedEvent(

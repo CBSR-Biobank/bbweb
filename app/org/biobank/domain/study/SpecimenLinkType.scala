@@ -139,7 +139,7 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
 
     for {
       item <- create
-      validSg <- validateSpecimenGroups(inputGroupId, outputGroupId)
+      inputOutputSgDifferent <- validateSpecimenGroups(inputGroupId, outputGroupId)
     } yield item
   }
 

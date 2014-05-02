@@ -79,9 +79,12 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
       validation should be('failure)
       validation.swap map { err =>
         err.list should have length 1
-	log.info(s"error: ${err.list.head}")
-        err.list.head should include("name already exists")
+        err.list.head should include("input and output specimen groups are the same")
       }
+    }
+
+    "not add a specimen link type with a specimen group that does not exist" in {
+      // test both input and output
     }
 
     "update a specimen link type" in {

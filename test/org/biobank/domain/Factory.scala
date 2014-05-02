@@ -217,7 +217,6 @@ trait FactoryComponent {
 
     def createSpecimenLinkType: SpecimenLinkType = {
       val processingType = defaultProcessingType
-      val specimenGroup = defaultSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutpuChange = BigDecimal(1.0)
@@ -226,8 +225,11 @@ trait FactoryComponent {
 
       val disabledStudy = defaultDisabledStudy
 
+      val intputSpecimenGroup = createSpecimenGroup
+      val outputSpecimenGroup = createSpecimenGroup
+
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutpuChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	expectedOutpuChange, inputCount, outputCount, intputSpecimenGroup.id, outputSpecimenGroup.id,
 	annotationTypeData = List.empty)
 
       if (validation.isFailure) {
