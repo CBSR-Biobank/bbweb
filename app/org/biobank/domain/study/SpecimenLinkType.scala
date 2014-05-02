@@ -114,29 +114,51 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
     outputContainerTypeId: Option[ContainerTypeId] = None,
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData] = List.empty): DomainValidation[SpecimenLinkType] = {
 
-    // (validateId(processingTypeId) :^:
-    //   validateId(id) :^:
-    //   validateAndIncrementVersion(version) :^:
-    //   validatePositiveNumber(
-    // 	expectedInputChange,
-    // 	"expected input change is not a positive number") :^:
-    //   validatePositiveNumber(
-    // 	expectedOutputChange,
-    // 	"expected output change is not a positive number") :^:
-    //   validatePositiveNumber(
-    // 	inputCount,
-    // 	"input count is not a positive number") :^:
-    //   validatePositiveNumber(
-    // 	outputCount,
-    // 	"output count is not a positive number") :^:
-    //   validateId(inputGroupId) :^:
-    //   validateId(outputGroupId) :^:
-    //   validateId(inputContainerTypeId) :^:
-    //   validateId(outputContainerTypeId) :^:
-    //   validateAnnotationTypeData(annotationTypeData) :^:
-    //   validateSpecimenGroups(inputGroupId, outputGroupId) :^:
-    //   KNil).applyP(SpecimenLinkType.apply.curried)
-    null
+    /** The validation code below validates 13 items and to create a SpecimenLinkType only
+      *  12 parameters are requried. This function ignores the value returned by the last validation
+      *  to create the SpecimenLinkType.
+      */
+    def applyFunc(
+      processingTypeId: ProcessingTypeId,
+      id: SpecimenLinkTypeId,
+      version: Long,
+      expectedInputChange: BigDecimal,
+      expectedOutputChange: BigDecimal,
+      inputCount: Int,
+      outputCount: Int,
+      inputGroupId: SpecimenGroupId,
+      outputGroupId: SpecimenGroupId,
+      inputContainerTypeId: Option[ContainerTypeId] = None,
+      outputContainerTypeId: Option[ContainerTypeId] = None,
+      annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData],
+      ignore: Boolean): SpecimenLinkType = {
+      SpecimenLinkType(processingTypeId, id, version, expectedInputChange, expectedOutputChange,
+	inputCount, outputCount, inputGroupId, outputGroupId, inputContainerTypeId,
+	outputContainerTypeId, annotationTypeData)
+    }
+
+    (validateId(processingTypeId) :^:
+      validateId(id) :^:
+      validateAndIncrementVersion(version) :^:
+      validatePositiveNumber(
+    	expectedInputChange,
+    	"expected input change is not a positive number") :^:
+      validatePositiveNumber(
+    	expectedOutputChange,
+    	"expected output change is not a positive number") :^:
+      validatePositiveNumber(
+    	inputCount,
+    	"input count is not a positive number") :^:
+      validatePositiveNumber(
+    	outputCount,
+    	"output count is not a positive number") :^:
+      validateId(inputGroupId) :^:
+      validateId(outputGroupId) :^:
+      validateId(inputContainerTypeId) :^:
+      validateId(outputContainerTypeId) :^:
+      validateAnnotationTypeData(annotationTypeData) :^:
+      validateSpecimenGroups(inputGroupId, outputGroupId) :^:
+      KNil).applyP(applyFunc _ curried)
   }
 
   private def validateSpecimenGroups(

@@ -18,7 +18,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
     "be created" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -28,7 +29,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
 	annotationTypeData = List.empty)
       validation should be ('success)
       validation map { slt =>
@@ -39,8 +40,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 	  'expectedOutputChange (expectedOutputChange),
 	  'inputCount (inputCount),
 	  'outputCount (outputCount),
-	  'inputGroupId (specimenGroup.id),
-	  'outputGroupId (specimenGroup.id),
+	  'inputGroupId (inputSpecimenGroup.id),
+	  'outputGroupId (outputSpecimenGroup.id),
 	  'inputContainerTypeId (None),
 	  'outputContainerTypeId (None)
 	)
@@ -54,7 +55,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
     "not be created with an empty processing type id" in {
       val processingTypeId = ProcessingTypeId("")
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -64,7 +66,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingTypeId, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
 	annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
@@ -74,7 +76,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
     "not be created with an empty id" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = SpecimenLinkTypeId("")
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -84,7 +87,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
 	annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
@@ -126,7 +129,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
     "not be created with an invalid version" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -136,7 +140,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -2L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
 	annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
@@ -146,7 +150,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
     "not be created with an invalid expected input / output change" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       var expectedInputChange: BigDecimal = BigDecimal(-1.0)
       var expectedOutputChange: BigDecimal = BigDecimal(1.0)
@@ -156,7 +161,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
 	annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
@@ -167,7 +172,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       expectedOutputChange = BigDecimal(-1.0)
 
       val validation2 = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
 	annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
@@ -177,7 +182,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
     "not be created with an invalid input / output count" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -187,7 +193,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
 	annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
@@ -197,7 +203,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       inputCount = 1
       outputCount = -1
       val validation2 = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
 	annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
@@ -207,7 +213,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
     "not be created with invalid container types" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -219,7 +226,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
 	containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
@@ -229,7 +236,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       containerTypeIdIn = Some(ContainerTypeId("abc"))
       containerTypeIdOut = Some(ContainerTypeId(""))
       val validation2 = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
 	containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
@@ -239,7 +246,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
     "have more than one validation fail" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = SpecimenLinkTypeId("")
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -249,7 +257,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -2L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
 	annotationTypeData = List.empty)
       validation should be ('failure)
       validation.swap.map { err =>
@@ -261,7 +269,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
     "not be created with an invalid annotation type id" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -272,7 +281,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val annotationTypeData = List(SpecimenLinkTypeAnnotationTypeData("", false))
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
+	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
 	annotationTypeData = annotationTypeData)
       validation should be('failure)
       validation.swap.map { err =>
