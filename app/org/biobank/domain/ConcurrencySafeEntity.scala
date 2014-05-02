@@ -38,24 +38,9 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
     */
   protected def requireVersion(expectedVersion: Option[Long]): DomainValidation[ConcurrencySafeEntity[T]] = {
     expectedVersion match {
+      case None => DomainError("expected version doesn't match current version").failNel
       case Some(expected) if (version != expected) => invalidVersion(expected).failNel
       case _ => this.success
     }
   }
 }
-
-// object Entity {
-
-//   protected def update[S <: ConcurrencySafeEntity[_], T <: ConcurrencySafeEntity[_]](
-//     entity: DomainValidation[S],
-//     id: IdentifiedDomainObject[_],
-//     expectedVersion: Option[Long])(f: S => DomainValidation[T]): DomainValidation[T] =
-//     entity match {
-//       case Failure(x) => DomainError(s"no entity with id: $id").failNel
-//       case Success(entity) => for {
-//         current <- entity.requireVersion(expectedVersion)
-//         updated <- f(entity)
-//       } yield updated
-//     }
-
-// }
