@@ -185,10 +185,10 @@ object DisabledStudy extends StudyValidationHelper {
     version: Long,
     name: String,
     description: Option[String]): DomainValidation[DisabledStudy] = {
-    (validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
-      validateNonEmptyOption(description, "description is null or empty").toValidationNel) {
+    (validateId(id) |@|
+      validateAndIncrementVersion(version) |@|
+      validateNonEmpty(name, "name is null or empty") |@|
+      validateNonEmptyOption(description, "description is null or empty")) {
         DisabledStudy(_, _, _, _)
       }
   }
@@ -224,10 +224,10 @@ object EnabledStudy extends StudyValidationHelper {
 
   /** A study must be in a disabled state before it can be enabled. */
   def create(study: DisabledStudy): DomainValidation[EnabledStudy] = {
-    (validateId(study.id).toValidationNel |@|
-      validateAndIncrementVersion(study.version).toValidationNel |@|
-      validateNonEmpty(study.name, "name is null or empty").toValidationNel |@|
-      validateNonEmptyOption(study.description, "description is null or empty").toValidationNel) {
+    (validateId(study.id) |@|
+      validateAndIncrementVersion(study.version) |@|
+      validateNonEmpty(study.name, "name is null or empty") |@|
+      validateNonEmptyOption(study.description, "description is null or empty")) {
         EnabledStudy(_, _, _, _)
       }
   }
@@ -263,10 +263,10 @@ object RetiredStudy extends StudyValidationHelper {
 
   /** A study must be in a disabled state before it can be retired. */
   def create(study: DisabledStudy): DomainValidation[RetiredStudy] = {
-    (validateId(study.id).toValidationNel |@|
-      validateAndIncrementVersion(study.version).toValidationNel |@|
-      validateNonEmpty(study.name, "name is null or empty").toValidationNel |@|
-      validateNonEmptyOption(study.description, "description is null or empty").toValidationNel) {
+    (validateId(study.id) |@|
+      validateAndIncrementVersion(study.version) |@|
+      validateNonEmpty(study.name, "name is null or empty") |@|
+      validateNonEmptyOption(study.description, "description is null or empty")) {
         RetiredStudy(_, _, _, _)
       }
   }

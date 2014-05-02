@@ -60,12 +60,12 @@ object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidationHelper {
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
     options: Option[Map[String, String]]): DomainValidation[SpecimenLinkAnnotationType] = {
-    (validateId(studyId).toValidationNel |@|
-      validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
-      validateNonEmptyOption(description, "description is null or empty").toValidationNel |@|
-      validateMaxValueCount(maxValueCount).toValidationNel |@|
+    (validateId(studyId) |@|
+      validateId(id) |@|
+      validateAndIncrementVersion(version) |@|
+      validateNonEmpty(name, "name is null or empty") |@|
+      validateNonEmptyOption(description, "description is null or empty") |@|
+      validateMaxValueCount(maxValueCount) |@|
       validateOptions(options)) {
         SpecimenLinkAnnotationType(_, _, _, _, _, valueType, _, _)
       }

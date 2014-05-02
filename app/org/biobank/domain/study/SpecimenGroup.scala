@@ -106,12 +106,12 @@ object SpecimenGroup extends StudyValidationHelper {
     preservationType: PreservationType,
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
-    (validateId(studyId).toValidationNel |@|
-      validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
-      validateNonEmptyOption(description, "description is null or empty").toValidationNel |@|
-      validateNonEmpty(units, "units is null or empty").toValidationNel) {
+    (validateId(studyId) |@|
+      validateId(id) |@|
+      validateAndIncrementVersion(version) |@|
+      validateNonEmpty(name, "name is null or empty") |@|
+      validateNonEmptyOption(description, "description is null or empty") |@|
+      validateNonEmpty(units, "units is null or empty")) {
       SpecimenGroup(_, _, _, _, _, _, anatomicalSourceType, preservationType,
 	preservationTemperatureType, specimenType)
     }

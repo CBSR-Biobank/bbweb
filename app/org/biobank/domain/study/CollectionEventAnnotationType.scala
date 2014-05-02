@@ -60,12 +60,12 @@ object CollectionEventAnnotationType extends StudyAnnotationTypeValidationHelper
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
     options: Option[Map[String, String]] = None): DomainValidation[CollectionEventAnnotationType] = {
-    (validateId(studyId).toValidationNel |@|
-      validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
-      validateNonEmptyOption(description, "description is null or empty").toValidationNel |@|
-      validateMaxValueCount(maxValueCount).toValidationNel |@|
+    (validateId(studyId) |@|
+      validateId(id) |@|
+      validateAndIncrementVersion(version) |@|
+      validateNonEmpty(name, "name is null or empty") |@|
+      validateNonEmptyOption(description, "description is null or empty") |@|
+      validateMaxValueCount(maxValueCount) |@|
       validateOptions(options)) {
         CollectionEventAnnotationType(_, _, _, _, _, valueType, _, _)
       }

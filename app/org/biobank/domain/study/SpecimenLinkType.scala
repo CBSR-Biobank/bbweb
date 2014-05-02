@@ -12,7 +12,8 @@ import org.biobank.infrastructure._
 import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
 
 import scalaz._
-import scalaz.Scalaz._
+import Scalaz._
+import typelevel._
 
 /** [[SpecimenLinkType]]s are assigned to a [[ProcessingType]], and are used to represent a regularly
   * performed processing procedure involving two [[Specimen]]s: an input, which must be in a specific
@@ -113,35 +114,34 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
     outputContainerTypeId: Option[ContainerTypeId] = None,
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData] = List.empty): DomainValidation[SpecimenLinkType] = {
 
-
-    (validateId(processingTypeId).toValidationNel |@|
-      validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validatePositiveNumber(
-	expectedInputChange,
-	"expected input change is not a positive number").toValidationNel |@|
-      validatePositiveNumber(
-	expectedOutputChange,
-	"expected output change is not a positive number").toValidationNel |@|
-      validatePositiveNumber(
-	inputCount,
-	"input count is not a positive number").toValidationNel |@|
-      validatePositiveNumber(
-	outputCount,
-	"output count is not a positive number").toValidationNel |@|
-      validateId(inputGroupId).toValidationNel |@|
-      validateId(outputGroupId).toValidationNel |@|
-      validateId(inputContainerTypeId).toValidationNel |@|
-      validateId(outputContainerTypeId).toValidationNel |@|
-      validateAnnotationTypeData(annotationTypeData).toValidationNel |@|
-      validateSpecimenGroups(inputGroupId, outputGroupId)) { case(a, b, c, d, e, f, g, h, i, j, k, l, m) =>
-      SpecimenLinkType(a, b, c, d, e, f, g, h, i, j, k, l)
-    }
+    // (validateId(processingTypeId) :^:
+    //   validateId(id) :^:
+    //   validateAndIncrementVersion(version) :^:
+    //   validatePositiveNumber(
+    // 	expectedInputChange,
+    // 	"expected input change is not a positive number") :^:
+    //   validatePositiveNumber(
+    // 	expectedOutputChange,
+    // 	"expected output change is not a positive number") :^:
+    //   validatePositiveNumber(
+    // 	inputCount,
+    // 	"input count is not a positive number") :^:
+    //   validatePositiveNumber(
+    // 	outputCount,
+    // 	"output count is not a positive number") :^:
+    //   validateId(inputGroupId) :^:
+    //   validateId(outputGroupId) :^:
+    //   validateId(inputContainerTypeId) :^:
+    //   validateId(outputContainerTypeId) :^:
+    //   validateAnnotationTypeData(annotationTypeData) :^:
+    //   validateSpecimenGroups(inputGroupId, outputGroupId) :^:
+    //   KNil).applyP(SpecimenLinkType.apply.curried)
+    null
   }
 
   private def validateSpecimenGroups(
     inputGroupId: SpecimenGroupId,
-    outputGroupId: SpecimenGroupId): ValidationNel[String, Boolean] = {
+    outputGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
     if (inputGroupId.equals(outputGroupId)) {
       DomainError("input and output specimen groups are the same").failNel
     } else {
@@ -149,7 +149,7 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
     }
   }
 
-  private def validateId(id: SpecimenLinkTypeId): Validation[String, SpecimenLinkTypeId] = {
+  private def validateId(id: SpecimenLinkTypeId): DomainValidation[SpecimenLinkTypeId] = {
     validateStringId(id.toString, "specimen link type id is null or empty") match {
       case Success(idString) => id.success
       case Failure(err) => err.fail

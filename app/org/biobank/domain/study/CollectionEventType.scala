@@ -86,18 +86,18 @@ object CollectionEventType extends StudyAnnotationTypeValidationHelper {
     recurring: Boolean,
     specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
     annotationTypeData: List[CollectionEventTypeAnnotationTypeData]): DomainValidation[CollectionEventType] = {
-    (validateId(studyId).toValidationNel |@|
-      validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
-      validateNonEmptyOption(description, "description is null or empty").toValidationNel |@|
+    (validateId(studyId) |@|
+      validateId(id) |@|
+      validateAndIncrementVersion(version) |@|
+      validateNonEmpty(name, "name is null or empty") |@|
+      validateNonEmptyOption(description, "description is null or empty") |@|
       validateSpecimenGroupData(specimenGroupData) |@|
-      validateAnnotationTypeData(annotationTypeData).toValidationNel) {
+      validateAnnotationTypeData(annotationTypeData)) {
       CollectionEventType(_, _, _, _, _, recurring, _, _)
     }
   }
 
-  protected def validateId(id: CollectionEventTypeId): Validation[String, CollectionEventTypeId] = {
+  protected def validateId(id: CollectionEventTypeId): DomainValidation[CollectionEventTypeId] = {
     validateStringId(id.toString, "collection event type id is null or empty") match {
       case Success(idString) => id.success
       case Failure(err) => err.fail
@@ -112,9 +112,9 @@ object CollectionEventType extends StudyAnnotationTypeValidationHelper {
 
     def validateSpecimenGroupItem(
       specimenGroupItem: CollectionEventTypeSpecimenGroupData): DomainValidation[CollectionEventTypeSpecimenGroupData] = {
-      (validateStringId(specimenGroupItem.specimenGroupId, "specimen group id is null or empty").toValidationNel |@|
-	validatePositiveNumber(specimenGroupItem.maxCount, "max count is not a positive number").toValidationNel |@|
-	validatePositiveNumberOption(specimenGroupItem.amount, "amount not is a positive number").toValidationNel) {
+      (validateStringId(specimenGroupItem.specimenGroupId, "specimen group id is null or empty") |@|
+	validatePositiveNumber(specimenGroupItem.maxCount, "max count is not a positive number") |@|
+	validatePositiveNumberOption(specimenGroupItem.amount, "amount not is a positive number")) {
         CollectionEventTypeSpecimenGroupData(_, _, _)
       }
     }

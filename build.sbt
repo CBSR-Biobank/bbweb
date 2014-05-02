@@ -29,6 +29,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"   %% "akka-slf4j"                     % "2.3.2"              % "compile",
   "org.scala-stm"       %% "scala-stm"                      % "0.7"                % "compile",
   "org.scalaz"          %% "scalaz-core"                    % "7.0.6"              % "compile",
+  "org.scalaz"          %% "scalaz-typelevel"               % "7.0.6"              % "compile",
   "org.webjars"          % "angularjs"                      % "1.2.16"             % "compile",
   "org.webjars"          % "bootstrap"                      % "3.1.1"              % "compile",
   "org.webjars"          % "requirejs"                      % "2.1.11"             % "compile",

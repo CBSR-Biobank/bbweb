@@ -80,14 +80,14 @@ object RegisteredUser extends UserValidationHelper {
     hasher: String,
     salt: Option[String],
     avatarUrl: Option[String]): DomainValidation[RegisteredUser] = {
-    (validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
-      validateEmail(email).toValidationNel |@|
-      validateNonEmpty(password, "password is null or empty").toValidationNel |@|
-      validateNonEmpty(hasher, "hasher is null or empty").toValidationNel |@|
-      validateNonEmptyOption(salt, "salt is null or empty").toValidationNel |@|
-      validateAvatarUrl(avatarUrl).toValidationNel) {
+    (validateId(id) |@|
+      validateAndIncrementVersion(version) |@|
+      validateNonEmpty(name, "name is null or empty") |@|
+      validateEmail(email) |@|
+      validateNonEmpty(password, "password is null or empty") |@|
+      validateNonEmpty(hasher, "hasher is null or empty") |@|
+      validateNonEmptyOption(salt, "salt is null or empty") |@|
+      validateAvatarUrl(avatarUrl)) {
         RegisteredUser(_, _, _, _, _, _, _, _)
       }
   }
@@ -121,14 +121,14 @@ object ActiveUser extends UserValidationHelper {
 
   /** Creates an active user from a registered user. */
   def create[T <: User](user: T): DomainValidation[ActiveUser] = {
-    (validateId(user.id).toValidationNel |@|
-      validateAndIncrementVersion(user.version).toValidationNel |@|
-      validateNonEmpty(user.name, "name is null or empty").toValidationNel |@|
-      validateEmail(user.email).toValidationNel |@|
-      validateNonEmpty(user.password, "password is null or empty").toValidationNel |@|
-      validateNonEmpty(user.hasher, "hasher is null or empty").toValidationNel |@|
-      validateNonEmptyOption(user.salt, "salt is null or empty").toValidationNel |@|
-      validateAvatarUrl(user.avatarUrl).toValidationNel) {
+    (validateId(user.id) |@|
+      validateAndIncrementVersion(user.version) |@|
+      validateNonEmpty(user.name, "name is null or empty") |@|
+      validateEmail(user.email) |@|
+      validateNonEmpty(user.password, "password is null or empty") |@|
+      validateNonEmpty(user.hasher, "hasher is null or empty") |@|
+      validateNonEmptyOption(user.salt, "salt is null or empty") |@|
+      validateAvatarUrl(user.avatarUrl)) {
         ActiveUser(_, _, _, _, _, _, _, _)
       }
   }
@@ -161,14 +161,14 @@ object LockedUser extends UserValidationHelper {
 
   /** Creates an active user from a locked user. */
   def create(user: ActiveUser): DomainValidation[LockedUser] = {
-    (validateId(user.id).toValidationNel |@|
-      validateAndIncrementVersion(user.version).toValidationNel |@|
-      validateNonEmpty(user.name, "name is null or empty").toValidationNel |@|
-      validateEmail(user.email).toValidationNel |@|
-      validateNonEmpty(user.password, "password is null or empty").toValidationNel |@|
-      validateNonEmpty(user.hasher, "hasher is null or empty").toValidationNel |@|
-      validateNonEmptyOption(user.salt, "salt is null or empty").toValidationNel |@|
-      validateAvatarUrl(user.avatarUrl).toValidationNel) {
+    (validateId(user.id) |@|
+      validateAndIncrementVersion(user.version) |@|
+      validateNonEmpty(user.name, "name is null or empty") |@|
+      validateEmail(user.email) |@|
+      validateNonEmpty(user.password, "password is null or empty") |@|
+      validateNonEmpty(user.hasher, "hasher is null or empty") |@|
+      validateNonEmptyOption(user.salt, "salt is null or empty") |@|
+      validateAvatarUrl(user.avatarUrl)) {
         LockedUser(_, _, _, _, _, _, _, _)
       }
   }
