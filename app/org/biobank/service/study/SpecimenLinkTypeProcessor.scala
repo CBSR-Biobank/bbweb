@@ -84,7 +84,7 @@ trait SpecimenLinkTypeProcessorComponent {
 	  cmd.outputContainerTypeId,
 	  cmd.annotationTypeData)
 	validSpecimenGroups <- validateSpecimenGroups(newItem.inputGroupId, newItem.outputGroupId)
-	validAtData <- validateAnnotationTypeData(processingTypeId, cmd.annotationTypeData)
+	validAnnotData <- validateAnnotationTypeData(processingTypeId, cmd.annotationTypeData)
 	event <- SpecimenLinkTypeAddedEvent(
           cmd.processingTypeId,
 	  id.id, newItem.version,
@@ -154,7 +154,7 @@ trait SpecimenLinkTypeProcessorComponent {
 	newItem <- SpecimenLinkType.create(
 	  processingTypeId,
 	  SpecimenLinkTypeId(event.specimenLinkTypeId),
-	  event.version,
+	  -1L,
 	  event.expectedInputChange,
 	  event.expectedOutputChange,
 	  event.inputCount,

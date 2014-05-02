@@ -3,6 +3,7 @@ package org.biobank.service
 import org.biobank.fixture._
 import org.biobank.infrastructure.CollectionEventTypeAnnotationTypeData
 import org.biobank.infrastructure.CollectionEventTypeSpecimenGroupData
+import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
   AnatomicalSourceType,
@@ -16,13 +17,10 @@ import org.biobank.domain.{
   SpecimenType
 }
 import org.biobank.domain.study._
-import org.biobank.infrastructure.command.StudyCommands._
 
 import org.slf4j.LoggerFactory
 
 import akka.pattern.ask
-import org.scalatest.Tag
-import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 

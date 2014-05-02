@@ -92,7 +92,7 @@ object CollectionEventType extends StudyAnnotationTypeValidationHelper {
       validateNonEmpty(name, "name is null or empty").toValidationNel |@|
       validateNonEmptyOption(description, "description is null or empty").toValidationNel |@|
       validateSpecimenGroupData(specimenGroupData) |@|
-      validateAnnotationTypeData(annotationTypeData)) {
+      validateAnnotationTypeData(annotationTypeData).toValidationNel) {
       CollectionEventType(_, _, _, _, _, recurring, _, _)
     }
   }
@@ -108,7 +108,7 @@ object CollectionEventType extends StudyAnnotationTypeValidationHelper {
     *  Validates each item in the set and returns all failures.
     */
   protected def validateSpecimenGroupData(
-    specimenGroupData: List[CollectionEventTypeSpecimenGroupData]): DomainValidation[List[CollectionEventTypeSpecimenGroupData]] = {
+    specimenGroupData: List[CollectionEventTypeSpecimenGroupData]): ValidationNel[String, List[CollectionEventTypeSpecimenGroupData]] = {
 
     def validateSpecimenGroupItem(
       specimenGroupItem: CollectionEventTypeSpecimenGroupData): DomainValidation[CollectionEventTypeSpecimenGroupData] = {

@@ -56,10 +56,10 @@ trait StudyAnnotationTypeValidationHelper extends StudyValidationHelper {
     *  Validates each item in the map and returns all failures.
     */
   def validateOptions(
-    options: Option[Map[String, String]]): DomainValidation[Option[Map[String, String]]] = {
+    options: Option[Map[String, String]]): ValidationNel[String, Option[Map[String, String]]] = {
 
     def validateOtionItem(
-      item: (String, String)): DomainValidation[(String, String)] = {
+      item: (String, String)): ValidationNel[String, (String, String)] = {
       (validateNonEmpty(item._1, "option key is null or empty").toValidationNel |@|
 	validateNonEmpty(item._2, "option value is null or empty").toValidationNel) {
         (_, _)
@@ -80,14 +80,14 @@ trait StudyAnnotationTypeValidationHelper extends StudyValidationHelper {
     *  Validates each item in the list and returns all failures if they exist.
     */
   protected def validateAnnotationTypeData[T <: AnnotationTypeData](
-    annotationTypeData: List[T]): DomainValidation[List[T]] = {
+    annotationTypeData: List[T]): Validation[String, List[T]] = {
 
-    def validateAnnotationTypeItem(annotationTypeItem: T): DomainValidation[T] = {
+    def validateAnnotationTypeItem(annotationTypeItem: T): Validation[String, T] = {
       validateStringId(
 	annotationTypeItem.annotationTypeId,
 	"annotation type id is null or empty") match {
 	case Success(id) => annotationTypeItem.success
-	case Failure(err) => err.failNel
+	case Failure(err) => err.fail
       }
     }
 

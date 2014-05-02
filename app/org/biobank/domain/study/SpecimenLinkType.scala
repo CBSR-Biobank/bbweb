@@ -113,6 +113,9 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
     outputContainerTypeId: Option[ContainerTypeId] = None,
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData] = List.empty): DomainValidation[SpecimenLinkType] = {
 
+
+    validateSpecimenGroups(inputGroupId, outputGroupId)
+
     (validateId(processingTypeId).toValidationNel |@|
       validateId(id).toValidationNel |@|
       validateAndIncrementVersion(version).toValidationNel |@|
@@ -132,13 +135,23 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
       validateId(outputGroupId).toValidationNel |@|
       validateId(inputContainerTypeId).toValidationNel |@|
       validateId(outputContainerTypeId).toValidationNel |@|
-      validateAnnotationTypeData(annotationTypeData)) {
+      validateAnnotationTypeData(annotationTypeData).toValidationNel) {
       SpecimenLinkType(_, _, _, _, _, _, _, _, _, _, _, _)
     }
 
   }
 
-  protected def validateId(id: SpecimenLinkTypeId): Validation[String, SpecimenLinkTypeId] = {
+  private def validateSpecimenGroups(
+    inputGroupId: SpecimenGroupId,
+    outputGroupId: SpecimenGroupId): Validation[String, Boolean] = {
+    if (inputGroupId.equals(outputGroupId)) {
+      DomainError("input and output specimen groups are the same").fail
+    } else {
+      true.success
+    }
+  }
+
+  private def validateId(id: SpecimenLinkTypeId): Validation[String, SpecimenLinkTypeId] = {
     validateStringId(id.toString, "specimen link type id is null or empty") match {
       case Success(idString) => id.success
       case Failure(err) => err.fail
