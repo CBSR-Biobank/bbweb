@@ -10,6 +10,7 @@ import org.biobank.domain.study.{
   SpecimenLinkTypeId,
   SpecimenLinkTypeRepositoryComponent,
   SpecimenLinkAnnotationTypeRepositoryComponent,
+  SpecimenGroup,
   SpecimenGroupId,
   SpecimenGroupRepositoryComponent
 }
@@ -285,20 +286,19 @@ trait SpecimenLinkTypeProcessorComponent {
       processingTypeId: ProcessingTypeId,
       annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData]): DomainValidation[Boolean] = {
 
-      val validation = processingTypeRepository.getByKey(processingTypeId)
+      def annotTypesValid(processingType: ProcessingType): DomainValidation[Boolean] = {
+        annotationTypeData.map(v => AnnotationTypeId(v.annotationTypeId)).map { id =>
+          (id -> specimenLinkAnnotationTypeRepository.withId(processingType.studyId, id).isSuccess)
+        }.filter(x => !x._2).map(_._1)
 
-      if (validation.isFailure) {
-        throw new IllegalStateException(s"processing type does not exist: $processingTypeId")
+        if (invalidSet.isEmpty) true.success
+        else DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).failNel
       }
 
-      val processingType = validation | null
-
-      val invalidSet = annotationTypeData.map(v => AnnotationTypeId(v.annotationTypeId)).map { id =>
-        (id -> specimenLinkAnnotationTypeRepository.withId(processingType.studyId, id).isSuccess)
-      }.filter(x => !x._2).map(_._1)
-
-      if (invalidSet.isEmpty) true.success
-      else DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).failNel
+      for {
+       processingType <- processingTypeRepository.getByKey(processingTypeId)
+        valid <- annotTypesValid
+      } yield valid
     }
 
   }

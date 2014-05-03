@@ -76,7 +76,7 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
 
   "A study processor" can {
 
-    "add a specimen link type" taggedAs(Tag("single")) in {
+    "add a specimen link type" in {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
 
@@ -121,7 +121,7 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "not add a specimen link type with an invalid processing type" in {
-      ???
+      fail
     }
 
     "not add a specimen link type with the same specimen group as input and output" in {
