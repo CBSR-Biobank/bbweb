@@ -3,6 +3,7 @@ package org.biobank.service.study
 import org.biobank.service.Messages._
 import org.biobank.domain._
 import org.biobank.domain.study.{
+  ProcessingType,
   ProcessingTypeId,
   ProcessingTypeRepositoryComponent,
   SpecimenLinkType,
@@ -70,6 +71,7 @@ trait SpecimenLinkTypeProcessorComponent {
       val id = specimenLinkTypeRepository.nextIdentity
 
       for {
+        processingType <- processingTypeRepository.getByKey(processingTypeId)
         newItem <- SpecimenLinkType.create(
           processingTypeId,
           id,
@@ -83,8 +85,8 @@ trait SpecimenLinkTypeProcessorComponent {
           cmd.inputContainerTypeId,
           cmd.outputContainerTypeId,
           cmd.annotationTypeData)
-        inputSgExists <- specimenGroupRepository.getByKey(newItem.inputGroupId)
-        outputSgExists <- specimenGroupRepository.getByKey(newItem.outputGroupId)
+        inputSpecimenGroup <- validSpecimenGroup(processingType, newItem.inputGroupId)
+        outputSpecimenGroup <- validSpecimenGroup(processingType, newItem.outputGroupId)
         // FIXME: check that container types are valid
         validSpecimenGroups <- validateSpecimenGroups(newItem.inputGroupId, newItem.outputGroupId)
         validAnnotData <- validateAnnotationTypeData(processingTypeId, cmd.annotationTypeData)
@@ -111,6 +113,7 @@ trait SpecimenLinkTypeProcessorComponent {
 
       for {
         oldItem <- specimenLinkTypeRepository.withId(processingTypeId,id)
+        processingType <- processingTypeRepository.getByKey(processingTypeId)
         newItem <- oldItem.update(
           cmd.expectedVersion,
           cmd.expectedInputChange,
@@ -122,8 +125,8 @@ trait SpecimenLinkTypeProcessorComponent {
           cmd.inputContainerTypeId,
           cmd.outputContainerTypeId,
           cmd.annotationTypeData)
-        inputSgExists <- specimenGroupRepository.getByKey(newItem.inputGroupId)
-        outputSgExists <- specimenGroupRepository.getByKey(newItem.outputGroupId)
+        inputSpecimenGroup <- validSpecimenGroup(processingType, newItem.inputGroupId)
+        outputSpecimenGroup <- validSpecimenGroup(processingType, newItem.outputGroupId)
         // FIXME: check that container types are valid
         validSpecimenGroups <- validateSpecimenGroups(newItem.inputGroupId, newItem.outputGroupId, newItem.id)
         validAtData <- validateAnnotationTypeData(processingTypeId, cmd.annotationTypeData)
@@ -220,6 +223,24 @@ trait SpecimenLinkTypeProcessorComponent {
         throw new IllegalStateException(
           s"recovering collection event type remove from event failed: $err")
       }
+    }
+
+    private def validSpecimenGroup(
+      processingType: ProcessingType,
+      specimenGroupId : SpecimenGroupId): DomainValidation[Boolean] = {
+
+      def studyIdMatches(specimenGroup: SpecimenGroup): DomainValidation[Boolean] = {
+        if (specimenGroup.studyId == processingType.studyId) {
+          true.success
+        } else {
+          DomainError("specimen group in wrong study").failNel
+          }
+      }
+
+      for {
+        specimenGroup <- specimenGroupRepository.getByKey(specimenGroupId)
+        studyMatch <- studyIdMatches(specimenGroup)
+      } yield studyMatch
     }
 
     // should only have one specimen link type with these two specimen groups

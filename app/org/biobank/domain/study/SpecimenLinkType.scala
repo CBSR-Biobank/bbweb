@@ -82,7 +82,7 @@ case class SpecimenLinkType private (
   }
 
   override def toString: String =
-    s"""|CollectionEventType:{
+    s"""|SpecimenLinkType:{
         |  processingTypeId: $processingTypeId,
         |  id: $id,
         |  version: $version,

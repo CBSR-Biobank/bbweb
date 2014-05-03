@@ -16,6 +16,7 @@ import org.biobank.domain.study.{
   SpecimenGroup,
   SpecimenGroupId,
   SpecimenGroupRepositoryComponent,
+  SpecimenLinkTypeRepositoryComponent,
   Study,
   StudyId }
 
@@ -25,7 +26,8 @@ import scalaz.Scalaz._
 
 trait SpecimenGroupProcessorComponent {
   self: SpecimenGroupRepositoryComponent
-      with CollectionEventTypeRepositoryComponent =>
+      with CollectionEventTypeRepositoryComponent
+      with SpecimenLinkTypeRepositoryComponent =>
 
   /**
     * This is the Specimen Group processor. It is a child actor of
@@ -175,11 +177,24 @@ trait SpecimenGroupProcessorComponent {
     private def checkNotInUse(
       studyId: StudyId,
       specimenGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
-      if (collectionEventTypeRepository.specimenGroupInUse(studyId, specimenGroupId)) {
-        DomainError(s"specimen group is in use by collection event type: $specimenGroupId").failNel
-      } else {
-        true.success
+
+      def checkNotInUseByCollectionEventType: DomainValidation[Boolean] = {
+        if (collectionEventTypeRepository.specimenGroupInUse(studyId, specimenGroupId)) {
+          DomainError(s"specimen group is in use by collection event type: $specimenGroupId").failNel
+        } else {
+          true.success
+        }
       }
+
+      def checkNotInUseBySpecimenLinkType: DomainValidation[Boolean] = {
+        if (specimenLinkTypeRepository.specimenGroupInUse(specimenGroupId)) {
+          DomainError(s"specimen group is in use by specimen link type: $specimenGroupId").failNel
+        } else {
+          true.success
+        }
+      }
+
+      (checkNotInUseByCollectionEventType |@| checkNotInUseBySpecimenLinkType) { case (_, _) => true }
     }
 
   }

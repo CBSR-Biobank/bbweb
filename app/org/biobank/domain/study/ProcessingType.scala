@@ -49,7 +49,7 @@ case class ProcessingType private (
   }
 
   override def toString: String =
-    s"""|CollectionEventType:{
+    s"""|ProcessingType:{
         |  studyId: $studyId,
         |  id: $id,
         |  version: $version,

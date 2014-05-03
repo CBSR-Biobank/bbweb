@@ -76,11 +76,23 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
 
   "A study processor" can {
 
-    "add a specimen link type" in {
+    "add a specimen link type" taggedAs(Tag("single")) in {
+      val study = factory.createDisabledStudy
+      studyRepository.put(study)
+
       val pt = factory.createProcessingType
       processingTypeRepository.put(pt)
 
-      val slt = factory.createSpecimenLinkType
+      val inputSg = factory.createSpecimenGroup
+      specimenGroupRepository.put(inputSg)
+
+      val outputSg = factory.createSpecimenGroup
+      specimenGroupRepository.put(outputSg)
+
+      val slt = factory.createSpecimenLinkType.copy(
+        inputGroupId = inputSg.id,
+        outputGroupId = outputSg.id
+      )
 
       askAddCommand(slt){ validation =>
         validation should be('success)
@@ -106,6 +118,10 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
           specimenLinkTypeRepository.allForProcessingType(pt.id) should have size 1
         }
       }
+    }
+
+    "not add a specimen link type with an invalid processing type" in {
+      ???
     }
 
     "not add a specimen link type with the same specimen group as input and output" in {
@@ -580,7 +596,7 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
       }
     }
 
-    "not add an annotation type if it is in wrong study" taggedAs(Tag("single")) in {
+    "not add an annotation type if it is in wrong study" in {
       val pt = factory.createProcessingType
       processingTypeRepository.put(pt)
 

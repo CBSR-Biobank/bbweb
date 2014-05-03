@@ -71,10 +71,8 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
     }
 
     def annotationTypeInUse(annotationType: CollectionEventAnnotationType): Boolean = {
-      val studyCeventTypes = getValues.filter(cet => cet.studyId.equals(annotationType.studyId))
-      studyCeventTypes.exists(cet =>
-        cet.annotationTypeData.exists(atd =>
-          atd.annotationTypeId.equals(annotationType.id.id)))
+      getValues.exists(cet =>
+        cet.annotationTypeData.exists(atd => atd.annotationTypeId.equals(annotationType.id.id)))
     }
   }
 }

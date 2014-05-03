@@ -19,6 +19,8 @@ trait SpecimenLinkTypeRepositoryComponent {
 
     def allForProcessingType(processingTypeId: ProcessingTypeId): Set[SpecimenLinkType]
 
+    def specimenGroupInUse(specimenGroupId: SpecimenGroupId): Boolean
+
   }
 }
 
@@ -54,6 +56,11 @@ trait SpecimenLinkTypeRepositoryComponentImpl extends SpecimenLinkTypeRepository
 
     def allForProcessingType(processingTypeId: ProcessingTypeId): Set[SpecimenLinkType] = {
       getValues.filter(x => x.processingTypeId.equals(processingTypeId)).toSet
+    }
+
+    def specimenGroupInUse(specimenGroupId: SpecimenGroupId): Boolean = {
+      getValues.exists(slt =>
+        (slt.inputGroupId == specimenGroupId) || (slt.outputGroupId == specimenGroupId))
     }
   }
 }
