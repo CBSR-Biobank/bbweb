@@ -100,6 +100,10 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       }
     }
 
+    "not add a processing type to a study that does not exist" in {
+      ???
+    }
+
     "not add a processing type with a name that already exists" in {
       val procType = factory.createProcessingType
       processingTypeRepository.put(procType)

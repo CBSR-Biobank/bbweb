@@ -66,6 +66,10 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       }
     }
 
+    "not add a participant annotation type to a study that does not exist" in {
+      ???
+    }
+
     "not add a participant annotation type if the name already exists" in {
       val annotType = factory.createParticipantAnnotationType
       participantAnnotationTypeRepository.put(annotType)

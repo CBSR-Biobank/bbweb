@@ -106,6 +106,11 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       }
     }
 
+
+    "not add a collection event type to a study that does not exist" in {
+      ???
+    }
+
     "not add a collection event type with a name that already exists" in {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)

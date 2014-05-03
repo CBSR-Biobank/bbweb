@@ -100,6 +100,10 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       }
     }
 
+    "not add a specimen group to a study that does not exist" in {
+      ???
+    }
+
     "update a specimen group" in {
       val sg = factory.createSpecimenGroup
       specimenGroupRepository.put(sg)

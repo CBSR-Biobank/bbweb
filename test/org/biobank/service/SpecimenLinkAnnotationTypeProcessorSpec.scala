@@ -66,6 +66,10 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       }
     }
 
+    "not add a specimen link annotation type to a study that does not exist" in {
+      ???
+    }
+
     "not add a specimen link annotation type if the name already exists" in {
       val annotType = factory.createSpecimenLinkAnnotationType
       specimenLinkAnnotationTypeRepository.put(annotType)

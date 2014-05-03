@@ -65,6 +65,10 @@ class CeventAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       }
     }
 
+    "not add a cevent annotation type to a study that does not exist" in {
+      ???
+    }
+
     "not add a cevent annotation type if the name already exists" in {
       val annotType = factory.createCollectionEventAnnotationType
       collectionEventAnnotationTypeRepository.put(annotType)
