@@ -133,25 +133,25 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
       annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData],
       ignore: Boolean): SpecimenLinkType = {
       SpecimenLinkType(processingTypeId, id, version, expectedInputChange, expectedOutputChange,
-	inputCount, outputCount, inputGroupId, outputGroupId, inputContainerTypeId,
-	outputContainerTypeId, annotationTypeData)
+        inputCount, outputCount, inputGroupId, outputGroupId, inputContainerTypeId,
+        outputContainerTypeId, annotationTypeData)
     }
 
     (validateId(processingTypeId) :^:
       validateId(id) :^:
       validateAndIncrementVersion(version) :^:
       validatePositiveNumber(
-    	expectedInputChange,
-    	"expected input change is not a positive number") :^:
+        expectedInputChange,
+        "expected input change is not a positive number") :^:
       validatePositiveNumber(
-    	expectedOutputChange,
-    	"expected output change is not a positive number") :^:
+        expectedOutputChange,
+        "expected output change is not a positive number") :^:
       validatePositiveNumber(
-    	inputCount,
-    	"input count is not a positive number") :^:
+        inputCount,
+        "input count is not a positive number") :^:
       validatePositiveNumber(
-    	outputCount,
-    	"output count is not a positive number") :^:
+        outputCount,
+        "output count is not a positive number") :^:
       validateId(inputGroupId) :^:
       validateId(outputGroupId) :^:
       validateId(inputContainerTypeId) :^:
