@@ -389,8 +389,8 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
           event.annotationTypeData should have length (1)
 
           event.annotationTypeData(0) should have(
-            'annotationTypeId(annotTypeData(0).annotationTypeId),
-            'required(annotTypeData(0).required))
+            'annotationTypeId (annotTypeData(0).annotationTypeId),
+            'required (annotTypeData(0).required))
         }
       }
     }

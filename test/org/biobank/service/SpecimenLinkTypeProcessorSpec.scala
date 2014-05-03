@@ -61,6 +61,19 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
     resultFunc(validation)
   }
 
+  private def askRemoveCommand(
+    specimenLinkType: SpecimenLinkType)(
+    resultFunc: DomainValidation[SpecimenLinkTypeRemovedEvent] => Unit): Unit = {
+    val cmd = RemoveSpecimenLinkTypeCmd(
+      specimenLinkType.processingTypeId.id,
+      specimenLinkType.id.id,
+      specimenLinkType.versionOption)
+    val validation = ask(studyProcessor, cmd)
+      .mapTo[DomainValidation[SpecimenLinkTypeRemovedEvent]]
+      .futureValue
+    resultFunc(validation)
+  }
+
   "A study processor" can {
 
     "add a specimen link type" in {
@@ -188,11 +201,36 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
       }
     }
 
-    "not update a specimen link type to name that already exists" in {
-      ???
+
+    "not update a specimen link type with the same specimen group as input and output" in {
+      val pt = factory.createProcessingType
+      processingTypeRepository.put(pt)
+
+      val slt = factory.createSpecimenLinkType
+      specimenLinkTypeRepository.put(slt)
+
+      val slt2 = slt.copy(outputGroupId = slt.inputGroupId)
+
+      askUpdateCommand(slt2){ validation =>
+        validation should be('failure)
+        validation.swap map { err =>
+          err.list should have length 1
+          err.list.head should include("input and output specimen groups are the same")
+        }
+      }
+
+      val slt3 = slt.copy(inputGroupId = slt.outputGroupId)
+
+      askUpdateCommand(slt3){ validation =>
+        validation should be('failure)
+        validation.swap map { err =>
+          err.list should have length 1
+          err.list.head should include("input and output specimen groups are the same")
+        }
+      }
     }
 
-    "not update a specimen link type to wrong processing type" taggedAs(Tag("single")) in {
+    "not update a specimen link type to wrong processing type" in {
       val pt = factory.createProcessingType
       processingTypeRepository.put(pt)
 
@@ -214,64 +252,359 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "not update a specimen link type with an invalid version" in {
-      ???
+      val pt = factory.createProcessingType
+      processingTypeRepository.put(pt)
+
+      val slt = factory.createSpecimenLinkType
+      specimenLinkTypeRepository.put(slt)
+
+      val slt2 = slt.copy(version = slt.version - 1)
+
+      askUpdateCommand(slt2){ validation =>
+        validation should be('failure)
+        validation.swap map { err =>
+          err.list should have length 1
+          err.list.head should include("expected version doesn't match current version")
+        }
+      }
     }
 
     "remove a specimen link type" in {
-      ???
+      val pt = factory.createProcessingType
+      processingTypeRepository.put(pt)
+
+      val slt = factory.createSpecimenLinkType
+      specimenLinkTypeRepository.put(slt)
+
+      askRemoveCommand(slt){ validation =>
+        validation should be('success)
+        validation map { event =>
+          event shouldBe a[SpecimenLinkTypeRemovedEvent]
+
+          val v = specimenLinkTypeRepository.withId(
+            pt.id, SpecimenLinkTypeId(event.specimenLinkTypeId))
+          v should be ('failure)
+          v.swap map { err =>
+            err.list should have length 1
+            err.list.head should include("specimen link type does not exist")
+          }
+        }
+      }
     }
 
-    "not remove a specimen link type  with an invalid version" in {
-      ???
-    }
+    "not remove a specimen link type with an invalid version" in {
+      val pt = factory.createProcessingType
+      processingTypeRepository.put(pt)
 
-    "add a specimen group to a specimen link type" in {
-      ???
-    }
+      val slt = factory.createSpecimenLinkType
+      specimenLinkTypeRepository.put(slt)
 
-    "update a specimen link type and add specimen groups" in {
-      ???
+      val slt2 = slt.copy(version = slt.version -1)
+
+      askRemoveCommand(slt2){ validation =>
+        validation should be('failure)
+        validation.swap map { err =>
+          err.list should have length 1
+          err.list.head should include("version mismatch")
+        }
+      }
     }
 
     "not update a specimen group if it used by specimen link type" in {
-      ???
-    }
+      val inputSg = factory.createSpecimenGroup
+      specimenGroupRepository.put(inputSg)
 
-    "remove a specimen group from specimen link type" in {
-      ???
+      val outputSg = factory.createSpecimenGroup
+      specimenGroupRepository.put(outputSg)
+
+      val slt = factory.createSpecimenLinkType.copy(
+        inputGroupId = inputSg.id,
+        outputGroupId = outputSg.id
+      )
+      specimenLinkTypeRepository.put(slt)
+
+      val cmd = new UpdateSpecimenGroupCmd(inputSg.studyId.id, inputSg.id.id,
+        inputSg.versionOption, inputSg.name, inputSg.description, inputSg.units,
+        inputSg.anatomicalSourceType, inputSg.preservationType, inputSg.preservationTemperatureType,
+        inputSg.specimenType)
+      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+        .futureValue
+      validation should be('failure)
+
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include("specimen group is in use by specimen link type")
+      }
+
+      val cmd2 = new UpdateSpecimenGroupCmd(outputSg.studyId.id, outputSg.id.id,
+        outputSg.versionOption, outputSg.name, outputSg.description, outputSg.units,
+        outputSg.anatomicalSourceType, outputSg.preservationType, outputSg.preservationTemperatureType,
+        outputSg.specimenType)
+      val validation2 = ask(studyProcessor, cmd2).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+        .futureValue
+      validation2 should be('failure)
+
+      validation2.swap map { err =>
+        err.list should have length 1
+        err.list.head should include("specimen group is in use by specimen link type")
+      }
     }
 
     "not remove a specimen group if used by specimen link type" in {
-      ???
+      val inputSg = factory.createSpecimenGroup
+      specimenGroupRepository.put(inputSg)
+
+      val outputSg = factory.createSpecimenGroup
+      specimenGroupRepository.put(outputSg)
+
+      val slt = factory.createSpecimenLinkType.copy(
+        inputGroupId = inputSg.id,
+        outputGroupId = outputSg.id
+      )
+      specimenLinkTypeRepository.put(slt)
+
+      val cmd = new RemoveSpecimenGroupCmd(inputSg.studyId.id, inputSg.id.id, inputSg.versionOption)
+      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
+        .futureValue
+      validation should be('failure)
+
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include("specimen group is in use by specimen link type")
+      }
+
+      val cmd2 = new RemoveSpecimenGroupCmd(outputSg.studyId.id, outputSg.id.id, outputSg.versionOption)
+      val validation2 = ask(studyProcessor, cmd2).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
+        .futureValue
+      validation2 should be('failure)
+
+      validation2.swap map { err =>
+        err.list should have length 1
+        err.list.head should include("specimen group is in use by specimen link type")
+      }
     }
 
     "not add a specimen group from a different study" in {
-      ???
+      // test both input and output
+      val pt = factory.createProcessingType
+      processingTypeRepository.put(pt)
+
+      val sg1 = factory.createSpecimenGroup
+      specimenGroupRepository.put(sg1)
+      val sg2 = factory.createSpecimenGroup
+      specimenGroupRepository.put(sg2)
+
+      factory.createDisabledStudy
+
+      val sg1WrongStudy = factory.createSpecimenGroup
+      specimenGroupRepository.put(sg1WrongStudy)
+      val sg2WrongStudy = factory.createSpecimenGroup
+      specimenGroupRepository.put(sg2WrongStudy)
+
+      val slt = factory.createSpecimenLinkType.copy(
+        inputGroupId = sg1.id,
+        outputGroupId = sg2WrongStudy.id)
+
+      askAddCommand(slt){ validation =>
+        validation should be('failure)
+        validation.swap map { err =>
+          err.list should have length 1
+          err.list.head should include("wrong study")
+        }
+      }
+
+      val slt2 = slt.copy(
+        inputGroupId = sg1WrongStudy.id,
+        outputGroupId = sg2.id)
+
+      askAddCommand(slt2){ validation =>
+        validation should be('failure)
+        validation.swap map { err =>
+          err.list should have length 1
+          err.list.head should include("wrong study")
+        }
+      }
     }
 
     "not update a specimen link type with a specimen group from a different study" in {
-      ???
+      // test both input and output
+      val pt = factory.createProcessingType
+      processingTypeRepository.put(pt)
+
+      val sg1 = factory.createSpecimenGroup
+      specimenGroupRepository.put(sg1)
+      val sg2 = factory.createSpecimenGroup
+      specimenGroupRepository.put(sg2)
+
+      factory.createDisabledStudy
+
+      val sg1WrongStudy = factory.createSpecimenGroup
+      specimenGroupRepository.put(sg1WrongStudy)
+      val sg2WrongStudy = factory.createSpecimenGroup
+      specimenGroupRepository.put(sg2WrongStudy)
+
+      val slt = factory.createSpecimenLinkType
+      specimenLinkTypeRepository.put(slt)
+
+      val slt2 = slt.copy(
+        inputGroupId = sg1.id,
+        outputGroupId = sg2WrongStudy.id)
+
+      askUpdateCommand(slt){ validation =>
+        validation should be('failure)
+        validation.swap map { err =>
+          err.list should have length 1
+          err.list.head should include("wrong study")
+        }
+      }
+
+      val slt3 = slt.copy(
+        inputGroupId = sg1WrongStudy.id,
+        outputGroupId = sg2.id)
+
+      askUpdateCommand(slt3){ validation =>
+        validation should be('failure)
+        validation.swap map { err =>
+          err.list should have length 1
+          err.list.head should include("wrong study")
+        }
+      }
     }
 
-    "add an annotation type to a specimen link" in {
-      ???
+    "add an annotation type to a specimen link type" in {
+      val pt = factory.createProcessingType
+      processingTypeRepository.put(pt)
+
+      val annotationType = factory.createSpecimenLinkAnnotationType
+      specimenLinkAnnotationTypeRepository.put(annotationType)
+
+      val sltAnnotationTypeData = List(
+        factory.createSpecimenLinkTypeAnnotationTypeData,
+        factory.createSpecimenLinkTypeAnnotationTypeData)
+
+      val slt = factory.createSpecimenLinkType.copy(
+        annotationTypeData = sltAnnotationTypeData)
+
+      askAddCommand(slt){ validation =>
+        validation should be('success)
+        validation map { event =>
+          event shouldBe a[SpecimenLinkTypeAddedEvent]
+          event.annotationTypeData should have length (2)
+
+          event.annotationTypeData(0) should have(
+            'annotationTypeId (sltAnnotationTypeData(0).annotationTypeId),
+            'required (sltAnnotationTypeData(0).required))
+
+          event.annotationTypeData(1) should have(
+            'annotationTypeId (sltAnnotationTypeData(1).annotationTypeId),
+            'required (sltAnnotationTypeData(1).required))
+        }
+      }
     }
 
     "not update an annotation type if used by specimen link type" in {
-      ???
+      val pt = factory.createProcessingType
+      processingTypeRepository.put(pt)
+
+      val annotationType = factory.createSpecimenLinkAnnotationType
+      specimenLinkAnnotationTypeRepository.put(annotationType)
+
+      val sltAnnotationTypeData = List(factory.createSpecimenLinkTypeAnnotationTypeData)
+
+      val slt = factory.createSpecimenLinkType.copy(
+        annotationTypeData = sltAnnotationTypeData)
+      specimenLinkTypeRepository.put(slt)
+
+      val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
+        annotationType.studyId.id, annotationType.id.id, annotationType.versionOption,
+        annotationType.name, annotationType.description, annotationType.valueType)
+      val validation = ask(studyProcessor, cmd)
+        .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
+        .futureValue
+
+      validation should be('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include("annotation type is in use by specimen link type")
+      }
     }
 
     "remove an annotation type from specimen link type" in {
-      ???
+      val pt = factory.createProcessingType
+      processingTypeRepository.put(pt)
+
+      val annotationType = factory.createSpecimenLinkAnnotationType
+      specimenLinkAnnotationTypeRepository.put(annotationType)
+
+      val sltAnnotationTypeData = List(factory.createSpecimenLinkTypeAnnotationTypeData)
+
+      val slt = factory.createSpecimenLinkType.copy(
+        annotationTypeData = sltAnnotationTypeData)
+      specimenLinkTypeRepository.put(slt)
+      specimenLinkTypeRepository.put(slt)
+
+      val slt2 = slt.copy(annotationTypeData = List.empty)
+
+      askUpdateCommand(slt2){ validation =>
+        validation should be('success)
+        validation map { event =>
+          event shouldBe a[SpecimenLinkTypeUpdatedEvent]
+          event.annotationTypeData should have length (0)
+        }
+      }
     }
 
     "not remove an annotation type if it is used by specimen link type" in {
-      ???
+      val pt = factory.createProcessingType
+      processingTypeRepository.put(pt)
+
+      val annotationType = factory.createSpecimenLinkAnnotationType
+      specimenLinkAnnotationTypeRepository.put(annotationType)
+
+      val sltAnnotationTypeData = List(factory.createSpecimenLinkTypeAnnotationTypeData)
+
+      val slt = factory.createSpecimenLinkType.copy(
+        annotationTypeData = sltAnnotationTypeData)
+      specimenLinkTypeRepository.put(slt)
+
+      val cmd = RemoveSpecimenLinkAnnotationTypeCmd(
+        annotationType.studyId.id, annotationType.id.id, annotationType.versionOption)
+      val validation = ask(studyProcessor, cmd)
+        .mapTo[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
+        .futureValue
+
+      validation should be('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include("annotation type is in use by specimen link type")
+      }
     }
 
-    "not add an annotation type if it is in wrong study" in {
-      ???
+    "not add an annotation type if it is in wrong study" taggedAs(Tag("single")) in {
+      val pt = factory.createProcessingType
+      processingTypeRepository.put(pt)
+
+      val slt = factory.createSpecimenLinkType
+      specimenLinkTypeRepository.put(slt)
+
+      factory.createDisabledStudy
+
+      val annotationType = factory.createSpecimenLinkAnnotationType
+      specimenLinkAnnotationTypeRepository.put(annotationType)
+
+      val sltAnnotationTypeData = List(
+        factory.createSpecimenLinkTypeAnnotationTypeData,
+        factory.createSpecimenLinkTypeAnnotationTypeData)
+
+      val slt2 = slt.copy(annotationTypeData = sltAnnotationTypeData)
+
+      askUpdateCommand(slt2){ validation =>
+        validation should be('failure)
+        validation.swap map { err =>
+          err.list should have length 1
+          err.list.head should include("annotation type(s) do not belong to study")
+        }
+      }
     }
   }
 }
-
