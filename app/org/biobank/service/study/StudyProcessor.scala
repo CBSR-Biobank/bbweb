@@ -100,7 +100,7 @@ trait StudyProcessorComponent
       val studyId = studyRepository.nextIdentity
 
       if (studyRepository.getByKey(studyId).isSuccess) {
-	throw new IllegalStateException(s"study with id already exsits: $id")
+        throw new IllegalStateException(s"study with id already exsits: $id")
       }
 
       for {
@@ -115,7 +115,7 @@ trait StudyProcessorComponent
       val studyId = StudyId(cmd.id)
       for {
         nameAvailable <- nameAvailable(cmd.name, studyId)
-	prevStudy <- isStudyDisabled(studyId)
+        prevStudy <- isStudyDisabled(studyId)
         updatedStudy <- prevStudy.update(cmd.expectedVersion, cmd.name, cmd.description)
         event <- StudyUpdatedEvent(cmd.id, updatedStudy.version, updatedStudy.name,
           updatedStudy.description).success
@@ -128,9 +128,9 @@ trait StudyProcessorComponent
       val collectionEventtypeCount = collectionEventTypeRepository.allForStudy(studyId).size
 
       for {
-	disabledStudy <- isStudyDisabled(studyId)
+        disabledStudy <- isStudyDisabled(studyId)
         enabledStudy <- disabledStudy.enable(cmd.expectedVersion, specimenGroupCount,
-	  collectionEventtypeCount)
+          collectionEventtypeCount)
         event <- StudyEnabledEvent(studyId.id, enabledStudy.version).success
       } yield event
     }
@@ -138,7 +138,7 @@ trait StudyProcessorComponent
     private def validateCmd(cmd: DisableStudyCmd): DomainValidation[StudyDisabledEvent] = {
       val studyId = StudyId(cmd.id)
       for {
-	enabledStudy <- isStudyEnabled(studyId)
+        enabledStudy <- isStudyEnabled(studyId)
         disabledStudy <- enabledStudy.disable(cmd.expectedVersion)
         event <- StudyDisabledEvent(cmd.id, disabledStudy.version).success
       } yield event
@@ -147,7 +147,7 @@ trait StudyProcessorComponent
     private def validateCmd(cmd: RetireStudyCmd): DomainValidation[StudyRetiredEvent] = {
       val studyId = StudyId(cmd.id)
       for {
-	disabledStudy <- isStudyDisabled(studyId)
+        disabledStudy <- isStudyDisabled(studyId)
         retiredStudy <- disabledStudy.retire(cmd.expectedVersion)
         event <- StudyRetiredEvent(cmd.id, retiredStudy.version).success
       } yield event
@@ -156,7 +156,7 @@ trait StudyProcessorComponent
     private def validateCmd(cmd: UnetireStudyCmd): DomainValidation[StudyUnretiredEvent] = {
       val studyId = StudyId(cmd.id)
       for {
-	retiredStudy <- isStudyRetired(studyId)
+        retiredStudy <- isStudyRetired(studyId)
         disabledStudy <- retiredStudy.unretire(cmd.expectedVersion)
         event <- StudyUnretiredEvent(studyId.id, disabledStudy.version).success
       } yield event
@@ -165,8 +165,8 @@ trait StudyProcessorComponent
     private def recoverEvent(event: StudyAddedEvent) {
       val studyId = StudyId(event.id)
       val validation = for {
-	study <- DisabledStudy.create(studyId, -1L, event.name, event.description)
-	savedStudy <- studyRepository.put(study).success
+        study <- DisabledStudy.create(studyId, -1L, event.name, event.description)
+        savedStudy <- studyRepository.put(study).success
       } yield study
 
       if (validation.isFailure) {
@@ -178,25 +178,25 @@ trait StudyProcessorComponent
 
     private def recoverEvent(event: StudyUpdatedEvent) {
       val validation = for {
-	disabledStudy <- isStudyDisabled(StudyId(event.id))
-	updatedStudy <- disabledStudy.update(disabledStudy.versionOption, event.name,
+        disabledStudy <- isStudyDisabled(StudyId(event.id))
+        updatedStudy <- disabledStudy.update(disabledStudy.versionOption, event.name,
           event.description)
-	savedStudy <- studyRepository.put(updatedStudy).success
+        savedStudy <- studyRepository.put(updatedStudy).success
       } yield savedStudy
 
       if (validation.isFailure) {
-	// this should never happen because the only way to get here is when the
-	// command passed validation
-	throw new IllegalStateException("recovering study from event failed")
+        // this should never happen because the only way to get here is when the
+        // command passed validation
+        throw new IllegalStateException("recovering study from event failed")
       }
     }
 
     private def recoverEvent(event: StudyEnabledEvent) {
       val studyId = StudyId(event.id)
       val validation = for {
-	disabledStudy <- isStudyDisabled(studyId)
-	enabledStudy <- disabledStudy.enable(disabledStudy.versionOption, 1, 1)
-	savedStudy <- studyRepository.put(enabledStudy).success
+        disabledStudy <- isStudyDisabled(studyId)
+        enabledStudy <- disabledStudy.enable(disabledStudy.versionOption, 1, 1)
+        savedStudy <- studyRepository.put(enabledStudy).success
       } yield  enabledStudy
 
       if (validation.isFailure) {
@@ -209,9 +209,9 @@ trait StudyProcessorComponent
     private def recoverEvent(event: StudyDisabledEvent) {
       val studyId = StudyId(event.id)
       val validation = for {
-	enabledStudy <- isStudyEnabled(studyId)
-	disabledStudy <- enabledStudy.disable(enabledStudy.versionOption)
-	savedStudy <- studyRepository.put(disabledStudy).success
+        enabledStudy <- isStudyEnabled(studyId)
+        disabledStudy <- enabledStudy.disable(enabledStudy.versionOption)
+        savedStudy <- studyRepository.put(disabledStudy).success
       } yield disabledStudy
 
       if (validation.isFailure) {
@@ -224,9 +224,9 @@ trait StudyProcessorComponent
     private def recoverEvent(event: StudyRetiredEvent) {
       val studyId = StudyId(event.id)
       val validation = for {
-	disabledStudy <- isStudyDisabled(studyId)
-	retiredStudy <- disabledStudy.retire(disabledStudy.versionOption)
-	savedStudy <- studyRepository.put(retiredStudy).success
+        disabledStudy <- isStudyDisabled(studyId)
+        retiredStudy <- disabledStudy.retire(disabledStudy.versionOption)
+        savedStudy <- studyRepository.put(retiredStudy).success
       } yield retiredStudy
 
       if (validation.isFailure) {
@@ -239,9 +239,9 @@ trait StudyProcessorComponent
     private def recoverEvent(event: StudyUnretiredEvent) {
       val studyId = StudyId(event.id)
       val validation = for {
-	retiredStudy <- isStudyRetired(studyId)
-	disabledStudy <- retiredStudy.unretire(retiredStudy.versionOption)
-	savedstudy <- studyRepository.put(disabledStudy).success
+        retiredStudy <- isStudyRetired(studyId)
+        disabledStudy <- retiredStudy.unretire(retiredStudy.versionOption)
+        savedstudy <- studyRepository.put(disabledStudy).success
       } yield disabledStudy
 
       if (validation.isFailure) {

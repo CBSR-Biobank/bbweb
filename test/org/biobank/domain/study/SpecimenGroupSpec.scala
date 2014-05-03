@@ -31,7 +31,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       val specimenGroup = SpecimenGroup.create(studyId, id, version, name, description, units,
-	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) | fail
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) | fail
       specimenGroup shouldBe a[SpecimenGroup]
 
       specimenGroup should have (
@@ -61,7 +61,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       val specimenGroup = SpecimenGroup.create(studyId, id, version, name, description, units,
-	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) | fail
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) | fail
 
       val name2 = nameGenerator.next[SpecimenGroup]
       val description2 = some(nameGenerator.next[SpecimenGroup])
@@ -72,7 +72,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType2 = SpecimenType.Plasma
 
       val updatedSg = specimenGroup.update(Some(0L), name2, description2, units2,
-	anatomicalSourceType2, preservationType2, preservationTemperatureType2, specimenType2) | fail
+        anatomicalSourceType2, preservationType2, preservationTemperatureType2, specimenType2) | fail
 
       updatedSg should have (
         'studyId                       (studyId),
@@ -105,10 +105,10 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       val v = SpecimenGroup.create(studyId, id, version, name, description, units,
-	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
         case Success(user) => fail
         case Failure(err) =>
-	  err.list should (have length 1 and contain("study id is null or empty"))
+          err.list should (have length 1 and contain("study id is null or empty"))
       }
     }
 
@@ -125,7 +125,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(studyId, id, version, name, description, units,
-	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("specimen group id is null or empty"))
@@ -145,7 +145,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
        val validation = SpecimenGroup.create(studyId, id, version, name, description, units,
-	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
       validation should be ('failure)
 
       validation.swap.map { err =>
@@ -166,15 +166,15 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       val sg = SpecimenGroup.create(studyId, id, version, name, description, units,
-	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) | fail
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) | fail
 
       val validation = sg.update(Some(10L), name, description, units,
-	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
       validation should be ('failure)
 
       validation.swap.map { err =>
         err.list should have length 1
-	err.list.head should include ("expected version doesn't match current version")
+        err.list.head should include ("expected version doesn't match current version")
       }
     }
 
@@ -191,7 +191,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(studyId, id, version, name, description, units,
-	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("name is null or empty"))
@@ -199,7 +199,7 @@ class SpecimenGroupSpec extends DomainSpec {
 
       name = ""
       SpecimenGroup.create(studyId, id, version, name, description, units,
-	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("name is null or empty"))
@@ -219,7 +219,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(studyId, id, version, name, description, units,
-	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("description is null or empty"))
@@ -227,7 +227,7 @@ class SpecimenGroupSpec extends DomainSpec {
 
       description = Some("")
       SpecimenGroup.create(studyId, id, version, name, description, units,
-	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("description is null or empty"))
@@ -247,7 +247,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(studyId, id, version, name, description, units,
-	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("units is null or empty"))
@@ -267,12 +267,12 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(studyId, id, version, name, description, units,
-	anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should have length 2
-	  err.list.head should be ("invalid version value: -2")
-	  err.list.tail.head should be ("units is null or empty")
+          err.list.head should be ("invalid version value: -2")
+          err.list.tail.head should be ("units is null or empty")
       }
     }
 

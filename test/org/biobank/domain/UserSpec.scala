@@ -39,17 +39,17 @@ class UserSpec extends WordSpecLike with Matchers {
 
       validation should be ('success)
       validation map { user =>
-	user shouldBe a[RegisteredUser]
+        user shouldBe a[RegisteredUser]
         user should have (
-	  'id (id),
-	  'version (0L),
-	  'name (name),
-	  'email (email),
-	  'password (password),
-	  'hasher (hasher),
-	  'salt (salt),
-	  'avatarUrl (avatarUrl)
-	)
+          'id (id),
+          'version (0L),
+          'name (name),
+          'email (email),
+          'password (password),
+          'hasher (hasher),
+          'salt (salt),
+          'avatarUrl (avatarUrl)
+        )
       }
     }
 
@@ -64,7 +64,7 @@ class UserSpec extends WordSpecLike with Matchers {
       val avatarUrl = Some("http://test.com/")
 
       val user = RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
-	.getOrElse(fail("could not create user"))
+        .getOrElse(fail("could not create user"))
       user shouldBe a[RegisteredUser]
 
       val activeUser = user.activate(Some(0L)).getOrElse(fail("could not activate user"))
@@ -128,15 +128,15 @@ class UserSpec extends WordSpecLike with Matchers {
       val avatarUrl = Some("http://test.com/")
 
       val user = RegisteredUser.create(id, version, name, email, password, hasher, salt,
-	avatarUrl) | fail
+        avatarUrl) | fail
 
       // val validation = user.update(id, Some(-1L), name, email, password, hasher, salt,
-      // 	avatarUrl)
+      //         avatarUrl)
       // validation should be Failure
 
       // validation.swap.map { err =>
       //   err.list should have length 1
-      // 	err.list.head should include ("expected version doesn't match current version")
+      //         err.list.head should include ("expected version doesn't match current version")
       // }
     }
 
@@ -222,7 +222,7 @@ class UserSpec extends WordSpecLike with Matchers {
         case Success(user) => fail("user avaltar url validation failed")
         case Failure(err) =>
           err.list should have length 1
-	  err.list.head should include("invalid avatar url")
+          err.list.head should include("invalid avatar url")
       }
     }
 
@@ -279,8 +279,8 @@ class UserSpec extends WordSpecLike with Matchers {
         case Success(user) => fail
         case Failure(err) =>
           err.list should have length 2
-	  err.list.head should be ("invalid version value: -2")
-	  err.list.tail.head should be ("name is null or empty")
+          err.list.head should be ("invalid version value: -2")
+          err.list.tail.head should be ("name is null or empty")
       }
     }
 

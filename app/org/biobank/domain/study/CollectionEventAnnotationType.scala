@@ -43,7 +43,7 @@ case class CollectionEventAnnotationType(
     for {
       validVersion <- requireVersion(expectedVersion)
       updatedAnnotationType <- CollectionEventAnnotationType.create(studyId, id, version,
-	name, description, valueType, maxValueCount, options)
+        name, description, valueType, maxValueCount, options)
     } yield updatedAnnotationType
   }
 }

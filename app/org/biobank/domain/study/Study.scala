@@ -85,8 +85,8 @@ case class DisabledStudy private (
       DomainError("no collection event types").failNel
     } else {
       for {
-	validVersion <- requireVersion(expectedVersion)
-	enabledStudy <- EnabledStudy.create(this)
+        validVersion <- requireVersion(expectedVersion)
+        enabledStudy <- EnabledStudy.create(this)
       } yield enabledStudy
     }
   }

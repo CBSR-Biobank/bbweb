@@ -58,7 +58,7 @@ case class CollectionEventType private (
     for {
       validVersion <- requireVersion(expectedVersion)
       newItem <- CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
     } yield newItem
   }
 
@@ -113,8 +113,8 @@ object CollectionEventType extends StudyAnnotationTypeValidationHelper {
     def validateSpecimenGroupItem(
       specimenGroupItem: CollectionEventTypeSpecimenGroupData): DomainValidation[CollectionEventTypeSpecimenGroupData] = {
       (validateStringId(specimenGroupItem.specimenGroupId, "specimen group id is null or empty") |@|
-	validatePositiveNumber(specimenGroupItem.maxCount, "max count is not a positive number") |@|
-	validatePositiveNumberOption(specimenGroupItem.amount, "amount not is a positive number")) {
+        validatePositiveNumber(specimenGroupItem.maxCount, "max count is not a positive number") |@|
+        validatePositiveNumberOption(specimenGroupItem.amount, "amount not is a positive number")) {
         CollectionEventTypeSpecimenGroupData(_, _, _)
       }
     }

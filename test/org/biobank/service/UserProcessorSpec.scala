@@ -24,14 +24,14 @@ class UserProcessorSpec extends UserProcessorFixture {
       val user = factory.createRegisteredUser
 
       val cmd = RegisterUserCommand(user.name, user.email, user.password, user.hasher,
-	user.salt, user.avatarUrl)
+        user.salt, user.avatarUrl)
       val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
-	.futureValue
+        .futureValue
 
       validation should be ('success)
       validation map { event =>
         event shouldBe a [UserRegisterdEvent]
-	event should have (
+        event should have (
           'id (user.email),
           'name (user.name),
           'email (user.email),
@@ -39,11 +39,11 @@ class UserProcessorSpec extends UserProcessorFixture {
           'hasher (user.hasher),
           'salt (user.salt),
           'avatarUrl (user.avatarUrl)
-	)
+        )
 
         userRepository.getByKey(UserId(event.id)) map { user =>
           user shouldBe a[RegisteredUser]
-	}
+        }
       }
     }
 
@@ -52,9 +52,9 @@ class UserProcessorSpec extends UserProcessorFixture {
       userRepository.put(user)
 
       val cmd = RegisterUserCommand(user.name, user.email, user.password, user.hasher,
-	user.salt, user.avatarUrl)
+        user.salt, user.avatarUrl)
       val validation2 = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
-	.futureValue
+        .futureValue
       validation2 should be ('failure)
 
       validation2.swap.map { err =>
@@ -69,12 +69,12 @@ class UserProcessorSpec extends UserProcessorFixture {
 
       val validation2 = ask(userProcessor, ActivateUserCommand(user.email, Some(0L)))
         .mapTo[DomainValidation[UserActivatedEvent]]
-	.futureValue
+        .futureValue
 
       validation2 should be ('success)
       validation2 map { event =>
-	event shouldBe a[UserActivatedEvent]
-	event.id should be(user.email)
+        event shouldBe a[UserActivatedEvent]
+        event.id should be(user.email)
       }
     }
 
@@ -84,12 +84,12 @@ class UserProcessorSpec extends UserProcessorFixture {
 
       val validation = ask(userProcessor, LockUserCommand(activeUser.email, Some(1L)))
         .mapTo[DomainValidation[UserLockedEvent]]
-	.futureValue
+        .futureValue
 
       validation should be ('success)
       validation map { event =>
-	event shouldBe a[UserLockedEvent]
-	event.id should be(activeUser.email)
+        event shouldBe a[UserLockedEvent]
+        event.id should be(activeUser.email)
       }
     }
 
@@ -99,7 +99,7 @@ class UserProcessorSpec extends UserProcessorFixture {
 
       val validation2 = ask(userProcessor, LockUserCommand(user.email, Some(0L)))
         .mapTo[DomainValidation[UserLockedEvent]]
-	.futureValue
+        .futureValue
       validation2 should be ('failure)
 
       validation2.swap map { err =>
@@ -114,7 +114,7 @@ class UserProcessorSpec extends UserProcessorFixture {
 
       val validation2 = ask(userProcessor, UnlockUserCommand(user.email, Some(0L)))
         .mapTo[DomainValidation[UserLockedEvent]]
-	.futureValue
+        .futureValue
       validation2 should be ('failure)
 
       validation2.swap map { err =>

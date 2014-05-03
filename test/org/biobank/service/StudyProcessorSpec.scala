@@ -39,7 +39,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
       val cmd = AddStudyCmd(study.name, study.description)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
-	.futureValue
+        .futureValue
 
       validation should be ('success)
       validation map { event =>
@@ -63,7 +63,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
       var cmd: StudyCommand = AddStudyCmd(study.name, study.description)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
-	.futureValue
+        .futureValue
 
       validation should be ('success)
       val event = validation.getOrElse(fail)
@@ -82,7 +82,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
       cmd = UpdateStudyCmd(event.id, Some(0), newName, newDescription)
       val validation2 = ask(newStudyProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]]
-	.futureValue
+        .futureValue
 
       validation2 should be ('success)
       validation2 map { event => event shouldBe a[StudyUpdatedEvent] }
@@ -93,12 +93,12 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       studyRepository.put(study)
 
       val validation = ask(studyProcessor, AddStudyCmd(study.name, study.description))
-	.mapTo[DomainValidation[StudyAddedEvent]].futureValue
+        .mapTo[DomainValidation[StudyAddedEvent]].futureValue
       validation should be ('failure)
 
       validation.swap.map { err =>
         err.list should have length 1
-	err.list.head should include ("study with name already exists")
+        err.list.head should include ("study with name already exists")
       }
     }
 
@@ -109,16 +109,16 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val description2 = Some(nameGenerator.next[Study])
 
       val validation2 = ask(
-	studyProcessor,
-	UpdateStudyCmd(disabledStudy.id.toString, Some(0), disabledStudy.name, description2))
-	.mapTo[DomainValidation[StudyUpdatedEvent]]
-	.futureValue
+        studyProcessor,
+        UpdateStudyCmd(disabledStudy.id.toString, Some(0), disabledStudy.name, description2))
+        .mapTo[DomainValidation[StudyUpdatedEvent]]
+        .futureValue
       validation2 should be ('success)
 
       validation2 map { event =>
-	event shouldBe a[StudyUpdatedEvent]
-	event.name should be (disabledStudy.name)
-	event.description should be (description2)
+        event shouldBe a[StudyUpdatedEvent]
+        event.name should be (disabledStudy.name)
+        event.description should be (description2)
       }
     }
 
@@ -130,15 +130,15 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val description2 = Some(nameGenerator.next[Study])
 
       val validation2 = ask(studyProcessor,
-	UpdateStudyCmd(disabledStudy.id.toString, Some(0), name2, description2))
-	.mapTo[DomainValidation[StudyUpdatedEvent]]
-	.futureValue
+        UpdateStudyCmd(disabledStudy.id.toString, Some(0), name2, description2))
+        .mapTo[DomainValidation[StudyUpdatedEvent]]
+        .futureValue
 
       validation2 should be ('success)
       validation2 map { event =>
-	event shouldBe a[StudyUpdatedEvent]
-	event.name should be (name2)
-	event.description should be (description2)
+        event shouldBe a[StudyUpdatedEvent]
+        event.name should be (name2)
+        event.description should be (description2)
       }
 
       val study = studyRepository.getByKey(disabledStudy.id) | fail
@@ -146,13 +146,13 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
       // update something other than the name
       val validation3 = ask(studyProcessor,
-	UpdateStudyCmd(disabledStudy.id.toString, Some(0), name2, None))
-	.mapTo[DomainValidation[StudyUpdatedEvent]]
-	.futureValue
+        UpdateStudyCmd(disabledStudy.id.toString, Some(0), name2, None))
+        .mapTo[DomainValidation[StudyUpdatedEvent]]
+        .futureValue
       validation3 should be ('failure)
 
       validation3 map { event =>
-	event.name should be (name2)
+        event.name should be (name2)
         event.description should be (None)
       }
     }
@@ -165,10 +165,10 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       studyRepository.put(study2)
 
       val validation = ask(
-	studyProcessor,
-	UpdateStudyCmd(study2.id.id, Some(0L), study1.name, None))
-	.mapTo[DomainValidation[StudyAddedEvent]]
-	.futureValue
+        studyProcessor,
+        UpdateStudyCmd(study2.id.id, Some(0L), study1.name, None))
+        .mapTo[DomainValidation[StudyAddedEvent]]
+        .futureValue
       validation should be ('failure)
 
       validation.swap.map { err =>
@@ -183,8 +183,8 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
       val cmd = UpdateStudyCmd(disabledStudy.id.toString, Some(10L), disabledStudy.name, None)
       val validation2 = ask(studyProcessor, cmd)
-	.mapTo[DomainValidation[StudyUpdatedEvent]]
-	.futureValue
+        .mapTo[DomainValidation[StudyUpdatedEvent]]
+        .futureValue
 
       validation2 should be ('failure)
 
@@ -205,13 +205,13 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       collectionEventTypeRepository.put(cet)
 
       val validation = ask(studyProcessor,
-      	EnableStudyCmd(disabledStudy.id.toString, Some(0L)))
-      	.mapTo[DomainValidation[StudyEnabledEvent]]
-      	.futureValue
+              EnableStudyCmd(disabledStudy.id.toString, Some(0L)))
+              .mapTo[DomainValidation[StudyEnabledEvent]]
+              .futureValue
       validation should be ('success)
 
       validation map { event =>
-      	event shouldBe a[StudyEnabledEvent]
+              event shouldBe a[StudyEnabledEvent]
         val study = studyRepository.getByKey(StudyId(event.id)) | fail
         study shouldBe a[EnabledStudy]
       }
@@ -222,13 +222,13 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       studyRepository.put(enabledStudy)
 
       val validation = ask(studyProcessor,
-	DisableStudyCmd(enabledStudy.id.toString, Some(1L)))
-	.mapTo[DomainValidation[StudyDisabledEvent]]
-	.futureValue
+        DisableStudyCmd(enabledStudy.id.toString, Some(1L)))
+        .mapTo[DomainValidation[StudyDisabledEvent]]
+        .futureValue
 
       validation should be ('success)
       validation map { event =>
-	event shouldBe a[StudyDisabledEvent]
+        event shouldBe a[StudyDisabledEvent]
         val study = studyRepository.getByKey(StudyId(event.id)) | fail
         study shouldBe a[DisabledStudy]
       }

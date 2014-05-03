@@ -69,10 +69,10 @@ private[domain] trait ValidationHelper {
     idOption: Option[ContainerTypeId]): DomainValidation[Option[ContainerTypeId]] = {
     idOption match {
       case Some(id) =>
-	validateId(id) match {
-	  case Success(id) => idOption.success
-	  case Failure(err) => err.fail
-	}
+        validateId(id) match {
+          case Success(id) => idOption.success
+          case Failure(err) => err.fail
+        }
       case _ => idOption.success
     }
   }

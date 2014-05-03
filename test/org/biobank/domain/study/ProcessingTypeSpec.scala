@@ -24,17 +24,17 @@ class ProcessingTypeSpec extends DomainSpec {
       val enabled = true
 
       val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-      	description, enabled)
+              description, enabled)
       validation should be ('success)
       validation map { processingType =>
-	processingType shouldBe a [ProcessingType]
-	processingType should have (
-	  'studyId (disabledStudy.id),
-	  'version (0L),
-	  'name (name),
-	  'description (description),
-	  'enabled (enabled)
-	)
+        processingType shouldBe a [ProcessingType]
+        processingType should have (
+          'studyId (disabledStudy.id),
+          'version (0L),
+          'name (name),
+          'description (description),
+          'enabled (enabled)
+        )
       }
     }
 
@@ -50,7 +50,7 @@ class ProcessingTypeSpec extends DomainSpec {
       val enabled = true
 
       val validation = ProcessingType.create(studyId, processingTypeId, -1L, name,
-      	description, enabled)
+              description, enabled)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("study id is null or empty"))
@@ -66,7 +66,7 @@ class ProcessingTypeSpec extends DomainSpec {
       val enabled = true
 
       val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-      	description, enabled)
+              description, enabled)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("processing type id is null or empty"))
@@ -81,7 +81,7 @@ class ProcessingTypeSpec extends DomainSpec {
       val enabled = true
 
       val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -2L, name,
-      	description, enabled)
+              description, enabled)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("invalid version value: -2"))
@@ -96,7 +96,7 @@ class ProcessingTypeSpec extends DomainSpec {
       val enabled = true
 
       val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-      	description, enabled)
+              description, enabled)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("name is null or empty"))
@@ -104,7 +104,7 @@ class ProcessingTypeSpec extends DomainSpec {
 
       name = ""
       val validation2 = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-      	description, enabled)
+              description, enabled)
       validation2 should be ('failure)
       validation2.swap.map { err =>
           err.list should (have length 1 and contain("name is null or empty"))
@@ -119,7 +119,7 @@ class ProcessingTypeSpec extends DomainSpec {
       val enabled = true
 
       val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-      	description, enabled)
+              description, enabled)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("description is null or empty"))
@@ -127,7 +127,7 @@ class ProcessingTypeSpec extends DomainSpec {
 
       description = Some("")
       val validation2 = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-      	description, enabled)
+              description, enabled)
       validation2 should be ('failure)
       validation2.swap.map { err =>
           err.list should (have length 1 and contain("description is null or empty"))
@@ -142,12 +142,12 @@ class ProcessingTypeSpec extends DomainSpec {
       val enabled = true
 
       val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -2L, name,
-      	description, enabled)
+              description, enabled)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should have length 2
-	  err.list(0) should be ("invalid version value: -2")
-	  err.list(1) should be ("description is null or empty")
+          err.list(0) should be ("invalid version value: -2")
+          err.list(1) should be ("description is null or empty")
       }
     }
   }

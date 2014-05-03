@@ -46,7 +46,7 @@ case class ParticipantAnnotationType private (
     for {
       validVersion <- requireVersion(expectedVersion)
       updatedAnnotationType <- ParticipantAnnotationType.create(studyId, id, version,
-	name, description, valueType, maxValueCount, options, required)
+        name, description, valueType, maxValueCount, options, required)
     } yield updatedAnnotationType
   }
 

@@ -44,7 +44,7 @@ trait ProcessingTypeRepositoryComponentImpl extends ProcessingTypeRepositoryComp
         case Failure(err) =>
           DomainError(
             s"processing type does not exist: { studyId: $studyId, processingTypeId: $processingTypeId }")
-	    .failNel
+            .failNel
         case Success(cet) =>
           if (cet.studyId.equals(studyId))
             cet.success

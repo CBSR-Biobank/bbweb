@@ -43,7 +43,7 @@ case class SpecimenLinkAnnotationType private (
     for {
       validVersion <- requireVersion(expectedVersion)
       updatedAnnotationType <- SpecimenLinkAnnotationType.create(studyId, id, version,
-	name, description, valueType, maxValueCount, options)
+        name, description, valueType, maxValueCount, options)
     } yield updatedAnnotationType
   }
 

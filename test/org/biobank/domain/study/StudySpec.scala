@@ -197,7 +197,7 @@ class StudySpec extends DomainSpec {
 
       validation.swap map { err =>
         err.list should have length 1
-	err.list.head should include ("expected version doesn't match current version")
+        err.list.head should include ("expected version doesn't match current version")
       }
     }
 
@@ -212,8 +212,8 @@ class StudySpec extends DomainSpec {
 
       validation.swap.map { err =>
         err.list should have length 2
-	err.list.head should be ("invalid version value: -2")
-	err.list.tail.head should be ("name is null or empty")
+        err.list.head should be ("invalid version value: -2")
+        err.list.tail.head should be ("name is null or empty")
       }
     }
 
@@ -229,7 +229,7 @@ class StudySpec extends DomainSpec {
 
       validation2.swap.map { err =>
         err.list should have length 1
-	err.list.head should include ("no specimen groups")
+        err.list.head should include ("no specimen groups")
       }
     }
   }

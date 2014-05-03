@@ -85,7 +85,7 @@ trait UserProcessorComponent {
         snapshot.users.foreach(i => userRepository.put(i))
 
       case _ =>
-	throw new IllegalStateException("message not handled")
+        throw new IllegalStateException("message not handled")
     }
 
     val receiveCommand: Receive = {
@@ -102,7 +102,7 @@ trait UserProcessorComponent {
         stash()
 
       case _ =>
-	throw new IllegalStateException("message not handled")
+        throw new IllegalStateException("message not handled")
     }
 
     def validateCmd(cmd: RegisterUserCommand): DomainValidation[UserRegisterdEvent] = {
@@ -153,9 +153,9 @@ trait UserProcessorComponent {
     def recoverEvent(event: UserRegisterdEvent) = {
       log.debug(s"recoverEvent: $event")
       val validation = for {
-	registeredUser <- RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
+        registeredUser <- RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
           event.password, event.hasher, event.salt, event.avatarUrl)
-	savedUser <- userRepository.put(registeredUser).success
+        savedUser <- userRepository.put(registeredUser).success
       } yield savedUser
 
       if (validation.isFailure) {
@@ -169,10 +169,10 @@ trait UserProcessorComponent {
       log.debug(s"recoverEvent: $event")
 
       val validation = for {
-	user <- userRepository.getByKey(UserId(event.id))
-	registeredUser <- isUserRegistered(user)
-	activatedUser <- registeredUser.activate(Some(registeredUser.version))
-	savedUser <- userRepository.put(activatedUser).success
+        user <- userRepository.getByKey(UserId(event.id))
+        registeredUser <- isUserRegistered(user)
+        activatedUser <- registeredUser.activate(Some(registeredUser.version))
+        savedUser <- userRepository.put(activatedUser).success
       } yield savedUser
 
       if (validation.isFailure) {
@@ -186,10 +186,10 @@ trait UserProcessorComponent {
       log.debug(s"recoverEvent: $event")
 
       val validation = for {
-	user <- userRepository.getByKey(UserId(event.id))
-	activeUser <- isUserActive(user)
-	lockedUser <- activeUser.lock(Some(activeUser.version))
-	savedUser <- userRepository.put(lockedUser).success
+        user <- userRepository.getByKey(UserId(event.id))
+        activeUser <- isUserActive(user)
+        lockedUser <- activeUser.lock(Some(activeUser.version))
+        savedUser <- userRepository.put(lockedUser).success
       } yield savedUser
 
       if (validation.isFailure) {
@@ -203,10 +203,10 @@ trait UserProcessorComponent {
       log.debug(s"recoverEvent: $event")
 
       val validation = for {
-	user <- userRepository.getByKey(UserId(event.id))
-	lockedUser <- isUserLocked(user)
-	unlockedUser <- lockedUser.unlock(Some(lockedUser.version))
-	savedUser <- userRepository.put(unlockedUser).success
+        user <- userRepository.getByKey(UserId(event.id))
+        lockedUser <- isUserLocked(user)
+        unlockedUser <- lockedUser.unlock(Some(lockedUser.version))
+        savedUser <- userRepository.put(unlockedUser).success
       } yield savedUser
 
       if (validation.isFailure) {

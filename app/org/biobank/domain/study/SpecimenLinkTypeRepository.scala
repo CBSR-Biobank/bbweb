@@ -42,7 +42,7 @@ trait SpecimenLinkTypeRepositoryComponentImpl extends SpecimenLinkTypeRepository
         case Failure(err) =>
           DomainError(
             s"specimen link type does not exist: { processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
-	    .failNel
+            .failNel
         case Success(slt) =>
           if (slt.processingTypeId.equals(processingTypeId))
             slt.success

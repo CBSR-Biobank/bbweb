@@ -75,8 +75,8 @@ case class SpecimenGroup private (
     for {
       validVersion <- requireVersion(expectedVersion)
       updatedSpecimenGroup <- SpecimenGroup.create(studyId, id, version, name, description,
-	units, anatomicalSourceType, preservationType, preservationTemperatureType,
-	specimenType)
+        units, anatomicalSourceType, preservationType, preservationTemperatureType,
+        specimenType)
     } yield updatedSpecimenGroup
   }
 }
@@ -113,7 +113,7 @@ object SpecimenGroup extends StudyValidationHelper {
       validateNonEmptyOption(description, "description is null or empty") |@|
       validateNonEmpty(units, "units is null or empty")) {
       SpecimenGroup(_, _, _, _, _, _, anatomicalSourceType, preservationType,
-	preservationTemperatureType, specimenType)
+        preservationTemperatureType, specimenType)
     }
   }
 }

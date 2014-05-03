@@ -42,8 +42,8 @@ trait ProcessingTypeProcessorComponent {
       case event: ProcessingTypeRemovedEvent => recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
-	snapshot.processingTypes.foreach{ ceType =>
-	  processingTypeRepository.put(ceType) }
+        snapshot.processingTypes.foreach{ ceType =>
+          processingTypeRepository.put(ceType) }
     }
 
 
@@ -56,7 +56,7 @@ trait ProcessingTypeProcessorComponent {
       case cmd: RemoveProcessingTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
       case _ =>
-	throw new Error("invalid message received")
+        throw new Error("invalid message received")
     }
 
     private def validateCmd(
@@ -66,9 +66,9 @@ trait ProcessingTypeProcessorComponent {
       val id = processingTypeRepository.nextIdentity
 
       for {
-	nameValid <- nameAvailable(cmd.name)
-	newItem <- ProcessingType.create(studyId, id, -1L, cmd.name, cmd.description, cmd.enabled)
-	event <- ProcessingTypeAddedEvent(
+        nameValid <- nameAvailable(cmd.name)
+        newItem <- ProcessingType.create(studyId, id, -1L, cmd.name, cmd.description, cmd.enabled)
+        event <- ProcessingTypeAddedEvent(
           cmd.studyId, id.id, newItem.version, newItem.name, newItem.description,
           newItem.enabled).success
       } yield event
@@ -80,11 +80,11 @@ trait ProcessingTypeProcessorComponent {
       val id = ProcessingTypeId(cmd.id)
 
       for {
-	oldItem <- processingTypeRepository.withId(studyId,id)
-	nameValid <- nameAvailable(cmd.name, id)
-	newItem <- oldItem.update(cmd.expectedVersion, cmd.name,
+        oldItem <- processingTypeRepository.withId(studyId,id)
+        nameValid <- nameAvailable(cmd.name, id)
+        newItem <- oldItem.update(cmd.expectedVersion, cmd.name,
           cmd.description, cmd.enabled)
-	event <- ProcessingTypeUpdatedEvent(
+        event <- ProcessingTypeUpdatedEvent(
           cmd.studyId, newItem.id.id, newItem.version, newItem.name, newItem.description,
           newItem.enabled).success
       } yield event
@@ -96,56 +96,56 @@ trait ProcessingTypeProcessorComponent {
       val id = ProcessingTypeId(cmd.id)
 
       for {
-	item <- processingTypeRepository.withId(studyId, id)
-	validVersion <- validateVersion(item, cmd.expectedVersion)
-	event <- ProcessingTypeRemovedEvent(cmd.studyId, cmd.id).success
+        item <- processingTypeRepository.withId(studyId, id)
+        validVersion <- validateVersion(item, cmd.expectedVersion)
+        event <- ProcessingTypeRemovedEvent(cmd.studyId, cmd.id).success
       } yield event
     }
 
     private def recoverEvent(event: ProcessingTypeAddedEvent): Unit = {
       val studyId = StudyId(event.studyId)
       val validation = for {
-	newItem <- ProcessingType.create(studyId, ProcessingTypeId(event.processingTypeId),
-	  -1L, event.name, event.description, event.enabled)
-	savedItem <- processingTypeRepository.put(newItem).success
+        newItem <- ProcessingType.create(studyId, ProcessingTypeId(event.processingTypeId),
+          -1L, event.name, event.description, event.enabled)
+        savedItem <- processingTypeRepository.put(newItem).success
       } yield newItem
 
       if (validation.isFailure) {
-	// this should never happen because the only way to get here is when the
-	// command passed validation
-	throw new IllegalStateException("recovering collection event type from event failed")
+        // this should never happen because the only way to get here is when the
+        // command passed validation
+        throw new IllegalStateException("recovering collection event type from event failed")
       }
     }
 
     private def recoverEvent(event: ProcessingTypeUpdatedEvent): Unit = {
       val validation = for {
-	item <- processingTypeRepository.getByKey(ProcessingTypeId(event.processingTypeId))
-	updatedItem <- item.update(item.versionOption, event.name,
-	  event.description, event.enabled)
-	savedItem <- processingTypeRepository.put(updatedItem).success
+        item <- processingTypeRepository.getByKey(ProcessingTypeId(event.processingTypeId))
+        updatedItem <- item.update(item.versionOption, event.name,
+          event.description, event.enabled)
+        savedItem <- processingTypeRepository.put(updatedItem).success
       } yield updatedItem
 
       if (validation.isFailure) {
-	// this should never happen because the only way to get here is when the
-	// command passed validation
-	val err = validation.swap.getOrElse(List.empty)
-	throw new IllegalStateException(
-	  s"recovering collection event type update from event failed: $err")
+        // this should never happen because the only way to get here is when the
+        // command passed validation
+        val err = validation.swap.getOrElse(List.empty)
+        throw new IllegalStateException(
+          s"recovering collection event type update from event failed: $err")
       }
     }
 
     private def recoverEvent(event: ProcessingTypeRemovedEvent): Unit = {
       val validation = for {
-	item <- processingTypeRepository.getByKey(ProcessingTypeId(event.processingTypeId))
-	removedItem <- processingTypeRepository.remove(item).success
+        item <- processingTypeRepository.getByKey(ProcessingTypeId(event.processingTypeId))
+        removedItem <- processingTypeRepository.remove(item).success
       } yield removedItem
 
       if (validation.isFailure) {
-	// this should never happen because the only way to get here is when the
-	// command passed validation
-	val err = validation.swap.getOrElse(List.empty)
-	throw new IllegalStateException(
-	  s"recovering collection event type remove from event failed: $err")
+        // this should never happen because the only way to get here is when the
+        // command passed validation
+        val err = validation.swap.getOrElse(List.empty)
+        throw new IllegalStateException(
+          s"recovering collection event type remove from event failed: $err")
       }
     }
 
@@ -155,7 +155,7 @@ trait ProcessingTypeProcessorComponent {
 
     private def nameAvailable(name: String, excludeId: ProcessingTypeId): DomainValidation[Boolean] = {
       nameAvailableMatcher(name, processingTypeRepository){ item =>
-	item.name.equals(name) && (item.id != excludeId)
+        item.name.equals(name) && (item.id != excludeId)
       }
     }
 

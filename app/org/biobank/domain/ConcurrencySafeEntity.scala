@@ -28,9 +28,9 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
     DomainError(
     s"""|${this.getClass}: expected version doesn't match current version: {
         |  id: $id,
-	|  actualVersion: $version,
-	|  expectedVersion: $expected
-	|}""".stripMargin)
+        |  actualVersion: $version,
+        |  expectedVersion: $expected
+        |}""".stripMargin)
 
   /** Used for optimistic concurrency versioning.
     *

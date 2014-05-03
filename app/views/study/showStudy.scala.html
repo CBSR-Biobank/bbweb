@@ -1,6 +1,6 @@
 @(study: org.biobank.domain.study.Study,
 activeTab: org.biobank.controllers.study.StudyTab.Value)(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent],
-							 flash: play.api.mvc.Flash)
+                                                         flash: play.api.mvc.Flash)
 
 @import org.biobank.controllers.study._
 @import StudyTab._
@@ -43,10 +43,10 @@ activeTab: org.biobank.controllers.study.StudyTab.Value)(implicit request: play.
   </ul>
 
   @flash.get("success").map { message =>
-			      <div class="alert alert-success">
-			      @message
-			      </div>
-			      }
+                              <div class="alert alert-success">
+                              @message
+                              </div>
+                              }
 
   <div class="tab-content">
   <div class="tab-pane fade in @tabSummaryActive" id="tab-summary">

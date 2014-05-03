@@ -26,20 +26,20 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
 
       val v = CollectionEventAnnotationType.create(studyId, id, version, name, description, valueType,
-	maxValueCount, options)
+        maxValueCount, options)
       val annotType = v.getOrElse(fail)
 
       annotType shouldBe a[CollectionEventAnnotationType]
 
       annotType should have (
-	'studyId (studyId),
-	'id (id),
-	'version (0L),
-	'name (name),
-	'description (description),
-	'valueType (valueType),
-	'maxValueCount (maxValueCount),
-	'options (options)
+        'studyId (studyId),
+        'id (id),
+        'version (0L),
+        'name (name),
+        'description (description),
+        'valueType (valueType),
+        'maxValueCount (maxValueCount),
+        'options (options)
       )
     }
 
@@ -58,7 +58,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
 
       CollectionEventAnnotationType.create(studyId, id, version, name, description, valueType,
-	maxValueCount, options) match {
+        maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("study id is null or empty"))
@@ -76,7 +76,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
 
       CollectionEventAnnotationType.create(studyId, id, version, name, description, valueType,
-	maxValueCount, options) match {
+        maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("annotation type id is null or empty"))
@@ -94,7 +94,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
 
       CollectionEventAnnotationType.create(studyId, id, version, name, description, valueType,
-	maxValueCount, options) match {
+        maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("invalid version value: -2"))
@@ -112,7 +112,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
 
       CollectionEventAnnotationType.create(studyId, id, version, name, description, valueType,
-	maxValueCount, options) match {
+        maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("name is null or empty"))
@@ -120,7 +120,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
 
       name = ""
       CollectionEventAnnotationType.create(studyId, id, version, name, description, valueType,
-	maxValueCount, options) match {
+        maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("name is null or empty"))
@@ -138,7 +138,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
 
       CollectionEventAnnotationType.create(studyId, id, version, name, description, valueType,
-	maxValueCount, options) match {
+        maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("description is null or empty"))
@@ -146,7 +146,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
 
       description = Some("")
       CollectionEventAnnotationType.create(studyId, id, version, name, description, valueType,
-	maxValueCount, options) match {
+        maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("description is null or empty"))
@@ -164,7 +164,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
 
       CollectionEventAnnotationType.create(studyId, id, version, name, description, valueType,
-	maxValueCount, options) match {
+        maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("max value count is not a positive number"))
@@ -183,7 +183,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       var options = Some(Map("" -> "a"))
 
       CollectionEventAnnotationType.create(
-	studyId, id, version, name, description, valueType, maxValueCount, options) match {
+        studyId, id, version, name, description, valueType, maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("option key is null or empty"))
@@ -191,7 +191,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
 
       options = Some(Map("1" -> ""))
       CollectionEventAnnotationType.create(
-	studyId, id, version, name, description, valueType, maxValueCount, options) match {
+        studyId, id, version, name, description, valueType, maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("option value is null or empty"))
@@ -199,7 +199,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
 
       options = Some(Map("1" -> null))
       CollectionEventAnnotationType.create(
-	studyId, id, version, name, description, valueType, maxValueCount, options) match {
+        studyId, id, version, name, description, valueType, maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should (have length 1 and contain("option value is null or empty"))
@@ -217,12 +217,12 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
 
       CollectionEventAnnotationType.create(
-	studyId, id, version, name, description, valueType, maxValueCount, options) match {
+        studyId, id, version, name, description, valueType, maxValueCount, options) match {
         case Success(user) => fail
         case Failure(err) =>
           err.list should have length 2
-	  err.list.head should be ("invalid version value: -2")
-	  err.list.tail.head should be ("name is null or empty")
+          err.list.head should be ("invalid version value: -2")
+          err.list.tail.head should be ("name is null or empty")
       }
     }
 

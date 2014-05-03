@@ -27,23 +27,23 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
 
       validation should be ('success)
       validation map { cet =>
-	cet shouldBe a[CollectionEventType]
+        cet shouldBe a[CollectionEventType]
 
-	cet should have (
-	'studyId (studyId),
-	'id (id),
-	'version (0L),
-	'name (name),
-	'description (description),
-	'recurring (recurring)
-	)
+        cet should have (
+        'studyId (studyId),
+        'id (id),
+        'version (0L),
+        'name (name),
+        'description (description),
+        'recurring (recurring)
+        )
 
-	cet.specimenGroupData should have length 1
-	cet.annotationTypeData should have length 1
+        cet.specimenGroupData should have length 1
+        cet.annotationTypeData should have length 1
       }
     }
   }
@@ -61,7 +61,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("study id is null or empty"))
@@ -79,7 +79,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("collection event type id is null or empty"))
@@ -97,7 +97,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("invalid version value: -2"))
@@ -115,7 +115,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("name is null or empty"))
@@ -123,7 +123,7 @@ class CollectionEventTypeSpec extends DomainSpec {
 
       name = ""
       val validation2 = CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
       validation2 should be ('failure)
       validation2.swap.map { err =>
           err.list should (have length 1 and contain("name is null or empty"))
@@ -141,7 +141,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("description is null or empty"))
@@ -149,7 +149,7 @@ class CollectionEventTypeSpec extends DomainSpec {
 
       description = Some("")
       val validation2 = CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
       validation2 should be ('failure)
       validation2.swap.map { err =>
           err.list should (have length 1 and contain("description is null or empty"))
@@ -167,7 +167,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("specimen group id is null or empty"))
@@ -185,7 +185,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("max count is not a positive number"))
@@ -203,7 +203,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("amount not is a positive number"))
@@ -221,7 +221,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("", false))
 
       val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("annotation type id is null or empty"))
@@ -239,12 +239,12 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("1", false))
 
       val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
-	specimenGroupData, annotationTypeData)
+        specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should have length 2
-	  err.list.head should be ("invalid version value: -2")
-	  err.list.tail.head should be ("name is null or empty")
+          err.list.head should be ("invalid version value: -2")
+          err.list.tail.head should be ("name is null or empty")
       }
     }
 

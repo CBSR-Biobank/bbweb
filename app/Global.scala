@@ -43,8 +43,8 @@ object Global extends GlobalSettings {
       // for debug only - password is "administrator"
       val email = "admin@admin.com"
       ApplicationComponent.userRepository.put(RegisteredUser.create(
-	UserId(email), -1L, "admin", email,
-	"$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS", "bcrypt", None, None) | null)
+        UserId(email), -1L, "admin", email,
+        "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS", "bcrypt", None, None) | null)
     }
   }
 

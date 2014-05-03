@@ -6,10 +6,10 @@
     <title>@title</title>
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
       <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.css"))'>
-	<script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery.min.js"))'></script>
-	<script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.js"))'></script>
-	<link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-	  <style>
+        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery.min.js"))'></script>
+        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.js"))'></script>
+        <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+          <style>
             body {
             padding-top: 60px;
             /* 60px to make the container go all the way to the bottom of the topbar */
@@ -60,36 +60,36 @@
 
             .container .credit {
             margin: 20px 0;
-	    }
-	  </style>
-	</head>
-	<body>
+            }
+          </style>
+        </head>
+        <body>
           <div id="navbar">
             <div class="navbar navbar-inverse navbar-fixed-top">
-	      <div class="navbar-header">
+              <div class="navbar-header">
                 <a class="navbar-brand" href="@org.biobank.controllers.routes.Application.index">Biobank</a>
-		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
-		  <span class="icon-bar"></span>
-		  <span class="icon-bar"></span>
-		  <span class="icon-bar"></span>
-		</button>
-	      </div>
-	      <div class="navbar-header navbar-right">
-		<ul class="nav navbar-nav">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+              </div>
+              <div class="navbar-header navbar-right">
+                <ul class="nav navbar-nav">
                   @request match {
                   case req : securesocial.core.SecuredRequest[_]  => {
-  		  <li class="dropdown">
-		    <a id="drop-user" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown"><strong>@req.user.email</strong> <b class="caret"></b></a>
-		    <ul class="dropdown-menu" role="menu" aria-labelledby="drop-user">
+                    <li class="dropdown">
+                    <a id="drop-user" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown"><strong>@req.user.email</strong> <b class="caret"></b></a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="drop-user">
                       <li role="presentation"><a role="menuitem" tabindex="-1" href="@org.biobank.controllers.routes.UserController.profile">My Profile</a></li>
                       <li role="presentation"><a role="menuitem" tabindex="-1" href="@securesocial.controllers.routes.LoginPage.logout">Logout</a></li>
-		    </ul>
-		  </li>
-		  }
-		  case _ => { }
-		  }
-		</ul>
-	      </div>
+                    </ul>
+                  </li>
+                  }
+                  case _ => { }
+                  }
+                </ul>
+              </div>
               <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                   <li class="active"><a href="@org.biobank.controllers.routes.Application.index">Home</a></li>
@@ -97,7 +97,7 @@
                   <li><a href="@org.biobank.controllers.routes.Application.contact">Contact</a></li>
                 </ul>
               </div>
-	    </div>
+            </div>
           </div>
         </div>
         <div class="container">

@@ -84,19 +84,19 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       val procType = factory.createProcessingType
 
       askAddCommand(procType){ validation =>
-	validation should be('success)
-	validation map { event =>
+        validation should be('success)
+        validation map { event =>
           event shouldBe a[ProcessingTypeAddedEvent]
           event should have(
-	    'name (procType.name),
-	    'description (procType.description),
-	    'enabled (procType.enabled))
+            'name (procType.name),
+            'description (procType.description),
+            'enabled (procType.enabled))
 
           val procType2 = processingTypeRepository.withId(
             disabledStudy.id, ProcessingTypeId(event.processingTypeId)) | fail
           procType2.version should be(0)
             processingTypeRepository.allForStudy(disabledStudy.id) should have size 1
-	}
+        }
       }
     }
 
@@ -105,11 +105,11 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       processingTypeRepository.put(procType)
 
       askAddCommand(procType){ validation =>
-	validation should be('failure)
-	validation.swap map { err =>
+        validation should be('failure)
+        validation.swap map { err =>
           err.list should have length 1
           err.list.head should include("name already exists")
-	}
+        }
       }
     }
 
@@ -120,14 +120,14 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       val procType2 = procType.copy(name = nameGenerator.next[String])
 
       askUpdateCommand(procType2) { validation =>
-	validation should be('success)
-	validation map { event =>
+        validation should be('success)
+        validation map { event =>
           event shouldBe a[ProcessingTypeUpdatedEvent]
           event should have(
-	    'name (procType2.name),
-	    'description (procType2.description),
-	    'enabled (procType2.enabled))
-	}
+            'name (procType2.name),
+            'description (procType2.description),
+            'enabled (procType2.enabled))
+        }
       }
     }
 
@@ -141,11 +141,11 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       val procType3 = procType2.copy(name = procType1.name)
 
       askUpdateCommand(procType3) { validation =>
-	validation should be('failure)
-	validation.swap map { err =>
+        validation should be('failure)
+        validation.swap map { err =>
           err.list should have length 1
           err.list.head should include("name already exists")
-	}
+        }
       }
     }
 
@@ -159,11 +159,11 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       val procType2 = procType.copy(studyId = study2.id)
 
       askUpdateCommand(procType2) { validation =>
-	validation should be('failure)
-	validation.swap map { err =>
+        validation should be('failure)
+        validation.swap map { err =>
           err.list should have length 1
           err.list.head should include("study does not have processing type")
-	}
+        }
       }
     }
 
@@ -174,11 +174,11 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       val procTypeBadVersion = procType.copy(version = procType.version - 2)
 
       askUpdateCommand(procTypeBadVersion) { validation =>
-	validation should be('failure)
-	validation.swap map { err =>
+        validation should be('failure)
+        validation.swap map { err =>
           err.list should have length 1
           err.list.head should include("doesn't match current version")
-	}
+        }
       }
     }
 
@@ -187,8 +187,8 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       processingTypeRepository.put(procType)
 
       askRemoveCommand(procType){ validation =>
-	validation should be('success)
-	validation map { event => event shouldBe a[ProcessingTypeRemovedEvent] }
+        validation should be('success)
+        validation map { event => event shouldBe a[ProcessingTypeRemovedEvent] }
       }
     }
 
@@ -199,11 +199,11 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       val procTypeBadVersion = procType.copy(version = procType.version - 2)
 
       askRemoveCommand(procTypeBadVersion){ validation =>
-	validation should be('failure)
-	validation.swap map { err =>
+        validation should be('failure)
+        validation.swap map { err =>
           err.list should have length 1
           err.list.head should include("version mismatch")
-	}
+        }
       }
     }
 

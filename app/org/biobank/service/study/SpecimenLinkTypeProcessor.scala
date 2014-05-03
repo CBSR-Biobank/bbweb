@@ -46,8 +46,8 @@ trait SpecimenLinkTypeProcessorComponent {
       case event: SpecimenLinkTypeRemovedEvent => recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
-	snapshot.specimenLinkTypes.foreach{ ceType =>
-	  specimenLinkTypeRepository.put(ceType) }
+        snapshot.specimenLinkTypes.foreach{ ceType =>
+          specimenLinkTypeRepository.put(ceType) }
     }
 
 
@@ -60,7 +60,7 @@ trait SpecimenLinkTypeProcessorComponent {
       case cmd: RemoveSpecimenLinkTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
       case _ =>
-	throw new Error("invalid message received")
+        throw new Error("invalid message received")
     }
 
     private def validateCmd(
@@ -70,37 +70,37 @@ trait SpecimenLinkTypeProcessorComponent {
       val id = specimenLinkTypeRepository.nextIdentity
 
       for {
-	newItem <- SpecimenLinkType.create(
+        newItem <- SpecimenLinkType.create(
           processingTypeId,
-	  id,
-	  -1L,
-	  cmd.expectedInputChange,
-	  cmd.expectedOutputChange,
-	  cmd.inputCount,
-	  cmd.outputCount,
-	  cmd.inputGroupId,
-	  cmd.outputGroupId,
-	  cmd.inputContainerTypeId,
-	  cmd.outputContainerTypeId,
-	  cmd.annotationTypeData)
-	inputSgExists <- specimenGroupRepository.getByKey(newItem.inputGroupId)
-	outputSgExists <- specimenGroupRepository.getByKey(newItem.outputGroupId)
-	// FIXME: check that container types are valid
-	validSpecimenGroups <- validateSpecimenGroups(newItem.inputGroupId, newItem.outputGroupId)
-	validAnnotData <- validateAnnotationTypeData(processingTypeId, cmd.annotationTypeData)
-	event <- SpecimenLinkTypeAddedEvent(
+          id,
+          -1L,
+          cmd.expectedInputChange,
+          cmd.expectedOutputChange,
+          cmd.inputCount,
+          cmd.outputCount,
+          cmd.inputGroupId,
+          cmd.outputGroupId,
+          cmd.inputContainerTypeId,
+          cmd.outputContainerTypeId,
+          cmd.annotationTypeData)
+        inputSgExists <- specimenGroupRepository.getByKey(newItem.inputGroupId)
+        outputSgExists <- specimenGroupRepository.getByKey(newItem.outputGroupId)
+        // FIXME: check that container types are valid
+        validSpecimenGroups <- validateSpecimenGroups(newItem.inputGroupId, newItem.outputGroupId)
+        validAnnotData <- validateAnnotationTypeData(processingTypeId, cmd.annotationTypeData)
+        event <- SpecimenLinkTypeAddedEvent(
           cmd.processingTypeId,
-	  id.id,
-	  newItem.version,
-	  newItem.expectedInputChange,
-	  newItem.expectedOutputChange,
-	  newItem.inputCount,
-	  newItem.outputCount,
-	  newItem.inputGroupId,
-	  newItem.outputGroupId,
-	  newItem.inputContainerTypeId,
-	  newItem.outputContainerTypeId,
-	  newItem.annotationTypeData).success
+          id.id,
+          newItem.version,
+          newItem.expectedInputChange,
+          newItem.expectedOutputChange,
+          newItem.inputCount,
+          newItem.outputCount,
+          newItem.inputGroupId,
+          newItem.outputGroupId,
+          newItem.inputContainerTypeId,
+          newItem.outputContainerTypeId,
+          newItem.annotationTypeData).success
       } yield event
     }
 
@@ -110,36 +110,36 @@ trait SpecimenLinkTypeProcessorComponent {
       val id = SpecimenLinkTypeId(cmd.id)
 
       for {
-	oldItem <- specimenLinkTypeRepository.withId(processingTypeId,id)
-	newItem <- oldItem.update(
-	  cmd.expectedVersion,
-	  cmd.expectedInputChange,
-	  cmd.expectedOutputChange,
-	  cmd.inputCount,
-	  cmd.outputCount,
-	  cmd.inputGroupId,
-	  cmd.outputGroupId,
-	  cmd.inputContainerTypeId,
-	  cmd.outputContainerTypeId,
-	  cmd.annotationTypeData)
-	inputSgExists <- specimenGroupRepository.getByKey(newItem.inputGroupId)
-	outputSgExists <- specimenGroupRepository.getByKey(newItem.outputGroupId)
-	// FIXME: check that container types are valid
-	validSpecimenGroups <- validateSpecimenGroups(newItem.inputGroupId, newItem.outputGroupId, newItem.id)
-	validAtData <- validateAnnotationTypeData(processingTypeId, cmd.annotationTypeData)
-	event <- SpecimenLinkTypeUpdatedEvent(
+        oldItem <- specimenLinkTypeRepository.withId(processingTypeId,id)
+        newItem <- oldItem.update(
+          cmd.expectedVersion,
+          cmd.expectedInputChange,
+          cmd.expectedOutputChange,
+          cmd.inputCount,
+          cmd.outputCount,
+          cmd.inputGroupId,
+          cmd.outputGroupId,
+          cmd.inputContainerTypeId,
+          cmd.outputContainerTypeId,
+          cmd.annotationTypeData)
+        inputSgExists <- specimenGroupRepository.getByKey(newItem.inputGroupId)
+        outputSgExists <- specimenGroupRepository.getByKey(newItem.outputGroupId)
+        // FIXME: check that container types are valid
+        validSpecimenGroups <- validateSpecimenGroups(newItem.inputGroupId, newItem.outputGroupId, newItem.id)
+        validAtData <- validateAnnotationTypeData(processingTypeId, cmd.annotationTypeData)
+        event <- SpecimenLinkTypeUpdatedEvent(
           cmd.processingTypeId,
-	  newItem.id.id,
-	  newItem.version,
-	  newItem.expectedInputChange,
-	  newItem.expectedOutputChange,
-	  newItem.inputCount,
-	  newItem.outputCount,
-	  newItem.inputGroupId,
-	  newItem.outputGroupId,
-	  newItem.inputContainerTypeId,
-	  newItem.outputContainerTypeId,
-	  newItem.annotationTypeData).success
+          newItem.id.id,
+          newItem.version,
+          newItem.expectedInputChange,
+          newItem.expectedOutputChange,
+          newItem.inputCount,
+          newItem.outputCount,
+          newItem.inputGroupId,
+          newItem.outputGroupId,
+          newItem.inputContainerTypeId,
+          newItem.outputContainerTypeId,
+          newItem.annotationTypeData).success
       } yield event
     }
 
@@ -149,76 +149,76 @@ trait SpecimenLinkTypeProcessorComponent {
       val id = SpecimenLinkTypeId(cmd.id)
 
       for {
-	item <- specimenLinkTypeRepository.withId(processingTypeId, id)
-	validVersion <- validateVersion(item, cmd.expectedVersion)
-	event <- SpecimenLinkTypeRemovedEvent(cmd.processingTypeId, cmd.id).success
+        item <- specimenLinkTypeRepository.withId(processingTypeId, id)
+        validVersion <- validateVersion(item, cmd.expectedVersion)
+        event <- SpecimenLinkTypeRemovedEvent(cmd.processingTypeId, cmd.id).success
       } yield event
     }
 
     private def recoverEvent(event: SpecimenLinkTypeAddedEvent): Unit = {
       val processingTypeId = ProcessingTypeId(event.processingTypeId)
       val validation = for {
-	newItem <- SpecimenLinkType.create(
-	  processingTypeId,
-	  SpecimenLinkTypeId(event.specimenLinkTypeId),
-	  -1L,
-	  event.expectedInputChange,
-	  event.expectedOutputChange,
-	  event.inputCount,
-	  event.outputCount,
-	  event.inputGroupId,
-	  event.outputGroupId,
-	  event.inputContainerTypeId,
-	  event.outputContainerTypeId,
-	  event.annotationTypeData)
-	savedItem <- specimenLinkTypeRepository.put(newItem).success
+        newItem <- SpecimenLinkType.create(
+          processingTypeId,
+          SpecimenLinkTypeId(event.specimenLinkTypeId),
+          -1L,
+          event.expectedInputChange,
+          event.expectedOutputChange,
+          event.inputCount,
+          event.outputCount,
+          event.inputGroupId,
+          event.outputGroupId,
+          event.inputContainerTypeId,
+          event.outputContainerTypeId,
+          event.annotationTypeData)
+        savedItem <- specimenLinkTypeRepository.put(newItem).success
       } yield newItem
 
       if (validation.isFailure) {
-	// this should never happen because the only way to get here is when the
-	// command passed validation
-	throw new IllegalStateException("recovering collection event type from event failed")
+        // this should never happen because the only way to get here is when the
+        // command passed validation
+        throw new IllegalStateException("recovering collection event type from event failed")
       }
     }
 
     private def recoverEvent(event: SpecimenLinkTypeUpdatedEvent): Unit = {
       val validation = for {
-	item <- specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId))
-	updatedItem <- item.update(
-	  item.versionOption,
-	  event.expectedInputChange,
-	  event.expectedOutputChange,
-	  event.inputCount,
-	  event.outputCount,
-	  event.inputGroupId,
-	  event.outputGroupId,
-	  event.inputContainerTypeId,
-	  event.outputContainerTypeId,
-	  event.annotationTypeData)
-	savedItem <- specimenLinkTypeRepository.put(updatedItem).success
+        item <- specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId))
+        updatedItem <- item.update(
+          item.versionOption,
+          event.expectedInputChange,
+          event.expectedOutputChange,
+          event.inputCount,
+          event.outputCount,
+          event.inputGroupId,
+          event.outputGroupId,
+          event.inputContainerTypeId,
+          event.outputContainerTypeId,
+          event.annotationTypeData)
+        savedItem <- specimenLinkTypeRepository.put(updatedItem).success
       } yield updatedItem
 
       if (validation.isFailure) {
-	// this should never happen because the only way to get here is when the
-	// command passed validation
-	val err = validation.swap.getOrElse(List.empty)
-	throw new IllegalStateException(
-	  s"recovering collection event type update from event failed: $err")
+        // this should never happen because the only way to get here is when the
+        // command passed validation
+        val err = validation.swap.getOrElse(List.empty)
+        throw new IllegalStateException(
+          s"recovering collection event type update from event failed: $err")
       }
     }
 
     private def recoverEvent(event: SpecimenLinkTypeRemovedEvent): Unit = {
       val validation = for {
-	item <- specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId))
-	removedItem <- specimenLinkTypeRepository.remove(item).success
+        item <- specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId))
+        removedItem <- specimenLinkTypeRepository.remove(item).success
       } yield removedItem
 
       if (validation.isFailure) {
-	// this should never happen because the only way to get here is when the
-	// command passed validation
-	val err = validation.swap.getOrElse(List.empty)
-	throw new IllegalStateException(
-	  s"recovering collection event type remove from event failed: $err")
+        // this should never happen because the only way to get here is when the
+        // command passed validation
+        val err = validation.swap.getOrElse(List.empty)
+        throw new IllegalStateException(
+          s"recovering collection event type remove from event failed: $err")
       }
     }
 
@@ -230,9 +230,9 @@ trait SpecimenLinkTypeProcessorComponent {
       val exists = specimenLinkTypeRepository.getValues.exists { slt => matcher(slt) }
 
       if (exists) {
-	DomainError("specimen link type with specimen groups already exists").failNel
+        DomainError("specimen link type with specimen groups already exists").failNel
       } else {
-	true.success
+        true.success
       }
     }
 
@@ -240,7 +240,7 @@ trait SpecimenLinkTypeProcessorComponent {
       inputGroupId: SpecimenGroupId,
       outputGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
       validateSpecimenGroupMatcher(inputGroupId, outputGroupId) { slt =>
-	(slt.inputGroupId == inputGroupId) && (slt.outputGroupId == outputGroupId)
+        (slt.inputGroupId == inputGroupId) && (slt.outputGroupId == outputGroupId)
       }
     }
 
@@ -249,9 +249,9 @@ trait SpecimenLinkTypeProcessorComponent {
       outputGroupId: SpecimenGroupId,
       specimenLinkTypeId: SpecimenLinkTypeId): DomainValidation[Boolean] = {
       validateSpecimenGroupMatcher(inputGroupId, outputGroupId) { slt =>
-	(slt.id != specimenLinkTypeId) &&
-	(slt.inputGroupId == inputGroupId) &&
-	(slt.outputGroupId == outputGroupId)
+        (slt.id != specimenLinkTypeId) &&
+        (slt.inputGroupId == inputGroupId) &&
+        (slt.outputGroupId == outputGroupId)
       }
     }
 
@@ -267,13 +267,13 @@ trait SpecimenLinkTypeProcessorComponent {
       val validation = processingTypeRepository.getByKey(processingTypeId)
 
       if (validation.isFailure) {
-	throw new IllegalStateException(s"processing type does not exist: $processingTypeId")
+        throw new IllegalStateException(s"processing type does not exist: $processingTypeId")
       }
 
       val processingType = validation | null
 
       val invalidSet = annotationTypeData.map(v => AnnotationTypeId(v.annotationTypeId)).map { id =>
-	(id -> specimenLinkAnnotationTypeRepository.withId(processingType.studyId, id).isSuccess)
+        (id -> specimenLinkAnnotationTypeRepository.withId(processingType.studyId, id).isSuccess)
       }.filter(x => !x._2).map(_._1)
 
       if (invalidSet.isEmpty) true.success

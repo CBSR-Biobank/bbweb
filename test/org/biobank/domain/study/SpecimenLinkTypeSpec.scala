@@ -29,24 +29,24 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-	annotationTypeData = List.empty)
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be ('success)
       validation map { slt =>
-	slt should have (
-	  'processingTypeId (processingType.id),
-	  'id (id),
-	  'expectedInputChange (expectedInputChange),
-	  'expectedOutputChange (expectedOutputChange),
-	  'inputCount (inputCount),
-	  'outputCount (outputCount),
-	  'inputGroupId (inputSpecimenGroup.id),
-	  'outputGroupId (outputSpecimenGroup.id),
-	  'inputContainerTypeId (None),
-	  'outputContainerTypeId (None)
-	)
+        slt should have (
+          'processingTypeId (processingType.id),
+          'id (id),
+          'expectedInputChange (expectedInputChange),
+          'expectedOutputChange (expectedOutputChange),
+          'inputCount (inputCount),
+          'outputCount (outputCount),
+          'inputGroupId (inputSpecimenGroup.id),
+          'outputGroupId (outputSpecimenGroup.id),
+          'inputContainerTypeId (None),
+          'outputContainerTypeId (None)
+        )
 
-	slt.annotationTypeData should have length (0)
+        slt.annotationTypeData should have length (0)
       }
     }
 
@@ -66,8 +66,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingTypeId, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-	annotationTypeData = List.empty)
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("processing type id is null or empty"))
@@ -87,8 +87,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-	annotationTypeData = List.empty)
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("specimen link type id is null or empty"))
@@ -108,8 +108,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroupIdIn, specimenGroupIdOut,
-	annotationTypeData = List.empty)
+        expectedOutputChange, inputCount, outputCount, specimenGroupIdIn, specimenGroupIdOut,
+        annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("specimen group id is null or empty"))
@@ -119,8 +119,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       specimenGroupIdOut = SpecimenGroupId("")
 
       val validation2 = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroupIdIn, specimenGroupIdOut,
-	annotationTypeData = List.empty)
+        expectedOutputChange, inputCount, outputCount, specimenGroupIdIn, specimenGroupIdOut,
+        annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
           err.list should (have length 1 and contain("specimen group id is null or empty"))
@@ -140,8 +140,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -2L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-	annotationTypeData = List.empty)
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("invalid version value: -2"))
@@ -161,8 +161,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-	annotationTypeData = List.empty)
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("expected input change is not a positive number"))
@@ -172,8 +172,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       expectedOutputChange = BigDecimal(-1.0)
 
       val validation2 = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-	annotationTypeData = List.empty)
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
           err.list should (have length 1 and contain("expected output change is not a positive number"))
@@ -193,8 +193,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-	annotationTypeData = List.empty)
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("input count is not a positive number"))
@@ -203,8 +203,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       inputCount = 1
       outputCount = -1
       val validation2 = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-	annotationTypeData = List.empty)
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
           err.list should (have length 1 and contain("output count is not a positive number"))
@@ -226,8 +226,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-	containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("collection event type id is null or empty"))
@@ -236,8 +236,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       containerTypeIdIn = Some(ContainerTypeId("abc"))
       containerTypeIdOut = Some(ContainerTypeId(""))
       val validation2 = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-	containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
           err.list should (have length 1 and contain("collection event type id is null or empty"))
@@ -257,13 +257,13 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(processingType.id, id, -2L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-	annotationTypeData = List.empty)
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should have length 2
-	  err.list(0) should be ("specimen link type id is null or empty")
-	  err.list(1) should be ("invalid version value: -2")
+          err.list(0) should be ("specimen link type id is null or empty")
+          err.list(1) should be ("invalid version value: -2")
       }
     }
 
@@ -281,8 +281,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val annotationTypeData = List(SpecimenLinkTypeAnnotationTypeData("", false))
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-	annotationTypeData = annotationTypeData)
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = annotationTypeData)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("annotation type id is null or empty"))

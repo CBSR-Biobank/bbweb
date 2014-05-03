@@ -45,13 +45,13 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
       studyId: StudyId,
       specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
       getByKey(specimenGroupId) match {
-	case Failure(err) => DomainError(
-	  s"specimen group does not exist: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
-	    .failNel
-	case Success(sg) if (sg.studyId.equals(studyId)) => sg.success
-	case _ => DomainError(
+        case Failure(err) => DomainError(
+          s"specimen group does not exist: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
+            .failNel
+        case Success(sg) if (sg.studyId.equals(studyId)) => sg.success
+        case _ => DomainError(
           s"study does not have specimen group: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
-	    .failNel
+            .failNel
       }
     }
   }

@@ -38,9 +38,9 @@ trait FactoryComponent {
       val avatarUrl = Some("http://test.com/")
 
       val validation = RegisteredUser.create(
-	id, version, name, email, password, hasher, salt, avatarUrl)
+        id, version, name, email, password, hasher, salt, avatarUrl)
       if (validation.isFailure) {
-	throw new Error
+        throw new Error
       }
 
       val user = validation | null
@@ -52,7 +52,7 @@ trait FactoryComponent {
       val registeredUser = defaultRegisteredUser
       val validation = registeredUser.activate(registeredUser.versionOption)
       if (validation.isFailure) {
-	throw new Error
+        throw new Error
       }
 
       val user = validation | null
@@ -67,7 +67,7 @@ trait FactoryComponent {
 
       val validation = DisabledStudy.create(id, -1L, name, description)
       if (validation.isFailure) {
-	throw new Error
+        throw new Error
       }
 
       val study = validation | null
@@ -95,10 +95,10 @@ trait FactoryComponent {
 
       val disabledStudy = defaultDisabledStudy
       val validation = SpecimenGroup.create(disabledStudy.id, sgId, -1L,
-	name, description, units, anatomicalSourceType, preservationType, preservationTempType,
-	specimenType)
+        name, description, units, anatomicalSourceType, preservationType, preservationTempType,
+        specimenType)
       if (validation.isFailure) {
-	throw new Error
+        throw new Error
       }
 
       val specimenGroup = validation | null
@@ -113,9 +113,9 @@ trait FactoryComponent {
 
       val disabledStudy = defaultDisabledStudy
       val validation = CollectionEventType.create(disabledStudy.id, ceventTypeId, -1L, name,
-	description, true, List.empty, List.empty)
+        description, true, List.empty, List.empty)
       if (validation.isFailure) {
-	throw new Error
+        throw new Error
       }
 
       val ceventType = validation | null
@@ -128,14 +128,14 @@ trait FactoryComponent {
       val name = nameGenerator.next[CollectionEventAnnotationType]
       val description = Some(nameGenerator.next[CollectionEventAnnotationType])
       val options = Some(Map(
-	nameGenerator.next[String] -> nameGenerator.next[String],
-	nameGenerator.next[String] -> nameGenerator.next[String]))
+        nameGenerator.next[String] -> nameGenerator.next[String],
+        nameGenerator.next[String] -> nameGenerator.next[String]))
 
       val disabledStudy = defaultDisabledStudy
       val validation = CollectionEventAnnotationType.create(disabledStudy.id, id, -1L, name,
-	description, AnnotationValueType.Select, Some(1), options)
+        description, AnnotationValueType.Select, Some(1), options)
       if (validation.isFailure) {
-	throw new Error
+        throw new Error
       }
 
       val annotationType = validation | null
@@ -163,14 +163,14 @@ trait FactoryComponent {
       val name = nameGenerator.next[ParticipantAnnotationType]
       val description = Some(nameGenerator.next[ParticipantAnnotationType])
       val options = Some(Map(
-	nameGenerator.next[String] -> nameGenerator.next[String],
-	nameGenerator.next[String] -> nameGenerator.next[String]))
+        nameGenerator.next[String] -> nameGenerator.next[String],
+        nameGenerator.next[String] -> nameGenerator.next[String]))
 
       val disabledStudy = defaultDisabledStudy
       val validation = ParticipantAnnotationType.create(disabledStudy.id, id, -1L, name,
-	description, AnnotationValueType.Select, Some(1), options, required = true)
+        description, AnnotationValueType.Select, Some(1), options, required = true)
       if (validation.isFailure) {
-	throw new Error
+        throw new Error
       }
 
       val annotationType = validation | null
@@ -183,14 +183,14 @@ trait FactoryComponent {
       val name = nameGenerator.next[SpecimenLinkAnnotationType]
       val description = Some(nameGenerator.next[SpecimenLinkAnnotationType])
       val options = Some(Map(
-	nameGenerator.next[String] -> nameGenerator.next[String],
-	nameGenerator.next[String] -> nameGenerator.next[String]))
+        nameGenerator.next[String] -> nameGenerator.next[String],
+        nameGenerator.next[String] -> nameGenerator.next[String]))
 
       val disabledStudy = defaultDisabledStudy
       val validation = SpecimenLinkAnnotationType.create(disabledStudy.id, id, -1L, name,
-	description, AnnotationValueType.Select, Some(1), options)
+        description, AnnotationValueType.Select, Some(1), options)
       if (validation.isFailure) {
-	throw new Error
+        throw new Error
       }
 
       val annotationType = validation | null
@@ -205,9 +205,9 @@ trait FactoryComponent {
 
       val disabledStudy = defaultDisabledStudy
       val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-      	description, enabled = true)
+              description, enabled = true)
       if (validation.isFailure) {
-      	throw new Error
+              throw new Error
       }
 
       val processingType = validation | null
@@ -231,11 +231,11 @@ trait FactoryComponent {
       specimenGroupRepository.put(outputSpecimenGroup)
 
       val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutpuChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-	annotationTypeData = List.empty)
+        expectedOutpuChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
 
       if (validation.isFailure) {
-	throw new Error
+        throw new Error
       }
 
       val annotationType = validation | null
@@ -285,20 +285,20 @@ trait FactoryComponent {
 
     def defaultCollectionEventTypeAnnotationTypeData: CollectionEventTypeAnnotationTypeData = {
       defaultObject(
-	classOf[CollectionEventTypeAnnotationTypeData],
-	createCollectionEventTypeAnnotationTypeData)
+        classOf[CollectionEventTypeAnnotationTypeData],
+        createCollectionEventTypeAnnotationTypeData)
     }
 
     def defaultParticipantAnnotationType: ParticipantAnnotationType = {
       defaultObject(
-	classOf[ParticipantAnnotationType],
-	createParticipantAnnotationType)
+        classOf[ParticipantAnnotationType],
+        createParticipantAnnotationType)
     }
 
     def defaultSpecimenLinkAnnotationType: SpecimenLinkAnnotationType = {
       defaultObject(
-	classOf[SpecimenLinkAnnotationType],
-	createSpecimenLinkAnnotationType)
+        classOf[SpecimenLinkAnnotationType],
+        createSpecimenLinkAnnotationType)
     }
 
     def defaultProcessingType: ProcessingType = {
@@ -311,16 +311,16 @@ trait FactoryComponent {
 
     def defaultSpecimenLinkTypeAnnotationTypeData: SpecimenLinkTypeAnnotationTypeData = {
       defaultObject(
-	classOf[SpecimenLinkTypeAnnotationTypeData],
-	createSpecimenLinkTypeAnnotationTypeData)
+        classOf[SpecimenLinkTypeAnnotationTypeData],
+        createSpecimenLinkTypeAnnotationTypeData)
     }
 
     /** Retrieves the class from the map, or calls 'create' if value does not exist
       */
     private def defaultObject[T](key: Class[T], create: => T): T = {
       domainObjects get key match {
-	case Some(obj) => key.cast(obj)
-	case None => create
+        case Some(obj) => key.cast(obj)
+        case None => create
       }
     }
 

@@ -49,7 +49,7 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
         case Failure(err) =>
           DomainError(
             s"collection event type does not exist: { studyId: $studyId, ceventTypeId: $ceventTypeId }")
-	    .failNel
+            .failNel
         case Success(cet) =>
           if (cet.studyId.equals(studyId))
             cet.success
