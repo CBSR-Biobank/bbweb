@@ -121,7 +121,26 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "not add a specimen link type with an invalid processing type" in {
-      fail
+      val pt = factory.createProcessingType
+
+      val inputSg = factory.createSpecimenGroup
+      specimenGroupRepository.put(inputSg)
+
+      val outputSg = factory.createSpecimenGroup
+      specimenGroupRepository.put(outputSg)
+
+      val slt = factory.createSpecimenLinkType.copy(
+        inputGroupId = inputSg.id,
+        outputGroupId = outputSg.id
+      )
+
+      askAddCommand(slt){ validation =>
+        validation should be('failure)
+        validation.swap map { err =>
+          err.list should have length 1
+          err.list.head should include("not found")
+        }
+      }
     }
 
     "not add a specimen link type with the same specimen group as input and output" in {

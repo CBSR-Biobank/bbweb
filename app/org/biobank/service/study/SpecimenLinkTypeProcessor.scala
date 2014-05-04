@@ -287,7 +287,7 @@ trait SpecimenLinkTypeProcessorComponent {
       annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData]): DomainValidation[Boolean] = {
 
       def annotTypesValid(processingType: ProcessingType): DomainValidation[Boolean] = {
-        annotationTypeData.map(v => AnnotationTypeId(v.annotationTypeId)).map { id =>
+        val invalidSet = annotationTypeData.map(v => AnnotationTypeId(v.annotationTypeId)).map { id =>
           (id -> specimenLinkAnnotationTypeRepository.withId(processingType.studyId, id).isSuccess)
         }.filter(x => !x._2).map(_._1)
 
@@ -297,7 +297,7 @@ trait SpecimenLinkTypeProcessorComponent {
 
       for {
        processingType <- processingTypeRepository.getByKey(processingTypeId)
-        valid <- annotTypesValid
+        valid <- annotTypesValid(processingType)
       } yield valid
     }
 

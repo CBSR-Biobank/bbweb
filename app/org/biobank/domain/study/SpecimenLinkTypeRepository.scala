@@ -21,6 +21,8 @@ trait SpecimenLinkTypeRepositoryComponent {
 
     def specimenGroupInUse(specimenGroupId: SpecimenGroupId): Boolean
 
+    def annotationTypeInUse(annotationType: SpecimenLinkAnnotationType): Boolean
+
   }
 }
 
@@ -61,6 +63,11 @@ trait SpecimenLinkTypeRepositoryComponentImpl extends SpecimenLinkTypeRepository
     def specimenGroupInUse(specimenGroupId: SpecimenGroupId): Boolean = {
       getValues.exists(slt =>
         (slt.inputGroupId == specimenGroupId) || (slt.outputGroupId == specimenGroupId))
+    }
+
+    def annotationTypeInUse(annotationType: SpecimenLinkAnnotationType): Boolean = {
+      getValues.exists(slt =>
+        slt.annotationTypeData.exists(atd => atd.annotationTypeId.equals(annotationType.id.id)))
     }
   }
 }

@@ -14,7 +14,8 @@ import scalaz._
 import scalaz.Scalaz._
 
 trait SpecimenLinkAnnotationTypeProcessorComponent {
-  self: SpecimenLinkAnnotationTypeRepositoryComponent =>
+  self: SpecimenLinkAnnotationTypeRepositoryComponent
+      with SpecimenLinkTypeRepositoryComponent =>
 
   class SpecimenLinkAnnotationTypeProcessor extends StudyAnnotationTypeProcessor[SpecimenLinkAnnotationType] {
 
@@ -137,10 +138,11 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
     }
 
     def checkNotInUse(annotationType: SpecimenLinkAnnotationType): DomainValidation[Boolean] = {
-      // FIXME: this is a stub for now
-      //
-      // it needs to be replaced with the real check on the specimenLink repository
-      true.success
+      if (specimenLinkTypeRepository.annotationTypeInUse(annotationType)) {
+        DomainError(s"annotation type is in use by specimen link type: ${annotationType.id}").failNel
+      } else {
+        true.success
+      }
     }
 
   }
