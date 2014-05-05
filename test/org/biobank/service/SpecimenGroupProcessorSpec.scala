@@ -104,7 +104,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       val study2 = factory.createDisabledStudy
       val sg = factory.createSpecimenGroup
 
-      var cmd = AddSpecimenGroupCmd(disabledStudy.id.id, sg.name, sg.description, sg.units,
+      var cmd = AddSpecimenGroupCmd(study2.id.id, sg.name, sg.description, sg.units,
         sg.anatomicalSourceType, sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
 
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]

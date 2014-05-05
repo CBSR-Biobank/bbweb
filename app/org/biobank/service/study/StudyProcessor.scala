@@ -83,25 +83,25 @@ trait StudyProcessorComponent
 
       case cmd: UnretireStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: SpecimenGroupCommand => forwardWithCheck(specimenGroupProcessor, cmd)
+      case cmd: SpecimenGroupCommand => validateAndForward(specimenGroupProcessor, cmd)
 
-      case cmd: CollectionEventTypeCommand => forwardWithCheck(collectionEventTypeProcessor, cmd)
+      case cmd: CollectionEventTypeCommand => validateAndForward(collectionEventTypeProcessor, cmd)
 
-      case cmd: CollectionEventAnnotationTypeCommand => forwardWithCheck(ceventAnnotationTypeProcessor, cmd)
+      case cmd: CollectionEventAnnotationTypeCommand => validateAndForward(ceventAnnotationTypeProcessor, cmd)
 
-      case cmd: ParticipantAnnotationTypeCommand => forwardWithCheck(participantAnnotationTypeProcessor, cmd)
+      case cmd: ParticipantAnnotationTypeCommand => validateAndForward(participantAnnotationTypeProcessor, cmd)
 
-      case cmd: ProcessingTypeCommand => forwardWithCheck(processingTypeProcessor, cmd)
+      case cmd: ProcessingTypeCommand => validateAndForward(processingTypeProcessor, cmd)
 
-      case cmd: SpecimenLinkTypeCommand => forwardWithCheck(specimenLinkTypeProcessor, cmd)
+      case cmd: SpecimenLinkTypeCommand => validateAndForward(specimenLinkTypeProcessor, cmd)
 
-      case cmd: SpecimenLinkAnnotationTypeCommand => forwardWithCheck(specimenLinkAnnotationTypeProcessor,  cmd)
+      case cmd: SpecimenLinkAnnotationTypeCommand => validateAndForward(specimenLinkAnnotationTypeProcessor,  cmd)
 
       case other =>
         throw new Error("invalid message received")
     }
 
-    private def forwardWithCheck(childActor: ActorRef, cmd: StudyCommandWithId) = {
+    private def validateAndForward(childActor: ActorRef, cmd: StudyCommandWithId) = {
       val validation = for {
         study <- studyRepository.getByKey(StudyId(cmd.studyId))
       } yield {
@@ -113,9 +113,10 @@ trait StudyProcessorComponent
       }
     }
 
-    private def forwardWithCheck(childActor: ActorRef, cmd: SpecimenLinkTypeCommand) = {
+    private def validateAndForward(childActor: ActorRef, cmd: SpecimenLinkTypeCommand) = {
       val validation = for {
         processingType <- processingTypeRepository.getByKey(ProcessingTypeId(cmd.processingTypeId))
+        study <- studyRepository.getByKey(processingType.studyId)
       } yield {
         childActor forward cmd
       }

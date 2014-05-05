@@ -463,6 +463,9 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
 
     "not update a specimen link type with a specimen group from a different study" in {
       // test both input and output
+      val study = factory.createDisabledStudy
+      studyRepository.put(study)
+
       val pt = factory.createProcessingType
       processingTypeRepository.put(pt)
 
@@ -471,7 +474,7 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
       val sg2 = factory.createSpecimenGroup
       specimenGroupRepository.put(sg2)
 
-      factory.createDisabledStudy
+      val study2 = factory.createDisabledStudy
 
       val sg1WrongStudy = factory.createSpecimenGroup
       specimenGroupRepository.put(sg1WrongStudy)
@@ -484,7 +487,6 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
       val slt2 = slt.copy(
         inputGroupId = sg1.id,
         outputGroupId = sg2WrongStudy.id)
-
       askUpdateCommand(slt){ validation =>
         validation should be('failure)
         validation.swap map { err =>
@@ -507,6 +509,9 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "add an annotation type to a specimen link type" in {
+      val study = factory.createDisabledStudy
+      studyRepository.put(study)
+
       val pt = factory.createProcessingType
       processingTypeRepository.put(pt)
 
@@ -538,6 +543,9 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "not update an annotation type if used by specimen link type" in {
+      val study = factory.createDisabledStudy
+      studyRepository.put(study)
+
       val pt = factory.createProcessingType
       processingTypeRepository.put(pt)
 
