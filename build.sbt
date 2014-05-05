@@ -18,6 +18,8 @@ javaOptions ++= Seq("-Xmx1024M", "-XX:MaxPermSize=512m")
 
 javaOptions in Test += "-Dconfig.file=conf/test.conf"
 
+(testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/report")
+
 resolvers ++= Seq(
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
@@ -35,7 +37,9 @@ libraryDependencies ++= Seq(
   "org.webjars"          % "requirejs"                      % "2.1.11"             % "compile",
   "org.webjars"         %% "webjars-play"                   % "2.3-M1"             % "compile",
   "ws.securesocial"     %% "securesocial"                   % "play-2.3-SNAPSHOT"  % "compile",
-  "org.scalatest"       %% "scalatest"                      % "2.1.2"              % "test",
+  "org.scalatest"       %% "scalatest"                      % "2.1.2"              % "test->*" excludeAll(
+    ExclusionRule(organization = "org.junit", name = "junit")
+  ),
   "com.typesafe.akka"   %% "akka-testkit"                   % "2.3.1"              % "test",
   "com.github.ddevore"  %% "akka-persistence-mongo-casbah"  % "0.7.1-SNAPSHOT"     % "compile",
   "com.typesafe"        %% "webdriver"                      % "1.0.0-M2"           % "test",
