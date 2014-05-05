@@ -108,7 +108,16 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
 
 
     "not add a collection event type to a study that does not exist" in {
-      ???
+      val study2 = factory.createDisabledStudy
+      val cet = factory.createCollectionEventType
+
+      askAddCommand(cet) { validation =>
+        validation should be('failure)
+        validation.swap map { err =>
+          err.list should have length 1
+          err.list.head should include regex s"${study2.id.id}.*not found"
+        }
+      }
     }
 
     "not add a collection event type with a name that already exists" in {

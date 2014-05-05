@@ -101,7 +101,16 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "not add a processing type to a study that does not exist" in {
-      ???
+      val study2 = factory.createDisabledStudy
+      val procType = factory.createProcessingType
+
+      askAddCommand(procType){ validation =>
+        validation should be('failure)
+        validation.swap map { err =>
+          err.list should have length 1
+          err.list.head should include regex s"${study2.id.id}.*not found"
+        }
+      }
     }
 
     "not add a processing type with a name that already exists" in {

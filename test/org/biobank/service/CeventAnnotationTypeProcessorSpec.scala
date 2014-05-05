@@ -66,7 +66,22 @@ class CeventAnnotationTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "not add a cevent annotation type to a study that does not exist" in {
-      ???
+      val study2 = factory.createDisabledStudy
+
+      val annotType = factory.createCollectionEventAnnotationType
+
+      val cmd = AddCollectionEventAnnotationTypeCmd(
+        annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
+        annotType.maxValueCount, annotType.options)
+      val validation = ask(studyProcessor, cmd)
+        .mapTo[DomainValidation[CollectionEventAnnotationTypeAddedEvent]]
+        .futureValue
+
+      validation should be('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include regex s"${study2.id.id}.*not found"
+      }
     }
 
     "not add a cevent annotation type if the name already exists" in {

@@ -54,7 +54,7 @@ object StudyCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  case class UnetireStudyCmd(
+  case class UnretireStudyCmd(
     id: String,
     expectedVersion: Option[Long])
       extends StudyCommand
@@ -62,7 +62,9 @@ object StudyCommands {
       with HasExpectedVersion
 
   // specimen group commands
-  trait SpecimenGroupCommand extends StudyCommand with HasStudyIdentity
+  trait StudyCommandWithId extends StudyCommand with HasStudyIdentity
+
+  trait SpecimenGroupCommand extends StudyCommandWithId
 
   case class AddSpecimenGroupCmd(
     studyId: String,
@@ -99,7 +101,7 @@ object StudyCommands {
       with HasExpectedVersion
 
   // collection event type commands
-  trait CollectionEventTypeCommand extends StudyCommand with HasStudyIdentity
+  trait CollectionEventTypeCommand extends StudyCommandWithId
 
   case class AddCollectionEventTypeCmd(
     studyId: String,
@@ -132,7 +134,7 @@ object StudyCommands {
       with HasExpectedVersion
 
   // study annotation type commands
-  trait StudyAnnotationTypeCommand extends StudyCommand with HasStudyIdentity
+  trait StudyAnnotationTypeCommand extends StudyCommandWithId
 
   // collection event annotation type commands
   trait CollectionEventAnnotationTypeCommand extends StudyAnnotationTypeCommand
@@ -242,7 +244,7 @@ object StudyCommands {
       with HasExpectedVersion
 
   // processing type commands
-  trait ProcessingTypeCommand extends StudyCommand with HasStudyIdentity
+  trait ProcessingTypeCommand extends StudyCommandWithId
 
   case class AddProcessingTypeCmd(
     studyId: String,

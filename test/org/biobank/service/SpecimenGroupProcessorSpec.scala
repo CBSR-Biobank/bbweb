@@ -101,7 +101,20 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
     }
 
     "not add a specimen group to a study that does not exist" in {
-      ???
+      val study2 = factory.createDisabledStudy
+      val sg = factory.createSpecimenGroup
+
+      var cmd = AddSpecimenGroupCmd(disabledStudy.id.id, sg.name, sg.description, sg.units,
+        sg.anatomicalSourceType, sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
+
+      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+        .futureValue
+
+      validation should be('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include regex s"${study2.id.id}.*not found"
+      }
     }
 
     "update a specimen group" in {

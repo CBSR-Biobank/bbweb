@@ -14,7 +14,7 @@ import org.biobank.domain.{
 import org.biobank.domain.study._
 import org.biobank.domain.study.Study
 
-import akka.actor.Props
+import akka.actor. { ActorRef, Props }
 import akka.pattern.ask
 import org.slf4j.LoggerFactory
 import akka.persistence.SnapshotOffer
@@ -79,21 +79,50 @@ trait StudyProcessorComponent
 
       case cmd: DisableStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: SpecimenGroupCommand => specimenGroupProcessor forward cmd
+      case cmd: RetireStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: CollectionEventTypeCommand => collectionEventTypeProcessor forward cmd
+      case cmd: UnretireStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: CollectionEventAnnotationTypeCommand => ceventAnnotationTypeProcessor forward cmd
+      case cmd: SpecimenGroupCommand => forwardWithCheck(specimenGroupProcessor, cmd)
 
-      case cmd: ParticipantAnnotationTypeCommand => participantAnnotationTypeProcessor forward cmd
+      case cmd: CollectionEventTypeCommand => forwardWithCheck(collectionEventTypeProcessor, cmd)
 
-      case cmd: ProcessingTypeCommand => processingTypeProcessor forward cmd
+      case cmd: CollectionEventAnnotationTypeCommand => forwardWithCheck(ceventAnnotationTypeProcessor, cmd)
 
-      case cmd: SpecimenLinkTypeCommand => specimenLinkTypeProcessor forward cmd
+      case cmd: ParticipantAnnotationTypeCommand => forwardWithCheck(participantAnnotationTypeProcessor, cmd)
 
-      case cmd: SpecimenLinkAnnotationTypeCommand => specimenLinkAnnotationTypeProcessor forward cmd
+      case cmd: ProcessingTypeCommand => forwardWithCheck(processingTypeProcessor, cmd)
 
-      case other => // must be for another command handler
+      case cmd: SpecimenLinkTypeCommand => forwardWithCheck(specimenLinkTypeProcessor, cmd)
+
+      case cmd: SpecimenLinkAnnotationTypeCommand => forwardWithCheck(specimenLinkAnnotationTypeProcessor,  cmd)
+
+      case other =>
+        throw new Error("invalid message received")
+    }
+
+    private def forwardWithCheck(childActor: ActorRef, cmd: StudyCommandWithId) = {
+      val validation = for {
+        study <- studyRepository.getByKey(StudyId(cmd.studyId))
+      } yield {
+        childActor forward cmd
+      }
+
+      if (validation.isFailure) {
+        context.sender ! validation
+      }
+    }
+
+    private def forwardWithCheck(childActor: ActorRef, cmd: SpecimenLinkTypeCommand) = {
+      val validation = for {
+        processingType <- processingTypeRepository.getByKey(ProcessingTypeId(cmd.processingTypeId))
+      } yield {
+        childActor forward cmd
+      }
+
+      if (validation.isFailure) {
+        context.sender ! validation
+      }
     }
 
     private def validateCmd(cmd: AddStudyCmd): DomainValidation[StudyAddedEvent] = {
@@ -153,7 +182,7 @@ trait StudyProcessorComponent
       } yield event
     }
 
-    private def validateCmd(cmd: UnetireStudyCmd): DomainValidation[StudyUnretiredEvent] = {
+    private def validateCmd(cmd: UnretireStudyCmd): DomainValidation[StudyUnretiredEvent] = {
       val studyId = StudyId(cmd.id)
       for {
         retiredStudy <- isStudyRetired(studyId)

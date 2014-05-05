@@ -67,7 +67,21 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
     }
 
     "not add a participant annotation type to a study that does not exist" in {
-      ???
+      val study2 = factory.createDisabledStudy
+      val annotType = factory.createParticipantAnnotationType
+
+      val cmd = AddParticipantAnnotationTypeCmd(
+        annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
+        annotType.maxValueCount, annotType.options)
+      val validation = ask(studyProcessor, cmd)
+        .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
+        .futureValue
+
+      validation should be('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include regex s"${study2.id.id}.*not found"
+      }
     }
 
     "not add a participant annotation type if the name already exists" in {
