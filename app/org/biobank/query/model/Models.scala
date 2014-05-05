@@ -5,7 +5,7 @@ package org.biobank.query.model
 // Commenting out code for now
 // import slick.lifted.{ Join, MappedTypeMapper }
 
-// import java.util.Date
+// import com.github.nscala_time.time.Imports._
 // import play.api.Play.current
 // import play.api.db.slick.Config.driver.simple._
 

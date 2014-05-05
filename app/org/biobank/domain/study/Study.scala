@@ -17,6 +17,7 @@ import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
 import org.biobank.domain.validation.StudyValidationHelper
 
+import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -40,6 +41,8 @@ sealed trait Study
     s"""|${this.getClass.getSimpleName}: {
         |  id: $id,
         |  version: $version,
+        |  addedDate: $addedDate,
+        |  lastUpdateDate: $lastUpdateDate,
         |  name: $name,
         |  description: $description
         |}""".stripMargin
@@ -56,6 +59,8 @@ sealed trait Study
 case class DisabledStudy private (
   id: StudyId,
   version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   description: Option[String])
   extends Study {
@@ -189,7 +194,7 @@ object DisabledStudy extends StudyValidationHelper {
       validateAndIncrementVersion(version) |@|
       validateNonEmpty(name, "name is null or empty") |@|
       validateNonEmptyOption(description, "description is null or empty")) {
-        DisabledStudy(_, _, _, _)
+        DisabledStudy(_, _, org.joda.time.DateTime.now, None, _, _)
       }
   }
 }
@@ -203,6 +208,8 @@ object DisabledStudy extends StudyValidationHelper {
 case class EnabledStudy private (
   id: StudyId,
   version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   description: Option[String])
   extends Study {
@@ -228,7 +235,7 @@ object EnabledStudy extends StudyValidationHelper {
       validateAndIncrementVersion(study.version) |@|
       validateNonEmpty(study.name, "name is null or empty") |@|
       validateNonEmptyOption(study.description, "description is null or empty")) {
-        EnabledStudy(_, _, _, _)
+        EnabledStudy(_, _, study.addedDate, Some(org.joda.time.DateTime.now), _, _)
       }
   }
 }
@@ -242,6 +249,8 @@ object EnabledStudy extends StudyValidationHelper {
 case class RetiredStudy private (
   id: StudyId,
   version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   description: Option[String])
   extends Study {
@@ -267,7 +276,7 @@ object RetiredStudy extends StudyValidationHelper {
       validateAndIncrementVersion(study.version) |@|
       validateNonEmpty(study.name, "name is null or empty") |@|
       validateNonEmptyOption(study.description, "description is null or empty")) {
-        RetiredStudy(_, _, _, _)
+        RetiredStudy(_, _, study.addedDate, Some(org.joda.time.DateTime.now), _, _)
       }
   }
 }

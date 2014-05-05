@@ -5,6 +5,7 @@ import org.biobank.fixture.NameGenerator
 
 import org.scalatest.OptionValues._
 import org.slf4j.LoggerFactory
+import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -26,10 +27,15 @@ class StudySpec extends DomainSpec {
       val study = v.getOrElse(fail("could not create study"))
       study shouldBe a[DisabledStudy]
 
-      study.id should be(id)
-      study.version should be(0L)
-      study.name should be(name)
-      study.description should be(description)
+      study should have (
+        'id (id),
+        'version (0L),
+        'name (name),
+        'description (description)
+      )
+
+      study.addedDate should be < DateTime.now
+      study.lastUpdateDate should be ('None)
     }
 
     "be updated" in {

@@ -9,6 +9,7 @@ import org.biobank.domain.{
 }
 import org.biobank.domain.validation.StudyValidationHelper
 
+import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -27,6 +28,8 @@ case class ProcessingType private (
   studyId: StudyId,
   id: ProcessingTypeId,
   version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   description: Option[String],
   enabled: Boolean)
@@ -52,6 +55,8 @@ case class ProcessingType private (
     s"""|ProcessingType:{
         |  studyId: $studyId,
         |  id: $id,
+        |  addedDate: $addedDate,
+        |  lastUpdateDate: $lastUpdateDate,
         |  version: $version,
         |  name: $name,
         |  description: $description,
@@ -73,7 +78,7 @@ object ProcessingType extends StudyValidationHelper {
       validateAndIncrementVersion(version) |@|
       validateNonEmpty(name, "name is null or empty") |@|
       validateNonEmptyOption(description, "description is null or empty")) {
-      ProcessingType(_, _, _, _, _, enabled)
+      ProcessingType(_, _, _, DateTime.now, None, _, _, enabled)
     }
   }
 }

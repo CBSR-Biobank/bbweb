@@ -1,7 +1,7 @@
 package org.biobank.domain
 
 import org.biobank.infrastructure._
-
+import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -18,11 +18,15 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
   /** The version converted to a Option. */
   val versionOption = if (version < 0) None else Some(version)
 
+  /** The date and time when this entity was added to the system. */
+  val addedDate: DateTime
+
+  /** The date and time when this entity was last updated. */
+  val lastUpdateDate: Option[DateTime]
+
   // FIXME: move these to another object
   //  val addedBy: UserId
-  //  val timeAdded: Long
   //  val updatedBy: Option[UserId]
-  //  val timeUpdated: Option[Long]
 
   protected def invalidVersion(expected: Long) =
     DomainError(

@@ -2,7 +2,7 @@ package org.biobank.domain
 
 import org.biobank.domain.validation.UserValidationHelper
 import org.biobank.infrastructure.event.UserEvents._
-
+import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -40,6 +40,8 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
     s"""|${this.getClass.getSimpleName}: {
         |  id: $id,
         |  version: $version,
+        |  addedDate: $addedDate,
+        |  lastUpdateDate: $lastUpdateDate,
         |  name: $name,
         |  email: $email
         |}""".stripMargin
@@ -51,6 +53,8 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
 case class RegisteredUser private (
   id: UserId,
   version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   email: String,
   password: String,
@@ -88,7 +92,7 @@ object RegisteredUser extends UserValidationHelper {
       validateNonEmpty(hasher, "hasher is null or empty") |@|
       validateNonEmptyOption(salt, "salt is null or empty") |@|
       validateAvatarUrl(avatarUrl)) {
-        RegisteredUser(_, _, _, _, _, _, _, _)
+        RegisteredUser(_, _, DateTime.now, None, _, _, _, _, _, _)
       }
   }
 
@@ -98,6 +102,8 @@ object RegisteredUser extends UserValidationHelper {
 case class ActiveUser private (
   id: UserId,
   version: Long = -1,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   email: String,
   password: String,
@@ -129,7 +135,7 @@ object ActiveUser extends UserValidationHelper {
       validateNonEmpty(user.hasher, "hasher is null or empty") |@|
       validateNonEmptyOption(user.salt, "salt is null or empty") |@|
       validateAvatarUrl(user.avatarUrl)) {
-        ActiveUser(_, _, _, _, _, _, _, _)
+        ActiveUser(_, _, user.addedDate, Some(DateTime.now), _, _, _, _, _, _)
       }
   }
 
@@ -139,6 +145,8 @@ object ActiveUser extends UserValidationHelper {
 case class LockedUser private (
   id: UserId,
   version: Long = -1,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   email: String,
   password: String,
@@ -169,7 +177,7 @@ object LockedUser extends UserValidationHelper {
       validateNonEmpty(user.hasher, "hasher is null or empty") |@|
       validateNonEmptyOption(user.salt, "salt is null or empty") |@|
       validateAvatarUrl(user.avatarUrl)) {
-        LockedUser(_, _, _, _, _, _, _, _)
+        LockedUser(_, _, user.addedDate, Some(DateTime.now), _, _, _, _, _, _)
       }
   }
 

@@ -4,6 +4,7 @@ import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
 import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
 import org.biobank.domain.AnnotationValueType._
 
+import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -14,6 +15,8 @@ case class ParticipantAnnotationType private (
    studyId: StudyId,
    id: AnnotationTypeId,
    version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
    name: String,
    description: Option[String],
    valueType: AnnotationValueType,
@@ -27,6 +30,8 @@ case class ParticipantAnnotationType private (
         |  studyId: $studyId,
         |  id: $id,
         |  version: $version,
+        |  addedDate: $addedDate,
+        |  lastUpdateDate: $lastUpdateDate,
         |  name: $name,
         |  description: $description,
         |  valueType: $valueType,
@@ -71,7 +76,7 @@ object ParticipantAnnotationType extends StudyAnnotationTypeValidationHelper {
       validateNonEmptyOption(description, "description is null or empty") |@|
       validateMaxValueCount(maxValueCount) |@|
       validateOptions(options)) {
-        ParticipantAnnotationType(_, _, _, _, _, valueType, _, _, required)
+        ParticipantAnnotationType(_, _, _, org.joda.time.DateTime.now, None, _, _, valueType, _, _, required)
       }
   }
 

@@ -42,6 +42,7 @@ libraryDependencies ++= Seq(
   ),
   //"com.typesafe.akka"   %% "akka-testkit"                   % "2.3.1"              % "test",
   "com.github.ddevore"  %% "akka-persistence-mongo-casbah"  % "0.7.2-SNAPSHOT"     % "compile",
+  "com.github.nscala-time" %% "nscala-time"                 % "1.0.0"              % "compile",
   "com.typesafe"        %% "webdriver"                      % "1.0.0-M2"           % "test",
   "com.typesafe.akka"   %% "akka-testkit"                   % "2.3.2"              % "test"
   //"com.typesafe.play"   %% "play-slick"                     % "0.6.0.1",

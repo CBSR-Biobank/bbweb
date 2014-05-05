@@ -7,6 +7,6 @@ object AnnotationValueType extends Enumeration {
   type AnnotationValueType = Value
   val Text = Value("Text")
   val Number = Value("Number")
-  val Date = Value("Date")
+  val DateTime = Value("DateTime")
   val Select = Value("Select")
 }

@@ -11,6 +11,7 @@ import org.biobank.domain.{
 import org.biobank.infrastructure._
 import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
 
+import com.github.nscala_time.time.Imports._
 import scalaz._
 import Scalaz._
 import typelevel._
@@ -49,6 +50,8 @@ case class SpecimenLinkType private (
   processingTypeId: ProcessingTypeId,
   id: SpecimenLinkTypeId,
   version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   expectedInputChange: BigDecimal,
   expectedOutputChange: BigDecimal,
   inputCount: Int,
@@ -86,6 +89,8 @@ case class SpecimenLinkType private (
         |  processingTypeId: $processingTypeId,
         |  id: $id,
         |  version: $version,
+        |  addedDate: $addedDate,
+        |  lastUpdateDate: $lastUpdateDate,
         |  expectedInputChange: $expectedInputChange,
         |  expectedOutputChange: $expectedOutputChange,
         |  inputCount: $inputCount,
@@ -132,9 +137,9 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
       outputContainerTypeId: Option[ContainerTypeId] = None,
       annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData],
       ignore: Boolean): SpecimenLinkType = {
-      SpecimenLinkType(processingTypeId, id, version, expectedInputChange, expectedOutputChange,
-        inputCount, outputCount, inputGroupId, outputGroupId, inputContainerTypeId,
-        outputContainerTypeId, annotationTypeData)
+      SpecimenLinkType(processingTypeId, id, version, DateTime.now, None, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, inputGroupId, outputGroupId,
+        inputContainerTypeId, outputContainerTypeId, annotationTypeData)
     }
 
     (validateId(processingTypeId) :^:

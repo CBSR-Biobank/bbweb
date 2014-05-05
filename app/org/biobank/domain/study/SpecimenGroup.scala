@@ -14,6 +14,7 @@ import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
 
+import com.github.nscala_time.time.Imports._
 import scalaz._
 import Scalaz._
 
@@ -37,6 +38,8 @@ case class SpecimenGroup private (
   studyId: StudyId,
   id: SpecimenGroupId,
   version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   description: Option[String],
   units: String,
@@ -55,6 +58,8 @@ case class SpecimenGroup private (
         |  id: $id,
         |  version: $version,
         |  name: $name,
+        |  addedDate: $addedDate,
+        |  lastUpdateDate: $lastUpdateDate,
         |  description: $description,
         |  units: $units,
         |  anatomicalSourceType: $anatomicalSourceType,
@@ -112,7 +117,7 @@ object SpecimenGroup extends StudyValidationHelper {
       validateNonEmpty(name, "name is null or empty") |@|
       validateNonEmptyOption(description, "description is null or empty") |@|
       validateNonEmpty(units, "units is null or empty")) {
-      SpecimenGroup(_, _, _, _, _, _, anatomicalSourceType, preservationType,
+      SpecimenGroup(_, _, _, DateTime.now, None, _, _, _, anatomicalSourceType, preservationType,
         preservationTemperatureType, specimenType)
     }
   }

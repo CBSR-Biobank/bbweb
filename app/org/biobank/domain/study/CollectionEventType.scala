@@ -12,7 +12,7 @@ import org.biobank.domain.{
 }
 
 import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
-
+import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -38,6 +38,8 @@ case class CollectionEventType private (
   studyId: StudyId,
   id: CollectionEventTypeId,
   version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   description: Option[String],
   recurring: Boolean,
@@ -67,6 +69,8 @@ case class CollectionEventType private (
         |  studyId: $studyId,
         |  id: $id,
         |  version: $version,
+        |  addedDate: $addedDate,
+        |  lastUpdateDate: $lastUpdateDate,
         |  name: $name,
         |  description: $description,
         |  recurring: $recurring,
@@ -93,7 +97,7 @@ object CollectionEventType extends StudyAnnotationTypeValidationHelper {
       validateNonEmptyOption(description, "description is null or empty") |@|
       validateSpecimenGroupData(specimenGroupData) |@|
       validateAnnotationTypeData(annotationTypeData)) {
-      CollectionEventType(_, _, _, _, _, recurring, _, _)
+      CollectionEventType(_, _, _, DateTime.now, None, _, _, recurring, _, _)
     }
   }
 
