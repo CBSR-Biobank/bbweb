@@ -95,7 +95,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       }
     }
 
-    "be able to update a study with the same name" in {
+    "update a study with the same name" in {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
 
@@ -112,7 +112,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       }
     }
 
-    "be able to update a study with new a name or description" in {
+    "update a study with new a name or description" in {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
 
