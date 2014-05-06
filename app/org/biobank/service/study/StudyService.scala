@@ -341,14 +341,13 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
         _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeRemovedEvent]])
 
     // specimen link annotation types
-    //
-    // FIXME: rename this to specimenLinkAnnotationTypeCanBeUpdated
     def isSpecimenLinkAnnotationTypeInUse(
       studyId: String, annotationTypeId: String): DomainValidation[Boolean] = {
-      // TODO: needs implementation
-      //
-      // return true if used by any participants
-      false.success
+      for {
+        at <- specimenLinkAnnotationTypeRepository.withId(
+          StudyId(studyId), AnnotationTypeId(annotationTypeId))
+        inUse <- specimenLinkTypeRepository.annotationTypeInUse(at).success
+      } yield inUse
     }
 
     def specimenLinkAnnotationTypesForStudy(studyId: String): Set[SpecimenLinkAnnotationType] =
