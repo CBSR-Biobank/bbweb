@@ -91,7 +91,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
         valueType, maxValueCount, options)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("study id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
@@ -109,7 +109,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
         valueType, maxValueCount, options)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("annotation type id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 

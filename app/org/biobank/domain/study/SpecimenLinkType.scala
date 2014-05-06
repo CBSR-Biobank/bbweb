@@ -181,10 +181,4 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
     }
   }
 
-  private def validateId(id: SpecimenLinkTypeId): DomainValidation[SpecimenLinkTypeId] = {
-    validateStringId(id.toString, "specimen link type id is null or empty") match {
-      case Success(idString) => id.success
-      case Failure(err) => err.fail
-    }
-  }
 }

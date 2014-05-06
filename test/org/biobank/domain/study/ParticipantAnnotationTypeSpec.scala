@@ -95,7 +95,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
         maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list should (have length 1 and contain("study id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
@@ -114,7 +114,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
         maxValueCount, options, required) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list should (have length 1 and contain("annotation type id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 

@@ -117,7 +117,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("processing type id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
@@ -138,7 +138,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("specimen link type id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
@@ -159,7 +159,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("specimen group id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
 
       specimenGroupIdIn = specimenGroupRepository.nextIdentity
@@ -170,7 +170,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("specimen group id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
@@ -277,7 +277,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("collection event type id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
 
       containerTypeIdIn = Some(ContainerTypeId("abc"))
@@ -287,7 +287,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("collection event type id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
@@ -309,7 +309,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should have length 2
-          err.list(0) should be ("specimen link type id is null or empty")
+          err.list(0) should be ("id is null or empty")
           err.list(1) should be ("invalid version value: -2")
       }
     }
@@ -332,7 +332,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = annotationTypeData)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("annotation type id is null or empty"))
+        err.list should have length 1
+        err.list(0) should include ("id is null or empty")
       }
     }
 

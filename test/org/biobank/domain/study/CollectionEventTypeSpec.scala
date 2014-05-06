@@ -98,7 +98,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-        err.list should (have length 1 and contain("study id is null or empty"))
+        err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
@@ -116,7 +116,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-        err.list should (have length 1 and contain("collection event type id is null or empty"))
+        err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
@@ -204,7 +204,8 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-        err.list should (have length 1 and contain("specimen group id is null or empty"))
+        err.list should have length 1
+        err.list(0) should include ("id is null or empty")
       }
     }
 
@@ -258,7 +259,8 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-        err.list should (have length 1 and contain("annotation type id is null or empty"))
+        err.list should have length 1
+        err.list(0) should include ("id is null or empty")
       }
     }
 

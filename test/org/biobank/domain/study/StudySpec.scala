@@ -148,7 +148,7 @@ class StudySpec extends DomainSpec {
       DisabledStudy.create(id, version, name, description) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list should (have length 1 and contain("study id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 

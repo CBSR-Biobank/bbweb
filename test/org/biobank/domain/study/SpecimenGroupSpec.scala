@@ -103,7 +103,7 @@ class SpecimenGroupSpec extends DomainSpec {
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list should (have length 1 and contain("study id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
@@ -123,7 +123,7 @@ class SpecimenGroupSpec extends DomainSpec {
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) match {
         case Success(user) => fail
         case Failure(err) =>
-          err.list should (have length 1 and contain("specimen group id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 

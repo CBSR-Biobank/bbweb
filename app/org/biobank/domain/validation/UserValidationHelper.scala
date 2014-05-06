@@ -14,15 +14,6 @@ trait UserValidationHelper extends ValidationHelper {
   val emailRegex = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?".r
   val urlRegex = "^((https?|ftp)://|(www|ftp)\\.)[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$".r
 
-  def validateId(id: UserId): DomainValidation[UserId] = {
-    val idString = id.toString
-    if ((idString == null) || idString.isEmpty()) {
-      "id is null or empty".failNel
-    } else {
-      id.success
-    }
-  }
-
   def validateEmail(email: String): DomainValidation[String] = {
     emailRegex.findFirstIn(email) match {
       case Some(e) => email.success

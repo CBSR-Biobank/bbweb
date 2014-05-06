@@ -82,7 +82,7 @@ class ProcessingTypeSpec extends DomainSpec {
               description, enabled)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("study id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
@@ -98,7 +98,7 @@ class ProcessingTypeSpec extends DomainSpec {
               description, enabled)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("processing type id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 

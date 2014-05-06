@@ -13,36 +13,9 @@ import scalaz.Scalaz._
 
 trait StudyValidationHelper extends ValidationHelper {
 
-  protected def validateId(id: StudyId): DomainValidation[StudyId] = {
-    validateStringId(id.toString, "study id is null or empty") match {
-      case Success(idString) => id.success
-      case Failure(err) => err.fail
-    }
-  }
-
-  protected def validateId(id: SpecimenGroupId): DomainValidation[SpecimenGroupId] = {
-    validateStringId(id.toString, "specimen group id is null or empty") match {
-      case Success(idString) => id.success
-      case Failure(err) => err.fail
-    }
-  }
-
-  protected def validateId(id: ProcessingTypeId): DomainValidation[ProcessingTypeId] = {
-    validateStringId(id.toString, "processing type id is null or empty") match {
-      case Success(idString) => id.success
-      case Failure(err) => err.fail
-    }
-  }
 }
 
 trait StudyAnnotationTypeValidationHelper extends StudyValidationHelper {
-
-    def validateId(id: AnnotationTypeId): DomainValidation[AnnotationTypeId] = {
-    validateStringId(id.toString, "annotation type id is null or empty") match {
-      case Success(idString) => id.success
-      case Failure(err) => err.fail
-    }
-  }
 
   def validateMaxValueCount(option: Option[Int]): DomainValidation[Option[Int]] =
     option match {
@@ -83,9 +56,7 @@ trait StudyAnnotationTypeValidationHelper extends StudyValidationHelper {
     annotationTypeData: List[T]): DomainValidation[List[T]] = {
 
     def validateAnnotationTypeItem(annotationTypeItem: T): DomainValidation[T] = {
-      validateStringId(
-        annotationTypeItem.annotationTypeId,
-        "annotation type id is null or empty") match {
+      validateStringId(annotationTypeItem.annotationTypeId, "annotation type id is null or empty") match {
         case Success(id) => annotationTypeItem.success
         case Failure(err) => err.fail
       }

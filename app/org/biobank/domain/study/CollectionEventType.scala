@@ -105,13 +105,6 @@ object CollectionEventType extends StudyAnnotationTypeValidationHelper {
     }
   }
 
-  protected def validateId(id: CollectionEventTypeId): DomainValidation[CollectionEventTypeId] = {
-    validateStringId(id.toString, "collection event type id is null or empty") match {
-      case Success(idString) => id.success
-      case Failure(err) => err.fail
-    }
-  }
-
   /**
     *  Validates each item in the set and returns all failures.
     */

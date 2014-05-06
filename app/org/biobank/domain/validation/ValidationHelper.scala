@@ -56,17 +56,15 @@ private[domain] trait ValidationHelper {
   protected def validateAndIncrementVersion(v: Long): DomainValidation[Long] =
     if (v >= -1) (v + 1).success else s"invalid version value: $v".failNel
 
-  //  FIXME: find a better spot for this function
-  protected def validateId(id: ContainerTypeId): DomainValidation[ContainerTypeId] = {
-    validateStringId(id.toString, "collection event type id is null or empty") match {
+  protected def validateId[T <: IdentifiedValueObject[String]](id: T): DomainValidation[T] = {
+    validateStringId(id.toString, "id is null or empty") match {
       case Success(idString) => id.success
       case Failure(err) => err.fail
     }
   }
 
-  //  FIXME: find a better spot for this function. Paired with function above.
-  protected def validateId(
-    idOption: Option[ContainerTypeId]): DomainValidation[Option[ContainerTypeId]] = {
+  protected def validateId[T <: IdentifiedValueObject[String]](
+    idOption: Option[T]): DomainValidation[Option[T]] = {
     idOption match {
       case Some(id) =>
         validateId(id) match {
