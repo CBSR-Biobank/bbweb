@@ -79,9 +79,12 @@ case class SpecimenGroup private (
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
     for {
       validVersion <- requireVersion(expectedVersion)
-      updatedSpecimenGroup <- SpecimenGroup.create(studyId, id, version, name, description,
+      validatedSpecimenGroup <- SpecimenGroup.create(studyId, id, version, name, description,
         units, anatomicalSourceType, preservationType, preservationTemperatureType,
         specimenType)
+      updatedSpecimenGroup <- validatedSpecimenGroup.copy(
+        addedDate = this.addedDate,
+        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
     } yield updatedSpecimenGroup
   }
 }

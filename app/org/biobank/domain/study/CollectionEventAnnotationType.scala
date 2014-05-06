@@ -11,7 +11,7 @@ import scalaz.Scalaz._
 /** Used to add custom annotations to collection events. The study can define multiple
   * annotation types on collection events to store different types of data.
   */
-case class CollectionEventAnnotationType(
+case class CollectionEventAnnotationType private (
   studyId: StudyId,
   id: AnnotationTypeId,
   version: Long,
@@ -47,8 +47,11 @@ case class CollectionEventAnnotationType(
     options: Option[Map[String, String]] = None): DomainValidation[CollectionEventAnnotationType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      updatedAnnotationType <- CollectionEventAnnotationType.create(studyId, id, version,
+      validatedAnnotationType <- CollectionEventAnnotationType.create(studyId, id, version,
         name, description, valueType, maxValueCount, options)
+      updatedAnnotationType <- validatedAnnotationType.copy(
+        addedDate = this.addedDate,
+        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
     } yield updatedAnnotationType
   }
 }

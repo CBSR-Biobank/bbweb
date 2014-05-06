@@ -4,6 +4,7 @@ import org.biobank.domain.{ DomainSpec, ContainerTypeId }
 import org.biobank.infrastructure._
 import org.biobank.fixture.NameGenerator
 
+import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
@@ -47,10 +48,56 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         )
 
         slt.annotationTypeData should have length (0)
+
+        (slt.addedDate to DateTime.now).millis should be < 100L
+        slt.lastUpdateDate should be (None)
+      }
+    }
+
+    "be update" in {
+      val slt = factory.createSpecimenLinkType
+
+      val processingType = factory.defaultProcessingType
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
+
+      val expectedInputChange = BigDecimal(5.0)
+      val expectedOutputChange = BigDecimal(5.0)
+      val inputCount = 10
+      val outputCount = 10
+
+      val disabledStudy = factory.defaultDisabledStudy
+
+      val validation = slt.update(
+        slt.versionOption, expectedInputChange, expectedOutputChange, inputCount, outputCount,
+        inputSpecimenGroup.id, outputSpecimenGroup.id, annotationTypeData = List.empty)
+      validation should be ('success)
+      validation map { slt2 =>
+        slt2 should have (
+          'processingTypeId (slt.processingTypeId),
+          'id (slt.id),
+          'version (slt.version + 1),
+          'expectedInputChange (expectedInputChange),
+          'expectedOutputChange (expectedOutputChange),
+          'inputCount (inputCount),
+          'outputCount (outputCount),
+          'inputGroupId (inputSpecimenGroup.id),
+          'outputGroupId (outputSpecimenGroup.id),
+          'inputContainerTypeId (None),
+          'outputContainerTypeId (None)
+        )
+
+        slt.annotationTypeData should have length (0)
+
+        slt2.addedDate should be (slt.addedDate)
+        val updateDate = slt2.lastUpdateDate | fail
+
+        (updateDate to DateTime.now).millis should be < 100L
       }
     }
 
   }
+
   "A specimen link type" should {
 
     "not be created with an empty processing type id" in {

@@ -73,14 +73,19 @@ case class SpecimenLinkType private (
     outputCount: Int,
     inputGroupId: SpecimenGroupId,
     outputGroupId: SpecimenGroupId,
-    inputContainerTypeId: Option[ContainerTypeId],
-    outputContainerTypeId: Option[ContainerTypeId],
+    inputContainerTypeId: Option[ContainerTypeId] = None,
+    outputContainerTypeId: Option[ContainerTypeId] = None,
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData]): DomainValidation[SpecimenLinkType] = {
+
     for {
       validVersion <- requireVersion(expectedVersion)
-      newItem <- SpecimenLinkType.create(processingTypeId, id, version,  expectedInputChange,
-        expectedOutputChange, inputCount, outputCount, inputGroupId, outputGroupId,
-        inputContainerTypeId, outputContainerTypeId, annotationTypeData)
+      validatedItem <- SpecimenLinkType.create(
+        processingTypeId, id, version,  expectedInputChange, expectedOutputChange, inputCount,
+        outputCount, inputGroupId, outputGroupId, inputContainerTypeId, outputContainerTypeId,
+        annotationTypeData)
+      newItem <- validatedItem.copy(
+        addedDate = this.addedDate,
+        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
     } yield newItem
   }
 

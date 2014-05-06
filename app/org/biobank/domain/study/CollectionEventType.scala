@@ -59,9 +59,12 @@ case class CollectionEventType private (
     annotationTypeData: List[CollectionEventTypeAnnotationTypeData]): DomainValidation[CollectionEventType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      newItem <- CollectionEventType.create(studyId, id, version, name, description, recurring,
-        specimenGroupData, annotationTypeData)
-    } yield newItem
+      validatedCeventType <- CollectionEventType.create(
+        studyId, id, version, name, description, recurring, specimenGroupData, annotationTypeData)
+      updatedCeventType <- validatedCeventType.copy(
+        addedDate = this.addedDate,
+        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+    } yield updatedCeventType
   }
 
   override def toString: String =
@@ -77,6 +80,7 @@ case class CollectionEventType private (
         |  specimenGroupData: { $specimenGroupData },
         |  annotationTypeData: { $annotationTypeData }
         |}""".stripMargin
+
 }
 
 object CollectionEventType extends StudyAnnotationTypeValidationHelper {

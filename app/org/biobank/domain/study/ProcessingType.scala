@@ -44,10 +44,13 @@ case class ProcessingType private (
     expectedVersion: Option[Long],
     name: String,
     description: Option[String],
-    enaled: Boolean): DomainValidation[ProcessingType] = {
+    enabled: Boolean): DomainValidation[ProcessingType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      newItem <- ProcessingType.create(studyId, id, version, name, description, enabled)
+      validatedItem <- ProcessingType.create(studyId, id, version, name, description, enabled)
+      newItem <- validatedItem.copy(
+        addedDate = this.addedDate,
+        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
     } yield newItem
   }
 

@@ -32,7 +32,7 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
     DomainError(
     s"""|${this.getClass}: expected version doesn't match current version: {
         |  id: $id,
-        |  actualVersion: $version,
+        |  version: $version,
         |  expectedVersion: $expected
         |}""".stripMargin)
 

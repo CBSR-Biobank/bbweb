@@ -3,7 +3,7 @@ package org.biobank.domain.study
 import org.biobank.domain.DomainSpec
 import org.biobank.infrastructure._
 import org.biobank.fixture.NameGenerator
-
+import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
@@ -34,18 +34,52 @@ class CollectionEventTypeSpec extends DomainSpec {
         cet shouldBe a[CollectionEventType]
 
         cet should have (
-        'studyId (studyId),
-        'id (id),
-        'version (0L),
-        'name (name),
-        'description (description),
-        'recurring (recurring)
+          'studyId (studyId),
+          'id (id),
+          'version (0L),
+          'name (name),
+          'description (description),
+          'recurring (recurring)
         )
 
         cet.specimenGroupData should have length 1
         cet.annotationTypeData should have length 1
+
+        (cet.addedDate to DateTime.now).millis should be < 100L
+        cet.lastUpdateDate should be (None)
       }
     }
+
+    "be updated" in {
+      val cet = factory.createCollectionEventType
+
+      val name = nameGenerator.next[CollectionEventType]
+      val description = some(nameGenerator.next[CollectionEventType])
+      val recurring = !cet.recurring
+      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
+
+      val cet2 = cet.update(
+        cet.versionOption, name, description, recurring, specimenGroupData, annotationTypeData) | fail
+      cet2 shouldBe a[CollectionEventType]
+
+      cet2 should have (
+        'studyId (cet.studyId),
+        'id (cet.id),
+        'version (cet.version + 1),
+        'name (name),
+        'description (description),
+        'recurring (recurring)
+      )
+
+      cet2.specimenGroupData should have length 1
+      cet2.annotationTypeData should have length 1
+
+      cet2.addedDate should be (cet.addedDate)
+      val updateDate = cet2.lastUpdateDate | fail
+      (updateDate to DateTime.now).millis should be < 100L
+    }
+
   }
 
   "A collection event type" should {
@@ -64,7 +98,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("study id is null or empty"))
+        err.list should (have length 1 and contain("study id is null or empty"))
       }
     }
 
@@ -82,7 +116,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("collection event type id is null or empty"))
+        err.list should (have length 1 and contain("collection event type id is null or empty"))
       }
     }
 
@@ -100,7 +134,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("invalid version value: -2"))
+        err.list should (have length 1 and contain("invalid version value: -2"))
       }
     }
 
@@ -118,7 +152,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("name is null or empty"))
+        err.list should (have length 1 and contain("name is null or empty"))
       }
 
       name = ""
@@ -126,7 +160,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation2 should be ('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("name is null or empty"))
+        err.list should (have length 1 and contain("name is null or empty"))
       }
     }
 
@@ -144,7 +178,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("description is null or empty"))
+        err.list should (have length 1 and contain("description is null or empty"))
       }
 
       description = Some("")
@@ -152,7 +186,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation2 should be ('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("description is null or empty"))
+        err.list should (have length 1 and contain("description is null or empty"))
       }
     }
 
@@ -170,7 +204,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("specimen group id is null or empty"))
+        err.list should (have length 1 and contain("specimen group id is null or empty"))
       }
     }
 
@@ -188,7 +222,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("max count is not a positive number"))
+        err.list should (have length 1 and contain("max count is not a positive number"))
       }
     }
 
@@ -206,7 +240,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("amount not is a positive number"))
+        err.list should (have length 1 and contain("amount not is a positive number"))
       }
     }
 
@@ -224,7 +258,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("annotation type id is null or empty"))
+        err.list should (have length 1 and contain("annotation type id is null or empty"))
       }
     }
 
@@ -242,9 +276,9 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should have length 2
-          err.list.head should be ("invalid version value: -2")
-          err.list.tail.head should be ("name is null or empty")
+        err.list should have length 2
+        err.list.head should be ("invalid version value: -2")
+        err.list.tail.head should be ("name is null or empty")
       }
     }
 

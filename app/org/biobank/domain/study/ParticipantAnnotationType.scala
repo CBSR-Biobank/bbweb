@@ -50,8 +50,11 @@ case class ParticipantAnnotationType private (
     required: Boolean = false): DomainValidation[ParticipantAnnotationType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      updatedAnnotationType <- ParticipantAnnotationType.create(studyId, id, version,
-        name, description, valueType, maxValueCount, options, required)
+      validatedAnnotationType <- ParticipantAnnotationType.create(
+        studyId, id, version, name, description, valueType, maxValueCount, options, required)
+      updatedAnnotationType <- validatedAnnotationType.copy(
+        addedDate = this.addedDate,
+        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
     } yield updatedAnnotationType
   }
 

@@ -47,9 +47,12 @@ case class SpecimenLinkAnnotationType private (
     options: Option[Map[String, String]] = None): DomainValidation[SpecimenLinkAnnotationType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      updatedAnnotationType <- SpecimenLinkAnnotationType.create(studyId, id, version,
+      validatedAnnotationType <- SpecimenLinkAnnotationType.create(studyId, id, version,
         name, description, valueType, maxValueCount, options)
-    } yield updatedAnnotationType
+      newItem <- validatedAnnotationType.copy(
+        addedDate = this.addedDate,
+        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+    } yield newItem
   }
 
 }

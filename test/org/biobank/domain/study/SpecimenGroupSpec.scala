@@ -7,10 +7,9 @@ import org.biobank.domain.AnatomicalSourceType
 import org.biobank.domain.PreservationType
 import org.biobank.domain.PreservationTemperatureType
 import org.biobank.domain.SpecimenType
-
+import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
-
 
 class SpecimenGroupSpec extends DomainSpec {
 
@@ -46,46 +45,42 @@ class SpecimenGroupSpec extends DomainSpec {
         'preservationTemperatureType   (preservationTemperatureType),
         'specimenType                  (specimenType)
       )
+
+      (specimenGroup.addedDate to DateTime.now).millis should be < 100L
+      specimenGroup.lastUpdateDate should be (None)
     }
 
     "be updated" in {
-      val studyId = StudyId(nameGenerator.next[SpecimenGroup])
-      val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
-      val version = -1L
+      val specimenGroup = factory.createSpecimenGroup
+
       val name = nameGenerator.next[SpecimenGroup]
       val description = some(nameGenerator.next[SpecimenGroup])
       val units = nameGenerator.next[SpecimenGroup]
-      val anatomicalSourceType = AnatomicalSourceType.Blood
-      val preservationType = PreservationType.FrozenSpecimen
-      val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
-      val specimenType = SpecimenType.BuffyCoat
+      val anatomicalSourceType = AnatomicalSourceType.Colon
+      val preservationType = PreservationType.RnaLater
+      val preservationTemperatureType = PreservationTemperatureType.RoomTemperature
+      val specimenType = SpecimenType.Plasma
 
-      val specimenGroup = SpecimenGroup.create(studyId, id, version, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) | fail
-
-      val name2 = nameGenerator.next[SpecimenGroup]
-      val description2 = some(nameGenerator.next[SpecimenGroup])
-      val units2 = nameGenerator.next[SpecimenGroup]
-      val anatomicalSourceType2 = AnatomicalSourceType.Colon
-      val preservationType2 = PreservationType.RnaLater
-      val preservationTemperatureType2 = PreservationTemperatureType.RoomTemperature
-      val specimenType2 = SpecimenType.Plasma
-
-      val updatedSg = specimenGroup.update(Some(0L), name2, description2, units2,
-        anatomicalSourceType2, preservationType2, preservationTemperatureType2, specimenType2) | fail
+      val updatedSg = specimenGroup.update(
+        specimenGroup.versionOption, name, description, units, anatomicalSourceType, preservationType,
+        preservationTemperatureType, specimenType) | fail
 
       updatedSg should have (
-        'studyId                       (studyId),
-        'id                            (id),
-        'version                       (1L),
-        'name                          (name2),
-        'description                   (description2),
-        'units                         (units2),
-        'anatomicalSourceType          (anatomicalSourceType2),
-        'preservationType              (preservationType2),
-        'preservationTemperatureType   (preservationTemperatureType2),
-        'specimenType                  (specimenType2)
+        'studyId                     (specimenGroup.studyId),
+        'id                          (specimenGroup.id),
+        'version                     (specimenGroup.version + 1),
+        'name                        (name),
+        'description                 (description),
+        'units                       (units),
+        'anatomicalSourceType        (anatomicalSourceType),
+        'preservationType            (preservationType),
+        'preservationTemperatureType (preservationTemperatureType),
+        'specimenType                (specimenType)
       )
+
+      updatedSg.addedDate should be (specimenGroup.addedDate)
+      val updateDate = updatedSg.lastUpdateDate | fail
+      (updateDate to DateTime.now).millis should be < 100L
     }
 
   }

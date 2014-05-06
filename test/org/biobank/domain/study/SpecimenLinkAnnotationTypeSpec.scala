@@ -4,11 +4,14 @@ import org.biobank.domain.DomainSpec
 import org.biobank.domain.AnnotationTypeId
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain.AnnotationValueType
-
+import com.github.nscala_time.time.Imports._
+import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
 
 class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
+
+  val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -24,21 +27,55 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       val maxValueCount = Some(1)
       val options = Some(Map("1" -> "a"))
 
-      val v = SpecimenLinkAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options)
-      val annotType = v.getOrElse(fail)
+      val annotType = SpecimenLinkAnnotationType.create(
+        studyId, id, version, name, description, valueType, maxValueCount, options) | fail
       annotType shouldBe a[SpecimenLinkAnnotationType]
 
-      annotType.studyId should be(studyId)
-      annotType.id should be(id)
-      annotType.version should be(0L)
-      annotType.name should be(name)
-      annotType.description should be(description)
-      annotType.valueType should be (valueType)
-      annotType.maxValueCount should be (maxValueCount)
-      annotType.options should be(options)
+      annotType should have (
+        'studyId (studyId),
+        'id (id),
+        'version (0L),
+        'name (name),
+        'description (description),
+        'valueType  (valueType),
+        'maxValueCount  (maxValueCount),
+        'options (options)
+      )
+
+      (annotType.addedDate to DateTime.now).millis should be < 100L
+      annotType.lastUpdateDate should be (None)
     }
 
+    "be updated" in {
+      val annotType = factory.createSpecimenLinkAnnotationType
+
+      val name = nameGenerator.next[SpecimenLinkAnnotationType]
+      val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
+      val valueType = AnnotationValueType.Number
+      val maxValueCount = Some(annotType.maxValueCount.getOrElse(0) + 100)
+      val options = Some(Map(nameGenerator.next[String] -> nameGenerator.next[String]))
+
+//      log.info(s"$annotType")
+
+      val annotType2 = annotType.update(
+        annotType.versionOption, name, description, valueType, maxValueCount, options) | fail
+      annotType2 shouldBe a[SpecimenLinkAnnotationType]
+
+      annotType2 should have (
+        'studyId (annotType.studyId),
+        'id (annotType.id),
+        'version (annotType.version + 1),
+        'name (name),
+        'description (description),
+        'valueType  (valueType),
+        'maxValueCount  (maxValueCount),
+        'options (options)
+      )
+
+      annotType2.addedDate should be (annotType.addedDate)
+      val updateDate = annotType2.lastUpdateDate | fail
+      (updateDate to DateTime.now).millis should be < 100L
+    }
   }
 
   "A specimen link annotation type" can {

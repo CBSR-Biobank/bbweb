@@ -34,7 +34,7 @@ class StudySpec extends DomainSpec {
         'description (description)
       )
 
-      (study.addedDate to DateTime.now).millis should be < 500L
+      (study.addedDate to DateTime.now).millis should be < 100L
       study.lastUpdateDate should be (None)
     }
 
@@ -61,7 +61,7 @@ class StudySpec extends DomainSpec {
 
       updatedStudy.addedDate should be (study.addedDate)
       val updateDate = updatedStudy.lastUpdateDate | fail
-      (updateDate to DateTime.now).millis should be < 500L
+      (updateDate to DateTime.now).millis should be < 100L
     }
 
     "be enabled" in {
@@ -78,7 +78,7 @@ class StudySpec extends DomainSpec {
 
       enabledStudy.addedDate should be (study.addedDate)
       var updateDate = enabledStudy.lastUpdateDate | fail
-      (updateDate to DateTime.now).millis should be < 500L
+      (updateDate to DateTime.now).millis should be < 100L
     }
 
     "disable an enabled study" in {
@@ -97,7 +97,7 @@ class StudySpec extends DomainSpec {
 
       disabledStudy.addedDate should be (study.addedDate)
       val updateDate = disabledStudy.lastUpdateDate | fail
-      (updateDate to DateTime.now).millis should be < 500L
+      (updateDate to DateTime.now).millis should be < 100L
     }
 
     "be retired" in {
@@ -114,7 +114,7 @@ class StudySpec extends DomainSpec {
 
       retiredStudy.addedDate should be (study.addedDate)
       val updateDate = retiredStudy.lastUpdateDate | fail
-      (updateDate to DateTime.now).millis should be < 500L
+      (updateDate to DateTime.now).millis should be < 100L
     }
 
     "unretire a study" in {
@@ -132,7 +132,7 @@ class StudySpec extends DomainSpec {
 
       disabledStudy.addedDate should be (study.addedDate)
       val updateDate = disabledStudy.lastUpdateDate | fail
-      (updateDate to DateTime.now).millis should be < 500L
+      (updateDate to DateTime.now).millis should be < 100L
     }
 
   }
