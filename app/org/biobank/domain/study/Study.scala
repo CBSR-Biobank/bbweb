@@ -74,8 +74,10 @@ case class DisabledStudy private (
     description: Option[String]): DomainValidation[DisabledStudy] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      updatedStudy <- DisabledStudy.create(id, version, addedDate, Some(org.joda.time.DateTime.now),
-        name, description)
+      validatedStudy <- DisabledStudy.create(id, version, name, description)
+      updatedStudy <- validatedStudy.copy(
+        addedDate = this.addedDate,
+        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
     } yield updatedStudy
   }
 
@@ -189,15 +191,13 @@ object DisabledStudy extends StudyValidationHelper {
   def create(
     id: StudyId,
     version: Long,
-    addedDate: DateTime,
-    lastUpdateDate: Option[DateTime],
     name: String,
     description: Option[String]): DomainValidation[DisabledStudy] = {
     (validateId(id) |@|
       validateAndIncrementVersion(version) |@|
       validateNonEmpty(name, "name is null or empty") |@|
       validateNonEmptyOption(description, "description is null or empty")) {
-        DisabledStudy(_, _, addedDate, lastUpdateDate, _, _)
+        DisabledStudy(_, _, org.joda.time.DateTime.now, None, _, _)
       }
   }
 }
@@ -222,8 +222,10 @@ case class EnabledStudy private (
   def disable(expectedVersion: Option[Long]): DomainValidation[DisabledStudy] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      disabledStudy <- DisabledStudy.create(id, version, addedDate, Some(org.joda.time.DateTime.now),
-        name, description)
+      validatedStudy <- DisabledStudy.create(id, version, name, description)
+      disabledStudy <- validatedStudy.copy(
+        addedDate = this.addedDate,
+        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
     } yield disabledStudy
   }
 }
@@ -264,8 +266,10 @@ case class RetiredStudy private (
   def unretire(expectedVersion: Option[Long]): DomainValidation[DisabledStudy] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      disabledStudy <- DisabledStudy.create(id, version, addedDate, Some(org.joda.time.DateTime.now),
-        name, description)
+      validatedStudy <- DisabledStudy.create(id, version, name, description)
+      disabledStudy <- validatedStudy.copy(
+        addedDate = this.addedDate,
+        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
     } yield disabledStudy
   }
 }

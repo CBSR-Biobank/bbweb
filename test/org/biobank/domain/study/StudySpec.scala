@@ -34,8 +34,8 @@ class StudySpec extends DomainSpec {
         'description (description)
       )
 
-      study.addedDate should be < DateTime.now
-      study.lastUpdateDate should be ('None)
+      (study.addedDate to DateTime.now).millis should be < 500L
+      study.lastUpdateDate should be (None)
     }
 
     "be updated" in {
@@ -52,10 +52,16 @@ class StudySpec extends DomainSpec {
 
       val updatedStudy = study.update(Some(0L), name2, description2) | fail
 
-      updatedStudy.id should be(id)
-      updatedStudy.version should be(1L)
-      updatedStudy.name should be(name2)
-      updatedStudy.description should be(description2)
+      updatedStudy should have (
+        'id (id),
+        'version (1L),
+        'name (name2),
+        'description (description2)
+      )
+
+      updatedStudy.addedDate should be (study.addedDate)
+      val updateDate = updatedStudy.lastUpdateDate | fail
+      (updateDate to DateTime.now).millis should be < 500L
     }
 
     "be enabled" in {
@@ -64,12 +70,15 @@ class StudySpec extends DomainSpec {
       val name = nameGenerator.next[Study]
       val description = some(nameGenerator.next[Study])
 
-      val v = DisabledStudy.create(id, version, name, description)
-      val disabledStudy = v.getOrElse(fail("could not create study"))
-      disabledStudy shouldBe a[DisabledStudy]
+      val study = DisabledStudy.create(id, version, name, description) | fail
+      study shouldBe a[DisabledStudy]
 
-      val enabledStudy = disabledStudy.enable(Some(0L), 1, 1) | fail
+      val enabledStudy = study.enable(Some(0L), 1, 1) | fail
       enabledStudy shouldBe a[EnabledStudy]
+
+      enabledStudy.addedDate should be (study.addedDate)
+      var updateDate = enabledStudy.lastUpdateDate | fail
+      (updateDate to DateTime.now).millis should be < 500L
     }
 
     "disable an enabled study" in {
@@ -78,13 +87,17 @@ class StudySpec extends DomainSpec {
       val name = nameGenerator.next[Study]
       val description = some(nameGenerator.next[Study])
 
-      val v = DisabledStudy.create(id, version, name, description)
-      val disabledStudy = v.getOrElse(fail("could not create study"))
+      val study = DisabledStudy.create(id, version, name, description) | fail
+      study shouldBe a[DisabledStudy]
+
+      val enabledStudy = study.enable(Some(0L), 1, 1) | fail
+
+      val disabledStudy = enabledStudy.disable(Some(1L)) | fail
       disabledStudy shouldBe a[DisabledStudy]
 
-      val enabledStudy = disabledStudy.enable(Some(0L), 1, 1) | fail
-      val disabledStudy2 = enabledStudy.disable(Some(1L)) | fail
-      disabledStudy2 shouldBe a[DisabledStudy]
+      disabledStudy.addedDate should be (study.addedDate)
+      val updateDate = disabledStudy.lastUpdateDate | fail
+      (updateDate to DateTime.now).millis should be < 500L
     }
 
     "be retired" in {
@@ -93,12 +106,15 @@ class StudySpec extends DomainSpec {
       val name = nameGenerator.next[Study]
       val description = some(nameGenerator.next[Study])
 
-      val v = DisabledStudy.create(id, version, name, description)
-      val disabledStudy = v.getOrElse(fail("could not create study"))
-      disabledStudy shouldBe a[DisabledStudy]
+      val study = DisabledStudy.create(id, version, name, description) | fail
+      study shouldBe a[DisabledStudy]
 
-      val retiredStudy = disabledStudy.retire(Some(0L)).getOrElse(fail("could not retire study"))
+      val retiredStudy = study.retire(Some(0L)) | fail
       retiredStudy shouldBe a[RetiredStudy]
+
+      retiredStudy.addedDate should be (study.addedDate)
+      val updateDate = retiredStudy.lastUpdateDate | fail
+      (updateDate to DateTime.now).millis should be < 500L
     }
 
     "unretire a study" in {
@@ -107,13 +123,16 @@ class StudySpec extends DomainSpec {
       val name = nameGenerator.next[Study]
       val description = some(nameGenerator.next[Study])
 
-      val v = DisabledStudy.create(id, version, name, description)
-      val disabledStudy = v.getOrElse(fail("could not create study"))
+      val study = DisabledStudy.create(id, version, name, description) | fail
+      study shouldBe a[DisabledStudy]
+
+      val retiredStudy = study.retire(Some(0L)) | fail
+      val disabledStudy =retiredStudy.unretire(Some(1L)) | fail
       disabledStudy shouldBe a[DisabledStudy]
 
-      val retiredStudy = disabledStudy.retire(Some(0L)).getOrElse(fail("could not retire study"))
-      val disabledStudy2 =retiredStudy.unretire(Some(1L)).getOrElse(fail("could not disable study"))
-      disabledStudy2 shouldBe a[DisabledStudy]
+      disabledStudy.addedDate should be (study.addedDate)
+      val updateDate = disabledStudy.lastUpdateDate | fail
+      (updateDate to DateTime.now).millis should be < 500L
     }
 
   }

@@ -18,7 +18,7 @@ javaOptions ++= Seq("-Xmx1024M", "-XX:MaxPermSize=512m")
 
 javaOptions in Test += "-Dconfig.file=conf/test.conf"
 
-(testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/report", "-oD")
+(testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/report")
 
 resolvers ++= Seq(
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
