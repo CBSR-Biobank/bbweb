@@ -218,8 +218,6 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
         StudyId(studyId), AnnotationTypeId(annotationTypeId))
     }
 
-    // FIXME: only commands should be sent to an aggregate
-
     def addStudy(cmd: AddStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyAddedEvent]] = {
       val id = studyRepository.nextIdentity
