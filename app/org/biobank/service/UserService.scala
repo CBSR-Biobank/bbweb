@@ -55,8 +55,8 @@ trait UserServiceComponent {
         some(PasswordInfo(PasswordHasher.BCryptHasher, user.password, None)))
     }
 
-    def add(cmd: RegisterUserCommand): Future[DomainValidation[UserRegisterdEvent]] = {
-      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserRegisterdEvent]])
+    def add(cmd: RegisterUserCommand): Future[DomainValidation[UserRegisteredEvent]] = {
+      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserRegisteredEvent]])
     }
 
   }
@@ -73,9 +73,11 @@ trait UserProcessorComponent {
   class UserProcessor extends Processor {
 
     val receiveRecover: Receive = {
-      case event: UserRegisterdEvent => recoverEvent(event)
+      case event: UserRegisteredEvent => recoverEvent(event)
 
       case event: UserActivatedEvent => recoverEvent(event)
+
+      case event: UserUpdatedEvent => recoverEvent(event)
 
       case event: UserLockedEvent => recoverEvent(event)
 
@@ -93,6 +95,8 @@ trait UserProcessorComponent {
 
       case cmd: ActivateUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
+      case cmd: UpdateUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
+
       case cmd: LockUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
       case cmd: UnlockUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
@@ -105,12 +109,12 @@ trait UserProcessorComponent {
         throw new IllegalStateException("message not handled")
     }
 
-    def validateCmd(cmd: RegisterUserCommand): DomainValidation[UserRegisterdEvent] = {
+    def validateCmd(cmd: RegisterUserCommand): DomainValidation[UserRegisteredEvent] = {
       for {
         emailAvailable <- userRepository.emailAvailable(cmd.email)
         user <- RegisteredUser.create(UserId(cmd.email), -1L, cmd.name, cmd.email,
           cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl)
-        event <- UserRegisterdEvent(user.id.toString, user.name, user.email,
+        event <- UserRegisteredEvent(user.id.toString, user.name, user.email,
           user.password, user.hasher, user.salt, user.avatarUrl).success
       } yield {
         event
@@ -123,6 +127,20 @@ trait UserProcessorComponent {
         registeredUser <- isUserRegistered(user)
         activatedUser <- registeredUser.activate(cmd.expectedVersion)
         event <- UserActivatedEvent(activatedUser.id.toString, activatedUser.version).success
+      } yield {
+        event
+      }
+    }
+
+    def validateCmd(cmd: UpdateUserCommand): DomainValidation[UserUpdatedEvent] = {
+      for {
+        user <- userRepository.getByKey(UserId(cmd.email))
+        activeUser <- isUserActive(user)
+        updatedUser <- activeUser.update(cmd.expectedVersion, cmd.name, cmd.email, cmd.password,
+          cmd.hasher, cmd.salt, cmd.avatarUrl)
+        event <- UserUpdatedEvent(updatedUser.id.id, updatedUser.version, updatedUser.name,
+          updatedUser.email, updatedUser.password, updatedUser.hasher, updatedUser.salt,
+          updatedUser.avatarUrl).success
       } yield {
         event
       }
@@ -150,7 +168,7 @@ trait UserProcessorComponent {
       }
     }
 
-    def recoverEvent(event: UserRegisterdEvent) = {
+    def recoverEvent(event: UserRegisteredEvent) = {
       log.debug(s"recoverEvent: $event")
       val validation = for {
         registeredUser <- RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
@@ -173,6 +191,24 @@ trait UserProcessorComponent {
         registeredUser <- isUserRegistered(user)
         activatedUser <- registeredUser.activate(Some(registeredUser.version))
         savedUser <- userRepository.put(activatedUser).success
+      } yield savedUser
+
+      if (validation.isFailure) {
+          // this should never happen because the only way to get here is when the
+          // command passed validation
+          throw new IllegalStateException("activating user from event failed")
+      }
+    }
+
+    def recoverEvent(event: UserUpdatedEvent): Unit = {
+      log.debug(s"recoverEvent: $event")
+
+      val validation = for {
+        user <- userRepository.getByKey(UserId(event.id))
+        activeUser <- isUserActive(user)
+        updatedUser <- activeUser.update(Some(activeUser.version), event.name, event.email,
+          event.password, event.hasher, event.salt, event.avatarUrl)
+        savedUser <- userRepository.put(updatedUser).success
       } yield savedUser
 
       if (validation.isFailure) {

@@ -84,6 +84,7 @@ object RegisteredUser extends UserValidationHelper {
     hasher: String,
     salt: Option[String],
     avatarUrl: Option[String]): DomainValidation[RegisteredUser] = {
+
     (validateId(id) |@|
       validateAndIncrementVersion(version) |@|
       validateNonEmpty(name, "name is null or empty") |@|
@@ -119,7 +120,25 @@ case class ActiveUser private (
     } yield lockedUser
   }
 
-  // FIXME: add update method
+  def update(
+    expectedVersion: Option[Long],
+    name: String,
+    email: String,
+    password: String,
+    hasher: String,
+    salt: Option[String],
+    avatarUrl: Option[String]) = {
+
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      registeredUser <- RegisteredUser.create(id, -1L, name, email, password, hasher, salt, avatarUrl)
+      validatedUser <- registeredUser.activate(registeredUser.versionOption)
+      udpatedUser <- validatedUser.copy(
+        version = this.version + 1,
+        addedDate = this.addedDate,
+        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+    } yield udpatedUser
+  }
 }
 
 /** Factory object. */

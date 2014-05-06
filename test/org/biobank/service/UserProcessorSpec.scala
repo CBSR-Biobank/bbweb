@@ -25,12 +25,12 @@ class UserProcessorSpec extends UserProcessorFixture {
 
       val cmd = RegisterUserCommand(user.name, user.email, user.password, user.hasher,
         user.salt, user.avatarUrl)
-      val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
+      val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisteredEvent]]
         .futureValue
 
       validation should be ('success)
       validation map { event =>
-        event shouldBe a [UserRegisterdEvent]
+        event shouldBe a [UserRegisteredEvent]
         event should have (
           'id (user.email),
           'name (user.name),
@@ -47,13 +47,44 @@ class UserProcessorSpec extends UserProcessorFixture {
       }
     }
 
+    "update a user" in {
+      val user = factory.createActiveUser
+      userRepository.put(user)
+
+      val user2 = factory.createActiveUser
+
+      val cmd = UpdateUserCommand(user.versionOption, user2.name, user2.email, user2.password, user2.hasher,
+        user2.salt, user2.avatarUrl)
+      val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserUpdatedEvent]]
+        .futureValue
+
+      validation should be ('success)
+      validation map { event =>
+        event shouldBe a [UserUpdatedEvent]
+        event should have (
+          'id        (user.email),
+          'version   (user.version + 1),
+          'name      (user2.name),
+          'email     (user2.email),
+          'password  (user2.password),
+          'hasher    (user2.hasher),
+          'salt      (user2.salt),
+          'avatarUrl (user2.avatarUrl)
+        )
+
+        userRepository.getByKey(UserId(event.id)) map { user =>
+          user shouldBe a[ActiveUser]
+        }
+      }
+    }
+
     "not add a user with an already registered email address" in {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
       val cmd = RegisterUserCommand(user.name, user.email, user.password, user.hasher,
         user.salt, user.avatarUrl)
-      val validation2 = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
+      val validation2 = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisteredEvent]]
         .futureValue
       validation2 should be ('failure)
 

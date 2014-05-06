@@ -15,6 +15,16 @@ object UserCommands {
     avatarUrl: Option[String])
     extends UserCommand
 
+  case class UpdateUserCommand(
+    expectedVersion: Option[Long],
+    name: String,
+    email: String,
+    password: String,
+    hasher: String,
+    salt: Option[String],
+    avatarUrl: Option[String])
+    extends UserCommand
+
   case class ActivateUserCommand(
     email: String,
     expectedVersion: Option[Long])

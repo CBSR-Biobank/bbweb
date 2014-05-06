@@ -5,8 +5,8 @@ import org.biobank.fixture.NameGenerator
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
 import org.scalatest.OptionValues._
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Tag
+import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
@@ -17,7 +17,7 @@ import scalaz.Scalaz._
  *
  */
 //@RunWith(classOf[JUnitRunner])
-class UserSpec extends WordSpecLike with Matchers {
+class UserSpec extends DomainSpec {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -28,7 +28,7 @@ class UserSpec extends WordSpecLike with Matchers {
     "be created" in {
       val version = -1L
       val name = nameGenerator.next[User]
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val id = UserId(email)
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
@@ -36,7 +36,6 @@ class UserSpec extends WordSpecLike with Matchers {
       val avatarUrl = Some("http://test.com/")
 
       val validation = RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
-
       validation should be ('success)
       validation map { user =>
         user shouldBe a[RegisteredUser]
@@ -50,13 +49,16 @@ class UserSpec extends WordSpecLike with Matchers {
           'salt (salt),
           'avatarUrl (avatarUrl)
         )
+
+        (user.addedDate to DateTime.now).millis should be < 100L
+        user.lastUpdateDate should be (None)
       }
     }
 
     "can be activated, locked, and unlocked" in {
       val version = -1L
       val name = nameGenerator.next[User]
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val id = UserId(email)
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
@@ -81,13 +83,48 @@ class UserSpec extends WordSpecLike with Matchers {
     }
   }
 
+  "An active user" can {
+
+    "be updated" in {
+      val user = factory.createActiveUser
+
+      val name = nameGenerator.next[User]
+      val email = nameGenerator.nextEmail[User]
+      val password = nameGenerator.next[User]
+      val hasher = nameGenerator.next[User]
+      val salt = Some(nameGenerator.next[User])
+      val avatarUrl = Some("http://test2.com/")
+
+      val validation = user.update(user.versionOption, name, email, password, hasher, salt, avatarUrl)
+      validation should be ('success)
+      validation map { user2 =>
+        user2 shouldBe a[ActiveUser]
+        user2 should have (
+          'id (user.id),
+          'version (user.version + 1),
+          'name (name),
+          'email (email),
+          'password (password),
+          'hasher (hasher),
+          'salt (salt),
+          'avatarUrl (avatarUrl)
+        )
+
+        user2.addedDate should be (user.addedDate)
+        val updateDate = user2.lastUpdateDate | fail
+          (updateDate to DateTime.now).millis should be < 100L
+      }
+    }
+
+  }
+
   "A user" should {
 
     "not be created with an empty id" in {
       val id = UserId("")
       val version = -1L
       val name = nameGenerator.next[User]
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
@@ -104,7 +141,7 @@ class UserSpec extends WordSpecLike with Matchers {
       val id = UserId(nameGenerator.next[User])
       val version = -2L
       val name = nameGenerator.next[User]
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
@@ -117,34 +154,29 @@ class UserSpec extends WordSpecLike with Matchers {
       }
     }
 
-    "not be updated with an invalid version" ignore {
-      val id = UserId(nameGenerator.next[User])
-      val version = -1L
+    "not be updated with an invalid version" taggedAs(Tag("single")) in {
+      val user = factory.createActiveUser
+
       val name = nameGenerator.next[User]
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
-      val avatarUrl = Some("http://test.com/")
+      val avatarUrl = Some("http://test3.com/")
 
-      val user = RegisteredUser.create(id, version, name, email, password, hasher, salt,
-        avatarUrl) | fail
-
-      // val validation = user.update(id, Some(-1L), name, email, password, hasher, salt,
-      //         avatarUrl)
-      // validation should be Failure
-
-      // validation.swap.map { err =>
-      //   err.list should have length 1
-      //         err.list.head should include ("expected version doesn't match current version")
-      // }
+      val validation = user.update(Some(user.version - 1), name, email, password, hasher, salt, avatarUrl)
+      validation should be ('failure)
+      validation.swap.map { err =>
+        err.list should have length 1
+              err.list.head should include ("expected version doesn't match current version")
+      }
     }
 
     "not be created with an empty name" in {
       val id = UserId(nameGenerator.next[User])
       val version = 0L
       val name = ""
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
@@ -161,7 +193,7 @@ class UserSpec extends WordSpecLike with Matchers {
       val id = UserId(nameGenerator.next[User])
       val version = 0L
       val name = nameGenerator.next[User]
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = ""
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
@@ -178,7 +210,7 @@ class UserSpec extends WordSpecLike with Matchers {
       val id = UserId(nameGenerator.next[User])
       val version = 0L
       val name = nameGenerator.next[User]
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = ""
       val salt = Some(nameGenerator.next[User])
@@ -195,7 +227,7 @@ class UserSpec extends WordSpecLike with Matchers {
       val id = UserId(nameGenerator.next[User])
       val version = 0L
       val name = nameGenerator.next[User]
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some("")
@@ -212,7 +244,7 @@ class UserSpec extends WordSpecLike with Matchers {
       val id = UserId(nameGenerator.next[User])
       val version = 0L
       val name = nameGenerator.next[User]
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
@@ -230,7 +262,7 @@ class UserSpec extends WordSpecLike with Matchers {
       val id = UserId(nameGenerator.next[User])
       val version = 0L
       val name = nameGenerator.next[User]
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
@@ -246,7 +278,7 @@ class UserSpec extends WordSpecLike with Matchers {
       val id = UserId(nameGenerator.next[User])
       val version = 0L
       val name = nameGenerator.next[User]
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
@@ -267,7 +299,7 @@ class UserSpec extends WordSpecLike with Matchers {
       val id = UserId(nameGenerator.next[User])
       val version = -2L
       val name = ""
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
       val salt = Some(nameGenerator.next[User])
