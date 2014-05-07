@@ -301,7 +301,7 @@ trait StudyProcessorComponent
         case Failure(msglist) => DomainError(s"no study with id: $studyId").failNel
         case Success(study) => study match {
           case enabledStudy: EnabledStudy => enabledStudy.success
-          case _ => DomainError("study is not enabled: ${study.name}").failNel
+          case _ => DomainError(s"study is not enabled: ${study.name}").failNel
         }
       }
 
@@ -313,7 +313,7 @@ trait StudyProcessorComponent
         case Failure(msglist) => DomainError(s"no study with id: $studyId").failNel
         case Success(study) => study match {
           case retiredStudy: RetiredStudy => retiredStudy.success
-          case _ => DomainError("study is not retired: ${study.name}").failNel
+          case _ => DomainError(s"study is not retired: ${study.name}").failNel
         }
       }
     }

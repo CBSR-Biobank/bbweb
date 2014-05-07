@@ -57,6 +57,12 @@ trait StudyServiceComponent {
     def disableStudy(cmd: DisableStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyDisabledEvent]]
 
+    def retireStudy(cmd: RetireStudyCmd)(
+      implicit userId: UserId): Future[DomainValidation[StudyRetiredEvent]]
+
+    def unretireStudy(cmd: UnretireStudyCmd)(
+      implicit userId: UserId): Future[DomainValidation[StudyUnretiredEvent]]
+
     // specimen groups
     def specimenGroupInUse(studyId: String, specimenGroupId: String): DomainValidation[Boolean]
 
@@ -238,6 +244,16 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
       implicit userId: UserId): Future[DomainValidation[StudyDisabledEvent]] =
       processor ? cmd map (
         _.asInstanceOf[DomainValidation[StudyDisabledEvent]])
+
+    def retireStudy(cmd: RetireStudyCmd)(
+      implicit userId: UserId): Future[DomainValidation[StudyRetiredEvent]] =
+      processor ? cmd map (
+        _.asInstanceOf[DomainValidation[StudyRetiredEvent]])
+
+    def unretireStudy(cmd: UnretireStudyCmd)(
+      implicit userId: UserId): Future[DomainValidation[StudyUnretiredEvent]] =
+      processor ? cmd map (
+        _.asInstanceOf[DomainValidation[StudyUnretiredEvent]])
 
     // specimen groups
     //

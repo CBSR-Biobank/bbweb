@@ -30,11 +30,7 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
 
   protected def invalidVersion(expected: Long) =
     DomainError(
-    s"""|${this.getClass}: expected version doesn't match current version: {
-        |  id: $id,
-        |  version: $version,
-        |  expectedVersion: $expected
-        |}""".stripMargin)
+    s"expected version doesn't match current version: id: $id, version: $version, expectedVersion: $expected")
 
   /** Used for optimistic concurrency versioning.
     *

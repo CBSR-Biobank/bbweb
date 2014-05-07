@@ -27,25 +27,25 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka"   %% "akka-persistence-experimental"  % "2.3.2"              % "compile",
-  "com.typesafe.akka"   %% "akka-slf4j"                     % "2.3.2"              % "compile",
-  "org.scala-stm"       %% "scala-stm"                      % "0.7"                % "compile",
-  "org.scalaz"          %% "scalaz-core"                    % "7.0.6"              % "compile",
-  "org.scalaz"          %% "scalaz-typelevel"               % "7.0.6"              % "compile",
-  "org.webjars"          % "angularjs"                      % "1.2.16"             % "compile",
-  "org.webjars"          % "bootstrap"                      % "3.1.1"              % "compile",
-  "org.webjars"          % "requirejs"                      % "2.1.11"             % "compile",
-  "org.webjars"         %% "webjars-play"                   % "2.3-M1"             % "compile",
-  "ws.securesocial"     %% "securesocial"                   % "play-2.3-SNAPSHOT"  % "compile",
-  "org.scalatest"       %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
+  "com.typesafe.akka"      %% "akka-persistence-experimental"  % "2.3.2"              % "compile",
+  "com.typesafe.akka"      %% "akka-slf4j"                     % "2.3.2"              % "compile",
+  "org.scala-stm"          %% "scala-stm"                      % "0.7"                % "compile",
+  "org.scalaz"             %% "scalaz-core"                    % "7.0.6"              % "compile",
+  "org.scalaz"             %% "scalaz-typelevel"               % "7.0.6"              % "compile",
+  "org.webjars"            %  "angularjs"                      % "1.2.16"             % "compile",
+  "org.webjars"            %  "bootstrap"                      % "3.1.1"              % "compile",
+  "org.webjars"            %  "requirejs"                      % "2.1.11"             % "compile",
+  "org.webjars"            %% "webjars-play"                   % "2.3-M1"             % "compile",
+  "ws.securesocial"        %% "securesocial"                   % "play-2.3-SNAPSHOT"  % "compile",
+  "org.scalatest"          %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
     ExclusionRule(organization = "org.junit", name = "junit")
   ),
-  //"com.typesafe.akka"   %% "akka-testkit"                   % "2.3.1"              % "test",
-  "com.github.ddevore"  %% "akka-persistence-mongo-casbah"  % "0.7.2-SNAPSHOT"     % "compile",
-  "com.github.nscala-time" %% "nscala-time"                 % "1.0.0"              % "compile",
-  "com.typesafe"        %% "webdriver"                      % "1.0.0-M2"           % "test",
-  "com.typesafe.akka"   %% "akka-testkit"                   % "2.3.2"              % "test"
-  //"com.typesafe.play"   %% "play-slick"                     % "0.6.0.1",
+  //"com.typesafe.akka"    %% "akka-testkit"                   % "2.3.1"              % "test",
+  "com.github.ddevore"     %% "akka-persistence-mongo-casbah"  % "0.7.2-SNAPSHOT"     % "compile",
+  "se.radley"              %% "play-plugins-enumeration"       % "1.1.0"              % "compile",
+  "com.typesafe"           %% "webdriver"                      % "1.0.0-M2"           % "test",
+  "com.typesafe.akka"      %% "akka-testkit"                   % "2.3.2"              % "test"
+  //"com.typesafe.play"    %% "play-slick"                     % "0.6.0.1",
 )
 
 //dependencyOverrides += "com.typesafe.akka" %% "akka-actor" % "2.3.2"

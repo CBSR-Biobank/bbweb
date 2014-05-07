@@ -6,6 +6,7 @@ package org.biobank.domain
   */
 object AnatomicalSourceType extends Enumeration {
   type AnatomicalSourceType = Value
+
   val Blood = Value("Blood")
   val Brain = Value("Brain")
   val Colon = Value("Colon")

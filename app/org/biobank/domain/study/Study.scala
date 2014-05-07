@@ -85,18 +85,20 @@ case class DisabledStudy private (
   def enable(
     expectedVersion: Option[Long],
     specimenGroupCount: Int,
-    collectionEventtypeCount: Int): DomainValidation[EnabledStudy] = {
+    collectionEventTypeCount: Int): DomainValidation[EnabledStudy] = {
 
-    if (specimenGroupCount <= 0) {
-      DomainError("no specimen groups").failNel
-    } else if (collectionEventtypeCount <= 0) {
-      DomainError("no collection event types").failNel
-    } else {
-      for {
-        validVersion <- requireVersion(expectedVersion)
-        enabledStudy <- EnabledStudy.create(this)
-      } yield enabledStudy
-    }
+    def checkSpecimenGroupCount =
+      if (specimenGroupCount > 0) true.success else DomainError("no specimen groups").failNel
+
+    def checkCollectionEventTypeCount =
+      if (collectionEventTypeCount > 0) true.success else DomainError("no collection event types").failNel
+
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      sgCount <- checkSpecimenGroupCount
+      cetCount <- checkCollectionEventTypeCount
+      enabledStudy <- EnabledStudy.create(this)
+    } yield enabledStudy
   }
 
   /** When a study will no longer collect specimens from participants it can be retired. */
