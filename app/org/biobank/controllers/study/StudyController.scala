@@ -21,6 +21,7 @@ import play.api.cache.Cache
 import play.api.Play.current
 import play.api.mvc._
 import play.api.libs.json._
+import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.data._
 import play.api.data.Forms._
@@ -57,14 +58,58 @@ case class StudyFormObject(
 
 object StudyController extends Controller with SecureSocial {
 
-  private lazy val studyService = ApplicationComponent.studyService
+  private val studyService = ApplicationComponent.studyService
+
+  implicit val studyWrites = new Writes[Study] {
+
+    def writes(study: Study) = Json.obj(
+      "id" -> study.id.id,
+      "version" -> study.version,
+      "name" -> study.name,
+      "description" -> study.description
+    )
+
+  }
+
+  implicit val addStudyCmdReads: Reads[AddStudyCmd] = (
+    (JsPath \ "name").read[String](minLength[String](2)) and
+      (JsPath \ "description").readNullable[String](minLength[String](2))
+  )(AddStudyCmd.apply _)
+
+  def list = Action {
+    val json = Json.toJson(studyService.getAll.toList)
+    Ok(json)
+  }
+
+  def createStudy = Action.async(BodyParsers.parse.json) { request =>
+    val cmdResult = request.body.validate[AddStudyCmd]
+    cmdResult.fold(
+      errors => {
+        Future.successful(BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors))))
+      },
+      cmd => {
+        Logger.info(s"$cmd")
+        val future = studyService.addStudy(cmd)(null)
+        future.map { validation =>
+          validation match {
+            case Success(event) =>
+              Ok(Json.obj("status" ->"OK", "message" -> (s"Study saved: ${cmd.name}.") ))
+            case Failure(err) =>
+              BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
+          }
+        }
+      }
+    )
+  }
+
+  //---
 
   private val studyForm = Form(
     mapping(
       "studyId" -> text,
       "version" -> longNumber,
       "name" -> nonEmptyText,
-      "description" -> optional(text))(StudyFormObject.apply)(StudyFormObject.unapply))
+      "description" -> play.api.data.Forms.optional(text))(StudyFormObject.apply)(StudyFormObject.unapply))
 
   private def studyBreadcrumbs = {
     Map((Messages("biobank.study.plural") -> null))
@@ -96,27 +141,6 @@ object StudyController extends Controller with SecureSocial {
   def selectedStudyTab(tab: StudyTab): Unit = {
     Cache.set("study.tab", tab)
     Logger.debug("selected tab: " + Cache.get("study.tab"))
-  }
-
-  implicit val studyWrites = new Writes[Study] {
-    def writes(study: Study) = Json.obj(
-      "id" -> study.id.id,
-      "version" -> study.version,
-      "name" -> study.name,
-      "description" -> study.description
-    )
-
-    def writes(study: DisabledStudy) = Json.obj(
-      "id" -> study.id.id,
-      "version" -> study.version,
-      "name" -> study.name,
-      "description" -> study.description
-    )
-  }
-
-  def list = Action {
-    val json = Json.toJson(studyService.getAll.toList)
-    Ok(json)
   }
 
   def selectedStudyTab: StudyTab = {

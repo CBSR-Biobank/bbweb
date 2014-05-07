@@ -220,8 +220,6 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
 
     def addStudy(cmd: AddStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyAddedEvent]] = {
-      val id = studyRepository.nextIdentity
-
       processor ? cmd map (
         _.asInstanceOf[DomainValidation[StudyAddedEvent]])
     }

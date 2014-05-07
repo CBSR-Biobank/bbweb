@@ -9,7 +9,7 @@ GET     /contact                    org.biobank.controllers.Application.contact
 
 # studies
 GET     /studies                    org.biobank.controllers.study.StudyController.list
-#POST    /studies                    org.biobank.controllers.study.StudyController.createStudy
+POST    /studies                    org.biobank.controllers.study.StudyController.createStudy
 #GET     /studies/:id                org.biobank.controllers.study.StudyController.showStudy(id)
 #PUT     /studies/:id                org.biobank.controllers.study.StudyController.updateStudy(id)
 

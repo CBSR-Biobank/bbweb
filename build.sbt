@@ -56,3 +56,4 @@ lazy val root = (project in file(".")).addPlugins(PlayScala).addPlugins(SbtWeb)
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
+com.jamesward.play.BrowserNotifierPlugin.livereload
