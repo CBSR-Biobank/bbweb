@@ -56,30 +56,28 @@ class UserSpec extends DomainSpec {
     }
 
     "can be activated, locked, and unlocked" in {
-      val version = -1L
-      val name = nameGenerator.next[User]
-      val email = nameGenerator.nextEmail[User]
-      val id = UserId(email)
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
-      val avatarUrl = Some("http://test.com/")
+      val user = factory.createRegisteredUser
 
-      val user = RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
-        .getOrElse(fail("could not create user"))
-      user shouldBe a[RegisteredUser]
-
-      val activeUser = user.activate(Some(0L)).getOrElse(fail("could not activate user"))
+      val activeUser = user.activate(user.versionOption)  | fail
       activeUser shouldBe a[ActiveUser]
       activeUser.version should be(user.version + 1)
+      activeUser.addedDate should be (user.addedDate)
+      var updateDate = activeUser.lastUpdateDate | fail
+        (updateDate to DateTime.now).millis should be < 100L
 
-      val lockedUser = activeUser.lock(Some(1l)).getOrElse(fail("could not lock user"))
+      val lockedUser = activeUser.lock(activeUser.versionOption) | fail
       lockedUser shouldBe a[LockedUser]
       lockedUser.version should be(activeUser.version + 1)
+      lockedUser.addedDate should be (user.addedDate)
+      updateDate = lockedUser.lastUpdateDate | fail
+        (updateDate to DateTime.now).millis should be < 100L
 
-      val unlockedUser = lockedUser.unlock(Some(2L)).getOrElse(fail("could not unlock user"))
+      val unlockedUser = lockedUser.unlock(lockedUser.versionOption) | fail
       unlockedUser shouldBe a[ActiveUser]
       unlockedUser.version should be(lockedUser.version + 1)
+      unlockedUser.addedDate should be (user.addedDate)
+      updateDate = unlockedUser.lastUpdateDate | fail
+        (updateDate to DateTime.now).millis should be < 100L
     }
   }
 
