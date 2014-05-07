@@ -76,16 +76,24 @@ object StudyController extends Controller with SecureSocial {
       (JsPath \ "description").readNullable[String](minLength[String](2))
   )(AddStudyCmd.apply _)
 
+  implicit val updateStudyCmdReads: Reads[UpdateStudyCmd] = (
+    (JsPath \ "id").read[String](minLength[String](2)) and
+    (JsPath \ "version").readNullable[Long](min[Long](0)) and
+    (JsPath \ "name").read[String](minLength[String](2)) and
+      (JsPath \ "description").readNullable[String](minLength[String](2))
+  )(UpdateStudyCmd.apply _)
+
   def list = Action {
     val json = Json.toJson(studyService.getAll.toList)
     Ok(json)
   }
 
-  def createStudy = Action.async(BodyParsers.parse.json) { request =>
+  def addStudy = Action.async(BodyParsers.parse.json) { request =>
     val cmdResult = request.body.validate[AddStudyCmd]
     cmdResult.fold(
       errors => {
-        Future.successful(BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors))))
+        Future.successful(
+          BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors))))
       },
       cmd => {
         Logger.info(s"$cmd")
@@ -93,7 +101,40 @@ object StudyController extends Controller with SecureSocial {
         future.map { validation =>
           validation match {
             case Success(event) =>
-              Ok(Json.obj("status" ->"OK", "message" -> (s"Study saved: ${cmd.name}.") ))
+              Ok(Json.obj("status" ->"OK", "message" -> (s"Study added: ${cmd.name}.") ))
+            case Failure(err) =>
+              BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
+          }
+        }
+      }
+    )
+  }
+
+  def readStudy(id: String) = Action { request =>
+    Logger.info(s"$request")
+    val validation = studyService.getStudy(id)
+      validation match {
+        case Success(study) =>
+          Ok(Json.toJson(study))
+        case Failure(err) =>
+          BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
+    }
+  }
+
+  def updateStudy(id: String) = Action.async(BodyParsers.parse.json) { request =>
+    val cmdResult = request.body.validate[UpdateStudyCmd]
+    cmdResult.fold(
+      errors => {
+        Future.successful(
+          BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors))))
+      },
+      cmd => {
+        Logger.info(s"$cmd")
+        val future = studyService.updateStudy(cmd)(null)
+        future.map { validation =>
+          validation match {
+            case Success(event) =>
+              Ok(Json.obj("status" ->"OK", "message" -> (s"Study updated: ${cmd.name}.") ))
             case Failure(err) =>
               BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
           }
@@ -237,7 +278,7 @@ object StudyController extends Controller with SecureSocial {
   /**
    * Add a study.
    */
-  def addStudy() = SecuredAction { implicit request =>
+  def addStudy2() = SecuredAction { implicit request =>
     Ok(html.study.addStudy(studyForm, AddFormType(), ""))
   }
 
@@ -273,7 +314,7 @@ object StudyController extends Controller with SecureSocial {
   /**
    * Update a study.
    */
-  def updateStudy(studyId: String) = SecuredAction { implicit request =>
+  def updateStudy2(studyId: String) = SecuredAction { implicit request =>
     validateStudy(studyId)(study => {
       Logger.debug("study version: " + study.version)
       Ok(html.study.addStudy(

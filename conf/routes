@@ -9,16 +9,16 @@ GET     /contact                    org.biobank.controllers.Application.contact
 
 # studies
 GET     /studies                    org.biobank.controllers.study.StudyController.list
-POST    /studies                    org.biobank.controllers.study.StudyController.createStudy
-#GET     /studies/:id                org.biobank.controllers.study.StudyController.showStudy(id)
-#PUT     /studies/:id                org.biobank.controllers.study.StudyController.updateStudy(id)
+POST    /studies                    org.biobank.controllers.study.StudyController.addStudy
+GET     /studies/:id                org.biobank.controllers.study.StudyController.readStudy(id)
+PUT     /studies/:id                org.biobank.controllers.study.StudyController.updateStudy(id)
 
 GET     /study                      org.biobank.controllers.study.StudyController.index
 GET     /study/summary/:id          org.biobank.controllers.study.StudyController.summary(id)
 GET     /study/show/:id             org.biobank.controllers.study.StudyController.showStudy(id)
-GET     /study/add                  org.biobank.controllers.study.StudyController.addStudy
+GET     /study/add                  org.biobank.controllers.study.StudyController.addStudy2
 POST    /study/add                  org.biobank.controllers.study.StudyController.addStudySubmit
-GET     /study/update/:id           org.biobank.controllers.study.StudyController.updateStudy(id)
+GET     /study/update/:id           org.biobank.controllers.study.StudyController.updateStudy2(id)
 POST    /study/update/:id           org.biobank.controllers.study.StudyController.updateStudySubmit(id)
 
 # study Ajax calls
