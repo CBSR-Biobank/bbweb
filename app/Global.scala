@@ -40,12 +40,23 @@ object Global extends GlobalSettings {
     createSqlDdlScripts(app)
 
     if (app.mode == Mode.Dev) {
-      // for debug only - password is "administrator"
-      val email = "admin@admin.com"
-      ApplicationComponent.userRepository.put(RegisteredUser.create(
-        UserId(email), -1L, "admin", email,
-        "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS", "bcrypt", None, None) | null)
+
+      if (ApplicationComponent.userRepository.isEmpty) {
+        // for debug only - password is "administrator"
+        val email = "admin@admin.com"
+        val validation = RegisteredUser.create(
+          UserId(email), -1L, "admin", email,
+          "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS", "bcrypt", None, None)
+        if (validation.isFailure) {
+          throw new Error("could not add default user in development mode")
+        }
+        validation map { user =>
+          ApplicationComponent.userRepository.put(user)
+        }
+      }
     }
+
+    super.onStart(app)
   }
 
   /**

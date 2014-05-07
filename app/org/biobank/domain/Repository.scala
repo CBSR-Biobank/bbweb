@@ -10,6 +10,8 @@ import scalaz.Scalaz._
   */
 trait  ReadRepository[K, A] {
 
+  def isEmpty: Boolean
+
   def getByKey(key: K): DomainValidation[A]
 
   def getValues: Iterable[A]
@@ -36,6 +38,8 @@ class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepository[K,
   protected val internalMap: Ref[Map[K, A]] = Ref(Map.empty[K, A])
 
   protected def getMap = internalMap.single.get
+
+  def isEmpty: Boolean = getMap.isEmpty
 
   def getByKey(key: K): DomainValidation[A] = {
     getMap.get(key) match {
