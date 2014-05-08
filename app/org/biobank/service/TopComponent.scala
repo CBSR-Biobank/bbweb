@@ -21,6 +21,7 @@ trait TopComponent extends ServiceComponent {
   val studyService: StudyService
   val userService: UserService
 
+
 }
 
 /**

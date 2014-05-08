@@ -2,11 +2,10 @@ package org.biobank.fixture
 
 import org.biobank.service._
 
-import scala.concurrent._
 import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import akka.util.Timeout
-import akka.actor._
+import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
 import com.mongodb.casbah.Imports._
 import scala.language.postfixOps
