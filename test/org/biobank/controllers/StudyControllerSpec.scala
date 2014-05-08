@@ -1,64 +1,27 @@
 package org.biobank.controllers
 
-import org.biobank.domain.FactoryComponent
-import org.biobank.domain.RepositoryComponentImpl
-import org.biobank.service.ServiceComponentImpl
+import org.biobank.service.json.JsonHelper._
+import org.biobank.fixture.ControllerFixture
 import org.biobank.service.json.Study._
-import akka.actor.Props
-import org.scalatest.FunSpec
-import org.scalatest.GivenWhenThen
-import org.scalatest.Matchers
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.test.FakeApplication
+import play.api.test.FakeRequest
 import play.api.libs.json._
-import play.api.Logger
-import com.mongodb.casbah.Imports._
-import org.joda.time.format.ISODateTimeFormat
 import org.slf4j.LoggerFactory
 
-
 /**
-  *
-  * Note need to pass timeout to status if not compiler complains about ambiguous implicit values.
+  * Tests the REST API for [[Study]].
   */
-class StudyControllerSpec
-    extends FunSpec
-    with Matchers
-    with RepositoryComponentImpl
-    with FactoryComponent {
+class StudyControllerSpec extends ControllerFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
-
-  val fmt = ISODateTimeFormat.dateTime();
-
-  val dbName = "bbweb-test"
-
-  // override the database settings
-  val akkaPersistenceConfig = Map(
-    "akka.persistence.journal.plugin"          -> "casbah-journal",
-    "akka.persistence.snapshot-store.plugin"   -> "casbah-snapshot-store",
-    "casbah-journal.mongo-journal-url"         -> s"mongodb://localhost/$dbName.messages",
-    "casbah-snapshot-store.mongo-snapshot-url" -> s"mongodb://localhost/$dbName.snapshots"
-  )
-
-  // ensure the database is empty
-  MongoConnection()(dbName)("messages").drop
-  MongoConnection()(dbName)("snapshots").drop
-
-  def fakeApplication = FakeApplication(
-    withoutPlugins = List("com.typesafe.plugin.CommonsMailerPlugin"),
-    additionalConfiguration = akkaPersistenceConfig
-  )
 
   describe("Study REST API") {
     describe("GET /studies") {
       it("should list no studies") {
         running(fakeApplication) {
-          val result = route(FakeRequest(GET, "/studies")).get
-          status(result) should be (OK)
-          contentType(result) should be (Some("application/json"))
-          contentAsString(result) should include ("[]")
+          val json = makeJsonRequest(GET, "/studies")
+          val jsonList = json.as[List[JsObject]]
+          jsonList should have size 0
         }
       }
     }
@@ -69,22 +32,34 @@ class StudyControllerSpec
           val study = factory.createDisabledStudy
           ApplicationComponent.studyRepository.put(study)
 
-          val result = route(FakeRequest(GET, "/studies")).get
-          status(result) should be (OK)
-          contentType(result) should be (Some("application/json"))
-          val json = Json.parse(contentAsString(result))
-
+          val json = makeJsonRequest(GET, "/studies")
           val jsonList = json.as[List[JsObject]]
           jsonList should have length 1
+          compareObj(jsonList(0), study)
+        }
+      }
+    }
 
-          log.info(s"${jsonList(0)}")
+    describe("GET /studies") {
+      it("should list multiple studies") {
+        running(fakeApplication) {
+          val studies = List(factory.createDisabledStudy, factory.createDisabledStudy)
+          ApplicationComponent.studyRepository.removeAll
+          studies.map(study => ApplicationComponent.studyRepository.put(study))
 
-          assert((jsonList(0) \ "id").as[String] === study.id.id)
-          assert((jsonList(0) \ "version").as[Long] === study.version)
-          assert((jsonList(0) \ "addedDate").as[String] === fmt.print(study.addedDate))
-//          assert((jsonList(0) \ "lastUpdateDate").as[String] === "null")
-          assert((jsonList(0) \ "name").as[String] === study.name)
-          assert((jsonList(0) \ "description").as[String] === study.description.get)
+          val json = makeJsonRequest(GET, "/studies")
+          val jsonList = json.as[List[JsObject]]
+          jsonList should have size studies.size
+
+          (jsonList zip studies).map { item => compareObj(item._1, item._2) }
+        }
+      }
+    }
+
+    describe("POST /studies") {
+      it("should add a study") {
+        running(fakeApplication) {
+          val json = makeJsonRequest(POST, "/studies")
         }
       }
     }

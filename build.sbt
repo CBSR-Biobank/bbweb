@@ -14,6 +14,8 @@ scalacOptions ++= Seq(
   "-Ywarn-inaccessible",
   "-unchecked")
 
+scalacOptions in (Compile,doc) := Seq("-groups", "-implicits")
+
 javaOptions ++= Seq("-Xmx1024M", "-XX:MaxPermSize=512m")
 
 javaOptions in Test ++=  Seq(

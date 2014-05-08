@@ -28,6 +28,8 @@ trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
 
   def remove(value: A): A
 
+  def removeAll: Unit
+
 }
 
 /**
@@ -70,6 +72,10 @@ private [domain] class ReadWriteRepositoryRefImpl[K, A](keyGetter: (A) => K)
   def remove(value: A): A = {
     internalMap.single.transform(map => map - keyGetter(value))
     value
+  }
+
+  def removeAll: Unit = {
+    internalMap.single.transform(map => map.empty)
   }
 
 }
