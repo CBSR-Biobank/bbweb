@@ -2,6 +2,10 @@ package org.biobank.service.json
 
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.domain.AnatomicalSourceType._
+import org.biobank.domain.PreservationType._
+import org.biobank.domain.PreservationTemperatureType._
+import org.biobank.domain.SpecimenType._
 
 import play.api.libs.json._
 import play.api.libs.json.Reads._
@@ -18,8 +22,8 @@ object SpecimenGroup {
       "studyId"                     -> sg.studyId.id,
       "id"                          -> sg.id.id,
       "version"                     -> sg.version,
-      "addedDate"                   -> fmt.print(study.addedDate),
-      "lastUpdateDate"              -> study.lastUpdateDate.map(fmt.print(_)),
+      "addedDate"                   -> fmt.print(sg.addedDate),
+      "lastUpdateDate"              -> sg.lastUpdateDate.map(fmt.print(_)),
       "name"                        -> sg.name,
       "description"                 -> sg.description,
       "units"                       -> sg.units,

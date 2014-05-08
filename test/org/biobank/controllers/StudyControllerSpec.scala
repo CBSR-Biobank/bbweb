@@ -1,7 +1,7 @@
 package org.biobank.controllers
 
 import org.biobank.domain.FactoryComponent
-import org.biobank.fixture.TestComponentImpl
+import org.biobank.domain.RepositoryComponentImpl
 import org.biobank.service.ServiceComponentImpl
 import org.biobank.service.json.Study._
 import akka.actor.Props
@@ -13,6 +13,12 @@ import play.api.test.Helpers._
 import play.api.test.FakeApplication
 import play.api.libs.json._
 import play.api.Logger
+import com.mongodb.casbah.Imports._
+import akka.util.Timeout
+import org.biobank.service.TopComponent
+import play.libs.Akka
+
+object FactoryComponentImpl extends RepositoryComponentImpl with FactoryComponent
 
 /**
   *
@@ -20,37 +26,35 @@ import play.api.Logger
   */
 class StudyControllerSpec
     extends FunSpec
-    with TestComponentImpl
-    with FactoryComponent
-    with ServiceComponentImpl
-    with GivenWhenThen
     with Matchers {
 
-  override val studyProcessor = system.actorOf(Props(new StudyProcessor), "studyproc")
-  override val userProcessor = null
+  val dbName = "bbweb-test"
 
-  override val studyService = null
-  override val userService = null
+  // override the database settings
+  val akkaPersistenceConfig = Map(
+    "akka.persistence.journal.plugin"          -> "casbah-journal",
+    "akka.persistence.snapshot-store.plugin"   -> "casbah-snapshot-store",
+    "casbah-journal.mongo-journal-url"         -> s"mongodb://localhost/$dbName.messages",
+    "casbah-snapshot-store.mongo-snapshot-url" -> s"mongodb://localhost/$dbName.snapshots"
+  )
+
+  // ensure the database is empty
+  MongoConnection()(dbName)("messages").drop
+  MongoConnection()(dbName)("snapshots").drop
 
   def fakeApplication = FakeApplication(
-    withoutPlugins = List("com.typesafe.plugin.CommonsMailerPlugin"))
+    withoutPlugins = List("com.typesafe.plugin.CommonsMailerPlugin"),
+    additionalConfiguration = akkaPersistenceConfig
+  )
 
   describe("Study REST API") {
     describe("GET /studies") {
       it("should list no studies") {
         running(fakeApplication) {
-
-          Given("no parameter")
           val result = route(FakeRequest(GET, "/studies")).get
-
-          Then("StatusCode is 200")
-          status(result)(timeout) should be (OK)
-
-          And("ContentType is application/json")
-          contentType(result)(timeout) should be (Some("application/json"))
-
-          And("Content is empty json")
-          contentAsString(result)(timeout) should include ("[]")
+          status(result) should be (OK)
+          contentType(result) should be (Some("application/json"))
+          contentAsString(result) should include ("[]")
         }
       }
     }
@@ -58,19 +62,14 @@ class StudyControllerSpec
     describe("GET /studies") {
       it("should list a study") {
         running(fakeApplication) {
-          Given("with a study in the repository")
-          val study = factory.createDisabledStudy
+          val study = FactoryComponentImpl.factory.createDisabledStudy
+          ApplicationComponent.studyRepository.put(study)
+
           val result = route(FakeRequest(GET, "/studies")).get
-
-          Then("StatusCode is 200")
-          status(result)(timeout) should be (OK)
-
-          And("ContentType is application/json")
-          contentType(result)(timeout) should be (Some("application/json"))
-
-          And("Content is json for a single study")
+          status(result) should be (OK)
+          contentType(result) should be (Some("application/json"))
           val expectedJson = Json.toJson(study)
-          val actualJson = Json.parse(contentAsString(result)(timeout))
+          val actualJson = Json.parse(contentAsString(result))
           assert(actualJson \ "id" === expectedJson \ "id")
         }
       }

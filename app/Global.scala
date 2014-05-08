@@ -15,7 +15,6 @@ import org.biobank.domain.{ RegisteredUser, UserId }
 import java.io.File
 import play.api.libs.Files
 import play.api.{ Configuration, GlobalSettings, Logger, Mode }
-import org.slf4j.LoggerFactory
 
 /**
  * Global settings for the web application.
@@ -24,8 +23,6 @@ import org.slf4j.LoggerFactory
  * also generated.
  */
 object Global extends GlobalSettings {
-
-  val log = LoggerFactory.getLogger(this.getClass)
 
   private val configKey = "slick"
   private val ScriptDirectory = "conf/evolutions/"
@@ -81,7 +78,6 @@ object Global extends GlobalSettings {
     //     }
     //   }
     // }
-    Logger.info("*** application started ***")
   }
 
   /**

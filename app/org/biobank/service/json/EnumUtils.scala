@@ -1,4 +1,4 @@
-package org.biobank.controllers
+package org.biobank.service.json
 
 import play.api.libs.json._
 import play.api.libs.json.JsString
