@@ -5,6 +5,7 @@
          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
     <encoder>
       <pattern>%d{HH:mm:ss.SSS} %-5level %c{1}:%L - %msg%n</pattern>
+      <immediateFlush>true</immediateFlush>
     </encoder>
   </appender>
 
@@ -15,9 +16,13 @@
      </encoder>
    </appender>
 
-  <logger name="or.biobank.domain" level="INFO" />
-  <logger name="or.biobank.service" level="DEBUG" />
-  <logger name="or.biobank.service.study.StudyProcessorImpl" level="DEBUG" />
+  <logger name="application" level="WARN" />
+  <logger name="play" level="WARN" />
+  <logger name="securesocial.core" level="WARN" />
+
+  <logger name="org.biobank.domain" level="INFO" />
+  <logger name="org.biobank.service" level="DEBUG" />
+  <logger name="org.biobank.query" level="INFO" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />

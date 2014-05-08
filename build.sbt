@@ -16,7 +16,10 @@ scalacOptions ++= Seq(
 
 javaOptions ++= Seq("-Xmx1024M", "-XX:MaxPermSize=512m")
 
-javaOptions in Test += "-Dconfig.file=conf/test.conf"
+javaOptions in Test ++=  Seq(
+  "-Dconfig.file=conf/test.conf",
+  "-Dlogger.resource=logback-test.xml"
+)
 
 (testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/report")
 
