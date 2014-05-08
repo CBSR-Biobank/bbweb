@@ -2,6 +2,7 @@ package org.biobank.controllers.study
 
 import org.biobank.controllers._
 import org.biobank.domain._
+import org.biobank.service.json.Study._
 import org.biobank.service._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.{ ServiceComponent, TopComponentImpl }
@@ -14,14 +15,11 @@ import play.api._
 import play.api.cache.Cache
 import play.api.Play.current
 import play.api.mvc._
-import play.api.libs.json._
-import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
 import play.api.data._
+import play.api.libs.json._
 import play.Logger
 import securesocial.core.SecureSocial
 import securesocial.core.SecuredRequest
-import scala.reflect.ClassTag
 
 import scalaz._
 import scalaz.Scalaz._
@@ -29,52 +27,6 @@ import scalaz.Scalaz._
 object StudyController extends Controller with SecureSocial {
 
   private val studyService = ApplicationComponent.studyService
-
-  implicit val studyWrites = new Writes[Study] {
-
-    def writes(study: Study) = Json.obj(
-      "id"             -> study.id.id,
-      "version"        -> study.version,
-      "addedDate"      -> study.addedDate,
-      "lastUpdateDate" -> study.lastUpdateDate,
-      "name"           -> study.name,
-      "description"    -> study.description,
-      "status"         -> study.status
-    )
-
-  }
-
-  implicit val addStudyCmdReads: Reads[AddStudyCmd] = (
-    (JsPath \ "name").read[String](minLength[String](2)) and
-      (JsPath \ "description").readNullable[String](minLength[String](2))
-  )(AddStudyCmd.apply _)
-
-  implicit val updateStudyCmdReads: Reads[UpdateStudyCmd] = (
-    (JsPath \ "id").read[String](minLength[String](2)) and
-      (JsPath \ "version").readNullable[Long](min[Long](0)) and
-      (JsPath \ "name").read[String](minLength[String](2)) and
-      (JsPath \ "description").readNullable[String](minLength[String](2))
-  )(UpdateStudyCmd.apply _)
-
-  implicit val enableStudyCmdReads: Reads[EnableStudyCmd] = (
-    (JsPath \ "id").read[String](minLength[String](2)) and
-      (JsPath \ "version").readNullable[Long](min[Long](0))
-  )(EnableStudyCmd.apply _)
-
-  implicit val disableStudyCmdReads: Reads[DisableStudyCmd] = (
-    (JsPath \ "id").read[String](minLength[String](2)) and
-      (JsPath \ "version").readNullable[Long](min[Long](0))
-  )(DisableStudyCmd.apply _)
-
-  implicit val retireStudyCmdReads: Reads[RetireStudyCmd] = (
-    (JsPath \ "id").read[String](minLength[String](2)) and
-      (JsPath \ "version").readNullable[Long](min[Long](0))
-  )(RetireStudyCmd.apply _)
-
-  implicit val unretireStudyCmdReads: Reads[UnretireStudyCmd] = (
-    (JsPath \ "id").read[String](minLength[String](2)) and
-      (JsPath \ "version").readNullable[Long](min[Long](0))
-  )(UnretireStudyCmd.apply _)
 
   def list = Action {
     val json = Json.toJson(studyService.getAll.toList)

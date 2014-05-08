@@ -3,6 +3,7 @@ package org.biobank.controllers
 import org.biobank.domain.FactoryComponent
 import org.biobank.fixture.TestComponentImpl
 import org.biobank.service.ServiceComponentImpl
+import org.biobank.service.json.Study._
 import akka.actor.Props
 import org.scalatest.FunSpec
 import org.scalatest.GivenWhenThen
@@ -31,7 +32,7 @@ class StudyControllerSpec
   override val studyService = null
   override val userService = null
 
-  val fakeApplication = FakeApplication(
+  def fakeApplication = FakeApplication(
     withoutPlugins = List("com.typesafe.plugin.CommonsMailerPlugin"))
 
   describe("Study REST API") {
@@ -40,7 +41,7 @@ class StudyControllerSpec
         running(fakeApplication) {
 
           Given("no parameter")
-          val Some(result) = route(FakeRequest(GET, "/studies"))
+          val result = route(FakeRequest(GET, "/studies")).get
 
           Then("StatusCode is 200")
           status(result)(timeout) should be (OK)
@@ -48,16 +49,8 @@ class StudyControllerSpec
           And("ContentType is application/json")
           contentType(result)(timeout) should be (Some("application/json"))
 
-          And("Content is all studies' json")
+          And("Content is empty json")
           contentAsString(result)(timeout) should include ("[]")
-
-          val study1 = factory.createDisabledStudy
-          //val study1Json = Json.toJson(study1)
-          studyRepository.put(study1)
-
-          //result = study.StudyController.list(FakeRequest())
-          //status(result)(timeout) should be (OK)
-          //contentAsJson(result)(timeout) should include ("[]")
         }
       }
     }
@@ -66,8 +59,8 @@ class StudyControllerSpec
       it("should list a study") {
         running(fakeApplication) {
           Given("with a study in the repository")
-          val study1 = factory.createDisabledStudy
-          val Some(result) = route(FakeRequest(GET, "/studies"))
+          val study = factory.createDisabledStudy
+          val result = route(FakeRequest(GET, "/studies")).get
 
           Then("StatusCode is 200")
           status(result)(timeout) should be (OK)
@@ -75,8 +68,10 @@ class StudyControllerSpec
           And("ContentType is application/json")
           contentType(result)(timeout) should be (Some("application/json"))
 
-          And("Content is all studies' json")
-          contentAsString(result)(timeout) should include ("[]")
+          And("Content is json for a single study")
+          val expectedJson = Json.toJson(study)
+          val actualJson = Json.parse(contentAsString(result)(timeout))
+          assert(actualJson \ "id" === expectedJson \ "id")
         }
       }
     }
