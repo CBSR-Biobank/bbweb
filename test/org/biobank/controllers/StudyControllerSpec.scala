@@ -14,11 +14,9 @@ import play.api.test.FakeApplication
 import play.api.libs.json._
 import play.api.Logger
 import com.mongodb.casbah.Imports._
-import akka.util.Timeout
-import org.biobank.service.TopComponent
-import play.libs.Akka
+import org.joda.time.format.ISODateTimeFormat
+import org.slf4j.LoggerFactory
 
-object FactoryComponentImpl extends RepositoryComponentImpl with FactoryComponent
 
 /**
   *
@@ -26,7 +24,13 @@ object FactoryComponentImpl extends RepositoryComponentImpl with FactoryComponen
   */
 class StudyControllerSpec
     extends FunSpec
-    with Matchers {
+    with Matchers
+    with RepositoryComponentImpl
+    with FactoryComponent {
+
+  val log = LoggerFactory.getLogger(this.getClass)
+
+  val fmt = ISODateTimeFormat.dateTime();
 
   val dbName = "bbweb-test"
 
@@ -62,15 +66,25 @@ class StudyControllerSpec
     describe("GET /studies") {
       it("should list a study") {
         running(fakeApplication) {
-          val study = FactoryComponentImpl.factory.createDisabledStudy
+          val study = factory.createDisabledStudy
           ApplicationComponent.studyRepository.put(study)
 
           val result = route(FakeRequest(GET, "/studies")).get
           status(result) should be (OK)
           contentType(result) should be (Some("application/json"))
-          val expectedJson = Json.toJson(study)
-          val actualJson = Json.parse(contentAsString(result))
-          assert(actualJson \ "id" === expectedJson \ "id")
+          val json = Json.parse(contentAsString(result))
+
+          val jsonList = json.as[List[JsObject]]
+          jsonList should have length 1
+
+          log.info(s"${jsonList(0)}")
+
+          assert((jsonList(0) \ "id").as[String] === study.id.id)
+          assert((jsonList(0) \ "version").as[Long] === study.version)
+          assert((jsonList(0) \ "addedDate").as[String] === fmt.print(study.addedDate))
+//          assert((jsonList(0) \ "lastUpdateDate").as[String] === "null")
+          assert((jsonList(0) \ "name").as[String] === study.name)
+          assert((jsonList(0) \ "description").as[String] === study.description.get)
         }
       }
     }

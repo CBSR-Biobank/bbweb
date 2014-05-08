@@ -16,7 +16,7 @@
      </encoder>
    </appender>
 
-  <logger name="application" level="INFO" />
+  <logger name="application" level="WARN" />
   <logger name="play" level="WARN" />
   <logger name="securesocial.core" level="WARN" />
 
