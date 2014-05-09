@@ -1,9 +1,9 @@
 package org.biobank.service
 
-import org.biobank.controllers.ApplicationComponent
+import org.biobank.controllers.BbwebPlugin
 import org.biobank.infrastructure.command.UserCommands._
 
-import play.api.{ Logger, Application }
+import play.api.{ Application, Logger, Play  }
 import securesocial.core._
 import securesocial.core.providers.Token
 import securesocial.core.IdentityId
@@ -17,7 +17,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class SecureSocialUserService(application: Application) extends UserServicePlugin(application) {
 
-  lazy val userService = ApplicationComponent.userService
+  private val userService = Play.current.plugin[BbwebPlugin].map(_.userService).getOrElse {
+    sys.error("Bbweb plugin is not registered")
+  }
 
   private var tokens = Map[String, Token]()
 

@@ -1,3 +1,4 @@
+1000:org.biobank.controllers.BbwebPlugin
 1500:com.typesafe.plugin.CommonsMailerPlugin
 9994:securesocial.core.DefaultAuthenticatorStore
 9995:securesocial.core.DefaultIdGenerator
@@ -7,4 +8,3 @@
 9999:securesocial.core.providers.utils.BCryptPasswordHasher
 10004:securesocial.core.providers.UsernamePasswordProvider
 10006:org.biobank.service.MyEventListener
-

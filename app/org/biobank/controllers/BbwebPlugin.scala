@@ -1,26 +1,24 @@
-// Upgraded to Play 2.3-M1 and it does not yet have a Slick plugin.
-//
-// Commenting out code for now
-// import play.api.db.slick.plugin.TableScanner
-// import play.api.db.slick._
-// import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
-// import scala.slick.session.Database
-// import scala.slick.jdbc.meta._
+package org.biobank.controllers
 
-import org.biobank.controllers.ApplicationComponent
 import org.biobank.domain.{ RegisteredUser, UserId }
+import org.biobank.service.TopComponentImpl
 
 import java.io.File
 import play.api.libs.Files
-import play.api.{ Configuration, GlobalSettings, Logger, Mode }
+import play.api.{ Configuration, GlobalSettings, Logger, Mode, Plugin }
+import play.libs.Akka
+import akka.actor.ActorSystem
+import akka.actor.Props
+import com.typesafe.config.ConfigFactory
 
-/**
- * Global settings for the web application.
- *
- * If the application is running in '''development''' mode, the query side DDL database scritps are
- * also generated.
- */
-object Global extends GlobalSettings {
+class BbwebPlugin(val app: play.api.Application) extends Plugin with TopComponentImpl {
+  implicit override val system: akka.actor.ActorSystem = Akka.system
+
+  override val studyProcessor = system.actorOf(Props(new StudyProcessor), "studyproc")
+  override val userProcessor = system.actorOf(Props(new UserProcessor), "userproc")
+
+  override val studyService = new StudyServiceImpl(studyProcessor)
+  override val userService = new UserService(userProcessor)
 
   private val configKey = "slick"
   private val ScriptDirectory = "conf/evolutions/"
@@ -31,12 +29,12 @@ object Global extends GlobalSettings {
   /**
    *
    */
-  override def onStart(app: play.api.Application) {
-    createSqlDdlScripts(app)
+  override def onStart() {
+    createSqlDdlScripts
 
     if (app.mode == Mode.Dev) {
 
-      if (ApplicationComponent.userRepository.isEmpty) {
+      if (userRepository.isEmpty) {
         // for debug only - password is "administrator"
         val email = "admin@admin.com"
         val validation = RegisteredUser.create(
@@ -46,18 +44,18 @@ object Global extends GlobalSettings {
           throw new Error("could not add default user in development mode")
         }
         validation map { user =>
-          ApplicationComponent.userRepository.put(user)
+          userRepository.put(user)
         }
       }
     }
 
-    super.onStart(app)
+    super.onStart
   }
 
   /**
    * Creates SQL DDL scripts on application start-up.
    */
-  private def createSqlDdlScripts(app: play.api.Application) {
+  private def createSqlDdlScripts: Unit = {
     // if (app.mode != Mode.Prod) {
     //   app.configuration.getConfig(configKey).foreach { configuration =>
     //     configuration.keys.foreach { database =>
@@ -89,4 +87,5 @@ object Global extends GlobalSettings {
     // val createSql = ddlStatements.flatten.mkString("\n\n")
     // Files.writeFileIfChanged(createScript, ScriptHeader + createSql)
   }
+
 }

@@ -32,8 +32,8 @@ import scalaz.Scalaz._
  */
 object SpecimenGroupController extends Controller with SecureSocial {
 
-  private val studyService = ApplicationComponent.studyService
-
-
+  private val studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
+    sys.error("Bbweb plugin is not registered")
+  }
 
 }

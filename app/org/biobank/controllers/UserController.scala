@@ -11,7 +11,9 @@ import Scalaz._
 
 object UserController extends Controller with SecureSocial {
 
-  lazy val userService = ApplicationComponent.userService
+  private val userService = Play.current.plugin[BbwebPlugin].map(_.userService).getOrElse {
+    sys.error("Bbweb plugin is not registered")
+  }
 
   def profile = SecuredAction { implicit request =>
     userService.getByEmail(request.user.email.getOrElse("")) match {

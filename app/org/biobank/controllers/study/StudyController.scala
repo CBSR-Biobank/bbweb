@@ -26,7 +26,9 @@ import scalaz.Scalaz._
 
 object StudyController extends Controller with SecureSocial {
 
-  private val studyService = ApplicationComponent.studyService
+  private val studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
+    sys.error("Bbweb plugin is not registered")
+  }
 
   def list = Action {
     val json = Json.toJson(studyService.getAll.toList)
