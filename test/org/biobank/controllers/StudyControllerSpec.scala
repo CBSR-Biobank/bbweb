@@ -1,5 +1,6 @@
 package org.biobank.controllers
 
+import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.json.JsonHelper._
 import org.biobank.fixture.ControllerFixture
 import org.biobank.service.json.Study._
@@ -59,7 +60,9 @@ class StudyControllerSpec extends ControllerFixture {
     describe("POST /studies") {
       it("should add a study") {
         running(fakeApplication) {
-          val json = makeJsonRequest(POST, "/studies")
+          val study = factory.createDisabledStudy
+          val map = Map("name" -> study.name, "description" -> study.description.getOrElse("null"))
+          val json = makeJsonRequest(POST, "/studies", Json.toJson(map))
         }
       }
     }

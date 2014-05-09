@@ -26,25 +26,23 @@ trait ControllerFixture
 
   private val dbName = "bbweb-test"
 
-  // override the database settings
-  private val akkaPersistenceConfig = Map(
-    "akka.persistence.journal.plugin"          -> "casbah-journal",
-    "akka.persistence.snapshot-store.plugin"   -> "casbah-snapshot-store",
-    "casbah-journal.mongo-journal-url"         -> s"mongodb://localhost/$dbName.messages",
-    "casbah-snapshot-store.mongo-snapshot-url" -> s"mongodb://localhost/$dbName.snapshots"
-  )
-
   // ensure the database is empty
   MongoConnection()(dbName)("messages").drop
   MongoConnection()(dbName)("snapshots").drop
 
   protected def fakeApplication = FakeApplication(
-    withoutPlugins = List("com.typesafe.plugin.CommonsMailerPlugin"),
-    additionalConfiguration = akkaPersistenceConfig
+    withoutPlugins = List("com.typesafe.plugin.CommonsMailerPlugin")
   )
 
   def makeJsonRequest(method: String, path: String): JsValue = {
     val result = route(FakeRequest(method, path)).get
+    status(result) should be (OK)
+    contentType(result) should be (Some("application/json"))
+    Json.parse(contentAsString(result))
+  }
+
+  def makeJsonRequest(method: String, path: String, json: JsValue): JsValue = {
+    val result = route(FakeRequest(method, path).withJsonBody(json)).get
     status(result) should be (OK)
     contentType(result) should be (Some("application/json"))
     Json.parse(contentAsString(result))

@@ -97,8 +97,7 @@ trait StudyProcessorComponent
 
       case cmd: SpecimenLinkAnnotationTypeCommand => validateAndForward(specimenLinkAnnotationTypeProcessor,  cmd)
 
-      case other =>
-        throw new Error("invalid message received")
+      case other => DomainError("invalid command received")
     }
 
     private def validateAndForward(childActor: ActorRef, cmd: StudyCommandWithId) = {

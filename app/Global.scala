@@ -10,8 +10,6 @@
 import org.biobank.controllers.ApplicationComponent
 import org.biobank.domain.{ RegisteredUser, UserId }
 
-//import play.api.mvc.Results._
-//import play.api.mvc.RequestHeader
 import java.io.File
 import play.api.libs.Files
 import play.api.{ Configuration, GlobalSettings, Logger, Mode }
