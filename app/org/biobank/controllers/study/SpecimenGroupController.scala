@@ -3,7 +3,6 @@ package org.biobank.controllers.study
 import org.biobank.controllers._
 import org.biobank.service._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.service.{ ServiceComponent, TopComponentImpl }
 import org.biobank.domain.study._
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
@@ -32,7 +31,7 @@ import scalaz.Scalaz._
  */
 object SpecimenGroupController extends Controller with SecureSocial {
 
-  private val studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
+  private def studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
     sys.error("Bbweb plugin is not registered")
   }
 

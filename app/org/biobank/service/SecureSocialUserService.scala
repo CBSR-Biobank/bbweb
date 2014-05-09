@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class SecureSocialUserService(application: Application) extends UserServicePlugin(application) {
 
-  private val userService = Play.current.plugin[BbwebPlugin].map(_.userService).getOrElse {
+  private def userService = Play.current.plugin[BbwebPlugin].map(_.userService).getOrElse {
     sys.error("Bbweb plugin is not registered")
   }
 

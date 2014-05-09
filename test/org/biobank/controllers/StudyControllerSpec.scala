@@ -21,27 +21,27 @@ class StudyControllerSpec extends ControllerFixture {
   val log = LoggerFactory.getLogger(this.getClass)
 
   describe("Study REST API") {
+
     describe("GET /studies") {
-      it("should list no studies", Tag("single")) {
+      it("should list no studies", Tag("thistest")) {
         running(fakeApplication) {
           val json = makeJsonRequest(GET, "/studies")
           val jsonList = json.as[List[JsObject]]
           jsonList should have size 0
+
         }
       }
-    }
 
-    describe("GET /studies") {
-      it("should list a study") {
+      it("should list a study", Tag("thistest")) {
         running(fakeApplication) {
-          val studyRepository = Play.current.plugin[BbwebPlugin].map(_.studyRepository).getOrElse {
+          val myStudyRepository = Play.current.plugin[BbwebPlugin].map(_.studyRepository).getOrElse {
             sys.error("Bbweb plugin is not registered")
           }
 
           val study = factory.createDisabledStudy
-          studyRepository.put(study)
-
+          myStudyRepository.put(study)
           val json = makeJsonRequest(GET, "/studies")
+
           val jsonList = json.as[List[JsObject]]
           jsonList should have length 1
           compareObj(jsonList(0), study)
@@ -79,6 +79,8 @@ class StudyControllerSpec extends ControllerFixture {
           val study = factory.createDisabledStudy
           val map = Map("name" -> study.name, "description" -> study.description.getOrElse("null"))
           val json = makeJsonRequest(POST, "/studies", Json.toJson(map))
+
+          log.info(s"$json")
         }
       }
     }

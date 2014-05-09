@@ -3,7 +3,6 @@ package org.biobank.controllers.study
 import org.biobank.controllers._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.service.{ ServiceComponent, TopComponentImpl }
 import org.biobank.domain._
 import org.biobank.domain.study._
 import views._

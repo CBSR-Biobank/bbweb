@@ -6,19 +6,19 @@ import org.biobank.service.TopComponentImpl
 import java.io.File
 import play.api.libs.Files
 import play.api.{ Configuration, GlobalSettings, Logger, Mode, Plugin }
-import play.libs.Akka
+import play.api.libs.concurrent._
 import akka.actor.ActorSystem
 import akka.actor.Props
 import com.typesafe.config.ConfigFactory
+import play.api.Play.current
 
 class BbwebPlugin(val app: play.api.Application) extends Plugin with TopComponentImpl {
-  implicit override val system: akka.actor.ActorSystem = Akka.system
 
-  override val studyProcessor = system.actorOf(Props(new StudyProcessor), "studyproc")
-  override val userProcessor = system.actorOf(Props(new UserProcessor), "userproc")
+  override lazy val studyProcessor = Akka.system.actorOf(Props(new StudyProcessor), "studyproc")
+  override lazy val userProcessor = Akka.system.actorOf(Props(new UserProcessor), "userproc")
 
-  override val studyService = new StudyServiceImpl(studyProcessor)
-  override val userService = new UserService(userProcessor)
+  override lazy val studyService = new StudyServiceImpl(studyProcessor)
+  override lazy val userService = new UserService(userProcessor)
 
   private val configKey = "slick"
   private val ScriptDirectory = "conf/evolutions/"
@@ -49,6 +49,7 @@ class BbwebPlugin(val app: play.api.Application) extends Plugin with TopComponen
       }
     }
 
+    Logger.info(s"Bbweb Plugin started")
     super.onStart
   }
 
@@ -86,6 +87,10 @@ class BbwebPlugin(val app: play.api.Application) extends Plugin with TopComponen
     // val createScript = new File(directory, fileName)
     // val createSql = ddlStatements.flatten.mkString("\n\n")
     // Files.writeFileIfChanged(createScript, ScriptHeader + createSql)
+  }
+
+  override def onStop() {
+    Logger.info(s"Bbweb Plugin stopped")
   }
 
 }

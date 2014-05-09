@@ -5,13 +5,12 @@ import org.biobank.domain._
 import org.biobank.service.json.Study._
 import org.biobank.service._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.service.{ ServiceComponent, TopComponentImpl }
 import org.biobank.domain.study.Study
 import views._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import play.api._
+import play.api.{ Play }
 import play.api.cache.Cache
 import play.api.Play.current
 import play.api.mvc._
@@ -26,7 +25,7 @@ import scalaz.Scalaz._
 
 object StudyController extends Controller with SecureSocial {
 
-  private val studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
+  private def studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
     sys.error("Bbweb plugin is not registered")
   }
 

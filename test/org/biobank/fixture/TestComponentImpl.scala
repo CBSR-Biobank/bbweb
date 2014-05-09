@@ -12,7 +12,7 @@ import scala.language.postfixOps
 
 trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
 
-  implicit override val system: ActorSystem = ActorSystem("bbweb-test", TestComponentImpl.config())
+  implicit val system: ActorSystem = ActorSystem("bbweb-test", TestComponentImpl.config())
   implicit val timeout = Timeout(5 seconds)
 
   // clear the event store

@@ -21,7 +21,7 @@ import scalaz.Scalaz._
 trait UserServiceComponent {
   self: RepositoryComponent =>
 
-  class UserService(userProcessor: ActorRef)(implicit system: ActorSystem) extends ApplicationService {
+  class UserService(userProcessor: ActorRef) extends ApplicationService {
 
     val log = LoggerFactory.getLogger(this.getClass)
 

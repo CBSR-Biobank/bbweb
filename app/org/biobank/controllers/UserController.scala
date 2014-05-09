@@ -11,7 +11,7 @@ import Scalaz._
 
 object UserController extends Controller with SecureSocial {
 
-  private val userService = Play.current.plugin[BbwebPlugin].map(_.userService).getOrElse {
+  private def userService = Play.current.plugin[BbwebPlugin].map(_.userService).getOrElse {
     sys.error("Bbweb plugin is not registered")
   }
 

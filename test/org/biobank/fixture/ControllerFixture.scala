@@ -4,13 +4,14 @@ import org.biobank.domain.FactoryComponent
 import org.biobank.domain.RepositoryComponentImpl
 
 import org.scalatest.FunSpec
-import org.scalatest.GivenWhenThen
+import org.scalatest.BeforeAndAfter
 import org.scalatest.Matchers
 import play.api.test.FakeApplication
-import com.mongodb.casbah.Imports._
 import play.api.libs.json._
 import play.api.test.Helpers._
 import play.api.test.FakeRequest
+import com.mongodb.casbah.Imports._
+import play.api.Logger
 
 /** This trait allows a test suite to run tests on a Play Framework fake application.
   *
@@ -30,9 +31,9 @@ trait ControllerFixture
   MongoConnection()(dbName)("messages").drop
   MongoConnection()(dbName)("snapshots").drop
 
-  protected def fakeApplication = FakeApplication(
-    withoutPlugins = List("com.typesafe.plugin.CommonsMailerPlugin")
-  )
+  protected def fakeApplication = {
+    FakeApplication(withoutPlugins = List("com.typesafe.plugin.CommonsMailerPlugin"))
+  }
 
   def makeJsonRequest(method: String, path: String): JsValue = {
     val result = route(FakeRequest(method, path)).get
@@ -49,3 +50,4 @@ trait ControllerFixture
   }
 
 }
+
