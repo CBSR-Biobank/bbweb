@@ -69,8 +69,9 @@ class StudyControllerSpec extends ControllerFixture {
       it("should add a study") {
         running(fakeApplication) {
           val study = factory.createDisabledStudy
-          val map = Map("name" -> study.name, "description" -> study.description.getOrElse("null"))
-          val json = makeJsonRequest(POST, "/studies", Json.toJson(map))
+          val cmdJson = JsObject(
+            "name" -> JsString(study.name) :: "description" -> JsString(study.description.getOrElse("null")) :: Nil)
+          val json = makeJsonRequest(POST, "/studies", json = cmdJson)
 
           (json \ "message").as[String] should include ("Study added")
         }
@@ -78,7 +79,27 @@ class StudyControllerSpec extends ControllerFixture {
     }
 
     describe("POST /studies/enable") {
-      it("should enable a study", Tag("single")) {
+      it("should enable a study") {
+        running(fakeApplication) {
+
+          val appRepositories = new AppRepositories
+
+          val study = factory.createDisabledStudy
+          appRepositories.studyRepository.put(study)
+          appRepositories.specimenGroupRepository.put(factory.createSpecimenGroup)
+          appRepositories.collectionEventTypeRepository.put(factory.createCollectionEventType)
+
+          val cmdJson = JsObject(
+            "id" -> JsString(study.id.id) :: "expectedVersion" -> JsNumber(study.version) :: Nil)
+          val json = makeJsonRequest(POST, "/studies/enable", json = cmdJson)
+
+          (json \ "message").as[String] should include ("Study enabled")
+        }
+      }
+    }
+
+    describe("POST /studies/enable") {
+      it("should not enable a study", Tag("single")) {
         running(fakeApplication) {
 
           val appRepositories = new AppRepositories
@@ -87,12 +108,10 @@ class StudyControllerSpec extends ControllerFixture {
           appRepositories.studyRepository.put(study)
 
           val cmdJson = JsObject(
-            "id" -> JsString(study.id.id) ::
-              "expectedVersion" -> JsNumber(study.version) ::
-              Nil)
-          val json = makeJsonRequest(POST, "/studies/enable", cmdJson)
+            "id" -> JsString(study.id.id) :: "expectedVersion" -> JsNumber(study.version) :: Nil)
+          val json = makeJsonRequest(POST, "/studies/enable", BAD_REQUEST, cmdJson)
 
-          (json \ "message").as[String] should include ("Study added")
+          (json \ "message").as[String] should include ("no specimen groups")
         }
       }
     }

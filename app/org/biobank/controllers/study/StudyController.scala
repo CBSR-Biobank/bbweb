@@ -74,7 +74,7 @@ object StudyController extends Controller with SecureSocial {
     future.map { validation =>
       validation match {
         case Success(event) =>
-          Ok(Json.obj("status" ->"OK", "message" -> (s"Study disabled: ${event.id}.") ))
+          Ok(Json.obj("status" ->"OK", "message" -> (s"Study enabled: ${event.id}.") ))
         case Failure(err) =>
           BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
       }
@@ -86,7 +86,7 @@ object StudyController extends Controller with SecureSocial {
     future.map { validation =>
       validation match {
         case Success(event) =>
-          Ok(Json.obj("status" ->"OK", "message" -> (s"Study diabled: ${event.id}.") ))
+          Ok(Json.obj("status" ->"OK", "message" -> (s"Study disabled: ${event.id}.") ))
         case Failure(err) =>
           BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
       }

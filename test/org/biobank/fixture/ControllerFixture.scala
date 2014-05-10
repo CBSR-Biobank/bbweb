@@ -37,21 +37,11 @@ trait ControllerFixture
     FakeApplication(withoutPlugins = List("com.typesafe.plugin.CommonsMailerPlugin"))
   }
 
-  def makeJsonRequest(method: String, path: String): JsValue = {
-    val result = route(FakeRequest(method, path)).get
-    status(result) should be (OK)
-    contentType(result) should be (Some("application/json"))
-    Json.parse(contentAsString(result))
-  }
-
-  def makeJsonRequest(method: String, path: String, json: JsValue): JsValue = {
+  def makeJsonRequest(method: String, path: String, expectedStatus: Int = OK, json: JsValue = JsNull): JsValue = {
     val result = route(FakeRequest(method, path).withJsonBody(json)).get
-    val statusVal = status(result)
-    if (statusVal != OK) {
-      Logger.info(s"makeJsonRequest: result not OK: ${contentAsString(result)}")
-    }
-    statusVal should be (OK)
+    status(result) should be (expectedStatus)
     contentType(result) should be (Some("application/json"))
+    Logger.info(s"makeJsonRequest: result: ${contentAsString(result)}")
     Json.parse(contentAsString(result))
   }
 
