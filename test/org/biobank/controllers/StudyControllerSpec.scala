@@ -99,7 +99,7 @@ class StudyControllerSpec extends ControllerFixture {
     }
 
     describe("POST /studies/enable") {
-      it("should not enable a study", Tag("single")) {
+      it("should not enable a study") {
         running(fakeApplication) {
 
           val appRepositories = new AppRepositories
@@ -112,6 +112,24 @@ class StudyControllerSpec extends ControllerFixture {
           val json = makeJsonRequest(POST, "/studies/enable", BAD_REQUEST, cmdJson)
 
           (json \ "message").as[String] should include ("no specimen groups")
+        }
+      }
+    }
+
+    describe("POST /studies/enable") {
+      it("should disable a study", Tag("single")) {
+        running(fakeApplication) {
+
+          val appRepositories = new AppRepositories
+
+          val study = factory.createDisabledStudy.enable(Some(0), 1, 1) | fail
+          appRepositories.studyRepository.put(study)
+
+          val cmdJson = JsObject(
+            "id" -> JsString(study.id.id) :: "expectedVersion" -> JsNumber(study.version) :: Nil)
+          val json = makeJsonRequest(POST, "/studies/disable", json = cmdJson)
+
+          (json \ "message").as[String] should include ("Study disabled")
         }
       }
     }
