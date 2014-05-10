@@ -1,11 +1,13 @@
 package org.biobank.fixture
 
-import org.biobank.domain.FactoryComponent
-import org.biobank.domain.RepositoryComponentImpl
+import org.biobank.controllers.BbwebPlugin
+import org.biobank.domain.study.{ Study, StudyId }
+import org.biobank.domain.{ FactoryComponent, RepositoryComponentImpl, ReadWriteRepository }
 
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
 import org.scalatest.Matchers
+import play.api.Play
 import play.api.test.FakeApplication
 import play.api.libs.json._
 import play.api.test.Helpers._
@@ -22,8 +24,8 @@ import play.api.Logger
 trait ControllerFixture
     extends FunSpec
     with Matchers
-    with RepositoryComponentImpl
-    with FactoryComponent {
+    with FactoryComponent
+    with RepositoryComponentImpl {
 
   private val dbName = "bbweb-test"
 
@@ -44,9 +46,31 @@ trait ControllerFixture
 
   def makeJsonRequest(method: String, path: String, json: JsValue): JsValue = {
     val result = route(FakeRequest(method, path).withJsonBody(json)).get
-    status(result) should be (OK)
+    val statusVal = status(result)
+    if (statusVal != OK) {
+      Logger.info(s"makeJsonRequest: result not OK: ${contentAsString(result)}")
+    }
+    statusVal should be (OK)
     contentType(result) should be (Some("application/json"))
     Json.parse(contentAsString(result))
+  }
+
+  class AppRepositories {
+
+    val plugin = Play.current.plugin[BbwebPlugin]
+
+    val studyRepository = plugin.map(_.studyRepository).getOrElse {
+      sys.error("Bbweb plugin is not registered")
+    }
+
+    val specimenGroupRepository = plugin.map(_.specimenGroupRepository).getOrElse {
+      sys.error("Bbweb plugin is not registered")
+    }
+
+    val collectionEventTypeRepository = plugin.map(_.collectionEventTypeRepository).getOrElse {
+      sys.error("Bbweb plugin is not registered")
+    }
+
   }
 
 }

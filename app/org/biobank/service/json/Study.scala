@@ -40,22 +40,22 @@ object Study {
 
   implicit val enableStudyCmdReads: Reads[EnableStudyCmd] = (
     (JsPath \ "id").read[String](minLength[String](2)) and
-      (JsPath \ "version").readNullable[Long](min[Long](0))
+      (JsPath \ "expectedVersion").readNullable[Long](min[Long](0))
   )(EnableStudyCmd.apply _)
 
   implicit val disableStudyCmdReads: Reads[DisableStudyCmd] = (
     (JsPath \ "id").read[String](minLength[String](2)) and
-      (JsPath \ "version").readNullable[Long](min[Long](0))
+      (JsPath \ "expectedVersion").readNullable[Long](min[Long](0))
   )(DisableStudyCmd.apply _)
 
   implicit val retireStudyCmdReads: Reads[RetireStudyCmd] = (
     (JsPath \ "id").read[String](minLength[String](2)) and
-      (JsPath \ "version").readNullable[Long](min[Long](0))
+      (JsPath \ "expectedVersion").readNullable[Long](min[Long](0))
   )(RetireStudyCmd.apply _)
 
   implicit val unretireStudyCmdReads: Reads[UnretireStudyCmd] = (
     (JsPath \ "id").read[String](minLength[String](2)) and
-      (JsPath \ "version").readNullable[Long](min[Long](0))
+      (JsPath \ "expectedVersion").readNullable[Long](min[Long](0))
   )(UnretireStudyCmd.apply _)
 
 }

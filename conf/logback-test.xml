@@ -16,8 +16,8 @@
      </encoder>
    </appender>
 
-  <logger name="application" level="WARN" />
-  <logger name="play" level="WARN" />
+  <logger name="application" level="INFO" />
+  <logger name="play" level="WARNING" />
   <logger name="securesocial.core" level="WARN" />
 
   <logger name="org.biobank.controllers" level="INFO" />
