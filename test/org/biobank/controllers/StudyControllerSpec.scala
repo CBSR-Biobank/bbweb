@@ -4,9 +4,6 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.json.JsonHelper._
 import org.biobank.fixture.ControllerFixture
 import org.biobank.service.json.Study._
-//import play.api.Play
-import play.api.test.Helpers._
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.test.FakeApplication
 import play.api.libs.json._

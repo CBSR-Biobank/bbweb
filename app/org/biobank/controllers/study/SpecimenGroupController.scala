@@ -2,7 +2,7 @@ package org.biobank.controllers.study
 
 import org.biobank.controllers._
 import org.biobank.service._
-import org.biobank.service.json.Study._
+import org.biobank.service.json.SpecimenGroup._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain.study._
 import org.biobank.domain.AnatomicalSourceType._
@@ -10,7 +10,8 @@ import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
 
-import play.api.{ Play }
+import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.{ Logger, Play }
 import play.api.mvc._
 import play.api.libs.json._
 
@@ -26,9 +27,16 @@ object SpecimenGroupController extends BbwebController {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = Action {
-    val json = Json.toJson(studyService.getAll.toList)
-    Ok(json)
+  def list = doCommand { cmd: AddSpecimenGroupCmd =>
+    val future = studyService.addSpecimenGroup(cmd)(null)
+    future.map { validation =>
+      validation match {
+        case Success(event) =>
+          Ok(Json.obj("status" ->"OK", "message" -> ("specimen group added.") ))
+        case Failure(err) =>
+          BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
+      }
+    }
   }
 
 }
