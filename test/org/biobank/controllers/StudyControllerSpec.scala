@@ -23,7 +23,7 @@ class StudyControllerSpec extends ControllerFixture {
   describe("Study REST API") {
 
     describe("GET /studies") {
-      it("should list no studies") {
+      it("should list none") {
         running(fakeApplication) {
           val json = makeJsonRequest(GET, "/studies")
           val jsonList = json.as[List[JsObject]]
@@ -78,7 +78,13 @@ class StudyControllerSpec extends ControllerFixture {
       }
     }
 
-    describe("POST /studies") {
+    describe("PUT /studies/:id") {
+
+      it("should update a study") (pending)
+
+    }
+
+    describe("GET /studies/:id") {
       it("should read a study") {
         running(fakeApplication) {
           val appRepositories = new AppRepositories

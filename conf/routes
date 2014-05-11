@@ -18,7 +18,7 @@ GET     /studies/:id                org.biobank.controllers.study.StudyControlle
 PUT     /studies/:id                org.biobank.controllers.study.StudyController.updateStudy(id)
 
 # specimen groups
-#GET     /study/sgroups              org.biobank.controllers.study.SpecimenGroupController.list
+GET     /study/sgroups              org.biobank.controllers.study.SpecimenGroupController.list
 #POST    /study/sg/add                         	       org.biobank.controllers.study.SpecimenGroupController.addSpecimenGroupSubmit
 #GET     /study/sg/update/:studyId/:studyName/:sgId     org.biobank.controllers.study.SpecimenGroupController.updateSpecimenGroup(studyId, studyName, sgId)
 #POST    /study/sg/update                      	       org.biobank.controllers.study.SpecimenGroupController.updateSpecimenGroupSubmit

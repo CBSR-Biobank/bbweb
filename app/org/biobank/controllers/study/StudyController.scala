@@ -6,24 +6,17 @@ import org.biobank.service.json.Study._
 import org.biobank.service._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain.study.Study
-import views._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import play.api.{ Play }
-import play.api.cache.Cache
+import play.api.{ Logger, Play }
 import play.api.Play.current
 import play.api.mvc._
-import play.api.data._
 import play.api.libs.json._
-import play.Logger
-import securesocial.core.SecureSocial
-import securesocial.core.SecuredRequest
 
 import scalaz._
 import scalaz.Scalaz._
 
-object StudyController extends Controller with SecureSocial {
+object StudyController extends BbwebController {
 
   private def studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
     sys.error("Bbweb plugin is not registered")
@@ -35,7 +28,6 @@ object StudyController extends Controller with SecureSocial {
   }
 
   def readStudy(id: String) = Action { request =>
-    Logger.info(s"$request")
     val validation = studyService.getStudy(id)
     validation match {
       case Success(study) =>
@@ -115,22 +107,6 @@ object StudyController extends Controller with SecureSocial {
           BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
       }
     }
-  }
-
-  private def doCommand[T <: StudyCommand](
-    func: T => Future[Result])(
-    implicit reads: Reads[T]) = Action.async(BodyParsers.parse.json) { request =>
-    val cmdResult = request.body.validate(reads)
-    cmdResult.fold(
-      errors => {
-        Future.successful(
-          BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors))))
-      },
-      cmd => {
-        Logger.info(s"$cmd")
-        func(cmd)
-      }
-    )
   }
 
 }
