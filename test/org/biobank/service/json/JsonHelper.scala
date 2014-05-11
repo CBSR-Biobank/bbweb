@@ -10,7 +10,7 @@ object JsonHelper {
 
   val fmt = ISODateTimeFormat.dateTime();
 
-  def compareObj(json: JsObject, study: Study)  = {
+  def compareObj(json: JsValue, study: Study)  = {
     assert((json \ "id").as[String] === study.id.id)
     assert((json \ "version").as[Long] === study.version)
     assert((json \ "addedDate").as[String] === fmt.print(study.addedDate))

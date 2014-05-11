@@ -78,6 +78,19 @@ class StudyControllerSpec extends ControllerFixture {
       }
     }
 
+    describe("POST /studies") {
+      it("should read a study") {
+        running(fakeApplication) {
+          val appRepositories = new AppRepositories
+
+          val study = factory.createDisabledStudy.enable(Some(0), 1, 1) | fail
+          appRepositories.studyRepository.put(study)
+          val json = makeJsonRequest(GET, s"/studies/${study.id.id}")
+          compareObj(json, study)
+        }
+      }
+    }
+
     describe("POST /studies/enable") {
       it("should enable a study") {
         running(fakeApplication) {
@@ -117,7 +130,7 @@ class StudyControllerSpec extends ControllerFixture {
     }
 
     describe("POST /studies/enable") {
-      it("should disable a study", Tag("single")) {
+      it("should disable a study") {
         running(fakeApplication) {
 
           val appRepositories = new AppRepositories
@@ -130,6 +143,42 @@ class StudyControllerSpec extends ControllerFixture {
           val json = makeJsonRequest(POST, "/studies/disable", json = cmdJson)
 
           (json \ "message").as[String] should include ("Study disabled")
+        }
+      }
+    }
+
+    describe("POST /studies/retire") {
+      it("should retire a study") {
+        running(fakeApplication) {
+
+          val appRepositories = new AppRepositories
+
+          val study = factory.createDisabledStudy
+          appRepositories.studyRepository.put(study)
+
+          val cmdJson = JsObject(
+            "id" -> JsString(study.id.id) :: "expectedVersion" -> JsNumber(study.version) :: Nil)
+          val json = makeJsonRequest(POST, "/studies/retire", json = cmdJson)
+
+          (json \ "message").as[String] should include ("Study retired")
+        }
+      }
+    }
+
+    describe("POST /studies/unretire") {
+      it("should unretire a study") {
+        running(fakeApplication) {
+
+          val appRepositories = new AppRepositories
+
+          val study = factory.createDisabledStudy.retire(Some(0)) | fail
+          appRepositories.studyRepository.put(study)
+
+          val cmdJson = JsObject(
+            "id" -> JsString(study.id.id) :: "expectedVersion" -> JsNumber(study.version) :: Nil)
+          val json = makeJsonRequest(POST, "/studies/unretire", json = cmdJson)
+
+          (json \ "message").as[String] should include ("Study unretired")
         }
       }
     }
