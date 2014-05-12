@@ -63,9 +63,10 @@ case class DisabledStudy private (
   lastUpdateDate: Option[DateTime],
   name: String,
   description: Option[String])
-  extends Study {
+    extends Study {
 
   override val status: String = "Disabled"
+
 
   /** Used to change the name or the description. */
   def update(

@@ -2,11 +2,13 @@ package org.biobank.controllers.study
 
 import org.biobank.controllers._
 import org.biobank.domain._
+import org.biobank.service.json.SpecimenGroup._
 import org.biobank.service.json.Study._
 import org.biobank.service._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain.study.Study
 
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.{ Logger, Play }
 import play.api.Play.current
@@ -37,11 +39,12 @@ object StudyController extends BbwebController {
   }
 
   def addStudy = doCommand { cmd: AddStudyCmd =>
+    Logger.info(s"addStudy: cmd: $cmd")
     val future = studyService.addStudy(cmd)(null)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"Study added: ${event.name}.") ))
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"study added: ${event.name}.") ))
       )
     }
   }
@@ -51,7 +54,7 @@ object StudyController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"Study updated: ${event.name}.") ))
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"study updated: ${event.name}.") ))
       )
     }
   }
@@ -61,7 +64,7 @@ object StudyController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"Study enabled: ${event.id}.") ))
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"study enabled: ${event.id}.") ))
       )
     }
   }
@@ -71,7 +74,7 @@ object StudyController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"Study disabled: ${event.id}.") ))
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"study disabled: ${event.id}.") ))
       )
     }
   }
@@ -81,7 +84,7 @@ object StudyController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"Study retired: ${event.id}.") ))
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"study retired: ${event.id}.") ))
       )
     }
   }
@@ -91,7 +94,7 @@ object StudyController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"Study unretired: ${event.id}.") ))
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"study unretired: ${event.id}.") ))
       )
     }
   }

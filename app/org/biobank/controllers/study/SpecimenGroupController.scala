@@ -41,7 +41,16 @@ object SpecimenGroupController extends BbwebController {
         Ok(json)
       }
     )
+  }
 
+  def addSpecimenGroup = doCommand { cmd: AddSpecimenGroupCmd =>
+    val future = studyService.addSpecimenGroup(cmd)(null)
+    future.map { validation =>
+      validation.fold(
+        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group added: ${event.name}.") ))
+      )
+    }
   }
 
 }

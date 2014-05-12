@@ -41,27 +41,27 @@ object SpecimenGroup {
   implicit val specimenTypeReads = EnumUtils.enumReads(org.biobank.domain.SpecimenType)
 
   implicit val addSpecimenGroupCmdReads: Reads[AddSpecimenGroupCmd] = (
-    (JsPath \ "studyId").read[String](minLength[String](2)) and
-      (JsPath \ "name").read[String](minLength[String](2)) and
-      (JsPath \ "description").readNullable[String](minLength[String](2)) and
-      (JsPath \ "units").read[String](minLength[String](2)) and
-      (JsPath \ "anatomicalSourceType").read[AnatomicalSourceType] and
-      (JsPath \ "preservationType").read[PreservationType] and
-      (JsPath \ "preservationTemperatureType").read[PreservationTemperatureType] and
-      (JsPath \ "specimenType").read[SpecimenType]
+    (__ \ "studyId").read[String](minLength[String](2)) and
+      (__ \ "name").read[String](minLength[String](2)) and
+      (__ \ "description").readNullable[String](minLength[String](2)) and
+      (__ \ "units").read[String](minLength[String](2)) and
+      (__ \ "anatomicalSourceType").read[AnatomicalSourceType] and
+      (__ \ "preservationType").read[PreservationType] and
+      (__ \ "preservationTemperatureType").read[PreservationTemperatureType] and
+      (__ \ "specimenType").read[SpecimenType]
   )(AddSpecimenGroupCmd.apply _)
 
   implicit val updateSpecimenGroupCmdReads: Reads[UpdateSpecimenGroupCmd] = (
-    (JsPath \ "studyId").read[String](minLength[String](2)) and
-      (JsPath \ "id").read[String](minLength[String](2)) and
-      (JsPath \ "version").readNullable[Long](min[Long](0)) and
-      (JsPath \ "name").read[String](minLength[String](2)) and
-      (JsPath \ "description").readNullable[String](minLength[String](2)) and
-      (JsPath \ "units").read[String](minLength[String](2)) and
-      (JsPath \ "anatomicalSourceType").read[AnatomicalSourceType] and
-      (JsPath \ "preservationType").read[PreservationType] and
-      (JsPath \ "preservationTemperatureType").read[PreservationTemperatureType] and
-      (JsPath \ "specimenType").read[SpecimenType]
+    (__ \ "studyId").read[String](minLength[String](2)) and
+      (__ \ "id").read[String](minLength[String](2)) and
+      (__ \ "version").readNullable[Long](min[Long](0)) and
+      (__ \ "name").read[String](minLength[String](2)) and
+      (__ \ "description").readNullable[String](minLength[String](2)) and
+      (__ \ "units").read[String](minLength[String](2)) and
+      (__ \ "anatomicalSourceType").read[AnatomicalSourceType] and
+      (__ \ "preservationType").read[PreservationType] and
+      (__ \ "preservationTemperatureType").read[PreservationTemperatureType] and
+      (__ \ "specimenType").read[SpecimenType]
   )(UpdateSpecimenGroupCmd.apply _)
 
 }

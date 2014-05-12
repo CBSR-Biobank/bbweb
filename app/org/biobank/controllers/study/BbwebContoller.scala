@@ -14,7 +14,8 @@ trait BbwebController extends SecureSocial {
   protected def doCommand[T <: Command](
     func: T => Future[Result])(
     implicit reads: Reads[T]) = Action.async(BodyParsers.parse.json) { request =>
-    val cmdResult = request.body.validate(reads)
+    Logger.info(s"doCommand: body: ${request.body}")
+    val cmdResult = request.body.validate[T]
     cmdResult.fold(
       errors => {
         Future.successful(
