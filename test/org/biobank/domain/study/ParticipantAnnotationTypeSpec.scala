@@ -92,11 +92,10 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options, required) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("id is null or empty"))
-      }
+        maxValueCount, options, required).fold(
+        err => err.list should (have length 1 and contain("id is null or empty")),
+        user => fail
+      )
     }
 
     "not be created with an empty id" in {
@@ -111,11 +110,10 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options, required) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("id is null or empty"))
-      }
+        maxValueCount, options, required).fold(
+        err => err.list should (have length 1 and contain("id is null or empty")),
+        user => fail
+      )
     }
 
     "not be created with an invalid version" in {
@@ -130,11 +128,10 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options, required) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("invalid version value: -2"))
-      }
+        maxValueCount, options, required).fold(
+        err => err.list should (have length 1 and contain("invalid version value: -2")),
+        user => fail
+      )
     }
 
     "not be created with an null or empty name" in {
@@ -149,19 +146,17 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options, required) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("name is null or empty"))
-      }
+        maxValueCount, options, required).fold(
+        err => err.list should (have length 1 and contain("name is null or empty")),
+        user => fail
+      )
 
       name = ""
       ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options, required) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("name is null or empty"))
-      }
+        maxValueCount, options, required).fold(
+        err => err.list should (have length 1 and contain("name is null or empty")),
+        user => fail
+      )
     }
 
     "not be created with an empty description option" in {
@@ -176,19 +171,17 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options, required) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("description is null or empty"))
-      }
+        maxValueCount, options, required).fold(
+        err => err.list should (have length 1 and contain("description is null or empty")),
+        user => fail
+      )
 
       description = Some("")
       ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options, required) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("description is null or empty"))
-      }
+        maxValueCount, options, required).fold(
+        err => err.list should (have length 1 and contain("description is null or empty")),
+        user => fail
+      )
     }
 
     "not be created with an negative max value count" in {
@@ -203,11 +196,10 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options, required) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("max value count is not a positive number"))
-      }
+        maxValueCount, options, required).fold(
+        err => err.list should (have length 1 and contain("max value count is not a positive number")),
+        user => fail
+      )
     }
 
     "not be created with an invalid options" in {
@@ -222,27 +214,24 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options, required) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("option key is null or empty"))
-      }
+        maxValueCount, options, required).fold(
+        err => err.list should (have length 1 and contain("option key is null or empty")),
+        user => fail
+      )
 
       options = Some(Map("1" -> ""))
       ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options, required) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("option value is null or empty"))
-      }
+        maxValueCount, options, required).fold(
+        err => err.list should (have length 1 and contain("option value is null or empty")),
+          user => fail
+      )
 
       options = Some(Map("1" -> null))
       ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options, required) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("option value is null or empty"))
-      }
+        maxValueCount, options, required).fold(
+        err => err.list should (have length 1 and contain("option value is null or empty")),
+          user => fail
+      )
     }
 
     "have more than one validation fail" in {
@@ -257,13 +246,14 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options, required) match {
-        case Success(user) => fail
-        case Failure(err) =>
+        maxValueCount, options, required).fold(
+        err => {
           err.list should have length 2
           err.list.head should be ("invalid version value: -2")
           err.list.tail.head should be ("name is null or empty")
-      }
+        },
+        user => fail
+      )
     }
 
   }

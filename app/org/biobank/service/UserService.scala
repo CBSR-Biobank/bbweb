@@ -26,22 +26,18 @@ trait UserServiceComponent {
     val log = LoggerFactory.getLogger(this.getClass)
 
     def find(id: securesocial.core.IdentityId): Option[securesocial.core.Identity] = {
-      userRepository.getByKey(UserId(id.userId)) match {
-        case Success(user) => Some(toSecureSocialIdentity(user))
-        case Failure(err) =>
-          log.error(err.list.mkString(","))
-          none
-      }
+      userRepository.getByKey(UserId(id.userId)).fold(
+        err => None,
+        user => Some(toSecureSocialIdentity(user))
+      )
     }
 
     def findByEmailAndProvider(
       email: String, providerId: String): Option[securesocial.core.Identity] = {
-      userRepository.getByKey(UserId(email)) match {
-        case Success(user) => some(toSecureSocialIdentity(user))
-        case Failure(err) =>
-          log.error(err.list.mkString(","))
-          none
-      }
+      userRepository.getByKey(UserId(email)).fold(
+        err => None,
+        user => some(toSecureSocialIdentity(user))
+      )
     }
 
     def getByEmail(email: String): DomainValidation[User] = {

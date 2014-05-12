@@ -40,18 +40,20 @@ trait ProcessingTypeRepositoryComponentImpl extends ProcessingTypeRepositoryComp
     def withId(
       studyId: StudyId,
       processingTypeId: ProcessingTypeId): DomainValidation[ProcessingType] = {
-      getByKey(processingTypeId) match {
-        case Failure(err) =>
+      getByKey(processingTypeId).fold(
+        err =>
+        DomainError(
+          s"processing type does not exist: { studyId: $studyId, processingTypeId: $processingTypeId }")
+          .failNel,
+        cet =>
+        if (cet.studyId.equals(studyId)) {
+          cet.success
+        } else {
           DomainError(
-            s"processing type does not exist: { studyId: $studyId, processingTypeId: $processingTypeId }")
-            .failNel
-        case Success(cet) =>
-          if (cet.studyId.equals(studyId))
-            cet.success
-          else DomainError(
             "study does not have processing type:{ studyId: $studyId, processingTypeId: $processingTypeId }")
-              .failNel
-      }
+            .failNel
+        }
+      )
     }
 
     def allForStudy(studyId: StudyId): Set[ProcessingType] = {

@@ -36,10 +36,10 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
     }
 
     def emailAvailable(email: String): DomainValidation[Boolean] = {
-      getByKey(new UserId(email)) match {
-        case Failure(err) => true.success
-        case Success(user) => DomainError(s"user already exists: $email").failNel
-      }
+      getByKey(new UserId(email)).fold(
+        err => true.success,
+        user => DomainError(s"user already exists: $email").failNel
+      )
     }
   }
 }

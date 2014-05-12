@@ -283,38 +283,40 @@ trait StudyProcessorComponent
     /**
       * Utility method to validiate state of a study
       */
-    private def isStudyDisabled(studyId: StudyId): DomainValidation[DisabledStudy] =
-      studyRepository.getByKey(studyId) match {
-        case Failure(msglist) => DomainError(s"no study with id: $studyId").failNel
-        case Success(study) => study match {
+    private def isStudyDisabled(studyId: StudyId): DomainValidation[DisabledStudy] = {
+      studyRepository.getByKey(studyId).fold(
+        err => DomainError(s"no study with id: $studyId").failNel,
+        study => study match {
           case dstudy: DisabledStudy => dstudy.success
           case _ => DomainError("study is not disabled: ${study.name}").failNel
         }
-      }
+      )
+    }
 
     /**
       * Utility method to validiate state of a study
       */
-    private def isStudyEnabled(studyId: StudyId): DomainValidation[EnabledStudy] =
-      studyRepository.getByKey(studyId) match {
-        case Failure(msglist) => DomainError(s"no study with id: $studyId").failNel
-        case Success(study) => study match {
+    private def isStudyEnabled(studyId: StudyId): DomainValidation[EnabledStudy] = {
+      studyRepository.getByKey(studyId).fold(
+        err => DomainError(s"no study with id: $studyId").failNel,
+        study => study match {
           case enabledStudy: EnabledStudy => enabledStudy.success
           case _ => DomainError(s"study is not enabled: ${study.name}").failNel
         }
-      }
+      )
+    }
 
     /**
       * Utility method to validiate state of a study
       */
     private def isStudyRetired(studyId: StudyId): DomainValidation[RetiredStudy] = {
-      studyRepository.getByKey(studyId) match {
-        case Failure(msglist) => DomainError(s"no study with id: $studyId").failNel
-        case Success(study) => study match {
+      studyRepository.getByKey(studyId).fold(
+        err => DomainError(s"no study with id: $studyId").failNel,
+        study => study match {
           case retiredStudy: RetiredStudy => retiredStudy.success
           case _ => DomainError(s"study is not retired: ${study.name}").failNel
         }
-      }
+      )
     }
 
     private def nameAvailable(name: String): DomainValidation[Boolean] = {

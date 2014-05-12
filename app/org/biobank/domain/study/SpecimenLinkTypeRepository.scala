@@ -42,18 +42,17 @@ trait SpecimenLinkTypeRepositoryComponentImpl extends SpecimenLinkTypeRepository
     def withId(
       processingTypeId: ProcessingTypeId,
       specimenLinkTypeId: SpecimenLinkTypeId): DomainValidation[SpecimenLinkType] = {
-      getByKey(specimenLinkTypeId) match {
-        case Failure(err) =>
-          DomainError(
-            s"specimen link type does not exist: { processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
-            .failNel
-        case Success(slt) =>
-          if (slt.processingTypeId.equals(processingTypeId))
-            slt.success
-          else DomainError(
-            s"processing type does not have specimen link type:{ processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
-              .failNel
-      }
+      getByKey(specimenLinkTypeId).fold(
+        err =>
+        DomainError(
+          s"specimen link type does not exist: { processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
+          .failNel,
+        slt => if (slt.processingTypeId.equals(processingTypeId))
+          slt.success
+        else DomainError(
+          s"processing type does not have specimen link type:{ processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
+          .failNel
+      )
     }
 
     def allForProcessingType(processingTypeId: ProcessingTypeId): Set[SpecimenLinkType] = {

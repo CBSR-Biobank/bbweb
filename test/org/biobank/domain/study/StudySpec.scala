@@ -145,11 +145,10 @@ class StudySpec extends DomainSpec {
       val name = nameGenerator.next[Study]
       val description = some(nameGenerator.next[Study])
 
-      DisabledStudy.create(id, version, name, description) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("id is null or empty"))
-      }
+      DisabledStudy.create(id, version, name, description).fold(
+        err => err.list should (have length 1 and contain("id is null or empty")),
+        user => fail
+      )
     }
 
     "not be created with an invalid version" in {
@@ -158,11 +157,10 @@ class StudySpec extends DomainSpec {
       val name = nameGenerator.next[Study]
       val description = some(nameGenerator.next[Study])
 
-      DisabledStudy.create(id, version, name, description) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("invalid version value: -2"))
-      }
+      DisabledStudy.create(id, version, name, description).fold(
+        err => err.list should (have length 1 and contain("invalid version value: -2")),
+        user => fail
+      )
     }
 
     "not be created with an null or empty name" in {
@@ -171,18 +169,16 @@ class StudySpec extends DomainSpec {
       var name: String = null
       val description = some(nameGenerator.next[Study])
 
-      DisabledStudy.create(id, version, name, description) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("name is null or empty"))
-      }
+      DisabledStudy.create(id, version, name, description).fold(
+        err => err.list should (have length 1 and contain("name is null or empty")),
+        user => fail
+      )
 
       name = ""
-      DisabledStudy.create(id, version, name, description) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("name is null or empty"))
-      }
+      DisabledStudy.create(id, version, name, description).fold(
+        err => err.list should (have length 1 and contain("name is null or empty")),
+        user => fail
+      )
     }
 
     "not be created with an empty description option" in {
@@ -191,18 +187,16 @@ class StudySpec extends DomainSpec {
       val name = nameGenerator.next[Study]
       var description: Option[String] = Some(null)
 
-      DisabledStudy.create(id, version, name, description) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("description is null or empty"))
-      }
+      DisabledStudy.create(id, version, name, description).fold(
+        err => err.list should (have length 1 and contain("description is null or empty")),
+        user => fail
+      )
 
       description = Some("")
-      DisabledStudy.create(id, version, name, description) match {
-        case Success(user) => fail
-        case Failure(err) =>
-          err.list should (have length 1 and contain("description is null or empty"))
-      }
+      DisabledStudy.create(id, version, name, description).fold(
+        err => err.list should (have length 1 and contain("description is null or empty")),
+        user => fail
+      )
     }
 
     "not be updated with an invalid version" in {

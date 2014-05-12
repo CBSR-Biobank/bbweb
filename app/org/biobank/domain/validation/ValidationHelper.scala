@@ -57,20 +57,19 @@ private[domain] trait ValidationHelper {
     if (v >= -1) (v + 1).success else s"invalid version value: $v".failNel
 
   protected def validateId[T <: IdentifiedValueObject[String]](id: T): DomainValidation[T] = {
-    validateStringId(id.toString, "id is null or empty") match {
-      case Success(idString) => id.success
-      case Failure(err) => err.fail
-    }
+    validateStringId(id.toString, "id is null or empty").fold(
+      err => err.fail,
+      idString => id.success)
   }
 
   protected def validateId[T <: IdentifiedValueObject[String]](
     idOption: Option[T]): DomainValidation[Option[T]] = {
     idOption match {
       case Some(id) =>
-        validateId(id) match {
-          case Success(id) => idOption.success
-          case Failure(err) => err.fail
-        }
+        validateId(id).fold(
+          err => err.fail,
+          id => idOption.success
+        )
       case _ => idOption.success
     }
   }

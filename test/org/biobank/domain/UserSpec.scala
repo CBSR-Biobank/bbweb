@@ -128,11 +128,10 @@ class UserSpec extends DomainSpec {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail("id validation failed")
-        case Failure(err) =>
-          err.list should (have length 1 and contain("id is null or empty"))
-      }
+      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl).fold(
+        err => err.list should (have length 1 and contain("id is null or empty")),
+        user => fail("id validation failed")
+      )
     }
 
     "not be created with an invalid version" in {
@@ -145,11 +144,10 @@ class UserSpec extends DomainSpec {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail("version validation failed")
-        case Failure(err) =>
-          err.list should (have length 1 and contain("invalid version value: -2"))
-      }
+      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl).fold(
+        err => err.list should (have length 1 and contain("invalid version value: -2")),
+        user => fail("version validation failed")
+      )
     }
 
     "not be updated with an invalid version" taggedAs(Tag("single")) in {
@@ -180,11 +178,10 @@ class UserSpec extends DomainSpec {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail("name validation failed")
-        case Failure(err) =>
-          err.list should (have length 1 and contain("name is null or empty"))
-      }
+      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl).fold(
+        err => err.list should (have length 1 and contain("name is null or empty")),
+        user => fail("name validation failed")
+      )
     }
 
     "not be created with an empty password" in {
@@ -197,11 +194,10 @@ class UserSpec extends DomainSpec {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail("user password validation failed")
-        case Failure(err) =>
-          err.list should (have length 1 and contain("password is null or empty"))
-      }
+      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl).fold(
+        err => err.list should (have length 1 and contain("password is null or empty")),
+        user => fail("user password validation failed")
+      )
     }
 
     "not be created with an empty hasher" in {
@@ -214,11 +210,10 @@ class UserSpec extends DomainSpec {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
-      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail("user hasher validation failed")
-        case Failure(err) =>
-          err.list should (have length 1 and contain("hasher is null or empty"))
-      }
+      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl).fold(
+        err => err.list should (have length 1 and contain("hasher is null or empty")),
+        user => fail("user hasher validation failed")
+      )
     }
 
     "not be created with an empty salt option" in {
@@ -231,11 +226,10 @@ class UserSpec extends DomainSpec {
       val salt = Some("")
       val avatarUrl = Some("http://test.com/")
 
-      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail("user salt validation failed")
-        case Failure(err) =>
-          err.list should (have length 1 and contain("salt is null or empty"))
-      }
+      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl).fold(
+        err => err.list should (have length 1 and contain("salt is null or empty")),
+        user => fail("user salt validation failed")
+      )
     }
 
     "not be created with an invalid avatar url" in {
@@ -248,12 +242,13 @@ class UserSpec extends DomainSpec {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some(nameGenerator.next[User])
 
-      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail("user avaltar url validation failed")
-        case Failure(err) =>
+      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl).fold(
+        err => {
           err.list should have length 1
           err.list.head should include("invalid avatar url")
-      }
+        },
+        user => fail("user avaltar url validation failed")
+      )
     }
 
     "pass authentication" in {
@@ -286,11 +281,10 @@ class UserSpec extends DomainSpec {
 
       val v = RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl)
       val user = v.getOrElse(fail("could not create user"))
-      user.authenticate(email, badPassword) match {
-        case Success(x) => fail("authentication should fail")
-        case Failure(err) =>
-          err.list should (have length 1 and contain("authentication failure"))
-      }
+      user.authenticate(email, badPassword).fold(
+        err => err.list should (have length 1 and contain("authentication failure")),
+        x => fail("authentication should fail")
+      )
     }
 
     "have more than one validation fail" in {
@@ -305,13 +299,14 @@ class UserSpec extends DomainSpec {
 
       val badPassword = nameGenerator.next[User]
 
-      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl) match {
-        case Success(user) => fail
-        case Failure(err) =>
+      RegisteredUser.create(id, version, name, email, password, hasher, salt, avatarUrl).fold(
+        err => {
           err.list should have length 2
           err.list.head should be ("invalid version value: -2")
           err.list.tail.head should be ("name is null or empty")
-      }
+        },
+        user => fail
+      )
     }
 
   }

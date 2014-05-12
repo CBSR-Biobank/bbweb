@@ -30,20 +30,18 @@ object StudyController extends BbwebController {
   def readStudy(id: String) = Action { request =>
     Logger.info(s"readStudy: id: $id")
     val validation = studyService.getStudy(id)
-    validation match {
-      case Success(study) =>
-        Ok(Json.toJson(study))
-      case Failure(err) =>
-        BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
-    }
+    validation.fold(
+      err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+      study => Ok(Json.toJson(study))
+    )
   }
 
   def addStudy = doCommand { cmd: AddStudyCmd =>
     val future = studyService.addStudy(cmd)(null)
     future.map { validation =>
       validation.fold(
-        error   => BadRequest(Json.obj("status" ->"KO", "message" -> error.list.mkString(", "))),
-        success => Ok(Json.obj("status" ->"OK", "message" -> (s"Study added: ${success.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"Study added: ${event.name}.") ))
       )
     }
   }
@@ -51,60 +49,50 @@ object StudyController extends BbwebController {
   def updateStudy(id: String) = doCommand { cmd : UpdateStudyCmd =>
     val future = studyService.updateStudy(cmd)(null)
     future.map { validation =>
-      validation match {
-        case Success(event) =>
-          Ok(Json.obj("status" ->"OK", "message" -> (s"Study updated: ${event.name}.") ))
-        case Failure(err) =>
-          BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
-      }
+      validation.fold(
+        err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"Study updated: ${event.name}.") ))
+      )
     }
   }
 
   def enableStudy = doCommand { cmd: EnableStudyCmd =>
     val future = studyService.enableStudy(cmd)(null)
     future.map { validation =>
-      validation match {
-        case Success(event) =>
-          Ok(Json.obj("status" ->"OK", "message" -> (s"Study enabled: ${event.id}.") ))
-        case Failure(err) =>
-          BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
-      }
+      validation.fold(
+        err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"Study enabled: ${event.id}.") ))
+      )
     }
   }
 
   def disableStudy = doCommand { cmd: DisableStudyCmd =>
     val future = studyService.disableStudy(cmd)(null)
     future.map { validation =>
-      validation match {
-        case Success(event) =>
-          Ok(Json.obj("status" ->"OK", "message" -> (s"Study disabled: ${event.id}.") ))
-        case Failure(err) =>
-          BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
-      }
+      validation.fold(
+        err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"Study disabled: ${event.id}.") ))
+      )
     }
   }
 
   def retireStudy = doCommand { cmd: RetireStudyCmd =>
     val future = studyService.retireStudy(cmd)(null)
     future.map { validation =>
-      validation match {
-        case Success(event) =>
-          Ok(Json.obj("status" ->"OK", "message" -> (s"Study retired: ${event.id}.") ))
-        case Failure(err) =>
-          BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
-      }
+      validation.fold(
+        err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"Study retired: ${event.id}.") ))
+      )
     }
   }
 
   def unretireStudy = doCommand { cmd: UnretireStudyCmd =>
     val future = studyService.unretireStudy(cmd)(null)
     future.map { validation =>
-      validation match {
-        case Success(event) =>
-          Ok(Json.obj("status" ->"OK", "message" -> (s"Study unretired: ${event.id}.") ))
-        case Failure(err) =>
-          BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
-      }
+      validation.fold(
+        err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"Study unretired: ${event.id}.") ))
+      )
     }
   }
 

@@ -41,10 +41,10 @@ trait StudyAnnotationTypeValidationHelper extends StudyValidationHelper {
 
     options match {
       case Some(optionsMap) =>
-        optionsMap.toList.map(validateOtionItem).sequenceU match {
-          case Success(list) => Some(list.toMap).success
-          case Failure(err) => err.fail
-        }
+        optionsMap.toList.map(validateOtionItem).sequenceU.fold(
+          err => err.fail,
+          list => Some(list.toMap).success
+        )
       case None => none.success
     }
   }
@@ -56,10 +56,10 @@ trait StudyAnnotationTypeValidationHelper extends StudyValidationHelper {
     annotationTypeData: List[T]): DomainValidation[List[T]] = {
 
     def validateAnnotationTypeItem(annotationTypeItem: T): DomainValidation[T] = {
-      validateStringId(annotationTypeItem.annotationTypeId, "annotation type id is null or empty") match {
-        case Success(id) => annotationTypeItem.success
-        case Failure(err) => err.fail
-      }
+      validateStringId(annotationTypeItem.annotationTypeId, "annotation type id is null or empty").fold(
+        err => err.fail,
+        id => annotationTypeItem.success
+      )
     }
 
     annotationTypeData.map(validateAnnotationTypeItem).sequenceU
