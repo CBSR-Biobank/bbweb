@@ -1,6 +1,7 @@
 package org.biobank.controllers
 
 import org.biobank.fixture.ControllerFixture
+import org.biobank.service.json.JsonHelper._
 
 import play.api.test.Helpers._
 import play.api.test.FakeApplication
@@ -15,7 +16,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     describe("GET /studies/sgroups") {
       it("should list none") {
         running(fakeApplication) {
-          val json = makeJsonRequest(GET, "/studies/sgroup")
+          val json = makeJsonRequest(GET, "/studies/sgroups")
           val jsonList = json.as[List[JsObject]]
           jsonList should have size 0
         }
@@ -23,11 +24,20 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     }
 
     describe("GET /studies/sgroups") {
-      it("should list none") (pending)
-    }
+      it("should list a single specimen group") {
+        running(fakeApplication) {
+          val appRepositories = new AppRepositories
 
-    describe("GET /studies/sgroups") {
-      it("should list a single specimen group") (pending)
+          appRepositories.studyRepository.put(factory.createDisabledStudy)
+          val sg = factory.createSpecimenGroup
+          appRepositories.specimenGroupRepository.put(sg)
+
+          val json = makeJsonRequest(GET, "/studies/sgroups")
+          val jsonList = json.as[List[JsObject]]
+          jsonList should have size 1
+          compareObj(jsonList(0), sg)
+        }
+      }
     }
 
     describe("GET /studies/sgroups") {
@@ -38,8 +48,16 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       it("should add a specimen group") (pending)
     }
 
+    describe("POST /studies/sgroups") {
+      it("should not add a specimen group to enabled study") (pending)
+    }
+
     describe("PUT /studies/sgroups") {
       it("should update a specimen group") (pending)
+    }
+
+    describe("PUT /studies/sgroups") {
+      it("should not update a specimen group on an enabled study") (pending)
     }
 
     describe("DELETE /studies/sgroups") {

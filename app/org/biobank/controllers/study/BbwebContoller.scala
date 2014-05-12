@@ -21,7 +21,7 @@ trait BbwebController extends SecureSocial {
           BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors))))
       },
       cmd => {
-        Logger.info(s"$cmd")
+        Logger.info(s"doCommand: $cmd")
         func(cmd)
       }
     )

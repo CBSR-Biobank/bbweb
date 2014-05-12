@@ -28,6 +28,7 @@ object StudyController extends BbwebController {
   }
 
   def readStudy(id: String) = Action { request =>
+    Logger.info(s"readStudy: id: $id")
     val validation = studyService.getStudy(id)
     validation match {
       case Success(study) =>

@@ -26,6 +26,10 @@ object Study {
 
   }
 
+  implicit val studyIdReads: Reads[StudyId] = (
+    (JsPath \ "id").read[String](minLength[String](2))
+  )(StudyId.apply _)
+
   implicit val addStudyCmdReads: Reads[AddStudyCmd] = (
     (JsPath \ "name").read[String](minLength[String](2)) and
       (JsPath \ "description").readNullable[String](minLength[String](2))

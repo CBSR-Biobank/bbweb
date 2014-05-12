@@ -39,9 +39,9 @@ trait ControllerFixture
 
   def makeJsonRequest(method: String, path: String, expectedStatus: Int = OK, json: JsValue = JsNull): JsValue = {
     val result = route(FakeRequest(method, path).withJsonBody(json)).get
+    Logger.info(s"makeJsonRequest: result: ${contentAsString(result)}")
     status(result) should be (expectedStatus)
     contentType(result) should be (Some("application/json"))
-    Logger.info(s"makeJsonRequest: result: ${contentAsString(result)}")
     Json.parse(contentAsString(result))
   }
 
