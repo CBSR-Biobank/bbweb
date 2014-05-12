@@ -41,12 +41,10 @@ object StudyController extends BbwebController {
   def addStudy = doCommand { cmd: AddStudyCmd =>
     val future = studyService.addStudy(cmd)(null)
     future.map { validation =>
-      validation match {
-        case Success(event) =>
-          Ok(Json.obj("status" ->"OK", "message" -> (s"Study added: ${event.name}.") ))
-        case Failure(err) =>
-          BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
-      }
+      validation.fold(
+        error   => BadRequest(Json.obj("status" ->"KO", "message" -> error.list.mkString(", "))),
+        success => Ok(Json.obj("status" ->"OK", "message" -> (s"Study added: ${success.name}.") ))
+      )
     }
   }
 

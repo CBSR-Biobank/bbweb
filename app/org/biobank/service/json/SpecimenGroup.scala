@@ -14,7 +14,7 @@ import org.joda.time.format.ISODateTimeFormat
 
 object SpecimenGroup {
 
-  implicit val studyWrites = new Writes[SpecimenGroup] {
+  implicit val specimenGroupWrites = new Writes[SpecimenGroup] {
 
     val fmt = ISODateTimeFormat.dateTime();
 

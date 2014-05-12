@@ -16,7 +16,13 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     describe("GET /studies/sgroups") {
       it("should list none") {
         running(fakeApplication) {
-          val json = makeJsonRequest(GET, "/studies/sgroups")
+          val appRepositories = new AppRepositories
+
+          val study = factory.createDisabledStudy
+          appRepositories.studyRepository.put(study)
+
+          val idJson = JsObject("id" -> JsString(study.id.id) :: Nil)
+          val json = makeJsonRequest(GET, "/studies/sgroups", json = idJson)
           val jsonList = json.as[List[JsObject]]
           jsonList should have size 0
         }
@@ -28,11 +34,14 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         running(fakeApplication) {
           val appRepositories = new AppRepositories
 
-          appRepositories.studyRepository.put(factory.createDisabledStudy)
+          val study = factory.createDisabledStudy
+          appRepositories.studyRepository.put(study)
+
           val sg = factory.createSpecimenGroup
           appRepositories.specimenGroupRepository.put(sg)
 
-          val json = makeJsonRequest(GET, "/studies/sgroups")
+          val idJson = JsObject("id" -> JsString(study.id.id) :: Nil)
+          val json = makeJsonRequest(GET, "/studies/sgroups", json = idJson)
           val jsonList = json.as[List[JsObject]]
           jsonList should have size 1
           compareObj(jsonList(0), sg)

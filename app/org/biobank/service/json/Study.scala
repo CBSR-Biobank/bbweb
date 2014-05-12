@@ -27,39 +27,39 @@ object Study {
   }
 
   implicit val studyIdReads: Reads[StudyId] = (
-    (JsPath \ "id").read[String](minLength[String](2))
-  )(StudyId.apply _)
+    (__ \ "id").read[String](minLength[String](2))
+  ) map StudyId
 
-  implicit val addStudyCmdReads: Reads[AddStudyCmd] = (
+  implicit val addStudyCmdReads = (
     (JsPath \ "name").read[String](minLength[String](2)) and
       (JsPath \ "description").readNullable[String](minLength[String](2))
-  )(AddStudyCmd.apply _)
+  )(AddStudyCmd)
 
   implicit val updateStudyCmdReads: Reads[UpdateStudyCmd] = (
     (JsPath \ "id").read[String](minLength[String](2)) and
       (JsPath \ "version").readNullable[Long](min[Long](0)) and
       (JsPath \ "name").read[String](minLength[String](2)) and
       (JsPath \ "description").readNullable[String](minLength[String](2))
-  )(UpdateStudyCmd.apply _)
+  )(UpdateStudyCmd)
 
   implicit val enableStudyCmdReads: Reads[EnableStudyCmd] = (
     (JsPath \ "id").read[String](minLength[String](2)) and
       (JsPath \ "expectedVersion").readNullable[Long](min[Long](0))
-  )(EnableStudyCmd.apply _)
+  )(EnableStudyCmd)
 
   implicit val disableStudyCmdReads: Reads[DisableStudyCmd] = (
     (JsPath \ "id").read[String](minLength[String](2)) and
       (JsPath \ "expectedVersion").readNullable[Long](min[Long](0))
-  )(DisableStudyCmd.apply _)
+  )(DisableStudyCmd)
 
   implicit val retireStudyCmdReads: Reads[RetireStudyCmd] = (
     (JsPath \ "id").read[String](minLength[String](2)) and
       (JsPath \ "expectedVersion").readNullable[Long](min[Long](0))
-  )(RetireStudyCmd.apply _)
+  )(RetireStudyCmd)
 
   implicit val unretireStudyCmdReads: Reads[UnretireStudyCmd] = (
     (JsPath \ "id").read[String](minLength[String](2)) and
       (JsPath \ "expectedVersion").readNullable[Long](min[Long](0))
-  )(UnretireStudyCmd.apply _)
+  )(UnretireStudyCmd)
 
 }
