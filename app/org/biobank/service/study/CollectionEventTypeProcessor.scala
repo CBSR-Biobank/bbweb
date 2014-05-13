@@ -76,7 +76,7 @@ trait CollectionEventTypeProcessorComponent {
         validSgData <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
         validAtData <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
         event <- CollectionEventTypeAddedEvent(
-          cmd.studyId, id.id, newItem.version, newItem.name, newItem.description,
+          cmd.studyId, id.id, newItem.addedDate, newItem.name, newItem.description,
           newItem.recurring, newItem.specimenGroupData, newItem.annotationTypeData).success
       } yield event
     }
@@ -94,8 +94,9 @@ trait CollectionEventTypeProcessorComponent {
         validSgData <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
         validAtData <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
         event <- CollectionEventTypeUpdatedEvent(
-          cmd.studyId, newItem.id.id, newItem.version, newItem.name, newItem.description,
-          newItem.recurring, newItem.specimenGroupData, newItem.annotationTypeData).success
+          cmd.studyId, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, newItem.name,
+          newItem.description, newItem.recurring, newItem.specimenGroupData,
+          newItem.annotationTypeData).success
       } yield event
     }
 

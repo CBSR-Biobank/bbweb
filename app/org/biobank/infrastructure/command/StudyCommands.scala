@@ -11,8 +11,6 @@ import org.biobank.domain.AnnotationValueType._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.Commands._
 
-import scala.collection.immutable
-
 object StudyCommands {
   // study commands
   trait StudyCommand extends Command

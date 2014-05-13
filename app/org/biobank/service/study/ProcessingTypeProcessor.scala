@@ -69,7 +69,7 @@ trait ProcessingTypeProcessorComponent {
         nameValid <- nameAvailable(cmd.name)
         newItem <- ProcessingType.create(studyId, id, -1L, cmd.name, cmd.description, cmd.enabled)
         event <- ProcessingTypeAddedEvent(
-          cmd.studyId, id.id, newItem.version, newItem.name, newItem.description,
+          cmd.studyId, id.id, newItem.addedDate, newItem.name, newItem.description,
           newItem.enabled).success
       } yield event
     }
@@ -85,8 +85,8 @@ trait ProcessingTypeProcessorComponent {
         newItem <- oldItem.update(cmd.expectedVersion, cmd.name,
           cmd.description, cmd.enabled)
         event <- ProcessingTypeUpdatedEvent(
-          cmd.studyId, newItem.id.id, newItem.version, newItem.name, newItem.description,
-          newItem.enabled).success
+          cmd.studyId, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, newItem.name,
+          newItem.description, newItem.enabled).success
       } yield event
     }
 

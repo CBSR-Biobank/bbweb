@@ -6,19 +6,16 @@ import org.biobank.infrastructure.command.StudyCommands._
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 
 object Study {
-
-  val fmt = ISODateTimeFormat.dateTime()
+  import JsonUtils._
 
   implicit val studyWrites = new Writes[Study] {
     def writes(study: Study) = Json.obj(
       "id"             -> study.id.id,
       "version"        -> study.version,
-      "addedDate"      -> fmt.print(study.addedDate),
-      "lastUpdateDate" -> study.lastUpdateDate.map(fmt.print(_)),
+      "addedDate"      -> study.addedDate,
+      "lastUpdateDate" -> study.lastUpdateDate,
       "name"           -> study.name,
       "description"    -> study.description,
       "status"         -> study.status

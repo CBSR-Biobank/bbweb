@@ -94,7 +94,7 @@ trait SpecimenLinkTypeProcessorComponent {
         event <- SpecimenLinkTypeAddedEvent(
           cmd.processingTypeId,
           id.id,
-          newItem.version,
+          newItem.addedDate,
           newItem.expectedInputChange,
           newItem.expectedOutputChange,
           newItem.inputCount,
@@ -135,6 +135,7 @@ trait SpecimenLinkTypeProcessorComponent {
           cmd.processingTypeId,
           newItem.id.id,
           newItem.version,
+          newItem.lastUpdateDate.get,
           newItem.expectedInputChange,
           newItem.expectedOutputChange,
           newItem.inputCount,

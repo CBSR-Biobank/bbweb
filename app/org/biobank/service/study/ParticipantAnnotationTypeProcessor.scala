@@ -55,7 +55,7 @@ trait ParticipantAnnotationTypeProcessorComponent {
           StudyId(cmd.studyId), id, -1L, cmd.name, cmd.description, cmd.valueType,
           cmd.maxValueCount, cmd.options, cmd.required)
         event <- ParticipantAnnotationTypeAddedEvent(
-          newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
+          newItem.studyId.id, newItem.id.id, newItem.addedDate, newItem.name, newItem.description,
           newItem.valueType, newItem.maxValueCount, newItem.options, newItem.required).success
       } yield event
     }
@@ -71,8 +71,9 @@ trait ParticipantAnnotationTypeProcessorComponent {
         newItem <- oldItem.update(cmd.expectedVersion, cmd.name, cmd.description, cmd.valueType,
           cmd.maxValueCount, cmd.options, cmd.required)
         event <- ParticipantAnnotationTypeUpdatedEvent(
-          newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
-          newItem.valueType, newItem.maxValueCount, newItem.options, newItem.required).success
+          newItem.studyId.id, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, newItem.name,
+          newItem.description, newItem.valueType, newItem.maxValueCount, newItem.options,
+          newItem.required).success
       } yield event
     }
 

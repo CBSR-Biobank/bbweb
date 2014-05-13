@@ -71,20 +71,21 @@ case class DisabledStudy private (
   /** Used to change the name or the description. */
   def update(
     expectedVersion: Option[Long],
+    dateTime: DateTime,
     name: String,
     description: Option[String]): DomainValidation[DisabledStudy] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      validatedStudy <- DisabledStudy.create(id, version, name, description)
+      validatedStudy <- DisabledStudy.create(id, version, addedDate, name, description)
       updatedStudy <- validatedStudy.copy(
-        addedDate = this.addedDate,
-        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+        lastUpdateDate = Some(dateTime)).success
     } yield updatedStudy
   }
 
   /** Used to enable a study after the study has been configured, or had configuration changes made on it. */
   def enable(
     expectedVersion: Option[Long],
+    dateTime: DateTime,
     specimenGroupCount: Int,
     collectionEventTypeCount: Int): DomainValidation[EnabledStudy] = {
 
@@ -98,15 +99,17 @@ case class DisabledStudy private (
       validVersion <- requireVersion(expectedVersion)
       sgCount <- checkSpecimenGroupCount
       cetCount <- checkCollectionEventTypeCount
-      enabledStudy <- EnabledStudy.create(this)
+      enabledStudy <- EnabledStudy.create(this, dateTime)
     } yield enabledStudy
   }
 
   /** When a study will no longer collect specimens from participants it can be retired. */
-  def retire(expectedVersion: Option[Long]): DomainValidation[RetiredStudy] = {
+  def retire(
+    expectedVersion: Option[Long],
+    dateTime: DateTime): DomainValidation[RetiredStudy] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      retiredStudy <- RetiredStudy.create(this)
+      retiredStudy <- RetiredStudy.create(this, dateTime)
     } yield retiredStudy
   }
 
@@ -116,6 +119,7 @@ case class DisabledStudy private (
   def addParticipantAnnotationType(
     id: AnnotationTypeId,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -132,6 +136,7 @@ case class DisabledStudy private (
   def addSpecimenGroup(
     id: SpecimenGroupId,
     version: Long = -1,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     units: String,
@@ -146,6 +151,7 @@ case class DisabledStudy private (
   def addColletionEventType(
     id: CollectionEventTypeId,
     version: Long = -1,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     recurring: Boolean,
@@ -158,6 +164,7 @@ case class DisabledStudy private (
   def addColletionEventAnnotationType(
     id: AnnotationTypeId,
     version: Long = -1,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -170,6 +177,7 @@ case class DisabledStudy private (
   def addSpecimenLinkAnnotationType(
     id: AnnotationTypeId,
     version: Long = -1,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -194,13 +202,14 @@ object DisabledStudy extends StudyValidationHelper {
   def create(
     id: StudyId,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String]): DomainValidation[DisabledStudy] = {
     (validateId(id) |@|
       validateAndIncrementVersion(version) |@|
       validateNonEmpty(name, "name is null or empty") |@|
       validateNonEmptyOption(description, "description is null or empty")) {
-        DisabledStudy(_, _, org.joda.time.DateTime.now, None, _, _)
+        DisabledStudy(_, _, dateTime, None, _, _)
       }
   }
 }
@@ -222,13 +231,14 @@ case class EnabledStudy private (
 
   override val status: String = "Enabled"
 
-  def disable(expectedVersion: Option[Long]): DomainValidation[DisabledStudy] = {
+  def disable(
+    expectedVersion: Option[Long],
+    dateTime: DateTime): DomainValidation[DisabledStudy] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      validatedStudy <- DisabledStudy.create(id, version, name, description)
+      validatedStudy <- DisabledStudy.create(id, version, addedDate, name, description)
       disabledStudy <- validatedStudy.copy(
-        addedDate = this.addedDate,
-        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+        lastUpdateDate = Some(dateTime)).success
     } yield disabledStudy
   }
 }
@@ -239,12 +249,14 @@ case class EnabledStudy private (
 object EnabledStudy extends StudyValidationHelper {
 
   /** A study must be in a disabled state before it can be enabled. */
-  def create(study: DisabledStudy): DomainValidation[EnabledStudy] = {
+  def create(
+    study: DisabledStudy,
+    dateTime: DateTime): DomainValidation[EnabledStudy] = {
     (validateId(study.id) |@|
       validateAndIncrementVersion(study.version) |@|
       validateNonEmpty(study.name, "name is null or empty") |@|
       validateNonEmptyOption(study.description, "description is null or empty")) {
-        EnabledStudy(_, _, study.addedDate, Some(org.joda.time.DateTime.now), _, _)
+        EnabledStudy(_, _, study.addedDate, Some(dateTime), _, _)
       }
   }
 }
@@ -266,13 +278,14 @@ case class RetiredStudy private (
 
   override val status: String = "Retired"
 
-  def unretire(expectedVersion: Option[Long]): DomainValidation[DisabledStudy] = {
+  def unretire(
+    expectedVersion: Option[Long],
+    dateTime: DateTime): DomainValidation[DisabledStudy] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      validatedStudy <- DisabledStudy.create(id, version, name, description)
+      validatedStudy <- DisabledStudy.create(id, version, addedDate, name, description)
       disabledStudy <- validatedStudy.copy(
-        addedDate = this.addedDate,
-        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+        lastUpdateDate = Some(dateTime)).success
     } yield disabledStudy
   }
 }
@@ -283,12 +296,14 @@ case class RetiredStudy private (
 object RetiredStudy extends StudyValidationHelper {
 
   /** A study must be in a disabled state before it can be retired. */
-  def create(study: DisabledStudy): DomainValidation[RetiredStudy] = {
+  def create(
+    study: DisabledStudy,
+    dateTime: DateTime): DomainValidation[RetiredStudy] = {
     (validateId(study.id) |@|
       validateAndIncrementVersion(study.version) |@|
       validateNonEmpty(study.name, "name is null or empty") |@|
       validateNonEmptyOption(study.description, "description is null or empty")) {
-        RetiredStudy(_, _, study.addedDate, Some(org.joda.time.DateTime.now), _, _)
+        RetiredStudy(_, _, study.addedDate, Some(dateTime), _, _)
       }
   }
 }

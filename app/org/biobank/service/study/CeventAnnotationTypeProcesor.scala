@@ -57,8 +57,8 @@ trait CeventAnnotationTypeProcessorComponent {
           StudyId(cmd.studyId), id, -1L, cmd.name, cmd.description, cmd.valueType,
           cmd.maxValueCount, cmd.options)
         event <- CollectionEventAnnotationTypeAddedEvent(
-          newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
-          newItem.valueType, newItem.maxValueCount, newItem.options).success
+          newItem.studyId.id, newItem.id.id, newItem.addedDate, newItem.name,
+          newItem.description, newItem.valueType, newItem.maxValueCount, newItem.options).success
       } yield event
     }
 
@@ -73,8 +73,8 @@ trait CeventAnnotationTypeProcessorComponent {
         newItem <- oldItem.update(cmd.expectedVersion, cmd.name, cmd.description, cmd.valueType,
           cmd.maxValueCount, cmd.options)
         event <- CollectionEventAnnotationTypeUpdatedEvent(
-          newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
-          newItem.valueType, newItem.maxValueCount, newItem.options).success
+          newItem.studyId.id, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, newItem.name,
+          newItem.description, newItem.valueType, newItem.maxValueCount, newItem.options).success
       } yield event
     }
 

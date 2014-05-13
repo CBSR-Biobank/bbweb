@@ -4,7 +4,7 @@ name := "bbweb"
 
 version := "0.1-SNAPSHOT"
 
-//scalaVersion := "2.10.4"
+scalaVersion := "2.10.4"
 
 scalacOptions ++= Seq(
   "deprecation",
@@ -61,7 +61,7 @@ libraryDependencies ++= Seq(
 
 JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala).enablePlugins(SbtWeb)
+lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 

@@ -135,7 +135,8 @@ trait StudyProcessorComponent
       for {
         nameAvailable <- nameAvailable(cmd.name)
         newStudy <- DisabledStudy.create(studyId, -1L, cmd.name, cmd.description)
-        event <- StudyAddedEvent(newStudy.id.toString, newStudy.name, newStudy.description).success
+        event <- StudyAddedEvent(
+          newStudy.id.toString, newStudy.addedDate, newStudy.name, newStudy.description).success
        } yield event
     }
 
@@ -146,7 +147,8 @@ trait StudyProcessorComponent
         nameAvailable <- nameAvailable(cmd.name, studyId)
         prevStudy <- isStudyDisabled(studyId)
         updatedStudy <- prevStudy.update(cmd.expectedVersion, cmd.name, cmd.description)
-        event <- StudyUpdatedEvent(cmd.id, updatedStudy.version, updatedStudy.name,
+        event <- StudyUpdatedEvent(
+          cmd.id, updatedStudy.version, updatedStudy.lastUpdateDate.get, updatedStudy.name,
           updatedStudy.description).success
       } yield event
     }
@@ -158,9 +160,10 @@ trait StudyProcessorComponent
 
       for {
         disabledStudy <- isStudyDisabled(studyId)
-        enabledStudy <- disabledStudy.enable(cmd.expectedVersion, specimenGroupCount,
-          collectionEventtypeCount)
-        event <- StudyEnabledEvent(studyId.id, enabledStudy.version).success
+        enabledStudy <- disabledStudy.enable(
+          cmd.expectedVersion, specimenGroupCount, collectionEventtypeCount)
+        event <- StudyEnabledEvent(
+          studyId.id, enabledStudy.version, enabledStudy.lastUpdateDate.get).success
       } yield event
     }
 
@@ -169,7 +172,8 @@ trait StudyProcessorComponent
       for {
         enabledStudy <- isStudyEnabled(studyId)
         disabledStudy <- enabledStudy.disable(cmd.expectedVersion)
-        event <- StudyDisabledEvent(cmd.id, disabledStudy.version).success
+        event <- StudyDisabledEvent(
+          cmd.id, disabledStudy.version, disabledStudy.lastUpdateDate.get).success
       } yield event
     }
 
@@ -178,7 +182,8 @@ trait StudyProcessorComponent
       for {
         disabledStudy <- isStudyDisabled(studyId)
         retiredStudy <- disabledStudy.retire(cmd.expectedVersion)
-        event <- StudyRetiredEvent(cmd.id, retiredStudy.version).success
+        event <- StudyRetiredEvent(
+          cmd.id, retiredStudy.version, retiredStudy.lastUpdateDate.get).success
       } yield event
     }
 
@@ -186,8 +191,9 @@ trait StudyProcessorComponent
       val studyId = StudyId(cmd.id)
       for {
         retiredStudy <- isStudyRetired(studyId)
-        disabledStudy <- retiredStudy.unretire(cmd.expectedVersion)
-        event <- StudyUnretiredEvent(studyId.id, disabledStudy.version).success
+        unretiredStudy <- retiredStudy.unretire(cmd.expectedVersion)
+        event <- StudyUnretiredEvent(
+          studyId.id, unretiredStudy.version, unretiredStudy.lastUpdateDate.get).success
       } yield event
     }
 

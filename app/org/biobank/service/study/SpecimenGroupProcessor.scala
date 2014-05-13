@@ -74,7 +74,7 @@ trait SpecimenGroupProcessorComponent {
           cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
           cmd.preservationTemperatureType, cmd.specimenType)
         newEvent <- SpecimenGroupAddedEvent(
-          newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
+          newItem.studyId.id, newItem.id.id, newItem.addedDate, newItem.name, newItem.description,
           newItem.units, newItem.anatomicalSourceType, newItem.preservationType,
           newItem.preservationTemperatureType, newItem.specimenType).success
       } yield newEvent
@@ -93,7 +93,7 @@ trait SpecimenGroupProcessorComponent {
           cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
           cmd.specimenType)
         newEvent <- SpecimenGroupUpdatedEvent(
-          cmd.studyId, newItem.id.id, newItem.version, cmd.name, cmd.description,
+          cmd.studyId, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, cmd.name, cmd.description,
           cmd.units, cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
           cmd.specimenType).success
       } yield newEvent
