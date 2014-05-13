@@ -1,4 +1,4 @@
-@(title: String, breadcrumbs: Map[String, Call] = Map.empty)(content: Html)(implicit request: RequestHeader)
+@(title: String, breadcrumbs: Map[String, Call] = Map.empty)(content: Html)
 <!DOCTYPE html>
 
 <html>
@@ -76,18 +76,6 @@
               </div>
               <div class="navbar-header navbar-right">
                 <ul class="nav navbar-nav">
-                  @request match {
-                  case req : securesocial.core.SecuredRequest[_]  => {
-                    <li class="dropdown">
-                    <a id="drop-user" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown"><strong>@req.user.email</strong> <b class="caret"></b></a>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="drop-user">
-                      <li role="presentation"><a role="menuitem" tabindex="-1" href="@org.biobank.controllers.routes.UserController.profile">My Profile</a></li>
-                      <li role="presentation"><a role="menuitem" tabindex="-1" href="@securesocial.controllers.routes.LoginPage.logout">Logout</a></li>
-                    </ul>
-                  </li>
-                  }
-                  case _ => { }
-                  }
                 </ul>
               </div>
               <div class="navbar-collapse collapse">

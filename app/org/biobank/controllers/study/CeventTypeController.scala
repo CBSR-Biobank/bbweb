@@ -15,11 +15,10 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.i18n.Messages
 import play.Logger
-import securesocial.core.SecureSocial
 
 import scalaz._
 import Scalaz._
 
-object CeventTypeController extends Controller with SecureSocial {
+object CeventTypeController extends Controller  {
 
 }

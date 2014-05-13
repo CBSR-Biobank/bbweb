@@ -1,6 +1,10 @@
+import PlayKeys._
+
 name := "bbweb"
 
 version := "0.1-SNAPSHOT"
+
+//scalaVersion := "2.10.4"
 
 scalacOptions ++= Seq(
   "deprecation",
@@ -41,13 +45,13 @@ libraryDependencies ++= Seq(
   "org.webjars"            %  "bootstrap"                      % "3.1.1"              % "compile",
   "org.webjars"            %  "requirejs"                      % "2.1.11"             % "compile",
   "org.webjars"            %% "webjars-play"                   % "2.3-M1"             % "compile",
-  "ws.securesocial"        %% "securesocial"                   % "play-2.3-SNAPSHOT"  % "compile",
+  //"ws.securesocial"        %% "securesocial"                   % "play-2.3-SNAPSHOT"  % "compile",
   "org.scalatest"          %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
     ExclusionRule(organization = "org.junit", name = "junit")
   ),
   //"com.typesafe.akka"    %% "akka-testkit"                   % "2.3.1"              % "test",
   "com.github.ddevore"     %% "akka-persistence-mongo-casbah"  % "0.7.2-SNAPSHOT"     % "compile",
-  "se.radley"              %% "play-plugins-enumeration"       % "1.1.0"              % "compile",
+  //"se.radley"              %% "play-plugins-enumeration"       % "1.1.0"              % "compile",
   "com.typesafe"           %% "webdriver"                      % "1.0.0-M2"           % "test",
   "com.typesafe.akka"      %% "akka-testkit"                   % "2.3.2"              % "test"
   //"com.typesafe.play"    %% "play-slick"                     % "0.6.0.1",
@@ -57,7 +61,7 @@ libraryDependencies ++= Seq(
 
 JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
 
-lazy val root = (project in file(".")).addPlugins(PlayScala).addPlugins(SbtWeb)
+lazy val root = (project in file(".")).enablePlugins(PlayScala).enablePlugins(SbtWeb)
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 

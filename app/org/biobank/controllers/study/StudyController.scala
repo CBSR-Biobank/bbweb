@@ -13,6 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.{ Logger, Play }
 import play.api.Play.current
 import play.api.mvc._
+import play.api.mvc.Results._
 import play.api.libs.json._
 
 import scalaz._

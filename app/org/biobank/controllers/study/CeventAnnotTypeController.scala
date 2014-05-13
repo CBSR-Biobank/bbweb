@@ -17,7 +17,6 @@ import play.api.templates._
 import play.api.i18n.Messages
 import play.Logger
 import akka.util.Timeout
-import securesocial.core.{ Authorization, Identity, SecuredRequest, SecureSocial }
 
 import scalaz._
 import Scalaz._

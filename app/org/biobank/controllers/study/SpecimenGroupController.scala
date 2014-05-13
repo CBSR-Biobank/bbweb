@@ -16,6 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.{ Logger, Play }
 import play.api.mvc._
 import play.api.libs.json._
+import play.api.mvc.Results._
 
 import scalaz._
 import scalaz.Scalaz._

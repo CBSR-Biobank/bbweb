@@ -6,10 +6,9 @@ import scala.concurrent.Future
 import play.Logger
 import play.api.mvc._
 import play.api.libs.json._
-import securesocial.core.SecureSocial
-import securesocial.core.SecuredRequest
+import play.api.mvc.Results._
 
-trait BbwebController extends SecureSocial {
+trait BbwebController {
 
   protected def doCommand[T <: Command](
     func: T => Future[Result])(

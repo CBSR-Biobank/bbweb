@@ -3,22 +3,21 @@ package org.biobank.controllers
 import scala.language.postfixOps
 import play.api.mvc._
 import views._
-import securesocial.core.SecureSocial
 
 /**
  * Controller for the main page, and also the about and contact us pages.
  */
-object Application extends Controller with SecureSocial {
+object Application extends Controller  {
 
-  def index = SecuredAction { implicit request =>
-    Ok(html.index(request))
+  def index = Action {
+    Ok(html.index())
   }
 
-  def about = UserAwareAction { implicit request =>
+  def about = Action {
     Ok(html.about())
   }
 
-  def contact = UserAwareAction { implicit request =>
+  def contact = Action {
     Ok(html.contact())
   }
 
