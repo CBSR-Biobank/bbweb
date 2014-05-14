@@ -2,37 +2,42 @@ package org.biobank.service.json
 
 import org.biobank.domain.study._
 
+import org.scalatest.matchers.ShouldMatchers
 import play.api.libs.json._
 import org.scalatest.Assertions._
-import org.joda.time.format.ISODateTimeFormat
+import com.github.nscala_time.time.Imports._
 
-object JsonHelper {
-
-  val fmt = ISODateTimeFormat.dateTime();
+object JsonHelper extends ShouldMatchers {
+  import org.biobank.service.json.JsonUtils._
 
   def compareObj(json: JsValue, study: Study)  = {
-    assert((json \ "id").as[String]                     === study.id.id)
-    assert((json \ "version").as[Long]                  === study.version)
-    assert((json \ "addedDate").as[String]              === fmt.print(study.addedDate))
-    assert((json \ "lastUpdateDate").as[Option[String]] === study.lastUpdateDate.map(fmt.print(_)))
-    assert((json \ "name").as[String]                   === study.name)
-    assert((json \ "description").as[Option[String]]    === study.description)
-    assert((json \ "status").as[String]                 === study.status)
+    (json \ "id").as[String]                     should be (study.id.id)
+    (json \ "version").as[Long]                  should be (study.version)
+    (json \ "name").as[String]                   should be (study.name)
+    (json \ "description").as[Option[String]]    should be (study.description)
+    (json \ "status").as[String]                 should be (study.status)
+
+    ((json \ "addedDate").as[DateTime] to study.addedDate).millis should be < 100L
+
+    (json \ "lastUpdateDate").as[Option[DateTixme]] map { dateTime =>
+      (dateTime to study.lastUpdateDate.get) should be < 100L
+    }
   }
 
   def compareObj(json: JsValue, specimenGroup: SpecimenGroup)  = {
-    assert((json \ "studyId").as[String]                     === specimenGroup.studyId.id)
-    assert((json \ "id").as[String]                          === specimenGroup.id.id)
-    assert((json \ "version").as[Long]                       === specimenGroup.version)
-    assert((json \ "addedDate").as[String]                   === fmt.print(specimenGroup.addedDate))
-    assert((json \ "lastUpdateDate").as[Option[String]]      === specimenGroup.lastUpdateDate.map(fmt.print(_)))
-    assert((json \ "name").as[String]                        === specimenGroup.name)
-    assert((json \ "description").as[Option[String]]         === specimenGroup.description)
-    assert((json \ "units").as[String]                       === specimenGroup.units)
-    assert((json \ "anatomicalSourceType").as[String]        === specimenGroup.anatomicalSourceType.toString)
-    assert((json \ "preservationType").as[String]            === specimenGroup.preservationType.toString)
-    assert((json \ "preservationTemperatureType").as[String] === specimenGroup.preservationTemperatureType.toString)
-    assert((json \ "specimenType").as[String]                === specimenGroup.specimenType.toString)
+    (json \ "studyId").as[String]                     should be (specimenGroup.studyId.id)
+    (json \ "id").as[String]                          should be (specimenGroup.id.id)
+    (json \ "version").as[Long]                       should be (specimenGroup.version)
+    (json \ "name").as[String]                        should be (specimenGroup.name)
+    (json \ "description").as[Option[String]]         should be (specimenGroup.description)
+    (json \ "units").as[String]                       should be (specimenGroup.units)
+    (json \ "anatomicalSourceType").as[String]        should be (specimenGroup.anatomicalSourceType.toString)
+    (json \ "preservationType").as[String]            should be (specimenGroup.preservationType.toString)
+    (json \ "preservationTemperatureType").as[String] should be (specimenGroup.preservationTemperatureType.toString)
+    (json \ "specimenType").as[String]                should be (specimenGroup.specimenType.toString)
+
+    ((json \ "addedDate").as[DateTime] to study.addedDate).millis should be < 100L
+    //assert((json \ "lastUpdateDate").as[Option[String]]      === specimenGroup.lastUpdateDate.map(fmt.print(_)))
   }
 
 }

@@ -134,7 +134,8 @@ trait StudyProcessorComponent
 
       for {
         nameAvailable <- nameAvailable(cmd.name)
-        newStudy <- DisabledStudy.create(studyId, -1L, cmd.name, cmd.description)
+        newStudy <- DisabledStudy.create(
+          studyId, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description)
         event <- StudyAddedEvent(
           newStudy.id.toString, newStudy.addedDate, newStudy.name, newStudy.description).success
        } yield event
@@ -146,7 +147,8 @@ trait StudyProcessorComponent
       for {
         nameAvailable <- nameAvailable(cmd.name, studyId)
         prevStudy <- isStudyDisabled(studyId)
-        updatedStudy <- prevStudy.update(cmd.expectedVersion, cmd.name, cmd.description)
+        updatedStudy <- prevStudy.update(
+          cmd.expectedVersion, org.joda.time.DateTime.now, cmd.name, cmd.description)
         event <- StudyUpdatedEvent(
           cmd.id, updatedStudy.version, updatedStudy.lastUpdateDate.get, updatedStudy.name,
           updatedStudy.description).success
@@ -161,7 +163,7 @@ trait StudyProcessorComponent
       for {
         disabledStudy <- isStudyDisabled(studyId)
         enabledStudy <- disabledStudy.enable(
-          cmd.expectedVersion, specimenGroupCount, collectionEventtypeCount)
+          cmd.expectedVersion, org.joda.time.DateTime.now, specimenGroupCount, collectionEventtypeCount)
         event <- StudyEnabledEvent(
           studyId.id, enabledStudy.version, enabledStudy.lastUpdateDate.get).success
       } yield event
@@ -171,7 +173,7 @@ trait StudyProcessorComponent
       val studyId = StudyId(cmd.id)
       for {
         enabledStudy <- isStudyEnabled(studyId)
-        disabledStudy <- enabledStudy.disable(cmd.expectedVersion)
+        disabledStudy <- enabledStudy.disable(cmd.expectedVersion, org.joda.time.DateTime.now)
         event <- StudyDisabledEvent(
           cmd.id, disabledStudy.version, disabledStudy.lastUpdateDate.get).success
       } yield event
@@ -181,7 +183,7 @@ trait StudyProcessorComponent
       val studyId = StudyId(cmd.id)
       for {
         disabledStudy <- isStudyDisabled(studyId)
-        retiredStudy <- disabledStudy.retire(cmd.expectedVersion)
+        retiredStudy <- disabledStudy.retire(cmd.expectedVersion, org.joda.time.DateTime.now)
         event <- StudyRetiredEvent(
           cmd.id, retiredStudy.version, retiredStudy.lastUpdateDate.get).success
       } yield event
@@ -191,7 +193,7 @@ trait StudyProcessorComponent
       val studyId = StudyId(cmd.id)
       for {
         retiredStudy <- isStudyRetired(studyId)
-        unretiredStudy <- retiredStudy.unretire(cmd.expectedVersion)
+        unretiredStudy <- retiredStudy.unretire(cmd.expectedVersion, org.joda.time.DateTime.now)
         event <- StudyUnretiredEvent(
           studyId.id, unretiredStudy.version, unretiredStudy.lastUpdateDate.get).success
       } yield event
@@ -200,7 +202,8 @@ trait StudyProcessorComponent
     private def recoverEvent(event: StudyAddedEvent) {
       val studyId = StudyId(event.id)
       val validation = for {
-        study <- DisabledStudy.create(studyId, -1L, event.name, event.description)
+        study <- DisabledStudy.create(
+          studyId, -1L, event.dateTime, event.name, event.description)
         savedStudy <- studyRepository.put(study).success
       } yield study
 
@@ -214,8 +217,8 @@ trait StudyProcessorComponent
     private def recoverEvent(event: StudyUpdatedEvent) {
       val validation = for {
         disabledStudy <- isStudyDisabled(StudyId(event.id))
-        updatedStudy <- disabledStudy.update(disabledStudy.versionOption, event.name,
-          event.description)
+        updatedStudy <- disabledStudy.update(
+          disabledStudy.versionOption, event.dateTime, event.name, event.description)
         savedStudy <- studyRepository.put(updatedStudy).success
       } yield savedStudy
 
@@ -230,7 +233,8 @@ trait StudyProcessorComponent
       val studyId = StudyId(event.id)
       val validation = for {
         disabledStudy <- isStudyDisabled(studyId)
-        enabledStudy <- disabledStudy.enable(disabledStudy.versionOption, 1, 1)
+        enabledStudy <- disabledStudy.enable(
+          disabledStudy.versionOption, event.dateTime, 1, 1)
         savedStudy <- studyRepository.put(enabledStudy).success
       } yield  enabledStudy
 
@@ -245,7 +249,7 @@ trait StudyProcessorComponent
       val studyId = StudyId(event.id)
       val validation = for {
         enabledStudy <- isStudyEnabled(studyId)
-        disabledStudy <- enabledStudy.disable(enabledStudy.versionOption)
+        disabledStudy <- enabledStudy.disable(enabledStudy.versionOption, event.dateTime)
         savedStudy <- studyRepository.put(disabledStudy).success
       } yield disabledStudy
 
@@ -260,7 +264,7 @@ trait StudyProcessorComponent
       val studyId = StudyId(event.id)
       val validation = for {
         disabledStudy <- isStudyDisabled(studyId)
-        retiredStudy <- disabledStudy.retire(disabledStudy.versionOption)
+        retiredStudy <- disabledStudy.retire(disabledStudy.versionOption, event.dateTime)
         savedStudy <- studyRepository.put(retiredStudy).success
       } yield retiredStudy
 
@@ -275,7 +279,7 @@ trait StudyProcessorComponent
       val studyId = StudyId(event.id)
       val validation = for {
         retiredStudy <- isStudyRetired(studyId)
-        disabledStudy <- retiredStudy.unretire(retiredStudy.versionOption)
+        disabledStudy <- retiredStudy.unretire(retiredStudy.versionOption, event.dateTime)
         savedstudy <- studyRepository.put(disabledStudy).success
       } yield disabledStudy
 

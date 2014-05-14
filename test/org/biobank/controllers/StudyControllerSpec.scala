@@ -85,7 +85,7 @@ class StudyControllerSpec extends ControllerFixture {
         running(fakeApplication) {
           val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy.enable(Some(0), 1, 1) | fail
+          val study = factory.createDisabledStudy.enable(Some(0), org.joda.time.DateTime.now, 1, 1) | fail
           appRepositories.studyRepository.put(study)
           val json = makeJsonRequest(GET, s"/studies/${study.id.id}")
           compareObj(json, study)
@@ -135,7 +135,7 @@ class StudyControllerSpec extends ControllerFixture {
 
           val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy.enable(Some(0), 1, 1) | fail
+          val study = factory.createDisabledStudy.enable(Some(0), org.joda.time.DateTime.now, 1, 1) | fail
           appRepositories.studyRepository.put(study)
 
           val cmdJson = Json.obj("id" -> study.id.id, "expectedVersion" -> Some(study.version))
@@ -169,7 +169,7 @@ class StudyControllerSpec extends ControllerFixture {
 
           val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy.retire(Some(0)) | fail
+          val study = factory.createDisabledStudy.retire(Some(0), org.joda.time.DateTime.now) | fail
           appRepositories.studyRepository.put(study)
 
           val cmdJson = Json.obj("id" -> study.id.id, "expectedVersion" -> Some(study.version))

@@ -65,7 +65,7 @@ trait FactoryComponent {
       val name = nameGenerator.next[Study]
       val description = Some(nameGenerator.next[Study])
 
-      val validation = DisabledStudy.create(id, -1L, name, description)
+      val validation = DisabledStudy.create(id, -1L, org.joda.time.DateTime.now, name, description)
       if (validation.isFailure) {
         throw new Error
       }
@@ -77,7 +77,8 @@ trait FactoryComponent {
 
     def createEnabledStudy: EnabledStudy = {
       val disabledStudy = defaultDisabledStudy
-      val enabledStudy = disabledStudy.enable(disabledStudy.versionOption, 1, 1) | null
+      val enabledStudy = disabledStudy.enable(
+        disabledStudy.versionOption, org.joda.time.DateTime.now, 1, 1) | null
       domainObjects = domainObjects + (classOf[EnabledStudy] -> enabledStudy)
       domainObjects = domainObjects - classOf[DisabledStudy]
       enabledStudy
