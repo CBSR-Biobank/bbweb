@@ -157,8 +157,8 @@ case class DisabledStudy private (
     recurring: Boolean,
     specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
     annotationTypeData: List[CollectionEventTypeAnnotationTypeData]): DomainValidation[CollectionEventType] =  {
-    CollectionEventType.create(this.id, id, version, name, description, recurring, specimenGroupData,
-      annotationTypeData)
+    CollectionEventType.create(this.id, id, version, dateTime, name, description, recurring,
+      specimenGroupData, annotationTypeData)
   }
 
   def addColletionEventAnnotationType(
@@ -171,8 +171,7 @@ case class DisabledStudy private (
     maxValueCount: Option[Int],
     options: Option[Map[String, String]]): DomainValidation[CollectionEventAnnotationType] =  {
     CollectionEventAnnotationType.create(
-      this.id, id, version, org.joda.time.DateTime.now, name, description, valueType,
-      maxValueCount, options)
+      this.id, id, version, dateTime, name, description, valueType, maxValueCount, options)
   }
 
   def addSpecimenLinkAnnotationType(

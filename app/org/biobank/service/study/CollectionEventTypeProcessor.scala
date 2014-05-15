@@ -71,7 +71,7 @@ trait CollectionEventTypeProcessorComponent {
       for {
         nameValid <- nameAvailable(cmd.name)
         newItem <- CollectionEventType.create(
-          studyId, id, -1L, cmd.name, cmd.description, cmd.recurring,
+          studyId, id, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.recurring,
           cmd.specimenGroupData, cmd.annotationTypeData)
         validSgData <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
         validAtData <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
@@ -89,7 +89,8 @@ trait CollectionEventTypeProcessorComponent {
       for {
         oldItem <- collectionEventTypeRepository.withId(studyId,id)
         nameValid <- nameAvailable(cmd.name, id)
-        newItem <- oldItem.update(cmd.expectedVersion, cmd.name,
+        newItem <- oldItem.update(
+          cmd.expectedVersion, org.joda.time.DateTime.now, cmd.name,
           cmd.description, cmd.recurring, cmd.specimenGroupData, cmd.annotationTypeData)
         validSgData <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
         validAtData <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
@@ -115,8 +116,9 @@ trait CollectionEventTypeProcessorComponent {
     private def recoverEvent(event: CollectionEventTypeAddedEvent): Unit = {
       val studyId = StudyId(event.studyId)
       val validation = for {
-        newItem <- CollectionEventType.create(studyId, CollectionEventTypeId(event.collectionEventTypeId),
-          -1L, event.name, event.description, event.recurring, event.specimenGroupData,
+        newItem <- CollectionEventType.create(
+          studyId, CollectionEventTypeId(event.collectionEventTypeId), -1L, event.dateTime,
+          event.name, event.description, event.recurring, event.specimenGroupData,
           event.annotationTypeData)
         savedItem <- collectionEventTypeRepository.put(newItem).success
       } yield newItem
@@ -131,7 +133,8 @@ trait CollectionEventTypeProcessorComponent {
     private def recoverEvent(event: CollectionEventTypeUpdatedEvent): Unit = {
       val validation = for {
         item <- collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.collectionEventTypeId))
-        updatedItem <- item.update(item.versionOption, event.name,
+        updatedItem <- item.update(
+          item.versionOption, event.dateTime, event.name,
           event.description, event.recurring, event.specimenGroupData, event.annotationTypeData)
         savedItem <- collectionEventTypeRepository.put(updatedItem).success
       } yield updatedItem

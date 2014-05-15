@@ -113,7 +113,8 @@ trait FactoryComponent {
       val description = Some(nameGenerator.next[CollectionEventType])
 
       val disabledStudy = defaultDisabledStudy
-      val validation = CollectionEventType.create(disabledStudy.id, ceventTypeId, -1L, name,
+      val validation = CollectionEventType.create(
+        disabledStudy.id, ceventTypeId, -1L, org.joda.time.DateTime.now, name,
         description, true, List.empty, List.empty)
       if (validation.isFailure) {
         throw new Error

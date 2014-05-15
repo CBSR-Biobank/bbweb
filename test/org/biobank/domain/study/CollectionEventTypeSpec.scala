@@ -26,7 +26,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation = CollectionEventType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
 
       validation should be ('success)
@@ -60,7 +61,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val cet2 = cet.update(
-        cet.versionOption, name, description, recurring, specimenGroupData, annotationTypeData) | fail
+        cet.versionOption, org.joda.time.DateTime.now, name, description, recurring,
+        specimenGroupData, annotationTypeData) | fail
       cet2 shouldBe a[CollectionEventType]
 
       cet2 should have (
@@ -75,7 +77,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       cet2.specimenGroupData should have length 1
       cet2.annotationTypeData should have length 1
 
-      cet2.addedDate should be (cet.addedDate)
+      (cet2.addedDate to cet.addedDate).millis should be < 100L
       val updateDate = cet2.lastUpdateDate | fail
       (updateDate to DateTime.now).millis should be < 100L
     }
@@ -94,7 +96,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation = CollectionEventType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
@@ -112,7 +115,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation = CollectionEventType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
@@ -130,7 +134,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation = CollectionEventType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
@@ -148,7 +153,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation = CollectionEventType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
@@ -156,7 +162,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       }
 
       name = ""
-      val validation2 = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation2 = CollectionEventType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation2 should be ('failure)
       validation2.swap.map { err =>
@@ -174,7 +181,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation = CollectionEventType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
@@ -182,7 +190,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       }
 
       description = Some("")
-      val validation2 = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation2 = CollectionEventType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation2 should be ('failure)
       validation2.swap.map { err =>
@@ -200,7 +209,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation = CollectionEventType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
@@ -219,7 +229,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", -1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation = CollectionEventType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
@@ -237,7 +248,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(-1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation = CollectionEventType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
@@ -255,7 +267,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("", false))
 
-      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation = CollectionEventType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
@@ -274,7 +287,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("1", false))
 
-      val validation = CollectionEventType.create(studyId, id, version, name, description, recurring,
+      val validation = CollectionEventType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>

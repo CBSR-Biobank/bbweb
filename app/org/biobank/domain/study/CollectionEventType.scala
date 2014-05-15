@@ -52,6 +52,7 @@ case class CollectionEventType private (
 
   def update(
     expectedVersion: Option[Long],
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     recurring: Boolean,
@@ -60,10 +61,8 @@ case class CollectionEventType private (
     for {
       validVersion <- requireVersion(expectedVersion)
       validatedCeventType <- CollectionEventType.create(
-        studyId, id, version, name, description, recurring, specimenGroupData, annotationTypeData)
-      updatedCeventType <- validatedCeventType.copy(
-        addedDate = this.addedDate,
-        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+        studyId, id, version, dateTime, name, description, recurring, specimenGroupData, annotationTypeData)
+      updatedCeventType <- validatedCeventType.copy(lastUpdateDate = Some(dateTime)).success
     } yield updatedCeventType
   }
 
@@ -89,6 +88,7 @@ object CollectionEventType extends StudyAnnotationTypeValidationHelper {
     studyId: StudyId,
     id: CollectionEventTypeId,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     recurring: Boolean,
@@ -101,7 +101,7 @@ object CollectionEventType extends StudyAnnotationTypeValidationHelper {
       validateNonEmptyOption(description, "description is null or empty") |@|
       validateSpecimenGroupData(specimenGroupData) |@|
       validateAnnotationTypeData(annotationTypeData)) {
-      CollectionEventType(_, _, _, DateTime.now, None, _, _, recurring, _, _)
+      CollectionEventType(_, _, _, dateTime, None, _, _, recurring, _, _)
     }
   }
 
