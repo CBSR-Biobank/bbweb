@@ -28,7 +28,8 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val required = true
 
       val annotType = ParticipantAnnotationType.create(
-        studyId, id, version, name, description, valueType, maxValueCount, options, required) | fail
+        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        maxValueCount, options, required) | fail
       annotType shouldBe a[ParticipantAnnotationType]
       annotType should have (
         'studyId (studyId),
@@ -57,7 +58,8 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val required = !annotType.required
 
       val annotType2 = annotType.update(
-        annotType.versionOption, name, description, valueType, maxValueCount, options, required) | fail
+        annotType.versionOption, org.joda.time.DateTime.now, name, description, valueType,
+        maxValueCount, options, required) | fail
       annotType2 shouldBe a[ParticipantAnnotationType]
       annotType2 should have (
         'studyId (annotType.studyId),
@@ -91,7 +93,8 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
       val required = true
 
-      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+      ParticipantAnnotationType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
         err => err.list should (have length 1 and contain("id is null or empty")),
         user => fail
@@ -109,7 +112,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
       val required = true
 
-      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+      ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
         err => err.list should (have length 1 and contain("id is null or empty")),
         user => fail
@@ -127,7 +130,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
       val required = true
 
-      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+      ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
         err => err.list should (have length 1 and contain("invalid version value: -2")),
         user => fail
@@ -145,14 +148,14 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
       val required = true
 
-      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+      ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
         err => err.list should (have length 1 and contain("name is null or empty")),
         user => fail
       )
 
       name = ""
-      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+      ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
         err => err.list should (have length 1 and contain("name is null or empty")),
         user => fail
@@ -170,14 +173,14 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
       val required = true
 
-      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+      ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
         err => err.list should (have length 1 and contain("description is null or empty")),
         user => fail
       )
 
       description = Some("")
-      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+      ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
         err => err.list should (have length 1 and contain("description is null or empty")),
         user => fail
@@ -195,7 +198,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       var options = Some(Map("1" -> "a"))
       val required = true
 
-      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+      ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
         err => err.list should (have length 1 and contain("max value count is not a positive number")),
         user => fail
@@ -213,21 +216,21 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       var options = Some(Map("" -> "a"))
       val required = true
 
-      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+      ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
         err => err.list should (have length 1 and contain("option key is null or empty")),
         user => fail
       )
 
       options = Some(Map("1" -> ""))
-      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+      ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
         err => err.list should (have length 1 and contain("option value is null or empty")),
           user => fail
       )
 
       options = Some(Map("1" -> null))
-      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+      ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
         err => err.list should (have length 1 and contain("option value is null or empty")),
           user => fail
@@ -245,7 +248,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
       val required = true
 
-      ParticipantAnnotationType.create(studyId, id, version, name, description, valueType,
+      ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
         err => {
           err.list should have length 2

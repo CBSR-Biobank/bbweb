@@ -170,7 +170,8 @@ trait FactoryComponent {
         nameGenerator.next[String] -> nameGenerator.next[String]))
 
       val disabledStudy = defaultDisabledStudy
-      val validation = ParticipantAnnotationType.create(disabledStudy.id, id, -1L, name,
+      val validation = ParticipantAnnotationType.create(
+        disabledStudy.id, id, -1L, org.joda.time.DateTime.now, name,
         description, AnnotationValueType.Select, Some(1), options, required = true)
       if (validation.isFailure) {
         throw new Error

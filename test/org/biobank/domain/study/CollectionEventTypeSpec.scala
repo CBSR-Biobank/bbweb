@@ -77,7 +77,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       cet2.specimenGroupData should have length 1
       cet2.annotationTypeData should have length 1
 
-      (cet2.addedDate to cet.addedDate).millis should be < 100L
+      (cet.addedDate to cet2.addedDate).millis should be < 100L
       val updateDate = cet2.lastUpdateDate | fail
       (updateDate to DateTime.now).millis should be < 100L
     }

@@ -126,8 +126,8 @@ case class DisabledStudy private (
     maxValueCount: Option[Int],
     options: Option[Map[String, String]],
     required: Boolean): DomainValidation[ParticipantAnnotationType] = {
-    ParticipantAnnotationType.create(this.id, id, version, name, description,
-      valueType, maxValueCount, options, required)
+    ParticipantAnnotationType.create(
+      this.id, id, version, dateTime, name, description, valueType, maxValueCount, options, required)
   }
 
   /**
@@ -144,8 +144,9 @@ case class DisabledStudy private (
     preservationType: PreservationType,
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
-    SpecimenGroup.create(this.id, id, version, name, description, units,
-    anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
+    SpecimenGroup.create(
+      this.id, id, version, name, description, units,
+      anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
   }
 
   def addColletionEventType(
@@ -183,8 +184,8 @@ case class DisabledStudy private (
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
     options: Option[Map[String, String]]): DomainValidation[SpecimenLinkAnnotationType] =  {
-    SpecimenLinkAnnotationType.create(this.id, id, version, name, description, valueType,
-      maxValueCount, options)
+    SpecimenLinkAnnotationType.create(
+      this.id, id, version, name, description, valueType, maxValueCount, options)
   }
 
 }

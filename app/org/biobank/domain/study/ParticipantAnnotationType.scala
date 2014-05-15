@@ -42,6 +42,7 @@ case class ParticipantAnnotationType private (
 
   def update(
     expectedVersion: Option[Long],
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -51,10 +52,8 @@ case class ParticipantAnnotationType private (
     for {
       validVersion <- requireVersion(expectedVersion)
       validatedAnnotationType <- ParticipantAnnotationType.create(
-        studyId, id, version, name, description, valueType, maxValueCount, options, required)
-      updatedAnnotationType <- validatedAnnotationType.copy(
-        addedDate = this.addedDate,
-        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+        studyId, id, version, addedDate, name, description, valueType, maxValueCount, options, required)
+      updatedAnnotationType <- validatedAnnotationType.copy(lastUpdateDate = Some(dateTime)).success
     } yield updatedAnnotationType
   }
 
@@ -66,6 +65,7 @@ object ParticipantAnnotationType extends StudyAnnotationTypeValidationHelper {
     studyId: StudyId,
     id: AnnotationTypeId,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -79,7 +79,7 @@ object ParticipantAnnotationType extends StudyAnnotationTypeValidationHelper {
       validateNonEmptyOption(description, "description is null or empty") |@|
       validateMaxValueCount(maxValueCount) |@|
       validateOptions(options)) {
-        ParticipantAnnotationType(_, _, _, org.joda.time.DateTime.now, None, _, _, valueType, _, _, required)
+        ParticipantAnnotationType(_, _, _, dateTime, None, _, _, valueType, _, _, required)
       }
   }
 
