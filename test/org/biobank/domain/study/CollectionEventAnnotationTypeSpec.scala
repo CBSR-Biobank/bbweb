@@ -25,8 +25,8 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val maxValueCount = Some(1)
       val options = Some(Map("1" -> "a"))
 
-      val annotType = CollectionEventAnnotationType.create(studyId, id, version, name, description, valueType,
-        maxValueCount, options) | fail
+      val annotType = CollectionEventAnnotationType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount, options) | fail
       annotType shouldBe a[CollectionEventAnnotationType]
 
       annotType should have (
@@ -54,7 +54,8 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map(nameGenerator.next[String] -> nameGenerator.next[String]))
 
       val annotType2 = annotType.update(
-        annotType.versionOption, name, description, valueType, maxValueCount, options) | fail
+        annotType.versionOption, org.joda.time.DateTime.now, name, description, valueType,
+        maxValueCount, options) | fail
       annotType2 shouldBe a[CollectionEventAnnotationType]
 
       annotType2 should have (
@@ -87,8 +88,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val maxValueCount = Some(1)
       val options = Some(Map("1" -> "a"))
 
-      val validation = CollectionEventAnnotationType.create(studyId, id, version, name, description,
-        valueType, maxValueCount, options)
+      val validation = CollectionEventAnnotationType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        maxValueCount, options)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("id is null or empty"))
@@ -105,8 +107,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val maxValueCount = Some(1)
       val options = Some(Map("1" -> "a"))
 
-      val validation = CollectionEventAnnotationType.create(studyId, id, version, name, description,
-        valueType, maxValueCount, options)
+      val validation = CollectionEventAnnotationType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        maxValueCount, options)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("id is null or empty"))
@@ -123,8 +126,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val maxValueCount = Some(1)
       val options = Some(Map("1" -> "a"))
 
-      val validation = CollectionEventAnnotationType.create(studyId, id, version, name, description,
-        valueType, maxValueCount, options)
+      val validation = CollectionEventAnnotationType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        maxValueCount, options)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("invalid version value: -2"))
@@ -141,15 +145,17 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val maxValueCount = Some(1)
       val options = Some(Map("1" -> "a"))
 
-      val validation = CollectionEventAnnotationType.create(studyId, id, version, name, description,
-        valueType, maxValueCount, options)
+      val validation = CollectionEventAnnotationType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        maxValueCount, options)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("name is null or empty"))
       }
 
       name = ""
-      val validation2 = CollectionEventAnnotationType.create(studyId, id, version, name, description,
+      val validation2 = CollectionEventAnnotationType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description,
         valueType, maxValueCount, options)
       validation2 should be ('failure)
       validation2.swap.map { err =>
@@ -167,15 +173,17 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val maxValueCount = Some(1)
       val options = Some(Map("1" -> "a"))
 
-      val validation = CollectionEventAnnotationType.create(studyId, id, version, name, description,
-        valueType, maxValueCount, options)
+      val validation = CollectionEventAnnotationType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        maxValueCount, options)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("description is null or empty"))
       }
 
       description = Some("")
-      val validation2 = CollectionEventAnnotationType.create(studyId, id, version, name, description,
+      val validation2 = CollectionEventAnnotationType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description,
         valueType, maxValueCount, options)
       validation2 should be ('failure)
       validation2.swap.map { err =>
@@ -193,8 +201,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val maxValueCount = Some(-1)
       val options = Some(Map("1" -> "a"))
 
-      val validation = CollectionEventAnnotationType.create(studyId, id, version, name, description,
-        valueType, maxValueCount, options)
+      val validation = CollectionEventAnnotationType.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        maxValueCount, options)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("max value count is not a positive number"))
@@ -213,7 +222,8 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       var options = Some(Map("" -> "a"))
 
       val validation = CollectionEventAnnotationType.create(
-        studyId, id, version, name, description, valueType, maxValueCount, options)
+        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        maxValueCount, options)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("option key is null or empty"))
@@ -221,7 +231,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
 
       options = Some(Map("1" -> ""))
       val validation2 = CollectionEventAnnotationType.create(
-        studyId, id, version, name, description, valueType, maxValueCount, options)
+        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount, options)
       validation2 should be ('failure)
       validation2.swap.map { err =>
           err.list should (have length 1 and contain("option value is null or empty"))
@@ -229,7 +239,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
 
       options = Some(Map("1" -> null))
       val validation3 = CollectionEventAnnotationType.create(
-        studyId, id, version, name, description, valueType, maxValueCount, options)
+        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount, options)
       validation3 should be ('failure)
       validation3.swap.map { err =>
           err.list should (have length 1 and contain("option value is null or empty"))
@@ -247,7 +257,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val options = Some(Map("1" -> "a"))
 
       val validation = CollectionEventAnnotationType.create(
-        studyId, id, version, name, description, valueType, maxValueCount, options)
+        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount, options)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should have length 2

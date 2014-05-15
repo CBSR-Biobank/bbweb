@@ -170,7 +170,8 @@ case class DisabledStudy private (
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
     options: Option[Map[String, String]]): DomainValidation[CollectionEventAnnotationType] =  {
-    CollectionEventAnnotationType.create(this.id, id, version, name, description, valueType,
+    CollectionEventAnnotationType.create(
+      this.id, id, version, org.joda.time.DateTime.now, name, description, valueType,
       maxValueCount, options)
   }
 

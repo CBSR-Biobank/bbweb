@@ -40,6 +40,7 @@ case class CollectionEventAnnotationType private (
 
   def update(
     expectedVersion: Option[Long],
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -47,11 +48,9 @@ case class CollectionEventAnnotationType private (
     options: Option[Map[String, String]] = None): DomainValidation[CollectionEventAnnotationType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      validatedAnnotationType <- CollectionEventAnnotationType.create(studyId, id, version,
-        name, description, valueType, maxValueCount, options)
-      updatedAnnotationType <- validatedAnnotationType.copy(
-        addedDate = this.addedDate,
-        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+      validatedAnnotationType <- CollectionEventAnnotationType.create(
+        studyId, id, version, addedDate, name, description, valueType, maxValueCount, options)
+      updatedAnnotationType <- validatedAnnotationType.copy(lastUpdateDate = Some(dateTime)).success
     } yield updatedAnnotationType
   }
 }
@@ -63,6 +62,7 @@ object CollectionEventAnnotationType extends StudyAnnotationTypeValidationHelper
     studyId: StudyId,
     id: AnnotationTypeId,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -75,7 +75,7 @@ object CollectionEventAnnotationType extends StudyAnnotationTypeValidationHelper
       validateNonEmptyOption(description, "description is null or empty") |@|
       validateMaxValueCount(maxValueCount) |@|
       validateOptions(options)) {
-        CollectionEventAnnotationType(_, _, _, org.joda.time.DateTime.now, None, _, _, valueType, _, _)
+        CollectionEventAnnotationType(_, _, _, dateTime, None, _, _, valueType, _, _)
       }
   }
 

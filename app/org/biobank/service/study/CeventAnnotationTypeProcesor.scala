@@ -54,8 +54,8 @@ trait CeventAnnotationTypeProcessorComponent {
       for {
         nameValid <- nameAvailable(cmd.name)
         newItem <- CollectionEventAnnotationType.create(
-          StudyId(cmd.studyId), id, -1L, cmd.name, cmd.description, cmd.valueType,
-          cmd.maxValueCount, cmd.options)
+          StudyId(cmd.studyId), id, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description,
+          cmd.valueType, cmd.maxValueCount, cmd.options)
         event <- CollectionEventAnnotationTypeAddedEvent(
           newItem.studyId.id, newItem.id.id, newItem.addedDate, newItem.name,
           newItem.description, newItem.valueType, newItem.maxValueCount, newItem.options).success
@@ -70,7 +70,8 @@ trait CeventAnnotationTypeProcessorComponent {
         oldItem <- annotationTypeRepository.withId(StudyId(cmd.studyId), id)
         notUsed <- checkNotInUse(oldItem)
         nameValid <- nameAvailable(cmd.name, id)
-        newItem <- oldItem.update(cmd.expectedVersion, cmd.name, cmd.description, cmd.valueType,
+        newItem <- oldItem.update(
+          cmd.expectedVersion, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.valueType,
           cmd.maxValueCount, cmd.options)
         event <- CollectionEventAnnotationTypeUpdatedEvent(
           newItem.studyId.id, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, newItem.name,
@@ -93,7 +94,7 @@ trait CeventAnnotationTypeProcessorComponent {
       val studyId = StudyId(event.studyId)
       val id = AnnotationTypeId(event.annotationTypeId)
       val validation = for {
-        newItem <- CollectionEventAnnotationType.create(studyId, id, -1L, event.name,
+        newItem <- CollectionEventAnnotationType.create(studyId, id, -1L, event.dateTime, event.name,
           event.description, event.valueType, event.maxValueCount, event.options)
         savedItem <- annotationTypeRepository.put(newItem).success
       } yield newItem
@@ -108,7 +109,7 @@ trait CeventAnnotationTypeProcessorComponent {
     private def recoverEvent(event: CollectionEventAnnotationTypeUpdatedEvent): Unit = {
       val validation = for {
         item <- annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId))
-        updatedItem <- item.update(item.versionOption, event.name,
+        updatedItem <- item.update(item.versionOption, event.dateTime, event.name,
           event.description, event.valueType, event.maxValueCount, event.options)
         savedItem <- annotationTypeRepository.put(updatedItem).success
       } yield updatedItem
