@@ -100,7 +100,6 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
           event shouldBe a[SpecimenLinkTypeAddedEvent]
           event should have(
             'processingTypeId      (pt.id.id),
-            'version               (slt.version),
             'expectedInputChange   (slt.expectedInputChange),
             'expectedOutputChange  (slt.expectedOutputChange),
             'inputCount            (slt.inputCount),

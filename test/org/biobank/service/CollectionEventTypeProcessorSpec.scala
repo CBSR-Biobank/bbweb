@@ -93,10 +93,10 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
         validation map { event =>
           event shouldBe a[CollectionEventTypeAddedEvent]
           event should have(
-            'version (0),
-            'name (cet.name),
+            'studyId     (cet.studyId.id),
+            'name        (cet.name),
             'description (cet.description),
-            'recurring (cet.recurring))
+            'recurring   (cet.recurring))
 
           val cet2 = collectionEventTypeRepository.withId(
             disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) | fail

@@ -14,10 +14,6 @@ class CollectionEventTypeControllerSpec extends ControllerFixture {
     }
 
     describe("GET /studies/sgroups") {
-      it("should list none") (pending)
-    }
-
-    describe("GET /studies/sgroups") {
       it("should list a single collection event type") (pending)
     }
 

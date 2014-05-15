@@ -13,6 +13,7 @@ import play.api.libs.functional.syntax._
 import org.joda.time.format.ISODateTimeFormat
 
 object SpecimenGroup {
+  import JsonUtils._
 
   implicit val specimenGroupWrites = new Writes[SpecimenGroup] {
 
@@ -22,8 +23,8 @@ object SpecimenGroup {
       "studyId"                     -> sg.studyId.id,
       "id"                          -> sg.id.id,
       "version"                     -> sg.version,
-      "addedDate"                   -> fmt.print(sg.addedDate),
-      "lastUpdateDate"              -> sg.lastUpdateDate.map(fmt.print(_)),
+      "addedDate"                   -> sg.addedDate,
+      "lastUpdateDate"              -> sg.lastUpdateDate,
       "name"                        -> sg.name,
       "description"                 -> sg.description,
       "units"                       -> sg.units,

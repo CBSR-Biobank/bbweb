@@ -2,12 +2,12 @@ package org.biobank.service.json
 
 import org.biobank.domain.study._
 
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import play.api.libs.json._
 import org.scalatest.Assertions._
 import com.github.nscala_time.time.Imports._
 
-object JsonHelper extends ShouldMatchers {
+object JsonHelper extends Matchers {
   import org.biobank.service.json.JsonUtils._
 
   def compareObj(json: JsValue, study: Study)  = {
@@ -17,10 +17,9 @@ object JsonHelper extends ShouldMatchers {
     (json \ "description").as[Option[String]]    should be (study.description)
     (json \ "status").as[String]                 should be (study.status)
 
-    ((json \ "addedDate").as[DateTime] to study.addedDate).millis should be < 100L
-
-    (json \ "lastUpdateDate").as[Option[DateTixme]] map { dateTime =>
-      (dateTime to study.lastUpdateDate.get) should be < 100L
+    ((json \ "addedDate").as[DateTime] to study.addedDate).millis should be < 1000L
+    (json \ "lastUpdateDate").as[Option[DateTime]] map { dateTime =>
+      (dateTime to study.lastUpdateDate.get).millis should be < 1000L
     }
   }
 
@@ -36,8 +35,10 @@ object JsonHelper extends ShouldMatchers {
     (json \ "preservationTemperatureType").as[String] should be (specimenGroup.preservationTemperatureType.toString)
     (json \ "specimenType").as[String]                should be (specimenGroup.specimenType.toString)
 
-    ((json \ "addedDate").as[DateTime] to study.addedDate).millis should be < 100L
-    //assert((json \ "lastUpdateDate").as[Option[String]]      === specimenGroup.lastUpdateDate.map(fmt.print(_)))
+    ((json \ "addedDate").as[DateTime] to specimenGroup.addedDate).millis should be < 1000L
+    (json \ "lastUpdateDate").as[Option[DateTime]] map { dateTime =>
+      (dateTime to specimenGroup.lastUpdateDate.get).millis should be < 1000L
+    }
   }
 
 }
