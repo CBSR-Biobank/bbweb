@@ -70,6 +70,7 @@ case class SpecimenGroup private (
 
   def update(
     expectedVersion: Option[Long],
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     units: String,
@@ -79,12 +80,10 @@ case class SpecimenGroup private (
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
     for {
       validVersion <- requireVersion(expectedVersion)
-      validatedSpecimenGroup <- SpecimenGroup.create(studyId, id, version, name, description,
-        units, anatomicalSourceType, preservationType, preservationTemperatureType,
-        specimenType)
-      updatedSpecimenGroup <- validatedSpecimenGroup.copy(
-        addedDate = this.addedDate,
-        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+      validatedSpecimenGroup <- SpecimenGroup.create(
+        studyId, id, version, dateTime, name, description, units, anatomicalSourceType,
+        preservationType, preservationTemperatureType, specimenType)
+      updatedSpecimenGroup <- validatedSpecimenGroup.copy(lastUpdateDate = Some(dateTime)).success
     } yield updatedSpecimenGroup
   }
 }
@@ -107,6 +106,7 @@ object SpecimenGroup extends StudyValidationHelper {
     studyId: StudyId,
     id: SpecimenGroupId,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     units: String,
@@ -120,7 +120,7 @@ object SpecimenGroup extends StudyValidationHelper {
       validateNonEmpty(name, "name is null or empty") |@|
       validateNonEmptyOption(description, "description is null or empty") |@|
       validateNonEmpty(units, "units is null or empty")) {
-      SpecimenGroup(_, _, _, DateTime.now, None, _, _, _, anatomicalSourceType, preservationType,
+      SpecimenGroup(_, _, _, dateTime, None, _, _, _, anatomicalSourceType, preservationType,
         preservationTemperatureType, specimenType)
     }
   }

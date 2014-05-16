@@ -70,7 +70,8 @@ trait SpecimenGroupProcessorComponent {
 
       for {
         nameValid <- nameAvailable(cmd.name)
-        newItem <-SpecimenGroup.create(StudyId(cmd.studyId), sgId, 0, cmd.name, cmd.description,
+        newItem <-SpecimenGroup.create(
+          StudyId(cmd.studyId), sgId, -1, org.joda.time.DateTime.now, cmd.name, cmd.description,
           cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
           cmd.preservationTemperatureType, cmd.specimenType)
         newEvent <- SpecimenGroupAddedEvent(
@@ -89,7 +90,8 @@ trait SpecimenGroupProcessorComponent {
         nameValid <- nameAvailable(cmd.name, specimenGroupId)
         oldItem <- specimenGroupRepository.withId(studyId, specimenGroupId)
         notInUse <- checkNotInUse(studyId, oldItem.id)
-        newItem <- oldItem.update(cmd.expectedVersion, cmd.name, cmd.description, cmd.units,
+        newItem <- oldItem.update(
+          cmd.expectedVersion, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.units,
           cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
           cmd.specimenType)
         newEvent <- SpecimenGroupUpdatedEvent(
@@ -114,7 +116,8 @@ trait SpecimenGroupProcessorComponent {
     private def recoverEvent(event: SpecimenGroupAddedEvent): Unit = {
       val studyId = StudyId(event.studyId)
       val validation = for {
-        newItem <- SpecimenGroup.create(studyId, SpecimenGroupId(event.specimenGroupId), -1, event.name,
+        newItem <- SpecimenGroup.create(
+          studyId, SpecimenGroupId(event.specimenGroupId), -1, event.dateTime, event.name,
           event.description, event.units, event.anatomicalSourceType, event.preservationType,
           event.preservationTemperatureType, event.specimenType)
         savedItem <- specimenGroupRepository.put(newItem).success
@@ -130,9 +133,10 @@ trait SpecimenGroupProcessorComponent {
     private def recoverEvent(event: SpecimenGroupUpdatedEvent): Unit = {
       val validation = for {
         item <- specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId))
-        updatedItem <- item.update(item.versionOption, event.name,
-          event.description, event.units, event.anatomicalSourceType, event.preservationType,
-          event.preservationTemperatureType, event.specimenType)
+        updatedItem <- item.update(
+          item.versionOption, event.dateTime, event.name, event.description, event.units,
+          event.anatomicalSourceType, event.preservationType, event.preservationTemperatureType,
+          event.specimenType)
         savedItem <- specimenGroupRepository.put(updatedItem).success
       } yield updatedItem
 

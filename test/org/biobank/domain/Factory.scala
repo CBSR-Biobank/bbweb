@@ -95,7 +95,7 @@ trait FactoryComponent {
       val specimenType = SpecimenType.FilteredUrine
 
       val disabledStudy = defaultDisabledStudy
-      val validation = SpecimenGroup.create(disabledStudy.id, sgId, -1L,
+      val validation = SpecimenGroup.create(disabledStudy.id, sgId, -1L, org.joda.time.DateTime.now,
         name, description, units, anatomicalSourceType, preservationType, preservationTempType,
         specimenType)
       if (validation.isFailure) {

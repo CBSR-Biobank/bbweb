@@ -145,7 +145,7 @@ case class DisabledStudy private (
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
     SpecimenGroup.create(
-      this.id, id, version, name, description, units,
+      this.id, id, version, org.joda.time.DateTime.now, name, description, units,
       anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
   }
 

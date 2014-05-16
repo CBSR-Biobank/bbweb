@@ -29,7 +29,8 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-      val specimenGroup = SpecimenGroup.create(studyId, id, version, name, description, units,
+      val specimenGroup = SpecimenGroup.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) | fail
       specimenGroup shouldBe a[SpecimenGroup]
 
@@ -62,7 +63,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.Plasma
 
       val updatedSg = specimenGroup.update(
-        specimenGroup.versionOption, name, description, units, anatomicalSourceType, preservationType,
+        specimenGroup.versionOption, org.joda.time.DateTime.now, name, description, units, anatomicalSourceType, preservationType,
         preservationTemperatureType, specimenType) | fail
 
       updatedSg should have (
@@ -99,7 +100,8 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-      val v = SpecimenGroup.create(studyId, id, version, name, description, units,
+      val v = SpecimenGroup.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => err.list should (have length 1 and contain("id is null or empty")),
         user => fail
@@ -118,7 +120,8 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-      SpecimenGroup.create(studyId, id, version, name, description, units,
+      SpecimenGroup.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => err.list should (have length 1 and contain("id is null or empty")),
         user => fail
@@ -137,7 +140,8 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-       val validation = SpecimenGroup.create(studyId, id, version, name, description, units,
+       val validation = SpecimenGroup.create(
+         studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
       validation should be ('failure)
 
@@ -158,10 +162,11 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-      val sg = SpecimenGroup.create(studyId, id, version, name, description, units,
+      val sg = SpecimenGroup.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) | fail
 
-      val validation = sg.update(Some(10L), name, description, units,
+      val validation = sg.update(Some(10L), org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
       validation should be ('failure)
 
@@ -183,14 +188,16 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-      SpecimenGroup.create(studyId, id, version, name, description, units,
+      SpecimenGroup.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => err.list should (have length 1 and contain("name is null or empty")),
         user => fail
       )
 
       name = ""
-      SpecimenGroup.create(studyId, id, version, name, description, units,
+      SpecimenGroup.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => err.list should (have length 1 and contain("name is null or empty")),
         user => fail
@@ -209,14 +216,15 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-      SpecimenGroup.create(studyId, id, version, name, description, units,
+      SpecimenGroup.create(
+        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => err.list should (have length 1 and contain("description is null or empty")),
         user => fail
       )
 
       description = Some("")
-      SpecimenGroup.create(studyId, id, version, name, description, units,
+      SpecimenGroup.create(studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => err.list should (have length 1 and contain("description is null or empty")),
         user => fail
@@ -235,7 +243,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-      SpecimenGroup.create(studyId, id, version, name, description, units,
+      SpecimenGroup.create(studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => err.list should (have length 1 and contain("units is null or empty")),
         user => fail
@@ -254,7 +262,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-      SpecimenGroup.create(studyId, id, version, name, description, units,
+      SpecimenGroup.create(studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => {
           err.list should have length 2
