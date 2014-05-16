@@ -42,15 +42,14 @@ case class ProcessingType private (
     */
   def update(
     expectedVersion: Option[Long],
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     enabled: Boolean): DomainValidation[ProcessingType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      validatedItem <- ProcessingType.create(studyId, id, version, name, description, enabled)
-      newItem <- validatedItem.copy(
-        addedDate = this.addedDate,
-        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+      validatedItem <- ProcessingType.create(studyId, id, version, addedDate, name, description, enabled)
+      newItem <- validatedItem.copy(lastUpdateDate = Some(dateTime)).success
     } yield newItem
   }
 
@@ -73,6 +72,7 @@ object ProcessingType extends StudyValidationHelper {
     studyId: StudyId,
     id: ProcessingTypeId,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     enabled: Boolean): DomainValidation[ProcessingType] = {
@@ -81,7 +81,7 @@ object ProcessingType extends StudyValidationHelper {
       validateAndIncrementVersion(version) |@|
       validateNonEmpty(name, "name is null or empty") |@|
       validateNonEmptyOption(description, "description is null or empty")) {
-      ProcessingType(_, _, _, DateTime.now, None, _, _, enabled)
+      ProcessingType(_, _, _, dateTime, None, _, _, enabled)
     }
   }
 }

@@ -25,7 +25,7 @@ class ProcessingTypeSpec extends DomainSpec {
       val enabled = true
 
       val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, name, description, enabled)
+        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
       validation should be ('success)
       validation map { processingType =>
         processingType shouldBe a [ProcessingType]
@@ -49,7 +49,8 @@ class ProcessingTypeSpec extends DomainSpec {
       val description = Some(nameGenerator.next[ProcessingType])
       val enabled = !processingType.enabled
 
-      val validation = processingType.update(processingType.versionOption, name, description, enabled)
+      val validation = processingType.update(
+        processingType.versionOption, org.joda.time.DateTime.now, name, description, enabled)
       validation should be ('success)
       validation map { pt2 =>
         pt2 shouldBe a [ProcessingType]
@@ -78,8 +79,8 @@ class ProcessingTypeSpec extends DomainSpec {
       val description = Some(nameGenerator.next[ProcessingType])
       val enabled = true
 
-      val validation = ProcessingType.create(studyId, processingTypeId, -1L, name,
-              description, enabled)
+      val validation = ProcessingType.create(
+        studyId, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("id is null or empty"))
@@ -94,8 +95,8 @@ class ProcessingTypeSpec extends DomainSpec {
       val description = Some(nameGenerator.next[ProcessingType])
       val enabled = true
 
-      val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-              description, enabled)
+      val validation = ProcessingType.create(
+        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("id is null or empty"))
@@ -109,8 +110,8 @@ class ProcessingTypeSpec extends DomainSpec {
       val description = Some(nameGenerator.next[ProcessingType])
       val enabled = true
 
-      val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -2L, name,
-              description, enabled)
+      val validation = ProcessingType.create(
+        disabledStudy.id, processingTypeId, -2L, org.joda.time.DateTime.now, name, description, enabled)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("invalid version value: -2"))
@@ -124,16 +125,16 @@ class ProcessingTypeSpec extends DomainSpec {
       val description = Some(nameGenerator.next[ProcessingType])
       val enabled = true
 
-      val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-              description, enabled)
+      val validation = ProcessingType.create(
+        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("name is null or empty"))
       }
 
       name = ""
-      val validation2 = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-              description, enabled)
+      val validation2 = ProcessingType.create(
+        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
       validation2 should be ('failure)
       validation2.swap.map { err =>
           err.list should (have length 1 and contain("name is null or empty"))
@@ -147,16 +148,16 @@ class ProcessingTypeSpec extends DomainSpec {
       var description: Option[String] = Some(null)
       val enabled = true
 
-      val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-              description, enabled)
+      val validation = ProcessingType.create(
+        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("description is null or empty"))
       }
 
       description = Some("")
-      val validation2 = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-              description, enabled)
+      val validation2 = ProcessingType.create(
+        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
       validation2 should be ('failure)
       validation2.swap.map { err =>
           err.list should (have length 1 and contain("description is null or empty"))
@@ -170,8 +171,8 @@ class ProcessingTypeSpec extends DomainSpec {
       var description: Option[String] = Some(null)
       val enabled = true
 
-      val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -2L, name,
-              description, enabled)
+      val validation = ProcessingType.create(
+        disabledStudy.id, processingTypeId, -2L, org.joda.time.DateTime.now, name, description, enabled)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should have length 2

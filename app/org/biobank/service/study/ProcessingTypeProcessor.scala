@@ -67,7 +67,7 @@ trait ProcessingTypeProcessorComponent {
 
       for {
         nameValid <- nameAvailable(cmd.name)
-        newItem <- ProcessingType.create(studyId, id, -1L, cmd.name, cmd.description, cmd.enabled)
+        newItem <- ProcessingType.create(studyId, id, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.enabled)
         event <- ProcessingTypeAddedEvent(
           cmd.studyId, id.id, newItem.addedDate, newItem.name, newItem.description,
           newItem.enabled).success
@@ -82,8 +82,8 @@ trait ProcessingTypeProcessorComponent {
       for {
         oldItem <- processingTypeRepository.withId(studyId,id)
         nameValid <- nameAvailable(cmd.name, id)
-        newItem <- oldItem.update(cmd.expectedVersion, cmd.name,
-          cmd.description, cmd.enabled)
+        newItem <- oldItem.update(
+          cmd.expectedVersion, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.enabled)
         event <- ProcessingTypeUpdatedEvent(
           cmd.studyId, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, newItem.name,
           newItem.description, newItem.enabled).success
@@ -105,8 +105,9 @@ trait ProcessingTypeProcessorComponent {
     private def recoverEvent(event: ProcessingTypeAddedEvent): Unit = {
       val studyId = StudyId(event.studyId)
       val validation = for {
-        newItem <- ProcessingType.create(studyId, ProcessingTypeId(event.processingTypeId),
-          -1L, event.name, event.description, event.enabled)
+        newItem <- ProcessingType.create(
+          studyId, ProcessingTypeId(event.processingTypeId), -1L, event.dateTime,
+          event.name, event.description, event.enabled)
         savedItem <- processingTypeRepository.put(newItem).success
       } yield newItem
 
@@ -120,8 +121,8 @@ trait ProcessingTypeProcessorComponent {
     private def recoverEvent(event: ProcessingTypeUpdatedEvent): Unit = {
       val validation = for {
         item <- processingTypeRepository.getByKey(ProcessingTypeId(event.processingTypeId))
-        updatedItem <- item.update(item.versionOption, event.name,
-          event.description, event.enabled)
+        updatedItem <- item.update(
+          item.versionOption, event.dateTime, event.name, event.description, event.enabled)
         savedItem <- processingTypeRepository.put(updatedItem).success
       } yield updatedItem
 

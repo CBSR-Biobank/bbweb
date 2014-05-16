@@ -208,8 +208,8 @@ trait FactoryComponent {
       val description = Some(nameGenerator.next[ProcessingType])
 
       val disabledStudy = defaultDisabledStudy
-      val validation = ProcessingType.create(disabledStudy.id, processingTypeId, -1L, name,
-              description, enabled = true)
+      val validation = ProcessingType.create(
+        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled = true)
       if (validation.isFailure) {
               throw new Error
       }
