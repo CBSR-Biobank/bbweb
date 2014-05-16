@@ -79,7 +79,7 @@ class SpecimenGroupSpec extends DomainSpec {
         'specimenType                (specimenType)
       )
 
-      updatedSg.addedDate should be (specimenGroup.addedDate)
+      (specimenGroup.addedDate to updatedSg.addedDate).millis should be < 100L
       val updateDate = updatedSg.lastUpdateDate | fail
       (updateDate to DateTime.now).millis should be < 100L
     }

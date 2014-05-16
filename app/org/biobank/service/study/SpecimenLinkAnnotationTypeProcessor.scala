@@ -53,7 +53,7 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
       for {
         nameValid <- nameAvailable(cmd.name)
         newItem <- SpecimenLinkAnnotationType.create(
-          StudyId(cmd.studyId), id, -1L, cmd.name, cmd.description, cmd.valueType,
+          StudyId(cmd.studyId), id, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.valueType,
           cmd.maxValueCount, cmd.options)
         event <- SpecimenLinkAnnotationTypeAddedEvent(
           newItem.studyId.id, newItem.id.id, newItem.addedDate, newItem.name, newItem.description,
@@ -69,7 +69,8 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
         oldItem <- annotationTypeRepository.withId(StudyId(cmd.studyId), id)
         notUsed <- checkNotInUse(oldItem)
         nameValid <- nameAvailable(cmd.name, id)
-        newItem <- oldItem.update(cmd.expectedVersion, cmd.name, cmd.description, cmd.valueType,
+        newItem <- oldItem.update(
+          cmd.expectedVersion, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.valueType,
           cmd.maxValueCount, cmd.options)
         event <- SpecimenLinkAnnotationTypeUpdatedEvent(
           newItem.studyId.id, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, newItem.name,
@@ -93,7 +94,8 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
       val studyId = StudyId(event.studyId)
       val id = AnnotationTypeId(event.annotationTypeId)
       val validation = for {
-        newItem <- SpecimenLinkAnnotationType.create(studyId, id, -1L, event.name, event.description,
+        newItem <- SpecimenLinkAnnotationType.create(
+          studyId, id, -1L, event.dateTime, event.name, event.description,
           event.valueType, event.maxValueCount, event.options)
         savedItem <- annotationTypeRepository.put(newItem).success
       } yield newItem
@@ -108,7 +110,8 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
     private def recoverEvent(event: SpecimenLinkAnnotationTypeUpdatedEvent): Unit = {
       val validation = for {
         item <- annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId))
-        updatedItem <- item.update(item.versionOption, event.name, event.description, event.valueType,
+        updatedItem <- item.update(
+          item.versionOption, event.dateTime, event.name, event.description, event.valueType,
           event.maxValueCount, event.options)
         savedItem <- annotationTypeRepository.put(updatedItem).success
       } yield updatedItem

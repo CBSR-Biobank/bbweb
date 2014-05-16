@@ -185,7 +185,7 @@ case class DisabledStudy private (
     maxValueCount: Option[Int],
     options: Option[Map[String, String]]): DomainValidation[SpecimenLinkAnnotationType] =  {
     SpecimenLinkAnnotationType.create(
-      this.id, id, version, name, description, valueType, maxValueCount, options)
+      this.id, id, version, dateTime, name, description, valueType, maxValueCount, options)
   }
 
 }

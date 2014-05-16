@@ -40,6 +40,7 @@ case class SpecimenLinkAnnotationType private (
 
   def update(
     expectedVersion: Option[Long],
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -47,11 +48,9 @@ case class SpecimenLinkAnnotationType private (
     options: Option[Map[String, String]] = None): DomainValidation[SpecimenLinkAnnotationType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      validatedAnnotationType <- SpecimenLinkAnnotationType.create(studyId, id, version,
-        name, description, valueType, maxValueCount, options)
-      newItem <- validatedAnnotationType.copy(
-        addedDate = this.addedDate,
-        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+      validatedAnnotationType <- SpecimenLinkAnnotationType.create(
+        studyId, id, version, addedDate, name, description, valueType, maxValueCount, options)
+      newItem <- validatedAnnotationType.copy(lastUpdateDate = Some(dateTime)).success
     } yield newItem
   }
 
@@ -63,6 +62,7 @@ object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidationHelper {
     studyId: StudyId,
     id: AnnotationTypeId,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -75,7 +75,7 @@ object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidationHelper {
       validateNonEmptyOption(description, "description is null or empty") |@|
       validateMaxValueCount(maxValueCount) |@|
       validateOptions(options)) {
-        SpecimenLinkAnnotationType(_, _, _, org.joda.time.DateTime.now, None, _, _, valueType, _, _)
+        SpecimenLinkAnnotationType(_, _, _, dateTime, None, _, _, valueType, _, _)
       }
   }
 
