@@ -77,6 +77,7 @@ trait SpecimenLinkTypeProcessorComponent {
           processingTypeId,
           id,
           -1L,
+          org.joda.time.DateTime.now,
           cmd.expectedInputChange,
           cmd.expectedOutputChange,
           cmd.inputCount,
@@ -117,6 +118,7 @@ trait SpecimenLinkTypeProcessorComponent {
         processingType <- processingTypeRepository.getByKey(processingTypeId)
         newItem <- oldItem.update(
           cmd.expectedVersion,
+          org.joda.time.DateTime.now,
           cmd.expectedInputChange,
           cmd.expectedOutputChange,
           cmd.inputCount,
@@ -167,6 +169,7 @@ trait SpecimenLinkTypeProcessorComponent {
           processingTypeId,
           SpecimenLinkTypeId(event.specimenLinkTypeId),
           -1L,
+          event.dateTime,
           event.expectedInputChange,
           event.expectedOutputChange,
           event.inputCount,
@@ -191,6 +194,7 @@ trait SpecimenLinkTypeProcessorComponent {
         item <- specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId))
         updatedItem <- item.update(
           item.versionOption,
+          event.dateTime,
           event.expectedInputChange,
           event.expectedOutputChange,
           event.inputCount,

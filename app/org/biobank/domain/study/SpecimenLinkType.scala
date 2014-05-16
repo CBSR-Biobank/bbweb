@@ -67,6 +67,7 @@ case class SpecimenLinkType private (
     */
   def update(
     expectedVersion: Option[Long],
+    dateTime: DateTime,
     expectedInputChange: BigDecimal,
     expectedOutputChange: BigDecimal,
     inputCount: Int,
@@ -80,12 +81,10 @@ case class SpecimenLinkType private (
     for {
       validVersion <- requireVersion(expectedVersion)
       validatedItem <- SpecimenLinkType.create(
-        processingTypeId, id, version,  expectedInputChange, expectedOutputChange, inputCount,
+        processingTypeId, id, version, addedDate, expectedInputChange, expectedOutputChange, inputCount,
         outputCount, inputGroupId, outputGroupId, inputContainerTypeId, outputContainerTypeId,
         annotationTypeData)
-      newItem <- validatedItem.copy(
-        addedDate = this.addedDate,
-        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+      newItem <- validatedItem.copy(lastUpdateDate = Some(dateTime)).success
     } yield newItem
   }
 
@@ -114,6 +113,7 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
     processingTypeId: ProcessingTypeId,
     id: SpecimenLinkTypeId,
     version: Long,
+    dateTime: DateTime,
     expectedInputChange: BigDecimal,
     expectedOutputChange: BigDecimal,
     inputCount: Int,
@@ -142,7 +142,7 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
       outputContainerTypeId: Option[ContainerTypeId] = None,
       annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData],
       ignore: Boolean): SpecimenLinkType = {
-      SpecimenLinkType(processingTypeId, id, version, DateTime.now, None, expectedInputChange,
+      SpecimenLinkType(processingTypeId, id, version, dateTime, None, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputGroupId, outputGroupId,
         inputContainerTypeId, outputContainerTypeId, annotationTypeData)
     }

@@ -235,7 +235,8 @@ trait FactoryComponent {
       val outputSpecimenGroup = createSpecimenGroup
       specimenGroupRepository.put(outputSpecimenGroup)
 
-      val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
+      val validation = SpecimenLinkType.create(
+        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutpuChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
 
