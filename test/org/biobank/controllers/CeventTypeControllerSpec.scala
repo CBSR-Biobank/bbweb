@@ -31,39 +31,64 @@ class CollectionEventTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    describe("GET /studies/sgroups") {
-      it("should list a single collection event type", Tag("single")) {
+    describe("GET /studies/cetypes") {
+      it("should list a single collection event type") {
         running(fakeApplication) {
           val appRepositories = new AppRepositories
 
           val study = factory.createDisabledStudy
           appRepositories.studyRepository.put(study)
 
-          val sg = factory.createCollectionEventType
-          appRepositories.collectionEventTypeRepository.put(sg)
+          val cet = factory.createCollectionEventType
+          appRepositories.collectionEventTypeRepository.put(cet)
 
           val idJson = Json.obj("id" -> study.id.id)
           val json = makeJsonRequest(GET, "/studies/cetypes", json = idJson)
           val jsonList = json.as[List[JsObject]]
           jsonList should have size 1
-          compareObj(jsonList(0), sg)
+          compareObj(jsonList(0), cet)
         }
       }
     }
 
-    describe("GET /studies/sgroups") {
-      it("should list multiple collection event types") (pending)
+    describe("GET /studies/cetypes") {
+      it("should list multiple collection event types", Tag("single")) {
+        running(fakeApplication) {
+          val appRepositories = new AppRepositories
+
+          val study = factory.createDisabledStudy
+          appRepositories.studyRepository.put(study)
+
+          val cet1 = factory.createCollectionEventType.copy(
+            specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
+            annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
+
+          val cet2 = factory.createCollectionEventType.copy(
+            specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
+            annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
+
+          val cetypes = List(cet1, cet2)
+          cetypes map { cet => appRepositories.collectionEventTypeRepository.put(cet) }
+
+          val idJson = Json.obj("id" -> study.id.id)
+          val json = makeJsonRequest(GET, "/studies/cetypes", json = idJson)
+          val jsonList = json.as[List[JsObject]]
+
+          jsonList should have size cetypes.size
+          (jsonList zip cetypes).map { item => compareObj(item._1, item._2) }
+        }
+      }
     }
 
-    describe("POST /studies/sgroups") {
+    describe("POST /studies/cetypes") {
       it("should add a collection event type") (pending)
     }
 
-    describe("PUT /studies/sgroups") {
+    describe("PUT /studies/cetypes") {
       it("should update a collection event type") (pending)
     }
 
-    describe("DELETE /studies/sgroups") {
+    describe("DELETE /studies/cetypes") {
       it("should remove a collection event type") (pending)
     }
   }
