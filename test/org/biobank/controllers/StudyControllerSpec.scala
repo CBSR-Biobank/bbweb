@@ -78,9 +78,24 @@ class StudyControllerSpec extends ControllerFixture {
     }
 
     describe("PUT /studies/:id") {
+      it("should update a study") {
+        running(fakeApplication) {
+          val appRepositories = new AppRepositories
 
-      it("should update a study") (pending)
+          val study = factory.createDisabledStudy
+          appRepositories.studyRepository.put(study)
 
+          val cmdJson = Json.obj(
+            "type"            -> "UpdateStudyCmd",
+            "id"              -> study.id.id,
+            "expectedVersion" -> Some(study.version),
+            "name"            -> study.name,
+            "description"     -> study.description)
+          val json = makeJsonRequest(PUT, s"/studies/${study.id.id}", json = cmdJson)
+
+          (json \ "message").as[String] should include ("study updated")
+        }
+      }
     }
 
     describe("GET /studies/:id") {

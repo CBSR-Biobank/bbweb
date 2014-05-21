@@ -24,8 +24,8 @@ trait TestFixture
     with ScalaFutures
     with WordSpecLike
     with Matchers
-    with BeforeAndAfterAll
-    with BeforeAndAfterEach {
+    with BeforeAndAfterEach
+    with BeforeAndAfterAll {
 
   // need to configure scalatest to have more patience when waiting for future results
   implicit val defaultPatience =

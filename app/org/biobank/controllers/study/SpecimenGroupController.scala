@@ -38,7 +38,7 @@ object SpecimenGroupController extends BbwebController {
         BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors)))
       },
       studyId => {
-        Logger.info(s"list: $id")
+        Logger.info(s"list: $studyId")
         val json = Json.toJson(studyService.specimenGroupsForStudy(studyId.id).toList)
         Ok(json)
       }
@@ -51,6 +51,26 @@ object SpecimenGroupController extends BbwebController {
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
         event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group added: ${event.name}.") ))
+      )
+    }
+  }
+
+  def updateSpecimenGroup(id: String) = doCommand { cmd: UpdateSpecimenGroupCmd =>
+    val future = studyService.updateSpecimenGroup(cmd)(null)
+    future.map { validation =>
+      validation.fold(
+        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group updated: ${event.name}.") ))
+      )
+    }
+  }
+
+  def deleteSpecimenGroup(id: String) = doCommand { cmd: RemoveSpecimenGroupCmd =>
+    val future = studyService.removeSpecimenGroup(cmd)(null)
+    future.map { validation =>
+      validation.fold(
+        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group deleted: ${event.specimenGroupId}.") ))
       )
     }
   }

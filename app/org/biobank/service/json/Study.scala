@@ -8,7 +8,7 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
 object StudyId{
-    implicit val reader = Reads.of[String](minLength[String](2)).map( new StudyId(_) )
+    implicit val reader = (__ \ "id").read[String](minLength[String](2)).map( new StudyId(_) )
     implicit val writer = Writes{ (studyId: StudyId) => JsString(studyId.id) }
 }
 
@@ -37,7 +37,7 @@ object Study {
   implicit val updateStudyCmdReads: Reads[UpdateStudyCmd] = (
     (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateStudyCmd")) andKeep
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "version").readNullable[Long](min[Long](0)) and
+      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String](minLength[String](2))
   )((id, version, name, description) => UpdateStudyCmd(id, version, name, description))

@@ -5,7 +5,7 @@ import org.biobank.domain.study.{ Study, StudyId }
 import org.biobank.domain.{ FactoryComponent, RepositoryComponentImpl, ReadWriteRepository }
 
 import org.scalatest.FunSpec
-import org.scalatest.BeforeAndAfter
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.Matchers
 import play.api.Play
 import play.api.test.FakeApplication
@@ -24,14 +24,17 @@ import play.api.Logger
 trait ControllerFixture
     extends FunSpec
     with Matchers
+    with BeforeAndAfterEach
     with FactoryComponent
     with RepositoryComponentImpl {
 
   private val dbName = "bbweb-test"
 
-  // ensure the database is empty
-  MongoConnection()(dbName)("messages").drop
-  MongoConnection()(dbName)("snapshots").drop
+  override def beforeEach: Unit = {
+    // ensure the database is empty
+    MongoConnection()(dbName)("messages").drop
+      MongoConnection()(dbName)("snapshots").drop
+  }
 
   protected def fakeApplication = {
     FakeApplication(withoutPlugins = List("com.typesafe.plugin.CommonsMailerPlugin"))

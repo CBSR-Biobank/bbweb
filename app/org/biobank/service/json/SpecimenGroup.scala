@@ -14,13 +14,14 @@ import org.joda.time.format.ISODateTimeFormat
 
 object SpecimenGroup {
   import JsonUtils._
+  import StudyId._
 
   implicit val specimenGroupWrites = new Writes[SpecimenGroup] {
 
     val fmt = ISODateTimeFormat.dateTime();
 
     def writes(sg: SpecimenGroup) = Json.obj(
-      "studyId"                     -> sg.studyId.id,
+      "studyId"                     -> sg.studyId,
       "id"                          -> sg.id.id,
       "version"                     -> sg.version,
       "addedDate"                   -> sg.addedDate,
@@ -42,7 +43,8 @@ object SpecimenGroup {
   implicit val specimenTypeReads = EnumUtils.enumReads(org.biobank.domain.SpecimenType)
 
   implicit val addSpecimenGroupCmdReads: Reads[AddSpecimenGroupCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "type").read[String](Reads.verifying[String](_ == "AddSpecimenGroupCmd")) andKeep
+      (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String](minLength[String](2)) and
       (__ \ "units").read[String](minLength[String](2)) and
@@ -50,12 +52,16 @@ object SpecimenGroup {
       (__ \ "preservationType").read[PreservationType] and
       (__ \ "preservationTemperatureType").read[PreservationTemperatureType] and
       (__ \ "specimenType").read[SpecimenType]
-  )(AddSpecimenGroupCmd.apply _)
+  )((studyId, name, description, units, anatomicalSourceType, preservationType,
+    preservationTemperatureType, specimenType) =>
+    AddSpecimenGroupCmd(studyId, name, description, units, anatomicalSourceType, preservationType,
+    preservationTemperatureType, specimenType))
 
   implicit val updateSpecimenGroupCmdReads: Reads[UpdateSpecimenGroupCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateSpecimenGroupCmd")) andKeep
+      (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "version").readNullable[Long](min[Long](0)) and
+      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String](minLength[String](2)) and
       (__ \ "units").read[String](minLength[String](2)) and
@@ -63,6 +69,15 @@ object SpecimenGroup {
       (__ \ "preservationType").read[PreservationType] and
       (__ \ "preservationTemperatureType").read[PreservationTemperatureType] and
       (__ \ "specimenType").read[SpecimenType]
-  )(UpdateSpecimenGroupCmd.apply _)
+  )((studyId, id, expectedVersion, name, description, units, anatomicalSourceType, preservationType,
+    preservationTemperatureType, specimenType) =>
+    UpdateSpecimenGroupCmd(studyId, id, expectedVersion, name, description, units, anatomicalSourceType,
+      preservationType, preservationTemperatureType, specimenType))
 
+  implicit val removeSpecimenGroupCmdReads: Reads[RemoveSpecimenGroupCmd] = (
+    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveSpecimenGroupCmd")) andKeep
+      (__ \ "studyId").read[String](minLength[String](2)) and
+      (__ \ "id").read[String](minLength[String](2)) and
+      (__ \ "expectedVersion").readNullable[Long](min[Long](0))
+  )((studyId, id, expectedVersion) => RemoveSpecimenGroupCmd(studyId, id, expectedVersion))
 }
