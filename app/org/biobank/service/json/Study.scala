@@ -7,12 +7,18 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
+object StudyId{
+    implicit val reader = Reads.of[String](minLength[String](2)).map( new StudyId(_) )
+    implicit val writer = Writes{ (studyId: StudyId) => JsString(studyId.id) }
+}
+
 object Study {
   import JsonUtils._
+  import StudyId._
 
   implicit val studyWrites = new Writes[Study] {
     def writes(study: Study) = Json.obj(
-      "id"             -> study.id.id,
+      "id"             -> study.id,
       "version"        -> study.version,
       "addedDate"      -> study.addedDate,
       "lastUpdateDate" -> study.lastUpdateDate,
@@ -22,40 +28,42 @@ object Study {
     )
   }
 
-  implicit val studyIdReads: Reads[StudyId] = (
-    (__ \ "id").read[String](minLength[String](2))
-  ) map StudyId
-
   implicit val addStudyCmdReads = (
-    (__ \ "name").read[String](minLength[String](2)) and
+    (__ \ "type").read[String](Reads.verifying[String](_ == "AddStudyCmd")) andKeep
+      (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String](minLength[String](2))
-  )(AddStudyCmd)
+  )((name, description) => AddStudyCmd(name, description))
 
   implicit val updateStudyCmdReads: Reads[UpdateStudyCmd] = (
-    (__ \ "id").read[String](minLength[String](2)) and
+    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateStudyCmd")) andKeep
+      (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "version").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String](minLength[String](2))
-  )(UpdateStudyCmd)
+  )((id, version, name, description) => UpdateStudyCmd(id, version, name, description))
 
   implicit val enableStudyCmdReads: Reads[EnableStudyCmd] = (
-    (__ \ "id").read[String](minLength[String](2)) and
+    (__ \ "type").read[String](Reads.verifying[String](_ == "EnableStudyCmd")) andKeep
+      (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )(EnableStudyCmd)
+  )((id, expectedVersion) => EnableStudyCmd(id, expectedVersion))
 
   implicit val disableStudyCmdReads: Reads[DisableStudyCmd] = (
-    (__ \ "id").read[String](minLength[String](2)) and
+    (__ \ "type").read[String](Reads.verifying[String](_ == "DisableStudyCmd")) andKeep
+      (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )(DisableStudyCmd)
+  )((id, expectedVersion) => DisableStudyCmd(id, expectedVersion))
 
   implicit val retireStudyCmdReads: Reads[RetireStudyCmd] = (
-    (__ \ "id").read[String](minLength[String](2)) and
+    (__ \ "type").read[String](Reads.verifying[String](_ == "RetireStudyCmd")) andKeep
+      (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )(RetireStudyCmd)
+  )((id, expectedVersion) => RetireStudyCmd(id, expectedVersion))
 
   implicit val unretireStudyCmdReads: Reads[UnretireStudyCmd] = (
-    (__ \ "id").read[String](minLength[String](2)) and
+    (__ \ "type").read[String](Reads.verifying[String](_ == "UnretireStudyCmd")) andKeep
+      (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )(UnretireStudyCmd)
+  )((id, expectedVersion) => UnretireStudyCmd(id, expectedVersion))
 
 }

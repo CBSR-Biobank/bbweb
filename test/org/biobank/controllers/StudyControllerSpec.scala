@@ -66,7 +66,10 @@ class StudyControllerSpec extends ControllerFixture {
       it("should add a study") {
         running(fakeApplication) {
           val study = factory.createDisabledStudy
-          val cmdJson = Json.obj("name" -> study.name, "description" -> study.description)
+          val cmdJson = Json.obj(
+            "type" -> "AddStudyCmd",
+            "name" -> study.name,
+            "description" -> study.description)
           val json = makeJsonRequest(POST, "/studies", json = cmdJson)
 
           (json \ "message").as[String] should include ("study added")
@@ -104,7 +107,10 @@ class StudyControllerSpec extends ControllerFixture {
           appRepositories.specimenGroupRepository.put(factory.createSpecimenGroup)
           appRepositories.collectionEventTypeRepository.put(factory.createCollectionEventType)
 
-          val cmdJson = Json.obj("id" -> study.id.id, "expectedVersion" -> Some(study.version))
+          val cmdJson = Json.obj(
+            "type" -> "EnableStudyCmd",
+            "id" -> study.id.id,
+            "expectedVersion" -> Some(study.version))
           val json = makeJsonRequest(POST, "/studies/enable", json = cmdJson)
 
           (json \ "message").as[String] should include ("study enabled")
@@ -121,7 +127,10 @@ class StudyControllerSpec extends ControllerFixture {
           val study = factory.createDisabledStudy
           appRepositories.studyRepository.put(study)
 
-          val cmdJson = Json.obj("id" -> study.id.id, "expectedVersion" -> Some(study.version))
+          val cmdJson = Json.obj(
+            "type" -> "EnableStudyCmd",
+            "id" -> study.id.id,
+            "expectedVersion" -> Some(study.version))
           val json = makeJsonRequest(POST, "/studies/enable", BAD_REQUEST, cmdJson)
 
           (json \ "message").as[String] should include ("no specimen groups")
@@ -129,7 +138,7 @@ class StudyControllerSpec extends ControllerFixture {
       }
     }
 
-    describe("POST /studies/enable") {
+    describe("POST /studies/disable") {
       it("should disable a study") {
         running(fakeApplication) {
 
@@ -138,7 +147,10 @@ class StudyControllerSpec extends ControllerFixture {
           val study = factory.createDisabledStudy.enable(Some(0), org.joda.time.DateTime.now, 1, 1) | fail
           appRepositories.studyRepository.put(study)
 
-          val cmdJson = Json.obj("id" -> study.id.id, "expectedVersion" -> Some(study.version))
+          val cmdJson = Json.obj(
+            "type" -> "DisableStudyCmd",
+            "id" -> study.id.id,
+            "expectedVersion" -> Some(study.version))
           val json = makeJsonRequest(POST, "/studies/disable", json = cmdJson)
 
           (json \ "message").as[String] should include ("study disabled")
@@ -155,7 +167,10 @@ class StudyControllerSpec extends ControllerFixture {
           val study = factory.createDisabledStudy
           appRepositories.studyRepository.put(study)
 
-          val cmdJson = Json.obj("id" -> study.id.id, "expectedVersion" -> Some(study.version))
+          val cmdJson = Json.obj(
+            "type" -> "RetireStudyCmd",
+            "id" -> study.id.id,
+            "expectedVersion" -> Some(study.version))
           val json = makeJsonRequest(POST, "/studies/retire", json = cmdJson)
 
           (json \ "message").as[String] should include ("study retired")
@@ -172,7 +187,10 @@ class StudyControllerSpec extends ControllerFixture {
           val study = factory.createDisabledStudy.retire(Some(0), org.joda.time.DateTime.now) | fail
           appRepositories.studyRepository.put(study)
 
-          val cmdJson = Json.obj("id" -> study.id.id, "expectedVersion" -> Some(study.version))
+          val cmdJson = Json.obj(
+            "type" -> "UnretireStudyCmd",
+            "id" -> study.id.id,
+            "expectedVersion" -> Some(study.version))
           val json = makeJsonRequest(POST, "/studies/unretire", json = cmdJson)
 
           (json \ "message").as[String] should include ("study unretired")
