@@ -1,6 +1,7 @@
 package org.biobank.service.json
 
 import org.biobank.domain.study._
+import org.biobank.infrastructure._
 
 import org.scalatest.Matchers
 import play.api.libs.json._
@@ -23,7 +24,7 @@ object JsonHelper extends Matchers {
     }
   }
 
-  def compareObj(json: JsValue, specimenGroup: SpecimenGroup)  = {
+  def compareObj(json: JsValue, specimenGroup: SpecimenGroup) = {
     (json \ "studyId").as[String]                     should be (specimenGroup.studyId.id)
     (json \ "id").as[String]                          should be (specimenGroup.id.id)
     (json \ "version").as[Long]                       should be (specimenGroup.version)
@@ -38,6 +39,44 @@ object JsonHelper extends Matchers {
     ((json \ "addedDate").as[DateTime] to specimenGroup.addedDate).millis should be < 1000L
     (json \ "lastUpdateDate").as[Option[DateTime]] map { dateTime =>
       (dateTime to specimenGroup.lastUpdateDate.get).millis should be < 1000L
+    }
+  }
+
+  def compareSgData(json: JsValue, specimenGroupData: CollectionEventTypeSpecimenGroupData) = {
+    (json \ "specimenGroupId").as[String] should be (specimenGroupData.specimenGroupId)
+    (json \ "maxCount").as[Int] should be (specimenGroupData.maxCount)
+    (json \ "amount").as[Option[BigDecimal]] should be (specimenGroupData.amount)
+  }
+
+  def compareAnnotData(json: JsValue, annotationTypeData: AnnotationTypeData) = {
+    (json \ "annotationTypeId").as[String] should be (annotationTypeData.annotationTypeId)
+    (json \ "required").as[Boolean] should be (annotationTypeData.required)
+  }
+
+  def compareObj(json: JsValue, ceventType: CollectionEventType)  = {
+    (json \ "studyId").as[String]             should be (ceventType.studyId.id)
+    (json \ "id").as[String]                  should be (ceventType.id.id)
+    (json \ "version").as[Long]               should be (ceventType.version)
+    (json \ "name").as[String]                should be (ceventType.name)
+    (json \ "description").as[Option[String]] should be (ceventType.description)
+    (json \ "recurring").as[Boolean]          should be (ceventType.recurring)
+
+    (json \ "specimenGroupData").as[List[JsObject]]  should have size ceventType.specimenGroupData.size
+    (json \ "annotationTypeData").as[List[JsObject]] should have size ceventType.annotationTypeData.size
+
+    (json \ "specimenGroupData")
+      .as[List[JsObject]].zip(ceventType.specimenGroupData).foreach { item =>
+      compareSgData(item._1, item._2)
+    }
+
+    (json \ "annotationTypeData")
+      .as[List[JsObject]].zip(ceventType.annotationTypeData).foreach { item =>
+      compareAnnotData(item._1, item._2)
+    }
+
+    ((json \ "addedDate").as[DateTime] to ceventType.addedDate).millis should be < 1000L
+    (json \ "lastUpdateDate").as[Option[DateTime]] map { dateTime =>
+      (dateTime to ceventType.lastUpdateDate.get).millis should be < 1000L
     }
   }
 

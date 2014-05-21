@@ -10,16 +10,12 @@ import org.biobank.domain.SpecimenType._
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
-import org.joda.time.format.ISODateTimeFormat
 
 object SpecimenGroup {
   import JsonUtils._
   import StudyId._
 
   implicit val specimenGroupWrites = new Writes[SpecimenGroup] {
-
-    val fmt = ISODateTimeFormat.dateTime();
-
     def writes(sg: SpecimenGroup) = Json.obj(
       "studyId"                     -> sg.studyId,
       "id"                          -> sg.id.id,
@@ -34,7 +30,6 @@ object SpecimenGroup {
       "preservationTemperatureType" -> sg.preservationTemperatureType.toString,
       "specimenType"                -> sg.specimenType.toString
     )
-
   }
 
   implicit val anatomicalSourceTypeReads = EnumUtils.enumReads(org.biobank.domain.AnatomicalSourceType)

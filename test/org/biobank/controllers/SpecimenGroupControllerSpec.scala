@@ -16,7 +16,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
   describe("Specimen Group REST API") {
     describe("GET /studies/sgroups") {
-      it("should list none"){
+      it("should list none") {
         running(fakeApplication) {
           val appRepositories = new AppRepositories
 
@@ -209,7 +209,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     }
 
     describe("DELETE /studies/sgroups") {
-      it("should not remove a specimen group from an enabled study", Tag("single")) {
+      it("should not remove a specimen group from an enabled study") {
         running(fakeApplication) {
           val appRepositories = new AppRepositories
 
