@@ -64,12 +64,12 @@ object SpecimenGroupController extends BbwebController {
     }
   }
 
-  def deleteSpecimenGroup(id: String) = doCommand { cmd: RemoveSpecimenGroupCmd =>
+  def removeSpecimenGroup(id: String) = doCommand { cmd: RemoveSpecimenGroupCmd =>
     val future = studyService.removeSpecimenGroup(cmd)(null)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group deleted: ${event.specimenGroupId}.") ))
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group removed: ${event.specimenGroupId}.") ))
       )
     }
   }

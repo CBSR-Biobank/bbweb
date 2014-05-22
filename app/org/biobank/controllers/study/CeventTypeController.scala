@@ -60,12 +60,12 @@ object CeventTypeController extends BbwebController  {
     }
   }
 
-  def deleteCollectionEventType(id: String) = doCommand { cmd: RemoveCollectionEventTypeCmd =>
+  def removeCollectionEventType(id: String) = doCommand { cmd: RemoveCollectionEventTypeCmd =>
     val future = studyService.removeCollectionEventType(cmd)(null)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"collection event type deleted: ${event.collectionEventTypeId}.") ))
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"collection event type removed: ${event.collectionEventTypeId}.") ))
       )
     }
   }

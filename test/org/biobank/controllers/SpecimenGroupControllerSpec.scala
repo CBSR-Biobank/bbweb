@@ -203,7 +203,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
             "expectedVersion" -> Some(sg.version))
           val json = makeJsonRequest(DELETE, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
 
-          (json \ "message").as[String] should include ("specimen group deleted")
+          (json \ "message").as[String] should include ("specimen group removed")
         }
       }
     }

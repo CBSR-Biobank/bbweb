@@ -82,7 +82,7 @@ object CollectionEventType {
     UpdateCollectionEventTypeCmd(studyId, id, expectedVersion, name, description, recurring, specimenGroupData, annotationTypeData))
 
   implicit val removeCollectionEventTypeCmdReads: Reads[RemoveCollectionEventTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateCollectionEventTypeCmd")) andKeep
+    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveCollectionEventTypeCmd")) andKeep
       (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
