@@ -1,5 +1,6 @@
 package org.biobank.controllers
 
+import org.biobank.domain.study.{ Study, SpecimenGroup }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.service.json.JsonHelper._
 
@@ -13,6 +14,117 @@ import org.joda.time.DateTime
 class CollectionEventTypeControllerSpec extends ControllerFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  def addOnNonDisabledStudy(
+    appRepositories: AppRepositories,
+    study: Study) {
+    appRepositories.studyRepository.put(study)
+
+    val sg = factory.createSpecimenGroup
+    appRepositories.specimenGroupRepository.put(sg)
+
+    val annotType = factory.createCollectionEventAnnotationType
+    appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
+
+    val cet = factory.createCollectionEventType.copy(
+      specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
+      annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
+
+    val cmdJson = Json.obj(
+      "type"                 -> "AddCollectionEventTypeCmd",
+      "studyId"              -> cet.studyId.id,
+      "name"                 -> cet.name,
+      "description"          -> cet.description,
+      "recurring"            -> cet.recurring,
+      "specimenGroupData"    -> Json.arr(
+        Json.obj(
+          "specimenGroupId"  -> cet.specimenGroupData(0).specimenGroupId,
+          "maxCount"         -> cet.specimenGroupData(0).maxCount,
+          "amount"           -> Some(cet.specimenGroupData(0).amount)
+        )),
+      "annotationTypeData"   -> Json.arr(
+        Json.obj(
+          "annotationTypeId" -> cet.annotationTypeData(0).annotationTypeId,
+          "required"         -> cet.annotationTypeData(0).required
+        ))
+    )
+
+    val json = makeJsonRequest(POST, "/studies/cetypes", BAD_REQUEST, cmdJson)
+
+    (json \ "message").as[String] should include ("study is not disabled")
+  }
+
+  def updateOnNonDisabledStudy(
+    appRepositories: AppRepositories,
+    study: Study) {
+    appRepositories.studyRepository.put(study)
+
+    val sg = factory.createSpecimenGroup
+    appRepositories.specimenGroupRepository.put(sg)
+
+    val annotType = factory.createCollectionEventAnnotationType
+    appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
+
+    val cet = factory.createCollectionEventType
+    appRepositories.collectionEventTypeRepository.put(cet)
+
+    val cet2 = factory.createCollectionEventType.copy(
+      specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
+      annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
+
+    val cmdJson = Json.obj(
+      "type"                 -> "UpdateCollectionEventTypeCmd",
+      "studyId"              -> cet.studyId.id,
+      "id"                   -> cet.id.id,
+      "expectedVersion"      -> Some(cet.version),
+      "name"                 -> cet2.name,
+      "description"          -> cet2.description,
+      "recurring"            -> cet2.recurring,
+      "specimenGroupData"    -> Json.arr(
+        Json.obj(
+          "specimenGroupId"  -> cet2.specimenGroupData(0).specimenGroupId,
+          "maxCount"         -> cet2.specimenGroupData(0).maxCount,
+          "amount"           -> Some(cet2.specimenGroupData(0).amount)
+        )),
+      "annotationTypeData"   -> Json.arr(
+        Json.obj(
+          "annotationTypeId" -> cet2.annotationTypeData(0).annotationTypeId,
+          "required"         -> cet2.annotationTypeData(0).required
+        ))
+    )
+
+    val json = makeJsonRequest(PUT, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
+
+    (json \ "message").as[String] should include ("study is not disabled")
+  }
+
+  def removeOnNonDisabledStudy(
+    appRepositories: AppRepositories,
+    study: Study) {
+    appRepositories.studyRepository.put(study)
+
+    val sg = factory.createSpecimenGroup
+    appRepositories.specimenGroupRepository.put(sg)
+
+    val annotType = factory.createCollectionEventAnnotationType
+    appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
+
+    val cet = factory.createCollectionEventType.copy(
+      specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
+      annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
+    appRepositories.collectionEventTypeRepository.put(cet)
+
+    val cmdJson = Json.obj(
+      "type"            -> "RemoveCollectionEventTypeCmd",
+      "studyId"         -> cet.studyId.id,
+      "id"              -> cet.id.id,
+      "expectedVersion" -> Some(cet.version)
+    )
+
+    val json = makeJsonRequest(DELETE, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
+
+    (json \ "message").as[String] should include ("study is not disabled")
+  }
 
   describe("Collection Event Type REST API") {
     describe("GET /studies/cetypes") {
@@ -75,7 +187,7 @@ class CollectionEventTypeControllerSpec extends ControllerFixture {
           val jsonList = json.as[List[JsObject]]
 
           jsonList should have size cetypes.size
-          (jsonList zip cetypes).map { item => compareObj(item._1, item._2) }
+            (jsonList zip cetypes).map { item => compareObj(item._1, item._2) }
         }
       }
     }
@@ -127,43 +239,19 @@ class CollectionEventTypeControllerSpec extends ControllerFixture {
     describe("POST /studies/cetypes") {
       it("should not add a collection event type to an enabled study") {
         running(fakeApplication) {
-          val appRepositories = new AppRepositories
+          addOnNonDisabledStudy(
+            new AppRepositories,
+            factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+        }
+      }
+    }
 
-          val study = factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail
-          appRepositories.studyRepository.put(study)
-
-          val sg = factory.createSpecimenGroup
-          appRepositories.specimenGroupRepository.put(sg)
-
-          val annotType = factory.createCollectionEventAnnotationType
-          appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
-
-          val cet = factory.createCollectionEventType.copy(
-            specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
-            annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
-
-          val cmdJson = Json.obj(
-            "type"                 -> "AddCollectionEventTypeCmd",
-            "studyId"              -> cet.studyId.id,
-            "name"                 -> cet.name,
-            "description"          -> cet.description,
-            "recurring"            -> cet.recurring,
-            "specimenGroupData"    -> Json.arr(
-              Json.obj(
-                "specimenGroupId"  -> cet.specimenGroupData(0).specimenGroupId,
-                "maxCount"         -> cet.specimenGroupData(0).maxCount,
-                "amount"           -> Some(cet.specimenGroupData(0).amount)
-              )),
-            "annotationTypeData"   -> Json.arr(
-              Json.obj(
-                "annotationTypeId" -> cet.annotationTypeData(0).annotationTypeId,
-                "required"         -> cet.annotationTypeData(0).required
-              ))
-          )
-
-          val json = makeJsonRequest(POST, "/studies/cetypes", BAD_REQUEST, cmdJson)
-
-          (json \ "message").as[String] should include ("study is not disabled")
+    describe("POST /studies/cetypes") {
+      it("should not add a collection event type to an retired study") {
+        running(fakeApplication) {
+          addOnNonDisabledStudy(
+            new AppRepositories,
+            factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
         }
       }
     }
@@ -220,48 +308,19 @@ class CollectionEventTypeControllerSpec extends ControllerFixture {
     describe("PUT /studies/cetypes") {
       it("should not update a collection event type on an enabled study") {
         running(fakeApplication) {
-          val appRepositories = new AppRepositories
+          updateOnNonDisabledStudy(
+            new AppRepositories,
+            factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+        }
+      }
+    }
 
-          val study = factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail
-          appRepositories.studyRepository.put(study)
-
-          val sg = factory.createSpecimenGroup
-          appRepositories.specimenGroupRepository.put(sg)
-
-          val annotType = factory.createCollectionEventAnnotationType
-          appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
-
-          val cet = factory.createCollectionEventType
-          appRepositories.collectionEventTypeRepository.put(cet)
-
-          val cet2 = factory.createCollectionEventType.copy(
-            specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
-            annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
-
-          val cmdJson = Json.obj(
-            "type"                 -> "UpdateCollectionEventTypeCmd",
-            "studyId"              -> cet.studyId.id,
-            "id"                   -> cet.id.id,
-            "expectedVersion"      -> Some(cet.version),
-            "name"                 -> cet2.name,
-            "description"          -> cet2.description,
-            "recurring"            -> cet2.recurring,
-            "specimenGroupData"    -> Json.arr(
-              Json.obj(
-                "specimenGroupId"  -> cet2.specimenGroupData(0).specimenGroupId,
-                "maxCount"         -> cet2.specimenGroupData(0).maxCount,
-                "amount"           -> Some(cet2.specimenGroupData(0).amount)
-              )),
-            "annotationTypeData"   -> Json.arr(
-              Json.obj(
-                "annotationTypeId" -> cet2.annotationTypeData(0).annotationTypeId,
-                "required"         -> cet2.annotationTypeData(0).required
-              ))
-          )
-
-          val json = makeJsonRequest(PUT, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
-
-          (json \ "message").as[String] should include ("study is not disabled")
+    describe("PUT /studies/cetypes") {
+      it("should not update a collection event type on an retired study") {
+        running(fakeApplication) {
+          updateOnNonDisabledStudy(
+            new AppRepositories,
+            factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
         }
       }
     }
@@ -300,34 +359,21 @@ class CollectionEventTypeControllerSpec extends ControllerFixture {
     }
 
     describe("DELETE /studies/cetypes") {
-      it("should not remove a collection event type on an enabled study", Tag("single")) {
+      it("should not remove a collection event type on an enabled study") {
         running(fakeApplication) {
-          val appRepositories = new AppRepositories
+          removeOnNonDisabledStudy(
+            new AppRepositories,
+            factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+        }
+      }
+    }
 
-          val study = factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail
-          appRepositories.studyRepository.put(study)
-
-          val sg = factory.createSpecimenGroup
-          appRepositories.specimenGroupRepository.put(sg)
-
-          val annotType = factory.createCollectionEventAnnotationType
-          appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
-
-          val cet = factory.createCollectionEventType.copy(
-            specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
-            annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
-          appRepositories.collectionEventTypeRepository.put(cet)
-
-          val cmdJson = Json.obj(
-            "type"            -> "RemoveCollectionEventTypeCmd",
-            "studyId"         -> cet.studyId.id,
-            "id"              -> cet.id.id,
-            "expectedVersion" -> Some(cet.version)
-          )
-
-          val json = makeJsonRequest(DELETE, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
-
-          (json \ "message").as[String] should include ("study is not disabled")
+    describe("DELETE /studies/cetypes") {
+      it("should not remove a collection event type on an retired study") {
+        running(fakeApplication) {
+          removeOnNonDisabledStudy(
+            new AppRepositories,
+            factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
         }
       }
     }
