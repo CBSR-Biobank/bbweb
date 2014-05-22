@@ -64,6 +64,10 @@ trait ControllerFixture
       sys.error("Bbweb plugin is not registered")
     }
 
+    val collectionEventAnnotationTypeRepository = plugin.map(_.collectionEventAnnotationTypeRepository).getOrElse {
+      sys.error("Bbweb plugin is not registered")
+    }
+
   }
 
 }

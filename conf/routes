@@ -23,11 +23,11 @@ DELETE  /studies/sgroups/:id        org.biobank.controllers.study.SpecimenGroupC
 
 # collection event types
 GET     /studies/cetypes              org.biobank.controllers.study.CeventTypeController.list
-#POST    /studies/cetype               org.biobank.controllers.study.CeventTypeController.addCeventType
-#GET     /studies/cetype/update/:studyId/:studyName/:cetId    org.biobank.controllers.study.CeventTypeController.updateCeventType(studyId, studyName, cetId)
-#POST    /studies/cetype/update                               org.biobank.controllers.study.CeventTypeController.updateCeventTypeSubmit
-#GET     /studies/cetype/remove/:studyId/:studyName/:cetId    org.biobank.controllers.study.CeventTypeController.removeCeventType(studyId, studyName, cetId)
-#GET     /studies/cetype/remove                               org.biobank.controllers.study.CeventTypeController.removeCeventTypeSubmit
+POST    /studies/cetypes               org.biobank.controllers.study.CeventTypeController.addCollectionEventType
+#GET     /studies/cetypes/update/:studyId/:studyName/:cetId    org.biobank.controllers.study.CeventTypeController.updateCollectionEventType(studyId, studyName, cetId)
+#POST    /studies/cetypes/update                               org.biobank.controllers.study.CeventTypeController.updateCollectionEventTypeSubmit
+#GET     /studies/cetypes/remove/:studyId/:studyName/:cetId    org.biobank.controllers.study.CeventTypeController.removeCollectionEventType(studyId, studyName, cetId)
+#GET     /studies/cetypes/remove                               org.biobank.controllers.study.CeventTypeController.removeCollectionEventTypeSubmit
 
 # study
 GET     /studies/:id                org.biobank.controllers.study.StudyController.readStudy(id)

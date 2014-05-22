@@ -45,7 +45,7 @@ object CeventTypeController extends BbwebController  {
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group added: ${event.name}.") ))
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"collection event type added: ${event.name}.") ))
       )
     }
   }
@@ -55,7 +55,7 @@ object CeventTypeController extends BbwebController  {
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group updated: ${event.name}.") ))
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"collection event type updated: ${event.name}.") ))
       )
     }
   }
@@ -65,7 +65,7 @@ object CeventTypeController extends BbwebController  {
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group deleted: ${event.collectionEventTypeId}.") ))
+        event => Ok(Json.obj("status" ->"OK", "message" -> (s"collection event type deleted: ${event.collectionEventTypeId}.") ))
       )
     }
   }
