@@ -16,7 +16,7 @@ object Study {
   import JsonUtils._
   import StudyId._
 
-  implicit val studyWrites = Writes[Study] {
+  implicit val studyWrites = new Writes[Study] {
     def writes(study: Study) = Json.obj(
       "id"             -> study.id,
       "version"        -> study.version,

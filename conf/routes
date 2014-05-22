@@ -36,18 +36,18 @@ DELETE  /studies/ceannottype/:id       org.biobank.controllers.study.CeventAnnot
 # participant annotation types
 GET     /studies/pannottype            org.biobank.controllers.study.ParticipantAnnotTypeController.list
 POST    /studies/pannottype            org.biobank.controllers.study.ParticipantAnnotTypeController.addAnnotationType
+PUT     /studies/pannottype/:id        org.biobank.controllers.study.ParticipantAnnotTypeController.updateAnnotationType(id)
+DELETE  /studies/pannottype/:id        org.biobank.controllers.study.ParticipantAnnotTypeController.removeAnnotationType(id)
+
+# specimenlink annotation types
+GET     /studies/slannottype           org.biobank.controllers.study.SpecimenLinkAnnotTypeController.list
+POST    /studies/slannottype           org.biobank.controllers.study.SpecimenLinkAnnotTypeController.addAnnotationType
+PUT     /studies/slannottype/:id       org.biobank.controllers.study.SpecimenLinkAnnotTypeController.updateAnnotationType(id)
+DELETE  /studies/slannottype/:id       org.biobank.controllers.study.SpecimenLinkAnnotTypeController.removeAnnotationType(id)
 
 # study
 GET     /studies/:id                   org.biobank.controllers.study.StudyController.readStudy(id)
 PUT     /studies/:id                   org.biobank.controllers.study.StudyController.updateStudy(id)
-
-## specimenlink annotation types
-#GET     /studies/spclink/annot/add/:studyId/:studyName                 org.biobank.controllers.study.SpecimenLinkAnnotTypeController.addAnnotationType(studyId, studyName)
-#POST    /studies/spclink/annot/add                                     org.biobank.controllers.study.SpecimenLinkAnnotTypeController.addAnnotationTypeSubmit
-#GET     /studies/spclink/annot/update/:studyId/:studyName/:annotId     org.biobank.controllers.study.SpecimenLinkAnnotTypeController.updateAnnotationType(studyId, studyName, annotId)
-#POST    /studies/spclink/annot/update                                  org.biobank.controllers.study.SpecimenLinkAnnotTypeController.updateAnnotationTypeSubmit
-#GET     /studies/spclink/annot/remove/:studyId/:studyName/:annotId     org.biobank.controllers.study.SpecimenLinkAnnotTypeController.removeAnnotationType(studyId, studyName, annotId)
-#POST    /studies/spclink/annot/remove                                  org.biobank.controllers.study.SpecimenLinkAnnotTypeController.removeAnnotationTypeSubmit
 
 # user
 GET     /user/profile               org.biobank.controllers.UserController.profile
