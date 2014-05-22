@@ -43,7 +43,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
         'required  (required)
       )
 
-      (annotType.addedDate to DateTime.now).millis should be < 100L
+      (annotType.addedDate to DateTime.now).millis should be < 200L
       annotType.lastUpdateDate should be (None)
     }
 
@@ -75,7 +75,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
 
       annotType2.addedDate should be (annotType.addedDate)
       val updateDate = annotType2.lastUpdateDate | fail
-      (updateDate to DateTime.now).millis should be < 100L
+      (updateDate to DateTime.now).millis should be < 200L
     }
 
   }

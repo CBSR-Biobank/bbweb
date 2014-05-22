@@ -11,7 +11,7 @@ import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 
-class CollectionEventTypeControllerSpec extends ControllerFixture {
+class CeventTypeControllerSpec extends ControllerFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
 

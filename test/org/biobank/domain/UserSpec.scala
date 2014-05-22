@@ -50,7 +50,7 @@ class UserSpec extends DomainSpec {
           'avatarUrl (avatarUrl)
         )
 
-        (user.addedDate to DateTime.now).millis should be < 100L
+        (user.addedDate to DateTime.now).millis should be < 200L
         user.lastUpdateDate should be (None)
       }
     }
@@ -63,21 +63,21 @@ class UserSpec extends DomainSpec {
       activeUser.version should be(user.version + 1)
       activeUser.addedDate should be (user.addedDate)
       var updateDate = activeUser.lastUpdateDate | fail
-        (updateDate to DateTime.now).millis should be < 100L
+        (updateDate to DateTime.now).millis should be < 200L
 
       val lockedUser = activeUser.lock(activeUser.versionOption) | fail
       lockedUser shouldBe a[LockedUser]
       lockedUser.version should be(activeUser.version + 1)
       lockedUser.addedDate should be (user.addedDate)
       updateDate = lockedUser.lastUpdateDate | fail
-        (updateDate to DateTime.now).millis should be < 100L
+        (updateDate to DateTime.now).millis should be < 200L
 
       val unlockedUser = lockedUser.unlock(lockedUser.versionOption) | fail
       unlockedUser shouldBe a[ActiveUser]
       unlockedUser.version should be(lockedUser.version + 1)
       unlockedUser.addedDate should be (user.addedDate)
       updateDate = unlockedUser.lastUpdateDate | fail
-        (updateDate to DateTime.now).millis should be < 100L
+        (updateDate to DateTime.now).millis should be < 200L
     }
   }
 
@@ -110,7 +110,7 @@ class UserSpec extends DomainSpec {
 
         user2.addedDate should be (user.addedDate)
         val updateDate = user2.lastUpdateDate | fail
-          (updateDate to DateTime.now).millis should be < 100L
+          (updateDate to DateTime.now).millis should be < 200L
       }
     }
 

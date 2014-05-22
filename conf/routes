@@ -28,10 +28,10 @@ PUT     /studies/cetypes/:id           org.biobank.controllers.study.CeventTypeC
 DELETE  /studies/cetypes/:id           org.biobank.controllers.study.CeventTypeController.removeCollectionEventType(id)
 
 ## collection event annotation types
-GET     /studies/ceventannot           org.biobank.controllers.study.CeventAnnotTypeController.list
-POST    /studies/ceventannot           org.biobank.controllers.study.CeventAnnotTypeController.addCollectionEventAnnotationType
-PUT     /studies/ceventannot/:id       org.biobank.controllers.study.CeventAnnotTypeController.updateCollectionEventAnnotationType(id)
-DELETE  /studies/ceventannot/:id       org.biobank.controllers.study.CeventAnnotTypeController.removeCollectionEventAnnotationType(id)
+GET     /studies/ceannottype           org.biobank.controllers.study.CeventAnnotTypeController.list
+POST    /studies/ceannottype           org.biobank.controllers.study.CeventAnnotTypeController.addCollectionEventAnnotationType
+PUT     /studies/ceannottype/:id       org.biobank.controllers.study.CeventAnnotTypeController.updateCollectionEventAnnotationType(id)
+DELETE  /studies/ceannottype/:id       org.biobank.controllers.study.CeventAnnotTypeController.removeCollectionEventAnnotationType(id)
 
 # study
 GET     /studies/:id                   org.biobank.controllers.study.StudyController.readStudy(id)
