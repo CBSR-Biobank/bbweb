@@ -3,10 +3,6 @@ package org.biobank.service.json
 import org.biobank.infrastructure._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.domain.AnatomicalSourceType._
-import org.biobank.domain.PreservationType._
-import org.biobank.domain.PreservationTemperatureType._
-import org.biobank.domain.SpecimenType._
 
 import play.api.libs.json._
 import play.api.libs.json.Reads._
