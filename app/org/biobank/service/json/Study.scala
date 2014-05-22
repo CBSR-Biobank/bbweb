@@ -8,15 +8,15 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
 object StudyId{
-    implicit val reader = (__ \ "id").read[String](minLength[String](2)).map( new StudyId(_) )
-    implicit val writer = Writes{ (studyId: StudyId) => JsString(studyId.id) }
+    implicit val studyIdReader = (__ \ "id").read[String](minLength[String](2)).map( new StudyId(_) )
+    implicit val studyIdWriter = Writes{ (studyId: StudyId) => JsString(studyId.id) }
 }
 
 object Study {
   import JsonUtils._
   import StudyId._
 
-  implicit val studyWrites = new Writes[Study] {
+  implicit val studyWrites = Writes[Study] {
     def writes(study: Study) = Json.obj(
       "id"             -> study.id,
       "version"        -> study.version,

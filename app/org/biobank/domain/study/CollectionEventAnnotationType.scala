@@ -4,7 +4,7 @@ import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
 import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
 import org.biobank.domain.AnnotationValueType._
 
-import com.github.nscala_time.time.Imports._
+import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
 

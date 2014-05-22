@@ -173,7 +173,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
           val annotType = factory.createCollectionEventAnnotationType
           val json = makeJsonRequest(POST, "/studies/ceannottype", json = annotTypeToAddCmdJson(annotType))
-          (json \ "message").as[String] should include ("collection event annotation type added")
+          (json \ "message").as[String] should include ("annotation type added")
         }
       }
     }
@@ -218,7 +218,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
             s"/studies/ceannottype/${annotType.id.id}",
             json = annotTypeToUpdateCmdJson(annotType2))
 
-          (json \ "message").as[String] should include ("collection event annotation type updated")
+          (json \ "message").as[String] should include ("annotation type updated")
         }
       }
     }
@@ -259,7 +259,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
             s"/studies/ceannottype/${annotType.id.id}",
             json = annotTypeToRemoveCmdJson(annotType))
 
-          (json \ "message").as[String] should include ("collection event annotation type removed")
+          (json \ "message").as[String] should include ("annotation type removed")
         }
       }
     }

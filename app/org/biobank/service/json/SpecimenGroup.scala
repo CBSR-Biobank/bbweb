@@ -10,32 +10,35 @@ import org.biobank.domain.SpecimenType._
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
+import org.joda.time.DateTime
+import scala.collection.immutable.Map
 
 object SpecimenGroup {
   import JsonUtils._
+  import EnumUtils._
   import StudyId._
 
-  implicit val specimenGroupWrites = new Writes[SpecimenGroup] {
-    def writes(sg: SpecimenGroup) = Json.obj(
-      "studyId"                     -> sg.studyId,
-      "id"                          -> sg.id.id,
-      "version"                     -> sg.version,
-      "addedDate"                   -> sg.addedDate,
-      "lastUpdateDate"              -> sg.lastUpdateDate,
-      "name"                        -> sg.name,
-      "description"                 -> sg.description,
-      "units"                       -> sg.units,
-      "anatomicalSourceType"        -> sg.anatomicalSourceType.toString,
-      "preservationType"            -> sg.preservationType.toString,
-      "preservationTemperatureType" -> sg.preservationTemperatureType.toString,
-      "specimenType"                -> sg.specimenType.toString
-    )
-  }
+  implicit val specimenGroupIdWrite = Writes{ (id: SpecimenGroupId) => JsString(id.id) }
 
   implicit val anatomicalSourceTypeReads = EnumUtils.enumReads(org.biobank.domain.AnatomicalSourceType)
   implicit val preservationTypeReads = EnumUtils.enumReads(org.biobank.domain.PreservationType)
   implicit val preservationTemperatureTypeReads = EnumUtils.enumReads(org.biobank.domain.PreservationTemperatureType)
   implicit val specimenTypeReads = EnumUtils.enumReads(org.biobank.domain.SpecimenType)
+
+  implicit val collectionEventTypeWrites: Writes[SpecimenGroup] = (
+    (__ \ "studyId").write[StudyId] and
+      (__ \ "id").write[SpecimenGroupId] and
+      (__ \ "version").write[Long] and
+      (__ \ "addedDate").write[DateTime] and
+      (__ \ "lastUpdateDate").write[Option[DateTime]] and
+      (__ \ "name").write[String] and
+      (__ \ "description").write[Option[String]] and
+      (__ \ "units").write[String] and
+      (__ \ "anatomicalSourceType").write[AnatomicalSourceType] and
+      (__ \ "preservationType").write[PreservationType] and
+      (__ \ "preservationTemperatureType").write[PreservationTemperatureType] and
+      (__ \ "specimenType").write[SpecimenType]
+  )(unlift(org.biobank.domain.study.SpecimenGroup.unapply))
 
   implicit val addSpecimenGroupCmdReads: Reads[AddSpecimenGroupCmd] = (
     (__ \ "type").read[String](Reads.verifying[String](_ == "AddSpecimenGroupCmd")) andKeep

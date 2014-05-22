@@ -80,7 +80,7 @@ object JsonHelper extends Matchers {
     }
   }
 
-  def compareObj(json: JsValue, annotType: CollectionEventAnnotationType)  = {
+  def compareObj(json: JsValue, annotType: StudyAnnotationType)  = {
     (json \ "studyId").as[String]             should be (annotType.studyId.id)
     (json \ "id").as[String]                  should be (annotType.id.id)
     (json \ "version").as[Long]               should be (annotType.version)
@@ -88,6 +88,24 @@ object JsonHelper extends Matchers {
     (json \ "description").as[Option[String]] should be (annotType.description)
     (json \ "valueType").as[String]           should be (annotType.valueType.toString)
     (json \ "maxValueCount").as[Option[Int]]  should be (annotType.maxValueCount)
+
+    (json \ "options").as[Option[Map[String, String]]] should be (annotType.options)
+
+    ((json \ "addedDate").as[DateTime] to annotType.addedDate).millis should be < 1000L
+    (json \ "lastUpdateDate").as[Option[DateTime]] map { dateTime =>
+      (dateTime to annotType.lastUpdateDate.get).millis should be < 1000L
+    }
+  }
+
+  def compareObj(json: JsValue, annotType: ParticipantAnnotationType)  = {
+    (json \ "studyId").as[String]             should be (annotType.studyId.id)
+    (json \ "id").as[String]                  should be (annotType.id.id)
+    (json \ "version").as[Long]               should be (annotType.version)
+    (json \ "name").as[String]                should be (annotType.name)
+    (json \ "description").as[Option[String]] should be (annotType.description)
+    (json \ "valueType").as[String]           should be (annotType.valueType.toString)
+    (json \ "maxValueCount").as[Option[Int]]  should be (annotType.maxValueCount)
+    (json \ "required").as[Boolean]           should be (annotType.required)
 
     (json \ "options").as[Option[Map[String, String]]] should be (annotType.options)
 

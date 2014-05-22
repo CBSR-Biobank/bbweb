@@ -12,13 +12,13 @@ import play.api.libs.functional.syntax._
 import org.joda.time.DateTime
 import scala.collection.immutable.Map
 
-object CollectionEventAnnotationType {
+object SpecimenLinkAnnotationType {
   import JsonUtils._
   import EnumUtils._
   import StudyId._
   import StudyAnnotationType._
 
-  implicit val collectionEventAnnotationTypeWrites: Writes[CollectionEventAnnotationType] = (
+  implicit val specimenLinkAnnotationTypeWrites: Writes[SpecimenLinkAnnotationType] = (
       (__ \ "studyId").write[StudyId] and
       (__ \ "id").write[AnnotationTypeId] and
       (__ \ "version").write[Long] and
@@ -29,10 +29,10 @@ object CollectionEventAnnotationType {
       (__ \ "valueType").write[AnnotationValueType] and
       (__ \ "maxValueCount").write[Option[Int]] and
       (__ \ "options").write[Option[Map[String, String]]]
-  )(unlift(org.biobank.domain.study.CollectionEventAnnotationType.unapply))
+  )(unlift(org.biobank.domain.study.SpecimenLinkAnnotationType.unapply))
 
-  implicit val addCollectionEventAnnotationTypeCmdReads: Reads[AddCollectionEventAnnotationTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "AddCollectionEventAnnotationTypeCmd")) andKeep
+  implicit val addSpecimenLinkAnnotationTypeCmdReads: Reads[AddSpecimenLinkAnnotationTypeCmd] = (
+    (__ \ "type").read[String](Reads.verifying[String](_ == "AddSpecimenLinkAnnotationTypeCmd")) andKeep
       (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String](minLength[String](2)) and
@@ -40,10 +40,10 @@ object CollectionEventAnnotationType {
       (__ \ "maxValueCount").readNullable[Int] and
       (__ \ "options").readNullable[Map[String, String]]
   )((studyId, name, description, valueType, maxValueCount, options) =>
-    AddCollectionEventAnnotationTypeCmd(studyId, name, description, valueType, maxValueCount, options))
+    AddSpecimenLinkAnnotationTypeCmd(studyId, name, description, valueType, maxValueCount, options))
 
-  implicit val updateCollectionEventAnnotationTypeCmdReads: Reads[UpdateCollectionEventAnnotationTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateCollectionEventAnnotationTypeCmd")) andKeep
+  implicit val updateSpecimenLinkAnnotationTypeCmdReads: Reads[UpdateSpecimenLinkAnnotationTypeCmd] = (
+    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateSpecimenLinkAnnotationTypeCmd")) andKeep
       (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
@@ -53,12 +53,12 @@ object CollectionEventAnnotationType {
       (__ \ "maxValueCount").readNullable[Int] and
       (__ \ "options").readNullable[Map[String, String]]
   )((studyId, id, expectedVersion, name, description, valueType, maxValueCount, options) =>
-    UpdateCollectionEventAnnotationTypeCmd(studyId, id, expectedVersion, name, description, valueType, maxValueCount, options))
+    UpdateSpecimenLinkAnnotationTypeCmd(studyId, id, expectedVersion, name, description, valueType, maxValueCount, options))
 
-  implicit val removeCollectionEventAnnotationTypeCmdReads: Reads[RemoveCollectionEventAnnotationTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveCollectionEventAnnotationTypeCmd")) andKeep
+  implicit val removeSpecimenLinkAnnotationTypeCmdReads: Reads[RemoveSpecimenLinkAnnotationTypeCmd] = (
+    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveSpecimenLinkAnnotationTypeCmd")) andKeep
       (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )((studyId, id, expectedVersion) => RemoveCollectionEventAnnotationTypeCmd(studyId, id, expectedVersion))
+  )((studyId, id, expectedVersion) => RemoveSpecimenLinkAnnotationTypeCmd(studyId, id, expectedVersion))
 }

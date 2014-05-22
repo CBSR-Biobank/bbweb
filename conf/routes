@@ -29,22 +29,18 @@ DELETE  /studies/cetypes/:id           org.biobank.controllers.study.CeventTypeC
 
 ## collection event annotation types
 GET     /studies/ceannottype           org.biobank.controllers.study.CeventAnnotTypeController.list
-POST    /studies/ceannottype           org.biobank.controllers.study.CeventAnnotTypeController.addCollectionEventAnnotationType
-PUT     /studies/ceannottype/:id       org.biobank.controllers.study.CeventAnnotTypeController.updateCollectionEventAnnotationType(id)
-DELETE  /studies/ceannottype/:id       org.biobank.controllers.study.CeventAnnotTypeController.removeCollectionEventAnnotationType(id)
+POST    /studies/ceannottype           org.biobank.controllers.study.CeventAnnotTypeController.addAnnotationType
+PUT     /studies/ceannottype/:id       org.biobank.controllers.study.CeventAnnotTypeController.updateAnnotationType(id)
+DELETE  /studies/ceannottype/:id       org.biobank.controllers.study.CeventAnnotTypeController.removeAnnotationType(id)
+
+# participant annotation types
+GET     /studies/pannottype            org.biobank.controllers.study.ParticipantAnnotTypeController.list
+POST    /studies/pannottype            org.biobank.controllers.study.ParticipantAnnotTypeController.addAnnotationType
 
 # study
 GET     /studies/:id                   org.biobank.controllers.study.StudyController.readStudy(id)
 PUT     /studies/:id                   org.biobank.controllers.study.StudyController.updateStudy(id)
 
-## participant annotation types
-#GET     /studies/participant/annot/add/:studyId/:studyName                 org.biobank.controllers.study.ParticipantAnnotTypeController.addAnnotationType(studyId, studyName)
-#POST    /studies/participant/annot/add                                     org.biobank.controllers.study.ParticipantAnnotTypeController.addAnnotationTypeSubmit
-#GET     /studies/participant/annot/update/:studyId/:studyName/:annotId     org.biobank.controllers.study.ParticipantAnnotTypeController.updateAnnotationType(studyId, studyName, annotId)
-#POST    /studies/participant/annot/update                                  org.biobank.controllers.study.ParticipantAnnotTypeController.updateAnnotationTypeSubmit
-#GET     /studies/participant/annot/remove/:studyId/:studyName/:annotId     org.biobank.controllers.study.ParticipantAnnotTypeController.removeAnnotationType(studyId, studyName, annotId)
-#POST    /studies/participant/annot/remove                                  org.biobank.controllers.study.ParticipantAnnotTypeController.removeAnnotationTypeSubmit
-#
 ## specimenlink annotation types
 #GET     /studies/spclink/annot/add/:studyId/:studyName                 org.biobank.controllers.study.SpecimenLinkAnnotTypeController.addAnnotationType(studyId, studyName)
 #POST    /studies/spclink/annot/add                                     org.biobank.controllers.study.SpecimenLinkAnnotTypeController.addAnnotationTypeSubmit

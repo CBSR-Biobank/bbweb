@@ -12,18 +12,18 @@ import scalaz.Scalaz._
   * annotation types on participants to store different types of data.
   */
 case class ParticipantAnnotationType private (
-   studyId: StudyId,
-   id: AnnotationTypeId,
-   version: Long,
+  studyId: StudyId,
+  id: AnnotationTypeId,
+  version: Long,
   addedDate: DateTime,
   lastUpdateDate: Option[DateTime],
-   name: String,
-   description: Option[String],
-   valueType: AnnotationValueType,
-   maxValueCount: Option[Int],
-   options: Option[Map[String, String]],
-   required: Boolean)
-  extends StudyAnnotationType {
+  name: String,
+  description: Option[String],
+  valueType: AnnotationValueType,
+  maxValueCount: Option[Int],
+  options: Option[Map[String, String]],
+  required: Boolean)
+    extends StudyAnnotationType {
 
   override def toString: String =
     s"""|ParticipantAnnotationTypex: {

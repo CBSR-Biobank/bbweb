@@ -7,46 +7,44 @@ import org.biobank.infrastructure.command.StudyCommands._
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
+import org.joda.time.DateTime
+import scala.collection.immutable.Map
 
 object CollectionEventType {
   import JsonUtils._
   import StudyId._
 
-  implicit val specimenGroupDataWrites = new Writes[CollectionEventTypeSpecimenGroupData] {
-    def writes(sgData: CollectionEventTypeSpecimenGroupData) = Json.obj(
-      "specimenGroupId" -> sgData.specimenGroupId,
-      "maxCount"        -> sgData.maxCount,
-      "amount"          -> sgData.amount
-    )
-  }
+  implicit val collectionEventTypeIdWrite = Writes{ (id: CollectionEventTypeId) => JsString(id.id) }
 
-  implicit val annotationTypeDataWrites = new Writes[CollectionEventTypeAnnotationTypeData] {
-    def writes(atData: CollectionEventTypeAnnotationTypeData) = Json.obj(
-      "annotationTypeId" -> atData.annotationTypeId,
-      "required" -> atData.required
-    )
-  }
+  implicit val specimenGroupDataWrites: Writes[CollectionEventTypeSpecimenGroupData] = (
+    (__ \ "specimenGroupId").write[String] and
+      (__ \ "maxCount").write[Int] and
+      (__ \ "amount").write[Option[BigDecimal]]
+  )(unlift(CollectionEventTypeSpecimenGroupData.unapply))
 
-  implicit val collectionEventTypeWrites = new Writes[CollectionEventType] {
-    def writes(cet: CollectionEventType) = Json.obj(
-      "studyId"            -> cet.studyId,
-      "id"                 -> cet.id.id,
-      "version"            -> cet.version,
-      "addedDate"          -> cet.addedDate,
-      "lastUpdateDate"     -> cet.lastUpdateDate,
-      "name"               -> cet.name,
-      "description"        -> cet.description,
-      "recurring"          -> cet.recurring,
-      "specimenGroupData"  -> cet.specimenGroupData,
-      "annotationTypeData" -> cet.annotationTypeData
-    )
-  }
+  implicit val annotationTypeDataWrites: Writes[CollectionEventTypeAnnotationTypeData] = (
+    (__ \ "annotationTypeId").write[String] and
+      (__ \ "required").write[Boolean]
+  )(unlift(CollectionEventTypeAnnotationTypeData.unapply))
+
+  implicit val collectionEventTypeWrites: Writes[CollectionEventType] = (
+    (__ \ "studyId").write[StudyId] and
+      (__ \ "id").write[CollectionEventTypeId] and
+      (__ \ "version").write[Long] and
+      (__ \ "addedDate").write[DateTime] and
+      (__ \ "lastUpdateDate").write[Option[DateTime]] and
+      (__ \ "name").write[String] and
+      (__ \ "description").write[Option[String]] and
+      (__ \ "recurring").write[Boolean] and
+      (__ \ "specimenGroupData").write[List[CollectionEventTypeSpecimenGroupData]] and
+      (__ \ "annotationTypeData").write[List[CollectionEventTypeAnnotationTypeData]]
+  )(unlift(org.biobank.domain.study.CollectionEventType.unapply))
 
   implicit val specimenGroupDataReads: Reads[CollectionEventTypeSpecimenGroupData]= (
     (__ \ "specimenGroupId").read[String](minLength[String](2)) and
       (__ \ "maxCount").read[Int] and
       (__ \ "amount").readNullable[BigDecimal]
-    )(CollectionEventTypeSpecimenGroupData)
+  )(CollectionEventTypeSpecimenGroupData)
 
   implicit val annotationTypeDataReads: Reads[CollectionEventTypeAnnotationTypeData] = (
     (__ \ "annotationTypeId").read[String](minLength[String](2)) and

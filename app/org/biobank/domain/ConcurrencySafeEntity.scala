@@ -1,7 +1,7 @@
 package org.biobank.domain
 
 import org.biobank.infrastructure._
-import com.github.nscala_time.time.Imports._
+import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
 
