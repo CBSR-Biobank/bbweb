@@ -4,6 +4,7 @@ import org.biobank.fixture._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
+  ContainerTypeId,
   DomainError,
   DomainValidation
 }
@@ -30,10 +31,10 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
       specimenLinkType.expectedOutputChange,
       specimenLinkType.inputCount,
       specimenLinkType.outputCount,
-      specimenLinkType.inputGroupId,
-      specimenLinkType.outputGroupId,
-      specimenLinkType.inputContainerTypeId,
-      specimenLinkType.outputContainerTypeId,
+      specimenLinkType.inputGroupId.id,
+      specimenLinkType.outputGroupId.id,
+      specimenLinkType.inputContainerTypeId.map(_.id),
+      specimenLinkType.outputContainerTypeId.map(_.id),
       specimenLinkType.annotationTypeData)
     val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenLinkTypeAddedEvent]]
       .futureValue
@@ -51,10 +52,10 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
       specimenLinkType.expectedOutputChange,
       specimenLinkType.inputCount,
       specimenLinkType.outputCount,
-      specimenLinkType.inputGroupId,
-      specimenLinkType.outputGroupId,
-      specimenLinkType.inputContainerTypeId,
-      specimenLinkType.outputContainerTypeId,
+      specimenLinkType.inputGroupId.id,
+      specimenLinkType.outputGroupId.id,
+      specimenLinkType.inputContainerTypeId.map(_.id),
+      specimenLinkType.outputContainerTypeId.map(_.id),
       specimenLinkType.annotationTypeData)
     val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenLinkTypeUpdatedEvent]]
       .futureValue

@@ -82,10 +82,10 @@ trait SpecimenLinkTypeProcessorComponent {
           cmd.expectedOutputChange,
           cmd.inputCount,
           cmd.outputCount,
-          cmd.inputGroupId,
-          cmd.outputGroupId,
-          cmd.inputContainerTypeId,
-          cmd.outputContainerTypeId,
+          SpecimenGroupId(cmd.inputGroupId),
+          SpecimenGroupId(cmd.outputGroupId),
+          cmd.inputContainerTypeId.map(ContainerTypeId(_)),
+          cmd.outputContainerTypeId.map(ContainerTypeId(_)),
           cmd.annotationTypeData)
         inputSpecimenGroup <- validSpecimenGroup(processingType, newItem.inputGroupId)
         outputSpecimenGroup <- validSpecimenGroup(processingType, newItem.outputGroupId)
@@ -123,10 +123,10 @@ trait SpecimenLinkTypeProcessorComponent {
           cmd.expectedOutputChange,
           cmd.inputCount,
           cmd.outputCount,
-          cmd.inputGroupId,
-          cmd.outputGroupId,
-          cmd.inputContainerTypeId,
-          cmd.outputContainerTypeId,
+          SpecimenGroupId(cmd.inputGroupId),
+          SpecimenGroupId(cmd.outputGroupId),
+          cmd.inputContainerTypeId.map(ContainerTypeId(_)),
+          cmd.outputContainerTypeId.map(ContainerTypeId(_)),
           cmd.annotationTypeData)
         inputSpecimenGroup <- validSpecimenGroup(processingType, newItem.inputGroupId)
         outputSpecimenGroup <- validSpecimenGroup(processingType, newItem.outputGroupId)

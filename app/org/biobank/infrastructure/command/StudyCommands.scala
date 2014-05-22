@@ -279,10 +279,10 @@ object StudyCommands {
     expectedOutputChange: BigDecimal,
     inputCount: Int,
     outputCount: Int,
-    inputGroupId: SpecimenGroupId,
-    outputGroupId: SpecimenGroupId,
-    inputContainerTypeId: Option[ContainerTypeId],
-    outputContainerTypeId: Option[ContainerTypeId],
+    inputGroupId: String,
+    outputGroupId: String,
+    inputContainerTypeId: Option[String],
+    outputContainerTypeId: Option[String],
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
       extends SpecimenLinkTypeCommand
       with HasProcessingTypeIdentity
@@ -295,10 +295,10 @@ object StudyCommands {
     expectedOutputChange: BigDecimal,
     inputCount: Int,
     outputCount: Int,
-    inputGroupId: SpecimenGroupId,
-    outputGroupId: SpecimenGroupId,
-    inputContainerTypeId: Option[ContainerTypeId],
-    outputContainerTypeId: Option[ContainerTypeId],
+    inputGroupId: String,
+    outputGroupId: String,
+    inputContainerTypeId: Option[String],
+    outputContainerTypeId: Option[String],
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
       extends SpecimenLinkTypeCommand
       with HasIdentity
