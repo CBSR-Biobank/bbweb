@@ -2,7 +2,7 @@ package org.biobank.controllers.study
 
 import org.biobank.controllers._
 import org.biobank.service._
-import org.biobank.service.json.StudyId._
+import org.biobank.service.json.Study._
 import org.biobank.service.json.SpecimenGroup._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain.study._

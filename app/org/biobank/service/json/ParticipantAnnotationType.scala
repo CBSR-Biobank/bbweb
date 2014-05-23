@@ -15,7 +15,7 @@ import scala.collection.immutable.Map
 object ParticipantAnnotationType {
   import JsonUtils._
   import EnumUtils._
-  import StudyId._
+  import Study._
   import StudyAnnotationType._
 
   implicit val participantAnnotationTypeWrites: Writes[ParticipantAnnotationType] = (

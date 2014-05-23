@@ -12,7 +12,7 @@ import scala.collection.immutable.Map
 
 object CollectionEventType {
   import JsonUtils._
-  import StudyId._
+  import Study._
 
   implicit val collectionEventTypeIdWrite = Writes{ (id: CollectionEventTypeId) => JsString(id.id) }
 

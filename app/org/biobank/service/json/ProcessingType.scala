@@ -14,8 +14,9 @@ import org.joda.time.DateTime
 import scala.collection.immutable.Map
 
 object ProcessingType {
-  import StudyId._
+  import Study._
 
+  implicit val processingTypeIdRead = (__ \ "id").read[String](minLength[String](2)).map( new ProcessingTypeId(_) )
   implicit val processingTypeIdWrite = Writes{ (id: ProcessingTypeId) => JsString(id.id) }
 
   implicit val processingTypeWrites: Writes[ProcessingType] = (

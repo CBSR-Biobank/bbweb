@@ -4,7 +4,7 @@ import org.biobank.controllers._
 import org.biobank.service._
 import org.biobank.infrastructure._
 import org.biobank.service.{ ServiceComponent, ServiceComponentImpl }
-import org.biobank.service.json.StudyId._
+import org.biobank.service.json.Study._
 import org.biobank.service.json.SpecimenLinkAnnotationType._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain._

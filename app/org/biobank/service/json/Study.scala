@@ -7,14 +7,11 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
-object StudyId{
-    implicit val studyIdReader = (__ \ "id").read[String](minLength[String](2)).map( new StudyId(_) )
-    implicit val studyIdWriter = Writes{ (studyId: StudyId) => JsString(studyId.id) }
-}
-
 object Study {
   import JsonUtils._
-  import StudyId._
+
+  implicit val studyIdReader = (__ \ "id").read[String](minLength[String](2)).map( new StudyId(_) )
+  implicit val studyIdWriter = Writes{ (studyId: StudyId) => JsString(studyId.id) }
 
   implicit val studyWrites = new Writes[Study] {
     def writes(study: Study) = Json.obj(

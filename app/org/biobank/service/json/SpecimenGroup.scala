@@ -16,7 +16,7 @@ import scala.collection.immutable.Map
 object SpecimenGroup {
   import JsonUtils._
   import EnumUtils._
-  import StudyId._
+  import Study._
 
   implicit val specimenGroupIdWrite = Writes{ (id: SpecimenGroupId) => JsString(id.id) }
 
