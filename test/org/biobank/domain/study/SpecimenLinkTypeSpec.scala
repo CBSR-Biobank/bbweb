@@ -34,8 +34,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
       validation should be ('success)
-      validation map { slt =>
-        slt should have (
+      validation map { slType =>
+        slType should have (
           'processingTypeId (processingType.id),
           'id (id),
           'expectedInputChange (expectedInputChange),
@@ -48,15 +48,15 @@ class SpecimenLinkTypeSpec extends DomainSpec {
           'outputContainerTypeId (None)
         )
 
-        slt.annotationTypeData should have length (0)
+        slType.annotationTypeData should have length (0)
 
-        (slt.addedDate to DateTime.now).millis should be < 100L
-        slt.lastUpdateDate should be (None)
+        (slType.addedDate to DateTime.now).millis should be < 100L
+        slType.lastUpdateDate should be (None)
       }
     }
 
     "be update" in {
-      val slt = factory.createSpecimenLinkType
+      val slType = factory.createSpecimenLinkType
 
       val processingType = factory.defaultProcessingType
       val inputSpecimenGroup = factory.createSpecimenGroup
@@ -69,16 +69,16 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
       val disabledStudy = factory.defaultDisabledStudy
 
-      val validation = slt.update(
-        slt.versionOption, org.joda.time.DateTime.now, expectedInputChange, expectedOutputChange,
+      val validation = slType.update(
+        slType.versionOption, org.joda.time.DateTime.now, expectedInputChange, expectedOutputChange,
         inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
       validation should be ('success)
-      validation map { slt2 =>
-        slt2 should have (
-          'processingTypeId (slt.processingTypeId),
-          'id (slt.id),
-          'version (slt.version + 1),
+      validation map { slType2 =>
+        slType2 should have (
+          'processingTypeId (slType.processingTypeId),
+          'id (slType.id),
+          'version (slType.version + 1),
           'expectedInputChange (expectedInputChange),
           'expectedOutputChange (expectedOutputChange),
           'inputCount (inputCount),
@@ -89,10 +89,10 @@ class SpecimenLinkTypeSpec extends DomainSpec {
           'outputContainerTypeId (None)
         )
 
-        slt.annotationTypeData should have length (0)
+        slType.annotationTypeData should have length (0)
 
-        slt2.addedDate should be (slt.addedDate)
-        val updateDate = slt2.lastUpdateDate | fail
+        slType2.addedDate should be (slType.addedDate)
+        val updateDate = slType2.lastUpdateDate | fail
 
         (updateDate to DateTime.now).millis should be < 100L
       }

@@ -197,7 +197,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val cet2 = cet.copy(version = cet.version - 1)
+      val cet2 = cet.copy(version = cet.version + 1)
 
       askUpdateCommand(cet2) { validation =>
         validation should be('failure)

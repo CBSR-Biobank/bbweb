@@ -1,5 +1,6 @@
 package org.biobank.service.json
 
+import org.biobank.domain.{ ConcurrencySafeEntity, IdentifiedDomainObject }
 import org.biobank.domain.study._
 import org.biobank.infrastructure._
 
@@ -11,23 +12,26 @@ import com.github.nscala_time.time.Imports._
 object JsonHelper extends Matchers {
   import org.biobank.service.json.JsonUtils._
 
-  def compareObj(json: JsValue, study: Study)  = {
-    (json \ "id").as[String]                     should be (study.id.id)
-    (json \ "version").as[Long]                  should be (study.version)
-    (json \ "name").as[String]                   should be (study.name)
-    (json \ "description").as[Option[String]]    should be (study.description)
-    (json \ "status").as[String]                 should be (study.status)
+  private def compareEntity[T <: IdentifiedDomainObject[_]](json: JsValue, entity: ConcurrencySafeEntity[T])  = {
+    (json \ "id").as[String]    should be (entity.id.toString)
+    (json \ "version").as[Long] should be (entity.version)
 
-    ((json \ "addedDate").as[DateTime] to study.addedDate).millis should be < 1000L
+    ((json \ "addedDate").as[DateTime] to entity.addedDate).millis should be < 1000L
     (json \ "lastUpdateDate").as[Option[DateTime]] map { dateTime =>
-      (dateTime to study.lastUpdateDate.get).millis should be < 1000L
+      (dateTime to entity.lastUpdateDate.get).millis should be < 1000L
     }
   }
 
+  def compareObj(json: JsValue, study: Study)  = {
+    compareEntity(json, study)
+    (json \ "name").as[String]                   should be (study.name)
+    (json \ "description").as[Option[String]]    should be (study.description)
+    (json \ "status").as[String]                 should be (study.status)
+  }
+
   def compareObj(json: JsValue, specimenGroup: SpecimenGroup) = {
+    compareEntity(json, specimenGroup)
     (json \ "studyId").as[String]                     should be (specimenGroup.studyId.id)
-    (json \ "id").as[String]                          should be (specimenGroup.id.id)
-    (json \ "version").as[Long]                       should be (specimenGroup.version)
     (json \ "name").as[String]                        should be (specimenGroup.name)
     (json \ "description").as[Option[String]]         should be (specimenGroup.description)
     (json \ "units").as[String]                       should be (specimenGroup.units)
@@ -35,11 +39,6 @@ object JsonHelper extends Matchers {
     (json \ "preservationType").as[String]            should be (specimenGroup.preservationType.toString)
     (json \ "preservationTemperatureType").as[String] should be (specimenGroup.preservationTemperatureType.toString)
     (json \ "specimenType").as[String]                should be (specimenGroup.specimenType.toString)
-
-    ((json \ "addedDate").as[DateTime] to specimenGroup.addedDate).millis should be < 1000L
-    (json \ "lastUpdateDate").as[Option[DateTime]] map { dateTime =>
-      (dateTime to specimenGroup.lastUpdateDate.get).millis should be < 1000L
-    }
   }
 
   def compareSgData(json: JsValue, specimenGroupData: CollectionEventTypeSpecimenGroupData) = {
@@ -54,9 +53,8 @@ object JsonHelper extends Matchers {
   }
 
   def compareObj(json: JsValue, ceventType: CollectionEventType)  = {
+    compareEntity(json, ceventType)
     (json \ "studyId").as[String]             should be (ceventType.studyId.id)
-    (json \ "id").as[String]                  should be (ceventType.id.id)
-    (json \ "version").as[Long]               should be (ceventType.version)
     (json \ "name").as[String]                should be (ceventType.name)
     (json \ "description").as[Option[String]] should be (ceventType.description)
     (json \ "recurring").as[Boolean]          should be (ceventType.recurring)
@@ -73,34 +71,22 @@ object JsonHelper extends Matchers {
       .as[List[JsObject]].zip(ceventType.annotationTypeData).foreach { item =>
       compareAnnotData(item._1, item._2)
     }
-
-    ((json \ "addedDate").as[DateTime] to ceventType.addedDate).millis should be < 1000L
-    (json \ "lastUpdateDate").as[Option[DateTime]] map { dateTime =>
-      (dateTime to ceventType.lastUpdateDate.get).millis should be < 1000L
-    }
   }
 
   def compareObj(json: JsValue, annotType: StudyAnnotationType)  = {
+    compareEntity(json, annotType)
     (json \ "studyId").as[String]             should be (annotType.studyId.id)
-    (json \ "id").as[String]                  should be (annotType.id.id)
-    (json \ "version").as[Long]               should be (annotType.version)
     (json \ "name").as[String]                should be (annotType.name)
     (json \ "description").as[Option[String]] should be (annotType.description)
     (json \ "valueType").as[String]           should be (annotType.valueType.toString)
     (json \ "maxValueCount").as[Option[Int]]  should be (annotType.maxValueCount)
 
     (json \ "options").as[Option[Map[String, String]]] should be (annotType.options)
-
-    ((json \ "addedDate").as[DateTime] to annotType.addedDate).millis should be < 1000L
-    (json \ "lastUpdateDate").as[Option[DateTime]] map { dateTime =>
-      (dateTime to annotType.lastUpdateDate.get).millis should be < 1000L
-    }
   }
 
   def compareObj(json: JsValue, annotType: ParticipantAnnotationType)  = {
+    compareEntity(json, annotType)
     (json \ "studyId").as[String]             should be (annotType.studyId.id)
-    (json \ "id").as[String]                  should be (annotType.id.id)
-    (json \ "version").as[Long]               should be (annotType.version)
     (json \ "name").as[String]                should be (annotType.name)
     (json \ "description").as[Option[String]] should be (annotType.description)
     (json \ "valueType").as[String]           should be (annotType.valueType.toString)
@@ -108,11 +94,35 @@ object JsonHelper extends Matchers {
     (json \ "required").as[Boolean]           should be (annotType.required)
 
     (json \ "options").as[Option[Map[String, String]]] should be (annotType.options)
+  }
 
-    ((json \ "addedDate").as[DateTime] to annotType.addedDate).millis should be < 1000L
-    (json \ "lastUpdateDate").as[Option[DateTime]] map { dateTime =>
-      (dateTime to annotType.lastUpdateDate.get).millis should be < 1000L
+  def compareObj(json: JsValue, processingType: ProcessingType)  = {
+    compareEntity(json, processingType)
+    (json \ "studyId").as[String]             should be (processingType.studyId.id)
+    (json \ "name").as[String]                should be (processingType.name)
+    (json \ "description").as[Option[String]] should be (processingType.description)
+    (json \ "enabled").as[Boolean]            should be (processingType.enabled)
+  }
+
+  def compareObj(json: JsValue, specimenLinkType: SpecimenLinkType)  = {
+    compareEntity(json, specimenLinkType)
+      (json \ "processingTypeId").as[String]              should be (specimenLinkType.processingTypeId.id)
+      (json \ "expectedInputChange").as[BigDecimal]       should be (specimenLinkType.expectedInputChange)
+      (json \ "expectedOutputChange").as[BigDecimal]      should be (specimenLinkType.expectedOutputChange)
+      (json \ "inputCount").as[Int]                       should be (specimenLinkType.inputCount)
+      (json \ "outputCount").as[Int]                      should be (specimenLinkType.outputCount)
+      (json \ "inputGroupId").as[String]                  should be (specimenLinkType.inputGroupId.id)
+      (json \ "outputGroupId").as[String]                 should be (specimenLinkType.outputGroupId.id)
+      (json \ "inputContainerTypeId").as[Option[String]]  should be (specimenLinkType.inputContainerTypeId.map(_.id))
+      (json \ "outputContainerTypeId").as[Option[String]] should be (specimenLinkType.outputContainerTypeId.map(_.id))
+
+    (json \ "annotationTypeData").as[List[JsObject]] should have size specimenLinkType.annotationTypeData.size
+
+    (json \ "annotationTypeData")
+      .as[List[JsObject]].zip(specimenLinkType.annotationTypeData).foreach { item =>
+      compareAnnotData(item._1, item._2)
     }
+
   }
 
 }

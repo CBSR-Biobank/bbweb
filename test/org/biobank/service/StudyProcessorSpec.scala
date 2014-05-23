@@ -169,7 +169,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
 
-      val study2 = study.copy(version = study.version -1)
+      val study2 = study.copy(version = study.version + 1)
 
       askUpdateCommand(study2) { validation =>
         validation should be ('failure)

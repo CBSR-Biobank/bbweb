@@ -46,16 +46,16 @@ PUT     /studies/slannottype/:id       org.biobank.controllers.study.SpecimenLin
 DELETE  /studies/slannottype/:id       org.biobank.controllers.study.SpecimenLinkAnnotTypeController.removeAnnotationType(id)
 
 # processing types
-GET     /studies/proctype              org.biobank.controllers.study.ProcessingTypeController.list
-POST    /studies/proctype              org.biobank.controllers.study.ProcessingTypeController.addProcessingType
-PUT     /studies/proctype/:id          org.biobank.controllers.study.ProcessingTypeController.updateProcessingType(id)
-DELETE  /studies/proctype/:id          org.biobank.controllers.study.ProcessingTypeController.removeProcessingType(id)
+GET     /studies/proctypes             org.biobank.controllers.study.ProcessingTypeController.list
+POST    /studies/proctypes             org.biobank.controllers.study.ProcessingTypeController.addProcessingType
+PUT     /studies/proctypes/:id         org.biobank.controllers.study.ProcessingTypeController.updateProcessingType(id)
+DELETE  /studies/proctypes/:id         org.biobank.controllers.study.ProcessingTypeController.removeProcessingType(id)
 
 # specimen link types
-GET     /studies/sltype                org.biobank.controllers.study.SpecimenLinkTypeController.list
-POST    /studies/sltype                org.biobank.controllers.study.SpecimenLinkTypeController.addSpecimenLinkType
-PUT     /studies/sltype/:id            org.biobank.controllers.study.SpecimenLinkTypeController.updateSpecimenLinkType(id)
-DELETE  /studies/sltype/:id            org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(id)
+GET     /studies/sltypes               org.biobank.controllers.study.SpecimenLinkTypeController.list
+POST    /studies/sltypes               org.biobank.controllers.study.SpecimenLinkTypeController.addSpecimenLinkType
+PUT     /studies/sltypes/:id           org.biobank.controllers.study.SpecimenLinkTypeController.updateSpecimenLinkType(id)
+DELETE  /studies/sltypes/:id           org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(id)
 
 # study
 GET     /studies/:id                   org.biobank.controllers.study.StudyController.readStudy(id)

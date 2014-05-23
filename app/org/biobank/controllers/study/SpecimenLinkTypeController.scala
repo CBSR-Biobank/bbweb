@@ -47,7 +47,7 @@ object SpecimenLinkTypeController extends BbwebController  {
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
         event => Ok(Json.obj(
           "status"  ->"OK",
-          "message" -> (s"specimenLink type added: ${event.specimenLinkTypeId}.") ))
+          "message" -> (s"specimen link type added: ${event.specimenLinkTypeId}.") ))
       )
     }
   }
@@ -59,7 +59,7 @@ object SpecimenLinkTypeController extends BbwebController  {
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
         event => Ok(Json.obj(
           "status"  ->"OK",
-          "message" -> (s"specimenLink type updated: ${event.specimenLinkTypeId}.") ))
+          "message" -> (s"specimen link type updated: ${event.specimenLinkTypeId}.") ))
       )
     }
   }
@@ -71,7 +71,7 @@ object SpecimenLinkTypeController extends BbwebController  {
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
         event => Ok(Json.obj(
           "status"  ->"OK",
-          "message" -> (s"specimenLink type removed: ${event.specimenLinkTypeId}.") ))
+          "message" -> (s"specimen link type removed: ${event.specimenLinkTypeId}.") ))
       )
     }
   }

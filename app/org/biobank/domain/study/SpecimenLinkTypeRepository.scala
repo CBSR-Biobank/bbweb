@@ -47,8 +47,8 @@ trait SpecimenLinkTypeRepositoryComponentImpl extends SpecimenLinkTypeRepository
         DomainError(
           s"specimen link type does not exist: { processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
           .failNel,
-        slt => if (slt.processingTypeId.equals(processingTypeId))
-          slt.success
+        slType => if (slType.processingTypeId.equals(processingTypeId))
+          slType.success
         else DomainError(
           s"processing type does not have specimen link type:{ processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
           .failNel
@@ -60,13 +60,13 @@ trait SpecimenLinkTypeRepositoryComponentImpl extends SpecimenLinkTypeRepository
     }
 
     def specimenGroupInUse(specimenGroupId: SpecimenGroupId): Boolean = {
-      getValues.exists(slt =>
-        (slt.inputGroupId == specimenGroupId) || (slt.outputGroupId == specimenGroupId))
+      getValues.exists(slType =>
+        (slType.inputGroupId == specimenGroupId) || (slType.outputGroupId == specimenGroupId))
     }
 
     def annotationTypeInUse(annotationType: SpecimenLinkAnnotationType): Boolean = {
-      getValues.exists(slt =>
-        slt.annotationTypeData.exists(atd => atd.annotationTypeId.equals(annotationType.id.id)))
+      getValues.exists(slType =>
+        slType.annotationTypeData.exists(atd => atd.annotationTypeId.equals(annotationType.id.id)))
     }
   }
 }

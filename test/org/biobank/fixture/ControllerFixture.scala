@@ -72,6 +72,14 @@ trait ControllerFixture
       sys.error("Bbweb plugin is not registered")
     }
 
+    val processingTypeRepository = plugin.map(_.processingTypeRepository).getOrElse {
+      sys.error("Bbweb plugin is not registered")
+    }
+
+    val specimenLinkTypeRepository = plugin.map(_.specimenLinkTypeRepository).getOrElse {
+      sys.error("Bbweb plugin is not registered")
+    }
+
     val specimenLinkAnnotationTypeRepository = plugin.map(_.specimenLinkAnnotationTypeRepository).getOrElse {
       sys.error("Bbweb plugin is not registered")
     }

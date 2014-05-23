@@ -115,9 +115,11 @@ trait StudyProcessorComponent
     }
 
     private def validateAndForward(childActor: ActorRef, cmd: SpecimenLinkTypeCommand) = {
+      val processingTypeId = ProcessingTypeId(cmd.processingTypeId)
       val validation = for {
-        processingType <- processingTypeRepository.getByKey(ProcessingTypeId(cmd.processingTypeId))
+        processingType <- processingTypeRepository.getByKey(processingTypeId)
         study <- studyRepository.getByKey(processingType.studyId)
+        disabledStudy <- isStudyDisabled(study.id)
       } yield {
         childActor forward cmd
       }

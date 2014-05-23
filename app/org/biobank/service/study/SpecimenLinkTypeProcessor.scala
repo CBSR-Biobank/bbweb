@@ -254,7 +254,7 @@ trait SpecimenLinkTypeProcessorComponent {
       inputGroupId: SpecimenGroupId,
       outputGroupId: SpecimenGroupId)(
       matcher: SpecimenLinkType => Boolean): DomainValidation[Boolean] = {
-      val exists = specimenLinkTypeRepository.getValues.exists { slt => matcher(slt) }
+      val exists = specimenLinkTypeRepository.getValues.exists { slType => matcher(slType) }
 
       if (exists) {
         DomainError("specimen link type with specimen groups already exists").failNel
@@ -266,8 +266,8 @@ trait SpecimenLinkTypeProcessorComponent {
     private def validateSpecimenGroups(
       inputGroupId: SpecimenGroupId,
       outputGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
-      validateSpecimenGroupMatcher(inputGroupId, outputGroupId) { slt =>
-        (slt.inputGroupId == inputGroupId) && (slt.outputGroupId == outputGroupId)
+      validateSpecimenGroupMatcher(inputGroupId, outputGroupId) { slType =>
+        (slType.inputGroupId == inputGroupId) && (slType.outputGroupId == outputGroupId)
       }
     }
 
@@ -275,10 +275,10 @@ trait SpecimenLinkTypeProcessorComponent {
       inputGroupId: SpecimenGroupId,
       outputGroupId: SpecimenGroupId,
       specimenLinkTypeId: SpecimenLinkTypeId): DomainValidation[Boolean] = {
-      validateSpecimenGroupMatcher(inputGroupId, outputGroupId) { slt =>
-        (slt.id != specimenLinkTypeId) &&
-        (slt.inputGroupId == inputGroupId) &&
-        (slt.outputGroupId == outputGroupId)
+      validateSpecimenGroupMatcher(inputGroupId, outputGroupId) { slType =>
+        (slType.id != specimenLinkTypeId) &&
+        (slType.inputGroupId == inputGroupId) &&
+        (slType.outputGroupId == outputGroupId)
       }
     }
 

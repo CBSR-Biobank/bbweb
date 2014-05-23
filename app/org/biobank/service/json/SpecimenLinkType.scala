@@ -21,6 +21,7 @@ object SpecimenLinkType {
 
   implicit val specimenLinkTypeIdWrite = Writes{ (id: SpecimenLinkTypeId) => JsString(id.id) }
 
+  // FIXME: containerTypeIdWrite needs to be moved to its own file
   implicit val containerTypeIdWrite = Writes{ (id: ContainerTypeId) => JsString(id.id) }
 
   implicit val annotationTypeDataWrites: Writes[SpecimenLinkTypeAnnotationTypeData] = (
@@ -91,7 +92,7 @@ object SpecimenLinkType {
 
   implicit val removeSpecimenLinkTypeCmdReads: Reads[RemoveSpecimenLinkTypeCmd] = (
     (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveSpecimenLinkTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+      (__ \ "processingTypeId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
   )((studyId, id, expectedVersion) => RemoveSpecimenLinkTypeCmd(studyId, id, expectedVersion))

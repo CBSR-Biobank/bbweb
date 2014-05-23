@@ -184,7 +184,7 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       val procType = factory.createProcessingType
       processingTypeRepository.put(procType)
 
-      val procTypeBadVersion = procType.copy(version = procType.version - 2)
+      val procTypeBadVersion = procType.copy(version = procType.version + 1)
 
       askUpdateCommand(procTypeBadVersion) { validation =>
         validation should be('failure)

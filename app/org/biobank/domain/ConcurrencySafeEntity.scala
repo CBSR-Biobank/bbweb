@@ -30,7 +30,7 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
 
   protected def invalidVersion(expected: Long) =
     DomainError(
-    s"expected version doesn't match current version: id: $id, version: $version, expectedVersion: $expected")
+    s"${this.getClass.getSimpleName}: expected version doesn't match current version: id: $id, version: $version, expectedVersion: $expected")
 
   /** Used for optimistic concurrency versioning.
     *
@@ -38,7 +38,7 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
     */
   protected def requireVersion(expectedVersion: Option[Long]): DomainValidation[ConcurrencySafeEntity[T]] = {
     expectedVersion match {
-      case None => DomainError("expected version doesn't match current version").failNel
+      case None => DomainError(s"${this.getClass.getSimpleName}: expected version is None").failNel
       case Some(expected) if (version != expected) => invalidVersion(expected).failNel
       case _ => this.success
     }

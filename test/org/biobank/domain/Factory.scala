@@ -230,14 +230,11 @@ trait FactoryComponent {
 
       val disabledStudy = defaultDisabledStudy
 
-      val inputSpecimenGroup = createSpecimenGroup
-      specimenGroupRepository.put(inputSpecimenGroup)
-      val outputSpecimenGroup = createSpecimenGroup
-      specimenGroupRepository.put(outputSpecimenGroup)
-
       val validation = SpecimenLinkType.create(
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
-        expectedOutpuChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        expectedOutpuChange, inputCount, outputCount,
+        specimenGroupRepository.nextIdentity,
+        specimenGroupRepository.nextIdentity,
         annotationTypeData = List.empty)
 
       if (validation.isFailure) {
@@ -247,6 +244,13 @@ trait FactoryComponent {
       val annotationType = validation | null
       domainObjects = domainObjects + (classOf[SpecimenLinkType] -> annotationType)
       annotationType
+    }
+
+    def createSpecimenLinkTypeAndSpecimenGroups: (SpecimenLinkType, SpecimenGroup, SpecimenGroup) = {
+      val inputSg = factory.createSpecimenGroup
+      val outputSg = factory.createSpecimenGroup
+      val slType = createSpecimenLinkType.copy(inputGroupId = inputSg.id, outputGroupId = outputSg.id)
+      (slType, inputSg, outputSg)
     }
 
     def createSpecimenLinkTypeAnnotationTypeData: SpecimenLinkTypeAnnotationTypeData = {
