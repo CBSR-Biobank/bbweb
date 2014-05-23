@@ -45,6 +45,12 @@ trait StudyServiceComponent {
 
     def collectionEventTypesForStudy(studyId: String): Set[CollectionEventType]
 
+    def processingTypeWithId(
+      studyId: String,
+      processingTypeId: String): DomainValidation[ProcessingType]
+
+    def processingTypesForStudy(studyId: String): Set[ProcessingType]
+
     def addStudy(cmd: AddStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyAddedEvent]]
 
@@ -146,6 +152,19 @@ trait StudyServiceComponent {
     def removeSpecimenLinkAnnotationType(
       cmd: RemoveSpecimenLinkAnnotationTypeCmd)(
         implicit userId: UserId): Future[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
+
+    // processing types
+    def addProcessingType(cmd: AddProcessingTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[ProcessingTypeAddedEvent]]
+
+    def updateProcessingType(cmd: UpdateProcessingTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[ProcessingTypeUpdatedEvent]]
+
+    def removeProcessingType(cmd: RemoveProcessingTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[ProcessingTypeRemovedEvent]]
+
+
+
   }
 
 }
@@ -222,6 +241,17 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
       annotationTypeId: String): DomainValidation[SpecimenLinkAnnotationType] = {
       specimenLinkAnnotationTypeRepository.withId(
         StudyId(studyId), AnnotationTypeId(annotationTypeId))
+    }
+
+    def processingTypeWithId(
+      studyId: String,
+      processingTypeId: String): DomainValidation[ProcessingType] = {
+      processingTypeRepository.withId(
+        StudyId(studyId), ProcessingTypeId(processingTypeId))
+    }
+
+    def processingTypesForStudy(studyId: String): Set[ProcessingType] = {
+      processingTypeRepository.allForStudy(StudyId(studyId))
     }
 
     def addStudy(cmd: AddStudyCmd)(
