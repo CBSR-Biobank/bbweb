@@ -16,8 +16,9 @@ object UserController extends Controller  {
   }
 
   /** Retrieves the user for the given id as JSON */
-  def user(id: Long) = Action(parse.empty) { request =>
+  def user(id: String) = Action(parse.empty) { request =>
     // TODO Find user and convert to JSON
+    Logger.info(s"user: $id")
     Ok(Json.obj("firstName" -> "John", "lastName" -> "Smith", "age" -> 42))
   }
 
@@ -28,13 +29,13 @@ object UserController extends Controller  {
   }
 
   /** Updates the user for the given id from the JSON body */
-  def updateUser(id: Long) = Action(parse.json) { request =>
+  def updateUser(id: String) = Action(parse.json) { request =>
     // TODO Implement User creation, typically via request.body.validate[User]
     Ok
   }
 
   /** Deletes a user for the given id */
-  def deleteUser(id: Long) = Action(parse.empty) { request =>
+  def deleteUser(id: String) = Action(parse.empty) { request =>
     // TODO Implement User creation, typically via request.body.validate[User]
     Ok
   }

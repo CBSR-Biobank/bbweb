@@ -6,14 +6,14 @@ define(["angular", "common"], function(angular) {
 
   var mod = angular.module("user.services", ["biobank.common"]);
   mod.factory("userService", ["$http", "$q", "playRoutes", function($http, $q, playRoutes) {
-    var user, token;
+  var user, token;
     return {
       loginUser : function(credentials) {
         return playRoutes.controllers.Application.login().post(credentials).then(function(response) {
           // return promise so we can chain easily
           token = response.data.token;
           // in a real app we could use the token to fetch the user data
-          return playRoutes.controllers.Users.user(3).get();
+          return playRoutes.controllers.UserController.user("admin@admin.com").get();
         }).then(function(response) {
           user = response.data; // Extract user data from user() request
           user.email = credentials.email;
@@ -21,8 +21,8 @@ define(["angular", "common"], function(angular) {
         });
       },
       logout : function() {
-      // Logout on server in a real app
-      user = undefined;
+        // Logout on server in a real app
+        user = undefined;
       },
       getUser : function() {
         return user;
