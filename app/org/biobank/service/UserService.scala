@@ -23,31 +23,9 @@ trait UserServiceComponent {
 
     val log = LoggerFactory.getLogger(this.getClass)
 
-    // def find(id: securesocial.core.IdentityId): Option[securesocial.core.Identity] = {
-    //   userRepository.getByKey(UserId(id.userId)).fold(
-    //     err => None,
-    //     user => Some(toSecureSocialIdentity(user))
-    //   )
-    // }
-
-    // def findByEmailAndProvider(
-    //   email: String, providerId: String): Option[securesocial.core.Identity] = {
-    //   userRepository.getByKey(UserId(email)).fold(
-    //     err => None,
-    //     user => some(toSecureSocialIdentity(user))
-    //   )
-    // }
-
     def getByEmail(email: String): DomainValidation[User] = {
       userRepository.getByKey(UserId(email))
     }
-
-    // private def toSecureSocialIdentity(user: User): securesocial.core.Identity = {
-    //   SocialUser(securesocial.core.IdentityId(user.email, "userpass"),
-    //     user.email, user.email, user.email,
-    //     some(user.email), None, AuthenticationMethod.UserPassword, None, None,
-    //     some(PasswordInfo(PasswordHasher.BCryptHasher, user.password, None)))
-    // }
 
     def add(cmd: RegisterUserCommand): Future[DomainValidation[UserRegisteredEvent]] = {
       userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserRegisteredEvent]])

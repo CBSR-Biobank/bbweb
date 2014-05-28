@@ -1,9 +1,14 @@
 package org.biobank.controllers
 
-import org.biobank.service.ServiceComponent
+import org.biobank.service.json.User._
 
-import play.api._
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.{ Logger, Play }
+import play.api.Play.current
 import play.api.mvc._
+import play.api.mvc.Results._
 import play.api.libs.json._
 
 import scalaz._
@@ -19,7 +24,14 @@ object UserController extends Controller  {
   def user(id: String) = Action(parse.empty) { request =>
     // TODO Find user and convert to JSON
     Logger.info(s"user: $id")
-    Ok(Json.obj("firstName" -> "John", "lastName" -> "Smith", "age" -> 42))
+    userService.getByEmail(id).fold(
+      err => {
+        BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
+      },
+      user => {
+        Ok(Json.toJson(user))
+      }
+    )
   }
 
   /** Creates a user from the given JSON */

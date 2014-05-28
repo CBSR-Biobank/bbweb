@@ -32,8 +32,7 @@ object StudyController extends BbwebController {
 
   def readStudy(id: String) = Action { request =>
     Logger.info(s"readStudy: id: $id")
-    val validation = studyService.getStudy(id)
-    validation.fold(
+    studyService.getStudy(id).fold(
       err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
       study => Ok(Json.toJson(study))
     )
