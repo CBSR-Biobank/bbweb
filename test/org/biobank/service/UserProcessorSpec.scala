@@ -1,7 +1,7 @@
 package org.biobank.service
 
 import org.biobank.fixture._
-import org.biobank.infrastructure.command.UserCmds._
+import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.domain._
 
@@ -23,8 +23,8 @@ class UserProcessorSpec extends UserProcessorFixture {
     "add a user" in {
       val user = factory.createRegisteredUser
 
-      val cmd = RegisterUserCmd(user.name, user.email, user.password, user.hasher,
-        user.salt, user.avatarUrl)
+      val cmd = RegisterUserCmd(
+        user.name, user.email, user.password, user.hasher, user.salt, user.avatarUrl)
       val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisteredEvent]]
         .futureValue
 

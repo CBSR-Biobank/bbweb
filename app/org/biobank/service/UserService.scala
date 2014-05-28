@@ -12,6 +12,7 @@ import akka.pattern.ask
 import org.slf4j.LoggerFactory
 import akka.persistence.SnapshotOffer
 import scala.concurrent.ExecutionContext.Implicits.global
+import org.joda.time.DateTime
 
 import scalaz._
 import scalaz.Scalaz._
@@ -104,9 +105,9 @@ trait UserProcessorComponent {
     def validateCmd(cmd: RegisterUserCmd): DomainValidation[UserRegisteredEvent] = {
       for {
         emailAvailable <- userRepository.emailAvailable(cmd.email)
-        user <- RegisteredUser.create(UserId(cmd.email), -1L, cmd.name, cmd.email,
+        user <- RegisteredUser.create(UserId(cmd.email), -1L, DateTime.now, cmd.name, cmd.email,
           cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl)
-        event <- UserRegisteredEvent(user.id.toString, user.name, user.email,
+        event <- UserRegisteredEvent(user.id.toString, DateTime.now, user.name, user.email,
           user.password, user.hasher, user.salt, user.avatarUrl).success
       } yield {
         event
@@ -114,23 +115,26 @@ trait UserProcessorComponent {
     }
 
     def validateCmd(cmd: ActivateUserCmd): DomainValidation[UserActivatedEvent] = {
+      val timeNow = DateTime.now
       for {
         user <- userRepository.getByKey(UserId(cmd.email))
         registeredUser <- isUserRegistered(user)
-        activatedUser <- registeredUser.activate(cmd.expectedVersion)
-        event <- UserActivatedEvent(activatedUser.id.toString, activatedUser.version).success
+        activatedUser <- registeredUser.activate(cmd.expectedVersion, timeNow)
+        event <- UserActivatedEvent(
+          activatedUser.id.toString, activatedUser.version, timeNow).success
       } yield {
         event
       }
     }
 
     def validateCmd(cmd: UpdateUserCmd): DomainValidation[UserUpdatedEvent] = {
+      val timeNow = DateTime.now
       for {
         user <- userRepository.getByKey(UserId(cmd.email))
         activeUser <- isUserActive(user)
-        updatedUser <- activeUser.update(cmd.expectedVersion, cmd.name, cmd.email, cmd.password,
+        updatedUser <- activeUser.update(cmd.expectedVersion, timeNow, cmd.name, cmd.email, cmd.password,
           cmd.hasher, cmd.salt, cmd.avatarUrl)
-        event <- UserUpdatedEvent(updatedUser.id.id, updatedUser.version, updatedUser.name,
+        event <- UserUpdatedEvent(updatedUser.id.id, updatedUser.version, timeNow, updatedUser.name,
           updatedUser.email, updatedUser.password, updatedUser.hasher, updatedUser.salt,
           updatedUser.avatarUrl).success
       } yield {
@@ -139,22 +143,24 @@ trait UserProcessorComponent {
     }
 
     def validateCmd(cmd: LockUserCmd): DomainValidation[UserLockedEvent] = {
+      val timeNow = DateTime.now
       for {
         user <- userRepository.getByKey(UserId(cmd.email))
         activeUser <- isUserActive(user)
-        lockedUser <- activeUser.lock(cmd.expectedVersion)
-        event <- UserLockedEvent(lockedUser.id.toString, lockedUser.version).success
+        lockedUser <- activeUser.lock(cmd.expectedVersion, timeNow)
+        event <- UserLockedEvent(lockedUser.id.toString, lockedUser.version, timeNow).success
       } yield {
         event
       }
     }
 
     def validateCmd(cmd: UnlockUserCmd): DomainValidation[UserUnlockedEvent] = {
+      val timeNow = DateTime.now
       for {
         user <- userRepository.getByKey(UserId(cmd.email))
         lockedUser <- isUserLocked(user)
-        unlockedUser <- lockedUser.unlock(cmd.expectedVersion)
-        event <- UserUnlockedEvent(lockedUser.id.toString, lockedUser.version).success
+        unlockedUser <- lockedUser.unlock(cmd.expectedVersion, timeNow)
+        event <- UserUnlockedEvent(lockedUser.id.toString, lockedUser.version, timeNow).success
       } yield {
         event
       }
@@ -163,8 +169,8 @@ trait UserProcessorComponent {
     def recoverEvent(event: UserRegisteredEvent) = {
       log.debug(s"recoverEvent: $event")
       val validation = for {
-        registeredUser <- RegisteredUser.create(UserId(event.email), -1L, event.name, event.email,
-          event.password, event.hasher, event.salt, event.avatarUrl)
+        registeredUser <- RegisteredUser.create(UserId(event.email), -1L, event.dateTime, event.name,
+          event.email, event.password, event.hasher, event.salt, event.avatarUrl)
         savedUser <- userRepository.put(registeredUser).success
       } yield savedUser
 
@@ -181,7 +187,7 @@ trait UserProcessorComponent {
       val validation = for {
         user <- userRepository.getByKey(UserId(event.id))
         registeredUser <- isUserRegistered(user)
-        activatedUser <- registeredUser.activate(Some(registeredUser.version))
+        activatedUser <- registeredUser.activate(Some(registeredUser.version), event.dateTime)
         savedUser <- userRepository.put(activatedUser).success
       } yield savedUser
 
@@ -198,7 +204,8 @@ trait UserProcessorComponent {
       val validation = for {
         user <- userRepository.getByKey(UserId(event.id))
         activeUser <- isUserActive(user)
-        updatedUser <- activeUser.update(Some(activeUser.version), event.name, event.email,
+        updatedUser <- activeUser.update(
+          Some(activeUser.version), event.dateTime, event.name, event.email,
           event.password, event.hasher, event.salt, event.avatarUrl)
         savedUser <- userRepository.put(updatedUser).success
       } yield savedUser
@@ -216,7 +223,7 @@ trait UserProcessorComponent {
       val validation = for {
         user <- userRepository.getByKey(UserId(event.id))
         activeUser <- isUserActive(user)
-        lockedUser <- activeUser.lock(Some(activeUser.version))
+        lockedUser <- activeUser.lock(Some(activeUser.version), event.dateTime)
         savedUser <- userRepository.put(lockedUser).success
       } yield savedUser
 
@@ -233,7 +240,7 @@ trait UserProcessorComponent {
       val validation = for {
         user <- userRepository.getByKey(UserId(event.id))
         lockedUser <- isUserLocked(user)
-        unlockedUser <- lockedUser.unlock(Some(lockedUser.version))
+        unlockedUser <- lockedUser.unlock(Some(lockedUser.version), event.dateTime)
         savedUser <- userRepository.put(unlockedUser).success
       } yield savedUser
 

@@ -11,6 +11,7 @@ import org.biobank.infrastructure.{
 import org.slf4j.LoggerFactory
 import scala.reflect.ClassTag
 import scala.reflect._
+import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
 
@@ -38,7 +39,7 @@ trait FactoryComponent {
       val avatarUrl = Some("http://test.com/")
 
       val validation = RegisteredUser.create(
-        id, version, name, email, password, hasher, salt, avatarUrl)
+        id, version, DateTime.now, name, email, password, hasher, salt, avatarUrl)
       if (validation.isFailure) {
         throw new Error
       }
@@ -50,7 +51,7 @@ trait FactoryComponent {
 
     def createActiveUser: ActiveUser = {
       val registeredUser = defaultRegisteredUser
-      val validation = registeredUser.activate(registeredUser.versionOption)
+      val validation = registeredUser.activate(registeredUser.versionOption, DateTime.now)
       if (validation.isFailure) {
         throw new Error
       }
@@ -65,7 +66,7 @@ trait FactoryComponent {
       val name = nameGenerator.next[Study]
       val description = Some(nameGenerator.next[Study])
 
-      val validation = DisabledStudy.create(id, -1L, org.joda.time.DateTime.now, name, description)
+      val validation = DisabledStudy.create(id, -1L, DateTime.now, name, description)
       if (validation.isFailure) {
         throw new Error
       }
@@ -78,7 +79,7 @@ trait FactoryComponent {
     def createEnabledStudy: EnabledStudy = {
       val disabledStudy = defaultDisabledStudy
       val enabledStudy = disabledStudy.enable(
-        disabledStudy.versionOption, org.joda.time.DateTime.now, 1, 1) | null
+        disabledStudy.versionOption, DateTime.now, 1, 1) | null
       domainObjects = domainObjects + (classOf[EnabledStudy] -> enabledStudy)
       domainObjects = domainObjects - classOf[DisabledStudy]
       enabledStudy
@@ -95,7 +96,7 @@ trait FactoryComponent {
       val specimenType = SpecimenType.FilteredUrine
 
       val disabledStudy = defaultDisabledStudy
-      val validation = SpecimenGroup.create(disabledStudy.id, sgId, -1L, org.joda.time.DateTime.now,
+      val validation = SpecimenGroup.create(disabledStudy.id, sgId, -1L, DateTime.now,
         name, description, units, anatomicalSourceType, preservationType, preservationTempType,
         specimenType)
       if (validation.isFailure) {
@@ -114,7 +115,7 @@ trait FactoryComponent {
 
       val disabledStudy = defaultDisabledStudy
       val validation = CollectionEventType.create(
-        disabledStudy.id, ceventTypeId, -1L, org.joda.time.DateTime.now, name,
+        disabledStudy.id, ceventTypeId, -1L, DateTime.now, name,
         description, true, List.empty, List.empty)
       if (validation.isFailure) {
         throw new Error
@@ -135,7 +136,7 @@ trait FactoryComponent {
 
       val disabledStudy = defaultDisabledStudy
       val validation = CollectionEventAnnotationType.create(
-        disabledStudy.id, id, -1L, org.joda.time.DateTime.now, name, description,
+        disabledStudy.id, id, -1L, DateTime.now, name, description,
         AnnotationValueType.Select, Some(1), options)
       if (validation.isFailure) {
         throw new Error
@@ -171,7 +172,7 @@ trait FactoryComponent {
 
       val disabledStudy = defaultDisabledStudy
       val validation = ParticipantAnnotationType.create(
-        disabledStudy.id, id, -1L, org.joda.time.DateTime.now, name,
+        disabledStudy.id, id, -1L, DateTime.now, name,
         description, AnnotationValueType.Select, Some(1), options, required = true)
       if (validation.isFailure) {
         throw new Error
@@ -192,7 +193,7 @@ trait FactoryComponent {
 
       val disabledStudy = defaultDisabledStudy
       val validation = SpecimenLinkAnnotationType.create(
-        disabledStudy.id, id, -1L, org.joda.time.DateTime.now, name, description,
+        disabledStudy.id, id, -1L, DateTime.now, name, description,
         AnnotationValueType.Select, Some(1), options)
       if (validation.isFailure) {
         throw new Error
@@ -210,7 +211,7 @@ trait FactoryComponent {
 
       val disabledStudy = defaultDisabledStudy
       val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled = true)
+        disabledStudy.id, processingTypeId, -1L, DateTime.now, name, description, enabled = true)
       if (validation.isFailure) {
               throw new Error
       }
@@ -231,7 +232,7 @@ trait FactoryComponent {
       val disabledStudy = defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(
-        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -1L, DateTime.now, expectedInputChange,
         expectedOutpuChange, inputCount, outputCount,
         specimenGroupRepository.nextIdentity,
         specimenGroupRepository.nextIdentity,
