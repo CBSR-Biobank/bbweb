@@ -4,8 +4,6 @@
 
 # Home page
 GET     /                              org.biobank.controllers.Application.index
-GET     /about                         org.biobank.controllers.Application.about
-GET     /contact                       org.biobank.controllers.Application.contact
 
 # studies
 GET     /studies                       org.biobank.controllers.study.StudyController.list
@@ -61,9 +59,22 @@ DELETE  /studies/sltypes/:id           org.biobank.controllers.study.SpecimenLin
 GET     /studies/:id                   org.biobank.controllers.study.StudyController.readStudy(id)
 PUT     /studies/:id                   org.biobank.controllers.study.StudyController.updateStudy(id)
 
-# user
-GET     /user/profile               org.biobank.controllers.UserController.profile
+# JavaScript routes object
+GET     /jsroutes.js                   org.biobank.controllers.Application.jsRoutes()
+
+# Routes used by Angular
+# ~~~~
+
+# Authentication
+POST    /login                         org.biobank.controllers.Application.login()
+POST    /logout                        org.biobank.controllers.Application.logout()
+
+# Users
+GET     /users/:id                     org.biobank.controllers.UserController.user(id: Long)
+POST    /users                         org.biobank.controllers.UserController.createUser()
+PUT     /users/:id                     org.biobank.controllers.UserController.updateUser(id: Long)
+DELETE  /users/:id                     org.biobank.controllers.UserController.deleteUser(id: Long)
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
-GET     /webjars/*file              controllers.WebJarAssets.at(file)
+GET     /assets/*file                  controllers.Assets.at(path="/public", file)
+GET     /webjars/*file                 org.biobank.controllers.CdnWebJarAssets.at(file)

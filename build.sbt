@@ -1,6 +1,6 @@
 import PlayKeys._
 
-name := "bbweb"
+name := """bbweb"""
 
 version := "0.1-SNAPSHOT"
 
@@ -41,11 +41,15 @@ libraryDependencies ++= Seq(
   "org.scala-stm"          %% "scala-stm"                      % "0.7"                % "compile",
   "org.scalaz"             %% "scalaz-core"                    % "7.0.6"              % "compile",
   "org.scalaz"             %% "scalaz-typelevel"               % "7.0.6"              % "compile",
-  "org.webjars"            %  "angularjs"                      % "1.2.16"             % "compile",
-  "org.webjars"            %  "bootstrap"                      % "3.1.1"              % "compile",
   "org.webjars"            %  "requirejs"                      % "2.1.11"             % "compile",
-  "org.webjars"            %% "webjars-play"                   % "2.3-M1"             % "compile",
-  //"ws.securesocial"        %% "securesocial"                   % "play-2.3-SNAPSHOT"  % "compile",
+  "org.webjars"            %  "webjars-locator"                % "0.13",
+  "org.webjars"            %% "webjars-play"                   % "2.3.0-RC1",
+  "org.webjars"            %  "underscorejs"                   % "1.6.0-1",
+  "org.webjars"            %  "jquery"                         % "1.11.0-1",
+  "org.webjars"            %  "angularjs"                      % "1.2.16" exclude(
+    "org.webjars", "jquery"),
+  "org.webjars"            %  "bootstrap"                      % "3.1.1" exclude(
+    "org.webjars", "jquery"),
   "org.scalatest"          %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
     ExclusionRule(organization = "org.junit", name = "junit")
   ),
@@ -65,4 +69,13 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-//com.jamesward.play.BrowserNotifierPlugin.livereload
+// This tells Play to optimize this file and its dependencies
+requireJs += "main.js"
+
+// The main config file
+// See http://requirejs.org/docs/optimization.html#mainConfigFile
+requireJsShim := "build.js"
+
+
+// To completely override the optimization process, use this config option:
+//requireNativePath := Some("node r.js -o name=main out=javascript-min/main.min.js")
