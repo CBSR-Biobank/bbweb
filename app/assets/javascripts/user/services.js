@@ -4,7 +4,7 @@
 define(["angular", "common"], function(angular) {
   "use strict";
 
-  var mod = angular.module("user.services", ["yourprefix.common"]);
+  var mod = angular.module("user.services", ["biobank.common"]);
   mod.factory("userService", ["$http", "$q", "playRoutes", function($http, $q, playRoutes) {
     var user, token;
     return {

@@ -2,7 +2,7 @@
  * Configure routes of user module.
  */
 define(["angular", "./controllers", "common"], function(angular, controllers) {
-  var mod = angular.module("user.routes", ["user.services", "yourprefix.common"]);
+  var mod = angular.module("user.routes", ["user.services", "biobank.common"]);
   mod.config(["$routeProvider", function($routeProvider) {
     $routeProvider
       .when("/login", {templateUrl:"/assets/templates/user/login.html", controller:controllers.LoginCtrl});

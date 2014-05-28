@@ -41,14 +41,15 @@ libraryDependencies ++= Seq(
   "org.scala-stm"          %% "scala-stm"                      % "0.7"                % "compile",
   "org.scalaz"             %% "scalaz-core"                    % "7.0.6"              % "compile",
   "org.scalaz"             %% "scalaz-typelevel"               % "7.0.6"              % "compile",
-  "org.webjars"            %  "requirejs"                      % "2.1.11"             % "compile",
+  // WebJars infrastructure
   "org.webjars"            %  "webjars-locator"                % "0.13",
   "org.webjars"            %% "webjars-play"                   % "2.3.0-RC1",
-  "org.webjars"            %  "underscorejs"                   % "1.6.0-1",
-  "org.webjars"            %  "jquery"                         % "1.11.0-1",
-  "org.webjars"            %  "angularjs"                      % "1.2.16" exclude(
+  // WebJars dependencies
+  "org.webjars"            %  "underscorejs"                   % "1.6.0-3",
+  "org.webjars"            %  "jquery"                         % "2.1.1",
+  "org.webjars"            %  "bootstrap"                      % "3.1.1-1" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"            %  "bootstrap"                      % "3.1.1" exclude(
+  "org.webjars"            %  "angularjs"                      % "1.3.0-beta.8" exclude(
     "org.webjars", "jquery"),
   "org.scalatest"          %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
     ExclusionRule(organization = "org.junit", name = "junit")

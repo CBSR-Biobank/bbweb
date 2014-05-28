@@ -6,5 +6,5 @@
 define(["angular", "./routes"], function(angular) {
   "use strict";
 
-  return angular.module("yourprefix.dashboard", ["ngRoute", "dashboard.routes"]);
+  return angular.module("biobank.dashboard", ["ngRoute", "dashboard.routes"]);
 });
