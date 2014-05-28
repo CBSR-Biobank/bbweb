@@ -6,7 +6,7 @@ object UserCommands {
 
   sealed trait UserCommand extends Command
 
-  case class RegisterUserCommand(
+  case class RegisterUserCmd(
     name: String,
     email: String,
     password: String,
@@ -15,7 +15,7 @@ object UserCommands {
     avatarUrl: Option[String])
     extends UserCommand
 
-  case class UpdateUserCommand(
+  case class UpdateUserCmd(
     expectedVersion: Option[Long],
     name: String,
     email: String,
@@ -25,19 +25,25 @@ object UserCommands {
     avatarUrl: Option[String])
     extends UserCommand
 
-  case class ActivateUserCommand(
+  case class ActivateUserCmd(
     email: String,
     expectedVersion: Option[Long])
       extends UserCommand
       with HasExpectedVersion
 
-  case class LockUserCommand(
+  case class LockUserCmd(
     email: String,
     expectedVersion: Option[Long])
       extends UserCommand
       with HasExpectedVersion
 
-  case class UnlockUserCommand(
+  case class UnlockUserCmd(
+    email: String,
+    expectedVersion: Option[Long])
+      extends UserCommand
+      with HasExpectedVersion
+
+  case class RemoveUserCmd(
     email: String,
     expectedVersion: Option[Long])
       extends UserCommand

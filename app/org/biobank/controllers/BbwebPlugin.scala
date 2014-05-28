@@ -38,7 +38,7 @@ class BbwebPlugin(val app: play.api.Application) extends Plugin with TopComponen
         // for debug only - password is "administrator"
         val email = "admin@admin.com"
         val validation = RegisteredUser.create(
-          UserId(email), -1L, "admin", email,
+          UserId(email), -1L, org.joda.time.DateTime.now, "admin", email,
           "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS", "bcrypt", None, None)
         if (validation.isFailure) {
           throw new Error("could not add default user in development mode")

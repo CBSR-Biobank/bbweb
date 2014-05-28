@@ -63,10 +63,13 @@ case class RegisteredUser private (
   avatarUrl: Option[String]) extends User {
 
   /* Activates a registered user. */
-  def activate(expectedVersion: Option[Long]): DomainValidation[ActiveUser] = {
+  def activate(
+    expectedVersion: Option[Long],
+    dateTime: DateTime): DomainValidation[ActiveUser] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      activatedUser <- ActiveUser.create(this)
+      validatedUser <- ActiveUser.create(this)
+      activatedUser <- validatedUser.copy(lastUpdateDate = Some(dateTime)).success
     } yield activatedUser
   }
 }
@@ -78,6 +81,7 @@ object RegisteredUser extends UserValidationHelper {
   def create(
     id: UserId,
     version: Long,
+    dateTime: DateTime,
     name: String,
     email: String,
     password: String,
@@ -93,7 +97,7 @@ object RegisteredUser extends UserValidationHelper {
       validateNonEmpty(hasher, "hasher is null or empty") |@|
       validateNonEmptyOption(salt, "salt is null or empty") |@|
       validateAvatarUrl(avatarUrl)) {
-        RegisteredUser(_, _, DateTime.now, None, _, _, _, _, _, _)
+        RegisteredUser(_, _, dateTime, None, _, _, _, _, _, _)
       }
   }
 
@@ -113,15 +117,19 @@ case class ActiveUser private (
   avatarUrl: Option[String]) extends User {
 
   /** Locks an active user. */
-  def lock(expectedVersion: Option[Long]): DomainValidation[LockedUser] = {
+  def lock(
+    expectedVersion: Option[Long],
+    dateTime: DateTime): DomainValidation[LockedUser] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      lockedUser <- LockedUser.create(this)
+      validatedUser <- LockedUser.create(this)
+      lockedUser <- validatedUser.copy(lastUpdateDate = Some(dateTime)).success
     } yield lockedUser
   }
 
   def update(
     expectedVersion: Option[Long],
+    dateTime: DateTime,
     name: String,
     email: String,
     password: String,
@@ -131,12 +139,10 @@ case class ActiveUser private (
 
     for {
       validVersion <- requireVersion(expectedVersion)
-      registeredUser <- RegisteredUser.create(id, -1L, name, email, password, hasher, salt, avatarUrl)
-      validatedUser <- registeredUser.activate(registeredUser.versionOption)
-      udpatedUser <- validatedUser.copy(
-        version = this.version + 1,
-        addedDate = this.addedDate,
-        lastUpdateDate = Some(org.joda.time.DateTime.now)).success
+      validatedUser <- RegisteredUser.create(id, version, addedDate, name, email, password, hasher,
+        salt, avatarUrl)
+      registeredUser <- validatedUser.activate(validatedUser.versionOption, dateTime)
+      udpatedUser <- validatedUser.copy(lastUpdateDate = Some(dateTime)).success
     } yield udpatedUser
   }
 }
@@ -154,7 +160,7 @@ object ActiveUser extends UserValidationHelper {
       validateNonEmpty(user.hasher, "hasher is null or empty") |@|
       validateNonEmptyOption(user.salt, "salt is null or empty") |@|
       validateAvatarUrl(user.avatarUrl)) {
-        ActiveUser(_, _, user.addedDate, Some(DateTime.now), _, _, _, _, _, _)
+        ActiveUser(_, _, user.addedDate, None, _, _, _, _, _, _)
       }
   }
 
@@ -174,10 +180,13 @@ case class LockedUser private (
   avatarUrl: Option[String]) extends User {
 
   /** Unlocks a locked user. */
-  def unlock(expectedVersion: Option[Long]): DomainValidation[ActiveUser] = {
+  def unlock(
+    expectedVersion: Option[Long],
+    dateTime: DateTime): DomainValidation[ActiveUser] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      activeUser <- ActiveUser.create(this)
+      validatedUser <- ActiveUser.create(this)
+      activeUser <- validatedUser.copy(lastUpdateDate = Some(dateTime)).success
     } yield activeUser
   }
 
@@ -196,7 +205,7 @@ object LockedUser extends UserValidationHelper {
       validateNonEmpty(user.hasher, "hasher is null or empty") |@|
       validateNonEmptyOption(user.salt, "salt is null or empty") |@|
       validateAvatarUrl(user.avatarUrl)) {
-        LockedUser(_, _, user.addedDate, Some(DateTime.now), _, _, _, _, _, _)
+        LockedUser(_, _, user.addedDate, None, _, _, _, _, _, _)
       }
   }
 

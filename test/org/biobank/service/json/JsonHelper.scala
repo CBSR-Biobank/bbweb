@@ -1,6 +1,6 @@
 package org.biobank.service.json
 
-import org.biobank.domain.{ ConcurrencySafeEntity, IdentifiedDomainObject }
+import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure._
 
@@ -20,6 +20,13 @@ object JsonHelper extends Matchers {
     (json \ "lastUpdateDate").as[Option[DateTime]] map { dateTime =>
       (dateTime to entity.lastUpdateDate.get).millis should be < 1000L
     }
+  }
+
+  def compareObj(json: JsValue, user: User)  = {
+    compareEntity(json, user)
+    (json \ "name").as[String]      should be (user.name)
+    (json \ "email").as[String]     should be (user.email)
+    (json \ "avatarurl").as[String] should be (user.avatarUrl)
   }
 
   def compareObj(json: JsValue, study: Study)  = {

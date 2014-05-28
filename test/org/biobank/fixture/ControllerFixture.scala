@@ -84,6 +84,10 @@ trait ControllerFixture
       sys.error("Bbweb plugin is not registered")
     }
 
+    val userRepository = plugin.map(_.userRepository).getOrElse {
+      sys.error("Bbweb plugin is not registered")
+    }
+
   }
 
 }

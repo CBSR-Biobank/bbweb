@@ -73,7 +73,7 @@ POST    /logout                        org.biobank.controllers.Application.logou
 GET     /users/:id                     org.biobank.controllers.UserController.user(id: String)
 POST    /users                         org.biobank.controllers.UserController.createUser()
 PUT     /users/:id                     org.biobank.controllers.UserController.updateUser(id: String)
-DELETE  /users/:id                     org.biobank.controllers.UserController.deleteUser(id: String)
+DELETE  /users/:id                     org.biobank.controllers.UserController.removeUser(id: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                  controllers.Assets.at(path="/public", file)

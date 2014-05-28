@@ -1,7 +1,7 @@
 package org.biobank.service
 
 import org.biobank.fixture._
-import org.biobank.infrastructure.command.UserCommands._
+import org.biobank.infrastructure.command.UserCmds._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.domain._
 
@@ -23,7 +23,7 @@ class UserProcessorSpec extends UserProcessorFixture {
     "add a user" in {
       val user = factory.createRegisteredUser
 
-      val cmd = RegisterUserCommand(user.name, user.email, user.password, user.hasher,
+      val cmd = RegisterUserCmd(user.name, user.email, user.password, user.hasher,
         user.salt, user.avatarUrl)
       val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisteredEvent]]
         .futureValue
@@ -53,7 +53,7 @@ class UserProcessorSpec extends UserProcessorFixture {
 
       val user2 = factory.createActiveUser
 
-      val cmd = UpdateUserCommand(user.versionOption, user2.name, user2.email, user2.password, user2.hasher,
+      val cmd = UpdateUserCmd(user.versionOption, user2.name, user2.email, user2.password, user2.hasher,
         user2.salt, user2.avatarUrl)
       val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserUpdatedEvent]]
         .futureValue
@@ -82,7 +82,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val cmd = RegisterUserCommand(user.name, user.email, user.password, user.hasher,
+      val cmd = RegisterUserCmd(user.name, user.email, user.password, user.hasher,
         user.salt, user.avatarUrl)
       val validation2 = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisteredEvent]]
         .futureValue
@@ -98,7 +98,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val validation2 = ask(userProcessor, ActivateUserCommand(user.email, Some(0L)))
+      val validation2 = ask(userProcessor, ActivateUserCmd(user.email, Some(0L)))
         .mapTo[DomainValidation[UserActivatedEvent]]
         .futureValue
 
@@ -113,7 +113,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val activeUser = factory.createActiveUser
       userRepository.put(activeUser)
 
-      val validation = ask(userProcessor, LockUserCommand(activeUser.email, Some(1L)))
+      val validation = ask(userProcessor, LockUserCmd(activeUser.email, Some(1L)))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
 
@@ -128,7 +128,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val validation2 = ask(userProcessor, LockUserCommand(user.email, Some(0L)))
+      val validation2 = ask(userProcessor, LockUserCmd(user.email, Some(0L)))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
       validation2 should be ('failure)
@@ -143,7 +143,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val validation2 = ask(userProcessor, UnlockUserCommand(user.email, Some(0L)))
+      val validation2 = ask(userProcessor, UnlockUserCmd(user.email, Some(0L)))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
       validation2 should be ('failure)

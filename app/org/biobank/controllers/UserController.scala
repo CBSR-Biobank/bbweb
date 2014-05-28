@@ -47,7 +47,7 @@ object UserController extends Controller  {
   }
 
   /** Deletes a user for the given id */
-  def deleteUser(id: String) = Action(parse.empty) { request =>
+  def removeUser(id: String) = Action(parse.empty) { request =>
     // TODO Implement User creation, typically via request.body.validate[User]
     Ok
   }

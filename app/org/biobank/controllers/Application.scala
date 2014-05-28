@@ -27,7 +27,7 @@ object Application extends Controller  {
         routes.javascript.UserController.user,
         routes.javascript.UserController.createUser,
         routes.javascript.UserController.updateUser,
-        routes.javascript.UserController.deleteUser
+        routes.javascript.UserController.removeUser
         // TODO Add your routes here
       )
     ).as(JAVASCRIPT)

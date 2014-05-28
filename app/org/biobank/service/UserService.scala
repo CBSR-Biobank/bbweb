@@ -27,8 +27,28 @@ trait UserServiceComponent {
       userRepository.getByKey(UserId(email))
     }
 
-    def add(cmd: RegisterUserCommand): Future[DomainValidation[UserRegisteredEvent]] = {
+    def register(cmd: RegisterUserCmd): Future[DomainValidation[UserRegisteredEvent]] = {
       userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserRegisteredEvent]])
+    }
+
+    def activate(cmd: ActivateUserCmd): Future[DomainValidation[UserActivatedEvent]] = {
+      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserActivatedEvent]])
+    }
+
+    def update(cmd: UpdateUserCmd): Future[DomainValidation[UserUpdatedEvent]] = {
+      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserUpdatedEvent]])
+    }
+
+    def lock(cmd: LockUserCmd): Future[DomainValidation[UserLockedEvent]] = {
+      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserLockedEvent]])
+    }
+
+    def unlock(cmd: UnlockUserCmd): Future[DomainValidation[UserUnlockedEvent]] = {
+      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserUnlockedEvent]])
+    }
+
+    def remove(cmd: RemoveUserCmd): Future[DomainValidation[UserRemovedEvent]] = {
+      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserRemovedEvent]])
     }
 
   }
@@ -63,15 +83,15 @@ trait UserProcessorComponent {
     }
 
     val receiveCommand: Receive = {
-      case cmd: RegisterUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: RegisterUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: ActivateUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: ActivateUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: UpdateUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: UpdateUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: LockUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: LockUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: UnlockUserCommand => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: UnlockUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
       case "snap" =>
         saveSnapshot(SnapshotState(userRepository.allUsers))
@@ -81,7 +101,7 @@ trait UserProcessorComponent {
         throw new IllegalStateException("message not handled")
     }
 
-    def validateCmd(cmd: RegisterUserCommand): DomainValidation[UserRegisteredEvent] = {
+    def validateCmd(cmd: RegisterUserCmd): DomainValidation[UserRegisteredEvent] = {
       for {
         emailAvailable <- userRepository.emailAvailable(cmd.email)
         user <- RegisteredUser.create(UserId(cmd.email), -1L, cmd.name, cmd.email,
@@ -93,7 +113,7 @@ trait UserProcessorComponent {
       }
     }
 
-    def validateCmd(cmd: ActivateUserCommand): DomainValidation[UserActivatedEvent] = {
+    def validateCmd(cmd: ActivateUserCmd): DomainValidation[UserActivatedEvent] = {
       for {
         user <- userRepository.getByKey(UserId(cmd.email))
         registeredUser <- isUserRegistered(user)
@@ -104,7 +124,7 @@ trait UserProcessorComponent {
       }
     }
 
-    def validateCmd(cmd: UpdateUserCommand): DomainValidation[UserUpdatedEvent] = {
+    def validateCmd(cmd: UpdateUserCmd): DomainValidation[UserUpdatedEvent] = {
       for {
         user <- userRepository.getByKey(UserId(cmd.email))
         activeUser <- isUserActive(user)
@@ -118,7 +138,7 @@ trait UserProcessorComponent {
       }
     }
 
-    def validateCmd(cmd: LockUserCommand): DomainValidation[UserLockedEvent] = {
+    def validateCmd(cmd: LockUserCmd): DomainValidation[UserLockedEvent] = {
       for {
         user <- userRepository.getByKey(UserId(cmd.email))
         activeUser <- isUserActive(user)
@@ -129,7 +149,7 @@ trait UserProcessorComponent {
       }
     }
 
-    def validateCmd(cmd: UnlockUserCommand): DomainValidation[UserUnlockedEvent] = {
+    def validateCmd(cmd: UnlockUserCmd): DomainValidation[UserUnlockedEvent] = {
       for {
         user <- userRepository.getByKey(UserId(cmd.email))
         lockedUser <- isUserLocked(user)
