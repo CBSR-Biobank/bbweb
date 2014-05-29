@@ -107,10 +107,14 @@ trait UserProcessorComponent {
     }
 
     def validateCmd(cmd: RegisterUserCmd): DomainValidation[UserRegisteredEvent] = {
+      // FIXME: need to set the hasher and the salt
+      val hasher = "hasher"
+      val salt = None
       for {
         emailAvailable <- userRepository.emailAvailable(cmd.email)
-        user <- RegisteredUser.create(UserId(cmd.email), -1L, DateTime.now, cmd.name, cmd.email,
-          cmd.password, cmd.hasher, cmd.salt, cmd.avatarUrl)
+        user <- RegisteredUser.create(
+          UserId(cmd.email), -1L, DateTime.now, cmd.name, cmd.email, cmd.password,
+          hasher, salt, cmd.avatarUrl)
         event <- UserRegisteredEvent(user.id.toString, DateTime.now, user.name, user.email,
           user.password, user.hasher, user.salt, user.avatarUrl).success
       } yield {
@@ -136,8 +140,9 @@ trait UserProcessorComponent {
       for {
         user <- userRepository.getByKey(UserId(cmd.email))
         activeUser <- isUserActive(user)
-        updatedUser <- activeUser.update(cmd.expectedVersion, timeNow, cmd.name, cmd.email, cmd.password,
-          cmd.hasher, cmd.salt, cmd.avatarUrl)
+        updatedUser <- activeUser.update(
+          cmd.expectedVersion, timeNow, cmd.name, cmd.email, cmd.password,
+          activeUser.hasher, activeUser.salt, cmd.avatarUrl)
         event <- UserUpdatedEvent(updatedUser.id.id, updatedUser.version, timeNow, updatedUser.name,
           updatedUser.email, updatedUser.password, updatedUser.hasher, updatedUser.salt,
           updatedUser.avatarUrl).success
@@ -161,6 +166,7 @@ trait UserProcessorComponent {
     def validateCmd(cmd: UnlockUserCmd): DomainValidation[UserUnlockedEvent] = {
       val timeNow = DateTime.now
       for {
+        logmsg <- log.info(s"******* cmd : $cmd").success
         user <- userRepository.getByKey(UserId(cmd.email))
         lockedUser <- isUserLocked(user)
         unlockedUser <- lockedUser.unlock(cmd.expectedVersion, timeNow)

@@ -10,8 +10,6 @@ object UserCommands {
     name: String,
     email: String,
     password: String,
-    hasher: String,
-    salt: Option[String],
     avatarUrl: Option[String])
     extends UserCommand
 
@@ -20,32 +18,30 @@ object UserCommands {
     name: String,
     email: String,
     password: String,
-    hasher: String,
-    salt: Option[String],
     avatarUrl: Option[String])
     extends UserCommand
 
   case class ActivateUserCmd(
-    email: String,
-    expectedVersion: Option[Long])
+    expectedVersion: Option[Long],
+    email: String)
       extends UserCommand
       with HasExpectedVersion
 
   case class LockUserCmd(
-    email: String,
-    expectedVersion: Option[Long])
+    expectedVersion: Option[Long],
+    email: String)
       extends UserCommand
       with HasExpectedVersion
 
   case class UnlockUserCmd(
-    email: String,
-    expectedVersion: Option[Long])
+    expectedVersion: Option[Long],
+    email: String)
       extends UserCommand
       with HasExpectedVersion
 
   case class RemoveUserCmd(
-    email: String,
-    expectedVersion: Option[Long])
+    expectedVersion: Option[Long],
+    email: String)
       extends UserCommand
       with HasExpectedVersion
 

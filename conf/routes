@@ -72,9 +72,12 @@ POST    /logout                        org.biobank.controllers.Application.logou
 # Users
 GET     /users                         org.biobank.controllers.UserController.list
 GET     /users/:id                     org.biobank.controllers.UserController.user(id: String)
-POST    /users                         org.biobank.controllers.UserController.createUser()
+POST    /users                         org.biobank.controllers.UserController.addUser()
 PUT     /users/:id                     org.biobank.controllers.UserController.updateUser(id: String)
 DELETE  /users/:id                     org.biobank.controllers.UserController.removeUser(id: String)
+PUT     /users/activate/:id            org.biobank.controllers.UserController.activateUser(id: String)
+PUT     /users/lock/:id                org.biobank.controllers.UserController.lockUser(id: String)
+PUT     /users/unlock/:id              org.biobank.controllers.UserController.unlockUser(id: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                  controllers.Assets.at(path="/public", file)

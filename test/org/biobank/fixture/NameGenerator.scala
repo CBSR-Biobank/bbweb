@@ -55,7 +55,7 @@ class NameGenerator(klass: Class[_]) {
 
   def nextEmail[T: ClassTag]: String = {
     val className = implicitly[ClassTag[T]].runtimeClass.getSimpleName
-    uniqueName(s"$rootSimpleName-${className}") + "@test.com"
+    uniqueName(s"$rootSimpleName-$className") + "@test.com"
   }
 
 }

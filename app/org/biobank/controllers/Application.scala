@@ -25,7 +25,7 @@ object Application extends Controller  {
         routes.javascript.Application.login,
         routes.javascript.Application.logout,
         routes.javascript.UserController.user,
-        routes.javascript.UserController.createUser,
+        routes.javascript.UserController.addUser,
         routes.javascript.UserController.updateUser,
         routes.javascript.UserController.removeUser
         // TODO Add your routes here

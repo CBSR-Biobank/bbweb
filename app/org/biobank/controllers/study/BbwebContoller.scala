@@ -13,7 +13,7 @@ trait BbwebController {
   protected def doCommand[T <: Command](
     func: T => Future[Result])(
     implicit reads: Reads[T]) = Action.async(BodyParsers.parse.json) { request =>
-    Logger.info(s"doCommand: body: ${request.body}")
+    Logger.info(s"doCommand: request body: ${request.body}")
     val cmdResult = request.body.validate[T]
     cmdResult.fold(
       errors => {

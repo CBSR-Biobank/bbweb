@@ -31,7 +31,7 @@ trait FactoryComponent {
     def createRegisteredUser: RegisteredUser = {
       val version = -1L
       val name = nameGenerator.next[User]
-      val email = "user1@test.com"
+      val email = nameGenerator.nextEmail[User]
       val id = UserId(email)
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]

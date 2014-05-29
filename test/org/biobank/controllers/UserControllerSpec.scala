@@ -9,6 +9,7 @@ import play.api.test.FakeApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
+import org.joda.time.DateTime
 
 /**
   * Tests the REST API for [[User]].
@@ -28,7 +29,7 @@ class UserControllerSpec extends ControllerFixture {
         }
       }
 
-      it("should list a user", Tag("single")) {
+      it("should list a user") {
         running(fakeApplication) {
           val appRepositories = new AppRepositories
 
@@ -49,7 +50,8 @@ class UserControllerSpec extends ControllerFixture {
           val appRepositories = new AppRepositories
 
           val users = List(factory.createRegisteredUser, factory.createRegisteredUser)
-          appRepositories.userRepository.removeAll
+          log.info(s"user: $users")
+          //appRepositories.userRepository.removeAll
           users.map(user => appRepositories.userRepository.put(user))
 
           val json = makeJsonRequest(GET, "/users")
@@ -66,9 +68,10 @@ class UserControllerSpec extends ControllerFixture {
         running(fakeApplication) {
           val user = factory.createRegisteredUser
           val cmdJson = Json.obj(
-            "type"      -> "AddUserCmd",
+            "type"      -> "RegisterUserCmd",
             "name"      -> user.name,
             "email"     -> user.email,
+            "password"  -> "testpassword",
             "avatarUrl" -> user.avatarUrl)
           val json = makeJsonRequest(POST, "/users", json = cmdJson)
 
@@ -82,16 +85,17 @@ class UserControllerSpec extends ControllerFixture {
         running(fakeApplication) {
           val appRepositories = new AppRepositories
 
-          val user = factory.createRegisteredUser
+          val user = factory.createRegisteredUser.activate(Some(0), DateTime.now) | fail
           appRepositories.userRepository.put(user)
 
           val cmdJson = Json.obj(
             "type"            -> "UpdateUserCmd",
             "id"              -> user.id.id,
             "expectedVersion" -> Some(user.version),
-            "name"      -> user.name,
-            "email"     -> user.email,
-            "avatarUrl" -> user.avatarUrl)
+            "name"            -> user.name,
+            "email"           -> user.email,
+            "password"        -> "testpassword",
+            "avatarUrl"       -> user.avatarUrl)
           val json = makeJsonRequest(PUT, s"/users/${user.id.id}", json = cmdJson)
 
           (json \ "message").as[String] should include ("user updated")
@@ -112,30 +116,8 @@ class UserControllerSpec extends ControllerFixture {
       }
     }
 
-    describe("POST /users/enable") {
-      it("should enable a user") {
-        running(fakeApplication) {
-
-          val appRepositories = new AppRepositories
-
-          val user = factory.createRegisteredUser
-          appRepositories.userRepository.put(user)
-          appRepositories.specimenGroupRepository.put(factory.createSpecimenGroup)
-          appRepositories.collectionEventTypeRepository.put(factory.createCollectionEventType)
-
-          val cmdJson = Json.obj(
-            "type" -> "EnableUserCmd",
-            "id" -> user.id.id,
-            "expectedVersion" -> Some(user.version))
-          val json = makeJsonRequest(POST, "/users/enable", json = cmdJson)
-
-          (json \ "message").as[String] should include ("user enabled")
-        }
-      }
-    }
-
-    describe("POST /users/enable") {
-      it("should not enable a user") {
+    describe("PUT /users/activate") {
+      it("should activate a user") {
         running(fakeApplication) {
 
           val appRepositories = new AppRepositories
@@ -144,76 +126,56 @@ class UserControllerSpec extends ControllerFixture {
           appRepositories.userRepository.put(user)
 
           val cmdJson = Json.obj(
-            "type" -> "EnableUserCmd",
-            "id" -> user.id.id,
-            "expectedVersion" -> Some(user.version))
-          val json = makeJsonRequest(POST, "/users/enable", BAD_REQUEST, cmdJson)
+            "type"            -> "ActivateUserCmd",
+            "expectedVersion" -> Some(user.version),
+            "email"           -> user.id.id)
+          val json = makeJsonRequest(PUT, s"/users/activate/${user.id.id}", json = cmdJson)
 
-          (json \ "message").as[String] should include ("no specimen groups")
+          (json \ "message").as[String] should include ("user activated")
         }
       }
     }
 
-    describe("POST /users/disable") {
-      it("should disable a user") {
+    describe("PUT /users/lock") {
+      it("should lock a user") {
         running(fakeApplication) {
 
           val appRepositories = new AppRepositories
 
-          val user = factory.createRegisteredUser.activate(Some(0), org.joda.time.DateTime.now) | fail
+          val user = factory.createRegisteredUser.activate(Some(0), DateTime.now) | fail
           appRepositories.userRepository.put(user)
 
           val cmdJson = Json.obj(
-            "type" -> "DisableUserCmd",
-            "id" -> user.id.id,
-            "expectedVersion" -> Some(user.version))
-          val json = makeJsonRequest(POST, "/users/disable", json = cmdJson)
+            "type"            -> "LockUserCmd",
+            "expectedVersion" -> Some(user.version),
+            "email"           -> user.id.id)
+          val json = makeJsonRequest(PUT, s"/users/lock/${user.id.id}", json = cmdJson)
 
-          (json \ "message").as[String] should include ("user disabled")
+          (json \ "message").as[String] should include ("user locked")
         }
       }
     }
 
-    describe("POST /users/retire") {
-      it("should retire a user") {
+    describe("PUT /users/unlock") {
+      it("should unlock a user", Tag("single")) {
         running(fakeApplication) {
 
           val appRepositories = new AppRepositories
 
-          val user = factory.createRegisteredUser
-          appRepositories.userRepository.put(user)
+          val user = factory.createRegisteredUser.activate(Some(0), DateTime.now) | fail
+          val lockedUser = user.lock(user.versionOption, DateTime.now) | fail
+          appRepositories.userRepository.put(lockedUser)
 
           val cmdJson = Json.obj(
-            "type" -> "RetireUserCmd",
-            "id" -> user.id.id,
-            "expectedVersion" -> Some(user.version))
-          val json = makeJsonRequest(POST, "/users/retire", json = cmdJson)
+            "type"            -> "UnlockUserCmd",
+            "expectedVersion" -> Some(lockedUser.version),
+            "email"           -> lockedUser.id.id)
+          val json = makeJsonRequest(PUT, s"/users/unlock/${lockedUser.id.id}", json = cmdJson)
 
-          (json \ "message").as[String] should include ("user retired")
-        }
-      }
-    }
-
-    describe("POST /users/unretire") {
-      it("should unretire a user") {
-        running(fakeApplication) {
-
-          val appRepositories = new AppRepositories
-
-          val user = factory.createRegisteredUser.activate(Some(0), org.joda.time.DateTime.now) | fail
-          appRepositories.userRepository.put(user)
-
-          val cmdJson = Json.obj(
-            "type" -> "UnretireUserCmd",
-            "id" -> user.id.id,
-            "expectedVersion" -> Some(user.version))
-          val json = makeJsonRequest(POST, "/users/unretire", json = cmdJson)
-
-          (json \ "message").as[String] should include ("user unretired")
+          (json \ "message").as[String] should include ("user unlocked")
         }
       }
     }
 
   }
-
 }
