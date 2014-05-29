@@ -142,7 +142,9 @@ case class ActiveUser private (
       validatedUser <- RegisteredUser.create(id, version, addedDate, name, email, password, hasher,
         salt, avatarUrl)
       registeredUser <- validatedUser.activate(validatedUser.versionOption, dateTime)
-      udpatedUser <- validatedUser.copy(lastUpdateDate = Some(dateTime)).success
+      udpatedUser <- registeredUser.copy(
+        version = version + 1,
+        lastUpdateDate = Some(dateTime)).success
     } yield udpatedUser
   }
 }

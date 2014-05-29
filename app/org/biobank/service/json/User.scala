@@ -10,13 +10,17 @@ import scala.collection.immutable.Map
 
 object User {
 
+  implicit val userIdWriter = Writes{ (userId: UserId) => JsString(userId.id) }
+
   implicit val userWrites = new Writes[User] {
     def writes(user: User) = Json.obj(
+      "id"             -> user.id,
+      "version"        -> user.version,
+      "addedDate"      -> user.addedDate,
+      "lastUpdateDate" -> user.lastUpdateDate,
       "name"           -> user.name,
       "email"          -> user.email,
-      "avatarUrl"      -> user.avatarUrl,
-      "addedDate"      -> user.addedDate,
-      "lastUpdateDate" -> user.lastUpdateDate
+      "avatarUrl"      -> user.avatarUrl
     )
   }
 

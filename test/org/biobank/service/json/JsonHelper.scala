@@ -24,9 +24,9 @@ object JsonHelper extends Matchers {
 
   def compareObj(json: JsValue, user: User)  = {
     compareEntity(json, user)
-    (json \ "name").as[String]      should be (user.name)
-    (json \ "email").as[String]     should be (user.email)
-    (json \ "avatarurl").as[String] should be (user.avatarUrl)
+    (json \ "name").as[String]              should be (user.name)
+    (json \ "email").as[String]             should be (user.email)
+    (json \ "avatarurl").as[Option[String]] should be (user.avatarUrl)
   }
 
   def compareObj(json: JsValue, study: Study)  = {

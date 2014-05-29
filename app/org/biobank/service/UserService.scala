@@ -24,6 +24,10 @@ trait UserServiceComponent {
 
     val log = LoggerFactory.getLogger(this.getClass)
 
+    def getAll: Set[User] = {
+      userRepository.allUsers
+    }
+
     def getByEmail(email: String): DomainValidation[User] = {
       userRepository.getByKey(UserId(email))
     }

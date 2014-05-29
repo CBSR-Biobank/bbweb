@@ -70,6 +70,7 @@ POST    /login                         org.biobank.controllers.Application.login
 POST    /logout                        org.biobank.controllers.Application.logout()
 
 # Users
+GET     /users                         org.biobank.controllers.UserController.list
 GET     /users/:id                     org.biobank.controllers.UserController.user(id: String)
 POST    /users                         org.biobank.controllers.UserController.createUser()
 PUT     /users/:id                     org.biobank.controllers.UserController.updateUser(id: String)

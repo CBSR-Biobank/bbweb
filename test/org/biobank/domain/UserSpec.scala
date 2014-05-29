@@ -35,8 +35,10 @@ class UserSpec extends DomainSpec {
       val salt = Some(nameGenerator.next[User])
       val avatarUrl = Some("http://test.com/")
 
+      val timeNow = DateTime.now
+
       val validation = RegisteredUser.create(
-        id, version, DateTime.now, name, email, password, hasher, salt, avatarUrl)
+        id, version, timeNow, name, email, password, hasher, salt, avatarUrl)
       validation should be ('success)
       validation map { user =>
         user shouldBe a[RegisteredUser]
@@ -51,7 +53,7 @@ class UserSpec extends DomainSpec {
           'avatarUrl (avatarUrl)
         )
 
-        (user.addedDate to DateTime.now).millis should be < 200L
+        user.addedDate should be (timeNow)
         user.lastUpdateDate should be (None)
       }
     }

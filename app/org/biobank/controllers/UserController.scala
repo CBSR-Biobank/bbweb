@@ -20,9 +20,12 @@ object UserController extends Controller  {
     sys.error("Bbweb plugin is not registered")
   }
 
+  def list = Action(parse.empty) { request =>
+    Ok(Json.toJson(userService.getAll.toList))
+  }
+
   /** Retrieves the user for the given id as JSON */
   def user(id: String) = Action(parse.empty) { request =>
-    // TODO Find user and convert to JSON
     Logger.info(s"user: $id")
     userService.getByEmail(id).fold(
       err => {
