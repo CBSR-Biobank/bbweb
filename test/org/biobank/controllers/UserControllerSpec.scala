@@ -28,7 +28,7 @@ class UserControllerSpec extends ControllerFixture {
         }
       }
 
-      it("should list a user") {
+      it("should list a user", Tag("single")) {
         running(fakeApplication) {
           val appRepositories = new AppRepositories
 
