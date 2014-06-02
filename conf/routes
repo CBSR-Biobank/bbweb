@@ -59,16 +59,6 @@ DELETE  /studies/sltypes/:id           org.biobank.controllers.study.SpecimenLin
 GET     /studies/:id                   org.biobank.controllers.study.StudyController.readStudy(id)
 PUT     /studies/:id                   org.biobank.controllers.study.StudyController.updateStudy(id)
 
-# JavaScript routes object
-GET     /jsroutes.js                   org.biobank.controllers.Application.jsRoutes()
-
-# Routes used by Angular
-# ~~~~
-
-# Authentication
-POST    /login                         org.biobank.controllers.Application.login()
-POST    /logout                        org.biobank.controllers.Application.logout()
-
 # Users
 GET     /users                         org.biobank.controllers.UserController.list
 GET     /users/:id                     org.biobank.controllers.UserController.user(id: String)
@@ -78,6 +68,16 @@ DELETE  /users/:id                     org.biobank.controllers.UserController.re
 PUT     /users/activate/:id            org.biobank.controllers.UserController.activateUser(id: String)
 PUT     /users/lock/:id                org.biobank.controllers.UserController.lockUser(id: String)
 PUT     /users/unlock/:id              org.biobank.controllers.UserController.unlockUser(id: String)
+
+# JavaScript routes object
+GET     /jsroutes.js                   org.biobank.controllers.Application.jsRoutes()
+
+# Routes used by Angular
+# ~~~~
+
+# Authentication
+POST    /login                         org.biobank.controllers.Application.login()
+POST    /logout                        org.biobank.controllers.Application.logout()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                  controllers.Assets.at(path="/public", file)

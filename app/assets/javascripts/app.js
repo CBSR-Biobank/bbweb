@@ -5,10 +5,14 @@
  * Splitting it into several RequireJS modules allows async loading. We cannot take full advantage
  * of RequireJS and lazy-load stuff because the angular modules have their own dependency system.
  */
-define(["angular", "home", "user", "dashboard"], function(angular) {
+define(["angular", "home", "user", "study", "dashboard"], function(angular) {
   "use strict";
 
   // We must already declare most dependencies here (except for common), or the submodules' routes
   // will not be resolved
-  return angular.module("app", ["biobank.home", "biobank.user", "biobank.dashboard"]);
+  return angular.module("app", [
+    "biobank.home",
+    "biobank.user",
+    "biobank.study",
+    "biobank.dashboard"]);
 });
