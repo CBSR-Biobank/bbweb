@@ -9,8 +9,10 @@ define(["angular"], function(angular) {
    */
   var StudiesCtrl = function($scope, $location, user, studyService) {
     $scope.user = user;
-    $scope.studies = studyService.list;
-    console.log("user: " + user);
+    $scope.studies = studyService.list();
+    for (var study in $scope.studies) {
+      console.log("study: " + study.name);
+    }
   };
 
   return {

@@ -6,9 +6,10 @@ define(["angular", "./controllers", "common"], function(angular, controllers) {
   mod.config(["$routeProvider", "userResolve", function($routeProvider, userResolve) {
     $routeProvider
       .when("/studies", {
-        templateUrl:"/assets/templates/study/studies.html",
-        controller:controllers.StudiesCtrl,
-        resolve:userResolve});
+        templateUrl: "/assets/templates/study/studies.html",
+        controller: controllers.StudiesCtrl,
+        resolve: userResolve
+      });
   }]);
   return mod;
 });
