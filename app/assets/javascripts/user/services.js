@@ -6,7 +6,7 @@ define(["angular", "common"], function(angular) {
 
   var mod = angular.module("user.services", ["biobank.common"]);
   mod.factory("userService", ["$http", "$q", "playRoutes", function($http, $q, playRoutes) {
-  var user, token;
+    var user, token;
     return {
       loginUser : function(credentials) {
         return playRoutes.controllers.Application.login().post(credentials).then(function(response) {

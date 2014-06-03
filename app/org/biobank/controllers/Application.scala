@@ -39,7 +39,6 @@ object Application extends Controller  {
    */
   def login() = Action(parse.json) { implicit request =>
     // TODO Check credentials, log user in, return correct token
-    Logger.info(s"login: ")
     val token = java.util.UUID.randomUUID().toString
     Ok(Json.obj("token" -> token))
   }
