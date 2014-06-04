@@ -5,22 +5,14 @@
   <i class="glyphicon glyphicon-edit"></i></a></h2>
 </div>
 <div class="clearfix">
-
-  <!-- use HTML data attributes to pass parameters to javascript -->
-  <ul class="nav nav-tabs">
-    <li class="active"><a data-target="#summary" data-toggle="tab">Summary</a></li>
-    <li><a data-target="#participants" data-toggle="tab">Participants</a></li>
-    <li><a data-target="#specimens" data-toggle="tab">Specimens</a></li>
-    <li><a data-target="#collectionEvents" data-toggle="tab">Collection Events</a></li>
-    <li><a data-target="#processingEvents" data-toggle="tab">Processing Events</a></li>
-  </ul>
-
   <div class="alert alert-success">
     Flash message goes here when study is updated
   </div>
 
-  <div class="tab-content">
-    <div class="tab-pane fade in active" id="summary">
+  <!-- use HTML data attributes to pass parameters to javascript -->
+  <tabset>
+    <tab>
+      <tab-heading>Summary</tab-heading>
       <h4>{{study.name}}</h4>
       <small class="muted">Status: {{study.status}}</small>
       <p><small class="muted">Added: {{study.addedDate}}</small></p>
@@ -28,10 +20,10 @@
         <small class="muted">Last updated: {{study.lastUpdateDate}}</small>
       </p>
       <p>{{study.description}}</p>
-    </div>
-    <div class="tab-pane fade" id="participants"></div>
-    <div class="tab-pane fade" id="specimens"></div>
-    <div class="tab-pane fade" id="collectionEvents"></div>
-    <div class="tab-pane fade" id="processingEvents"></div>
-  </div>
+    </tab>
+    <tab heading="Participants">Participants</tab>
+    <tab heading="Specimens">Specimens</tab>
+    <tab heading="CollectionEvents">Collection Events</tab>
+    <tab heading="ProcessingEvents">Processing Events</tab>
+  </tabset>
 </div>

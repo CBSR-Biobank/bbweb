@@ -5,5 +5,10 @@
 define(["angular", "./routes", "./services"], function(angular) {
   "use strict";
 
-  return angular.module("biobank.study", ["ngCookies", "ngRoute", "study.routes", "study.services"]);
+  return angular.module("biobank.study", [
+    "ngCookies",
+    'ui.bootstrap',
+    "ngRoute",
+    "study.routes",
+    "study.services"]);
 });

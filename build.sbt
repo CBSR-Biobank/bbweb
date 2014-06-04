@@ -51,6 +51,7 @@ libraryDependencies ++= Seq(
     "org.webjars", "jquery"),
   "org.webjars"            %  "angularjs"                      % "1.3.0-beta.8" exclude(
     "org.webjars", "jquery"),
+  "org.webjars"            % "angular-ui-bootstrap"            % "0.11.0-2",
   "org.scalatest"          %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
     ExclusionRule(organization = "org.junit", name = "junit")
   ),
