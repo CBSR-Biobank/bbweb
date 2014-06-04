@@ -9,6 +9,10 @@ define(["angular", "./controllers", "common"], function(angular, controllers) {
         templateUrl: "/assets/templates/study/studies.html",
         controller: controllers.StudiesCtrl,
         resolve: userResolve
+      }).when("/studies/:id", {
+        templateUrl: "/assets/templates/study/study.html",
+        controller: controllers.StudyCtrl,
+        resolve: userResolve
       });
   }]);
   return mod;

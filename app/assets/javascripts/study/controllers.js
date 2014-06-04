@@ -14,8 +14,16 @@ define(["angular"], function(angular) {
     });
   };
 
+  var StudyCtrl = function($scope, $location, user, studyService) {
+    studyService.query().then(function(response) {
+      $scope.study = response.data;
+      $scope.user = user;
+    });
+  };
+
   return {
-    StudiesCtrl: StudiesCtrl
+    StudiesCtrl: StudiesCtrl,
+    StudyCtrl: StudyCtrl
   };
 
 });

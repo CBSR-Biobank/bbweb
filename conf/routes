@@ -7,11 +7,11 @@ GET     /                              org.biobank.controllers.Application.index
 
 # studies
 GET     /studies                       org.biobank.controllers.study.StudyController.list
-POST    /studies                       org.biobank.controllers.study.StudyController.addStudy
-POST    /studies/enable                org.biobank.controllers.study.StudyController.enableStudy
-POST    /studies/disable               org.biobank.controllers.study.StudyController.disableStudy
-POST    /studies/retire                org.biobank.controllers.study.StudyController.retireStudy
-POST    /studies/unretire              org.biobank.controllers.study.StudyController.unretireStudy
+POST    /studies                       org.biobank.controllers.study.StudyController.add
+POST    /studies/enable                org.biobank.controllers.study.StudyController.enable
+POST    /studies/disable               org.biobank.controllers.study.StudyController.disable
+POST    /studies/retire                org.biobank.controllers.study.StudyController.retire
+POST    /studies/unretire              org.biobank.controllers.study.StudyController.unretire
 
 # specimen groups
 GET     /studies/sgroups               org.biobank.controllers.study.SpecimenGroupController.list
@@ -56,8 +56,8 @@ PUT     /studies/sltypes/:id           org.biobank.controllers.study.SpecimenLin
 DELETE  /studies/sltypes/:id           org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(id)
 
 # study
-GET     /studies/:id                   org.biobank.controllers.study.StudyController.readStudy(id)
-PUT     /studies/:id                   org.biobank.controllers.study.StudyController.updateStudy(id)
+GET     /studies/:id                   org.biobank.controllers.study.StudyController.query(id)
+PUT     /studies/:id                   org.biobank.controllers.study.StudyController.update(id)
 
 # Users
 GET     /users                         org.biobank.controllers.UserController.list

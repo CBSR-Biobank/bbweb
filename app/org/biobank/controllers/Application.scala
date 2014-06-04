@@ -25,6 +25,7 @@ object Application extends Controller  {
         routes.javascript.Application.login,
         routes.javascript.Application.logout,
         org.biobank.controllers.study.routes.javascript.StudyController.list,
+        org.biobank.controllers.study.routes.javascript.StudyController.query,
         routes.javascript.UserController.user,
         routes.javascript.UserController.addUser,
         routes.javascript.UserController.updateUser,

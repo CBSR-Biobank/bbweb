@@ -30,16 +30,14 @@ object StudyController extends BbwebController {
     Ok(json)
   }
 
-  def readStudy(id: String) = Action { request =>
-    Logger.info(s"readStudy: id: $id")
+  def query(id: String) = Action { request =>
     studyService.getStudy(id).fold(
       err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
       study => Ok(Json.toJson(study))
     )
   }
 
-  def addStudy = doCommand { cmd: AddStudyCmd =>
-    Logger.info(s"addStudy: cmd: $cmd")
+  def add = doCommand { cmd: AddStudyCmd =>
     val future = studyService.addStudy(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -49,7 +47,7 @@ object StudyController extends BbwebController {
     }
   }
 
-  def updateStudy(id: String) = doCommand { cmd : UpdateStudyCmd =>
+  def update(id: String) = doCommand { cmd : UpdateStudyCmd =>
     val future = studyService.updateStudy(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -59,7 +57,7 @@ object StudyController extends BbwebController {
     }
   }
 
-  def enableStudy = doCommand { cmd: EnableStudyCmd =>
+  def enable = doCommand { cmd: EnableStudyCmd =>
     val future = studyService.enableStudy(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -69,7 +67,7 @@ object StudyController extends BbwebController {
     }
   }
 
-  def disableStudy = doCommand { cmd: DisableStudyCmd =>
+  def disable = doCommand { cmd: DisableStudyCmd =>
     val future = studyService.disableStudy(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -79,7 +77,7 @@ object StudyController extends BbwebController {
     }
   }
 
-  def retireStudy = doCommand { cmd: RetireStudyCmd =>
+  def retire = doCommand { cmd: RetireStudyCmd =>
     val future = studyService.retireStudy(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -89,7 +87,7 @@ object StudyController extends BbwebController {
     }
   }
 
-  def unretireStudy = doCommand { cmd: UnretireStudyCmd =>
+  def unretire = doCommand { cmd: UnretireStudyCmd =>
     val future = studyService.unretireStudy(cmd)(null)
     future.map { validation =>
       validation.fold(

@@ -25,3 +25,4 @@ addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.4")
 // plugin for Play Framework apps which works with a Chrome Extension to auto-refresh your browser
 // when changes are made to the web app
 addSbtPlugin("com.jamesward" %% "play-auto-refresh" % "0.0.7")
+
