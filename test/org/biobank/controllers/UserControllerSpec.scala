@@ -59,6 +59,7 @@ class UserControllerSpec extends ControllerFixture {
           jsonList should have size users.size
 
           (jsonList zip users).map { item => compareObj(item._1, item._2) }
+          ()
         }
       }
     }

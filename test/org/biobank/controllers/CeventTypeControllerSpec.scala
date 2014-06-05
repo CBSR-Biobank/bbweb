@@ -188,6 +188,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
 
           jsonList should have size cetypes.size
             (jsonList zip cetypes).map { item => compareObj(item._1, item._2) }
+          ()
         }
       }
     }

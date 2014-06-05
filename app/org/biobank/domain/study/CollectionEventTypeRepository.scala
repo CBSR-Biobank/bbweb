@@ -54,7 +54,7 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
         if (cet.studyId.equals(studyId))
           cet.success
         else DomainError(
-          "study does not have collection event type:{ studyId: $studyId, ceventTypeId: $ceventTypeId }")
+          s"study does not have collection event type:{ studyId: $studyId, ceventTypeId: $ceventTypeId }")
           .failNel
       )
     }

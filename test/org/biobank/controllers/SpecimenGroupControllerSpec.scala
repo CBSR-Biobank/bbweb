@@ -132,6 +132,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           val jsonList = json.as[List[JsObject]]
           jsonList should have size sgroups.size
             (jsonList zip sgroups).map { item => compareObj(item._1, item._2) }
+          ()
         }
       }
     }

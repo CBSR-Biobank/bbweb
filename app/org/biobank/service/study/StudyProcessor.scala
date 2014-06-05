@@ -97,7 +97,9 @@ trait StudyProcessorComponent
 
       case cmd: SpecimenLinkAnnotationTypeCommand => validateAndForward(specimenLinkAnnotationTypeProcessor,  cmd)
 
-      case other => DomainError("invalid command received")
+      case other =>
+        DomainError("invalid command received")
+        ()
     }
 
     private def validateAndForward(childActor: ActorRef, cmd: StudyCommandWithId) = {
@@ -302,7 +304,7 @@ trait StudyProcessorComponent
         err => DomainError(s"no study with id: $studyId").failNel,
         study => study match {
           case dstudy: DisabledStudy => dstudy.success
-          case _ => DomainError("study is not disabled: ${study.name}").failNel
+          case _ => DomainError(s"study is not disabled: ${study.name}").failNel
         }
       )
     }

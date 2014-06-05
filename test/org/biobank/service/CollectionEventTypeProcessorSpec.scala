@@ -36,6 +36,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
   override def beforeEach: Unit = {
     disabledStudy = factory.createDisabledStudy
     studyRepository.put(disabledStudy)
+    ()
   }
 
   private def askAddCommand(

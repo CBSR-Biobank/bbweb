@@ -192,6 +192,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
           jsonList should have size sltypes.size
             (jsonList zip sltypes).map { item => compareObj(item._1, item._2) }
+          ()
         }
       }
     }

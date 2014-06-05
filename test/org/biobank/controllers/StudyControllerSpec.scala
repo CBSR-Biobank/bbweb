@@ -58,6 +58,7 @@ class StudyControllerSpec extends ControllerFixture {
           jsonList should have size studies.size
 
           (jsonList zip studies).map { item => compareObj(item._1, item._2) }
+          ()
         }
       }
     }

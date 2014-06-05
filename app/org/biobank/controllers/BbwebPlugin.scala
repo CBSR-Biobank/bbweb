@@ -56,7 +56,7 @@ class BbwebPlugin(val app: play.api.Application) extends Plugin with TopComponen
   /**
    * Creates SQL DDL scripts on application start-up.
    */
-  private def createSqlDdlScripts: Unit = {
+  private def createSqlDdlScripts(): Unit = {
     // if (app.mode != Mode.Prod) {
     //   app.configuration.getConfig(configKey).foreach { configuration =>
     //     configuration.keys.foreach { database =>

@@ -75,7 +75,8 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
   // create the study to be used for each tests*
   override def beforeEach: Unit = {
     disabledStudy = factory.createDisabledStudy
-      studyRepository.put(disabledStudy)
+    studyRepository.put(disabledStudy)
+    ()
   }
 
   "A study processor" can {

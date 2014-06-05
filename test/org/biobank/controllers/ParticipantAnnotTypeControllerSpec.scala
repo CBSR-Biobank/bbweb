@@ -161,6 +161,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
 
           jsonList should have size annotTypes.size
             (jsonList zip annotTypes).map { item => compareObj(item._1, item._2) }
+          ()
         }
       }
     }

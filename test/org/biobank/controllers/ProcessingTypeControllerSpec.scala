@@ -156,6 +156,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
           jsonList should have size proctypes.size
             (jsonList zip proctypes).map { item => compareObj(item._1, item._2) }
+          ()
         }
       }
     }

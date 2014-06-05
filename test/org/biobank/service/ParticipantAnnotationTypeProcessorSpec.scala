@@ -25,6 +25,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
   override def beforeEach: Unit = {
     disabledStudy = factory.createDisabledStudy
     studyRepository.put(disabledStudy)
+    ()
   }
 
   "A study processor" can {

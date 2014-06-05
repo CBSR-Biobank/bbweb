@@ -1,6 +1,6 @@
 package org.biobank.domain
 
-package object study {
+package study {
 
   trait HasStudyId {
 

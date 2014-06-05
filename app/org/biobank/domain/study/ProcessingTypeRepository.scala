@@ -50,7 +50,7 @@ trait ProcessingTypeRepositoryComponentImpl extends ProcessingTypeRepositoryComp
           cet.success
         } else {
           DomainError(
-            "study does not have processing type:{ studyId: $studyId, processingTypeId: $processingTypeId }")
+            s"study does not have processing type:{ studyId: $studyId, processingTypeId: $processingTypeId }")
             .failNel
         }
       )

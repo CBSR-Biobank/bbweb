@@ -12,7 +12,9 @@ package object domain {
 
   /** Contains an error messsage when a command fails validation. */
   type DomainError = String
+}
 
+package domain {
   /** Factory object to create a domain error. */
   object DomainError {
     def apply(msg: String): DomainError = msg

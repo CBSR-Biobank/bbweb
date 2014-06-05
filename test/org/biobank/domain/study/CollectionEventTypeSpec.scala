@@ -23,7 +23,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
@@ -57,7 +58,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = !cet.recurring
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val cet2 = cet.update(
@@ -93,7 +95,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
@@ -112,7 +115,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
@@ -131,7 +135,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
@@ -150,7 +155,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       var name: String = null
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
@@ -178,7 +184,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val name = nameGenerator.next[CollectionEventType]
       var description: Option[String] = Some(null)
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
@@ -206,7 +213,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("", 1, Option(1)))
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
@@ -226,7 +234,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", -1, Option(1)))
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
@@ -245,7 +254,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(-1)))
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
@@ -264,7 +274,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val name = nameGenerator.next[CollectionEventType]
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("", false))
 
       val validation = CollectionEventType.create(
@@ -284,7 +295,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val name = ""
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
-      val specimenGroupData = List(CollectionEventTypeSpecimenGroupData("x", 1, Option(1)))
+      val specimenGroupData = List(
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("1", false))
 
       val validation = CollectionEventType.create(
