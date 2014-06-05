@@ -1,8 +1,8 @@
 /** Common filters. */
-define(["angular"], function(angular) {
-  "use strict";
+define(['angular'], function(angular) {
+  'use strict';
 
-  var mod = angular.module("common.filters", []);
+  var mod = angular.module('common.filters', []);
 
   /**
    * Extracts a given property from the value it is applied to.
@@ -10,13 +10,13 @@ define(["angular"], function(angular) {
    * (user | property:'name')
    * }}}
    */
-  mod.filter("property", function(value, property) {
+  mod.filter('property', function(value, property) {
     if (angular.isObject(value)) {
       if (value.hasOwnProperty(property)) {
         return value[property];
       }
     }
-    return "invalid property on value: " + property;
+    return 'invalid property on value: ' + property;
   });
 
   mod.filter('truncate', function () {
@@ -25,7 +25,7 @@ define(["angular"], function(angular) {
         length = 10;
 
       if (end === undefined)
-        end = "...";
+        end = '...';
 
       if (text.length <= length || text.length - end.length <= length) {
         return text;

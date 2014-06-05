@@ -6,19 +6,19 @@
  * // For `POST /login controller.Application.login()` Play generates:
  * jsRoutes.controllers.Application.login()
  * // With playRoutes, this can be used like this:
- * playRoutes.controllers.Application.login().post({user:"username", password:"secret"}).then(function(response) {
+ * playRoutes.controllers.Application.login().post({user:'username', password:'secret'}).then(function(response) {
  *   ...
  * )};
  * }}}
  * @author Marius Soutier, 2013
  */
-define(["angular", "require", "jsRoutes"], function(angular, require, jsRoutes) {
-  "use strict";
+define(['angular', 'require', 'jsRoutes'], function(angular, require, jsRoutes) {
+  'use strict';
 
   // The service - will be used by controllers or other services, filters, etc.
-  var mod = angular.module("common.playRoutes", []);
+  var mod = angular.module('common.playRoutes', []);
 
-  mod.service("playRoutes", ["$http", function($http) {
+  mod.service('playRoutes', ['$http', function($http) {
     /**
      * Wrap a Play JS function with a new function that adds the appropriate $http method.
      * Note that the url has been already applied to the $http method so you only have to pass in
@@ -45,7 +45,7 @@ define(["angular", "require", "jsRoutes"], function(angular, require, jsRoutes) 
       };
     };
 
-    // Add package object, in most cases "controllers"
+    // Add package object, in most cases 'controllers'
     var addPackageObject = function(packageName, service) {
       if (!(packageName in service)) {
         service[packageName] = {};

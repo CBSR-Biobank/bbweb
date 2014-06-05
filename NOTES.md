@@ -18,6 +18,14 @@ curl --include --request POST --header "Content-type: application/json" \
     http://localhost:9000/studies/retire
 ```
 
+# Learning AngularjS
+
+https://github.com/jmcunningham/AngularJS-Learning
+
+# Grids or Tables in AngularJS
+
+http://stackoverflow.com/questions/21375073/best-way-to-represent-a-grid-or-table-in-angularjs-with-bootstrap-3
+
 ---
 
 [Back to top](../README.md)
