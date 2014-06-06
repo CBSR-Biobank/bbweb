@@ -47,7 +47,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         cet.specimenGroupData should have length 1
         cet.annotationTypeData should have length 1
 
-        (cet.addedDate to DateTime.now).millis should be < 100L
+        (cet.addedDate to DateTime.now).millis should be < 200L
         cet.lastUpdateDate should be (None)
       }
     }
@@ -214,7 +214,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
+        CollectionEventTypeSpecimenGroupData("", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
@@ -235,7 +235,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
+        CollectionEventTypeSpecimenGroupData("x", -1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
@@ -255,7 +255,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(-1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
