@@ -20,12 +20,12 @@ object UserController extends BbwebController {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = HasToken(parse.empty) { token => userId => implicit request =>
+  def list = AuthAction(parse.empty) { token => userId => implicit request =>
     Ok(Json.toJson(userService.getAll.toList))
   }
 
   /** Retrieves the user for the given id as JSON */
-  def user(id: String) = HasToken(parse.empty) { token => userId => implicit request =>
+  def user(id: String) = AuthAction(parse.empty) { token => userId => implicit request =>
     Logger.info(s"user: $id")
     userService.getByEmail(id).fold(
       err => {

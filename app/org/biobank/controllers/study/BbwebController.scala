@@ -12,7 +12,7 @@ import play.api.mvc.Results._
 trait BbwebController extends Controller with Security {
 
   def CommandAction[A, T <: Command](func: T => UserId => Future[Result])(implicit reads: Reads[T]) = {
-    HasTokenFuture(parse.json) { token => userId => implicit request =>
+    AuthActionAsync(parse.json) { token => userId => implicit request =>
       val cmdResult = request.body.validate[T]
       cmdResult.fold(
         errors => {

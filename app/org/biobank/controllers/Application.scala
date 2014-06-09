@@ -1,5 +1,7 @@
 package org.biobank.controllers
 
+import org.biobank.domain.UserId
+
 import scala.language.postfixOps
 import play.api._
 import play.api.mvc._
@@ -48,7 +50,7 @@ object Application extends Controller with Security {
   def login() = Action(parse.json) { implicit request =>
     // TODO Check credentials, log user in, return correct token
     val token = java.util.UUID.randomUUID().toString
-     val userId = "temp";
+     val userId = UserId("temp");
     Cache.set(token, userId)
     Ok(Json.obj("token" -> token))
       .withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
@@ -60,7 +62,7 @@ object Application extends Controller with Security {
     * Discards the cookie {@link AuthTokenCookieKey} to have AngularJS no longer set the
     * X-XSRF-TOKEN in HTTP header.
     */
-  def logout() = HasToken(parse.json) { token => userId => implicit request =>
+  def logout() = AuthAction(parse.json) { token => userId => implicit request =>
     Cache.remove(token)
     Ok.discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
   }

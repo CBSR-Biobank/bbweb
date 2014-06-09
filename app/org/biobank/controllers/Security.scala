@@ -20,12 +20,18 @@ trait Security { self: Controller =>
   val AuthTokenCookieKey = "XSRF-TOKEN"
   val AuthTokenUrlKey = "auth"
 
+  private def getToken[A](request: Request[A]) = {
+    val maybeToken = request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey))
+    maybeToken flatMap { token =>
+      Some(token)
+    }
+  }
+
   /** Checks that a token is either in the header or in the query string */
-  def HasToken[A](p: BodyParser[A] = parse.anyContent)(
+  def AuthAction[A](p: BodyParser[A] = parse.anyContent)(
     f: String => UserId => Request[A] => Result): Action[A] = {
     Action(p) { implicit request =>
-      val maybeToken = request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey))
-      maybeToken flatMap { token =>
+      getToken(request).flatMap { token =>
         Cache.getAs[UserId](token) map { userId =>
           f(token)(userId)(request)
         }
@@ -34,11 +40,10 @@ trait Security { self: Controller =>
   }
 
   /** Checks that a token is either in the header or in the query string */
-  def HasTokenFuture[A](p: BodyParser[A] = parse.anyContent)(
+  def AuthActionAsync[A](p: BodyParser[A] = parse.anyContent)(
     f: String => UserId => Request[A] => Future[Result]) = {
     Action.async(p) { request =>
-      val maybeToken = request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey))
-      maybeToken flatMap { token =>
+      getToken(request).flatMap { token =>
         Cache.getAs[UserId](token) map { userId =>
           f(token)(userId)(request)
         }

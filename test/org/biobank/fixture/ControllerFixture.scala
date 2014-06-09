@@ -30,14 +30,28 @@ trait ControllerFixture
 
   private val dbName = "bbweb-test"
 
+  var token: String = ""
+
   override def beforeEach: Unit = {
     // ensure the database is empty
     MongoConnection()(dbName)("messages").drop
-      MongoConnection()(dbName)("snapshots").drop
+    MongoConnection()(dbName)("snapshots").drop
   }
 
-  protected def fakeApplication = {
-    FakeApplication(withoutPlugins = List("com.typesafe.plugin.CommonsMailerPlugin"))
+  protected def fakeApplication = () => FakeApplication()
+
+  def doLogin() = {
+    // Log in with test user
+    val request = Json.obj("login" -> true)
+    route(FakeRequest(POST, "/login").withJsonBody(request)) match {
+      case Some(result) =>
+        status(result) should be (OK)
+        contentType(result) should be (Some("application/json"))
+        val json = Json.parse(contentAsString(result))
+        token = (json \ "token").as[String]
+      case _ =>
+        assert(false)
+    }
   }
 
   def makeJsonRequest(
@@ -45,7 +59,7 @@ trait ControllerFixture
     path: String,
     expectedStatus: Int = OK,
     json: JsValue = JsNull): JsValue = {
-    route(FakeRequest(method, path).withJsonBody(json)) match {
+    route(FakeRequest(method, path).withJsonBody(json).withHeaders(("X-XSRF-TOKEN", token))) match {
       case Some(result) =>
         Logger.info(s"makeJsonRequest: result: ${contentAsString(result)}")
         status(result) should be (expectedStatus)

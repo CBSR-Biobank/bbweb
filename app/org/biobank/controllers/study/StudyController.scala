@@ -25,20 +25,20 @@ object StudyController extends BbwebController {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = Action {
+  def list = AuthAction(parse.empty) { token => userId => implicit request =>
     val json = Json.toJson(studyService.getAll.toList)
     Ok(json)
   }
 
-  def query(id: String) = Action { request =>
+  def query(id: String) = AuthAction(parse.empty) { token => userId => implicit request =>
     studyService.getStudy(id).fold(
       err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
       study => Ok(Json.toJson(study))
     )
   }
 
-  def add = CommandAction { cmd: AddStudyCmd => userId =>
-    val future = studyService.addStudy(cmd)(null)
+  def add = CommandAction { cmd: AddStudyCmd => implicit userId =>
+    val future = studyService.addStudy(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -47,8 +47,8 @@ object StudyController extends BbwebController {
     }
   }
 
-  def update(id: String) = CommandAction { cmd : UpdateStudyCmd => userId =>
-    val future = studyService.updateStudy(cmd)(null)
+  def update(id: String) = CommandAction { cmd : UpdateStudyCmd => implicit userId =>
+    val future = studyService.updateStudy(cmd)
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -57,8 +57,8 @@ object StudyController extends BbwebController {
     }
   }
 
-  def enable = CommandAction { cmd: EnableStudyCmd => userId =>
-    val future = studyService.enableStudy(cmd)(null)
+  def enable = CommandAction { cmd: EnableStudyCmd => implicit userId =>
+    val future = studyService.enableStudy(cmd)
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -67,8 +67,8 @@ object StudyController extends BbwebController {
     }
   }
 
-  def disable = CommandAction { cmd: DisableStudyCmd => userId =>
-    val future = studyService.disableStudy(cmd)(null)
+  def disable = CommandAction { cmd: DisableStudyCmd => implicit userId =>
+    val future = studyService.disableStudy(cmd)
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -77,8 +77,8 @@ object StudyController extends BbwebController {
     }
   }
 
-  def retire = CommandAction { cmd: RetireStudyCmd => userId =>
-    val future = studyService.retireStudy(cmd)(null)
+  def retire = CommandAction { cmd: RetireStudyCmd => implicit userId =>
+    val future = studyService.retireStudy(cmd)
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -87,8 +87,8 @@ object StudyController extends BbwebController {
     }
   }
 
-  def unretire = CommandAction { cmd: UnretireStudyCmd => userId =>
-    val future = studyService.unretireStudy(cmd)(null)
+  def unretire = CommandAction { cmd: UnretireStudyCmd => implicit userId =>
+    val future = studyService.unretireStudy(cmd)
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),

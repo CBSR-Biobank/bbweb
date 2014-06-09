@@ -26,7 +26,7 @@ object ProcessingTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = Action(BodyParsers.parse.json) { request =>
+  def list = AuthAction(BodyParsers.parse.json) { token => userId => implicit request =>
     val idResult = request.body.validate[StudyId]
     idResult.fold(
       errors => {

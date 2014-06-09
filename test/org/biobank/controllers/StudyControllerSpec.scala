@@ -5,7 +5,7 @@ import org.biobank.service.json.JsonHelper._
 import org.biobank.fixture.ControllerFixture
 import org.biobank.service.json.Study._
 import play.api.test.Helpers._
-import play.api.test.FakeApplication
+import play.api.test.{ FakeApplication, WithApplication }
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
@@ -20,12 +20,12 @@ class StudyControllerSpec extends ControllerFixture {
   describe("Study REST API") {
 
     describe("GET /studies") {
-      it("should list none") {
-        running(fakeApplication) {
+      in new WithApplication(app = fakeApplication()) {
+        it("should list none", Tag("single")) {
+          doLogin
           val json = makeJsonRequest(GET, "/studies")
           val jsonList = json.as[List[JsObject]]
           jsonList should have size 0
-
         }
       }
 
