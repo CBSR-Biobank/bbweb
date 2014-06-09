@@ -40,7 +40,7 @@ object CeventTypeController extends BbwebController  {
     )
   }
 
-  def addCollectionEventType = doCommand { cmd: AddCollectionEventTypeCmd =>
+  def addCollectionEventType = CommandAction { cmd: AddCollectionEventTypeCmd => userId =>
     val future = studyService.addCollectionEventType(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -50,7 +50,7 @@ object CeventTypeController extends BbwebController  {
     }
   }
 
-  def updateCollectionEventType(id: String) = doCommand { cmd: UpdateCollectionEventTypeCmd =>
+  def updateCollectionEventType(id: String) = CommandAction { cmd: UpdateCollectionEventTypeCmd => userId =>
     val future = studyService.updateCollectionEventType(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -60,7 +60,7 @@ object CeventTypeController extends BbwebController  {
     }
   }
 
-  def removeCollectionEventType(id: String) = doCommand { cmd: RemoveCollectionEventTypeCmd =>
+  def removeCollectionEventType(id: String) = CommandAction { cmd: RemoveCollectionEventTypeCmd => userId =>
     val future = studyService.removeCollectionEventType(cmd)(null)
     future.map { validation =>
       validation.fold(

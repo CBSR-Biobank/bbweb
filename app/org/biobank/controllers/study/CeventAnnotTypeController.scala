@@ -40,7 +40,7 @@ object CeventAnnotTypeController extends BbwebController  {
     )
   }
 
-  def addAnnotationType = doCommand { cmd: AddCollectionEventAnnotationTypeCmd =>
+  def addAnnotationType = CommandAction { cmd: AddCollectionEventAnnotationTypeCmd => userId =>
     val future = studyService.addCollectionEventAnnotationType(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -52,7 +52,7 @@ object CeventAnnotTypeController extends BbwebController  {
     }
   }
 
-  def updateAnnotationType(id: String) = doCommand { cmd: UpdateCollectionEventAnnotationTypeCmd =>
+  def updateAnnotationType(id: String) = CommandAction { cmd: UpdateCollectionEventAnnotationTypeCmd => userId =>
     val future = studyService.updateCollectionEventAnnotationType(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -64,7 +64,7 @@ object CeventAnnotTypeController extends BbwebController  {
     }
   }
 
-  def removeAnnotationType(id: String) = doCommand { cmd: RemoveCollectionEventAnnotationTypeCmd =>
+  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveCollectionEventAnnotationTypeCmd => userId =>
     val future = studyService.removeCollectionEventAnnotationType(cmd)(null)
     future.map { validation =>
       validation.fold(

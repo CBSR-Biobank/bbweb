@@ -42,7 +42,7 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
     )
   }
 
-  def addAnnotationType = doCommand { cmd: AddSpecimenLinkAnnotationTypeCmd =>
+  def addAnnotationType = CommandAction { cmd: AddSpecimenLinkAnnotationTypeCmd => userId =>
     val future = studyService.addSpecimenLinkAnnotationType(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -54,7 +54,7 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
     }
   }
 
-  def updateAnnotationType(id: String) = doCommand { cmd: UpdateSpecimenLinkAnnotationTypeCmd =>
+  def updateAnnotationType(id: String) = CommandAction { cmd: UpdateSpecimenLinkAnnotationTypeCmd => userId =>
     val future = studyService.updateSpecimenLinkAnnotationType(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -66,7 +66,7 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
     }
   }
 
-  def removeAnnotationType(id: String) = doCommand { cmd: RemoveSpecimenLinkAnnotationTypeCmd =>
+  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveSpecimenLinkAnnotationTypeCmd => userId =>
     val future = studyService.removeSpecimenLinkAnnotationType(cmd)(null)
     future.map { validation =>
       validation.fold(

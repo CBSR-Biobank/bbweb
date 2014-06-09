@@ -40,7 +40,7 @@ object SpecimenLinkTypeController extends BbwebController  {
     )
   }
 
-  def addSpecimenLinkType = doCommand { cmd: AddSpecimenLinkTypeCmd =>
+  def addSpecimenLinkType = CommandAction { cmd: AddSpecimenLinkTypeCmd => userId =>
     val future = studyService.addSpecimenLinkType(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -52,7 +52,7 @@ object SpecimenLinkTypeController extends BbwebController  {
     }
   }
 
-  def updateSpecimenLinkType(id: String) = doCommand { cmd: UpdateSpecimenLinkTypeCmd =>
+  def updateSpecimenLinkType(id: String) = CommandAction { cmd: UpdateSpecimenLinkTypeCmd => userId =>
     val future = studyService.updateSpecimenLinkType(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -64,7 +64,7 @@ object SpecimenLinkTypeController extends BbwebController  {
     }
   }
 
-  def removeSpecimenLinkType(id: String) = doCommand { cmd: RemoveSpecimenLinkTypeCmd =>
+  def removeSpecimenLinkType(id: String) = CommandAction { cmd: RemoveSpecimenLinkTypeCmd => userId =>
     val future = studyService.removeSpecimenLinkType(cmd)(null)
     future.map { validation =>
       validation.fold(

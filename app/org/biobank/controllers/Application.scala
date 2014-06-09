@@ -4,13 +4,12 @@ import scala.language.postfixOps
 import play.api._
 import play.api.mvc._
 import play.api.libs.json._
-import play.api.Play.current
-import play.api.cache.Cached
+import play.api.cache._
 
 /**
   * Controller for the main page, and also the about and contact us pages.
   */
-object Application extends Controller  {
+object Application extends Controller with Security {
 
   def index = Action {
     Ok(views.html.index())
@@ -40,18 +39,30 @@ object Application extends Controller  {
 
   /**
     * Log-in a user. Pass the credentials as JSON body.
+    *
+    * Set the cookie {@link AuthTokenCookieKey} to have AngularJS set X-XSRF-TOKEN in the HTTP
+    * header.
+    *
     * @return The token needed for subsequent requests
     */
   def login() = Action(parse.json) { implicit request =>
     // TODO Check credentials, log user in, return correct token
     val token = java.util.UUID.randomUUID().toString
+     val userId = "temp";
+    Cache.set(token, userId)
     Ok(Json.obj("token" -> token))
+      .withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
   }
 
-  /** Logs the user out, i.e. invalidated the token. */
-  def logout() = Action {
-    // TODO Invalidate token, remove cookie
-    Ok
+  /**
+    * Logs the user out.
+    *
+    * Discards the cookie {@link AuthTokenCookieKey} to have AngularJS no longer set the
+    * X-XSRF-TOKEN in HTTP header.
+    */
+  def logout() = HasToken(parse.json) { token => userId => implicit request =>
+    Cache.remove(token)
+    Ok.discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
   }
 }
 

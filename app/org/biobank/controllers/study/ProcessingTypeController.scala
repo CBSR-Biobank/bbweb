@@ -40,7 +40,7 @@ object ProcessingTypeController extends BbwebController  {
     )
   }
 
-  def addProcessingType = doCommand { cmd: AddProcessingTypeCmd =>
+  def addProcessingType = CommandAction { cmd: AddProcessingTypeCmd => userId =>
     val future = studyService.addProcessingType(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -52,7 +52,7 @@ object ProcessingTypeController extends BbwebController  {
     }
   }
 
-  def updateProcessingType(id: String) = doCommand { cmd: UpdateProcessingTypeCmd =>
+  def updateProcessingType(id: String) = CommandAction { cmd: UpdateProcessingTypeCmd => userId =>
     val future = studyService.updateProcessingType(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -64,7 +64,7 @@ object ProcessingTypeController extends BbwebController  {
     }
   }
 
-  def removeProcessingType(id: String) = doCommand { cmd: RemoveProcessingTypeCmd =>
+  def removeProcessingType(id: String) = CommandAction { cmd: RemoveProcessingTypeCmd => userId =>
     val future = studyService.removeProcessingType(cmd)(null)
     future.map { validation =>
       validation.fold(

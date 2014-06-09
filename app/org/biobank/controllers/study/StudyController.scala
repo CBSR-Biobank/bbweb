@@ -37,7 +37,7 @@ object StudyController extends BbwebController {
     )
   }
 
-  def add = doCommand { cmd: AddStudyCmd =>
+  def add = CommandAction { cmd: AddStudyCmd => userId =>
     val future = studyService.addStudy(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -47,7 +47,7 @@ object StudyController extends BbwebController {
     }
   }
 
-  def update(id: String) = doCommand { cmd : UpdateStudyCmd =>
+  def update(id: String) = CommandAction { cmd : UpdateStudyCmd => userId =>
     val future = studyService.updateStudy(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -57,7 +57,7 @@ object StudyController extends BbwebController {
     }
   }
 
-  def enable = doCommand { cmd: EnableStudyCmd =>
+  def enable = CommandAction { cmd: EnableStudyCmd => userId =>
     val future = studyService.enableStudy(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -67,7 +67,7 @@ object StudyController extends BbwebController {
     }
   }
 
-  def disable = doCommand { cmd: DisableStudyCmd =>
+  def disable = CommandAction { cmd: DisableStudyCmd => userId =>
     val future = studyService.disableStudy(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -77,7 +77,7 @@ object StudyController extends BbwebController {
     }
   }
 
-  def retire = doCommand { cmd: RetireStudyCmd =>
+  def retire = CommandAction { cmd: RetireStudyCmd => userId =>
     val future = studyService.retireStudy(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -87,7 +87,7 @@ object StudyController extends BbwebController {
     }
   }
 
-  def unretire = doCommand { cmd: UnretireStudyCmd =>
+  def unretire = CommandAction { cmd: UnretireStudyCmd => userId =>
     val future = studyService.unretireStudy(cmd)(null)
     future.map { validation =>
       validation.fold(

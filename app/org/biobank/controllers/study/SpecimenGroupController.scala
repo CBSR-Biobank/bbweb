@@ -44,7 +44,7 @@ object SpecimenGroupController extends BbwebController {
     )
   }
 
-  def addSpecimenGroup = doCommand { cmd: AddSpecimenGroupCmd =>
+  def addSpecimenGroup = CommandAction { cmd: AddSpecimenGroupCmd => userId =>
     val future = studyService.addSpecimenGroup(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -54,7 +54,7 @@ object SpecimenGroupController extends BbwebController {
     }
   }
 
-  def updateSpecimenGroup(id: String) = doCommand { cmd: UpdateSpecimenGroupCmd =>
+  def updateSpecimenGroup(id: String) = CommandAction { cmd: UpdateSpecimenGroupCmd => userId =>
     val future = studyService.updateSpecimenGroup(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -64,7 +64,7 @@ object SpecimenGroupController extends BbwebController {
     }
   }
 
-  def removeSpecimenGroup(id: String) = doCommand { cmd: RemoveSpecimenGroupCmd =>
+  def removeSpecimenGroup(id: String) = CommandAction { cmd: RemoveSpecimenGroupCmd => userId =>
     val future = studyService.removeSpecimenGroup(cmd)(null)
     future.map { validation =>
       validation.fold(

@@ -39,7 +39,7 @@ object ParticipantAnnotTypeController extends BbwebController  {
     )
   }
 
-  def addAnnotationType = doCommand { cmd: AddParticipantAnnotationTypeCmd =>
+  def addAnnotationType = CommandAction { cmd: AddParticipantAnnotationTypeCmd => userId =>
     val future = studyService.addParticipantAnnotationType(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -51,7 +51,7 @@ object ParticipantAnnotTypeController extends BbwebController  {
     }
   }
 
-  def updateAnnotationType(id: String) = doCommand { cmd: UpdateParticipantAnnotationTypeCmd =>
+  def updateAnnotationType(id: String) = CommandAction { cmd: UpdateParticipantAnnotationTypeCmd => userId =>
     val future = studyService.updateParticipantAnnotationType(cmd)(null)
     future.map { validation =>
       validation.fold(
@@ -63,7 +63,7 @@ object ParticipantAnnotTypeController extends BbwebController  {
     }
   }
 
-  def removeAnnotationType(id: String) = doCommand { cmd: RemoveParticipantAnnotationTypeCmd =>
+  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveParticipantAnnotationTypeCmd => userId =>
     val future = studyService.removeParticipantAnnotationType(cmd)(null)
     future.map { validation =>
       validation.fold(
