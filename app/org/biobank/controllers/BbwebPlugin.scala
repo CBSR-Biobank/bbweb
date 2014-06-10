@@ -63,7 +63,7 @@ class BbwebPlugin(val app: play.api.Application) extends Plugin with TopComponen
     //       val databaseConfiguration = configuration.getString(database).getOrElse {
     //         throw configuration.reportError(database, "No config: key " + database, None)
     //       }
-    //       val packageNames = databaseConfiguration.split(",").toSet
+    //       val packageNames = databaseConfiguration.spl"," in new WithApplication(fakeApplication()).toSet
     //       val classloader = app.classloader
     //       val ddls = TableScanner.reflectAllDDLMethods(packageNames, classloader)
 

@@ -5,7 +5,7 @@ import org.biobank.fixture.ControllerFixture
 import org.biobank.service.json.JsonHelper._
 
 import play.api.test.Helpers._
-import play.api.test.FakeApplication
+import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
@@ -79,210 +79,199 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
-  // describe("Specimen Group REST API") {
-  //   describe("GET /studies/sgroups") {
-  //     it("should list none") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+  "Specimen Group REST API" when {
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "GET /studies/sgroups" should {
+      "list none" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val idJson = Json.obj("id" -> study.id.id)
-  //         val json = makeJsonRequest(GET, "/studies/sgroups", json = idJson)
-  //         val jsonList = json.as[List[JsObject]]
-  //         jsonList should have size 0
-  //       }
-  //     }
-  //   }
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //   describe("GET /studies/sgroups") {
-  //     it("should list a single specimen group") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+        val idJson = Json.obj("id" -> study.id.id)
+        val json = makeJsonRequest(GET, "/studies/sgroups", json = idJson)
+        val jsonList = json.as[List[JsObject]]
+        jsonList should have size 0
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "GET /studies/sgroups" should {
+      "list a single specimen group" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val sg = factory.createSpecimenGroup
-  //         appRepositories.specimenGroupRepository.put(sg)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val idJson = Json.obj("id" -> study.id.id)
-  //         val json = makeJsonRequest(GET, "/studies/sgroups", json = idJson)
-  //         val jsonList = json.as[List[JsObject]]
-  //         jsonList should have size 1
-  //         compareObj(jsonList(0), sg)
-  //       }
-  //     }
-  //   }
+        val sg = factory.createSpecimenGroup
+        appRepositories.specimenGroupRepository.put(sg)
 
-  //   describe("GET /studies/sgroups") {
-  //     it("should list multiple specimen groups") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+        val idJson = Json.obj("id" -> study.id.id)
+        val json = makeJsonRequest(GET, "/studies/sgroups", json = idJson)
+        val jsonList = json.as[List[JsObject]]
+        jsonList should have size 1
+        compareObj(jsonList(0), sg)
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "GET /studies/sgroups" should {
+      "list multiple specimen groups" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val sgroups = List(factory.createSpecimenGroup, factory.createSpecimenGroup)
-  //         sgroups map { sg => appRepositories.specimenGroupRepository.put(sg) }
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val idJson = Json.obj("id" -> study.id.id)
-  //         val json = makeJsonRequest(GET, "/studies/sgroups", json = idJson)
-  //         val jsonList = json.as[List[JsObject]]
-  //         jsonList should have size sgroups.size
-  //           (jsonList zip sgroups).map { item => compareObj(item._1, item._2) }
-  //         ()
-  //       }
-  //     }
-  //   }
+        val sgroups = List(factory.createSpecimenGroup, factory.createSpecimenGroup)
+        sgroups map { sg => appRepositories.specimenGroupRepository.put(sg) }
 
-  //   describe("POST /studies/sgroups") {
-  //     it("should add a specimen group") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+        val idJson = Json.obj("id" -> study.id.id)
+        val json = makeJsonRequest(GET, "/studies/sgroups", json = idJson)
+        val jsonList = json.as[List[JsObject]]
+        jsonList should have size sgroups.size
+          (jsonList zip sgroups).map { item => compareObj(item._1, item._2) }
+        ()
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "POST /studies/sgroups" should {
+      "add a specimen group" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val sg = factory.createSpecimenGroup
-  //         val cmdJson = Json.obj(
-  //           "type"                        -> "AddSpecimenGroupCmd",
-  //           "studyId"                     -> sg.studyId.id,
-  //           "name"                        -> sg.name,
-  //           "description"                 -> sg.description,
-  //           "units"                       -> sg.units,
-  //           "anatomicalSourceType"        -> sg.anatomicalSourceType.toString,
-  //           "preservationType"            -> sg.preservationType.toString,
-  //           "preservationTemperatureType" -> sg.preservationTemperatureType.toString,
-  //           "specimenType"                -> sg.specimenType.toString)
-  //         val json = makeJsonRequest(POST, "/studies/sgroups", json = cmdJson)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         (json \ "message").as[String] should include ("specimen group added")
-  //       }
-  //     }
-  //   }
+        val sg = factory.createSpecimenGroup
+        val cmdJson = Json.obj(
+          "type"                        -> "AddSpecimenGroupCmd",
+          "studyId"                     -> sg.studyId.id,
+          "name"                        -> sg.name,
+          "description"                 -> sg.description,
+          "units"                       -> sg.units,
+          "anatomicalSourceType"        -> sg.anatomicalSourceType.toString,
+          "preservationType"            -> sg.preservationType.toString,
+          "preservationTemperatureType" -> sg.preservationTemperatureType.toString,
+          "specimenType"                -> sg.specimenType.toString)
+        val json = makeJsonRequest(POST, "/studies/sgroups", json = cmdJson)
 
-  //   describe("POST /studies/sgroups") {
-  //     it("should not add a specimen group to enabled study") {
-  //       running(fakeApplication) {
-  //         addToNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail,
-  //           factory.createSpecimenGroup)
-  //       }
-  //     }
-  //   }
+        (json \ "message").as[String] should include ("specimen group added")
+      }
+    }
 
-  //   describe("POST /studies/sgroups") {
-  //     it("should not add a specimen group to retired study") {
-  //       running(fakeApplication) {
-  //         addToNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail,
-  //           factory.createSpecimenGroup)
-  //       }
-  //     }
-  //   }
+    "POST /studies/sgroups" should {
+      "not add a specimen group to enabled study" in new WithApplication(fakeApplication()) {
+        doLogin
+        addToNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail,
+          factory.createSpecimenGroup)
+      }
+    }
 
-  //   describe("PUT /studies/sgroups") {
-  //     it("should update a specimen group") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+    "POST /studies/sgroups" should {
+      "not add a specimen group to retired study" in new WithApplication(fakeApplication()) {
+        doLogin
+        addToNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail,
+          factory.createSpecimenGroup)
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "PUT /studies/sgroups" should {
+      "update a specimen group" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val sg = factory.createSpecimenGroup
-  //         appRepositories.specimenGroupRepository.put(sg)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val sg2 = factory.createSpecimenGroup
-  //         val cmdJson = Json.obj(
-  //           "type"                        -> "UpdateSpecimenGroupCmd",
-  //           "studyId"                     -> study.id.id,
-  //           "id"                          -> sg.id.id,
-  //           "expectedVersion"             -> Some(sg.version),
-  //           "name"                        -> sg2.name,
-  //           "description"                 -> sg2.description,
-  //           "units"                       -> sg2.units,
-  //           "anatomicalSourceType"        -> sg2.anatomicalSourceType.toString,
-  //           "preservationType"            -> sg2.preservationType.toString,
-  //           "preservationTemperatureType" -> sg2.preservationTemperatureType.toString,
-  //           "specimenType"                -> sg2.specimenType.toString)
-  //         val json = makeJsonRequest(PUT, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
+        val sg = factory.createSpecimenGroup
+        appRepositories.specimenGroupRepository.put(sg)
 
-  //         (json \ "message").as[String] should include ("specimen group updated")
-  //       }
-  //     }
-  //   }
+        val sg2 = factory.createSpecimenGroup
+        val cmdJson = Json.obj(
+          "type"                        -> "UpdateSpecimenGroupCmd",
+          "studyId"                     -> study.id.id,
+          "id"                          -> sg.id.id,
+          "expectedVersion"             -> Some(sg.version),
+          "name"                        -> sg2.name,
+          "description"                 -> sg2.description,
+          "units"                       -> sg2.units,
+          "anatomicalSourceType"        -> sg2.anatomicalSourceType.toString,
+          "preservationType"            -> sg2.preservationType.toString,
+          "preservationTemperatureType" -> sg2.preservationTemperatureType.toString,
+          "specimenType"                -> sg2.specimenType.toString)
+        val json = makeJsonRequest(PUT, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
 
-  //   describe("PUT /studies/sgroups") {
-  //     it("should not update a specimen group on an enabled study") {
-  //       running(fakeApplication) {
-  //         updateOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail,
-  //           factory.createSpecimenGroup)
-  //       }
-  //     }
-  //   }
+        (json \ "message").as[String] should include ("specimen group updated")
+      }
+    }
 
-  //   describe("PUT /studies/sgroups") {
-  //     it("should not update a specimen group on an retired study") {
-  //       running(fakeApplication) {
-  //         updateOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail,
-  //           factory.createSpecimenGroup)
-  //       }
-  //     }
-  //   }
+    "PUT /studies/sgroups" should {
+      "not update a specimen group on an enabled study" in new WithApplication(fakeApplication()) {
+        doLogin
+        updateOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail,
+          factory.createSpecimenGroup)
+      }
+    }
 
-  //   describe("DELETE /studies/sgroups") {
-  //     it("should remove a specimen group") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+    "PUT /studies/sgroups" should {
+      "not update a specimen group on an retired study" in new WithApplication(fakeApplication()) {
+        doLogin
+        updateOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail,
+          factory.createSpecimenGroup)
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "DELETE /studies/sgroups" should {
+      "remove a specimen group" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val sg = factory.createSpecimenGroup
-  //         appRepositories.specimenGroupRepository.put(sg)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val cmdJson = Json.obj(
-  //           "type"            -> "RemoveSpecimenGroupCmd",
-  //           "studyId"         -> study.id.id,
-  //           "id"              -> sg.id.id,
-  //           "expectedVersion" -> Some(sg.version))
-  //         val json = makeJsonRequest(DELETE, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
+        val sg = factory.createSpecimenGroup
+        appRepositories.specimenGroupRepository.put(sg)
 
-  //         (json \ "message").as[String] should include ("specimen group removed")
-  //       }
-  //     }
-  //   }
+        val cmdJson = Json.obj(
+          "type"            -> "RemoveSpecimenGroupCmd",
+          "studyId"         -> study.id.id,
+          "id"              -> sg.id.id,
+          "expectedVersion" -> Some(sg.version))
+        val json = makeJsonRequest(DELETE, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
 
-  //   describe("DELETE /studies/sgroups") {
-  //     it("should not remove a specimen group from an enabled study") {
-  //       running(fakeApplication) {
-  //         removeOnNonDisabledStudy(
-  //         new AppRepositories,
-  //         factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail,
-  //         factory.createSpecimenGroup)
-  //       }
-  //     }
-  //   }
+        (json \ "message").as[String] should include ("specimen group removed")
+      }
+    }
 
-  //   describe("DELETE /studies/sgroups") {
-  //     it("should not remove a specimen group from an retired study") {
-  //       running(fakeApplication) {
-  //         removeOnNonDisabledStudy(
-  //         new AppRepositories,
-  //         factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail,
-  //         factory.createSpecimenGroup)
-  //       }
-  //     }
-  //   }
+    "DELETE /studies/sgroups" should {
+      "not remove a specimen group from an enabled study" in new WithApplication(fakeApplication()) {
+        doLogin
+        removeOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail,
+          factory.createSpecimenGroup)
+      }
+    }
 
-  // }
+    "DELETE /studies/sgroups" should {
+      "not remove a specimen group from an retired study" in new WithApplication(fakeApplication()) {
+        doLogin
+        removeOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail,
+          factory.createSpecimenGroup)
+      }
+    }
+
+  }
 
 }

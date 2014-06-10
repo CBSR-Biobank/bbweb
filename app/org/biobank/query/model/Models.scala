@@ -30,7 +30,7 @@ package org.biobank.query.model
 //   def version = column[Long]("version", O.NotNull)
 //   def name = column[String]("name", O.NotNull)
 //   def description = column[Option[String]]("description", O.Nullable, O.DBType("text"))
-//   def enabled = column[Boolean]("enabled", O.NotNull, O.DBType("bit(1)"))
+//   def enabled = column[Boolean]("enabled", O.NotNull, O.DBType("b1 in new WithApplication(fakeApplication())"))
 //   def * = id ~ version ~ name ~ description ~ enabled <> (Study.apply _, Study.unapply _)
 
 //   val byId = createFinderBy(_.id)

@@ -5,7 +5,7 @@ import org.biobank.fixture.ControllerFixture
 import org.biobank.service.json.JsonHelper._
 
 import play.api.test.Helpers._
-import play.api.test.FakeApplication
+import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
@@ -126,258 +126,247 @@ class CeventTypeControllerSpec extends ControllerFixture {
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
-  // describe("Collection Event Type REST API") {
-  //   describe("GET /studies/cetypes") {
-  //     it("should list none") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+  "Collection Event Type REST API" when {
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "GET /studies/cetypes" should {
+      "list none" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val idJson = Json.obj("id" -> study.id.id)
-  //         val json = makeJsonRequest(GET, "/studies/cetypes", json = idJson)
-  //         val jsonList = json.as[List[JsObject]]
-  //         jsonList should have size 0
-  //       }
-  //     }
-  //   }
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //   describe("GET /studies/cetypes") {
-  //     it("should list a single collection event type") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+        val idJson = Json.obj("id" -> study.id.id)
+        val json = makeJsonRequest(GET, "/studies/cetypes", json = idJson)
+        val jsonList = json.as[List[JsObject]]
+        jsonList should have size 0
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "GET /studies/cetypes" should {
+      "list a single collection event type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val cet = factory.createCollectionEventType
-  //         appRepositories.collectionEventTypeRepository.put(cet)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val idJson = Json.obj("id" -> study.id.id)
-  //         val json = makeJsonRequest(GET, "/studies/cetypes", json = idJson)
-  //         val jsonList = json.as[List[JsObject]]
-  //         jsonList should have size 1
-  //         compareObj(jsonList(0), cet)
-  //       }
-  //     }
-  //   }
+        val cet = factory.createCollectionEventType
+        appRepositories.collectionEventTypeRepository.put(cet)
 
-  //   describe("GET /studies/cetypes") {
-  //     it("should list multiple collection event types") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+        val idJson = Json.obj("id" -> study.id.id)
+        val json = makeJsonRequest(GET, "/studies/cetypes", json = idJson)
+        val jsonList = json.as[List[JsObject]]
+        jsonList should have size 1
+        compareObj(jsonList(0), cet)
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "GET /studies/cetypes" should {
+      "list multiple collection event types" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val cet1 = factory.createCollectionEventType.copy(
-  //           specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
-  //           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val cet2 = factory.createCollectionEventType.copy(
-  //           specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
-  //           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
+        val cet1 = factory.createCollectionEventType.copy(
+          specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
+          annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
-  //         val cetypes = List(cet1, cet2)
-  //         cetypes map { cet => appRepositories.collectionEventTypeRepository.put(cet) }
+        val cet2 = factory.createCollectionEventType.copy(
+          specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
+          annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
-  //         val idJson = Json.obj("id" -> study.id.id)
-  //         val json = makeJsonRequest(GET, "/studies/cetypes", json = idJson)
-  //         val jsonList = json.as[List[JsObject]]
+        val cetypes = List(cet1, cet2)
+        cetypes map { cet => appRepositories.collectionEventTypeRepository.put(cet) }
 
-  //         jsonList should have size cetypes.size
-  //           (jsonList zip cetypes).map { item => compareObj(item._1, item._2) }
-  //         ()
-  //       }
-  //     }
-  //   }
+        val idJson = Json.obj("id" -> study.id.id)
+        val json = makeJsonRequest(GET, "/studies/cetypes", json = idJson)
+        val jsonList = json.as[List[JsObject]]
 
-  //   describe("POST /studies/cetypes") {
-  //     it("should add a collection event type") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+        jsonList should have size cetypes.size
+          (jsonList zip cetypes).map { item => compareObj(item._1, item._2) }
+        ()
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "POST /studies/cetypes" should {
+      "add a collection event type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val sg = factory.createSpecimenGroup
-  //         appRepositories.specimenGroupRepository.put(sg)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val annotType = factory.createCollectionEventAnnotationType
-  //         appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
+        val sg = factory.createSpecimenGroup
+        appRepositories.specimenGroupRepository.put(sg)
 
-  //         val cet = factory.createCollectionEventType.copy(
-  //           specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
-  //           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
+        val annotType = factory.createCollectionEventAnnotationType
+        appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
 
-  //         val cmdJson = Json.obj(
-  //           "type"                 -> "AddCollectionEventTypeCmd",
-  //           "studyId"              -> cet.studyId.id,
-  //           "name"                 -> cet.name,
-  //           "description"          -> cet.description,
-  //           "recurring"            -> cet.recurring,
-  //           "specimenGroupData"    -> Json.arr(
-  //             Json.obj(
-  //               "specimenGroupId"  -> cet.specimenGroupData(0).specimenGroupId,
-  //               "maxCount"         -> cet.specimenGroupData(0).maxCount,
-  //               "amount"           -> Some(cet.specimenGroupData(0).amount)
-  //             )),
-  //           "annotationTypeData"   -> Json.arr(
-  //             Json.obj(
-  //               "annotationTypeId" -> cet.annotationTypeData(0).annotationTypeId,
-  //               "required"         -> cet.annotationTypeData(0).required
-  //             ))
-  //         )
+        val cet = factory.createCollectionEventType.copy(
+          specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
+          annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
-  //         val json = makeJsonRequest(POST, "/studies/cetypes", json = cmdJson)
+        val cmdJson = Json.obj(
+          "type"                 -> "AddCollectionEventTypeCmd",
+          "studyId"              -> cet.studyId.id,
+          "name"                 -> cet.name,
+          "description"          -> cet.description,
+          "recurring"            -> cet.recurring,
+          "specimenGroupData"    -> Json.arr(
+            Json.obj(
+              "specimenGroupId"  -> cet.specimenGroupData(0).specimenGroupId,
+              "maxCount"         -> cet.specimenGroupData(0).maxCount,
+              "amount"           -> Some(cet.specimenGroupData(0).amount)
+            )),
+          "annotationTypeData"   -> Json.arr(
+            Json.obj(
+              "annotationTypeId" -> cet.annotationTypeData(0).annotationTypeId,
+              "required"         -> cet.annotationTypeData(0).required
+            ))
+        )
 
-  //         (json \ "message").as[String] should include ("collection event type added")
-  //       }
-  //     }
-  //   }
+        val json = makeJsonRequest(POST, "/studies/cetypes", json = cmdJson)
 
-  //   describe("POST /studies/cetypes") {
-  //     it("should not add a collection event type to an enabled study") {
-  //       running(fakeApplication) {
-  //         addOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-  //       }
-  //     }
-  //   }
+        (json \ "message").as[String] should include ("collection event type added")
+      }
+    }
 
-  //   describe("POST /studies/cetypes") {
-  //     it("should not add a collection event type to an retired study") {
-  //       running(fakeApplication) {
-  //         addOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-  //       }
-  //     }
-  //   }
+    "POST /studies/cetypes" should {
+      "not add a collection event type to an enabled study" in new WithApplication(fakeApplication()) {
+        doLogin
+        addOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+      }
+    }
 
-  //   describe("PUT /studies/cetypes") {
-  //     it("should update a collection event type") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+    "POST /studies/cetypes" should {
+      "not add a collection event type to an retired study" in new WithApplication(fakeApplication()) {
+        doLogin
+        addOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "PUT /studies/cetypes" should {
+      "update a collection event type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val sg = factory.createSpecimenGroup
-  //         appRepositories.specimenGroupRepository.put(sg)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val annotType = factory.createCollectionEventAnnotationType
-  //         appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
+        val sg = factory.createSpecimenGroup
+        appRepositories.specimenGroupRepository.put(sg)
 
-  //         val cet = factory.createCollectionEventType
-  //         appRepositories.collectionEventTypeRepository.put(cet)
+        val annotType = factory.createCollectionEventAnnotationType
+        appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
 
-  //         val cet2 = factory.createCollectionEventType.copy(
-  //           specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
-  //           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
+        val cet = factory.createCollectionEventType
+        appRepositories.collectionEventTypeRepository.put(cet)
 
-  //         val cmdJson = Json.obj(
-  //           "type"                 -> "UpdateCollectionEventTypeCmd",
-  //           "studyId"              -> cet.studyId.id,
-  //           "id"                   -> cet.id.id,
-  //           "expectedVersion"      -> Some(cet.version),
-  //           "name"                 -> cet2.name,
-  //           "description"          -> cet2.description,
-  //           "recurring"            -> cet2.recurring,
-  //           "specimenGroupData"    -> Json.arr(
-  //             Json.obj(
-  //               "specimenGroupId"  -> cet2.specimenGroupData(0).specimenGroupId,
-  //               "maxCount"         -> cet2.specimenGroupData(0).maxCount,
-  //               "amount"           -> Some(cet2.specimenGroupData(0).amount)
-  //             )),
-  //           "annotationTypeData"   -> Json.arr(
-  //             Json.obj(
-  //               "annotationTypeId" -> cet2.annotationTypeData(0).annotationTypeId,
-  //               "required"         -> cet2.annotationTypeData(0).required
-  //             ))
-  //         )
+        val cet2 = factory.createCollectionEventType.copy(
+          specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
+          annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
-  //         val json = makeJsonRequest(PUT, s"/studies/cetypes/${cet.id.id}", json = cmdJson)
+        val cmdJson = Json.obj(
+          "type"                 -> "UpdateCollectionEventTypeCmd",
+          "studyId"              -> cet.studyId.id,
+          "id"                   -> cet.id.id,
+          "expectedVersion"      -> Some(cet.version),
+          "name"                 -> cet2.name,
+          "description"          -> cet2.description,
+          "recurring"            -> cet2.recurring,
+          "specimenGroupData"    -> Json.arr(
+            Json.obj(
+              "specimenGroupId"  -> cet2.specimenGroupData(0).specimenGroupId,
+              "maxCount"         -> cet2.specimenGroupData(0).maxCount,
+              "amount"           -> Some(cet2.specimenGroupData(0).amount)
+            )),
+          "annotationTypeData"   -> Json.arr(
+            Json.obj(
+              "annotationTypeId" -> cet2.annotationTypeData(0).annotationTypeId,
+              "required"         -> cet2.annotationTypeData(0).required
+            ))
+        )
 
-  //         (json \ "message").as[String] should include ("collection event type updated")
-  //       }
-  //     }
-  //   }
+        val json = makeJsonRequest(PUT, s"/studies/cetypes/${cet.id.id}", json = cmdJson)
 
-  //   describe("PUT /studies/cetypes") {
-  //     it("should not update a collection event type on an enabled study") {
-  //       running(fakeApplication) {
-  //         updateOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-  //       }
-  //     }
-  //   }
+        (json \ "message").as[String] should include ("collection event type updated")
+      }
+    }
 
-  //   describe("PUT /studies/cetypes") {
-  //     it("should not update a collection event type on an retired study") {
-  //       running(fakeApplication) {
-  //         updateOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-  //       }
-  //     }
-  //   }
+    "PUT /studies/cetypes" should {
+      "not update a collection event type on an enabled study" in new WithApplication(fakeApplication()) {
+        doLogin
+        updateOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+      }
+    }
 
-  //   describe("DELETE /studies/cetypes") {
-  //     it("should remove a collection event type") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+    "PUT /studies/cetypes" should {
+      "not update a collection event type on an retired study" in new WithApplication(fakeApplication()) {
+        doLogin
+        updateOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "DELETE /studies/cetypes" should {
+      "remove a collection event type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val sg = factory.createSpecimenGroup
-  //         appRepositories.specimenGroupRepository.put(sg)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val annotType = factory.createCollectionEventAnnotationType
-  //         appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
+        val sg = factory.createSpecimenGroup
+        appRepositories.specimenGroupRepository.put(sg)
 
-  //         val cet = factory.createCollectionEventType.copy(
-  //           specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
-  //           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
-  //         appRepositories.collectionEventTypeRepository.put(cet)
+        val annotType = factory.createCollectionEventAnnotationType
+        appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
 
-  //         val cmdJson = Json.obj(
-  //           "type"            -> "RemoveCollectionEventTypeCmd",
-  //           "studyId"         -> cet.studyId.id,
-  //           "id"              -> cet.id.id,
-  //           "expectedVersion" -> Some(cet.version)
-  //         )
+        val cet = factory.createCollectionEventType.copy(
+          specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
+          annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
+        appRepositories.collectionEventTypeRepository.put(cet)
 
-  //         val json = makeJsonRequest(DELETE, s"/studies/cetypes/${cet.id.id}", json = cmdJson)
+        val cmdJson = Json.obj(
+          "type"            -> "RemoveCollectionEventTypeCmd",
+          "studyId"         -> cet.studyId.id,
+          "id"              -> cet.id.id,
+          "expectedVersion" -> Some(cet.version)
+        )
 
-  //         (json \ "message").as[String] should include ("collection event type removed")
-  //       }
-  //     }
-  //   }
+        val json = makeJsonRequest(DELETE, s"/studies/cetypes/${cet.id.id}", json = cmdJson)
 
-  //   describe("DELETE /studies/cetypes") {
-  //     it("should not remove a collection event type on an enabled study") {
-  //       running(fakeApplication) {
-  //         removeOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-  //       }
-  //     }
-  //   }
+        (json \ "message").as[String] should include ("collection event type removed")
+      }
+    }
 
-  //   describe("DELETE /studies/cetypes") {
-  //     it("should not remove a collection event type on an retired study") {
-  //       running(fakeApplication) {
-  //         removeOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-  //       }
-  //     }
-  //   }
-  // }
+    "DELETE /studies/cetypes" should {
+      "not remove a collection event type on an enabled study" in new WithApplication(fakeApplication()) {
+        doLogin
+        removeOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+      }
+    }
+
+    "DELETE /studies/cetypes" should {
+      "not remove a collection event type on an retired study" in new WithApplication(fakeApplication()) {
+        doLogin
+        removeOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+      }
+    }
+  }
 
 }

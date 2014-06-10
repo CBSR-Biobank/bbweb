@@ -5,7 +5,7 @@ import org.biobank.fixture.ControllerFixture
 import org.biobank.service.json.JsonHelper._
 
 import play.api.test.Helpers._
-import play.api.test.FakeApplication
+import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
@@ -135,217 +135,206 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
-  // describe("SpecimenLink Type REST API") {
-  //   describe("GET /studies/sltypes") {
-  //     it("should list none") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+  "SpecimenLink Type REST API" when {
 
-  //         val procType = factory.createProcessingType
-  //         appRepositories.processingTypeRepository.put(procType)
+    "GET /studies/sltypes" should {
+      "list none" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val idJson = Json.obj("id" -> procType.id.id)
-  //         val json = makeJsonRequest(GET, "/studies/sltypes", json = idJson)
-  //         val jsonList = json.as[List[JsObject]]
-  //         jsonList should have size 0
-  //       }
-  //     }
-  //   }
+        val procType = factory.createProcessingType
+        appRepositories.processingTypeRepository.put(procType)
 
-  //   describe("GET /studies/sltypes") {
-  //     it("should list a single specimen link type") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+        val idJson = Json.obj("id" -> procType.id.id)
+        val json = makeJsonRequest(GET, "/studies/sltypes", json = idJson)
+        val jsonList = json.as[List[JsObject]]
+        jsonList should have size 0
+      }
+    }
 
-  //         val procType = factory.createProcessingType
-  //         appRepositories.processingTypeRepository.put(procType)
+    "GET /studies/sltypes" should {
+      "list a single specimen link type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-  //         appRepositories.specimenGroupRepository.put(inputSg)
-  //         appRepositories.specimenGroupRepository.put(outputSg)
-  //         appRepositories.specimenLinkTypeRepository.put(slType)
+        val procType = factory.createProcessingType
+        appRepositories.processingTypeRepository.put(procType)
 
-  //         val idJson = Json.obj("id" -> procType.id.id)
-  //         val json = makeJsonRequest(GET, "/studies/sltypes", json = idJson)
-  //         val jsonList = json.as[List[JsObject]]
-  //         jsonList should have size 1
-  //         compareObj(jsonList(0), slType)
-  //       }
-  //     }
-  //   }
+        val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
+        appRepositories.specimenGroupRepository.put(inputSg)
+        appRepositories.specimenGroupRepository.put(outputSg)
+        appRepositories.specimenLinkTypeRepository.put(slType)
 
-  //   describe("GET /studies/sltypes") {
-  //     it("should list multiple specimen link types") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+        val idJson = Json.obj("id" -> procType.id.id)
+        val json = makeJsonRequest(GET, "/studies/sltypes", json = idJson)
+        val jsonList = json.as[List[JsObject]]
+        jsonList should have size 1
+        compareObj(jsonList(0), slType)
+      }
+    }
 
-  //         val procType = factory.createProcessingType
-  //         appRepositories.processingTypeRepository.put(procType)
+    "GET /studies/sltypes" should {
+      "list multiple specimen link types" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val sltypes = List(factory.createSpecimenLinkType, factory.createSpecimenLinkType)
+        val procType = factory.createProcessingType
+        appRepositories.processingTypeRepository.put(procType)
 
-  //         sltypes map { slType => appRepositories.specimenLinkTypeRepository.put(slType) }
+        val sltypes = List(factory.createSpecimenLinkType, factory.createSpecimenLinkType)
 
-  //         val idJson = Json.obj("id" -> procType.id.id)
-  //         val json = makeJsonRequest(GET, "/studies/sltypes", json = idJson)
-  //         val jsonList = json.as[List[JsObject]]
+        sltypes map { slType => appRepositories.specimenLinkTypeRepository.put(slType) }
 
-  //         jsonList should have size sltypes.size
-  //           (jsonList zip sltypes).map { item => compareObj(item._1, item._2) }
-  //         ()
-  //       }
-  //     }
-  //   }
+        val idJson = Json.obj("id" -> procType.id.id)
+        val json = makeJsonRequest(GET, "/studies/sltypes", json = idJson)
+        val jsonList = json.as[List[JsObject]]
 
-  //   describe("POST /studies/sltypes") {
-  //     it("should add a specimen link type") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+        jsonList should have size sltypes.size
+          (jsonList zip sltypes).map { item => compareObj(item._1, item._2) }
+        ()
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "POST /studies/sltypes" should {
+      "add a specimen link type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val procType = factory.createProcessingType
-  //         appRepositories.processingTypeRepository.put(procType)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-  //         appRepositories.specimenGroupRepository.put(inputSg)
-  //         appRepositories.specimenGroupRepository.put(outputSg)
+        val procType = factory.createProcessingType
+        appRepositories.processingTypeRepository.put(procType)
 
-  //         val json = makeJsonRequest(
-  //           POST,
-  //           "/studies/sltypes",
-  //           json = slTypeToAddCmdJson(slType))
+        val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
+        appRepositories.specimenGroupRepository.put(inputSg)
+        appRepositories.specimenGroupRepository.put(outputSg)
 
-  //         (json \ "message").as[String] should include ("specimen link type added")
-  //       }
-  //     }
-  //   }
+        val json = makeJsonRequest(
+          POST,
+          "/studies/sltypes",
+          json = slTypeToAddCmdJson(slType))
 
-  //   describe("POST /studies/sltypes") {
-  //     it("should not add a specimen link type to an enabled study") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
-  //         val study = appRepositories.studyRepository.put(
-  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-  //         addOnNonDisabledStudy(appRepositories, study, factory.createProcessingType)
-  //       }
-  //     }
-  //   }
+        (json \ "message").as[String] should include ("specimen link type added")
+      }
+    }
 
-  //   describe("POST /studies/sltypes") {
-  //     it("should not add a specimen link type to an retired study") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
-  //         val study = appRepositories.studyRepository.put(
-  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-  //         addOnNonDisabledStudy(appRepositories, study, factory.createProcessingType)
-  //       }
-  //     }
-  //   }
+    "POST /studies/sltypes" should {
+      "not add a specimen link type to an enabled study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
+        val study = appRepositories.studyRepository.put(
+          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+        addOnNonDisabledStudy(appRepositories, study, factory.createProcessingType)
+      }
+    }
 
-  //   describe("PUT /studies/sltypes") {
-  //     it("should update a specimen link type", Tag("single")) {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+    "POST /studies/sltypes" should {
+      "not add a specimen link type to an retired study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
+        val study = appRepositories.studyRepository.put(
+          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+        addOnNonDisabledStudy(appRepositories, study, factory.createProcessingType)
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "PUT /studies/sltypes" should {
+      "should update a specimen link type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val procType = factory.createProcessingType
-  //         appRepositories.processingTypeRepository.put(procType)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-  //         appRepositories.specimenGroupRepository.put(inputSg)
-  //         appRepositories.specimenGroupRepository.put(outputSg)
-  //         appRepositories.specimenLinkTypeRepository.put(slType)
+        val procType = factory.createProcessingType
+        appRepositories.processingTypeRepository.put(procType)
 
-  //         val slType2 = factory.createSpecimenLinkType.copy(
-  //           id = slType.id,
-  //           version = slType.version,
-  //           inputGroupId = slType.inputGroupId,
-  //           outputGroupId = slType.outputGroupId
-  //         )
+        val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
+        appRepositories.specimenGroupRepository.put(inputSg)
+        appRepositories.specimenGroupRepository.put(outputSg)
+        appRepositories.specimenLinkTypeRepository.put(slType)
 
-  //         val json = makeJsonRequest(
-  //           PUT,
-  //           s"/studies/sltypes/${slType.id.id}",
-  //           json = slTypeToUpdateCmdJson(slType2))
+        val slType2 = factory.createSpecimenLinkType.copy(
+          id = slType.id,
+          version = slType.version,
+          inputGroupId = slType.inputGroupId,
+          outputGroupId = slType.outputGroupId
+        )
 
-  //         (json \ "message").as[String] should include ("specimen link type updated")
-  //       }
-  //     }
-  //   }
+        val json = makeJsonRequest(
+          PUT,
+          s"/studies/sltypes/${slType.id.id}",
+          json = slTypeToUpdateCmdJson(slType2))
 
-  //   describe("PUT /studies/sltypes") {
-  //     it("should not update a specimen link type on an enabled study") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
-  //         val study = appRepositories.studyRepository.put(
-  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-  //         updateOnNonDisabledStudy(appRepositories, study, factory.createProcessingType)
-  //       }
-  //     }
-  //   }
+        (json \ "message").as[String] should include ("specimen link type updated")
+      }
+    }
 
-  //   describe("PUT /studies/sltypes") {
-  //     it("should not update a specimen link type on an retired study") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
-  //         val study = appRepositories.studyRepository.put(
-  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-  //         updateOnNonDisabledStudy(appRepositories, study, factory.createProcessingType)
-  //       }
-  //     }
-  //   }
+    "PUT /studies/sltypes" should {
+      "not update a specimen link type on an enabled study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
+        val study = appRepositories.studyRepository.put(
+          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+        updateOnNonDisabledStudy(appRepositories, study, factory.createProcessingType)
+      }
+    }
 
-  //   describe("DELETE /studies/sltypes") {
-  //     it("should remove a specimen link type") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+    "PUT /studies/sltypes" should {
+      "not update a specimen link type on an retired study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
+        val study = appRepositories.studyRepository.put(
+          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+        updateOnNonDisabledStudy(appRepositories, study, factory.createProcessingType)
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "DELETE /studies/sltypes" should {
+      "remove a specimen link type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val procType = factory.createProcessingType
-  //         appRepositories.processingTypeRepository.put(procType)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-  //         appRepositories.specimenGroupRepository.put(inputSg)
-  //         appRepositories.specimenGroupRepository.put(outputSg)
-  //         appRepositories.specimenLinkTypeRepository.put(slType)
+        val procType = factory.createProcessingType
+        appRepositories.processingTypeRepository.put(procType)
 
-  //         val json = makeJsonRequest(
-  //           DELETE,
-  //           s"/studies/sltypes/${slType.id.id}",
-  //           json = slTypeToRemoveCmdJson(slType))
+        val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
+        appRepositories.specimenGroupRepository.put(inputSg)
+        appRepositories.specimenGroupRepository.put(outputSg)
+        appRepositories.specimenLinkTypeRepository.put(slType)
 
-  //         (json \ "message").as[String] should include ("specimen link type removed")
-  //       }
-  //     }
-  //   }
+        val json = makeJsonRequest(
+          DELETE,
+          s"/studies/sltypes/${slType.id.id}",
+          json = slTypeToRemoveCmdJson(slType))
 
-  //   describe("DELETE /studies/sltypes") {
-  //     it("should not remove a specimen link type on an enabled study") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
-  //         val study = appRepositories.studyRepository.put(
-  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-  //         removeOnNonDisabledStudy(appRepositories, study, factory.createProcessingType)
-  //       }
-  //     }
-  //   }
+        (json \ "message").as[String] should include ("specimen link type removed")
+      }
+    }
 
-  //   describe("DELETE /studies/sltypes") {
-  //     it("should not remove a specimen link type on an retired study") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
-  //         val study = appRepositories.studyRepository.put(
-  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-  //         removeOnNonDisabledStudy(appRepositories, study, factory.createProcessingType)
-  //       }
-  //     }
-  //   }
-  // }
+    "DELETE /studies/sltypes" should {
+      "not remove a specimen link type on an enabled study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
+        val study = appRepositories.studyRepository.put(
+          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+        removeOnNonDisabledStudy(appRepositories, study, factory.createProcessingType)
+      }
+    }
+
+    "DELETE /studies/sltypes" should {
+      "not remove a specimen link type on an retired study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
+        val study = appRepositories.studyRepository.put(
+          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+        removeOnNonDisabledStudy(appRepositories, study, factory.createProcessingType)
+      }
+    }
+  }
 
 }

@@ -5,7 +5,7 @@ import org.biobank.service.json.JsonHelper._
 import org.biobank.fixture.ControllerFixture
 import org.biobank.service.json.Study._
 import play.api.test.Helpers._
-import play.api.test.{ FakeApplication, WithApplication }
+import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory

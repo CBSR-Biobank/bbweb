@@ -5,7 +5,7 @@ import org.biobank.fixture.ControllerFixture
 import org.biobank.service.json.JsonHelper._
 
 import play.api.test.Helpers._
-import play.api.test.FakeApplication
+import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
@@ -103,187 +103,176 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
-  // describe("Collection Event Type REST API") {
-  //   describe("GET /studies/slannottype") {
-  //     it("should list none") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+  "Collection Event Type REST API" when {
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "GET /studies/slannottype" should {
+      "list none" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val idJson = Json.obj("id" -> study.id.id)
-  //         val json = makeJsonRequest(GET, "/studies/slannottype", json = idJson)
-  //         val jsonList = json.as[List[JsObject]]
-  //         jsonList should have size 0
-  //       }
-  //     }
-  //   }
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //   describe("GET /studies/slannottype") {
-  //     it("should list a single collection event annotation type") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+        val idJson = Json.obj("id" -> study.id.id)
+        val json = makeJsonRequest(GET, "/studies/slannottype", json = idJson)
+        val jsonList = json.as[List[JsObject]]
+        jsonList should have size 0
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "GET /studies/slannottype" should {
+      "list a single collection event annotation type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val annotType = factory.createSpecimenLinkAnnotationType
-  //         appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val idJson = Json.obj("id" -> study.id.id)
-  //         val json = makeJsonRequest(GET, "/studies/slannottype", json = idJson)
-  //         val jsonList = json.as[List[JsObject]]
-  //         jsonList should have size 1
-  //         compareObj(jsonList(0), annotType)
-  //       }
-  //     }
-  //   }
+        val annotType = factory.createSpecimenLinkAnnotationType
+        appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
 
-  //   describe("GET /studies/slannottype") {
-  //     it("should list multiple collection event annotation types") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+        val idJson = Json.obj("id" -> study.id.id)
+        val json = makeJsonRequest(GET, "/studies/slannottype", json = idJson)
+        val jsonList = json.as[List[JsObject]]
+        jsonList should have size 1
+        compareObj(jsonList(0), annotType)
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "GET /studies/slannottype" should {
+      "list multiple collection event annotation types" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val annotTypes = List(
-  //           factory.createSpecimenLinkAnnotationType,
-  //           factory.createSpecimenLinkAnnotationType)
-  //         annotTypes map { annotType => appRepositories.specimenLinkAnnotationTypeRepository.put(annotType) }
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val idJson = Json.obj("id" -> study.id.id)
-  //         val json = makeJsonRequest(GET, "/studies/slannottype", json = idJson)
-  //         val jsonList = json.as[List[JsObject]]
+        val annotTypes = List(
+          factory.createSpecimenLinkAnnotationType,
+          factory.createSpecimenLinkAnnotationType)
+        annotTypes map { annotType => appRepositories.specimenLinkAnnotationTypeRepository.put(annotType) }
 
-  //         jsonList should have size annotTypes.size
-  //           (jsonList zip annotTypes).map { item => compareObj(item._1, item._2) }
-  //         ()
-  //       }
-  //     }
-  //   }
+        val idJson = Json.obj("id" -> study.id.id)
+        val json = makeJsonRequest(GET, "/studies/slannottype", json = idJson)
+        val jsonList = json.as[List[JsObject]]
 
-  //   describe("POST /studies/slannottype") {
-  //     it("should add a collection event annotation type") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+        jsonList should have size annotTypes.size
+          (jsonList zip annotTypes).map { item => compareObj(item._1, item._2) }
+        ()
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "POST /studies/slannottype" should {
+      "add a collection event annotation type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val annotType = factory.createSpecimenLinkAnnotationType
-  //         val json = makeJsonRequest(POST, "/studies/slannottype", json = annotTypeToAddCmdJson(annotType))
-  //         (json \ "message").as[String] should include ("annotation type added")
-  //       }
-  //     }
-  //   }
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //   describe("POST /studies/slannottype") {
-  //     it("should not add a collection event annotation type to an enabled study") {
-  //       running(fakeApplication) {
-  //         addOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-  //       }
-  //     }
-  //   }
+        val annotType = factory.createSpecimenLinkAnnotationType
+        val json = makeJsonRequest(POST, "/studies/slannottype", json = annotTypeToAddCmdJson(annotType))
+          (json \ "message").as[String] should include ("annotation type added")
+      }
+    }
 
-  //   describe("POST /studies/slannottype") {
-  //     it("should not add a collection event annotation type to an retired study") {
-  //       running(fakeApplication) {
-  //         addOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-  //       }
-  //     }
-  //   }
+    "POST /studies/slannottype" should {
+      "not add a collection event annotation type to an enabled study" in new WithApplication(fakeApplication()) {
+        doLogin
+        addOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+      }
+    }
 
-  //   describe("PUT /studies/slannottype") {
-  //     it("should update a collection event annotation type") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+    "POST /studies/slannottype" should {
+      "not add a collection event annotation type to an retired study" in new WithApplication(fakeApplication()) {
+        doLogin
+        addOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "PUT /studies/slannottype" should {
+      "update a collection event annotation type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val annotType = factory.createSpecimenLinkAnnotationType
-  //         appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val annotType2 = factory.createSpecimenLinkAnnotationType.copy(
-  //           id = annotType.id,
-  //           version = annotType.version
-  //         )
+        val annotType = factory.createSpecimenLinkAnnotationType
+        appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
 
-  //         val json = makeJsonRequest(PUT,
-  //           s"/studies/slannottype/${annotType.id.id}",
-  //           json = annotTypeToUpdateCmdJson(annotType2))
+        val annotType2 = factory.createSpecimenLinkAnnotationType.copy(
+          id = annotType.id,
+          version = annotType.version
+        )
 
-  //         (json \ "message").as[String] should include ("annotation type updated")
-  //       }
-  //     }
-  //   }
+        val json = makeJsonRequest(PUT,
+          s"/studies/slannottype/${annotType.id.id}",
+          json = annotTypeToUpdateCmdJson(annotType2))
 
-  //   describe("PUT /studies/slannottype") {
-  //     it("should not update a collection event annotation type on an enabled study") {
-  //       running(fakeApplication) {
-  //         updateOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-  //       }
-  //     }
-  //   }
+        (json \ "message").as[String] should include ("annotation type updated")
+      }
+    }
 
-  //   describe("PUT /studies/slannottype") {
-  //     it("should not update a collection event annotation type on an retired study") {
-  //       running(fakeApplication) {
-  //         updateOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-  //       }
-  //     }
-  //   }
+    "PUT /studies/slannottype" should {
+      "not update a collection event annotation type on an enabled study" in new WithApplication(fakeApplication()) {
+        doLogin
+        updateOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+      }
+    }
 
-  //   describe("DELETE /studies/slannottype") {
-  //     it("should remove a collection event annotation type") {
-  //       running(fakeApplication) {
-  //         val appRepositories = new AppRepositories
+    "PUT /studies/slannottype" should {
+      "not update a collection event annotation type on an retired study" in new WithApplication(fakeApplication()) {
+        doLogin
+        updateOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+      }
+    }
 
-  //         val study = factory.createDisabledStudy
-  //         appRepositories.studyRepository.put(study)
+    "DELETE /studies/slannottype" should {
+      "remove a collection event annotation type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-  //         val annotType = factory.createSpecimenLinkAnnotationType
-  //         appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-  //         val json = makeJsonRequest(
-  //           DELETE,
-  //           s"/studies/slannottype/${annotType.id.id}",
-  //           json = annotTypeToRemoveCmdJson(annotType))
+        val annotType = factory.createSpecimenLinkAnnotationType
+        appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
 
-  //         (json \ "message").as[String] should include ("annotation type removed")
-  //       }
-  //     }
-  //   }
+        val json = makeJsonRequest(
+          DELETE,
+          s"/studies/slannottype/${annotType.id.id}",
+          json = annotTypeToRemoveCmdJson(annotType))
 
-  //   describe("DELETE /studies/slannottype") {
-  //     it("should not remove a collection event annotation type on an enabled study") {
-  //       running(fakeApplication) {
-  //         removeOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-  //       }
-  //     }
-  //   }
+        (json \ "message").as[String] should include ("annotation type removed")
+      }
+    }
 
-  //   describe("DELETE /studies/slannottype") {
-  //     it("should not remove a collection event annotation type on an retired study") {
-  //       running(fakeApplication) {
-  //         removeOnNonDisabledStudy(
-  //           new AppRepositories,
-  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-  //       }
-  //     }
-  //   }
-  // }
+    "DELETE /studies/slannottype" should {
+      "not remove a collection event annotation type on an enabled study" in new WithApplication(fakeApplication()) {
+        doLogin
+        removeOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+      }
+    }
+
+    "DELETE /studies/slannottype" should {
+      "not remove a collection event annotation type on an retired study" in new WithApplication(fakeApplication()) {
+        doLogin
+        removeOnNonDisabledStudy(
+          new AppRepositories,
+          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+      }
+    }
+  }
 
 }
