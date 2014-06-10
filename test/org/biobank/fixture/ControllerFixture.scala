@@ -37,8 +37,8 @@ trait ControllerFixture
     * See FixedEhCachePlugin.
     */
   protected val fakeApplication = () => FakeApplication(
-    additionalConfiguration = Map(
-      "ehcacheplugin" -> "disabled"))
+    additionalPlugins = List("org.biobank.controllers.FixedEhCachePlugin"),
+    additionalConfiguration = Map("ehcacheplugin" -> "disabled"))
 
   override def beforeEach: Unit = {
     // ensure the database is empty

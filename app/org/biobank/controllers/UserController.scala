@@ -24,9 +24,23 @@ object UserController extends BbwebController {
     Ok(Json.toJson(userService.getAll.toList))
   }
 
+  /** Retrieves the currently logged in user if the token is valid.
+    */
+  def authUser() = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.info(s"authUser: userId: $userId")
+    userService.getByEmail(userId.id).fold(
+      err => {
+        BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
+      },
+      user => {
+        Ok(Json.toJson(user))
+      }
+    )
+  }
+
   /** Retrieves the user for the given id as JSON */
   def user(id: String) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.info(s"user: $id")
+    Logger.info(s"user: id: $id")
     userService.getByEmail(id).fold(
       err => {
         BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))

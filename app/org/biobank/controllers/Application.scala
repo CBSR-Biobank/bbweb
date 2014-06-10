@@ -6,12 +6,18 @@ import scala.language.postfixOps
 import play.api._
 import play.api.mvc._
 import play.api.libs.json._
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
 import play.api.cache._
 
 /**
   * Controller for the main page, and also the about and contact us pages.
   */
 object Application extends Controller with Security {
+
+  private def userService = Play.current.plugin[BbwebPlugin].map(_.userService).getOrElse {
+    sys.error("Bbweb plugin is not registered")
+  }
 
   def index = Action {
     Ok(views.html.index())
@@ -27,16 +33,24 @@ object Application extends Controller with Security {
         Routes.javascriptRouter(varName)(
           routes.javascript.Application.login,
           routes.javascript.Application.logout,
-          org.biobank.controllers.study.routes.javascript.StudyController.list,
-          org.biobank.controllers.study.routes.javascript.StudyController.query,
+          routes.javascript.UserController.authUser,
           routes.javascript.UserController.user,
           routes.javascript.UserController.addUser,
           routes.javascript.UserController.updateUser,
-          routes.javascript.UserController.removeUser
+          routes.javascript.UserController.removeUser,
+          org.biobank.controllers.study.routes.javascript.StudyController.list,
+          org.biobank.controllers.study.routes.javascript.StudyController.query
         )
       ).as(JAVASCRIPT)
     }
   }
+
+  case class LoginCredentials(email: String, password: String)
+
+  implicit val loginCredentialsReads = (
+    (__ \ "email").read[String](minLength[String](5)) and
+      (__ \ "password").read[String](minLength[String](2))
+  )((email, password) => LoginCredentials(email, password))
 
   /**
     * Log-in a user. Pass the credentials as JSON body.
@@ -47,12 +61,27 @@ object Application extends Controller with Security {
     * @return The token needed for subsequent requests
     */
   def login() = Action(parse.json) { implicit request =>
-    // TODO Check credentials, log user in, return correct token
-    val token = java.util.UUID.randomUUID().toString
-     val userId = UserId("temp");
-    Cache.set(token, userId)
-    Ok(Json.obj("token" -> token))
-      .withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
+    val jsonValidation = request.body.validate[LoginCredentials]
+    jsonValidation.fold(
+      errors => {
+        BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors)))
+      },
+      loginCredentials => {
+        Logger.info(s"login: $loginCredentials")
+        userService.getByEmail(loginCredentials.email).fold(
+          err => {
+            BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
+          },
+          user => {
+            // TODO: token should be derived from salt
+            val token = java.util.UUID.randomUUID().toString
+            Cache.set(token, user.id)
+            Ok(Json.obj("token" -> token))
+              .withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
+          }
+        )
+      }
+    )
   }
 
   /**

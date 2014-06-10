@@ -60,6 +60,7 @@ GET     /studies/:id                   org.biobank.controllers.study.StudyContro
 PUT     /studies/:id                   org.biobank.controllers.study.StudyController.update(id)
 
 # Users
+GET     /authuser                      org.biobank.controllers.UserController.authUser
 GET     /users                         org.biobank.controllers.UserController.list
 GET     /users/:id                     org.biobank.controllers.UserController.user(id: String)
 POST    /users                         org.biobank.controllers.UserController.addUser()
