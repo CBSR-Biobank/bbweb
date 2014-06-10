@@ -1,7 +1,13 @@
 /**
  * Common functionality.
  */
-define(['angular', './services/helper', './services/playRoutes', './filters', './directives/example'],
+define([
+  'angular',
+  './services/helper',
+  './services/playRoutes',
+  './filters',
+  './directives/example',
+  './directives/ngLoginSubmit'],
        function(angular) {
          'use strict';
 
@@ -10,5 +16,6 @@ define(['angular', './services/helper', './services/playRoutes', './filters', '.
              'common.helper',
              'common.playRoutes',
              'common.filters',
-             'common.directives.example']);
+             'common.directives.example',
+             'common.directives.ngLoginSubmit']);
        });

@@ -51,6 +51,16 @@
         <div class="container" data-ng-cloak>
           <div data-ng-view></div>
         </div>
+        <!--
+            This form is hidden to allow for autofill / autocomplete. See the following web page for an
+            explanation:
+
+            http://timothy.userapp.io/post/63412334209/form-autocomplete-and-remember-password-with-angularjs
+        -->
+        <form name="login-form" id="login-form" method="post" action="" style="display: none;">
+          <input name="email" id="login-email" type="text" />
+          <input name="password" id="login-password" type="password" />
+        </form>
         @*-- Footer -- *@
         <footer data-ng-controller="FooterCtrl">
         </footer>

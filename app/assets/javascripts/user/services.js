@@ -39,7 +39,7 @@ define(['angular', 'common'], function(angular) {
         token = undefined;
         user = undefined;
         var dummyObj = {};
-        return playRoutes.controllers.Application.logout().post(dummyObj).then(
+        return playRoutes.controllers.Application.logout().post().then(
           function(response) {
             console.log("loggout response: " + response.data);
           });

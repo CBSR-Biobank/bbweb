@@ -45,17 +45,19 @@ object Application extends Controller with Security {
     }
   }
 
+  /** Used for obtaining the email and password from the HTTP login request */
   case class LoginCredentials(email: String, password: String)
 
+  /** JSON reader for [[LoginCredentials]]. */
   implicit val loginCredentialsReads = (
     (__ \ "email").read[String](minLength[String](5)) and
       (__ \ "password").read[String](minLength[String](2))
   )((email, password) => LoginCredentials(email, password))
 
   /**
-    * Log-in a user. Pass the credentials as JSON body.
+    * Log-in a user. Expects the credentials in the body in JSON format.
     *
-    * Set the cookie {@link AuthTokenCookieKey} to have AngularJS set X-XSRF-TOKEN in the HTTP
+    * Set the cookie [[AuthTokenCookieKey]] to have AngularJS set the X-XSRF-TOKEN in the HTTP
     * header.
     *
     * @return The token needed for subsequent requests
@@ -85,12 +87,12 @@ object Application extends Controller with Security {
   }
 
   /**
-    * Logs the user out.
+    * Log-out a user. Invalidates the authentication token.
     *
-    * Discards the cookie {@link AuthTokenCookieKey} to have AngularJS no longer set the
+    * Discard the cookie [[AuthTokenCookieKey]] to have AngularJS no longer set the
     * X-XSRF-TOKEN in HTTP header.
     */
-  def logout() = AuthAction(parse.json) { token => userId => implicit request =>
+  def logout() = AuthAction(parse.empty) { token => userId => implicit request =>
     Cache.remove(token)
     Ok.discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
   }
