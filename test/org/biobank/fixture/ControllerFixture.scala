@@ -4,7 +4,7 @@ import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, StudyId }
 import org.biobank.domain.{ FactoryComponent, RepositoryComponentImpl, ReadWriteRepository }
 
-import org.scalatest.FunSpec
+import org.scalatest.WordSpec
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.Matchers
 import play.api.Play
@@ -22,7 +22,7 @@ import play.api.Logger
   * to make it easier to drop all items in the database prior to running a test suite.
   */
 trait ControllerFixture
-    extends FunSpec
+    extends WordSpec
     with Matchers
     with BeforeAndAfterEach
     with FactoryComponent
@@ -32,13 +32,19 @@ trait ControllerFixture
 
   var token: String = ""
 
+  /** tests will not work with EhCache, need alternate implementation
+    *
+    * See FixedEhCachePlugin.
+    */
+  protected val fakeApplication = () => FakeApplication(
+    additionalConfiguration = Map(
+      "ehcacheplugin" -> "disabled"))
+
   override def beforeEach: Unit = {
     // ensure the database is empty
     MongoConnection()(dbName)("messages").drop
     MongoConnection()(dbName)("snapshots").drop
   }
-
-  protected def fakeApplication = () => FakeApplication()
 
   def doLogin() = {
     // Log in with test user

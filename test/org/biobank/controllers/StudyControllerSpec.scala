@@ -17,200 +17,180 @@ class StudyControllerSpec extends ControllerFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  describe("Study REST API") {
+  "Study REST API" when {
 
-    describe("GET /studies") {
-      in new WithApplication(app = fakeApplication()) {
-        it("should list none", Tag("single")) {
-          doLogin
-          val json = makeJsonRequest(GET, "/studies")
-          val jsonList = json.as[List[JsObject]]
-          jsonList should have size 0
-        }
+    "GET /studies" should {
+      "list none" in new WithApplication(fakeApplication()) {
+        doLogin
+        val json = makeJsonRequest(GET, "/studies")
+        val jsonList = json.as[List[JsObject]]
+        jsonList should have size 0
       }
 
-      it("should list a study") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+      "list a study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-          val json = makeJsonRequest(GET, "/studies")
-          val jsonList = json.as[List[JsObject]]
-          jsonList should have length 1
-          compareObj(jsonList(0), study)
-        }
+        val json = makeJsonRequest(GET, "/studies")
+        val jsonList = json.as[List[JsObject]]
+        jsonList should have length 1
+        compareObj(jsonList(0), study)
       }
-    }
 
-    describe("GET /studies") {
-      it("should list multiple studies") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+      "list multiple studies" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-          val studies = List(factory.createDisabledStudy, factory.createDisabledStudy)
-          appRepositories.studyRepository.removeAll
-          studies.map(study => appRepositories.studyRepository.put(study))
+        val studies = List(factory.createDisabledStudy, factory.createDisabledStudy)
+        appRepositories.studyRepository.removeAll
+        studies.map(study => appRepositories.studyRepository.put(study))
 
-          val json = makeJsonRequest(GET, "/studies")
-          val jsonList = json.as[List[JsObject]]
-          jsonList should have size studies.size
+        val json = makeJsonRequest(GET, "/studies")
+        val jsonList = json.as[List[JsObject]]
+        jsonList should have size studies.size
 
-          (jsonList zip studies).map { item => compareObj(item._1, item._2) }
-          ()
-        }
+        (jsonList zip studies).map { item => compareObj(item._1, item._2) }
       }
     }
 
-    describe("POST /studies") {
-      it("should add a study") {
-        running(fakeApplication) {
-          val study = factory.createDisabledStudy
-          val cmdJson = Json.obj(
-            "type" -> "AddStudyCmd",
-            "name" -> study.name,
-            "description" -> study.description)
-          val json = makeJsonRequest(POST, "/studies", json = cmdJson)
+    "POST /studies" should {
+      "add a study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val study = factory.createDisabledStudy
+        val cmdJson = Json.obj(
+          "type" -> "AddStudyCmd",
+          "name" -> study.name,
+          "description" -> study.description)
+        val json = makeJsonRequest(POST, "/studies", json = cmdJson)
 
-          (json \ "message").as[String] should include ("study added")
-        }
+        (json \ "message").as[String] should include ("study added")
       }
     }
 
-    describe("PUT /studies/:id") {
-      it("should update a study") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+    "PUT /studies/:id" should {
+      "update a study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-          val cmdJson = Json.obj(
-            "type"            -> "UpdateStudyCmd",
-            "id"              -> study.id.id,
-            "expectedVersion" -> Some(study.version),
-            "name"            -> study.name,
-            "description"     -> study.description)
-          val json = makeJsonRequest(PUT, s"/studies/${study.id.id}", json = cmdJson)
+        val cmdJson = Json.obj(
+          "type"            -> "UpdateStudyCmd",
+          "id"              -> study.id.id,
+          "expectedVersion" -> Some(study.version),
+          "name"            -> study.name,
+          "description"     -> study.description)
+        val json = makeJsonRequest(PUT, s"/studies/${study.id.id}", json = cmdJson)
 
-          (json \ "message").as[String] should include ("study updated")
-        }
+        (json \ "message").as[String] should include ("study updated")
       }
     }
 
-    describe("GET /studies/:id") {
-      it("should read a study") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+    "GET /studies/:id" should {
+      "read a study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy.enable(Some(0), org.joda.time.DateTime.now, 1, 1) | fail
-          appRepositories.studyRepository.put(study)
-          val json = makeJsonRequest(GET, s"/studies/${study.id.id}")
-          compareObj(json, study)
-        }
+        val study = factory.createDisabledStudy.enable(Some(0), org.joda.time.DateTime.now, 1, 1) | fail
+        appRepositories.studyRepository.put(study)
+        val json = makeJsonRequest(GET, s"/studies/${study.id.id}")
+        compareObj(json, study)
       }
     }
 
-    describe("POST /studies/enable") {
-      it("should enable a study") {
-        running(fakeApplication) {
+    "POST /studies/enable" should {
+      "enable a study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-          val appRepositories = new AppRepositories
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
+        appRepositories.specimenGroupRepository.put(factory.createSpecimenGroup)
+        appRepositories.collectionEventTypeRepository.put(factory.createCollectionEventType)
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
-          appRepositories.specimenGroupRepository.put(factory.createSpecimenGroup)
-          appRepositories.collectionEventTypeRepository.put(factory.createCollectionEventType)
+        val cmdJson = Json.obj(
+          "type" -> "EnableStudyCmd",
+          "id" -> study.id.id,
+          "expectedVersion" -> Some(study.version))
+        val json = makeJsonRequest(POST, "/studies/enable", json = cmdJson)
 
-          val cmdJson = Json.obj(
-            "type" -> "EnableStudyCmd",
-            "id" -> study.id.id,
-            "expectedVersion" -> Some(study.version))
-          val json = makeJsonRequest(POST, "/studies/enable", json = cmdJson)
-
-          (json \ "message").as[String] should include ("study enabled")
-        }
+        (json \ "message").as[String] should include ("study enabled")
       }
     }
 
-    describe("POST /studies/enable") {
-      it("should not enable a study") {
-        running(fakeApplication) {
+    "POST /studies/enable" should {
+      "not enable a study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-          val appRepositories = new AppRepositories
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+        val cmdJson = Json.obj(
+          "type" -> "EnableStudyCmd",
+          "id" -> study.id.id,
+          "expectedVersion" -> Some(study.version))
+        val json = makeJsonRequest(POST, "/studies/enable", BAD_REQUEST, cmdJson)
 
-          val cmdJson = Json.obj(
-            "type" -> "EnableStudyCmd",
-            "id" -> study.id.id,
-            "expectedVersion" -> Some(study.version))
-          val json = makeJsonRequest(POST, "/studies/enable", BAD_REQUEST, cmdJson)
-
-          (json \ "message").as[String] should include ("no specimen groups")
-        }
+        (json \ "message").as[String] should include ("no specimen groups")
       }
     }
 
-    describe("POST /studies/disable") {
-      it("should disable a study") {
-        running(fakeApplication) {
+    "POST /studies/disable" should {
+      "disable a study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-          val appRepositories = new AppRepositories
+        val study = factory.createDisabledStudy.enable(Some(0), org.joda.time.DateTime.now, 1, 1) | fail
+        appRepositories.studyRepository.put(study)
 
-          val study = factory.createDisabledStudy.enable(Some(0), org.joda.time.DateTime.now, 1, 1) | fail
-          appRepositories.studyRepository.put(study)
+        val cmdJson = Json.obj(
+          "type" -> "DisableStudyCmd",
+          "id" -> study.id.id,
+          "expectedVersion" -> Some(study.version))
+        val json = makeJsonRequest(POST, "/studies/disable", json = cmdJson)
 
-          val cmdJson = Json.obj(
-            "type" -> "DisableStudyCmd",
-            "id" -> study.id.id,
-            "expectedVersion" -> Some(study.version))
-          val json = makeJsonRequest(POST, "/studies/disable", json = cmdJson)
-
-          (json \ "message").as[String] should include ("study disabled")
-        }
+        (json \ "message").as[String] should include ("study disabled")
       }
     }
 
-    describe("POST /studies/retire") {
-      it("should retire a study") {
-        running(fakeApplication) {
+    "POST /studies/retire" should {
+      "retire a study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-          val appRepositories = new AppRepositories
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+        val cmdJson = Json.obj(
+          "type" -> "RetireStudyCmd",
+          "id" -> study.id.id,
+          "expectedVersion" -> Some(study.version))
+        val json = makeJsonRequest(POST, "/studies/retire", json = cmdJson)
 
-          val cmdJson = Json.obj(
-            "type" -> "RetireStudyCmd",
-            "id" -> study.id.id,
-            "expectedVersion" -> Some(study.version))
-          val json = makeJsonRequest(POST, "/studies/retire", json = cmdJson)
-
-          (json \ "message").as[String] should include ("study retired")
-        }
+        (json \ "message").as[String] should include ("study retired")
       }
     }
 
-    describe("POST /studies/unretire") {
-      it("should unretire a study") {
-        running(fakeApplication) {
+    "POST /studies/unretire" should {
+      "unretire a study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
 
-          val appRepositories = new AppRepositories
+        val study = factory.createDisabledStudy.retire(Some(0), org.joda.time.DateTime.now) | fail
+        appRepositories.studyRepository.put(study)
 
-          val study = factory.createDisabledStudy.retire(Some(0), org.joda.time.DateTime.now) | fail
-          appRepositories.studyRepository.put(study)
+        val cmdJson = Json.obj(
+          "type" -> "UnretireStudyCmd",
+          "id" -> study.id.id,
+          "expectedVersion" -> Some(study.version))
+        val json = makeJsonRequest(POST, "/studies/unretire", json = cmdJson)
 
-          val cmdJson = Json.obj(
-            "type" -> "UnretireStudyCmd",
-            "id" -> study.id.id,
-            "expectedVersion" -> Some(study.version))
-          val json = makeJsonRequest(POST, "/studies/unretire", json = cmdJson)
-
-          (json \ "message").as[String] should include ("study unretired")
-        }
+        (json \ "message").as[String] should include ("study unretired")
       }
     }
 

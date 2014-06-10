@@ -105,187 +105,187 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
-  describe("Participant Type REST API") {
-    describe("GET /studies/pannottype") {
-      it("should list none") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+  // describe("Participant Type REST API") {
+  //   describe("GET /studies/pannottype") {
+  //     it("should list none") {
+  //       running(fakeApplication) {
+  //         val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+  //         val study = factory.createDisabledStudy
+  //         appRepositories.studyRepository.put(study)
 
-          val idJson = Json.obj("id" -> study.id.id)
-          val json = makeJsonRequest(GET, "/studies/pannottype", json = idJson)
-          val jsonList = json.as[List[JsObject]]
-          jsonList should have size 0
-        }
-      }
-    }
+  //         val idJson = Json.obj("id" -> study.id.id)
+  //         val json = makeJsonRequest(GET, "/studies/pannottype", json = idJson)
+  //         val jsonList = json.as[List[JsObject]]
+  //         jsonList should have size 0
+  //       }
+  //     }
+  //   }
 
-    describe("GET /studies/pannottype") {
-      it("should list a single participant annotation type") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+  //   describe("GET /studies/pannottype") {
+  //     it("should list a single participant annotation type") {
+  //       running(fakeApplication) {
+  //         val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+  //         val study = factory.createDisabledStudy
+  //         appRepositories.studyRepository.put(study)
 
-          val annotType = factory.createParticipantAnnotationType
-          appRepositories.participantAnnotationTypeRepository.put(annotType)
+  //         val annotType = factory.createParticipantAnnotationType
+  //         appRepositories.participantAnnotationTypeRepository.put(annotType)
 
-          val idJson = Json.obj("id" -> study.id.id)
-          val json = makeJsonRequest(GET, "/studies/pannottype", json = idJson)
-          val jsonList = json.as[List[JsObject]]
-          jsonList should have size 1
-          compareObj(jsonList(0), annotType)
-        }
-      }
-    }
+  //         val idJson = Json.obj("id" -> study.id.id)
+  //         val json = makeJsonRequest(GET, "/studies/pannottype", json = idJson)
+  //         val jsonList = json.as[List[JsObject]]
+  //         jsonList should have size 1
+  //         compareObj(jsonList(0), annotType)
+  //       }
+  //     }
+  //   }
 
-    describe("GET /studies/pannottype") {
-      it("should list multiple participant annotation types") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+  //   describe("GET /studies/pannottype") {
+  //     it("should list multiple participant annotation types") {
+  //       running(fakeApplication) {
+  //         val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+  //         val study = factory.createDisabledStudy
+  //         appRepositories.studyRepository.put(study)
 
-          val annotTypes = List(
-            factory.createParticipantAnnotationType,
-            factory.createParticipantAnnotationType)
-          annotTypes map { annotType => appRepositories.participantAnnotationTypeRepository.put(annotType) }
+  //         val annotTypes = List(
+  //           factory.createParticipantAnnotationType,
+  //           factory.createParticipantAnnotationType)
+  //         annotTypes map { annotType => appRepositories.participantAnnotationTypeRepository.put(annotType) }
 
-          val idJson = Json.obj("id" -> study.id.id)
-          val json = makeJsonRequest(GET, "/studies/pannottype", json = idJson)
-          val jsonList = json.as[List[JsObject]]
+  //         val idJson = Json.obj("id" -> study.id.id)
+  //         val json = makeJsonRequest(GET, "/studies/pannottype", json = idJson)
+  //         val jsonList = json.as[List[JsObject]]
 
-          jsonList should have size annotTypes.size
-            (jsonList zip annotTypes).map { item => compareObj(item._1, item._2) }
-          ()
-        }
-      }
-    }
+  //         jsonList should have size annotTypes.size
+  //           (jsonList zip annotTypes).map { item => compareObj(item._1, item._2) }
+  //         ()
+  //       }
+  //     }
+  //   }
 
-    describe("POST /studies/pannottype") {
-      it("should add a participant annotation type") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+  //   describe("POST /studies/pannottype") {
+  //     it("should add a participant annotation type") {
+  //       running(fakeApplication) {
+  //         val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+  //         val study = factory.createDisabledStudy
+  //         appRepositories.studyRepository.put(study)
 
-          val annotType = factory.createParticipantAnnotationType
-          val json = makeJsonRequest(POST, "/studies/pannottype", json = annotTypeToAddCmdJson(annotType))
-          (json \ "message").as[String] should include ("annotation type added")
-        }
-      }
-    }
+  //         val annotType = factory.createParticipantAnnotationType
+  //         val json = makeJsonRequest(POST, "/studies/pannottype", json = annotTypeToAddCmdJson(annotType))
+  //         (json \ "message").as[String] should include ("annotation type added")
+  //       }
+  //     }
+  //   }
 
-    describe("POST /studies/pannottype") {
-      it("should not add a participant annotation type to an enabled study") {
-        running(fakeApplication) {
-          addOnNonDisabledStudy(
-            new AppRepositories,
-            factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-        }
-      }
-    }
+  //   describe("POST /studies/pannottype") {
+  //     it("should not add a participant annotation type to an enabled study") {
+  //       running(fakeApplication) {
+  //         addOnNonDisabledStudy(
+  //           new AppRepositories,
+  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+  //       }
+  //     }
+  //   }
 
-    describe("POST /studies/pannottype") {
-      it("should not add a participant annotation type to an retired study") {
-        running(fakeApplication) {
-          addOnNonDisabledStudy(
-            new AppRepositories,
-            factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-        }
-      }
-    }
+  //   describe("POST /studies/pannottype") {
+  //     it("should not add a participant annotation type to an retired study") {
+  //       running(fakeApplication) {
+  //         addOnNonDisabledStudy(
+  //           new AppRepositories,
+  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+  //       }
+  //     }
+  //   }
 
-    describe("PUT /studies/pannottype") {
-      it("should update a participant annotation type") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+  //   describe("PUT /studies/pannottype") {
+  //     it("should update a participant annotation type") {
+  //       running(fakeApplication) {
+  //         val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+  //         val study = factory.createDisabledStudy
+  //         appRepositories.studyRepository.put(study)
 
-          val annotType = factory.createParticipantAnnotationType
-          appRepositories.participantAnnotationTypeRepository.put(annotType)
+  //         val annotType = factory.createParticipantAnnotationType
+  //         appRepositories.participantAnnotationTypeRepository.put(annotType)
 
-          val annotType2 = factory.createParticipantAnnotationType.copy(
-            id = annotType.id,
-            version = annotType.version
-          )
+  //         val annotType2 = factory.createParticipantAnnotationType.copy(
+  //           id = annotType.id,
+  //           version = annotType.version
+  //         )
 
-          val json = makeJsonRequest(PUT,
-            s"/studies/pannottype/${annotType.id.id}",
-            json = annotTypeToUpdateCmdJson(annotType2))
+  //         val json = makeJsonRequest(PUT,
+  //           s"/studies/pannottype/${annotType.id.id}",
+  //           json = annotTypeToUpdateCmdJson(annotType2))
 
-          (json \ "message").as[String] should include ("annotation type updated")
-        }
-      }
-    }
+  //         (json \ "message").as[String] should include ("annotation type updated")
+  //       }
+  //     }
+  //   }
 
-    describe("PUT /studies/pannottype") {
-      it("should not update a participant annotation type on an enabled study") {
-        running(fakeApplication) {
-          updateOnNonDisabledStudy(
-            new AppRepositories,
-            factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-        }
-      }
-    }
+  //   describe("PUT /studies/pannottype") {
+  //     it("should not update a participant annotation type on an enabled study") {
+  //       running(fakeApplication) {
+  //         updateOnNonDisabledStudy(
+  //           new AppRepositories,
+  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+  //       }
+  //     }
+  //   }
 
-    describe("PUT /studies/pannottype") {
-      it("should not update a participant annotation type on an retired study") {
-        running(fakeApplication) {
-          updateOnNonDisabledStudy(
-            new AppRepositories,
-            factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-        }
-      }
-    }
+  //   describe("PUT /studies/pannottype") {
+  //     it("should not update a participant annotation type on an retired study") {
+  //       running(fakeApplication) {
+  //         updateOnNonDisabledStudy(
+  //           new AppRepositories,
+  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+  //       }
+  //     }
+  //   }
 
-    describe("DELETE /studies/pannottype") {
-      it("should remove a participant annotation type") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+  //   describe("DELETE /studies/pannottype") {
+  //     it("should remove a participant annotation type") {
+  //       running(fakeApplication) {
+  //         val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+  //         val study = factory.createDisabledStudy
+  //         appRepositories.studyRepository.put(study)
 
-          val annotType = factory.createParticipantAnnotationType
-          appRepositories.participantAnnotationTypeRepository.put(annotType)
+  //         val annotType = factory.createParticipantAnnotationType
+  //         appRepositories.participantAnnotationTypeRepository.put(annotType)
 
-          val json = makeJsonRequest(
-            DELETE,
-            s"/studies/pannottype/${annotType.id.id}",
-            json = annotTypeToRemoveCmdJson(annotType))
+  //         val json = makeJsonRequest(
+  //           DELETE,
+  //           s"/studies/pannottype/${annotType.id.id}",
+  //           json = annotTypeToRemoveCmdJson(annotType))
 
-          (json \ "message").as[String] should include ("annotation type removed")
-        }
-      }
-    }
+  //         (json \ "message").as[String] should include ("annotation type removed")
+  //       }
+  //     }
+  //   }
 
-    describe("DELETE /studies/pannottype") {
-      it("should not remove a participant annotation type on an enabled study") {
-        running(fakeApplication) {
-          removeOnNonDisabledStudy(
-            new AppRepositories,
-            factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-        }
-      }
-    }
+  //   describe("DELETE /studies/pannottype") {
+  //     it("should not remove a participant annotation type on an enabled study") {
+  //       running(fakeApplication) {
+  //         removeOnNonDisabledStudy(
+  //           new AppRepositories,
+  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+  //       }
+  //     }
+  //   }
 
-    describe("DELETE /studies/pannottype") {
-      it("should not remove a participant annotation type on an retired study") {
-        running(fakeApplication) {
-          removeOnNonDisabledStudy(
-            new AppRepositories,
-            factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-        }
-      }
-    }
-  }
+  //   describe("DELETE /studies/pannottype") {
+  //     it("should not remove a participant annotation type on an retired study") {
+  //       running(fakeApplication) {
+  //         removeOnNonDisabledStudy(
+  //           new AppRepositories,
+  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+  //       }
+  //     }
+  //   }
+  // }
 
 }

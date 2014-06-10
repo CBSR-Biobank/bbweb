@@ -101,191 +101,191 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
-  describe("Processing Type REST API") {
-    describe("GET /studies/proctypes") {
-      it("should list none") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+  // describe("Processing Type REST API") {
+  //   describe("GET /studies/proctypes") {
+  //     it("should list none") {
+  //       running(fakeApplication) {
+  //         val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+  //         val study = factory.createDisabledStudy
+  //         appRepositories.studyRepository.put(study)
 
-          val idJson = Json.obj("id" -> study.id.id)
-          val json = makeJsonRequest(GET, "/studies/proctypes", json = idJson)
-          val jsonList = json.as[List[JsObject]]
-          jsonList should have size 0
-        }
-      }
-    }
+  //         val idJson = Json.obj("id" -> study.id.id)
+  //         val json = makeJsonRequest(GET, "/studies/proctypes", json = idJson)
+  //         val jsonList = json.as[List[JsObject]]
+  //         jsonList should have size 0
+  //       }
+  //     }
+  //   }
 
-    describe("GET /studies/proctypes") {
-      it("should list a single processing type") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+  //   describe("GET /studies/proctypes") {
+  //     it("should list a single processing type") {
+  //       running(fakeApplication) {
+  //         val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+  //         val study = factory.createDisabledStudy
+  //         appRepositories.studyRepository.put(study)
 
-          val procType = factory.createProcessingType
-          appRepositories.processingTypeRepository.put(procType)
+  //         val procType = factory.createProcessingType
+  //         appRepositories.processingTypeRepository.put(procType)
 
-          val idJson = Json.obj("id" -> study.id.id)
-          val json = makeJsonRequest(GET, "/studies/proctypes", json = idJson)
-          val jsonList = json.as[List[JsObject]]
-          jsonList should have size 1
-          compareObj(jsonList(0), procType)
-        }
-      }
-    }
+  //         val idJson = Json.obj("id" -> study.id.id)
+  //         val json = makeJsonRequest(GET, "/studies/proctypes", json = idJson)
+  //         val jsonList = json.as[List[JsObject]]
+  //         jsonList should have size 1
+  //         compareObj(jsonList(0), procType)
+  //       }
+  //     }
+  //   }
 
-    describe("GET /studies/proctypes") {
-      it("should list multiple processing types") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+  //   describe("GET /studies/proctypes") {
+  //     it("should list multiple processing types") {
+  //       running(fakeApplication) {
+  //         val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+  //         val study = factory.createDisabledStudy
+  //         appRepositories.studyRepository.put(study)
 
-          val proctypes = List(factory.createProcessingType, factory.createProcessingType)
+  //         val proctypes = List(factory.createProcessingType, factory.createProcessingType)
 
-          proctypes map { procType => appRepositories.processingTypeRepository.put(procType) }
+  //         proctypes map { procType => appRepositories.processingTypeRepository.put(procType) }
 
-          val idJson = Json.obj("id" -> study.id.id)
-          val json = makeJsonRequest(GET, "/studies/proctypes", json = idJson)
-          val jsonList = json.as[List[JsObject]]
+  //         val idJson = Json.obj("id" -> study.id.id)
+  //         val json = makeJsonRequest(GET, "/studies/proctypes", json = idJson)
+  //         val jsonList = json.as[List[JsObject]]
 
-          jsonList should have size proctypes.size
-            (jsonList zip proctypes).map { item => compareObj(item._1, item._2) }
-          ()
-        }
-      }
-    }
+  //         jsonList should have size proctypes.size
+  //           (jsonList zip proctypes).map { item => compareObj(item._1, item._2) }
+  //         ()
+  //       }
+  //     }
+  //   }
 
-    describe("POST /studies/proctypes") {
-      it("should add a processing type") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+  //   describe("POST /studies/proctypes") {
+  //     it("should add a processing type") {
+  //       running(fakeApplication) {
+  //         val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+  //         val study = factory.createDisabledStudy
+  //         appRepositories.studyRepository.put(study)
 
-          val procType = factory.createProcessingType
-          val json = makeJsonRequest(
-            POST,
-            "/studies/proctypes",
-            json = procTypeToAddCmdJson(procType))
+  //         val procType = factory.createProcessingType
+  //         val json = makeJsonRequest(
+  //           POST,
+  //           "/studies/proctypes",
+  //           json = procTypeToAddCmdJson(procType))
 
-          (json \ "message").as[String] should include ("processing type added")
-        }
-      }
-    }
+  //         (json \ "message").as[String] should include ("processing type added")
+  //       }
+  //     }
+  //   }
 
-    describe("POST /studies/proctypes") {
-      it("should not add a processing type to an enabled study") {
-        running(fakeApplication) {
-          addOnNonDisabledStudy(
-            new AppRepositories,
-            factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-        }
-      }
-    }
+  //   describe("POST /studies/proctypes") {
+  //     it("should not add a processing type to an enabled study") {
+  //       running(fakeApplication) {
+  //         addOnNonDisabledStudy(
+  //           new AppRepositories,
+  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+  //       }
+  //     }
+  //   }
 
-    describe("POST /studies/proctypes") {
-      it("should not add a processing type to an retired study") {
-        running(fakeApplication) {
-          addOnNonDisabledStudy(
-            new AppRepositories,
-            factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-        }
-      }
-    }
+  //   describe("POST /studies/proctypes") {
+  //     it("should not add a processing type to an retired study") {
+  //       running(fakeApplication) {
+  //         addOnNonDisabledStudy(
+  //           new AppRepositories,
+  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+  //       }
+  //     }
+  //   }
 
-    describe("PUT /studies/proctypes") {
-      it("should update a processing type") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+  //   describe("PUT /studies/proctypes") {
+  //     it("should update a processing type") {
+  //       running(fakeApplication) {
+  //         val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+  //         val study = factory.createDisabledStudy
+  //         appRepositories.studyRepository.put(study)
 
-          val procType = factory.createProcessingType
-          appRepositories.processingTypeRepository.put(procType)
+  //         val procType = factory.createProcessingType
+  //         appRepositories.processingTypeRepository.put(procType)
 
-          val procType2 = factory.createProcessingType.copy(
-            id = procType.id,
-            version = procType.version
-          )
+  //         val procType2 = factory.createProcessingType.copy(
+  //           id = procType.id,
+  //           version = procType.version
+  //         )
 
-          val json = makeJsonRequest(
-            PUT,
-            s"/studies/proctypes/${procType.id.id}",
-            json = procTypeToUpdateCmdJson(procType2))
+  //         val json = makeJsonRequest(
+  //           PUT,
+  //           s"/studies/proctypes/${procType.id.id}",
+  //           json = procTypeToUpdateCmdJson(procType2))
 
-          (json \ "message").as[String] should include ("processing type updated")
-        }
-      }
-    }
+  //         (json \ "message").as[String] should include ("processing type updated")
+  //       }
+  //     }
+  //   }
 
-    describe("PUT /studies/proctypes") {
-      it("should not update a processing type on an enabled study") {
-        running(fakeApplication) {
-          updateOnNonDisabledStudy(
-            new AppRepositories,
-            factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-        }
-      }
-    }
+  //   describe("PUT /studies/proctypes") {
+  //     it("should not update a processing type on an enabled study") {
+  //       running(fakeApplication) {
+  //         updateOnNonDisabledStudy(
+  //           new AppRepositories,
+  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+  //       }
+  //     }
+  //   }
 
-    describe("PUT /studies/proctypes") {
-      it("should not update a processing type on an retired study") {
-        running(fakeApplication) {
-          updateOnNonDisabledStudy(
-            new AppRepositories,
-            factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-        }
-      }
-    }
+  //   describe("PUT /studies/proctypes") {
+  //     it("should not update a processing type on an retired study") {
+  //       running(fakeApplication) {
+  //         updateOnNonDisabledStudy(
+  //           new AppRepositories,
+  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+  //       }
+  //     }
+  //   }
 
-    describe("DELETE /studies/proctypes") {
-      it("should remove a processing type") {
-        running(fakeApplication) {
-          val appRepositories = new AppRepositories
+  //   describe("DELETE /studies/proctypes") {
+  //     it("should remove a processing type") {
+  //       running(fakeApplication) {
+  //         val appRepositories = new AppRepositories
 
-          val study = factory.createDisabledStudy
-          appRepositories.studyRepository.put(study)
+  //         val study = factory.createDisabledStudy
+  //         appRepositories.studyRepository.put(study)
 
-          val procType = factory.createProcessingType
-          appRepositories.processingTypeRepository.put(procType)
+  //         val procType = factory.createProcessingType
+  //         appRepositories.processingTypeRepository.put(procType)
 
-          val json = makeJsonRequest(
-            DELETE,
-            s"/studies/proctypes/${procType.id.id}",
-            json = procTypeToRemoveCmdJson(procType))
+  //         val json = makeJsonRequest(
+  //           DELETE,
+  //           s"/studies/proctypes/${procType.id.id}",
+  //           json = procTypeToRemoveCmdJson(procType))
 
-          (json \ "message").as[String] should include ("processing type removed")
-        }
-      }
-    }
+  //         (json \ "message").as[String] should include ("processing type removed")
+  //       }
+  //     }
+  //   }
 
-    describe("DELETE /studies/proctypes") {
-      it("should not remove a processing type on an enabled study") {
-        running(fakeApplication) {
-          removeOnNonDisabledStudy(
-            new AppRepositories,
-            factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
-        }
-      }
-    }
+  //   describe("DELETE /studies/proctypes") {
+  //     it("should not remove a processing type on an enabled study") {
+  //       running(fakeApplication) {
+  //         removeOnNonDisabledStudy(
+  //           new AppRepositories,
+  //           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+  //       }
+  //     }
+  //   }
 
-    describe("DELETE /studies/proctypes") {
-      it("should not remove a processing type on an retired study") {
-        running(fakeApplication) {
-          removeOnNonDisabledStudy(
-            new AppRepositories,
-            factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
-        }
-      }
-    }
-  }
+  //   describe("DELETE /studies/proctypes") {
+  //     it("should not remove a processing type on an retired study") {
+  //       running(fakeApplication) {
+  //         removeOnNonDisabledStudy(
+  //           new AppRepositories,
+  //           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+  //       }
+  //     }
+  //   }
+  // }
 
 }

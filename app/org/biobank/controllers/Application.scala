@@ -33,7 +33,6 @@ object Application extends Controller with Security {
           routes.javascript.UserController.addUser,
           routes.javascript.UserController.updateUser,
           routes.javascript.UserController.removeUser
-            // TODO Add your routes here
         )
       ).as(JAVASCRIPT)
     }
