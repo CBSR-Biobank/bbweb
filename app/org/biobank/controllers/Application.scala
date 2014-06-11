@@ -39,7 +39,8 @@ object Application extends Controller with Security {
           routes.javascript.UserController.updateUser,
           routes.javascript.UserController.removeUser,
           org.biobank.controllers.study.routes.javascript.StudyController.list,
-          org.biobank.controllers.study.routes.javascript.StudyController.query
+          org.biobank.controllers.study.routes.javascript.StudyController.query,
+          org.biobank.controllers.study.routes.javascript.StudyController.add
         )
       ).as(JAVASCRIPT)
     }

@@ -32,7 +32,19 @@ define(['angular'], function(angular) {
 
   var StudyAddCtrl = function($scope, $rootScope, $location, user, studyService) {
     $rootScope.pageTitle = 'Biobank study';
-    $scope.title = "AddStudy";
+    $scope.form = {
+      title: "Add new study",
+      study: {
+        type: "AddStudyCmd",
+        name: "",
+        description: ""}
+    };
+
+    $scope.submit = function(study) {
+      studyService.add(study).then(function(response) {
+        $location.path('/studies');
+      });
+    };
   };
 
   return {

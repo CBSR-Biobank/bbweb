@@ -14,6 +14,9 @@ define(['angular', 'common'], function(angular) {
       query: function() {
         var id = $route.current.params.id;
         return playRoutes.controllers.study.StudyController.query(id).get();
+      },
+      add: function(study) {
+        return playRoutes.controllers.study.StudyController.add().post(study);
       }
     };
   }]);
