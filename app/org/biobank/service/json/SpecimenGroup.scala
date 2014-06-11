@@ -44,7 +44,7 @@ object SpecimenGroup {
     (__ \ "type").read[String](Reads.verifying[String](_ == "AddSpecimenGroupCmd")) andKeep
       (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String](minLength[String](2)) and
+      (__ \ "description").readNullable[String] and
       (__ \ "units").read[String](minLength[String](2)) and
       (__ \ "anatomicalSourceType").read[AnatomicalSourceType] and
       (__ \ "preservationType").read[PreservationType] and
@@ -61,7 +61,7 @@ object SpecimenGroup {
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String](minLength[String](2)) and
+      (__ \ "description").readNullable[String] and
       (__ \ "units").read[String](minLength[String](2)) and
       (__ \ "anatomicalSourceType").read[AnatomicalSourceType] and
       (__ \ "preservationType").read[PreservationType] and

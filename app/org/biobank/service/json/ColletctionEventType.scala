@@ -55,7 +55,7 @@ object CollectionEventType {
     (__ \ "type").read[String](Reads.verifying[String](_ == "AddCollectionEventTypeCmd")) andKeep
       (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String](minLength[String](2)) and
+      (__ \ "description").readNullable[String] and
       (__ \ "recurring").read[Boolean] and
       (__ \ "specimenGroupData").read[List[CollectionEventTypeSpecimenGroupData]] and
       (__ \ "annotationTypeData").read[List[CollectionEventTypeAnnotationTypeData]]
@@ -68,7 +68,7 @@ object CollectionEventType {
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String](minLength[String](2)) and
+      (__ \ "description").readNullable[String] and
       (__ \ "recurring").read[Boolean] and
       (__ \ "specimenGroupData").read[List[CollectionEventTypeSpecimenGroupData]] and
       (__ \ "annotationTypeData").read[List[CollectionEventTypeAnnotationTypeData]]

@@ -35,7 +35,7 @@ object CollectionEventAnnotationType {
     (__ \ "type").read[String](Reads.verifying[String](_ == "AddCollectionEventAnnotationTypeCmd")) andKeep
       (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String](minLength[String](2)) and
+      (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
       (__ \ "options").readNullable[Map[String, String]]
@@ -48,7 +48,7 @@ object CollectionEventAnnotationType {
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String](minLength[String](2)) and
+      (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
       (__ \ "options").readNullable[Map[String, String]]

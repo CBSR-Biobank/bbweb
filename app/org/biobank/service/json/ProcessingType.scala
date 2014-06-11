@@ -34,7 +34,7 @@ object ProcessingType {
     (__ \ "type").read[String](Reads.verifying[String](_ == "AddProcessingTypeCmd")) andKeep
       (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String](minLength[String](2)) and
+      (__ \ "description").readNullable[String] and
       (__ \ "enabled").read[Boolean]
   )((studyId, name, description, enabled) => AddProcessingTypeCmd(studyId, name, description, enabled))
 
@@ -44,7 +44,7 @@ object ProcessingType {
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String](minLength[String](2)) and
+      (__ \ "description").readNullable[String] and
       (__ \ "enabled").read[Boolean]
   )((studyId, id, expectedVersion, name, description, enabled) =>
     UpdateProcessingTypeCmd(studyId, id, expectedVersion, name, description, enabled))

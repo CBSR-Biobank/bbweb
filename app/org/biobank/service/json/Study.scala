@@ -28,7 +28,7 @@ object Study {
   implicit val addStudyCmdReads = (
     (__ \ "type").read[String](Reads.verifying[String](_ == "AddStudyCmd")) andKeep
       (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String](minLength[String](2))
+      (__ \ "description").readNullable[String]
   )((name, description) => AddStudyCmd(name, description))
 
   implicit val updateStudyCmdReads: Reads[UpdateStudyCmd] = (
@@ -36,7 +36,7 @@ object Study {
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String](minLength[String](2))
+      (__ \ "description").readNullable[String]
   )((id, version, name, description) => UpdateStudyCmd(id, version, name, description))
 
   implicit val enableStudyCmdReads: Reads[EnableStudyCmd] = (

@@ -37,7 +37,8 @@ define(['angular'], function(angular) {
       study: {
         type: "AddStudyCmd",
         name: "",
-        description: ""}
+        description: null
+      }
     };
 
     $scope.submit = function(study) {

@@ -15,7 +15,7 @@
       <tr ng-repeat="study in studies">
         <td><a href="#/studies/{{study.id}}">{{study.name}}</a></td>
         <td>{{study.status}}</td>
-        <td>{{study.description | truncate:20}}</td>
+        <td>{{study.description === null ? "" : study.description | truncate:20}}</td>
       </tr>
     </table>
   </div>
