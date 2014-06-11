@@ -13,15 +13,8 @@
 
   <!-- use HTML data attributes to pass parameters to javascript -->
   <tabset>
-    <tab>
-      <tab-heading>Summary</tab-heading>
-      <h4>{{study.name}}</h4>
-      <small class="muted">Status: {{study.status}}</small>
-      <p><small class="muted">Added: {{study.addedDate}}</small></p>
-      <p ng-if="study.lastUpdateDate != null">
-        <small class="muted">Last updated: {{study.lastUpdateDate}}</small>
-      </p>
-      <p>{{study.description}}</p>
+    <tab heading="Summary">
+      <study-summary-tab></study-summary-tab>
     </tab>
     <tab heading="Participants" select="loadTab('participants')"></tab>
     <tab heading="Specimens">Specimens</tab>

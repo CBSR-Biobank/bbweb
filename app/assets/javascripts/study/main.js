@@ -2,7 +2,7 @@
  * User package module.
  * Manages all sub-modules so other RequireJS modules only have to import the package.
  */
-define(['angular', './routes', './services'], function(angular) {
+define(['angular', './routes', './services', './directives/studyTabs'], function(angular) {
   'use strict';
 
   return angular.module('biobank.study', [
@@ -10,5 +10,6 @@ define(['angular', './routes', './services'], function(angular) {
     'ui.bootstrap',
     'ngRoute',
     'study.routes',
-    'study.services']);
+    'study.services',
+    'study.directives.studySummaryTabContent']);
 });

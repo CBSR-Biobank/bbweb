@@ -1,0 +1,9 @@
+<h4>Name: {{study.name}}</h4>
+<blockquote>
+  <p><cite>Status: {{study.status}}</cite></p>
+  <p><small><cite>Added: {{study.addedDate}}</cite></small></p>
+  <p ng-if="study.lastUpdateDate != null">
+    <small><cite>Last updated: {{study.lastUpdateDate}}</cite></small>
+  </p>
+</blockquote>
+<p>{{study.description}}</p>
