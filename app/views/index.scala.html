@@ -1,15 +1,68 @@
-@(implicit request: play.api.mvc.WrappedRequest[play.api.mvc.AnyContent])
+@()<!DOCTYPE html>
+<html>
+  <head>
+    <title data-ng-bind="pageTitle"></title>
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+      @import play.api.Play.current
+      @import play.api.Mode
+      @if(current.mode == Mode.Dev) {
+      <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.css")" />
+      }
+      @if(current.mode == Mode.Prod) {
+      <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.min.css")" />
+      }
+      @*-- Add More CSS here -- *@
 
-@import org.biobank.controllers.study._
+      <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+        <script data-main="@routes.Assets.versioned("javascripts/main.js")" type="text/javascript" src="@routes.Assets.versioned("lib/requirejs/require.js")"></script>
+      </head>
+      <body>
+        @*-- Header -- *@
+        <header class="navbar navbar-inverse navbar-fixed-top basics-nav" data-ng-controller="HeaderCtrl"
+                data-ng-cloak>
+          <div class="container" data-ng-switch="!!user" data-ng-cloak>
+            <a href="#/" class="navbar-brand">Biobank</a>
+            <div data-ng-switch-when="true">
+              <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                  <a href="" class="dropdown-toggle" data-toggle="dropdown">
+                    <span class="glyphicon glyphicon-user"></span> {{user.name}}
+                    <b class="caret"></b>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a href="#/settings"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
+                    <li>
+                      <a href="" data-ng-click="logout()">
+                        <span class="glyphicon glyphicon-off"></span> Logout
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+            <div data-ng-switch-when="false">
+              <ul class="nav navbar-nav pull-right">
+                <li><a href="#/login">Login</a></li>
+              </ul>
+            </div>
+          </div>
+        </header>
+        @* -- Main Content -- *@
+        <div class="container" data-ng-cloak>
+          <div data-ng-view></div>
+        </div>
+        <!--
+            This form is hidden to allow for autofill / autocomplete. See the following web page for an
+            explanation:
 
-@main("Biobank") {
-<div class="page-header">
-  <h2>Select a task</h2>
-</div>
-
-<div class="clearfix">
-  <p>
-    <a href="@routes.StudyController.index" class="btn btn-primary" type="button">View Studies</a>
-  </p>
-</div>
-}
+            http://timothy.userapp.io/post/63412334209/form-autocomplete-and-remember-password-with-angularjs
+        -->
+        <form name="login-form" id="login-form" method="post" action="" style="display: none;">
+          <input name="email" id="login-email" type="text" />
+          <input name="password" id="login-password" type="password" />
+        </form>
+        @*-- Footer -- *@
+        <footer data-ng-controller="FooterCtrl">
+        </footer>
+      </body>
+    </html>

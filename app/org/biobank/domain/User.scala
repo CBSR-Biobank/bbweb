@@ -2,7 +2,7 @@ package org.biobank.domain
 
 import org.biobank.domain.validation.UserValidationHelper
 import org.biobank.infrastructure.event.UserEvents._
-
+import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -40,8 +40,11 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
     s"""|${this.getClass.getSimpleName}: {
         |  id: $id,
         |  version: $version,
+        |  addedDate: $addedDate,
+        |  lastUpdateDate: $lastUpdateDate,
         |  name: $name,
         |  email: $email
+        |  avatarUrl: $avatarUrl
         |}""".stripMargin
 }
 
@@ -51,6 +54,8 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
 case class RegisteredUser private (
   id: UserId,
   version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   email: String,
   password: String,
@@ -59,10 +64,13 @@ case class RegisteredUser private (
   avatarUrl: Option[String]) extends User {
 
   /* Activates a registered user. */
-  def activate(expectedVersion: Option[Long]): DomainValidation[ActiveUser] = {
+  def activate(
+    expectedVersion: Option[Long],
+    dateTime: DateTime): DomainValidation[ActiveUser] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      activatedUser <- ActiveUser.create(this)
+      validatedUser <- ActiveUser.create(this)
+      activatedUser <- validatedUser.copy(lastUpdateDate = Some(dateTime)).success
     } yield activatedUser
   }
 }
@@ -74,21 +82,23 @@ object RegisteredUser extends UserValidationHelper {
   def create(
     id: UserId,
     version: Long,
+    dateTime: DateTime,
     name: String,
     email: String,
     password: String,
     hasher: String,
     salt: Option[String],
     avatarUrl: Option[String]): DomainValidation[RegisteredUser] = {
-    (validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
-      validateEmail(email).toValidationNel |@|
-      validateNonEmpty(password, "password is null or empty").toValidationNel |@|
-      validateNonEmpty(hasher, "hasher is null or empty").toValidationNel |@|
-      validateNonEmptyOption(salt, "salt is null or empty").toValidationNel |@|
-      validateAvatarUrl(avatarUrl).toValidationNel) {
-        RegisteredUser(_, _, _, _, _, _, _, _)
+
+    (validateId(id) |@|
+      validateAndIncrementVersion(version) |@|
+      validateNonEmpty(name, "name is null or empty") |@|
+      validateEmail(email) |@|
+      validateNonEmpty(password, "password is null or empty") |@|
+      validateNonEmpty(hasher, "hasher is null or empty") |@|
+      validateNonEmptyOption(salt, "salt is null or empty") |@|
+      validateAvatarUrl(avatarUrl)) {
+        RegisteredUser(_, _, dateTime, None, _, _, _, _, _, _)
       }
   }
 
@@ -98,6 +108,8 @@ object RegisteredUser extends UserValidationHelper {
 case class ActiveUser private (
   id: UserId,
   version: Long = -1,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   email: String,
   password: String,
@@ -106,14 +118,36 @@ case class ActiveUser private (
   avatarUrl: Option[String]) extends User {
 
   /** Locks an active user. */
-  def lock(expectedVersion: Option[Long]): DomainValidation[LockedUser] = {
+  def lock(
+    expectedVersion: Option[Long],
+    dateTime: DateTime): DomainValidation[LockedUser] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      lockedUser <- LockedUser.create(this)
+      validatedUser <- LockedUser.create(this)
+      lockedUser <- validatedUser.copy(lastUpdateDate = Some(dateTime)).success
     } yield lockedUser
   }
 
-  // FIXME: add update method
+  def update(
+    expectedVersion: Option[Long],
+    dateTime: DateTime,
+    name: String,
+    email: String,
+    password: String,
+    hasher: String,
+    salt: Option[String],
+    avatarUrl: Option[String]) = {
+
+    for {
+      validVersion <- requireVersion(expectedVersion)
+      validatedUser <- RegisteredUser.create(id, version, addedDate, name, email, password, hasher,
+        salt, avatarUrl)
+      registeredUser <- validatedUser.activate(validatedUser.versionOption, dateTime)
+      udpatedUser <- registeredUser.copy(
+        version = version + 1,
+        lastUpdateDate = Some(dateTime)).success
+    } yield udpatedUser
+  }
 }
 
 /** Factory object. */
@@ -121,15 +155,15 @@ object ActiveUser extends UserValidationHelper {
 
   /** Creates an active user from a registered user. */
   def create[T <: User](user: T): DomainValidation[ActiveUser] = {
-    (validateId(user.id).toValidationNel |@|
-      validateAndIncrementVersion(user.version).toValidationNel |@|
-      validateNonEmpty(user.name, "name is null or empty").toValidationNel |@|
-      validateEmail(user.email).toValidationNel |@|
-      validateNonEmpty(user.password, "password is null or empty").toValidationNel |@|
-      validateNonEmpty(user.hasher, "hasher is null or empty").toValidationNel |@|
-      validateNonEmptyOption(user.salt, "salt is null or empty").toValidationNel |@|
-      validateAvatarUrl(user.avatarUrl).toValidationNel) {
-        ActiveUser(_, _, _, _, _, _, _, _)
+    (validateId(user.id) |@|
+      validateAndIncrementVersion(user.version) |@|
+      validateNonEmpty(user.name, "name is null or empty") |@|
+      validateEmail(user.email) |@|
+      validateNonEmpty(user.password, "password is null or empty") |@|
+      validateNonEmpty(user.hasher, "hasher is null or empty") |@|
+      validateNonEmptyOption(user.salt, "salt is null or empty") |@|
+      validateAvatarUrl(user.avatarUrl)) {
+        ActiveUser(_, _, user.addedDate, None, _, _, _, _, _, _)
       }
   }
 
@@ -139,6 +173,8 @@ object ActiveUser extends UserValidationHelper {
 case class LockedUser private (
   id: UserId,
   version: Long = -1,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   email: String,
   password: String,
@@ -147,10 +183,13 @@ case class LockedUser private (
   avatarUrl: Option[String]) extends User {
 
   /** Unlocks a locked user. */
-  def unlock(expectedVersion: Option[Long]): DomainValidation[ActiveUser] = {
+  def unlock(
+    expectedVersion: Option[Long],
+    dateTime: DateTime): DomainValidation[ActiveUser] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      activeUser <- ActiveUser.create(this)
+      validatedUser <- ActiveUser.create(this)
+      activeUser <- validatedUser.copy(lastUpdateDate = Some(dateTime)).success
     } yield activeUser
   }
 
@@ -161,15 +200,15 @@ object LockedUser extends UserValidationHelper {
 
   /** Creates an active user from a locked user. */
   def create(user: ActiveUser): DomainValidation[LockedUser] = {
-    (validateId(user.id).toValidationNel |@|
-      validateAndIncrementVersion(user.version).toValidationNel |@|
-      validateNonEmpty(user.name, "name is null or empty").toValidationNel |@|
-      validateEmail(user.email).toValidationNel |@|
-      validateNonEmpty(user.password, "password is null or empty").toValidationNel |@|
-      validateNonEmpty(user.hasher, "hasher is null or empty").toValidationNel |@|
-      validateNonEmptyOption(user.salt, "salt is null or empty").toValidationNel |@|
-      validateAvatarUrl(user.avatarUrl).toValidationNel) {
-        LockedUser(_, _, _, _, _, _, _, _)
+    (validateId(user.id) |@|
+      validateAndIncrementVersion(user.version) |@|
+      validateNonEmpty(user.name, "name is null or empty") |@|
+      validateEmail(user.email) |@|
+      validateNonEmpty(user.password, "password is null or empty") |@|
+      validateNonEmpty(user.hasher, "hasher is null or empty") |@|
+      validateNonEmptyOption(user.salt, "salt is null or empty") |@|
+      validateAvatarUrl(user.avatarUrl)) {
+        LockedUser(_, _, user.addedDate, None, _, _, _, _, _, _)
       }
   }
 

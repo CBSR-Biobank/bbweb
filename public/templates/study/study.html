@@ -1,0 +1,31 @@
+<div class="page-header">
+  <h2>{{study.name}}
+  <a href="#/studies/:id" class="btn btn-info btn-xs"
+     type="button" data-toggle="tooltip" title="Update summary information.">
+    <i class="glyphicon glyphicon-edit"> Update</i>
+  </a>
+  </h2>
+</div>
+<div class="clearfix">
+  <div class="alert alert-success">
+    Flash message goes here when study is updated
+  </div>
+
+  <!-- use HTML data attributes to pass parameters to javascript -->
+  <tabset>
+    <tab>
+      <tab-heading>Summary</tab-heading>
+      <h4>{{study.name}}</h4>
+      <small class="muted">Status: {{study.status}}</small>
+      <p><small class="muted">Added: {{study.addedDate}}</small></p>
+      <p ng-if="study.lastUpdateDate != null">
+        <small class="muted">Last updated: {{study.lastUpdateDate}}</small>
+      </p>
+      <p>{{study.description}}</p>
+    </tab>
+    <tab heading="Participants" select="loadTab('participants')"></tab>
+    <tab heading="Specimens">Specimens</tab>
+    <tab heading="CollectionEvents">Collection Events</tab>
+    <tab heading="ProcessingEvents">Processing Events</tab>
+  </tabset>
+</div>

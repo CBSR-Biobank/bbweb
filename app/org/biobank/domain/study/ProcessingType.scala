@@ -9,6 +9,7 @@ import org.biobank.domain.{
 }
 import org.biobank.domain.validation.StudyValidationHelper
 
+import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -27,6 +28,8 @@ case class ProcessingType private (
   studyId: StudyId,
   id: ProcessingTypeId,
   version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   description: Option[String],
   enabled: Boolean)
@@ -39,19 +42,23 @@ case class ProcessingType private (
     */
   def update(
     expectedVersion: Option[Long],
+    dateTime: DateTime,
     name: String,
     description: Option[String],
-    enaled: Boolean): DomainValidation[ProcessingType] = {
+    enabled: Boolean): DomainValidation[ProcessingType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
-      newItem <- ProcessingType.create(studyId, id, version, name, description, enabled)
+      validatedItem <- ProcessingType.create(studyId, id, version, addedDate, name, description, enabled)
+      newItem <- validatedItem.copy(lastUpdateDate = Some(dateTime)).success
     } yield newItem
   }
 
   override def toString: String =
-    s"""|CollectionEventType:{
+    s"""|ProcessingType:{
         |  studyId: $studyId,
         |  id: $id,
+        |  addedDate: $addedDate,
+        |  lastUpdateDate: $lastUpdateDate,
         |  version: $version,
         |  name: $name,
         |  description: $description,
@@ -65,15 +72,16 @@ object ProcessingType extends StudyValidationHelper {
     studyId: StudyId,
     id: ProcessingTypeId,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     enabled: Boolean): DomainValidation[ProcessingType] = {
-    (validateId(studyId).toValidationNel |@|
-      validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
-      validateNonEmptyOption(description, "description is null or empty").toValidationNel) {
-      ProcessingType(_, _, _, _, _, enabled)
+    (validateId(studyId) |@|
+      validateId(id) |@|
+      validateAndIncrementVersion(version) |@|
+      validateNonEmpty(name, "name is null or empty") |@|
+      validateNonEmptyOption(description, "description is null or empty")) {
+      ProcessingType(_, _, _, dateTime, None, _, _, enabled)
     }
   }
 }

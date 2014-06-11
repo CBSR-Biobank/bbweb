@@ -10,6 +10,8 @@ import scalaz.Scalaz._
   */
 trait  ReadRepository[K, A] {
 
+  def isEmpty: Boolean
+
   def getByKey(key: K): DomainValidation[A]
 
   def getValues: Iterable[A]
@@ -26,6 +28,8 @@ trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
 
   def remove(value: A): A
 
+  def removeAll()
+
 }
 
 /**
@@ -37,10 +41,12 @@ class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepository[K,
 
   protected def getMap = internalMap.single.get
 
+  def isEmpty: Boolean = getMap.isEmpty
+
   def getByKey(key: K): DomainValidation[A] = {
     getMap.get(key) match {
       case Some(value) => value.success
-      case None => DomainError(s"value with key $key not found").failNel
+      case None => DomainError(s"${this.getClass.getSimpleName}: value with key $key not found").failNel
     }
   }
 
@@ -66,6 +72,10 @@ private [domain] class ReadWriteRepositoryRefImpl[K, A](keyGetter: (A) => K)
   def remove(value: A): A = {
     internalMap.single.transform(map => map - keyGetter(value))
     value
+  }
+
+  def removeAll() = {
+    internalMap.single.transform(map => map.empty)
   }
 
 }

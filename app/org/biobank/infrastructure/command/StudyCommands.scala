@@ -2,6 +2,7 @@ package org.biobank.infrastructure.command
 
 import org.biobank.infrastructure._
 import org.biobank.domain.study._
+import org.biobank.domain.ContainerTypeId
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
@@ -10,12 +11,11 @@ import org.biobank.domain.AnnotationValueType._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.Commands._
 
-import scala.collection.immutable
-
 object StudyCommands {
   // study commands
   trait StudyCommand extends Command
   trait HasStudyIdentity { val studyId: String }
+  trait HasProcessingTypeIdentity { val processingTypeId: String }
 
   case class AddStudyCmd(
     name: String,
@@ -52,7 +52,7 @@ object StudyCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  case class UnetireStudyCmd(
+  case class UnretireStudyCmd(
     id: String,
     expectedVersion: Option[Long])
       extends StudyCommand
@@ -60,7 +60,9 @@ object StudyCommands {
       with HasExpectedVersion
 
   // specimen group commands
-  trait SpecimenGroupCommand extends StudyCommand with HasStudyIdentity
+  trait StudyCommandWithId extends StudyCommand with HasStudyIdentity
+
+  trait SpecimenGroupCommand extends StudyCommandWithId
 
   case class AddSpecimenGroupCmd(
     studyId: String,
@@ -96,8 +98,8 @@ object StudyCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  // collection event commands
-  trait CollectionEventTypeCommand extends StudyCommand with HasStudyIdentity
+  // collection event type commands
+  trait CollectionEventTypeCommand extends StudyCommandWithId
 
   case class AddCollectionEventTypeCmd(
     studyId: String,
@@ -130,7 +132,7 @@ object StudyCommands {
       with HasExpectedVersion
 
   // study annotation type commands
-  trait StudyAnnotationTypeCommand extends StudyCommand with HasStudyIdentity
+  trait StudyAnnotationTypeCommand extends StudyCommandWithId
 
   // collection event annotation type commands
   trait CollectionEventAnnotationTypeCommand extends StudyAnnotationTypeCommand
@@ -238,5 +240,77 @@ object StudyCommands {
       with HasIdentity
       with HasStudyIdentity
       with HasExpectedVersion
+
+  // processing type commands
+  trait ProcessingTypeCommand extends StudyCommandWithId
+
+  case class AddProcessingTypeCmd(
+    studyId: String,
+    name: String,
+    description: Option[String],
+    enabled: Boolean)
+      extends ProcessingTypeCommand with HasStudyIdentity
+
+  case class UpdateProcessingTypeCmd(
+    studyId: String,
+    id: String,
+    expectedVersion: Option[Long],
+    name: String,
+    description: Option[String],
+    enabled: Boolean)
+      extends ProcessingTypeCommand
+      with HasIdentity
+      with HasExpectedVersion
+
+  case class RemoveProcessingTypeCmd(
+    studyId: String,
+    id: String,
+    expectedVersion: Option[Long])
+      extends ProcessingTypeCommand
+      with HasIdentity
+      with HasExpectedVersion
+
+  // specimen link type commands
+  trait SpecimenLinkTypeCommand extends StudyCommand with HasProcessingTypeIdentity
+
+  case class AddSpecimenLinkTypeCmd(
+    processingTypeId: String,
+    expectedInputChange: BigDecimal,
+    expectedOutputChange: BigDecimal,
+    inputCount: Int,
+    outputCount: Int,
+    inputGroupId: String,
+    outputGroupId: String,
+    inputContainerTypeId: Option[String],
+    outputContainerTypeId: Option[String],
+    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
+      extends SpecimenLinkTypeCommand
+      with HasProcessingTypeIdentity
+
+  case class UpdateSpecimenLinkTypeCmd(
+    processingTypeId: String,
+    id: String,
+    expectedVersion: Option[Long],
+    expectedInputChange: BigDecimal,
+    expectedOutputChange: BigDecimal,
+    inputCount: Int,
+    outputCount: Int,
+    inputGroupId: String,
+    outputGroupId: String,
+    inputContainerTypeId: Option[String],
+    outputContainerTypeId: Option[String],
+    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
+      extends SpecimenLinkTypeCommand
+      with HasIdentity
+      with HasExpectedVersion
+
+  case class RemoveSpecimenLinkTypeCmd(
+    processingTypeId: String,
+    id: String,
+    expectedVersion: Option[Long])
+      extends SpecimenLinkTypeCommand
+      with HasIdentity
+      with HasExpectedVersion
+
 
 }

@@ -1,0 +1,22 @@
+<div class="page-header">
+  <h2>Studies</h2>
+</div>
+<div class="clearfix">
+  <div ng-if="studies.length == 0">
+    <p>No studies have been added.</p>
+  </div>
+  <div ng-if="studies.length != 0">
+    <table class="table table-bordered table-hover table-condensed" style="table-layout: fixed;">
+      <tr>
+        <th>Name</th>
+        <th>Status</th>
+        <th style="width: 50%">Description</th>
+      </tr>
+      <tr ng-repeat="study in studies">
+        <td><a href="#/studies/{{study.id}}">{{study.name}}</a></td>
+        <td>{{study.status}}</td>
+        <td>{{study.description === null ? "" : study.description | truncate:20}}</td>
+      </tr>
+    </table>
+  </div>
+</div>

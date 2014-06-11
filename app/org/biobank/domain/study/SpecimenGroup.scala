@@ -14,6 +14,7 @@ import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
 
+import com.github.nscala_time.time.Imports._
 import scalaz._
 import Scalaz._
 
@@ -37,6 +38,8 @@ case class SpecimenGroup private (
   studyId: StudyId,
   id: SpecimenGroupId,
   version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
   name: String,
   description: Option[String],
   units: String,
@@ -55,6 +58,8 @@ case class SpecimenGroup private (
         |  id: $id,
         |  version: $version,
         |  name: $name,
+        |  addedDate: $addedDate,
+        |  lastUpdateDate: $lastUpdateDate,
         |  description: $description,
         |  units: $units,
         |  anatomicalSourceType: $anatomicalSourceType,
@@ -65,6 +70,7 @@ case class SpecimenGroup private (
 
   def update(
     expectedVersion: Option[Long],
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     units: String,
@@ -74,9 +80,10 @@ case class SpecimenGroup private (
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
     for {
       validVersion <- requireVersion(expectedVersion)
-      updatedSpecimenGroup <- SpecimenGroup.create(studyId, id, version, name, description,
-	units, anatomicalSourceType, preservationType, preservationTemperatureType,
-	specimenType)
+      validatedSpecimenGroup <- SpecimenGroup.create(
+        studyId, id, version, dateTime, name, description, units, anatomicalSourceType,
+        preservationType, preservationTemperatureType, specimenType)
+      updatedSpecimenGroup <- validatedSpecimenGroup.copy(lastUpdateDate = Some(dateTime)).success
     } yield updatedSpecimenGroup
   }
 }
@@ -99,6 +106,7 @@ object SpecimenGroup extends StudyValidationHelper {
     studyId: StudyId,
     id: SpecimenGroupId,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     units: String,
@@ -106,14 +114,14 @@ object SpecimenGroup extends StudyValidationHelper {
     preservationType: PreservationType,
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
-    (validateId(studyId).toValidationNel |@|
-      validateId(id).toValidationNel |@|
-      validateAndIncrementVersion(version).toValidationNel |@|
-      validateNonEmpty(name, "name is null or empty").toValidationNel |@|
-      validateNonEmptyOption(description, "description is null or empty").toValidationNel |@|
-      validateNonEmpty(units, "units is null or empty").toValidationNel) {
-      SpecimenGroup(_, _, _, _, _, _, anatomicalSourceType, preservationType,
-	preservationTemperatureType, specimenType)
+    (validateId(studyId) |@|
+      validateId(id) |@|
+      validateAndIncrementVersion(version) |@|
+      validateNonEmpty(name, "name is null or empty") |@|
+      validateNonEmptyOption(description, "description is null or empty") |@|
+      validateNonEmpty(units, "units is null or empty")) {
+      SpecimenGroup(_, _, _, dateTime, None, _, _, _, anatomicalSourceType, preservationType,
+        preservationTemperatureType, specimenType)
     }
   }
 }

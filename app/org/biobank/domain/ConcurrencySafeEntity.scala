@@ -1,7 +1,7 @@
 package org.biobank.domain
 
 import org.biobank.infrastructure._
-
+import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
 
@@ -18,19 +18,19 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
   /** The version converted to a Option. */
   val versionOption = if (version < 0) None else Some(version)
 
+  /** The date and time when this entity was added to the system. */
+  val addedDate: DateTime
+
+  /** The date and time when this entity was last updated. */
+  val lastUpdateDate: Option[DateTime]
+
   // FIXME: move these to another object
   //  val addedBy: UserId
-  //  val timeAdded: Long
   //  val updatedBy: Option[UserId]
-  //  val timeUpdated: Option[Long]
 
   protected def invalidVersion(expected: Long) =
     DomainError(
-    s"""|${this.getClass}: expected version doesn't match current version: {
-        |  id: $id,
-	|  actualVersion: $version,
-	|  expectedVersion: $expected
-	|}""".stripMargin)
+    s"${this.getClass.getSimpleName}: expected version doesn't match current version: id: $id, version: $version, expectedVersion: $expected")
 
   /** Used for optimistic concurrency versioning.
     *
@@ -38,24 +38,9 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
     */
   protected def requireVersion(expectedVersion: Option[Long]): DomainValidation[ConcurrencySafeEntity[T]] = {
     expectedVersion match {
+      case None => DomainError(s"${this.getClass.getSimpleName}: expected version is None").failNel
       case Some(expected) if (version != expected) => invalidVersion(expected).failNel
       case _ => this.success
     }
   }
 }
-
-// object Entity {
-
-//   protected def update[S <: ConcurrencySafeEntity[_], T <: ConcurrencySafeEntity[_]](
-//     entity: DomainValidation[S],
-//     id: IdentifiedDomainObject[_],
-//     expectedVersion: Option[Long])(f: S => DomainValidation[T]): DomainValidation[T] =
-//     entity match {
-//       case Failure(x) => DomainError(s"no entity with id: $id").failNel
-//       case Success(entity) => for {
-//         current <- entity.requireVersion(expectedVersion)
-//         updated <- f(entity)
-//       } yield updated
-//     }
-
-// }

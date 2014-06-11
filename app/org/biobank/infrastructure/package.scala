@@ -1,6 +1,6 @@
 package org.biobank
 
-package object infrastructure {
+package infrastructure {
 
   trait HasIdentity {
 

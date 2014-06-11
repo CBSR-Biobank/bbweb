@@ -23,27 +23,55 @@ class UserProcessorSpec extends UserProcessorFixture {
     "add a user" in {
       val user = factory.createRegisteredUser
 
-      val cmd = RegisterUserCommand(user.name, user.email, user.password, user.hasher,
-	user.salt, user.avatarUrl)
-      val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
-	.futureValue
+      val cmd = RegisterUserCmd(user.name, user.email, user.password, user.avatarUrl)
+      val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisteredEvent]]
+        .futureValue
 
       validation should be ('success)
       validation map { event =>
-        event shouldBe a [UserRegisterdEvent]
-	event should have (
+        event shouldBe a [UserRegisteredEvent]
+        event should have (
           'id (user.email),
           'name (user.name),
           'email (user.email),
           'password (user.password),
-          'hasher (user.hasher),
-          'salt (user.salt),
           'avatarUrl (user.avatarUrl)
-	)
+        )
 
         userRepository.getByKey(UserId(event.id)) map { user =>
           user shouldBe a[RegisteredUser]
-	}
+        }
+      }
+    }
+
+    "update a user" in {
+      val user = factory.createActiveUser
+      userRepository.put(user)
+
+      val user2 = factory.createActiveUser
+
+      val cmd = UpdateUserCmd(
+        user.versionOption, user2.name, user2.email, user2.password, user2.avatarUrl)
+      val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserUpdatedEvent]]
+        .futureValue
+
+      validation should be ('success)
+      validation map { event =>
+        event shouldBe a [UserUpdatedEvent]
+        event should have (
+          'id        (user.email),
+          'version   (user.version + 1),
+          'name      (user2.name),
+          'email     (user2.email),
+          'password  (user2.password),
+          'hasher    (user2.hasher),
+          'salt      (user2.salt),
+          'avatarUrl (user2.avatarUrl)
+        )
+
+        userRepository.getByKey(UserId(event.id)) map { user =>
+          user shouldBe a[ActiveUser]
+        }
       }
     }
 
@@ -51,10 +79,9 @@ class UserProcessorSpec extends UserProcessorFixture {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val cmd = RegisterUserCommand(user.name, user.email, user.password, user.hasher,
-	user.salt, user.avatarUrl)
-      val validation2 = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisterdEvent]]
-	.futureValue
+      val cmd = RegisterUserCmd(user.name, user.email, user.password, user.avatarUrl)
+      val validation2 = ask(userProcessor, cmd).mapTo[DomainValidation[UserRegisteredEvent]]
+        .futureValue
       validation2 should be ('failure)
 
       validation2.swap.map { err =>
@@ -67,14 +94,14 @@ class UserProcessorSpec extends UserProcessorFixture {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val validation2 = ask(userProcessor, ActivateUserCommand(user.email, Some(0L)))
+      val validation2 = ask(userProcessor, ActivateUserCmd(Some(0L), user.email))
         .mapTo[DomainValidation[UserActivatedEvent]]
-	.futureValue
+        .futureValue
 
       validation2 should be ('success)
       validation2 map { event =>
-	event shouldBe a[UserActivatedEvent]
-	event.id should be(user.email)
+        event shouldBe a[UserActivatedEvent]
+        event.id should be(user.email)
       }
     }
 
@@ -82,14 +109,14 @@ class UserProcessorSpec extends UserProcessorFixture {
       val activeUser = factory.createActiveUser
       userRepository.put(activeUser)
 
-      val validation = ask(userProcessor, LockUserCommand(activeUser.email, Some(1L)))
+      val validation = ask(userProcessor, LockUserCmd(Some(1L), activeUser.email))
         .mapTo[DomainValidation[UserLockedEvent]]
-	.futureValue
+        .futureValue
 
       validation should be ('success)
       validation map { event =>
-	event shouldBe a[UserLockedEvent]
-	event.id should be(activeUser.email)
+        event shouldBe a[UserLockedEvent]
+        event.id should be(activeUser.email)
       }
     }
 
@@ -97,9 +124,9 @@ class UserProcessorSpec extends UserProcessorFixture {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val validation2 = ask(userProcessor, LockUserCommand(user.email, Some(0L)))
+      val validation2 = ask(userProcessor, LockUserCmd(Some(0L), user.email))
         .mapTo[DomainValidation[UserLockedEvent]]
-	.futureValue
+        .futureValue
       validation2 should be ('failure)
 
       validation2.swap map { err =>
@@ -108,13 +135,13 @@ class UserProcessorSpec extends UserProcessorFixture {
       }
     }
 
-    "not unlock a registered user" taggedAs(Tag("SingleTest")) in {
+    "not unlock a registered user" in {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val validation2 = ask(userProcessor, UnlockUserCommand(user.email, Some(0L)))
+      val validation2 = ask(userProcessor, UnlockUserCmd(Some(0L), user.email))
         .mapTo[DomainValidation[UserLockedEvent]]
-	.futureValue
+        .futureValue
       validation2 should be ('failure)
 
       validation2.swap map { err =>

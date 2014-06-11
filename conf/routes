@@ -3,98 +3,82 @@
 # ~~~~
 
 # Home page
-GET     /                           org.biobank.controllers.Application.index
-GET     /about                      org.biobank.controllers.Application.about
-GET     /contact                    org.biobank.controllers.Application.contact
+GET     /                              org.biobank.controllers.Application.index
 
 # studies
-GET     /studies                    org.biobank.controllers.study.StudyController.list
-#POST    /studies                    org.biobank.controllers.study.StudyController.createStudy
-#GET     /studies/:id                org.biobank.controllers.study.StudyController.showStudy(id)
-#PUT     /studies/:id                org.biobank.controllers.study.StudyController.updateStudy(id)
-
-GET     /study                      org.biobank.controllers.study.StudyController.index
-GET     /study/summary/:id          org.biobank.controllers.study.StudyController.summary(id)
-GET     /study/show/:id             org.biobank.controllers.study.StudyController.showStudy(id)
-GET     /study/add                  org.biobank.controllers.study.StudyController.addStudy
-POST    /study/add                  org.biobank.controllers.study.StudyController.addStudySubmit
-GET     /study/update/:id           org.biobank.controllers.study.StudyController.updateStudy(id)
-POST    /study/update/:id           org.biobank.controllers.study.StudyController.updateStudySubmit(id)
-
-# study Ajax calls
-GET     /study/summary/:studyId/:studyName         org.biobank.controllers.study.StudyController.summaryTab(studyId,studyName)
-GET     /study/participants/:studyId/:studyName    org.biobank.controllers.study.StudyController.participantsTab(studyId,studyName)
-GET     /study/specimens/:studyId/:studyName       org.biobank.controllers.study.StudyController.specimensTab(studyId, studyName)
-GET     /study/cevents/list/:studyId/:studyName    org.biobank.controllers.study.StudyController.ceventsTab(studyId,studyName)
-GET     /study/pevents/list/:studyId/:studyName    org.biobank.controllers.study.StudyController.peventsTab(studyId,studyName)
+GET     /studies                       org.biobank.controllers.study.StudyController.list
+POST    /studies                       org.biobank.controllers.study.StudyController.add
+POST    /studies/enable                org.biobank.controllers.study.StudyController.enable
+POST    /studies/disable               org.biobank.controllers.study.StudyController.disable
+POST    /studies/retire                org.biobank.controllers.study.StudyController.retire
+POST    /studies/unretire              org.biobank.controllers.study.StudyController.unretire
 
 # specimen groups
-GET     /study/sg/add/:studyId/:studyName              org.biobank.controllers.study.SpecimenGroupController.addSpecimenGroup(studyId, studyName)
-POST    /study/sg/add                         	       org.biobank.controllers.study.SpecimenGroupController.addSpecimenGroupSubmit
-GET     /study/sg/update/:studyId/:studyName/:sgId     org.biobank.controllers.study.SpecimenGroupController.updateSpecimenGroup(studyId, studyName, sgId)
-POST    /study/sg/update                      	       org.biobank.controllers.study.SpecimenGroupController.updateSpecimenGroupSubmit
-GET     /study/sg/remove/:studyId/:studyName/:sgId     org.biobank.controllers.study.SpecimenGroupController.removeSpecimenGroup(studyId, studyName, sgId)
-POST    /study/sg/remove                      	       org.biobank.controllers.study.SpecimenGroupController.removeSpecimenGroupSubmit
+GET     /studies/sgroups               org.biobank.controllers.study.SpecimenGroupController.list
+POST    /studies/sgroups               org.biobank.controllers.study.SpecimenGroupController.addSpecimenGroup
+PUT     /studies/sgroups/:id           org.biobank.controllers.study.SpecimenGroupController.updateSpecimenGroup(id)
+DELETE  /studies/sgroups/:id           org.biobank.controllers.study.SpecimenGroupController.removeSpecimenGroup(id)
 
 # collection event types
-GET     /study/cetype/add/:studyId/:studyName              org.biobank.controllers.study.CeventTypeController.addCeventType(studyId, studyName)
-POST    /study/cetype/add                                  org.biobank.controllers.study.CeventTypeController.addCeventTypeSubmit
-GET     /study/cetype/update/:studyId/:studyName/:cetId    org.biobank.controllers.study.CeventTypeController.updateCeventType(studyId, studyName, cetId)
-POST    /study/cetype/update                               org.biobank.controllers.study.CeventTypeController.updateCeventTypeSubmit
-GET     /study/cetype/remove/:studyId/:studyName/:cetId    org.biobank.controllers.study.CeventTypeController.removeCeventType(studyId, studyName, cetId)
-GET     /study/cetype/remove                               org.biobank.controllers.study.CeventTypeController.removeCeventTypeSubmit
+GET     /studies/cetypes               org.biobank.controllers.study.CeventTypeController.list
+POST    /studies/cetypes               org.biobank.controllers.study.CeventTypeController.addCollectionEventType
+PUT     /studies/cetypes/:id           org.biobank.controllers.study.CeventTypeController.updateCollectionEventType(id)
+DELETE  /studies/cetypes/:id           org.biobank.controllers.study.CeventTypeController.removeCollectionEventType(id)
 
-# collection event annotation types
-GET     /study/cevent/annot/add/:studyId/:studyName                 org.biobank.controllers.study.CeventAnnotTypeController.addAnnotationType(studyId, studyName)
-POST    /study/cevent/annot/add                                     org.biobank.controllers.study.CeventAnnotTypeController.addAnnotationTypeSubmit
-GET     /study/cevent/annot/update/:studyId/:studyName/:annotId     org.biobank.controllers.study.CeventAnnotTypeController.updateAnnotationType(studyId, studyName, annotId)
-POST    /study/cevent/annot/update                                  org.biobank.controllers.study.CeventAnnotTypeController.updateAnnotationTypeSubmit
-GET     /study/cevent/annot/remove/:studyId/:studyName/:annotId     org.biobank.controllers.study.CeventAnnotTypeController.removeAnnotationType(studyId, studyName, annotId)
-POST    /study/cevent/annot/remove                                  org.biobank.controllers.study.CeventAnnotTypeController.removeAnnotationTypeSubmit
+## collection event annotation types
+GET     /studies/ceannottype           org.biobank.controllers.study.CeventAnnotTypeController.list
+POST    /studies/ceannottype           org.biobank.controllers.study.CeventAnnotTypeController.addAnnotationType
+PUT     /studies/ceannottype/:id       org.biobank.controllers.study.CeventAnnotTypeController.updateAnnotationType(id)
+DELETE  /studies/ceannottype/:id       org.biobank.controllers.study.CeventAnnotTypeController.removeAnnotationType(id)
 
 # participant annotation types
-GET     /study/participant/annot/add/:studyId/:studyName                 org.biobank.controllers.study.ParticipantAnnotTypeController.addAnnotationType(studyId, studyName)
-POST    /study/participant/annot/add                                     org.biobank.controllers.study.ParticipantAnnotTypeController.addAnnotationTypeSubmit
-GET     /study/participant/annot/update/:studyId/:studyName/:annotId     org.biobank.controllers.study.ParticipantAnnotTypeController.updateAnnotationType(studyId, studyName, annotId)
-POST    /study/participant/annot/update                                  org.biobank.controllers.study.ParticipantAnnotTypeController.updateAnnotationTypeSubmit
-GET     /study/participant/annot/remove/:studyId/:studyName/:annotId     org.biobank.controllers.study.ParticipantAnnotTypeController.removeAnnotationType(studyId, studyName, annotId)
-POST    /study/participant/annot/remove                                  org.biobank.controllers.study.ParticipantAnnotTypeController.removeAnnotationTypeSubmit
+GET     /studies/pannottype            org.biobank.controllers.study.ParticipantAnnotTypeController.list
+POST    /studies/pannottype            org.biobank.controllers.study.ParticipantAnnotTypeController.addAnnotationType
+PUT     /studies/pannottype/:id        org.biobank.controllers.study.ParticipantAnnotTypeController.updateAnnotationType(id)
+DELETE  /studies/pannottype/:id        org.biobank.controllers.study.ParticipantAnnotTypeController.removeAnnotationType(id)
 
 # specimenlink annotation types
-GET     /study/spclink/annot/add/:studyId/:studyName                 org.biobank.controllers.study.SpecimenLinkAnnotTypeController.addAnnotationType(studyId, studyName)
-POST    /study/spclink/annot/add                                     org.biobank.controllers.study.SpecimenLinkAnnotTypeController.addAnnotationTypeSubmit
-GET     /study/spclink/annot/update/:studyId/:studyName/:annotId     org.biobank.controllers.study.SpecimenLinkAnnotTypeController.updateAnnotationType(studyId, studyName, annotId)
-POST    /study/spclink/annot/update                                  org.biobank.controllers.study.SpecimenLinkAnnotTypeController.updateAnnotationTypeSubmit
-GET     /study/spclink/annot/remove/:studyId/:studyName/:annotId     org.biobank.controllers.study.SpecimenLinkAnnotTypeController.removeAnnotationType(studyId, studyName, annotId)
-POST    /study/spclink/annot/remove                                  org.biobank.controllers.study.SpecimenLinkAnnotTypeController.removeAnnotationTypeSubmit
+GET     /studies/slannottype           org.biobank.controllers.study.SpecimenLinkAnnotTypeController.list
+POST    /studies/slannottype           org.biobank.controllers.study.SpecimenLinkAnnotTypeController.addAnnotationType
+PUT     /studies/slannottype/:id       org.biobank.controllers.study.SpecimenLinkAnnotTypeController.updateAnnotationType(id)
+DELETE  /studies/slannottype/:id       org.biobank.controllers.study.SpecimenLinkAnnotTypeController.removeAnnotationType(id)
 
-# user
-GET     /user/profile               org.biobank.controllers.UserController.profile
+# processing types
+GET     /studies/proctypes             org.biobank.controllers.study.ProcessingTypeController.list
+POST    /studies/proctypes             org.biobank.controllers.study.ProcessingTypeController.addProcessingType
+PUT     /studies/proctypes/:id         org.biobank.controllers.study.ProcessingTypeController.updateProcessingType(id)
+DELETE  /studies/proctypes/:id         org.biobank.controllers.study.ProcessingTypeController.removeProcessingType(id)
 
-# Login page
-GET     /login                      securesocial.controllers.LoginPage.login
-GET     /logout                     securesocial.controllers.LoginPage.logout
+# specimen link types
+GET     /studies/sltypes               org.biobank.controllers.study.SpecimenLinkTypeController.list
+POST    /studies/sltypes               org.biobank.controllers.study.SpecimenLinkTypeController.addSpecimenLinkType
+PUT     /studies/sltypes/:id           org.biobank.controllers.study.SpecimenLinkTypeController.updateSpecimenLinkType(id)
+DELETE  /studies/sltypes/:id           org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(id)
 
-# User Registration and password handling
-GET     /signup                     securesocial.controllers.Registration.startSignUp
-POST    /signup                     securesocial.controllers.Registration.handleStartSignUp
-GET     /signup/:token              securesocial.controllers.Registration.signUp(token)
-POST    /signup/:token              securesocial.controllers.Registration.handleSignUp(token)
-GET     /reset                      securesocial.controllers.Registration.startResetPassword
-POST    /reset                      securesocial.controllers.Registration.handleStartResetPassword
-GET     /reset/:token               securesocial.controllers.Registration.resetPassword(token)
-POST    /reset/:token               securesocial.controllers.Registration.handleResetPassword(token)
-GET     /password                   securesocial.controllers.PasswordChange.page
-POST    /password                   securesocial.controllers.PasswordChange.handlePasswordChange
+# study
+GET     /studies/:id                   org.biobank.controllers.study.StudyController.query(id)
+PUT     /studies/:id                   org.biobank.controllers.study.StudyController.update(id)
 
-# Providers entry points
-GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider, redirectTo:Option[String])
-POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider, redirectTo:Option[String])
-GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
+# Users
+GET     /authuser                      org.biobank.controllers.UserController.authUser
+GET     /users                         org.biobank.controllers.UserController.list
+GET     /users/:id                     org.biobank.controllers.UserController.user(id: String)
+POST    /users                         org.biobank.controllers.UserController.addUser()
+PUT     /users/:id                     org.biobank.controllers.UserController.updateUser(id: String)
+DELETE  /users/:id                     org.biobank.controllers.UserController.removeUser(id: String)
+PUT     /users/activate/:id            org.biobank.controllers.UserController.activateUser(id: String)
+PUT     /users/lock/:id                org.biobank.controllers.UserController.lockUser(id: String)
+PUT     /users/unlock/:id              org.biobank.controllers.UserController.unlockUser(id: String)
 
-GET     /assets/stylesheets/img/glyphicons-halflings-white.png      controllers.Assets.at(path="/public", file="/images/glyphicons-halflings-white.png")
-GET     /assets/stylesheets/img/glyphicons-halflings.png            controllers.Assets.at(path="/public", file="/images/glyphicons-halflings.png")
+# JavaScript routes object
+GET     /jsroutes.js                   org.biobank.controllers.Application.jsRoutes()
+
+# Routes used by Angular
+# ~~~~
+
+# Authentication
+POST    /login                         org.biobank.controllers.Application.login()
+POST    /logout                        org.biobank.controllers.Application.logout()
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
-GET     /webjars/*file              controllers.WebJarAssets.at(file)
+GET     /assets/*file                  controllers.Assets.versioned(path="/public", file: Asset)

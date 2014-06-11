@@ -21,9 +21,9 @@ trait Processor extends EventsourcedProcessor with ActorLogging {
     val originalSender = context.sender
     validation map { event =>
       persist(event) { e =>
-	onSuccess(e)
-	// inform the sender of the successful command with the event
-	originalSender ! e.success
+        onSuccess(e)
+        // inform the sender of the successful command with the event
+        originalSender ! e.success
       }
     }
 

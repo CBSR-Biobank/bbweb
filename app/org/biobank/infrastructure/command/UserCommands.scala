@@ -6,30 +6,42 @@ object UserCommands {
 
   sealed trait UserCommand extends Command
 
-  case class RegisterUserCommand(
+  case class RegisterUserCmd(
     name: String,
     email: String,
     password: String,
-    hasher: String,
-    salt: Option[String],
     avatarUrl: Option[String])
     extends UserCommand
 
-  case class ActivateUserCommand(
+  case class UpdateUserCmd(
+    expectedVersion: Option[Long],
+    name: String,
     email: String,
-    expectedVersion: Option[Long])
+    password: String,
+    avatarUrl: Option[String])
+    extends UserCommand
+
+  case class ActivateUserCmd(
+    expectedVersion: Option[Long],
+    email: String)
       extends UserCommand
       with HasExpectedVersion
 
-  case class LockUserCommand(
-    email: String,
-    expectedVersion: Option[Long])
+  case class LockUserCmd(
+    expectedVersion: Option[Long],
+    email: String)
       extends UserCommand
       with HasExpectedVersion
 
-  case class UnlockUserCommand(
-    email: String,
-    expectedVersion: Option[Long])
+  case class UnlockUserCmd(
+    expectedVersion: Option[Long],
+    email: String)
+      extends UserCommand
+      with HasExpectedVersion
+
+  case class RemoveUserCmd(
+    expectedVersion: Option[Long],
+    email: String)
       extends UserCommand
       with HasExpectedVersion
 

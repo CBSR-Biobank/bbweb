@@ -2,13 +2,14 @@ package org.biobank.infrastructure.event
 
 import org.biobank.infrastructure._
 import org.biobank.domain.study._
+import org.biobank.domain.ContainerTypeId
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.AnnotationValueType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
 
-import scala.collection.immutable
+import org.joda.time.DateTime
 
 /**
  * Events used by the Study Aggregate.
@@ -19,6 +20,7 @@ object StudyEvents {
 
   case class StudyAddedEvent(
     id: String,
+    dateTime: DateTime,
     name: String,
     description: Option[String])
     extends StudyEvent
@@ -26,28 +28,33 @@ object StudyEvents {
   case class StudyUpdatedEvent(
     id: String,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String])
     extends StudyEvent
 
   case class StudyEnabledEvent(
     id: String,
-    version: Long)
+    version: Long,
+    dateTime: DateTime)
     extends StudyEvent
 
   case class StudyDisabledEvent(
     id: String,
-    version: Long)
+    version: Long,
+    dateTime: DateTime)
     extends StudyEvent
 
   case class StudyRetiredEvent(
     id: String,
-    version: Long)
+    version: Long,
+    dateTime: DateTime)
     extends StudyEvent
 
   case class StudyUnretiredEvent(
     id: String,
-    version: Long)
+    version: Long,
+    dateTime: DateTime)
     extends StudyEvent
 
   // specimen group events
@@ -56,7 +63,7 @@ object StudyEvents {
   case class SpecimenGroupAddedEvent(
     studyId: String,
     specimenGroupId: String,
-    version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     units: String,
@@ -70,6 +77,7 @@ object StudyEvents {
     studyId: String,
     specimenGroupId: String,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     units: String,
@@ -88,7 +96,7 @@ object StudyEvents {
   case class CollectionEventTypeAddedEvent(
     studyId: String,
     collectionEventTypeId: String,
-    version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     recurring: Boolean,
@@ -100,6 +108,7 @@ object StudyEvents {
     studyId: String,
     collectionEventTypeId: String,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     recurring: Boolean,
@@ -112,26 +121,10 @@ object StudyEvents {
     collectionEventTypeId: String)
     extends StudyEvent
 
-  case class SpecimenGroupAddedToCollectionEventTypeEvent(
-    studyId: String,
-    sg2cetId: String,
-    collectionEventTypeId: String,
-    specimenGroupId: String,
-    maxCount: Int,
-    amount: BigDecimal)
-    extends StudyEvent
-
-  case class SpecimenGroupRemovedFromCollectionEventTypeEvent(
-    studyId: String,
-    sg2cetId: String,
-    collectionEventTypeId: String,
-    specimenGroupId: String)
-    extends StudyEvent
-
   case class CollectionEventAnnotationTypeAddedEvent(
     studyId: String,
     annotationTypeId: String,
-    version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -143,6 +136,7 @@ object StudyEvents {
     studyId: String,
     annotationTypeId: String,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -154,26 +148,12 @@ object StudyEvents {
     studyId: String,
     annotationTypeId: String)
 
-  case class AnnotationTypeAddedToCollectionEventTypeEvent(
-    studyId: String,
-    collectionEventTypeAnnotationTypeId: String,
-    collectionEventTypeId: String,
-    annotationTypeId: String)
-    extends StudyEvent
-
-  case class AnnotationTypeRemovedFromCollectionEventTypeEvent(
-    studyId: String,
-    collectionEventTypeAnnotationTypeId: String,
-    collectionEventTypeId: String,
-    annotationTypeId: String)
-    extends StudyEvent
-
   // participant annotation types
 
   case class ParticipantAnnotationTypeAddedEvent(
     studyId: String,
     annotationTypeId: String,
-    version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -186,6 +166,7 @@ object StudyEvents {
     studyId: String,
     annotationTypeId: String,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -199,12 +180,73 @@ object StudyEvents {
     annotationTypeId: String)
     extends StudyEvent
 
-  // specimen link annotation types
+  // procesing type events
+  case class ProcessingTypeAddedEvent(
+    studyId: String,
+    processingTypeId: String,
+    dateTime: DateTime,
+    name: String,
+    description: Option[String],
+    enabled: Boolean)
+    extends StudyEvent
 
+  case class ProcessingTypeUpdatedEvent(
+    studyId: String,
+    processingTypeId: String,
+    version: Long,
+    dateTime: DateTime,
+    name: String,
+    description: Option[String],
+    enabled: Boolean)
+    extends StudyEvent
+
+  case class ProcessingTypeRemovedEvent(
+    studyId: String,
+    processingTypeId: String)
+    extends StudyEvent
+
+  // specimen link type
+  case class SpecimenLinkTypeAddedEvent(
+    processingTypeId: String,
+    specimenLinkTypeId: String,
+    dateTime: DateTime,
+    expectedInputChange: BigDecimal,
+    expectedOutputChange: BigDecimal,
+    inputCount: Int,
+    outputCount: Int,
+    inputGroupId: SpecimenGroupId,
+    outputGroupId: SpecimenGroupId,
+    inputContainerTypeId: Option[ContainerTypeId],
+    outputContainerTypeId: Option[ContainerTypeId],
+    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
+    extends StudyEvent
+
+  case class SpecimenLinkTypeUpdatedEvent(
+    processingTypeId: String,
+    specimenLinkTypeId: String,
+    version: Long,
+    dateTime: DateTime,
+    expectedInputChange: BigDecimal,
+    expectedOutputChange: BigDecimal,
+    inputCount: Int,
+    outputCount: Int,
+    inputGroupId: SpecimenGroupId,
+    outputGroupId: SpecimenGroupId,
+    inputContainerTypeId: Option[ContainerTypeId],
+    outputContainerTypeId: Option[ContainerTypeId],
+    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
+    extends StudyEvent
+
+  case class SpecimenLinkTypeRemovedEvent(
+    studyId: String,
+    specimenLinkTypeId: String)
+    extends StudyEvent
+
+  // specimen link annotation types
   case class SpecimenLinkAnnotationTypeAddedEvent(
     studyId: String,
     annotationTypeId: String,
-    version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -216,6 +258,7 @@ object StudyEvents {
     studyId: String,
     annotationTypeId: String,
     version: Long,
+    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,

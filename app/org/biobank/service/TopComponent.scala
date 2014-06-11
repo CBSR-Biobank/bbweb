@@ -13,13 +13,12 @@ import akka.persistence._
  */
 trait TopComponent extends ServiceComponent {
 
-  implicit val system: ActorSystem
-
   val studyProcessor: ActorRef
   val userProcessor: ActorRef
 
   val studyService: StudyService
   val userService: UserService
+
 
 }
 

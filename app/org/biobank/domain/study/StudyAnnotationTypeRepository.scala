@@ -27,16 +27,16 @@ trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
   def withId(
     studyId: StudyId,
     annotationTypeId: AnnotationTypeId): DomainValidation[A] = {
-    getByKey(annotationTypeId) match {
-      case Failure(err) =>
-        DomainError(
-          s"annotation type does not exist: { studyId: $studyId, annotationTypeId: $annotationTypeId }").failNel
-      case Success(annotType) =>
-        if (annotType.studyId.equals(studyId)) annotType.success
-        else DomainError(
-          "study does not have annotation type: { studyId: %s, annotationTypeId: %s }".format(
-            studyId, annotationTypeId)).failNel
-    }
+    getByKey(annotationTypeId).fold(
+      err =>
+      DomainError(
+        s"annotation type does not exist: { studyId: $studyId, annotationTypeId: $annotationTypeId }").failNel,
+      annotType =>
+      if (annotType.studyId.equals(studyId)) annotType.success
+      else DomainError(
+        "study does not have annotation type: { studyId: %s, annotationTypeId: %s }".format(
+          studyId, annotationTypeId)).failNel
+    )
   }
 
   def withId(

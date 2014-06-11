@@ -45,18 +45,18 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
     def withId(
       studyId: StudyId,
       ceventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType] = {
-      getByKey(ceventTypeId) match {
-        case Failure(err) =>
-          DomainError(
-            s"collection event type does not exist: { studyId: $studyId, ceventTypeId: $ceventTypeId }")
-	    .failNel
-        case Success(cet) =>
-          if (cet.studyId.equals(studyId))
-            cet.success
-          else DomainError(
-            "study does not have collection event type:{ studyId: $studyId, ceventTypeId: $ceventTypeId }")
-              .failNel
-      }
+      getByKey(ceventTypeId).fold(
+        err =>
+        DomainError(
+          s"collection event type does not exist: { studyId: $studyId, ceventTypeId: $ceventTypeId }")
+          .failNel,
+        cet =>
+        if (cet.studyId.equals(studyId))
+          cet.success
+        else DomainError(
+          s"study does not have collection event type:{ studyId: $studyId, ceventTypeId: $ceventTypeId }")
+          .failNel
+      )
     }
 
     def allForStudy(studyId: StudyId): Set[CollectionEventType] = {
@@ -71,10 +71,8 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
     }
 
     def annotationTypeInUse(annotationType: CollectionEventAnnotationType): Boolean = {
-      val studyCeventTypes = getValues.filter(cet => cet.studyId.equals(annotationType.studyId))
-      studyCeventTypes.exists(cet =>
-        cet.annotationTypeData.exists(atd =>
-          atd.annotationTypeId.equals(annotationType.id.id)))
+      getValues.exists(cet =>
+        cet.annotationTypeData.exists(atd => atd.annotationTypeId.equals(annotationType.id.id)))
     }
   }
 }

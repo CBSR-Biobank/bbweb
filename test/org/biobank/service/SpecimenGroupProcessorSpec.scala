@@ -24,7 +24,7 @@ import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
-class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
+class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -34,6 +34,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAft
   override def beforeEach: Unit = {
     disabledStudy = factory.createDisabledStudy
     studyRepository.put(disabledStudy)
+    ()
   }
 
 
@@ -97,6 +98,23 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture with BeforeAndAft
           sg.version should be (0)
           specimenGroupRepository.allForStudy(disabledStudy.id) should have size 2
         }
+      }
+    }
+
+    "not add a specimen group to a study that does not exist" in {
+      val study2 = factory.createDisabledStudy
+      val sg = factory.createSpecimenGroup
+
+      var cmd = AddSpecimenGroupCmd(study2.id.id, sg.name, sg.description, sg.units,
+        sg.anatomicalSourceType, sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
+
+      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+        .futureValue
+
+      validation should be('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include regex s"${study2.id.id}.*not found"
       }
     }
 

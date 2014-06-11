@@ -4,6 +4,7 @@ import org.biobank.domain.{ DomainSpec, ContainerTypeId }
 import org.biobank.infrastructure._
 import org.biobank.fixture.NameGenerator
 
+import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
@@ -18,7 +19,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
     "be created" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -27,34 +29,83 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
       val disabledStudy = factory.defaultDisabledStudy
 
-      val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
-	annotationTypeData = List.empty)
+      val validation = SpecimenLinkType.create(
+        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be ('success)
-      validation map { slt =>
-	slt should have (
-	  'processingTypeId (processingType.id),
-	  'id (id),
-	  'expectedInputChange (expectedInputChange),
-	  'expectedOutputChange (expectedOutputChange),
-	  'inputCount (inputCount),
-	  'outputCount (outputCount),
-	  'inputGroupId (specimenGroup.id),
-	  'outputGroupId (specimenGroup.id),
-	  'inputContainerTypeId (None),
-	  'outputContainerTypeId (None)
-	)
+      validation map { slType =>
+        slType should have (
+          'processingTypeId (processingType.id),
+          'id (id),
+          'expectedInputChange (expectedInputChange),
+          'expectedOutputChange (expectedOutputChange),
+          'inputCount (inputCount),
+          'outputCount (outputCount),
+          'inputGroupId (inputSpecimenGroup.id),
+          'outputGroupId (outputSpecimenGroup.id),
+          'inputContainerTypeId (None),
+          'outputContainerTypeId (None)
+        )
 
-	slt.annotationTypeData should have length (0)
+        slType.annotationTypeData should have length (0)
+
+        (slType.addedDate to DateTime.now).millis should be < 100L
+        slType.lastUpdateDate should be (None)
+      }
+    }
+
+    "be update" in {
+      val slType = factory.createSpecimenLinkType
+
+      val processingType = factory.defaultProcessingType
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
+
+      val expectedInputChange = BigDecimal(5.0)
+      val expectedOutputChange = BigDecimal(5.0)
+      val inputCount = 10
+      val outputCount = 10
+
+      val disabledStudy = factory.defaultDisabledStudy
+
+      val validation = slType.update(
+        slType.versionOption, org.joda.time.DateTime.now, expectedInputChange, expectedOutputChange,
+        inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
+      validation should be ('success)
+      validation map { slType2 =>
+        slType2 should have (
+          'processingTypeId (slType.processingTypeId),
+          'id (slType.id),
+          'version (slType.version + 1),
+          'expectedInputChange (expectedInputChange),
+          'expectedOutputChange (expectedOutputChange),
+          'inputCount (inputCount),
+          'outputCount (outputCount),
+          'inputGroupId (inputSpecimenGroup.id),
+          'outputGroupId (outputSpecimenGroup.id),
+          'inputContainerTypeId (None),
+          'outputContainerTypeId (None)
+        )
+
+        slType.annotationTypeData should have length (0)
+
+        slType2.addedDate should be (slType.addedDate)
+        val updateDate = slType2.lastUpdateDate | fail
+
+        (updateDate to DateTime.now).millis should be < 100L
       }
     }
 
   }
+
   "A specimen link type" should {
 
     "not be created with an empty processing type id" in {
       val processingTypeId = ProcessingTypeId("")
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -63,18 +114,20 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
       val disabledStudy = factory.defaultDisabledStudy
 
-      val validation = SpecimenLinkType.create(processingTypeId, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
-	annotationTypeData = List.empty)
+      val validation = SpecimenLinkType.create(
+        processingTypeId, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("processing type id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
     "not be created with an empty id" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = SpecimenLinkTypeId("")
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -83,12 +136,13 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
       val disabledStudy = factory.defaultDisabledStudy
 
-      val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
-	annotationTypeData = List.empty)
+      val validation = SpecimenLinkType.create(
+        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("specimen link type id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
@@ -104,29 +158,32 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
       val disabledStudy = factory.defaultDisabledStudy
 
-      val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroupIdIn, specimenGroupIdOut,
-	annotationTypeData = List.empty)
+      val validation = SpecimenLinkType.create(
+        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, specimenGroupIdIn, specimenGroupIdOut,
+        annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("specimen group id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
 
       specimenGroupIdIn = specimenGroupRepository.nextIdentity
       specimenGroupIdOut = SpecimenGroupId("")
 
-      val validation2 = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroupIdIn, specimenGroupIdOut,
-	annotationTypeData = List.empty)
+      val validation2 = SpecimenLinkType.create(
+        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, specimenGroupIdIn, specimenGroupIdOut,
+        annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("specimen group id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
     "not be created with an invalid version" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -135,9 +192,10 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
       val disabledStudy = factory.defaultDisabledStudy
 
-      val validation = SpecimenLinkType.create(processingType.id, id, -2L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
-	annotationTypeData = List.empty)
+      val validation = SpecimenLinkType.create(
+        processingType.id, id, -2L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("invalid version value: -2"))
@@ -146,7 +204,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
     "not be created with an invalid expected input / output change" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       var expectedInputChange: BigDecimal = BigDecimal(-1.0)
       var expectedOutputChange: BigDecimal = BigDecimal(1.0)
@@ -155,9 +214,10 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
       val disabledStudy = factory.defaultDisabledStudy
 
-      val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
-	annotationTypeData = List.empty)
+      val validation = SpecimenLinkType.create(
+        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("expected input change is not a positive number"))
@@ -166,9 +226,10 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       expectedInputChange = BigDecimal(1.0)
       expectedOutputChange = BigDecimal(-1.0)
 
-      val validation2 = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
-	annotationTypeData = List.empty)
+      val validation2 = SpecimenLinkType.create(
+        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
           err.list should (have length 1 and contain("expected output change is not a positive number"))
@@ -177,7 +238,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
     "not be created with an invalid input / output count" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -186,9 +248,10 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
       val disabledStudy = factory.defaultDisabledStudy
 
-      val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
-	annotationTypeData = List.empty)
+      val validation = SpecimenLinkType.create(
+        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
           err.list should (have length 1 and contain("input count is not a positive number"))
@@ -196,9 +259,10 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
       inputCount = 1
       outputCount = -1
-      val validation2 = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
-	annotationTypeData = List.empty)
+      val validation2 = SpecimenLinkType.create(
+        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
           err.list should (have length 1 and contain("output count is not a positive number"))
@@ -207,7 +271,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
     "not be created with invalid container types" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -218,28 +283,31 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
       val disabledStudy = factory.defaultDisabledStudy
 
-      val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
-	containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
+      val validation = SpecimenLinkType.create(
+        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("collection event type id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
 
       containerTypeIdIn = Some(ContainerTypeId("abc"))
       containerTypeIdOut = Some(ContainerTypeId(""))
-      val validation2 = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
-	containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
+      val validation2 = SpecimenLinkType.create(
+        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("collection event type id is null or empty"))
+          err.list should (have length 1 and contain("id is null or empty"))
       }
     }
 
     "have more than one validation fail" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = SpecimenLinkTypeId("")
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -248,20 +316,22 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
       val disabledStudy = factory.defaultDisabledStudy
 
-      val validation = SpecimenLinkType.create(processingType.id, id, -2L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
-	annotationTypeData = List.empty)
+      val validation = SpecimenLinkType.create(
+        processingType.id, id, -2L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = List.empty)
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should have length 2
-	  err.list(0) should be ("specimen link type id is null or empty")
-	  err.list(1) should be ("invalid version value: -2")
+          err.list(0) should be ("id is null or empty")
+          err.list(1) should be ("invalid version value: -2")
       }
     }
 
     "not be created with an invalid annotation type id" in {
       val processingType = factory.defaultProcessingType
-      val specimenGroup = factory.defaultSpecimenGroup
+      val inputSpecimenGroup = factory.createSpecimenGroup
+      val outputSpecimenGroup = factory.createSpecimenGroup
       val id = specimenLinkTypeRepository.nextIdentity
       val expectedInputChange = BigDecimal(1.0)
       val expectedOutputChange = BigDecimal(1.0)
@@ -271,12 +341,14 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
       val annotationTypeData = List(SpecimenLinkTypeAnnotationTypeData("", false))
 
-      val validation = SpecimenLinkType.create(processingType.id, id, -1L, expectedInputChange,
-	expectedOutputChange, inputCount, outputCount, specimenGroup.id, specimenGroup.id,
-	annotationTypeData = annotationTypeData)
+      val validation = SpecimenLinkType.create(
+        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
+        annotationTypeData = annotationTypeData)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("annotation type id is null or empty"))
+        err.list should have length 1
+        err.list(0) should include ("id is null or empty")
       }
     }
 

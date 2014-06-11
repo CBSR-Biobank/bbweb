@@ -44,15 +44,18 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
     def withId(
       studyId: StudyId,
       specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
-      getByKey(specimenGroupId) match {
-	case Failure(err) => DomainError(
-	  s"specimen group does not exist: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
-	    .failNel
-	case Success(sg) if (sg.studyId.equals(studyId)) => sg.success
-	case _ => DomainError(
-          s"study does not have specimen group: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
-	    .failNel
-      }
+      getByKey(specimenGroupId).fold(
+        err => DomainError(
+          s"specimen group does not exist: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
+          .failNel,
+        sg => if (sg.studyId.equals(studyId)) {
+          sg.success
+        } else {
+          DomainError(
+            s"study does not have specimen group: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
+            .failNel
+        }
+      )
     }
   }
 }

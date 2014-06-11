@@ -2,8 +2,6 @@ package org.biobank.fixture
 
 import org.biobank.domain._
 
-import scala.concurrent.Await
-import scala.concurrent.Future
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
 import org.scalatest.BeforeAndAfterAll
@@ -21,13 +19,13 @@ import org.scalatest.time._
  * Test fixture to make it easier to write specifications.
  */
 trait TestFixture
-  extends TestComponentImpl
+    extends TestComponentImpl
     with FactoryComponent
-  with ScalaFutures
-  with WordSpecLike
-  with Matchers
-    with BeforeAndAfterAll
-    with BeforeAndAfterEach {
+    with ScalaFutures
+    with WordSpecLike
+    with Matchers
+    with BeforeAndAfterEach
+    with BeforeAndAfterAll {
 
   // need to configure scalatest to have more patience when waiting for future results
   implicit val defaultPatience =

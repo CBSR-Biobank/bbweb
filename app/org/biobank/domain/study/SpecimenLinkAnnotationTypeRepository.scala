@@ -10,8 +10,7 @@ trait SpecimenLinkAnnotationTypeRepositoryComponent {
   val specimenLinkAnnotationTypeRepository: SpecimenLinkAnnotationTypeRepository
 
   trait SpecimenLinkAnnotationTypeRepository
-    extends StudyAnnotationTypeRepository[SpecimenLinkAnnotationType] {
-  }
+    extends StudyAnnotationTypeRepository[SpecimenLinkAnnotationType]
 }
 
 trait SpecimenLinkAnnotationTypeRepositoryComponentImpl
@@ -22,6 +21,5 @@ trait SpecimenLinkAnnotationTypeRepositoryComponentImpl
   class SpecimenLinkAnnotationTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[AnnotationTypeId, SpecimenLinkAnnotationType](v => v.id)
     with StudyAnnotationTypeRepositoryImpl[SpecimenLinkAnnotationType]
-    with SpecimenLinkAnnotationTypeRepository {
-  }
+    with SpecimenLinkAnnotationTypeRepository
 }

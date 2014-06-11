@@ -16,6 +16,7 @@ import org.biobank.domain.study.{
   SpecimenGroup,
   SpecimenGroupId,
   SpecimenGroupRepositoryComponent,
+  SpecimenLinkTypeRepositoryComponent,
   Study,
   StudyId }
 
@@ -25,7 +26,8 @@ import scalaz.Scalaz._
 
 trait SpecimenGroupProcessorComponent {
   self: SpecimenGroupRepositoryComponent
-      with CollectionEventTypeRepositoryComponent =>
+      with CollectionEventTypeRepositoryComponent
+      with SpecimenLinkTypeRepositoryComponent =>
 
   /**
     * This is the Specimen Group processor. It is a child actor of
@@ -46,7 +48,7 @@ trait SpecimenGroupProcessorComponent {
       case event: SpecimenGroupRemovedEvent => recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
-	snapshot.specimenGroups.foreach{ specimenGroup => specimenGroupRepository.put(specimenGroup) }
+        snapshot.specimenGroups.foreach{ specimenGroup => specimenGroupRepository.put(specimenGroup) }
     }
 
     val receiveCommand: Receive = {
@@ -63,16 +65,17 @@ trait SpecimenGroupProcessorComponent {
       val sgId = specimenGroupRepository.nextIdentity
 
       if (specimenGroupRepository.getByKey(sgId).isSuccess) {
-	throw new IllegalStateException(s"specimen group with id already exsits: $id")
+        throw new IllegalStateException(s"specimen group with id already exsits: $id")
       }
 
       for {
-	nameValid <- nameAvailable(cmd.name)
-	newItem <-SpecimenGroup.create(StudyId(cmd.studyId), sgId, 0, cmd.name, cmd.description,
+        nameValid <- nameAvailable(cmd.name)
+        newItem <-SpecimenGroup.create(
+          StudyId(cmd.studyId), sgId, -1, org.joda.time.DateTime.now, cmd.name, cmd.description,
           cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
           cmd.preservationTemperatureType, cmd.specimenType)
-	newEvent <- SpecimenGroupAddedEvent(
-          newItem.studyId.id, newItem.id.id, newItem.version, newItem.name, newItem.description,
+        newEvent <- SpecimenGroupAddedEvent(
+          newItem.studyId.id, newItem.id.id, newItem.addedDate, newItem.name, newItem.description,
           newItem.units, newItem.anatomicalSourceType, newItem.preservationType,
           newItem.preservationTemperatureType, newItem.specimenType).success
       } yield newEvent
@@ -84,16 +87,17 @@ trait SpecimenGroupProcessorComponent {
       val specimenGroupId = SpecimenGroupId(cmd.id)
 
       for {
-	nameValid <- nameAvailable(cmd.name, specimenGroupId)
-	oldItem <- specimenGroupRepository.withId(studyId, specimenGroupId)
-	notInUse <- checkNotInUse(studyId, oldItem.id)
-	newItem <- oldItem.update(cmd.expectedVersion, cmd.name, cmd.description, cmd.units,
-	  cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
-	  cmd.specimenType)
-	newEvent <- SpecimenGroupUpdatedEvent(
-          cmd.studyId, newItem.id.id, newItem.version, cmd.name, cmd.description,
-	  cmd.units, cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
-	  cmd.specimenType).success
+        nameValid <- nameAvailable(cmd.name, specimenGroupId)
+        oldItem <- specimenGroupRepository.withId(studyId, specimenGroupId)
+        notInUse <- checkNotInUse(studyId, oldItem.id)
+        newItem <- oldItem.update(
+          cmd.expectedVersion, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.units,
+          cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
+          cmd.specimenType)
+        newEvent <- SpecimenGroupUpdatedEvent(
+          cmd.studyId, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, cmd.name, cmd.description,
+          cmd.units, cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
+          cmd.specimenType).success
       } yield newEvent
     }
 
@@ -102,65 +106,67 @@ trait SpecimenGroupProcessorComponent {
       val studyId = StudyId(cmd.studyId)
 
       for {
-	item <- specimenGroupRepository.withId(studyId, SpecimenGroupId(cmd.id))
-	notInUse <- checkNotInUse(studyId, item.id)
-	validVersion <- validateVersion(item, cmd.expectedVersion)
-	newEvent <- SpecimenGroupRemovedEvent(item.studyId.id, item.id.id).success
+        item <- specimenGroupRepository.withId(studyId, SpecimenGroupId(cmd.id))
+        notInUse <- checkNotInUse(studyId, item.id)
+        validVersion <- validateVersion(item, cmd.expectedVersion)
+        newEvent <- SpecimenGroupRemovedEvent(item.studyId.id, item.id.id).success
       } yield newEvent
     }
 
     private def recoverEvent(event: SpecimenGroupAddedEvent): Unit = {
       val studyId = StudyId(event.studyId)
       val validation = for {
-	newItem <- SpecimenGroup.create(studyId, SpecimenGroupId(event.specimenGroupId), -1, event.name,
-	  event.description, event.units, event.anatomicalSourceType, event.preservationType,
+        newItem <- SpecimenGroup.create(
+          studyId, SpecimenGroupId(event.specimenGroupId), -1, event.dateTime, event.name,
+          event.description, event.units, event.anatomicalSourceType, event.preservationType,
           event.preservationTemperatureType, event.specimenType)
-	savedItem <- specimenGroupRepository.put(newItem).success
+        savedItem <- specimenGroupRepository.put(newItem).success
       } yield newItem
 
       if (validation.isFailure) {
-	// this should never happen because the only way to get here is when the
-	// command passed validation
-	throw new IllegalStateException("recovering specimen group from event failed")
+        // this should never happen because the only way to get here is when the
+        // command passed validation
+        throw new IllegalStateException("recovering specimen group from event failed")
       }
     }
 
     private def recoverEvent(event: SpecimenGroupUpdatedEvent): Unit = {
       val validation = for {
-	item <- specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId))
-	updatedItem <- item.update(item.versionOption, event.name,
-	  event.description, event.units, event.anatomicalSourceType, event.preservationType,
-          event.preservationTemperatureType, event.specimenType)
-	savedItem <- specimenGroupRepository.put(updatedItem).success
+        item <- specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId))
+        updatedItem <- item.update(
+          item.versionOption, event.dateTime, event.name, event.description, event.units,
+          event.anatomicalSourceType, event.preservationType, event.preservationTemperatureType,
+          event.specimenType)
+        savedItem <- specimenGroupRepository.put(updatedItem).success
       } yield updatedItem
 
       if (validation.isFailure) {
-	// this should never happen because the only way to get here is when the
-	// command passed validation
-	val err = validation.swap.getOrElse(List.empty)
-	throw new IllegalStateException(
-	  s"recovering specimen group update from event failed: $err")
+        // this should never happen because the only way to get here is when the
+        // command passed validation
+        val err = validation.swap.getOrElse(List.empty)
+        throw new IllegalStateException(
+          s"recovering specimen group update from event failed: $err")
       }
     }
 
     private def recoverEvent(event: SpecimenGroupRemovedEvent): Unit = {
       val validation = for {
-	item <- specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId))
-	removedItem <- specimenGroupRepository.remove(item).success
+        item <- specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId))
+        removedItem <- specimenGroupRepository.remove(item).success
       } yield removedItem
 
       if (validation.isFailure) {
-	// this should never happen because the only way to get here is when the
-	// command passed validation
-	val err = validation.swap.getOrElse(List.empty)
-	throw new IllegalStateException(
-	  s"recovering specimen group remove from event failed: $err")
+        // this should never happen because the only way to get here is when the
+        // command passed validation
+        val err = validation.swap.getOrElse(List.empty)
+        throw new IllegalStateException(
+          s"recovering specimen group remove from event failed: $err")
       }
     }
 
     private def nameAvailable(specimenGroupName: String): DomainValidation[Boolean] = {
       nameAvailableMatcher(specimenGroupName, specimenGroupRepository) { item =>
-	item.name.equals(specimenGroupName)
+        item.name.equals(specimenGroupName)
       }
     }
 
@@ -168,18 +174,31 @@ trait SpecimenGroupProcessorComponent {
       specimenGroupName: String,
       id: SpecimenGroupId): DomainValidation[Boolean] = {
       nameAvailableMatcher(specimenGroupName, specimenGroupRepository) { item =>
-	item.name.equals(specimenGroupName) && (item.id != id)
+        item.name.equals(specimenGroupName) && (item.id != id)
       }
     }
 
     private def checkNotInUse(
       studyId: StudyId,
       specimenGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
-      if (collectionEventTypeRepository.specimenGroupInUse(studyId, specimenGroupId)) {
-	DomainError(s"specimen group is in use by collection event type: $specimenGroupId").failNel
-      } else {
-	true.success
+
+      def checkNotInUseByCollectionEventType: DomainValidation[Boolean] = {
+        if (collectionEventTypeRepository.specimenGroupInUse(studyId, specimenGroupId)) {
+          DomainError(s"specimen group is in use by collection event type: $specimenGroupId").failNel
+        } else {
+          true.success
+        }
       }
+
+      def checkNotInUseBySpecimenLinkType: DomainValidation[Boolean] = {
+        if (specimenLinkTypeRepository.specimenGroupInUse(specimenGroupId)) {
+          DomainError(s"specimen group is in use by specimen link type: $specimenGroupId").failNel
+        } else {
+          true.success
+        }
+      }
+
+      (checkNotInUseByCollectionEventType |@| checkNotInUseBySpecimenLinkType) { case (_, _) => true }
     }
 
   }

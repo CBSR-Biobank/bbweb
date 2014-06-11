@@ -19,6 +19,10 @@ trait SpecimenLinkTypeRepositoryComponent {
 
     def allForProcessingType(processingTypeId: ProcessingTypeId): Set[SpecimenLinkType]
 
+    def specimenGroupInUse(specimenGroupId: SpecimenGroupId): Boolean
+
+    def annotationTypeInUse(annotationType: SpecimenLinkAnnotationType): Boolean
+
   }
 }
 
@@ -38,22 +42,31 @@ trait SpecimenLinkTypeRepositoryComponentImpl extends SpecimenLinkTypeRepository
     def withId(
       processingTypeId: ProcessingTypeId,
       specimenLinkTypeId: SpecimenLinkTypeId): DomainValidation[SpecimenLinkType] = {
-      getByKey(specimenLinkTypeId) match {
-        case Failure(err) =>
-          DomainError(
-            s"collection event type does not exist: { processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
-	    .failNel
-        case Success(slt) =>
-          if (slt.processingTypeId.equals(processingTypeId))
-            slt.success
-          else DomainError(
-            "study does not have collection event type:{ processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
-              .failNel
-      }
+      getByKey(specimenLinkTypeId).fold(
+        err =>
+        DomainError(
+          s"specimen link type does not exist: { processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
+          .failNel,
+        slType => if (slType.processingTypeId.equals(processingTypeId))
+          slType.success
+        else DomainError(
+          s"processing type does not have specimen link type:{ processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
+          .failNel
+      )
     }
 
     def allForProcessingType(processingTypeId: ProcessingTypeId): Set[SpecimenLinkType] = {
       getValues.filter(x => x.processingTypeId.equals(processingTypeId)).toSet
+    }
+
+    def specimenGroupInUse(specimenGroupId: SpecimenGroupId): Boolean = {
+      getValues.exists(slType =>
+        (slType.inputGroupId == specimenGroupId) || (slType.outputGroupId == specimenGroupId))
+    }
+
+    def annotationTypeInUse(annotationType: SpecimenLinkAnnotationType): Boolean = {
+      getValues.exists(slType =>
+        slType.annotationTypeData.exists(atd => atd.annotationTypeId.equals(annotationType.id.id)))
     }
   }
 }

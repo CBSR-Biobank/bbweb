@@ -15,7 +15,7 @@ trait ProcessingTypeRepositoryComponent {
 
     def nextIdentity: ProcessingTypeId
 
-    def processingTypeWithId(
+    def withId(
       studyId: StudyId,
       processingTypeId: ProcessingTypeId): DomainValidation[ProcessingType]
 
@@ -37,21 +37,23 @@ trait ProcessingTypeRepositoryComponentImpl extends ProcessingTypeRepositoryComp
     def nextIdentity: ProcessingTypeId =
       new ProcessingTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
 
-    def processingTypeWithId(
+    def withId(
       studyId: StudyId,
       processingTypeId: ProcessingTypeId): DomainValidation[ProcessingType] = {
-      getByKey(processingTypeId) match {
-        case Failure(err) =>
+      getByKey(processingTypeId).fold(
+        err =>
+        DomainError(
+          s"processing type does not exist: { studyId: $studyId, processingTypeId: $processingTypeId }")
+          .failNel,
+        cet =>
+        if (cet.studyId.equals(studyId)) {
+          cet.success
+        } else {
           DomainError(
-            s"collection event type does not exist: { studyId: $studyId, processingTypeId: $processingTypeId }")
-	    .failNel
-        case Success(cet) =>
-          if (cet.studyId.equals(studyId))
-            cet.success
-          else DomainError(
-            "study does not have collection event type:{ studyId: $studyId, processingTypeId: $processingTypeId }")
-              .failNel
-      }
+            s"study does not have processing type:{ studyId: $studyId, processingTypeId: $processingTypeId }")
+            .failNel
+        }
+      )
     }
 
     def allForStudy(studyId: StudyId): Set[ProcessingType] = {

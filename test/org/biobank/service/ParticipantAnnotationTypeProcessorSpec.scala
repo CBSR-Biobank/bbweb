@@ -13,7 +13,7 @@ import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import Scalaz._
 
-class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with BeforeAndAfterEach {
+class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
@@ -25,6 +25,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
   override def beforeEach: Unit = {
     disabledStudy = factory.createDisabledStudy
     studyRepository.put(disabledStudy)
+    ()
   }
 
   "A study processor" can {
@@ -33,8 +34,8 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
       val annotType = factory.createParticipantAnnotationType
 
       val cmd = AddParticipantAnnotationTypeCmd(
-	annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
-	annotType.maxValueCount, annotType.options)
+        annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
+        annotType.maxValueCount, annotType.options)
       val validation = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue
@@ -43,21 +44,21 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
       validation map { event =>
         event shouldBe a[ParticipantAnnotationTypeAddedEvent]
         event should have(
-	  'studyId (annotType.studyId.id),
+          'studyId (annotType.studyId.id),
           'name (annotType.name),
           'description (annotType.description),
           'valueType (annotType.valueType),
-	  'maxValueCount (annotType.maxValueCount)
-	)
+          'maxValueCount (annotType.maxValueCount)
+        )
 
-	val options = event.options map { eventOptions =>
-	  val annotTypeOptions = annotType.options | fail
-	  eventOptions should have size annotTypeOptions.size
-	  // verify each option
-	  annotTypeOptions.map { item =>
-	    eventOptions should contain (item)
-	  }
-	}
+        val options = event.options map { eventOptions =>
+          val annotTypeOptions = annotType.options | fail
+          eventOptions should have size annotTypeOptions.size
+          // verify each option
+          annotTypeOptions.map { item =>
+            eventOptions should contain (item)
+          }
+        }
 
         val at = participantAnnotationTypeRepository.withId(
           disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
@@ -66,13 +67,31 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
       }
     }
 
+    "not add a participant annotation type to a study that does not exist" in {
+      val study2 = factory.createDisabledStudy
+      val annotType = factory.createParticipantAnnotationType
+
+      val cmd = AddParticipantAnnotationTypeCmd(
+        annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
+        annotType.maxValueCount, annotType.options)
+      val validation = ask(studyProcessor, cmd)
+        .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
+        .futureValue
+
+      validation should be('failure)
+      validation.swap map { err =>
+        err.list should have length 1
+        err.list.head should include regex s"${study2.id.id}.*not found"
+      }
+    }
+
     "not add a participant annotation type if the name already exists" in {
       val annotType = factory.createParticipantAnnotationType
       participantAnnotationTypeRepository.put(annotType)
 
       val cmd = AddParticipantAnnotationTypeCmd(
-	annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
-	annotType.maxValueCount, annotType.options)
+        annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
+        annotType.maxValueCount, annotType.options)
       val validation = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue
@@ -91,8 +110,8 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
       val annotType2 = factory.createParticipantAnnotationType
 
       val cmd = UpdateParticipantAnnotationTypeCmd(
-	annotType.studyId.id, annotType.id.id, annotType.versionOption, annotType2.name,
-	annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
+        annotType.studyId.id, annotType.id.id, annotType.versionOption, annotType2.name,
+        annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
       val validation = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
@@ -101,22 +120,22 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
       validation map { event =>
         event shouldBe a[ParticipantAnnotationTypeUpdatedEvent]
         event should have(
-	  'studyId (annotType.studyId.id),
-	  'version (annotType.version + 1),
+          'studyId (annotType.studyId.id),
+          'version (annotType.version + 1),
           'name (annotType2.name),
           'description (annotType2.description),
           'valueType (annotType2.valueType),
-	  'maxValueCount (annotType2.maxValueCount)
-	)
+          'maxValueCount (annotType2.maxValueCount)
+        )
 
-	val options = event.options map { eventOptions =>
-	  val annotTypeOptions = annotType2.options | fail
-	  eventOptions should have size annotTypeOptions.size
-	  // verify each option
-	  annotTypeOptions.map { item =>
-	    eventOptions should contain (item)
-	  }
-	}
+        val options = event.options map { eventOptions =>
+          val annotTypeOptions = annotType2.options | fail
+          eventOptions should have size annotTypeOptions.size
+          // verify each option
+          annotTypeOptions.map { item =>
+            eventOptions should contain (item)
+          }
+        }
 
         val at = participantAnnotationTypeRepository.withId(
           disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
@@ -135,8 +154,8 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
       val dupliacteName = annotType.name
 
       val cmd = UpdateParticipantAnnotationTypeCmd(
-	annotType2.studyId.id, annotType2.id.id, annotType2.versionOption, dupliacteName,
-	annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
+        annotType2.studyId.id, annotType2.id.id, annotType2.versionOption, dupliacteName,
+        annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
       val validation = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
@@ -156,8 +175,8 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
       studyRepository.put(study2)
 
       val cmd = UpdateParticipantAnnotationTypeCmd(
-	study2.id.id, annotType.id.id, annotType.versionOption, annotType.name,
-	annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
+        study2.id.id, annotType.id.id, annotType.versionOption, annotType.name,
+        annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
       val validation = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
@@ -173,8 +192,8 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
       participantAnnotationTypeRepository.put(annotType)
 
       val cmd = UpdateParticipantAnnotationTypeCmd(
-	annotType.studyId.id, annotType.id.id, Some(annotType.version - 1), annotType.name,
-	annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
+        annotType.studyId.id, annotType.id.id, Some(annotType.version - 1), annotType.name,
+        annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
       val validation = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
@@ -191,7 +210,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
       participantAnnotationTypeRepository.put(annotType)
 
       val cmd = RemoveParticipantAnnotationTypeCmd(
-	annotType.studyId.id, annotType.id.id, annotType.versionOption)
+        annotType.studyId.id, annotType.id.id, annotType.versionOption)
       val validation = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
         .futureValue
@@ -205,7 +224,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture with 
       participantAnnotationTypeRepository.put(annotType)
 
       val cmd = RemoveParticipantAnnotationTypeCmd(
-	annotType.studyId.id, annotType.id.id, Some(annotType.version - 1))
+        annotType.studyId.id, annotType.id.id, Some(annotType.version - 1))
       val validation = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
         .futureValue

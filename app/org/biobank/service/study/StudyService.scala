@@ -45,6 +45,18 @@ trait StudyServiceComponent {
 
     def collectionEventTypesForStudy(studyId: String): Set[CollectionEventType]
 
+    def processingTypeWithId(
+      studyId: String,
+      processingTypeId: String): DomainValidation[ProcessingType]
+
+    def processingTypesForStudy(studyId: String): Set[ProcessingType]
+
+    def specimenLinkTypeWithId(
+      studyId: String,
+      specimenLinkTypeId: String): DomainValidation[SpecimenLinkType]
+
+    def specimenLinkTypesForProcessingType(processingTypeId: String): Set[SpecimenLinkType]
+
     def addStudy(cmd: AddStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyAddedEvent]]
 
@@ -56,6 +68,12 @@ trait StudyServiceComponent {
 
     def disableStudy(cmd: DisableStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyDisabledEvent]]
+
+    def retireStudy(cmd: RetireStudyCmd)(
+      implicit userId: UserId): Future[DomainValidation[StudyRetiredEvent]]
+
+    def unretireStudy(cmd: UnretireStudyCmd)(
+      implicit userId: UserId): Future[DomainValidation[StudyUnretiredEvent]]
 
     // specimen groups
     def specimenGroupInUse(studyId: String, specimenGroupId: String): DomainValidation[Boolean]
@@ -140,6 +158,27 @@ trait StudyServiceComponent {
     def removeSpecimenLinkAnnotationType(
       cmd: RemoveSpecimenLinkAnnotationTypeCmd)(
         implicit userId: UserId): Future[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
+
+    // processing types
+    def addProcessingType(cmd: AddProcessingTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[ProcessingTypeAddedEvent]]
+
+    def updateProcessingType(cmd: UpdateProcessingTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[ProcessingTypeUpdatedEvent]]
+
+    def removeProcessingType(cmd: RemoveProcessingTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[ProcessingTypeRemovedEvent]]
+
+    // specimen link types
+    def addSpecimenLinkType(cmd: AddSpecimenLinkTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[SpecimenLinkTypeAddedEvent]]
+
+    def updateSpecimenLinkType(cmd: UpdateSpecimenLinkTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[SpecimenLinkTypeUpdatedEvent]]
+
+    def removeSpecimenLinkType(cmd: RemoveSpecimenLinkTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[SpecimenLinkTypeRemovedEvent]]
+
   }
 
 }
@@ -156,7 +195,7 @@ trait StudyServiceComponent {
 trait StudyServiceComponentImpl extends StudyServiceComponent {
   self: RepositoryComponent =>
 
-  class StudyServiceImpl(processor: ActorRef)(implicit system: ActorSystem) extends StudyService {
+  class StudyServiceImpl(processor: ActorRef) extends StudyService {
 
     val log = LoggerFactory.getLogger(this.getClass)
 
@@ -218,12 +257,30 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
         StudyId(studyId), AnnotationTypeId(annotationTypeId))
     }
 
-    // FIXME: only commands should be sent to an aggregate
+    def processingTypeWithId(
+      studyId: String,
+      processingTypeId: String): DomainValidation[ProcessingType] = {
+      processingTypeRepository.withId(
+        StudyId(studyId), ProcessingTypeId(processingTypeId))
+    }
+
+    def processingTypesForStudy(studyId: String): Set[ProcessingType] = {
+      processingTypeRepository.allForStudy(StudyId(studyId))
+    }
+
+    def specimenLinkTypeWithId(
+      processingTypeId: String,
+      specimenLinkTypeId: String): DomainValidation[SpecimenLinkType] = {
+      specimenLinkTypeRepository.withId(
+        ProcessingTypeId(processingTypeId), SpecimenLinkTypeId(specimenLinkTypeId))
+    }
+
+    def specimenLinkTypesForProcessingType(processingTypeId: String): Set[SpecimenLinkType] = {
+      specimenLinkTypeRepository.allForProcessingType(ProcessingTypeId(processingTypeId))
+    }
 
     def addStudy(cmd: AddStudyCmd)(
       implicit userId: UserId): Future[DomainValidation[StudyAddedEvent]] = {
-      val id = studyRepository.nextIdentity
-
       processor ? cmd map (
         _.asInstanceOf[DomainValidation[StudyAddedEvent]])
     }
@@ -242,6 +299,16 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
       implicit userId: UserId): Future[DomainValidation[StudyDisabledEvent]] =
       processor ? cmd map (
         _.asInstanceOf[DomainValidation[StudyDisabledEvent]])
+
+    def retireStudy(cmd: RetireStudyCmd)(
+      implicit userId: UserId): Future[DomainValidation[StudyRetiredEvent]] =
+      processor ? cmd map (
+        _.asInstanceOf[DomainValidation[StudyRetiredEvent]])
+
+    def unretireStudy(cmd: UnretireStudyCmd)(
+      implicit userId: UserId): Future[DomainValidation[StudyUnretiredEvent]] =
+      processor ? cmd map (
+        _.asInstanceOf[DomainValidation[StudyUnretiredEvent]])
 
     // specimen groups
     //
@@ -343,14 +410,13 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
         _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeRemovedEvent]])
 
     // specimen link annotation types
-    //
-    // FIXME: rename this to specimenLinkAnnotationTypeCanBeUpdated
     def isSpecimenLinkAnnotationTypeInUse(
       studyId: String, annotationTypeId: String): DomainValidation[Boolean] = {
-      // TODO: needs implementation
-      //
-      // return true if used by any participants
-      false.success
+      for {
+        at <- specimenLinkAnnotationTypeRepository.withId(
+          StudyId(studyId), AnnotationTypeId(annotationTypeId))
+        inUse <- specimenLinkTypeRepository.annotationTypeInUse(at).success
+      } yield inUse
     }
 
     def specimenLinkAnnotationTypesForStudy(studyId: String): Set[SpecimenLinkAnnotationType] =
@@ -371,5 +437,40 @@ trait StudyServiceComponentImpl extends StudyServiceComponent {
       implicit userId: UserId): Future[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]] =
       processor ? cmd map (
         _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]])
+
+    // processing types
+    def addProcessingType(cmd: AddProcessingTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[ProcessingTypeAddedEvent]] = {
+      processor ? cmd map (
+        _.asInstanceOf[DomainValidation[ProcessingTypeAddedEvent]])
+    }
+
+    def updateProcessingType(cmd: UpdateProcessingTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[ProcessingTypeUpdatedEvent]] =
+      processor ? cmd map (
+        _.asInstanceOf[DomainValidation[ProcessingTypeUpdatedEvent]])
+
+    def removeProcessingType(cmd: RemoveProcessingTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[ProcessingTypeRemovedEvent]] =
+      processor ? cmd map (
+        _.asInstanceOf[DomainValidation[ProcessingTypeRemovedEvent]])
+
+    // specimen link types
+    def addSpecimenLinkType(cmd: AddSpecimenLinkTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[SpecimenLinkTypeAddedEvent]] = {
+      processor ? cmd map (
+        _.asInstanceOf[DomainValidation[SpecimenLinkTypeAddedEvent]])
+    }
+
+    def updateSpecimenLinkType(cmd: UpdateSpecimenLinkTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[SpecimenLinkTypeUpdatedEvent]] =
+      processor ? cmd map (
+        _.asInstanceOf[DomainValidation[SpecimenLinkTypeUpdatedEvent]])
+
+    def removeSpecimenLinkType(cmd: RemoveSpecimenLinkTypeCmd)(
+      implicit userId: UserId): Future[DomainValidation[SpecimenLinkTypeRemovedEvent]] =
+      processor ? cmd map (
+        _.asInstanceOf[DomainValidation[SpecimenLinkTypeRemovedEvent]])
+
   }
 }
