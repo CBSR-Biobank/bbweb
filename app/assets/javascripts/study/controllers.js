@@ -30,9 +30,15 @@ define(['angular'], function(angular) {
     });
   };
 
+  var StudyAddCtrl = function($scope, $rootScope, $location, user, studyService) {
+    $rootScope.pageTitle = 'Biobank study';
+    $scope.title = "AddStudy";
+  };
+
   return {
     StudiesCtrl: StudiesCtrl,
-    StudyCtrl: StudyCtrl
+    StudyCtrl: StudyCtrl,
+    StudyAddCtrl: StudyAddCtrl
   };
 
 });
