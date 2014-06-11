@@ -26,7 +26,7 @@ object SpecimenLinkTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(BodyParsers.parse.json) { token => userId => implicit request =>
+  def list = AuthAction(BodyParsers.parse.json) { token => implicit userId => implicit request =>
     val idResult = request.body.validate[ProcessingTypeId]
     idResult.fold(
       errors => {
@@ -40,8 +40,8 @@ object SpecimenLinkTypeController extends BbwebController  {
     )
   }
 
-  def addSpecimenLinkType = CommandAction { cmd: AddSpecimenLinkTypeCmd => userId =>
-    val future = studyService.addSpecimenLinkType(cmd)(null)
+  def addSpecimenLinkType = CommandAction { cmd: AddSpecimenLinkTypeCmd => implicit userId =>
+    val future = studyService.addSpecimenLinkType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -52,8 +52,8 @@ object SpecimenLinkTypeController extends BbwebController  {
     }
   }
 
-  def updateSpecimenLinkType(id: String) = CommandAction { cmd: UpdateSpecimenLinkTypeCmd => userId =>
-    val future = studyService.updateSpecimenLinkType(cmd)(null)
+  def updateSpecimenLinkType(id: String) = CommandAction { cmd: UpdateSpecimenLinkTypeCmd => implicit userId =>
+    val future = studyService.updateSpecimenLinkType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -64,8 +64,8 @@ object SpecimenLinkTypeController extends BbwebController  {
     }
   }
 
-  def removeSpecimenLinkType(id: String) = CommandAction { cmd: RemoveSpecimenLinkTypeCmd => userId =>
-    val future = studyService.removeSpecimenLinkType(cmd)(null)
+  def removeSpecimenLinkType(id: String) = CommandAction { cmd: RemoveSpecimenLinkTypeCmd => implicit userId =>
+    val future = studyService.removeSpecimenLinkType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),

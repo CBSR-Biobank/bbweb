@@ -26,7 +26,7 @@ object CeventTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(BodyParsers.parse.json) { token => userId => implicit request =>
+  def list = AuthAction(BodyParsers.parse.json) { token => implicit userId => implicit request =>
     val idResult = request.body.validate[StudyId]
     idResult.fold(
       errors => {
@@ -40,8 +40,8 @@ object CeventTypeController extends BbwebController  {
     )
   }
 
-  def addCollectionEventType = CommandAction { cmd: AddCollectionEventTypeCmd => userId =>
-    val future = studyService.addCollectionEventType(cmd)(null)
+  def addCollectionEventType = CommandAction { cmd: AddCollectionEventTypeCmd => implicit userId =>
+    val future = studyService.addCollectionEventType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -50,8 +50,8 @@ object CeventTypeController extends BbwebController  {
     }
   }
 
-  def updateCollectionEventType(id: String) = CommandAction { cmd: UpdateCollectionEventTypeCmd => userId =>
-    val future = studyService.updateCollectionEventType(cmd)(null)
+  def updateCollectionEventType(id: String) = CommandAction { cmd: UpdateCollectionEventTypeCmd => implicit userId =>
+    val future = studyService.updateCollectionEventType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -60,8 +60,8 @@ object CeventTypeController extends BbwebController  {
     }
   }
 
-  def removeCollectionEventType(id: String) = CommandAction { cmd: RemoveCollectionEventTypeCmd => userId =>
-    val future = studyService.removeCollectionEventType(cmd)(null)
+  def removeCollectionEventType(id: String) = CommandAction { cmd: RemoveCollectionEventTypeCmd => implicit userId =>
+    val future = studyService.removeCollectionEventType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),

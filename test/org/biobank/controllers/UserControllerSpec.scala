@@ -1,5 +1,6 @@
 package org.biobank.controllers
 
+import org.biobank.domain._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.service.json.JsonHelper._
 import org.biobank.fixture.ControllerFixture
@@ -21,14 +22,16 @@ class UserControllerSpec extends ControllerFixture {
   "User REST API" should {
 
     "GET /users" should {
-      "list none" in new WithApplication(fakeApplication()) {
+      "list the default user in the test environment" in new WithApplication(fakeApplication()) {
         doLogin
         val json = makeJsonRequest(GET, "/users")
         val jsonList = json.as[List[JsObject]]
-        jsonList should have size 0
+        jsonList should have size 1
+        val jsonDefaultUser = jsonList(0)
+        (jsonDefaultUser \ "email").as[String] should be ("admin@admin.com")
       }
 
-      "list a user" in new WithApplication(fakeApplication()) {
+      "list a new user" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
 
@@ -37,8 +40,8 @@ class UserControllerSpec extends ControllerFixture {
 
         val json = makeJsonRequest(GET, "/users")
         val jsonList = json.as[List[JsObject]]
-        jsonList should have length 1
-        compareObj(jsonList(0), user)
+        jsonList should have length 2
+        compareObj(jsonList(1), user)
       }
     }
 
@@ -48,16 +51,16 @@ class UserControllerSpec extends ControllerFixture {
         val appRepositories = new AppRepositories
 
         val users = List(factory.createRegisteredUser, factory.createRegisteredUser)
-        log.info(s"user: $users")
-        //appRepositories.userRepository.removeAll
         users.map(user => appRepositories.userRepository.put(user))
 
         val json = makeJsonRequest(GET, "/users")
-        val jsonList = json.as[List[JsObject]]
+        val jsonList = json.as[List[JsObject]].filterNot { u =>
+          (u \ "id").as[String].equals("admin@admin.com")
+        }
+
         jsonList should have size users.size
 
         (jsonList zip users).map { item => compareObj(item._1, item._2) }
-        ()
       }
     }
 

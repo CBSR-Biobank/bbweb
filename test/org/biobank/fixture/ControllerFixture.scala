@@ -48,7 +48,7 @@ trait ControllerFixture
 
   def doLogin() = {
     // Log in with test user
-    val request = Json.obj("login" -> true)
+    val request = Json.obj("email" -> "admin@admin.com", "password" -> "password")
     route(FakeRequest(POST, "/login").withJsonBody(request)) match {
       case Some(result) =>
         status(result) should be (OK)

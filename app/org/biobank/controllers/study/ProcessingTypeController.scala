@@ -26,7 +26,7 @@ object ProcessingTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(BodyParsers.parse.json) { token => userId => implicit request =>
+  def list = AuthAction(BodyParsers.parse.json) { token => implicit userId => implicit request =>
     val idResult = request.body.validate[StudyId]
     idResult.fold(
       errors => {
@@ -40,8 +40,8 @@ object ProcessingTypeController extends BbwebController  {
     )
   }
 
-  def addProcessingType = CommandAction { cmd: AddProcessingTypeCmd => userId =>
-    val future = studyService.addProcessingType(cmd)(null)
+  def addProcessingType = CommandAction { cmd: AddProcessingTypeCmd => implicit userId =>
+    val future = studyService.addProcessingType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -52,8 +52,8 @@ object ProcessingTypeController extends BbwebController  {
     }
   }
 
-  def updateProcessingType(id: String) = CommandAction { cmd: UpdateProcessingTypeCmd => userId =>
-    val future = studyService.updateProcessingType(cmd)(null)
+  def updateProcessingType(id: String) = CommandAction { cmd: UpdateProcessingTypeCmd => implicit userId =>
+    val future = studyService.updateProcessingType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -64,8 +64,8 @@ object ProcessingTypeController extends BbwebController  {
     }
   }
 
-  def removeProcessingType(id: String) = CommandAction { cmd: RemoveProcessingTypeCmd => userId =>
-    val future = studyService.removeProcessingType(cmd)(null)
+  def removeProcessingType(id: String) = CommandAction { cmd: RemoveProcessingTypeCmd => implicit userId =>
+    val future = studyService.removeProcessingType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),

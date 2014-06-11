@@ -25,12 +25,12 @@ object StudyController extends BbwebController {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(parse.empty) { token => userId => implicit request =>
+  def list = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     val json = Json.toJson(studyService.getAll.toList)
     Ok(json)
   }
 
-  def query(id: String) = AuthAction(parse.empty) { token => userId => implicit request =>
+  def query(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     studyService.getStudy(id).fold(
       err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
       study => Ok(Json.toJson(study))

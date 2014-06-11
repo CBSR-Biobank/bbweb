@@ -39,8 +39,8 @@ object ParticipantAnnotTypeController extends BbwebController  {
     )
   }
 
-  def addAnnotationType = CommandAction { cmd: AddParticipantAnnotationTypeCmd => userId =>
-    val future = studyService.addParticipantAnnotationType(cmd)(null)
+  def addAnnotationType = CommandAction { cmd: AddParticipantAnnotationTypeCmd => implicit userId =>
+    val future = studyService.addParticipantAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -51,8 +51,8 @@ object ParticipantAnnotTypeController extends BbwebController  {
     }
   }
 
-  def updateAnnotationType(id: String) = CommandAction { cmd: UpdateParticipantAnnotationTypeCmd => userId =>
-    val future = studyService.updateParticipantAnnotationType(cmd)(null)
+  def updateAnnotationType(id: String) = CommandAction { cmd: UpdateParticipantAnnotationTypeCmd => implicit userId =>
+    val future = studyService.updateParticipantAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -63,8 +63,8 @@ object ParticipantAnnotTypeController extends BbwebController  {
     }
   }
 
-  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveParticipantAnnotationTypeCmd => userId =>
-    val future = studyService.removeParticipantAnnotationType(cmd)(null)
+  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveParticipantAnnotationTypeCmd => implicit userId =>
+    val future = studyService.removeParticipantAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),

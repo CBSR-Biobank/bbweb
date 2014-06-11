@@ -30,7 +30,7 @@ object SpecimenGroupController extends BbwebController {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(BodyParsers.parse.json) { token => userId => implicit request =>
+  def list = AuthAction(parse.json) { token => userId => implicit request =>
     val idResult = request.body.validate[StudyId]
     idResult.fold(
       errors => {
@@ -44,8 +44,8 @@ object SpecimenGroupController extends BbwebController {
     )
   }
 
-  def addSpecimenGroup = CommandAction { cmd: AddSpecimenGroupCmd => userId =>
-    val future = studyService.addSpecimenGroup(cmd)(null)
+  def addSpecimenGroup = CommandAction { cmd: AddSpecimenGroupCmd => implicit userId =>
+    val future = studyService.addSpecimenGroup(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -54,8 +54,8 @@ object SpecimenGroupController extends BbwebController {
     }
   }
 
-  def updateSpecimenGroup(id: String) = CommandAction { cmd: UpdateSpecimenGroupCmd => userId =>
-    val future = studyService.updateSpecimenGroup(cmd)(null)
+  def updateSpecimenGroup(id: String) = CommandAction { cmd: UpdateSpecimenGroupCmd => implicit userId =>
+    val future = studyService.updateSpecimenGroup(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -64,8 +64,8 @@ object SpecimenGroupController extends BbwebController {
     }
   }
 
-  def removeSpecimenGroup(id: String) = CommandAction { cmd: RemoveSpecimenGroupCmd => userId =>
-    val future = studyService.removeSpecimenGroup(cmd)(null)
+  def removeSpecimenGroup(id: String) = CommandAction { cmd: RemoveSpecimenGroupCmd => implicit userId =>
+    val future = studyService.removeSpecimenGroup(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),

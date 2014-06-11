@@ -93,7 +93,7 @@ object Application extends Controller with Security {
     * Discard the cookie [[AuthTokenCookieKey]] to have AngularJS no longer set the
     * X-XSRF-TOKEN in HTTP header.
     */
-  def logout() = AuthAction(parse.empty) { token => userId => implicit request =>
+  def logout() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Cache.remove(token)
     Ok.discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
   }

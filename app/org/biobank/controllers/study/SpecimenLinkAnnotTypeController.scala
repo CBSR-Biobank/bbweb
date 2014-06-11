@@ -28,7 +28,7 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(BodyParsers.parse.json) { token => userId => implicit request =>
+  def list = AuthAction(BodyParsers.parse.json) { token => implicit userId => implicit request =>
     val idResult = request.body.validate[StudyId]
     idResult.fold(
       errors => {
@@ -42,8 +42,8 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
     )
   }
 
-  def addAnnotationType = CommandAction { cmd: AddSpecimenLinkAnnotationTypeCmd => userId =>
-    val future = studyService.addSpecimenLinkAnnotationType(cmd)(null)
+  def addAnnotationType = CommandAction { cmd: AddSpecimenLinkAnnotationTypeCmd => implicit userId =>
+    val future = studyService.addSpecimenLinkAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -54,8 +54,8 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
     }
   }
 
-  def updateAnnotationType(id: String) = CommandAction { cmd: UpdateSpecimenLinkAnnotationTypeCmd => userId =>
-    val future = studyService.updateSpecimenLinkAnnotationType(cmd)(null)
+  def updateAnnotationType(id: String) = CommandAction { cmd: UpdateSpecimenLinkAnnotationTypeCmd => implicit userId =>
+    val future = studyService.updateSpecimenLinkAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -66,8 +66,8 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
     }
   }
 
-  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveSpecimenLinkAnnotationTypeCmd => userId =>
-    val future = studyService.removeSpecimenLinkAnnotationType(cmd)(null)
+  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveSpecimenLinkAnnotationTypeCmd => implicit userId =>
+    val future = studyService.removeSpecimenLinkAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),

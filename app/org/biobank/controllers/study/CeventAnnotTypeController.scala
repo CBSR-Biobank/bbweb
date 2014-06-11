@@ -26,7 +26,7 @@ object CeventAnnotTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(BodyParsers.parse.json) { token => userId => implicit request =>
+  def list = AuthAction(BodyParsers.parse.json) { token => implicit userId => implicit request =>
     val idResult = request.body.validate[StudyId]
     idResult.fold(
       errors => {
@@ -40,8 +40,8 @@ object CeventAnnotTypeController extends BbwebController  {
     )
   }
 
-  def addAnnotationType = CommandAction { cmd: AddCollectionEventAnnotationTypeCmd => userId =>
-    val future = studyService.addCollectionEventAnnotationType(cmd)(null)
+  def addAnnotationType = CommandAction { cmd: AddCollectionEventAnnotationTypeCmd => implicit userId =>
+    val future = studyService.addCollectionEventAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -52,8 +52,8 @@ object CeventAnnotTypeController extends BbwebController  {
     }
   }
 
-  def updateAnnotationType(id: String) = CommandAction { cmd: UpdateCollectionEventAnnotationTypeCmd => userId =>
-    val future = studyService.updateCollectionEventAnnotationType(cmd)(null)
+  def updateAnnotationType(id: String) = CommandAction { cmd: UpdateCollectionEventAnnotationTypeCmd => implicit userId =>
+    val future = studyService.updateCollectionEventAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
@@ -64,8 +64,8 @@ object CeventAnnotTypeController extends BbwebController  {
     }
   }
 
-  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveCollectionEventAnnotationTypeCmd => userId =>
-    val future = studyService.removeCollectionEventAnnotationType(cmd)(null)
+  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveCollectionEventAnnotationTypeCmd => implicit userId =>
+    val future = studyService.removeCollectionEventAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
