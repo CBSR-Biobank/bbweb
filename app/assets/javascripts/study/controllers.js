@@ -9,13 +9,12 @@ define(['angular'], function(angular) {
    */
   var StudiesCtrl = function($scope, $rootScope, $location, user, studyService) {
     $rootScope.pageTitle = 'Biobank studies';
+    $scope.studies = [];
+    $scope.user = user;
+
     studyService.list().then(function(response) {
       $scope.studies = response.data;
-      $scope.user = user;
     });
-
-    $scope.loadTab = function(tabName) {
-    };
 
   };
 
@@ -24,10 +23,20 @@ define(['angular'], function(angular) {
    */
   var StudyCtrl = function($scope, $rootScope, $location, user, studyService) {
     $rootScope.pageTitle = 'Biobank study';
+    $scope.user = user;
+    $scope.study = {};
+    $scope.participantAnnotTypeInfo = {};
+
     studyService.query().then(function(response) {
       $scope.study = response.data;
-      $scope.user = user;
     });
+
+    $scope.getParticipantInfo = function() {
+      studyService.participantInfo().then(function(response) {
+        $scope.participantAnnotTypeInfo = response.data;
+      });
+    };
+
   };
 
   var StudyAddCtrl = function($scope, $rootScope, $location, user, studyService) {

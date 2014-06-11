@@ -11,5 +11,5 @@ define(['angular', './routes', './services', './directives/studyTabs'], function
     'ngRoute',
     'study.routes',
     'study.services',
-    'study.directives.studySummaryTabContent']);
+    'study.directives.studyTabs']);
 });

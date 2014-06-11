@@ -81,6 +81,9 @@ define(['angular', 'require', 'jsRoutes'], function(angular, require, jsRoutes) 
     createPlayRoutes(
       jsRoutes.org.biobank.controllers.study.StudyController,
       playRoutes.controllers.study.StudyController);
+    createPlayRoutes(
+      jsRoutes.org.biobank.controllers.study.ParticipantAnnotTypeController,
+      playRoutes.controllers.study.ParticipantAnnotTypeController);
     return playRoutes;
 
   }]);
