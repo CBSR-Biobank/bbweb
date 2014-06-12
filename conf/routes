@@ -32,7 +32,7 @@ PUT     /studies/ceannottype/:id       org.biobank.controllers.study.CeventAnnot
 DELETE  /studies/ceannottype/:id       org.biobank.controllers.study.CeventAnnotTypeController.removeAnnotationType(id)
 
 # participant annotation types
-GET     /studies/pannottype            org.biobank.controllers.study.ParticipantAnnotTypeController.list
+GET     /studies/pannottype/:studyId   org.biobank.controllers.study.ParticipantAnnotTypeController.list(studyId)
 POST    /studies/pannottype            org.biobank.controllers.study.ParticipantAnnotTypeController.addAnnotationType
 PUT     /studies/pannottype/:id        org.biobank.controllers.study.ParticipantAnnotTypeController.updateAnnotationType(id)
 DELETE  /studies/pannottype/:id        org.biobank.controllers.study.ParticipantAnnotTypeController.removeAnnotationType(id)

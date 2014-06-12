@@ -19,7 +19,7 @@ define(['angular', 'common'], function(angular) {
         return playRoutes.controllers.study.StudyController.add().post(study);
       },
       participantInfo: function(study) {
-        return playRoutes.controllers.study.ParticipantAnnotTypeController.list().post(study.id);
+        return playRoutes.controllers.study.ParticipantAnnotTypeController.list(study.id).get();
       }
     };
   }]);

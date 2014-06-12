@@ -32,9 +32,12 @@ define(['angular'], function(angular) {
     });
 
     $scope.getParticipantInfo = function() {
-      studyService.participantInfo().then(function(response) {
-        $scope.participantAnnotTypeInfo = response.data;
-      });
+      var study = $scope.study;
+      if (study.id !== undefined) {
+        studyService.participantInfo(study).then(function(response) {
+          $scope.participantAnnotTypeInfo = response.data;
+        });
+      }
     };
 
   };

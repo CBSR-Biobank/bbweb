@@ -72,7 +72,8 @@ define(['angular', 'require', 'jsRoutes'], function(angular, require, jsRoutes) 
         Application: {},
         UserController: {},
         study: {
-          StudyController: {}
+          StudyController: {},
+          ParticipantAnnotTypeController: {}
         }
       }
     };

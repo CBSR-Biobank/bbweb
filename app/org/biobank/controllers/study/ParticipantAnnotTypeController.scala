@@ -25,18 +25,10 @@ object ParticipantAnnotTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(BodyParsers.parse.json) { token => userId => implicit request =>
-    val idResult = request.body.validate[StudyId]
-    idResult.fold(
-      errors => {
-        BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors)))
-      },
-      studyId => {
-        Logger.info(s"list: $studyId")
-        val json = Json.toJson(studyService.participantAnnotationTypesForStudy(studyId.id).toList)
-        Ok(json)
-      }
-    )
+  def list(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.info(s"ParticipantAnnotTypeController.list: studyId: $studyId")
+    val json = Json.toJson(studyService.participantAnnotationTypesForStudy(studyId).toList)
+    Ok(json)
   }
 
   def addAnnotationType = CommandAction { cmd: AddParticipantAnnotationTypeCmd => implicit userId =>
