@@ -1,7 +1,5 @@
 <h4>Study {{study.name}} Participant Configuration</h4>
 
 <h5>Participant Annotation Types</h5>
-<div ng-repeat="pat in participantAnnotTypeInfo">
-  {{pat.name}} - {{pat.description === null ? "" : pat.description | truncate}}<br/>
-  Value Type: {{pat.valueType}}
+<div class="gridStyle" ng-grid="gridOptions">
 </div>

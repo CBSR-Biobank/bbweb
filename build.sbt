@@ -63,11 +63,12 @@ libraryDependencies ++= Seq(
     "org.webjars", "jquery"),
   "org.webjars"            %  "angularjs"                      % "1.3.0-beta.8" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"            % "angular-ui-bootstrap"            % "0.11.0-2",
-  "org.webjars"            % "angular-ui-router"               % "0.2.10-1",
+  "org.webjars"            %  "angular-ui-bootstrap"           % "0.11.0-2",
+  "org.webjars"            %  "angular-ui-router"              % "0.2.10-1",
   "org.scalatest"          %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
     ExclusionRule(organization = "org.junit", name = "junit")
   ),
+  "org.webjars"            %  "ng-grid"                        % "2.0.11-2",
   //"com.typesafe.akka"    %% "akka-testkit"                   % "2.3.1"              % "test",
   "com.github.ddevore"     %% "akka-persistence-mongo-casbah"  % "0.7.2-SNAPSHOT"     % "compile",
   //"se.radley"              %% "play-plugins-enumeration"       % "1.1.0"              % "compile",

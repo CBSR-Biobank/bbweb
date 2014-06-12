@@ -7,8 +7,9 @@ define(['angular', './routes', './services', './directives/studyTabs'], function
 
   return angular.module('biobank.study', [
     'ngCookies',
-    'ui.bootstrap',
     'ngRoute',
+    'ui.bootstrap',
+    'ngGrid',
     'study.routes',
     'study.services',
     'study.directives.studyTabs']);

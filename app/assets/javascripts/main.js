@@ -19,7 +19,8 @@
       'angular-route': ['angular'],
       'angular-cookies': ['angular'],
       'bootstrap': ['jquery'],
-      'ui-bootstrap-tpls': ['angular', 'bootstrap']
+      'ui-bootstrap-tpls': ['angular', 'bootstrap'],
+      'ng-grid': ['angular', 'jquery']
     },
     paths: {
       'requirejs': ['../lib/requirejs/require'],
@@ -29,6 +30,7 @@
       'angular-cookies': ['../lib/angularjs/angular-cookies'],
       'bootstrap': ['../lib/bootstrap/js/bootstrap'],
       'ui-bootstrap-tpls': ['../lib/angular-ui-bootstrap/ui-bootstrap-tpls'],
+      'ng-grid': ['../lib/ng-grid/ng-grid'],
       'jsRoutes': ['/jsroutes']
     }
   });
@@ -38,9 +40,17 @@
   };
 
   // Load the app. This is kept minimal so it doesn't need much updating.
-  require(['angular', 'angular-cookies', 'angular-route', 'ui-bootstrap-tpls', 'jquery', 'bootstrap', './app'],
-    function(angular) {
-      angular.bootstrap(document, ['app']);
-    }
-  );
+  require([
+    'angular',
+    'angular-cookies',
+    'angular-route',
+    'ui-bootstrap-tpls',
+    'ng-grid',
+    'jquery',
+    'bootstrap',
+    './app'],
+          function(angular) {
+            angular.bootstrap(document, ['app']);
+          }
+         );
 })(requirejs);
