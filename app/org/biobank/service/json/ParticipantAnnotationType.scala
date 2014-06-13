@@ -39,9 +39,10 @@ object ParticipantAnnotationType {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Map[String, String]]
-  )((studyId, name, description, valueType, maxValueCount, options) =>
-    AddParticipantAnnotationTypeCmd(studyId, name, description, valueType, maxValueCount, options))
+      (__ \ "options").readNullable[Map[String, String]] and
+      (__ \ "required").read[Boolean]
+  )((studyId, name, description, valueType, maxValueCount, options, required) =>
+    AddParticipantAnnotationTypeCmd(studyId, name, description, valueType, maxValueCount, options, required))
 
   implicit val updateParticipantAnnotationTypeCmdReads: Reads[UpdateParticipantAnnotationTypeCmd] = (
     (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateParticipantAnnotationTypeCmd")) andKeep
@@ -52,9 +53,10 @@ object ParticipantAnnotationType {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Map[String, String]]
-  )((studyId, id, expectedVersion, name, description, valueType, maxValueCount, options) =>
-    UpdateParticipantAnnotationTypeCmd(studyId, id, expectedVersion, name, description, valueType, maxValueCount, options))
+      (__ \ "options").readNullable[Map[String, String]] and
+      (__ \ "required").read[Boolean]
+  )((studyId, id, expectedVersion, name, description, valueType, maxValueCount, options, required) =>
+    UpdateParticipantAnnotationTypeCmd(studyId, id, expectedVersion, name, description, valueType, maxValueCount, options, required))
 
   implicit val removeParticipantAnnotationTypeCmdReads: Reads[RemoveParticipantAnnotationTypeCmd] = (
     (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveParticipantAnnotationTypeCmd")) andKeep

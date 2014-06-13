@@ -1,7 +1,7 @@
 /**
  * Tabs used when displaying a study.
  */
-define(['angular'], function(angular) {
+define(['angular', '../controllers'], function(angular, controllers) {
   'use strict';
 
   var mod = angular.module('study.directives.studyTabs', []);
@@ -12,7 +12,7 @@ define(['angular'], function(angular) {
     };
   });
 
-  mod.directive('studyParticipantsTab', ['$log', '$route', '$filter', 'ngTableParams', 'studyService', 'studyService', function($log, $route, $filter, ngTableParams, studyService) {
+  mod.directive('studyParticipantsTab', ['$log', '$route', '$modal', '$filter', 'ngTableParams', 'studyService', 'studyService', function($log, $route, $modal, $filter, ngTableParams, studyService) {
     return {
       restrict: 'E',
       templateUrl: '/assets/templates/study/studyParticipantsTab.html',
@@ -43,7 +43,22 @@ define(['angular'], function(angular) {
         /* jshint ignore:end */
 
         $scope.changeSelection = function(annotType) {
-          $log.info(annotType);
+          $log.debug(annotType);
+
+          var modalInstance = $modal.open({
+            templateUrl: '/assets/templates/study/annotationType.html',
+            controller: controllers.AnnotationTypeCtrl,
+            size: 'sm',
+            resolve: {
+              annotType: function () {
+                return annotType;
+              }
+            }
+          });
+
+          modalInstance.result.then(function (selectedItem) {
+            $scope.selected = selectedItem;
+          });
         };
       }
     };

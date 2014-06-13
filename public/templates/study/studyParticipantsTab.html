@@ -1,10 +1,12 @@
 <h4>Participant Annotation Types</h4>
 <table ng-table="tableParams" class="table table-hover ng-table-rowselected">
-  <tr ng-repeat="annotType in $data">
+  <tr ng-repeat="annotType in $data"
+      ng-click="annotType.$selected = !annotType.$selected; changeSelection(annotType)"
+      ng-class="{'active': user.$selected}">
     <td data-title="'Name'" sortable="'name'">
       {{annotType.name}}
     </td>
-    <td data-title="'Value Type'" sortable="'valueType'">
+    <td data-title="'Type'" sortable="'valueType'">
       {{annotType.valueType}}
     </td>
     <td data-title="'Description'" sortable="'description'">
