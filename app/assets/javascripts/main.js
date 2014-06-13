@@ -20,7 +20,7 @@
       'angular-cookies': ['angular'],
       'bootstrap': ['jquery'],
       'ui-bootstrap-tpls': ['angular', 'bootstrap'],
-      'ng-grid': ['angular', 'jquery']
+      'ng-table': ['angular']
     },
     paths: {
       'requirejs': ['../lib/requirejs/require'],
@@ -30,7 +30,7 @@
       'angular-cookies': ['../lib/angularjs/angular-cookies'],
       'bootstrap': ['../lib/bootstrap/js/bootstrap'],
       'ui-bootstrap-tpls': ['../lib/angular-ui-bootstrap/ui-bootstrap-tpls'],
-      'ng-grid': ['../lib/ng-grid/ng-grid'],
+      'ng-table': ['../lib/ng-table/ng-table'],
       'jsRoutes': ['/jsroutes']
     }
   });
@@ -45,7 +45,7 @@
     'angular-cookies',
     'angular-route',
     'ui-bootstrap-tpls',
-    'ng-grid',
+    'ng-table',
     'jquery',
     'bootstrap',
     './app'],

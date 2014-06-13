@@ -9,7 +9,7 @@ define(['angular', './routes', './services', './directives/studyTabs'], function
     'ngCookies',
     'ngRoute',
     'ui.bootstrap',
-    'ngGrid',
+    'ngTable',
     'study.routes',
     'study.services',
     'study.directives.studyTabs']);

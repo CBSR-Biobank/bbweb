@@ -1,5 +1,14 @@
-<h4>Study {{study.name}} Participant Configuration</h4>
-
-<h5>Participant Annotation Types</h5>
-<div class="gridStyle" ng-grid="gridOptions">
-</div>
+<h4>Participant Annotation Types</h4>
+<table ng-table="tableParams" class="table">
+  <tr ng-repeat="annotType in $data">
+    <td data-title="'Name'" sortable="'name'">
+      {{annotType.name}}
+    </td>
+    <td data-title="'Value Type'" sortable="'valueType'">
+      {{annotType.valueType}}
+    </td>
+    <td data-title="'Description'" sortable="'description'">
+      {{annotType.description === null ? "" : annotType.description | truncate:40}}
+    </td>
+  </tr>
+</table>

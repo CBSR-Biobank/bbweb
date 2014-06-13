@@ -65,8 +65,7 @@ object Application extends Controller with Security {
     * @return The token needed for subsequent requests
     */
   def login() = Action(parse.json) { implicit request =>
-    val jsonValidation = request.body.validate[LoginCredentials]
-    jsonValidation.fold(
+    request.body.validate[LoginCredentials].fold(
       errors => {
         BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors)))
       },

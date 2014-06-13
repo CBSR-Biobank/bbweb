@@ -25,34 +25,11 @@ define(['angular'], function(angular) {
     $rootScope.pageTitle = 'Biobank study';
     $scope.user = user;
     $scope.study = {};
-    $scope.participantAnnotTypeInfo = [
-//      { name: 'A', valueType: 'Select' },
-//      { name: 'B', valueType: 'Select' }
-    ];
-    $scope.gridOptions = {
-      data: 'participantAnnotTypeInfo',
-      showFilter : true,
-      enableColumnResize : true,
-      columnDefs: [
-        { field:'name', displayName: 'Name' },
-        { field:'valueType', displayName: 'Value Type' }
-        //{ field:'', displayName: '' },
-        //{ field:'description', displayName: 'Description' }
-      ]
-    };
+    $scope.tableParams = {};
 
     studyService.query().then(function(response) {
       $scope.study = response.data;
     });
-
-    $scope.getParticipantInfo = function() {
-      var study = $scope.study;
-      if (study.id !== undefined) {
-        studyService.participantInfo(study).then(function(response) {
-          $scope.participantAnnotTypeInfo = response.data;
-        });
-      }
-    };
   };
 
   var StudyAddCtrl = function($scope, $rootScope, $location, user, studyService) {

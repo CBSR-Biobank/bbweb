@@ -12,12 +12,39 @@ define(['angular'], function(angular) {
     };
   });
 
-  mod.directive('studyParticipantsTab', function() {
+  mod.directive('studyParticipantsTab', ['$log', '$route', '$filter', 'ngTableParams', 'studyService', 'studyService', function($log, $route, $filter, ngTableParams, studyService) {
     return {
       restrict: 'E',
-      templateUrl: '/assets/templates/study/studyParticipantsTab.html'
+      templateUrl: '/assets/templates/study/studyParticipantsTab.html',
+      controller: function($scope) {
+        /* jshint ignore:start */
+        $scope.tableParams = new ngTableParams({
+          page: 1,            // show first page
+          count: 10,          // count per page
+          sorting: {
+            name: 'asc'     // initial sorting
+          }
+        }, {
+          counts: [], // hide page counts control
+          total: 0,           // length of data
+          getData: function($defer, params) {
+            var study = { id: $route.current.params.id };
+            studyService.participantInfo(study).then(function(response) {
+              var orderedData = params.sorting()
+                ? $filter('orderBy')(response.data, params.orderBy())
+                : response.data;
+              params.total(orderedData.length);
+              $defer.resolve(orderedData.slice(
+                (params.page() - 1) * params.count(),
+                params.page() * params.count()));
+            });
+          }
+        });
+        /* jshint ignore:end */
+
+      }
     };
-  });
+  }]);
 
   return mod;
 });

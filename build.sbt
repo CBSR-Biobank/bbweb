@@ -6,9 +6,9 @@ organization := "org.biobank"
 
 version := "0.1-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
-
 scalaVersion := "2.11.1"
+
+lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalacOptions ++= Seq(
   "-target:jvm-1.7",
@@ -56,8 +56,9 @@ libraryDependencies ++= Seq(
   "org.webjars"            %  "webjars-locator"                % "0.13",
   "org.webjars"            %% "webjars-play"                   % "2.3.0",
   // WebJars dependencies
-  "org.webjars"             % "requirejs"                      % "2.1.11-1",
+  "org.webjars"            % "requirejs"                       % "2.1.11-1",
   "org.webjars"            %  "underscorejs"                   % "1.6.0-3",
+  "org.webjars"            % "jasmine"                         % "2.0.0",
   "org.webjars"            %  "jquery"                         % "2.1.1",
   "org.webjars"            %  "bootstrap"                      % "3.1.1-1" exclude(
     "org.webjars", "jquery"),
@@ -65,10 +66,10 @@ libraryDependencies ++= Seq(
     "org.webjars", "jquery"),
   "org.webjars"            %  "angular-ui-bootstrap"           % "0.11.0-2",
   "org.webjars"            %  "angular-ui-router"              % "0.2.10-1",
+  "org.webjars"            %  "ng-table"                       % "0.3.2",
   "org.scalatest"          %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
     ExclusionRule(organization = "org.junit", name = "junit")
   ),
-  "org.webjars"            %  "ng-grid"                        % "2.0.11-2",
   //"com.typesafe.akka"    %% "akka-testkit"                   % "2.3.1"              % "test",
   "com.github.ddevore"     %% "akka-persistence-mongo-casbah"  % "0.7.2-SNAPSHOT"     % "compile",
   //"se.radley"              %% "play-plugins-enumeration"       % "1.1.0"              % "compile",
