@@ -72,7 +72,7 @@ libraryDependencies ++= Seq(
   ),
   "com.github.ddevore"     %% "akka-persistence-mongo-casbah"  % "0.7.2-SNAPSHOT"     % "compile",
   // Test Dependencies
-  "com.typesafe.akka"      %% "akka-testkit"                   % "2.3.2"              % "test",
+  "com.typesafe.akka"      %% "akka-testkit"                   % "2.3.2"              % "test"
 )
 
 JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
