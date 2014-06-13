@@ -60,14 +60,14 @@ trait ControllerFixture
     }
   }
 
-  def makeJsonRequest(
+  def makeRequest(
     method: String,
     path: String,
     expectedStatus: Int = OK,
     json: JsValue = JsNull): JsValue = {
     route(FakeRequest(method, path).withJsonBody(json).withHeaders(("X-XSRF-TOKEN", token))) match {
       case Some(result) =>
-        Logger.info(s"makeJsonRequest: result: ${contentAsString(result)}")
+        Logger.info(s"makeRequest: result: ${contentAsString(result)}")
         status(result) should be (expectedStatus)
         contentType(result) should be (Some("application/json"))
         Json.parse(contentAsString(result))

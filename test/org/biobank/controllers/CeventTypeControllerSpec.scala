@@ -49,7 +49,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         ))
     )
 
-    val json = makeJsonRequest(POST, "/studies/cetypes", BAD_REQUEST, cmdJson)
+    val json = makeRequest(POST, "/studies/cetypes", BAD_REQUEST, cmdJson)
 
     (json \ "message").as[String] should include ("study is not disabled")
   }
@@ -93,7 +93,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         ))
     )
 
-    val json = makeJsonRequest(PUT, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
+    val json = makeRequest(PUT, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
 
     (json \ "message").as[String] should include ("study is not disabled")
   }
@@ -121,7 +121,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "expectedVersion" -> Some(cet.version)
     )
 
-    val json = makeJsonRequest(DELETE, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
+    val json = makeRequest(DELETE, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
 
     (json \ "message").as[String] should include ("study is not disabled")
   }
@@ -136,8 +136,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         appRepositories.studyRepository.put(study)
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/cetypes", json = idJson)
+        val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
       }
@@ -154,8 +153,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val cet = factory.createCollectionEventType
         appRepositories.collectionEventTypeRepository.put(cet)
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/cetypes", json = idJson)
+        val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), cet)
@@ -181,8 +179,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val cetypes = List(cet1, cet2)
         cetypes map { cet => appRepositories.collectionEventTypeRepository.put(cet) }
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/cetypes", json = idJson)
+        val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
 
         jsonList should have size cetypes.size
@@ -228,7 +225,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
             ))
         )
 
-        val json = makeJsonRequest(POST, "/studies/cetypes", json = cmdJson)
+        val json = makeRequest(POST, "/studies/cetypes", json = cmdJson)
 
         (json \ "message").as[String] should include ("collection event type added")
       }
@@ -294,7 +291,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
             ))
         )
 
-        val json = makeJsonRequest(PUT, s"/studies/cetypes/${cet.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, s"/studies/cetypes/${cet.id.id}", json = cmdJson)
 
         (json \ "message").as[String] should include ("collection event type updated")
       }
@@ -344,7 +341,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(cet.version)
         )
 
-        val json = makeJsonRequest(DELETE, s"/studies/cetypes/${cet.id.id}", json = cmdJson)
+        val json = makeRequest(DELETE, s"/studies/cetypes/${cet.id.id}", json = cmdJson)
 
         (json \ "message").as[String] should include ("collection event type removed")
       }

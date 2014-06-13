@@ -57,7 +57,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     val annotType = factory.createSpecimenLinkAnnotationType
     appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       POST,
       "/studies/slannottype",
       BAD_REQUEST,
@@ -74,7 +74,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     val annotType = factory.createSpecimenLinkAnnotationType
     appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       PUT,
       s"/studies/slannottype/${annotType.id.id}",
       BAD_REQUEST,
@@ -94,7 +94,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     val annotType = factory.createSpecimenLinkAnnotationType
     appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       DELETE,
       s"/studies/slannottype/${annotType.id.id}",
       BAD_REQUEST,
@@ -113,8 +113,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         appRepositories.studyRepository.put(study)
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/slannottype", json = idJson)
+        val json = makeRequest(GET, s"/studies/slannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
       }
@@ -131,8 +130,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createSpecimenLinkAnnotationType
         appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/slannottype", json = idJson)
+        val json = makeRequest(GET, s"/studies/slannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), annotType)
@@ -152,8 +150,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
           factory.createSpecimenLinkAnnotationType)
         annotTypes map { annotType => appRepositories.specimenLinkAnnotationTypeRepository.put(annotType) }
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/slannottype", json = idJson)
+        val json = makeRequest(GET, s"/studies/slannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
 
         jsonList should have size annotTypes.size
@@ -171,7 +168,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
         appRepositories.studyRepository.put(study)
 
         val annotType = factory.createSpecimenLinkAnnotationType
-        val json = makeJsonRequest(POST, "/studies/slannottype", json = annotTypeToAddCmdJson(annotType))
+        val json = makeRequest(POST, "/studies/slannottype", json = annotTypeToAddCmdJson(annotType))
           (json \ "message").as[String] should include ("annotation type added")
       }
     }
@@ -210,7 +207,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
           version = annotType.version
         )
 
-        val json = makeJsonRequest(PUT,
+        val json = makeRequest(PUT,
           s"/studies/slannottype/${annotType.id.id}",
           json = annotTypeToUpdateCmdJson(annotType2))
 
@@ -247,7 +244,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createSpecimenLinkAnnotationType
         appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
 
-        val json = makeJsonRequest(
+        val json = makeRequest(
           DELETE,
           s"/studies/slannottype/${annotType.id.id}",
           json = annotTypeToRemoveCmdJson(annotType))

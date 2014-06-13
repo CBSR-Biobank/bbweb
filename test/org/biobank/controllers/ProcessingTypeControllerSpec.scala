@@ -56,7 +56,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
     val procType = factory.createProcessingType
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       POST,
       "/studies/proctypes",
       BAD_REQUEST,
@@ -75,7 +75,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
     val procType2 = factory.createProcessingType
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       PUT,
       s"/studies/proctypes/${procType.id.id}",
       BAD_REQUEST,
@@ -92,7 +92,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     val procType = factory.createProcessingType
     appRepositories.processingTypeRepository.put(procType)
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       DELETE,
       s"/studies/proctypes/${procType.id.id}",
       BAD_REQUEST,
@@ -111,8 +111,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         appRepositories.studyRepository.put(study)
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/proctypes", json = idJson)
+        val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
       }
@@ -129,8 +128,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         appRepositories.processingTypeRepository.put(procType)
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/proctypes", json = idJson)
+        val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), procType)
@@ -149,8 +147,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
         proctypes map { procType => appRepositories.processingTypeRepository.put(procType) }
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/proctypes", json = idJson)
+        val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
 
         jsonList should have size proctypes.size
@@ -168,7 +165,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         appRepositories.studyRepository.put(study)
 
         val procType = factory.createProcessingType
-        val json = makeJsonRequest(
+        val json = makeRequest(
           POST,
           "/studies/proctypes",
           json = procTypeToAddCmdJson(procType))
@@ -211,7 +208,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
           version = procType.version
         )
 
-        val json = makeJsonRequest(
+        val json = makeRequest(
           PUT,
           s"/studies/proctypes/${procType.id.id}",
           json = procTypeToUpdateCmdJson(procType2))
@@ -249,7 +246,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         appRepositories.processingTypeRepository.put(procType)
 
-        val json = makeJsonRequest(
+        val json = makeRequest(
           DELETE,
           s"/studies/proctypes/${procType.id.id}",
           json = procTypeToRemoveCmdJson(procType))

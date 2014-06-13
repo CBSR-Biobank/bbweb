@@ -26,18 +26,9 @@ object SpecimenLinkTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(BodyParsers.parse.json) { token => implicit userId => implicit request =>
-    val idResult = request.body.validate[ProcessingTypeId]
-    idResult.fold(
-      errors => {
-        BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors)))
-      },
-      processingTypeId => {
-        Logger.info(s"list: $processingTypeId")
-        val json = Json.toJson(studyService.specimenLinkTypesForProcessingType(processingTypeId.id).toList)
-        Ok(json)
-      }
-    )
+  def list(processingTypeId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.debug(s"SpecimenLinkTypeController.list: processingTypeId: $processingTypeId")
+    Ok(Json.toJson(studyService.specimenLinkTypesForProcessingType(processingTypeId).toList))
   }
 
   def addSpecimenLinkType = CommandAction { cmd: AddSpecimenLinkTypeCmd => implicit userId =>

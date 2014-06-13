@@ -57,7 +57,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
     val annotType = factory.createCollectionEventAnnotationType
     appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       POST,
       "/studies/ceannottype",
       BAD_REQUEST,
@@ -74,7 +74,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
     val annotType = factory.createCollectionEventAnnotationType
     appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       PUT,
       s"/studies/ceannottype/${annotType.id.id}",
       BAD_REQUEST,
@@ -94,7 +94,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
     val annotType = factory.createCollectionEventAnnotationType
     appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       DELETE,
       s"/studies/ceannottype/${annotType.id.id}",
       BAD_REQUEST,
@@ -112,8 +112,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         appRepositories.studyRepository.put(study)
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/ceannottype", json = idJson)
+        val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
       }
@@ -130,8 +129,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createCollectionEventAnnotationType
         appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/ceannottype", json = idJson)
+        val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), annotType)
@@ -151,8 +149,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
           factory.createCollectionEventAnnotationType)
         annotTypes map { annotType => appRepositories.collectionEventAnnotationTypeRepository.put(annotType) }
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/ceannottype", json = idJson)
+        val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
 
         jsonList should have size annotTypes.size
@@ -170,7 +167,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         appRepositories.studyRepository.put(study)
 
         val annotType = factory.createCollectionEventAnnotationType
-        val json = makeJsonRequest(POST, "/studies/ceannottype", json = annotTypeToAddCmdJson(annotType))
+        val json = makeRequest(POST, "/studies/ceannottype", json = annotTypeToAddCmdJson(annotType))
           (json \ "message").as[String] should include ("annotation type added")
       }
     }
@@ -209,7 +206,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
           version = annotType.version
         )
 
-        val json = makeJsonRequest(PUT,
+        val json = makeRequest(PUT,
           s"/studies/ceannottype/${annotType.id.id}",
           json = annotTypeToUpdateCmdJson(annotType2))
 
@@ -246,7 +243,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createCollectionEventAnnotationType
         appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
 
-        val json = makeJsonRequest(
+        val json = makeRequest(
           DELETE,
           s"/studies/ceannottype/${annotType.id.id}",
           json = annotTypeToRemoveCmdJson(annotType))

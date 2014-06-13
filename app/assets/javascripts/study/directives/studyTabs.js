@@ -42,6 +42,9 @@ define(['angular'], function(angular) {
         });
         /* jshint ignore:end */
 
+        $scope.changeSelection = function(annotType) {
+          $log.info(annotType);
+        };
       }
     };
   }]);

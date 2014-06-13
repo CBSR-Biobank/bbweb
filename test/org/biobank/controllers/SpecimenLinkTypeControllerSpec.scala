@@ -82,7 +82,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     appRepositories.specimenGroupRepository.put(outputSg)
     appRepositories.specimenLinkTypeRepository.put(slType)
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       POST,
       "/studies/sltypes",
       BAD_REQUEST,
@@ -105,7 +105,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
     val slType2 = factory.createSpecimenLinkType
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       PUT,
       s"/studies/sltypes/${slType.id.id}",
       BAD_REQUEST,
@@ -126,7 +126,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     appRepositories.specimenGroupRepository.put(outputSg)
     appRepositories.specimenLinkTypeRepository.put(slType)
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       DELETE,
       s"/studies/sltypes/${slType.id.id}",
       BAD_REQUEST,
@@ -145,8 +145,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         appRepositories.processingTypeRepository.put(procType)
 
-        val idJson = Json.obj("id" -> procType.id.id)
-        val json = makeJsonRequest(GET, "/studies/sltypes", json = idJson)
+        val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
       }
@@ -165,8 +164,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         appRepositories.specimenGroupRepository.put(outputSg)
         appRepositories.specimenLinkTypeRepository.put(slType)
 
-        val idJson = Json.obj("id" -> procType.id.id)
-        val json = makeJsonRequest(GET, "/studies/sltypes", json = idJson)
+        val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), slType)
@@ -185,8 +183,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
         sltypes map { slType => appRepositories.specimenLinkTypeRepository.put(slType) }
 
-        val idJson = Json.obj("id" -> procType.id.id)
-        val json = makeJsonRequest(GET, "/studies/sltypes", json = idJson)
+        val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
         val jsonList = json.as[List[JsObject]]
 
         jsonList should have size sltypes.size
@@ -210,7 +207,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         appRepositories.specimenGroupRepository.put(inputSg)
         appRepositories.specimenGroupRepository.put(outputSg)
 
-        val json = makeJsonRequest(
+        val json = makeRequest(
           POST,
           "/studies/sltypes",
           json = slTypeToAddCmdJson(slType))
@@ -262,7 +259,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
           outputGroupId = slType.outputGroupId
         )
 
-        val json = makeJsonRequest(
+        val json = makeRequest(
           PUT,
           s"/studies/sltypes/${slType.id.id}",
           json = slTypeToUpdateCmdJson(slType2))
@@ -307,7 +304,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         appRepositories.specimenGroupRepository.put(outputSg)
         appRepositories.specimenLinkTypeRepository.put(slType)
 
-        val json = makeJsonRequest(
+        val json = makeRequest(
           DELETE,
           s"/studies/sltypes/${slType.id.id}",
           json = slTypeToRemoveCmdJson(slType))

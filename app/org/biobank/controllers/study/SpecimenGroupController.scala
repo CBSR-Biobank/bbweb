@@ -30,18 +30,9 @@ object SpecimenGroupController extends BbwebController {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(parse.json) { token => userId => implicit request =>
-    val idResult = request.body.validate[StudyId]
-    idResult.fold(
-      errors => {
-        BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors)))
-      },
-      studyId => {
-        Logger.info(s"list: $studyId")
-        val json = Json.toJson(studyService.specimenGroupsForStudy(studyId.id).toList)
-        Ok(json)
-      }
-    )
+  def list(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.debug(s"SpecimenGroupController.list: studyId: $studyId")
+    Ok(Json.toJson(studyService.specimenGroupsForStudy(studyId).toList))
   }
 
   def addSpecimenGroup = CommandAction { cmd: AddSpecimenGroupCmd => implicit userId =>

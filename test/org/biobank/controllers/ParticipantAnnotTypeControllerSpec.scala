@@ -59,7 +59,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
     val annotType = factory.createParticipantAnnotationType
     appRepositories.participantAnnotationTypeRepository.put(annotType)
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       POST,
       "/studies/pannottype",
       BAD_REQUEST,
@@ -76,7 +76,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
     val annotType = factory.createParticipantAnnotationType
     appRepositories.participantAnnotationTypeRepository.put(annotType)
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       PUT,
       s"/studies/pannottype/${annotType.id.id}",
       BAD_REQUEST,
@@ -96,7 +96,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
     val annotType = factory.createParticipantAnnotationType
     appRepositories.participantAnnotationTypeRepository.put(annotType)
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       DELETE,
       s"/studies/pannottype/${annotType.id.id}",
       BAD_REQUEST,
@@ -116,7 +116,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         appRepositories.studyRepository.put(study)
 
         val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/pannottype", json = idJson)
+        val json = makeRequest(GET, s"/studies/pannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
       }
@@ -134,7 +134,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         appRepositories.participantAnnotationTypeRepository.put(annotType)
 
         val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/pannottype", json = idJson)
+        val json = makeRequest(GET, s"/studies/pannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), annotType)
@@ -155,7 +155,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         annotTypes map { annotType => appRepositories.participantAnnotationTypeRepository.put(annotType) }
 
         val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/pannottype", json = idJson)
+        val json = makeRequest(GET, s"/studies/pannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
 
         jsonList should have size annotTypes.size
@@ -173,7 +173,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         appRepositories.studyRepository.put(study)
 
         val annotType = factory.createParticipantAnnotationType
-        val json = makeJsonRequest(POST, "/studies/pannottype", json = annotTypeToAddCmdJson(annotType))
+        val json = makeRequest(POST, "/studies/pannottype", json = annotTypeToAddCmdJson(annotType))
           (json \ "message").as[String] should include ("annotation type added")
       }
     }
@@ -212,7 +212,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
           version = annotType.version
         )
 
-        val json = makeJsonRequest(PUT,
+        val json = makeRequest(PUT,
           s"/studies/pannottype/${annotType.id.id}",
           json = annotTypeToUpdateCmdJson(annotType2))
 
@@ -249,7 +249,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createParticipantAnnotationType
         appRepositories.participantAnnotationTypeRepository.put(annotType)
 
-        val json = makeJsonRequest(
+        val json = makeRequest(
           DELETE,
           s"/studies/pannottype/${annotType.id.id}",
           json = annotTypeToRemoveCmdJson(annotType))

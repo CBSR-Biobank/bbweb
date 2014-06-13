@@ -24,7 +24,7 @@ class UserControllerSpec extends ControllerFixture {
     "GET /users" should {
       "list the default user in the test environment" in new WithApplication(fakeApplication()) {
         doLogin
-        val json = makeJsonRequest(GET, "/users")
+        val json = makeRequest(GET, "/users")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         val jsonDefaultUser = jsonList(0)
@@ -38,7 +38,7 @@ class UserControllerSpec extends ControllerFixture {
         val user = factory.createRegisteredUser
         appRepositories.userRepository.put(user)
 
-        val json = makeJsonRequest(GET, "/users")
+        val json = makeRequest(GET, "/users")
         val jsonList = json.as[List[JsObject]]
         jsonList should have length 2
         compareObj(jsonList(1), user)
@@ -53,7 +53,7 @@ class UserControllerSpec extends ControllerFixture {
         val users = List(factory.createRegisteredUser, factory.createRegisteredUser)
         users.map(user => appRepositories.userRepository.put(user))
 
-        val json = makeJsonRequest(GET, "/users")
+        val json = makeRequest(GET, "/users")
         val jsonList = json.as[List[JsObject]].filterNot { u =>
           (u \ "id").as[String].equals("admin@admin.com")
         }
@@ -74,7 +74,7 @@ class UserControllerSpec extends ControllerFixture {
           "email"     -> user.email,
           "password"  -> "testpassword",
           "avatarUrl" -> user.avatarUrl)
-        val json = makeJsonRequest(POST, "/users", json = cmdJson)
+        val json = makeRequest(POST, "/users", json = cmdJson)
 
         (json \ "message").as[String] should include ("user added")
       }
@@ -96,7 +96,7 @@ class UserControllerSpec extends ControllerFixture {
           "email"           -> user.email,
           "password"        -> "testpassword",
           "avatarUrl"       -> user.avatarUrl)
-        val json = makeJsonRequest(PUT, s"/users/${user.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, s"/users/${user.id.id}", json = cmdJson)
 
         (json \ "message").as[String] should include ("user updated")
       }
@@ -109,7 +109,7 @@ class UserControllerSpec extends ControllerFixture {
 
         val user = factory.createRegisteredUser.activate(Some(0), org.joda.time.DateTime.now) | fail
         appRepositories.userRepository.put(user)
-        val json = makeJsonRequest(GET, s"/users/${user.id.id}")
+        val json = makeRequest(GET, s"/users/${user.id.id}")
         compareObj(json, user)
       }
     }
@@ -127,7 +127,7 @@ class UserControllerSpec extends ControllerFixture {
           "type"            -> "ActivateUserCmd",
           "expectedVersion" -> Some(user.version),
           "email"           -> user.id.id)
-        val json = makeJsonRequest(PUT, s"/users/activate/${user.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, s"/users/activate/${user.id.id}", json = cmdJson)
 
         (json \ "message").as[String] should include ("user activated")
       }
@@ -146,7 +146,7 @@ class UserControllerSpec extends ControllerFixture {
           "type"            -> "LockUserCmd",
           "expectedVersion" -> Some(user.version),
           "email"           -> user.id.id)
-        val json = makeJsonRequest(PUT, s"/users/lock/${user.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, s"/users/lock/${user.id.id}", json = cmdJson)
 
         (json \ "message").as[String] should include ("user locked")
       }
@@ -166,7 +166,7 @@ class UserControllerSpec extends ControllerFixture {
           "type"            -> "UnlockUserCmd",
           "expectedVersion" -> Some(lockedUser.version),
           "email"           -> lockedUser.id.id)
-        val json = makeJsonRequest(PUT, s"/users/unlock/${lockedUser.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, s"/users/unlock/${lockedUser.id.id}", json = cmdJson)
 
         (json \ "message").as[String] should include ("user unlocked")
       }

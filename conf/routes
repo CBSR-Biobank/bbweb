@@ -14,19 +14,19 @@ POST    /studies/retire                org.biobank.controllers.study.StudyContro
 POST    /studies/unretire              org.biobank.controllers.study.StudyController.unretire
 
 # specimen groups
-GET     /studies/sgroups               org.biobank.controllers.study.SpecimenGroupController.list
+GET     /studies/sgroups/:studyId      org.biobank.controllers.study.SpecimenGroupController.list(studyId)
 POST    /studies/sgroups               org.biobank.controllers.study.SpecimenGroupController.addSpecimenGroup
 PUT     /studies/sgroups/:id           org.biobank.controllers.study.SpecimenGroupController.updateSpecimenGroup(id)
 DELETE  /studies/sgroups/:id           org.biobank.controllers.study.SpecimenGroupController.removeSpecimenGroup(id)
 
 # collection event types
-GET     /studies/cetypes               org.biobank.controllers.study.CeventTypeController.list
+GET     /studies/cetypes/:studyId      org.biobank.controllers.study.CeventTypeController.list(studyId)
 POST    /studies/cetypes               org.biobank.controllers.study.CeventTypeController.addCollectionEventType
 PUT     /studies/cetypes/:id           org.biobank.controllers.study.CeventTypeController.updateCollectionEventType(id)
 DELETE  /studies/cetypes/:id           org.biobank.controllers.study.CeventTypeController.removeCollectionEventType(id)
 
 ## collection event annotation types
-GET     /studies/ceannottype           org.biobank.controllers.study.CeventAnnotTypeController.list
+GET     /studies/ceannottype/:studyId  org.biobank.controllers.study.CeventAnnotTypeController.list(studyId)
 POST    /studies/ceannottype           org.biobank.controllers.study.CeventAnnotTypeController.addAnnotationType
 PUT     /studies/ceannottype/:id       org.biobank.controllers.study.CeventAnnotTypeController.updateAnnotationType(id)
 DELETE  /studies/ceannottype/:id       org.biobank.controllers.study.CeventAnnotTypeController.removeAnnotationType(id)
@@ -38,19 +38,19 @@ PUT     /studies/pannottype/:id        org.biobank.controllers.study.Participant
 DELETE  /studies/pannottype/:id        org.biobank.controllers.study.ParticipantAnnotTypeController.removeAnnotationType(id)
 
 # specimenlink annotation types
-GET     /studies/slannottype           org.biobank.controllers.study.SpecimenLinkAnnotTypeController.list
+GET     /studies/slannottype/:studyId  org.biobank.controllers.study.SpecimenLinkAnnotTypeController.list(studyId)
 POST    /studies/slannottype           org.biobank.controllers.study.SpecimenLinkAnnotTypeController.addAnnotationType
 PUT     /studies/slannottype/:id       org.biobank.controllers.study.SpecimenLinkAnnotTypeController.updateAnnotationType(id)
 DELETE  /studies/slannottype/:id       org.biobank.controllers.study.SpecimenLinkAnnotTypeController.removeAnnotationType(id)
 
 # processing types
-GET     /studies/proctypes             org.biobank.controllers.study.ProcessingTypeController.list
+GET     /studies/proctypes/:studyId    org.biobank.controllers.study.ProcessingTypeController.list(studyId)
 POST    /studies/proctypes             org.biobank.controllers.study.ProcessingTypeController.addProcessingType
 PUT     /studies/proctypes/:id         org.biobank.controllers.study.ProcessingTypeController.updateProcessingType(id)
 DELETE  /studies/proctypes/:id         org.biobank.controllers.study.ProcessingTypeController.removeProcessingType(id)
 
 # specimen link types
-GET     /studies/sltypes               org.biobank.controllers.study.SpecimenLinkTypeController.list
+GET     /studies/sltypes/:procTypeId   org.biobank.controllers.study.SpecimenLinkTypeController.list(procTypeId)
 POST    /studies/sltypes               org.biobank.controllers.study.SpecimenLinkTypeController.addSpecimenLinkType
 PUT     /studies/sltypes/:id           org.biobank.controllers.study.SpecimenLinkTypeController.updateSpecimenLinkType(id)
 DELETE  /studies/sltypes/:id           org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(id)

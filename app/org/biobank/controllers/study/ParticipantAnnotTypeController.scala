@@ -26,9 +26,8 @@ object ParticipantAnnotTypeController extends BbwebController  {
   }
 
   def list(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.info(s"ParticipantAnnotTypeController.list: studyId: $studyId")
-    val json = Json.toJson(studyService.participantAnnotationTypesForStudy(studyId).toList)
-    Ok(json)
+    Logger.debug(s"ParticipantAnnotTypeController.list: studyId: $studyId")
+    Ok(Json.toJson(studyService.participantAnnotationTypesForStudy(studyId).toList))
   }
 
   def addAnnotationType = CommandAction { cmd: AddParticipantAnnotationTypeCmd => implicit userId =>

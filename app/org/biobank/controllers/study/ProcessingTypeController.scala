@@ -26,18 +26,9 @@ object ProcessingTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(BodyParsers.parse.json) { token => implicit userId => implicit request =>
-    val idResult = request.body.validate[StudyId]
-    idResult.fold(
-      errors => {
-        BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors)))
-      },
-      studyId => {
-        Logger.info(s"list: $studyId")
-        val json = Json.toJson(studyService.processingTypesForStudy(studyId.id).toList)
-        Ok(json)
-      }
-    )
+  def list(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.debug(s"ProcessingTypeController.list: studyId: $studyId")
+    Ok(Json.toJson(studyService.processingTypesForStudy(studyId).toList))
   }
 
   def addProcessingType = CommandAction { cmd: AddProcessingTypeCmd => implicit userId =>
