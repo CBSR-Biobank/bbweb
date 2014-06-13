@@ -70,19 +70,16 @@ libraryDependencies ++= Seq(
   "org.scalatest"          %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
     ExclusionRule(organization = "org.junit", name = "junit")
   ),
-  //"com.typesafe.akka"    %% "akka-testkit"                   % "2.3.1"              % "test",
   "com.github.ddevore"     %% "akka-persistence-mongo-casbah"  % "0.7.2-SNAPSHOT"     % "compile",
-  //"se.radley"              %% "play-plugins-enumeration"       % "1.1.0"              % "compile",
-  //"com.typesafe"           %% "webdriver"                      % "1.0.0-M2"           % "test",
-  "com.typesafe.akka"      %% "akka-testkit"                   % "2.3.2"              % "test"
-  //"com.typesafe.play"    %% "play-slick"                     % "0.6.0.1",
+  // Test Dependencies
+  "com.typesafe.akka"      %% "akka-testkit"                   % "2.3.2"              % "test",
 )
-
-//dependencyOverrides += "com.typesafe.akka" %% "akka-actor" % "2.3.2"
 
 JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
+
+//MochaKeys.requires += "./setup.js"
 
 // Configure the steps of the asset pipeline (used in stage and dist tasks)
 // rjs = RequireJS, uglifies, shrinks to one file, replaces WebJars with CDN
