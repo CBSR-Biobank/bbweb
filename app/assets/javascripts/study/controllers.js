@@ -50,6 +50,57 @@ define(['angular'], function(angular) {
     };
   };
 
+  /**
+   * Displays study annotation type summary information in a table. The user can then select a row
+   * to display more informaiton for te annotation type.
+   */
+  var AnnotationTypeDirectiveCtrl = function($log, $route, $modal, $filter, ngTableParams, studyService, $scope) {
+    /* jshint ignore:start */
+    $scope.tableParams = new ngTableParams({
+      page: 1,            // show first page
+      count: 10,          // count per page
+      sorting: {
+        name: 'asc'     // initial sorting
+      }
+    }, {
+      counts: [], // hide page counts control
+      total: 0,           // length of data
+      getData: function($defer, params) {
+        var study = { id: $route.current.params.id };
+        studyService.participantInfo(study).then(function(response) {
+          var orderedData = params.sorting()
+            ? $filter('orderBy')(response.data, params.orderBy())
+            : response.data;
+          params.total(orderedData.length);
+          $defer.resolve(orderedData.slice(
+            (params.page() - 1) * params.count(),
+            params.page() * params.count()));
+        });
+      }
+    });
+    /* jshint ignore:end */
+
+    $scope.changeSelection = function(annotType) {
+      $log.debug(annotType);
+
+      var modalInstance = $modal.open({
+        templateUrl: '/assets/templates/study/annotationType.html',
+        controller: AnnotationTypeCtrl,
+        backdrop: true,
+        size: 'sm',
+        resolve: {
+          annotType: function () {
+            return annotType;
+          }
+        }
+      });
+    };
+  };
+
+  /**
+   * This controller displays a study annotation type in a modal. The information is displayed
+   * in a table.
+   */
   var AnnotationTypeCtrl = function ($scope, $modalInstance, ngTableParams, annotType) {
     $scope.annotType = annotType;
     $scope.data = [];
@@ -99,6 +150,7 @@ define(['angular'], function(angular) {
     StudiesCtrl: StudiesCtrl,
     StudyCtrl: StudyCtrl,
     StudyAddCtrl: StudyAddCtrl,
+    AnnotationTypeDirectiveCtrl: AnnotationTypeDirectiveCtrl,
     AnnotationTypeCtrl: AnnotationTypeCtrl
   };
 
