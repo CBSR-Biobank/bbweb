@@ -11,19 +11,26 @@ import play.api.mvc.Results._
 
 trait BbwebController extends Controller with Security {
 
-  def CommandAction[A, T <: Command](func: T => UserId => Future[Result])(implicit reads: Reads[T]) = {
+  def CommandAction[A, T <: Command](
+    func: T => UserId => Future[Result])(implicit reads: Reads[T]) = {
     AuthActionAsync(parse.json) { token => implicit userId => implicit request =>
-      val cmdResult = request.body.validate[T]
-      cmdResult.fold(
-        errors => {
-          Future.successful(
-            BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors))))
-        },
-        cmd => {
-          Logger.info(s"CommandAction: $cmd")
-          func(cmd)(userId)
-        }
-      )
+//      if ((numKeys > 0) && (request.body.transform[JsObject].keys == numKeys)) {
+        val cmdResult = request.body.validate[T]
+        cmdResult.fold(
+          errors => {
+            Future.successful(
+              BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors))))
+          },
+          cmd => {
+            Logger.info(s"CommandAction: $cmd")
+            func(cmd)(userId)
+          }
+        )
+      // } else {
+      //   Future.successful(
+      //     BadRequest(Json.obj("status" ->"error", "message" -> "invalid json object")))
+      // }
     }
   }
+
 }

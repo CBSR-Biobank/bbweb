@@ -27,44 +27,38 @@ object User {
   }
 
   implicit val registerUserCmdReads = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RegisterUserCmd")) andKeep
-      (__ \ "name").read[String](minLength[String](2)) and
+    (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "email").read[String](minLength[String](5)) and
       (__ \ "password").read[String](minLength[String](2)) and
       (__ \ "avatarUrl").readNullable[String](minLength[String](2))
-  )((name, email, password, avatarUrl) => RegisterUserCmd(name, email, password, avatarUrl))
+  )(RegisterUserCmd.apply _)
 
   implicit val activateUserCmdReads = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "ActivateUserCmd")) andKeep
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "email").read[String](minLength[String](5))
-  )((version, email) => ActivateUserCmd(version, email))
+  )(ActivateUserCmd.apply _)
 
   implicit val updateUserCmdReads = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateUserCmd")) andKeep
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "email").read[String](minLength[String](5)) and
       (__ \ "password").read[String](minLength[String](2)) and
       (__ \ "avatarUrl").readNullable[String](minLength[String](2))
-  )((version, name, email, password, avatarUrl) => UpdateUserCmd(version, name, email, password, avatarUrl))
+  )(UpdateUserCmd.apply _)
 
   implicit val lockUserCmdReads = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "LockUserCmd")) andKeep
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "email").read[String](minLength[String](5))
-  )((version, email) => LockUserCmd(version, email))
+  )(LockUserCmd.apply _)
 
   implicit val unlockUserCmdReads = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UnlockUserCmd")) andKeep
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "email").read[String](minLength[String](5))
-  )((version, email) => UnlockUserCmd(version, email))
+  )(UnlockUserCmd.apply _)
 
   implicit val removeUserCmdReads = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveUserCmd")) andKeep
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "email").read[String](minLength[String](5))
-  )((version, email) => RemoveUserCmd(version, email))
+  )(RemoveUserCmd.apply _)
 
 }

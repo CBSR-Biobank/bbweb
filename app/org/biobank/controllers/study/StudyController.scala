@@ -36,7 +36,7 @@ object StudyController extends BbwebController {
 
   def query(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     studyService.getStudy(id).fold(
-      err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+      err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
       study => Ok(Json.toJson(study))
     )
   }
@@ -45,7 +45,7 @@ object StudyController extends BbwebController {
     val future = studyService.addStudy(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         event => Ok(eventToJsonReply(event, "study added"))
       )
     }
@@ -55,7 +55,7 @@ object StudyController extends BbwebController {
     val future = studyService.updateStudy(cmd)
     future.map { validation =>
       validation.fold(
-        err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         event => Ok(eventToJsonReply(event, "study updated"))
       )
     }
@@ -65,7 +65,7 @@ object StudyController extends BbwebController {
     val future = studyService.enableStudy(cmd)
     future.map { validation =>
       validation.fold(
-        err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         event => Ok(eventToJsonReply(event, "study enabled"))
       )
     }
@@ -75,7 +75,7 @@ object StudyController extends BbwebController {
     val future = studyService.disableStudy(cmd)
     future.map { validation =>
       validation.fold(
-        err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         event => Ok(eventToJsonReply(event, "study disabled"))
       )
     }
@@ -85,7 +85,7 @@ object StudyController extends BbwebController {
     val future = studyService.retireStudy(cmd)
     future.map { validation =>
       validation.fold(
-        err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         event => Ok(eventToJsonReply(event, "study retired"))
       )
     }
@@ -95,7 +95,7 @@ object StudyController extends BbwebController {
     val future = studyService.unretireStudy(cmd)
     future.map { validation =>
       validation.fold(
-        err => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         event => Ok(eventToJsonReply(event, "study unretired"))
       )
     }

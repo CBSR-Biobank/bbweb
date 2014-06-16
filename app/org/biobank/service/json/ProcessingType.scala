@@ -31,28 +31,24 @@ object ProcessingType {
   )(unlift(org.biobank.domain.study.ProcessingType.unapply))
 
   implicit val addProcessingTypeCmdReads: Reads[AddProcessingTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "AddProcessingTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "enabled").read[Boolean]
-  )((studyId, name, description, enabled) => AddProcessingTypeCmd(studyId, name, description, enabled))
+  )(AddProcessingTypeCmd.apply _)
 
   implicit val updateProcessingTypeCmdReads: Reads[UpdateProcessingTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateProcessingTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "enabled").read[Boolean]
-  )((studyId, id, expectedVersion, name, description, enabled) =>
-    UpdateProcessingTypeCmd(studyId, id, expectedVersion, name, description, enabled))
+  )(UpdateProcessingTypeCmd.apply _)
 
   implicit val removeProcessingTypeCmdReads: Reads[RemoveProcessingTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveProcessingTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )((studyId, id, expectedVersion) => RemoveProcessingTypeCmd(studyId, id, expectedVersion))
+  )(RemoveProcessingTypeCmd.apply _)
 }

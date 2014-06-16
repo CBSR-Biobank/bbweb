@@ -87,7 +87,7 @@ define(['angular'], function(angular) {
         templateUrl: '/assets/templates/study/annotationType.html',
         controller: AnnotationTypeCtrl,
         backdrop: true,
-//        size: 'sm',
+        //        size: 'sm',
         resolve: {
           annotType: function () {
             return annotType;

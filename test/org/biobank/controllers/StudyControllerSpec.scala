@@ -69,13 +69,13 @@ class StudyControllerSpec extends ControllerFixture {
           "description" -> study.description)
         val json = makeRequest(POST, "/studies", json = cmdJson)
 
-        (json \ "message").as[String] should include ("study added")
+        (json \ "status").as[String] should include ("success")
 
-        val eventStudyId = (json \ "event" \ "id").as[String]
+        val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
         val validation = appRepositories.studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
-          repoStudy.name should be ((json \ "event" \ "name").as[String])
+          repoStudy.name should be ((json \ "data" \ "event" \ "name").as[String])
         }
       }
     }
@@ -96,14 +96,14 @@ class StudyControllerSpec extends ControllerFixture {
           "description"     -> study.description)
         val json = makeRequest(PUT, s"/studies/${study.id.id}", json = cmdJson)
 
-        (json \ "message").as[String] should include ("study updated")
+        (json \ "status").as[String] should include ("success")
 
-        val eventStudyId = (json \ "event" \ "id").as[String]
+        val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
         val validation = appRepositories.studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
-          repoStudy.name should be ((json \ "event" \ "name").as[String])
-          repoStudy.version should be ((json \ "event" \ "version").as[Long])
+          repoStudy.name should be ((json \ "data" \ "event" \ "name").as[String])
+          repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
         }
       }
     }
@@ -136,13 +136,13 @@ class StudyControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/enable", json = cmdJson)
 
-        (json \ "message").as[String] should include ("study enabled")
+        (json \ "status").as[String] should include ("success")
 
-        val eventStudyId = (json \ "event" \ "id").as[String]
+        val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
         val validation = appRepositories.studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
-          repoStudy.version should be ((json \ "event" \ "version").as[Long])
+          repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
         }
       }
     }
@@ -161,6 +161,7 @@ class StudyControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/enable", BAD_REQUEST, cmdJson)
 
+        (json \ "status").as[String] should include ("error")
         (json \ "message").as[String] should include ("no specimen groups")
       }
     }
@@ -179,13 +180,13 @@ class StudyControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/disable", json = cmdJson)
 
-        (json \ "message").as[String] should include ("study disabled")
+        (json \ "status").as[String] should include ("success")
 
-        val eventStudyId = (json \ "event" \ "id").as[String]
+        val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
         val validation = appRepositories.studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
-          repoStudy.version should be ((json \ "event" \ "version").as[Long])
+          repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
         }
       }
     }
@@ -204,13 +205,13 @@ class StudyControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/retire", json = cmdJson)
 
-        (json \ "message").as[String] should include ("study retired")
+        (json \ "status").as[String] should include ("success")
 
-        val eventStudyId = (json \ "event" \ "id").as[String]
+        val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
         val validation = appRepositories.studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
-          repoStudy.version should be ((json \ "event" \ "version").as[Long])
+          repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
         }
       }
     }
@@ -229,13 +230,13 @@ class StudyControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/unretire", json = cmdJson)
 
-        (json \ "message").as[String] should include ("study unretired")
+        (json \ "status").as[String] should include ("success")
 
-        val eventStudyId = (json \ "event" \ "id").as[String]
+        val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
         val validation = appRepositories.studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
-          repoStudy.version should be ((json \ "event" \ "version").as[Long])
+          repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
         }
       }
     }

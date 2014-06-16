@@ -41,8 +41,7 @@ object SpecimenGroup {
   )(unlift(org.biobank.domain.study.SpecimenGroup.unapply))
 
   implicit val addSpecimenGroupCmdReads: Reads[AddSpecimenGroupCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "AddSpecimenGroupCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "units").read[String](minLength[String](2)) and
@@ -50,14 +49,10 @@ object SpecimenGroup {
       (__ \ "preservationType").read[PreservationType] and
       (__ \ "preservationTemperatureType").read[PreservationTemperatureType] and
       (__ \ "specimenType").read[SpecimenType]
-  )((studyId, name, description, units, anatomicalSourceType, preservationType,
-    preservationTemperatureType, specimenType) =>
-    AddSpecimenGroupCmd(studyId, name, description, units, anatomicalSourceType, preservationType,
-    preservationTemperatureType, specimenType))
+  )(AddSpecimenGroupCmd.apply _)
 
   implicit val updateSpecimenGroupCmdReads: Reads[UpdateSpecimenGroupCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateSpecimenGroupCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
@@ -67,15 +62,11 @@ object SpecimenGroup {
       (__ \ "preservationType").read[PreservationType] and
       (__ \ "preservationTemperatureType").read[PreservationTemperatureType] and
       (__ \ "specimenType").read[SpecimenType]
-  )((studyId, id, expectedVersion, name, description, units, anatomicalSourceType, preservationType,
-    preservationTemperatureType, specimenType) =>
-    UpdateSpecimenGroupCmd(studyId, id, expectedVersion, name, description, units, anatomicalSourceType,
-      preservationType, preservationTemperatureType, specimenType))
+  )(UpdateSpecimenGroupCmd.apply _)
 
   implicit val removeSpecimenGroupCmdReads: Reads[RemoveSpecimenGroupCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveSpecimenGroupCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )((studyId, id, expectedVersion) => RemoveSpecimenGroupCmd(studyId, id, expectedVersion))
+  )(RemoveSpecimenGroupCmd.apply _)
 }

@@ -32,19 +32,16 @@ object SpecimenLinkAnnotationType {
   )(unlift(org.biobank.domain.study.SpecimenLinkAnnotationType.unapply))
 
   implicit val addSpecimenLinkAnnotationTypeCmdReads: Reads[AddSpecimenLinkAnnotationTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "AddSpecimenLinkAnnotationTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
       (__ \ "options").readNullable[Map[String, String]]
-  )((studyId, name, description, valueType, maxValueCount, options) =>
-    AddSpecimenLinkAnnotationTypeCmd(studyId, name, description, valueType, maxValueCount, options))
+  )(AddSpecimenLinkAnnotationTypeCmd.apply _)
 
   implicit val updateSpecimenLinkAnnotationTypeCmdReads: Reads[UpdateSpecimenLinkAnnotationTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateSpecimenLinkAnnotationTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
@@ -52,13 +49,11 @@ object SpecimenLinkAnnotationType {
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
       (__ \ "options").readNullable[Map[String, String]]
-  )((studyId, id, expectedVersion, name, description, valueType, maxValueCount, options) =>
-    UpdateSpecimenLinkAnnotationTypeCmd(studyId, id, expectedVersion, name, description, valueType, maxValueCount, options))
+  )(UpdateSpecimenLinkAnnotationTypeCmd.apply _)
 
   implicit val removeSpecimenLinkAnnotationTypeCmdReads: Reads[RemoveSpecimenLinkAnnotationTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveSpecimenLinkAnnotationTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )((studyId, id, expectedVersion) => RemoveSpecimenLinkAnnotationTypeCmd(studyId, id, expectedVersion))
+  )(RemoveSpecimenLinkAnnotationTypeCmd.apply _)
 }

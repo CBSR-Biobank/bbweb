@@ -10,7 +10,6 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import org.joda.time.DateTime
-import scala.collection.immutable.Map
 
 object CollectionEventAnnotationType {
   import JsonUtils._
@@ -32,19 +31,16 @@ object CollectionEventAnnotationType {
   )(unlift(org.biobank.domain.study.CollectionEventAnnotationType.unapply))
 
   implicit val addCollectionEventAnnotationTypeCmdReads: Reads[AddCollectionEventAnnotationTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "AddCollectionEventAnnotationTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
       (__ \ "options").readNullable[Map[String, String]]
-  )((studyId, name, description, valueType, maxValueCount, options) =>
-    AddCollectionEventAnnotationTypeCmd(studyId, name, description, valueType, maxValueCount, options))
+  )(AddCollectionEventAnnotationTypeCmd.apply _)
 
   implicit val updateCollectionEventAnnotationTypeCmdReads: Reads[UpdateCollectionEventAnnotationTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateCollectionEventAnnotationTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
@@ -52,13 +48,11 @@ object CollectionEventAnnotationType {
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
       (__ \ "options").readNullable[Map[String, String]]
-  )((studyId, id, expectedVersion, name, description, valueType, maxValueCount, options) =>
-    UpdateCollectionEventAnnotationTypeCmd(studyId, id, expectedVersion, name, description, valueType, maxValueCount, options))
+  )(UpdateCollectionEventAnnotationTypeCmd.apply _)
 
   implicit val removeCollectionEventAnnotationTypeCmdReads: Reads[RemoveCollectionEventAnnotationTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveCollectionEventAnnotationTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )((studyId, id, expectedVersion) => RemoveCollectionEventAnnotationTypeCmd(studyId, id, expectedVersion))
+  )(RemoveCollectionEventAnnotationTypeCmd.apply _)
 }

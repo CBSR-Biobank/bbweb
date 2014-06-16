@@ -28,67 +28,54 @@ object Study {
   }
 
   implicit val addStudyCmdReads = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "AddStudyCmd")) andKeep
-      (__ \ "name").read[String](minLength[String](2)) and
+    (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String]
-  )((name, description) => AddStudyCmd(name, description))
+  )(AddStudyCmd.apply _ )
 
   implicit val updateStudyCmdReads: Reads[UpdateStudyCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateStudyCmd")) andKeep
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String]
-  )((id, version, name, description) => UpdateStudyCmd(id, version, name, description))
+  )(UpdateStudyCmd.apply _)
 
   implicit val enableStudyCmdReads: Reads[EnableStudyCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "EnableStudyCmd")) andKeep
-      (__ \ "id").read[String](minLength[String](2)) and
+    (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )((id, expectedVersion) => EnableStudyCmd(id, expectedVersion))
+  )(EnableStudyCmd.apply _ )
 
   implicit val disableStudyCmdReads: Reads[DisableStudyCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "DisableStudyCmd")) andKeep
-      (__ \ "id").read[String](minLength[String](2)) and
+    (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )((id, expectedVersion) => DisableStudyCmd(id, expectedVersion))
+  )(DisableStudyCmd.apply _)
 
   implicit val retireStudyCmdReads: Reads[RetireStudyCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RetireStudyCmd")) andKeep
-      (__ \ "id").read[String](minLength[String](2)) and
+    (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )((id, expectedVersion) => RetireStudyCmd(id, expectedVersion))
+  )(RetireStudyCmd.apply _)
 
   implicit val unretireStudyCmdReads: Reads[UnretireStudyCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UnretireStudyCmd")) andKeep
-      (__ \ "id").read[String](minLength[String](2)) and
+    (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )((id, expectedVersion) => UnretireStudyCmd(id, expectedVersion))
+  )(UnretireStudyCmd.apply _)
 
-  implicit val studyAddedEventWriter = new Writes[StudyAddedEvent] {
-    def writes(event: StudyAddedEvent) = Json.obj(
-      "type"        -> "StudyAddedEvent",
-      "id"          -> event.id,
-      "dateTime "   -> event.dateTime,
-      "name"        -> event.name,
-      "description" -> event.description
-    )
-  }
+  implicit val studyAddedEventWriter: Writes[StudyAddedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").writeNullable[String]
+  )(unlift(StudyAddedEvent.unapply))
 
-  implicit val studyUpdatedEventWriter = new Writes[StudyUpdatedEvent] {
-    def writes(event: StudyUpdatedEvent) = Json.obj(
-      "type"        -> "StudyUpdatedEvent",
-      "id"          -> event.id,
-      "version"     -> event.version,
-      "dateTime "   -> event.dateTime,
-      "name"        -> event.name,
-      "description" -> event.description
-    )
-  }
+  implicit val studyUpdatedEventWriter: Writes[StudyUpdatedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").writeNullable[String]
+  )(unlift(StudyUpdatedEvent.unapply))
 
   implicit val studyStatusChangeWrites = new Writes[StudyStatusChangedEvent] {
     def writes(event: StudyStatusChangedEvent) = Json.obj(
-      "type"     -> event.getClass.getSimpleName,
       "id"       -> event.id,
       "version"  -> event.version,
       "dateTime" -> event.dateTime

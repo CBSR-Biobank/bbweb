@@ -34,20 +34,17 @@ object ParticipantAnnotationType {
   )(unlift(org.biobank.domain.study.ParticipantAnnotationType.unapply))
 
   implicit val addParticipantAnnotationTypeCmdReads: Reads[AddParticipantAnnotationTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "AddParticipantAnnotationTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
       (__ \ "options").readNullable[Map[String, String]] and
       (__ \ "required").read[Boolean]
-  )((studyId, name, description, valueType, maxValueCount, options, required) =>
-    AddParticipantAnnotationTypeCmd(studyId, name, description, valueType, maxValueCount, options, required))
+  )(AddParticipantAnnotationTypeCmd.apply _)
 
   implicit val updateParticipantAnnotationTypeCmdReads: Reads[UpdateParticipantAnnotationTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateParticipantAnnotationTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
@@ -56,15 +53,13 @@ object ParticipantAnnotationType {
       (__ \ "maxValueCount").readNullable[Int] and
       (__ \ "options").readNullable[Map[String, String]] and
       (__ \ "required").read[Boolean]
-  )((studyId, id, expectedVersion, name, description, valueType, maxValueCount, options, required) =>
-    UpdateParticipantAnnotationTypeCmd(studyId, id, expectedVersion, name, description, valueType, maxValueCount, options, required))
+  )(UpdateParticipantAnnotationTypeCmd.apply _)
 
   implicit val removeParticipantAnnotationTypeCmdReads: Reads[RemoveParticipantAnnotationTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveParticipantAnnotationTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )((studyId, id, expectedVersion) => RemoveParticipantAnnotationTypeCmd(studyId, id, expectedVersion))
+  )(RemoveParticipantAnnotationTypeCmd.apply _)
 
   implicit val participantAnnotationTypeAddedEventWriter: Writes[ParticipantAnnotationTypeAddedEvent] = (
     (__ \ "studyId").write[String] and
