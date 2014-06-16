@@ -37,7 +37,9 @@ object ParticipantAnnotTypeController extends BbwebController  {
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
         event => Ok(Json.obj(
           "status"  ->"OK",
-          "message" -> (s"annotation type added: ${event.name}.") ))
+          "message" -> "annotation type added",
+          "event" -> Json.toJson(event)
+        ))
       )
     }
   }
@@ -49,7 +51,9 @@ object ParticipantAnnotTypeController extends BbwebController  {
         err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
         event => Ok(Json.obj(
           "status"  ->"OK",
-          "message" -> (s"annotation type updated: ${event.name}.") ))
+          "message" -> "annotation type updated",
+          "event" -> Json.toJson(event)
+        ))
       )
     }
   }

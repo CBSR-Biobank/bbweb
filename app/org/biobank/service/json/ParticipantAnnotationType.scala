@@ -4,6 +4,7 @@ import org.biobank.infrastructure._
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.AnnotationValueType._
 
 import play.api.libs.json._
@@ -64,4 +65,30 @@ object ParticipantAnnotationType {
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
   )((studyId, id, expectedVersion) => RemoveParticipantAnnotationTypeCmd(studyId, id, expectedVersion))
+
+  implicit val participantAnnotationTypeAddedEventWriter: Writes[ParticipantAnnotationTypeAddedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "annotationTypeId").write[String] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").writeNullable[String] and
+      (__ \ "valueType").write[AnnotationValueType] and
+      (__ \ "maxValueCount").writeNullable[Int] and
+      (__ \ "options").write[Option[Map[String, String]]] and
+      (__ \ "required").write[Boolean]
+  )(unlift(ParticipantAnnotationTypeAddedEvent.unapply))
+
+  implicit val participantAnnotationTypeUpdatedEventWriter: Writes[ParticipantAnnotationTypeUpdatedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "annotationTypeId").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").writeNullable[String] and
+      (__ \ "valueType").write[AnnotationValueType] and
+      (__ \ "maxValueCount").writeNullable[Int] and
+      (__ \ "options").write[Option[Map[String, String]]] and
+      (__ \ "required").write[Boolean]
+  )(unlift(ParticipantAnnotationTypeUpdatedEvent.unapply))
+
 }

@@ -33,29 +33,35 @@ object StudyEvents {
     description: Option[String])
     extends StudyEvent
 
+  sealed trait StudyStatusChangedEvent extends StudyEvent {
+    val id: String
+    val version: Long
+    val dateTime: DateTime
+  }
+
   case class StudyEnabledEvent(
     id: String,
     version: Long,
     dateTime: DateTime)
-    extends StudyEvent
+    extends StudyStatusChangedEvent
 
   case class StudyDisabledEvent(
     id: String,
     version: Long,
     dateTime: DateTime)
-    extends StudyEvent
+    extends StudyStatusChangedEvent
 
   case class StudyRetiredEvent(
     id: String,
     version: Long,
     dateTime: DateTime)
-    extends StudyEvent
+    extends StudyStatusChangedEvent
 
   case class StudyUnretiredEvent(
     id: String,
     version: Long,
     dateTime: DateTime)
-    extends StudyEvent
+    extends StudyStatusChangedEvent
 
   // specimen group events
   trait SpecimenGroupEvent extends StudyEvent

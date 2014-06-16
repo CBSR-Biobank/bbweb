@@ -2,10 +2,12 @@ package org.biobank.service.json
 
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEvents._
 
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
+import org.joda.time.DateTime
 
 object Study {
   import JsonUtils._
@@ -63,4 +65,40 @@ object Study {
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
   )((id, expectedVersion) => UnretireStudyCmd(id, expectedVersion))
 
+  implicit val studyAddedEventWriter = new Writes[StudyAddedEvent] {
+    def writes(event: StudyAddedEvent) = Json.obj(
+      "type"        -> "StudyAddedEvent",
+      "id"          -> event.id,
+      "dateTime "   -> event.dateTime,
+      "name"        -> event.name,
+      "description" -> event.description
+    )
+  }
+
+  implicit val studyUpdatedEventWriter = new Writes[StudyUpdatedEvent] {
+    def writes(event: StudyUpdatedEvent) = Json.obj(
+      "type"        -> "StudyUpdatedEvent",
+      "id"          -> event.id,
+      "version"     -> event.version,
+      "dateTime "   -> event.dateTime,
+      "name"        -> event.name,
+      "description" -> event.description
+    )
+  }
+
+  implicit val studyStatusChangeWrites = new Writes[StudyStatusChangedEvent] {
+    def writes(event: StudyStatusChangedEvent) = Json.obj(
+      "type"     -> event.getClass.getSimpleName,
+      "id"       -> event.id,
+      "version"  -> event.version,
+      "dateTime" -> event.dateTime
+    )
+  }
+
+  def eventToJsonReply[T <: StudyEvent](event: T, message: String)(implicit writes: Writes[T]): JsObject = {
+    Json.obj(
+      "status" ->"success",
+      "data" -> Json.obj("event" -> Json.toJson(event))
+    )
+  }
 }

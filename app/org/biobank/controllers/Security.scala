@@ -43,14 +43,13 @@ trait Security { self: Controller =>
     } else if (headerTokenOption == None) {
       DomainError("No Token").failNel
     } else {
-      val xsrfTokenCookie = xsrfTokenCookieOption.get
       val token = headerTokenOption.get
-
       val userIdOption = Cache.getAs[UserId](token)
 
       if (userIdOption == None) {
         DomainError("Token not found in cache").failNel
       } else {
+        val xsrfTokenCookie = xsrfTokenCookieOption.get
         val userId = userIdOption.get
 
         if (xsrfTokenCookie.value.equals(token)) {

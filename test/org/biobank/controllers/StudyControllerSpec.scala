@@ -1,6 +1,8 @@
 package org.biobank.controllers
 
+import org.biobank.domain.study.StudyId
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service.json.JsonHelper._
 import org.biobank.fixture.ControllerFixture
 import org.biobank.service.json.Study._
@@ -59,6 +61,7 @@ class StudyControllerSpec extends ControllerFixture {
     "POST /studies" should {
       "add a study" in new WithApplication(fakeApplication()) {
         doLogin
+        val appRepositories = new AppRepositories
         val study = factory.createDisabledStudy
         val cmdJson = Json.obj(
           "type" -> "AddStudyCmd",
@@ -67,6 +70,13 @@ class StudyControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, "/studies", json = cmdJson)
 
         (json \ "message").as[String] should include ("study added")
+
+        val eventStudyId = (json \ "event" \ "id").as[String]
+        val validation = appRepositories.studyRepository.getByKey(StudyId(eventStudyId))
+        validation should be ('success)
+        validation map { repoStudy =>
+          repoStudy.name should be ((json \ "event" \ "name").as[String])
+        }
       }
     }
 
@@ -87,6 +97,14 @@ class StudyControllerSpec extends ControllerFixture {
         val json = makeRequest(PUT, s"/studies/${study.id.id}", json = cmdJson)
 
         (json \ "message").as[String] should include ("study updated")
+
+        val eventStudyId = (json \ "event" \ "id").as[String]
+        val validation = appRepositories.studyRepository.getByKey(StudyId(eventStudyId))
+        validation should be ('success)
+        validation map { repoStudy =>
+          repoStudy.name should be ((json \ "event" \ "name").as[String])
+          repoStudy.version should be ((json \ "event" \ "version").as[Long])
+        }
       }
     }
 
@@ -119,6 +137,13 @@ class StudyControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, "/studies/enable", json = cmdJson)
 
         (json \ "message").as[String] should include ("study enabled")
+
+        val eventStudyId = (json \ "event" \ "id").as[String]
+        val validation = appRepositories.studyRepository.getByKey(StudyId(eventStudyId))
+        validation should be ('success)
+        validation map { repoStudy =>
+          repoStudy.version should be ((json \ "event" \ "version").as[Long])
+        }
       }
     }
 
@@ -155,6 +180,13 @@ class StudyControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, "/studies/disable", json = cmdJson)
 
         (json \ "message").as[String] should include ("study disabled")
+
+        val eventStudyId = (json \ "event" \ "id").as[String]
+        val validation = appRepositories.studyRepository.getByKey(StudyId(eventStudyId))
+        validation should be ('success)
+        validation map { repoStudy =>
+          repoStudy.version should be ((json \ "event" \ "version").as[Long])
+        }
       }
     }
 
@@ -173,6 +205,13 @@ class StudyControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, "/studies/retire", json = cmdJson)
 
         (json \ "message").as[String] should include ("study retired")
+
+        val eventStudyId = (json \ "event" \ "id").as[String]
+        val validation = appRepositories.studyRepository.getByKey(StudyId(eventStudyId))
+        validation should be ('success)
+        validation map { repoStudy =>
+          repoStudy.version should be ((json \ "event" \ "version").as[Long])
+        }
       }
     }
 
@@ -191,6 +230,13 @@ class StudyControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, "/studies/unretire", json = cmdJson)
 
         (json \ "message").as[String] should include ("study unretired")
+
+        val eventStudyId = (json \ "event" \ "id").as[String]
+        val validation = appRepositories.studyRepository.getByKey(StudyId(eventStudyId))
+        validation should be ('success)
+        validation map { repoStudy =>
+          repoStudy.version should be ((json \ "event" \ "version").as[Long])
+        }
       }
     }
 

@@ -80,14 +80,14 @@ define(['angular'], function(angular) {
     });
     /* jshint ignore:end */
 
-    $scope.changeSelection = function(annotType) {
+    $scope.annotInformation = function(annotType) {
       $log.debug(annotType);
 
       var modalInstance = $modal.open({
         templateUrl: '/assets/templates/study/annotationType.html',
         controller: AnnotationTypeCtrl,
         backdrop: true,
-        size: 'sm',
+//        size: 'sm',
         resolve: {
           annotType: function () {
             return annotType;
