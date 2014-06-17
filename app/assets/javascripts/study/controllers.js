@@ -54,31 +54,42 @@ define(['angular'], function(angular) {
    * Displays study annotation type summary information in a table. The user can then select a row
    * to display more informaiton for te annotation type.
    */
-  var AnnotationTypeDirectiveCtrl = function($log, $route, $modal, $filter, ngTableParams, studyService, $scope) {
-    /* jshint ignore:start */
-    $scope.tableParams = new ngTableParams({
-      page: 1,            // show first page
-      count: 10,          // count per page
-      sorting: {
-        name: 'asc'     // initial sorting
-      }
-    }, {
-      counts: [], // hide page counts control
-      total: 0,           // length of data
-      getData: function($defer, params) {
-        var study = { id: $route.current.params.id };
-        studyService.participantInfo(study).then(function(response) {
-          var orderedData = params.sorting()
-            ? $filter('orderBy')(response.data, params.orderBy())
-            : response.data;
-          params.total(orderedData.length);
-          $defer.resolve(orderedData.slice(
-            (params.page() - 1) * params.count(),
-            params.page() * params.count()));
+  var AnnotationTypeDirectiveCtrl = function($route, $modal, $q, $filter, $log, ngTableParams, studyService, $scope) {
+
+    $scope.annotationTypes = [];
+    var study = { id: $route.current.params.id };
+    var defer = $q.defer();
+
+    studyService.participantInfo(study)
+      .then(function(response) {
+        $scope.annotationTypes = response.data;
+        return response.data;
+      })
+      .then(function(data) {
+        /* jshint ignore:start */
+        $scope.tableParams = new ngTableParams({
+          page: 1,            // show first page
+          count: 10,          // count per page
+          sorting: {
+            name: 'asc'     // initial sorting
+          }
+        }, {
+          counts: [], // hide page counts control
+          total: data.length,
+          getData: function($defer, params) {
+            var orderedData = params.sorting()
+              ? $filter('orderBy')($scope.annotationTypes, params.orderBy())
+              : data;
+            params.total(data.length);
+            $defer.resolve(orderedData.slice(
+              (params.page() - 1) * params.count(),
+              params.page() * params.count()));
+          }
         });
-      }
-    });
-    /* jshint ignore:end */
+        /* jshint ignore:end */
+
+        defer.resolve(data);
+      });
 
     $scope.annotInformation = function(annotType) {
       $log.debug(annotType);
@@ -87,7 +98,6 @@ define(['angular'], function(angular) {
         templateUrl: '/assets/templates/study/annotationType.html',
         controller: AnnotationTypeCtrl,
         backdrop: true,
-        //        size: 'sm',
         resolve: {
           annotType: function () {
             return annotType;
@@ -95,6 +105,8 @@ define(['angular'], function(angular) {
         }
       });
     };
+
+    defer.resolve();
   };
 
   /**
