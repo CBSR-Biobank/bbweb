@@ -1,6 +1,7 @@
 package org.biobank.infrastructure.event
 
 import org.biobank.infrastructure._
+import org.biobank.infrastructure.event.Events._
 import org.biobank.domain.study._
 import org.biobank.domain.ContainerTypeId
 import org.biobank.domain.AnatomicalSourceType._
@@ -16,7 +17,7 @@ import org.joda.time.DateTime
  */
 object StudyEvents {
 
-  sealed trait StudyEvent
+  sealed trait StudyEvent extends Event
 
   case class StudyAddedEvent(
     id: String,

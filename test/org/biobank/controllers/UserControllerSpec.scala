@@ -76,7 +76,7 @@ class UserControllerSpec extends ControllerFixture {
           "avatarUrl" -> user.avatarUrl)
         val json = makeRequest(POST, "/users", json = cmdJson)
 
-        (json \ "message").as[String] should include ("user added")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -98,7 +98,7 @@ class UserControllerSpec extends ControllerFixture {
           "avatarUrl"       -> user.avatarUrl)
         val json = makeRequest(PUT, s"/users/${user.id.id}", json = cmdJson)
 
-        (json \ "message").as[String] should include ("user updated")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -129,7 +129,7 @@ class UserControllerSpec extends ControllerFixture {
           "email"           -> user.id.id)
         val json = makeRequest(PUT, s"/users/activate/${user.id.id}", json = cmdJson)
 
-        (json \ "message").as[String] should include ("user activated")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -148,7 +148,7 @@ class UserControllerSpec extends ControllerFixture {
           "email"           -> user.id.id)
         val json = makeRequest(PUT, s"/users/lock/${user.id.id}", json = cmdJson)
 
-        (json \ "message").as[String] should include ("user locked")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -168,7 +168,7 @@ class UserControllerSpec extends ControllerFixture {
           "email"           -> lockedUser.id.id)
         val json = makeRequest(PUT, s"/users/unlock/${lockedUser.id.id}", json = cmdJson)
 
-        (json \ "message").as[String] should include ("user unlocked")
+        (json \ "status").as[String] should include ("success")
       }
     }
 

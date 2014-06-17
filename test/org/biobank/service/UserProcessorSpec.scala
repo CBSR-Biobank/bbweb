@@ -64,8 +64,6 @@ class UserProcessorSpec extends UserProcessorFixture {
           'name      (user2.name),
           'email     (user2.email),
           'password  (user2.password),
-          'hasher    (user2.hasher),
-          'salt      (user2.salt),
           'avatarUrl (user2.avatarUrl)
         )
 

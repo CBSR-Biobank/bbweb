@@ -2,6 +2,7 @@ package org.biobank.controllers
 
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.service.json.User._
+import org.biobank.service.json.Events._
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,12 +30,8 @@ object UserController extends BbwebController {
   def authUser() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Logger.info(s"authUser: userId: $userId")
     userService.getByEmail(userId.id).fold(
-      err => {
-        BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))
-      },
-      user => {
-        Ok(Json.toJson(user))
-      }
+      err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+      user => Ok(Json.toJson(user))
     )
   }
 
@@ -42,12 +39,8 @@ object UserController extends BbwebController {
   def user(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Logger.info(s"user: id: $id")
     userService.getByEmail(id).fold(
-      err => {
-        BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))
-      },
-      user => {
-        Ok(Json.toJson(user))
-      }
+      err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+      user => Ok(Json.toJson(user))
     )
   }
 
@@ -57,7 +50,7 @@ object UserController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"user added: ${event.id}.") ))
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -67,7 +60,7 @@ object UserController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"user activated: ${event.id}.") ))
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -77,7 +70,7 @@ object UserController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"user updated: ${event.id}.") ))
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -87,7 +80,7 @@ object UserController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"user locked: ${event.id}.") ))
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -98,7 +91,7 @@ object UserController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"user unlocked: ${event.id}.") ))
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -108,7 +101,7 @@ object UserController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"user removed: ${event.id}.") ))
+        event => Ok(eventToJsonReply(event))
       )
     }
   }

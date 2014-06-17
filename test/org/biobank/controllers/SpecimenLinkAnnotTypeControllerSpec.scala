@@ -63,6 +63,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       annotTypeToAddCmdJson(annotType))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -80,6 +81,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       annotTypeToUpdateCmdJson(annotType))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -100,6 +102,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       annotTypeToRemoveCmdJson(annotType))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -169,7 +172,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
 
         val annotType = factory.createSpecimenLinkAnnotationType
         val json = makeRequest(POST, "/studies/slannottype", json = annotTypeToAddCmdJson(annotType))
-          (json \ "message").as[String] should include ("annotation type added")
+          (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -211,7 +214,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
           s"/studies/slannottype/${annotType.id.id}",
           json = annotTypeToUpdateCmdJson(annotType2))
 
-        (json \ "message").as[String] should include ("annotation type updated")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -249,7 +252,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
           s"/studies/slannottype/${annotType.id.id}",
           json = annotTypeToRemoveCmdJson(annotType))
 
-        (json \ "message").as[String] should include ("annotation type removed")
+        (json \ "status").as[String] should include ("success")
       }
     }
 

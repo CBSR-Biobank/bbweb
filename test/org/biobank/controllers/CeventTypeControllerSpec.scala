@@ -51,6 +51,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(POST, "/studies/cetypes", BAD_REQUEST, cmdJson)
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -95,6 +96,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(PUT, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -123,6 +125,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(DELETE, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -227,7 +230,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(POST, "/studies/cetypes", json = cmdJson)
 
-        (json \ "message").as[String] should include ("collection event type added")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -293,7 +296,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(PUT, s"/studies/cetypes/${cet.id.id}", json = cmdJson)
 
-        (json \ "message").as[String] should include ("collection event type updated")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -343,7 +346,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(DELETE, s"/studies/cetypes/${cet.id.id}", json = cmdJson)
 
-        (json \ "message").as[String] should include ("collection event type removed")
+        (json \ "status").as[String] should include ("success")
       }
     }
 

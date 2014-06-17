@@ -62,6 +62,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       procTypeToAddCmdJson(procType))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -81,6 +82,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       procTypeToUpdateCmdJson(procType2))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -98,6 +100,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       procTypeToRemoveCmdJson(procType))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -170,7 +173,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
           "/studies/proctypes",
           json = procTypeToAddCmdJson(procType))
 
-        (json \ "message").as[String] should include ("processing type added")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -213,7 +216,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
           s"/studies/proctypes/${procType.id.id}",
           json = procTypeToUpdateCmdJson(procType2))
 
-        (json \ "message").as[String] should include ("processing type updated")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -251,7 +254,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
           s"/studies/proctypes/${procType.id.id}",
           json = procTypeToRemoveCmdJson(procType))
 
-        (json \ "message").as[String] should include ("processing type removed")
+        (json \ "status").as[String] should include ("success")
       }
     }
 

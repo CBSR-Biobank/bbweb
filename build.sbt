@@ -36,6 +36,8 @@ javaOptions in Test ++=  Seq(
   "-Dlogger.resource=logback-test.xml"
 )
 
+testOptions in Test := Nil
+
 (testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/report")
 
 resolvers ++= Seq(

@@ -2,6 +2,7 @@ package org.biobank.service.json
 
 import org.biobank.domain._
 import org.biobank.infrastructure.command.UserCommands._
+import org.biobank.infrastructure.event.UserEvents._
 
 import play.api.libs.json._
 import play.api.libs.json.Reads._
@@ -60,5 +61,48 @@ object User {
     (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "email").read[String](minLength[String](5))
   )(RemoveUserCmd.apply _)
+
+  implicit val userRegisteredEventWrites: Writes[UserRegisteredEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "email").write[String] and
+      (__ \ "password").write[String] and
+      (__ \ "avatarUrl").writeNullable[String]
+  )(unlift(UserRegisteredEvent.unapply))
+
+  implicit val userUpdatedEventWrites: Writes[UserUpdatedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "email").write[String] and
+      (__ \ "password").write[String] and
+      (__ \ "avatarUrl").writeNullable[String]
+  )(unlift(UserUpdatedEvent.unapply))
+
+  implicit val userActivatedEventWrites: Writes[UserActivatedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime]
+  )(unlift(UserActivatedEvent.unapply))
+
+  implicit val userLockedEventWrites: Writes[UserLockedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime]
+  )(unlift(UserLockedEvent.unapply))
+
+  implicit val userUnlockedEventWrites: Writes[UserUnlockedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime]
+  )(unlift(UserUnlockedEvent.unapply))
+
+  implicit val userRemovedEventWrites: Writes[UserRemovedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime]
+  )(unlift(UserRemovedEvent.unapply))
 
 }

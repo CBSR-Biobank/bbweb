@@ -88,6 +88,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       slTypeToAddCmdJson(slType))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -111,6 +112,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       slTypeToUpdateCmdJson(slType2))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -132,6 +134,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       slTypeToRemoveCmdJson(slType))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -212,7 +215,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
           "/studies/sltypes",
           json = slTypeToAddCmdJson(slType))
 
-        (json \ "message").as[String] should include ("specimen link type added")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -264,7 +267,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
           s"/studies/sltypes/${slType.id.id}",
           json = slTypeToUpdateCmdJson(slType2))
 
-        (json \ "message").as[String] should include ("specimen link type updated")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -309,7 +312,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
           s"/studies/sltypes/${slType.id.id}",
           json = slTypeToRemoveCmdJson(slType))
 
-        (json \ "message").as[String] should include ("specimen link type removed")
+        (json \ "status").as[String] should include ("success")
       }
     }
 

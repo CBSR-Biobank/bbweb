@@ -34,6 +34,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "specimenType"                -> sg.specimenType.toString)
     val json = makeRequest(POST, "/studies/sgroups", BAD_REQUEST, cmdJson)
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -59,6 +60,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "specimenType"                -> sg2.specimenType.toString)
     val json = makeRequest(PUT, s"/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -76,6 +78,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "expectedVersion" -> Some(sg.version))
     val json = makeRequest(DELETE, s"/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -153,7 +156,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           "specimenType"                -> sg.specimenType.toString)
         val json = makeRequest(POST, "/studies/sgroups", json = cmdJson)
 
-        (json \ "message").as[String] should include ("specimen group added")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -203,7 +206,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           "specimenType"                -> sg2.specimenType.toString)
         val json = makeRequest(PUT, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
 
-        (json \ "message").as[String] should include ("specimen group updated")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -245,7 +248,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(sg.version))
         val json = makeRequest(DELETE, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
 
-        (json \ "message").as[String] should include ("specimen group removed")
+        (json \ "status").as[String] should include ("success")
       }
     }
 

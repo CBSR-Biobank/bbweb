@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 
 object UserEvents {
 
-  sealed trait UserEvent //extends Event
+  sealed trait UserEvent extends Event
 
   case class UserRegisteredEvent(
     id: String,
@@ -15,8 +15,6 @@ object UserEvents {
     name: String,
     email: String,
     password: String,
-    hasher: String,
-    salt: Option[String],
     avatarUrl: Option[String])
       extends UserEvent
       with HasIdentity
@@ -28,8 +26,6 @@ object UserEvents {
     name: String,
     email: String,
     password: String,
-    hasher: String,
-    salt: Option[String],
     avatarUrl: Option[String])
       extends UserEvent
       with HasIdentity

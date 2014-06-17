@@ -63,6 +63,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       annotTypeToAddCmdJson(annotType))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -80,6 +81,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       annotTypeToUpdateCmdJson(annotType))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -100,6 +102,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       annotTypeToRemoveCmdJson(annotType))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -168,7 +171,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
         val annotType = factory.createCollectionEventAnnotationType
         val json = makeRequest(POST, "/studies/ceannottype", json = annotTypeToAddCmdJson(annotType))
-          (json \ "message").as[String] should include ("annotation type added")
+          (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -210,7 +213,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
           s"/studies/ceannottype/${annotType.id.id}",
           json = annotTypeToUpdateCmdJson(annotType2))
 
-        (json \ "message").as[String] should include ("annotation type updated")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -248,7 +251,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
           s"/studies/ceannottype/${annotType.id.id}",
           json = annotTypeToRemoveCmdJson(annotType))
 
-        (json \ "message").as[String] should include ("annotation type removed")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
