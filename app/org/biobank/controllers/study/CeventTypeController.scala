@@ -35,8 +35,8 @@ object CeventTypeController extends BbwebController  {
     val future = studyService.addCollectionEventType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"collection event type added: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -45,8 +45,8 @@ object CeventTypeController extends BbwebController  {
     val future = studyService.updateCollectionEventType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"collection event type updated: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -55,8 +55,8 @@ object CeventTypeController extends BbwebController  {
     val future = studyService.removeCollectionEventType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"collection event type removed: ${event.collectionEventTypeId}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }

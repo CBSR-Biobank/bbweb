@@ -37,10 +37,8 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
     val future = studyService.addSpecimenLinkAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"annotation type added: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -49,10 +47,8 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
     val future = studyService.updateSpecimenLinkAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"annotation type updated: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -61,10 +57,8 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
     val future = studyService.removeSpecimenLinkAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"annotation type removed: ${event.annotationTypeId}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }

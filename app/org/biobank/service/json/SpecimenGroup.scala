@@ -2,6 +2,7 @@ package org.biobank.service.json
 
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
@@ -25,7 +26,7 @@ object SpecimenGroup {
   implicit val preservationTemperatureTypeReads = EnumUtils.enumReads(org.biobank.domain.PreservationTemperatureType)
   implicit val specimenTypeReads = EnumUtils.enumReads(org.biobank.domain.SpecimenType)
 
-  implicit val collectionEventTypeWrites: Writes[SpecimenGroup] = (
+  implicit val specimenGroupWrites: Writes[SpecimenGroup] = (
     (__ \ "studyId").write[StudyId] and
       (__ \ "id").write[SpecimenGroupId] and
       (__ \ "version").write[Long] and
@@ -69,4 +70,36 @@ object SpecimenGroup {
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
   )(RemoveSpecimenGroupCmd.apply _)
+
+  implicit val specimenGroupAddedEventWrites: Writes[SpecimenGroupAddedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "specimenGroupId").write[String] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").write[Option[String]] and
+      (__ \ "units").write[String] and
+      (__ \ "anatomicalSourceType").write[AnatomicalSourceType] and
+      (__ \ "preservationType").write[PreservationType] and
+      (__ \ "preservationTemperatureType").write[PreservationTemperatureType] and
+      (__ \ "specimenType").write[SpecimenType]
+  )(unlift(SpecimenGroupAddedEvent.unapply))
+
+  implicit val specimenGroupUpdatedEventWrites: Writes[SpecimenGroupUpdatedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "specimenGroupId").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").write[Option[String]] and
+      (__ \ "units").write[String] and
+      (__ \ "anatomicalSourceType").write[AnatomicalSourceType] and
+      (__ \ "preservationType").write[PreservationType] and
+      (__ \ "preservationTemperatureType").write[PreservationTemperatureType] and
+      (__ \ "specimenType").write[SpecimenType]
+  )(unlift(SpecimenGroupUpdatedEvent.unapply))
+
+  implicit val specimenGroupRemovedEventWriter: Writes[SpecimenGroupRemovedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "specimenGroupId").write[String]
+  )(unlift(SpecimenGroupRemovedEvent.unapply))
 }

@@ -34,12 +34,8 @@ object ParticipantAnnotTypeController extends BbwebController  {
     val future = studyService.addParticipantAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> "annotation type added",
-          "event" -> Json.toJson(event)
-        ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -48,12 +44,8 @@ object ParticipantAnnotTypeController extends BbwebController  {
     val future = studyService.updateParticipantAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> "annotation type updated",
-          "event" -> Json.toJson(event)
-        ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -62,10 +54,8 @@ object ParticipantAnnotTypeController extends BbwebController  {
     val future = studyService.removeParticipantAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"annotation type removed: ${event.annotationTypeId}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }

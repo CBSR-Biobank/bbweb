@@ -19,7 +19,7 @@ trait BbwebController extends Controller with Security {
         cmdResult.fold(
           errors => {
             Future.successful(
-              BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors))))
+              BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors))))
           },
           cmd => {
             Logger.info(s"CommandAction: $cmd")

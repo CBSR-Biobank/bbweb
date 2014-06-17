@@ -82,7 +82,7 @@ object Study {
     )
   }
 
-  def eventToJsonReply[T <: StudyEvent](event: T, message: String)(implicit writes: Writes[T]): JsObject = {
+  def eventToJsonReply[T <: StudyEvent](event: T)(implicit writes: Writes[T]): JsObject = {
     Json.obj(
       "status" ->"success",
       "data" -> Json.obj("event" -> Json.toJson(event))

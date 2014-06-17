@@ -46,7 +46,7 @@ object StudyController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event, "study added"))
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -56,7 +56,7 @@ object StudyController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event, "study updated"))
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -66,7 +66,7 @@ object StudyController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event, "study enabled"))
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -76,7 +76,7 @@ object StudyController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event, "study disabled"))
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -86,7 +86,7 @@ object StudyController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event, "study retired"))
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -96,7 +96,7 @@ object StudyController extends BbwebController {
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event, "study unretired"))
+        event => Ok(eventToJsonReply(event))
       )
     }
   }

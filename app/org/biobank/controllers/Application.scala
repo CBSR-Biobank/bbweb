@@ -67,13 +67,13 @@ object Application extends Controller with Security {
   def login() = Action(parse.json) { implicit request =>
     request.body.validate[LoginCredentials].fold(
       errors => {
-        BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors)))
+        BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors)))
       },
       loginCredentials => {
         Logger.info(s"login: $loginCredentials")
         userService.getByEmail(loginCredentials.email).fold(
           err => {
-            BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
+            BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))
           },
           user => {
             // TODO: token should be derived from salt

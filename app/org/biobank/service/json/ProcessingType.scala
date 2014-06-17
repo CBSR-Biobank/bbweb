@@ -2,6 +2,7 @@ package org.biobank.service.json
 
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
@@ -51,4 +52,28 @@ object ProcessingType {
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
   )(RemoveProcessingTypeCmd.apply _)
+
+  implicit val processingTypeAddedEventWrites: Writes[ProcessingTypeAddedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "processingTypeId").write[String] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").write[Option[String]] and
+      (__ \ "enabled").write[Boolean]
+  )(unlift(ProcessingTypeAddedEvent.unapply))
+
+  implicit val processingTypeUpdatedEventWrites: Writes[ProcessingTypeUpdatedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "processingTypeId").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").write[Option[String]] and
+      (__ \ "enabled").write[Boolean]
+  )(unlift(ProcessingTypeUpdatedEvent.unapply))
+
+  implicit val collectionEventAnnotationTypeRemovedEventWriter: Writes[ProcessingTypeRemovedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "processingTypeId").write[String]
+  )(unlift(ProcessingTypeRemovedEvent.unapply))
 }

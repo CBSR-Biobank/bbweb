@@ -35,10 +35,8 @@ object ProcessingTypeController extends BbwebController  {
     val future = studyService.addProcessingType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"processing type added: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -47,10 +45,8 @@ object ProcessingTypeController extends BbwebController  {
     val future = studyService.updateProcessingType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"processing type updated: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -59,10 +55,8 @@ object ProcessingTypeController extends BbwebController  {
     val future = studyService.removeProcessingType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"processing type removed: ${event.processingTypeId}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }

@@ -30,7 +30,7 @@ object UserController extends BbwebController {
     Logger.info(s"authUser: userId: $userId")
     userService.getByEmail(userId.id).fold(
       err => {
-        BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
+        BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))
       },
       user => {
         Ok(Json.toJson(user))
@@ -43,7 +43,7 @@ object UserController extends BbwebController {
     Logger.info(s"user: id: $id")
     userService.getByEmail(id).fold(
       err => {
-        BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
+        BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))
       },
       user => {
         Ok(Json.toJson(user))
@@ -56,7 +56,7 @@ object UserController extends BbwebController {
     val future = userService.register(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         event => Ok(Json.obj("status" ->"OK", "message" -> (s"user added: ${event.id}.") ))
       )
     }
@@ -66,7 +66,7 @@ object UserController extends BbwebController {
     val future = userService.activate(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         event => Ok(Json.obj("status" ->"OK", "message" -> (s"user activated: ${event.id}.") ))
       )
     }
@@ -76,7 +76,7 @@ object UserController extends BbwebController {
     val future = userService.update(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         event => Ok(Json.obj("status" ->"OK", "message" -> (s"user updated: ${event.id}.") ))
       )
     }
@@ -86,7 +86,7 @@ object UserController extends BbwebController {
     val future = userService.lock(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         event => Ok(Json.obj("status" ->"OK", "message" -> (s"user locked: ${event.id}.") ))
       )
     }
@@ -97,7 +97,7 @@ object UserController extends BbwebController {
     val future = userService.unlock(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         event => Ok(Json.obj("status" ->"OK", "message" -> (s"user unlocked: ${event.id}.") ))
       )
     }
@@ -107,7 +107,7 @@ object UserController extends BbwebController {
     val future = userService.remove(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         event => Ok(Json.obj("status" ->"OK", "message" -> (s"user removed: ${event.id}.") ))
       )
     }

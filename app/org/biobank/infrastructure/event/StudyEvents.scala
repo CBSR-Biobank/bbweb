@@ -153,6 +153,7 @@ object StudyEvents {
   case class CollectionEventAnnotationTypeRemovedEvent(
     studyId: String,
     annotationTypeId: String)
+    extends StudyEvent
 
   // participant annotation types
 

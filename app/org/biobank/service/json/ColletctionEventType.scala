@@ -3,6 +3,7 @@ package org.biobank.service.json
 import org.biobank.infrastructure._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEvents._
 
 import play.api.libs.json._
 import play.api.libs.json.Reads._
@@ -76,4 +77,32 @@ object CollectionEventType {
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
   )(RemoveCollectionEventTypeCmd.apply _)
+
+  implicit val collectionEventTypeAddedEventWriter: Writes[CollectionEventTypeAddedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "collectionEventTypeId").write[String] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").writeNullable[String] and
+      (__ \ "recurring").write[Boolean] and
+      (__ \ "specimenGroupData").write[List[CollectionEventTypeSpecimenGroupData]] and
+      (__ \ "annotationTypeData").write[List[CollectionEventTypeAnnotationTypeData]]
+  )(unlift(CollectionEventTypeAddedEvent.unapply))
+
+  implicit val collectionEventTypeUpdatedEventWriter: Writes[CollectionEventTypeUpdatedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "collectionEventTypeId").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").write[Option[String]] and
+      (__ \ "recurring").write[Boolean] and
+      (__ \ "specimenGroupData").write[List[CollectionEventTypeSpecimenGroupData]] and
+      (__ \ "annotationTypeData").write[List[CollectionEventTypeAnnotationTypeData]]
+  )(unlift(CollectionEventTypeUpdatedEvent.unapply))
+
+  implicit val collectionEventTypeRemovedEventWriter: Writes[CollectionEventTypeRemovedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "collectionEventTypeId").write[String]
+  )(unlift(CollectionEventTypeRemovedEvent.unapply))
 }

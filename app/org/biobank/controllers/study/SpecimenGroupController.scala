@@ -39,8 +39,8 @@ object SpecimenGroupController extends BbwebController {
     val future = studyService.addSpecimenGroup(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group added: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -49,8 +49,8 @@ object SpecimenGroupController extends BbwebController {
     val future = studyService.updateSpecimenGroup(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group updated: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -59,8 +59,8 @@ object SpecimenGroupController extends BbwebController {
     val future = studyService.removeSpecimenGroup(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group removed: ${event.specimenGroupId}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }

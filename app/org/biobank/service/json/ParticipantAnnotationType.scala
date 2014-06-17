@@ -86,4 +86,9 @@ object ParticipantAnnotationType {
       (__ \ "required").write[Boolean]
   )(unlift(ParticipantAnnotationTypeUpdatedEvent.unapply))
 
+  implicit val participantAnnotationTypeRemovedEventWriter: Writes[ParticipantAnnotationTypeRemovedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "annotationTypeId").write[String]
+  )(unlift(ParticipantAnnotationTypeRemovedEvent.unapply))
+
 }

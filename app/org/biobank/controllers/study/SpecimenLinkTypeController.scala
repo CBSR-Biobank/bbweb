@@ -2,6 +2,7 @@ package org.biobank.controllers.study
 
 import org.biobank.controllers._
 import org.biobank.infrastructure._
+import org.biobank.service.json.Study._
 import org.biobank.service.json.ProcessingType._
 import org.biobank.service.json.SpecimenLinkType._
 import org.biobank.infrastructure.command.StudyCommands._
@@ -35,10 +36,8 @@ object SpecimenLinkTypeController extends BbwebController  {
     val future = studyService.addSpecimenLinkType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"specimen link type added: ${event.specimenLinkTypeId}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -47,10 +46,8 @@ object SpecimenLinkTypeController extends BbwebController  {
     val future = studyService.updateSpecimenLinkType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"specimen link type updated: ${event.specimenLinkTypeId}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
@@ -59,10 +56,8 @@ object SpecimenLinkTypeController extends BbwebController  {
     val future = studyService.removeSpecimenLinkType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"specimen link type removed: ${event.specimenLinkTypeId}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
