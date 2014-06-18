@@ -53,6 +53,13 @@ define(['angular'], function(angular) {
       $location.path("/studies/edit/" + study.id);
     };
 
+    $scope.changeStatus = function(study) {
+      if (study.id === undefined) {
+        throw new Error("study does not have an ID");
+      }
+      alert("change status of " + study.name);
+    };
+
   };
 
   /**
