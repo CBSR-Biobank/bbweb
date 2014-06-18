@@ -6,9 +6,10 @@ define(['angular'], function(angular) {
   mod.controller('versionMismatchModal', [
     '$scope',
     '$modalInstance',
+    'title',
     'message',
-    function($scope, $modalInstance, message) {
-      $scope.title = "Modified by another user";
+    function($scope, $modalInstance, title, message) {
+      $scope.title = title;
       $scope.message = message;
 
       $scope.ok = function () {

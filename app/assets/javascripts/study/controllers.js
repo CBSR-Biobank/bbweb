@@ -112,17 +112,22 @@ define(['angular', 'common'], function(angular, common) {
     }
 
     $scope.submit = function(study) {
+      var modalInstance = {};
+
       studyService.addOrUpdate(study)
         .success(function() {
           $location.path('/studies/' + $scope.study.id);
         })
         .error(function(error) {
-          $log.info("submit error:", error);
           if (error.message.indexOf("expected version doesn't match current version") > -1) {
-            var modalInstance = $modal.open({
+            /* concurrent change error */
+            modalInstance = $modal.open({
               templateUrl: '/assets/templates/versionMismatch.html',
               controller: 'versionMismatchModal',
               resolve: {
+                title: function () {
+                  return "Modified by another user";
+                },
                 message: function() {
                   return "Another user already made changes to this study. Press OK to make " +
                     " your changes again, or Cancel to dismiss your changes.";
@@ -136,9 +141,31 @@ define(['angular', 'common'], function(angular, common) {
               $location.path('/studies/' + $scope.study.id);
             });
           } else {
-            $location.path('/studies/error');
+            /* some other error */
+            modalInstance = $modal.open({
+              templateUrl: '/assets/templates/versionMismatch.html',
+              controller: 'versionMismatchModal',
+              resolve: {
+                title: function () {
+                  return "Cannot update study";
+                },
+                message: function() {
+                  return "Error: " + error.message;
+                }
+              }
+            });
+
+            modalInstance.result.then(function(selectedItem) {
+              $route.reload();
+            }, function () {
+              $route.reload();
+            });
           }
         });
+    };
+
+    $scope.cancel = function(study) {
+      $location.path('/studies/' + $scope.study.id);
     };
   };
 
