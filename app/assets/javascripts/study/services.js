@@ -24,7 +24,7 @@ define(['angular', 'common'], function(angular) {
           return playRoutes.controllers.study.StudyController.add().post(cmd);
         } else {
           cmd.id = study.id;
-          cmd.expectedVersion = study.version + 1;
+          cmd.expectedVersion = study.version;
 
           return playRoutes.controllers.study.StudyController.update(study.id).put(cmd);
         }

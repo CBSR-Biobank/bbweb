@@ -1,8 +1,8 @@
 /**
  * Configure routes of user module.
  */
-define(['angular', './controllers', 'common'], function(angular, controllers) {
-  var mod = angular.module('study.routes', ['study.services', 'biobank.common']);
+define(['angular', './controllers'], function(angular, controllers) {
+  var mod = angular.module('study.routes', ['study.services']);
   mod.config(['$routeProvider', 'userResolve', function($routeProvider, userResolve) {
     $routeProvider
       .when(

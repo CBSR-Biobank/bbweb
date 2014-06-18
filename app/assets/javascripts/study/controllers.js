@@ -87,6 +87,7 @@ define(['angular', 'common'], function(angular, common) {
   var StudyEditCtrl = function(
     $scope,
     $rootScope,
+    $route,
     $routeParams,
     $location,
     $modal,
@@ -111,30 +112,29 @@ define(['angular', 'common'], function(angular, common) {
     }
 
     $scope.submit = function(study) {
-      $log.info("submit", study);
-
       studyService.addOrUpdate(study)
         .success(function() {
-          $location.path('/studies');
+          $location.path('/studies/' + $scope.study.id);
         })
         .error(function(error) {
           $log.info("submit error:", error);
           if (error.message.indexOf("expected version doesn't match current version") > -1) {
-            $log.info("version mismatch");
-
-            $modal.open({
+            var modalInstance = $modal.open({
               templateUrl: '/assets/templates/versionMismatch.html',
-              controller: common.VersionMismatchModal,
+              controller: 'versionMismatchModal',
               resolve: {
                 message: function() {
-                  return "Another user already made changes to this study. Please submit your changes again.";
-                },
-                newLocation: function() {
-                  return '/studies/' + $scope.study.id;
+                  return "Another user already made changes to this study. Press OK to make " +
+                    " your changes again, or Cancel to dismiss your changes.";
                 }
               }
             });
 
+            modalInstance.result.then(function(selectedItem) {
+              $route.reload();
+            }, function () {
+              $location.path('/studies/' + $scope.study.id);
+            });
           } else {
             $location.path('/studies/error');
           }
