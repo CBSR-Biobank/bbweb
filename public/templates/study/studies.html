@@ -13,34 +13,6 @@
   </div>
   <div ng-if="studies.length != 0">
     <p>The following studies have been configured:</p>
-    <table ng-table="tableParams" class="table table-hover">
-      <tr ng-repeat="study in $data"
-          ng-class="{'active': user.$selected}">
-        <td data-title="'Name'" sortable="'name'">
-          {{study.name}}
-        </td>
-        <td data-title="'Status'" sortable="'valueType'">
-          {{study.status}}
-        </td>
-        <td data-title="'Description'" sortable="'description'">
-          {{study.description === null ? "" : study.description | truncate:20}}
-        </td>
-        <td>
-          <button class="btn btn-xs btn-primary"
-                  ng-click="studyInformation(study)"
-                  title="More information">
-          <i class="glyphicon glyphicon-info-sign"></i></button>
-          <button class="btn btn-xs btn-primary"
-                  ng-click="updateStudy(study)"
-                  title="Update">
-          <i class="glyphicon glyphicon-edit"></i></button>
-          <button class="btn btn-xs btn-success"
-                  ng-click="changeStatus(study)"
-                  title="Change status">
-          <i class="glyphicon glyphicon-cog"></i></button>
-        </td>
-      </tr>
-    </table>
 
   </div>
 </div>

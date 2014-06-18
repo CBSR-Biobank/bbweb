@@ -8,14 +8,12 @@ define(['angular'], function(angular) {
    * user is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
   var StudiesCtrl = function($scope, $rootScope, $filter, $location, $log, ngTableParams, user, studyService) {
+  };
+
+  var StudiesTableCtrl = function($scope, $rootScope, $filter, $location, $log, ngTableParams, user, studyService) {
     $rootScope.pageTitle = 'Biobank studies';
     $scope.studies = [];
     $scope.user = user;
-
-
-    $scope.studyInformation = function(annotType) {
-      $location.path("/studies/" + annotType.id);
-    };
 
     studyService.list().then(function(response) {
       $scope.studies = response.data;
@@ -46,18 +44,8 @@ define(['angular'], function(angular) {
       $location.path("/studies/edit");
     };
 
-    $scope.updateStudy = function(study) {
-      if (study.id === undefined) {
-        throw new Error("study does not have an ID");
-      }
-      $location.path("/studies/edit/" + study.id);
-    };
-
-    $scope.changeStatus = function(study) {
-      if (study.id === undefined) {
-        throw new Error("study does not have an ID");
-      }
-      alert("change status of " + study.name);
+    $scope.studyInformation = function(annotType) {
+      $location.path("/studies/" + annotType.id);
     };
 
   };
@@ -85,11 +73,18 @@ define(['angular'], function(angular) {
       }
       $location.path("/studies/edit/" + study.id);
     };
+
+    $scope.changeStatus = function(study) {
+      if (study.id === undefined) {
+        throw new Error("study does not have an ID");
+      }
+      alert("change status of " + study.name);
+    };
   };
 
   /** Called to add or update a study.
    */
-  var StudyEditCtrl = function($scope, $rootScope, $routeParams, $location, user, studyService) {
+  var StudyEditCtrl = function($scope, $rootScope, $routeParams, $location, $log, user, studyService) {
     var id = $routeParams.id;
 
     $rootScope.pageTitle = 'Biobank study';
@@ -107,9 +102,15 @@ define(['angular'], function(angular) {
     }
 
     $scope.submit = function(study) {
-      studyService.add(study).then(function(response) {
-        $location.path('/studies');
-      });
+      $log.info("submit", study);
+
+      studyService.addOrUpdate(study)
+        .success(function() {
+          $location.path('/studies');
+        })
+        .error(function(error) {
+          $log.info("submit error:", error);
+        });
     };
   };
 
@@ -241,6 +242,7 @@ define(['angular'], function(angular) {
 
   return {
     StudiesCtrl: StudiesCtrl,
+    StudiesTableCtrl: StudiesTableCtrl,
     StudyCtrl: StudyCtrl,
     StudyEditCtrl: StudyEditCtrl,
     AnnotationTypeDirectiveCtrl: AnnotationTypeDirectiveCtrl,

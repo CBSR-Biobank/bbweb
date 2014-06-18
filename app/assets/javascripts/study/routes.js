@@ -10,26 +10,37 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
         templateUrl: '/assets/templates/study/studies.html',
         controller: controllers.StudiesCtrl,
         resolve: userResolve
-      }).when(
+      })
+      .when(
+        '/studies/table', {
+        templateUrl: '/assets/templates/study/studiesTable.html',
+        controller: controllers.StudiesTableCtrl,
+        resolve: userResolve
+      })
+      .when(
         '/studies/edit/:id?', {
         templateUrl: '/assets/templates/study/studyForm.html',
         controller: controllers.StudyEditCtrl,
         resolve: userResolve
-      }).when(
+      })
+      .when(
         '/studies/error', {
         template: '<div><h1>Study does not exist</h1></div>',
         resolve: userResolve
-      }).when(
+      })
+      .when(
         '/studies/:id', {
         templateUrl: '/assets/templates/study/study.html',
         controller: controllers.StudyCtrl,
         resolve: userResolve
-      }).when(
+      })
+      .when(
         '/studies/partannot/edit/:id?', {
         template: 'edit', //'/assets/templates/study/annotationTypeForm.html',
         controller: controllers.StudyAnnotationTypeEditCtrl,
         resolve: userResolve
-      }).when(
+      })
+      .when(
         '/studies/partannot/remove/:id', {
         template: 'remove', //'/assets/templates/study/annotationTypeRemovescaForm.html',
         controller: controllers.StudyAnnotationTypeRemoveCtrl,

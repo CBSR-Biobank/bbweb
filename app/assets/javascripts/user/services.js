@@ -26,6 +26,7 @@ define(['angular', 'common'], function(angular) {
 
     return {
       loginUser: function(credentials) {
+        // FIXME: handle login failure
         return playRoutes.controllers.Application.login().post(credentials).then(function(response) {
           token = response.data.token;
           return playRoutes.controllers.UserController.authUser().get();

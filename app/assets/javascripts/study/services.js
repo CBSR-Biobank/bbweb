@@ -14,8 +14,20 @@ define(['angular', 'common'], function(angular) {
       query: function(id) {
         return playRoutes.controllers.study.StudyController.query(id).get();
       },
-      add: function(study) {
-        return playRoutes.controllers.study.StudyController.add().post(study);
+      addOrUpdate: function(study) {
+        var cmd = {
+          name: study.name,
+          description: study.description
+        };
+
+        if (study.id === undefined) {
+          return playRoutes.controllers.study.StudyController.add().post(cmd);
+        } else {
+          cmd.id = study.id;
+          cmd.expectedVersion = study.version + 1;
+
+          return playRoutes.controllers.study.StudyController.update(study.id).put(cmd);
+        }
       },
       participantInfo: function(studyId) {
         return playRoutes.controllers.study.ParticipantAnnotTypeController.list(studyId).get();
