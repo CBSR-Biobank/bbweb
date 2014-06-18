@@ -211,7 +211,6 @@ trait StudyProcessorComponent
     }
 
     private def recoverEvent(event: StudyAddedEvent) {
-      log.info(s"recoverEvent: $event")
       val studyId = StudyId(event.id)
       val validation = for {
         study <- DisabledStudy.create(
@@ -227,7 +226,6 @@ trait StudyProcessorComponent
     }
 
     private def recoverEvent(event: StudyUpdatedEvent) {
-      log.info(s"recoverEvent: $event")
       val validation = for {
         disabledStudy <- isStudyDisabled(StudyId(event.id))
         updatedStudy <- disabledStudy.update(

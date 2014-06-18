@@ -1,7 +1,7 @@
 /**
  * User controllers.
  */
-define(['angular'], function(angular) {
+define(['angular', 'common'], function(angular, common) {
   'use strict';
 
   /**
@@ -84,7 +84,16 @@ define(['angular'], function(angular) {
 
   /** Called to add or update a study.
    */
-  var StudyEditCtrl = function($scope, $rootScope, $routeParams, $location, $log, user, studyService) {
+  var StudyEditCtrl = function(
+    $scope,
+    $rootScope,
+    $routeParams,
+    $location,
+    $modal,
+    $log,
+    user,
+    studyService) {
+
     var id = $routeParams.id;
 
     $rootScope.pageTitle = 'Biobank study';
@@ -110,6 +119,25 @@ define(['angular'], function(angular) {
         })
         .error(function(error) {
           $log.info("submit error:", error);
+          if (error.message.indexOf("expected version doesn't match current version") > -1) {
+            $log.info("version mismatch");
+
+            $modal.open({
+              templateUrl: '/assets/templates/versionMismatch.html',
+              controller: common.VersionMismatchModal,
+              resolve: {
+                message: function() {
+                  return "Another user already made changes to this study. Please submit your changes again.";
+                },
+                newLocation: function() {
+                  return '/studies/' + $scope.study.id;
+                }
+              }
+            });
+
+          } else {
+            $location.path('/studies/error');
+          }
         });
     };
   };
@@ -134,26 +162,15 @@ define(['angular'], function(angular) {
     $scope.annotInformation = function(annotType) {
       $log.debug(annotType);
 
-      var modalInstance = $modal.open({
+      $modal.open({
         templateUrl: '/assets/templates/study/annotationType.html',
         controller: AnnotationTypeCtrl,
-        backdrop: true,
         resolve: {
           annotType: function () {
             return annotType;
           }
         }
       });
-    };
-
-    $scope.updateAnnotationType = function(annotType) {
-      $log.info("editAnnotationType");
-      $location.path("/studies/partannot/edit/" + annotType.id);
-    };
-
-    $scope.removeAnnotationType = function(annotType) {
-      $log.info("removeAnnotationType");
-      $location.path("/studies/partannot/remove/" + annotType.id);
     };
 
     studyService.participantInfo(studyId)
@@ -181,6 +198,16 @@ define(['angular'], function(angular) {
         });
         /* jshint ignore:end */
       });
+
+    $scope.updateAnnotationType = function(annotType) {
+      $log.info("editAnnotationType");
+      $location.path("/studies/partannot/edit/" + annotType.id);
+    };
+
+    $scope.removeAnnotationType = function(annotType) {
+      $log.info("removeAnnotationType");
+      $location.path("/studies/partannot/remove/" + annotType.id);
+    };
   };
 
   /**
@@ -226,10 +253,6 @@ define(['angular'], function(angular) {
       }
     });
     /* jshint ignore:end */
-
-    $scope.ok = function () {
-      $modalInstance.close();
-    };
   };
 
   var StudyAnnotationTypeEditCtrl = function ($scope, $log, $routeParams) {

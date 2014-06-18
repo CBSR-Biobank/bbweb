@@ -5,6 +5,7 @@ define([
   'angular',
   './services/helper',
   './services/playRoutes',
+  './services/versionMismatchModal',
   './filters',
   './directives/example',
   './directives/ngLoginSubmit'],
@@ -15,6 +16,7 @@ define([
            'biobank.common', [
              'common.helper',
              'common.playRoutes',
+             'common.versionMismatchModal',
              'common.filters',
              'common.directives.example',
              'common.directives.ngLoginSubmit']);
