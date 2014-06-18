@@ -1,9 +1,28 @@
-<h4>Name: {{study.name}}</h4>
-<blockquote>
-  <p><cite>Status: {{study.status}}</cite></p>
-  <p><small><cite>Added: {{study.addedDate}}</cite></small></p>
-  <p ng-if="study.lastUpdateDate != null">
-    <small><cite>Last updated: {{study.lastUpdateDate}}</cite></small>
-  </p>
-</blockquote>
-<p>{{study.description}}</p>
+<div class="panel panel-default" style="margin-top: 10px;">
+  <div class="panel-heading">
+    <h3 class="panel-title">{{study.name}}
+    <button class="btn btn-xs btn-primary pull-right"
+            ng-click="updateStudy(study)"
+            title="Update">
+    <i class="glyphicon glyphicon-edit"></i></button>
+    </h3>
+  </div>
+  <table class="table">
+    <tr>
+      <td><strong>Status:</strong></td>
+      <td>{{study.status}}</td>
+    </tr>
+    <tr>
+      <td><strong>Added:</strong></td>
+      <td>{{study.addedDate}}</td>
+    </tr>
+    <tr ng-if="study.lastUpdateDate != null">
+      <td><strong>Last updated:</strong></td>
+      <td>{{study.lastUpdateDate}}</td>
+    </tr>
+    <tr>
+      <td><strong>Description:</strong></td>
+      <td>{{study.description}}</td>
+    </tr>
+  </table>
+</div>

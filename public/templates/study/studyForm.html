@@ -1,4 +1,4 @@
-<div class="page-header"><h1>{{form.title}}</h1></div>
+<div class="page-header"><h1>{{title}}</h1></div>
 <form name="studyAddForm"
       ng-submit="studyAddForm.$valid && submit(form.study)"
       novalidate>
@@ -9,7 +9,7 @@
           name="name"
           type="text"
           class="form-control"
-          ng-model="form.study.name"
+          ng-model="study.name"
           placeholder="A short name for the study" required/>
       <br />
     </div>
@@ -18,8 +18,8 @@
       <textarea name="description"
                 class="form-control"
                 rows="10"
-                ng-model="form.study.description"
-                placeholder="describes the study name" />
+                ng-model="study.description"
+                placeholder="A description of the study" />
       <br />
       <button class="btn btn-primary"
               data-ng-disabled="form.$invalid">Submit</button>

@@ -11,15 +11,14 @@ define(['angular', 'common'], function(angular) {
       list : function() {
         return playRoutes.controllers.study.StudyController.list().get();
       },
-      query: function() {
-        var id = $route.current.params.id;
+      query: function(id) {
         return playRoutes.controllers.study.StudyController.query(id).get();
       },
       add: function(study) {
         return playRoutes.controllers.study.StudyController.add().post(study);
       },
-      participantInfo: function(study) {
-        return playRoutes.controllers.study.ParticipantAnnotTypeController.list(study.id).get();
+      participantInfo: function(studyId) {
+        return playRoutes.controllers.study.ParticipantAnnotTypeController.list(studyId).get();
       }
     };
   }]);

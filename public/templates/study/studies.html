@@ -1,22 +1,42 @@
 <div class="page-header">
-  <h2>Studies</h2>
+  <h2>
+    Studies
+    <button class="btn btn-xs btn-primary pull-right"
+            ng-click="addStudy()"
+            title="Add study">
+    <i class="glyphicon glyphicon-plus"></i></button>
+  </h2>
 </div>
 <div class="clearfix">
   <div ng-if="studies.length == 0">
     <p>No studies have been added.</p>
   </div>
   <div ng-if="studies.length != 0">
-    <table class="table table-bordered table-hover table-condensed" style="table-layout: fixed;">
-      <tr>
-        <th>Name</th>
-        <th>Status</th>
-        <th style="width: 50%">Description</th>
-      </tr>
-      <tr ng-repeat="study in studies">
-        <td><a href="#/studies/{{study.id}}">{{study.name}}</a></td>
-        <td>{{study.status}}</td>
-        <td>{{study.description === null ? "" : study.description | truncate:20}}</td>
+    <p>The following studies have been configured:</p>
+    <table ng-table="tableParams" class="table table-hover">
+      <tr ng-repeat="study in $data"
+          ng-class="{'active': user.$selected}">
+        <td data-title="'Name'" sortable="'name'">
+          {{study.name}}
+        </td>
+        <td data-title="'Status'" sortable="'valueType'">
+          {{study.status}}
+        </td>
+        <td data-title="'Description'" sortable="'description'">
+          {{study.description === null ? "" : study.description | truncate:20}}
+        </td>
+        <td>
+          <button class="btn btn-xs btn-primary"
+                  ng-click="studyInformation(study)"
+                  title="More information">
+          <i class="glyphicon glyphicon-info-sign"></i></button>
+          <button class="btn btn-xs btn-primary"
+                  ng-click="updateStudy(study)"
+                  title="Update">
+          <i class="glyphicon glyphicon-edit"></i></button>
+        </td>
       </tr>
     </table>
+
   </div>
 </div>

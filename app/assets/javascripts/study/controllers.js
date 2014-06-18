@@ -7,41 +7,97 @@ define(['angular'], function(angular) {
   /**
    * user is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
-  var StudiesCtrl = function($scope, $rootScope, $location, user, studyService) {
+  var StudiesCtrl = function($scope, $rootScope, $filter, $location, $log, ngTableParams, user, studyService) {
     $rootScope.pageTitle = 'Biobank studies';
     $scope.studies = [];
     $scope.user = user;
 
+
+    $scope.studyInformation = function(annotType) {
+      $location.path("/studies/" + annotType.id);
+    };
+
     studyService.list().then(function(response) {
       $scope.studies = response.data;
+
+      /* jshint ignore:start */
+      $scope.tableParams = new ngTableParams({
+        page: 1,            // show first page
+        count: 10,          // count per page
+        sorting: {
+          name: 'asc'       // initial sorting
+        }
+      }, {
+        counts: [], // hide page counts control
+        total: $scope.studies.length,
+        getData: function($defer, params) {
+          var orderedData = params.sorting()
+            ? $filter('orderBy')($scope.studies, params.orderBy())
+            : $scope.studies;
+          $defer.resolve(orderedData.slice(
+            (params.page() - 1) * params.count(),
+            params.page() * params.count()));
+        }
+      });
+      /* jshint ignore:end */
     });
+
+    $scope.addStudy = function() {
+      $location.path("/studies/edit");
+    };
+
+    $scope.updateStudy = function(study) {
+      if (study.id === undefined) {
+        throw new Error("study does not have an ID");
+      }
+      $location.path("/studies/edit/" + study.id);
+    };
 
   };
 
   /**
    * See http://stackoverflow.com/questions/22881782/angularjs-tabset-does-not-show-the-correct-state-when-the-page-is-reloaded
    */
-  var StudyCtrl = function($scope, $rootScope, $location, user, studyService) {
+  var StudyCtrl = function($scope, $rootScope, $routeParams, $location, $log, user, studyService) {
     $rootScope.pageTitle = 'Biobank study';
     $scope.user = user;
     $scope.study = {};
-    $scope.tableParams = {};
 
-    studyService.query().then(function(response) {
-      $scope.study = response.data;
-    });
+    studyService.query($routeParams.id)
+      .success(function(data) {
+        $scope.study = data;
+      })
+      .error(function() {
+        $location.path("/studies/error");
+      });
+
+    $scope.updateStudy = function(study) {
+      $log.info("updateStudy");
+      if (study.id === undefined) {
+        throw new Error("study does not have an ID");
+      }
+      $location.path("/studies/edit/" + study.id);
+    };
   };
 
-  var StudyAddCtrl = function($scope, $rootScope, $location, user, studyService) {
+  /** Called to add or update a study.
+   */
+  var StudyEditCtrl = function($scope, $rootScope, $routeParams, $location, user, studyService) {
+    var id = $routeParams.id;
+
     $rootScope.pageTitle = 'Biobank study';
-    $scope.form = {
-      title: "Add new study",
-      study: {
-        type: "AddStudyCmd",
+    if (id === undefined) {
+      $scope.title =  "Add new study";
+      $scope.study = {
         name: "",
         description: null
-      }
-    };
+      };
+    } else {
+      $scope.title =  "Update study";
+      studyService.query(id).then(function(response) {
+        $scope.study = response.data;
+      });
+    }
 
     $scope.submit = function(study) {
       studyService.add(study).then(function(response) {
@@ -54,42 +110,18 @@ define(['angular'], function(angular) {
    * Displays study annotation type summary information in a table. The user can then select a row
    * to display more informaiton for te annotation type.
    */
-  var AnnotationTypeDirectiveCtrl = function($route, $modal, $q, $filter, $log, ngTableParams, studyService, $scope) {
+  var AnnotationTypeDirectiveCtrl = function(
+    $routeParams,
+    $modal,
+    $location,
+    $filter,
+    $log,
+    ngTableParams,
+    studyService,
+    $scope) {
 
     $scope.annotationTypes = [];
-    var study = { id: $route.current.params.id };
-    var defer = $q.defer();
-
-    studyService.participantInfo(study)
-      .then(function(response) {
-        $scope.annotationTypes = response.data;
-        return response.data;
-      })
-      .then(function(data) {
-        /* jshint ignore:start */
-        $scope.tableParams = new ngTableParams({
-          page: 1,            // show first page
-          count: 10,          // count per page
-          sorting: {
-            name: 'asc'     // initial sorting
-          }
-        }, {
-          counts: [], // hide page counts control
-          total: data.length,
-          getData: function($defer, params) {
-            var orderedData = params.sorting()
-              ? $filter('orderBy')($scope.annotationTypes, params.orderBy())
-              : data;
-            params.total(data.length);
-            $defer.resolve(orderedData.slice(
-              (params.page() - 1) * params.count(),
-              params.page() * params.count()));
-          }
-        });
-        /* jshint ignore:end */
-
-        defer.resolve(data);
-      });
+    var studyId = $routeParams.id;
 
     $scope.annotInformation = function(annotType) {
       $log.debug(annotType);
@@ -106,7 +138,41 @@ define(['angular'], function(angular) {
       });
     };
 
-    defer.resolve();
+    $scope.updateAnnotationType = function(annotType) {
+      $log.info("editAnnotationType");
+      $location.path("/studies/partannot/edit/" + annotType.id);
+    };
+
+    $scope.removeAnnotationType = function(annotType) {
+      $log.info("removeAnnotationType");
+      $location.path("/studies/partannot/remove/" + annotType.id);
+    };
+
+    studyService.participantInfo(studyId)
+      .then(function(response) {
+        $scope.annotationTypes = response.data;
+
+        /* jshint ignore:start */
+        $scope.tableParams = new ngTableParams({
+          page: 1,            // show first page
+          count: 10,          // count per page
+          sorting: {
+            name: 'asc'       // initial sorting
+          }
+        }, {
+          counts: [], // hide page counts control
+          total: $scope.annotationTypes.length,
+          getData: function($defer, params) {
+            var orderedData = params.sorting()
+              ? $filter('orderBy')($scope.annotationTypes, params.orderBy())
+              : $scope.annotationTypes;
+            $defer.resolve(orderedData.slice(
+              (params.page() - 1) * params.count(),
+              params.page() * params.count()));
+          }
+        });
+        /* jshint ignore:end */
+      });
   };
 
   /**
@@ -158,12 +224,22 @@ define(['angular'], function(angular) {
     };
   };
 
+  var StudyAnnotationTypeEditCtrl = function ($scope, $log, $routeParams) {
+    $log.info("StudyAnnotationTypeEditCtrl:", $routeParams);
+  };
+
+  var StudyAnnotationTypeRemoveCtrl = function ($scope, $log, $routeParams) {
+    $log.info("StudyAnnotationTypeRemoveCtrl:", $routeParams);
+  };
+
   return {
     StudiesCtrl: StudiesCtrl,
     StudyCtrl: StudyCtrl,
-    StudyAddCtrl: StudyAddCtrl,
+    StudyEditCtrl: StudyEditCtrl,
     AnnotationTypeDirectiveCtrl: AnnotationTypeDirectiveCtrl,
-    AnnotationTypeCtrl: AnnotationTypeCtrl
+    AnnotationTypeCtrl: AnnotationTypeCtrl,
+    StudyAnnotationTypeEditCtrl: StudyAnnotationTypeEditCtrl,
+    StudyAnnotationTypeRemoveCtrl: StudyAnnotationTypeRemoveCtrl
   };
 
 });

@@ -15,6 +15,7 @@ define(['angular', '../controllers'], function(angular, controllers) {
   mod.directive('studyParticipantsTab', function() {
     return {
       restrict: 'E',
+      scope: {},
       templateUrl: '/assets/templates/study/studyParticipantsTab.html',
       controller: controllers.AnnotationTypeDirectiveCtrl
     };
