@@ -15,6 +15,10 @@
   </div>
   <table class="table">
     <tr>
+      <td><strong>Description:</strong></td>
+      <td>{{study.description}}</td>
+    </tr>
+    <tr>
       <td><strong>Status:</strong></td>
       <td>{{study.status}}</td>
     </tr>
@@ -25,10 +29,6 @@
     <tr ng-if="study.lastUpdateDate != null">
       <td><strong>Last updated:</strong></td>
       <td>{{study.lastUpdateDate}}</td>
-    </tr>
-    <tr>
-      <td><strong>Description:</strong></td>
-      <td>{{study.description}}</td>
     </tr>
   </table>
 </div>

@@ -1,10 +1,17 @@
 <div class="page-header">
   <h2>
-    Studies
-    <button class="btn btn-xs btn-primary pull-right"
-            ng-click="addStudy()"
-            title="Add study">
-    <i class="glyphicon glyphicon-plus"></i></button>
+    Study administration
+    <div class="btn-group pull-right">
+      <button class="btn btn-xs btn-primary"
+              ng-click="tableView()"
+              title="More information"
+              ng-if="studies.length > 0">
+      Table view</button>
+      <button class="btn btn-xs btn-primary"
+              ng-click="addStudy()"
+              title="Add study">
+      Add study <i class="glyphicon glyphicon-plus"></i></button>
+    </div>
   </h2>
 </div>
 <div class="clearfix">
@@ -13,6 +20,32 @@
   </div>
   <div ng-if="studies.length != 0">
     <p>The following studies have been configured:</p>
-
+    <div class="row" ng-repeat="rows in studies | partition:3">
+      <div class="col-md-4" ng-repeat="study in rows">
+        <div class="panel panel-default" style="margin-top: 10px;">
+          <div class="panel-heading">
+            <h3 class="panel-title">{{study.name}}</h3>
+          </div>
+          <div class="panel-body">
+            <p>{{study.description | truncate:100}}</p>
+            <p>
+              <small><strong>Status:</strong> {{study.status}}</small><br>
+              <small><strong>Added:</strong> {{study.addedDate}}</small><br>
+              <span ng-if="study.lastUpdateDate != null">
+                <small><strong>Last updated:</strong> {{study.lastUpdateDate}}</small>
+              </span>
+            </br>
+            <p>
+              <div class="btn-group">
+                <button class="btn btn-xs btn-primary"
+                        ng-click="studyInformation(study)"
+                        title="More information">
+                More information <i class="glyphicon glyphicon-info-sign"></i></button>
+              </div>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

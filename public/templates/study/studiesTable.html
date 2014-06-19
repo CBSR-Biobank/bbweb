@@ -1,10 +1,17 @@
 <div class="page-header">
   <h2>
-    Studies
-    <button class="btn btn-xs btn-primary pull-right"
-            ng-click="addStudy()"
-            title="Add study">
-    <i class="glyphicon glyphicon-plus"></i></button>
+    Study administration
+    <div class="btn-group pull-right">
+      <button class="btn btn-xs btn-primary"
+              ng-click="defaultView()"
+              title="More information"
+              ng-if="studies.length > 0">
+      Default view</button>
+      <button class="btn btn-xs btn-primary"
+              ng-click="addStudy()"
+              title="Add study">
+      Add study <i class="glyphicon glyphicon-plus"></i></button>
+    </div>
   </h2>
 </div>
 <div class="clearfix">
@@ -33,6 +40,5 @@
         </td>
       </tr>
     </table>
-
   </div>
 </div>

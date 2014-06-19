@@ -8,12 +8,29 @@ define(['angular', 'common'], function(angular, common) {
    * user is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
   var StudiesCtrl = function($scope, $rootScope, $filter, $location, $log, ngTableParams, user, studyService) {
+    $rootScope.pageTitle = 'Biobank studies';
+    $scope.studies = [];
+    $scope.user = user;
+    studyService.list().then(function(response) {
+      $scope.studies = response.data;
+    });
+
+    $scope.addStudy = function() {
+      $location.path("/studies/edit");
+    };
+
+    $scope.studyInformation = function(annotType) {
+      $location.path("/studies/" + annotType.id);
+    };
+
+    $scope.tableView = function() {
+      $location.path("/studies/table");
+    };
   };
 
   var StudiesTableCtrl = function($scope, $rootScope, $filter, $location, $log, ngTableParams, user, studyService) {
     $rootScope.pageTitle = 'Biobank studies';
     $scope.studies = [];
-    $scope.user = user;
 
     studyService.list().then(function(response) {
       $scope.studies = response.data;
@@ -46,6 +63,10 @@ define(['angular', 'common'], function(angular, common) {
 
     $scope.studyInformation = function(annotType) {
       $location.path("/studies/" + annotType.id);
+    };
+
+    $scope.defaultView = function() {
+      $location.path("/studies");
     };
 
   };
@@ -147,7 +168,7 @@ define(['angular', 'common'], function(angular, common) {
               controller: 'versionMismatchModal',
               resolve: {
                 title: function () {
-                  return "Cannot update study";
+                  return (study.id === undefined) ? "Cannot add study" : "Cannot update study";
                 },
                 message: function() {
                   return "Error: " + error.message;
@@ -165,7 +186,11 @@ define(['angular', 'common'], function(angular, common) {
     };
 
     $scope.cancel = function(study) {
-      $location.path('/studies/' + $scope.study.id);
+      if ($scope.study.id === undefined) {
+        $location.path('/studies');
+      } else {
+        $location.path('/studies/' + $scope.study.id);
+      }
     };
   };
 

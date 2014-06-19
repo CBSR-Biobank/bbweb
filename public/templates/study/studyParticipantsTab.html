@@ -23,20 +23,22 @@
             {{annotType.description === null ? "" : annotType.description | truncate:40}}
           </td>
           <td>
-            <button class="btn btn-xs btn-primary"
-                    ng-click="annotInformation(annotType)"
-                    title="More information">
-            <i class="glyphicon glyphicon-info-sign"></i></button>
-            <button class="btn btn-xs btn-primary"
-                    ng-click="updateAnnotationType(annotType)"
-                    title="Update">
-            <i class="glyphicon glyphicon-edit"></i></button>
-            <button class="btn btn-xs btn-warning"
-                    ng-click="removeAnnotationType(annotType)"
-                    data-toggle="tooltip"
-                    title="Remove">
-              <i class="glyphicon glyphicon-remove"></i>
-            </button>
+            <div class="btn-group pull-right">
+              <button class="btn btn-xs btn-primary"
+                      ng-click="annotInformation(annotType)"
+                      title="More information">
+              <i class="glyphicon glyphicon-info-sign"></i></button>
+              <button class="btn btn-xs btn-primary"
+                      ng-click="updateAnnotationType(annotType)"
+                      title="Update">
+              <i class="glyphicon glyphicon-edit"></i></button>
+              <button class="btn btn-xs btn-warning"
+                      ng-click="removeAnnotationType(annotType)"
+                      data-toggle="tooltip"
+                      title="Remove">
+                <i class="glyphicon glyphicon-remove"></i>
+              </button>
+            </div>
           </td>
         </tr>
       </table>
