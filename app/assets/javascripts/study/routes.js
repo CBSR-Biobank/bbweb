@@ -7,19 +7,19 @@ define(['angular', './controllers'], function(angular, controllers) {
     $routeProvider
       .when(
         '/studies', {
-        templateUrl: '/assets/templates/study/studies.html',
+        templateUrl: '/assets/javascripts/study/studies.html',
         controller: controllers.StudiesCtrl,
         resolve: userResolve
       })
       .when(
         '/studies/table', {
-        templateUrl: '/assets/templates/study/studiesTable.html',
+        templateUrl: '/assets/javascripts/study/studiesTable.html',
         controller: controllers.StudiesTableCtrl,
         resolve: userResolve
       })
       .when(
         '/studies/edit/:id?', {
-        templateUrl: '/assets/templates/study/studyForm.html',
+        templateUrl: '/assets/javascripts/study/studyForm.html',
         controller: controllers.StudyEditCtrl,
         resolve: userResolve
       })
@@ -30,19 +30,19 @@ define(['angular', './controllers'], function(angular, controllers) {
       })
       .when(
         '/studies/:id', {
-        templateUrl: '/assets/templates/study/study.html',
+        templateUrl: '/assets/javascripts/study/study.html',
         controller: controllers.StudyCtrl,
         resolve: userResolve
       })
       .when(
         '/studies/partannot/edit/:id?', {
-        template: 'edit', //'/assets/templates/study/annotationTypeForm.html',
+        template: 'edit', //'/assets/javascripts/study/annotationTypeForm.html',
         controller: controllers.StudyAnnotationTypeEditCtrl,
         resolve: userResolve
       })
       .when(
         '/studies/partannot/remove/:id', {
-        template: 'remove', //'/assets/templates/study/annotationTypeRemovescaForm.html',
+        template: 'remove', //'/assets/javascripts/study/annotationTypeRemovescaForm.html',
         controller: controllers.StudyAnnotationTypeRemoveCtrl,
         resolve: userResolve
       });

@@ -8,10 +8,10 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
   mod.config(['$routeProvider', function($routeProvider) {
     $routeProvider
       .when('/',  {
-        templateUrl: '/assets/templates/home/home.html',
+        templateUrl: '/assets/javascripts/home/home.html',
         controller: controllers.HomeCtrl})
       .otherwise( {
-        templateUrl: '/assets/templates/home/notFound.html'});
+        templateUrl: '/assets/javascripts/home/notFound.html'});
   }]);
   return mod;
 });

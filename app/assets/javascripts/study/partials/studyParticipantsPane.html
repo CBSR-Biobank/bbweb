@@ -1,6 +1,13 @@
 <div class="panel panel-default" style="margin-top: 10px;">
   <div class="panel-heading">
-    <h3 class="panel-title">Participant Annotation Types</h3>
+    <h3 class="panel-title">Participant Annotation Types
+    <div class="btn-group pull-right">
+      <button class="btn btn-xs btn-primary"
+              ng-click="addAnnotationType(study)"
+              title="Add annotation type">
+      <i class="glyphicon glyphicon-plus"></i></button>
+    </div>
+    </h3>
   </div>
   <div class="panel-body">
     <div ng-if="annotationTypes.length == 0">
@@ -44,3 +51,4 @@
       </table>
     </div>
   </div>
+</div>

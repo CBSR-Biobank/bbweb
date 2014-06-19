@@ -95,3 +95,5 @@ RjsKeys.paths += ("jsRoutes" -> ("/jsroutes" -> "empty:"))
 
 // To completely override the optimization process, use this config option:
 //requireNativePath := Some("node r.js -o name=main out=javascript-min/main.min.js")
+
+//com.jamesward.play.BrowserNotifierPlugin.livereload

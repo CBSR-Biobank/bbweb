@@ -74,14 +74,17 @@ define(['angular', 'common'], function(angular, common) {
   /**
    * See http://stackoverflow.com/questions/22881782/angularjs-tabset-does-not-show-the-correct-state-when-the-page-is-reloaded
    */
-  var StudyCtrl = function($scope, $rootScope, $routeParams, $location, $log, user, studyService) {
+  var StudyCtrl = function($scope, $rootScope, $routeParams, $location, $log, $filter, user, studyService) {
     $rootScope.pageTitle = 'Biobank study';
     $scope.user = user;
     $scope.study = {};
+    $scope.description = "";
+    $scope.descriptionToggle = true;
 
     studyService.query($routeParams.id)
       .success(function(data) {
         $scope.study = data;
+        $scope.description = $scope.study.description;
       })
       .error(function() {
         $location.path("/studies/error");
@@ -100,6 +103,15 @@ define(['angular', 'common'], function(angular, common) {
         throw new Error("study does not have an ID");
       }
       alert("change status of " + study.name);
+    };
+
+    $scope.truncateDescriptionToggle = function() {
+      if ($scope.descriptionToggle) {
+        $scope.description = $filter('truncate')($scope.study.description, 100);
+      } else {
+        $scope.description = $scope.study.description;
+      }
+      $scope.descriptionToggle = !$scope.descriptionToggle;
     };
   };
 
@@ -143,8 +155,8 @@ define(['angular', 'common'], function(angular, common) {
           if (error.message.indexOf("expected version doesn't match current version") > -1) {
             /* concurrent change error */
             modalInstance = $modal.open({
-              templateUrl: '/assets/templates/versionMismatch.html',
-              controller: 'versionMismatchModal',
+              templateUrl: '/assets/javascripts/common/errorModal.html',
+              controller: 'errorModal',
               resolve: {
                 title: function () {
                   return "Modified by another user";
@@ -164,8 +176,8 @@ define(['angular', 'common'], function(angular, common) {
           } else {
             /* some other error */
             modalInstance = $modal.open({
-              templateUrl: '/assets/templates/versionMismatch.html',
-              controller: 'versionMismatchModal',
+              templateUrl: '/assets/javascripts/common/errorModal.html',
+              controller: 'errorModal',
               resolve: {
                 title: function () {
                   return (study.id === undefined) ? "Cannot add study" : "Cannot update study";
@@ -199,23 +211,25 @@ define(['angular', 'common'], function(angular, common) {
    * to display more informaiton for te annotation type.
    */
   var AnnotationTypeDirectiveCtrl = function(
+    $scope,
+    $element,
     $routeParams,
     $modal,
     $location,
     $filter,
     $log,
     ngTableParams,
-    studyService,
-    $scope) {
+    studyService) {
 
     $scope.annotationTypes = [];
+    $scope.tableParams = {};
     var studyId = $routeParams.id;
 
     $scope.annotInformation = function(annotType) {
       $log.debug(annotType);
 
       $modal.open({
-        templateUrl: '/assets/templates/study/annotationType.html',
+        templateUrl: '/assets/javascripts/study/annotationType.html',
         controller: AnnotationTypeCtrl,
         resolve: {
           annotType: function () {
@@ -226,8 +240,8 @@ define(['angular', 'common'], function(angular, common) {
     };
 
     studyService.participantInfo(studyId)
-      .then(function(response) {
-        $scope.annotationTypes = response.data;
+      .success(function(data) {
+        $scope.annotationTypes = data;
 
         /* jshint ignore:start */
         $scope.tableParams = new ngTableParams({
@@ -249,7 +263,24 @@ define(['angular', 'common'], function(angular, common) {
           }
         });
         /* jshint ignore:end */
+      })
+      .error(function(err) {
+        throw new Error("invalid response for study participant annotation types: ", err);
       });
+
+    $scope.annotInformation = function(annotType) {
+      $log.debug(annotType);
+
+      $modal.open({
+        templateUrl: '/assets/javascripts/study/annotationType.html',
+        controller: AnnotationTypeCtrl,
+        resolve: {
+          annotType: function () {
+            return annotType;
+          }
+        }
+      });
+    };
 
     $scope.updateAnnotationType = function(annotType) {
       $log.info("editAnnotationType");

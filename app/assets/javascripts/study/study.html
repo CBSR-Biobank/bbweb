@@ -1,0 +1,18 @@
+<div class="page-header">
+  <h2>Study administration: {{study.name}} </h2>
+</div>
+<div class="clearfix">
+  <study-tabs>
+    <summary-pane title="Summary">
+      <div ng-include="'/assets/javascripts/study/partials/studySummaryPane.html'"></div>
+    </summary-pane>
+    <participants-pane title="Participants">
+      <div ng-include="'/assets/javascripts/study/partials/studyParticipantsPane.html'"></div>
+    </participants-pane>
+    <!--
+        <tab heading="Specimens">Specimens</tab>
+        <tab heading="CollectionEvents">Collection Events</tab>
+        <tab heading="ProcessingEvents">Processing Events</tab>
+    -->
+  </study-tabs>
+</div>

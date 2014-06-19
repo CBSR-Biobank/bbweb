@@ -2,8 +2,8 @@
 define(['angular'], function(angular) {
   'use strict';
 
-  var mod = angular.module('common.versionMismatchModal', []);
-  mod.controller('versionMismatchModal', [
+  var mod = angular.module('common.errorModal', []);
+  mod.controller('errorModal', [
     '$scope',
     '$modalInstance',
     'title',

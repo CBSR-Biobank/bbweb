@@ -1,0 +1,38 @@
+<div class="page-header"><h1>Biobank Log In</h1></div>
+<div class="clearfix">
+  <form class="form-horizontal"
+        name="login-form"
+        autocomplete="on"
+        ng-login-submit="login">
+    <div class="form-group">
+      <label for="email" class="col-sm-2 control-label">Email address</label>
+      <div class="col-sm-10">
+        <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            placeholder="Email"
+            required/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="password" class="col-sm-2 control-label">Password</label>
+      <div class="col-sm-10">
+        <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            placeholder="Password" required />
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button class="btn btn-primary" data-ng-disabled="form.$invalid">
+          Log In
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
