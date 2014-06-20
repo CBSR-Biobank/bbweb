@@ -27,7 +27,7 @@
             <h3 class="panel-title">{{study.name}}</h3>
           </div>
           <div class="panel-body">
-            <p>{{study.description | truncate:100}}</p>
+            <p>{{study.description === null ? "" : study.description | truncate:100}}</p>
             <p>
               <small><strong>Status:</strong> {{study.status}}</small><br>
               <small><strong>Added:</strong> {{study.addedDate}}</small><br>

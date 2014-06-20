@@ -19,7 +19,8 @@
         <strong>Description: </strong>
         <i class="glyphicon"
            ng-class="{'glyphicon-plus': !descriptionToggle, 'glyphicon-minus': descriptionToggle}"
-           ng-click="truncateDescriptionToggle()"></i>
+           ng-click="truncateDescriptionToggle()"
+           ng-if="study.description.length > descriptionToggleLength"></i>
       </div>
       <div class="col-md-10">
         {{description}}

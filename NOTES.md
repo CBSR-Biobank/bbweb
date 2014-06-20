@@ -9,6 +9,7 @@ Install this: https://github.com/jakubroztocil/httpie
 
 ```bash
 export TOKEN="141136cf-8e2b-4c92-9900-e0cd1ed07c19"
+export TOKEN_HDR="\"Cookie:XSRF-TOKEN=$TOKEN\" X-XSRF-TOKEN:$TOKEN"
 
 http GET localhost:9000/users/admin@admin.com "Cookie:XSRF-TOKEN=$TOKEN" X-XSRF-TOKEN:$TOKEN
 
@@ -18,9 +19,9 @@ export STUDY_ID="1A18C06C-D7FE-4D7D-8CBF-04BA9DD31CD6
 
 http POST localhost:9000/studies/pannottype "Cookie:XSRF-TOKEN=$TOKEN" X-XSRF-TOKEN:$TOKEN studyId=$STUDY_ID name=PAT1 description="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam" valueType=Select maxValueCount:=1 options:='{ "1": "1", "2": "2" }' required:=true
 
-http POST localhost:9000/studies/pannottype X-XSRF-TOKEN:f53d509d-4768-48d5-a9f7-911c0dc4e051 type=AddParticipantAnnotationTypeCmd studyId=8B505F3E-88E9-42EA-AF4A-7003BD257390 name=PAT5 description="Lorem ipsum dolor sit amet" valueType=Number maxValueCount:=0 options:='{}' required:=true
+http POST localhost:9000/studies/pannottype "Cookie:XSRF-TOKEN=$TOKEN" X-XSRF-TOKEN:$TOKEN studyId=$STUDY_ID name=PAT5 description="Lorem ipsum dolor sit amet" valueType=Number maxValueCount:=0 options:='{}' required:=true
 
-http POST localhost:9000/studies/pannottype X-XSRF-TOKEN:f53d509d-4768-48d5-a9f7-911c0dc4e051 type=AddParticipantAnnotationTypeCmd studyId=8B505F3E-88E9-42EA-AF4A-7003BD257390 name=PAT6 description="Lorem ipsum dolor sit amet" valueType=Number maxValueCount:=0 options:='{}' required:=true
+http POST localhost:9000/studies/pannottype "Cookie:XSRF-TOKEN=$TOKEN" X-XSRF-TOKEN:$TOKEN studyId=$STUDY_ID name=PAT6 description="Lorem ipsum dolor sit amet" valueType=Number maxValueCount:=0 options:='{}' required:=true
 ```
 
 # Learning AngularjS
