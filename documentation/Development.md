@@ -106,6 +106,13 @@ object MyTag extends Tag("MyTag")
 ...
 ```
 
+## NPM
+
+Add dependencies to `package.json` in the root directory. Use command `web-assets:jseNpmNodeModules`
+to download the modules.
+
+OR: `web-assets:web-node-modules`
+
 ---
 
 [Back to top](../README.md)

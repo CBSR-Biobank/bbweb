@@ -51,7 +51,11 @@
         </header>
         @* -- Main Content -- *@
         <div class="container" data-ng-cloak>
-          <div data-ng-view></div>
+          <ui-breadcrumbs
+              displayname-property="data.displayName"
+              abstract-proxy-property="data.breadcrumbProxy">
+          </ui-breadcrumbs>
+          <div data-ui-view></div>
         </div>
         <!--
             This form is hidden to allow for autofill / autocomplete. See the following web page for an

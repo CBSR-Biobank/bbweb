@@ -11,13 +11,7 @@ define(['angular', 'common'], function(angular, common) {
    *
    * "user" is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
-  mod.controller('StudiesCtrl', [
-    '$rootScope',
-    '$scope',
-    '$location',
-    'user',
-    'studyService',
-    function($rootScope, $scope, $location, user, studyService) {
+  mod.controller('StudiesCtrl', function($rootScope, $scope, $state, $location, user, studyService) {
       $rootScope.pageTitle = 'Biobank studies';
       $scope.studies = [];
       $scope.user = user;
@@ -27,33 +21,26 @@ define(['angular', 'common'], function(angular, common) {
       });
 
       $scope.addStudy = function() {
-        $location.path("/studies/edit");
+        $state.go("admin.studies.edit");
       };
 
       $scope.studyInformation = function(annotType) {
-        $location.path("/studies/" + annotType.id);
+        $state.go("admin.studies.view", { id: annotType.id });
       };
 
       $scope.tableView = function() {
-        $location.path("/studies/table");
+        $state.go("admin.studies.table");
       };
-    }]);
+    });
 
   /**
    * Displays a list of studies in an ng-table.
    *
    * "user" is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
-  mod.controller('StudiesTableCtrl', [
-    '$scope',
-    '$rootScope',
-    '$filter',
-    '$location',
-    '$log',
-    'ngTableParams',
-    'user',
-    'studyService',
-    function($scope, $rootScope, $filter, $location, $log, ngTableParams, user, studyService) {
+  mod.controller(
+    'StudiesTableCtrl',
+    function($scope, $rootScope, $filter, $state, $location, $log, ngTableParams, user, studyService) {
       $rootScope.pageTitle = 'Biobank studies';
       $scope.studies = [];
 
@@ -83,18 +70,18 @@ define(['angular', 'common'], function(angular, common) {
       });
 
       $scope.addStudy = function() {
-        $location.path("/studies/edit");
+        $state.go("admin.studies.edit");
       };
 
       $scope.studyInformation = function(annotType) {
-        $location.path("/studies/" + annotType.id);
+        $state.go("admin.studies.view", { id: annotType.id });
       };
 
       $scope.defaultView = function() {
-        $location.path("/studies");
+        $state.go("admin.studies.panels");
       };
 
-    }]);
+    });
 
   /**
    * Displays the study administrtion page, with a number of tabs. Each tab displays the configuration
@@ -102,74 +89,135 @@ define(['angular', 'common'], function(angular, common) {
    *
    * See http://stackoverflow.com/questions/22881782/angularjs-tabset-does-not-show-the-correct-state-when-the-page-is-reloaded
    */
-  mod.controller('StudyCtrl', [
-    '$scope',
-    '$rootScope',
-    '$routeParams',
-    '$location',
-    '$log',
-    '$filter',
-    'user',
-    'studyService',
-    function($scope, $rootScope, $routeParams, $location, $log, $filter, user, studyService) {
-      $rootScope.pageTitle = 'Biobank study';
-      $scope.user = user;
-      $scope.study = {};
-      $scope.description = "";
-      $scope.descriptionToggle = true;
-      $scope.descriptionToggleLength = 100;
+  mod.controller(
+    'StudyCtrl',
+    function($scope, $rootScope, $stateParams, $state, $location, $log, $filter, user, study) {
 
-      studyService.query($routeParams.id)
-        .success(function(data) {
-          $scope.study = data;
-          $scope.description = $scope.study.description;
-        })
-        .error(function() {
-          $location.path("/studies/error");
-        });
+      $scope.study = study;
+      $scope.description = $scope.study.description;
 
-      $scope.updateStudy = function(study) {
-        if (study.id === undefined) {
-          throw new Error("study does not have an ID");
-        }
-        $location.path("/studies/edit/" + study.id);
-      };
-
-      $scope.changeStatus = function(study) {
-        if (study.id === undefined) {
-          throw new Error("study does not have an ID");
-        }
-        alert("change status of " + study.name);
-      };
-
-      $scope.truncateDescriptionToggle = function() {
-        if ($scope.descriptionToggle) {
-          $scope.description = $filter('truncate')(
-            $scope.study.description, $scope.descriptionToggleLength);
-        } else {
-          $scope.description = $scope.study.description;
-        }
-        $scope.descriptionToggle = !$scope.descriptionToggle;
-      };
+      // studyService.query($stateParams.id)
+      //   .success(function(data) {
+      //     $scope.study = data;
+      //     $scope.description = $scope.study.description;
+      //   })
+      //   .error(function() {
+      //     $location.path("/studies/error");
+      //   });
 
       $scope.tabSelected = function() {
         /* this event gets picked up by the child controller to update its contents. */
         $scope.$broadcast('tabSelected');
       };
-    }]);
+    });
+
+  /**
+   * Displays study annotation type summary information in a table. The user can then select a row
+   * to display more informaiton for te annotation type.
+   */
+  mod.controller(
+    'participantsPaneCtrl',
+    function(
+      $scope,
+      $stateParams,
+      $modal,
+      $location,
+      $filter,
+      $log,
+      ngTableParams,
+      studyService) {
+
+      var studyId = $stateParams.id;
+      $scope.annotationTypes = [];
+      $scope.tableParams = getAnnotationTableParams($scope, $filter, ngTableParams);
+
+      /**
+       * Creates a modal to display the annotation type details.
+       *
+       * @param {annotType} the annotation type to display.
+       */
+      $scope.annotInformation = function(annotType) {
+        $modal.open({
+          templateUrl: '/assets/javascripts/study/annotationType.html',
+          controller: AnnotationTypeCtrl,
+          resolve: {
+            annotType: function () {
+              return annotType;
+            }
+          }
+        });
+      };
+
+      /**
+       * Switches to the page to edit an annotation type.
+       *
+       * @param {annotType} the annotation type to be edited.
+       */
+      $scope.updateAnnotationType = function(annotType) {
+        $log.info("editAnnotationType");
+        $location.path("/studies/partannot/edit/" + annotType.id);
+      };
+
+      /**
+       * Switches to the page to remove an annotation type.
+       *
+       * @param {annotType} the annotation type to be edited.
+       */
+      $scope.removeAnnotationType = function(annotType) {
+        $log.info("removeAnnotationType");
+        $location.path("/studies/partannot/remove/" + annotType.id);
+      };
+
+      /**
+       * This event is received when the user selects the "Participants" tab in the study view page.
+       *
+       * @param {event} a don't care parameter.
+       * @param {args} a don't care parameter.
+       */
+      $scope.$on('tabSelected', function(event, args) {
+        studyService.participantInfo(studyId).then(function(response) {
+          $scope.annotationTypes = response.data;
+
+          if ($scope.tableParams.data.length > 0) {
+            $scope.tableParams.reload();
+          }
+        });
+      });
+    });
+
+  /**
+   * Returns an ng-table with containing the data passed in the parameter.
+   */
+  var getAnnotationTableParams = function($scope, $filter, ngTableParams) {
+    /* jshint ignore:start */
+    return new ngTableParams({
+      page: 1,            // show first page
+      count: 10,          // count per page
+      sorting: {
+        name: 'asc'       // initial sorting
+      }
+    },{
+      counts: [], // hide page counts control
+      total: function() { return $scope.annotationTypes.length; },
+      getData: function($defer, params) {
+        var data = $scope.annotationTypes;
+        params.total($scope.annotationTypes.length);
+        var orderedData = params.sorting()
+          ? $filter('orderBy')(data, params.orderBy())
+          : data;
+        $defer.resolve(orderedData.slice(
+          (params.page() - 1) * params.count(),
+          params.page() * params.count()));
+      }
+    });
+    /* jshint ignore:end */
+  };
 
   /**
    * Called to add or update the summary information for study.
    */
-  mod.controller('StudyEditCtrl', [
-    '$scope',
-    '$rootScope',
-    '$filter',
-    '$location',
-    '$log',
-    'ngTableParams',
-    'user',
-    'studyService',
+  mod.controller(
+    'StudyEditCtrl',
     function(
       $scope,
       $rootScope,
@@ -257,116 +305,7 @@ define(['angular', 'common'], function(angular, common) {
           $location.path('/studies/' + $scope.study.id);
         }
       };
-    }]);
-
-  /**
-   * Returns an ng-table with containing the data passed in the parameter.
-   */
-  var getAnnotationTableParams = function($scope, $filter, ngTableParams) {
-    /* jshint ignore:start */
-    return new ngTableParams({
-      page: 1,            // show first page
-      count: 10,          // count per page
-      sorting: {
-        name: 'asc'       // initial sorting
-      }
-    },{
-      counts: [], // hide page counts control
-      total: function() { return $scope.annotationTypes.length; },
-      getData: function($defer, params) {
-        var data = $scope.annotationTypes;
-        params.total($scope.annotationTypes.length);
-        var orderedData = params.sorting()
-          ? $filter('orderBy')(data, params.orderBy())
-          : data;
-        $defer.resolve(orderedData.slice(
-          (params.page() - 1) * params.count(),
-          params.page() * params.count()));
-      }
     });
-    /* jshint ignore:end */
-  };
-
-  /**
-   * Displays study annotation type summary information in a table. The user can then select a row
-   * to display more informaiton for te annotation type.
-   */
-  mod.controller('participantsPaneCtrl',  [
-    '$scope',
-    '$routeParams',
-    '$modal',
-    '$location',
-    '$filter',
-    '$log',
-    'ngTableParams',
-    'studyService',
-    function(
-      $scope,
-      $routeParams,
-      $modal,
-      $location,
-      $filter,
-      $log,
-      ngTableParams,
-      studyService) {
-
-      var studyId = $routeParams.id;
-      $scope.annotationTypes = [];
-      $scope.tableParams = getAnnotationTableParams($scope, $filter, ngTableParams);
-
-      /**
-       * Creates a modal to display the annotation type details.
-       *
-       * @param {annotType} the annotation type to display.
-       */
-      $scope.annotInformation = function(annotType) {
-        $modal.open({
-          templateUrl: '/assets/javascripts/study/annotationType.html',
-          controller: AnnotationTypeCtrl,
-          resolve: {
-            annotType: function () {
-              return annotType;
-            }
-          }
-        });
-      };
-
-      /**
-       * Switches to the page to edit an annotation type.
-       *
-       * @param {annotType} the annotation type to be edited.
-       */
-      $scope.updateAnnotationType = function(annotType) {
-        $log.info("editAnnotationType");
-        $location.path("/studies/partannot/edit/" + annotType.id);
-      };
-
-      /**
-       * Switches to the page to remove an annotation type.
-       *
-       * @param {annotType} the annotation type to be edited.
-       */
-      $scope.removeAnnotationType = function(annotType) {
-        $log.info("removeAnnotationType");
-        $location.path("/studies/partannot/remove/" + annotType.id);
-      };
-
-      /**
-       * This event is received when the user selects the "Participants" tab in the study view page.
-       *
-       * @param {event} a don't care parameter.
-       * @param {args} a don't care parameter.
-       */
-      $scope.$on('tabSelected', function(event, args) {
-        studyService.participantInfo(studyId).then(function(response) {
-          $scope.annotationTypes = response.data;
-
-          if ($scope.tableParams.data.length > 0) {
-            $scope.tableParams.reload();
-          }
-        });
-      });
-    }]);
 
   /**
    * This controller displays a study annotation type in a modal. The information is displayed
@@ -413,21 +352,16 @@ define(['angular', 'common'], function(angular, common) {
     /* jshint ignore:end */
   };
 
-  mod.controller('StudyAnnotationTypeEditCtrl', [
-    '$scope',
-    '$log',
-    '$routeParams',
+  mod.controller(
+    'StudyAnnotationTypeEditCtrl',
     function ($scope, $log, $routeParams) {
       $log.info("StudyAnnotationTypeEditCtrl:", $routeParams);
-    }]);
+    });
 
-  mod.controller('StudyAnnotationTypeRemoveCtrl', [
-    '$scope',
-    '$log',
-    '$routeParams',
+  mod.controller('StudyAnnotationTypeRemoveCtrl',
     function ($scope, $log, $routeParams) {
       $log.info("StudyAnnotationTypeRemoveCtrl:", $routeParams);
-    }]);
+    });
 
   var studyCompare = function(a, b) {
     if (a.name < b.name) {

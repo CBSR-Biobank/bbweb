@@ -8,6 +8,7 @@ define([
   './controllers/errorModal',
   './filters',
   './directives/forms',
+  './directives/uiBreadcrumbs',
   './directives/ngLoginSubmit'],
        function(angular) {
          'use strict';
@@ -19,5 +20,6 @@ define([
              'common.errorModal',
              'common.filters',
              'common.directives.forms',
+             'common.directives.uiBreadcrumbs',
              'common.directives.ngLoginSubmit']);
        });

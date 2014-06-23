@@ -3,8 +3,8 @@
  * dashboard/main.js is the entry module which serves as an entry point so other modules only have
  * to include a single module.
  */
-define(['angular', './routes'], function(angular) {
+define(['angular', './states'], function(angular) {
   'use strict';
 
-  return angular.module('biobank.dashboard', ['ngRoute', 'dashboard.routes']);
+  return angular.module('biobank.dashboard', ['ngRoute', 'dashboard.states']);
 });
