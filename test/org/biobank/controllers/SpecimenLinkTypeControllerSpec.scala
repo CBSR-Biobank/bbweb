@@ -53,7 +53,6 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
   private def slTypeToUpdateCmdJson(slType: SpecimenLinkType) = {
     val result = Json.obj(
-      "type"            -> "UpdateSpecimenLinkTypeCmd",
       "id"              -> slType.id.id,
       "expectedVersion" -> Some(slType.version)
     )
@@ -63,7 +62,6 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
   private def slTypeToRemoveCmdJson(slType: SpecimenLinkType) = {
     Json.obj(
-      "type"             -> "RemoveSpecimenLinkTypeCmd",
       "processingTypeId" -> slType.processingTypeId.id,
       "id"               -> slType.id.id,
       "expectedVersion"  -> Some(slType.version)
@@ -171,6 +169,24 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), slType)
+      }
+    }
+
+    "GET /studies/sltypes" should {
+      "get a single specimen link type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
+
+        val procType = factory.createProcessingType
+        appRepositories.processingTypeRepository.put(procType)
+
+        val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
+        appRepositories.specimenGroupRepository.put(inputSg)
+        appRepositories.specimenGroupRepository.put(outputSg)
+        appRepositories.specimenLinkTypeRepository.put(slType)
+
+        val jsonObj = makeRequest(GET, s"/studies/sltypes/${procType.id.id}?slTypeId=${slType.id.id}").as[JsObject]
+        compareObj(jsonObj, slType)
       }
     }
 

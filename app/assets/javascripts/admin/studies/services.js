@@ -30,7 +30,11 @@ define(['angular', 'common'], function(angular) {
         }
       },
       participantInfo: function(studyId) {
-        return playRoutes.controllers.study.ParticipantAnnotTypeController.list(studyId).get();
+        return playRoutes.controllers.study.ParticipantAnnotTypeController.get(studyId).get();
+      },
+      participantAnnotType: function(studyId, participantAnnotTypeId) {
+        return playRoutes.controllers.study.ParticipantAnnotTypeController.get(
+          studyId, participantAnnotTypeId).get();
       }
     };
   }]);

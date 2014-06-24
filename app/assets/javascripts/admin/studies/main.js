@@ -7,8 +7,8 @@ define([
   './states',
   './controllers',
   './services',
-  './annotTypes/controllers',
-  './directives/studyTabs'
+  './directives/studyTabs',
+  './annotTypes/main'
 ], function(angular) {
   'use strict';
 
@@ -17,9 +17,9 @@ define([
     'ngRoute',
     'ui.bootstrap',
     'ngTable',
-    'study.controllers',
-    'study.states',
+    'admin.studies.controllers',
+    'admin.studies.states',
+    'admin.studies.directives.studyTabs',
     'study.services',
-    'study.annotType.controllers',
-    'study.directives.studyTabs']);
+    'admin.studies.annotTypes']);
 });

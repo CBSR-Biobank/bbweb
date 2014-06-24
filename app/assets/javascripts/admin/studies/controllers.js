@@ -4,7 +4,7 @@
 define(['angular', 'common'], function(angular, common) {
   'use strict';
 
-  var mod = angular.module('study.controllers', ['study.services']);
+  var mod = angular.module('admin.studies.controllers', ['study.services']);
 
   /**
    * Displays a list of studies with each in its own mini-panel.
@@ -21,7 +21,7 @@ define(['angular', 'common'], function(angular, common) {
       });
 
       $scope.addStudy = function() {
-        $state.go("admin.studies.edit");
+        $state.go("admin.studies.add");
       };
 
       $scope.studyInformation = function(annotType) {
@@ -70,7 +70,7 @@ define(['angular', 'common'], function(angular, common) {
       });
 
       $scope.addStudy = function() {
-        $state.go("admin.studies.edit");
+        $state.go("admin.studies.add");
       };
 
       $scope.studyInformation = function(annotType) {
@@ -89,21 +89,45 @@ define(['angular', 'common'], function(angular, common) {
    *
    * See http://stackoverflow.com/questions/22881782/angularjs-tabset-does-not-show-the-correct-state-when-the-page-is-reloaded
    */
-  mod.controller(
-    'StudyCtrl',
-    function($scope, $rootScope, $stateParams, $state, $location, $log, $filter, user, study) {
+  mod.controller('StudyViewCtrl', function(
+    $scope,
+    $rootScope,
+    $stateParams,
+    $state, $location,
+    $log,
+    $filter,
+    user,
+    study) {
 
       $scope.study = study;
       $scope.description = $scope.study.description;
+      $scope.descriptionToggle = true;
+      $scope.descriptionToggleLength = 100;
 
-      // studyService.query($stateParams.id)
-      //   .success(function(data) {
-      //     $scope.study = data;
-      //     $scope.description = $scope.study.description;
-      //   })
-      //   .error(function() {
-      //     $location.path("/studies/error");
-      //   });
+      $scope.updateStudy = function(study) {
+        if (study.id === undefined) {
+          throw new Error("study does not have an ID");
+        }
+        $state.go("admin.studies.update", { id: study.id });
+      };
+
+      $scope.changeStatus = function(study) {
+        if (study.id === undefined) {
+          throw new Error("study does not have an ID");
+        }
+        alert("change status of " + study.name);
+      };
+
+      $scope.truncateDescriptionToggle = function() {
+        if ($scope.descriptionToggle) {
+          $scope.description = $filter('truncate')(
+            $scope.study.description, $scope.descriptionToggleLength);
+        } else {
+          $scope.description = $scope.study.description;
+        }
+        $scope.descriptionToggle = !$scope.descriptionToggle;
+      };
+
 
       $scope.tabSelected = function() {
         /* this event gets picked up by the child controller to update its contents. */
@@ -119,6 +143,7 @@ define(['angular', 'common'], function(angular, common) {
     'participantsPaneCtrl',
     function(
       $scope,
+      $state,
       $stateParams,
       $modal,
       $location,
@@ -138,7 +163,7 @@ define(['angular', 'common'], function(angular, common) {
        */
       $scope.annotInformation = function(annotType) {
         $modal.open({
-          templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotationTypeModal.html',
+          templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotTypeModal.html',
           controller: 'AnnotationTypeModalCtrl',
           resolve: {
             annotType: function () {
@@ -153,9 +178,21 @@ define(['angular', 'common'], function(angular, common) {
        *
        * @param {annotType} the annotation type to be edited.
        */
+      $scope.addAnnotationType = function(study) {
+        $log.info("addAnnotationType");
+        $state.go('admin.studies.participantAnnotType.add',
+                  { studyId: study.id });
+      };
+
+      /**
+       * Switches to the page to edit an annotation type.
+       *
+       * @param {annotType} the annotation type to be edited.
+       */
       $scope.updateAnnotationType = function(annotType) {
-        $log.info("editAnnotationType");
-        $location.path("/studies/partannot/edit/" + annotType.id);
+        $log.info("updateAnnotationType");
+        $state.go('admin.studies.participantAnnotType.update',
+                  { studyId: annotType.studyId, annotTypeId: annotType.id });
       };
 
       /**
@@ -165,7 +202,8 @@ define(['angular', 'common'], function(angular, common) {
        */
       $scope.removeAnnotationType = function(annotType) {
         $log.info("removeAnnotationType");
-        $location.path("/studies/partannot/remove/" + annotType.id);
+        $state.go('admin.studies.participantAnnotType.remove',
+                  { studyId: annotType.studyId, annotTypeId: annotType.id });
       };
 
       /**
@@ -220,19 +258,17 @@ define(['angular', 'common'], function(angular, common) {
     'StudyEditCtrl',
     function(
       $scope,
-      $rootScope,
-      $route,
-      $routeParams,
+      $state,
+      $stateParams,
       $location,
       $modal,
       $log,
       user,
       studyService) {
 
-      var id = $routeParams.id;
+      var id = $stateParams.id;
 
-      $rootScope.pageTitle = 'Biobank study';
-      if (id === undefined) {
+      if ((id === null) || (id === '')) {
         $scope.title =  "Add new study";
         $scope.study = {
           name: "",
@@ -250,7 +286,7 @@ define(['angular', 'common'], function(angular, common) {
 
         studyService.addOrUpdate(study)
           .success(function() {
-            $location.path('/studies/' + $scope.study.id);
+            $state.go('admin.studies.view', { id: $scope.study.id });
           })
           .error(function(error) {
             if (error.message.indexOf("expected version doesn't match current version") > -1) {
@@ -270,9 +306,9 @@ define(['angular', 'common'], function(angular, common) {
               });
 
               modalInstance.result.then(function(selectedItem) {
-                $route.reload();
+                $state.$reload();
               }, function () {
-                $location.path('/studies/' + $scope.study.id);
+                $state.go('admin.studies');
               });
             } else {
               /* some other error */
@@ -290,32 +326,24 @@ define(['angular', 'common'], function(angular, common) {
               });
 
               modalInstance.result.then(function(selectedItem) {
-                $route.reload();
+                $state.reload();
               }, function () {
-                $route.reload();
+                $state.reload();
               });
             }
           });
       };
 
       $scope.cancel = function(study) {
-        if ($scope.study.id === undefined) {
-          $location.path('/studies');
+        if ($state.current.name === "admin.studies.add")  {
+          $state.go('admin.studies.panels');
         } else {
-          $location.path('/studies/' + $scope.study.id);
+          if (($stateParams.id === null) || ($stateParams.id === ''))  {
+            throw new Error("state params id is null");
+          }
+          $state.go('admin.studies.view', { id: $scope.study.id });
         }
       };
-    });
-
-  mod.controller(
-    'StudyAnnotationTypeEditCtrl',
-    function ($scope, $log, $routeParams) {
-      $log.info("StudyAnnotationTypeEditCtrl:", $routeParams);
-    });
-
-  mod.controller('StudyAnnotationTypeRemoveCtrl',
-    function ($scope, $log, $routeParams) {
-      $log.info("StudyAnnotationTypeRemoveCtrl:", $routeParams);
     });
 
   var studyCompare = function(a, b) {

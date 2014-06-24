@@ -17,7 +17,6 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
   private def procTypeToAddCmdJson(procType: ProcessingType) = {
     Json.obj(
-      "type"        -> "AddProcessingTypeCmd",
       "studyId"     -> procType.studyId.id,
       "name"        -> procType.name,
       "description" -> procType.description,
@@ -27,7 +26,6 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
   private def procTypeToUpdateCmdJson(procType: ProcessingType) = {
     Json.obj(
-      "type"            -> "UpdateProcessingTypeCmd",
       "studyId"         -> procType.studyId.id,
       "id"              -> procType.id.id,
       "expectedVersion" -> Some(procType.version),
@@ -39,7 +37,6 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
   private def procTypeToRemoveCmdJson(procType: ProcessingType) = {
     Json.obj(
-      "type"            -> "RemoveProcessingTypeCmd",
       "studyId"         -> procType.studyId.id,
       "id"              -> procType.id.id,
       "expectedVersion" -> Some(procType.version)
@@ -135,6 +132,22 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), procType)
+      }
+    }
+
+    "GET /studies/proctypes" should {
+      "get a single processing type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
+
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
+
+        val procType = factory.createProcessingType
+        appRepositories.processingTypeRepository.put(procType)
+
+        val jsonObj = makeRequest(GET, s"/studies/proctypes/${study.id.id}?procTypeId=${procType.id.id}").as[JsObject]
+        compareObj(jsonObj, procType)
       }
     }
 

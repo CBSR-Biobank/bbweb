@@ -23,7 +23,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     appRepositories.studyRepository.put(study)
 
     val cmdJson = Json.obj(
-      "type"                        -> "AddSpecimenGroupCmd",
       "studyId"                     -> study.id.id,
       "name"                        -> sg.name,
       "description"                 -> sg.description,
@@ -47,7 +46,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
     val sg2 = factory.createSpecimenGroup
     val cmdJson = Json.obj(
-      "type"                        -> "UpdateSpecimenGroupCmd",
       "studyId"                     -> study.id.id,
       "id"                          -> sg.id.id,
       "expectedVersion"             -> Some(sg.version),
@@ -72,7 +70,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     appRepositories.specimenGroupRepository.put(sg)
 
     val cmdJson = Json.obj(
-      "type"            -> "RemoveSpecimenGroupCmd",
       "studyId"         -> study.id.id,
       "id"              -> sg.id.id,
       "expectedVersion" -> Some(sg.version))
@@ -117,6 +114,22 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     }
 
     "GET /studies/sgroups" should {
+      "get a single specimen group" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
+
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
+
+        val sg = factory.createSpecimenGroup
+        appRepositories.specimenGroupRepository.put(sg)
+
+        val jsonObj = makeRequest(GET, s"/studies/sgroups/${study.id.id}?sgId=${sg.id.id}").as[JsObject]
+        compareObj(jsonObj, sg)
+      }
+    }
+
+    "GET /studies/sgroups" should {
       "list multiple specimen groups" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -131,7 +144,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val jsonList = json.as[List[JsObject]]
         jsonList should have size sgroups.size
           (jsonList zip sgroups).map { item => compareObj(item._1, item._2) }
-        ()
       }
     }
 
@@ -145,7 +157,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
         val sg = factory.createSpecimenGroup
         val cmdJson = Json.obj(
-          "type"                        -> "AddSpecimenGroupCmd",
           "studyId"                     -> sg.studyId.id,
           "name"                        -> sg.name,
           "description"                 -> sg.description,

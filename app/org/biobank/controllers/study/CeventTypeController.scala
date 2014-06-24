@@ -26,10 +26,18 @@ object CeventTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list(studyId: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    Logger.debug(s"CeventTypeController.list: studyId: $studyId")
-    Ok(Json.toJson(studyService.collectionEventTypesForStudy(studyId).toList))
-  }
+  def get(studyId: String, ceventTypeId: Option[String]) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
+    Logger.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
+
+    ceventTypeId.fold {
+      Ok(Json.toJson(studyService.collectionEventTypesForStudy(studyId).toList))
+    } {
+      id =>
+      studyService.collectionEventTypeWithId(studyId, id).fold(
+        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        ceventType => Ok(Json.toJson(ceventType))
+      )
+    }  }
 
   def addCollectionEventType = CommandAction { cmd: AddCollectionEventTypeCmd => implicit userId =>
     val future = studyService.addCollectionEventType(cmd)

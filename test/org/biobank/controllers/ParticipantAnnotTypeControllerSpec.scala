@@ -111,14 +111,13 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
   "Participant Type REST API" when {
 
     "GET /studies/pannottype" should {
-      "list none" in new WithApplication(fakeApplication()) {
+      "list none" taggedAs(Tag("single")) in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
 
         val study = factory.createDisabledStudy
         appRepositories.studyRepository.put(study)
 
-        val idJson = Json.obj("id" -> study.id.id)
         val json = makeRequest(GET, s"/studies/pannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
@@ -136,7 +135,6 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createParticipantAnnotationType
         appRepositories.participantAnnotationTypeRepository.put(annotType)
 
-        val idJson = Json.obj("id" -> study.id.id)
         val json = makeRequest(GET, s"/studies/pannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
@@ -157,7 +155,6 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
           factory.createParticipantAnnotationType)
         annotTypes map { annotType => appRepositories.participantAnnotationTypeRepository.put(annotType) }
 
-        val idJson = Json.obj("id" -> study.id.id)
         val json = makeRequest(GET, s"/studies/pannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
 

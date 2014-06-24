@@ -28,10 +28,18 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.debug(s"SpecimenLinkAnnotTypeController.list: studyId: $studyId")
-    Ok(Json.toJson(studyService.specimenLinkAnnotationTypesForStudy(studyId).toList))
-  }
+  def get(studyId: String, annotTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.debug(s"SpecimenLinkAnnotTypeController.list: studyId: $studyId, annotTypeId: $annotTypeId")
+
+    annotTypeId.fold {
+      Ok(Json.toJson(studyService.specimenLinkAnnotationTypesForStudy(studyId).toList))
+    } {
+      id =>
+      studyService.specimenLinkAnnotationTypeWithId(studyId, id).fold(
+        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        annotType => Ok(Json.toJson(annotType))
+      )
+    }  }
 
   def addAnnotationType = CommandAction { cmd: AddSpecimenLinkAnnotationTypeCmd => implicit userId =>
     val future = studyService.addSpecimenLinkAnnotationType(cmd)

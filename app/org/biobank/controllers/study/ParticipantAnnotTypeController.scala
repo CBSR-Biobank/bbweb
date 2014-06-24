@@ -25,9 +25,27 @@ object ParticipantAnnotTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.debug(s"ParticipantAnnotTypeController.list: studyId: $studyId")
-    Ok(Json.toJson(studyService.participantAnnotationTypesForStudy(studyId).toList))
+  /**
+    * If [[annotTypeId]] is an empty string, then all the participant annotation types for the
+    * study are returned. If non empty, the annotation with the matching [[studyId]] and
+    * [[annotTypeId]] is returned.
+    *
+    * If [[studyId]] is invalid then an empty array is returned.
+    *
+    * If no matching annotation type is found then an error result is returned.
+    */
+  def get(studyId: String, annotTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.info(s"ParticipantAnnotTypeController.get: studyId: $studyId, annotTypeId: $annotTypeId")
+
+    annotTypeId.fold {
+      Ok(Json.toJson(studyService.participantAnnotationTypesForStudy(studyId).toList))
+    } {
+      id =>
+      studyService.participantAnnotationTypeWithId(studyId, id).fold(
+        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        annotType => Ok(Json.toJson(annotType))
+      )
+    }
   }
 
   def addAnnotationType = CommandAction { cmd: AddParticipantAnnotationTypeCmd => implicit userId =>

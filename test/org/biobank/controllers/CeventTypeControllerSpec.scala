@@ -31,7 +31,6 @@ class CeventTypeControllerSpec extends ControllerFixture {
       annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
     val cmdJson = Json.obj(
-      "type"                 -> "AddCollectionEventTypeCmd",
       "studyId"              -> cet.studyId.id,
       "name"                 -> cet.name,
       "description"          -> cet.description,
@@ -74,7 +73,6 @@ class CeventTypeControllerSpec extends ControllerFixture {
       annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
     val cmdJson = Json.obj(
-      "type"                 -> "UpdateCollectionEventTypeCmd",
       "studyId"              -> cet.studyId.id,
       "id"                   -> cet.id.id,
       "expectedVersion"      -> Some(cet.version),
@@ -117,7 +115,6 @@ class CeventTypeControllerSpec extends ControllerFixture {
     appRepositories.collectionEventTypeRepository.put(cet)
 
     val cmdJson = Json.obj(
-      "type"            -> "RemoveCollectionEventTypeCmd",
       "studyId"         -> cet.studyId.id,
       "id"              -> cet.id.id,
       "expectedVersion" -> Some(cet.version)
@@ -160,6 +157,22 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), cet)
+      }
+    }
+
+    "GET /studies/cetypes" should {
+      "get a single collection event type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
+
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
+
+        val cet = factory.createCollectionEventType
+        appRepositories.collectionEventTypeRepository.put(cet)
+
+        val jsonObj = makeRequest(GET, s"/studies/cetypes/${study.id.id}?cetId=${cet.id.id}").as[JsObject]
+        compareObj(jsonObj, cet)
       }
     }
 

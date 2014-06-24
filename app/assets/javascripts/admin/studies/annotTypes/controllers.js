@@ -4,7 +4,7 @@
 define(['angular', 'common'], function(angular, common) {
   'use strict';
 
-  var mod = angular.module('study.annotType.controllers', ['study.services']);
+  var mod = angular.module('admin.studies.annotTypes.controllers', ['study.services']);
 
   /**
    * This controller displays a study annotation type in a modal. The information is displayed
@@ -53,6 +53,14 @@ define(['angular', 'common'], function(angular, common) {
     $scope.ok = function () {
       $modalInstance.close();
     };
+  });
+
+  mod.controller('StudyAnnotationTypeEditCtrl', function ($scope, $log, $routeParams) {
+    $log.info("StudyAnnotationTypeEditCtrl:", $routeParams);
+  });
+
+  mod.controller('StudyAnnotationTypeRemoveCtrl', function ($scope, $log, $routeParams) {
+    $log.info("StudyAnnotationTypeRemoveCtrl:", $routeParams);
   });
 
   return mod;

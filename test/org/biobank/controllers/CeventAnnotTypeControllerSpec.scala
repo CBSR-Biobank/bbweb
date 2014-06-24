@@ -17,7 +17,6 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
   private def annotTypeToAddCmdJson(annotType: CollectionEventAnnotationType) = {
     Json.obj(
-      "type"          -> "AddCollectionEventAnnotationTypeCmd",
       "studyId"       -> annotType.studyId.id,
       "name"          -> annotType.name,
       "description"   -> annotType.description,
@@ -29,7 +28,6 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
   private def annotTypeToUpdateCmdJson(annotType: CollectionEventAnnotationType) = {
     Json.obj(
-      "type"            -> "UpdateCollectionEventAnnotationTypeCmd",
       "studyId"         -> annotType.studyId.id,
       "id"              -> annotType.id.id,
       "expectedVersion" -> Some(annotType.version),
@@ -42,7 +40,6 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
   private def annotTypeToRemoveCmdJson(annotType: CollectionEventAnnotationType) = {
     Json.obj(
-      "type"            -> "RemoveCollectionEventAnnotationTypeCmd",
       "studyId"         -> annotType.studyId.id,
       "id"              -> annotType.id.id,
       "expectedVersion" -> Some(annotType.version)
@@ -136,6 +133,22 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), annotType)
+      }
+    }
+
+    "GET /studies/ceannottype" should {
+      "get a single collection event annotation type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
+
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
+
+        val annotType = factory.createCollectionEventAnnotationType
+        appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
+
+        val jsonObj = makeRequest(GET, s"/studies/ceannottype/${study.id.id}?annotTypeId=${annotType.id.id}").as[JsObject]
+        compareObj(jsonObj, annotType)
       }
     }
 

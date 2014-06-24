@@ -27,10 +27,18 @@ object CeventAnnotTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.debug(s"CeventAnnotTypeController.list: studyId: $studyId")
-    Ok(Json.toJson(studyService.collectionEventAnnotationTypesForStudy(studyId).toList))
-  }
+  def get(studyId: String, annotTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.debug(s"CeventAnnotTypeController.list: studyId: $studyId, annotTypeId: $annotTypeId")
+
+    annotTypeId.fold {
+      Ok(Json.toJson(studyService.collectionEventAnnotationTypesForStudy(studyId).toList))
+    } {
+      id =>
+      studyService.collectionEventAnnotationTypeWithId(studyId, id).fold(
+        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        annotType => Ok(Json.toJson(annotType))
+      )
+    }  }
 
   def addAnnotationType = CommandAction { cmd: AddCollectionEventAnnotationTypeCmd => implicit userId =>
     val future = studyService.addCollectionEventAnnotationType(cmd)
