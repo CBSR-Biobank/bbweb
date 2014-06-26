@@ -10,46 +10,59 @@ define(['angular'], function(angular) {
       .state('admin.studies', {
         abstract: true,
         url: '/studies',
-        template: '<ui-view></ui-view>',
         resolve: userResolve,
         data: {
           breadcrumbProxy: 'admin.studies.panels'
         }
       })
       .state('admin.studies.panels', {
-        url: '/',
-        templateUrl: '/assets/javascripts/admin/studies/studiesPanels.html',
+        url: '',
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/admin/studies/studiesPanels.html',
+            controller: 'StudiesCtrl'
+          }
+        },
         resolve: userResolve,
-        controller: 'StudiesCtrl',
         data: {
           displayName: 'Studies'
         }
       })
       .state('admin.studies.table', {
-        url: '/',
-        templateUrl: '/assets/javascripts/admin/studies/studiesTable.html',
+        url: '',
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/admin/studies/studiesTable.html',
+            controller: 'StudiesTableCtrl'
+          }
+        },
         resolve: userResolve,
-        controller: 'StudiesTableCtrl',
         data: {
           displayName: false
         }
       })
       .state('admin.studies.add', {
-        url: '/edit',
-        templateUrl: '/assets/javascripts/admin/studies/studyForm.html',
-        controller: 'StudyEditCtrl',
+        url: '/add',
+        resolve: {
+          study: function() {
+            return null;
+          },
+          user: function() {
+            return userResolve;
+          }
+        },
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/admin/studies/studyForm.html',
+            controller: 'StudyEditCtrl'
+          }
+        },
         data: {
           displayName: 'Add Study'
-        },
-        resolve: userResolve
+        }
       })
       .state('admin.studies.study', {
-        abstract: true,
         url: '/{studyId}',
-        template: '<ui-view></ui-view>',
-        data: {
-          breadcrumbProxy: 'admin.studies.study.view'
-        },
         resolve: {
           study: function($stateParams, studyService) {
             if ($stateParams.studyId)  {
@@ -59,33 +72,49 @@ define(['angular'], function(angular) {
             }
             throw new Error("state parameter id is invalid");
           },
-          userResolve: function($stateParams, studyService) {
+          user: function() {
             return userResolve;
           }
-        }
-      })
-      .state('admin.studies.study.view', {
-        url: '/view',
-        templateUrl: '/assets/javascripts/admin/studies/studyView.html',
-        controller: 'StudyViewCtrl',
-        data: {
-          displayName: '{{study.name}}'
         },
-        resolve: userResolve
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/admin/studies/studyView.html',
+            controller: 'StudyViewCtrl'
+          }
+        },
+        data: {
+          displayName: "{{study.name}}"
+        }
       })
       .state('admin.studies.study.update', {
         url: '/update',
-        templateUrl: '/assets/javascripts/admin/studies/studyForm.html',
-        controller: 'StudyEditCtrl',
-        data: {
-          displayName: '{{study.name}}'
+        resolve: {
+          user: function() {
+            return userResolve;
+          }
         },
-        resolve: userResolve
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/admin/studies/studyForm.html',
+            controller: 'StudyEditCtrl'
+          }
+        },
+        data: {
+          displayName: 'Update'
+        }
       })
       .state('admin.studies.error', {
         url: '/error',
-        template: '<div><h1>Study does not exist</h1></div>',
-        resolve: userResolve
+        views: {
+          'main@': {
+        template: '<div><h1>Study does not exist</h1></div>'
+          }
+        },
+        resolve: {
+          user: function() {
+            return userResolve;
+          }
+        }
       });
   });
   return mod;

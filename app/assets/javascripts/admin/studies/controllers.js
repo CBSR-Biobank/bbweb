@@ -25,7 +25,7 @@ define(['angular', 'common'], function(angular, common) {
     };
 
     $scope.studyInformation = function(study) {
-      $state.go("admin.studies.study.view", { studyId: study.id });
+      $state.go("admin.studies.study", { studyId: study.id });
     };
 
     $scope.tableView = function() {
@@ -81,7 +81,7 @@ define(['angular', 'common'], function(angular, common) {
     };
 
     $scope.studyInformation = function(study) {
-      $state.go("admin.studies.study.view", { studyId: study.id });
+      $state.go("admin.studies.study", { studyId: study.id });
     };
 
     $scope.defaultView = function() {
@@ -112,17 +112,19 @@ define(['angular', 'common'], function(angular, common) {
     $scope.descriptionToggleLength = 100;
 
     $scope.updateStudy = function(study) {
-      if (study.id === undefined) {
-        throw new Error("study does not have an ID");
+      if (study.id) {
+        $state.go("admin.studies.study.update", { studyId: study.id });
+        return;
       }
-      $state.go("admin.studies.study.update", { id: study.id });
+      throw new Error("study does not have an ID");
     };
 
     $scope.changeStatus = function(study) {
-      if (study.id === undefined) {
-        throw new Error("study does not have an ID");
+      if (study.id) {
+        alert("change status of " + study.name);
+        return;
       }
-      alert("change status of " + study.name);
+      throw new Error("study does not have an ID");
     };
 
     $scope.truncateDescriptionToggle = function() {
@@ -138,6 +140,7 @@ define(['angular', 'common'], function(angular, common) {
 
     $scope.tabSelected = function() {
       /* this event gets picked up by the child controller to update its contents. */
+      // note, this is also called when the user goes to another page
       $scope.$broadcast('tabSelected');
     };
   });
@@ -267,6 +270,7 @@ define(['angular', 'common'], function(angular, common) {
     $modal,
     $log,
     user,
+    study,
     studyService) {
 
     if ($state.current.name === "admin.studies.add")  {
@@ -276,76 +280,77 @@ define(['angular', 'common'], function(angular, common) {
         description: null
       };
     } else {
-      $scope.title =  "Update study";
-      studyService.query($stateParams.studyId).then(function(response) {
-        $scope.study = response.data;
-      });
+      $scope.title = "Update study";
+      $scope.study = study;
     }
 
     $scope.submit = function(study) {
-      var modalInstance = {};
-
       studyService.addOrUpdate(study)
         .success(function() {
-          $state.go('admin.studies.study.view', { id: $scope.study.id });
+          $state.go('admin.studies.study', { id: $scope.study.id });
         })
         .error(function(error) {
-          if (error.message.indexOf("expected version doesn't match current version") > -1) {
-            /* concurrent change error */
-            modalInstance = $modal.open({
-              templateUrl: '/assets/javascripts/common/errorModal.html',
-              controller: 'errorModal',
-              resolve: {
-                title: function () {
-                  return "Modified by another user";
-                },
-                message: function() {
-                  return "Another user already made changes to this study. Press OK to make " +
-                    " your changes again, or Cancel to dismiss your changes.";
-                }
-              }
-            });
-
-            modalInstance.result.then(function(selectedItem) {
-              $state.$reload();
-            }, function () {
-              $state.go('admin.studies');
-            });
-          } else {
-            /* some other error */
-            modalInstance = $modal.open({
-              templateUrl: '/assets/javascripts/common/errorModal.html',
-              controller: 'errorModal',
-              resolve: {
-                title: function () {
-                  return (study.id === undefined) ? "Cannot add study" : "Cannot update study";
-                },
-                message: function() {
-                  return "Error: " + error.message;
-                }
-              }
-            });
-
-            modalInstance.result.then(function(selectedItem) {
-              $state.reload();
-            }, function () {
-              $state.reload();
-            });
-          }
+          studySaveError($scope, $state, $modal, study, error);
         });
     };
 
     $scope.cancel = function(study) {
       if ($state.current.name === "admin.studies.add")  {
         $state.go('admin.studies.panels');
+      } else if ($stateParams.studyId) {
+        $state.go('admin.studies.study', { studyId: $stateParams.studyId });
       } else {
-        if (($stateParams.id === null) || ($stateParams.id === ''))  {
-          throw new Error("state params id is null");
-        }
-        $state.go('admin.studies.study.view', { id: $scope.study.id });
+        throw new Error("state params studyId is null");
       }
     };
   });
+
+  var studySaveError = function($scope, $state, $modal, study, error) {
+    var modalInstance = {};
+
+    if (error.message.indexOf("expected version doesn't match current version") > -1) {
+      /* concurrent change error */
+      modalInstance = $modal.open({
+        templateUrl: '/assets/javascripts/common/errorModal.html',
+        controller: 'errorModal',
+        resolve: {
+          title: function () {
+            return "Modified by another user";
+          },
+          message: function() {
+            return "Another user already made changes to this study. Press OK to make " +
+              " your changes again, or Cancel to dismiss your changes.";
+          }
+        }
+      });
+
+      modalInstance.result.then(function(selectedItem) {
+        $state.$reload();
+      }, function () {
+        $state.go('admin.studies');
+      });
+    } else {
+      /* some other error */
+      modalInstance = $modal.open({
+        templateUrl: '/assets/javascripts/common/errorModal.html',
+        controller: 'errorModal',
+        resolve: {
+          title: function () {
+            return (study.id === undefined) ? "Cannot add study" : "Cannot update study";
+          },
+          message: function() {
+            return "Error: " + error.message;
+          }
+        }
+      });
+
+      modalInstance.result.then(function(selectedItem) {
+        $state.reload();
+      }, function () {
+        $state.reload();
+      });
+    }
+  };
 
   var studyCompare = function(a, b) {
     if (a.name < b.name) {

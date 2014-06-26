@@ -55,14 +55,24 @@ define(['angular', 'common'], function(angular, common) {
     };
   });
 
-  mod.controller('StudyAnnotationTypeEditCtrl', function ($scope, $log, $state) {
+  mod.controller('StudyAnnotationTypeEditCtrl', function ($scope, $log, $state, study, annotType) {
     $log.info("StudyAnnotationTypeEditCtrl:", $state.current.name);
 
-    if ($state.current.name === "admin.studies.study.view.participantAnnotTypeAdd") {
-        $scope.title =  "Add Annotation Type";
+    if ($state.current.name === "admin.studies.study.participantAnnotTypeAdd") {
+      $scope.title =  "Add Annotation Type";
+      $scope.annotType = {};
     } else {
-        $scope.title =  "Update Annotation Type";
+      $scope.title =  "Update Annotation Type";
+      $scope.annotType = annotType;
     }
+
+    $scope.submit = function(annotType) {
+      alert('save annotation type');
+    };
+
+    $scope.cancel = function() {
+      $state.go('admin.studies.study', { studyId: study.id });
+    };
   });
 
   mod.controller('StudyAnnotationTypeRemoveCtrl', function ($scope, $log, $routeParams) {

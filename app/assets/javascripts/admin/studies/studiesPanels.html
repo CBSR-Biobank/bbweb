@@ -29,10 +29,10 @@
           <div class="panel-body">
             <p>{{study.description === null ? "" : study.description | truncate:100}}</p>
             <p>
-              <small><strong>Status:</strong> {{study.status}}</small><br>
-              <small><strong>Added:</strong> {{study.addedDate}}</small><br>
+              <small class="text-info"><strong>Status:</strong> {{study.status}}</small><br>
+              <small class="text-muted"><strong>Added:</strong> {{study.addedDate}}</small><br>
               <span ng-if="study.lastUpdateDate != null">
-                <small><strong>Last updated:</strong> {{study.lastUpdateDate}}</small>
+                <small class="text-muted"><strong>Last updated:</strong> {{study.lastUpdateDate}}</small>
               </span>
             </br>
             <p>

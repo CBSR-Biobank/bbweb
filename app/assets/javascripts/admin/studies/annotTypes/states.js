@@ -12,27 +12,26 @@ define(['angular'], function(angular) {
     $stateProvider
       .state('admin.studies.study.participantAnnotTypeAdd', {
         url: '/participant/annottype/add',
-        templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotTypeForm.html',
-        controller: 'StudyAnnotationTypeEditCtrl',
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotTypeForm.html',
+            controller: 'StudyAnnotationTypeEditCtrl'
+          }
+        },
         data: {
           displayName: 'Participant Annotation Type'
         },
         resolve: {
-          study: function($stateParams, studyService, study) {
-            return study;
+          annotType: function() {
+            return null;
           },
-          userResolve: function($stateParams, studyService) {
+          user: function() {
             return userResolve;
           }
         }
       })
       .state('admin.studies.study.participantAnnotTypeUpdate', {
         url: '/participant/annottype/update/{annotTypeId}',
-        templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotTypeForm.html',
-        controller: 'StudyAnnotationTypeEditCtrl',
-        data: {
-          displayName: 'Participant Annotation Type'
-        },
         resolve: {
           annotType: function($stateParams, studyService, study) {
             if ($stateParams.annotTypeId) {
@@ -43,15 +42,28 @@ define(['angular'], function(angular) {
             }
             throw new Error("state parameter annotTypeId is invalid");
           },
-          userResolve: function($stateParams, studyService) {
+          user: function() {
             return userResolve;
           }
+        },
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotTypeForm.html',
+            controller: 'StudyAnnotationTypeEditCtrl'
+          }
+        },
+        data: {
+          displayName: 'Participant Annotation Type'
         }
       })
       .state('admin.studies.study.participantAnnotTypeRemove', {
         url: '/participant/annottype/remove/{annotTypeId}',
-        template: 'remove', //'/assets/javascripts/admin/studies/annotationTypeRemovescaForm.html',
-        controller: 'StudyAnnotationTypeRemoveCtrl',
+        views: {
+          'main@': {
+            template: 'remove', //'/assets/javascripts/admin/studies/annotationTypeRemovescaForm.html',
+            controller: 'StudyAnnotationTypeRemoveCtrl'
+          }
+        },
         data: {
           displayName: 'Studies'
         },

@@ -11,15 +11,18 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
       .state('admin', {
         abstract: true,
         url: '/admin',
-        template: '<ui-view></ui-view>',
         resolve: userResolve,
         data: {
           breadcrumbProxy: 'admin.details'
         }
       })
       .state('admin.details', {
-        url: '/',
-        templateUrl: '/assets/javascripts/admin/adminDetails.html',
+        url: '',
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/admin/adminDetails.html'
+          }
+        },
         resolve: userResolve,
         data: {
           displayName: 'Administration'

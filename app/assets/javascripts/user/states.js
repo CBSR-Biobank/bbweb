@@ -10,8 +10,12 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
     $stateProvider
       .state('user', {
         url: '/login',
-        templateUrl: '/assets/javascripts/user/login.html',
-        controller: controllers.LoginCtrl
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/user/login.html',
+            controller: controllers.LoginCtrl
+          }
+        }
       });
     //.when('/users', {templateUrl:'/assets/javascripts/user/users.html', controller:controllers.UserCtrl})
     //.when('/users/:id', {templateUrl:'/assets/javascripts/user/editUser.html', controller:controllers.UserCtrl});

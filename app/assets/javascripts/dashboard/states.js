@@ -9,8 +9,12 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
     $stateProvider
       .state('dashboard', {
         url: '/dashboard',
-        templateUrl: '/assets/javascripts/dashboard/dashboard.html',
-        controller:controllers.DashboardCtrl,
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/dashboard/dashboard.html',
+            controller:controllers.DashboardCtrl
+          }
+        },
         resolve:userResolve,
         data: {
           displayName: false
@@ -18,8 +22,12 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
       })
       .state('dashboard.admin', {
         url: '/admin/dashboard',
-        templateUrl: '/assets/javascripts/dashboard/admin.html',
-        controller:controllers.AdminDashboardCtrl,
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/dashboard/admin.html',
+            controller:controllers.AdminDashboardCtrl
+          }
+        },
         resolve:userResolve,
         data: {
           displayName: false
