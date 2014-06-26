@@ -58,7 +58,7 @@ define(['angular', 'common'], function(angular, common) {
   mod.controller('StudyAnnotationTypeEditCtrl', function ($scope, $log, $state) {
     $log.info("StudyAnnotationTypeEditCtrl:", $state.current.name);
 
-    if ($state.current.name === "admin.studies.view.participantAnnotTypeAdd") {
+    if ($state.current.name === "admin.studies.study.view.participantAnnotTypeAdd") {
         $scope.title =  "Add Annotation Type";
     } else {
         $scope.title =  "Update Annotation Type";

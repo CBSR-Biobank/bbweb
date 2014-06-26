@@ -1,7 +1,7 @@
 /**
  * Taken from:
  *
- * https://raw.githubusercontent.com/michaelbromley/angularUtils/master/src/directives/uiBreadcrumbs/uiBreadcrumbs.js
+ * https://github.com/michaelbromley/angularUtils/tree/master/src/directives/uiBreadcrumbs
  *
  * Created by Michael on 02/04/14.
  */

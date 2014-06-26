@@ -10,37 +10,24 @@ define(['angular'], function(angular) {
   ]);
   mod.config(function($stateProvider, userResolve) {
     $stateProvider
-      .state('admin.studies.participantAnnotType', {
-        url: '/{studyId}/partannottype',
-        template: '<ui-view></ui-view>',
+      .state('admin.studies.study.participantAnnotTypeAdd', {
+        url: '/participant/annottype/add',
+        templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotTypeForm.html',
+        controller: 'StudyAnnotationTypeEditCtrl',
         data: {
-          displayName: '{{study.name}}'
+          displayName: 'Participant Annotation Type'
         },
         resolve: {
-          study: function($stateParams, studyService) {
-            if ($stateParams.studyId)  {
-              return studyService.query($stateParams.studyId).then(function(response) {
-                return response.data;
-              });
-            }
-            throw new Error("state parameter id is invalid");
+          study: function($stateParams, studyService, study) {
+            return study;
           },
           userResolve: function($stateParams, studyService) {
             return userResolve;
           }
         }
       })
-      .state('admin.studies.participantAnnotType.add', {
-        url: '/add',
-        templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotTypeForm.html',
-        controller: 'StudyAnnotationTypeEditCtrl',
-        data: {
-          displayName: 'Participant Annotation Type'
-        },
-        resolve: userResolve
-      })
-      .state('admin.studies.participantAnnotType.update', {
-        url: '/update/{annotTypeId}',
+      .state('admin.studies.study.participantAnnotTypeUpdate', {
+        url: '/participant/annottype/update/{annotTypeId}',
         templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotTypeForm.html',
         controller: 'StudyAnnotationTypeEditCtrl',
         data: {
@@ -61,8 +48,8 @@ define(['angular'], function(angular) {
           }
         }
       })
-      .state('admin.studies.participantAnnotType.remove', {
-        url: '/remove/{annotTypeId}',
+      .state('admin.studies.study.participantAnnotTypeRemove', {
+        url: '/participant/annottype/remove/{annotTypeId}',
         template: 'remove', //'/assets/javascripts/admin/studies/annotationTypeRemovescaForm.html',
         controller: 'StudyAnnotationTypeRemoveCtrl',
         data: {

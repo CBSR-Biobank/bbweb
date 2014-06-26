@@ -43,47 +43,44 @@ define(['angular'], function(angular) {
         },
         resolve: userResolve
       })
-      .state('admin.studies.view', {
-        url: '/view/{id}',
-        templateUrl: '/assets/javascripts/admin/studies/studyView.html',
-        controller: 'StudyViewCtrl',
+      .state('admin.studies.study', {
+        abstract: true,
+        url: '/{studyId}',
+        template: '<ui-view></ui-view>',
         data: {
-          displayName: '{{study.name}}'
+          breadcrumbProxy: 'admin.studies.study.view'
         },
         resolve: {
           study: function($stateParams, studyService) {
-            if (($stateParams.id === null) || ($stateParams.id === ''))  {
-              throw new Error("state parameter id is null");
+            if ($stateParams.studyId)  {
+              return studyService.query($stateParams.studyId).then(function(response) {
+                return response.data;
+              });
             }
-            return studyService.query($stateParams.id).then(function(response) {
-              return response.data;
-            });
+            throw new Error("state parameter id is invalid");
           },
           userResolve: function($stateParams, studyService) {
             return userResolve;
           }
         }
       })
-      .state('admin.studies.update', {
-        url: '/update/{id}',
+      .state('admin.studies.study.view', {
+        url: '/view',
+        templateUrl: '/assets/javascripts/admin/studies/studyView.html',
+        controller: 'StudyViewCtrl',
+        data: {
+          displayName: '{{study.name}}'
+        },
+        resolve: userResolve
+      })
+      .state('admin.studies.study.update', {
+        url: '/update',
         templateUrl: '/assets/javascripts/admin/studies/studyForm.html',
         controller: 'StudyEditCtrl',
         data: {
           displayName: '{{study.name}}'
         },
-        resolve: {
-          study: function($stateParams, studyService) {
-            if (($stateParams.id === null) || ($stateParams.id === ''))  {
-              throw new Error("state parameter id is null");
-            }
-            return studyService.query($stateParams.id).then(function(response) {
-              return response.data;
-            });
-          },
-          userResolve: function($stateParams, studyService) {
-            return userResolve;
-          }
-        }
+        resolve: userResolve
       })
       .state('admin.studies.error', {
         url: '/error',
