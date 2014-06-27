@@ -12,7 +12,8 @@ import play.api.libs.functional.syntax._
 
 object StudyAnnotationType {
 
-  implicit val annotationTypeIdReader = (__ \ "id").read[String](minLength[String](2)).map( new AnnotationTypeId(_) )
+  implicit val annotationTypeIdReader = (__ \ "id").read[String](minLength[String](2)).map(
+    new AnnotationTypeId(_) )
 
   implicit val annotationTypeIdWriter = Writes{ (id: AnnotationTypeId) => JsString(id.id) }
 

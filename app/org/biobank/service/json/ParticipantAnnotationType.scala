@@ -29,7 +29,7 @@ object ParticipantAnnotationType {
       (__ \ "description").write[Option[String]] and
       (__ \ "valueType").write[AnnotationValueType] and
       (__ \ "maxValueCount").write[Option[Int]] and
-      (__ \ "options").write[Option[Map[String, String]]] and
+      (__ \ "options").write[Option[Seq[String]]] and
       (__ \ "required").write[Boolean]
   )(unlift(org.biobank.domain.study.ParticipantAnnotationType.unapply))
 
@@ -39,7 +39,7 @@ object ParticipantAnnotationType {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Map[String, String]] and
+      (__ \ "options").readNullable[Seq[String]] and
       (__ \ "required").read[Boolean]
   )(AddParticipantAnnotationTypeCmd.apply _)
 
@@ -51,7 +51,7 @@ object ParticipantAnnotationType {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Map[String, String]] and
+      (__ \ "options").readNullable[Seq[String]] and
       (__ \ "required").read[Boolean]
   )(UpdateParticipantAnnotationTypeCmd.apply _)
 
@@ -69,7 +69,7 @@ object ParticipantAnnotationType {
       (__ \ "description").writeNullable[String] and
       (__ \ "valueType").write[AnnotationValueType] and
       (__ \ "maxValueCount").writeNullable[Int] and
-      (__ \ "options").write[Option[Map[String, String]]] and
+      (__ \ "options").write[Option[Seq[String]]] and
       (__ \ "required").write[Boolean]
   )(unlift(ParticipantAnnotationTypeAddedEvent.unapply))
 
@@ -82,7 +82,7 @@ object ParticipantAnnotationType {
       (__ \ "description").writeNullable[String] and
       (__ \ "valueType").write[AnnotationValueType] and
       (__ \ "maxValueCount").writeNullable[Int] and
-      (__ \ "options").write[Option[Map[String, String]]] and
+      (__ \ "options").write[Option[Seq[String]]] and
       (__ \ "required").write[Boolean]
   )(unlift(ParticipantAnnotationTypeUpdatedEvent.unapply))
 

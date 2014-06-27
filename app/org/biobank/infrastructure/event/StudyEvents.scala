@@ -136,7 +136,7 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]])
+    options: Option[Seq[String]])
     extends StudyEvent
 
   case class CollectionEventAnnotationTypeUpdatedEvent(
@@ -148,7 +148,7 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]])
+    options: Option[Seq[String]])
     extends StudyEvent
 
   case class CollectionEventAnnotationTypeRemovedEvent(
@@ -166,7 +166,7 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]],
+    options: Option[Seq[String]],
     required: Boolean = false)
     extends StudyEvent
 
@@ -179,7 +179,7 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]],
+    options: Option[Seq[String]],
     required: Boolean = false)
     extends StudyEvent
 
@@ -259,7 +259,7 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]])
+    options: Option[Seq[String]])
     extends StudyEvent
 
   case class SpecimenLinkAnnotationTypeUpdatedEvent(
@@ -271,7 +271,7 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]])
+    options: Option[Seq[String]])
     extends StudyEvent
 
   case class SpecimenLinkAnnotationTypeRemovedEvent(

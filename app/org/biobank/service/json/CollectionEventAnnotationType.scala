@@ -28,7 +28,7 @@ object CollectionEventAnnotationType {
       (__ \ "description").write[Option[String]] and
       (__ \ "valueType").write[AnnotationValueType] and
       (__ \ "maxValueCount").write[Option[Int]] and
-      (__ \ "options").write[Option[Map[String, String]]]
+      (__ \ "options").write[Option[Seq[String]]]
   )(unlift(org.biobank.domain.study.CollectionEventAnnotationType.unapply))
 
   implicit val addCollectionEventAnnotationTypeCmdReads: Reads[AddCollectionEventAnnotationTypeCmd] = (
@@ -37,7 +37,7 @@ object CollectionEventAnnotationType {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Map[String, String]]
+      (__ \ "options").readNullable[Seq[String]]
   )(AddCollectionEventAnnotationTypeCmd.apply _)
 
   implicit val updateCollectionEventAnnotationTypeCmdReads: Reads[UpdateCollectionEventAnnotationTypeCmd] = (
@@ -48,7 +48,7 @@ object CollectionEventAnnotationType {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Map[String, String]]
+      (__ \ "options").readNullable[Seq[String]]
   )(UpdateCollectionEventAnnotationTypeCmd.apply _)
 
   implicit val removeCollectionEventAnnotationTypeCmdReads: Reads[RemoveCollectionEventAnnotationTypeCmd] = (
@@ -65,7 +65,7 @@ object CollectionEventAnnotationType {
       (__ \ "description").writeNullable[String] and
       (__ \ "valueType").write[AnnotationValueType] and
       (__ \ "maxValueCount").writeNullable[Int] and
-      (__ \ "options").write[Option[Map[String, String]]]
+      (__ \ "options").write[Option[Seq[String]]]
   )(unlift(CollectionEventAnnotationTypeAddedEvent.unapply))
 
   implicit val collectionEventAnnotationTypeUpdatedEventWriter: Writes[CollectionEventAnnotationTypeUpdatedEvent] = (
@@ -77,7 +77,7 @@ object CollectionEventAnnotationType {
       (__ \ "description").writeNullable[String] and
       (__ \ "valueType").write[AnnotationValueType] and
       (__ \ "maxValueCount").writeNullable[Int] and
-      (__ \ "options").write[Option[Map[String, String]]]
+      (__ \ "options").write[Option[Seq[String]]]
   )(unlift(CollectionEventAnnotationTypeUpdatedEvent.unapply))
 
   implicit val collectionEventAnnotationTypeRemovedEventWriter: Writes[CollectionEventAnnotationTypeRemovedEvent] = (

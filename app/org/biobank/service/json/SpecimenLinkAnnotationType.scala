@@ -29,7 +29,7 @@ object SpecimenLinkAnnotationType {
       (__ \ "description").write[Option[String]] and
       (__ \ "valueType").write[AnnotationValueType] and
       (__ \ "maxValueCount").write[Option[Int]] and
-      (__ \ "options").write[Option[Map[String, String]]]
+      (__ \ "options").write[Option[Seq[String]]]
   )(unlift(org.biobank.domain.study.SpecimenLinkAnnotationType.unapply))
 
   implicit val addSpecimenLinkAnnotationTypeCmdReads: Reads[AddSpecimenLinkAnnotationTypeCmd] = (
@@ -38,7 +38,7 @@ object SpecimenLinkAnnotationType {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Map[String, String]]
+      (__ \ "options").readNullable[Seq[String]]
   )(AddSpecimenLinkAnnotationTypeCmd.apply _)
 
   implicit val updateSpecimenLinkAnnotationTypeCmdReads: Reads[UpdateSpecimenLinkAnnotationTypeCmd] = (
@@ -49,7 +49,7 @@ object SpecimenLinkAnnotationType {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Map[String, String]]
+      (__ \ "options").readNullable[Seq[String]]
   )(UpdateSpecimenLinkAnnotationTypeCmd.apply _)
 
   implicit val removeSpecimenLinkAnnotationTypeCmdReads: Reads[RemoveSpecimenLinkAnnotationTypeCmd] = (
@@ -66,7 +66,7 @@ object SpecimenLinkAnnotationType {
       (__ \ "description").writeNullable[String] and
       (__ \ "valueType").write[AnnotationValueType] and
       (__ \ "maxValueCount").writeNullable[Int] and
-      (__ \ "options").write[Option[Map[String, String]]]
+      (__ \ "options").write[Option[Seq[String]]]
   )(unlift(SpecimenLinkAnnotationTypeAddedEvent.unapply))
 
   implicit val specimenLinkAnnotationTypeUpdatedEventWrites: Writes[SpecimenLinkAnnotationTypeUpdatedEvent] = (
@@ -78,7 +78,7 @@ object SpecimenLinkAnnotationType {
       (__ \ "description").writeNullable[String] and
       (__ \ "valueType").write[AnnotationValueType] and
       (__ \ "maxValueCount").writeNullable[Int] and
-      (__ \ "options").write[Option[Map[String, String]]]
+      (__ \ "options").write[Option[Seq[String]]]
   )(unlift(SpecimenLinkAnnotationTypeUpdatedEvent.unapply))
 
   implicit val specimenLinkAnnotationTypeRemovedEventWrites: Writes[SpecimenLinkAnnotationTypeRemovedEvent] = (

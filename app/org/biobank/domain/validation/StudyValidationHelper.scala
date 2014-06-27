@@ -5,7 +5,7 @@ import org.biobank.domain.study.{
   SpecimenGroupId,
   StudyId
 }
-import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
+import org.biobank.domain.{ AnnotationTypeId, DomainValidation, DomainError }
 import org.biobank.infrastructure.AnnotationTypeData
 
 import scalaz._
@@ -29,24 +29,20 @@ trait StudyAnnotationTypeValidationHelper extends StudyValidationHelper {
     *  Validates each item in the map and returns all failures.
     */
   def validateOptions(
-    options: Option[Map[String, String]]): DomainValidation[Option[Map[String, String]]] = {
+    options: Option[Seq[String]]): DomainValidation[Option[Seq[String]]] = {
 
-    def validateOtionItem(
-      item: (String, String)): ValidationNel[String, (String, String)] = {
-      (validateNonEmpty(item._1, "option key is null or empty") |@|
-        validateNonEmpty(item._2, "option value is null or empty")) {
-        (_, _)
+      options match {
+        case Some(optionsSeq) =>
+          if (optionsSeq.distinct.size == optionsSeq.size) {
+            optionsSeq.toList.map(validateNonEmpty(_, "option is empty or null")).sequenceU.fold(
+              err => err.fail,
+              list => Some(list.toSeq).success
+            )
+          } else {
+            DomainError("duplicate items in options").failNel
+          }
+        case None => none.success
       }
-    }
-
-    options match {
-      case Some(optionsMap) =>
-        optionsMap.toList.map(validateOtionItem).sequenceU.fold(
-          err => err.fail,
-          list => Some(list.toMap).success
-        )
-      case None => none.success
-    }
   }
 
   /**

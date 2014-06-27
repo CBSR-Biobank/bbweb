@@ -24,7 +24,9 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[ParticipantAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
       val required = true
 
       val annotType = ParticipantAnnotationType.create(
@@ -54,7 +56,9 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[ParticipantAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(annotType.maxValueCount.getOrElse(0) + 100)
-      val options = Some(Map(nameGenerator.next[String] -> nameGenerator.next[String]))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
       val required = !annotType.required
 
       val annotType2 = annotType.update(
@@ -90,7 +94,9 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[ParticipantAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
       val required = true
 
       ParticipantAnnotationType.create(
@@ -109,7 +115,9 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[ParticipantAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -127,7 +135,9 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[ParticipantAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -145,7 +155,9 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[ParticipantAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -170,7 +182,9 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       var description: Option[String] = Some(null)
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -195,7 +209,9 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[ParticipantAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(-1)
-      var options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -213,26 +229,19 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[ParticipantAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      var options = Some(Map("" -> "a"))
+      var options = Some(Seq(""))
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
-        err => err.list should (have length 1 and contain("option key is null or empty")),
+        err => err.list should (have length 1 and contain("option is empty or null")),
         user => fail
       )
 
-      options = Some(Map("1" -> ""))
+      options = Some(Seq("duplicate", "duplicate"))
       ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
-        err => err.list should (have length 1 and contain("option value is null or empty")),
-          user => fail
-      )
-
-      options = Some(Map("1" -> null))
-      ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
-        maxValueCount, options, required).fold(
-        err => err.list should (have length 1 and contain("option value is null or empty")),
+        err => err.list should (have length 1 and contain("duplicate items in options")),
           user => fail
       )
     }
@@ -245,7 +254,9 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[ParticipantAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
       val required = true
 
       ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,

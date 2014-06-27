@@ -17,7 +17,7 @@ define(['angular', 'common'], function(angular, common) {
     $scope.data.push({name: 'Name:', value: annotType.name});
     $scope.data.push({name: 'Type:', value: annotType.valueType});
 
-    if (annotType.required !== undefined) {
+    if (!annotType.required) {
       $scope.data.push({name: 'Required:', value: annotType.required ? "Yes" : "No"});
     }
 
@@ -55,23 +55,56 @@ define(['angular', 'common'], function(angular, common) {
     };
   });
 
-  mod.controller('StudyAnnotationTypeEditCtrl', function ($scope, $log, $state, study, annotType) {
+  mod.controller('StudyAnnotationTypeEditCtrl', function (
+    $scope,
+    $log,
+    $state,
+    studyService,
+    study,
+    annotType) {
     $log.info("StudyAnnotationTypeEditCtrl:", $state.current.name);
 
     if ($state.current.name === "admin.studies.study.participantAnnotTypeAdd") {
       $scope.title =  "Add Annotation Type";
-      $scope.annotType = {};
+      $scope.annotType = { required: false };
     } else {
       $scope.title =  "Update Annotation Type";
       $scope.annotType = annotType;
     }
 
+    $scope.hasRequiredField = (typeof $scope.annotType.required !== 'undefined');
+
+    studyService.valueTypes().then(function(response) {
+      $scope.valueTypes = response.data.sort();
+    });
+
+    $scope.addNewOption = function() {
+      var newOptionId = $scope.annotType.options.length;
+      $scope.annotType.options.push("");
+    };
+
+    $scope.removeOption = function(option) {
+      if ($scope.annotType.options.length <= 1) {
+        throw new Error("invalid length for options");
+      }
+
+      var index = $scope.annotType.options.indexOf(option);
+      if (index > -1) {
+        $scope.annotType.options.splice(index, 1);
+      }
+    };
+
+    $scope.removeButtonDisabled = function() {
+      return $scope.annotType.options.length <= 1;
+    };
+
     $scope.submit = function(annotType) {
+      $log.info($scope.annotType.options);
       alert('save annotation type');
     };
 
     $scope.cancel = function() {
-      $state.go('admin.studies.study', { studyId: study.id });
+      $state.go('admin.studies.study.participants', { studyId: study.id });
     };
   });
 

@@ -124,7 +124,7 @@ case class DisabledStudy private (
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]],
+    options: Option[Seq[String]],
     required: Boolean): DomainValidation[ParticipantAnnotationType] = {
     ParticipantAnnotationType.create(
       this.id, id, version, dateTime, name, description, valueType, maxValueCount, options, required)
@@ -170,7 +170,7 @@ case class DisabledStudy private (
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]]): DomainValidation[CollectionEventAnnotationType] =  {
+    options: Option[Seq[String]]): DomainValidation[CollectionEventAnnotationType] =  {
     CollectionEventAnnotationType.create(
       this.id, id, version, dateTime, name, description, valueType, maxValueCount, options)
   }
@@ -183,7 +183,7 @@ case class DisabledStudy private (
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]]): DomainValidation[SpecimenLinkAnnotationType] =  {
+    options: Option[Seq[String]]): DomainValidation[SpecimenLinkAnnotationType] =  {
     SpecimenLinkAnnotationType.create(
       this.id, id, version, dateTime, name, description, valueType, maxValueCount, options)
   }

@@ -2,17 +2,30 @@
   <h2>Study administration: {{study.name}} </h2>
 </div>
 <div class="clearfix">
+  <!--
+      The 'ui-sref' attribute has to go on the 'tab' tag to have the state change when any part
+      of the tab is clicked on, not just the link.
+  -->
   <tabset>
-    <tab heading="Summary">
-      <div ng-include="'/assets/javascripts/admin/studies/studySummaryPane.html'"></div>
+    <tab ui-sref="admin.studies.study.summary">
+      <tab-heading>
+        <a ui-sref-active="active">Summary</a>
+      </tab-heading>
     </tab>
-    <tab heading="Participants" select="tabSelected()" ng-controller="participantsPaneCtrl">
-      <div ng-include="'/assets/javascripts/admin/studies/studyParticipantsPane.html'"></div>
+    <tab ui-sref="admin.studies.study.participants" active="tabActive.participants">
+      <tab-heading>
+        <a ui-sref-active="active">Participants</a>
+      </tab-heading>
     </tab>
     <!--
+      <div ng-include="'/assets/javascripts/admin/studies/studyParticipantsPane.html'"></div>
+      <div ng-include="'/assets/javascripts/admin/studies/studySummaryPane.html'"></div>
         <tab heading="Specimens">Specimens</tab>
         <tab heading="CollectionEvents">Collection Events</tab>
         <tab heading="ProcessingEvents">Processing Events</tab>
     -->
   </tabset>
+  <div class="row">
+    <div ui-view="studyDetails" style="margin-top: 10px;"></div>
+  </div>
 </div>

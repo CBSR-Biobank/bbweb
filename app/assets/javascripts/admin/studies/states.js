@@ -79,11 +79,69 @@ define(['angular'], function(angular) {
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/admin/studies/studyView.html',
-            controller: 'StudyViewCtrl'
+            controller: function($scope, $state, $timeout, study){
+              $scope.study = study;
+
+              if ($state.current.name === 'admin.studies.study') {
+                $state.go('admin.studies.study.summary', { studyId: study.id });
+              }
+
+              /*
+               * At the moment, static tabs overwrite whatever is passed to active when the directive is run,
+               * which is a bug. As a kludge, a timeout with 0 seconds delay is used to set the active state.
+               *
+               */
+              $scope.tabActive = {
+                participants: false
+              };
+              if ($state.current.name === 'admin.studies.study.participants') {
+                $timeout(function() {
+                  $scope.tabActive.participants = true;
+                }, 0);
+              }
+
+              // if ($state.current.name === 'admin.studies.study') {
+              // } else {
+              // }
+            }
           }
         },
         data: {
           displayName: "{{study.name}}"
+        }
+      })
+      .state('admin.studies.study.summary', {
+        url: '/summary',
+        resolve: {
+          user: function() {
+            return userResolve;
+          }
+        },
+        views: {
+          'studyDetails': {
+            templateUrl: '/assets/javascripts/admin/studies/studySummaryPane.html',
+            controller: 'StudySummaryCtrl'
+          }
+        },
+        data: {
+          displayName: false
+        }
+      })
+      .state('admin.studies.study.participants', {
+        url: '/participants',
+        resolve: {
+          user: function() {
+            return userResolve;
+          }
+        },
+        views: {
+          'studyDetails': {
+            templateUrl: '/assets/javascripts/admin/studies/studyParticipantsPane.html',
+            controller: 'ParticipantsPaneCtrl'
+          }
+        },
+        data: {
+          displayName: false
         }
       })
       .state('admin.studies.study.update', {

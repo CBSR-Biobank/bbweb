@@ -21,7 +21,7 @@ case class SpecimenLinkAnnotationType private (
   description: Option[String],
   valueType: AnnotationValueType,
   maxValueCount: Option[Int],
-  options: Option[Map[String, String]])
+  options: Option[Seq[String]])
   extends StudyAnnotationType {
 
   override def toString: String =
@@ -45,7 +45,7 @@ case class SpecimenLinkAnnotationType private (
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Map[String, String]] = None): DomainValidation[SpecimenLinkAnnotationType] = {
+    options: Option[Seq[String]] = None): DomainValidation[SpecimenLinkAnnotationType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
       validatedAnnotationType <- SpecimenLinkAnnotationType.create(
@@ -67,7 +67,7 @@ object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidationHelper {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]]): DomainValidation[SpecimenLinkAnnotationType] = {
+    options: Option[Seq[String]]): DomainValidation[SpecimenLinkAnnotationType] = {
     (validateId(studyId) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|

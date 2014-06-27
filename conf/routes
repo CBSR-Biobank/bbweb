@@ -55,6 +55,13 @@ POST    /studies/sltypes               org.biobank.controllers.study.SpecimenLin
 PUT     /studies/sltypes/:id           org.biobank.controllers.study.SpecimenLinkTypeController.updateSpecimenLinkType(id)
 DELETE  /studies/sltypes/:id           org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(id)
 
+# value objects
+GET /studies/valuetypes                org.biobank.controllers.study.StudyController.valueTypes
+GET /studies/anatomicalsrctypes        org.biobank.controllers.study.StudyController.anatomicalSourceTypes
+GET /studies/specimentypes             org.biobank.controllers.study.StudyController.specimenTypes
+GET /studies/preservtypes              org.biobank.controllers.study.StudyController.preservTypes
+GET /studies/preservtemptypes          org.biobank.controllers.study.StudyController.preservTempTypes
+
 # study
 GET     /studies/:id                   org.biobank.controllers.study.StudyController.query(id)
 PUT     /studies/:id                   org.biobank.controllers.study.StudyController.update(id)

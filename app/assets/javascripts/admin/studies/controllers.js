@@ -6,6 +6,14 @@ define(['angular', 'common'], function(angular, common) {
 
   var mod = angular.module('admin.studies.controllers', ['study.services']);
 
+  // For debugging
+  //
+  // mod.run(['$rootScope', '$state', '$stateParams',
+  //          function ($rootScope, $state, $stateParams) {
+  //            $rootScope.$state = $state;
+  //            $rootScope.$stateParams = $stateParams;
+  //          }]);
+
   /**
    * Displays a list of studies with each in its own mini-panel.
    *
@@ -25,7 +33,7 @@ define(['angular', 'common'], function(angular, common) {
     };
 
     $scope.studyInformation = function(study) {
-      $state.go("admin.studies.study", { studyId: study.id });
+      $state.go("admin.studies.study.summary", { studyId: study.id });
     };
 
     $scope.tableView = function() {
@@ -81,7 +89,7 @@ define(['angular', 'common'], function(angular, common) {
     };
 
     $scope.studyInformation = function(study) {
-      $state.go("admin.studies.study", { studyId: study.id });
+      $state.go("admin.studies.study.summary", { studyId: study.id });
     };
 
     $scope.defaultView = function() {
@@ -96,11 +104,11 @@ define(['angular', 'common'], function(angular, common) {
    *
    * See http://stackoverflow.com/questions/22881782/angularjs-tabset-does-not-show-the-correct-state-when-the-page-is-reloaded
    */
-  mod.controller('StudyViewCtrl', function(
+  mod.controller('StudySummaryCtrl', function(
     $scope,
     $rootScope,
     $stateParams,
-    $state, $location,
+    $state,
     $log,
     $filter,
     user,
@@ -137,19 +145,13 @@ define(['angular', 'common'], function(angular, common) {
       $scope.descriptionToggle = !$scope.descriptionToggle;
     };
 
-
-    $scope.tabSelected = function() {
-      /* this event gets picked up by the child controller to update its contents. */
-      // note, this is also called when the user goes to another page
-      $scope.$broadcast('tabSelected');
-    };
   });
 
   /**
    * Displays study annotation type summary information in a table. The user can then select a row
    * to display more informaiton for te annotation type.
    */
-  mod.controller('participantsPaneCtrl', function(
+  mod.controller('ParticipantsPaneCtrl', function(
     $scope,
     $state,
     $stateParams,
@@ -189,7 +191,7 @@ define(['angular', 'common'], function(angular, common) {
     $scope.addAnnotationType = function(study) {
       $log.info("addAnnotationType");
       $state.go('admin.studies.study.participantAnnotTypeAdd',
-                { studyId: study.id });
+                { studyId: studyId });
     };
 
     /**
@@ -214,13 +216,7 @@ define(['angular', 'common'], function(angular, common) {
                 { studyId: annotType.studyId, annotTypeId: annotType.id });
     };
 
-    /**
-     * This event is received when the user selects the "Participants" tab in the study view page.
-     *
-     * @param {event} a don't care parameter.
-     * @param {args} a don't care parameter.
-     */
-    $scope.$on('tabSelected', function(event, args) {
+    $scope.tabSelected = function() {
       studyService.participantInfo(studyId).then(function(response) {
         $scope.annotationTypes = response.data;
 
@@ -228,7 +224,7 @@ define(['angular', 'common'], function(angular, common) {
           $scope.tableParams.reload();
         }
       });
-    });
+    };
   });
 
   /**
@@ -298,7 +294,7 @@ define(['angular', 'common'], function(angular, common) {
       if ($state.current.name === "admin.studies.add")  {
         $state.go('admin.studies.panels');
       } else if ($stateParams.studyId) {
-        $state.go('admin.studies.study', { studyId: $stateParams.studyId });
+        $state.go('admin.studies.study.summarypane', { studyId: $stateParams.studyId });
       } else {
         throw new Error("state params studyId is null");
       }
@@ -336,7 +332,7 @@ define(['angular', 'common'], function(angular, common) {
         controller: 'errorModal',
         resolve: {
           title: function () {
-            return (study.id === undefined) ? "Cannot add study" : "Cannot update study";
+            return study.id ?  "Cannot update study" : "Cannot add study";
           },
           message: function() {
             return "Error: " + error.message;

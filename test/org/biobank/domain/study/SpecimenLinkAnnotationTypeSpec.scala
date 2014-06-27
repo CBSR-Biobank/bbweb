@@ -25,7 +25,9 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       val annotType = SpecimenLinkAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -54,7 +56,9 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(annotType.maxValueCount.getOrElse(0) + 100)
-      val options = Some(Map(nameGenerator.next[String] -> nameGenerator.next[String]))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       //      log.info(s"$annotType")
 
@@ -90,7 +94,9 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
@@ -107,7 +113,9 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
@@ -124,7 +132,9 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
@@ -141,7 +151,9 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
@@ -165,7 +177,9 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       var description: Option[String] = Some(null)
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
@@ -189,7 +203,9 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(-1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
@@ -207,28 +223,20 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      var options = Some(Map("" -> "a"))
+      var options = Some(Seq(""))
 
       SpecimenLinkAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount,
         options).fold(
-        err => err.list should (have length 1 and contain("option key is null or empty")),
+        err => err.list should (have length 1 and contain("option is empty or null")),
           user => fail
       )
 
-      options = Some(Map("1" -> ""))
+      options = Some(Seq("duplicate", "duplicate"))
       SpecimenLinkAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount,
         options).fold(
-        err => err.list should (have length 1 and contain("option value is null or empty")),
-          user => fail
-      )
-
-      options = Some(Map("1" -> null))
-      SpecimenLinkAnnotationType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount,
-        options).fold(
-        err => err.list should (have length 1 and contain("option value is null or empty")),
+        err => err.list should (have length 1 and contain("duplicate items in options")),
           user => fail
       )
     }
@@ -241,7 +249,9 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       SpecimenLinkAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount,

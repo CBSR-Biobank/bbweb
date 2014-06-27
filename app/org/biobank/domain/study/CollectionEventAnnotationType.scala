@@ -21,7 +21,7 @@ case class CollectionEventAnnotationType private (
   description: Option[String],
   valueType: AnnotationValueType,
   maxValueCount: Option[Int],
-  options: Option[Map[String, String]])
+  options: Option[Seq[String]])
   extends StudyAnnotationType {
 
   override def toString: String =
@@ -45,7 +45,7 @@ case class CollectionEventAnnotationType private (
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Map[String, String]] = None): DomainValidation[CollectionEventAnnotationType] = {
+    options: Option[Seq[String]] = None): DomainValidation[CollectionEventAnnotationType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
       validatedAnnotationType <- CollectionEventAnnotationType.create(
@@ -67,7 +67,7 @@ object CollectionEventAnnotationType extends StudyAnnotationTypeValidationHelper
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Map[String, String]] = None): DomainValidation[CollectionEventAnnotationType] = {
+    options: Option[Seq[String]] = None): DomainValidation[CollectionEventAnnotationType] = {
     (validateId(studyId) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|

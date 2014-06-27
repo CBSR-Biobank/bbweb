@@ -23,7 +23,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq("a"))
 
       val annotType = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount, options) | fail
@@ -51,7 +51,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(annotType.maxValueCount.getOrElse(0) + 100)
-      val options = Some(Map(nameGenerator.next[String] -> nameGenerator.next[String]))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       val annotType2 = annotType.update(
         annotType.versionOption, org.joda.time.DateTime.now, name, description, valueType,
@@ -86,7 +88,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -105,7 +109,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -124,7 +130,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -143,7 +151,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -171,7 +181,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       var description: Option[String] = Some(null)
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -199,7 +211,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(-1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -210,7 +224,6 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       }
     }
 
-
     "not be created with an invalid options" in {
       val studyId = StudyId(nameGenerator.next[CollectionEventAnnotationType])
       val id = AnnotationTypeId(nameGenerator.next[CollectionEventAnnotationType])
@@ -219,30 +232,22 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      var options = Some(Map("" -> "a"))
+      var options = Some(Seq(""))
 
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("option key is null or empty"))
+          err.list should (have length 1 and contain("option is empty or null"))
       }
 
-      options = Some(Map("1" -> ""))
+      options = Some(Seq("duplicate", "duplicate"))
       val validation2 = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount, options)
       validation2 should be ('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("option value is null or empty"))
-      }
-
-      options = Some(Map("1" -> null))
-      val validation3 = CollectionEventAnnotationType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount, options)
-      validation3 should be ('failure)
-      validation3.swap.map { err =>
-          err.list should (have length 1 and contain("option value is null or empty"))
+          err.list should (have length 1 and contain("duplicate items in options"))
       }
     }
 
@@ -254,7 +259,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventAnnotationType])
       val valueType = AnnotationValueType.Number
       val maxValueCount = Some(1)
-      val options = Some(Map("1" -> "a"))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount, options)

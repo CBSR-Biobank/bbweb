@@ -20,14 +20,29 @@ define(['angular', 'common'], function(angular) {
           description: study.description
         };
 
-        if (study.id === undefined) {
-          return playRoutes.controllers.study.StudyController.add().post(cmd);
-        } else {
+        if (study.id) {
           cmd.id = study.id;
           cmd.expectedVersion = study.version;
 
           return playRoutes.controllers.study.StudyController.update(study.id).put(cmd);
+        } else {
+          return playRoutes.controllers.study.StudyController.add().post(cmd);
         }
+      },
+      valueTypes : function() {
+        return playRoutes.controllers.study.StudyController.valueTypes().get();
+      },
+      anatomicalSourceTypes : function() {
+        return playRoutes.controllers.study.StudyController.anatomicalSourceTypes().get();
+      },
+      specimenTypes : function() {
+        return playRoutes.controllers.study.StudyController.specimenTypes().get();
+      },
+      preservTypes : function() {
+        return playRoutes.controllers.study.StudyController.preservTypes().get();
+      },
+      preservTempTypes : function() {
+        return playRoutes.controllers.study.StudyController.preservTempTypes().get();
       },
       participantInfo: function(studyId) {
         return playRoutes.controllers.study.ParticipantAnnotTypeController.get(studyId).get();

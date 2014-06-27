@@ -102,5 +102,25 @@ object StudyController extends BbwebController {
     }
   }
 
+  def valueTypes = Action(parse.empty) { request =>
+     Ok(Json.toJson(AnnotationValueType.values.map(x =>x.toString)))
+  }
+
+  def anatomicalSourceTypes = Action(parse.empty) { request =>
+     Ok(Json.toJson(AnatomicalSourceType.values.map(x =>x.toString)))
+  }
+
+  def specimenTypes = Action(parse.empty) { request =>
+     Ok(Json.toJson(SpecimenType.values.map(x =>x.toString)))
+  }
+
+  def preservTypes = Action(parse.empty) { request =>
+     Ok(Json.toJson(PreservationType.values.map(x =>x.toString)))
+  }
+
+  def preservTempTypes = Action(parse.empty) { request =>
+     Ok(Json.toJson(PreservationTemperatureType.values.map(x =>x.toString)))
+  }
+
 }
 

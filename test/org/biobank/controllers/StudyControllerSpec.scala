@@ -162,7 +162,7 @@ class StudyControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, "/studies/enable", BAD_REQUEST, cmdJson)
 
         (json \ "status").as[String] should include ("error")
-        (json \ "message").as[String] should include ("no specimen groups")
+          (json \ "message").as[String] should include ("no specimen groups")
       }
     }
 
@@ -238,6 +238,52 @@ class StudyControllerSpec extends ControllerFixture {
         validation map { repoStudy =>
           repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
         }
+      }
+    }
+
+    "GET /studies/valuetypes" should {
+      "list all" in new WithApplication(fakeApplication()) {
+        doLogin
+        val json = makeRequest(GET, "/studies/valuetypes")
+        val values = json.as[List[String]]
+        values.size should be > 0
+      }
+    }
+
+
+    "GET /studies/anatomicalsrctypes" should {
+      "list all" in new WithApplication(fakeApplication()) {
+        doLogin
+        val json = makeRequest(GET, "/studies/anatomicalsrctypes")
+        val values = json.as[List[String]]
+        values.size should be > 0
+      }
+    }
+
+    "GET /studies/specimentypes" should {
+      "list all" in new WithApplication(fakeApplication()) {
+        doLogin
+        val json = makeRequest(GET, "/studies/specimentypes")
+        val values = json.as[List[String]]
+        values.size should be > 0
+      }
+    }
+
+    "GET /studies/preservtypes" should {
+      "list all" in new WithApplication(fakeApplication()) {
+        doLogin
+        val json = makeRequest(GET, "/studies/preservtypes")
+        val values = json.as[List[String]]
+        values.size should be > 0
+      }
+    }
+
+    "GET /studies/preservtemptypes " should {
+      "list all" in new WithApplication(fakeApplication()) {
+        doLogin
+        val json = makeRequest(GET, "/studies/preservtemptypes")
+        val values = json.as[List[String]]
+        values.size should be > 0
       }
     }
 
