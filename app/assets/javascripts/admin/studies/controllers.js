@@ -19,12 +19,12 @@ define(['angular', 'common'], function(angular, common) {
    *
    * "user" is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
-  mod.controller('StudiesCtrl', function($rootScope, $scope, $state, $location, user, studyService) {
+  mod.controller('StudiesCtrl', function($rootScope, $scope, $state, $location, user, StudyService) {
     $rootScope.pageTitle = 'Biobank studies';
     $scope.studies = [];
     $scope.user = user;
 
-    studyService.list().then(function(response) {
+    StudyService.list().then(function(response) {
       $scope.studies = response.data.sort(studyCompare);
     });
 
@@ -55,11 +55,11 @@ define(['angular', 'common'], function(angular, common) {
     $log,
     ngTableParams,
     user,
-    studyService) {
+    StudyService) {
     $rootScope.pageTitle = 'Biobank studies';
     $scope.studies = [];
 
-    studyService.list().then(function(response) {
+    StudyService.list().then(function(response) {
       $scope.studies = response.data;
 
       /* jshint ignore:start */
@@ -160,7 +160,7 @@ define(['angular', 'common'], function(angular, common) {
     $filter,
     $log,
     ngTableParams,
-    studyService) {
+    ParticipantAnnotTypeService) {
 
     var studyId = $stateParams.studyId;
     $scope.annotationTypes = [];
@@ -217,7 +217,7 @@ define(['angular', 'common'], function(angular, common) {
     };
 
     $scope.tabSelected = function() {
-      studyService.participantInfo(studyId).then(function(response) {
+      ParticipantAnnotTypeService.getAll(studyId).then(function(response) {
         $scope.annotationTypes = response.data;
 
         if ($scope.tableParams.data.length > 0) {
@@ -267,7 +267,7 @@ define(['angular', 'common'], function(angular, common) {
     $log,
     user,
     study,
-    studyService) {
+    StudyService) {
 
     if ($state.current.name === "admin.studies.add")  {
       $scope.title =  "Add new study";
@@ -281,7 +281,7 @@ define(['angular', 'common'], function(angular, common) {
     }
 
     $scope.submit = function(study) {
-      studyService.addOrUpdate(study)
+      StudyService.addOrUpdate(study)
         .success(function() {
           $state.go('admin.studies.study', { id: $scope.study.id });
         })

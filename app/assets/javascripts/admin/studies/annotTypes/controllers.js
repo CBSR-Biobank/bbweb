@@ -59,7 +59,7 @@ define(['angular', 'common'], function(angular, common) {
     $scope,
     $log,
     $state,
-    studyService,
+    StudyService,
     study,
     annotType) {
     $log.info("StudyAnnotationTypeEditCtrl:", $state.current.name);
@@ -74,7 +74,7 @@ define(['angular', 'common'], function(angular, common) {
 
     $scope.hasRequiredField = (typeof $scope.annotType.required !== 'undefined');
 
-    studyService.valueTypes().then(function(response) {
+    StudyService.valueTypes().then(function(response) {
       $scope.valueTypes = response.data.sort();
     });
 

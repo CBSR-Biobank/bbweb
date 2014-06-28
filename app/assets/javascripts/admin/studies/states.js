@@ -64,9 +64,9 @@ define(['angular'], function(angular) {
       .state('admin.studies.study', {
         url: '/{studyId}',
         resolve: {
-          study: function($stateParams, studyService) {
+          study: function($stateParams, StudyService) {
             if ($stateParams.studyId)  {
-              return studyService.query($stateParams.studyId).then(function(response) {
+              return StudyService.query($stateParams.studyId).then(function(response) {
                 return response.data;
               });
             }

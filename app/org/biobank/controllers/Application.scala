@@ -50,7 +50,10 @@ object Application extends Controller with Security {
         org.biobank.controllers.study.routes.javascript.StudyController.specimenTypes,
         org.biobank.controllers.study.routes.javascript.StudyController.preservTypes,
         org.biobank.controllers.study.routes.javascript.StudyController.preservTempTypes,
-        org.biobank.controllers.study.routes.javascript.ParticipantAnnotTypeController.get
+        org.biobank.controllers.study.routes.javascript.ParticipantAnnotTypeController.get,
+        org.biobank.controllers.study.routes.javascript.ParticipantAnnotTypeController.addAnnotationType,
+        org.biobank.controllers.study.routes.javascript.ParticipantAnnotTypeController.updateAnnotationType,
+        org.biobank.controllers.study.routes.javascript.ParticipantAnnotTypeController.removeAnnotationType
       )
     ).as(JAVASCRIPT)
   }

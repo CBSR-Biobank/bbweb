@@ -5,8 +5,7 @@ define(['angular', 'common'], function(angular) {
   'use strict';
 
   var mod = angular.module('study.services', ['biobank.common']);
-  mod.factory('studyService', ['$http', '$route', '$q', 'playRoutes', function($http, $route, $q, playRoutes) {
-    var studies;
+  mod.factory('StudyService', function($http, $route, $q, playRoutes) {
     return {
       list : function() {
         return playRoutes.controllers.study.StudyController.list().get();
@@ -43,15 +42,20 @@ define(['angular', 'common'], function(angular) {
       },
       preservTempTypes : function() {
         return playRoutes.controllers.study.StudyController.preservTempTypes().get();
-      },
-      participantInfo: function(studyId) {
+      }
+    };
+  });
+
+  mod.factory('ParticipantAnnotTypeService', function($http, $route, $q, playRoutes) {
+    return {
+      getAll: function(studyId) {
         return playRoutes.controllers.study.ParticipantAnnotTypeController.get(studyId).get();
       },
-      participantAnnotType: function(studyId, participantAnnotTypeId) {
+      get: function(studyId, participantAnnotTypeId) {
         return playRoutes.controllers.study.ParticipantAnnotTypeController.get(
           studyId, participantAnnotTypeId).get();
       }
     };
-  }]);
+  });
 });
 

@@ -33,9 +33,9 @@ define(['angular'], function(angular) {
       .state('admin.studies.study.participantAnnotTypeUpdate', {
         url: '/participant/annottype/update/{annotTypeId}',
         resolve: {
-          annotType: function($stateParams, studyService, study) {
+          annotType: function($stateParams, ParticipantAnnotTypeService, study) {
             if ($stateParams.annotTypeId) {
-              return studyService.participantAnnotType(study.id, $stateParams.annotTypeId)
+              return ParticipantAnnotTypeService.get(study.id, $stateParams.annotTypeId)
                 .then(function(response) {
                   return response.data;
                 });
@@ -68,16 +68,16 @@ define(['angular'], function(angular) {
           displayName: 'Studies'
         },
         resolve: {
-          annotType: function($stateParams, studyService, study) {
+          annotType: function($stateParams, StudyService, study) {
             if ($stateParams.annotTypeId) {
-              return studyService.participantAnnotType(study.id, $stateParams.annotTypeId)
+              return StudyService.participantAnnotType(study.id, $stateParams.annotTypeId)
                 .then(function(response) {
                   return response.data;
                 });
             }
             throw new Error("annotation type id is null");
           },
-          userResolve: function($stateParams, studyService) {
+          userResolve: function($stateParams, StudyService) {
             return userResolve;
           }
         }
