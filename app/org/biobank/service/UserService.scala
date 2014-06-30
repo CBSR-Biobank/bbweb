@@ -69,6 +69,8 @@ trait UserProcessorComponent {
     */
   class UserProcessor extends Processor {
 
+    override def persistenceId = "user-processor-id"
+
     val receiveRecover: Receive = {
       case event: UserRegisteredEvent => recoverEvent(event)
 

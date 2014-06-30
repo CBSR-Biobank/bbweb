@@ -5,12 +5,12 @@ import org.biobank.domain._
 
 import akka.actor.ActorLogging
 import org.slf4j.Logger
-import akka.persistence.EventsourcedProcessor
+import akka.persistence.PersistentActor
 
 import scalaz._
 import scalaz.Scalaz._
 
-trait Processor extends EventsourcedProcessor with ActorLogging {
+trait Processor extends PersistentActor with ActorLogging {
 
   /** Persists the event passed in the validation if it is successful. In either case
     * the sender is sent either the success or failure validation.

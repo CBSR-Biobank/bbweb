@@ -40,6 +40,8 @@ trait StudyProcessorComponent
     */
   sealed class StudyProcessor extends Processor {
 
+    override def persistenceId = "study-processor-id"
+
     case class SnapshotState(studies: Set[Study])
 
     val specimenGroupProcessor = context.system.actorOf(

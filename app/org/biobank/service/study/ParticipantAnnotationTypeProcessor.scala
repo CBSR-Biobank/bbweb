@@ -18,6 +18,8 @@ trait ParticipantAnnotationTypeProcessorComponent {
 
   class ParticipantAnnotationTypeProcessor extends StudyAnnotationTypeProcessor[ParticipantAnnotationType] {
 
+    override def persistenceId = "participant-annotation-type-processor-id"
+
     override val annotationTypeRepository = participantAnnotationTypeRepository
 
     case class SnapshotState(annotationTypes: Set[ParticipantAnnotationType])

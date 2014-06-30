@@ -38,6 +38,8 @@ trait SpecimenLinkTypeProcessorComponent {
     */
   class SpecimenLinkTypeProcessor extends Processor {
 
+    override def persistenceId = "specimen-link-type-processor-id"
+
     case class SnapshotState(specimenLinkTypes: Set[SpecimenLinkType])
 
     val receiveRecover: Receive = {

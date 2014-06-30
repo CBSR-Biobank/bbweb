@@ -38,6 +38,8 @@ trait SpecimenGroupProcessorComponent {
     */
   class SpecimenGroupProcessor extends Processor {
 
+    override def persistenceId = "specimen-group-processor-id"
+
     case class SnapshotState(specimenGroups: Set[SpecimenGroup])
 
     val receiveRecover: Receive = {

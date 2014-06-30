@@ -49,7 +49,7 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  "com.typesafe.akka"      %% "akka-persistence-experimental"  % "2.3.2"              % "compile",
+  "com.typesafe.akka"      %% "akka-persistence-experimental"  % "2.3.4"              % "compile",
   "com.typesafe.akka"      %% "akka-slf4j"                     % "2.3.2"              % "compile",
   "org.scala-stm"          %% "scala-stm"                      % "0.7"                % "compile",
   "org.scalaz"             %% "scalaz-core"                    % "7.0.6"              % "compile",

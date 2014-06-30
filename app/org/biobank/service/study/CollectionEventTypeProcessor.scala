@@ -35,6 +35,8 @@ trait CollectionEventTypeProcessorComponent {
     */
   class CollectionEventTypeProcessor extends Processor {
 
+    override def persistenceId = "collection-event-processor-id"
+
     case class SnapshotState(collectionEventTypes: Set[CollectionEventType])
 
     val receiveRecover: Receive = {

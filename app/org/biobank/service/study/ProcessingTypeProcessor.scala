@@ -32,6 +32,8 @@ trait ProcessingTypeProcessorComponent {
     */
   class ProcessingTypeProcessor extends Processor {
 
+    override def persistenceId = "processing-type-processor-id"
+
     case class SnapshotState(processingTypes: Set[ProcessingType])
 
     val receiveRecover: Receive = {

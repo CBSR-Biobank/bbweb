@@ -19,6 +19,8 @@ trait CeventAnnotationTypeProcessorComponent {
 
   class CeventAnnotationTypeProcessor extends StudyAnnotationTypeProcessor[CollectionEventAnnotationType] {
 
+    override def persistenceId = "cevent-annotation-type-processor-id"
+
     case class SnapshotState(ceventAnnotationTypes: Set[CollectionEventAnnotationType])
 
     override val annotationTypeRepository = collectionEventAnnotationTypeRepository

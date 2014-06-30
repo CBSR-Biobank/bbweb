@@ -19,6 +19,8 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
 
   class SpecimenLinkAnnotationTypeProcessor extends StudyAnnotationTypeProcessor[SpecimenLinkAnnotationType] {
 
+    override def persistenceId = "specimen-link-annotation-type-processor-id"
+
     override val annotationTypeRepository = specimenLinkAnnotationTypeRepository
 
     case class SnapshotState(annotationTypes: Set[SpecimenLinkAnnotationType])
