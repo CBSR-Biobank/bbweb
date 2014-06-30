@@ -31,7 +31,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "preservationType"            -> sg.preservationType.toString,
       "preservationTemperatureType" -> sg.preservationTemperatureType.toString,
       "specimenType"                -> sg.specimenType.toString)
-    val json = makeRequest(POST, "/studies/sgroups", BAD_REQUEST, cmdJson)
+    val json = makeRequest(POST, "/admin/studies/sgroups", BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -56,7 +56,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "preservationType"            -> sg2.preservationType.toString,
       "preservationTemperatureType" -> sg2.preservationTemperatureType.toString,
       "specimenType"                -> sg2.specimenType.toString)
-    val json = makeRequest(PUT, s"/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
+    val json = makeRequest(PUT, s"/admin/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -73,7 +73,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "studyId"         -> study.id.id,
       "id"              -> sg.id.id,
       "expectedVersion" -> Some(sg.version))
-    val json = makeRequest(DELETE, s"/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
+    val json = makeRequest(DELETE, s"/admin/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -81,7 +81,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
   "Specimen Group REST API" when {
 
-    "GET /studies/sgroups" should {
+    "GET /admin/studies/sgroups" should {
       "list none" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -89,13 +89,13 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         appRepositories.studyRepository.put(study)
 
-        val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
+        val json = makeRequest(GET, s"/admin/studies/sgroups/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
       }
     }
 
-    "GET /studies/sgroups" should {
+    "GET /admin/studies/sgroups" should {
       "list a single specimen group" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -106,14 +106,14 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val sg = factory.createSpecimenGroup
         appRepositories.specimenGroupRepository.put(sg)
 
-        val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
+        val json = makeRequest(GET, s"/admin/studies/sgroups/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), sg)
       }
     }
 
-    "GET /studies/sgroups" should {
+    "GET /admin/studies/sgroups" should {
       "get a single specimen group" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -124,12 +124,12 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val sg = factory.createSpecimenGroup
         appRepositories.specimenGroupRepository.put(sg)
 
-        val jsonObj = makeRequest(GET, s"/studies/sgroups/${study.id.id}?sgId=${sg.id.id}").as[JsObject]
+        val jsonObj = makeRequest(GET, s"/admin/studies/sgroups/${study.id.id}?sgId=${sg.id.id}").as[JsObject]
         compareObj(jsonObj, sg)
       }
     }
 
-    "GET /studies/sgroups" should {
+    "GET /admin/studies/sgroups" should {
       "list multiple specimen groups" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -140,14 +140,14 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val sgroups = List(factory.createSpecimenGroup, factory.createSpecimenGroup)
         sgroups map { sg => appRepositories.specimenGroupRepository.put(sg) }
 
-        val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
+        val json = makeRequest(GET, s"/admin/studies/sgroups/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size sgroups.size
           (jsonList zip sgroups).map { item => compareObj(item._1, item._2) }
       }
     }
 
-    "POST /studies/sgroups" should {
+    "POST /admin/studies/sgroups" should {
       "add a specimen group" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -165,13 +165,13 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           "preservationType"            -> sg.preservationType.toString,
           "preservationTemperatureType" -> sg.preservationTemperatureType.toString,
           "specimenType"                -> sg.specimenType.toString)
-        val json = makeRequest(POST, "/studies/sgroups", json = cmdJson)
+        val json = makeRequest(POST, "/admin/studies/sgroups", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
       }
     }
 
-    "POST /studies/sgroups" should {
+    "POST /admin/studies/sgroups" should {
       "not add a specimen group to enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         addToNonDisabledStudy(
@@ -181,7 +181,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /studies/sgroups" should {
+    "POST /admin/studies/sgroups" should {
       "not add a specimen group to retired study" in new WithApplication(fakeApplication()) {
         doLogin
         addToNonDisabledStudy(
@@ -191,7 +191,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /studies/sgroups" should {
+    "PUT /admin/studies/sgroups" should {
       "update a specimen group" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -215,13 +215,13 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           "preservationType"            -> sg2.preservationType.toString,
           "preservationTemperatureType" -> sg2.preservationTemperatureType.toString,
           "specimenType"                -> sg2.specimenType.toString)
-        val json = makeRequest(PUT, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, s"/admin/studies/sgroups/${sg.id.id}", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
       }
     }
 
-    "PUT /studies/sgroups" should {
+    "PUT /admin/studies/sgroups" should {
       "not update a specimen group on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
@@ -231,7 +231,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /studies/sgroups" should {
+    "PUT /admin/studies/sgroups" should {
       "not update a specimen group on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
@@ -241,7 +241,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /studies/sgroups" should {
+    "DELETE /admin/studies/sgroups" should {
       "remove a specimen group" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -257,13 +257,13 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           "studyId"         -> study.id.id,
           "id"              -> sg.id.id,
           "expectedVersion" -> Some(sg.version))
-        val json = makeRequest(DELETE, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
+        val json = makeRequest(DELETE, s"/admin/studies/sgroups/${sg.id.id}", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
       }
     }
 
-    "DELETE /studies/sgroups" should {
+    "DELETE /admin/studies/sgroups" should {
       "not remove a specimen group from an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
@@ -273,7 +273,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /studies/sgroups" should {
+    "DELETE /admin/studies/sgroups" should {
       "not remove a specimen group from an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(

@@ -56,7 +56,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       POST,
-      "/studies/ceannottype",
+      "/admin/studies/ceannottype",
       BAD_REQUEST,
       annotTypeToAddCmdJson(annotType))
 
@@ -74,7 +74,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       PUT,
-      s"/studies/ceannottype/${annotType.id.id}",
+      s"/admin/studies/ceannottype/${annotType.id.id}",
       BAD_REQUEST,
       annotTypeToUpdateCmdJson(annotType))
 
@@ -95,7 +95,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       DELETE,
-      s"/studies/ceannottype/${annotType.id.id}",
+      s"/admin/studies/ceannottype/${annotType.id.id}",
       BAD_REQUEST,
       annotTypeToRemoveCmdJson(annotType))
 
@@ -104,7 +104,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
   }
 
   "Collection Event Type REST API" when {
-    "GET /studies/ceannottype" should {
+    "GET /admin/studies/ceannottype" should {
       "list none" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -112,13 +112,13 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         appRepositories.studyRepository.put(study)
 
-        val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}")
+        val json = makeRequest(GET, s"/admin/studies/ceannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
       }
     }
 
-    "GET /studies/ceannottype" should {
+    "GET /admin/studies/ceannottype" should {
       "list a single collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -129,14 +129,14 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createCollectionEventAnnotationType
         appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
 
-        val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}")
+        val json = makeRequest(GET, s"/admin/studies/ceannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), annotType)
       }
     }
 
-    "GET /studies/ceannottype" should {
+    "GET /admin/studies/ceannottype" should {
       "get a single collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -147,12 +147,12 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createCollectionEventAnnotationType
         appRepositories.collectionEventAnnotationTypeRepository.put(annotType)
 
-        val jsonObj = makeRequest(GET, s"/studies/ceannottype/${study.id.id}?annotTypeId=${annotType.id.id}").as[JsObject]
+        val jsonObj = makeRequest(GET, s"/admin/studies/ceannottype/${study.id.id}?annotTypeId=${annotType.id.id}").as[JsObject]
         compareObj(jsonObj, annotType)
       }
     }
 
-    "GET /studies/ceannottype" should {
+    "GET /admin/studies/ceannottype" should {
       "list multiple collection event annotation types" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -165,7 +165,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
           factory.createCollectionEventAnnotationType)
         annotTypes map { annotType => appRepositories.collectionEventAnnotationTypeRepository.put(annotType) }
 
-        val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}")
+        val json = makeRequest(GET, s"/admin/studies/ceannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
 
         jsonList should have size annotTypes.size
@@ -174,7 +174,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /studies/ceannottype" should {
+    "POST /admin/studies/ceannottype" should {
       "add a collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -183,12 +183,12 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         appRepositories.studyRepository.put(study)
 
         val annotType = factory.createCollectionEventAnnotationType
-        val json = makeRequest(POST, "/studies/ceannottype", json = annotTypeToAddCmdJson(annotType))
+        val json = makeRequest(POST, "/admin/studies/ceannottype", json = annotTypeToAddCmdJson(annotType))
           (json \ "status").as[String] should include ("success")
       }
     }
 
-    "POST /studies/ceannottype" should {
+    "POST /admin/studies/ceannottype" should {
       "not add a collection event annotation type to an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
@@ -197,7 +197,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /studies/ceannottype" should {
+    "POST /admin/studies/ceannottype" should {
       "not add a collection event annotation type to an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
@@ -206,7 +206,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /studies/ceannottype" should {
+    "PUT /admin/studies/ceannottype" should {
       "update a collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -223,14 +223,14 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         )
 
         val json = makeRequest(PUT,
-          s"/studies/ceannottype/${annotType.id.id}",
+          s"/admin/studies/ceannottype/${annotType.id.id}",
           json = annotTypeToUpdateCmdJson(annotType2))
 
         (json \ "status").as[String] should include ("success")
       }
     }
 
-    "PUT /studies/ceannottype" should {
+    "PUT /admin/studies/ceannottype" should {
       "not update a collection event annotation type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
@@ -239,7 +239,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /studies/ceannottype" should {
+    "PUT /admin/studies/ceannottype" should {
       "not update a collection event annotation type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
@@ -248,7 +248,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /studies/ceannottype" should {
+    "DELETE /admin/studies/ceannottype" should {
       "remove a collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -261,14 +261,14 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(
           DELETE,
-          s"/studies/ceannottype/${annotType.id.id}",
+          s"/admin/studies/ceannottype/${annotType.id.id}",
           json = annotTypeToRemoveCmdJson(annotType))
 
         (json \ "status").as[String] should include ("success")
       }
     }
 
-    "DELETE /studies/ceannottype" should {
+    "DELETE /admin/studies/ceannottype" should {
       "not remove a collection event annotation type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
@@ -277,7 +277,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /studies/ceannottype" should {
+    "DELETE /admin/studies/ceannottype" should {
       "not remove a collection event annotation type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(

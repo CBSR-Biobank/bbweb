@@ -48,7 +48,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         ))
     )
 
-    val json = makeRequest(POST, "/studies/cetypes", BAD_REQUEST, cmdJson)
+    val json = makeRequest(POST, "/admin/studies/cetypes", BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -92,7 +92,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         ))
     )
 
-    val json = makeRequest(PUT, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
+    val json = makeRequest(PUT, s"/admin/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -120,7 +120,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "expectedVersion" -> Some(cet.version)
     )
 
-    val json = makeRequest(DELETE, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
+    val json = makeRequest(DELETE, s"/admin/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -128,7 +128,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
 
   "Collection Event Type REST API" when {
 
-    "GET /studies/cetypes" should {
+    "GET /admin/studies/cetypes" should {
       "list none" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -136,13 +136,13 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         appRepositories.studyRepository.put(study)
 
-        val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}")
+        val json = makeRequest(GET, s"/admin/studies/cetypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
       }
     }
 
-    "GET /studies/cetypes" should {
+    "GET /admin/studies/cetypes" should {
       "list a single collection event type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -153,14 +153,14 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val cet = factory.createCollectionEventType
         appRepositories.collectionEventTypeRepository.put(cet)
 
-        val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}")
+        val json = makeRequest(GET, s"/admin/studies/cetypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), cet)
       }
     }
 
-    "GET /studies/cetypes" should {
+    "GET /admin/studies/cetypes" should {
       "get a single collection event type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -171,12 +171,12 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val cet = factory.createCollectionEventType
         appRepositories.collectionEventTypeRepository.put(cet)
 
-        val jsonObj = makeRequest(GET, s"/studies/cetypes/${study.id.id}?cetId=${cet.id.id}").as[JsObject]
+        val jsonObj = makeRequest(GET, s"/admin/studies/cetypes/${study.id.id}?cetId=${cet.id.id}").as[JsObject]
         compareObj(jsonObj, cet)
       }
     }
 
-    "GET /studies/cetypes" should {
+    "GET /admin/studies/cetypes" should {
       "list multiple collection event types" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -195,7 +195,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val cetypes = List(cet1, cet2)
         cetypes map { cet => appRepositories.collectionEventTypeRepository.put(cet) }
 
-        val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}")
+        val json = makeRequest(GET, s"/admin/studies/cetypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
 
         jsonList should have size cetypes.size
@@ -204,7 +204,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /studies/cetypes" should {
+    "POST /admin/studies/cetypes" should {
       "add a collection event type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -241,13 +241,13 @@ class CeventTypeControllerSpec extends ControllerFixture {
             ))
         )
 
-        val json = makeRequest(POST, "/studies/cetypes", json = cmdJson)
+        val json = makeRequest(POST, "/admin/studies/cetypes", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
       }
     }
 
-    "POST /studies/cetypes" should {
+    "POST /admin/studies/cetypes" should {
       "not add a collection event type to an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
@@ -256,7 +256,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /studies/cetypes" should {
+    "POST /admin/studies/cetypes" should {
       "not add a collection event type to an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
@@ -265,7 +265,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /studies/cetypes" should {
+    "PUT /admin/studies/cetypes" should {
       "update a collection event type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -307,13 +307,13 @@ class CeventTypeControllerSpec extends ControllerFixture {
             ))
         )
 
-        val json = makeRequest(PUT, s"/studies/cetypes/${cet.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, s"/admin/studies/cetypes/${cet.id.id}", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
       }
     }
 
-    "PUT /studies/cetypes" should {
+    "PUT /admin/studies/cetypes" should {
       "not update a collection event type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
@@ -322,7 +322,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /studies/cetypes" should {
+    "PUT /admin/studies/cetypes" should {
       "not update a collection event type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
@@ -331,7 +331,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /studies/cetypes" should {
+    "DELETE /admin/studies/cetypes" should {
       "remove a collection event type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -357,13 +357,13 @@ class CeventTypeControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(cet.version)
         )
 
-        val json = makeRequest(DELETE, s"/studies/cetypes/${cet.id.id}", json = cmdJson)
+        val json = makeRequest(DELETE, s"/admin/studies/cetypes/${cet.id.id}", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
       }
     }
 
-    "DELETE /studies/cetypes" should {
+    "DELETE /admin/studies/cetypes" should {
       "not remove a collection event type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
@@ -372,7 +372,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /studies/cetypes" should {
+    "DELETE /admin/studies/cetypes" should {
       "not remove a collection event type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(

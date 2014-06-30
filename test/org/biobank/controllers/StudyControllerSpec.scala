@@ -21,10 +21,10 @@ class StudyControllerSpec extends ControllerFixture {
 
   "Study REST API" when {
 
-    "GET /studies" should {
+    "GET /admin/studies" should {
       "list none" in new WithApplication(fakeApplication()) {
         doLogin
-        val json = makeRequest(GET, "/studies")
+        val json = makeRequest(GET, "/admin/studies")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
       }
@@ -36,7 +36,7 @@ class StudyControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         appRepositories.studyRepository.put(study)
 
-        val json = makeRequest(GET, "/studies")
+        val json = makeRequest(GET, "/admin/studies")
         val jsonList = json.as[List[JsObject]]
         jsonList should have length 1
         compareObj(jsonList(0), study)
@@ -50,7 +50,7 @@ class StudyControllerSpec extends ControllerFixture {
         appRepositories.studyRepository.removeAll
         studies.map(study => appRepositories.studyRepository.put(study))
 
-        val json = makeRequest(GET, "/studies")
+        val json = makeRequest(GET, "/admin/studies")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size studies.size
 
@@ -58,7 +58,7 @@ class StudyControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /studies" should {
+    "POST /admin/studies" should {
       "add a study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -67,7 +67,7 @@ class StudyControllerSpec extends ControllerFixture {
           "type" -> "AddStudyCmd",
           "name" -> study.name,
           "description" -> study.description)
-        val json = makeRequest(POST, "/studies", json = cmdJson)
+        val json = makeRequest(POST, "/admin/studies", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
 
@@ -80,7 +80,7 @@ class StudyControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /studies/:id" should {
+    "PUT /admin/studies/:id" should {
       "update a study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -94,7 +94,7 @@ class StudyControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(study.version),
           "name"            -> study.name,
           "description"     -> study.description)
-        val json = makeRequest(PUT, s"/studies/${study.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, s"/admin/studies/${study.id.id}", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
 
@@ -108,19 +108,19 @@ class StudyControllerSpec extends ControllerFixture {
       }
     }
 
-    "GET /studies/:id" should {
+    "GET /admin/studies/:id" should {
       "read a study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
 
         val study = factory.createDisabledStudy.enable(Some(0), org.joda.time.DateTime.now, 1, 1) | fail
         appRepositories.studyRepository.put(study)
-        val json = makeRequest(GET, s"/studies/${study.id.id}")
+        val json = makeRequest(GET, s"/admin/studies/${study.id.id}")
         compareObj(json, study)
       }
     }
 
-    "POST /studies/enable" should {
+    "POST /admin/studies/enable" should {
       "enable a study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -134,7 +134,7 @@ class StudyControllerSpec extends ControllerFixture {
           "type" -> "EnableStudyCmd",
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, "/studies/enable", json = cmdJson)
+        val json = makeRequest(POST, "/admin/studies/enable", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
 
@@ -147,7 +147,7 @@ class StudyControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /studies/enable" should {
+    "POST /admin/studies/enable" should {
       "not enable a study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -159,14 +159,14 @@ class StudyControllerSpec extends ControllerFixture {
           "type" -> "EnableStudyCmd",
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, "/studies/enable", BAD_REQUEST, cmdJson)
+        val json = makeRequest(POST, "/admin/studies/enable", BAD_REQUEST, cmdJson)
 
         (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("no specimen groups")
       }
     }
 
-    "POST /studies/disable" should {
+    "POST /admin/studies/disable" should {
       "disable a study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -178,7 +178,7 @@ class StudyControllerSpec extends ControllerFixture {
           "type" -> "DisableStudyCmd",
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, "/studies/disable", json = cmdJson)
+        val json = makeRequest(POST, "/admin/studies/disable", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
 
@@ -191,7 +191,7 @@ class StudyControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /studies/retire" should {
+    "POST /admin/studies/retire" should {
       "retire a study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -203,7 +203,7 @@ class StudyControllerSpec extends ControllerFixture {
           "type" -> "RetireStudyCmd",
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, "/studies/retire", json = cmdJson)
+        val json = makeRequest(POST, "/admin/studies/retire", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
 
@@ -216,7 +216,7 @@ class StudyControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /studies/unretire" should {
+    "POST /admin/studies/unretire" should {
       "unretire a study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -228,7 +228,7 @@ class StudyControllerSpec extends ControllerFixture {
           "type" -> "UnretireStudyCmd",
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, "/studies/unretire", json = cmdJson)
+        val json = makeRequest(POST, "/admin/studies/unretire", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
 
@@ -241,47 +241,47 @@ class StudyControllerSpec extends ControllerFixture {
       }
     }
 
-    "GET /studies/valuetypes" should {
+    "GET /admin/studies/valuetypes" should {
       "list all" in new WithApplication(fakeApplication()) {
         doLogin
-        val json = makeRequest(GET, "/studies/valuetypes")
+        val json = makeRequest(GET, "/admin/studies/valuetypes")
         val values = json.as[List[String]]
         values.size should be > 0
       }
     }
 
 
-    "GET /studies/anatomicalsrctypes" should {
+    "GET /admin/studies/anatomicalsrctypes" should {
       "list all" in new WithApplication(fakeApplication()) {
         doLogin
-        val json = makeRequest(GET, "/studies/anatomicalsrctypes")
+        val json = makeRequest(GET, "/admin/studies/anatomicalsrctypes")
         val values = json.as[List[String]]
         values.size should be > 0
       }
     }
 
-    "GET /studies/specimentypes" should {
+    "GET /admin/studies/specimentypes" should {
       "list all" in new WithApplication(fakeApplication()) {
         doLogin
-        val json = makeRequest(GET, "/studies/specimentypes")
+        val json = makeRequest(GET, "/admin/studies/specimentypes")
         val values = json.as[List[String]]
         values.size should be > 0
       }
     }
 
-    "GET /studies/preservtypes" should {
+    "GET /admin/studies/preservtypes" should {
       "list all" in new WithApplication(fakeApplication()) {
         doLogin
-        val json = makeRequest(GET, "/studies/preservtypes")
+        val json = makeRequest(GET, "/admin/studies/preservtypes")
         val values = json.as[List[String]]
         values.size should be > 0
       }
     }
 
-    "GET /studies/preservtemptypes " should {
+    "GET /admin/studies/preservtemptypes " should {
       "list all" in new WithApplication(fakeApplication()) {
         doLogin
-        val json = makeRequest(GET, "/studies/preservtemptypes")
+        val json = makeRequest(GET, "/admin/studies/preservtemptypes")
         val values = json.as[List[String]]
         values.size should be > 0
       }
