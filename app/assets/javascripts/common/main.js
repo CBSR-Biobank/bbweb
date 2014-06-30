@@ -5,8 +5,10 @@ define([
   'angular',
   './services/helper',
   './services/playRoutes',
+  './controllers/errorModal',
   './filters',
-  './directives/example',
+  './directives/forms',
+  './directives/uiBreadcrumbs',
   './directives/ngLoginSubmit'],
        function(angular) {
          'use strict';
@@ -15,7 +17,9 @@ define([
            'biobank.common', [
              'common.helper',
              'common.playRoutes',
+             'common.errorModal',
              'common.filters',
-             'common.directives.example',
+             'common.directives.forms',
+             'common.directives.uiBreadcrumbs',
              'common.directives.ngLoginSubmit']);
        });

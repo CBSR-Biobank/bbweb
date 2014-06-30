@@ -2,7 +2,7 @@ package org.biobank.controllers.study
 
 import org.biobank.controllers._
 import org.biobank.service._
-import org.biobank.service.json.Study._
+import org.biobank.service.json.Events._
 import org.biobank.service.json.SpecimenGroup._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain.study._
@@ -30,46 +30,46 @@ object SpecimenGroupController extends BbwebController {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(BodyParsers.parse.json) { token => userId => implicit request =>
-    val idResult = request.body.validate[StudyId]
-    idResult.fold(
-      errors => {
-        BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors)))
-      },
-      studyId => {
-        Logger.info(s"list: $studyId")
-        val json = Json.toJson(studyService.specimenGroupsForStudy(studyId.id).toList)
-        Ok(json)
-      }
-    )
-  }
+  def get(studyId: String, sgId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.debug(s"SpecimenGroupController.get: studyId: $studyId, sgId: $sgId")
 
-  def addSpecimenGroup = CommandAction { cmd: AddSpecimenGroupCmd => userId =>
-    val future = studyService.addSpecimenGroup(cmd)(null)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group added: ${event.name}.") ))
+    sgId.fold {
+      Ok(Json.toJson(studyService.specimenGroupsForStudy(studyId).toList))
+    } {
+      id =>
+      studyService.specimenGroupWithId(studyId, id).fold(
+        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        specimenGroup => Ok(Json.toJson(specimenGroup))
       )
     }
   }
 
-  def updateSpecimenGroup(id: String) = CommandAction { cmd: UpdateSpecimenGroupCmd => userId =>
-    val future = studyService.updateSpecimenGroup(cmd)(null)
+  def addSpecimenGroup = CommandAction(numFields = 8) { cmd: AddSpecimenGroupCmd => implicit userId =>
+    val future = studyService.addSpecimenGroup(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group updated: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
 
-  def removeSpecimenGroup(id: String) = CommandAction { cmd: RemoveSpecimenGroupCmd => userId =>
-    val future = studyService.removeSpecimenGroup(cmd)(null)
+  def updateSpecimenGroup(id: String) = CommandAction { cmd: UpdateSpecimenGroupCmd => implicit userId =>
+    val future = studyService.updateSpecimenGroup(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"specimen group removed: ${event.specimenGroupId}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
+      )
+    }
+  }
+
+  def removeSpecimenGroup(id: String) = CommandAction { cmd: RemoveSpecimenGroupCmd => implicit userId =>
+    val future = studyService.removeSpecimenGroup(cmd)
+    future.map { validation =>
+      validation.fold(
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }

@@ -2,6 +2,7 @@ package org.biobank.service.json
 
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
@@ -31,28 +32,48 @@ object ProcessingType {
   )(unlift(org.biobank.domain.study.ProcessingType.unapply))
 
   implicit val addProcessingTypeCmdReads: Reads[AddProcessingTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "AddProcessingTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "enabled").read[Boolean]
-  )((studyId, name, description, enabled) => AddProcessingTypeCmd(studyId, name, description, enabled))
+  )(AddProcessingTypeCmd.apply _)
 
   implicit val updateProcessingTypeCmdReads: Reads[UpdateProcessingTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateProcessingTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "enabled").read[Boolean]
-  )((studyId, id, expectedVersion, name, description, enabled) =>
-    UpdateProcessingTypeCmd(studyId, id, expectedVersion, name, description, enabled))
+  )(UpdateProcessingTypeCmd.apply _)
 
   implicit val removeProcessingTypeCmdReads: Reads[RemoveProcessingTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveProcessingTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )((studyId, id, expectedVersion) => RemoveProcessingTypeCmd(studyId, id, expectedVersion))
+  )(RemoveProcessingTypeCmd.apply _)
+
+  implicit val processingTypeAddedEventWrites: Writes[ProcessingTypeAddedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "processingTypeId").write[String] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").write[Option[String]] and
+      (__ \ "enabled").write[Boolean]
+  )(unlift(ProcessingTypeAddedEvent.unapply))
+
+  implicit val processingTypeUpdatedEventWrites: Writes[ProcessingTypeUpdatedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "processingTypeId").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").write[Option[String]] and
+      (__ \ "enabled").write[Boolean]
+  )(unlift(ProcessingTypeUpdatedEvent.unapply))
+
+  implicit val collectionEventAnnotationTypeRemovedEventWriter: Writes[ProcessingTypeRemovedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "processingTypeId").write[String]
+  )(unlift(ProcessingTypeRemovedEvent.unapply))
 }

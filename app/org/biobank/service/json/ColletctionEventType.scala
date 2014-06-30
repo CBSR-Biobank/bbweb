@@ -3,6 +3,7 @@ package org.biobank.service.json
 import org.biobank.infrastructure._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEvents._
 
 import play.api.libs.json._
 import play.api.libs.json.Reads._
@@ -52,19 +53,16 @@ object CollectionEventType {
   )(CollectionEventTypeAnnotationTypeData)
 
   implicit val addCollectionEventTypeCmdReads: Reads[AddCollectionEventTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "AddCollectionEventTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "recurring").read[Boolean] and
       (__ \ "specimenGroupData").read[List[CollectionEventTypeSpecimenGroupData]] and
       (__ \ "annotationTypeData").read[List[CollectionEventTypeAnnotationTypeData]]
-  )((studyId, name, description, recurring, specimenGroupData, annotationTypeData) =>
-    AddCollectionEventTypeCmd(studyId, name, description, recurring, specimenGroupData, annotationTypeData))
+  )(AddCollectionEventTypeCmd.apply _)
 
   implicit val updateCollectionEventTypeCmdReads: Reads[UpdateCollectionEventTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateCollectionEventTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
@@ -72,13 +70,39 @@ object CollectionEventType {
       (__ \ "recurring").read[Boolean] and
       (__ \ "specimenGroupData").read[List[CollectionEventTypeSpecimenGroupData]] and
       (__ \ "annotationTypeData").read[List[CollectionEventTypeAnnotationTypeData]]
-  )((studyId, id, expectedVersion, name, description, recurring, specimenGroupData, annotationTypeData) =>
-    UpdateCollectionEventTypeCmd(studyId, id, expectedVersion, name, description, recurring, specimenGroupData, annotationTypeData))
+  )(UpdateCollectionEventTypeCmd.apply _)
 
   implicit val removeCollectionEventTypeCmdReads: Reads[RemoveCollectionEventTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveCollectionEventTypeCmd")) andKeep
-      (__ \ "studyId").read[String](minLength[String](2)) and
+    (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )((studyId, id, expectedVersion) => RemoveCollectionEventTypeCmd(studyId, id, expectedVersion))
+  )(RemoveCollectionEventTypeCmd.apply _)
+
+  implicit val collectionEventTypeAddedEventWriter: Writes[CollectionEventTypeAddedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "collectionEventTypeId").write[String] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").writeNullable[String] and
+      (__ \ "recurring").write[Boolean] and
+      (__ \ "specimenGroupData").write[List[CollectionEventTypeSpecimenGroupData]] and
+      (__ \ "annotationTypeData").write[List[CollectionEventTypeAnnotationTypeData]]
+  )(unlift(CollectionEventTypeAddedEvent.unapply))
+
+  implicit val collectionEventTypeUpdatedEventWriter: Writes[CollectionEventTypeUpdatedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "collectionEventTypeId").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "description").write[Option[String]] and
+      (__ \ "recurring").write[Boolean] and
+      (__ \ "specimenGroupData").write[List[CollectionEventTypeSpecimenGroupData]] and
+      (__ \ "annotationTypeData").write[List[CollectionEventTypeAnnotationTypeData]]
+  )(unlift(CollectionEventTypeUpdatedEvent.unapply))
+
+  implicit val collectionEventTypeRemovedEventWriter: Writes[CollectionEventTypeRemovedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "collectionEventTypeId").write[String]
+  )(unlift(CollectionEventTypeRemovedEvent.unapply))
 }

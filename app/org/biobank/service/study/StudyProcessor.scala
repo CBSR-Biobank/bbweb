@@ -65,6 +65,11 @@ trait StudyProcessorComponent
 
     val receiveRecover: Receive = {
       case event: StudyAddedEvent => recoverEvent(event)
+      case event: StudyUpdatedEvent => recoverEvent(event)
+      case event: StudyEnabledEvent => recoverEvent(event)
+      case event: StudyDisabledEvent => recoverEvent(event)
+      case event: StudyRetiredEvent => recoverEvent(event)
+      case event: StudyUnretiredEvent => recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.studies.foreach{ study => studyRepository.put(study) }

@@ -116,7 +116,7 @@ trait UserProcessorComponent {
           UserId(cmd.email), -1L, DateTime.now, cmd.name, cmd.email, cmd.password,
           hasher, salt, cmd.avatarUrl)
         event <- UserRegisteredEvent(user.id.toString, DateTime.now, user.name, user.email,
-          user.password, user.hasher, user.salt, user.avatarUrl).success
+          user.password, user.avatarUrl).success
       } yield {
         event
       }
@@ -144,8 +144,7 @@ trait UserProcessorComponent {
           cmd.expectedVersion, timeNow, cmd.name, cmd.email, cmd.password,
           activeUser.hasher, activeUser.salt, cmd.avatarUrl)
         event <- UserUpdatedEvent(updatedUser.id.id, updatedUser.version, timeNow, updatedUser.name,
-          updatedUser.email, updatedUser.password, updatedUser.hasher, updatedUser.salt,
-          updatedUser.avatarUrl).success
+          updatedUser.email, updatedUser.password, updatedUser.avatarUrl).success
       } yield {
         event
       }
@@ -179,8 +178,9 @@ trait UserProcessorComponent {
     def recoverEvent(event: UserRegisteredEvent) = {
       log.debug(s"recoverEvent: $event")
       val validation = for {
+        // FIXME: add hasher and salt to user
         registeredUser <- RegisteredUser.create(UserId(event.email), -1L, event.dateTime, event.name,
-          event.email, event.password, event.hasher, event.salt, event.avatarUrl)
+          event.email, event.password, "fixme-hasher", Some("fixme-salt"), event.avatarUrl)
         savedUser <- userRepository.put(registeredUser).success
       } yield savedUser
 
@@ -216,7 +216,7 @@ trait UserProcessorComponent {
         activeUser <- isUserActive(user)
         updatedUser <- activeUser.update(
           Some(activeUser.version), event.dateTime, event.name, event.email,
-          event.password, event.hasher, event.salt, event.avatarUrl)
+          event.password, activeUser.hasher, activeUser.salt, event.avatarUrl)
         savedUser <- userRepository.put(updatedUser).success
       } yield savedUser
 

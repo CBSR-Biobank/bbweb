@@ -44,10 +44,9 @@ class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepository[K,
   def isEmpty: Boolean = getMap.isEmpty
 
   def getByKey(key: K): DomainValidation[A] = {
-    getMap.get(key) match {
-      case Some(value) => value.success
-      case None => DomainError(s"${this.getClass.getSimpleName}: value with key $key not found").failNel
-    }
+    getMap.get(key).flatMap { value =>
+      some(value.successNel)
+    } getOrElse DomainError(s"${this.getClass.getSimpleName}: value with key $key not found").failNel
   }
 
   def getValues: Iterable[A] = getMap.values

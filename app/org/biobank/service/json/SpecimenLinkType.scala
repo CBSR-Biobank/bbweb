@@ -3,6 +3,7 @@ package org.biobank.service.json
 import org.biobank.domain.study._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.ContainerTypeId
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
@@ -52,8 +53,7 @@ object SpecimenLinkType {
   )(SpecimenLinkTypeAnnotationTypeData)
 
   implicit val addSpecimenLinkTypeCmdReads: Reads[AddSpecimenLinkTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "AddSpecimenLinkTypeCmd")) andKeep
-      (__ \ "processingTypeId").read[String](minLength[String](2)) and
+    (__ \ "processingTypeId").read[String](minLength[String](2)) and
       (__ \ "expectedInputChange").read[BigDecimal] and
       (__ \ "expectedOutputChange").read[BigDecimal] and
       (__ \ "inputCount").read[Int] and
@@ -63,15 +63,10 @@ object SpecimenLinkType {
       (__ \ "inputContainerTypeId").read[Option[String]] and
       (__ \ "outputContainerTypeId").read[Option[String]] and
       (__ \ "annotationTypeData").read[List[SpecimenLinkTypeAnnotationTypeData]]
-  )((processingTypeId, expectedInputChange, expectedOutputChange, inputCount, outputCount,
-    inputGroupId, outputGroupId, inputContainerTypeId, outputContainerTypeId, annotationTypeData) =>
-    AddSpecimenLinkTypeCmd(processingTypeId, expectedInputChange, expectedOutputChange, inputCount,
-      outputCount, inputGroupId, outputGroupId, inputContainerTypeId, outputContainerTypeId,
-      annotationTypeData))
+  )(AddSpecimenLinkTypeCmd.apply _)
 
   implicit val updateSpecimenLinkTypeCmdReads: Reads[UpdateSpecimenLinkTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateSpecimenLinkTypeCmd")) andKeep
-      (__ \ "processingTypeId").read[String](minLength[String](2)) and
+    (__ \ "processingTypeId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "expectedInputChange").read[BigDecimal] and
@@ -83,17 +78,47 @@ object SpecimenLinkType {
       (__ \ "inputContainerTypeId").read[Option[String]] and
       (__ \ "outputContainerTypeId").read[Option[String]] and
       (__ \ "annotationTypeData").read[List[SpecimenLinkTypeAnnotationTypeData]]
-  )((processingTypeId, id, expectedVersion, expectedInputChange, expectedOutputChange, inputCount,
-    outputCount, inputGroupId, outputGroupId, inputContainerTypeId, outputContainerTypeId,
-    annotationTypeData) =>
-    UpdateSpecimenLinkTypeCmd(processingTypeId, id, expectedVersion, expectedInputChange,
-      expectedOutputChange, inputCount, outputCount, inputGroupId, outputGroupId,
-      inputContainerTypeId, outputContainerTypeId, annotationTypeData))
+  )(UpdateSpecimenLinkTypeCmd.apply _)
 
   implicit val removeSpecimenLinkTypeCmdReads: Reads[RemoveSpecimenLinkTypeCmd] = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveSpecimenLinkTypeCmd")) andKeep
-      (__ \ "processingTypeId").read[String](minLength[String](2)) and
+    (__ \ "processingTypeId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )((studyId, id, expectedVersion) => RemoveSpecimenLinkTypeCmd(studyId, id, expectedVersion))
+  )(RemoveSpecimenLinkTypeCmd.apply _)
+
+  implicit val specimenLinkTypeAddedEventWrites: Writes[SpecimenLinkTypeAddedEvent] = (
+    (__ \ "processingTypeId").write[String] and
+      (__ \ "specimenLinkTypeId").write[String] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "expectedInputChange").write[BigDecimal] and
+      (__ \ "expectedOutputChange").write[BigDecimal] and
+      (__ \ "inputCount").write[Int] and
+      (__ \ "outputCount").write[Int] and
+      (__ \ "inputGroupId").write[SpecimenGroupId] and
+      (__ \ "outputGroupId").write[SpecimenGroupId] and
+      (__ \ "inputContainerTypeId").write[Option[ContainerTypeId]] and
+      (__ \ "outputContainerTypeId").write[Option[ContainerTypeId]] and
+      (__ \ "annotationTypeData").write[List[SpecimenLinkTypeAnnotationTypeData]]
+  )(unlift(SpecimenLinkTypeAddedEvent.unapply))
+
+  implicit val specimenLinkTypeUpdatedEventWrites: Writes[SpecimenLinkTypeUpdatedEvent] = (
+    (__ \ "processingTypeId").write[String] and
+      (__ \ "specimenLinkTypeId").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "expectedInputChange").write[BigDecimal] and
+      (__ \ "expectedOutputChange").write[BigDecimal] and
+      (__ \ "inputCount").write[Int] and
+      (__ \ "outputCount").write[Int] and
+      (__ \ "inputGroupId").write[SpecimenGroupId] and
+      (__ \ "outputGroupId").write[SpecimenGroupId] and
+      (__ \ "inputContainerTypeId").write[Option[ContainerTypeId]] and
+      (__ \ "outputContainerTypeId").write[Option[ContainerTypeId]] and
+      (__ \ "annotationTypeData").write[List[SpecimenLinkTypeAnnotationTypeData]]
+  )(unlift(SpecimenLinkTypeUpdatedEvent.unapply))
+
+  implicit val specimenLinkTypeRemovedEventWriter: Writes[SpecimenLinkTypeRemovedEvent] = (
+    (__ \ "studyId").write[String] and
+      (__ \ "specimenLinkTypeId").write[String]
+  )(unlift(SpecimenLinkTypeRemovedEvent.unapply))
 }

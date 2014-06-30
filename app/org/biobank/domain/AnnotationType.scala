@@ -32,7 +32,7 @@ trait AnnotationType
     *
     * @todo describe why this is a map.
     */
-  val options: Option[Map[String, String]]
+  val options: Option[Seq[String]]
 
   private def validateValueType: DomainValidation[Boolean] = {
     if (valueType.equals(AnnotationValueType.Select)) {

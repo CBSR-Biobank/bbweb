@@ -17,7 +17,6 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
   private def procTypeToAddCmdJson(procType: ProcessingType) = {
     Json.obj(
-      "type"        -> "AddProcessingTypeCmd",
       "studyId"     -> procType.studyId.id,
       "name"        -> procType.name,
       "description" -> procType.description,
@@ -27,7 +26,6 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
   private def procTypeToUpdateCmdJson(procType: ProcessingType) = {
     Json.obj(
-      "type"            -> "UpdateProcessingTypeCmd",
       "studyId"         -> procType.studyId.id,
       "id"              -> procType.id.id,
       "expectedVersion" -> Some(procType.version),
@@ -39,7 +37,6 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
   private def procTypeToRemoveCmdJson(procType: ProcessingType) = {
     Json.obj(
-      "type"            -> "RemoveProcessingTypeCmd",
       "studyId"         -> procType.studyId.id,
       "id"              -> procType.id.id,
       "expectedVersion" -> Some(procType.version)
@@ -56,12 +53,13 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
     val procType = factory.createProcessingType
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       POST,
       "/studies/proctypes",
       BAD_REQUEST,
       procTypeToAddCmdJson(procType))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -75,12 +73,13 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
     val procType2 = factory.createProcessingType
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       PUT,
       s"/studies/proctypes/${procType.id.id}",
       BAD_REQUEST,
       procTypeToUpdateCmdJson(procType2))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -92,12 +91,13 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     val procType = factory.createProcessingType
     appRepositories.processingTypeRepository.put(procType)
 
-    val json = makeJsonRequest(
+    val json = makeRequest(
       DELETE,
       s"/studies/proctypes/${procType.id.id}",
       BAD_REQUEST,
       procTypeToRemoveCmdJson(procType))
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -111,8 +111,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         appRepositories.studyRepository.put(study)
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/proctypes", json = idJson)
+        val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
       }
@@ -129,11 +128,26 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         appRepositories.processingTypeRepository.put(procType)
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/proctypes", json = idJson)
+        val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), procType)
+      }
+    }
+
+    "GET /studies/proctypes" should {
+      "get a single processing type" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
+
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
+
+        val procType = factory.createProcessingType
+        appRepositories.processingTypeRepository.put(procType)
+
+        val jsonObj = makeRequest(GET, s"/studies/proctypes/${study.id.id}?procTypeId=${procType.id.id}").as[JsObject]
+        compareObj(jsonObj, procType)
       }
     }
 
@@ -149,8 +163,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
         proctypes map { procType => appRepositories.processingTypeRepository.put(procType) }
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/proctypes", json = idJson)
+        val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
 
         jsonList should have size proctypes.size
@@ -168,12 +181,12 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         appRepositories.studyRepository.put(study)
 
         val procType = factory.createProcessingType
-        val json = makeJsonRequest(
+        val json = makeRequest(
           POST,
           "/studies/proctypes",
           json = procTypeToAddCmdJson(procType))
 
-        (json \ "message").as[String] should include ("processing type added")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -211,12 +224,12 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
           version = procType.version
         )
 
-        val json = makeJsonRequest(
+        val json = makeRequest(
           PUT,
           s"/studies/proctypes/${procType.id.id}",
           json = procTypeToUpdateCmdJson(procType2))
 
-        (json \ "message").as[String] should include ("processing type updated")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -249,12 +262,12 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         appRepositories.processingTypeRepository.put(procType)
 
-        val json = makeJsonRequest(
+        val json = makeRequest(
           DELETE,
           s"/studies/proctypes/${procType.id.id}",
           json = procTypeToRemoveCmdJson(procType))
 
-        (json \ "message").as[String] should include ("processing type removed")
+        (json \ "status").as[String] should include ("success")
       }
     }
 

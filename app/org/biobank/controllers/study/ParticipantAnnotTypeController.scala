@@ -3,7 +3,7 @@ package org.biobank.controllers.study
 import org.biobank.controllers._
 import org.biobank.service._
 import org.biobank.service.{ ServiceComponent, ServiceComponentImpl }
-import org.biobank.service.json.Study._
+import org.biobank.service.json.Events._
 import org.biobank.service.json.ParticipantAnnotationType._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain.study._
@@ -25,52 +25,55 @@ object ParticipantAnnotTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(BodyParsers.parse.json) { token => userId => implicit request =>
-    val idResult = request.body.validate[StudyId]
-    idResult.fold(
-      errors => {
-        BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors)))
-      },
-      studyId => {
-        Logger.info(s"list: $studyId")
-        val json = Json.toJson(studyService.participantAnnotationTypesForStudy(studyId.id).toList)
-        Ok(json)
-      }
-    )
-  }
+  /**
+    * If [[annotTypeId]] is an empty string, then all the participant annotation types for the
+    * study are returned. If non empty, the annotation with the matching [[studyId]] and
+    * [[annotTypeId]] is returned.
+    *
+    * If [[studyId]] is invalid then an empty array is returned.
+    *
+    * If no matching annotation type is found then an error result is returned.
+    */
+  def get(studyId: String, annotTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.info(s"ParticipantAnnotTypeController.get: studyId: $studyId, annotTypeId: $annotTypeId")
 
-  def addAnnotationType = CommandAction { cmd: AddParticipantAnnotationTypeCmd => userId =>
-    val future = studyService.addParticipantAnnotationType(cmd)(null)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"annotation type added: ${event.name}.") ))
+    annotTypeId.fold {
+      Ok(Json.toJson(studyService.participantAnnotationTypesForStudy(studyId).toList))
+    } {
+      id =>
+      studyService.participantAnnotationTypeWithId(studyId, id).fold(
+        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        annotType => Ok(Json.toJson(annotType))
       )
     }
   }
 
-  def updateAnnotationType(id: String) = CommandAction { cmd: UpdateParticipantAnnotationTypeCmd => userId =>
-    val future = studyService.updateParticipantAnnotationType(cmd)(null)
+  def addAnnotationType = CommandAction { cmd: AddParticipantAnnotationTypeCmd => implicit userId =>
+    val future = studyService.addParticipantAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"annotation type updated: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
 
-  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveParticipantAnnotationTypeCmd => userId =>
-    val future = studyService.removeParticipantAnnotationType(cmd)(null)
+  def updateAnnotationType(id: String) = CommandAction { cmd: UpdateParticipantAnnotationTypeCmd => implicit userId =>
+    val future = studyService.updateParticipantAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"annotation type removed: ${event.annotationTypeId}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
+      )
+    }
+  }
+
+  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveParticipantAnnotationTypeCmd => implicit userId =>
+    val future = studyService.removeParticipantAnnotationType(cmd)
+    future.map { validation =>
+      validation.fold(
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }

@@ -4,7 +4,7 @@
   // -- RequireJS config --
   requirejs.config({
     // Packages = top-level folders; loads a contained file named 'main.js'
-    packages: ['common', 'home', 'user', 'study', 'dashboard'],
+    packages: ['common', 'home', 'user', 'admin', 'dashboard'],
     shim: {
       'jsRoutes' : {
         deps : [],
@@ -19,7 +19,9 @@
       'angular-route': ['angular'],
       'angular-cookies': ['angular'],
       'bootstrap': ['jquery'],
-      'ui-bootstrap-tpls': ['angular', 'bootstrap']
+      'angular-ui-router': ['angular'],
+      'ui-bootstrap-tpls': ['angular', 'bootstrap'],
+      'ng-table': ['angular']
     },
     paths: {
       'requirejs': ['../lib/requirejs/require'],
@@ -27,8 +29,10 @@
       'angular': ['../lib/angularjs/angular'],
       'angular-route': ['../lib/angularjs/angular-route'],
       'angular-cookies': ['../lib/angularjs/angular-cookies'],
+      'angular-ui-router': ['../lib/angular-ui-router/angular-ui-router'],
       'bootstrap': ['../lib/bootstrap/js/bootstrap'],
       'ui-bootstrap-tpls': ['../lib/angular-ui-bootstrap/ui-bootstrap-tpls'],
+      'ng-table': ['../lib/ng-table/ng-table'],
       'jsRoutes': ['/jsroutes']
     }
   });
@@ -38,9 +42,18 @@
   };
 
   // Load the app. This is kept minimal so it doesn't need much updating.
-  require(['angular', 'angular-cookies', 'angular-route', 'ui-bootstrap-tpls', 'jquery', 'bootstrap', './app'],
-    function(angular) {
-      angular.bootstrap(document, ['app']);
-    }
-  );
+  require([
+    'angular',
+    'angular-cookies',
+    'angular-route',
+    'angular-ui-router',
+    'ui-bootstrap-tpls',
+    'ng-table',
+    'jquery',
+    'bootstrap',
+    './app'],
+          function(angular) {
+            angular.bootstrap(document, ['app']);
+          }
+         );
 })(requirejs);

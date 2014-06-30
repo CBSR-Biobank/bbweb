@@ -23,7 +23,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     appRepositories.studyRepository.put(study)
 
     val cmdJson = Json.obj(
-      "type"                        -> "AddSpecimenGroupCmd",
       "studyId"                     -> study.id.id,
       "name"                        -> sg.name,
       "description"                 -> sg.description,
@@ -32,8 +31,9 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "preservationType"            -> sg.preservationType.toString,
       "preservationTemperatureType" -> sg.preservationTemperatureType.toString,
       "specimenType"                -> sg.specimenType.toString)
-    val json = makeJsonRequest(POST, "/studies/sgroups", BAD_REQUEST, cmdJson)
+    val json = makeRequest(POST, "/studies/sgroups", BAD_REQUEST, cmdJson)
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -46,7 +46,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
     val sg2 = factory.createSpecimenGroup
     val cmdJson = Json.obj(
-      "type"                        -> "UpdateSpecimenGroupCmd",
       "studyId"                     -> study.id.id,
       "id"                          -> sg.id.id,
       "expectedVersion"             -> Some(sg.version),
@@ -57,8 +56,9 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "preservationType"            -> sg2.preservationType.toString,
       "preservationTemperatureType" -> sg2.preservationTemperatureType.toString,
       "specimenType"                -> sg2.specimenType.toString)
-    val json = makeJsonRequest(PUT, s"/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
+    val json = makeRequest(PUT, s"/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -70,12 +70,12 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     appRepositories.specimenGroupRepository.put(sg)
 
     val cmdJson = Json.obj(
-      "type"            -> "RemoveSpecimenGroupCmd",
       "studyId"         -> study.id.id,
       "id"              -> sg.id.id,
       "expectedVersion" -> Some(sg.version))
-    val json = makeJsonRequest(DELETE, s"/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
+    val json = makeRequest(DELETE, s"/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
 
+    (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
   }
 
@@ -89,8 +89,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         appRepositories.studyRepository.put(study)
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/sgroups", json = idJson)
+        val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
       }
@@ -107,11 +106,26 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val sg = factory.createSpecimenGroup
         appRepositories.specimenGroupRepository.put(sg)
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/sgroups", json = idJson)
+        val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), sg)
+      }
+    }
+
+    "GET /studies/sgroups" should {
+      "get a single specimen group" in new WithApplication(fakeApplication()) {
+        doLogin
+        val appRepositories = new AppRepositories
+
+        val study = factory.createDisabledStudy
+        appRepositories.studyRepository.put(study)
+
+        val sg = factory.createSpecimenGroup
+        appRepositories.specimenGroupRepository.put(sg)
+
+        val jsonObj = makeRequest(GET, s"/studies/sgroups/${study.id.id}?sgId=${sg.id.id}").as[JsObject]
+        compareObj(jsonObj, sg)
       }
     }
 
@@ -126,12 +140,10 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val sgroups = List(factory.createSpecimenGroup, factory.createSpecimenGroup)
         sgroups map { sg => appRepositories.specimenGroupRepository.put(sg) }
 
-        val idJson = Json.obj("id" -> study.id.id)
-        val json = makeJsonRequest(GET, "/studies/sgroups", json = idJson)
+        val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size sgroups.size
           (jsonList zip sgroups).map { item => compareObj(item._1, item._2) }
-        ()
       }
     }
 
@@ -145,7 +157,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
         val sg = factory.createSpecimenGroup
         val cmdJson = Json.obj(
-          "type"                        -> "AddSpecimenGroupCmd",
           "studyId"                     -> sg.studyId.id,
           "name"                        -> sg.name,
           "description"                 -> sg.description,
@@ -154,9 +165,9 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           "preservationType"            -> sg.preservationType.toString,
           "preservationTemperatureType" -> sg.preservationTemperatureType.toString,
           "specimenType"                -> sg.specimenType.toString)
-        val json = makeJsonRequest(POST, "/studies/sgroups", json = cmdJson)
+        val json = makeRequest(POST, "/studies/sgroups", json = cmdJson)
 
-        (json \ "message").as[String] should include ("specimen group added")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -204,9 +215,9 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           "preservationType"            -> sg2.preservationType.toString,
           "preservationTemperatureType" -> sg2.preservationTemperatureType.toString,
           "specimenType"                -> sg2.specimenType.toString)
-        val json = makeJsonRequest(PUT, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
 
-        (json \ "message").as[String] should include ("specimen group updated")
+        (json \ "status").as[String] should include ("success")
       }
     }
 
@@ -246,9 +257,9 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           "studyId"         -> study.id.id,
           "id"              -> sg.id.id,
           "expectedVersion" -> Some(sg.version))
-        val json = makeJsonRequest(DELETE, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
+        val json = makeRequest(DELETE, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
 
-        (json \ "message").as[String] should include ("specimen group removed")
+        (json \ "status").as[String] should include ("success")
       }
     }
 

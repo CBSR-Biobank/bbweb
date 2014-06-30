@@ -1,47 +1,60 @@
 body {
-  margin-top: 40px;
+    margin-top: 40px;
+    padding: 10px !important;
 }
 
 @link-color: #e3ffc7;
 
 .basics-nav {
-  /* background-color: #7ece25; */
-  .navbar-brand {
-    color: @link-color;
-  }
-  .navbar-nav {
-    li a {
-      color: @link-color;
+    /* background-color: #7ece25; */
+    .navbar-brand {
+        color: @link-color;
     }
-    .dropdown-menu {
-      a {
-        color: #000;
-      }
+    .navbar-nav {
+        li a {
+            color: @link-color;
+        }
+        .dropdown-menu {
+            a {
+                color: #000;
+            }
+        }
     }
-  }
 }
 
 /* AngularJS */
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
-  display: none;
+    display: none;
 }
 
 .table td.header {
-  font-weight: bold;
+    font-weight: bold;
 }
 
 .data-heading {
-  margin-bottom: 10px;
-  margin-top: 1px;
-  padding: 2px;
-  font-weight: bold;
+    margin-bottom: 10px;
+    margin-top: 1px;
+    padding: 2px;
+    font-weight: bold;
 }
 
 .well-tiny {
-  margin-bottom: 10px;
-  padding: 2px;
+    margin-bottom: 10px;
+    padding: 2px;
 }
 
 .popover {
     width: 600px;
+}
+
+.ng-invalid.ng-dirty {
+    border-color: #FA787E;
+}
+
+.ng-valid.ng-dirty {
+    border-color: #78FA89;
+}
+
+.ng-table {
+/* border: 1px solid #000; */
 }

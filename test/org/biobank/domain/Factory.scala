@@ -130,9 +130,9 @@ trait FactoryComponent {
       val id = collectionEventAnnotationTypeRepository.nextIdentity
       val name = nameGenerator.next[CollectionEventAnnotationType]
       val description = Some(nameGenerator.next[CollectionEventAnnotationType])
-      val options = Some(Map(
-        nameGenerator.next[String] -> nameGenerator.next[String],
-        nameGenerator.next[String] -> nameGenerator.next[String]))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       val disabledStudy = defaultDisabledStudy
       val validation = CollectionEventAnnotationType.create(
@@ -166,9 +166,9 @@ trait FactoryComponent {
       val id = participantAnnotationTypeRepository.nextIdentity
       val name = nameGenerator.next[ParticipantAnnotationType]
       val description = Some(nameGenerator.next[ParticipantAnnotationType])
-      val options = Some(Map(
-        nameGenerator.next[String] -> nameGenerator.next[String],
-        nameGenerator.next[String] -> nameGenerator.next[String]))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       val disabledStudy = defaultDisabledStudy
       val validation = ParticipantAnnotationType.create(
@@ -187,9 +187,9 @@ trait FactoryComponent {
       val id = specimenLinkAnnotationTypeRepository.nextIdentity
       val name = nameGenerator.next[SpecimenLinkAnnotationType]
       val description = Some(nameGenerator.next[SpecimenLinkAnnotationType])
-      val options = Some(Map(
-        nameGenerator.next[String] -> nameGenerator.next[String],
-        nameGenerator.next[String] -> nameGenerator.next[String]))
+      val options = Some(Seq(
+        nameGenerator.next[String],
+        nameGenerator.next[String]))
 
       val disabledStudy = defaultDisabledStudy
       val validation = SpecimenLinkAnnotationType.create(

@@ -21,7 +21,7 @@ case class ParticipantAnnotationType private (
   description: Option[String],
   valueType: AnnotationValueType,
   maxValueCount: Option[Int],
-  options: Option[Map[String, String]],
+  options: Option[Seq[String]],
   required: Boolean)
     extends StudyAnnotationType {
 
@@ -47,7 +47,7 @@ case class ParticipantAnnotationType private (
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Map[String, String]] = None,
+    options: Option[Seq[String]] = None,
     required: Boolean = false): DomainValidation[ParticipantAnnotationType] = {
     for {
       validVersion <- requireVersion(expectedVersion)
@@ -70,7 +70,7 @@ object ParticipantAnnotationType extends StudyAnnotationTypeValidationHelper {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]],
+    options: Option[Seq[String]],
     required: Boolean): DomainValidation[ParticipantAnnotationType] = {
     (validateId(studyId) |@|
       validateId(id) |@|

@@ -27,23 +27,35 @@ object Application extends Controller with Security {
     * Returns the JavaScript router that the client can use for "type-safe" routes.
     * @param varName The name of the global variable, defaults to `jsRoutes`
     */
-  def jsRoutes(varName: String = "jsRoutes") = Cached(_ => "jsRoutes", duration = 86400) {
-    Action { implicit request =>
-      Ok(
-        Routes.javascriptRouter(varName)(
-          routes.javascript.Application.login,
-          routes.javascript.Application.logout,
-          routes.javascript.UserController.authUser,
-          routes.javascript.UserController.user,
-          routes.javascript.UserController.addUser,
-          routes.javascript.UserController.updateUser,
-          routes.javascript.UserController.removeUser,
-          org.biobank.controllers.study.routes.javascript.StudyController.list,
-          org.biobank.controllers.study.routes.javascript.StudyController.query,
-          org.biobank.controllers.study.routes.javascript.StudyController.add
-        )
-      ).as(JAVASCRIPT)
-    }
+  def jsRoutes(varName: String = "jsRoutes") = Action { implicit request =>
+    Ok(
+      Routes.javascriptRouter(varName)(
+        routes.javascript.Application.login,
+        routes.javascript.Application.logout,
+        routes.javascript.UserController.authUser,
+        routes.javascript.UserController.user,
+        routes.javascript.UserController.addUser,
+        routes.javascript.UserController.updateUser,
+        routes.javascript.UserController.removeUser,
+        org.biobank.controllers.study.routes.javascript.StudyController.list,
+        org.biobank.controllers.study.routes.javascript.StudyController.query,
+        org.biobank.controllers.study.routes.javascript.StudyController.add,
+        org.biobank.controllers.study.routes.javascript.StudyController.update,
+        org.biobank.controllers.study.routes.javascript.StudyController.enable,
+        org.biobank.controllers.study.routes.javascript.StudyController.disable,
+        org.biobank.controllers.study.routes.javascript.StudyController.retire,
+        org.biobank.controllers.study.routes.javascript.StudyController.unretire,
+        org.biobank.controllers.study.routes.javascript.StudyController.valueTypes,
+        org.biobank.controllers.study.routes.javascript.StudyController.anatomicalSourceTypes,
+        org.biobank.controllers.study.routes.javascript.StudyController.specimenTypes,
+        org.biobank.controllers.study.routes.javascript.StudyController.preservTypes,
+        org.biobank.controllers.study.routes.javascript.StudyController.preservTempTypes,
+        org.biobank.controllers.study.routes.javascript.ParticipantAnnotTypeController.get,
+        org.biobank.controllers.study.routes.javascript.ParticipantAnnotTypeController.addAnnotationType,
+        org.biobank.controllers.study.routes.javascript.ParticipantAnnotTypeController.updateAnnotationType,
+        org.biobank.controllers.study.routes.javascript.ParticipantAnnotTypeController.removeAnnotationType
+      )
+    ).as(JAVASCRIPT)
   }
 
   /** Used for obtaining the email and password from the HTTP login request */
@@ -64,16 +76,15 @@ object Application extends Controller with Security {
     * @return The token needed for subsequent requests
     */
   def login() = Action(parse.json) { implicit request =>
-    val jsonValidation = request.body.validate[LoginCredentials]
-    jsonValidation.fold(
+    request.body.validate[LoginCredentials].fold(
       errors => {
-        BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors)))
+        BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors)))
       },
       loginCredentials => {
         Logger.info(s"login: $loginCredentials")
         userService.getByEmail(loginCredentials.email).fold(
           err => {
-            BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", ")))
+            BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))
           },
           user => {
             // TODO: token should be derived from salt
@@ -93,7 +104,7 @@ object Application extends Controller with Security {
     * Discard the cookie [[AuthTokenCookieKey]] to have AngularJS no longer set the
     * X-XSRF-TOKEN in HTTP header.
     */
-  def logout() = AuthAction(parse.empty) { token => userId => implicit request =>
+  def logout() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Cache.remove(token)
     Ok.discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
   }

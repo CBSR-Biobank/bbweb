@@ -142,7 +142,7 @@ object StudyCommands {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Map[String, String]] = None)
+    options: Option[Seq[String]] = None)
       extends CollectionEventAnnotationTypeCommand
 
   case class UpdateCollectionEventAnnotationTypeCmd(
@@ -153,7 +153,7 @@ object StudyCommands {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Map[String, String]] = None)
+    options: Option[Seq[String]] = None)
       extends CollectionEventAnnotationTypeCommand
       with HasIdentity
       with HasStudyIdentity
@@ -177,7 +177,7 @@ object StudyCommands {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Map[String, String]] = None,
+    options: Option[Seq[String]] = None,
     required: Boolean = false)
       extends ParticipantAnnotationTypeCommand
       with HasStudyIdentity
@@ -190,7 +190,7 @@ object StudyCommands {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Map[String, String]] = None,
+    options: Option[Seq[String]] = None,
     required: Boolean = false)
       extends ParticipantAnnotationTypeCommand
       with HasIdentity
@@ -214,7 +214,7 @@ object StudyCommands {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Map[String, String]] = None)
+    options: Option[Seq[String]] = None)
       extends SpecimenLinkAnnotationTypeCommand
       with HasStudyIdentity
 
@@ -226,7 +226,7 @@ object StudyCommands {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Map[String, String]] = None)
+    options: Option[Seq[String]] = None)
       extends SpecimenLinkAnnotationTypeCommand
       with HasIdentity
       with HasStudyIdentity

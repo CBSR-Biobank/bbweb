@@ -2,7 +2,7 @@ package org.biobank.controllers.study
 
 import org.biobank.controllers._
 import org.biobank.infrastructure._
-import org.biobank.service.json.Study._
+import org.biobank.service.json.Events._
 import org.biobank.service.json.ProcessingType._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain._
@@ -26,52 +26,45 @@ object ProcessingTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(BodyParsers.parse.json) { token => userId => implicit request =>
-    val idResult = request.body.validate[StudyId]
-    idResult.fold(
-      errors => {
-        BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors)))
-      },
-      studyId => {
-        Logger.info(s"list: $studyId")
-        val json = Json.toJson(studyService.processingTypesForStudy(studyId.id).toList)
-        Ok(json)
-      }
-    )
-  }
+  def get(studyId: String, procTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.debug(s"ProcessingTypeController.list: studyId: $studyId, procTypeId: $procTypeId")
 
-  def addProcessingType = CommandAction { cmd: AddProcessingTypeCmd => userId =>
-    val future = studyService.addProcessingType(cmd)(null)
+    procTypeId.fold {
+      Ok(Json.toJson(studyService.processingTypesForStudy(studyId).toList))
+    } {
+      id =>
+      studyService.processingTypeWithId(studyId, id).fold(
+        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        procType => Ok(Json.toJson(procType))
+      )
+    }  }
+
+  def addProcessingType = CommandAction { cmd: AddProcessingTypeCmd => implicit userId =>
+    val future = studyService.addProcessingType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"processing type added: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
 
-  def updateProcessingType(id: String) = CommandAction { cmd: UpdateProcessingTypeCmd => userId =>
-    val future = studyService.updateProcessingType(cmd)(null)
+  def updateProcessingType(id: String) = CommandAction { cmd: UpdateProcessingTypeCmd => implicit userId =>
+    val future = studyService.updateProcessingType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"processing type updated: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
 
-  def removeProcessingType(id: String) = CommandAction { cmd: RemoveProcessingTypeCmd => userId =>
-    val future = studyService.removeProcessingType(cmd)(null)
+  def removeProcessingType(id: String) = CommandAction { cmd: RemoveProcessingTypeCmd => implicit userId =>
+    val future = studyService.removeProcessingType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj(
-          "status"  ->"OK",
-          "message" -> (s"processing type removed: ${event.processingTypeId}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }

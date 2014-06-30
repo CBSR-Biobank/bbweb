@@ -1,6 +1,7 @@
 package org.biobank.infrastructure.event
 
 import org.biobank.infrastructure._
+import org.biobank.infrastructure.event.Events._
 import org.biobank.domain.study._
 import org.biobank.domain.ContainerTypeId
 import org.biobank.domain.AnatomicalSourceType._
@@ -16,7 +17,7 @@ import org.joda.time.DateTime
  */
 object StudyEvents {
 
-  sealed trait StudyEvent
+  sealed trait StudyEvent extends Event
 
   case class StudyAddedEvent(
     id: String,
@@ -33,29 +34,35 @@ object StudyEvents {
     description: Option[String])
     extends StudyEvent
 
+  sealed trait StudyStatusChangedEvent extends StudyEvent {
+    val id: String
+    val version: Long
+    val dateTime: DateTime
+  }
+
   case class StudyEnabledEvent(
     id: String,
     version: Long,
     dateTime: DateTime)
-    extends StudyEvent
+    extends StudyStatusChangedEvent
 
   case class StudyDisabledEvent(
     id: String,
     version: Long,
     dateTime: DateTime)
-    extends StudyEvent
+    extends StudyStatusChangedEvent
 
   case class StudyRetiredEvent(
     id: String,
     version: Long,
     dateTime: DateTime)
-    extends StudyEvent
+    extends StudyStatusChangedEvent
 
   case class StudyUnretiredEvent(
     id: String,
     version: Long,
     dateTime: DateTime)
-    extends StudyEvent
+    extends StudyStatusChangedEvent
 
   // specimen group events
   trait SpecimenGroupEvent extends StudyEvent
@@ -129,7 +136,7 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]])
+    options: Option[Seq[String]])
     extends StudyEvent
 
   case class CollectionEventAnnotationTypeUpdatedEvent(
@@ -141,12 +148,13 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]])
+    options: Option[Seq[String]])
     extends StudyEvent
 
   case class CollectionEventAnnotationTypeRemovedEvent(
     studyId: String,
     annotationTypeId: String)
+    extends StudyEvent
 
   // participant annotation types
 
@@ -158,7 +166,7 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]],
+    options: Option[Seq[String]],
     required: Boolean = false)
     extends StudyEvent
 
@@ -171,7 +179,7 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]],
+    options: Option[Seq[String]],
     required: Boolean = false)
     extends StudyEvent
 
@@ -251,7 +259,7 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]])
+    options: Option[Seq[String]])
     extends StudyEvent
 
   case class SpecimenLinkAnnotationTypeUpdatedEvent(
@@ -263,7 +271,7 @@ object StudyEvents {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Map[String, String]])
+    options: Option[Seq[String]])
     extends StudyEvent
 
   case class SpecimenLinkAnnotationTypeRemovedEvent(

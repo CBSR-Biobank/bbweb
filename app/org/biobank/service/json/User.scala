@@ -2,6 +2,7 @@ package org.biobank.service.json
 
 import org.biobank.domain._
 import org.biobank.infrastructure.command.UserCommands._
+import org.biobank.infrastructure.event.UserEvents._
 
 import play.api.libs.json._
 import play.api.libs.json.Reads._
@@ -27,44 +28,81 @@ object User {
   }
 
   implicit val registerUserCmdReads = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RegisterUserCmd")) andKeep
-      (__ \ "name").read[String](minLength[String](2)) and
+    (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "email").read[String](minLength[String](5)) and
       (__ \ "password").read[String](minLength[String](2)) and
       (__ \ "avatarUrl").readNullable[String](minLength[String](2))
-  )((name, email, password, avatarUrl) => RegisterUserCmd(name, email, password, avatarUrl))
+  )(RegisterUserCmd.apply _)
 
   implicit val activateUserCmdReads = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "ActivateUserCmd")) andKeep
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "email").read[String](minLength[String](5))
-  )((version, email) => ActivateUserCmd(version, email))
+  )(ActivateUserCmd.apply _)
 
   implicit val updateUserCmdReads = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UpdateUserCmd")) andKeep
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "email").read[String](minLength[String](5)) and
       (__ \ "password").read[String](minLength[String](2)) and
       (__ \ "avatarUrl").readNullable[String](minLength[String](2))
-  )((version, name, email, password, avatarUrl) => UpdateUserCmd(version, name, email, password, avatarUrl))
+  )(UpdateUserCmd.apply _)
 
   implicit val lockUserCmdReads = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "LockUserCmd")) andKeep
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "email").read[String](minLength[String](5))
-  )((version, email) => LockUserCmd(version, email))
+  )(LockUserCmd.apply _)
 
   implicit val unlockUserCmdReads = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "UnlockUserCmd")) andKeep
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "email").read[String](minLength[String](5))
-  )((version, email) => UnlockUserCmd(version, email))
+  )(UnlockUserCmd.apply _)
 
   implicit val removeUserCmdReads = (
-    (__ \ "type").read[String](Reads.verifying[String](_ == "RemoveUserCmd")) andKeep
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
       (__ \ "email").read[String](minLength[String](5))
-  )((version, email) => RemoveUserCmd(version, email))
+  )(RemoveUserCmd.apply _)
+
+  implicit val userRegisteredEventWrites: Writes[UserRegisteredEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "email").write[String] and
+      (__ \ "password").write[String] and
+      (__ \ "avatarUrl").writeNullable[String]
+  )(unlift(UserRegisteredEvent.unapply))
+
+  implicit val userUpdatedEventWrites: Writes[UserUpdatedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String] and
+      (__ \ "email").write[String] and
+      (__ \ "password").write[String] and
+      (__ \ "avatarUrl").writeNullable[String]
+  )(unlift(UserUpdatedEvent.unapply))
+
+  implicit val userActivatedEventWrites: Writes[UserActivatedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime]
+  )(unlift(UserActivatedEvent.unapply))
+
+  implicit val userLockedEventWrites: Writes[UserLockedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime]
+  )(unlift(UserLockedEvent.unapply))
+
+  implicit val userUnlockedEventWrites: Writes[UserUnlockedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime]
+  )(unlift(UserUnlockedEvent.unapply))
+
+  implicit val userRemovedEventWrites: Writes[UserRemovedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime]
+  )(unlift(UserRemovedEvent.unapply))
 
 }

@@ -5,18 +5,19 @@ define(['angular', 'common'], function(angular) {
   'use strict';
 
   var mod = angular.module('user.services', ['biobank.common', 'ngCookies']);
-  mod.factory('userService', ['$http', '$q', 'playRoutes', '$cookies', function($http, $q, playRoutes, $cookies) {
+  mod.factory('userService', ['$http', '$q', 'playRoutes', '$cookies', '$log', function($http, $q, playRoutes, $cookies, $log) {
     var user, token = $cookies['XSRF-TOKEN'];
 
     /* If the token is assigned, check that the token is still valid on the server */
     if (token) {
-      playRoutes.controllers.UserController.authUser().get().then(
-        function(response) {
-          user = response.data;
-        },
-        function(response) {
+      playRoutes.controllers.UserController.authUser().get()
+        .success(function(data) {
+          $log.info('Welcome back, ' + data.name);
+          user = data;
+        })
+        .error(function() {
           /* the token is no longer valid */
-          console.log("response error: " + response.data.err);
+          $log.info('Token no longer valid, please log in.');
           token = undefined;
           delete $cookies['XSRF-TOKEN'];
           return $q.reject("Token invalid");
@@ -24,27 +25,28 @@ define(['angular', 'common'], function(angular) {
     }
 
     return {
-      loginUser : function(credentials) {
+      loginUser: function(credentials) {
+        // FIXME: handle login failure
         return playRoutes.controllers.Application.login().post(credentials).then(function(response) {
           token = response.data.token;
           return playRoutes.controllers.UserController.authUser().get();
         }).then(function(response) {
           user = response.data;
+          $log.info('Welcome ' + user.name);
           return user;
         });
       },
-      logout : function() {
+      logout: function() {
         // Logout on server in a real app
         delete $cookies['XSRF-TOKEN'];
         token = undefined;
         user = undefined;
         var dummyObj = {};
-        return playRoutes.controllers.Application.logout().post().then(
-          function(response) {
-            console.log("loggout response: " + response.data);
-          });
+        return playRoutes.controllers.Application.logout().post().then(function(response) {
+          $log.info("Good bye ");
+        });
       },
-      getUser : function() {
+      getUser: function() {
         return user;
       }
     };

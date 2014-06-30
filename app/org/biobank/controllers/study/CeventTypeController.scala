@@ -2,7 +2,7 @@ package org.biobank.controllers.study
 
 import org.biobank.controllers._
 import org.biobank.infrastructure._
-import org.biobank.service.json.Study._
+import org.biobank.service.json.Events._
 import org.biobank.service.json.CollectionEventType._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain._
@@ -26,46 +26,45 @@ object CeventTypeController extends BbwebController  {
     sys.error("Bbweb plugin is not registered")
   }
 
-  def list = AuthAction(BodyParsers.parse.json) { token => userId => implicit request =>
-    val idResult = request.body.validate[StudyId]
-    idResult.fold(
-      errors => {
-        BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toFlatJson(errors)))
-      },
-      studyId => {
-        Logger.info(s"list: $studyId")
-        val json = Json.toJson(studyService.collectionEventTypesForStudy(studyId.id).toList)
-        Ok(json)
-      }
-    )
-  }
+  def get(studyId: String, ceventTypeId: Option[String]) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
+    Logger.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
 
-  def addCollectionEventType = CommandAction { cmd: AddCollectionEventTypeCmd => userId =>
-    val future = studyService.addCollectionEventType(cmd)(null)
+    ceventTypeId.fold {
+      Ok(Json.toJson(studyService.collectionEventTypesForStudy(studyId).toList))
+    } {
+      id =>
+      studyService.collectionEventTypeWithId(studyId, id).fold(
+        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        ceventType => Ok(Json.toJson(ceventType))
+      )
+    }  }
+
+  def addCollectionEventType = CommandAction { cmd: AddCollectionEventTypeCmd => implicit userId =>
+    val future = studyService.addCollectionEventType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"collection event type added: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
 
-  def updateCollectionEventType(id: String) = CommandAction { cmd: UpdateCollectionEventTypeCmd => userId =>
-    val future = studyService.updateCollectionEventType(cmd)(null)
+  def updateCollectionEventType(id: String) = CommandAction { cmd: UpdateCollectionEventTypeCmd => implicit userId =>
+    val future = studyService.updateCollectionEventType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"collection event type updated: ${event.name}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
 
-  def removeCollectionEventType(id: String) = CommandAction { cmd: RemoveCollectionEventTypeCmd => userId =>
-    val future = studyService.removeCollectionEventType(cmd)(null)
+  def removeCollectionEventType(id: String) = CommandAction { cmd: RemoveCollectionEventTypeCmd => implicit userId =>
+    val future = studyService.removeCollectionEventType(cmd)
     future.map { validation =>
       validation.fold(
-        err   => BadRequest(Json.obj("status" ->"KO", "message" -> err.list.mkString(", "))),
-        event => Ok(Json.obj("status" ->"OK", "message" -> (s"collection event type removed: ${event.collectionEventTypeId}.") ))
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
       )
     }
   }
