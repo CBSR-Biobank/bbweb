@@ -6,7 +6,7 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
 
   var mod = angular.module('admin.states', ['ui.router', 'user.services', 'biobank.common']);
 
-  mod.config(function($stateProvider, userResolve) {
+  mod.config(['$stateProvider', 'userResolve', function($stateProvider, userResolve) {
     $stateProvider
       .state('admin', {
         abstract: true,
@@ -30,7 +30,7 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
       });
     //.when('/users', {templateUrl:'/assets/javascripts/user/users.html', controller:controllers.UserCtrl})
     //.when('/users/:id', {templateUrl:'/assets/javascripts/user/editUser.html', controller:controllers.UserCtrl});
-  });
+  }]);
 
   return mod;
 });

@@ -5,7 +5,7 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
   'use strict';
 
   var mod = angular.module('dashboard.states', ['ui.router', 'biobank.common']);
-  mod.config(function($stateProvider, userResolve) {
+  mod.config(['$stateProvider', 'userResolve', function($stateProvider, userResolve) {
     $stateProvider
       .state('dashboard', {
         url: '/dashboard',
@@ -21,10 +21,10 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
         }
       })
       .state('dashboard.admin', {
-        url: '/admin/dashboard',
+        url: '/admin',
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/dashboard/admin.html',
+            templateUrl: '/assets/javascripts/dashboard/dashboard.html',
             controller:controllers.AdminDashboardCtrl
           }
         },
@@ -33,6 +33,6 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
           displayName: false
         }
       });
-  });
+  }]);
   return mod;
 });

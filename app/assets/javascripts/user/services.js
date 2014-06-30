@@ -5,6 +5,7 @@ define(['angular', 'common'], function(angular) {
   'use strict';
 
   var mod = angular.module('user.services', ['biobank.common', 'ngCookies']);
+
   mod.factory('userService', ['$http', '$q', 'playRoutes', '$cookies', '$log', function($http, $q, playRoutes, $cookies, $log) {
     var user, token = $cookies['XSRF-TOKEN'];
 
@@ -51,6 +52,7 @@ define(['angular', 'common'], function(angular) {
       }
     };
   }]);
+
   /**
    * Add this object to a route definition to only allow resolving the route if the user is
    * logged in. This also adds the contents of the objects as a dependency of the controller.
@@ -70,12 +72,12 @@ define(['angular', 'common'], function(angular) {
   /**
    * If the current route does not resolve, go back to the start page.
    */
-  var handleRouteError = function($rootScope, $location) {
+  var handleRouteError = function($rootScope, $state) {
     $rootScope.$on('$routeChangeError', function(e, next, current) {
-      $location.path('/');
+      $state.go('home');
     });
   };
-  handleRouteError.$inject = ['$rootScope', '$location'];
+  handleRouteError.$inject = ['$rootScope', '$state'];
   mod.run(handleRouteError);
   return mod;
 });

@@ -4,15 +4,19 @@
 define(['angular'], function(angular) {
   'use strict';
 
+    var mod = angular.module('home.controllers', ['user.services']);
+
   /** Controls the index page */
-  var HomeCtrl = function($scope, $rootScope, $location, helper) {
-    //console.log(helper.sayHi());
+  mod.controller('HomeCtrl', [
+    '$scope', '$rootScope',
+    function($scope, $rootScope) {
     $rootScope.pageTitle = 'Biobank';
-  };
-  HomeCtrl.$inject = ['$scope', '$rootScope', '$location', 'helper'];
+  }]);
 
   /** Controls the header */
-  var HeaderCtrl = function($scope, userService, helper, $location) {
+  mod.controller('HeaderCtrl', [
+    '$scope', '$state', 'userService',
+    function($scope, $state, userService) {
     // Wrap the current user from the service in a watch expression
     $scope.$watch(function() {
       var user = userService.getUser();
@@ -24,20 +28,12 @@ define(['angular'], function(angular) {
     $scope.logout = function() {
       userService.logout();
       $scope.user = undefined;
-      $location.path('/');
+      $state.go('home');
     };
-  };
-  HeaderCtrl.$inject = ['$scope', 'userService', 'helper', '$location'];
+  }]);
 
   /** Controls the footer */
-  var FooterCtrl = function(/*$scope*/) {
-  };
-  //FooterCtrl.$inject = ['$scope'];
-
-  return {
-    HeaderCtrl: HeaderCtrl,
-    FooterCtrl: FooterCtrl,
-    HomeCtrl: HomeCtrl
-  };
+  mod.controller('FooterCtrl', function(/*$scope*/) {
+  });
 
 });

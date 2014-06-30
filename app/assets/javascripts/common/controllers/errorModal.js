@@ -4,10 +4,7 @@ define(['angular'], function(angular) {
 
   var mod = angular.module('common.errorModal', []);
   mod.controller('errorModal', [
-    '$scope',
-    '$modalInstance',
-    'title',
-    'message',
+    '$scope', '$modalInstance', 'title', 'message',
     function($scope, $modalInstance, title, message) {
       $scope.title = title;
       $scope.message = message;

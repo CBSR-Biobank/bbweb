@@ -16,7 +16,7 @@ define(['angular', 'require', 'jsRoutes'], function(angular, require, jsRoutes) 
   'use strict';
 
   // The service - will be used by controllers or other services, filters, etc.
-  var mod = angular.module('common.playRoutes', []);
+  var mod = angular.module('common.playRoutes', ['ngRoute']);
 
   mod.service('playRoutes', ['$http', function($http) {
     /**
@@ -79,14 +79,16 @@ define(['angular', 'require', 'jsRoutes'], function(angular, require, jsRoutes) 
     };
     createPlayRoutes(jsRoutes.org.biobank.controllers.Application, playRoutes.controllers.Application);
     createPlayRoutes(jsRoutes.org.biobank.controllers.UserController, playRoutes.controllers.UserController);
+
     createPlayRoutes(
       jsRoutes.org.biobank.controllers.study.StudyController,
       playRoutes.controllers.study.StudyController);
+
     createPlayRoutes(
       jsRoutes.org.biobank.controllers.study.ParticipantAnnotTypeController,
       playRoutes.controllers.study.ParticipantAnnotTypeController);
-    return playRoutes;
 
+    return playRoutes;
   }]);
 
   return mod;

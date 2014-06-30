@@ -29,7 +29,7 @@ scalacOptions ++= Seq(
 
 scalacOptions in (Compile,doc) := Seq("-groups", "-implicits")
 
-javaOptions ++= Seq("-Xmx1024M", "-XX:MaxPermSize=512m")
+//javaOptions ++= Seq("-Xmx1024M", "-XX:MaxPermSize=512m")
 
 javaOptions in Test ++=  Seq(
   "-Dconfig.file=conf/test.conf",

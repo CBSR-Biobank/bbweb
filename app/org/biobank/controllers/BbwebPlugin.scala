@@ -32,7 +32,7 @@ class BbwebPlugin(val app: play.api.Application) extends Plugin with TopComponen
   override def onStart() {
     createSqlDdlScripts
 
-    if ((app.mode == Mode.Dev) || (app.mode == Mode.Test)) {
+    //if ((app.mode == Mode.Dev) || (app.mode == Mode.Test)) {
 
       if (userRepository.isEmpty) {
         // for debug only - password is "administrator"
@@ -47,7 +47,7 @@ class BbwebPlugin(val app: play.api.Application) extends Plugin with TopComponen
           userRepository.put(user)
         }
       }
-    }
+    //}
 
     Logger.info(s"Bbweb Plugin started")
     super.onStart

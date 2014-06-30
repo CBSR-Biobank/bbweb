@@ -6,7 +6,7 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
 
   var mod = angular.module('user.states', ['ui.router', 'user.services', 'biobank.common']);
 
-  mod.config(function($stateProvider) {
+  mod.config(['$stateProvider', function($stateProvider) {
     $stateProvider
       .state('user', {
         url: '/login',
@@ -19,7 +19,7 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
       });
     //.when('/users', {templateUrl:'/assets/javascripts/user/users.html', controller:controllers.UserCtrl})
     //.when('/users/:id', {templateUrl:'/assets/javascripts/user/editUser.html', controller:controllers.UserCtrl});
-  });
+  }]);
 
   return mod;
 });

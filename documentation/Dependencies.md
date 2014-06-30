@@ -21,6 +21,11 @@ This version of Biobank uses the following open source tools / software packages
 
     A SQL relational database management system used to store the query model.
 
+* [node.js](http://nodejs.org/)
+
+    Node.js is a software platform for scalable server-side and networking applications. Node.js applications
+    are written in JavaScript.
+
 * [AngularJS](https://angularjs.org/)
 
     AngularJS lets you extend HTML vocabulary for your application. The resulting environment is

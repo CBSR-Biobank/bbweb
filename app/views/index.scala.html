@@ -10,48 +10,47 @@
       </head>
       <body>
         @*-- Header -- *@
-        <header class="navbar navbar-inverse navbar-fixed-top basics-nav" data-ng-controller="HeaderCtrl"
-                data-ng-cloak>
-          <div class="container" data-ng-switch="!!user" data-ng-cloak>
-            <a href="#/" class="navbar-brand">Biobank</a>
-            <div data-ng-switch-when="true">
-              <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown">
-                  <a href="" class="dropdown-toggle" data-toggle="dropdown">
-                    <span class="glyphicon glyphicon-user"></span> {{user.name}}
-                    <b class="caret"></b>
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li><a href="#/settings"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
-                    <li>
-                      <a href="" data-ng-click="logout()">
-                        <span class="glyphicon glyphicon-off"></span> Logout
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-              </ul>
-            </div>
-            <div data-ng-switch-when="false">
-              <ul class="nav navbar-nav pull-right">
+        <div data-ng-controller="HeaderCtrl" data-ng-cloak>
+          <header class="navbar navbar-inverse navbar-fixed-top basics-nav">
+            <div class="container" data-ng-switch="!!user" data-ng-cloak>
+              <a href="#/" class="navbar-brand">Biobank</a>
+              <div data-ng-switch-when="true">
+                <ul class="nav navbar-nav navbar-right">
+                  <li class="dropdown">
+                    <a href="" class="dropdown-toggle" data-toggle="dropdown">
+                      <span class="glyphicon glyphicon-user"></span> {{user.name}}
+                      <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                      <li><a href="#/settings"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
+                      <li>
+                        <a href="" data-ng-click="logout()">
+                          <span class="glyphicon glyphicon-off"></span> Logout
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <ul class="nav navbar-nav pull-right"  data-ng-switch-when="false">
                 <li><a href="#/login">Login</a></li>
               </ul>
             </div>
+          </header>
+          <div data-ng-if="!!user">
+            <ui-breadcrumbs displayname-property="data.displayName"
+                            abstract-proxy-property="data.breadcrumbProxy">
+            </ui-breadcrumbs>
           </div>
-        </header>
-        @* -- Main Content -- *@
+        </div>
         <div class="container" data-ng-cloak>
-          <ui-breadcrumbs
-              displayname-property="data.displayName"
-              abstract-proxy-property="data.breadcrumbProxy">
-          </ui-breadcrumbs>
           <div data-ui-view="main"></div>
         </div>
         <!--
             This form is hidden to allow for autofill / autocomplete. See the following web page for an
             explanation:
 
-            http://timothy.userapp.io/post/63412334209/form-autocomplete-and-remember-password-with-angularjs
+http://timothy.userapp.io/post/63412334209/form-autocomplete-and-remember-password-with-angularjs
         -->
         <form name="login-form" id="login-form" method="post" action="" style="display: none;">
           <input name="email" id="login-email" type="text" />

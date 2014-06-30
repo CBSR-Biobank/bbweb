@@ -8,7 +8,7 @@ define(['angular'], function(angular) {
     'ui.router',
     'admin.studies.annotTypes.controllers'
   ]);
-  mod.config(function($stateProvider, userResolve) {
+  mod.config(['$stateProvider', 'userResolve', function($stateProvider, userResolve) {
     $stateProvider
       .state('admin.studies.study.participantAnnotTypeAdd', {
         url: '/participant/annottype/add',
@@ -82,6 +82,6 @@ define(['angular'], function(angular) {
           }
         }
       });
-  });
+  }]);
   return mod;
 });

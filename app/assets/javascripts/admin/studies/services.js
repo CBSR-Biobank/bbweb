@@ -5,7 +5,8 @@ define(['angular', 'common'], function(angular) {
   'use strict';
 
   var mod = angular.module('study.services', ['biobank.common']);
-  mod.factory('StudyService', function($http, $route, $q, playRoutes) {
+
+  mod.factory('StudyService', ['playRoutes', function(playRoutes) {
     return {
       list : function() {
         return playRoutes.controllers.study.StudyController.list().get();
@@ -44,9 +45,9 @@ define(['angular', 'common'], function(angular) {
         return playRoutes.controllers.study.StudyController.preservTempTypes().get();
       }
     };
-  });
+  }]);
 
-  mod.factory('ParticipantAnnotTypeService', function($http, $route, $q, playRoutes) {
+  mod.factory('ParticipantAnnotTypeService', ['playRoutes', function(playRoutes) {
     return {
       getAll: function(studyId) {
         return playRoutes.controllers.study.ParticipantAnnotTypeController.get(studyId).get();
@@ -54,8 +55,36 @@ define(['angular', 'common'], function(angular) {
       get: function(studyId, participantAnnotTypeId) {
         return playRoutes.controllers.study.ParticipantAnnotTypeController.get(
           studyId, participantAnnotTypeId).get();
+      },
+      addOrUpdate: function(annotType) {
+        var cmd = {
+          studyId: annotType.studyId,
+          name: annotType.name,
+          description: annotType.description,
+          valueType: annotType.valueType,
+          maxValueCount: annotType.maxValueCount,
+          options: annotType.options,
+          required: annotType.required
+        };
+
+        if (annotType.id) {
+          cmd.id = annotType.id;
+          cmd.expectedVersion = annotType.version;
+
+          return playRoutes.controllers.study.ParticipantAnnotTypeController.updateAnnotationType(annotType.id).put(cmd);
+        } else {
+          return playRoutes.controllers.study.ParticipantAnnotTypeController.addAnnotationType().post(cmd);
+        }
+      },
+      remove: function(annotType) {
+        var cmd = {
+          studyId: annotType.studyId,
+          id: annotType.id,
+          expectedVersion: annotType.version
+        };
+        return playRoutes.controllers.study.ParticipantAnnotTypeController.removeAnnotationType(annotType.id).delete(cmd);
       }
     };
-  });
+  }]);
 });
 
