@@ -9,9 +9,6 @@ Install this: https://github.com/jakubroztocil/httpie
 
 ```bash
 export TOKEN="141136cf-8e2b-4c92-9900-e0cd1ed07c19"
-export TOKEN_HDR="\"Cookie:XSRF-TOKEN=$TOKEN\" X-XSRF-TOKEN:$TOKEN"
-
-http GET localhost:9000/users/admin@admin.com "Cookie:XSRF-TOKEN=$TOKEN" X-XSRF-TOKEN:$TOKEN
 
 http POST localhost:9000/studies "Cookie:XSRF-TOKEN=$TOKEN" X-XSRF-TOKEN:$TOKEN name=ST1 description="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam"
 

@@ -8,13 +8,9 @@ This version of Biobank uses the following open source tools / software packages
     model–view–controller (MVC) architectural pattern. It aims to optimize developer productivity by
     using convention over configuration, hot code reloading and display of errors in the browser.
 
-* [Eventsourced](https://github.com/eligosource/eventsourced)
+* [Akka Persistence](http://doc.akka.io/docs/akka/snapshot/scala/persistence.html)
 
     Adds scalable actor state persistence and at-least-once message delivery guarantees.
-
-* [Slick](http://slick.typesafe.com/)
-
-    Slick is a modern database query and access library for Scala.
 
 * [MongoDB](http://www.mongodb.org/)
 
@@ -24,6 +20,11 @@ This version of Biobank uses the following open source tools / software packages
 * [MySQL](http://www.mysql.com/)
 
     A SQL relational database management system used to store the query model.
+
+* [AngularJS](https://angularjs.org/)
+
+    AngularJS lets you extend HTML vocabulary for your application. The resulting environment is
+    extraordinarily expressive, readable, and quick to develop.
 
 * [Twitter Bootstrap](http://getbootstrap.com/2.3.2/)
 
