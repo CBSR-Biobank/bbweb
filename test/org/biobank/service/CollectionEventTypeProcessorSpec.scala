@@ -60,7 +60,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
     val cmd = UpdateCollectionEventTypeCmd(
       ceventType.studyId.id,
       ceventType.id.id,
-      ceventType.versionOption,
+      ceventType.version,
       ceventType.name,
       ceventType.description,
       ceventType.recurring,
@@ -77,7 +77,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
     val cmd = RemoveCollectionEventTypeCmd(
       ceventType.studyId.id,
       ceventType.id.id,
-      ceventType.versionOption)
+      ceventType.version)
     val validation = ask(studyProcessor, cmd)
       .mapTo[DomainValidation[CollectionEventTypeRemovedEvent]]
       .futureValue
@@ -299,7 +299,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       collectionEventTypeRepository.put(cet)
 
       val cmd = new UpdateSpecimenGroupCmd(sg.studyId.id, sg.id.id,
-        sg.versionOption, sg.name, sg.description, sg.units, sg.anatomicalSourceType,
+        sg.version, sg.name, sg.description, sg.units, sg.anatomicalSourceType,
         sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
@@ -338,7 +338,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
         specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData))
       collectionEventTypeRepository.put(cet)
 
-      val cmd = new RemoveSpecimenGroupCmd(sg.studyId.id, sg.id.id, sg.versionOption)
+      val cmd = new RemoveSpecimenGroupCmd(sg.studyId.id, sg.id.id, sg.version)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
         .futureValue
 
@@ -419,7 +419,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       collectionEventTypeRepository.put(cet)
 
       val cmd = UpdateCollectionEventAnnotationTypeCmd(
-        annotationType.studyId.id, annotationType.id.id, annotationType.versionOption,
+        annotationType.studyId.id, annotationType.id.id, annotationType.version,
         annotationType.name, annotationType.description, annotationType.valueType)
       val validation = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
@@ -459,7 +459,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       collectionEventTypeRepository.put(cet)
 
       val cmd = RemoveCollectionEventAnnotationTypeCmd(
-        annotationType.studyId.id, annotationType.id.id, annotationType.versionOption)
+        annotationType.studyId.id, annotationType.id.id, annotationType.version)
       val validation = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
         .futureValue

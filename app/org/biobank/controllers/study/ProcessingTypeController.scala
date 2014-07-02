@@ -59,7 +59,8 @@ object ProcessingTypeController extends BbwebController  {
     }
   }
 
-  def removeProcessingType(id: String) = CommandAction { cmd: RemoveProcessingTypeCmd => implicit userId =>
+  def removeProcessingType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    val cmd = RemoveProcessingTypeCmd(studyId, id, ver)
     val future = studyService.removeProcessingType(cmd)
     future.map { validation =>
       validation.fold(

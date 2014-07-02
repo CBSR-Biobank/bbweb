@@ -63,8 +63,8 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.Plasma
 
       val updatedSg = specimenGroup.update(
-        specimenGroup.versionOption, org.joda.time.DateTime.now, name, description, units, anatomicalSourceType, preservationType,
-        preservationTemperatureType, specimenType) | fail
+        specimenGroup.versionOption, org.joda.time.DateTime.now, name, description, units,
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) | fail
 
       updatedSg should have (
         'studyId                     (specimenGroup.studyId),

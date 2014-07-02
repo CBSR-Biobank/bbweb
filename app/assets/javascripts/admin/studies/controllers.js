@@ -142,8 +142,8 @@ define(['angular', 'common'], function(angular, common) {
    * to display more informaiton for te annotation type.
    */
   mod.controller('ParticipantsPaneCtrl', [
-    '$scope', '$state', '$stateParams', '$modal', '$location', '$filter', '$log', 'ngTableParams', 'ParticipantAnnotTypeService',
-    function($scope, $state, $stateParams, $modal, $location, $filter, $log, ngTableParams, ParticipantAnnotTypeService) {
+    '$scope', '$state', '$stateParams', '$modal', '$filter', '$log', 'ngTableParams', 'ParticipantAnnotTypeService',
+    function($scope, $state, $stateParams, $modal, $filter, $log, ngTableParams, ParticipantAnnotTypeService) {
 
       var studyId = $stateParams.studyId;
       $scope.annotationTypes = [];
@@ -156,13 +156,13 @@ define(['angular', 'common'], function(angular, common) {
        */
       $scope.annotInformation = function(annotType) {
         $modal.open({
-          templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotTypeModal.html',
-          controller: 'AnnotationTypeModalCtrl',
           resolve: {
             annotType: function () {
               return annotType;
             }
-          }
+          },
+          templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotTypeModal.html',
+          controller: 'AnnotationTypeModalCtrl'
         });
       };
 
@@ -195,8 +195,7 @@ define(['angular', 'common'], function(angular, common) {
        */
       $scope.removeAnnotationType = function(annotType) {
         $log.info("removeAnnotationType");
-        $state.go('admin.studies.study.participantAnnotTypeRemove',
-                  { studyId: annotType.studyId, annotTypeId: annotType.id });
+        studyAnnotationTypeRemove($scope, $state, $stateParams, $modal, ParticipantAnnotTypeService, annotType);
       };
 
       $scope.tabSelected = function() {
@@ -345,8 +344,8 @@ define(['angular', 'common'], function(angular, common) {
           return modalParams.message;
         }
       },
-      templateUrl: '/assets/javascripts/common/errorModal.html',
-      controller: 'ErrorModal'
+      templateUrl: '/assets/javascripts/common/okCancelModal.html',
+      controller: 'OkCancelModal'
     });
 
     modalInstance.result.then(function(selectedItem) {
@@ -367,6 +366,35 @@ define(['angular', 'common'], function(angular, common) {
     }
     return 0;
   };
+
+  function studyAnnotationTypeRemove($scope, $state, $stateParams, $modal, ParticipantAnnotTypeService, annotType) {
+    var modalInstance = $modal.open({
+      resolve: {
+        title: function () {
+          return "Remove Participant Annotation Type";
+        },
+        message: function() {
+          return "Are you sure you want to remove annotation type " + annotType.name + "?";
+        }
+      },
+      templateUrl: '/assets/javascripts/common/okCancelModal.html',
+      controller: 'OkCancelModal'
+    });
+
+    modalInstance.result.then(function(selectedItem) {
+      ParticipantAnnotTypeService.remove(annotType);
+
+      // could use $state.reload() here but it does not re-initialize the
+      // controller
+      $state.transitionTo($state.current, $stateParams, {
+        reload: true,
+        inherit: false,
+        notify: true
+      });
+    }, function () {
+      $state.go('admin.studies.study.participants');
+    });
+  }
 
   return mod;
 });

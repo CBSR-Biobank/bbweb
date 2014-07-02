@@ -69,7 +69,7 @@ trait ParticipantAnnotationTypeProcessorComponent {
         notUsed <- checkNotInUse(oldItem)
         nameValid <- nameAvailable(cmd.name, id)
         newItem <- oldItem.update(
-          cmd.expectedVersion, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.valueType,
+         Some(cmd.expectedVersion), org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.valueType,
           cmd.maxValueCount, cmd.options, cmd.required)
         event <- ParticipantAnnotationTypeUpdatedEvent(
           newItem.studyId.id, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, newItem.name,
@@ -84,7 +84,7 @@ trait ParticipantAnnotationTypeProcessorComponent {
       for {
         item <- annotationTypeRepository.withId(StudyId(cmd.studyId), id)
         notUsed <- checkNotInUse(item)
-        validVersion <- validateVersion(item, cmd.expectedVersion)
+        validVersion <- validateVersion(item,Some(cmd.expectedVersion))
         event <- ParticipantAnnotationTypeRemovedEvent(item.studyId.id, item.id.id).success
       } yield event
     }

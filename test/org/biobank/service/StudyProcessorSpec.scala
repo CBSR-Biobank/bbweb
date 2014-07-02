@@ -48,7 +48,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
     resultFunc: DomainValidation[StudyUpdatedEvent] => Unit): Unit = {
     val cmd = UpdateStudyCmd(
       study.id.id,
-      study.versionOption,
+      study.version,
       study.name,
       study.description)
     val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]]
@@ -190,7 +190,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val validation = ask(studyProcessor, EnableStudyCmd(study.id.toString, Some(0L)))
+      val validation = ask(studyProcessor, EnableStudyCmd(study.id.toString, 0L))
         .mapTo[DomainValidation[StudyEnabledEvent]]
         .futureValue
       validation should be ('success)
@@ -206,7 +206,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val enabledStudy = factory.createEnabledStudy
       studyRepository.put(enabledStudy)
 
-      val validation = ask(studyProcessor, DisableStudyCmd(enabledStudy.id.toString, Some(1L)))
+      val validation = ask(studyProcessor, DisableStudyCmd(enabledStudy.id.toString, 1L))
         .mapTo[DomainValidation[StudyDisabledEvent]]
         .futureValue
 
@@ -228,7 +228,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val validation = ask(studyProcessor, RetireStudyCmd(study.id.toString, Some(0L)))
+      val validation = ask(studyProcessor, RetireStudyCmd(study.id.toString, 0L))
         .mapTo[DomainValidation[StudyRetiredEvent]]
         .futureValue
       validation should be ('success)
@@ -266,7 +266,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val newName = nameGenerator.next[Study]
       val newDescription = some(nameGenerator.next[Study])
 
-      cmd = UpdateStudyCmd(event.id, Some(0), newName, newDescription)
+      cmd = UpdateStudyCmd(event.id, 0, newName, newDescription)
       val validation2 = ask(newStudyProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]]
         .futureValue
 

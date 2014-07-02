@@ -159,7 +159,7 @@ trait StudyProcessorComponent
         nameAvailable <- nameAvailable(cmd.name, studyId)
         prevStudy <- isStudyDisabled(studyId)
         updatedStudy <- prevStudy.update(
-          cmd.expectedVersion, org.joda.time.DateTime.now, cmd.name, cmd.description)
+         Some(cmd.expectedVersion), org.joda.time.DateTime.now, cmd.name, cmd.description)
         event <- StudyUpdatedEvent(
           cmd.id, updatedStudy.version, updatedStudy.lastUpdateDate.get, updatedStudy.name,
           updatedStudy.description).success
@@ -174,7 +174,7 @@ trait StudyProcessorComponent
       for {
         disabledStudy <- isStudyDisabled(studyId)
         enabledStudy <- disabledStudy.enable(
-          cmd.expectedVersion, org.joda.time.DateTime.now, specimenGroupCount, collectionEventtypeCount)
+         Some(cmd.expectedVersion), org.joda.time.DateTime.now, specimenGroupCount, collectionEventtypeCount)
         event <- StudyEnabledEvent(
           studyId.id, enabledStudy.version, enabledStudy.lastUpdateDate.get).success
       } yield event
@@ -184,7 +184,7 @@ trait StudyProcessorComponent
       val studyId = StudyId(cmd.id)
       for {
         enabledStudy <- isStudyEnabled(studyId)
-        disabledStudy <- enabledStudy.disable(cmd.expectedVersion, org.joda.time.DateTime.now)
+        disabledStudy <- enabledStudy.disable(Some(cmd.expectedVersion), org.joda.time.DateTime.now)
         event <- StudyDisabledEvent(
           cmd.id, disabledStudy.version, disabledStudy.lastUpdateDate.get).success
       } yield event
@@ -194,7 +194,7 @@ trait StudyProcessorComponent
       val studyId = StudyId(cmd.id)
       for {
         disabledStudy <- isStudyDisabled(studyId)
-        retiredStudy <- disabledStudy.retire(cmd.expectedVersion, org.joda.time.DateTime.now)
+        retiredStudy <- disabledStudy.retire(Some(cmd.expectedVersion), org.joda.time.DateTime.now)
         event <- StudyRetiredEvent(
           cmd.id, retiredStudy.version, retiredStudy.lastUpdateDate.get).success
       } yield event
@@ -204,7 +204,7 @@ trait StudyProcessorComponent
       val studyId = StudyId(cmd.id)
       for {
         retiredStudy <- isStudyRetired(studyId)
-        unretiredStudy <- retiredStudy.unretire(cmd.expectedVersion, org.joda.time.DateTime.now)
+        unretiredStudy <- retiredStudy.unretire(Some(cmd.expectedVersion), org.joda.time.DateTime.now)
         event <- StudyUnretiredEvent(
           studyId.id, unretiredStudy.version, unretiredStudy.lastUpdateDate.get).success
       } yield event

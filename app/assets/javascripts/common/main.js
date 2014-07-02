@@ -17,7 +17,7 @@ define([
            'biobank.common', [
              'common.helper',
              'common.playRoutes',
-             'common.errorModal',
+             'common.modals',
              'common.filters',
              'common.directives.forms',
              'common.directives.uiBreadcrumbs',

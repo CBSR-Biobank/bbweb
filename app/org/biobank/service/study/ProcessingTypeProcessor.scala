@@ -83,7 +83,7 @@ trait ProcessingTypeProcessorComponent {
         oldItem <- processingTypeRepository.withId(studyId,id)
         nameValid <- nameAvailable(cmd.name, id)
         newItem <- oldItem.update(
-          cmd.expectedVersion, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.enabled)
+         Some(cmd.expectedVersion), org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.enabled)
         event <- ProcessingTypeUpdatedEvent(
           cmd.studyId, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, newItem.name,
           newItem.description, newItem.enabled).success
@@ -97,7 +97,7 @@ trait ProcessingTypeProcessorComponent {
 
       for {
         item <- processingTypeRepository.withId(studyId, id)
-        validVersion <- validateVersion(item, cmd.expectedVersion)
+        validVersion <- validateVersion(item,Some(cmd.expectedVersion))
         event <- ProcessingTypeRemovedEvent(cmd.studyId, cmd.id).success
       } yield event
     }

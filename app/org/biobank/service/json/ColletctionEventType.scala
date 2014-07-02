@@ -64,7 +64,7 @@ object CollectionEventType {
   implicit val updateCollectionEventTypeCmdReads: Reads[UpdateCollectionEventTypeCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "recurring").read[Boolean] and
@@ -75,7 +75,7 @@ object CollectionEventType {
   implicit val removeCollectionEventTypeCmdReads: Reads[RemoveCollectionEventTypeCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0))
+      (__ \ "expectedVersion").read[Long](min[Long](0))
   )(RemoveCollectionEventTypeCmd.apply _)
 
   implicit val collectionEventTypeAddedEventWriter: Writes[CollectionEventTypeAddedEvent] = (

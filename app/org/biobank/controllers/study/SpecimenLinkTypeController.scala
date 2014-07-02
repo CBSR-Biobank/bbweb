@@ -61,7 +61,8 @@ object SpecimenLinkTypeController extends BbwebController  {
     }
   }
 
-  def removeSpecimenLinkType(id: String) = CommandAction { cmd: RemoveSpecimenLinkTypeCmd => implicit userId =>
+  def removeSpecimenLinkType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    val cmd = RemoveSpecimenLinkTypeCmd(studyId, id, ver)
     val future = studyService.removeSpecimenLinkType(cmd)
     future.map { validation =>
       validation.fold(

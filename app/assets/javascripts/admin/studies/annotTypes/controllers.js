@@ -57,79 +57,63 @@ define(['angular', 'common'], function(angular, common) {
       };
     }]);
 
-  mod.controller('StudyAnnotationTypeAddCtrl', [
-    '$scope', '$log', '$state', '$modal', 'StudyService', 'ParticipantAnnotTypeService', 'study', 'annotType',
-    function ($scope, $log, $state, $modal, StudyService, ParticipantAnnotTypeService, study, annotType) {
-      $scope.title =  "Add Annotation Type";
-      $scope.annotType = annotType;
-      studyAnnotationTypeEditCommon($scope, $modal, StudyService, ParticipantAnnotTypeService);
-    }]);
-
-  mod.controller('StudyAnnotationTypeUpdateCtrl', [
-    '$scope', '$log', '$state', '$modal', 'StudyService', 'ParticipantAnnotTypeService', 'study', 'annotType',
-    function ($scope, $log, $state, $modal, StudyService, ParticipantAnnotTypeService, study, annotType) {
-      $scope.title =  "Update Participant Annotation Type";
-      $scope.annotType = annotType;
-      studyAnnotationTypeEditCommon($scope, $modal, StudyService, ParticipantAnnotTypeService);
-    }]);
-
   /**
    * Common code to add or edit an annotation type.
    */
-  function studyAnnotationTypeEditCommon($scope, $modal, StudyService, ParticipantAnnotTypeService) {
-      $scope.hasRequiredField = (typeof $scope.annotType.required !== 'undefined');
+  function studyAnnotationTypeEditCommon($scope, $state, $stateParams, $modal, StudyService, ParticipantAnnotTypeService) {
+    $scope.hasRequiredField = (typeof $scope.annotType.required !== 'undefined');
 
-      StudyService.valueTypes().then(function(response) {
-        $scope.valueTypes = response.data.sort();
-      });
+    StudyService.valueTypes().then(function(response) {
+      $scope.valueTypes = response.data.sort();
+    });
 
-      $scope.optionAdd = function() {
-        var newOptionId = $scope.annotType.options.length;
-        $scope.annotType.options.push("");
-      };
+    $scope.optionAdd = function() {
+      var newOptionId = $scope.annotType.options.length;
+      $scope.annotType.options.push("");
+    };
 
-      $scope.removeOption = function(option) {
-        if ($scope.annotType.options.length <= 1) {
-          throw new Error("invalid length for options");
-        }
+    $scope.removeOption = function(option) {
+      if ($scope.annotType.options.length <= 1) {
+        throw new Error("invalid length for options");
+      }
 
-        var index = $scope.annotType.options.indexOf(option);
-        if (index > -1) {
-          $scope.annotType.options.splice(index, 1);
-        }
-      };
+      var index = $scope.annotType.options.indexOf(option);
+      if (index > -1) {
+        $scope.annotType.options.splice(index, 1);
+      }
+    };
 
-      $scope.removeButtonDisabled = function() {
-        return $scope.annotType.options.length <= 1;
-      };
+    $scope.removeButtonDisabled = function() {
+      return $scope.annotType.options.length <= 1;
+    };
 
-      $scope.submit = function(annotType) {
-        ParticipantAnnotTypeService.addOrUpdate(annotType)
-          .success(function() {
-            $state.go('admin.studies.study.participants', { studyId: $scope.study.id });
-          })
-          .error(function(error) {
-            annotTypeSaveError(
-              $scope, $modal, annotType, error,
-              function() {
-                // could use $state.reload() here but it does not re-initialize the
-                // controller
-                $state.transitionTo($state.current, $stateParams, {
-                  reload: true,
-                  inherit: false,
-                  notify: true
-                });
-              },
-              function() {
-                $state.go('admin.studies.study.participants');
-              }
-            );
-          });
-      };
+    $scope.submit = function(annotType) {
+      ParticipantAnnotTypeService.addOrUpdate(annotType)
+        .success(function() {
+          $state.go('admin.studies.study.participants', { studyId: $scope.study.id });
+        })
+        .error(function(error) {
+          annotTypeSaveError(
+            $scope, $modal, annotType, error,
+            function() {
+              // could use $state.reload() here but it does not re-initialize the
+              // controller
+              $state.transitionTo($state.current, $stateParams, {
+                reload: true,
+                inherit: false,
+                notify: true
+              });
+            },
+            function() {
+              $state.go('admin.studies.study.participants');
+            }
+          );
+        });
+    };
 
-      $scope.cancel = function() {
-        $state.go('admin.studies.study.participants', { studyId: study.id });
-      };
+    $scope.cancel = function() {
+      $state.go('admin.studies.study.participants', { studyId: study.id });
+    };
   }
 
   function annotTypeSaveError($scope, $modal, annotType, error, onOk, onCancel) {
@@ -156,8 +140,8 @@ define(['angular', 'common'], function(angular, common) {
           return modalParams.message;
         }
       },
-      templateUrl: '/assets/javascripts/common/errorModal.html',
-      controller: 'ErrorModal'
+      templateUrl: '/assets/javascripts/common/okCancelModal.html',
+      controller: 'OkCancelModal'
     });
 
     modalInstance.result.then(function(selectedItem) {
@@ -167,10 +151,22 @@ define(['angular', 'common'], function(angular, common) {
     });
   }
 
-  mod.controller('StudyAnnotationTypeRemoveCtrl', [
-    '$scope', '$log',
-    function ($scope, $log) {
-      $log.info("StudyAnnotationTypeRemoveCtrl:");
+  mod.controller('StudyAnnotationTypeAddCtrl', [
+    '$scope', '$state', '$stateParams', '$modal', 'StudyService', 'ParticipantAnnotTypeService', 'study', 'annotType',
+    function ($scope, $state, $stateParams, $modal, StudyService, ParticipantAnnotTypeService, study, annotType) {
+      $scope.title =  "Add Annotation Type";
+      $scope.study = study;
+      $scope.annotType = annotType;
+      studyAnnotationTypeEditCommon($scope, $state, $stateParams, $modal, StudyService, ParticipantAnnotTypeService);
+    }]);
+
+  mod.controller('StudyAnnotationTypeUpdateCtrl', [
+    '$scope', '$state', '$stateParams', '$modal', 'StudyService', 'ParticipantAnnotTypeService', 'study', 'annotType',
+    function ($scope, $state, $stateParams, $modal, StudyService, ParticipantAnnotTypeService, study, annotType) {
+      $scope.title =  "Update Participant Annotation Type";
+      $scope.study = study;
+      $scope.annotType = annotType;
+      studyAnnotationTypeEditCommon($scope, $state, $stateParams, $modal, StudyService, ParticipantAnnotTypeService);
     }]);
 
   return mod;

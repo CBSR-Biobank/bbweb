@@ -35,12 +35,12 @@ object User {
   )(RegisterUserCmd.apply _)
 
   implicit val activateUserCmdReads = (
-    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
-      (__ \ "email").read[String](minLength[String](5))
+      (__ \ "email").read[String](minLength[String](5)) and
+    (__ \ "expectedVersion").read[Long](min[Long](0))
   )(ActivateUserCmd.apply _)
 
   implicit val updateUserCmdReads = (
-    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+    (__ \ "expectedVersion").read[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "email").read[String](minLength[String](5)) and
       (__ \ "password").read[String](minLength[String](2)) and
@@ -48,19 +48,14 @@ object User {
   )(UpdateUserCmd.apply _)
 
   implicit val lockUserCmdReads = (
-    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
-      (__ \ "email").read[String](minLength[String](5))
+    (__ \ "email").read[String](minLength[String](5)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0))
   )(LockUserCmd.apply _)
 
   implicit val unlockUserCmdReads = (
-    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
-      (__ \ "email").read[String](minLength[String](5))
+    (__ \ "email").read[String](minLength[String](5)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0))
   )(UnlockUserCmd.apply _)
-
-  implicit val removeUserCmdReads = (
-    (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
-      (__ \ "email").read[String](minLength[String](5))
-  )(RemoveUserCmd.apply _)
 
   implicit val userRegisteredEventWrites: Writes[UserRegisteredEvent] = (
     (__ \ "id").write[String] and

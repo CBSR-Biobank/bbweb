@@ -34,29 +34,29 @@ object Study {
 
   implicit val updateStudyCmdReads: Reads[UpdateStudyCmd] = (
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String]
   )(UpdateStudyCmd.apply _)
 
   implicit val enableStudyCmdReads: Reads[EnableStudyCmd] = (
     (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0))
+      (__ \ "expectedVersion").read[Long](min[Long](0))
   )(EnableStudyCmd.apply _ )
 
   implicit val disableStudyCmdReads: Reads[DisableStudyCmd] = (
     (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0))
+      (__ \ "expectedVersion").read[Long](min[Long](0))
   )(DisableStudyCmd.apply _)
 
   implicit val retireStudyCmdReads: Reads[RetireStudyCmd] = (
     (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0))
+      (__ \ "expectedVersion").read[Long](min[Long](0))
   )(RetireStudyCmd.apply _)
 
   implicit val unretireStudyCmdReads: Reads[UnretireStudyCmd] = (
     (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0))
+      (__ \ "expectedVersion").read[Long](min[Long](0))
   )(UnretireStudyCmd.apply _)
 
   implicit val studyAddedEventWriter: Writes[StudyAddedEvent] = (

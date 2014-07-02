@@ -90,7 +90,7 @@ trait CollectionEventTypeProcessorComponent {
         oldItem <- collectionEventTypeRepository.withId(studyId,id)
         nameValid <- nameAvailable(cmd.name, id)
         newItem <- oldItem.update(
-          cmd.expectedVersion, org.joda.time.DateTime.now, cmd.name,
+         Some(cmd.expectedVersion), org.joda.time.DateTime.now, cmd.name,
           cmd.description, cmd.recurring, cmd.specimenGroupData, cmd.annotationTypeData)
         validSgData <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
         validAtData <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
@@ -108,7 +108,7 @@ trait CollectionEventTypeProcessorComponent {
 
       for {
         item <- collectionEventTypeRepository.withId(studyId, id)
-        validVersion <- validateVersion(item, cmd.expectedVersion)
+        validVersion <- validateVersion(item,Some(cmd.expectedVersion))
         event <- CollectionEventTypeRemovedEvent(cmd.studyId, cmd.id).success
       } yield event
     }

@@ -46,7 +46,7 @@ object ParticipantAnnotationType {
   implicit val updateParticipantAnnotationTypeCmdReads: Reads[UpdateParticipantAnnotationTypeCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
@@ -54,12 +54,6 @@ object ParticipantAnnotationType {
       (__ \ "options").readNullable[Seq[String]] and
       (__ \ "required").read[Boolean]
   )(UpdateParticipantAnnotationTypeCmd.apply _)
-
-  implicit val removeParticipantAnnotationTypeCmdReads: Reads[RemoveParticipantAnnotationTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0))
-  )(RemoveParticipantAnnotationTypeCmd.apply _)
 
   implicit val participantAnnotationTypeAddedEventWriter: Writes[ParticipantAnnotationTypeAddedEvent] = (
     (__ \ "studyId").write[String] and

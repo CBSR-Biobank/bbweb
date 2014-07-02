@@ -60,14 +60,6 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     result ++ slTypeCommonToAddCmdJson(slType) ++ annotTypeJson(slType)
   }
 
-  private def slTypeToRemoveCmdJson(slType: SpecimenLinkType) = {
-    Json.obj(
-      "processingTypeId" -> slType.processingTypeId.id,
-      "id"               -> slType.id.id,
-      "expectedVersion"  -> Some(slType.version)
-    )
-  }
-
   def addOnNonDisabledStudy(
     appRepositories: AppRepositories,
     study: Study,
@@ -82,7 +74,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       POST,
-      "/admin/studies/sltypes",
+      "/studies/sltypes",
       BAD_REQUEST,
       slTypeToAddCmdJson(slType))
 
@@ -106,7 +98,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       PUT,
-      s"/admin/studies/sltypes/${slType.id.id}",
+      s"/studies/sltypes/${slType.id.id}",
       BAD_REQUEST,
       slTypeToUpdateCmdJson(slType2))
 
@@ -128,9 +120,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       DELETE,
-      s"/admin/studies/sltypes/${slType.id.id}",
-      BAD_REQUEST,
-      slTypeToRemoveCmdJson(slType))
+      s"/studies/sltypes/${slType.processingTypeId.id}/${slType.id.id}/${slType.version}",
+      BAD_REQUEST)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -138,7 +129,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
   "SpecimenLink Type REST API" when {
 
-    "GET /admin/studies/sltypes" should {
+    "GET /studies/sltypes" should {
       "list none" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -146,13 +137,13 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         appRepositories.processingTypeRepository.put(procType)
 
-        val json = makeRequest(GET, s"/admin/studies/sltypes/${procType.id.id}")
+        val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 0
       }
     }
 
-    "GET /admin/studies/sltypes" should {
+    "GET /studies/sltypes" should {
       "list a single specimen link type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -165,14 +156,14 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         appRepositories.specimenGroupRepository.put(outputSg)
         appRepositories.specimenLinkTypeRepository.put(slType)
 
-        val json = makeRequest(GET, s"/admin/studies/sltypes/${procType.id.id}")
+        val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
         val jsonList = json.as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), slType)
       }
     }
 
-    "GET /admin/studies/sltypes" should {
+    "GET /studies/sltypes" should {
       "get a single specimen link type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -185,12 +176,12 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         appRepositories.specimenGroupRepository.put(outputSg)
         appRepositories.specimenLinkTypeRepository.put(slType)
 
-        val jsonObj = makeRequest(GET, s"/admin/studies/sltypes/${procType.id.id}?slTypeId=${slType.id.id}").as[JsObject]
+        val jsonObj = makeRequest(GET, s"/studies/sltypes/${procType.id.id}?slTypeId=${slType.id.id}").as[JsObject]
         compareObj(jsonObj, slType)
       }
     }
 
-    "GET /admin/studies/sltypes" should {
+    "GET /studies/sltypes" should {
       "list multiple specimen link types" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -202,7 +193,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
         sltypes map { slType => appRepositories.specimenLinkTypeRepository.put(slType) }
 
-        val json = makeRequest(GET, s"/admin/studies/sltypes/${procType.id.id}")
+        val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
         val jsonList = json.as[List[JsObject]]
 
         jsonList should have size sltypes.size
@@ -211,7 +202,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /admin/studies/sltypes" should {
+    "POST /studies/sltypes" should {
       "add a specimen link type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -228,14 +219,14 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(
           POST,
-          "/admin/studies/sltypes",
+          "/studies/sltypes",
           json = slTypeToAddCmdJson(slType))
 
         (json \ "status").as[String] should include ("success")
       }
     }
 
-    "POST /admin/studies/sltypes" should {
+    "POST /studies/sltypes" should {
       "not add a specimen link type to an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -245,7 +236,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /admin/studies/sltypes" should {
+    "POST /studies/sltypes" should {
       "not add a specimen link type to an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -255,7 +246,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /admin/studies/sltypes" should {
+    "PUT /studies/sltypes" should {
       "should update a specimen link type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -280,14 +271,14 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(
           PUT,
-          s"/admin/studies/sltypes/${slType.id.id}",
+          s"/studies/sltypes/${slType.id.id}",
           json = slTypeToUpdateCmdJson(slType2))
 
         (json \ "status").as[String] should include ("success")
       }
     }
 
-    "PUT /admin/studies/sltypes" should {
+    "PUT /studies/sltypes" should {
       "not update a specimen link type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -297,7 +288,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /admin/studies/sltypes" should {
+    "PUT /studies/sltypes" should {
       "not update a specimen link type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -307,7 +298,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /admin/studies/sltypes" should {
+    "DELETE /studies/sltypes" should {
       "remove a specimen link type" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -325,14 +316,13 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(
           DELETE,
-          s"/admin/studies/sltypes/${slType.id.id}",
-          json = slTypeToRemoveCmdJson(slType))
+          s"/studies/sltypes/${slType.processingTypeId.id}/${slType.id.id}/${slType.version}")
 
         (json \ "status").as[String] should include ("success")
       }
     }
 
-    "DELETE /admin/studies/sltypes" should {
+    "DELETE /studies/sltypes" should {
       "not remove a specimen link type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories
@@ -342,7 +332,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /admin/studies/sltypes" should {
+    "DELETE /studies/sltypes" should {
       "not remove a specimen link type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         val appRepositories = new AppRepositories

@@ -82,7 +82,8 @@ define(['angular', 'common'], function(angular) {
           id: annotType.id,
           expectedVersion: annotType.version
         };
-        return playRoutes.controllers.study.ParticipantAnnotTypeController.removeAnnotationType(annotType.id).delete(cmd);
+        return playRoutes.controllers.study.ParticipantAnnotTypeController
+          .removeAnnotationType(annotType.studyId, annotType.id, annotType.version).delete();
       }
     };
   }]);

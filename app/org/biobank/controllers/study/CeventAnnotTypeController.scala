@@ -60,7 +60,8 @@ object CeventAnnotTypeController extends BbwebController  {
     }
   }
 
-  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveCollectionEventAnnotationTypeCmd => implicit userId =>
+  def removeAnnotationType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    val cmd =  RemoveCollectionEventAnnotationTypeCmd(studyId, id, ver)
     val future = studyService.removeCollectionEventAnnotationType(cmd)
     future.map { validation =>
       validation.fold(

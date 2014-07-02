@@ -51,7 +51,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val user2 = factory.createActiveUser
 
       val cmd = UpdateUserCmd(
-        user.versionOption, user2.name, user2.email, user2.password, user2.avatarUrl)
+        user.version, user2.name, user2.email, user2.password, user2.avatarUrl)
       val validation = ask(userProcessor, cmd).mapTo[DomainValidation[UserUpdatedEvent]]
         .futureValue
 
@@ -92,7 +92,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val validation2 = ask(userProcessor, ActivateUserCmd(Some(0L), user.email))
+      val validation2 = ask(userProcessor, ActivateUserCmd(user.email, 0L))
         .mapTo[DomainValidation[UserActivatedEvent]]
         .futureValue
 
@@ -107,7 +107,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val activeUser = factory.createActiveUser
       userRepository.put(activeUser)
 
-      val validation = ask(userProcessor, LockUserCmd(Some(1L), activeUser.email))
+      val validation = ask(userProcessor, LockUserCmd(activeUser.email, 1L))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
 
@@ -122,7 +122,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val validation2 = ask(userProcessor, LockUserCmd(Some(0L), user.email))
+      val validation2 = ask(userProcessor, LockUserCmd(user.email, 0L))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
       validation2 should be ('failure)
@@ -137,7 +137,7 @@ class UserProcessorSpec extends UserProcessorFixture {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val validation2 = ask(userProcessor, UnlockUserCmd(Some(0L), user.email))
+      val validation2 = ask(userProcessor, UnlockUserCmd(user.email, 0L))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
       validation2 should be ('failure)

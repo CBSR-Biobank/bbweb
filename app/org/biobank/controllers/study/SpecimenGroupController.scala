@@ -64,7 +64,8 @@ object SpecimenGroupController extends BbwebController {
     }
   }
 
-  def removeSpecimenGroup(id: String) = CommandAction { cmd: RemoveSpecimenGroupCmd => implicit userId =>
+  def removeSpecimenGroup(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    val cmd = RemoveSpecimenGroupCmd(studyId, id, ver)
     val future = studyService.removeSpecimenGroup(cmd)
     future.map { validation =>
       validation.fold(

@@ -2,8 +2,9 @@
 define(['angular'], function(angular) {
   'use strict';
 
-  var mod = angular.module('common.errorModal', []);
-  mod.controller('ErrorModal', [
+  var mod = angular.module('common.modals', []);
+
+  mod.controller('OkCancelModal', [
     '$scope', '$modalInstance', 'title', 'message',
     function($scope, $modalInstance, title, message) {
       $scope.title = title;
@@ -17,5 +18,6 @@ define(['angular'], function(angular) {
         $modalInstance.dismiss('cancel');
       };
     }]);
+
   return mod;
 });

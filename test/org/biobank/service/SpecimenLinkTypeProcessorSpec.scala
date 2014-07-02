@@ -47,7 +47,7 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
     val cmd = UpdateSpecimenLinkTypeCmd(
       specimenLinkType.processingTypeId.id,
       specimenLinkType.id.id,
-      specimenLinkType.versionOption,
+      specimenLinkType.version,
       specimenLinkType.expectedInputChange,
       specimenLinkType.expectedOutputChange,
       specimenLinkType.inputCount,
@@ -68,7 +68,7 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
     val cmd = RemoveSpecimenLinkTypeCmd(
       specimenLinkType.processingTypeId.id,
       specimenLinkType.id.id,
-      specimenLinkType.versionOption)
+      specimenLinkType.version)
     val validation = ask(studyProcessor, cmd)
       .mapTo[DomainValidation[SpecimenLinkTypeRemovedEvent]]
       .futureValue
@@ -338,7 +338,7 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
       specimenLinkTypeRepository.put(slType)
 
       val cmd = new UpdateSpecimenGroupCmd(inputSg.studyId.id, inputSg.id.id,
-        inputSg.versionOption, inputSg.name, inputSg.description, inputSg.units,
+        inputSg.version, inputSg.name, inputSg.description, inputSg.units,
         inputSg.anatomicalSourceType, inputSg.preservationType, inputSg.preservationTemperatureType,
         inputSg.specimenType)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
@@ -351,7 +351,7 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
       }
 
       val cmd2 = new UpdateSpecimenGroupCmd(outputSg.studyId.id, outputSg.id.id,
-        outputSg.versionOption, outputSg.name, outputSg.description, outputSg.units,
+        outputSg.version, outputSg.name, outputSg.description, outputSg.units,
         outputSg.anatomicalSourceType, outputSg.preservationType, outputSg.preservationTemperatureType,
         outputSg.specimenType)
       val validation2 = ask(studyProcessor, cmd2).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
@@ -370,7 +370,7 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
       specimenGroupRepository.put(outputSg)
       specimenLinkTypeRepository.put(slType)
 
-      val cmd = new RemoveSpecimenGroupCmd(inputSg.studyId.id, inputSg.id.id, inputSg.versionOption)
+      val cmd = new RemoveSpecimenGroupCmd(inputSg.studyId.id, inputSg.id.id, inputSg.version)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
         .futureValue
       validation should be('failure)
@@ -380,7 +380,7 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
         err.list.head should include("specimen group is in use by specimen link type")
       }
 
-      val cmd2 = new RemoveSpecimenGroupCmd(outputSg.studyId.id, outputSg.id.id, outputSg.versionOption)
+      val cmd2 = new RemoveSpecimenGroupCmd(outputSg.studyId.id, outputSg.id.id, outputSg.version)
       val validation2 = ask(studyProcessor, cmd2).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
         .futureValue
       validation2 should be('failure)
@@ -531,7 +531,7 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
       specimenLinkTypeRepository.put(slType)
 
       val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
-        annotationType.studyId.id, annotationType.id.id, annotationType.versionOption,
+        annotationType.studyId.id, annotationType.id.id, annotationType.version,
         annotationType.name, annotationType.description, annotationType.valueType)
       val validation = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
@@ -584,7 +584,7 @@ class SpecimenLinkTypeProcessorSpec extends StudyProcessorFixture {
       specimenLinkTypeRepository.put(slType)
 
       val cmd = RemoveSpecimenLinkAnnotationTypeCmd(
-        annotationType.studyId.id, annotationType.id.id, annotationType.versionOption)
+        annotationType.studyId.id, annotationType.id.id, annotationType.version)
       val validation = ask(studyProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
         .futureValue

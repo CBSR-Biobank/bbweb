@@ -96,7 +96,8 @@ object UserController extends BbwebController {
     }
   }
 
-  def removeUser(id: String) =  CommandAction { cmd: RemoveUserCmd => implicit userId =>
+  def removeUser(id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    val cmd = RemoveUserCmd(id, ver)
     val future = userService.remove(cmd)
     future.map { validation =>
       validation.fold(

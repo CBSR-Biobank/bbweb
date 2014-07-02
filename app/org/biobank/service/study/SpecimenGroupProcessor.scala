@@ -91,7 +91,7 @@ trait SpecimenGroupProcessorComponent {
         oldItem <- specimenGroupRepository.withId(studyId, specimenGroupId)
         notInUse <- checkNotInUse(studyId, oldItem.id)
         newItem <- oldItem.update(
-          cmd.expectedVersion, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.units,
+         Some(cmd.expectedVersion), org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.units,
           cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
           cmd.specimenType)
         newEvent <- SpecimenGroupUpdatedEvent(
@@ -108,7 +108,7 @@ trait SpecimenGroupProcessorComponent {
       for {
         item <- specimenGroupRepository.withId(studyId, SpecimenGroupId(cmd.id))
         notInUse <- checkNotInUse(studyId, item.id)
-        validVersion <- validateVersion(item, cmd.expectedVersion)
+        validVersion <- validateVersion(item,Some(cmd.expectedVersion))
         newEvent <- SpecimenGroupRemovedEvent(item.studyId.id, item.id.id).success
       } yield newEvent
     }
