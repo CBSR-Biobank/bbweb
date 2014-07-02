@@ -21,7 +21,7 @@
                   class="form-control"
                   rows="10"
                   ng-model="annotType.description"
-                  placeholder="A description of the annotation type" />
+                  placeholder="A description of the annotation type (optional)" />
       </div>
     </div>
     <div class="form-group" ng-if="hasRequiredField">
@@ -83,7 +83,7 @@
          ng-if="annotType.valueType === 'Select'">
       <div class="col-sm-2">
         <button class="btn btn-sm btn-primary pull-right"
-                ng-click="addNewOption()"
+                ng-click="optionAdd()"
                 ng-disabled="annotTypeEditForm.$invalid">
         Add option <i class="glyphicon glyphicon-plus"></i>
         </button>

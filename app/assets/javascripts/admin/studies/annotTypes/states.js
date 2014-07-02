@@ -15,33 +15,42 @@ define(['angular'], function(angular) {
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotTypeForm.html',
-            controller: 'StudyAnnotationTypeEditCtrl'
+            controller: 'StudyAnnotationTypeAddCtrl'
+          }
+        },
+        resolve: {
+          annotType: ['study', function(study) {
+            return {
+              studyId: study.id,
+              name: "",
+              description: null,
+              required: false,
+              valueType: "",
+              options: []
+            };
+          }],
+          user: function() {
+            return userResolve;
           }
         },
         data: {
           displayName: 'Participant Annotation Type'
-        },
-        resolve: {
-          annotType: function() {
-            return null;
-          },
-          user: function() {
-            return userResolve;
-          }
         }
       })
       .state('admin.studies.study.participantAnnotTypeUpdate', {
         url: '/participant/annottype/update/{annotTypeId}',
         resolve: {
-          annotType: function($stateParams, ParticipantAnnotTypeService, study) {
-            if ($stateParams.annotTypeId) {
-              return ParticipantAnnotTypeService.get(study.id, $stateParams.annotTypeId)
-                .then(function(response) {
-                  return response.data;
-                });
-            }
-            throw new Error("state parameter annotTypeId is invalid");
-          },
+          annotType: [
+            '$stateParams', 'ParticipantAnnotTypeService', 'study',
+            function($stateParams, ParticipantAnnotTypeService, study) {
+              if ($stateParams.annotTypeId) {
+                return ParticipantAnnotTypeService.get(study.id, $stateParams.annotTypeId)
+                  .then(function(response) {
+                    return response.data;
+                  });
+              }
+              throw new Error("state parameter annotTypeId is invalid");
+            }],
           user: function() {
             return userResolve;
           }
@@ -49,7 +58,7 @@ define(['angular'], function(angular) {
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotTypeForm.html',
-            controller: 'StudyAnnotationTypeEditCtrl'
+            controller: 'StudyAnnotationTypeUpdateCtrl'
           }
         },
         data: {

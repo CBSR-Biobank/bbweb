@@ -246,10 +246,7 @@ define(['angular', 'common'], function(angular, common) {
     function($scope, $state, $stateParams, $location, $modal, $log, user, study, StudyService) {
 
       $scope.title =  "Add new study";
-      $scope.study = {
-        name: "",
-        description: null
-      };
+      $scope.study = study;
 
       $scope.submit = function(study) {
         StudyService.addOrUpdate(study)
@@ -257,7 +254,23 @@ define(['angular', 'common'], function(angular, common) {
             $state.go('admin.studies.panels');
           })
           .error(function(error) {
-            studySaveError($scope, $state, $modal, study, error);
+            studySaveError(
+              $scope, $modal, study, error,
+              // on OK
+              function() {
+                // could use $state.reload() here but it does not re-initialize the
+                // controller
+                $state.transitionTo($state.current, $stateParams, {
+                  reload: true,
+                  inherit: false,
+                  notify: true
+                });
+              },
+              // on Cancel
+              function() {
+                $state.go('admin.studies.panels');
+              }
+            );
           });
       };
 
@@ -282,7 +295,21 @@ define(['angular', 'common'], function(angular, common) {
             $state.go('admin.studies.study', { studyId: $scope.study.id });
           })
           .error(function(error) {
-            studySaveError($scope, $state, $modal, study, error);
+            studySaveError(
+              $scope, $modal, study, error,
+              function() {
+                // could use $state.reload() here but it does not re-initialize the
+                // controller
+                $state.transitionTo($state.current, $stateParams, {
+                  reload: true,
+                  inherit: false,
+                  notify: true
+                });
+              },
+              function() {
+                $state.go('admin.studies.study.summary');
+              }
+            );
           });
       };
 
@@ -294,52 +321,40 @@ define(['angular', 'common'], function(angular, common) {
   /**
    * Called where there was an error when attempting to add or update a study.
    */
-  var studySaveError = function($scope, $state, $modal, study, error) {
+  function studySaveError($scope, $modal, study, error, onOk, onCancel) {
     var modalInstance = {};
+    var modalParams = {};
 
     if (error.message.indexOf("expected version doesn't match current version") > -1) {
       /* concurrent change error */
-      modalInstance = $modal.open({
-        templateUrl: '/assets/javascripts/common/errorModal.html',
-        controller: 'errorModal',
-        resolve: {
-          title: function () {
-            return "Modified by another user";
-          },
-          message: function() {
-            return "Another user already made changes to this study. Press OK to make " +
-              " your changes again, or Cancel to dismiss your changes.";
-          }
-        }
-      });
-
-      modalInstance.result.then(function(selectedItem) {
-        $state.$reload();
-      }, function () {
-        $state.go('admin.studies');
-      });
+      modalParams.title = "Modified by another user";
+      modalParams.message = "Another user already made changes to this study. Press OK to make " +
+        " your changes again, or Cancel to dismiss your changes.";
     } else {
       /* some other error */
-      modalInstance = $modal.open({
-        templateUrl: '/assets/javascripts/common/errorModal.html',
-        controller: 'errorModal',
-        resolve: {
-          title: function () {
-            return study.id ?  "Cannot update study" : "Cannot add study";
-          },
-          message: function() {
-            return "Error: " + error.message;
-          }
-        }
-      });
-
-      modalInstance.result.then(function(selectedItem) {
-        $state.reload();
-      }, function () {
-        $state.reload();
-      });
+      modalParams.title = study.id ?  "Cannot update study" : "Cannot add study";
+      modalParams.message = "Error: " + error.message;
     }
-  };
+
+    modalInstance = $modal.open({
+      resolve: {
+        title: function () {
+          return modalParams.title;
+        },
+        message: function() {
+          return modalParams.message;
+        }
+      },
+      templateUrl: '/assets/javascripts/common/errorModal.html',
+      controller: 'ErrorModal'
+    });
+
+    modalInstance.result.then(function(selectedItem) {
+      onOk();
+    }, function () {
+      onCancel();
+    });
+  }
 
   /**
    * Used to sort a list of studies. Returns the comparison of names of the two studies.

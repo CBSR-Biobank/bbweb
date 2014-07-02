@@ -47,7 +47,7 @@ define(['angular'], function(angular) {
           url: '/add',
           resolve: {
             study: function() {
-              return null;
+              return { name: "", description: null };
             },
             user: function() {
               return userResolve;
