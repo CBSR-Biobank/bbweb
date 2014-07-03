@@ -7,7 +7,7 @@
 define(['angular'], function(angular) {
   'use strict';
 
-  var mod = angular.module('admin.studies.directives.studyTabs', ['study.services']);
+  var mod = angular.module('admin.studies.directives.studyTabs', ['studies.services']);
   //   .directive('summaryPane', function() {
   //     return {
   //       require: '^tab',

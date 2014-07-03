@@ -1,57 +1,57 @@
 <div class="panel panel-default" ng-init="tabSelected()">
   <div class="panel-heading">
-    <h3 class="panel-title">Participant Annotation Types
+    <h3 class="panel-title">Specimen Groups
     <div class="btn-group pull-right">
       <button class="btn btn-xs btn-primary"
-              ng-click="addAnnotationType(study)"
-              title="Add annotation type">
+              ng-click="addSpecimenGroup(study)"
+              title="Add specimen group">
       <i class="glyphicon glyphicon-plus"></i></button>
     </div>
     </h3>
   </div>
   <div class="panel-body">
     <p>
-      Participant annotations allow a study to collect custom named and defined pieces of data for each
-      participant. Annotations are optional and are not required to be defined.
+      A Specimen Group is used to configure a specimen type used by the study. It records ownership, summary,
+      storage, and classification information that applies to an entire group or collection of Specimens.
     </p>
-    <p ng-if="annotationTypes.length == 0"
+    <p ng-if="specimenGroups.length == 0"
        class="bg-info"
        style="padding: 10px;">
-      No participant annotation types have been defined for this study yet.
+      No specimen groups have been defined for this study yet.
     </p>
-    <p ng-if="annotationTypes.length != 0">
-      The following annotation types have been defined:
+    <p ng-if="specimenGroups.length != 0">
+      The following specimen groups have been defined:
     </p>
   </div>
-  <table ng-show="annotationTypes.length != 0"
+  <table ng-show="specimenGroups.length != 0"
          class="table table-hover"
          ng-table="tableParams">
-    <tr ng-repeat="annotType in $data"
+    <tr ng-repeat="specimenGroup in $data"
         ng-class="{'active': user.$selected}">
       <td data-title="'Name'" sortable="'name'">
-        {{annotType.name}}
+        {{specimenGroup.name}}
       </td>
-      <td data-title="'Type'" sortable="'valueType'">
-        {{annotType.valueType}}
+      <td data-title="'Anatomical Source'" sortable="'anatomicalSourceType'">
+        {{specimenGroup.anatomicalSourceType}}
       </td>
-      <td data-title="'Required'" sortable="'required'">
-        {{annotType.required ? "Yes" : "No"}}
+      <td data-title="'Specimen Type'" sortable="'specimenType'">
+        {{specimenGroup.specimenType}}
       </td>
       <td data-title="'Description'" sortable="'description'">
-        {{annotType.description === null ? "" : annotType.description | truncate:40}}
+        {{specimenGroup.description === null ? "" : specimenGroup.description | truncate:40}}
       </td>
       <td>
         <div class="btn-group pull-right">
           <button class="btn btn-xs btn-primary"
-                  ng-click="annotInformation(annotType)"
+                  ng-click="specimenGroupInformation(specimenGroup)"
                   title="More information">
           <i class="glyphicon glyphicon-info-sign"></i></button>
           <button class="btn btn-xs btn-primary"
-                  ng-click="updateAnnotationType(annotType)"
+                  ng-click="updateSpecimenGroup(specimenGroup)"
                   title="Update">
           <i class="glyphicon glyphicon-edit"></i></button>
           <button class="btn btn-xs btn-warning"
-                  ng-click="removeAnnotationType(annotType)"
+                  ng-click="removeSpecimenGroup(specimenGroup)"
                   data-toggle="tooltip"
                   title="Remove">
             <i class="glyphicon glyphicon-remove"></i>

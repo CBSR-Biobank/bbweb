@@ -1,0 +1,103 @@
+<div class="page-header"><h1>{{title}}</h1></div>
+<div class="clearfix">
+  <form class="form-horizontal"
+        name="specimenGroupEditForm"
+        novalidate>
+    <div class="form-group">
+      <label for="name" class="col-sm-2 control-label">Name</label>
+      <div class="col-sm-10">
+        <input name="name"
+               type="text"
+               class="form-control"
+               ng-model="specimenGroup.name"
+               ng-minlength="2"
+               placeholder="A short name for the specimen group" required=true/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="description" class="col-sm-2 control-label">Description</label>
+      <div class="col-sm-10">
+        <textarea name="description"
+                  class="form-control"
+                  rows="10"
+                  ng-model="specimenGroup.description"
+                  placeholder="A description of the specimen group (optional)" />
+      </div>
+    </div>
+    <div class="form-group" ng-if="hasRequiredField">
+      <label for="required" class="col-sm-2 control-label">Required</label>
+      <div class="col-sm-10">
+        <input name="required"
+               type="checkbox"
+               ng-model="specimenGroup.required"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="units" class="col-sm-2 control-label">Units</label>
+      <div class="col-sm-10">
+        <input name="units"
+               type="text"
+               class="form-control"
+               ng-model="specimenGroup.units"
+               ng-minlength="2"
+               placeholder="the type of units the specimens are measured in (eg. mL, cm, etc.)" required=true/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="anatomicalSourceType" class="col-sm-2 control-label">Anatomical Source</label>
+      <div class="col-sm-10">
+        <select class="form-control"
+                name="anatomicalSourceType"
+                ng-model="specimenGroup.anatomicalSourceType"
+                ng-options="source for source in anatomicalSourceTypes"
+                required>
+          <option value="">-- make a selection --</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="perservationType" class="col-sm-2 control-label">Preservation Type</label>
+      <div class="col-sm-10">
+        <select class="form-control"
+                name="perservationType"
+                ng-model="specimenGroup.perservationType"
+                ng-options="preserv for preserv in preservTypes"
+                required>
+          <option value="">-- make a selection --</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="perservationTempType" class="col-sm-2 control-label">Preservation Temperature</label>
+      <div class="col-sm-10">
+        <select class="form-control"
+                name="perservationTempType"
+                ng-model="specimenGroup.perservationTempType"
+                ng-options="temp for temp in preservTempTypes"
+                required>
+          <option value="">-- make a selection --</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="specimenType" class="col-sm-2 control-label">Specimen Type</label>
+      <div class="col-sm-10">
+        <select class="form-control"
+                name="specimenType"
+                ng-model="specimenGroup.specimenType"
+                ng-options="type for type in specimenTypes"
+                required>
+          <option value="">-- make a selection --</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button class="btn btn-primary"
+                ng-disabled="specimenGroupEditForm.$invalid"
+                ng-click="submit(specimenGroup)">Submit</button>
+        <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+      </div>
+    </div>
+  </form>
+</div>

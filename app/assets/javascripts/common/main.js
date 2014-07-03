@@ -3,9 +3,9 @@
  */
 define([
   'angular',
-  './services/helper',
+  './services/helpers',
   './services/playRoutes',
-  './controllers/errorModal',
+  './controllers/controllers',
   './filters',
   './directives/forms',
   './directives/uiBreadcrumbs',
@@ -15,9 +15,8 @@ define([
 
          return angular.module(
            'biobank.common', [
-             'common.helper',
+             'common.helpers',
              'common.playRoutes',
-             'common.modals',
              'common.filters',
              'common.directives.forms',
              'common.directives.uiBreadcrumbs',

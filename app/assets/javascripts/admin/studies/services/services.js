@@ -4,7 +4,7 @@
 define(['angular', 'common'], function(angular) {
   'use strict';
 
-  var mod = angular.module('study.services', ['biobank.common']);
+  var mod = angular.module('studies.services', ['biobank.common']);
 
   mod.factory('StudyService', ['playRoutes', function(playRoutes) {
     return {
@@ -84,6 +84,43 @@ define(['angular', 'common'], function(angular) {
         };
         return playRoutes.controllers.study.ParticipantAnnotTypeController
           .removeAnnotationType(annotType.studyId, annotType.id, annotType.version).delete();
+      }
+    };
+  }]);
+
+  mod.factory('SpecimenGroupService', ['$http', function($http) {
+    return {
+      getAll: function(studyId) {
+        return $http.get('/studies/sgroups/' + studyId);
+      },
+      get: function(studyId, specimenGroupId) {
+        return $http.get('/studies/sgroups/' + studyId + '/' + specimenGroupId);
+      },
+      addOrUpdate: function(specimenGroup) {
+        var cmd = {
+          studyId: specimenGroup.studyId,
+          name: specimenGroup.name,
+          description: specimenGroup.description,
+          units: specimenGroup.units,
+          anatomicalSourceType: specimenGroup.anatomicalSourceType,
+          preservationType: specimenGroup.preservationType,
+          preservationTemperatureType: specimenGroup.preservationTemperatureType,
+          specimenType: specimenGroup.specimenType
+        };
+
+        if (specimenGroup.id) {
+          cmd.id = specimenGroup.id;
+          cmd.expectedVersion = specimenGroup.version;
+          return $http.put('/studies/sgroups/' + specimenGroup.id, cmd);
+        } else {
+          return $http.post('/studies/sgroups', cmd);
+        }
+      },
+      remove: function(specimenGroup) {
+        return $http.delete(
+          '/studies/sgroups/' + specimenGroup.studyId +
+            '/' + specimenGroup.id +
+            '/' + specimenGroup.version);
       }
     };
   }]);

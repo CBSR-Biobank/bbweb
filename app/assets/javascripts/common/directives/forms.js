@@ -8,5 +8,16 @@ define(['angular'], function(angular) {
 
   var mod = angular.module('common.directives.forms', []);
 
+  mod.directive('integer', function(){
+    return {
+        require: 'ngModel',
+        link: function(scope, ele, attr, ctrl){
+            ctrl.$parsers.unshift(function(viewValue){
+                return parseInt(viewValue);
+            });
+        }
+    };
+});
+
   return mod;
 });

@@ -4,7 +4,7 @@
 define(['angular', 'common'], function(angular, common) {
   'use strict';
 
-  var mod = angular.module('admin.studies.controllers', ['study.services']);
+  var mod = angular.module('admin.studies.controllers', ['studies.services']);
 
   // For debugging
   //
@@ -138,16 +138,41 @@ define(['angular', 'common'], function(angular, common) {
     }]);
 
   /**
-   * Displays study annotation type summary information in a table. The user can then select a row
-   * to display more informaiton for te annotation type.
+   * Displays study participant information in a table.
    */
   mod.controller('ParticipantsPaneCtrl', [
-    '$scope', '$state', '$stateParams', '$modal', '$filter', '$log', 'ngTableParams', 'ParticipantAnnotTypeService',
-    function($scope, $state, $stateParams, $modal, $filter, $log, ngTableParams, ParticipantAnnotTypeService) {
+    '$scope',
+    '$state',
+    '$stateParams',
+    '$modal',
+    'modalService',
+    'annotTypeModalService',
+    '$filter',
+    '$log',
+    'ngTableParams',
+    'ParticipantAnnotTypeService',
+    'annotTypes',
+    function(
+      $scope,
+      $state,
+      $stateParams,
+      $modal,
+      modalService,
+      annotTypeModalService,
+      $filter,
+      $log,
+      ngTableParams,
+      ParticipantAnnotTypeService,
+      annotTypes) {
 
       var studyId = $stateParams.studyId;
-      $scope.annotationTypes = [];
-      $scope.tableParams = getAnnotationTableParams($scope, $filter, ngTableParams);
+      $scope.annotationTypes = annotTypes;
+      $scope.tableParams =
+        getAnnotationTableParams($scope, $filter, ngTableParams, $scope.annotationTypes);
+
+      if ($scope.tableParams.data.length > 0) {
+        $scope.tableParams.reload();
+      }
 
       /**
        * Creates a modal to display the annotation type details.
@@ -155,15 +180,7 @@ define(['angular', 'common'], function(angular, common) {
        * @param {annotType} the annotation type to display.
        */
       $scope.annotInformation = function(annotType) {
-        $modal.open({
-          resolve: {
-            annotType: function () {
-              return annotType;
-            }
-          },
-          templateUrl: '/assets/javascripts/admin/studies/annotTypes/annotTypeModal.html',
-          controller: 'AnnotationTypeModalCtrl'
-        });
+        annotTypeModalService.show(annotType);
       };
 
       /**
@@ -172,9 +189,7 @@ define(['angular', 'common'], function(angular, common) {
        * @param {annotType} the annotation type to be edited.
        */
       $scope.addAnnotationType = function(study) {
-        $log.info("addAnnotationType");
-        $state.go('admin.studies.study.participantAnnotTypeAdd',
-                  { studyId: studyId });
+        $state.go('admin.studies.study.participantAnnotTypeAdd', { studyId: studyId });
       };
 
       /**
@@ -183,7 +198,6 @@ define(['angular', 'common'], function(angular, common) {
        * @param {annotType} the annotation type to be edited.
        */
       $scope.updateAnnotationType = function(annotType) {
-        $log.info("updateAnnotationType");
         $state.go('admin.studies.study.participantAnnotTypeUpdate',
                   { studyId: annotType.studyId, annotTypeId: annotType.id });
       };
@@ -194,25 +208,89 @@ define(['angular', 'common'], function(angular, common) {
        * @param {annotType} the annotation type to be edited.
        */
       $scope.removeAnnotationType = function(annotType) {
-        $log.info("removeAnnotationType");
-        studyAnnotationTypeRemove($scope, $state, $stateParams, $modal, ParticipantAnnotTypeService, annotType);
+        studyAnnotationTypeRemove(
+          $scope, $state, $stateParams, modalService, ParticipantAnnotTypeService, annotType);
+      };
+    }]);
+
+    /**
+   * Displays study specimen configuration information in a table.
+   */
+  mod.controller('SpecimensPaneCtrl', [
+    '$scope',
+    '$state',
+    '$stateParams',
+    '$modal',
+    'modalService',
+    'specimenGroupModalService',
+    '$filter',
+    'ngTableParams',
+    'SpecimenGroupService',
+    'specimenGroups',
+    function(
+      $scope,
+      $state,
+      $stateParams,
+      $modal,
+      modalService,
+      specimenGroupModalService,
+      $filter,
+      ngTableParams,
+      SpecimenGroupService,
+      specimenGroups) {
+
+      var studyId = $stateParams.studyId;
+      $scope.specimenGroups = specimenGroups;
+      $scope.tableParams =
+        getSpecimenGroupTableParams($scope, $filter, ngTableParams, $scope.specimenGroups);
+
+      if ($scope.tableParams.data.length > 0) {
+        $scope.tableParams.reload();
+      }
+
+      /**
+       * Creates a modal to display the annotation type details.
+       *
+       * @param {specimenGroup} the annotation type to display.
+       */
+      $scope.specimenGroupInformation = function(specimenGroup) {
+        specimenGroupModalService.show(specimenGroup);
       };
 
-      $scope.tabSelected = function() {
-        ParticipantAnnotTypeService.getAll(studyId).then(function(response) {
-          $scope.annotationTypes = response.data;
+      /**
+       * Switches to the page to edit an annotation type.
+       *
+       * @param {specimenGroup} the annotation type to be edited.
+       */
+      $scope.addSpecimenGroup = function(study) {
+        $state.go('admin.studies.study.specimenGroupAdd', { studyId: studyId });
+      };
 
-          if ($scope.tableParams.data.length > 0) {
-            $scope.tableParams.reload();
-          }
-        });
+      /**
+       * Switches to the page to edit an annotation type.
+       *
+       * @param {specimenGroup} the annotation type to be edited.
+       */
+      $scope.updateSpecimenGroup = function(specimenGroup) {
+        $state.go('admin.studies.study.specimenGroupUpdate',
+                  { studyId: specimenGroup.studyId, specimenGroupId: specimenGroup.id });
+      };
+
+      /**
+       * Switches to the page to remove an annotation type.
+       *
+       * @param {specimenGroup} the annotation type to be edited.
+       */
+      $scope.removeSpecimenGroup = function(specimenGroup) {
+        studySpecimenGroupRemove(
+          $scope, $state, $stateParams, modalService, SpecimenGroupService, specimenGroup);
       };
     }]);
 
   /**
    * Returns an ng-table with containing the data passed in the parameter.
    */
-  var getAnnotationTableParams = function($scope, $filter, ngTableParams) {
+  var getAnnotationTableParams = function($scope, $filter, ngTableParams, annotationTypes) {
     /* jshint ignore:start */
     return new ngTableParams({
       page: 1,            // show first page
@@ -222,10 +300,38 @@ define(['angular', 'common'], function(angular, common) {
       }
     },{
       counts: [], // hide page counts control
-      total: function() { return $scope.annotationTypes.length; },
+      total: function() { return annotationTypes.length; },
       getData: function($defer, params) {
-        var data = $scope.annotationTypes;
-        params.total($scope.annotationTypes.length);
+        var data = annotationTypes;
+        params.total(annotationTypes.length);
+        var orderedData = params.sorting()
+          ? $filter('orderBy')(data, params.orderBy())
+          : data;
+        $defer.resolve(orderedData.slice(
+          (params.page() - 1) * params.count(),
+          params.page() * params.count()));
+      }
+    });
+    /* jshint ignore:end */
+  };
+
+  /**
+   * Returns an ng-table with containing the data passed in the parameter.
+   */
+  var getSpecimenGroupTableParams = function($scope, $filter, ngTableParams, specimenGroups) {
+    /* jshint ignore:start */
+    return new ngTableParams({
+      page: 1,            // show first page
+      count: 10,          // count per page
+      sorting: {
+        name: 'asc'       // initial sorting
+      }
+    },{
+      counts: [], // hide page counts control
+      total: function() { return $scope.specimenGroups.length; },
+      getData: function($defer, params) {
+        var data = specimenGroups;
+        params.total(specimenGroups.length);
         var orderedData = params.sorting()
           ? $filter('orderBy')(data, params.orderBy())
           : data;
@@ -241,8 +347,8 @@ define(['angular', 'common'], function(angular, common) {
    * Called to add a study.
    */
   mod.controller('StudyAddCtrl', [
-    '$scope', '$state', '$stateParams', '$location', '$modal', '$log', 'user', 'study', 'StudyService',
-    function($scope, $state, $stateParams, $location, $modal, $log, user, study, StudyService) {
+    '$scope', '$state', '$stateParams', '$location', 'modalService', 'user', 'study', 'StudyService',
+    function($scope, $state, $stateParams, $location, modalService, user, study, StudyService) {
 
       $scope.title =  "Add new study";
       $scope.study = study;
@@ -254,7 +360,7 @@ define(['angular', 'common'], function(angular, common) {
           })
           .error(function(error) {
             studySaveError(
-              $scope, $modal, study, error,
+              $scope, modalService, study, error,
               // on OK
               function() {
                 // could use $state.reload() here but it does not re-initialize the
@@ -282,8 +388,8 @@ define(['angular', 'common'], function(angular, common) {
    * Called to update the summary information for study.
    */
   mod.controller('StudyUpdateCtrl', [
-    '$scope', '$state', '$stateParams', '$location', '$modal', '$log', 'user', 'study', 'StudyService',
-    function($scope, $state, $stateParams, $location, $modal, $log, user, study, StudyService) {
+    '$scope', '$state', '$stateParams', '$location', 'modalService', 'user', 'study', 'StudyService',
+    function($scope, $state, $stateParams, $location, modalService, user, study, StudyService) {
 
       $scope.title = "Update study";
       $scope.study = study;
@@ -295,7 +401,7 @@ define(['angular', 'common'], function(angular, common) {
           })
           .error(function(error) {
             studySaveError(
-              $scope, $modal, study, error,
+              $scope, modalService, study, error,
               function() {
                 // could use $state.reload() here but it does not re-initialize the
                 // controller
@@ -320,35 +426,24 @@ define(['angular', 'common'], function(angular, common) {
   /**
    * Called where there was an error when attempting to add or update a study.
    */
-  function studySaveError($scope, $modal, study, error, onOk, onCancel) {
-    var modalInstance = {};
-    var modalParams = {};
+  function studySaveError($scope, modalService, study, error, onOk, onCancel) {
+    var modalOptions = {
+      closeButtonText: 'Cancel',
+      actionButtonText: 'OK'
+    };
 
     if (error.message.indexOf("expected version doesn't match current version") > -1) {
       /* concurrent change error */
-      modalParams.title = "Modified by another user";
-      modalParams.message = "Another user already made changes to this study. Press OK to make " +
-        " your changes again, or Cancel to dismiss your changes.";
+      modalOptions.headerText = 'Modified by another user';
+      modalOptions.bodyText = 'Another user already made changes to this study. Press OK to make ' +
+        ' your changes again, or Cancel to dismiss your changes.';
     } else {
       /* some other error */
-      modalParams.title = study.id ?  "Cannot update study" : "Cannot add study";
-      modalParams.message = "Error: " + error.message;
+      modalOptions.headerText = study.id ?  'Cannot update study' : 'Cannot add study';
+      modalOptions.bodyText = 'Error: ' + error.message;
     }
 
-    modalInstance = $modal.open({
-      resolve: {
-        title: function () {
-          return modalParams.title;
-        },
-        message: function() {
-          return modalParams.message;
-        }
-      },
-      templateUrl: '/assets/javascripts/common/okCancelModal.html',
-      controller: 'OkCancelModal'
-    });
-
-    modalInstance.result.then(function(selectedItem) {
+    modalService.showModal({}, modalOptions).then(function (result) {
       onOk();
     }, function () {
       onCancel();
@@ -367,30 +462,51 @@ define(['angular', 'common'], function(angular, common) {
     return 0;
   };
 
-  function studyAnnotationTypeRemove($scope, $state, $stateParams, $modal, ParticipantAnnotTypeService, annotType) {
-    var modalInstance = $modal.open({
-      resolve: {
-        title: function () {
-          return "Remove Participant Annotation Type";
-        },
-        message: function() {
-          return "Are you sure you want to remove annotation type " + annotType.name + "?";
-        }
-      },
-      templateUrl: '/assets/javascripts/common/okCancelModal.html',
-      controller: 'OkCancelModal'
+  function studyAnnotationTypeRemove(
+    $scope,
+    $state,
+    $stateParams,
+    modalService,
+    ParticipantAnnotTypeService,
+    annotType) {
+
+    var modalOptions = {
+      closeButtonText: 'Cancel',
+      headerText: 'Remove Participant Annotation Type',
+      bodyText: 'Are you sure you want to remove annotation type ' + annotType.name + '?'
+    };
+
+    modalService.showModal({}, modalOptions).then(function (result) {
+      ParticipantAnnotTypeService.remove(annotType)
+        .success(function() {
+          // could use $state.reload() here but it does not re-initialize the
+          // controller
+          $state.transitionTo($state.current, $stateParams, {
+            reload: true,
+            inherit: false,
+            notify: true
+          });
+        })
+        .error(function(error) {
+          studyAnnotationTypeRemoveError($state, modalService, annotType, error);
+        });
+    }, function() {
+      $state.go('admin.studies.study.participants');
     });
+  }
 
-    modalInstance.result.then(function(selectedItem) {
-      ParticipantAnnotTypeService.remove(annotType);
+  /*
+   * Called when an annotation type cannot be removed.
+   */
+  function studyAnnotationTypeRemoveError($state, modalService, annotType, error) {
+    var modalOptions = {
+      closeButtonText: 'Cancel',
+      headerText: 'Remove failed',
+      bodyText: 'Annotation type ' + annotType.name + ' cannot be removed: ' + error.message
+    };
 
-      // could use $state.reload() here but it does not re-initialize the
-      // controller
-      $state.transitionTo($state.current, $stateParams, {
-        reload: true,
-        inherit: false,
-        notify: true
-      });
+    modalService.showModal({}, modalOptions).then(function (result) {
+      $state.go('admin.studies.study.participants');
     }, function () {
       $state.go('admin.studies.study.participants');
     });

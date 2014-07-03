@@ -6,9 +6,11 @@ define([
   'angular',
   './states',
   './controllers',
-  './services',
+  './services/services',
+  './services/helpers',
   './directives/studyTabs',
-  './annotTypes/main'
+  './annotTypes/main',
+  './specimenGroups/main'
 ], function(angular) {
   'use strict';
 
@@ -20,6 +22,8 @@ define([
     'admin.studies.controllers',
     'admin.studies.states',
     'admin.studies.directives.studyTabs',
-    'study.services',
-    'admin.studies.annotTypes']);
+    'studies.services',
+    'studies.helpers',
+    'admin.studies.annotTypes',
+    'admin.studies.specimenGroups']);
 });

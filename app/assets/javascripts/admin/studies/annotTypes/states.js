@@ -8,6 +8,7 @@ define(['angular'], function(angular) {
     'ui.router',
     'admin.studies.annotTypes.controllers'
   ]);
+
   mod.config(['$stateProvider', 'userResolve', function($stateProvider, userResolve) {
     $stateProvider
       .state('admin.studies.study.participantAnnotTypeAdd', {
