@@ -37,7 +37,7 @@ define(['angular', 'common'], function(angular, common) {
     $scope.submit = function(specimenGroup) {
       SpecimenGroupService.addOrUpdate(specimenGroup)
         .success(function() {
-          $state.go('admin.studies.study.participants', { studyId: $scope.study.id });
+          $state.go('admin.studies.study.specimens', { studyId: $scope.study.id });
         })
         .error(function(error) {
           specimenGroupSaveError(
@@ -52,7 +52,7 @@ define(['angular', 'common'], function(angular, common) {
               });
             },
             function() {
-              $state.go('admin.studies.study.participants');
+              $state.go('admin.studies.study.specimens');
             }
           );
         });

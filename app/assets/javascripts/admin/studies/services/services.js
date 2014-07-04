@@ -58,13 +58,13 @@ define(['angular', 'common'], function(angular) {
       },
       addOrUpdate: function(annotType) {
         var cmd = {
-          studyId: annotType.studyId,
-          name: annotType.name,
-          description: annotType.description,
-          valueType: annotType.valueType,
+          studyId:       annotType.studyId,
+          name:          annotType.name,
+          description:   annotType.description,
+          valueType:     annotType.valueType,
           maxValueCount: annotType.maxValueCount,
-          options: annotType.options,
-          required: annotType.required
+          options:       annotType.options,
+          required:      annotType.required
         };
 
         if (annotType.id) {
@@ -94,18 +94,18 @@ define(['angular', 'common'], function(angular) {
         return $http.get('/studies/sgroups/' + studyId);
       },
       get: function(studyId, specimenGroupId) {
-        return $http.get('/studies/sgroups/' + studyId + '/' + specimenGroupId);
+        return $http.get('/studies/sgroups/' + studyId + '?sgId=' + specimenGroupId);
       },
       addOrUpdate: function(specimenGroup) {
         var cmd = {
-          studyId: specimenGroup.studyId,
-          name: specimenGroup.name,
-          description: specimenGroup.description,
-          units: specimenGroup.units,
-          anatomicalSourceType: specimenGroup.anatomicalSourceType,
-          preservationType: specimenGroup.preservationType,
+          studyId:                     specimenGroup.studyId,
+          name:                        specimenGroup.name,
+          description:                 specimenGroup.description,
+          units:                       specimenGroup.units,
+          anatomicalSourceType:        specimenGroup.anatomicalSourceType,
+          preservationType:            specimenGroup.preservationType,
           preservationTemperatureType: specimenGroup.preservationTemperatureType,
-          specimenType: specimenGroup.specimenType
+          specimenType:                specimenGroup.specimenType
         };
 
         if (specimenGroup.id) {
@@ -121,6 +121,76 @@ define(['angular', 'common'], function(angular) {
           '/studies/sgroups/' + specimenGroup.studyId +
             '/' + specimenGroup.id +
             '/' + specimenGroup.version);
+      }
+    };
+  }]);
+
+  mod.factory('CollectionEventTypeService', ['$http', function($http) {
+    return {
+      getAll: function(studyId) {
+        return $http.get('/studies/cetypes/' + studyId);
+      },
+      get: function(studyId, collectionEventTypeId) {
+        return $http.get('/studies/cetypes/' + studyId + '?cetId=' + collectionEventTypeId);
+      },
+      addOrUpdate: function(collectionEventType) {
+        var cmd = {
+          studyId:            collectionEventType.studyId,
+          name:               collectionEventType.name,
+          description:        collectionEventType.description,
+          required:           collectionEventType.required,
+          specimenGroupData:  collectionEventType.specimenGroupData,
+          annotationTypeData: collectionEventType.annotationTypeData
+        };
+
+        if (collectionEventType.id) {
+          cmd.id = collectionEventType.id;
+          cmd.expectedVersion = collectionEventType.version;
+          return $http.put('/studies/cetypes/' + collectionEventType.id, cmd);
+        } else {
+          return $http.post('/studies/cetypes', cmd);
+        }
+      },
+      remove: function(collectionEventType) {
+        return $http.delete(
+          '/studies/cetypes/' + collectionEventType.studyId +
+            '/' + collectionEventType.id +
+            '/' + collectionEventType.version);
+      }
+    };
+  }]);
+
+  mod.factory('CeventAnnotationTypeService', ['$http', function($http) {
+    return {
+      getAll: function(studyId) {
+        return $http.get('/studies/ceannottype/' + studyId);
+      },
+      get: function(studyId, collectionEventTypeId) {
+        return $http.get('/studies/ceannottype/' + studyId + '?annotTypeId=' + collectionEventTypeId);
+      },
+      addOrUpdate: function(annotType) {
+        var cmd = {
+          studyId:       annotType.studyId,
+          name:          annotType.name,
+          description:   annotType.description,
+          valueType:     annotType.valueType,
+          maxValueCount: annotType.maxValueCount,
+          options:       annotType.options
+        };
+
+        if (annotType.id) {
+          cmd.id = annotType.id;
+          cmd.expectedVersion = annotType.version;
+          return $http.put('/studies/ceannottype/' + annotType.id, cmd);
+        } else {
+          return $http.post('/studies/ceannottype', cmd);
+        }
+      },
+      remove: function(annotType) {
+        return $http.delete(
+          '/studies/ceannottype/' + annotType.studyId +
+            '/' + annotType.id +
+            '/' + annotType.version);
       }
     };
   }]);

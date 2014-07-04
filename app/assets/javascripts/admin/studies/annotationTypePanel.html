@@ -1,0 +1,55 @@
+<div class="panel panel-default" ng-init="tabSelected()">
+  <div class="panel-heading">
+    <h3 class="panel-title">{{panel.title}}
+    <div class="btn-group pull-right">
+      <button class="btn btn-xs btn-primary"
+              ng-click="panel.addAnnotationType(study)"
+              title="Add annotation type">
+      <i class="glyphicon glyphicon-plus"></i></button>
+    </div>
+    </h3>
+  </div>
+  <div class="panel-body">
+    <p>{{panel.header}}</p>
+    <p ng-if="panel.annotTypes.length == 0" class="bg-info" style="padding: 10px;">
+      No annotation types have been defined for this study yet.
+    </p>
+    <p ng-if="panel.annotTypes.length != 0">
+      The following annotation types have been defined:
+    </p>
+  </div>
+  <table ng-show="panel.annotTypes.length != 0"
+         class="table table-hover"
+         ng-table="panel.tableParams">
+    <tr ng-repeat="annotType in $data">
+      <td data-title="'Name'" sortable="'name'">{{annotType.name}}</td>
+      <td data-title="'Type'" sortable="'valueType'">{{annotType.valueType}}</td>
+      <td data-title="'Required'"
+          sortable="'required'"
+          ng-if="annotType.required !== undefined">
+        {{annotType.required ? "Yes" : "No"}}
+      </td>
+      <td data-title="'Description'" sortable="'description'">
+        {{annotType.description === null ? "" : annotType.description | truncate:40}}
+      </td>
+      <td>
+        <div class="btn-group pull-right">
+          <button class="btn btn-xs btn-primary"
+                  ng-click="panel.annotTypeInformation(annotType)"
+                  title="More information">
+          <i class="glyphicon glyphicon-info-sign"></i></button>
+          <button class="btn btn-xs btn-primary"
+                  ng-click="panel.updateAnnotType(annotType)"
+                  title="Update">
+          <i class="glyphicon glyphicon-edit"></i></button>
+          <button class="btn btn-xs btn-warning"
+                  ng-click="panel.removeAnnotType(annotType)"
+                  data-toggle="tooltip"
+                  title="Remove">
+            <i class="glyphicon glyphicon-remove"></i>
+          </button>
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>

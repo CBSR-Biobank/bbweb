@@ -7,7 +7,7 @@
       of the tab is clicked on, not just the link.
   -->
   <tabset>
-    <tab ui-sref="admin.studies.study.summary">
+    <tab ui-sref="admin.studies.study.summary" active="tabActive.summary">
       <tab-heading>
         <a ui-sref-active="active">Summary</a>
       </tab-heading>
@@ -20,6 +20,11 @@
     <tab ui-sref="admin.studies.study.specimens" active="tabActive.specimens">
       <tab-heading>
         <a ui-sref-active="active">Specimens</a>
+      </tab-heading>
+    </tab>
+    <tab ui-sref="admin.studies.study.collection" active="tabActive.collections">
+      <tab-heading>
+        <a ui-sref-active="active">Collection</a>
       </tab-heading>
     </tab>
     <!--

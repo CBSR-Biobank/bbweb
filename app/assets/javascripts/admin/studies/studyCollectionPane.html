@@ -1,0 +1,65 @@
+<!-- COLLECTION EVENT ANNOTATION TYPES -->
+<ng-include src="'/assets/javascripts/admin/studies/annotationTypePanel.html'"></ng-include>
+
+<!-- COLLECTION EVENT TYPES -->
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Collection Event Types
+    <div class="btn-group pull-right">
+      <button class="btn btn-xs btn-primary"
+              ng-click="addCollectionEventType(study)"
+              title="Add specimen group">
+      <i class="glyphicon glyphicon-plus"></i></button>
+    </div>
+    </h3>
+  </div>
+  <div class="panel-body">
+    <p>
+      A Collection Event Type defines a classification name, unique to the Study, to a participant visit. A
+      participant visit is a record of when specimens were collected from a participant at a collection
+      centre.
+    </p>
+    <p ng-if="ceventTypes.length == 0"
+       class="bg-info"
+       style="padding: 10px;">
+      No collection event types have been defined for this study yet.
+    </p>
+    <p ng-if="ceventTypes.length != 0">
+      The following collection event types have been defined:
+    </p>
+  </div>
+  <table ng-show="ceventTypes.length != 0"
+         class="table table-hover"
+         ng-table="tableParams">
+    <tr ng-repeat="collectionEventType in $data">
+      <td data-title="'Name'" sortable="'name'">
+        {{collectionEventType.name}}
+      </td>
+      <td data-title="'Required'" sortable="'anatomicalSourceType'">
+        {{collectionEventType.anatomicalSourceType}}
+      </td>
+      <td data-title="'Description'" sortable="'description'">
+        {{collectionEventType.description === null ? "" : collectionEventType.description | truncate:40}}
+      </td>
+      <td>
+        <div class="btn-group pull-right">
+          <button class="btn btn-xs btn-primary"
+                  ng-click="collectionEventTypeInformation(collectionEventType)"
+                  title="More information">
+          <i class="glyphicon glyphicon-info-sign"></i></button>
+          <button class="btn btn-xs btn-primary"
+                  ng-click="updateCollectionEventType(collectionEventType)"
+                  title="Update">
+          <i class="glyphicon glyphicon-edit"></i></button>
+          <button class="btn btn-xs btn-warning"
+                  ng-click="removeCollectionEventType(collectionEventType)"
+                  data-toggle="tooltip"
+                  title="Remove">
+            <i class="glyphicon glyphicon-remove"></i>
+          </button>
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
+
