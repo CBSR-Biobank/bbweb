@@ -13,7 +13,7 @@ define(['angular'], function(angular) {
      * Studies - view all studies in panels
      */
     $stateProvider.state('admin.studies', {
-      url: '',
+      url: '/studies',
       views: {
         'main@': {
           templateUrl: '/assets/javascripts/admin/studies/studiesPanels.html',
@@ -104,18 +104,24 @@ define(['angular'], function(angular) {
                *
                */
               $scope.tabActive = {
-                participants: false
+                participants: false,
+                specimens: false,
+                collection: false
               };
+
               if ($state.current.name === 'admin.studies.study.participants') {
                 $timeout(function() {
                   $scope.tabActive.participants = true;
                 }, 0);
-                return;
+              } else if ($state.current.name === 'admin.studies.study.specimens') {
+                $timeout(function() {
+                  $scope.tabActive.specimens = true;
+                }, 0);
+              } else if ($state.current.name === 'admin.studies.study.collection') {
+                $timeout(function() {
+                  $scope.tabActive.collection = true;
+                }, 0);
               }
-
-              // if ($state.current.name === 'admin.studies.study') {
-              // } else {
-              // }
             }]
         }
       },
@@ -169,7 +175,7 @@ define(['angular'], function(angular) {
       },
       views: {
         'studyDetails': {
-          templateUrl: '/assets/javascripts/admin/studies/studyParticipantsPane.html',
+          template: '<ng-include src="\'/assets/javascripts/admin/studies/annotationTypePanel.html\'"></ng-include>',
           controller: 'ParticipantsPaneCtrl'
         }
       },

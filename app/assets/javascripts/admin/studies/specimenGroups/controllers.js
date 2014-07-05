@@ -33,7 +33,6 @@ define(['angular', 'common'], function(angular, common) {
       $scope.specimenTypes = response.data.sort();
     });
 
-
     $scope.submit = function(specimenGroup) {
       SpecimenGroupService.addOrUpdate(specimenGroup)
         .success(function() {
@@ -59,7 +58,7 @@ define(['angular', 'common'], function(angular, common) {
     };
 
     $scope.cancel = function() {
-      $state.go('admin.studies.study.participants', { studyId: $scope.study.id });
+      $state.go('admin.studies.study.specimens', { studyId: $scope.study.id });
     };
   }
 

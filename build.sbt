@@ -58,17 +58,17 @@ libraryDependencies ++= Seq(
   "org.webjars"            %  "webjars-locator"                % "0.13",
   "org.webjars"            %% "webjars-play"                   % "2.3.0",
   // WebJars dependencies
-  "org.webjars"            % "requirejs"                       % "2.1.11-1",
+  "org.webjars"            % "requirejs"                       % "2.1.14-1",
   "org.webjars"            %  "underscorejs"                   % "1.6.0-3",
   "org.webjars"            % "jasmine"                         % "2.0.0",
   "org.webjars"            %  "jquery"                         % "2.1.1",
-  "org.webjars"            %  "bootstrap"                      % "3.1.1-1" exclude(
+  "org.webjars"            %  "bootstrap"                      % "3.2.0" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"            %  "angularjs"                      % "1.3.0-beta.8" exclude(
+  "org.webjars"            %  "angularjs"                      % "1.3.0-beta.2" exclude(
     "org.webjars", "jquery"),
   "org.webjars"            %  "angular-ui-bootstrap"           % "0.11.0-2",
   "org.webjars"            %  "angular-ui-router"              % "0.2.10-1",
-  "org.webjars"            %  "ng-table"                       % "0.3.2",
+  "org.webjars"            %  "ng-table"                       % "0.3.3",
   "org.scalatest"          %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
     ExclusionRule(organization = "org.junit", name = "junit")
   ),

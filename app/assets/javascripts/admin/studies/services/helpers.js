@@ -115,7 +115,7 @@ define(['angular'], function(angular) {
       };
     }]);
 
-  mod.service('panelTableService', ['ngTableParams', '$filter', function (ngTableParams, $filter) {
+  mod.service('panelTableService', ['$filter', 'ngTableParams', function ($filter, ngTableParams) {
     this.getTableParams = function(data) {
       /* jshint ignore:start */
       return new ngTableParams({
@@ -126,9 +126,8 @@ define(['angular'], function(angular) {
         }
       },{
         counts: [], // hide page counts control
-        total: function() { return data.length; },
+        total: data.length,
         getData: function($defer, params) {
-          params.total(data.length);
           var orderedData = params.sorting()
             ? $filter('orderBy')(data, params.orderBy())
             : data;

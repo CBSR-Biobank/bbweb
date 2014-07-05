@@ -7,9 +7,8 @@ define([
   './services/playRoutes',
   './controllers/controllers',
   './filters',
-  './directives/forms',
-  './directives/uiBreadcrumbs',
-  './directives/ngLoginSubmit'],
+  './directives/directives',
+  './directives/uiBreadcrumbs'],
        function(angular) {
          'use strict';
 
@@ -18,7 +17,6 @@ define([
              'common.helpers',
              'common.playRoutes',
              'common.filters',
-             'common.directives.forms',
-             'common.directives.uiBreadcrumbs',
-             'common.directives.ngLoginSubmit']);
+             'common.directives.directives',
+             'common.directives.uiBreadcrumbs']);
        });

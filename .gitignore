@@ -21,6 +21,7 @@ evolutions
 .idea*
 
 # Others
+.tern-port
 .cache
 .classpath
 .ensime

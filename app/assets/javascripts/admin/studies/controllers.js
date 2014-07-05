@@ -20,8 +20,8 @@ define(['angular', 'common'], function(angular, common) {
    * "user" is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
   mod.controller('StudiesCtrl', [
-    '$rootScope', '$scope', '$state', '$log', 'user', 'StudyService',
-    function($rootScope, $scope, $state, $log, user, StudyService) {
+    '$rootScope', '$scope', '$state', '$log', 'user', 'StudyService', 'studyCompareService',
+    function($rootScope, $scope, $state, $log, user, StudyService, studyCompareService) {
       $rootScope.pageTitle = 'Biobank studies';
       $scope.studies = [];
       $scope.user = user;
@@ -158,33 +158,29 @@ define(['angular', 'common'], function(angular, common) {
       annotTypes) {
 
       var studyId = $stateParams.studyId;
-      $scope.panel = {};
-      $scope.panel.title = 'Participant Annotation Types';
-      $scope.panel.header = 'Participant annotations allow a study to collect custom named and ' +
-        'defined pieces of data for each participant. Annotations are optional and are not ' +
-        'required to be defined.';
-      $scope.panel.annotTypes = annotTypes;
-      $scope.panel.tableParams = panelTableService.getTableParams($scope.panel.annotTypes);
 
-      if ($scope.panel.tableParams.data.length > 0) {
-        $scope.panel.tableParams.reload();
-      }
-
-      $scope.panel.annotTypeInformation = function(annotType) {
-        annotTypeModalService.show(annotType);
-      };
-
-      $scope.panel.addAnnotType = function(study) {
-        $state.go('admin.studies.study.participantAnnotTypeAdd', { studyId: studyId });
-      };
-
-      $scope.panel.updateAnnotType = function(annotType) {
-        $state.go('admin.studies.study.participantAnnotTypeUpdate',
-                  { studyId: annotType.studyId, annotTypeId: annotType.id });
-      };
-
-      $scope.panel.removeAnnotType = function(annotType) {
-        participantAnnotTypeRemoveService.remove($state, $stateParams, annotType);
+      $scope.panel = {
+        annotTypes: {
+          data: annotTypes,
+          title: 'Participant Annotation Types',
+          header: 'Participant annotations allow a study to collect custom named and ' +
+            'defined pieces of data for each participant. Annotations are optional and are not ' +
+            'required to be defined.',
+          tableParams: panelTableService.getTableParams(annotTypes),
+          information: function(annotType) {
+            annotTypeModalService.show(annotType);
+          },
+          add: function(study) {
+            $state.go('admin.studies.study.participantAnnotTypeAdd', { studyId: studyId });
+          },
+          update: function(annotType) {
+            $state.go('admin.studies.study.participantAnnotTypeUpdate',
+                      { studyId: annotType.studyId, annotTypeId: annotType.id });
+          },
+          remove: function(annotType) {
+            participantAnnotTypeRemoveService.remove($state, $stateParams, annotType);
+          }
+        }
       };
     }]);
 
@@ -211,28 +207,29 @@ define(['angular', 'common'], function(angular, common) {
       specimenGroups) {
 
       var studyId = $stateParams.studyId;
-      $scope.specimenGroups = specimenGroups;
-      $scope.tableParams = panelTableService.getTableParams($scope.specimenGroups);
 
-      if ($scope.tableParams.data.length > 0) {
-        $scope.tableParams.reload();
-      }
-
-      $scope.specimenGroupInformation = function(specimenGroup) {
-        specimenGroupModalService.show(specimenGroup);
-      };
-
-      $scope.addSpecimenGroup = function(study) {
-        $state.go('admin.studies.study.specimenGroupAdd', { studyId: studyId });
-      };
-
-      $scope.updateSpecimenGroup = function(specimenGroup) {
-        $state.go('admin.studies.study.specimenGroupUpdate',
-                  { studyId: specimenGroup.studyId, specimenGroupId: specimenGroup.id });
-      };
-
-      $scope.removeSpecimenGroup = function(specimenGroup) {
-        specimenGroupRemoveService.remove($state, $stateParams, specimenGroup);
+      $scope.panel = {
+        specimenGroups: {
+          data: specimenGroups,
+          title: 'Specimen Groups',
+          header: ' A Specimen Group is used to configure a specimen type to be used by the study. ' +
+            'It records ownership, summary, storage, and classification information that applies ' +
+            'to an entire group or collection of Specimens.',
+          tableParams: panelTableService.getTableParams(specimenGroups),
+          information: function(specimenGroup) {
+            specimenGroupModalService.show(specimenGroup);
+          },
+          add: function(study) {
+            $state.go('admin.studies.study.specimenGroupAdd', { studyId: studyId });
+          },
+          update: function(specimenGroup) {
+            $state.go('admin.studies.study.specimenGroupUpdate',
+                      { studyId: specimenGroup.studyId, specimenGroupId: specimenGroup.id });
+          },
+          remove: function(specimenGroup) {
+            specimenGroupRemoveService.remove($state, $stateParams, specimenGroup);
+          }
+        }
       };
     }]);
 
@@ -244,6 +241,7 @@ define(['angular', 'common'], function(angular, common) {
     '$state',
     '$stateParams',
     'ceventTypeModalService',
+    'ceventTypeRemoveService',
     'ceventAnnotTypeRemoveService',
     'annotTypeModalService',
     'panelTableService',
@@ -255,6 +253,7 @@ define(['angular', 'common'], function(angular, common) {
       $state,
       $stateParams,
       ceventTypeModalService,
+      ceventTypeRemoveService,
       ceventAnnotTypeRemoveService,
       annotTypeModalService,
       panelTableService,
@@ -263,54 +262,52 @@ define(['angular', 'common'], function(angular, common) {
       specimenGroups) {
 
       var studyId = $stateParams.studyId;
-      $scope.panel = {};
-      $scope.panel.title = 'Collection Event Annotation Types';
-      $scope.panel.header = 'Collection event annotations allow a study to collect custom named and ' +
-        'defined pieces of data for each collection event. Annotations are optional and are not ' +
-        'required to be defined.';
-      $scope.panel.ceventTypes = ceventTypes;
-      $scope.panel.annotTypes = annotTypes;
+      $scope.panel = {
+        ceventTypes: {
+          title: 'Collection Event Types',
+          header: 'A Collection Event Type defines a classification name, unique to the Study, to a ' +
+            'participant visit. A participant visit is a record of when specimens were collected ' +
+            'from a participant at a collection centre.',
+          data: ceventTypes,
+          tableParams: panelTableService.getTableParams(ceventTypes),
+          information: function(ceventType) {
+            ceventTypeModalService.show(ceventType);
+          },
+          add: function(study) {
+            $state.go('admin.studies.study.ceventTypeAdd', { studyId: studyId });
+          },
+          update: function(ceventType) {
+            $state.go('admin.studies.study.ceventTypeUpdate',
+                      { studyId: ceventType.studyId, ceventTypeId: ceventType.id });
+          },
+          remove: function(ceventType) {
+            ceventTypeRemoveService.remove($state, $stateParams, ceventType);
+          }
+        },
+        annotTypes: {
+          title: 'Collection Event Annotation Types',
+          header: 'Collection event annotations allow a study to collect custom named and defined ' +
+            'pieces of data for each collection event. Annotations are optional and are not ' +
+            'required to be defined.',
+          data: annotTypes,
+          tableParams: panelTableService.getTableParams(annotTypes),
+          information: function(annotType) {
+            annotTypeModalService.show(annotType);
+          },
+          add: function(study) {
+            $state.go('admin.studies.study.ceventAnnotTypeAdd', { studyId: studyId });
+          },
+          update: function(annotType) {
+            $state.go('admin.studies.study.ceventAnnotTypeUpdate',
+                      { studyId: annotType.studyId, annotTypeId: annotType.id });
+          },
+          remove: function(annotType) {
+            ceventAnnotTypeRemoveService.remove($state, $stateParams, annotType);
+          }
+        }
+      };
+
       $scope.panel.specimenGroups = specimenGroups;
-      $scope.panel.tableParams = panelTableService.getTableParams($scope.panel.ceventTypes);
-
-      if ($scope.panel.tableParams.data.length > 0) {
-        $scope.panel.tableParams.reload();
-      }
-
-      $scope.panel.ceventTypeInformation = function(ceventType) {
-        ceventTypeModalService.show(ceventType);
-      };
-
-      $scope.panel.addCeventType = function(study) {
-        $state.go('admin.studies.study.ceventTypeAdd', { studyId: studyId });
-      };
-
-      $scope.panel.updateCeventType = function(ceventType) {
-        $state.go('admin.studies.study.ceventTypeUpdate',
-                  { studyId: ceventType.studyId, ceventTypeId: ceventType.id });
-      };
-
-      $scope.panel.removeCeventType = function(ceventType) {
-        studyCeventTypeRemove(
-          $scope, $state, $stateParams, modalService, CollectionEventTypeService, ceventType);
-      };
-
-      $scope.panel.annotTypeInformation = function(ceventType) {
-        ceventTypeModalService.show(ceventType);
-      };
-
-      $scope.panel.addAnnotType = function(study) {
-        $state.go('admin.studies.study.ceventAnnotTypeAdd', { studyId: studyId });
-      };
-
-      $scope.panel.updateAnnotType = function(ceventType) {
-        $state.go('admin.studies.study.ceventAnnotTypeUpdate',
-                  { studyId: ceventType.studyId, ceventTypeId: ceventType.id });
-      };
-
-      $scope.panel.removeAnnotType = function(ceventType) {
-        ceventAnnotTypeRemoveService.remove($state, $stateParams, annotType);
-      };
     }]);
 
   /**
