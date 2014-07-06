@@ -8,12 +8,39 @@ define(['angular'], function(angular) {
 
   var mod = angular.module('common.directives.directives', []);
 
+  var INTEGER_REGEXP = /^\-?\d+$/;
   mod.directive('integer', function(){
     return {
       require: 'ngModel',
       link: function(scope, ele, attr, ctrl){
         ctrl.$parsers.unshift(function(viewValue){
-          return parseInt(viewValue);
+          if (INTEGER_REGEXP.test(viewValue)) {
+            // it is valid
+            ctrl.$setValidity('integer', true);
+            return viewValue;
+          } else {
+            // it is invalid, return undefined (no model update)
+            ctrl.$setValidity('integer', false);
+            return undefined;
+          }
+        });
+      }
+    };
+  });
+
+  var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+  mod.directive('smartFloat', function() {
+    return {
+      require: 'ngModel',
+      link: function(scope, elm, attrs, ctrl) {
+        ctrl.$parsers.unshift(function(viewValue) {
+          if (FLOAT_REGEXP.test(viewValue)) {
+            ctrl.$setValidity('float', true);
+            return parseFloat(viewValue.replace(',', '.'));
+          } else {
+            ctrl.$setValidity('float', false);
+            return undefined;
+          }
         });
       }
     };

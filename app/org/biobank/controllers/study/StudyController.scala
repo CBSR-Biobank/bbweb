@@ -122,5 +122,14 @@ object StudyController extends BbwebController {
      Ok(Json.toJson(PreservationTemperatureType.values.map(x =>x.toString)))
   }
 
+  def specimenGroupValueTypes = Action(parse.empty) { request =>
+    Ok(Json.obj(
+      "anatomicalSourceType"        -> Json.toJson(AnatomicalSourceType.values.map(x =>x.toString)),
+      "preservationType"            -> Json.toJson(PreservationType.values.map(x =>x.toString)),
+      "preservationTemperatureType" -> Json.toJson(PreservationTemperatureType.values.map(x =>x.toString)),
+      "specimenType"                -> Json.toJson(SpecimenType.values.map(x =>x.toString))
+    ))
+  }
+
 }
 

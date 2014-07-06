@@ -46,9 +46,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
   }
 
   private def slTypeToAddCmdJson(slType: SpecimenLinkType) = {
-    val result = Json.obj("type" -> "AddSpecimenLinkTypeCmd")
-
-    result ++ slTypeCommonToAddCmdJson(slType) ++ annotTypeJson(slType)
+    slTypeCommonToAddCmdJson(slType) ++ annotTypeJson(slType)
   }
 
   private def slTypeToUpdateCmdJson(slType: SpecimenLinkType) = {

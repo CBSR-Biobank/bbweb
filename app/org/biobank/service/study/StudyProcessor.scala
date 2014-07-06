@@ -3,7 +3,6 @@ package org.biobank.service.study
 import org.biobank.service.Processor
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service.Messages._
 import org.biobank.domain.{
   DomainValidation,
   DomainError,

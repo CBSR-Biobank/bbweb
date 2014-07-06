@@ -23,7 +23,7 @@
       <td data-title="'Type'" sortable="'valueType'">{{annotType.valueType}}</td>
       <td data-title="'Required'"
           sortable="'required'"
-          ng-if="annotType.required !== undefined">
+          ng-show="panel.annotTypes.hasRequired">
         {{annotType.required ? "Yes" : "No"}}
       </td>
       <td data-title="'Description'" sortable="'description'">

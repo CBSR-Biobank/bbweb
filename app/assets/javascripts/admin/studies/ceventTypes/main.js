@@ -10,8 +10,8 @@ define([
 ], function(angular) {
   'use strict';
 
-  return angular.module('admin.studies.specimenGroups', [
-    'admin.studies.specimenGroups.controllers',
-    'admin.studies.specimenGroups.states',
-    'admin.studies.specimenGroups.helpers']);
+  return angular.module('admin.studies.ceventTypes', [
+    'admin.studies.ceventTypes.controllers',
+    'admin.studies.ceventTypes.states',
+    'admin.studies.ceventTypes.helpers']);
 });

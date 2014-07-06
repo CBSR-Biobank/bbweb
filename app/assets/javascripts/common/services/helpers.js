@@ -5,6 +5,25 @@ define(['angular'], function(angular) {
   var mod = angular.module('common.helpers', []);
 
   /**
+   * Hack to reload state and re-initialize the controller.
+   */
+  mod.service('stateHelper', [
+    '$state', '$stateParams',
+    function ($state, $stateParams) {
+      return {
+        reloadAndReinit: function() {
+          // could use $state.reload() here but it does not re-initialize the
+          // controller
+          $state.transitionTo($state.current, $stateParams, {
+            reload: true,
+            inherit: false,
+            notify: true
+          });
+        }
+      };
+    }]);
+
+  /**
    * Code originally taken from:
    *
    * http://weblogs.asp.net/dwahlin/building-an-angularjs-modal-service

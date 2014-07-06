@@ -58,13 +58,27 @@ define(['angular', 'common'], function(angular) {
    * logged in. This also adds the contents of the objects as a dependency of the controller.
    */
   mod.constant('userResolve', {
-    user: ['$q', 'userService', function($q, userService) {
+    user: ['$cookies', '$q', 'playRoutes', 'userService', function($cookies, $q, playRoutes, userService) {
+      var token;
       var deferred = $q.defer();
       var user = userService.getUser();
+
       if (user) {
         deferred.resolve(user);
       } else {
-        deferred.reject();
+        token = $cookies['XSRF-TOKEN'];
+
+        if (token) {
+          playRoutes.controllers.UserController.authUser().get()
+            .success(function(data) {
+              deferred.resolve(data);
+            })
+            .error(function() {
+              deferred.reject();
+            });
+        } else {
+          deferred.reject();
+        }
       }
       return deferred.promise;
     }]

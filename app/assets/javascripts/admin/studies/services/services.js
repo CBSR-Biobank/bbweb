@@ -6,7 +6,7 @@ define(['angular', 'common'], function(angular) {
 
   var mod = angular.module('studies.services', ['biobank.common']);
 
-  mod.factory('StudyService', ['playRoutes', function(playRoutes) {
+  mod.factory('StudyService', ['$http', 'playRoutes', function($http, playRoutes) {
     return {
       list : function() {
         return playRoutes.controllers.study.StudyController.list().get();
@@ -43,6 +43,9 @@ define(['angular', 'common'], function(angular) {
       },
       preservTempTypes : function() {
         return playRoutes.controllers.study.StudyController.preservTempTypes().get();
+      },
+      specimenGroupValueTypes : function() {
+        return $http.get('/studies/sgvaluetypes');
       }
     };
   }]);
@@ -125,42 +128,44 @@ define(['angular', 'common'], function(angular) {
     };
   }]);
 
-  mod.factory('CollectionEventTypeService', ['$http', function($http) {
-    return {
-      getAll: function(studyId) {
-        return $http.get('/studies/cetypes/' + studyId);
-      },
-      get: function(studyId, collectionEventTypeId) {
-        return $http.get('/studies/cetypes/' + studyId + '?cetId=' + collectionEventTypeId);
-      },
-      addOrUpdate: function(collectionEventType) {
-        var cmd = {
-          studyId:            collectionEventType.studyId,
-          name:               collectionEventType.name,
-          description:        collectionEventType.description,
-          required:           collectionEventType.required,
-          specimenGroupData:  collectionEventType.specimenGroupData,
-          annotationTypeData: collectionEventType.annotationTypeData
-        };
+  mod.factory('CeventTypeService', [
+    '$http', 'SpecimenGroupService',
+    function($http, SpecimenGroupService) {
+      return {
+        getAll: function(studyId) {
+          return $http.get('/studies/cetypes/' + studyId);
+        },
+        get: function(studyId, collectionEventTypeId) {
+          return $http.get('/studies/cetypes/' + studyId + '?cetId=' + collectionEventTypeId);
+        },
+        addOrUpdate: function(collectionEventType) {
+          var cmd = {
+            studyId:            collectionEventType.studyId,
+            name:               collectionEventType.name,
+            description:        collectionEventType.description,
+            recurring:          collectionEventType.recurring,
+            specimenGroupData:  collectionEventType.specimenGroupData,
+            annotationTypeData: collectionEventType.annotationTypeData
+          };
 
-        if (collectionEventType.id) {
-          cmd.id = collectionEventType.id;
-          cmd.expectedVersion = collectionEventType.version;
-          return $http.put('/studies/cetypes/' + collectionEventType.id, cmd);
-        } else {
-          return $http.post('/studies/cetypes', cmd);
+          if (collectionEventType.id) {
+            cmd.id = collectionEventType.id;
+            cmd.expectedVersion = collectionEventType.version;
+            return $http.put('/studies/cetypes/' + collectionEventType.id, cmd);
+          } else {
+            return $http.post('/studies/cetypes', cmd);
+          }
+        },
+        remove: function(collectionEventType) {
+          return $http.delete(
+            '/studies/cetypes/' + collectionEventType.studyId +
+              '/' + collectionEventType.id +
+              '/' + collectionEventType.version);
         }
-      },
-      remove: function(collectionEventType) {
-        return $http.delete(
-          '/studies/cetypes/' + collectionEventType.studyId +
-            '/' + collectionEventType.id +
-            '/' + collectionEventType.version);
-      }
-    };
-  }]);
+      };
+    }]);
 
-  mod.factory('CeventAnnotationTypeService', ['$http', function($http) {
+  mod.factory('CeventAnnotTypeService', ['$http', function($http) {
     return {
       getAll: function(studyId) {
         return $http.get('/studies/ceannottype/' + studyId);

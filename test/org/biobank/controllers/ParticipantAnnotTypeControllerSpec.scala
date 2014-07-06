@@ -17,7 +17,6 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
 
   private def annotTypeToAddCmdJson(annotType: ParticipantAnnotationType) = {
     Json.obj(
-      "type"          -> "AddParticipantAnnotationTypeCmd",
       "studyId"       -> annotType.studyId.id,
       "name"          -> annotType.name,
       "description"   -> annotType.description,
@@ -30,7 +29,6 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
 
   private def annotTypeToUpdateCmdJson(annotType: ParticipantAnnotationType) = {
     Json.obj(
-      "type"            -> "UpdateParticipantAnnotationTypeCmd",
       "studyId"         -> annotType.studyId.id,
       "id"              -> annotType.id.id,
       "expectedVersion" -> Some(annotType.version),

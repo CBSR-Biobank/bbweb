@@ -38,12 +38,15 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "specimenGroupData"    -> Json.arr(
         Json.obj(
           "specimenGroupId"  -> cet.specimenGroupData(0).specimenGroupId,
+          "name"             -> cet.specimenGroupData(0).name,
           "maxCount"         -> cet.specimenGroupData(0).maxCount,
-          "amount"           -> Some(cet.specimenGroupData(0).amount)
+          "amount"           -> Some(cet.specimenGroupData(0).amount),
+          "units"             -> cet.specimenGroupData(0).units
         )),
       "annotationTypeData"   -> Json.arr(
         Json.obj(
           "annotationTypeId" -> cet.annotationTypeData(0).annotationTypeId,
+          "name"             -> cet.annotationTypeData(0).name,
           "required"         -> cet.annotationTypeData(0).required
         ))
     )
@@ -82,12 +85,15 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "specimenGroupData"    -> Json.arr(
         Json.obj(
           "specimenGroupId"  -> cet2.specimenGroupData(0).specimenGroupId,
+          "name"             -> cet2.specimenGroupData(0).name,
           "maxCount"         -> cet2.specimenGroupData(0).maxCount,
-          "amount"           -> Some(cet2.specimenGroupData(0).amount)
+          "amount"           -> Some(cet2.specimenGroupData(0).amount),
+          "units"            -> cet2.specimenGroupData(0).units
         )),
       "annotationTypeData"   -> Json.arr(
         Json.obj(
           "annotationTypeId" -> cet2.annotationTypeData(0).annotationTypeId,
+          "name"             -> cet2.annotationTypeData(0).name,
           "required"         -> cet2.annotationTypeData(0).required
         ))
     )
@@ -220,7 +226,6 @@ class CeventTypeControllerSpec extends ControllerFixture {
           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
         val cmdJson = Json.obj(
-          "type"                 -> "AddCollectionEventTypeCmd",
           "studyId"              -> cet.studyId.id,
           "name"                 -> cet.name,
           "description"          -> cet.description,
@@ -228,12 +233,15 @@ class CeventTypeControllerSpec extends ControllerFixture {
           "specimenGroupData"    -> Json.arr(
             Json.obj(
               "specimenGroupId"  -> cet.specimenGroupData(0).specimenGroupId,
+              "name"             -> cet.specimenGroupData(0).name,
               "maxCount"         -> cet.specimenGroupData(0).maxCount,
-              "amount"           -> Some(cet.specimenGroupData(0).amount)
+              "amount"           -> Some(cet.specimenGroupData(0).amount),
+              "units"            -> cet.specimenGroupData(0).units
             )),
           "annotationTypeData"   -> Json.arr(
             Json.obj(
               "annotationTypeId" -> cet.annotationTypeData(0).annotationTypeId,
+              "name"             -> cet.annotationTypeData(0).name,
               "required"         -> cet.annotationTypeData(0).required
             ))
         )
@@ -284,7 +292,6 @@ class CeventTypeControllerSpec extends ControllerFixture {
           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
         val cmdJson = Json.obj(
-          "type"                 -> "UpdateCollectionEventTypeCmd",
           "studyId"              -> cet.studyId.id,
           "id"                   -> cet.id.id,
           "expectedVersion"      -> Some(cet.version),
@@ -294,12 +301,15 @@ class CeventTypeControllerSpec extends ControllerFixture {
           "specimenGroupData"    -> Json.arr(
             Json.obj(
               "specimenGroupId"  -> cet2.specimenGroupData(0).specimenGroupId,
+              "name"             -> cet2.specimenGroupData(0).name,
               "maxCount"         -> cet2.specimenGroupData(0).maxCount,
-              "amount"           -> Some(cet2.specimenGroupData(0).amount)
+              "amount"           -> Some(cet2.specimenGroupData(0).amount),
+              "units"            -> cet2.specimenGroupData(0).units
             )),
           "annotationTypeData"   -> Json.arr(
             Json.obj(
               "annotationTypeId" -> cet2.annotationTypeData(0).annotationTypeId,
+              "name"             -> cet2.annotationTypeData(0).name,
               "required"         -> cet2.annotationTypeData(0).required
             ))
         )

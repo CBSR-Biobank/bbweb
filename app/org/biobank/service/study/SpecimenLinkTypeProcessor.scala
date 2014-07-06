@@ -1,6 +1,5 @@
 package org.biobank.service.study
 
-import org.biobank.service.Messages._
 import org.biobank.domain._
 import org.biobank.domain.study.{
   ProcessingType,

@@ -114,9 +114,11 @@ object CollectionEventType extends StudyAnnotationTypeValidationHelper {
     def validateSpecimenGroupItem(
       specimenGroupItem: CollectionEventTypeSpecimenGroupData): DomainValidation[CollectionEventTypeSpecimenGroupData] = {
       (validateStringId(specimenGroupItem.specimenGroupId, "specimen group id is null or empty") |@|
+        validateNonEmpty(specimenGroupItem.name, "specimen group name is null or empty") |@|
         validatePositiveNumber(specimenGroupItem.maxCount, "max count is not a positive number") |@|
-        validatePositiveNumberOption(specimenGroupItem.amount, "amount not is a positive number")) {
-        CollectionEventTypeSpecimenGroupData(_, _, _)
+        validatePositiveNumberOption(specimenGroupItem.amount, "amount is not a positive number") |@|
+        validateNonEmpty(specimenGroupItem.units, "specimen group units is null or empty")) {
+        CollectionEventTypeSpecimenGroupData(_, _, _, _, _)
       }
     }
 

@@ -4,7 +4,6 @@ import org.biobank.domain._
 import org.biobank.domain.validation.UserValidationHelper
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
-import org.biobank.service.Messages._
 
 import akka.actor.{ ActorSystem, ActorRef }
 import scala.concurrent.Future

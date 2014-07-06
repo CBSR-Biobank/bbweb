@@ -7,7 +7,7 @@ define(['angular'], function(angular, controllers) {
   var mod = angular.module('home.states', ['ui.router', 'home.controllers', 'biobank.common']);
   mod.config(['$urlRouterProvider', '$stateProvider', function($urlRouterProvider, $stateProvider) {
 
-    $urlRouterProvider.otherwise('/home');
+    $urlRouterProvider.otherwise('/');
 
     $stateProvider
       .state('home', {

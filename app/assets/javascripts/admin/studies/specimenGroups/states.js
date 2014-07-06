@@ -7,17 +7,17 @@ define(['angular'], function(angular) {
   var mod = angular.module('admin.studies.specimenGroups.states', [
     'ui.router', 'admin.studies.controllers']);
 
-  mod.config(['$stateProvider', 'userResolve', function($stateProvider, userResolve) {
+  mod.config([
+    '$urlRouterProvider', '$stateProvider', 'userResolve',
+    function($urlRouterProvider, $stateProvider, userResolve ) {
+
+    $urlRouterProvider.otherwise('/');
+
     $stateProvider
       .state('admin.studies.study.specimenGroupAdd', {
         url: '/spcgroup/add',
-        views: {
-          'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
-            controller: 'SpecimenGroupAddCtrl'
-          }
-        },
         resolve: {
+          user: userResolve.user,
           specimenGroup: ['study', function(study) {
             return {
               studyId: study.id,
@@ -29,9 +29,12 @@ define(['angular'], function(angular) {
               preservationTemperatureType: '',
               specimenType: ''
             };
-          }],
-          user: function() {
-            return userResolve;
+          }]
+        },
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
+            controller: 'SpecimenGroupAddCtrl'
           }
         },
         data: {
@@ -41,6 +44,7 @@ define(['angular'], function(angular) {
       .state('admin.studies.study.specimenGroupUpdate', {
         url: '/spcgroup/update/{specimenGroupId}',
         resolve: {
+          user: userResolve.user,
           specimenGroup: [
             '$stateParams', 'SpecimenGroupService', 'study',
             function($stateParams, SpecimenGroupService, study) {
@@ -51,10 +55,7 @@ define(['angular'], function(angular) {
                   });
               }
               throw new Error('state parameter specimenGroupId is invalid');
-            }],
-          user: function() {
-            return userResolve;
-          }
+            }]
         },
         views: {
           'main@': {

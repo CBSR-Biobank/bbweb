@@ -6,9 +6,13 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
 
   var mod = angular.module('user.states', ['ui.router', 'user.services', 'biobank.common']);
 
-  mod.config(['$stateProvider', function($stateProvider) {
-    $stateProvider
-      .state('user', {
+  mod.config([
+    '$urlRouterProvider', '$stateProvider', 'userResolve',
+    function($urlRouterProvider, $stateProvider, userResolve ) {
+
+    $urlRouterProvider.otherwise('/');
+
+    $stateProvider.state('user', {
         url: '/login',
         views: {
           'main@': {

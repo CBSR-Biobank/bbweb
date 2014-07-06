@@ -203,7 +203,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
         val sg2 = factory.createSpecimenGroup
         val cmdJson = Json.obj(
-          "type"                        -> "UpdateSpecimenGroupCmd",
           "studyId"                     -> study.id.id,
           "id"                          -> sg.id.id,
           "expectedVersion"             -> Some(sg.version),

@@ -6,14 +6,6 @@ define(['angular', 'common'], function(angular, common) {
 
   var mod = angular.module('admin.studies.controllers', ['studies.services']);
 
-  // For debugging
-  //
-  // mod.run(['$rootScope', '$state', '$stateParams',
-  //          function ($rootScope, $state, $stateParams) {
-  //            $rootScope.$state = $state;
-  //            $rootScope.$stateParams = $stateParams;
-  //          }]);
-
   /**
    * Displays a list of studies with each in its own mini-panel.
    *
@@ -138,6 +130,38 @@ define(['angular', 'common'], function(angular, common) {
     }]);
 
   /**
+   * Called to add a study.
+   */
+  mod.controller('StudyAddCtrl', [
+    '$scope', '$state', 'studyEditService', 'user', 'study',
+    function($scope, $state, studyEditService, user, study) {
+      $scope.title =  "Add new study";
+      $scope.study = study;
+
+      var callback = function () {
+        $state.go('admin.studies');
+      };
+
+      studyEditService.edit($scope, callback, callback, callback);
+    }]);
+
+  /**
+   * Called to update the summary information for study.
+   */
+  mod.controller('StudyUpdateCtrl', [
+    '$scope', '$state', 'studyEditService', 'user', 'study',
+    function($scope, $state, studyEditService, user, study) {
+      $scope.title = "Update study";
+      $scope.study = study;
+
+      var callback = function () {
+        $state.go('admin.studies.study', { studyId: $scope.study.id });
+      };
+
+      studyEditService.edit($scope, callback, callback, callback);
+    }]);
+
+  /**
    * Displays study participant information in a table.
    */
   mod.controller('ParticipantsPaneCtrl', [
@@ -167,8 +191,9 @@ define(['angular', 'common'], function(angular, common) {
             'defined pieces of data for each participant. Annotations are optional and are not ' +
             'required to be defined.',
           tableParams: panelTableService.getTableParams(annotTypes),
+          hasRequired: true,
           information: function(annotType) {
-            annotTypeModalService.show(annotType);
+            annotTypeModalService.show('Participant Annotation Type', annotType);
           },
           add: function(study) {
             $state.go('admin.studies.study.participantAnnotTypeAdd', { studyId: studyId });
@@ -178,7 +203,7 @@ define(['angular', 'common'], function(angular, common) {
                       { studyId: annotType.studyId, annotTypeId: annotType.id });
           },
           remove: function(annotType) {
-            participantAnnotTypeRemoveService.remove($state, $stateParams, annotType);
+            participantAnnotTypeRemoveService.remove(annotType);
           }
         }
       };
@@ -227,7 +252,7 @@ define(['angular', 'common'], function(angular, common) {
                       { studyId: specimenGroup.studyId, specimenGroupId: specimenGroup.id });
           },
           remove: function(specimenGroup) {
-            specimenGroupRemoveService.remove($state, $stateParams, specimenGroup);
+            specimenGroupRemoveService.remove(specimenGroup);
           }
         }
       };
@@ -245,9 +270,11 @@ define(['angular', 'common'], function(angular, common) {
     'ceventAnnotTypeRemoveService',
     'annotTypeModalService',
     'panelTableService',
+    'study',
     'ceventTypes',
     'annotTypes',
     'specimenGroups',
+    'userResolve',
     function(
       $scope,
       $state,
@@ -257,12 +284,47 @@ define(['angular', 'common'], function(angular, common) {
       ceventAnnotTypeRemoveService,
       annotTypeModalService,
       panelTableService,
+      study,
       ceventTypes,
       annotTypes,
-      specimenGroups) {
+      specimenGroups, userResolve) {
 
-      var studyId = $stateParams.studyId;
+      var specimenGroupsById = {};
+      specimenGroups.forEach(function (sg) {
+        specimenGroupsById[sg.id] = sg;
+      });
+
+      $scope.cetSgNames = {};
+      ceventTypes.forEach(function (cet) {
+        $scope.cetSgNames[cet.id] = [];
+        cet.specimenGroupData.forEach(function (sgData) {
+          $scope.cetSgNames[cet.id].push(specimenGroupsById[sgData.specimenGroupId].name);
+        });
+      });
+
       $scope.panel = {
+        annotTypes: {
+          title: 'Collection Event Annotation Types',
+          header: 'Collection event annotations allow a study to collect custom named and defined ' +
+            'pieces of data for each collection event. Annotations are optional and are not ' +
+            'required to be defined.',
+          data: annotTypes,
+          tableParams: panelTableService.getTableParams(annotTypes),
+          hasRequired: false,
+          information: function(annotType) {
+            annotTypeModalService.show('Collection Event Annotation Type', annotType);
+          },
+          add: function(study) {
+            $state.go('admin.studies.study.collection.ceventAnnotTypeAdd', { studyId: study.id });
+          },
+          update: function(annotType) {
+            $state.go('admin.studies.study.collection.ceventAnnotTypeUpdate',
+                      { studyId: annotType.studyId, annotTypeId: annotType.id });
+          },
+          remove: function(annotType) {
+            ceventAnnotTypeRemoveService.remove(annotType);
+          }
+        },
         ceventTypes: {
           title: 'Collection Event Types',
           header: 'A Collection Event Type defines a classification name, unique to the Study, to a ' +
@@ -271,151 +333,21 @@ define(['angular', 'common'], function(angular, common) {
           data: ceventTypes,
           tableParams: panelTableService.getTableParams(ceventTypes),
           information: function(ceventType) {
-            ceventTypeModalService.show(ceventType);
+            ceventTypeModalService.show(ceventType, specimenGroups, annotTypes);
           },
           add: function(study) {
-            $state.go('admin.studies.study.ceventTypeAdd', { studyId: studyId });
+            $state.go('admin.studies.study.collection.ceventTypeAdd', { studyId: study.id });
           },
           update: function(ceventType) {
-            $state.go('admin.studies.study.ceventTypeUpdate',
+            $state.go('admin.studies.study.collection.ceventTypeUpdate',
                       { studyId: ceventType.studyId, ceventTypeId: ceventType.id });
           },
           remove: function(ceventType) {
             ceventTypeRemoveService.remove($state, $stateParams, ceventType);
           }
-        },
-        annotTypes: {
-          title: 'Collection Event Annotation Types',
-          header: 'Collection event annotations allow a study to collect custom named and defined ' +
-            'pieces of data for each collection event. Annotations are optional and are not ' +
-            'required to be defined.',
-          data: annotTypes,
-          tableParams: panelTableService.getTableParams(annotTypes),
-          information: function(annotType) {
-            annotTypeModalService.show(annotType);
-          },
-          add: function(study) {
-            $state.go('admin.studies.study.ceventAnnotTypeAdd', { studyId: studyId });
-          },
-          update: function(annotType) {
-            $state.go('admin.studies.study.ceventAnnotTypeUpdate',
-                      { studyId: annotType.studyId, annotTypeId: annotType.id });
-          },
-          remove: function(annotType) {
-            ceventAnnotTypeRemoveService.remove($state, $stateParams, annotType);
-          }
         }
       };
-
-      $scope.panel.specimenGroups = specimenGroups;
     }]);
-
-  /**
-   * Called to add a study.
-   */
-  mod.controller('StudyAddCtrl', [
-    '$scope', '$state', '$stateParams', '$location', 'modalService', 'user', 'study', 'StudyService',
-    function($scope, $state, $stateParams, $location, modalService, user, study, StudyService) {
-
-      $scope.title =  "Add new study";
-      $scope.study = study;
-
-      $scope.submit = function(study) {
-        StudyService.addOrUpdate(study)
-          .success(function() {
-            $state.go('admin.studies');
-          })
-          .error(function(error) {
-            studySaveError(
-              $scope, modalService, study, error,
-              // on OK
-              function() {
-                // could use $state.reload() here but it does not re-initialize the
-                // controller
-                $state.transitionTo($state.current, $stateParams, {
-                  reload: true,
-                  inherit: false,
-                  notify: true
-                });
-              },
-              // on Cancel
-              function() {
-                $state.go('admin.studies');
-              }
-            );
-          });
-      };
-
-      $scope.cancel = function(study) {
-        $state.go('admin.studies');
-      };
-    }]);
-
-  /**
-   * Called to update the summary information for study.
-   */
-  mod.controller('StudyUpdateCtrl', [
-    '$scope', '$state', '$stateParams', '$location', 'modalService', 'user', 'study', 'StudyService',
-    function($scope, $state, $stateParams, $location, modalService, user, study, StudyService) {
-
-      $scope.title = "Update study";
-      $scope.study = study;
-
-      $scope.submit = function(study) {
-        StudyService.addOrUpdate(study)
-          .success(function() {
-            $state.go('admin.studies.study', { studyId: $scope.study.id });
-          })
-          .error(function(error) {
-            studySaveError(
-              $scope, modalService, study, error,
-              function() {
-                // could use $state.reload() here but it does not re-initialize the
-                // controller
-                $state.transitionTo($state.current, $stateParams, {
-                  reload: true,
-                  inherit: false,
-                  notify: true
-                });
-              },
-              function() {
-                $state.go('admin.studies.study.summary');
-              }
-            );
-          });
-      };
-
-      $scope.cancel = function(study) {
-        $state.go('admin.studies.study.summarypane', { studyId: $stateParams.studyId });
-      };
-    }]);
-
-  /**
-   * Called where there was an error when attempting to add or update a study.
-   */
-  function studySaveError($scope, modalService, study, error, onOk, onCancel) {
-    var modalOptions = {
-      closeButtonText: 'Cancel',
-      actionButtonText: 'OK'
-    };
-
-    if (error.message.indexOf("expected version doesn't match current version") > -1) {
-      /* concurrent change error */
-      modalOptions.headerText = 'Modified by another user';
-      modalOptions.bodyText = 'Another user already made changes to this study. Press OK to make ' +
-        ' your changes again, or Cancel to dismiss your changes.';
-    } else {
-      /* some other error */
-      modalOptions.headerText = study.id ?  'Cannot update study' : 'Cannot add study';
-      modalOptions.bodyText = 'Error: ' + error.message;
-    }
-
-    modalService.showModal({}, modalOptions).then(function (result) {
-      onOk();
-    }, function () {
-      onCancel();
-    });
-  }
 
   return mod;
 });

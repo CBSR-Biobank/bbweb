@@ -27,17 +27,20 @@
       <td data-title="'Name'" sortable="'name'">
         {{ceventType.name}}
       </td>
-      <td data-title="'Required'" sortable="'anatomicalSourceType'">
-        {{ceventType.anatomicalSourceType}}
+      <td data-title="'Specimen Groups'">
+        {{cetSgNames[ceventType.id].join(", ")}}
+      </td>
+      <td data-title="'Recurring'" sortable="'recurring'">
+        {{ceventType.recurring ? 'Y' : 'N'}}
       </td>
       <td data-title="'Description'" sortable="'description'">
         {{ceventType.description === null ? "" : ceventType.description | truncate:40}}
       </td>
       <td>
         <info-update-remove-buttons
-            on-info="panel.ceventType.information(ceventType)"
-            on-update="panel.ceventType.update(ceventType)"
-            on-remove="panel.ceventType.remove(ceventType)">
+            on-info="panel.ceventTypes.information(ceventType)"
+            on-update="panel.ceventTypes.update(ceventType)"
+            on-remove="panel.ceventTypes.remove(ceventType)">
         </info-update-remove-buttons>
       </td>
     </tr>

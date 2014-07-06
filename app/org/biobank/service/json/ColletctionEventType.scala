@@ -19,12 +19,15 @@ object CollectionEventType {
 
   implicit val specimenGroupDataWrites: Writes[CollectionEventTypeSpecimenGroupData] = (
     (__ \ "specimenGroupId").write[String] and
+      (__ \ "name").write[String] and
       (__ \ "maxCount").write[Int] and
-      (__ \ "amount").write[Option[BigDecimal]]
+      (__ \ "amount").write[Option[BigDecimal]] and
+      (__ \ "units").write[String]
   )(unlift(CollectionEventTypeSpecimenGroupData.unapply))
 
   implicit val annotationTypeDataWrites: Writes[CollectionEventTypeAnnotationTypeData] = (
     (__ \ "annotationTypeId").write[String] and
+      (__ \ "name").write[String] and
       (__ \ "required").write[Boolean]
   )(unlift(CollectionEventTypeAnnotationTypeData.unapply))
 
@@ -43,12 +46,15 @@ object CollectionEventType {
 
   implicit val specimenGroupDataReads: Reads[CollectionEventTypeSpecimenGroupData]= (
     (__ \ "specimenGroupId").read[String](minLength[String](2)) and
+      (__ \ "name").read[String] and
       (__ \ "maxCount").read[Int] and
-      (__ \ "amount").readNullable[BigDecimal]
+      (__ \ "amount").readNullable[BigDecimal] and
+      (__ \ "units").read[String]
   )(CollectionEventTypeSpecimenGroupData)
 
   implicit val annotationTypeDataReads: Reads[CollectionEventTypeAnnotationTypeData] = (
     (__ \ "annotationTypeId").read[String](minLength[String](2)) and
+      (__ \ "name").read[String] and
       (__ \ "required").read[Boolean]
   )(CollectionEventTypeAnnotationTypeData)
 

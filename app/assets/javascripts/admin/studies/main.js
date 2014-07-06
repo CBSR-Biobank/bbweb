@@ -9,8 +9,9 @@ define([
   './services/services',
   './services/helpers',
   './directives/studyTabs',
-  './annotTypes/main',
-  './specimenGroups/main'
+  './participants/main',
+  './specimenGroups/main',
+  './ceventTypes/main'
 ], function(angular) {
   'use strict';
 
@@ -23,7 +24,8 @@ define([
     'admin.studies.states',
     'admin.studies.directives.studyTabs',
     'studies.services',
-    'studies.helpers',
-    'admin.studies.annotTypes',
-    'admin.studies.specimenGroups']);
+    'admin.studies.helpers',
+    'admin.studies.participants',
+    'admin.studies.specimenGroups',
+    'admin.studies.ceventTypes']);
 });

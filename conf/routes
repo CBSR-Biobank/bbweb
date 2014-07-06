@@ -61,6 +61,7 @@ GET     /studies/anatomicalsrctypes            org.biobank.controllers.study.Stu
 GET     /studies/specimentypes                 org.biobank.controllers.study.StudyController.specimenTypes
 GET     /studies/preservtypes                  org.biobank.controllers.study.StudyController.preservTypes
 GET     /studies/preservtemptypes              org.biobank.controllers.study.StudyController.preservTempTypes
+GET     /studies/sgvaluetypes                  org.biobank.controllers.study.StudyController.specimenGroupValueTypes
 
 # study
 GET     /studies/:id                           org.biobank.controllers.study.StudyController.query(id)

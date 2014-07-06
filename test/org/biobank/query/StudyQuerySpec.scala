@@ -3,7 +3,6 @@ package org.biobank.query
 import org.biobank.domain.UserId
 import org.biobank.fixture._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service.Messages._
 
 import java.util.UUID
 import org.junit.runner.RunWith
