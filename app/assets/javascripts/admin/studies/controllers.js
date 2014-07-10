@@ -93,8 +93,8 @@ define(['angular', 'common'], function(angular, common) {
    * See http://stackoverflow.com/questions/22881782/angularjs-tabset-does-not-show-the-correct-state-when-the-page-is-reloaded
    */
   mod.controller('StudySummaryCtrl', [
-    '$scope', '$rootScope', '$stateParams', '$state', '$log', '$filter', 'user', 'study',
-    function($scope, $rootScope, $stateParams, $state, $log, $filter, user, study) {
+    '$scope', '$rootScope', '$state', '$log', '$filter', 'user', 'study',
+    function($scope, $rootScope, $state, $log, $filter, user, study) {
 
       $scope.study = study;
       $scope.description = $scope.study.description;
@@ -167,21 +167,19 @@ define(['angular', 'common'], function(angular, common) {
   mod.controller('ParticipantsPaneCtrl', [
     '$scope',
     '$state',
-    '$stateParams',
     'annotTypeModalService',
     'panelTableService',
     'participantAnnotTypeRemoveService',
+    'study',
     'annotTypes',
     function(
       $scope,
       $state,
-      $stateParams,
       annotTypeModalService,
       panelTableService,
       participantAnnotTypeRemoveService,
+      study,
       annotTypes) {
-
-      var studyId = $stateParams.studyId;
 
       $scope.panel = {
         annotTypes: {
@@ -196,10 +194,10 @@ define(['angular', 'common'], function(angular, common) {
             annotTypeModalService.show('Participant Annotation Type', annotType);
           },
           add: function(study) {
-            $state.go('admin.studies.study.participantAnnotTypeAdd', { studyId: studyId });
+            $state.go('admin.studies.study.participants.annotTypeAdd', { studyId: study.id });
           },
           update: function(annotType) {
-            $state.go('admin.studies.study.participantAnnotTypeUpdate',
+            $state.go('admin.studies.study.participants.annotTypeUpdate',
                       { studyId: annotType.studyId, annotTypeId: annotType.id });
           },
           remove: function(annotType) {
@@ -215,23 +213,21 @@ define(['angular', 'common'], function(angular, common) {
   mod.controller('SpecimensPaneCtrl', [
     '$scope',
     '$state',
-    '$stateParams',
     'specimenGroupModalService',
     'panelTableService',
     'SpecimenGroupService',
     'specimenGroupRemoveService',
+    'study',
     'specimenGroups',
     function(
       $scope,
       $state,
-      $stateParams,
       specimenGroupModalService,
       panelTableService,
       SpecimenGroupService,
       specimenGroupRemoveService,
+      study,
       specimenGroups) {
-
-      var studyId = $stateParams.studyId;
 
       $scope.panel = {
         specimenGroups: {
@@ -245,10 +241,10 @@ define(['angular', 'common'], function(angular, common) {
             specimenGroupModalService.show(specimenGroup);
           },
           add: function(study) {
-            $state.go('admin.studies.study.specimenGroupAdd', { studyId: studyId });
+            $state.go('admin.studies.study.specimens.groupAdd', { studyId: study.id });
           },
           update: function(specimenGroup) {
-            $state.go('admin.studies.study.specimenGroupUpdate',
+            $state.go('admin.studies.study.specimens.groupUpdate',
                       { studyId: specimenGroup.studyId, specimenGroupId: specimenGroup.id });
           },
           remove: function(specimenGroup) {
@@ -264,7 +260,6 @@ define(['angular', 'common'], function(angular, common) {
   mod.controller('CollectionPaneCtrl', [
     '$scope',
     '$state',
-    '$stateParams',
     'ceventTypeModalService',
     'ceventTypeRemoveService',
     'ceventAnnotTypeRemoveService',
@@ -274,11 +269,9 @@ define(['angular', 'common'], function(angular, common) {
     'ceventTypes',
     'annotTypes',
     'specimenGroups',
-    'userResolve',
     function(
       $scope,
       $state,
-      $stateParams,
       ceventTypeModalService,
       ceventTypeRemoveService,
       ceventAnnotTypeRemoveService,
@@ -287,20 +280,7 @@ define(['angular', 'common'], function(angular, common) {
       study,
       ceventTypes,
       annotTypes,
-      specimenGroups, userResolve) {
-
-      var specimenGroupsById = {};
-      specimenGroups.forEach(function (sg) {
-        specimenGroupsById[sg.id] = sg;
-      });
-
-      $scope.cetSgNames = {};
-      ceventTypes.forEach(function (cet) {
-        $scope.cetSgNames[cet.id] = [];
-        cet.specimenGroupData.forEach(function (sgData) {
-          $scope.cetSgNames[cet.id].push(specimenGroupsById[sgData.specimenGroupId].name);
-        });
-      });
+      specimenGroups) {
 
       $scope.panel = {
         annotTypes: {
@@ -343,7 +323,114 @@ define(['angular', 'common'], function(angular, common) {
                       { studyId: ceventType.studyId, ceventTypeId: ceventType.id });
           },
           remove: function(ceventType) {
-            ceventTypeRemoveService.remove($state, $stateParams, ceventType);
+            ceventTypeRemoveService.remove(ceventType);
+          }
+        }
+      };
+
+      $scope.cetSgNames = {};
+      ceventTypes.forEach(function (cet) {
+        $scope.cetSgNames[cet.id] = [];
+        cet.specimenGroupData.forEach(function (sgItem) {
+          $scope.cetSgNames[cet.id].push(sgItem.name);
+        });
+      });
+    }]);
+
+
+  /**
+   * Displays study specimen configuration information in a table.
+   */
+  mod.controller('ProcessingPaneCtrl', [
+    '$scope',
+    '$state',
+    'processingTypeModalService',
+    'processingTypeRemoveService',
+    'spcLinkAnnotTypeRemoveService',
+    'annotTypeModalService',
+    'panelTableService',
+    'study',
+    'processingTypes',
+    'annotTypes',
+    'spcLinkTypes',
+    function(
+      $scope,
+      $state,
+      processingTypeModalService,
+      processingTypeRemoveService,
+      spcLinkAnnotTypeRemoveService,
+      annotTypeModalService,
+      panelTableService,
+      study,
+      processingTypes,
+      annotTypes,
+      spcLinkTypes) {
+
+      $scope.panel = {
+        processingTypes: {
+          title: 'Processing Types',
+          header: 'A Processing Type describes a regularly performed specimen processing procedure ' +
+            'with a unique name (unique to this study). There should be one or more associated ' +
+            'Specimen Link Types that (1) further define legal procedures and (2) allow recording ' +
+            'of procedures performed on different types of Specimens. ',
+          data: processingTypes,
+          tableParams: panelTableService.getTableParams(processingTypes),
+          information: function(processingType) {
+            processingTypeModalService.show(processingType, processingTypes);
+          },
+          add: function(study) {
+            $state.go('admin.studies.study.processing.processingTypeAdd', { studyId: study.id });
+          },
+          update: function(processingType) {
+            $state.go('admin.studies.study.processing.processingTypeUpdate',
+                      { studyId: processingType.studyId, processingTypeId: processingType.id });
+          },
+          remove: function(processingType) {
+            processingTypeRemoveService.remove(processingType);
+          }
+        },
+        annotTypes: {
+          title: 'Specimen Link Annotation Types',
+          header: 'Specimen link annotations allow a study to collect custom named and defined ' +
+            'pieces of data when processing specimens. Annotations are optional and are not ' +
+            'required to be defined.',
+          data: annotTypes,
+          tableParams: panelTableService.getTableParams(annotTypes),
+          hasRequired: false,
+          information: function(annotType) {
+            annotTypeModalService.show('Processing Event Annotation Type', annotType);
+          },
+          add: function(study) {
+            $state.go('admin.studies.study.processing.spcLinkAnnotTypeAdd', { studyId: study.id });
+          },
+          update: function(annotType) {
+            $state.go('admin.studies.study.processing.spcLinkAnnotTypeUpdate',
+                      { studyId: annotType.studyId, annotTypeId: annotType.id });
+          },
+          remove: function(annotType) {
+            spcLinkAnnotTypeRemoveService.remove(annotType);
+          }
+        },
+        spcLinkTypes: {
+          title: 'Specimen Link Types',
+          header: 'Specimen Link Types are assigned to a processing type, and used to represent a ' +
+            'regularly performed processing procedure involving two Specimens: an input, which ' +
+            'must be in a specific Specimen Group, and an output, which must be in a specific ' +
+            'Specimen Group. ',
+          data: spcLinkTypes,
+          tableParams: panelTableService.getTableParams(spcLinkTypes),
+          information: function(spcLinkType) {
+            spcLinkTypeModalService.show(spcLinkType, spcLinkTypes);
+          },
+          add: function(study) {
+            $state.go('admin.studies.study.processing.spcLinkTypeAdd', { studyId: study.id });
+          },
+          update: function(spcLinkType) {
+            $state.go('admin.studies.study.processing.spcLinkTypeUpdate',
+                      { studyId: spcLinkType.studyId, spcLinkTypeId: spcLinkType.id });
+          },
+          remove: function(spcLinkType) {
+            spcLinkTypeRemoveService.remove(spcLinkType);
           }
         }
       };

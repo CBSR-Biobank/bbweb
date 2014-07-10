@@ -8,21 +8,21 @@ define(['angular', 'common'], function(angular, common) {
     'studies.services', 'admin.studies.helpers']);
 
   mod.controller('participantAnnotationTypeAddCtrl', [
-    '$scope', 'paricipantAnnotTypeEditService', 'study', 'annotType',
-    function ($scope, paricipantAnnotTypeEditService, study, annotType) {
+    '$scope', 'participantAnnotTypeEditService', 'study', 'annotType',
+    function ($scope, participantAnnotTypeEditService, study, annotType) {
       $scope.title =  "Add Annotation Type";
       $scope.study = study;
       $scope.annotType = annotType;
-      paricipantAnnotTypeEditService.edit($scope);
+      participantAnnotTypeEditService.edit($scope);
     }]);
 
   mod.controller('participantAnnotationTypeUpdateCtrl', [
-    '$scope', 'paricipantAnnotTypeEditService', 'study', 'annotType',
-    function ($scope, paricipantAnnotTypeEditService, study, annotType) {
+    '$scope', 'participantAnnotTypeEditService', 'study', 'annotType',
+    function ($scope, participantAnnotTypeEditService, study, annotType) {
       $scope.title =  "Update Annotation Type";
       $scope.study = study;
       $scope.annotType = annotType;
-      paricipantAnnotTypeEditService.edit($scope);
+      participantAnnotTypeEditService.edit($scope);
     }]);
 
   return mod;

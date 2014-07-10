@@ -6,9 +6,9 @@
   </div>
   <div class="panel-body">
     <p>{{panel.annotTypes.header}}</p>
-    <div class="panel panel-danger" ng-if="panel.annotTypes.data.length == 0">
+    <div class="panel panel-warning" ng-if="panel.annotTypes.data.length == 0">
       <div class="panel-heading">
-        No annotation types have been defined for this study yet.
+        Annotation types have not been defined for this study yet.
       </div>
     </div>
     <p ng-if="panel.annotTypes.data.length != 0">

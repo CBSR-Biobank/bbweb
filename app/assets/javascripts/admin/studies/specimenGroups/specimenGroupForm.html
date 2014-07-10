@@ -41,11 +41,10 @@
                type="text"
                class="form-control"
                ng-model="specimenGroup.units"
-               ng-minlength="2"
-               placeholder="the units the specimens are measured in (eg. mL, cm, etc.)" required=true/>
+               placeholder="the units the specimens are measured in (eg. mL, cm, etc.)"
+               required/>
       </div>
       <div class="col-sm-offset-2 col-sm-10">
-        <p ng-show="sgForm.units.$error.minlength" class="help-block">Value for units is too short.</p>
         <p ng-show="sgForm.units.$invalid && !sgForm.units.$pristine"
            class="help-block">
           Units are required.</p>

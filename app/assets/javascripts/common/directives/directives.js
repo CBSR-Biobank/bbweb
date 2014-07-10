@@ -46,6 +46,17 @@ define(['angular'], function(angular) {
     };
   });
 
+  mod.directive('str2integer', function(){
+    return {
+      require: 'ngModel',
+      link: function(scope, ele, attr, ctrl){
+        ctrl.$parsers.unshift(function(viewValue){
+          return parseInt(viewValue);
+        });
+      }
+    };
+  });
+
   /**
    * Fixes form auto fill. See the following web page for an explanation:
    *

@@ -30,8 +30,8 @@ define(['angular'], function(angular) {
    * Common code to add or edit an specimen Group.
    */
   mod.service('specimenGroupEditService', [
-    '$state', '$stateParams', 'stateHelper', 'modalService', 'StudyService', 'SpecimenGroupService',
-    function($state, $stateParams, stateHelper, modalService, StudyService, SpecimenGroupService) {
+    '$state', '$stateParams', 'stateHelper', 'modalService', 'SpecimenGroupService',
+    function($state, $stateParams, stateHelper, modalService, SpecimenGroupService) {
 
       var saveError = function ($scope, specimenGroup, error) {
         var modalOptions = {
@@ -60,7 +60,7 @@ define(['angular'], function(angular) {
 
       return {
         edit: function($scope) {
-          StudyService.specimenGroupValueTypes().then(function(response) {
+          SpecimenGroupService.specimenGroupValueTypes().then(function(response) {
             $scope.anatomicalSourceTypes = response.data.anatomicalSourceType.sort();
             $scope.preservTypes = response.data.preservationType.sort();
             $scope.preservTempTypes = response.data.preservationTemperatureType.sort();
@@ -70,7 +70,10 @@ define(['angular'], function(angular) {
           $scope.submit = function(specimenGroup) {
             SpecimenGroupService.addOrUpdate(specimenGroup)
               .success(function() {
-                $state.go('admin.studies.study.specimens', { studyId: $scope.study.id });
+                $state.transitionTo(
+                  'admin.studies.study.specimens',
+                  $stateParams,
+                  { reload: true, inherit: false, notify: true });
               })
               .error(function(error) {
                 saveError($scope, specimenGroup, error);
@@ -89,11 +92,11 @@ define(['angular'], function(angular) {
    * Removes a specimen group.
    */
   mod.service('specimenGroupRemoveService', [
-    '$state', '$stateParams', 'stateHelper', 'studyAnnotTypeRemoveService', 'SpecimenGroupService', 'modalService',
-    function ($state, $stateParams, stateHelper, studyAnnotTypeRemoveService, SpecimenGroupService, modalService) {
+    '$state', 'stateHelper', 'studyRemoveModalService', 'SpecimenGroupService', 'modalService',
+    function ($state, stateHelper, studyRemoveModalService, SpecimenGroupService, modalService) {
       return {
         remove: function(specimenGroup) {
-          studyAnnotTypeRemoveService.remove(
+          studyRemoveModalService.remove(
             'Remove Specimen Group',
             'Are you sure you want to remove specimen group ' + specimenGroup.name + '?',
             function (result) {
@@ -104,17 +107,11 @@ define(['angular'], function(angular) {
                 })
 
                 .error(function(error) {
-                  var modalOptions = {
-                    closeButtonText: 'Cancel',
-                    headerText: 'Remove failed',
-                    bodyText: 'Specimen group ' + specimenGroup.name + ' cannot be removed: ' + error.message
-                  };
-
-                  modalService.showModal({}, modalOptions).then(function (result) {
-                    $state.go('admin.studies.study.specimens');
-                  }, function () {
-                    $state.go('admin.studies.study.specimens');
-                  });
+                  var bodyText = 'Specimen group ' + specimenGroup.name + ' cannot be removed: ' + error.message;
+                  studyRemoveModalService.orError(
+                    bodyText,
+                    'admin.studies.study.specimens',
+                    'admin.studies.study.specimens');
                 });
             },
             function() {

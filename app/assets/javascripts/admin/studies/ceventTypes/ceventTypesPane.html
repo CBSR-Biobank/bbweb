@@ -1,6 +1,3 @@
-<!-- COLLECTION EVENT ANNOTATION TYPES -->
-<ng-include src="'/assets/javascripts/admin/studies/annotationTypePanel.html'"></ng-include>
-
 <!-- COLLECTION EVENT TYPES -->
 <div class="panel panel-default">
   <div class="panel-heading">
@@ -10,9 +7,9 @@
   </div>
   <div class="panel-body">
     <p>{{panel.ceventTypes.header}}</p>
-    <div class="panel panel-danger" ng-if="panel.ceventTypes.data.length == 0">
+    <div class="panel panel-warning" ng-if="panel.ceventTypes.data.length == 0">
       <div class="panel-heading">
-        No collection event types have been defined for this study yet.
+        Collection event types have not been defined for this study yet.
       </div>
     </div>
     <p ng-if="panel.ceventTypes.data.length != 0">
@@ -22,8 +19,7 @@
   <table ng-show="panel.ceventTypes.data.length != 0"
          class="table table-hover"
          ng-table="panel.ceventTypes.tableParams">
-    <tr ng-repeat="ceventType in $data"
-        ng-class="{'active': user.$selected}" >
+    <tr ng-repeat="ceventType in $data">
       <td data-title="'Name'" sortable="'name'">
         {{ceventType.name}}
       </td>

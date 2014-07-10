@@ -11,7 +11,8 @@ define([
   './directives/studyTabs',
   './participants/main',
   './specimenGroups/main',
-  './ceventTypes/main'
+  './ceventTypes/main',
+  './processing/main'
 ], function(angular) {
   'use strict';
 
@@ -27,5 +28,6 @@ define([
     'admin.studies.helpers',
     'admin.studies.participants',
     'admin.studies.specimenGroups',
-    'admin.studies.ceventTypes']);
+    'admin.studies.ceventTypes',
+    'admin.studies.processing']);
 });

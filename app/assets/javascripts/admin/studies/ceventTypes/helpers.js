@@ -5,7 +5,7 @@ define(['angular'], function(angular) {
   var mod = angular.module('admin.studies.ceventTypes.helpers', ['admin.studies.helpers']);
 
   /**
-   * Displays a study annotation type in a modal. The information is displayed in an ng-table.
+   * Displays a collection event type in a modal. The information is displayed in an ng-table.
    *
    */
   mod.service('ceventTypeModalService', [
@@ -38,19 +38,26 @@ define(['angular'], function(angular) {
       };
     }]);
 
+  /**
+   * Common code to edit a collection event annotation type.
+   *
+   */
   mod.service('ceventAnnotTypeEditService', [
-    '$state', '$stateParams', 'modalService', 'studyAnnotationTypeService', 'CeventAnnotTypeService',
-    function($state, $stateParams, modalService, studyAnnotationTypeService, CeventAnnotTypeService) {
+    '$state', '$stateParams', 'modalService', 'studyAnnotTypeEditService', 'CeventAnnotTypeService',
+    function($state, $stateParams, modalService, studyAnnotTypeEditService, CeventAnnotTypeService) {
       return {
         edit: function ($scope) {
 
           var onSubmit = function (annotType) {
             CeventAnnotTypeService.addOrUpdate(annotType)
               .success(function() {
-                $state.go('admin.studies.study.collection');
+                $state.transitionTo(
+                  'admin.studies.study.collection',
+                  $stateParams,
+                  { reload: true, inherit: false, notify: true });
               })
               .error(function(error) {
-                studyAnnotationTypeService.onError($scope, error, 'admin.studies.study.collection');
+                studyAnnotTypeEditService.onError($scope, error, 'admin.studies.study.collection');
               });
           };
 
@@ -58,7 +65,7 @@ define(['angular'], function(angular) {
             $state.go('admin.studies.study.collection');
           };
 
-          studyAnnotationTypeService.edit($scope, onSubmit, onCancel);
+          studyAnnotTypeEditService.edit($scope, onSubmit, onCancel);
         }
       };
     }]);
@@ -67,11 +74,11 @@ define(['angular'], function(angular) {
    * Removes a collection event annotation type.
    */
   mod.service('ceventAnnotTypeRemoveService', [
-    '$state', '$stateParams', 'stateHelper', 'studyAnnotTypeRemoveService', 'CeventAnnotTypeService', 'modalService',
-    function ($state, $stateParams, stateHelper, studyAnnotTypeRemoveService, CeventAnnotTypeService, modalService) {
+    '$state', 'stateHelper', 'studyRemoveModalService', 'CeventAnnotTypeService', 'modalService',
+    function ($state, stateHelper, studyRemoveModalService, CeventAnnotTypeService, modalService) {
       return {
         remove: function(ceventAnnotType) {
-          studyAnnotTypeRemoveService.remove(
+          studyRemoveModalService.remove(
             'Remove Collection Event Annotation Type',
             'Are you sure you want to remove collection event annotation type ' + ceventAnnotType.name + '?',
             function (result) {
@@ -82,17 +89,11 @@ define(['angular'], function(angular) {
                 })
 
                 .error(function(error) {
-                  var modalOptions = {
-                    closeButtonText: 'Cancel',
-                    headerText: 'Remove failed',
-                    bodyText: 'Collection event annotation type ' + ceventAnnotType.name + ' cannot be removed: ' + error.message
-                  };
-
-                  modalService.showModal({}, modalOptions).then(function (result) {
-                    $state.go('admin.studies.study.collection');
-                  }, function () {
-                    $state.go('admin.studies.study.collection');
-                  });
+                  var bodyText = 'Collection event annotation type ' + ceventAnnotType.name + ' cannot be removed: ' + error.message;
+                  studyRemoveModalService.orError(
+                    bodyText,
+                    'admin.studies.study.collection',
+                    'admin.studies.study.collection');
                 });
             },
             function() {
@@ -103,11 +104,11 @@ define(['angular'], function(angular) {
     }]);
 
   /**
-   * Common code to add or edit an collection event type.
+   * Common code to add or edit a collection event type.
    */
   mod.service('ceventTypeEditService', [
-    '$state', '$stateParams', '$filter', 'stateHelper', 'modalService', 'StudyService', 'CeventTypeService',
-    function($state, $stateParams, $filter, stateHelper, modalService, StudyService, CeventTypeService) {
+    '$state', '$stateParams', '$filter', 'stateHelper', 'modalService', 'CeventTypeService',
+    function($state, $stateParams, $filter, stateHelper, modalService, CeventTypeService) {
 
       /*
        * Called when the submission failed due to an error.
@@ -125,7 +126,8 @@ define(['angular'], function(angular) {
             'your changes again, or Cancel to dismiss your changes.';
         } else {
           /* some other error */
-          modalOptions.headerText = sprintf('Cannot %s Collection Event Type', ceventType.id ?  'update' : 'add ');
+          modalOptions.headerText =
+            'Cannot ' +  (ceventType.id ?  'update' : 'add ') + ' Collection Event';
           modalOptions.bodyText = 'Error: ' + error.message;
         }
 
@@ -147,6 +149,7 @@ define(['angular'], function(angular) {
                   throw new Error("specimen group not found with name: " + sgData.name);
                 }
                 sgData.specimenGroupId = specimenGroup.id;
+                sgData.units = specimenGroup.units;
               });
 
               // fill in the 'annotationTypeId' field
@@ -160,7 +163,10 @@ define(['angular'], function(angular) {
 
               CeventTypeService.addOrUpdate(ceventType)
                 .success(function() {
-                  $state.go('admin.studies.study.collection', { studyId: $scope.study.id });
+                  $state.transitionTo(
+                    'admin.studies.study.collection',
+                    $stateParams,
+                    { reload: true, inherit: false, notify: true });
                 })
                 .error(function(error) {
                   saveError($scope, ceventType, error);
@@ -219,11 +225,11 @@ define(['angular'], function(angular) {
    * Removes a collection event type.
    */
   mod.service('ceventTypeRemoveService', [
-    '$state', '$stateParams', 'stateHelper', 'studyAnnotTypeRemoveService', 'CeventTypeService', 'modalService',
-    function ($state, $stateParams, stateHelper, studyAnnotTypeRemoveService, CeventTypeService, modalService) {
+    '$state', 'stateHelper', 'studyRemoveModalService', 'CeventTypeService', 'modalService',
+    function ($state, stateHelper, studyRemoveModalService, CeventTypeService, modalService) {
       return {
         remove: function(ceventType) {
-          studyAnnotTypeRemoveService.remove(
+          studyRemoveModalService.remove(
             'Remove Collection Event Type',
             'Are you sure you want to remove collection event type ' + ceventType.name + '?',
             function (result) {
@@ -234,17 +240,11 @@ define(['angular'], function(angular) {
                 })
 
                 .error(function(error) {
-                  var modalOptions = {
-                    closeButtonText: 'Cancel',
-                    headerText: 'Remove failed',
-                    bodyText: 'Collection event type ' + ceventType.name + ' cannot be removed: ' + error.message
-                  };
-
-                  modalService.showModal({}, modalOptions).then(function (result) {
-                    $state.go('admin.studies.study.collection');
-                  }, function () {
-                    $state.go('admin.studies.study.collection');
-                  });
+                  var bodyText = 'Collection event type ' + ceventType.name + ' cannot be removed: ' + error.message;
+                  studyRemoveModalService.orError(
+                    bodyText,
+                    'admin.studies.study.collection',
+                    'admin.studies.study.collection');
                 });
             },
             function() {

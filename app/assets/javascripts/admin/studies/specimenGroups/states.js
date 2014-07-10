@@ -14,7 +14,7 @@ define(['angular'], function(angular) {
     $urlRouterProvider.otherwise('/');
 
     $stateProvider
-      .state('admin.studies.study.specimenGroupAdd', {
+      .state('admin.studies.study.specimens.groupAdd', {
         url: '/spcgroup/add',
         resolve: {
           user: userResolve.user,
@@ -41,7 +41,7 @@ define(['angular'], function(angular) {
           displayName: 'Specimen Group'
         }
       })
-      .state('admin.studies.study.specimenGroupUpdate', {
+      .state('admin.studies.study.specimens.groupUpdate', {
         url: '/spcgroup/update/{specimenGroupId}',
         resolve: {
           user: userResolve.user,

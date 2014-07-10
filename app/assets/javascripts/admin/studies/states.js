@@ -110,7 +110,8 @@ define(['angular'], function(angular) {
                 $scope.tabActive = {
                   participants: false,
                   specimens: false,
-                  collection: false
+                  collection: false,
+                  processing: false
                 };
 
                 if ($state.current.name === 'admin.studies.study.participants') {
@@ -125,144 +126,16 @@ define(['angular'], function(angular) {
                   $timeout(function() {
                     $scope.tabActive.collection = true;
                   }, 0);
+                } else if ($state.current.name === 'admin.studies.study.processing') {
+                  $timeout(function() {
+                    $scope.tabActive.processing = true;
+                  }, 0);
                 }
               }]
           }
         },
         data: {
           displayName: "{{study.name}}"
-        }
-      });
-
-      /**
-       * Study view summary information
-       */
-      $stateProvider.state('admin.studies.study.summary', {
-        url: '/summary',
-        resolve: {
-          user: userResolve.user
-        },
-        views: {
-          'studyDetails': {
-            templateUrl: '/assets/javascripts/admin/studies/studySummaryPane.html',
-            controller: 'StudySummaryCtrl'
-          }
-        },
-        data: {
-          displayName: false
-        }
-      });
-
-      /**
-       * Study view participatns information
-       */
-      $stateProvider.state('admin.studies.study.participants', {
-        url: '/participants',
-        resolve: {
-          user: userResolve.user,
-          annotTypes: [
-            '$stateParams',
-            'ParticipantAnnotTypeService',
-            '$log',
-            function($stateParams, ParticipantAnnotTypeService, $log) {
-              if ($stateParams.studyId) {
-                return ParticipantAnnotTypeService.getAll($stateParams.studyId).then(function(response) {
-                  return response.data;
-                });
-              }
-              throw new Error("state parameter studyId is invalid");
-            }]
-        },
-        views: {
-          'studyDetails': {
-            template: '<ng-include src="\'/assets/javascripts/admin/studies/annotationTypePanel.html\'"></ng-include>',
-            controller: 'ParticipantsPaneCtrl'
-          }
-        },
-        data: {
-          displayName: false
-        }
-      });
-
-      /**
-       * Study view specimen information
-       */
-      $stateProvider.state('admin.studies.study.specimens', {
-        url: '/specimens',
-        resolve: {
-          user: userResolve.user,
-          specimenGroups: [
-            '$stateParams',
-            'SpecimenGroupService',
-            function($stateParams, SpecimenGroupService) {
-              if ($stateParams.studyId) {
-                return SpecimenGroupService.getAll($stateParams.studyId).then(function(response) {
-                  return response.data;
-                });
-              }
-              throw new Error("state parameter studyId is invalid");
-            }]
-        },
-        views: {
-          'studyDetails': {
-            templateUrl: '/assets/javascripts/admin/studies/studySpecimensPane.html',
-            controller: 'SpecimensPaneCtrl'
-          }
-        },
-        data: {
-          displayName: false
-        }
-      });
-
-      /**
-       * Study view collection information
-       */
-      $stateProvider.state('admin.studies.study.collection', {
-        url: '/collection',
-        resolve: {
-          user: userResolve.user,
-          ceventTypes: [
-            '$stateParams',
-            'CeventTypeService',
-            function($stateParams, CeventTypeService) {
-              if ($stateParams.studyId) {
-                return CeventTypeService.getAll($stateParams.studyId).then(function(response) {
-                  return response.data;
-                });
-              }
-              throw new Error("state parameter studyId is invalid");
-            }],
-          annotTypes: [
-            '$stateParams',
-            'CeventAnnotTypeService',
-            function($stateParams, CeventAnnotTypeService) {
-              if ($stateParams.studyId) {
-                return CeventAnnotTypeService.getAll($stateParams.studyId).then(function(response) {
-                  return response.data;
-                });
-              }
-              throw new Error("state parameter studyId is invalid");
-            }],
-          specimenGroups: [
-            '$stateParams',
-            'SpecimenGroupService',
-            function($stateParams, SpecimenGroupService) {
-              if ($stateParams.studyId) {
-                return SpecimenGroupService.getAll($stateParams.studyId).then(function(response) {
-                  return response.data;
-                });
-              }
-              throw new Error("state parameter studyId is invalid");
-            }]
-        },
-        views: {
-          'studyDetails': {
-            templateUrl: '/assets/javascripts/admin/studies/studyCollectionPane.html',
-            controller: 'CollectionPaneCtrl'
-          }
-        },
-        data: {
-          displayName: false
         }
       });
 
@@ -294,6 +167,157 @@ define(['angular'], function(angular) {
           'main@': {
             template: '<div><h1>Study does not exist</h1></div>'
           }
+        }
+      });
+
+      /**
+       * Study view summary information
+       */
+      $stateProvider.state('admin.studies.study.summary', {
+        url: '/summary',
+        resolve: {
+          user: userResolve.user
+        },
+        views: {
+          'studyDetails': {
+            templateUrl: '/assets/javascripts/admin/studies/studySummaryPane.html',
+            controller: 'StudySummaryCtrl'
+          }
+        },
+        data: {
+          displayName: false
+        }
+      });
+
+      /**
+       * Study view participatns information
+       */
+      $stateProvider.state('admin.studies.study.participants', {
+        url: '/participants',
+        resolve: {
+          user: userResolve.user,
+          annotTypes: [
+            'ParticipantAnnotTypeService', 'study',
+            function(ParticipantAnnotTypeService, study) {
+              return ParticipantAnnotTypeService.getAll(study.id).then(function(response) {
+                return response.data;
+              });
+            }]
+        },
+        views: {
+          'studyDetails': {
+            template: '<ng-include src="\'/assets/javascripts/admin/studies/annotationTypesPane.html\'"></ng-include>',
+            controller: 'ParticipantsPaneCtrl'
+          }
+        },
+        data: {
+          displayName: false
+        }
+      });
+
+      /**
+       * Study view specimen information
+       */
+      $stateProvider.state('admin.studies.study.specimens', {
+        url: '/specimens',
+        resolve: {
+          user: userResolve.user,
+          specimenGroups: [
+            'SpecimenGroupService', 'study',
+            function(SpecimenGroupService, study) {
+              return SpecimenGroupService.getAll(study.id).then(function(response) {
+                return response.data;
+              });
+            }]
+        },
+        views: {
+          'studyDetails': {
+            templateUrl: '/assets/javascripts/admin/studies/studySpecimensPane.html',
+            controller: 'SpecimensPaneCtrl'
+          }
+        },
+        data: {
+          displayName: false
+        }
+      });
+
+      /**
+       * Study view collection information
+       */
+      $stateProvider.state('admin.studies.study.collection', {
+        url: '/collection',
+        resolve: {
+          user: userResolve.user,
+          ceventTypes: [
+            'CeventTypeService', 'study',
+            function( CeventTypeService, study) {
+              return CeventTypeService.getAll(study.id).then(function(response) {
+                return response.data;
+              });
+            }],
+          annotTypes: [
+            'CeventAnnotTypeService', 'study',
+            function(CeventAnnotTypeService, study) {
+              return CeventAnnotTypeService.getAll(study.id).then(function(response) {
+                return response.data;
+              });
+            }],
+          specimenGroups: [
+            'SpecimenGroupService', 'study',
+            function(SpecimenGroupService, study) {
+              return SpecimenGroupService.getAll(study.id).then(function(response) {
+                return response.data;
+              });
+            }]
+        },
+        views: {
+          'studyDetails': {
+            templateUrl: '/assets/javascripts/admin/studies/studyCollectionPanes.html',
+            controller: 'CollectionPaneCtrl'
+          }
+        },
+        data: {
+          displayName: false
+        }
+      });
+
+      /**
+       * Study view processing tab
+       */
+      $stateProvider.state('admin.studies.study.processing', {
+        url: '/processing',
+        resolve: {
+          user: userResolve.user,
+          processingTypes: [
+            'ProcessingTypeService', 'study',
+            function( ProcessingTypeService, study) {
+              return ProcessingTypeService.getAll(study.id).then(function(response) {
+                return response.data;
+              });
+            }],
+          annotTypes: [
+            'SpcLinkAnnotTypeService', 'study',
+            function(SpcLinkAnnotTypeService, study) {
+              return SpcLinkAnnotTypeService.getAll(study.id).then(function(response) {
+                return response.data;
+              });
+            }],
+          spcLinkTypes: [
+            'SpcLinkTypeService', 'study',
+            function(SpcLinkTypeService, study) {
+              return SpcLinkTypeService.getAll(study.id).then(function(response) {
+                return response.data;
+              });
+            }]
+        },
+        views: {
+          'studyDetails': {
+            templateUrl: '/assets/javascripts/admin/studies/studyProcessingPanes.html',
+            controller: 'ProcessingPaneCtrl'
+          }
+        },
+        data: {
+          displayName: false
         }
       });
     }]);

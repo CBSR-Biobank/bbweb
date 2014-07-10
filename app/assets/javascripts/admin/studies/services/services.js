@@ -6,6 +6,9 @@ define(['angular', 'common'], function(angular) {
 
   var mod = angular.module('studies.services', ['biobank.common']);
 
+  /**
+   * Service to acccess studies.
+   */
   mod.factory('StudyService', ['$http', 'playRoutes', function($http, playRoutes) {
     return {
       list : function() {
@@ -28,69 +31,76 @@ define(['angular', 'common'], function(angular) {
         } else {
           return playRoutes.controllers.study.StudyController.add().post(cmd);
         }
-      },
-      valueTypes : function() {
-        return playRoutes.controllers.study.StudyController.valueTypes().get();
-      },
-      anatomicalSourceTypes : function() {
-        return playRoutes.controllers.study.StudyController.anatomicalSourceTypes().get();
-      },
-      specimenTypes : function() {
-        return playRoutes.controllers.study.StudyController.specimenTypes().get();
-      },
-      preservTypes : function() {
-        return playRoutes.controllers.study.StudyController.preservTypes().get();
-      },
-      preservTempTypes : function() {
-        return playRoutes.controllers.study.StudyController.preservTempTypes().get();
-      },
-      specimenGroupValueTypes : function() {
-        return $http.get('/studies/sgvaluetypes');
       }
     };
   }]);
 
-  mod.factory('ParticipantAnnotTypeService', ['playRoutes', function(playRoutes) {
+  /**
+   * Service to access study annotation types.
+   */
+  mod.factory('StudyAnnotTypeService', ['$http', function($http) {
     return {
-      getAll: function(studyId) {
-        return playRoutes.controllers.study.ParticipantAnnotTypeController.get(studyId).get();
+      getAll: function(baseUrl, studyId) {
+        return $http.get(baseUrl + '/' + studyId);
       },
-      get: function(studyId, participantAnnotTypeId) {
-        return playRoutes.controllers.study.ParticipantAnnotTypeController.get(
-          studyId, participantAnnotTypeId).get();
+      get: function(baseUrl, studyId, annotTypeId) {
+        return $http.get(baseUrl + '/'  + studyId + '?annotTypeId=' + annotTypeId);
       },
-      addOrUpdate: function(annotType) {
+      addOrUpdate: function(baseUrl, annotType) {
         var cmd = {
           studyId:       annotType.studyId,
           name:          annotType.name,
           description:   annotType.description,
           valueType:     annotType.valueType,
           maxValueCount: annotType.maxValueCount,
-          options:       annotType.options,
-          required:      annotType.required
+          options:       annotType.options
         };
+
+        if (typeof annotType.required !== 'undefined') {
+          cmd.required = annotType.required;
+        }
 
         if (annotType.id) {
           cmd.id = annotType.id;
           cmd.expectedVersion = annotType.version;
-
-          return playRoutes.controllers.study.ParticipantAnnotTypeController.updateAnnotationType(annotType.id).put(cmd);
+          return $http.put(baseUrl + '/'  + annotType.id, cmd);
         } else {
-          return playRoutes.controllers.study.ParticipantAnnotTypeController.addAnnotationType().post(cmd);
+          return $http.post(baseUrl, cmd);
         }
       },
-      remove: function(annotType) {
-        var cmd = {
-          studyId: annotType.studyId,
-          id: annotType.id,
-          expectedVersion: annotType.version
-        };
-        return playRoutes.controllers.study.ParticipantAnnotTypeController
-          .removeAnnotationType(annotType.studyId, annotType.id, annotType.version).delete();
+      remove: function(baseUrl, annotType) {
+        return $http.delete(baseUrl + '/'  + annotType.studyId + '/' + annotType.id + '/' + annotType.version);
+      },
+      valueTypes : function() {
+        return $http.get('/studies/valuetypes');
       }
     };
   }]);
 
+  /**
+   * Service to access participant annotation types.
+   */
+  mod.factory('ParticipantAnnotTypeService', ['StudyAnnotTypeService', function(StudyAnnotTypeService) {
+    var baseUrl = '/studies/pannottype';
+    return {
+      getAll: function(studyId) {
+        return StudyAnnotTypeService.getAll(baseUrl, studyId);
+      },
+      get: function(studyId, annotTypeId) {
+        return StudyAnnotTypeService.get(baseUrl, studyId, annotTypeId);
+      },
+      addOrUpdate: function(annotType) {
+        return StudyAnnotTypeService.addOrUpdate(baseUrl, annotType);
+      },
+      remove: function(annotType) {
+        return StudyAnnotTypeService.remove(baseUrl, annotType);
+      }
+    };
+  }]);
+
+  /**
+   * Service to access specimen groups.
+   */
   mod.factory('SpecimenGroupService', ['$http', function($http) {
     return {
       getAll: function(studyId) {
@@ -124,78 +134,179 @@ define(['angular', 'common'], function(angular) {
           '/studies/sgroups/' + specimenGroup.studyId +
             '/' + specimenGroup.id +
             '/' + specimenGroup.version);
+      },
+      anatomicalSourceTypes : function() {
+        return $http.get('/studies/anatomicalsrctypes');
+      },
+      specimenTypes : function() {
+        return $http.get('/studies/specimentypes');
+      },
+      preservTypes : function() {
+        return $http.get('/studies/preservtypes');
+      },
+      preservTempTypes : function() {
+        return $http.get('/studies/preservtemptypes');
+      },
+      specimenGroupValueTypes : function() {
+        return $http.get('/studies/sgvaluetypes');
       }
     };
   }]);
 
-  mod.factory('CeventTypeService', [
-    '$http', 'SpecimenGroupService',
-    function($http, SpecimenGroupService) {
-      return {
-        getAll: function(studyId) {
-          return $http.get('/studies/cetypes/' + studyId);
-        },
-        get: function(studyId, collectionEventTypeId) {
-          return $http.get('/studies/cetypes/' + studyId + '?cetId=' + collectionEventTypeId);
-        },
-        addOrUpdate: function(collectionEventType) {
-          var cmd = {
-            studyId:            collectionEventType.studyId,
-            name:               collectionEventType.name,
-            description:        collectionEventType.description,
-            recurring:          collectionEventType.recurring,
-            specimenGroupData:  collectionEventType.specimenGroupData,
-            annotationTypeData: collectionEventType.annotationTypeData
-          };
-
-          if (collectionEventType.id) {
-            cmd.id = collectionEventType.id;
-            cmd.expectedVersion = collectionEventType.version;
-            return $http.put('/studies/cetypes/' + collectionEventType.id, cmd);
-          } else {
-            return $http.post('/studies/cetypes', cmd);
-          }
-        },
-        remove: function(collectionEventType) {
-          return $http.delete(
-            '/studies/cetypes/' + collectionEventType.studyId +
-              '/' + collectionEventType.id +
-              '/' + collectionEventType.version);
-        }
-      };
-    }]);
-
-  mod.factory('CeventAnnotTypeService', ['$http', function($http) {
+  /**
+   * Service to access Collection Event Types.
+   */
+  mod.factory('CeventTypeService', ['$http', function($http) {
     return {
       getAll: function(studyId) {
-        return $http.get('/studies/ceannottype/' + studyId);
+        return $http.get('/studies/cetypes/' + studyId);
       },
       get: function(studyId, collectionEventTypeId) {
-        return $http.get('/studies/ceannottype/' + studyId + '?annotTypeId=' + collectionEventTypeId);
+        return $http.get('/studies/cetypes/' + studyId + '?cetId=' + collectionEventTypeId);
       },
-      addOrUpdate: function(annotType) {
+      addOrUpdate: function(collectionEventType) {
         var cmd = {
-          studyId:       annotType.studyId,
-          name:          annotType.name,
-          description:   annotType.description,
-          valueType:     annotType.valueType,
-          maxValueCount: annotType.maxValueCount,
-          options:       annotType.options
+          studyId:            collectionEventType.studyId,
+          name:               collectionEventType.name,
+          description:        collectionEventType.description,
+          recurring:          collectionEventType.recurring,
+          specimenGroupData:  collectionEventType.specimenGroupData,
+          annotationTypeData: collectionEventType.annotationTypeData
         };
 
-        if (annotType.id) {
-          cmd.id = annotType.id;
-          cmd.expectedVersion = annotType.version;
-          return $http.put('/studies/ceannottype/' + annotType.id, cmd);
+        if (collectionEventType.id) {
+          cmd.id = collectionEventType.id;
+          cmd.expectedVersion = collectionEventType.version;
+          return $http.put('/studies/cetypes/' + collectionEventType.id, cmd);
         } else {
-          return $http.post('/studies/ceannottype', cmd);
+          return $http.post('/studies/cetypes', cmd);
         }
       },
-      remove: function(annotType) {
+      remove: function(collectionEventType) {
         return $http.delete(
-          '/studies/ceannottype/' + annotType.studyId +
-            '/' + annotType.id +
-            '/' + annotType.version);
+          '/studies/cetypes/' + collectionEventType.studyId +
+            '/' + collectionEventType.id +
+            '/' + collectionEventType.version);
+      }
+    };
+  }]);
+
+  /**
+   * Service to access Collection Event Annotation Types.
+   */
+  mod.factory('CeventAnnotTypeService', ['StudyAnnotTypeService', function(StudyAnnotTypeService) {
+    var baseUrl = '/studies/ceannottype';
+    return {
+      getAll: function(studyId) {
+        return StudyAnnotTypeService.getAll(baseUrl, studyId);
+      },
+      get: function(studyId, participantAnnotTypeId) {
+        return StudyAnnotTypeService.get(baseUrl, studyId, participantAnnotTypeId);
+      },
+      addOrUpdate: function(annotType) {
+        return StudyAnnotTypeService.addOrUpdate(baseUrl, annotType);
+      },
+      remove: function(annotType) {
+        return StudyAnnotTypeService.remove(baseUrl, annotType);
+      }
+    };
+  }]);
+
+  /**
+   * Service to access Specimen Link Annotation Types.
+   */
+  mod.factory('SpcLinkAnnotTypeService', ['StudyAnnotTypeService', function(StudyAnnotTypeService) {
+    var baseUrl = '/studies/slannottype';
+    return {
+      getAll: function(studyId) {
+        return StudyAnnotTypeService.getAll(baseUrl, studyId);
+      },
+      get: function(studyId, participantAnnotTypeId) {
+        return StudyAnnotTypeService.get(baseUrl, studyId, participantAnnotTypeId);
+      },
+      addOrUpdate: function(annotType) {
+        return StudyAnnotTypeService.addOrUpdate(baseUrl, annotType);
+      },
+      remove: function(annotType) {
+        return StudyAnnotTypeService.remove(baseUrl, annotType);
+      }
+    };
+  }]);
+
+  /**
+   * Service to access Processing Types.
+   */
+  mod.factory('ProcessingTypeService', ['$http', function($http) {
+    return {
+      getAll: function(studyId) {
+        return $http.get('/studies/proctypes/' + studyId);
+      },
+      get: function(studyId, processingTypeId) {
+        return $http.get('/studies/proctypes/' + studyId + '?procTypeId=' + processingTypeId);
+      },
+      addOrUpdate: function(processingType) {
+        var cmd = {
+          studyId:     processingType.studyId,
+          name:        processingType.name,
+          description: processingType.description,
+          enabled:     processingType.enabled
+        };
+
+        if (processingType.id) {
+          cmd.id = processingType.id;
+          cmd.expectedVersion = processingType.version;
+          return $http.put('/studies/proctypes/' + processingType.id, cmd);
+        } else {
+          return $http.post('/studies/proctypes', cmd);
+        }
+      },
+      remove: function(processingType) {
+        return $http.delete(
+          '/studies/proctypes/' + processingType.studyId +
+            '/' + processingType.id +
+            '/' + processingType.version);
+      }
+    };
+  }]);
+
+  /**
+   * Service to access Spcecimen Link Types.
+   */
+  mod.factory('SpcLinkTypeService', ['$http', function($http) {
+    return {
+      getAll: function(studyId) {
+        return $http.get('/studies/sltypes/' + studyId);
+      },
+      get: function(studyId, spcLinkTypeId) {
+        return $http.get('/studies/sltypes/' + studyId + '?procTypeId=' + spcLinkTypeId);
+      },
+      addOrUpdate: function(spcLinkType) {
+        var cmd = {
+          studyId:               spcLinkType.studyId,
+          expectedInputChange:   spcLinkType.expectedInputChange,
+          expectedOutputChange:  spcLinkType.expectedOutputChange,
+          inputCount:            spcLinkType.inputCount,
+          outputCount:           spcLinkType.outputCount,
+          inputGroupId:          spcLinkType.inputGroupId,
+          outputGroupId:         spcLinkType.outputGroupId,
+          inputContainerTypeId:  spcLinkType.inputContainerTypeId,
+          outputContainerTypeId: spcLinkType.outputContainerTypeId,
+          annotationTypeData:    spcLinkType.annotationTypeData
+        };
+
+        if (spcLinkType.id) {
+          cmd.id = spcLinkType.id;
+          cmd.expectedVersion = spcLinkType.version;
+          return $http.put('/studies/sltypes/' + spcLinkType.id, cmd);
+        } else {
+          return $http.post('/studies/sltypes', cmd);
+        }
+      },
+      remove: function(spcLinkType) {
+        return $http.delete(
+          '/studies/sltypes/' + spcLinkType.studyId +
+            '/' + spcLinkType.id +
+            '/' + spcLinkType.version);
       }
     };
   }]);

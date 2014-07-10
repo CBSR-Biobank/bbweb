@@ -45,7 +45,7 @@ object SpecimenGroup {
     (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
-      (__ \ "units").read[String](minLength[String](2)) and
+      (__ \ "units").read[String](minLength[String](1)) and
       (__ \ "anatomicalSourceType").read[AnatomicalSourceType] and
       (__ \ "preservationType").read[PreservationType] and
       (__ \ "preservationTemperatureType").read[PreservationTemperatureType] and
@@ -58,7 +58,7 @@ object SpecimenGroup {
       (__ \ "expectedVersion").read[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
-      (__ \ "units").read[String](minLength[String](2)) and
+      (__ \ "units").read[String](minLength[String](1)) and
       (__ \ "anatomicalSourceType").read[AnatomicalSourceType] and
       (__ \ "preservationType").read[PreservationType] and
       (__ \ "preservationTemperatureType").read[PreservationTemperatureType] and

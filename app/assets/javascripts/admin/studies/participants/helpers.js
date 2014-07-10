@@ -4,56 +4,22 @@ define(['angular'], function(angular) {
 
   var mod = angular.module('admin.studies.participants.helpers', []);
 
-  /**
-   * Displays a study annotation type in a modal. The information is displayed in an ng-table.
-   *
-   */
-  mod.service('annotTypeModalService', [
-    'modelObjModalService', 'addTimeStampsService',
-    function (modelObjModalService, addTimeStampsService) {
-      this.show = function (title, annotType) {
-        var data = [];
-        data.push({name: 'Name:', value: annotType.name});
-        data.push({name: 'Type:', value: annotType.valueType});
-
-        if (typeof annotType.required !== 'undefined') {
-          data.push({name: 'Required:', value: annotType.required ? "Yes" : "No"});
-        }
-
-        if (annotType.valueType === 'Select') {
-          var optionValues = [];
-          for (var name in annotType.options) {
-            optionValues.push(annotType.options[name]);
-          }
-
-          data.push({
-            name: '# Selections Allowed:',
-            value: annotType.maxValueCount === 1 ? "Single" : "Multiple"});
-          data.push({
-            name: 'Selections:',
-            value: optionValues.join(", ")});
-        }
-
-        data.push({name: 'Description:', value: annotType.description});
-        data = data.concat(addTimeStampsService.get(annotType));
-
-        modelObjModalService.show(title, data);
-      };
-    }]);
-
-  mod.service('paricipantAnnotTypeEditService', [
-    '$state', '$stateParams', 'modalService', 'studyAnnotationTypeService', 'ParticipantAnnotTypeService',
-    function($state, $stateParams, modalService, studyAnnotationTypeService, ParticipantAnnotTypeService) {
+  mod.service('participantAnnotTypeEditService', [
+    '$state', '$stateParams', 'modalService', 'studyAnnotTypeEditService', 'ParticipantAnnotTypeService',
+    function($state, $stateParams, modalService, studyAnnotTypeEditService, ParticipantAnnotTypeService) {
       return {
         edit: function ($scope) {
 
           var onSubmit = function (annotType) {
             ParticipantAnnotTypeService.addOrUpdate(annotType)
               .success(function() {
-                $state.go('admin.studies.study.participants');
+                $state.transitionTo(
+                  'admin.studies.study.participants',
+                  $stateParams,
+                  { reload: true, inherit: false, notify: true });
               })
               .error(function(error) {
-                studyAnnotationTypeService.onError($scope, error, 'admin.studies.study.participants');
+                studyAnnotTypeEditService.onError($scope, error, 'admin.studies.study.participants');
               });
           };
 
@@ -61,7 +27,7 @@ define(['angular'], function(angular) {
             $state.go('admin.studies.study.participants');
           };
 
-          studyAnnotationTypeService.edit($scope, onSubmit, onCancel);
+          studyAnnotTypeEditService.edit($scope, onSubmit, onCancel);
         }
       };
     }]);
@@ -70,11 +36,11 @@ define(['angular'], function(angular) {
    * Removes a participant annotation type.
    */
   mod.service('participantAnnotTypeRemoveService', [
-    '$state', '$stateParams', 'stateHelper', 'studyAnnotTypeRemoveService', 'ParticipantAnnotTypeService', 'modalService',
-    function ($state, $stateParams, stateHelper, studyAnnotTypeRemoveService, ParticipantAnnotTypeService, modalService) {
+    '$state', 'stateHelper', 'studyRemoveModalService', 'ParticipantAnnotTypeService', 'modalService',
+    function ($state, stateHelper, studyRemoveModalService, ParticipantAnnotTypeService, modalService) {
       return {
         remove: function(annotType) {
-          studyAnnotTypeRemoveService.remove(
+          studyRemoveModalService.remove(
             'Remove Participant Annotation Type',
             'Are you sure you want to remove annotation type ' + annotType.name + '?',
             function (result) {
@@ -85,17 +51,11 @@ define(['angular'], function(angular) {
                 })
 
                 .error(function(error) {
-                  var modalOptions = {
-                    closeButtonText: 'Cancel',
-                    headerText: 'Remove failed',
-                    bodyText: 'Annotation type ' + annotType.name + ' cannot be removed: ' + error.message
-                  };
-
-                  modalService.showModal({}, modalOptions).then(function (result) {
-                    $state.go('admin.studies.study.participants');
-                  }, function () {
-                    $state.go('admin.studies.study.participants');
-                  });
+                  var bodyText = 'Annotation type ' + annotType.name + ' cannot be removed: ' + error.message;
+                  studyRemoveModalService.orError(
+                    bodyText,
+                    'admin.studies.study.participants',
+                    'admin.studies.study.participants');
                 });
             },
             function() {

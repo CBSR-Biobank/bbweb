@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h2>Study administration: {{study.name}} </h2>
+  <h1>{{study.name}} <small>Study administration </small></h1>
 </div>
 <div class="clearfix">
   <!--
@@ -27,10 +27,11 @@
         <a ui-sref-active="active">Collection</a>
       </tab-heading>
     </tab>
-    <!--
-        <tab heading="CollectionEvents">Collection Events</tab>
-        <tab heading="ProcessingEvents">Processing Events</tab>
-    -->
+    <tab ui-sref="admin.studies.study.processing" active="tabActive.processing">
+      <tab-heading>
+        <a ui-sref-active="active">Processing</a>
+      </tab-heading>
+    </tab>
   </tabset>
   <div class="row">
     <div ui-view="studyDetails" style="margin-top: 10px;"></div>

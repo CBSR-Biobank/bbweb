@@ -70,13 +70,13 @@
                type="radio"
                ng-model="annotType.maxValueCount"
                value="1"
-               integer /> Single selection only
+               str2integer /> Single selection only
       </div>
       <div class="col-sm-5">
         <input type="radio"
                ng-model="annotType.maxValueCount"
                value="2"
-               integer /> Multiple selections allowed
+               str2integer /> Multiple selections allowed
       </div>
     </div>
 
@@ -104,7 +104,9 @@
           </button>
         </div>
         <div class="col-sm-offset-2 col-sm-10">
-          <p class="help-block" ng-show="subForm.option.$invalid">A value is required</p>
+          <p class="help-block" ng-show="subForm.option.$invalid && !subForm.option.$pristine">
+            A value is required
+          </p>
         </div>
       </ng-form>
     </div>

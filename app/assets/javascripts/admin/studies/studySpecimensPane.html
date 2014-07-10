@@ -6,9 +6,9 @@
   </div>
   <div class="panel-body">
     <p>{{panel.specimenGroups.header}}</p>
-    <div class="panel panel-danger" ng-if="panel.specimenGroups.data.length == 0">
+    <div class="panel panel-warning" ng-if="panel.specimenGroups.data.length == 0">
       <div class="panel-heading">
-        No specimen groups have been defined for this study yet.
+        Specimen groups have not been defined for this study yet.
       </div>
     </div>
     <p ng-if="panel.specimenGroups.data.length != 0">
@@ -18,8 +18,7 @@
   <table ng-show="panel.specimenGroups.data.length != 0"
          class="table table-hover"
          ng-table="panel.specimenGroups.tableParams">
-    <tr ng-repeat="specimenGroup in $data"
-        ng-class="{'active': user.$selected}">
+    <tr ng-repeat="specimenGroup in $data">
       <td data-title="'Name'" sortable="'name'">
         {{specimenGroup.name}}
       </td>
