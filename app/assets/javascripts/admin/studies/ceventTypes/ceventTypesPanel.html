@@ -1,0 +1,54 @@
+<!-- COLLECTION EVENT TYPES -->
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      {{ceventTypesPanel.title}}
+      <add-button on-add="ceventTypesPanel.add(study)"></add-button>
+      <a data-toggle="collapse"
+         data-parent="#accordion"
+         data-target="#collapseCeventTypes"
+         ng-click="ceventTypesPanel.togglePanel()">
+        <i class="glyphicon"
+           ng-class="{'glyphicon-chevron-down': ceventTypesPanel.panelOpen, 'glyphicon-chevron-right': !ceventTypesPanel.panelOpen}"></i>
+      </a>
+    </h3>
+  </div>
+  <div id="collapseCeventTypes" class="panel-collapse collapse in">
+    <div class="panel-body">
+      <p>{{ceventTypesPanel.header}}</p>
+      <div class="panel panel-warning" ng-if="ceventTypesPanel.data.length == 0">
+        <div class="panel-heading">
+          Collection event types have not been defined for this study yet.
+        </div>
+      </div>
+      <p ng-if="ceventTypesPanel.data.length != 0">
+        The following collection event types have been defined:
+      </p>
+    </div>
+    <table ng-show="ceventTypesPanel.data.length != 0"
+           class="table table-condensed table-hover"
+           ng-table="ceventTypesPanel.tableParams">
+      <tr ng-repeat="ceventType in $data">
+        <td data-title="'Name'" sortable="'name'">
+          {{ceventType.name}}
+        </td>
+        <td data-title="'Specimen Groups'">
+          {{cetSgNames[ceventType.id].join(", ")}}
+        </td>
+        <td data-title="'Recurring'" sortable="'recurring'">
+          {{ceventType.recurring ? 'Y' : 'N'}}
+        </td>
+        <td data-title="'Description'" sortable="'description'">
+          {{ceventType.description === null ? "" : ceventType.description | truncate:40}}
+        </td>
+        <td>
+          <info-update-remove-buttons
+              on-info="ceventTypesPanel.information(ceventType)"
+              on-update="ceventTypesPanel.update(ceventType)"
+              on-remove="ceventTypesPanel.remove(ceventType)">
+          </info-update-remove-buttons>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>

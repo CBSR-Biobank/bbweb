@@ -19,7 +19,7 @@ define(['angular'], function(angular) {
      * Prticipant Annotation Type Add
      */
     $stateProvider.state('admin.studies.study.participants.annotTypeAdd', {
-      url: '/participant/annottype/add',
+      url: '/annottype/add',
       resolve: {
         user: userResolve.user,
         annotType: ['study', function(study) {
@@ -48,7 +48,7 @@ define(['angular'], function(angular) {
      * Prticipant Annotation Type Update
      */
     $stateProvider.state('admin.studies.study.participants.annotTypeUpdate', {
-      url: '/participant/annottype/update/{annotTypeId}',
+      url: '/annottype/update/{annotTypeId}',
       resolve: {
         user: userResolve.user,
         annotType: [

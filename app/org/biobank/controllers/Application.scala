@@ -23,37 +23,6 @@ object Application extends Controller with Security {
     Ok(views.html.index())
   }
 
-  /**
-    * Returns the JavaScript router that the client can use for "type-safe" routes.
-    * @param varName The name of the global variable, defaults to `jsRoutes`
-    */
-  def jsRoutes(varName: String = "jsRoutes") = Action { implicit request =>
-    Ok(
-      Routes.javascriptRouter(varName)(
-        routes.javascript.Application.login,
-        routes.javascript.Application.logout,
-        routes.javascript.UserController.authUser,
-        routes.javascript.UserController.user,
-        routes.javascript.UserController.addUser,
-        routes.javascript.UserController.updateUser,
-        routes.javascript.UserController.removeUser,
-        org.biobank.controllers.study.routes.javascript.StudyController.list,
-        org.biobank.controllers.study.routes.javascript.StudyController.query,
-        org.biobank.controllers.study.routes.javascript.StudyController.add,
-        org.biobank.controllers.study.routes.javascript.StudyController.update,
-        org.biobank.controllers.study.routes.javascript.StudyController.enable,
-        org.biobank.controllers.study.routes.javascript.StudyController.disable,
-        org.biobank.controllers.study.routes.javascript.StudyController.retire,
-        org.biobank.controllers.study.routes.javascript.StudyController.unretire,
-        org.biobank.controllers.study.routes.javascript.StudyController.valueTypes,
-        org.biobank.controllers.study.routes.javascript.StudyController.anatomicalSourceTypes,
-        org.biobank.controllers.study.routes.javascript.StudyController.specimenTypes,
-        org.biobank.controllers.study.routes.javascript.StudyController.preservTypes,
-        org.biobank.controllers.study.routes.javascript.StudyController.preservTempTypes
-      )
-    ).as(JAVASCRIPT)
-  }
-
   /** Used for obtaining the email and password from the HTTP login request */
   case class LoginCredentials(email: String, password: String)
 

@@ -79,12 +79,6 @@ PUT     /users/activate/:id                    org.biobank.controllers.UserContr
 PUT     /users/lock/:id                        org.biobank.controllers.UserController.lockUser(id)
 PUT     /users/unlock/:id                      org.biobank.controllers.UserController.unlockUser(id)
 
-# JavaScript routes object
-GET     /jsroutes.js                           org.biobank.controllers.Application.jsRoutes()
-
-# Routes used by Angular
-# ~~~~
-
 # Authentication
 POST    /login                                 org.biobank.controllers.Application.login()
 POST    /logout                                org.biobank.controllers.Application.logout()

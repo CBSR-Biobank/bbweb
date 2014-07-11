@@ -9,13 +9,21 @@ define(['angular', 'common'], function(angular) {
   /**
    * Service to acccess studies.
    */
-  mod.factory('StudyService', ['$http', 'playRoutes', function($http, playRoutes) {
+  mod.factory('StudyService', ['$http', function($http) {
+    var changeStatus = function(status, study) {
+        var cmd = {
+          id: study.id,
+          expectedVersion: study.version
+        };
+        return $http.post('/studies/' + status, cmd);
+    };
+
     return {
       list : function() {
-        return playRoutes.controllers.study.StudyController.list().get();
+        return $http.get('/studies');
       },
       query: function(id) {
-        return playRoutes.controllers.study.StudyController.query(id).get();
+        return $http.get('/studies/' + id);
       },
       addOrUpdate: function(study) {
         var cmd = {
@@ -27,10 +35,22 @@ define(['angular', 'common'], function(angular) {
           cmd.id = study.id;
           cmd.expectedVersion = study.version;
 
-          return playRoutes.controllers.study.StudyController.update(study.id).put(cmd);
+          return $http.put('/studies/' + study.id, cmd);
         } else {
-          return playRoutes.controllers.study.StudyController.add().post(cmd);
+          return $http.post('/studies', cmd);
         }
+      },
+      enable: function(study) {
+        return changeStatus('enabled', study);
+      },
+      disable: function(study) {
+        return changeStatus('disabled', study);
+      },
+      retire: function(study) {
+        return changeStatus('retire', study);
+      },
+      unretire: function(study) {
+        return changeStatus('unretire', study);
       }
     };
   }]);

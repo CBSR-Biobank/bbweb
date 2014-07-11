@@ -1,0 +1,52 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      {{specimenGroupsPanel.title}}
+      <a data-toggle="collapse"
+         data-target="#collapseSpecimenGroups"
+         ng-click="specimenGroupsPanel.togglePanel()">
+        <i class="glyphicon"
+           ng-class="{'glyphicon-chevron-down': specimenGroupsPanel.panelOpen, 'glyphicon-chevron-right': !specimenGroupsPanel.panelOpen}"></i>
+      </a>
+      <add-button on-add="specimenGroupsPanel.add(study)"></add-button>
+    </h3>
+  </div>
+  <div id="collapseSpecimenGroups" class="panel-collapse collapse in">
+    <div class="panel-body">
+      <p>{{specimenGroupsPanel.header}}</p>
+      <div class="panel panel-warning" ng-if="specimenGroupsPanel.data.length == 0">
+        <div class="panel-heading">
+          Specimen groups have not been defined for this study yet.
+        </div>
+      </div>
+      <p ng-if="specimenGroupsPanel.data.length != 0">
+        The following specimen groups have been defined:
+      </p>
+    </div>
+    <table ng-show="specimenGroupsPanel.data.length != 0"
+           class="table table-hover table-condensed"
+           ng-table="specimenGroupsPanel.tableParams">
+      <tr ng-repeat="specimenGroup in $data">
+        <td data-title="'Name'" sortable="'name'">
+          {{specimenGroup.name}}
+        </td>
+        <td data-title="'Anatomical Source'" sortable="'anatomicalSourceType'">
+          {{specimenGroup.anatomicalSourceType}}
+        </td>
+        <td data-title="'Specimen Type'" sortable="'specimenType'">
+          {{specimenGroup.specimenType}}
+        </td>
+        <td data-title="'Description'" sortable="'description'">
+          {{specimenGroup.description === null ? "" : specimenGroup.description | truncate:40}}
+        </td>
+        <td>
+          <info-update-remove-buttons
+              on-info="specimenGroupsPanel.information(specimenGroup)"
+              on-update="specimenGroupsPanel.update(specimenGroup)"
+              on-remove="specimenGroupsPanel.remove(specimenGroup)">
+          </info-update-remove-buttons>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>

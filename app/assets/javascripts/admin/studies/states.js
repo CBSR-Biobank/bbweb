@@ -180,8 +180,8 @@ define(['angular'], function(angular) {
         },
         views: {
           'studyDetails': {
-            templateUrl: '/assets/javascripts/admin/studies/studySummaryPane.html',
-            controller: 'StudySummaryCtrl'
+            templateUrl: '/assets/javascripts/admin/studies/studySummaryTab.html',
+            controller: 'StudySummaryTabCtrl'
           }
         },
         data: {
@@ -206,8 +206,8 @@ define(['angular'], function(angular) {
         },
         views: {
           'studyDetails': {
-            template: '<ng-include src="\'/assets/javascripts/admin/studies/annotationTypesPane.html\'"></ng-include>',
-            controller: 'ParticipantsPaneCtrl'
+            template: '<ng-include src="\'/assets/javascripts/admin/studies/annotationTypesPanel.html\'"></ng-include>',
+            controller: 'ParticipantsTabCtrl'
           }
         },
         data: {
@@ -232,8 +232,8 @@ define(['angular'], function(angular) {
         },
         views: {
           'studyDetails': {
-            templateUrl: '/assets/javascripts/admin/studies/studySpecimensPane.html',
-            controller: 'SpecimensPaneCtrl'
+            templateUrl: '/assets/javascripts/admin/studies/studySpecimensTab.html',
+            controller: 'SpecimensTabCtrl'
           }
         },
         data: {
@@ -272,8 +272,8 @@ define(['angular'], function(angular) {
         },
         views: {
           'studyDetails': {
-            templateUrl: '/assets/javascripts/admin/studies/studyCollectionPanes.html',
-            controller: 'CollectionPaneCtrl'
+            templateUrl: '/assets/javascripts/admin/studies/studyCollectionTab.html',
+            controller: 'CollectionTabCtrl'
           }
         },
         data: {
@@ -312,8 +312,8 @@ define(['angular'], function(angular) {
         },
         views: {
           'studyDetails': {
-            templateUrl: '/assets/javascripts/admin/studies/studyProcessingPanes.html',
-            controller: 'ProcessingPaneCtrl'
+            templateUrl: '/assets/javascripts/admin/studies/studyProcessingTab.html',
+            controller: 'ProcessingTabCtrl'
           }
         },
         data: {

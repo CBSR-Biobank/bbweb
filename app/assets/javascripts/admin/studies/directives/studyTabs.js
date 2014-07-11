@@ -12,7 +12,7 @@ define(['angular'], function(angular) {
   //     return {
   //       require: '^tab',
   //       restrict: 'E',
-  //       templateUrl: '/assets/javascripts/study/studySummaryPane.html'
+  //       templateUrl: '/assets/javascripts/study/studySummaryTab.html'
   //     };
   //   })
 

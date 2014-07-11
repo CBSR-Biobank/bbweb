@@ -6,12 +6,14 @@ define(['angular', 'common'], function(angular) {
 
   var mod = angular.module('user.services', ['biobank.common', 'ngCookies']);
 
-  mod.factory('userService', ['$http', '$q', 'playRoutes', '$cookies', '$log', function($http, $q, playRoutes, $cookies, $log) {
+  mod.factory('userService', [
+    '$http', '$q', '$cookies', '$log',
+    function($http, $q, $cookies, $log) {
     var user, token = $cookies['XSRF-TOKEN'];
 
     /* If the token is assigned, check that the token is still valid on the server */
     if (token) {
-      playRoutes.controllers.UserController.authUser().get()
+      $http.get('/authuser')
         .success(function(data) {
           $log.info('Welcome back, ' + data.name);
           user = data;
@@ -28,9 +30,9 @@ define(['angular', 'common'], function(angular) {
     return {
       loginUser: function(credentials) {
         // FIXME: handle login failure
-        return playRoutes.controllers.Application.login().post(credentials).then(function(response) {
+        return $http.post('/login', credentials).then(function(response) {
           token = response.data.token;
-          return playRoutes.controllers.UserController.authUser().get();
+          return $http.get('/authuser');
         }).then(function(response) {
           user = response.data;
           $log.info('Welcome ' + user.name);
@@ -43,7 +45,7 @@ define(['angular', 'common'], function(angular) {
         token = undefined;
         user = undefined;
         var dummyObj = {};
-        return playRoutes.controllers.Application.logout().post().then(function(response) {
+        return $http.post('/logout').then(function(response) {
           $log.info("Good bye ");
         });
       },
@@ -58,7 +60,7 @@ define(['angular', 'common'], function(angular) {
    * logged in. This also adds the contents of the objects as a dependency of the controller.
    */
   mod.constant('userResolve', {
-    user: ['$cookies', '$q', 'playRoutes', 'userService', function($cookies, $q, playRoutes, userService) {
+    user: ['$cookies', '$q', '$http', 'userService', function($cookies, $q, $http, userService) {
       var token;
       var deferred = $q.defer();
       var user = userService.getUser();
@@ -69,7 +71,7 @@ define(['angular', 'common'], function(angular) {
         token = $cookies['XSRF-TOKEN'];
 
         if (token) {
-          playRoutes.controllers.UserController.authUser().get()
+          $http.get('/authuser')
             .success(function(data) {
               deferred.resolve(data);
             })
