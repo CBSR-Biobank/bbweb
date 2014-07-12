@@ -206,7 +206,7 @@ define(['angular'], function(angular) {
         },
         views: {
           'studyDetails': {
-            template: '<ng-include src="\'/assets/javascripts/admin/studies/annotationTypesPanel.html\'"></ng-include>',
+            template: '<participants-annot-types-panel></participants-annot-types-panel>',
             controller: 'ParticipantsTabCtrl'
           }
         },
@@ -232,7 +232,7 @@ define(['angular'], function(angular) {
         },
         views: {
           'studyDetails': {
-            templateUrl: '/assets/javascripts/admin/studies/studySpecimensTab.html',
+            template: '<specimen-groups-panel></specimen-groups-panel>',
             controller: 'SpecimensTabCtrl'
           }
         },
@@ -306,6 +306,13 @@ define(['angular'], function(angular) {
             'SpcLinkTypeService', 'study',
             function(SpcLinkTypeService, study) {
               return SpcLinkTypeService.getAll(study.id).then(function(response) {
+                return response.data;
+              });
+            }],
+          specimenGroups: [
+            'SpecimenGroupService', 'study',
+            function(SpecimenGroupService, study) {
+              return SpecimenGroupService.getAll(study.id).then(function(response) {
                 return response.data;
               });
             }]

@@ -4,19 +4,36 @@ define(['angular'], function(angular) {
 
   var mod = angular.module('admin.studies.helpers', []);
 
-  /**
-   * Used to sort a list of studies. Returns the comparison of names of the two studies.
-   */
-  mod.service('studyCompareService', function() {
-    this.compare = function (a, b) {
-      if (a.name < b.name) {
-        return -1;
-      } else if (a.name > b.name) {
-        return 1;
-      }
-      return 0;
-    };
-  });
+  mod.service('studyUtilsService', [
+    '$state', 'modalService', function ($state, modalService) {
+      return {
+        /**
+         * Used to sort a list of objects with a 'name'field.
+         */
+        compareByName: function (a, b) {
+          if (a.name < b.name) {
+            return -1;
+          } else if (a.name > b.name) {
+            return 1;
+          }
+          return 0;
+        },
+
+        /**
+         * Returns an associative array with the keys being the value of fieldName.
+         */
+        asAssocArray: function(objs, fieldName) {
+          var result = [];
+          objs.forEach(function (obj) {
+            if (typeof obj[fieldName] == 'undefined') {
+              throw new Error("getFieldsAsArray: no such field: " + fieldName);
+            }
+            result[obj[fieldName]] = obj;
+          });
+          return result;
+        }
+      };
+    }]);
 
   mod.service('panelTableService', ['$filter', 'ngTableParams', function ($filter, ngTableParams) {
     this.getTableParams = function(data) {

@@ -24,8 +24,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", "x", 1, Option(BigDecimal(1.0)), "x"))
-      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", "x", false))
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
@@ -59,8 +59,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = !cet.recurring
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", "x", 1, Option(BigDecimal(1.0)), "x"))
-      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", "x", false))
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val cet2 = cet.update(
         cet.versionOption, org.joda.time.DateTime.now, name, description, recurring,
@@ -96,8 +96,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", "x", 1, Option(BigDecimal(1.0)), "x"))
-      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", "x", false))
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
@@ -116,8 +116,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", "x", 1, Option(BigDecimal(1.0)), "x"))
-      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", "x", false))
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
@@ -136,8 +136,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", "x", 1, Option(BigDecimal(1.0)), "x"))
-      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", "x", false))
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
@@ -156,8 +156,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", "x", 1, Option(BigDecimal(1.0)),"x"))
-      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", "x", false))
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
@@ -185,8 +185,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       var description: Option[String] = Some(null)
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", "x", 1, Option(BigDecimal(1.0)),"x"))
-      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", "x", false))
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
@@ -214,8 +214,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("", "x", 1, Option(BigDecimal(1.0)),"x"))
-      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", "x", false))
+        CollectionEventTypeSpecimenGroupData("", 1, Option(BigDecimal(1.0))))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
@@ -235,8 +235,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", "x", -1, Option(BigDecimal(1.0)),"x"))
-      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", "x", false))
+        CollectionEventTypeSpecimenGroupData("x", -1, Option(BigDecimal(1.0))))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
@@ -255,8 +255,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", "x", 1, Option(BigDecimal(-1.0)),"x"))
-      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", "x", false))
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(-1.0))))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
@@ -275,8 +275,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", "x", 1, Option(BigDecimal(1.0)),"x"))
-      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("", "x", false))
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("", false))
 
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
@@ -296,8 +296,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       val description = some(nameGenerator.next[CollectionEventType])
       val recurring = false
       val specimenGroupData = List(
-        CollectionEventTypeSpecimenGroupData("x", "x", 1, Option(BigDecimal(1.0)),"x"))
-      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("1", "x", false))
+        CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
+      val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("1", false))
 
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,

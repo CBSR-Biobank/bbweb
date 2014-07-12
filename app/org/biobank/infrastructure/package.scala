@@ -17,9 +17,6 @@ package infrastructure {
     /** @param annotationTypeId The ID of the corresponding  annotation type. */
     val annotationTypeId: String
 
-    /** @param name A copy of the name of the corresponding annotation type. Read only. */
-    val name: String
-
     /** When true, then a value for this annotation type is required when the collection event is entered.
       */
     val required: Boolean
@@ -28,14 +25,12 @@ package infrastructure {
   /** Used to define annotation types to be used by a [[org.biobank.domain.study.CollectionEventType]]. */
   case class CollectionEventTypeAnnotationTypeData(
     annotationTypeId: String,
-    name: String,
     required: Boolean)
       extends AnnotationTypeData
 
   /** Used to define annotation types to be used by a [[org.biobank.domain.study.SpecimenLinkType]]. */
   case class SpecimenLinkTypeAnnotationTypeData(
     annotationTypeId: String,
-    name: String,
     required: Boolean)
       extends AnnotationTypeData
 
@@ -57,9 +52,7 @@ package infrastructure {
     */
   case class CollectionEventTypeSpecimenGroupData(
     specimenGroupId: String,
-    name: String,
     maxCount: Int,
-    amount: Option[BigDecimal],
-    units: String)
+    amount: Option[BigDecimal])
 
 }

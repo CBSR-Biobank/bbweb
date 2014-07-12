@@ -1,45 +1,184 @@
 <div class="page-header"><h1>{{study.name}} <small>{{title}}</small></h1></div>
 <div class="clearfix">
   <form class="form-horizontal"
-        name="ptForm"
+        name="spcLinkTypeForm"
         novalidate>
 
-    <!-- NAME -->
-    <div class="form-group" ng-class="{ 'has-error' : ptForm.name.$invalid && !ptForm.name.$pristine }">
-      <label for="name" class="col-sm-2 control-label">Name</label>
-      <div class="col-sm-10">
-        <input name="name"
-               type="text"
-               class="form-control"
-               ng-model="processingType.name"
-               ng-minlength="2"
-               placeholder="A short name for the specimen link type"
-               required />
+    <!-- PROCESSING TYPE -->
+    <div class="form-group">
+      <label for="description" class="col-sm-3 control-label">Processing Type</label>
+      <div class="col-sm-9">
+        <select class="form-control"
+                name="procTypeId"
+                ng-model="spcLinkType.processingTypeId"
+                ng-options="pt.id as pt.name for pt in processingTypes"
+                required>
+          <option value="">-- make a selection --</option>
+        </select>
       </div>
-      <div class="col-sm-offset-2 col-sm-10">
-        <p class="help-block" ng-show="ptForm.name.$error.minlength">Name is too short.</p>
+    </div>
+    <div class="col-sm-offset-3 col-sm-9">
+      <p class="help-block"
+         ng-show="spcLinkTypeForm.procTypeName.$error.required && !spcLinkTypeForm.procTypeName.$pristine">
+        Please select a processing type
+      </p>
+    </div>
+
+    <!-- INPUT COUNT -->
+    <div class="form-group">
+      <label for="description" class="col-sm-3 control-label">Input count</label>
+      <div class="col-sm-2">
+        <input type="number"
+               min="1"
+               name="inputCount"
+               class="form-control input-sm"
+               ng-model="spcLinkType.inputCount"
+               placeholder="count"
+               integer />
+        </div>
+    </div>
+    <div class="col-sm-offset-3 col-sm-9">
+      <p class="help-block"
+         ng-show="spcLinkTypeForm.inputCount.$error.integer || spcLinkTypeForm.inputCount.$error.min">
+        Input count should be a positive an integer number greater than 1
+      </p>
+    </div>
+
+    <!-- OUTPUT COUNT -->
+    <div class="form-group">
+      <label for="description" class="col-sm-3 control-label">Output count</label>
+        <div class="col-sm-2">
+          <input type="number"
+                 min="1"
+                 name="outputCount"
+                 class="form-control input-sm"
+                 ng-model="spcLinkType.outputCount"
+                 placeholder="count"
+                 integer />
+        </div>
+    </div>
+    <div class="col-sm-offset-3 col-sm-9">
+      <p class="help-block" ng-show="spcLinkTypeForm.outputCount.$error.integer">
+        Output count should be a positive an integer number greater than 1
+      </p>
+    </div>
+
+    <!-- INPUT SPECIMEN GROUP -->
+    <div class="form-group">
+      <label for="description" class="col-sm-3 control-label">Input Specimen Group</label>
+      <div class="col-sm-9">
+        <select class="form-control"
+                name="inputGroupName"
+                ng-model="spcLinkType.inputGroupId"
+                ng-options="sg.id as sg.name for sg in specimenGroups"
+                required>
+          <option value="">-- make a selection --</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-sm-offset-3 col-sm-9">
+      <p class="help-block"
+         ng-show="spcLinkTypeForm.inputGroupName.$error.required && !spcLinkTypeForm.inputGroupName.$pristine">
+        Please select a specimen group
+      </p>
+    </div>
+
+    <!-- OUTPUT SPECIMEN GROUP -->
+    <div class="form-group">
+      <label for="description" class="col-sm-3 control-label">Output Specimen Group</label>
+      <div class="col-sm-9">
+        <select class="form-control"
+                name="outputGroupName"
+                ng-model="spcLinkType.outuptGroupId"
+                ng-options="sg.id as sg.name for sg in specimenGroups"
+                required>
+          <option value="">-- make a selection --</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-sm-offset-3 col-sm-9">
+      <p class="help-block"
+         ng-show="spcLinkTypeForm.outputGroupName.$error.required && !spcLinkTypeForm.outputGroupName.$pristine">
+        Please select a specimen group
+      </p>
+    </div>
+
+    <!-- INPUT CONTAINER TYPE -->
+    <div class="form-group">
+      <label for="description" class="col-sm-3 control-label">Input Container Type</label>
+      <div class="col-sm-9">
+        <select class="form-control"
+                name="inputContainertypeName"
+                ng-model="spcLinkType.inputContainertypeName"
+                ng-options="ct for ct in containerTypeNames">
+          <option value="">-- make a selection --</option>
+        </select>
       </div>
     </div>
 
-    <!-- DESCRIPTION -->
+    <!-- INPUT CONTAINER TYPE -->
     <div class="form-group">
-      <label for="description" class="col-sm-2 control-label">Description</label>
-      <div class="col-sm-10">
-        <textarea name="description"
-                  class="form-control"
-                  rows="10"
-                  ng-model="processingType.description"
-                  placeholder="A description of the specimen link type (optional)" />
+      <label for="description" class="col-sm-3 control-label">Output Container Type</label>
+      <div class="col-sm-9">
+        <select class="form-control"
+                name="outputContainertypeName"
+                ng-model="spcLinkType.outputContainertypeName"
+                ng-options="ct for ct in containerTypeNames">
+          <option value="">-- make a selection --</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ANNOTATION TYPE DATA -->
+    <div class="form-group" ng-repeat="atData in spcLinkType.annotationTypeData track by $index">
+      <ng-form name="atSubForm">
+        <div class="col-sm-2 control-label">
+          <label>Annotation Type {{$index + 1}}</label>
+        </div>
+        <div class="col-sm-3">
+          <select class="form-control"
+                  name="annotTypeName"
+                  ng-model="spcLinkType.annotationTypeData[$index].name"
+                  ng-options="annotType for annotType in annotTypeNames"
+                  required>
+            <option value="">-- make a selection --</option>
+          </select>
+        </div>
+        <div class="col-sm-2">
+          <input name="required" type="checkbox" ng-model="spcLinkType.annotationTypeData[$index].required"/> Required
+        </div>
+        <div class="col-sm-1">
+          <button class="btn btn-xs btn-warning"
+                  ng-click="form.removeAnnotType(atData)">
+            <i class="glyphicon glyphicon-minus"></i> Remove
+          </button>
+        </div>
+        <div class="col-sm-offset-3 col-sm-9">
+          <p class="help-block" ng-show="atSubForm.name.$error.required && !atSubForm.name.$pristine">
+            Please select an annotation type
+          </p>
+        </div>
+      </ng-form>
+    </div>
+
+    <!-- ANNOTATION TYPE DATA ADD -->
+    <div class="form-group">
+      <div class="col-sm-2">
+        <button class="btn btn-sm btn-primary pull-right"
+                ng-disabled="annotTypeNames == 0"
+                ng-click="form.addAnnotType()">
+           Add annotation type <i class="glyphicon glyphicon-plus"></i>
+        </button>
       </div>
     </div>
 
     <!-- BUTTONS  -->
     <div class="form-group">
-      <div class="col-sm-offset-2 col-sm-10">
+      <div class="col-sm-offset-3 col-sm-9">
         <button class="btn btn-primary"
-                ng-disabled="ptForm.$invalid"
+                ng-disabled="form.$invalid"
                 ng-click="form.submit(processingType)">Submit</button>
-        <button class="btn" ng-click="form.cancel()">Cancel</button>
+        <button class="btn" ng-click="spcLinkTypeForm.cancel()">Cancel</button>
       </div>
     </div>
   </form>

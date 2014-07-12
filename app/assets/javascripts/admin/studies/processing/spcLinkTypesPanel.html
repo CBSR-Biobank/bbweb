@@ -2,31 +2,28 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
-      {{spcLinkTypesPanel.title}}
-      <a data-toggle="collapse"
-         data-target="#collapseSpcLinkTypes"
-         ng-click="spcLinkTypesPanel.togglePanel()">
-        <i class="glyphicon"
-           ng-class="{'glyphicon-chevron-down': spcLinkTypesPanel.panelOpen, 'glyphicon-chevron-right': !spcLinkTypesPanel.panelOpen}"></i>
-      </a>
-      <add-button on-add="spcLinkTypesPanel.add(study)"></add-button>
+      {{panel.spcLinkTypes.title}}
+      <panel-buttons on-add="panel.spcLinkTypes.add(study)"
+                     add-button-title="add specimen link type"
+                     collapse-data-target="#collapseSpcLinkTypes">
+      </panel-buttons>
     </h3>
   </div>
   <div id="collapseSpcLinkTypes" class="panel-collapse collapse in">
     <div class="panel-body">
-      <p>{{spcLinkTypesPanel.header}}</p>
-      <div class="panel panel-warning" ng-if="spcLinkTypesPanel.data.length == 0">
+      <p>{{panel.spcLinkTypes.header}}</p>
+      <div class="panel panel-warning" ng-if="panel.spcLinkTypes.data.length == 0">
         <div class="panel-heading">
           Specimen link types have not been defined for this study yet.
         </div>
       </div>
-      <p ng-if="spcLinkTypesPanel.data.length != 0">
+      <p ng-if="panel.spcLinkTypes.data.length != 0">
         The following specimen link types have been defined:
       </p>
     </div>
-    <table ng-show="spcLinkTypesPanel.data.length != 0"
+    <table ng-show="panel.spcLinkTypes.data.length != 0"
            class="table table-condensed table-hover"
-           ng-table="spcLinkTypesPanel.tableParams">
+           ng-table="panel.spcLinkTypes.tableParams">
       <tr ng-repeat="spcLinkType in $data">
         <td data-title="'Name'" sortable="'name'">
           {{spcLinkType.name}}
@@ -42,9 +39,9 @@
         </td>
         <td>
           <info-update-remove-buttons
-              on-info="spcLinkTypesPanel.information(spcLinkType)"
-              on-update="spcLinkTypesPanel.update(spcLinkType)"
-              on-remove="spcLinkTypesPanel.remove(spcLinkType)">
+              on-info="panel.spcLinkTypes.information(spcLinkType)"
+              on-update="panel.spcLinkTypes.update(spcLinkType)"
+              on-remove="panel.spcLinkTypes.remove(spcLinkType)">
           </info-update-remove-buttons>
         </td>
       </tr>

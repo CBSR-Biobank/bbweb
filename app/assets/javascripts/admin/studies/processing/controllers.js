@@ -59,11 +59,26 @@ define(['angular', 'common'], function(angular, common) {
    * Add Specimen Link Type
    */
   mod.controller('SpcLinkTypeAddCtrl', [
-    '$scope', 'spcLinkTypeEditService', 'study', 'spcLinkType',
-    function ($scope, spcLinkTypeEditService, study, spcLinkType) {
-      $scope.title =  "Add Spcecimen Link Type";
-      $scope.study = study;
-      $scope.spcLinkType = spcLinkType;
+    '$scope',
+    'spcLinkTypeEditService',
+    'study',
+    'spcLinkType',
+    'processingTypes',
+    'annotTypes',
+    'specimenGroups',
+    function ($scope,
+              spcLinkTypeEditService,
+              study,
+              spcLinkType,
+              processingTypes,
+              annotTypes,
+              specimenGroups) {
+      $scope.title           =  "Add Spcecimen Link Type";
+      $scope.study           = study;
+      $scope.spcLinkType     = spcLinkType;
+      $scope.processingTypes = processingTypes;
+      $scope.annotTypes      = annotTypes;
+      $scope.specimenGroups  = specimenGroups;
       spcLinkTypeEditService.edit($scope);
     }]);
 
@@ -71,11 +86,25 @@ define(['angular', 'common'], function(angular, common) {
    * Update Specimen Link Type
    */
   mod.controller('SpcLinkTypeUpdateCtrl', [
-    '$scope', 'spcLinkTypeEditService', 'study', 'spcLinkType',
-    function ($scope, spcLinkTypeEditService, study, spcLinkType) {
-      $scope.title =  "Update Spcecimen Link Type";
-      $scope.study = study;
-      $scope.spcLinkType = spcLinkType;
+    '$scope',
+    'spcLinkTypeEditService',
+    'study',
+    'spcLinkType',
+    'processingTypes',
+    'annotTypes',
+    'specimenGroups',
+    function ($scope,
+              spcLinkTypeEditService,
+              study,
+              spcLinkType,
+              processingTypes,
+              annotTypes,specimenGroups) {
+      $scope.title           = "Update Spcecimen Link Type";
+      $scope.study           = study;
+      $scope.spcLinkType     = spcLinkType;
+      $scope.processingTypes = processingTypes;
+      $scope.annotTypes      = annotTypes;
+      $scope.specimenGroups  = specimenGroups;
       spcLinkTypeEditService.edit($scope);
     }]);
 

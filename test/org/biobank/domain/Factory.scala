@@ -150,7 +150,7 @@ trait FactoryComponent {
     def createCollectionEventTypeSpecimenGroupData: CollectionEventTypeSpecimenGroupData = {
       val sg = defaultSpecimenGroup
       val ceventTypeSpecimenGroup = CollectionEventTypeSpecimenGroupData(
-        sg.id.id, sg.name, 1, Some(BigDecimal(1.0)), sg.units)
+        sg.id.id, 1, Some(BigDecimal(1.0)))
       domainObjects = domainObjects + (classOf[CollectionEventTypeSpecimenGroupData] -> ceventTypeSpecimenGroup)
       ceventTypeSpecimenGroup
     }
@@ -158,7 +158,7 @@ trait FactoryComponent {
     def createCollectionEventTypeAnnotationTypeData: CollectionEventTypeAnnotationTypeData = {
       val annotationType = defaultCollectionEventAnnotationType
       val ceventTypeAnnotationType = CollectionEventTypeAnnotationTypeData(
-        annotationType.id.id, annotationType.name, true)
+        annotationType.id.id, true)
       domainObjects = domainObjects +
       (classOf[CollectionEventTypeAnnotationTypeData] -> ceventTypeAnnotationType)
       ceventTypeAnnotationType
@@ -259,7 +259,7 @@ trait FactoryComponent {
     def createSpecimenLinkTypeAnnotationTypeData: SpecimenLinkTypeAnnotationTypeData = {
       val annotationType = defaultSpecimenLinkAnnotationType
       val specimenLinkTypeAnnotationType = SpecimenLinkTypeAnnotationTypeData(
-        annotationType.id.id, annotationType.name, true)
+        annotationType.id.id, true)
       domainObjects = domainObjects +
       (classOf[SpecimenLinkTypeAnnotationTypeData] -> specimenLinkTypeAnnotationType)
       specimenLinkTypeAnnotationType

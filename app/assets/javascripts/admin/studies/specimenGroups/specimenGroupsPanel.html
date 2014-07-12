@@ -1,31 +1,28 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
-      {{specimenGroupsPanel.title}}
-      <a data-toggle="collapse"
-         data-target="#collapseSpecimenGroups"
-         ng-click="specimenGroupsPanel.togglePanel()">
-        <i class="glyphicon"
-           ng-class="{'glyphicon-chevron-down': specimenGroupsPanel.panelOpen, 'glyphicon-chevron-right': !specimenGroupsPanel.panelOpen}"></i>
-      </a>
-      <add-button on-add="specimenGroupsPanel.add(study)"></add-button>
+      {{panel.specimenGroups.title}}
+      <panel-buttons on-add="panel.specimenGroups.add(study)"
+                     add-button-title="add specimen group"
+                     collapse-data-target="#collapseSpecimenGroups">
+      </panel-buttons>
     </h3>
   </div>
   <div id="collapseSpecimenGroups" class="panel-collapse collapse in">
     <div class="panel-body">
-      <p>{{specimenGroupsPanel.header}}</p>
-      <div class="panel panel-warning" ng-if="specimenGroupsPanel.data.length == 0">
+      <p>{{panel.specimenGroups.header}}</p>
+      <div class="panel panel-warning" ng-if="panel.specimenGroups.data.length == 0">
         <div class="panel-heading">
           Specimen groups have not been defined for this study yet.
         </div>
       </div>
-      <p ng-if="specimenGroupsPanel.data.length != 0">
+      <p ng-if="panel.specimenGroups.data.length != 0">
         The following specimen groups have been defined:
       </p>
     </div>
-    <table ng-show="specimenGroupsPanel.data.length != 0"
+    <table ng-show="panel.specimenGroups.data.length != 0"
            class="table table-hover table-condensed"
-           ng-table="specimenGroupsPanel.tableParams">
+           ng-table="panel.specimenGroups.tableParams">
       <tr ng-repeat="specimenGroup in $data">
         <td data-title="'Name'" sortable="'name'">
           {{specimenGroup.name}}
@@ -41,9 +38,9 @@
         </td>
         <td>
           <info-update-remove-buttons
-              on-info="specimenGroupsPanel.information(specimenGroup)"
-              on-update="specimenGroupsPanel.update(specimenGroup)"
-              on-remove="specimenGroupsPanel.remove(specimenGroup)">
+              on-info="panel.specimenGroups.information(specimenGroup)"
+              on-update="panel.specimenGroups.update(specimenGroup)"
+              on-remove="panel.specimenGroups.remove(specimenGroup)">
           </info-update-remove-buttons>
         </td>
       </tr>

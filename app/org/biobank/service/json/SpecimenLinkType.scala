@@ -27,7 +27,6 @@ object SpecimenLinkType {
 
   implicit val annotationTypeDataWrites: Writes[SpecimenLinkTypeAnnotationTypeData] = (
     (__ \ "annotationTypeId").write[String] and
-      (__ \ "name").write[String] and
       (__ \ "required").write[Boolean]
   )(unlift(SpecimenLinkTypeAnnotationTypeData.unapply))
 
@@ -50,7 +49,6 @@ object SpecimenLinkType {
 
   implicit val annotationTypeDataReads: Reads[SpecimenLinkTypeAnnotationTypeData] = (
     (__ \ "annotationTypeId").read[String](minLength[String](2)) and
-    (__ \ "name").read[String] and
       (__ \ "required").read[Boolean]
   )(SpecimenLinkTypeAnnotationTypeData)
 

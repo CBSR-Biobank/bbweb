@@ -339,7 +339,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val outputCount = 1
 
       val disabledStudy = factory.defaultDisabledStudy
-      val annotationTypeData = List(SpecimenLinkTypeAnnotationTypeData("", "x", false))
+      val annotationTypeData = List(SpecimenLinkTypeAnnotationTypeData("", false))
 
       val validation = SpecimenLinkType.create(
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,

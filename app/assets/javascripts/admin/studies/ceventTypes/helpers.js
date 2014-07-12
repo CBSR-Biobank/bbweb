@@ -1,5 +1,5 @@
 /** Common helpers */
-define(['angular'], function(angular) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
 
   var mod = angular.module('admin.studies.ceventTypes.helpers', ['admin.studies.helpers']);
@@ -142,25 +142,6 @@ define(['angular'], function(angular) {
         edit: function($scope) {
           $scope.form = {
             submit: function(ceventType) {
-              // fill in the 'specimenGroupId' field
-              $scope.ceventType.specimenGroupData.forEach(function (sgData) {
-                var specimenGroup = $filter('getByName')($scope.specimenGroups, sgData.name);
-                if (specimenGroup === null) {
-                  throw new Error("specimen group not found with name: " + sgData.name);
-                }
-                sgData.specimenGroupId = specimenGroup.id;
-                sgData.units = specimenGroup.units;
-              });
-
-              // fill in the 'annotationTypeId' field
-              $scope.ceventType.annotationTypeData.forEach(function (annotTypeData) {
-                var annotType = $filter('getByName')($scope.annotTypes, annotTypeData.name);
-                if (annotType === null) {
-                  throw new Error("annotation type not found with name: " + annotType.name);
-                }
-                annotTypeData.annotationTypeId = annotType.id;
-              });
-
               CeventTypeService.addOrUpdate(ceventType)
                 .success(function() {
                   $state.transitionTo(
@@ -206,17 +187,8 @@ define(['angular'], function(angular) {
             }
           };
 
-          $scope.specimenGroupNames = [];
-          $scope.specimenGroupUnits = {};
-          $scope.specimenGroups.forEach(function (sg) {
-            $scope.specimenGroupUnits[sg.name] = sg.units;
-            $scope.specimenGroupNames.push(sg.name);
-          });
-
-          $scope.annotTypeNames = [];
-          $scope.annotTypes.forEach(function (annotType) {
-            $scope.annotTypeNames.push(annotType.name);
-          });
+          // used to display the specimen group units label in the form
+          $scope.specimenGroupsById = _.indexBy($scope.specimenGroups, 'id');
         }
       };
     }]);

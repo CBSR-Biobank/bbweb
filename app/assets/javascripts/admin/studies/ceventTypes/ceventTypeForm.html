@@ -48,9 +48,9 @@
         </div>
         <div class="col-sm-3">
           <select class="form-control"
-                  name="name"
-                  ng-model="ceventType.specimenGroupData[$index].name"
-                  ng-options="sg for sg in specimenGroupNames"
+                  name="sgId"
+                  ng-model="ceventType.specimenGroupData[$index].specimenGroupId"
+                  ng-options="sg.id as sg.name for sg in specimenGroups | orderBy: 'name'"
                   required>
             <option value="">-- make a selection --</option>
           </select>
@@ -65,11 +65,13 @@
                  class="form-control input-sm"
                  ng-model="ceventType.specimenGroupData[$index].maxCount"
                  placeholder="max count"
+                 required
                  integer />
         </div>
         <div class="col-sm-1 control-label">
           <label class="small">
-          {{(specimenGroupUnits[sgData.name] ? specimenGroupUnits[sgData.name] : 'Amount') + ':'}}
+          {{(specimenGroupsById[sgData.specimenGroupId]
+                ? specimenGroupsById[sgData.specimenGroupId].units : 'Amount') + ':'}}
           </label>
         </div>
         <div class="col-sm-2">
@@ -79,6 +81,7 @@
                  class="form-control input-sm"
                  ng-model="ceventType.specimenGroupData[$index].amount"
                  placeholder="amount"
+                 required
                  smart-float />
         </div>
         <div class="col-sm-1">
@@ -89,19 +92,15 @@
           </button>
         </div>
         <div class="col-sm-offset-2 col-sm-10">
-          <p class="help-block" ng-show="sgSubForm.name.$error.required && !sgSubForm.name.$pristine">
+          <p class="help-block"
+             ng-show="sgSubForm.sgName.$error.required && !sgSubForm.sgName.$pristine">
             Please select a specimen group
           </p>
-          <p class="help-block" ng-show="sgSubForm.maxCount.$error.min">
+          <p class="help-block"
+             ng-show="sgSubForm.maxCount.$error.min || sgSubForm.maxCount.$error.integer">
             Max count should be a positive number greater than 1
           </p>
-          <p class="help-block" ng-show="sgSubForm.maxCount.$error.integer">
-            Max count should be a positive an integer number greater than 1
-          </p>
-          <p class="help-block" ng-show="sgSubForm.amount.$error.min">
-            Amount should be a positive floating point number
-          </p>
-          <p class="help-block" ng-show="sgSubForm.amount.$error.float">
+          <p class="help-block" ng-show="sgSubForm.amount.$error.float || sgSubForm.amount.$error.min">
             Amount should be a positive floating point number
           </p>
         </div>
@@ -126,8 +125,8 @@
         <div class="col-sm-3">
           <select class="form-control"
                   name="name"
-                  ng-model="ceventType.annotationTypeData[$index].name"
-                  ng-options="annotType for annotType in annotTypeNames"
+                  ng-model="ceventType.annotationTypeData[$index].id"
+                  ng-options="annotType.id as annotType.name for annotType in annotTypes | orderBy: 'name'"
                   required>
             <option value="">-- make a selection --</option>
           </select>

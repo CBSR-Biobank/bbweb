@@ -2,31 +2,28 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
-      {{processingTypesPanel.title}}
-      <a data-toggle="collapse"
-         data-target="#collapseProcessingTypes"
-         ng-click="processingTypesPanel.togglePanel()">
-        <i class="glyphicon"
-           ng-class="{'glyphicon-chevron-down': processingTypesPanel.panelOpen, 'glyphicon-chevron-right': !processingTypesPanel.panelOpen}"></i>
-      </a>
-      <add-button on-add="processingTypesPanel.add(study)"></add-button>
+      {{panel.processingTypes.title}}
+      <panel-buttons on-add="panel.processingTypes.add(study)"
+                     add-button-title="add processing type"
+                     collapse-data-target="#collapseProcessingTypes">
+      </panel-buttons>
     </h3>
   </div>
   <div id="collapseProcessingTypes" class="panel-collapse collapse in">
     <div class="panel-body">
-      <p>{{processingTypesPanel.header}}</p>
-      <div class="panel panel-warning" ng-if="processingTypesPanel.data.length == 0">
+      <p>{{panel.processingTypes.header}}</p>
+      <div class="panel panel-warning" ng-if="panel.processingTypes.data.length == 0">
         <div class="panel-heading">
           Processing types have not been defined for this study yet.
         </div>
       </div>
-      <p ng-if="processingTypesPanel.data.length != 0">
+      <p ng-if="panel.processingTypes.data.length != 0">
         The following processing types have been defined:
       </p>
     </div>
-    <table ng-show="processingTypesPanel.data.length != 0"
+    <table ng-show="panel.processingTypes.data.length != 0"
            class="table table-condensed table-hover"
-           ng-table="processingTypesPanel.tableParams">
+           ng-table="panel.processingTypes.tableParams">
       <tr ng-repeat="processingType in $data"
           ng-class="{'active': user.$selected}" >
         <td data-title="'Name'" sortable="'name'">
@@ -40,9 +37,9 @@
         </td>
         <td>
           <info-update-remove-buttons
-              on-info="processingTypesPanel.information(processingType)"
-              on-update="processingTypesPanel.update(processingType)"
-              on-remove="processingTypesPanel.remove(processingType)">
+              on-info="panel.processingTypes.information(processingType)"
+              on-update="panel.processingTypes.update(processingType)"
+              on-remove="panel.processingTypes.remove(processingType)">
           </info-update-remove-buttons>
         </td>
       </tr>

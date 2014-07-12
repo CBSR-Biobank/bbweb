@@ -1,0 +1,13 @@
+<div class="btn-group pull-right">
+  <button class="btn btn-xs btn-default" title="{{addButtonTitle}}" ng-click="add()">
+    <i class="glyphicon glyphicon-plus"></i>
+  </button>
+  <button class="btn btn-xs btn-default"
+          data-toggle="collapse"
+          data-target="{{collapseDataTarget}}"
+          ng-click="panel.toggle()"
+          title="expand / collapse">
+    <i class="glyphicon"
+       ng-class="{'glyphicon-chevron-down': panel.open, 'glyphicon-chevron-right': !panel.closed}"></i>
+  </button>
+</div>

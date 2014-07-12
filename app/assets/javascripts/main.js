@@ -16,6 +16,9 @@
         deps: ['jquery'],
         exports: 'angular'
       },
+      'underscore': {
+        exports: '_'
+      },
       'angular-route': ['angular'],
       'angular-cookies': ['angular'],
       'bootstrap': ['jquery'],
@@ -27,6 +30,7 @@
       'requirejs': ['../lib/requirejs/require'],
       'jquery': ['../lib/jquery/jquery'],
       'angular': ['../lib/angularjs/angular'],
+      'underscore': '../lib/underscorejs/underscore',
       'angular-route': ['../lib/angularjs/angular-route'],
       'angular-cookies': ['../lib/angularjs/angular-cookies'],
       'angular-ui-router': ['../lib/angular-ui-router/angular-ui-router'],

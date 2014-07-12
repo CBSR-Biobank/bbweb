@@ -86,19 +86,24 @@ define(['angular'], function(angular) {
    * Displays a right justified button with a 'plus' icon. Meant to be used in a pane to add a
    * domain object.
    */
-  mod.directive("addButton", function () {
+  mod.directive("panelButtons", function () {
     return {
       restrict: "E",
       replace: 'true',
       scope: {
-        'add': '&onAdd'
+        add: '&onAdd',
+        addButtonTitle: '@',
+        collapseDataTarget: '@'
       },
-      template: '<div class="btn-group pull-right">' +
-        '  <button class="btn btn-xs btn-primary"' +
-        '          ng-click="add()"' +
-        '          title="Add annotation type">' +
-        '  <i class="glyphicon glyphicon-plus"></i></button>' +
-        '</div>'
+      templateUrl: '/assets/javascripts/common/directives/panelButtons.html',
+      link: function(scope, element) {
+        scope.panel = {
+          open: true,
+          toggle: function() {
+            this.open = !this.open;
+          }
+        };
+      }
     };
   });
 

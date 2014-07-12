@@ -185,7 +185,7 @@ define(['angular'], function(angular) {
     '$filter', 'modelObjModalService', 'addTimeStampsService',
     function ($filter, modelObjModalService, addTimeStampsService) {
       return {
-        show: function (spcLinkType, spcLinkTypes) {
+        show: function (spcLinkType) {
           var title = 'Specimen Link Type';
           var data = [];
           data.push({name: 'Name:', value: spcLinkType.name});
@@ -202,9 +202,20 @@ define(['angular'], function(angular) {
    * Common code to add or edit a specimen link type.
    */
   mod.service('spcLinkTypeEditService', [
-    '$state', '$stateParams', '$filter', 'stateHelper', 'modalService', 'StudyService', 'SpcLinkTypeService',
-    function($state, $stateParams, $filter, stateHelper, modalService, StudyService, SpcLinkTypeService) {
-
+    '$state',
+    '$stateParams',
+    '$filter',
+    'stateHelper',
+    'modalService',
+    'StudyService',
+    'SpcLinkTypeService',
+    function($state,
+             $stateParams,
+             $filter,
+             stateHelper,
+             modalService,
+             StudyService,
+             SpcLinkTypeService) {
       /*
        * Called when the submission failed due to an error.
        */

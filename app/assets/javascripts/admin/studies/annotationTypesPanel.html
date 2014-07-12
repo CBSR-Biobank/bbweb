@@ -1,37 +1,34 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
-      {{annotTypesPanel.title}}
-      <a data-toggle="collapse"
-         data-target="#collapseAnnotTypes"
-         ng-click="annotTypesPanel.togglePanel()">
-        <i class="glyphicon"
-           ng-class="{'glyphicon-chevron-down': annotTypesPanel.panelOpen, 'glyphicon-chevron-right': !annotTypesPanel.panelOpen}"></i>
-      </a>
-      <add-button on-add="annotTypesPanel.add(study)"></add-button>
+      {{panel.annotTypes.title}}
+      <panel-buttons on-add="panel.annotTypes.add(study)"
+                     add-button-title="Add annotation type"
+                     collapse-data-target="#collapseAnnotTypes">
+      </panel-buttons>
     </h3>
   </div>
   <div id="collapseAnnotTypes" class="panel-collapse collapse in">
     <div class="panel-body">
-      <p>{{annotTypesPanel.header}}</p>
-      <div class="panel panel-warning" ng-if="annotTypesPanel.data.length == 0">
+      <p>{{panel.annotTypes.header}}</p>
+      <div class="panel panel-warning" ng-if="panel.annotTypes.data.length == 0">
         <div class="panel-heading">
           Annotation types have not been defined for this study yet.
         </div>
       </div>
-      <p ng-if="annotTypesPanel.data.length != 0">
+      <p ng-if="panel.annotTypes.data.length != 0">
         The following annotation types have been defined:
       </p>
     </div>
-    <table ng-show="annotTypesPanel.data.length != 0"
+    <table ng-show="panel.annotTypes.data.length != 0"
            class="table table-condensed table-hover"
-           ng-table="annotTypesPanel.tableParams">
+           ng-table="panel.annotTypes.tableParams">
       <tr ng-repeat="annotType in $data">
         <td data-title="'Name'" sortable="'name'">{{annotType.name}}</td>
         <td data-title="'Type'" sortable="'valueType'">{{annotType.valueType}}</td>
         <td data-title="'Required'"
             sortable="'required'"
-            ng-show="annotTypesPanel.hasRequired">
+            ng-show="panel.annotTypes.hasRequired">
           {{annotType.required ? "Yes" : "No"}}
         </td>
         <td data-title="'Description'" sortable="'description'">
@@ -39,9 +36,9 @@
         </td>
         <td>
           <info-update-remove-buttons
-              on-info="annotTypesPanel.information(annotType)"
-              on-update="annotTypesPanel.update(annotType)"
-              on-remove="annotTypesPanel.remove(annotType)">
+              on-info="panel.annotTypes.information(annotType)"
+              on-update="panel.annotTypes.update(annotType)"
+              on-remove="panel.annotTypes.remove(annotType)">
           </info-update-remove-buttons>
         </td>
       </tr>
