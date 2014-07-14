@@ -302,7 +302,7 @@ define(['angular', 'common'], function(angular) {
       },
       addOrUpdate: function(spcLinkType) {
         var cmd = {
-          studyId:               spcLinkType.studyId,
+          processingTypeId:      spcLinkType.processingTypeId,
           expectedInputChange:   spcLinkType.expectedInputChange,
           expectedOutputChange:  spcLinkType.expectedOutputChange,
           inputCount:            spcLinkType.inputCount,

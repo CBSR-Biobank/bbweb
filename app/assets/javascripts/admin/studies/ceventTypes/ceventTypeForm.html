@@ -65,8 +65,8 @@
                  class="form-control input-sm"
                  ng-model="ceventType.specimenGroupData[$index].maxCount"
                  placeholder="max count"
-                 required
-                 integer />
+                 valid-count
+                 required/>
         </div>
         <div class="col-sm-1 control-label">
           <label class="small">
@@ -81,8 +81,8 @@
                  class="form-control input-sm"
                  ng-model="ceventType.specimenGroupData[$index].amount"
                  placeholder="amount"
-                 required
-                 smart-float />
+                 valid-amount
+                 required />
         </div>
         <div class="col-sm-1">
           <button class="btn btn-xs btn-warning"
@@ -97,10 +97,10 @@
             Please select a specimen group
           </p>
           <p class="help-block"
-             ng-show="sgSubForm.maxCount.$error.min || sgSubForm.maxCount.$error.integer">
+             ng-show="sgSubForm.maxCount.$error.validCount">
             Max count should be a positive number greater than 1
           </p>
-          <p class="help-block" ng-show="sgSubForm.amount.$error.float || sgSubForm.amount.$error.min">
+          <p class="help-block" ng-show="sgSubForm.amount.$error.validAmount">
             Amount should be a positive floating point number
           </p>
         </div>

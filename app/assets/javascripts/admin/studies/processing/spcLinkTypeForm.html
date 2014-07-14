@@ -11,7 +11,7 @@
         <select class="form-control"
                 name="procTypeId"
                 ng-model="spcLinkType.processingTypeId"
-                ng-options="pt.id as pt.name for pt in processingTypes"
+                ng-options="pt.id as pt.name for pt in processingTypes | orderBy: 'name'"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -24,45 +24,6 @@
       </p>
     </div>
 
-    <!-- INPUT COUNT -->
-    <div class="form-group">
-      <label for="description" class="col-sm-3 control-label">Input count</label>
-      <div class="col-sm-2">
-        <input type="number"
-               min="1"
-               name="inputCount"
-               class="form-control input-sm"
-               ng-model="spcLinkType.inputCount"
-               placeholder="count"
-               integer />
-        </div>
-    </div>
-    <div class="col-sm-offset-3 col-sm-9">
-      <p class="help-block"
-         ng-show="spcLinkTypeForm.inputCount.$error.integer || spcLinkTypeForm.inputCount.$error.min">
-        Input count should be a positive an integer number greater than 1
-      </p>
-    </div>
-
-    <!-- OUTPUT COUNT -->
-    <div class="form-group">
-      <label for="description" class="col-sm-3 control-label">Output count</label>
-        <div class="col-sm-2">
-          <input type="number"
-                 min="1"
-                 name="outputCount"
-                 class="form-control input-sm"
-                 ng-model="spcLinkType.outputCount"
-                 placeholder="count"
-                 integer />
-        </div>
-    </div>
-    <div class="col-sm-offset-3 col-sm-9">
-      <p class="help-block" ng-show="spcLinkTypeForm.outputCount.$error.integer">
-        Output count should be a positive an integer number greater than 1
-      </p>
-    </div>
-
     <!-- INPUT SPECIMEN GROUP -->
     <div class="form-group">
       <label for="description" class="col-sm-3 control-label">Input Specimen Group</label>
@@ -70,7 +31,7 @@
         <select class="form-control"
                 name="inputGroupName"
                 ng-model="spcLinkType.inputGroupId"
-                ng-options="sg.id as sg.name for sg in specimenGroups"
+                ng-options="sg.id as sg.name for sg in specimenGroups | orderBy: 'name'"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -83,6 +44,59 @@
       </p>
     </div>
 
+    <!-- INPUT COUNT -->
+    <div class="form-group">
+      <label for="description" class="col-sm-3 control-label">Input count</label>
+      <div class="col-sm-2">
+        <input type="number"
+               name="inputCount"
+               class="form-control input-sm"
+               ng-model="spcLinkType.inputCount"
+               placeholder="count"
+               valid-count
+               requried />
+        </div>
+    </div>
+    <div class="col-sm-offset-3 col-sm-9">
+      <p class="help-block"
+         ng-show="spcLinkTypeForm.inputCount.$error.validCount">
+        Input count should be a positive integer number greater than 1
+      </p>
+    </div>
+
+    <!-- EXPECTED INPUT CHANGE -->
+    <div class="form-group">
+      <label for="description" class="col-sm-3 control-label">Expected Input change</label>
+      <div class="col-sm-2">
+        <input type="number"
+               name="expectedInputChange"
+               class="form-control input-sm"
+               ng-model="spcLinkType.expectedInputChange"
+               placeholder="amount"
+               valid-amount
+               requried />
+        </div>
+    </div>
+    <div class="col-sm-offset-3 col-sm-9">
+      <p class="help-block"
+         ng-show="spcLinkTypeForm.expectedInputChange.$error.validAmount">
+        Input change should be a positive floating point number greater than zero
+      </p>
+    </div>
+
+    <!-- INPUT CONTAINER TYPE -->
+    <div class="form-group">
+      <label for="description" class="col-sm-3 control-label">Input Container Type</label>
+      <div class="col-sm-9">
+        <select class="form-control"
+                name="inputContainertypeName"
+                ng-model="spcLinkType.inputContainertypeName"
+                ng-options="ct.id as ct.name for ct in containerTypeNames | orderBy: 'name'">
+          <option value="">-- make a selection --</option>
+        </select>
+      </div>
+    </div>
+
     <!-- OUTPUT SPECIMEN GROUP -->
     <div class="form-group">
       <label for="description" class="col-sm-3 control-label">Output Specimen Group</label>
@@ -90,7 +104,7 @@
         <select class="form-control"
                 name="outputGroupName"
                 ng-model="spcLinkType.outuptGroupId"
-                ng-options="sg.id as sg.name for sg in specimenGroups"
+                ng-options="sg.id as sg.name for sg in specimenGroups | orderBy: 'name'"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -103,27 +117,54 @@
       </p>
     </div>
 
-    <!-- INPUT CONTAINER TYPE -->
+    <!-- OUTPUT COUNT -->
     <div class="form-group">
-      <label for="description" class="col-sm-3 control-label">Input Container Type</label>
-      <div class="col-sm-9">
-        <select class="form-control"
-                name="inputContainertypeName"
-                ng-model="spcLinkType.inputContainertypeName"
-                ng-options="ct for ct in containerTypeNames">
-          <option value="">-- make a selection --</option>
-        </select>
-      </div>
+      <label for="description" class="col-sm-3 control-label">Output count</label>
+        <div class="col-sm-2">
+          <input type="number"
+                 name="outputCount"
+                 class="form-control input-sm"
+                 ng-model="spcLinkType.outputCount"
+                 placeholder="count"
+                 integer
+                 required />
+        </div>
+    </div>
+    <div class="col-sm-offset-3 col-sm-9">
+      <p class="help-block" ng-show="spcLinkTypeForm.outputCount.$error.validCount">
+        Output count should be a positive an integer number greater than 1
+      </p>
     </div>
 
-    <!-- INPUT CONTAINER TYPE -->
+    <!-- EXPECTED OUTPUT CHANGE -->
+    <div class="form-group">
+      <label for="description" class="col-sm-3 control-label">Expected Output change</label>
+      <div class="col-sm-2">
+        <input type="number"
+               min="0"
+               name="expectedOutputChange"
+               class="form-control input-sm"
+               ng-model="spcLinkType.expectedOutputChange"
+               placeholder="amount"
+               valid-amount
+               requried />
+        </div>
+    </div>
+    <div class="col-sm-offset-3 col-sm-9">
+      <p class="help-block"
+         ng-show="spcLinkTypeForm.expectedOutputChange.$error.validAmount">
+        Input change should be a positive floating point number greater than zero
+      </p>
+    </div>
+
+    <!-- OUTPUT CONTAINER TYPE -->
     <div class="form-group">
       <label for="description" class="col-sm-3 control-label">Output Container Type</label>
       <div class="col-sm-9">
         <select class="form-control"
                 name="outputContainertypeName"
                 ng-model="spcLinkType.outputContainertypeName"
-                ng-options="ct for ct in containerTypeNames">
+                ng-options="ct.id as ct.name for ct in containerTypeNames | orderBy: 'name'">
           <option value="">-- make a selection --</option>
         </select>
       </div>
@@ -176,9 +217,9 @@
     <div class="form-group">
       <div class="col-sm-offset-3 col-sm-9">
         <button class="btn btn-primary"
-                ng-disabled="form.$invalid"
-                ng-click="form.submit(processingType)">Submit</button>
-        <button class="btn" ng-click="spcLinkTypeForm.cancel()">Cancel</button>
+                ng-disabled="spcLinkTypeForm.$invalid"
+                ng-click="form.submit(spcLinkType)">Submit</button>
+        <button class="btn" ng-click="form.cancel()">Cancel</button>
       </div>
     </div>
   </form>
