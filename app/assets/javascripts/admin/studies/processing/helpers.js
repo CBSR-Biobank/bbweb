@@ -248,6 +248,17 @@ define(['angular'], function(angular) {
         edit: function($scope) {
           $scope.form = {
             submit: function(spcLinkType) {
+              var checkFields = ['inputContainerTypeId', 'outputContainerTypeId'];
+              checkFields.forEach(function(fieldName) {
+                if (typeof spcLinkType[fieldName] === 'undefined') {
+                  spcLinkType[fieldName] = null;
+                }
+              });
+
+              if (typeof spcLinkType.annotationTypeData === 'undefined') {
+                spcLinkType.annotationTypeData = [];
+              }
+
               SpcLinkTypeService.addOrUpdate(spcLinkType)
                 .success(function() {
                   $state.transitionTo(

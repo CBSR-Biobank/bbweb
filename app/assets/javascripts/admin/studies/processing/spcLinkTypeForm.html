@@ -49,6 +49,7 @@
       <label for="description" class="col-sm-3 control-label">Input count</label>
       <div class="col-sm-2">
         <input type="number"
+               min="1"
                name="inputCount"
                class="form-control input-sm"
                ng-model="spcLinkType.inputCount"
@@ -69,6 +70,7 @@
       <label for="description" class="col-sm-3 control-label">Expected Input change</label>
       <div class="col-sm-2">
         <input type="number"
+               min="0"
                name="expectedInputChange"
                class="form-control input-sm"
                ng-model="spcLinkType.expectedInputChange"
@@ -103,7 +105,7 @@
       <div class="col-sm-9">
         <select class="form-control"
                 name="outputGroupName"
-                ng-model="spcLinkType.outuptGroupId"
+                ng-model="spcLinkType.outputGroupId"
                 ng-options="sg.id as sg.name for sg in specimenGroups | orderBy: 'name'"
                 required>
           <option value="">-- make a selection --</option>
@@ -122,11 +124,12 @@
       <label for="description" class="col-sm-3 control-label">Output count</label>
         <div class="col-sm-2">
           <input type="number"
+                 min="1"
                  name="outputCount"
                  class="form-control input-sm"
                  ng-model="spcLinkType.outputCount"
                  placeholder="count"
-                 integer
+                 valid-count
                  required />
         </div>
     </div>
