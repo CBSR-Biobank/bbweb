@@ -4,6 +4,8 @@ import org.biobank.controllers._
 import org.biobank.infrastructure._
 import org.biobank.service.json.Events._
 import org.biobank.service.json.ProcessingType._
+import org.biobank.service.json.SpecimenLinkType._
+import org.biobank.service.json.SpecimenLinkAnnotationType._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain._
 import org.biobank.domain.study._
@@ -27,7 +29,7 @@ object ProcessingTypeController extends BbwebController  {
   }
 
   def get(studyId: String, procTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.debug(s"ProcessingTypeController.list: studyId: $studyId, procTypeId: $procTypeId")
+    Logger.debug(s"ProcessingTypeController.get: studyId: $studyId, procTypeId: $procTypeId")
 
     procTypeId.fold {
       Ok(Json.toJson(studyService.processingTypesForStudy(studyId).toList))
@@ -37,7 +39,23 @@ object ProcessingTypeController extends BbwebController  {
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         procType => Ok(Json.toJson(procType))
       )
-    }  }
+    }
+  }
+
+  def getProcessingDto(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.debug(s"ProcessingTypeController.getProcessingDto: studyId: $studyId")
+
+    val processingTypes = studyService.processingTypesForStudy(studyId)
+    val specimenLinkTypes = processingTypes.flatMap { pt =>
+      studyService.specimenLinkTypesForProcessingType(pt.id.id)
+    }
+
+    Ok(Json.obj(
+      "processingTypes" -> Json.toJson(processingTypes.toList),
+      "specimenLinkTypes" -> Json.toJson(specimenLinkTypes.toList),
+      "specimenLinkAnnotationTypes" -> studyService.specimenLinkAnnotationTypesForStudy(studyId).toList
+    ))
+  }
 
   def addProcessingType = CommandAction { cmd: AddProcessingTypeCmd => implicit userId =>
     val future = studyService.addProcessingType(cmd)

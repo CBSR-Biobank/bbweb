@@ -1,6 +1,9 @@
+# -*- mode: text; eval: (auto-fill-mode 0);  -*-
+#
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
+
 
 # Home page
 GET     /                                      org.biobank.controllers.Application.index
@@ -62,6 +65,9 @@ GET     /studies/specimentypes                 org.biobank.controllers.study.Stu
 GET     /studies/preservtypes                  org.biobank.controllers.study.StudyController.preservTypes
 GET     /studies/preservtemptypes              org.biobank.controllers.study.StudyController.preservTempTypes
 GET     /studies/sgvaluetypes                  org.biobank.controllers.study.StudyController.specimenGroupValueTypes
+
+# DTOs
+GET     /studies/processing/:studyId           org.biobank.controllers.study.ProcessingTypeController.getProcessingDto(studyId)
 
 # study
 GET     /studies/:id                           org.biobank.controllers.study.StudyController.query(id)
