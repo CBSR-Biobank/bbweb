@@ -396,32 +396,30 @@ define(['angular', 'common'], function(angular, common) {
     '$state',
     'processingTypeModalService',
     'processingTypeRemoveService',
-    'spcLinkAnnotTypeRemoveService',
     'annotTypeModalService',
+    'spcLinkAnnotTypeRemoveService',
+    'spcLinkTypeModalService',
+    'spcLinkTypeRemoveService',
     'panelTableService',
-    'processingTypes',
-    'annotTypes',
-    'spcLinkTypes',
-    function(
-      $injector,
-      $scope,
-      $state,
-      processingTypeModalService,
-      processingTypeRemoveService,
-      spcLinkAnnotTypeRemoveService,
-      annotTypeModalService,
-      panelTableService,
-      processingTypes,
-      annotTypes,
-      spcLinkTypes) {
-
+    'dtoProcessing',
+    function($injector,
+             $scope,
+             $state,
+             processingTypeModalService,
+             processingTypeRemoveService,
+             annotTypeModalService,
+             spcLinkAnnotTypeRemoveService,
+             spcLinkTypeModalService,
+             spcLinkTypeRemoveService,
+             panelTableService,
+             dtoProcessing) {
       $scope.panel = {
         annotTypes: new AnnotTypesPanelSettings(
           $injector,
           $scope,
           panelTableService,
           annotTypeModalService,
-          annotTypes,
+          dtoProcessing.specimenLinkAnnotationTypes,
           'Specimen Link Annotation Types',
           'Specimen link annotations allow a study to collect custom named and defined ' +
             'pieces of data when processing specimens. Annotations are optional and are not ' +
@@ -445,7 +443,7 @@ define(['angular', 'common'], function(angular, common) {
           'Specimen Link Types that (1) further define legal procedures and (2) allow recording ' +
           'of procedures performed on different types of Specimens. ';
         this.information = function(processingType) {
-          processingTypeModalService.show(processingType, processingTypes);
+          processingTypeModalService.show(processingType);
         };
         this.add = function(study) {
           $state.go('admin.studies.study.processing.processingTypeAdd', { studyId: study.id });
@@ -461,7 +459,7 @@ define(['angular', 'common'], function(angular, common) {
         $injector.invoke(PanelSettings, this, {
           $scope: $scope,
           panelTableService: panelTableService,
-          data: processingTypes
+          data: dtoProcessing.processingTypes
         });
       }
 
@@ -474,13 +472,14 @@ define(['angular', 'common'], function(angular, common) {
           'must be in a specific Specimen Group, and an output, which must be in a specific ' +
           'Specimen Group.';
         this.information = function(spcLinkType) {
-          spcLinkTypeModalService.show(spcLinkType, spcLinkTypes);
+          spcLinkTypeModalService.show(spcLinkType);
         };
         this.add = function(study) {
           $state.go('admin.studies.study.processing.spcLinkTypeAdd');
         };
         this.update = function(spcLinkType) {
-          $state.go('admin.studies.study.processing.spcLinkTypeUpdate', { spcLinkTypeId: spcLinkType.id });
+          $state.go('admin.studies.study.processing.spcLinkTypeUpdate',
+                    { procTypeId: spcLinkType.processingTypeId, spcLinkTypeId: spcLinkType.id });
         };
         this.remove = function(spcLinkType) {
           spcLinkTypeRemoveService.remove(spcLinkType);
@@ -489,7 +488,7 @@ define(['angular', 'common'], function(angular, common) {
         $injector.invoke(PanelSettings, this, {
           $scope: $scope,
           panelTableService: panelTableService,
-          data: spcLinkTypes
+          data: dtoProcessing.specimenLinkTypes
         });
       }
 

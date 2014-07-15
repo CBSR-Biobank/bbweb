@@ -39,7 +39,8 @@ object SpecimenLinkTypeController extends BbwebController  {
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         slType => Ok(Json.toJson(slType))
       )
-    }  }
+    }
+  }
 
   def addSpecimenLinkType = CommandAction { cmd: AddSpecimenLinkTypeCmd => implicit userId =>
     val future = studyService.addSpecimenLinkType(cmd)

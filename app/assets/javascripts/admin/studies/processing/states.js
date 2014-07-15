@@ -162,13 +162,13 @@ define(['angular'], function(angular) {
        * Specimen Link Type Update
        */
       $stateProvider.state('admin.studies.study.processing.spcLinkTypeUpdate', {
-        url: '/sltype/update/{spcLinkTypeId}',
+        url: '/sltype/update/{procTypeId}/{spcLinkTypeId}',
         resolve: {
           user: userResolve.user,
           spcLinkType: [
             '$stateParams', 'SpcLinkTypeService', 'study',
             function($stateParams, SpcLinkTypeService, study) {
-              return SpcLinkTypeService.get(study.id, $stateParams.spcLinkTypeId)
+              return SpcLinkTypeService.get($stateParams.procTypeId, $stateParams.spcLinkTypeId)
                 .then(function(response) {
                   return response.data;
                 });

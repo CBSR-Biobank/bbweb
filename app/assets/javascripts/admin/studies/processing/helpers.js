@@ -12,7 +12,7 @@ define(['angular'], function(angular) {
     '$filter', 'modelObjModalService', 'addTimeStampsService',
     function ($filter, modelObjModalService, addTimeStampsService) {
       return {
-        show: function (processingType, processingTypes) {
+        show: function (processingType) {
           var title = 'Processing Type';
           var data = [];
           data.push({name: 'Name:', value: processingType.name});
@@ -23,7 +23,6 @@ define(['angular'], function(angular) {
         }
       };
     }]);
-
 
   /**
    * Common code to add or edit a processing type.

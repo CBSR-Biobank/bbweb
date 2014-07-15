@@ -67,7 +67,7 @@ GET     /studies/preservtemptypes              org.biobank.controllers.study.Stu
 GET     /studies/sgvaluetypes                  org.biobank.controllers.study.StudyController.specimenGroupValueTypes
 
 # DTOs
-GET     /studies/processing/:studyId           org.biobank.controllers.study.ProcessingTypeController.getProcessingDto(studyId)
+GET     /studies/dto/processing/:studyId           org.biobank.controllers.study.StudyController.getProcessingDto(studyId)
 
 # study
 GET     /studies/:id                           org.biobank.controllers.study.StudyController.query(id)

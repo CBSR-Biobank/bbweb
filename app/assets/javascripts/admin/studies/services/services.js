@@ -51,6 +51,11 @@ define(['angular', 'common'], function(angular) {
       },
       unretire: function(study) {
         return changeStatus('unretire', study);
+      },
+      dto: {
+        processing: function(study) {
+          return $http.get('/studies/dto/processing/' + study.id);
+        }
       }
     };
   }]);
@@ -298,7 +303,7 @@ define(['angular', 'common'], function(angular) {
         return $http.get('/studies/sltypes/' + studyId);
       },
       get: function(studyId, spcLinkTypeId) {
-        return $http.get('/studies/sltypes/' + studyId + '?procTypeId=' + spcLinkTypeId);
+        return $http.get('/studies/sltypes/' + studyId + '?slTypeId=' + spcLinkTypeId);
       },
       addOrUpdate: function(spcLinkType) {
         var cmd = {

@@ -13,7 +13,7 @@
                 ng-model="spcLinkType.processingTypeId"
                 ng-options="pt.id as pt.name for pt in processingTypes | orderBy: 'name'"
                 required>
-          <option value="">-- make a selection --</option>
+          <option value="">-- choose processing type --</option>
         </select>
       </div>
     </div>
@@ -33,7 +33,7 @@
                 ng-model="spcLinkType.inputGroupId"
                 ng-options="sg.id as sg.name for sg in specimenGroups | orderBy: 'name'"
                 required>
-          <option value="">-- make a selection --</option>
+          <option value="">-- choose specimen group --</option>
         </select>
       </div>
     </div>
@@ -94,7 +94,7 @@
                 name="inputContainertypeName"
                 ng-model="spcLinkType.inputContainertypeName"
                 ng-options="ct.id as ct.name for ct in containerTypeNames | orderBy: 'name'">
-          <option value="">-- make a selection --</option>
+          <option value="">None</option>
         </select>
       </div>
     </div>
@@ -108,7 +108,7 @@
                 ng-model="spcLinkType.outputGroupId"
                 ng-options="sg.id as sg.name for sg in specimenGroups | orderBy: 'name'"
                 required>
-          <option value="">-- make a selection --</option>
+          <option value="">-- choose specimen group --</option>
         </select>
       </div>
     </div>
@@ -168,7 +168,7 @@
                 name="outputContainertypeName"
                 ng-model="spcLinkType.outputContainertypeName"
                 ng-options="ct.id as ct.name for ct in containerTypeNames | orderBy: 'name'">
-          <option value="">-- make a selection --</option>
+          <option value="">None</option>
         </select>
       </div>
     </div>
@@ -185,7 +185,7 @@
                   ng-model="spcLinkType.annotationTypeData[$index].name"
                   ng-options="annotType for annotType in annotTypeNames"
                   required>
-            <option value="">-- make a selection --</option>
+            <option value="">-- choose annotation type --</option>
           </select>
         </div>
         <div class="col-sm-2">

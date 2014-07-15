@@ -25,17 +25,14 @@
            class="table table-condensed table-hover"
            ng-table="panel.spcLinkTypes.tableParams">
       <tr ng-repeat="spcLinkType in $data">
-        <td data-title="'Name'" sortable="'name'">
-          {{spcLinkType.name}}
+        <td data-title="'ProcType'" sortable="'name'">
+          {{spcLinkType.processingTypeId}}
         </td>
-        <td data-title="'Specimen Groups'">
-          {{cetSgNames[spcLinkType.id].join(", ")}}
+        <td data-title="'Input Specimen Group'">
+          {{spcLinkType.inputGroupId}}
         </td>
-        <td data-title="'Recurring'" sortable="'recurring'">
-          {{spcLinkType.recurring ? 'Y' : 'N'}}
-        </td>
-        <td data-title="'Description'" sortable="'description'">
-          {{spcLinkType.description === null ? "" : spcLinkType.description | truncate:40}}
+        <td data-title="'Output Specimen Group'">
+          {{spcLinkType.outputGroupId}}
         </td>
         <td>
           <info-update-remove-buttons

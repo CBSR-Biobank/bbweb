@@ -288,31 +288,10 @@ define(['angular'], function(angular) {
         url: '/processing',
         resolve: {
           user: userResolve.user,
-          processingTypes: [
-            'ProcessingTypeService', 'study',
-            function( ProcessingTypeService, study) {
-              return ProcessingTypeService.getAll(study.id).then(function(response) {
-                return response.data;
-              });
-            }],
-          annotTypes: [
-            'SpcLinkAnnotTypeService', 'study',
-            function(SpcLinkAnnotTypeService, study) {
-              return SpcLinkAnnotTypeService.getAll(study.id).then(function(response) {
-                return response.data;
-              });
-            }],
-          spcLinkTypes: [
-            'SpcLinkTypeService', 'study',
-            function(SpcLinkTypeService, study) {
-              return SpcLinkTypeService.getAll(study.id).then(function(response) {
-                return response.data;
-              });
-            }],
-          specimenGroups: [
-            'SpecimenGroupService', 'study',
-            function(SpecimenGroupService, study) {
-              return SpecimenGroupService.getAll(study.id).then(function(response) {
+          dtoProcessing: [
+            'StudyService', 'study',
+            function( StudyService, study) {
+              return StudyService.dto.processing(study).then(function(response) {
                 return response.data;
               });
             }]

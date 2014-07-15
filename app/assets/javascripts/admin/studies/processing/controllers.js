@@ -63,22 +63,18 @@ define(['angular', 'common'], function(angular, common) {
     'spcLinkTypeEditService',
     'study',
     'spcLinkType',
-    'processingTypes',
-    'annotTypes',
-    'specimenGroups',
+    'dtoProcessing',
     function ($scope,
               spcLinkTypeEditService,
               study,
               spcLinkType,
-              processingTypes,
-              annotTypes,
-              specimenGroups) {
+              dtoProcessing) {
       $scope.title           =  "Add Spcecimen Link Type";
       $scope.study           = study;
       $scope.spcLinkType     = spcLinkType;
-      $scope.processingTypes = processingTypes;
-      $scope.annotTypes      = annotTypes;
-      $scope.specimenGroups  = specimenGroups;
+      $scope.processingTypes = dtoProcessing.processingTypes;
+      $scope.annotTypes      = dtoProcessing.annotTypes;
+      $scope.specimenGroups  = dtoProcessing.specimenGroups;
       spcLinkTypeEditService.edit($scope);
     }]);
 
@@ -90,21 +86,18 @@ define(['angular', 'common'], function(angular, common) {
     'spcLinkTypeEditService',
     'study',
     'spcLinkType',
-    'processingTypes',
-    'annotTypes',
-    'specimenGroups',
+    'dtoProcessing',
     function ($scope,
               spcLinkTypeEditService,
               study,
               spcLinkType,
-              processingTypes,
-              annotTypes,specimenGroups) {
+              dtoProcessing) {
       $scope.title           = "Update Spcecimen Link Type";
       $scope.study           = study;
       $scope.spcLinkType     = spcLinkType;
-      $scope.processingTypes = processingTypes;
-      $scope.annotTypes      = annotTypes;
-      $scope.specimenGroups  = specimenGroups;
+      $scope.processingTypes = dtoProcessing.processingTypes;
+      $scope.annotTypes      = dtoProcessing.annotTypes;
+      $scope.specimenGroups  = dtoProcessing.specimenGroups;
       spcLinkTypeEditService.edit($scope);
     }]);
 
