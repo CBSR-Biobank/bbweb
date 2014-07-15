@@ -1,47 +1,44 @@
-<!-- SPECIMEN LINK TYPES -->
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title">
-      {{panel.spcLinkTypes.title}}
-      <panel-buttons on-add="panel.spcLinkTypes.add(study)"
-                     add-button-title="add specimen link type"
-                     collapse-data-target="#collapseSpcLinkTypes">
-      </panel-buttons>
-    </h3>
-  </div>
-  <div id="collapseSpcLinkTypes" class="panel-collapse collapse in">
-    <div class="panel-body">
-      <p>{{panel.spcLinkTypes.header}}</p>
-      <div class="panel panel-warning" ng-if="panel.spcLinkTypes.data.length == 0">
-        <div class="panel-heading">
-          Specimen link types have not been defined for this study yet.
-        </div>
-      </div>
-      <p ng-if="panel.spcLinkTypes.data.length != 0">
-        The following specimen link types have been defined:
-      </p>
+<accordion-group is-open="panel.spcLinkTypes.panelOpen" style="margin-top: 10px;">
+  <accordion-heading>
+    {{panel.spcLinkTypes.title}}
+    <panel-buttons on-add="panel.spcLinkTypes.add(study)"
+                   add-button-title="add specimen link type"
+                     panel-open="panel.spcLinkTypes.panelOpen"
+                     panel-toggle="panel.spcLinkTypes.panelToggle()">
+    </panel-buttons>
+  </accordion-heading>
+  <p>{{panel.spcLinkTypes.header}}</p>
+  <div class="panel panel-warning" ng-if="panel.spcLinkTypes.data.length == 0">
+    <div class="panel-heading">
+      Specimen link types have not been defined for this study yet.
     </div>
-    <table ng-show="panel.spcLinkTypes.data.length != 0"
-           class="table table-condensed table-hover"
-           ng-table="panel.spcLinkTypes.tableParams">
-      <tr ng-repeat="spcLinkType in $data">
-        <td data-title="'ProcType'" sortable="'name'">
-          {{spcLinkType.processingTypeId}}
-        </td>
-        <td data-title="'Input Specimen Group'">
-          {{spcLinkType.inputGroupId}}
-        </td>
-        <td data-title="'Output Specimen Group'">
-          {{spcLinkType.outputGroupId}}
-        </td>
-        <td>
-          <info-update-remove-buttons
-              on-info="panel.spcLinkTypes.information(spcLinkType)"
-              on-update="panel.spcLinkTypes.update(spcLinkType)"
-              on-remove="panel.spcLinkTypes.remove(spcLinkType)">
-          </info-update-remove-buttons>
-        </td>
-      </tr>
-    </table>
   </div>
-</div>
+  <p ng-if="panel.spcLinkTypes.data.length != 0">
+    The following specimen link types have been defined:
+  </p>
+  <table ng-show="panel.spcLinkTypes.data.length != 0"
+         class="table table-condensed table-hover"
+         ng-table="panel.spcLinkTypes.tableParams">
+    <tr ng-repeat="spcLinkType in $data">
+      <td data-title="'Processing Type'"
+          ng-click="panel.spcLinkTypes.showProcessingType(spcLinkType.processingTypeId)">
+        <a href>{{panel.spcLinkTypes.processingTypesById[spcLinkType.processingTypeId].name}}</a>
+      </td>
+      <td data-title="'Input Specimen Group'"
+          ng-click="panel.spcLinkTypes.showSpecimenGroup(spcLinkType.inputGroupId)">
+        <a href>{{panel.spcLinkTypes.specimenGroupsById[spcLinkType.inputGroupId].name}}</a>
+      </td>
+      <td data-title="'Output Specimen Group'"
+          ng-click="panel.spcLinkTypes.showSpecimenGroup(spcLinkType.outputGroupId)">
+        <a href>{{panel.spcLinkTypes.specimenGroupsById[spcLinkType.outputGroupId].name}}</a>
+      </td>
+      <td>
+        <info-update-remove-buttons
+            on-info="panel.spcLinkTypes.information(spcLinkType)"
+            on-update="panel.spcLinkTypes.update(spcLinkType)"
+            on-remove="panel.spcLinkTypes.remove(spcLinkType)">
+        </info-update-remove-buttons>
+      </td>
+    </tr>
+  </table>
+</accordion-group>

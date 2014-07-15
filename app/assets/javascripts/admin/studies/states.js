@@ -93,11 +93,12 @@ define(['angular'], function(angular) {
           'main@': {
             templateUrl: '/assets/javascripts/admin/studies/studyView.html',
             controller: [
-              '$scope', '$state', '$timeout', '$log', 'study',
-              function($scope, $state, $timeout, $log, study) {
+              '$scope', '$state', '$timeout', 'studyViewSettings', 'study',
+              function($scope, $state, $timeout, studyViewSettings, study) {
                 $scope.study = study;
 
                 if ($state.current.name === 'admin.studies.study') {
+                  studyViewSettings.initialize(study.id);
                   $state.go('admin.studies.study.summary', { studyId: study.id });
                   return;
                 }
@@ -206,7 +207,9 @@ define(['angular'], function(angular) {
         },
         views: {
           'studyDetails': {
-            template: '<participants-annot-types-panel></participants-annot-types-panel>',
+            template: '<accordion close-others="false">' +
+              '<participants-annot-types-panel></participants-annot-types-panel>' +
+              '</accordion>',
             controller: 'ParticipantsTabCtrl'
           }
         },
@@ -232,7 +235,9 @@ define(['angular'], function(angular) {
         },
         views: {
           'studyDetails': {
-            template: '<specimen-groups-panel></specimen-groups-panel>',
+            template: '<accordion close-others="false">' +
+              '<specimen-groups-panel></specimen-groups-panel>' +
+              '</accordion>',
             controller: 'SpecimensTabCtrl'
           }
         },

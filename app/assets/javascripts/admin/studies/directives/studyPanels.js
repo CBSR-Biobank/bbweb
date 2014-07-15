@@ -7,13 +7,13 @@
 define(['angular'], function(angular) {
   'use strict';
 
-  var mod = angular.module('admin.studies.directives.studyPanes', ['studies.services']);
+  var mod = angular.module('admin.studies.directives.studyPanels', ['studies.services']);
 
   mod.directive('participantsAnnotTypesPanel', function() {
     return {
       require: '^tab',
       restrict: 'E',
-      templateUrl: '/assets/javascripts/admin/studies/annotationTypesPanel.html'
+      templateUrl: '/assets/javascripts/admin/studies/annotTypesPanel.html'
     };
   });
 
@@ -21,7 +21,7 @@ define(['angular'], function(angular) {
     return {
       require: '^tab',
       restrict: 'E',
-      templateUrl: '/assets/javascripts/admin/studies/annotationTypesPanel.html'
+      templateUrl: '/assets/javascripts/admin/studies/annotTypesPanel.html'
     };
   });
 
@@ -29,7 +29,7 @@ define(['angular'], function(angular) {
     return {
       require: '^tab',
       restrict: 'E',
-      templateUrl: '/assets/javascripts/admin/studies/annotationTypesPanel.html'
+      templateUrl: '/assets/javascripts/admin/studies/annotTypesPanel.html'
     };
   });
 

@@ -93,17 +93,10 @@ define(['angular'], function(angular) {
       scope: {
         add: '&onAdd',
         addButtonTitle: '@',
-        collapseDataTarget: '@'
+        panelToggle: '&',
+        panelOpen: '&'
       },
-      templateUrl: '/assets/javascripts/common/directives/panelButtons.html',
-      link: function(scope, element) {
-        scope.panel = {
-          open: true,
-          toggle: function() {
-            this.open = !this.open;
-          }
-        };
-      }
+      templateUrl: '/assets/javascripts/common/directives/panelButtons.html'
     };
   });
 

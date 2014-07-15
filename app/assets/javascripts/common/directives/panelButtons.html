@@ -3,11 +3,9 @@
     <i class="glyphicon glyphicon-plus"></i>
   </button>
   <button class="btn btn-xs btn-default"
-          data-toggle="collapse"
-          data-target="{{collapseDataTarget}}"
-          ng-click="panel.toggle()"
+          ng-click="panelToggle()"
           title="expand / collapse">
     <i class="glyphicon"
-       ng-class="{'glyphicon-chevron-down': panel.open, 'glyphicon-chevron-right': !panel.closed}"></i>
+       ng-class="panelOpen() ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
   </button>
 </div>

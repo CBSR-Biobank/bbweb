@@ -1,39 +1,58 @@
 /** Common helpers */
-define(['angular'], function(angular) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
 
   var mod = angular.module('admin.studies.helpers', []);
 
-  mod.service('studyUtilsService', [
-    '$state', 'modalService', function ($state, modalService) {
+  mod.service('studyViewSettings', function() {
+    var initialSettings = function() {
       return {
-        /**
-         * Used to sort a list of objects with a 'name'field.
-         */
-        compareByName: function (a, b) {
-          if (a.name < b.name) {
-            return -1;
-          } else if (a.name > b.name) {
-            return 1;
-          }
-          return 0;
-        },
-
-        /**
-         * Returns an associative array with the keys being the value of fieldName.
-         */
-        asAssocArray: function(objs, fieldName) {
-          var result = [];
-          objs.forEach(function (obj) {
-            if (typeof obj[fieldName] == 'undefined') {
-              throw new Error("getFieldsAsArray: no such field: " + fieldName);
-            }
-            result[obj[fieldName]] = obj;
-          });
-          return result;
+        studyId: null,
+        panelStates: {
+          participantAnnotTypes: true,
+          specimenGroups:        true,
+          ceventAnnotTypes:      true,
+          ceventTypes:           true,
+          processingTypes:       true,
+          spcLinkAnnotTypes:     true,
+          spcLinkTypes:          true
         }
       };
-    }]);
+    };
+
+    var currentState = initialSettings();
+
+    return {
+      panelState: function(panel, state) {
+        if (typeof currentState.panelStates[panel] === 'undefined') {
+          throw new Error("panel not defined: " + panel);
+        }
+
+        if (state === undefined) {
+          return currentState.panelStates[panel];
+        }
+        currentState.panelStates[panel] = state;
+        return state;
+      },
+      panelStateToggle: function(panel) {
+        if (typeof currentState.panelStates[panel] === 'undefined') {
+          throw new Error("panel not defined: " + panel);
+        }
+        currentState.panelStates[panel] = !currentState.panelStates[panel];
+        return currentState.panelStates[panel];
+      },
+      initialize: function(studyId) {
+        if (studyId != currentState.studyId) {
+          // initialize state only when a new study is selected
+          currentState = initialSettings();
+          currentState.studyId = studyId;
+        }
+      },
+      getState: function() {
+        return currentState;
+      }
+    };
+  });
 
   mod.service('panelTableService', ['$filter', 'ngTableParams', function ($filter, ngTableParams) {
     this.getTableParams = function(data) {

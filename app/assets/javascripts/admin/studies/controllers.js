@@ -1,19 +1,25 @@
 /**
  * Study administration controllers.
  */
-define(['angular', 'common'], function(angular, common) {
+define(['angular', 'underscore', 'common'], function(angular, _, common) {
   'use strict';
 
   var mod = angular.module('admin.studies.controllers', ['studies.services']);
 
-  function PanelSettings($scope, panelTableService, data) {
+  function PanelSettings($scope, studyViewSettings, panelTableService, data, panelStateName) {
     this.data = data;
     this.tableParams = panelTableService.getTableParams(this.data);
+    this.panelOpen = studyViewSettings.panelState(panelStateName);
+    this.panelToggle = function() {
+      studyViewSettings.panelStateToggle(panelStateName);
+    };
   }
 
   function AnnotTypesPanelSettings(
     $injector,
     $scope,
+    studyViewSettings,
+    panelStateName,
     panelTableService,
     annotTypeModalService,
     annotTypes,
@@ -38,8 +44,10 @@ define(['angular', 'common'], function(angular, common) {
 
     $injector.invoke(PanelSettings, this, {
       $scope: $scope,
+      studyViewSettings: studyViewSettings,
       panelTableService: panelTableService,
-      data: annotTypes
+      data: annotTypes,
+      panelStateName: panelStateName
     });
   }
 
@@ -49,14 +57,13 @@ define(['angular', 'common'], function(angular, common) {
    * "user" is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
   mod.controller('StudiesCtrl', [
-    '$rootScope', '$scope', '$state', '$log', 'user', 'StudyService', 'studyUtilsService',
-    function($rootScope, $scope, $state, $log, user, StudyService, studyUtilsService) {
+    '$rootScope', '$scope', '$state', 'StudyService',
+    function($rootScope, $scope, $state, StudyService) {
       $rootScope.pageTitle = 'Biobank studies';
       $scope.studies = [];
-      $scope.user = user;
 
       StudyService.list().then(function(response) {
-        $scope.studies = response.data.sort(studyUtilsService.compareByName);
+        $scope.studies = _.sortBy(response.data, function(study) { return study.name; });
       });
 
       $scope.addStudy = function() {
@@ -78,9 +85,19 @@ define(['angular', 'common'], function(angular, common) {
    * "user" is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
   mod.controller('StudiesTableCtrl', [
-    '$scope', '$rootScope', '$filter', '$state', '$log', 'ngTableParams',
-    'user', 'StudyService',
-    function($scope, $rootScope, $filter, $state, $log, ngTableParams, user, StudyService) {
+    '$scope',
+    '$rootScope',
+    '$filter',
+    '$state',
+    'ngTableParams',
+    'StudyService',
+    'studyViewSettings',
+    function($scope,
+             $rootScope,
+             $filter,
+             $state,
+             ngTableParams,
+             StudyService) {
       $rootScope.pageTitle = 'Biobank studies';
       $scope.studies = [];
 
@@ -130,8 +147,8 @@ define(['angular', 'common'], function(angular, common) {
    * See http://stackoverflow.com/questions/22881782/angularjs-tabset-does-not-show-the-correct-state-when-the-page-is-reloaded
    */
   mod.controller('StudySummaryTabCtrl', [
-    '$scope', '$rootScope', '$state', '$log', '$filter', 'user', 'study',
-    function($scope, $rootScope, $state, $log, $filter, user, study) {
+    '$scope', '$rootScope', '$state', '$filter', 'user', 'study',
+    function($scope, $rootScope, $state, $filter, user, study) {
 
       $scope.study = study;
       $scope.description = $scope.study.description;
@@ -205,16 +222,18 @@ define(['angular', 'common'], function(angular, common) {
     '$injector',
     '$scope',
     '$state',
-    'annotTypeModalService',
+    'studyViewSettings',
     'panelTableService',
+    'annotTypeModalService',
     'participantAnnotTypeRemoveService',
     'annotTypes',
     function (
       $injector,
       $scope,
       $state,
-      annotTypeModalService,
+      studyViewSettings,
       panelTableService,
+      annotTypeModalService,
       participantAnnotTypeRemoveService,
       annotTypes) {
 
@@ -222,6 +241,8 @@ define(['angular', 'common'], function(angular, common) {
         annotTypes:  new AnnotTypesPanelSettings(
           $injector,
           $scope,
+          studyViewSettings,
+          'participantAnnotTypes',
           panelTableService,
           annotTypeModalService,
           annotTypes,
@@ -236,8 +257,7 @@ define(['angular', 'common'], function(angular, common) {
           function(annotType) {
             $state.go('admin.studies.study.participants.annotTypeUpdate',
                       { annotTypeId: annotType.id });
-          },
-          participantAnnotTypeRemoveService
+          }
         )
       };
     }]);
@@ -250,21 +270,21 @@ define(['angular', 'common'], function(angular, common) {
     '$injector',
     '$scope',
     '$state',
+    'studyViewSettings',
     'specimenGroupModalService',
     'panelTableService',
     'SpecimenGroupService',
     'specimenGroupRemoveService',
-    'study',
     'specimenGroups',
     function(
       $injector,
       $scope,
       $state,
+      studyViewSettings,
       specimenGroupModalService,
       panelTableService,
       SpecimenGroupService,
       specimenGroupRemoveService,
-      study,
       specimenGroups) {
 
       function SpecimenGroupSettings() {
@@ -287,8 +307,10 @@ define(['angular', 'common'], function(angular, common) {
 
         $injector.invoke(PanelSettings, this, {
           $scope: $scope,
+          studyViewSettings: studyViewSettings,
           panelTableService: panelTableService,
-          data: specimenGroups
+          data: specimenGroups,
+          panelStateName: 'specimenGroups'
         });
       }
 
@@ -304,6 +326,7 @@ define(['angular', 'common'], function(angular, common) {
     '$injector',
     '$scope',
     '$state',
+    'studyViewSettings',
     'ceventTypeModalService',
     'ceventTypeRemoveService',
     'ceventAnnotTypeRemoveService',
@@ -316,6 +339,7 @@ define(['angular', 'common'], function(angular, common) {
       $injector,
       $scope,
       $state,
+      studyViewSettings,
       ceventTypeModalService,
       ceventTypeRemoveService,
       ceventAnnotTypeRemoveService,
@@ -329,6 +353,8 @@ define(['angular', 'common'], function(angular, common) {
         annotTypes: new AnnotTypesPanelSettings(
           $injector,
           $scope,
+          studyViewSettings,
+          'ceventAnnotTypes',
           panelTableService,
           annotTypeModalService,
           annotTypes,
@@ -366,6 +392,10 @@ define(['angular', 'common'], function(angular, common) {
         this.remove = function(ceventType) {
           ceventTypeRemoveService.remove(ceventType);
         };
+        this.panelOpen = studyViewSettings.panelState('ceventTypes');
+        this.panelToggle = function() {
+          studyViewSettings.panelState('ceventTypes');
+        };
 
         // push all specimen groups names into an array for easy display
         var specimenGroupsById = _.indexBy(specimenGroups, 'id');
@@ -378,8 +408,10 @@ define(['angular', 'common'], function(angular, common) {
 
         $injector.invoke(PanelSettings, this, {
           $scope: $scope,
+          studyViewSettings: studyViewSettings,
           panelTableService: panelTableService,
-          data: ceventTypes
+          data: ceventTypes,
+          panelStateName: 'ceventTypes'
         });
       }
 
@@ -394,6 +426,7 @@ define(['angular', 'common'], function(angular, common) {
     '$injector',
     '$scope',
     '$state',
+    'studyViewSettings',
     'processingTypeModalService',
     'processingTypeRemoveService',
     'annotTypeModalService',
@@ -401,10 +434,12 @@ define(['angular', 'common'], function(angular, common) {
     'spcLinkTypeModalService',
     'spcLinkTypeRemoveService',
     'panelTableService',
+    'specimenGroupModalService',
     'dtoProcessing',
     function($injector,
              $scope,
              $state,
+             studyViewSettings,
              processingTypeModalService,
              processingTypeRemoveService,
              annotTypeModalService,
@@ -412,11 +447,14 @@ define(['angular', 'common'], function(angular, common) {
              spcLinkTypeModalService,
              spcLinkTypeRemoveService,
              panelTableService,
+             specimenGroupModalService,
              dtoProcessing) {
       $scope.panel = {
         annotTypes: new AnnotTypesPanelSettings(
           $injector,
           $scope,
+          studyViewSettings,
+          'spcLinkAnnotTypes',
           panelTableService,
           annotTypeModalService,
           dtoProcessing.specimenLinkAnnotationTypes,
@@ -455,11 +493,17 @@ define(['angular', 'common'], function(angular, common) {
         this.remove = function(processingType) {
           processingTypeRemoveService.remove(processingType);
         };
+        this.panelOpen = studyViewSettings.panelState('processingTypes');
+        this.panelToggle = function() {
+          studyViewSettings.panelState('processingTypes');
+        };
 
         $injector.invoke(PanelSettings, this, {
           $scope: $scope,
+          studyViewSettings: studyViewSettings,
           panelTableService: panelTableService,
-          data: dtoProcessing.processingTypes
+          data: dtoProcessing.processingTypes,
+          panelStateName: 'processingTypes'
         });
       }
 
@@ -484,11 +528,28 @@ define(['angular', 'common'], function(angular, common) {
         this.remove = function(spcLinkType) {
           spcLinkTypeRemoveService.remove(spcLinkType);
         };
+        this.panelOpen = studyViewSettings.panelState('spcLinkTypes');
+        this.panelToggle = function() {
+          studyViewSettings.panelState('spcLinkTypes');
+        };
+
+        this.processingTypesById = _.indexBy(dtoProcessing.processingTypes, 'id');
+        this.specimenGroupsById = _.indexBy(dtoProcessing.specimenGroups, 'id');
+
+        this.showProcessingType = function (processingTypeId) {
+          processingTypeModalService.show(this.processingTypesById[processingTypeId]);
+        };
+
+        this.showSpecimenGroup = function (specimenGroupId) {
+          specimenGroupModalService.show(this.specimenGroupsById[specimenGroupId]);
+        };
 
         $injector.invoke(PanelSettings, this, {
           $scope: $scope,
+          studyViewSettings: studyViewSettings,
           panelTableService: panelTableService,
-          data: dtoProcessing.specimenLinkTypes
+          data: dtoProcessing.specimenLinkTypes,
+          panelStateName: 'spcLinkTypes'
         });
       }
 
