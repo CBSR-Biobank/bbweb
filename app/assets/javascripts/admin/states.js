@@ -6,31 +6,30 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
 
   var mod = angular.module('admin.states', ['ui.router', 'user.services', 'biobank.common']);
 
-  mod.config(function($stateProvider, userResolve) {
+  mod.config([
+    '$urlRouterProvider', '$stateProvider', 'userResolve',
+    function($urlRouterProvider, $stateProvider, userResolve ) {
+
+    $urlRouterProvider.otherwise('/');
+
     $stateProvider
       .state('admin', {
-        abstract: true,
         url: '/admin',
-        resolve: userResolve,
-        data: {
-          breadcrumbProxy: 'admin.details'
-        }
-      })
-      .state('admin.details', {
-        url: '',
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/admin/adminDetails.html'
           }
         },
-        resolve: userResolve,
+        resolve: {
+          user: userResolve.user
+        },
         data: {
           displayName: 'Administration'
         }
       });
     //.when('/users', {templateUrl:'/assets/javascripts/user/users.html', controller:controllers.UserCtrl})
     //.when('/users/:id', {templateUrl:'/assets/javascripts/user/editUser.html', controller:controllers.UserCtrl});
-  });
+  }]);
 
   return mod;
 });

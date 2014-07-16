@@ -10,7 +10,7 @@ define(['angular'], function(angular) {
 
   var mod = angular.module('common.directives.uiBreadcrumbs', ['ui.router']);
 
-  mod.directive('uiBreadcrumbs', function($interpolate, $state) {
+  mod.directive('uiBreadcrumbs', ['$interpolate', '$state', function($interpolate, $state) {
     return {
       restrict: 'E',
       templateUrl: '/assets/javascripts/common/directives/uiBreadcrumbs.html',
@@ -153,7 +153,7 @@ define(['angular'], function(angular) {
         }
       }
     };
-  });
+  }]);
 
   return mod;
 });

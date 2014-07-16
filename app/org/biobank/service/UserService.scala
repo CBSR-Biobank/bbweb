@@ -4,7 +4,6 @@ import org.biobank.domain._
 import org.biobank.domain.validation.UserValidationHelper
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
-import org.biobank.service.Messages._
 
 import akka.actor.{ ActorSystem, ActorRef }
 import scala.concurrent.Future
@@ -129,7 +128,7 @@ trait UserProcessorComponent {
       for {
         user <- userRepository.getByKey(UserId(cmd.email))
         registeredUser <- isUserRegistered(user)
-        activatedUser <- registeredUser.activate(cmd.expectedVersion, timeNow)
+        activatedUser <- registeredUser.activate(Some(cmd.expectedVersion), timeNow)
         event <- UserActivatedEvent(
           activatedUser.id.toString, activatedUser.version, timeNow).success
       } yield {
@@ -143,7 +142,7 @@ trait UserProcessorComponent {
         user <- userRepository.getByKey(UserId(cmd.email))
         activeUser <- isUserActive(user)
         updatedUser <- activeUser.update(
-          cmd.expectedVersion, timeNow, cmd.name, cmd.email, cmd.password,
+          Some(cmd.expectedVersion), timeNow, cmd.name, cmd.email, cmd.password,
           activeUser.hasher, activeUser.salt, cmd.avatarUrl)
         event <- UserUpdatedEvent(updatedUser.id.id, updatedUser.version, timeNow, updatedUser.name,
           updatedUser.email, updatedUser.password, updatedUser.avatarUrl).success
@@ -157,7 +156,7 @@ trait UserProcessorComponent {
       for {
         user <- userRepository.getByKey(UserId(cmd.email))
         activeUser <- isUserActive(user)
-        lockedUser <- activeUser.lock(cmd.expectedVersion, timeNow)
+        lockedUser <- activeUser.lock(Some(cmd.expectedVersion), timeNow)
         event <- UserLockedEvent(lockedUser.id.toString, lockedUser.version, timeNow).success
       } yield {
         event
@@ -167,10 +166,9 @@ trait UserProcessorComponent {
     def validateCmd(cmd: UnlockUserCmd): DomainValidation[UserUnlockedEvent] = {
       val timeNow = DateTime.now
       for {
-        logmsg <- log.info(s"******* cmd : $cmd").success
         user <- userRepository.getByKey(UserId(cmd.email))
         lockedUser <- isUserLocked(user)
-        unlockedUser <- lockedUser.unlock(cmd.expectedVersion, timeNow)
+        unlockedUser <- lockedUser.unlock(Some(cmd.expectedVersion), timeNow)
         event <- UserUnlockedEvent(lockedUser.id.toString, lockedUser.version, timeNow).success
       } yield {
         event

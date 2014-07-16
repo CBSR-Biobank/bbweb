@@ -124,7 +124,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
 
       val sg2 = factory.createSpecimenGroup
 
-      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sg.id.id, Some(sg.version),
+      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sg.id.id, sg.version,
         sg2.name, sg2.description, sg2.units, sg2.anatomicalSourceType, sg2.preservationType,
         sg2.preservationTemperatureType, sg2.specimenType)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
@@ -156,7 +156,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       val item = factory.createSpecimenGroup
       specimenGroupRepository.put(item)
 
-      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, item.id.id, Some(-1L), item.name,
+      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, item.id.id, -1L, item.name,
         item.description, item.units, item.anatomicalSourceType, item.preservationType,
         item.preservationTemperatureType, item.specimenType)
 
@@ -196,7 +196,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
 
       val sg3 = factory.createSpecimenGroup
 
-      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sg2.id.id, Some(sg2.version),
+      val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sg2.id.id, sg2.version,
         sg1.name, sg1.description, sg1.units, sg1.anatomicalSourceType, sg1.preservationType,
         sg1.preservationTemperatureType, sg1.specimenType)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
@@ -216,7 +216,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       val study2 = factory.createDisabledStudy
       studyRepository.put(study2)
 
-      val cmd = new UpdateSpecimenGroupCmd(study2.id.id, item.id.id, item.versionOption, item.name,
+      val cmd = new UpdateSpecimenGroupCmd(study2.id.id, item.id.id, item.version, item.name,
         item.description, item.units, item.anatomicalSourceType, item.preservationType,
         item.preservationTemperatureType, item.specimenType)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
@@ -233,7 +233,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       val item = factory.createSpecimenGroup
       specimenGroupRepository.put(item)
 
-      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id, item.versionOption)
+      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id, item.version)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
         .futureValue
 
@@ -247,7 +247,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       val item = factory.createSpecimenGroup
       specimenGroupRepository.put(item)
 
-      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id, Some(item.version - 10))
+      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id, item.version - 10)
       val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
         .futureValue
 

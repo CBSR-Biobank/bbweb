@@ -1,9 +1,11 @@
-<div class="page-header"><h1>{{title}}</h1></div>
+<div class="page-header"><h1>{{study.name}} <small>{{title}}</small></h1></div>
 <div class="clearfix">
   <form class="form-horizontal"
-        name="studyEditForm"
-        ng-submit="studyEditForm.$valid && submit(study)"
+        name="studyForm"
+        ng-submit="studyForm.$valid && submit(study)"
         novalidate>
+
+    <!-- NAME -->
     <div class="form-group">
       <label for="name" class="col-sm-2 control-label">Name</label>
       <div class="col-sm-10">
@@ -13,9 +15,15 @@
             class="form-control"
             ng-model="study.name"
             ng-minlength="2"
-            placeholder="A short name for the study" required="true"/>
+            placeholder="A short name for the study"
+            required />
+      </div>
+      <div class="col-sm-offset-2 col-sm-10">
+        <p class="help-block" ng-show="studyForm.name.$error.minlength">Name is too short.</p>
       </div>
     </div>
+
+    <!-- DESCRIPTION -->
     <div class="form-group">
       <label for="description" class="col-sm-2 control-label">Description</label>
       <div class="col-sm-10">
@@ -23,13 +31,15 @@
                   class="form-control"
                   rows="10"
                   ng-model="study.description"
-                  placeholder="A description of the study" />
+                  placeholder="A description of the study (optional)" />
       </div>
     </div>
+
+    <!-- BUTTONS  -->
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
-        <button class="btn btn-primary" data-ng-disabled="studyEditForm.$invalid">Submit</button>
-        <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+        <button class="btn btn-primary" data-ng-disabled="studyForm.$invalid">Submit</button>
+        <button class="btn" ng-click="cancel()">Cancel</button>
       </div>
     </div>
   </form>

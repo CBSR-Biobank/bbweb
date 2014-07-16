@@ -38,14 +38,6 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     )
   }
 
-  private def annotTypeToRemoveCmdJson(annotType: SpecimenLinkAnnotationType) = {
-    Json.obj(
-      "studyId"         -> annotType.studyId.id,
-      "id"              -> annotType.id.id,
-      "expectedVersion" -> Some(annotType.version)
-    )
-  }
-
   private def addOnNonDisabledStudy(
     appRepositories: AppRepositories,
     study: Study) {
@@ -95,9 +87,8 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       DELETE,
-      s"/studies/slannottype/${annotType.id.id}",
-      BAD_REQUEST,
-      annotTypeToRemoveCmdJson(annotType))
+      s"/studies/slannottype/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}",
+      BAD_REQUEST)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -262,8 +253,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(
           DELETE,
-          s"/studies/slannottype/${annotType.id.id}",
-          json = annotTypeToRemoveCmdJson(annotType))
+          s"/studies/slannottype/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}")
 
         (json \ "status").as[String] should include ("success")
       }

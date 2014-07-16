@@ -64,7 +64,6 @@ class StudyControllerSpec extends ControllerFixture {
         val appRepositories = new AppRepositories
         val study = factory.createDisabledStudy
         val cmdJson = Json.obj(
-          "type" -> "AddStudyCmd",
           "name" -> study.name,
           "description" -> study.description)
         val json = makeRequest(POST, "/studies", json = cmdJson)
@@ -89,7 +88,6 @@ class StudyControllerSpec extends ControllerFixture {
         appRepositories.studyRepository.put(study)
 
         val cmdJson = Json.obj(
-          "type"            -> "UpdateStudyCmd",
           "id"              -> study.id.id,
           "expectedVersion" -> Some(study.version),
           "name"            -> study.name,
@@ -131,7 +129,6 @@ class StudyControllerSpec extends ControllerFixture {
         appRepositories.collectionEventTypeRepository.put(factory.createCollectionEventType)
 
         val cmdJson = Json.obj(
-          "type" -> "EnableStudyCmd",
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/enable", json = cmdJson)
@@ -156,7 +153,6 @@ class StudyControllerSpec extends ControllerFixture {
         appRepositories.studyRepository.put(study)
 
         val cmdJson = Json.obj(
-          "type" -> "EnableStudyCmd",
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/enable", BAD_REQUEST, cmdJson)
@@ -175,7 +171,6 @@ class StudyControllerSpec extends ControllerFixture {
         appRepositories.studyRepository.put(study)
 
         val cmdJson = Json.obj(
-          "type" -> "DisableStudyCmd",
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/disable", json = cmdJson)
@@ -200,7 +195,6 @@ class StudyControllerSpec extends ControllerFixture {
         appRepositories.studyRepository.put(study)
 
         val cmdJson = Json.obj(
-          "type" -> "RetireStudyCmd",
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/retire", json = cmdJson)
@@ -225,7 +219,6 @@ class StudyControllerSpec extends ControllerFixture {
         appRepositories.studyRepository.put(study)
 
         val cmdJson = Json.obj(
-          "type" -> "UnretireStudyCmd",
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/unretire", json = cmdJson)
@@ -284,6 +277,18 @@ class StudyControllerSpec extends ControllerFixture {
         val json = makeRequest(GET, "/studies/preservtemptypes")
         val values = json.as[List[String]]
         values.size should be > 0
+      }
+    }
+
+    "GET /studies/sgvaluetypes " should {
+      "list all" in new WithApplication(fakeApplication()) {
+        doLogin
+        val jsonReq = makeRequest(GET, "/studies/sgvaluetypes")
+        val json = jsonReq.as[JsObject]
+        (json \ "anatomicalSourceType").as[List[String]].size        should be > 0
+        (json \ "preservationType").as[List[String]].size            should be > 0
+        (json \ "preservationTemperatureType").as[List[String]].size should be > 0
+        (json \ "specimenType").as[List[String]].size                should be > 0
       }
     }
 

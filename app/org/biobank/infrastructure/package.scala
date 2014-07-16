@@ -14,7 +14,7 @@ package infrastructure {
     */
   sealed trait AnnotationTypeData {
 
-    /** @param annotationTypeId The ID of the object this annotation belongs to. */
+    /** @param annotationTypeId The ID of the corresponding  annotation type. */
     val annotationTypeId: String
 
     /** When true, then a value for this annotation type is required when the collection event is entered.
@@ -39,11 +39,15 @@ package infrastructure {
     * collection event types.
     *
     * @param specimenGroupId The ID associated with the [[org.biobank.domain.study.SpecimenGroup]].
-
+    *
+    * @param name A copy of the name of the corresponding specimen group. Read only.
+    *
     * @param maxCount The number of specimens required to be collected.
-
+    *
     * @param amount The amount of substance that is expected in each collected specimen, or None
     *        if there is no default amount. The unit on the amount is defined in the SpecimenGroup.
+    *
+    * @param units A copy of the units field from the specimen group. Read only.
     *
     */
   case class CollectionEventTypeSpecimenGroupData(

@@ -1,13 +1,13 @@
 /**
  * Home routes.
  */
-define(['angular', './controllers', 'common'], function(angular, controllers) {
+define(['angular'], function(angular, controllers) {
   'use strict';
 
-  var mod = angular.module('home.states', ['ui.router', 'biobank.common']);
-  mod.config(function($urlRouterProvider, $stateProvider) {
+  var mod = angular.module('home.states', ['ui.router', 'home.controllers', 'biobank.common']);
+  mod.config(['$urlRouterProvider', '$stateProvider', function($urlRouterProvider, $stateProvider) {
 
-    $urlRouterProvider.otherwise('/home');
+    $urlRouterProvider.otherwise('/');
 
     $stateProvider
       .state('home', {
@@ -15,7 +15,7 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/home/home.html',
-            controller: controllers.HomeCtrl
+            controller: 'HomeCtrl'
           }
         },
         data: {
@@ -26,26 +26,24 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
         url: '/about',
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/home/about.html',
-            controller: controllers.HomeCtrl
+            templateUrl: '/assets/javascripts/home/about.html'
           }
         },
         data: {
-          displayName: 'About'
+          displayName: false
         }
       })
       .state('contact', {
         url: '/contact',
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/home/contact.html',
-            controller: controllers.HomeCtrl
+            templateUrl: '/assets/javascripts/home/contact.html'
           }
         },
         data: {
-          displayName: 'Contact us'
+          displayName: false
         }
       });
-  });
+  }]);
   return mod;
 });

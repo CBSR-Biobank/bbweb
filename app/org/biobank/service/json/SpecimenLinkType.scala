@@ -68,7 +68,7 @@ object SpecimenLinkType {
   implicit val updateSpecimenLinkTypeCmdReads: Reads[UpdateSpecimenLinkTypeCmd] = (
     (__ \ "processingTypeId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0)) and
       (__ \ "expectedInputChange").read[BigDecimal] and
       (__ \ "expectedOutputChange").read[BigDecimal] and
       (__ \ "inputCount").read[Int] and
@@ -83,7 +83,7 @@ object SpecimenLinkType {
   implicit val removeSpecimenLinkTypeCmdReads: Reads[RemoveSpecimenLinkTypeCmd] = (
     (__ \ "processingTypeId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0))
+      (__ \ "expectedVersion").read[Long](min[Long](0))
   )(RemoveSpecimenLinkTypeCmd.apply _)
 
   implicit val specimenLinkTypeAddedEventWrites: Writes[SpecimenLinkTypeAddedEvent] = (

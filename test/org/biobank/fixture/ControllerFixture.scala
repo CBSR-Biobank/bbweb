@@ -72,7 +72,7 @@ trait ControllerFixture
       .withJsonBody(json)
       .withHeaders("X-XSRF-TOKEN" -> token)
       .withCookies(Cookie("XSRF-TOKEN", token))
-    Logger.info(s"makeRequest: request: $fakeRequest")
+    Logger.info(s"makeRequest: request: $fakeRequest, $json")
     route(fakeRequest).fold {
       Json.parse("{ status: KO, message: request returned None")
     } { result =>

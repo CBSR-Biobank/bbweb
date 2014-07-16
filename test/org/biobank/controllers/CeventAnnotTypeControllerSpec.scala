@@ -38,14 +38,6 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
     )
   }
 
-  private def annotTypeToRemoveCmdJson(annotType: CollectionEventAnnotationType) = {
-    Json.obj(
-      "studyId"         -> annotType.studyId.id,
-      "id"              -> annotType.id.id,
-      "expectedVersion" -> Some(annotType.version)
-    )
-  }
-
   private def addOnNonDisabledStudy(
     appRepositories: AppRepositories,
     study: Study) {
@@ -95,9 +87,8 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       DELETE,
-      s"/studies/ceannottype/${annotType.id.id}",
-      BAD_REQUEST,
-      annotTypeToRemoveCmdJson(annotType))
+      s"/studies/ceannottype/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}",
+      BAD_REQUEST)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -261,8 +252,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(
           DELETE,
-          s"/studies/ceannottype/${annotType.id.id}",
-          json = annotTypeToRemoveCmdJson(annotType))
+          s"/studies/ceannottype/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}")
 
         (json \ "status").as[String] should include ("success")
       }

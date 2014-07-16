@@ -1,0 +1,135 @@
+<div class="page-header"><h1>{{study.name}} <small>{{title}}</small></h1></div>
+<div class="clearfix">
+  <form class="form-horizontal"
+        name="annotTypeForm"
+        novalidate>
+
+    <!-- NAME -->
+    <div class="form-group">
+      <label for="name" class="col-sm-2 control-label">Name</label>
+      <div class="col-sm-10">
+        <input name="name"
+               type="text"
+               class="form-control"
+               ng-model="annotType.name"
+               ng-minlength="2"
+               placeholder="A short name for the annotation type"
+               required/>
+      </div>
+      <div class="col-sm-offset-2 col-sm-10">
+        <p class="help-block" ng-show="annotTypeForm.name.$error.minlength">Name is too short.</p>
+      </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="form-group">
+      <label for="description" class="col-sm-2 control-label">Description</label>
+      <div class="col-sm-10">
+        <textarea name="description"
+                  class="form-control"
+                  rows="10"
+                  ng-model="annotType.description"
+                  placeholder="A description of the annotation type (optional)" />
+      </div>
+    </div>
+
+    <!-- REQUIRED -->
+    <div class="form-group" ng-if="hasRequiredField">
+      <label for="required" class="col-sm-2 control-label">Required</label>
+      <div class="col-sm-10">
+        <input name="required"
+               type="checkbox"
+               ng-model="annotType.required"/>
+      </div>
+    </div>
+
+    <!--VALUE TYPE  -->
+    <div class="form-group">
+      <label for="valueType" class="col-sm-2 control-label">Value Type</label>
+      <div class="col-sm-10">
+        <select class="form-control"
+                name="valueType"
+                ng-model="annotType.valueType"
+                ng-options="valueType for valueType in valueTypes"
+                required>
+          <option value="">-- make a selection --</option>
+        </select>
+      </div>
+      <div class="col-sm-offset-2 col-sm-10">
+        <p ng-show="annotTypeForm.valueType.$invalid && !annotTypeForm.valueType.$pristine"
+           class="help-block">
+        Value type is required.</p>
+      </div>
+    </div>
+
+    <!-- SELECTIONS -->
+    <div class="form-group" ng-if="annotType.valueType === 'Select'">
+      <label for="maxValueCount" class="col-sm-2 control-label">Selections</label>
+      <div class="col-sm-5">
+        <input name="maxValueCount"
+               type="radio"
+               ng-model="annotType.maxValueCount"
+               value="1"
+               str2integer /> Single selection only
+      </div>
+      <div class="col-sm-5">
+        <input type="radio"
+               ng-model="annotType.maxValueCount"
+               value="2"
+               str2integer /> Multiple selections allowed
+      </div>
+    </div>
+
+    <!-- SELECTION OPTIONS -->
+    <div class="form-group"
+         ng-if="annotType.valueType === 'Select'"
+         ng-repeat="opt in annotType.options track by $index">
+      <ng-form name="subForm">
+        <div class="col-sm-2 control-label">
+          <label>Selection Option {{$index + 1}}</label>
+        </div>
+        <div class="col-sm-8">
+          <input type="text"
+                 name="option"
+                 class="form-control"
+                 ng-model="annotType.options[$index]"
+                 placeholder="Enter an option"
+                 required />
+        </div>
+        <div class="col-sm-2">
+          <button class="btn btn-sm btn-warning"
+                  ng-click="removeOption(opt)"
+                  ng-disabled="removeButtonDisabled()">
+            <i class="glyphicon glyphicon-minus"></i> Remove
+          </button>
+        </div>
+        <div class="col-sm-offset-2 col-sm-10">
+          <p class="help-block" ng-show="subForm.option.$invalid && !subForm.option.$pristine">
+            A value is required
+          </p>
+        </div>
+      </ng-form>
+    </div>
+
+    <!-- ADD SELECTION OPTION -->
+    <div class="form-group"
+         ng-if="annotType.valueType === 'Select'">
+      <div class="col-sm-2">
+        <button class="btn btn-sm btn-primary pull-right"
+                ng-click="optionAdd()">
+          Add option <i class="glyphicon glyphicon-plus"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button class="btn btn-primary"
+                ng-disabled="annotTypeForm.$invalid"
+                ng-click="submit(annotType)">Submit</button>
+        <button class="btn" ng-click="cancel()">Cancel</button>
+      </div>
+    </div>
+  </form>
+</div>

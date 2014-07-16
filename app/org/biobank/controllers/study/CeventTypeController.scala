@@ -59,7 +59,8 @@ object CeventTypeController extends BbwebController  {
     }
   }
 
-  def removeCollectionEventType(id: String) = CommandAction { cmd: RemoveCollectionEventTypeCmd => implicit userId =>
+  def removeCollectionEventType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    val cmd = RemoveCollectionEventTypeCmd(studyId, id, ver)
     val future = studyService.removeCollectionEventType(cmd)
     future.map { validation =>
       validation.fold(

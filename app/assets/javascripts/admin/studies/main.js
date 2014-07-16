@@ -6,9 +6,14 @@ define([
   'angular',
   './states',
   './controllers',
-  './services',
-  './directives/studyTabs',
-  './annotTypes/main'
+  './services/services',
+  './services/helpers',
+  './directives/studyForms',
+  './directives/studyPanels',
+  './participants/main',
+  './specimenGroups/main',
+  './ceventTypes/main',
+  './processing/main'
 ], function(angular) {
   'use strict';
 
@@ -19,7 +24,12 @@ define([
     'ngTable',
     'admin.studies.controllers',
     'admin.studies.states',
-    'admin.studies.directives.studyTabs',
-    'study.services',
-    'admin.studies.annotTypes']);
+    'admin.studies.directives.studyForms',
+    'admin.studies.directives.studyPanels',
+    'studies.services',
+    'admin.studies.helpers',
+    'admin.studies.participants',
+    'admin.studies.specimenGroups',
+    'admin.studies.ceventTypes',
+    'admin.studies.processing']);
 });

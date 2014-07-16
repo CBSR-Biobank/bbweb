@@ -68,7 +68,8 @@ object ParticipantAnnotTypeController extends BbwebController  {
     }
   }
 
-  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveParticipantAnnotationTypeCmd => implicit userId =>
+  def removeAnnotationType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    val cmd = RemoveParticipantAnnotationTypeCmd(studyId, id, ver)
     val future = studyService.removeParticipantAnnotationType(cmd)
     future.map { validation =>
       validation.fold(

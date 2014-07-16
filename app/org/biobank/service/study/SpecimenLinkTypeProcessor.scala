@@ -1,6 +1,5 @@
 package org.biobank.service.study
 
-import org.biobank.service.Messages._
 import org.biobank.domain._
 import org.biobank.domain.study.{
   ProcessingType,
@@ -119,7 +118,7 @@ trait SpecimenLinkTypeProcessorComponent {
         oldItem <- specimenLinkTypeRepository.withId(processingTypeId,id)
         processingType <- processingTypeRepository.getByKey(processingTypeId)
         newItem <- oldItem.update(
-          cmd.expectedVersion,
+         Some(cmd.expectedVersion),
           org.joda.time.DateTime.now,
           cmd.expectedInputChange,
           cmd.expectedOutputChange,
@@ -159,7 +158,7 @@ trait SpecimenLinkTypeProcessorComponent {
 
       for {
         item <- specimenLinkTypeRepository.withId(processingTypeId, id)
-        validVersion <- validateVersion(item, cmd.expectedVersion)
+        validVersion <- validateVersion(item,Some(cmd.expectedVersion))
         event <- SpecimenLinkTypeRemovedEvent(cmd.processingTypeId, cmd.id).success
       } yield event
     }

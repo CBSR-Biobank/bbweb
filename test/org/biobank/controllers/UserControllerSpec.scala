@@ -69,7 +69,6 @@ class UserControllerSpec extends ControllerFixture {
         doLogin
         val user = factory.createRegisteredUser
         val cmdJson = Json.obj(
-          "type"      -> "RegisterUserCmd",
           "name"      -> user.name,
           "email"     -> user.email,
           "password"  -> "testpassword",
@@ -89,7 +88,6 @@ class UserControllerSpec extends ControllerFixture {
         appRepositories.userRepository.put(user)
 
         val cmdJson = Json.obj(
-          "type"            -> "UpdateUserCmd",
           "id"              -> user.id.id,
           "expectedVersion" -> Some(user.version),
           "name"            -> user.name,
@@ -124,7 +122,6 @@ class UserControllerSpec extends ControllerFixture {
         appRepositories.userRepository.put(user)
 
         val cmdJson = Json.obj(
-          "type"            -> "ActivateUserCmd",
           "expectedVersion" -> Some(user.version),
           "email"           -> user.id.id)
         val json = makeRequest(PUT, s"/users/activate/${user.id.id}", json = cmdJson)
@@ -143,7 +140,6 @@ class UserControllerSpec extends ControllerFixture {
         appRepositories.userRepository.put(user)
 
         val cmdJson = Json.obj(
-          "type"            -> "LockUserCmd",
           "expectedVersion" -> Some(user.version),
           "email"           -> user.id.id)
         val json = makeRequest(PUT, s"/users/lock/${user.id.id}", json = cmdJson)
@@ -163,7 +159,6 @@ class UserControllerSpec extends ControllerFixture {
         appRepositories.userRepository.put(lockedUser)
 
         val cmdJson = Json.obj(
-          "type"            -> "UnlockUserCmd",
           "expectedVersion" -> Some(lockedUser.version),
           "email"           -> lockedUser.id.id)
         val json = makeRequest(PUT, s"/users/unlock/${lockedUser.id.id}", json = cmdJson)

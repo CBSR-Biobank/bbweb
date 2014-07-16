@@ -114,13 +114,10 @@ class CeventTypeControllerSpec extends ControllerFixture {
       annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
     appRepositories.collectionEventTypeRepository.put(cet)
 
-    val cmdJson = Json.obj(
-      "studyId"         -> cet.studyId.id,
-      "id"              -> cet.id.id,
-      "expectedVersion" -> Some(cet.version)
-    )
-
-    val json = makeRequest(DELETE, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
+    val json = makeRequest(
+      DELETE,
+      s"/studies/cetypes/${cet.studyId.id}/${cet.id.id}/${cet.version}",
+      BAD_REQUEST)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -223,7 +220,6 @@ class CeventTypeControllerSpec extends ControllerFixture {
           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
         val cmdJson = Json.obj(
-          "type"                 -> "AddCollectionEventTypeCmd",
           "studyId"              -> cet.studyId.id,
           "name"                 -> cet.name,
           "description"          -> cet.description,
@@ -287,7 +283,6 @@ class CeventTypeControllerSpec extends ControllerFixture {
           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
         val cmdJson = Json.obj(
-          "type"                 -> "UpdateCollectionEventTypeCmd",
           "studyId"              -> cet.studyId.id,
           "id"                   -> cet.id.id,
           "expectedVersion"      -> Some(cet.version),
@@ -350,14 +345,9 @@ class CeventTypeControllerSpec extends ControllerFixture {
           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
         appRepositories.collectionEventTypeRepository.put(cet)
 
-        val cmdJson = Json.obj(
-          "type"            -> "RemoveCollectionEventTypeCmd",
-          "studyId"         -> cet.studyId.id,
-          "id"              -> cet.id.id,
-          "expectedVersion" -> Some(cet.version)
-        )
-
-        val json = makeRequest(DELETE, s"/studies/cetypes/${cet.id.id}", json = cmdJson)
+        val json = makeRequest(
+          DELETE,
+          s"/studies/cetypes/${cet.studyId.id}/${cet.id.id}/${cet.version}")
 
         (json \ "status").as[String] should include ("success")
       }

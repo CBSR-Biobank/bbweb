@@ -45,7 +45,7 @@ object SpecimenGroup {
     (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
-      (__ \ "units").read[String](minLength[String](2)) and
+      (__ \ "units").read[String](minLength[String](1)) and
       (__ \ "anatomicalSourceType").read[AnatomicalSourceType] and
       (__ \ "preservationType").read[PreservationType] and
       (__ \ "preservationTemperatureType").read[PreservationTemperatureType] and
@@ -55,10 +55,10 @@ object SpecimenGroup {
   implicit val updateSpecimenGroupCmdReads: Reads[UpdateSpecimenGroupCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
-      (__ \ "units").read[String](minLength[String](2)) and
+      (__ \ "units").read[String](minLength[String](1)) and
       (__ \ "anatomicalSourceType").read[AnatomicalSourceType] and
       (__ \ "preservationType").read[PreservationType] and
       (__ \ "preservationTemperatureType").read[PreservationTemperatureType] and
@@ -68,7 +68,7 @@ object SpecimenGroup {
   implicit val removeSpecimenGroupCmdReads: Reads[RemoveSpecimenGroupCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0))
+      (__ \ "expectedVersion").read[Long](min[Long](0))
   )(RemoveSpecimenGroupCmd.apply _)
 
   implicit val specimenGroupAddedEventWrites: Writes[SpecimenGroupAddedEvent] = (

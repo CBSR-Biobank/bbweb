@@ -35,11 +35,11 @@ define(['angular'], function(angular) {
     };
   });
 
-/**
- * Taken from:
- *
- * http://stackoverflow.com/questions/21644493/how-to-split-the-ng-repeat-data-with-three-columns-using-bootstrap
- */
+  /**
+   * Taken from:
+   *
+   * http://stackoverflow.com/questions/21644493/how-to-split-the-ng-repeat-data-with-three-columns-using-bootstrap
+   */
   mod.filter('partition', function() {
     var cache = {};
     return function(arr, size) {
@@ -55,6 +55,30 @@ define(['angular'], function(angular) {
       }
       cache[arrString+size] = newArr;
       return newArr;
+    };
+  });
+
+  mod.filter('getById', function() {
+    return function(input, id) {
+      var i=0, len=input.length;
+      for (; i<len; i++) {
+        if (input[i].id === id) {
+          return input[i];
+        }
+      }
+      return null;
+    };
+  });
+
+  mod.filter('getByName', function() {
+    return function(input, name) {
+      var i=0, len=input.length;
+      for (; i<len; i++) {
+        if (input[i].name === name) {
+          return input[i];
+        }
+      }
+      return null;
     };
   });
 

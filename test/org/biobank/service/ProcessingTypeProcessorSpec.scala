@@ -50,7 +50,7 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
     val cmd = UpdateProcessingTypeCmd(
       procType.studyId.id,
       procType.id.id,
-      procType.versionOption,
+      procType.version,
       procType.name,
       procType.description,
       procType.enabled)
@@ -65,7 +65,7 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
     val cmd = RemoveProcessingTypeCmd(
       procType.studyId.id,
       procType.id.id,
-      procType.versionOption)
+      procType.version)
     val validation = ask(studyProcessor, cmd)
       .mapTo[DomainValidation[ProcessingTypeRemovedEvent]]
       .futureValue

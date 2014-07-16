@@ -46,9 +46,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
   }
 
   private def slTypeToAddCmdJson(slType: SpecimenLinkType) = {
-    val result = Json.obj("type" -> "AddSpecimenLinkTypeCmd")
-
-    result ++ slTypeCommonToAddCmdJson(slType) ++ annotTypeJson(slType)
+    slTypeCommonToAddCmdJson(slType) ++ annotTypeJson(slType)
   }
 
   private def slTypeToUpdateCmdJson(slType: SpecimenLinkType) = {
@@ -58,14 +56,6 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     )
 
     result ++ slTypeCommonToAddCmdJson(slType) ++ annotTypeJson(slType)
-  }
-
-  private def slTypeToRemoveCmdJson(slType: SpecimenLinkType) = {
-    Json.obj(
-      "processingTypeId" -> slType.processingTypeId.id,
-      "id"               -> slType.id.id,
-      "expectedVersion"  -> Some(slType.version)
-    )
   }
 
   def addOnNonDisabledStudy(
@@ -128,9 +118,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       DELETE,
-      s"/studies/sltypes/${slType.id.id}",
-      BAD_REQUEST,
-      slTypeToRemoveCmdJson(slType))
+      s"/studies/sltypes/${slType.processingTypeId.id}/${slType.id.id}/${slType.version}",
+      BAD_REQUEST)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -325,8 +314,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(
           DELETE,
-          s"/studies/sltypes/${slType.id.id}",
-          json = slTypeToRemoveCmdJson(slType))
+          s"/studies/sltypes/${slType.processingTypeId.id}/${slType.id.id}/${slType.version}")
 
         (json \ "status").as[String] should include ("success")
       }

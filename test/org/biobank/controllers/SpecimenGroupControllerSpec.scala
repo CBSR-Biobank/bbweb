@@ -69,11 +69,10 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     appRepositories.studyRepository.put(study)
     appRepositories.specimenGroupRepository.put(sg)
 
-    val cmdJson = Json.obj(
-      "studyId"         -> study.id.id,
-      "id"              -> sg.id.id,
-      "expectedVersion" -> Some(sg.version))
-    val json = makeRequest(DELETE, s"/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
+    val json = makeRequest(
+      DELETE,
+      s"/studies/sgroups/${sg.studyId.id}/${sg.id.id}/${sg.version}",
+      BAD_REQUEST)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -204,7 +203,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
         val sg2 = factory.createSpecimenGroup
         val cmdJson = Json.obj(
-          "type"                        -> "UpdateSpecimenGroupCmd",
           "studyId"                     -> study.id.id,
           "id"                          -> sg.id.id,
           "expectedVersion"             -> Some(sg.version),
@@ -252,12 +250,9 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val sg = factory.createSpecimenGroup
         appRepositories.specimenGroupRepository.put(sg)
 
-        val cmdJson = Json.obj(
-          "type"            -> "RemoveSpecimenGroupCmd",
-          "studyId"         -> study.id.id,
-          "id"              -> sg.id.id,
-          "expectedVersion" -> Some(sg.version))
-        val json = makeRequest(DELETE, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
+        val json = makeRequest(
+          DELETE,
+          s"/studies/sgroups/${sg.studyId.id}/${sg.id.id}/${sg.version}")
 
         (json \ "status").as[String] should include ("success")
       }

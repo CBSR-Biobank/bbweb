@@ -263,7 +263,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         specimenGroupData, annotationTypeData)
       validation should be ('failure)
       validation.swap.map { err =>
-        err.list should (have length 1 and contain("amount not is a positive number"))
+        err.list should (have length 1 and contain("amount is not a positive number"))
       }
     }
 

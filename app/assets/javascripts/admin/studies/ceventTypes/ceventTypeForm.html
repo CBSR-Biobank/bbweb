@@ -1,0 +1,172 @@
+<div class="page-header"><h1>{{study.name}} <small>{{title}}</small></h1></div>
+<div class="clearfix">
+  <form class="form-horizontal"
+        name="cetForm"
+        novalidate>
+
+    <!-- NAME -->
+    <div class="form-group" ng-class="{ 'has-error' : cetForm.name.$invalid && !cetForm.name.$pristine }">
+      <label for="name" class="col-sm-2 control-label">Name</label>
+      <div class="col-sm-10">
+        <input name="name"
+               type="text"
+               class="form-control"
+               ng-model="ceventType.name"
+               ng-minlength="2"
+               placeholder="A short name for the collection event type"
+               required />
+      </div>
+      <div class="col-sm-offset-2 col-sm-10">
+        <p class="help-block" ng-show="cetForm.name.$error.minlength">Name is too short.</p>
+      </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="form-group">
+      <label for="description" class="col-sm-2 control-label">Description</label>
+      <div class="col-sm-10">
+        <textarea name="description"
+                  class="form-control"
+                  rows="10"
+                  ng-model="ceventType.description"
+                  placeholder="A description of the collection event type (optional)" />
+      </div>
+    </div>
+
+    <!-- RECURRING -->
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <input name="recurring" type="checkbox" ng-model="ceventType.recurring"/> Recurring
+      </div>
+    </div>
+
+    <!-- SPECIMEN GROUP DATA -->
+    <div class="form-group" ng-repeat="sgData in ceventType.specimenGroupData track by $index">
+      <ng-form name="sgSubForm">
+        <div class="col-sm-2 control-label">
+          <label>Specimen Group {{$index + 1}}</label>
+        </div>
+        <div class="col-sm-3">
+          <select class="form-control"
+                  name="sgId"
+                  ng-model="ceventType.specimenGroupData[$index].specimenGroupId"
+                  ng-options="sg.id as sg.name for sg in specimenGroups | orderBy: 'name'"
+                  required>
+            <option value="">-- make a selection --</option>
+          </select>
+        </div>
+        <div class="col-sm-1 control-label">
+          <label class="small">#:</label>
+        </div>
+        <div class="col-sm-2">
+          <input type="number"
+                 min="1"
+                 name="maxCount"
+                 class="form-control input-sm"
+                 ng-model="ceventType.specimenGroupData[$index].maxCount"
+                 placeholder="max count"
+                 valid-count
+                 required/>
+        </div>
+        <div class="col-sm-1 control-label">
+          <label class="small">
+          {{(specimenGroupsById[sgData.specimenGroupId]
+                ? specimenGroupsById[sgData.specimenGroupId].units : 'Amount') + ':'}}
+          </label>
+        </div>
+        <div class="col-sm-2">
+          <input type="number"
+                 min="0"
+                 name="amount"
+                 class="form-control input-sm"
+                 ng-model="ceventType.specimenGroupData[$index].amount"
+                 placeholder="amount"
+                 valid-amount
+                 required />
+        </div>
+        <div class="col-sm-1">
+          <button class="btn btn-xs btn-warning"
+                  ng-click="form.removeSpecimenGroup(sgData)"
+                  ng-disabled="form.removeSpecimenGroupButtonDisabled()">
+            <i class="glyphicon glyphicon-minus"></i> Remove
+          </button>
+        </div>
+        <div class="col-sm-offset-2 col-sm-10">
+          <p class="help-block"
+             ng-show="sgSubForm.sgName.$error.required && !sgSubForm.sgName.$pristine">
+            Please select a specimen group
+          </p>
+          <p class="help-block"
+             ng-show="sgSubForm.maxCount.$error.validCount">
+            Max count should be a positive number greater than 1
+          </p>
+          <p class="help-block" ng-show="sgSubForm.amount.$error.validAmount">
+            Amount should be a positive floating point number
+          </p>
+        </div>
+      </ng-form>
+    </div>
+
+    <!-- SPECIMEN GROUP DATA ADD -->
+    <div class="form-group">
+      <div class="col-sm-2">
+        <button class="btn btn-sm btn-primary pull-right" ng-click="form.addSpecimenGroup()">
+           Add specimen group <i class="glyphicon glyphicon-plus"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ANNOTATION TYPE DATA -->
+    <div class="form-group" ng-repeat="atData in ceventType.annotationTypeData track by $index">
+      <ng-form name="atSubForm">
+        <div class="col-sm-2 control-label">
+          <label>Annotation Type {{$index + 1}}</label>
+        </div>
+        <div class="col-sm-3">
+          <select class="form-control"
+                  name="name"
+                  ng-model="ceventType.annotationTypeData[$index].annotationTypeId"
+                  ng-options="annotType.id as annotType.name for annotType in annotTypes | orderBy: 'name'"
+                  required>
+            <option value="">-- make a selection --</option>
+          </select>
+        </div>
+        <div class="col-sm-2">
+          <input name="required" type="checkbox" ng-model="ceventType.annotationTypeData[$index].required"/> Required
+        </div>
+        <div class="col-sm-1">
+          <button class="btn btn-xs btn-warning"
+                  ng-click="form.removeAnnotType(atData)">
+            <i class="glyphicon glyphicon-minus"></i> Remove
+          </button>
+        </div>
+        <div class="col-sm-offset-2 col-sm-10">
+          <p class="help-block" ng-show="atSubForm.name.$error.required && !atSubForm.name.$pristine">
+            Please select an annotation type
+          </p>
+        </div>
+      </ng-form>
+    </div>
+
+    <!-- ANNOTATION TYPE DATA ADD -->
+    <div class="form-group">
+      <div class="col-sm-2">
+        <button class="btn btn-sm btn-primary pull-right"
+                ng-disabled="annotTypeNames == 0"
+                ng-click="form.addAnnotType()">
+           Add annotation type <i class="glyphicon glyphicon-plus"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- BUTTONS  -->
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button class="btn btn-primary"
+                ng-disabled="cetForm.$invalid"
+                ng-click="form.submit(ceventType)">Submit</button>
+        <button class="btn" ng-click="form.cancel()">Cancel</button>
+      </div>
+    </div>
+  </form>
+</div>

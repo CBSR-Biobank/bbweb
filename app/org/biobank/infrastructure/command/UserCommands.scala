@@ -14,7 +14,7 @@ object UserCommands {
     extends UserCommand
 
   case class UpdateUserCmd(
-    expectedVersion: Option[Long],
+    expectedVersion: Long,
     name: String,
     email: String,
     password: String,
@@ -22,26 +22,26 @@ object UserCommands {
     extends UserCommand
 
   case class ActivateUserCmd(
-    expectedVersion: Option[Long],
-    email: String)
+    email: String,
+    expectedVersion: Long)
       extends UserCommand
       with HasExpectedVersion
 
   case class LockUserCmd(
-    expectedVersion: Option[Long],
-    email: String)
+    email: String,
+    expectedVersion: Long)
       extends UserCommand
       with HasExpectedVersion
 
   case class UnlockUserCmd(
-    expectedVersion: Option[Long],
-    email: String)
+    email: String,
+    expectedVersion: Long)
       extends UserCommand
       with HasExpectedVersion
 
   case class RemoveUserCmd(
-    expectedVersion: Option[Long],
-    email: String)
+    email: String,
+    expectedVersion: Long)
       extends UserCommand
       with HasExpectedVersion
 

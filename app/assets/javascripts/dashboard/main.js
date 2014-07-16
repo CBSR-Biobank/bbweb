@@ -6,5 +6,5 @@
 define(['angular', './states'], function(angular) {
   'use strict';
 
-  return angular.module('biobank.dashboard', ['ngRoute', 'dashboard.states']);
+  return angular.module('biobank.dashboard', ['dashboard.states']);
 });

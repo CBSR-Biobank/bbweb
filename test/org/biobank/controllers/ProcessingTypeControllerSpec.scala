@@ -35,14 +35,6 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     )
   }
 
-  private def procTypeToRemoveCmdJson(procType: ProcessingType) = {
-    Json.obj(
-      "studyId"         -> procType.studyId.id,
-      "id"              -> procType.id.id,
-      "expectedVersion" -> Some(procType.version)
-    )
-  }
-
   def addOnNonDisabledStudy(
     appRepositories: AppRepositories,
     study: Study) {
@@ -93,9 +85,8 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       DELETE,
-      s"/studies/proctypes/${procType.id.id}",
-      BAD_REQUEST,
-      procTypeToRemoveCmdJson(procType))
+      s"/studies/proctypes/${procType.studyId.id}/${procType.id.id}/${procType.version}",
+      BAD_REQUEST)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -264,8 +255,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(
           DELETE,
-          s"/studies/proctypes/${procType.id.id}",
-          json = procTypeToRemoveCmdJson(procType))
+          s"/studies/proctypes/${procType.studyId.id}/${procType.id.id}/${procType.version}")
 
         (json \ "status").as[String] should include ("success")
       }

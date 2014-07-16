@@ -7,8 +7,10 @@ define(['angular'], function(angular) {
 
   var mod = angular.module('admin.controllers', []);
 
-  mod.controller('AdminCtrl', function($scope, $location, userService) {
-  });
+  mod.controller('AdminCtrl', [
+    '$scope', 'userService',
+    function($scope, userService) {
+  }]);
 
   return mod;
 

@@ -27,7 +27,7 @@ object ProcessingTypeController extends BbwebController  {
   }
 
   def get(studyId: String, procTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.debug(s"ProcessingTypeController.list: studyId: $studyId, procTypeId: $procTypeId")
+    Logger.debug(s"ProcessingTypeController.get: studyId: $studyId, procTypeId: $procTypeId")
 
     procTypeId.fold {
       Ok(Json.toJson(studyService.processingTypesForStudy(studyId).toList))
@@ -37,7 +37,8 @@ object ProcessingTypeController extends BbwebController  {
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         procType => Ok(Json.toJson(procType))
       )
-    }  }
+    }
+  }
 
   def addProcessingType = CommandAction { cmd: AddProcessingTypeCmd => implicit userId =>
     val future = studyService.addProcessingType(cmd)
@@ -59,7 +60,8 @@ object ProcessingTypeController extends BbwebController  {
     }
   }
 
-  def removeProcessingType(id: String) = CommandAction { cmd: RemoveProcessingTypeCmd => implicit userId =>
+  def removeProcessingType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    val cmd = RemoveProcessingTypeCmd(studyId, id, ver)
     val future = studyService.removeProcessingType(cmd)
     future.map { validation =>
       validation.fold(

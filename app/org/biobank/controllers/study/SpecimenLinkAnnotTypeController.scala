@@ -61,7 +61,8 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
     }
   }
 
-  def removeAnnotationType(id: String) = CommandAction { cmd: RemoveSpecimenLinkAnnotationTypeCmd => implicit userId =>
+  def removeAnnotationType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    val cmd = RemoveSpecimenLinkAnnotationTypeCmd(studyId, id, ver)
     val future = studyService.removeSpecimenLinkAnnotationType(cmd)
     future.map { validation =>
       validation.fold(

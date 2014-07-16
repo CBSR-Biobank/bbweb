@@ -17,7 +17,6 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
 
   private def annotTypeToAddCmdJson(annotType: ParticipantAnnotationType) = {
     Json.obj(
-      "type"          -> "AddParticipantAnnotationTypeCmd",
       "studyId"       -> annotType.studyId.id,
       "name"          -> annotType.name,
       "description"   -> annotType.description,
@@ -30,7 +29,6 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
 
   private def annotTypeToUpdateCmdJson(annotType: ParticipantAnnotationType) = {
     Json.obj(
-      "type"            -> "UpdateParticipantAnnotationTypeCmd",
       "studyId"         -> annotType.studyId.id,
       "id"              -> annotType.id.id,
       "expectedVersion" -> Some(annotType.version),
@@ -39,15 +37,6 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "maxValueCount"   -> annotType.maxValueCount,
       "options"         -> annotType.options,
       "required"        -> annotType.required
-    )
-  }
-
-  private def annotTypeToRemoveCmdJson(annotType: ParticipantAnnotationType) = {
-    Json.obj(
-      "type"            -> "RemoveParticipantAnnotationTypeCmd",
-      "studyId"         -> annotType.studyId.id,
-      "id"              -> annotType.id.id,
-      "expectedVersion" -> Some(annotType.version)
     )
   }
 
@@ -100,9 +89,8 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       DELETE,
-      s"/studies/pannottype/${annotType.id.id}",
-      BAD_REQUEST,
-      annotTypeToRemoveCmdJson(annotType))
+      s"/studies/pannottype/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}",
+      BAD_REQUEST)
 
     (json \ "status").as[String] should include ("error")
     (json \ "message").as[String] should include ("study is not disabled")
@@ -251,8 +239,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(
           DELETE,
-          s"/studies/pannottype/${annotType.id.id}",
-          json = annotTypeToRemoveCmdJson(annotType))
+          s"/studies/pannottype/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}")
 
         (json \ "status").as[String] should include ("success")
       }

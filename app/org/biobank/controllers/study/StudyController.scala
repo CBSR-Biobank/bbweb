@@ -5,6 +5,9 @@ import org.biobank.domain._
 import org.biobank.service.json.Events._
 import org.biobank.service.json.Study._
 import org.biobank.service.json.SpecimenGroup._
+import org.biobank.service.json.ProcessingType._
+import org.biobank.service.json.SpecimenLinkType._
+import org.biobank.service.json.SpecimenLinkAnnotationType._
 import org.biobank.service._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
@@ -120,6 +123,35 @@ object StudyController extends BbwebController {
 
   def preservTempTypes = Action(parse.empty) { request =>
      Ok(Json.toJson(PreservationTemperatureType.values.map(x =>x.toString)))
+  }
+
+  /** Value types used by Specimen groups.
+    *
+    */
+  def specimenGroupValueTypes = Action(parse.empty) { request =>
+    // FIXME add container types to this response
+    Ok(Json.obj(
+      "anatomicalSourceType"        -> Json.toJson(AnatomicalSourceType.values.map(x =>x.toString)),
+      "preservationType"            -> Json.toJson(PreservationType.values.map(x =>x.toString)),
+      "preservationTemperatureType" -> Json.toJson(PreservationTemperatureType.values.map(x =>x.toString)),
+      "specimenType"                -> Json.toJson(SpecimenType.values.map(x =>x.toString))
+    ))
+  }
+
+  def getProcessingDto(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.debug(s"ProcessingTypeController.getProcessingDto: studyId: $studyId")
+
+    val processingTypes = studyService.processingTypesForStudy(studyId)
+    val specimenLinkTypes = processingTypes.flatMap { pt =>
+      studyService.specimenLinkTypesForProcessingType(pt.id.id)
+    }
+
+    Ok(Json.obj(
+      "processingTypes" -> Json.toJson(processingTypes.toList),
+      "specimenLinkTypes" -> Json.toJson(specimenLinkTypes.toList),
+      "specimenLinkAnnotationTypes" -> studyService.specimenLinkAnnotationTypesForStudy(studyId).toList,
+      "specimenGroups" -> Json.toJson(studyService.specimenGroupsForStudy(studyId).toList)
+    ))
   }
 
 }

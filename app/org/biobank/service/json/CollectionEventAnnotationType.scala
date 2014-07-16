@@ -43,7 +43,7 @@ object CollectionEventAnnotationType {
   implicit val updateCollectionEventAnnotationTypeCmdReads: Reads[UpdateCollectionEventAnnotationTypeCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
@@ -54,7 +54,7 @@ object CollectionEventAnnotationType {
   implicit val removeCollectionEventAnnotationTypeCmdReads: Reads[RemoveCollectionEventAnnotationTypeCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0))
+      (__ \ "expectedVersion").read[Long](min[Long](0))
   )(RemoveCollectionEventAnnotationTypeCmd.apply _)
 
   implicit val collectionEventAnnotationTypeAddedEventWriter: Writes[CollectionEventAnnotationTypeAddedEvent] = (

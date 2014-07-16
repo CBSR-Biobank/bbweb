@@ -1,0 +1,42 @@
+<accordion-group is-open="panel.processingTypes.panelOpen" style="margin-top: 10px;">
+  <accordion-heading>
+    {{panel.processingTypes.title}}
+    <panel-buttons on-add="panel.processingTypes.add(study)"
+                   add-button-title="add processing type"
+                     panel-open="panel.processingTypes.panelOpen"
+                     panel-toggle="panel.processingTypes.panelToggle()">
+    </panel-buttons>
+  </accordion-heading>
+  <p>{{panel.processingTypes.header}}</p>
+  <div class="panel panel-warning" ng-if="panel.processingTypes.data.length == 0">
+    <div class="panel-heading">
+      Processing types have not been defined for this study yet.
+    </div>
+  </div>
+  <p ng-if="panel.processingTypes.data.length != 0">
+    The following processing types have been defined:
+  </p>
+  <table ng-show="panel.processingTypes.data.length != 0"
+         class="table table-condensed table-hover"
+         ng-table="panel.processingTypes.tableParams">
+    <tr ng-repeat="processingType in $data"
+        ng-class="{'active': user.$selected}" >
+      <td data-title="'Name'" sortable="'name'">
+        {{processingType.name}}
+      </td>
+      <td data-title="'Enabled'" sortable="'enabled'">
+        {{processingType.enabled ? 'Yes' : 'No'}}
+      </td>
+      <td data-title="'Description'" sortable="'description'">
+        {{processingType.description === null ? '' : processingType.description | truncate:40}}
+      </td>
+      <td>
+        <info-update-remove-buttons
+            on-info="panel.processingTypes.information(processingType)"
+            on-update="panel.processingTypes.update(processingType)"
+            on-remove="panel.processingTypes.remove(processingType)">
+        </info-update-remove-buttons>
+      </td>
+    </tr>
+  </table>
+</accordion-group>

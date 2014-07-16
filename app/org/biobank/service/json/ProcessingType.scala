@@ -41,7 +41,7 @@ object ProcessingType {
   implicit val updateProcessingTypeCmdReads: Reads[UpdateProcessingTypeCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "enabled").read[Boolean]
@@ -50,7 +50,7 @@ object ProcessingType {
   implicit val removeProcessingTypeCmdReads: Reads[RemoveProcessingTypeCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
       (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").readNullable[Long](min[Long](0))
+      (__ \ "expectedVersion").read[Long](min[Long](0))
   )(RemoveProcessingTypeCmd.apply _)
 
   implicit val processingTypeAddedEventWrites: Writes[ProcessingTypeAddedEvent] = (

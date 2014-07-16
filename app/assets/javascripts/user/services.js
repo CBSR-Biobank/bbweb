@@ -5,12 +5,15 @@ define(['angular', 'common'], function(angular) {
   'use strict';
 
   var mod = angular.module('user.services', ['biobank.common', 'ngCookies']);
-  mod.factory('userService', ['$http', '$q', 'playRoutes', '$cookies', '$log', function($http, $q, playRoutes, $cookies, $log) {
+
+  mod.factory('userService', [
+    '$http', '$q', '$cookies', '$log',
+    function($http, $q, $cookies, $log) {
     var user, token = $cookies['XSRF-TOKEN'];
 
     /* If the token is assigned, check that the token is still valid on the server */
     if (token) {
-      playRoutes.controllers.UserController.authUser().get()
+      $http.get('/authuser')
         .success(function(data) {
           $log.info('Welcome back, ' + data.name);
           user = data;
@@ -27,9 +30,9 @@ define(['angular', 'common'], function(angular) {
     return {
       loginUser: function(credentials) {
         // FIXME: handle login failure
-        return playRoutes.controllers.Application.login().post(credentials).then(function(response) {
+        return $http.post('/login', credentials).then(function(response) {
           token = response.data.token;
-          return playRoutes.controllers.UserController.authUser().get();
+          return $http.get('/authuser');
         }).then(function(response) {
           user = response.data;
           $log.info('Welcome ' + user.name);
@@ -42,7 +45,7 @@ define(['angular', 'common'], function(angular) {
         token = undefined;
         user = undefined;
         var dummyObj = {};
-        return playRoutes.controllers.Application.logout().post().then(function(response) {
+        return $http.post('/logout').then(function(response) {
           $log.info("Good bye ");
         });
       },
@@ -51,18 +54,33 @@ define(['angular', 'common'], function(angular) {
       }
     };
   }]);
+
   /**
    * Add this object to a route definition to only allow resolving the route if the user is
    * logged in. This also adds the contents of the objects as a dependency of the controller.
    */
   mod.constant('userResolve', {
-    user: ['$q', 'userService', function($q, userService) {
+    user: ['$cookies', '$q', '$http', 'userService', function($cookies, $q, $http, userService) {
+      var token;
       var deferred = $q.defer();
       var user = userService.getUser();
+
       if (user) {
         deferred.resolve(user);
       } else {
-        deferred.reject();
+        token = $cookies['XSRF-TOKEN'];
+
+        if (token) {
+          $http.get('/authuser')
+            .success(function(data) {
+              deferred.resolve(data);
+            })
+            .error(function() {
+              deferred.reject();
+            });
+        } else {
+          deferred.reject();
+        }
       }
       return deferred.promise;
     }]
@@ -70,12 +88,12 @@ define(['angular', 'common'], function(angular) {
   /**
    * If the current route does not resolve, go back to the start page.
    */
-  var handleRouteError = function($rootScope, $location) {
+  var handleRouteError = function($rootScope, $state) {
     $rootScope.$on('$routeChangeError', function(e, next, current) {
-      $location.path('/');
+      $state.go('home');
     });
   };
-  handleRouteError.$inject = ['$rootScope', '$location'];
+  handleRouteError.$inject = ['$rootScope', '$state'];
   mod.run(handleRouteError);
   return mod;
 });

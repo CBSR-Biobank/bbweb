@@ -3,23 +3,18 @@
  */
 define([
   'angular',
-  './services/helper',
-  './services/playRoutes',
-  './controllers/errorModal',
+  './services/helpers',
+  './controllers/controllers',
   './filters',
-  './directives/forms',
-  './directives/uiBreadcrumbs',
-  './directives/ngLoginSubmit'],
+  './directives/directives',
+  './directives/uiBreadcrumbs'],
        function(angular) {
          'use strict';
 
          return angular.module(
            'biobank.common', [
-             'common.helper',
-             'common.playRoutes',
-             'common.errorModal',
+             'common.helpers',
              'common.filters',
-             'common.directives.forms',
-             'common.directives.uiBreadcrumbs',
-             'common.directives.ngLoginSubmit']);
+             'common.directives.directives',
+             'common.directives.uiBreadcrumbs']);
        });
