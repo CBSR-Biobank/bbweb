@@ -9,7 +9,7 @@ import akka.actor.{ ActorSystem, ActorRef }
 import scala.concurrent.Future
 import akka.pattern.ask
 import org.slf4j.LoggerFactory
-import akka.persistence.SnapshotOffer
+import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.joda.time.DateTime
 
@@ -84,8 +84,10 @@ trait UserProcessorComponent {
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.users.foreach(i => userRepository.put(i))
 
-      case _ =>
-        throw new IllegalStateException("message not handled")
+      case event: RecoveryCompleted =>
+
+      case msg =>
+        throw new IllegalStateException(s"message not handled: $msg")
     }
 
     val receiveCommand: Receive = {

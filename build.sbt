@@ -72,7 +72,7 @@ libraryDependencies ++= Seq(
   "org.scalatest"          %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
     ExclusionRule(organization = "org.junit", name = "junit")
   ),
-  "com.github.ddevore"     %% "akka-persistence-mongo-casbah"  % "0.7.2-SNAPSHOT"     % "compile",
+  "com.github.ddevore"     %% "akka-persistence-mongo-casbah"  % "0.7.3-SNAPSHOT"     % "compile",
   // Test Dependencies
   "com.typesafe.akka"      %% "akka-testkit"                   % "2.3.2"              % "test"
 )
