@@ -140,10 +140,12 @@ define(['angular'], function(angular) {
           user: userResolve.user,
           spcLinkType: ['study', function(study) {
             return {
-              studyId: study.id,
-              name: '',
-              description: null,
-              enabled: false
+              processingTypeId:      null,
+              inputGroupId:          null,
+              outputGroupId:         null,
+              inputContainerTypeId:  null,
+              outputContainerTypeId: null,
+              annotationTypeData:    []
             };
           }]
         },
