@@ -153,33 +153,35 @@ define(['angular', 'underscore'], function(angular, _) {
   mod.service('annotTypeModalService', [
     'modelObjModalService', 'addTimeStampsService',
     function (modelObjModalService, addTimeStampsService) {
-      this.show = function (title, annotType) {
-        var data = [];
-        data.push({name: 'Name:', value: annotType.name});
-        data.push({name: 'Type:', value: annotType.valueType});
+      return {
+        show: function (title, annotType) {
+          var data = [];
+          data.push({name: 'Name:', value: annotType.name});
+          data.push({name: 'Type:', value: annotType.valueType});
 
-        if (typeof annotType.required !== 'undefined') {
-          data.push({name: 'Required:', value: annotType.required ? "Yes" : "No"});
-        }
-
-        if (annotType.valueType === 'Select') {
-          var optionValues = [];
-          for (var name in annotType.options) {
-            optionValues.push(annotType.options[name]);
+          if (typeof annotType.required !== 'undefined') {
+            data.push({name: 'Required:', value: annotType.required ? "Yes" : "No"});
           }
 
-          data.push({
-            name: '# Selections Allowed:',
-            value: annotType.maxValueCount === 1 ? "Single" : "Multiple"});
-          data.push({
-            name: 'Selections:',
-            value: optionValues.join(", ")});
+          if (annotType.valueType === 'Select') {
+            var optionValues = [];
+            for (var name in annotType.options) {
+              optionValues.push(annotType.options[name]);
+            }
+
+            data.push({
+              name: '# Selections Allowed:',
+              value: annotType.maxValueCount === 1 ? "Single" : "Multiple"});
+            data.push({
+              name: 'Selections:',
+              value: optionValues.join(", ")});
+          }
+
+          data.push({name: 'Description:', value: annotType.description});
+          data = data.concat(addTimeStampsService.get(annotType));
+
+          modelObjModalService.show(title, data);
         }
-
-        data.push({name: 'Description:', value: annotType.description});
-        data = data.concat(addTimeStampsService.get(annotType));
-
-        modelObjModalService.show(title, data);
       };
     }]);
 
@@ -254,35 +256,35 @@ define(['angular', 'underscore'], function(angular, _) {
 
   mod.service('studyRemoveModalService', [
     '$state', 'modalService', function ($state, modalService) {
-    return {
-      remove: function (title, message, onConfirm, onCancel) {
-        var modalOptions = {
-          closeButtonText: 'Cancel',
-          headerText: title,
-          bodyText: message
-        };
+      return {
+        remove: function (title, message, onConfirm, onCancel) {
+          var modalOptions = {
+            closeButtonText: 'Cancel',
+            headerText: title,
+            bodyText: message
+          };
 
-        modalService.showModal({}, modalOptions).then(function (result) {
-          onConfirm();
-        }, function() {
-          onCancel();
-        });
-      },
-      onError: function(bodyText, onModalOkState, onModalCancelState) {
-        var modalOptions = {
-          closeButtonText: 'Cancel',
-          headerText: 'Remove failed',
-          bodyText: bodyText
-        };
+          modalService.showModal({}, modalOptions).then(function (result) {
+            onConfirm();
+          }, function() {
+            onCancel();
+          });
+        },
+        onError: function(bodyText, onModalOkState, onModalCancelState) {
+          var modalOptions = {
+            closeButtonText: 'Cancel',
+            headerText: 'Remove failed',
+            bodyText: bodyText
+          };
 
-        modalService.showModal({}, modalOptions).then(function (result) {
-          $state.go(onModalOkState);
-        }, function () {
-          $state.go(onModalCancelState);
-        });
-      }
-    };
-  }]);
+          modalService.showModal({}, modalOptions).then(function (result) {
+            $state.go(onModalOkState);
+          }, function () {
+            $state.go(onModalCancelState);
+          });
+        }
+      };
+    }]);
 
   return mod;
 });

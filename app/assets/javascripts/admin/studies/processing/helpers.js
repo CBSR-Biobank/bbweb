@@ -16,7 +16,7 @@ define(['angular'], function(angular) {
           var title = 'Processing Type';
           var data = [];
           data.push({name: 'Name:', value: processingType.name});
-          data.push({name: 'Enabled:', value: processingType.enabled});
+          data.push({name: 'Enabled:', value: processingType.enabled ? 'Yes' : 'No'});
           data.push({name: 'Description:', value: processingType.description});
           data = data.concat(addTimeStampsService.get(processingType));
           modelObjModalService.show(title, data);
@@ -184,12 +184,24 @@ define(['angular'], function(angular) {
     '$filter', 'modelObjModalService', 'addTimeStampsService',
     function ($filter, modelObjModalService, addTimeStampsService) {
       return {
-        show: function (spcLinkType) {
+        show: function (spcLinkType, processingTypesById, specimenGropusById) {
           var title = 'Specimen Link Type';
           var data = [];
-          data.push({name: 'Name:', value: spcLinkType.name});
-          data.push({name: 'Enabled:', value: spcLinkType.enabled});
-          data.push({name: 'Description:', value: spcLinkType.description});
+          var inputGroup =  specimenGropusById[spcLinkType.inputGroupId];
+          var outputGroup =  specimenGropusById[spcLinkType.outputGroupId];
+
+          data.push({name: 'Processing Type:',
+                     value: processingTypesById[spcLinkType.processingTypeId].name});
+          data.push({name: 'Input Group:', value: inputGroup.name});
+          data.push({name: 'Expected input change:',
+                     value: spcLinkType.expectedInputChange + ' ' + inputGroup.units});
+          data.push({name: 'Input count:', value: spcLinkType.inputCount});
+          data.push({name: 'Input Container Type:', value: 'None'});
+          data.push({name: 'Output Group:', value: outputGroup.name});
+          data.push({name: 'Expected output change:',
+                     value: spcLinkType.expectedInputChange + ' ' + outputGroup.units});
+          data.push({name: 'Output count:', value: spcLinkType.outputCount});
+          data.push({name: 'Output Container Type:', value: 'None'});
           data = data.concat(addTimeStampsService.get(spcLinkType));
           modelObjModalService.show(title, data);
         }
@@ -271,6 +283,19 @@ define(['angular'], function(angular) {
             },
             cancel: function() {
               $state.go('admin.studies.study.processing', { studyId: $scope.study.id });
+            },
+            addAnnotType: function () {
+              $scope.spcLinkType.annotationTypeData.push({name:'', annotationTypeId:'', required: false});
+            },
+            removeAnnotType: function (atData) {
+              if ($scope.spcLinkType.annotationTypeData.length < 1) {
+                throw new Error("invalid length for annotation type data");
+              }
+
+              var index = $scope.spcLinkType.annotationTypeData.indexOf(atData);
+              if (index > -1) {
+                $scope.spcLinkType.annotationTypeData.splice(index, 1);
+              }
             }
           };
         }

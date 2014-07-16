@@ -125,7 +125,7 @@
         <div class="col-sm-3">
           <select class="form-control"
                   name="name"
-                  ng-model="ceventType.annotationTypeData[$index].id"
+                  ng-model="ceventType.annotationTypeData[$index].annotationTypeId"
                   ng-options="annotType.id as annotType.name for annotType in annotTypes | orderBy: 'name'"
                   required>
             <option value="">-- make a selection --</option>

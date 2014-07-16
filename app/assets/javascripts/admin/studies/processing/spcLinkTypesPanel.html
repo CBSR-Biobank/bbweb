@@ -35,11 +35,15 @@
           ng-click="panel.spcLinkTypes.showSpecimenGroup(tableData.specimenLinkType.outputGroupId)">
         <a href>{{tableData.outputGroupName}}</a>
       </td>
+      <td data-title="'Annotation Types'"
+          sortable="'annotTypeNames'">
+        {{tableData.annotTypeNames.join(', ')}}
+      </td>
       <td>
         <info-update-remove-buttons
-            on-info="panel.spcLinkTypes.information(spcLinkType)"
-            on-update="panel.spcLinkTypes.update(spcLinkType)"
-            on-remove="panel.spcLinkTypes.remove(spcLinkType)">
+            on-info="panel.spcLinkTypes.information(tableData.specimenLinkType)"
+            on-update="panel.spcLinkTypes.update(tableData.specimenLinkType)"
+            on-remove="panel.spcLinkTypes.remove(tableData.specimenLinkType)">
         </info-update-remove-buttons>
       </td>
     </tr>

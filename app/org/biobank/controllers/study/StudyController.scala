@@ -129,6 +129,7 @@ object StudyController extends BbwebController {
     *
     */
   def specimenGroupValueTypes = Action(parse.empty) { request =>
+    // FIXME add container types to this response
     Ok(Json.obj(
       "anatomicalSourceType"        -> Json.toJson(AnatomicalSourceType.values.map(x =>x.toString)),
       "preservationType"            -> Json.toJson(PreservationType.values.map(x =>x.toString)),

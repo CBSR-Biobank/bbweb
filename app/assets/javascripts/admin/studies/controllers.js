@@ -511,13 +511,17 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
 
       function SpcLinkTypesPanelSettings() {
         var self = this;
+        var processingTypesById = _.indexBy(dtoProcessing.processingTypes, 'id');
+        var specimenGroupsById = _.indexBy(dtoProcessing.specimenGroups, 'id');
+        var annotTypesById = _.indexBy(dtoProcessing.specimenLinkAnnotationTypes, 'id');
+
         this.title = 'Specimen Link Types';
         this.header = 'Specimen Link Types are assigned to a processing type, and used to represent a ' +
           'regularly performed processing procedure involving two Specimens: an input, which ' +
           'must be in a specific Specimen Group, and an output, which must be in a specific ' +
           'Specimen Group.';
         this.information = function(spcLinkType) {
-          spcLinkTypeModalService.show(spcLinkType);
+          spcLinkTypeModalService.show(spcLinkType, processingTypesById, specimenGroupsById);
         };
         this.add = function(study) {
           $state.go('admin.studies.study.processing.spcLinkTypeAdd');
@@ -534,9 +538,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
           studyViewSettings.panelState('spcLinkTypes');
         };
 
-        var processingTypesById = _.indexBy(dtoProcessing.processingTypes, 'id');
-        var specimenGroupsById = _.indexBy(dtoProcessing.specimenGroups, 'id');
-
         this.showProcessingType = function (processingTypeId) {
           processingTypeModalService.show(processingTypesById[processingTypeId]);
         };
@@ -547,11 +548,17 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
 
         var tableData = [];
         dtoProcessing.specimenLinkTypes.forEach(function(slt) {
+          var annotTypeNames = [];
+          slt.annotationTypeData.forEach(function (annotTypeItem) {
+            annotTypeNames.push(annotTypesById[annotTypeItem.annotationTypeId].name);
+          });
+
           tableData.push({
             specimenLinkType: slt,
             processingTypeName: processingTypesById[slt.processingTypeId].name,
             inputGroupName: specimenGroupsById[slt.inputGroupId].name,
-            outputGroupName: specimenGroupsById[slt.outputGroupId].name
+            outputGroupName: specimenGroupsById[slt.outputGroupId].name,
+            annotTypeNames: annotTypeNames
           });
         });
 

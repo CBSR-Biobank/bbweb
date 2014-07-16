@@ -99,7 +99,7 @@ define(['angular'], function(angular) {
         /* jshint ignore:start */
         $scope.modalOptions.tableParams = new ngTableParams({
           page:1,
-          count: 10
+          count: 20
         }, {
           counts: [],                                       // hide page counts control
           total: $scope.modalOptions.data.length,           // length of data

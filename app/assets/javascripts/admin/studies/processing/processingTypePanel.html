@@ -25,7 +25,7 @@
         {{processingType.name}}
       </td>
       <td data-title="'Enabled'" sortable="'enabled'">
-        {{processingType.recurring ? 'Yes' : 'No'}}
+        {{processingType.enabled ? 'Yes' : 'No'}}
       </td>
       <td data-title="'Description'" sortable="'description'">
         {{processingType.description === null ? '' : processingType.description | truncate:40}}

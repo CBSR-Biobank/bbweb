@@ -73,7 +73,7 @@ define(['angular', 'common'], function(angular, common) {
       $scope.study           = study;
       $scope.spcLinkType     = spcLinkType;
       $scope.processingTypes = dtoProcessing.processingTypes;
-      $scope.annotTypes      = dtoProcessing.annotTypes;
+      $scope.annotTypes      = dtoProcessing.specimenLinkAnnotationTypes;
       $scope.specimenGroups  = dtoProcessing.specimenGroups;
       spcLinkTypeEditService.edit($scope);
     }]);
@@ -96,7 +96,7 @@ define(['angular', 'common'], function(angular, common) {
       $scope.study           = study;
       $scope.spcLinkType     = spcLinkType;
       $scope.processingTypes = dtoProcessing.processingTypes;
-      $scope.annotTypes      = dtoProcessing.annotTypes;
+      $scope.annotTypes      = dtoProcessing.specimenLinkAnnotationTypes;
       $scope.specimenGroups  = dtoProcessing.specimenGroups;
       spcLinkTypeEditService.edit($scope);
     }]);

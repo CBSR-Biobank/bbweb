@@ -6,7 +6,7 @@
 
     <!-- PROCESSING TYPE -->
     <div class="form-group">
-      <label for="description" class="col-sm-3 control-label">Processing Type</label>
+      <label for="procTypeId" class="col-sm-3 control-label">Processing Type</label>
       <div class="col-sm-9">
         <select class="form-control"
                 name="procTypeId"
@@ -26,10 +26,10 @@
 
     <!-- INPUT SPECIMEN GROUP -->
     <div class="form-group">
-      <label for="description" class="col-sm-3 control-label">Input Specimen Group</label>
+      <label for="inputGroupId" class="col-sm-3 control-label">Input Specimen Group</label>
       <div class="col-sm-9">
         <select class="form-control"
-                name="inputGroupName"
+                name="inputGroupId"
                 ng-model="spcLinkType.inputGroupId"
                 ng-options="sg.id as sg.name for sg in specimenGroups | orderBy: 'name'"
                 required>
@@ -46,7 +46,7 @@
 
     <!-- INPUT COUNT -->
     <div class="form-group">
-      <label for="description" class="col-sm-3 control-label">Input count</label>
+      <label for="inputCount" class="col-sm-3 control-label">Input count</label>
       <div class="col-sm-2">
         <input type="number"
                min="1"
@@ -55,7 +55,7 @@
                ng-model="spcLinkType.inputCount"
                placeholder="count"
                valid-count
-               requried />
+               required />
         </div>
     </div>
     <div class="col-sm-offset-3 col-sm-9">
@@ -67,7 +67,7 @@
 
     <!-- EXPECTED INPUT CHANGE -->
     <div class="form-group">
-      <label for="description" class="col-sm-3 control-label">Expected Input change</label>
+      <label for="expectedInputChange" class="col-sm-3 control-label">Expected Input change</label>
       <div class="col-sm-2">
         <input type="number"
                min="0"
@@ -76,7 +76,10 @@
                ng-model="spcLinkType.expectedInputChange"
                placeholder="amount"
                valid-amount
-               requried />
+               required />
+        </div>
+        <div class="col-sm-2">
+          amount
         </div>
     </div>
     <div class="col-sm-offset-3 col-sm-9">
@@ -88,12 +91,12 @@
 
     <!-- INPUT CONTAINER TYPE -->
     <div class="form-group">
-      <label for="description" class="col-sm-3 control-label">Input Container Type</label>
+      <label for="inputContainertypeId" class="col-sm-3 control-label">Input Container Type</label>
       <div class="col-sm-9">
         <select class="form-control"
-                name="inputContainertypeName"
+                name="inputContainertypeId"
                 ng-model="spcLinkType.inputContainertypeName"
-                ng-options="ct.id as ct.name for ct in containerTypeNames | orderBy: 'name'">
+                ng-options="ct.id as ct.name for ct in containerTypes | orderBy: 'name'">
           <option value="">None</option>
         </select>
       </div>
@@ -101,10 +104,10 @@
 
     <!-- OUTPUT SPECIMEN GROUP -->
     <div class="form-group">
-      <label for="description" class="col-sm-3 control-label">Output Specimen Group</label>
+      <label for="outputGroupId" class="col-sm-3 control-label">Output Specimen Group</label>
       <div class="col-sm-9">
         <select class="form-control"
-                name="outputGroupName"
+                name="outputGroupId"
                 ng-model="spcLinkType.outputGroupId"
                 ng-options="sg.id as sg.name for sg in specimenGroups | orderBy: 'name'"
                 required>
@@ -121,7 +124,7 @@
 
     <!-- OUTPUT COUNT -->
     <div class="form-group">
-      <label for="description" class="col-sm-3 control-label">Output count</label>
+      <label for="outputCount" class="col-sm-3 control-label">Output count</label>
         <div class="col-sm-2">
           <input type="number"
                  min="1"
@@ -141,7 +144,7 @@
 
     <!-- EXPECTED OUTPUT CHANGE -->
     <div class="form-group">
-      <label for="description" class="col-sm-3 control-label">Expected Output change</label>
+      <label for="expectedOutputChange" class="col-sm-3 control-label">Expected Output change</label>
       <div class="col-sm-2">
         <input type="number"
                min="0"
@@ -150,7 +153,10 @@
                ng-model="spcLinkType.expectedOutputChange"
                placeholder="amount"
                valid-amount
-               requried />
+               required />
+        </div>
+        <div class="col-sm-2">
+          amount
         </div>
     </div>
     <div class="col-sm-offset-3 col-sm-9">
@@ -162,12 +168,12 @@
 
     <!-- OUTPUT CONTAINER TYPE -->
     <div class="form-group">
-      <label for="description" class="col-sm-3 control-label">Output Container Type</label>
+      <label for="outputContainertypeId" class="col-sm-3 control-label">Output Container Type</label>
       <div class="col-sm-9">
         <select class="form-control"
-                name="outputContainertypeName"
-                ng-model="spcLinkType.outputContainertypeName"
-                ng-options="ct.id as ct.name for ct in containerTypeNames | orderBy: 'name'">
+                name="outputContainertypeId"
+                ng-model="spcLinkType.outputContainertypeId"
+                ng-options="ct.id as ct.name for ct in containerTypes | orderBy: 'name'">
           <option value="">None</option>
         </select>
       </div>
@@ -176,14 +182,14 @@
     <!-- ANNOTATION TYPE DATA -->
     <div class="form-group" ng-repeat="atData in spcLinkType.annotationTypeData track by $index">
       <ng-form name="atSubForm">
-        <div class="col-sm-2 control-label">
+        <div class="col-sm-3 control-label">
           <label>Annotation Type {{$index + 1}}</label>
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-4">
           <select class="form-control"
                   name="annotTypeName"
-                  ng-model="spcLinkType.annotationTypeData[$index].name"
-                  ng-options="annotType for annotType in annotTypeNames"
+                  ng-model="spcLinkType.annotationTypeData[$index].annotationTypeId"
+                  ng-options="annotType.id as annotType.name for annotType in annotTypes | orderBy: 'name'"
                   required>
             <option value="">-- choose annotation type --</option>
           </select>
@@ -207,7 +213,7 @@
 
     <!-- ANNOTATION TYPE DATA ADD -->
     <div class="form-group">
-      <div class="col-sm-2">
+      <div class="col-sm-3">
         <button class="btn btn-sm btn-primary pull-right"
                 ng-disabled="annotTypeNames == 0"
                 ng-click="form.addAnnotType()">
