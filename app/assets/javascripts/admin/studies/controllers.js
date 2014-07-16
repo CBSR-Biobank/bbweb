@@ -510,6 +510,7 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       $scope.panel.processingTypes = new ProcessingTypesPanelSettings();
 
       function SpcLinkTypesPanelSettings() {
+        var self = this;
         this.title = 'Specimen Link Types';
         this.header = 'Specimen Link Types are assigned to a processing type, and used to represent a ' +
           'regularly performed processing procedure involving two Specimens: an input, which ' +
@@ -533,22 +534,32 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
           studyViewSettings.panelState('spcLinkTypes');
         };
 
-        this.processingTypesById = _.indexBy(dtoProcessing.processingTypes, 'id');
-        this.specimenGroupsById = _.indexBy(dtoProcessing.specimenGroups, 'id');
+        var processingTypesById = _.indexBy(dtoProcessing.processingTypes, 'id');
+        var specimenGroupsById = _.indexBy(dtoProcessing.specimenGroups, 'id');
 
         this.showProcessingType = function (processingTypeId) {
-          processingTypeModalService.show(this.processingTypesById[processingTypeId]);
+          processingTypeModalService.show(processingTypesById[processingTypeId]);
         };
 
         this.showSpecimenGroup = function (specimenGroupId) {
-          specimenGroupModalService.show(this.specimenGroupsById[specimenGroupId]);
+          specimenGroupModalService.show(specimenGroupsById[specimenGroupId]);
         };
+
+        var tableData = [];
+        dtoProcessing.specimenLinkTypes.forEach(function(slt) {
+          tableData.push({
+            specimenLinkType: slt,
+            processingTypeName: processingTypesById[slt.processingTypeId].name,
+            inputGroupName: specimenGroupsById[slt.inputGroupId].name,
+            outputGroupName: specimenGroupsById[slt.outputGroupId].name
+          });
+        });
 
         $injector.invoke(PanelSettings, this, {
           $scope: $scope,
           studyViewSettings: studyViewSettings,
           panelTableService: panelTableService,
-          data: dtoProcessing.specimenLinkTypes,
+          data: tableData,
           panelStateName: 'spcLinkTypes'
         });
       }

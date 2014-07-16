@@ -19,18 +19,21 @@
   <table ng-show="panel.spcLinkTypes.data.length != 0"
          class="table table-condensed table-hover"
          ng-table="panel.spcLinkTypes.tableParams">
-    <tr ng-repeat="spcLinkType in $data">
+    <tr ng-repeat="tableData in $data">
       <td data-title="'Processing Type'"
-          ng-click="panel.spcLinkTypes.showProcessingType(spcLinkType.processingTypeId)">
-        <a href>{{panel.spcLinkTypes.processingTypesById[spcLinkType.processingTypeId].name}}</a>
+          sortable="'processingTypeName'"
+          ng-click="panel.spcLinkTypes.showProcessingType(tableData.specimenLinkType.processingTypeId)">
+        <a href>{{tableData.processingTypeName}}</a>
       </td>
       <td data-title="'Input Specimen Group'"
-          ng-click="panel.spcLinkTypes.showSpecimenGroup(spcLinkType.inputGroupId)">
-        <a href>{{panel.spcLinkTypes.specimenGroupsById[spcLinkType.inputGroupId].name}}</a>
+          sortable="'inputGroupName'"
+          ng-click="panel.spcLinkTypes.showSpecimenGroup(tableData.specimenLinkType.inputGroupId)">
+        <a href>{{tableData.inputGroupName}}</a>
       </td>
       <td data-title="'Output Specimen Group'"
-          ng-click="panel.spcLinkTypes.showSpecimenGroup(spcLinkType.outputGroupId)">
-        <a href>{{panel.spcLinkTypes.specimenGroupsById[spcLinkType.outputGroupId].name}}</a>
+          sortable="'outputGroupName'"
+          ng-click="panel.spcLinkTypes.showSpecimenGroup(tableData.specimenLinkType.outputGroupId)">
+        <a href>{{tableData.outputGroupName}}</a>
       </td>
       <td>
         <info-update-remove-buttons
