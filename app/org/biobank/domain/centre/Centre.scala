@@ -3,11 +3,19 @@ package org.biobank.domain.centre
 import org.biobank.domain.{
   Comment,
   ConcurrencySafeEntity,
+  DomainError,
+  DomainValidation,
   HasUniqueName,
   HasDescriptionOption,
   Location
 }
 import org.biobank.domain.study.StudyId
+import org.biobank.domain.validation.ValidationHelper
+
+import org.joda.time.DateTime
+
+import scalaz._
+import scalaz.Scalaz._
 
 /**
   * A Centre can be one or a combination of the following:
@@ -28,14 +36,14 @@ sealed trait Centre
     with HasUniqueName
     with HasDescriptionOption {
 
-  /*** @param studyIds Links a centre and a study. When linked, the center can then participate in the study. */
-  val studyIds: Set[StudyId]
+  // /*** @param studyIds Links a centre and a study. When linked, the center can then participate in the study. */
+  // val studyIds: Set[StudyId]
 
-  /** @param locations Used to record a location. A centre may have more than one location. */
-  val locations: List[Location]
+  // /** @param locations Used to record a location. A centre may have more than one location. */
+  // val locations: List[Location]
 
-  /** @params comments A set of comments made by users. */
-  val comments: List[Comment]
+  // /** @params comments A set of comments made by users. */
+  // val comments: List[Comment]
 
   /** @param status Contains the current state of the object, one of: Disabled, Enabled. */
   val status: String
@@ -66,10 +74,7 @@ case class DisabledCentre private (
   addedDate: DateTime,
   lastUpdateDate: Option[DateTime],
   name: String,
-  description: Option[String],
-  studyIds: Set[StudyId],
-  locations: List[Location],
-  comments: List[Comment])
+  description: Option[String])
     extends Centre {
 
   override val status: String = "Disabled"
@@ -87,41 +92,40 @@ case class DisabledCentre private (
     } yield updatedCentre
   }
 
-  def addStudy(studyId: StudyId): Centre = {
-    this.copy(studyIds = this.studyIds + studyId)
-  }
-
-  def removeStudy(studyId: StudyId): Centre = {
-    this.copy(studyIds = this.studyIds + studyId)
-  }
-
-  def addLocation(location: Location): Centre = {
-    this.copy(locations = this.locations + location)
-  }
-
-  def removeLocation(location: Location): Centre = {
-    this.copy(locations = this.locations - location)
-  }
-
-  def addComment(comment: Comment): Centre = {
-    this.copy(comments = this.comments + comment)
-  }
-
   /** Used to enable a centre after it has been configured, or had configuration changes made on it. */
   def enable(
     expectedVersion: Option[Long],
     dateTime: DateTime): DomainValidation[EnabledCentre] = {
 
-    def checkSpecimenGroupCount =
-      if (specimenGroupCount > 0) true.success else DomainError("no specimen groups").failNel
-
-    def checkCollectionEventTypeCount =
-      if (collectionEventTypeCount > 0) true.success else DomainError("no collection event types").failNel
-
     for {
       validVersion <- requireVersion(expectedVersion)
       enabledCentre <- EnabledCentre.create(this, dateTime)
     } yield enabledCentre
+  }
+}
+
+/**
+  * Factory object used to create a centre.
+  */
+object DisabledCentre extends ValidationHelper {
+
+  /**
+    * The factory method to create a centre.
+    *
+    * Performs validation on fields.
+    */
+  def create(
+    id: CentreId,
+    version: Long,
+    dateTime: DateTime,
+    name: String,
+    description: Option[String]): DomainValidation[DisabledCentre] = {
+    (validateId(id) |@|
+      validateAndIncrementVersion(version) |@|
+      validateNonEmpty(name, "name is null or empty") |@|
+      validateNonEmptyOption(description, "description is null or empty")) {
+        DisabledCentre(_, _, dateTime, None, _, _)
+      }
   }
 }
 
@@ -150,5 +154,24 @@ case class EnabledCentre private (
       validatedCentre <- DisabledCentre.create(id, version, addedDate, name, description)
       disabledCentre <- validatedCentre.copy(lastUpdateDate = Some(dateTime)).success
     } yield disabledCentre
+  }
+}
+
+
+/**
+  * Factory object used to enable a centre.
+  */
+object EnabledCentre extends ValidationHelper {
+
+  /** A centre must be in a disabled state before it can be enabled. */
+  def create(
+    centre: DisabledCentre,
+    dateTime: DateTime): DomainValidation[EnabledCentre] = {
+    (validateId(centre.id) |@|
+      validateAndIncrementVersion(centre.version) |@|
+      validateNonEmpty(centre.name, "name is null or empty") |@|
+      validateNonEmptyOption(centre.description, "description is null or empty")) {
+        EnabledCentre(_, _, centre.addedDate, Some(dateTime), _, _)
+      }
   }
 }
