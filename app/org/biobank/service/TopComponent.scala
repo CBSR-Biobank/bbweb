@@ -19,19 +19,4 @@ trait TopComponent extends ServiceComponent {
   val studyService: StudyService
   val userService: UserService
 
-
-}
-
-/**
- * Web Application Eventsourced configuration
- *
- * ==Akka-Persistence configuration==
- *
- *
- * ==Recovery==
- *
- * @author Nelson Loyola
- */
-trait TopComponentImpl extends TopComponent with ServiceComponentImpl {
-
 }

@@ -1,7 +1,7 @@
 package org.biobank.controllers
 
 import org.biobank.domain.{ RegisteredUser, UserId }
-import org.biobank.service.TopComponentImpl
+import org.biobank.service.{ TopComponent, ServiceComponentImpl }
 
 import java.io.File
 import play.api.libs.Files
@@ -12,7 +12,10 @@ import akka.actor.Props
 import com.typesafe.config.ConfigFactory
 import play.api.Play.current
 
-class BbwebPlugin(val app: play.api.Application) extends Plugin with TopComponentImpl {
+class BbwebPlugin(val app: play.api.Application)
+    extends Plugin
+    with TopComponent
+    with ServiceComponentImpl {
 
   override lazy val studyProcessor = Akka.system.actorOf(Props(new StudyProcessor), "studyproc")
   override lazy val userProcessor = Akka.system.actorOf(Props(new UserProcessor), "userproc")
@@ -30,6 +33,12 @@ class BbwebPlugin(val app: play.api.Application) extends Plugin with TopComponen
    *
    */
   override def onStart() {
+    // evaluate the lazy variabled declared up top
+    studyProcessor
+    userProcessor
+    studyService
+    userService
+
     createSqlDdlScripts
 
     //if ((app.mode == Mode.Dev) || (app.mode == Mode.Test)) {

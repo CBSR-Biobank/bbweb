@@ -35,7 +35,7 @@ trait Processor extends PersistentActor with ActorLogging {
 
   /** Searches the repository for a matching item.
     */
-  protected  def nameAvailableMatcher[T <: ConcurrencySafeEntity[_]](
+  protected def nameAvailableMatcher[T <: ConcurrencySafeEntity[_]](
     name: String,
     repository: ReadRepository[_, T])(
     matcher: T => Boolean): DomainValidation[Boolean] = {
@@ -51,7 +51,7 @@ trait Processor extends PersistentActor with ActorLogging {
 
   /** Checks that the domain objects version matches the expected one.
     */
-  protected  def validateVersion[T <: ConcurrencySafeEntity[_]](
+  protected def validateVersion[T <: ConcurrencySafeEntity[_]](
     item: T,
     expectedVersion: Option[Long]): DomainValidation[Boolean] = {
     if (item.versionOption == expectedVersion) true.success
