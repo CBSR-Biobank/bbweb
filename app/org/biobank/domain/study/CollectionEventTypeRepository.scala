@@ -14,8 +14,6 @@ trait CollectionEventTypeRepositoryComponent {
   trait CollectionEventTypeRepository
       extends ReadWriteRepository [CollectionEventTypeId, CollectionEventType] {
 
-    def nextIdentity: CollectionEventTypeId
-
     def withId(
       studyId: StudyId,
       ceventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType]
@@ -39,8 +37,7 @@ trait CollectionEventTypeRepositoryComponentImpl extends CollectionEventTypeRepo
 
     val log = LoggerFactory.getLogger(this.getClass)
 
-    def nextIdentity: CollectionEventTypeId =
-      new CollectionEventTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
+    def nextIdentity: CollectionEventTypeId = new CollectionEventTypeId(nextIdentityAsString)
 
     def withId(
       studyId: StudyId,

@@ -1,7 +1,7 @@
 package org.biobank.controllers
 
 import org.biobank.domain.{ RegisteredUser, UserId }
-import org.biobank.service.{ TopComponent, ServiceComponentImpl }
+import org.biobank.service.{ TopComponent, ServicesComponentImpl }
 
 import java.io.File
 import play.api.libs.Files
@@ -15,13 +15,15 @@ import play.api.Play.current
 class BbwebPlugin(val app: play.api.Application)
     extends Plugin
     with TopComponent
-    with ServiceComponentImpl {
+    with ServicesComponentImpl {
 
-  override lazy val studyProcessor = Akka.system.actorOf(Props(new StudyProcessor), "studyproc")
-  override lazy val userProcessor = Akka.system.actorOf(Props(new UserProcessor), "userproc")
+  override lazy val studiesProcessor = Akka.system.actorOf(Props(new StudiesProcessor), "studyproc")
+  override lazy val centresProcessor = Akka.system.actorOf(Props(new CentresProcessor), "centresproc")
+  override lazy val usersProcessor = Akka.system.actorOf(Props(new UsersProcessor), "userproc")
 
-  override lazy val studyService = new StudyServiceImpl(studyProcessor)
-  override lazy val userService = new UserService(userProcessor)
+  override lazy val studiesService = new StudiesServiceImpl(studiesProcessor)
+  override lazy val centresService = new CentresServiceImpl(centresProcessor)
+  override lazy val usersService = new UsersService(usersProcessor)
 
   private val configKey = "slick"
   private val ScriptDirectory = "conf/evolutions/"
@@ -34,10 +36,12 @@ class BbwebPlugin(val app: play.api.Application)
    */
   override def onStart() {
     // evaluate the lazy variabled declared up top
-    studyProcessor
-    userProcessor
-    studyService
-    userService
+    studiesProcessor
+    centresProcessor
+    usersProcessor
+    studiesService
+    centresService
+    usersService
 
     createSqlDdlScripts
 

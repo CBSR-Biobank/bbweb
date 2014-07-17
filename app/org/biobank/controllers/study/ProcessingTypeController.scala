@@ -22,7 +22,7 @@ import scalaz.Scalaz._
 
 object ProcessingTypeController extends BbwebController  {
 
-  private def studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
+  private def studiesService = Play.current.plugin[BbwebPlugin].map(_.studiesService).getOrElse {
     sys.error("Bbweb plugin is not registered")
   }
 
@@ -30,10 +30,10 @@ object ProcessingTypeController extends BbwebController  {
     Logger.debug(s"ProcessingTypeController.get: studyId: $studyId, procTypeId: $procTypeId")
 
     procTypeId.fold {
-      Ok(Json.toJson(studyService.processingTypesForStudy(studyId).toList))
+      Ok(Json.toJson(studiesService.processingTypesForStudy(studyId).toList))
     } {
       id =>
-      studyService.processingTypeWithId(studyId, id).fold(
+      studiesService.processingTypeWithId(studyId, id).fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         procType => Ok(Json.toJson(procType))
       )
@@ -41,7 +41,7 @@ object ProcessingTypeController extends BbwebController  {
   }
 
   def addProcessingType = CommandAction { cmd: AddProcessingTypeCmd => implicit userId =>
-    val future = studyService.addProcessingType(cmd)
+    val future = studiesService.addProcessingType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -51,7 +51,7 @@ object ProcessingTypeController extends BbwebController  {
   }
 
   def updateProcessingType(id: String) = CommandAction { cmd: UpdateProcessingTypeCmd => implicit userId =>
-    val future = studyService.updateProcessingType(cmd)
+    val future = studiesService.updateProcessingType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -62,7 +62,7 @@ object ProcessingTypeController extends BbwebController  {
 
   def removeProcessingType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
     val cmd = RemoveProcessingTypeCmd(studyId, id, ver)
-    val future = studyService.removeProcessingType(cmd)
+    val future = studiesService.removeProcessingType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),

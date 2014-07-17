@@ -2,7 +2,7 @@ package org.biobank.fixture
 
 import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, StudyId }
-import org.biobank.domain.{ FactoryComponent, RepositoryComponentImpl, ReadWriteRepository }
+import org.biobank.domain.{ FactoryComponent, RepositoriesComponentImpl, ReadWriteRepository }
 
 import org.scalatest.WordSpec
 import org.scalatest.BeforeAndAfterEach
@@ -28,7 +28,7 @@ trait ControllerFixture
   with Matchers
   with BeforeAndAfterEach
   with FactoryComponent
-  with RepositoryComponentImpl {
+  with RepositoriesComponentImpl {
 
   private val dbName = "bbweb-test"
 
@@ -74,7 +74,7 @@ trait ControllerFixture
       .withCookies(Cookie("XSRF-TOKEN", token))
     Logger.info(s"makeRequest: request: $fakeRequest, $json")
     route(fakeRequest).fold {
-      Json.parse("{ status: KO, message: request returned None")
+      cancel("HTTP request returned NONE")
     } { result =>
       Logger.info(s"makeRequest: result: ${contentAsString(result)}")
       status(result) should be(expectedStatus)
@@ -116,6 +116,22 @@ trait ControllerFixture
     }
 
     val specimenLinkAnnotationTypeRepository = plugin.map(_.specimenLinkAnnotationTypeRepository).getOrElse {
+      sys.error("Bbweb plugin is not registered")
+    }
+
+    val centreRepository = plugin.map(_.centreRepository).getOrElse {
+      sys.error("Bbweb plugin is not registered")
+    }
+
+    val centreLocationRepository = plugin.map(_.centreLocationRepository).getOrElse {
+      sys.error("Bbweb plugin is not registered")
+    }
+
+    val studyCentreRepository = plugin.map(_.studyCentreRepository).getOrElse {
+      sys.error("Bbweb plugin is not registered")
+    }
+
+    val locationRepository = plugin.map(_.locationRepository).getOrElse {
       sys.error("Bbweb plugin is not registered")
     }
 

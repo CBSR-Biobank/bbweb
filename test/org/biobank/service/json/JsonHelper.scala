@@ -2,6 +2,7 @@ package org.biobank.service.json
 
 import org.biobank.domain._
 import org.biobank.domain.study._
+import org.biobank.domain.centre._
 import org.biobank.infrastructure._
 
 import org.scalatest.Matchers
@@ -129,7 +130,25 @@ object JsonHelper extends Matchers {
       .as[List[JsObject]].zip(specimenLinkType.annotationTypeData).foreach { item =>
       compareAnnotData(item._1, item._2)
     }
-
   }
+
+  def compareObj(json: JsValue, centre: Centre) = {
+    compareEntity(json, centre)
+      (json \ "name").as[String]                   should be (centre.name)
+      (json \ "description").as[Option[String]]    should be (centre.description)
+      (json \ "status").as[String]                 should be (centre.status)
+  }
+
+  def compareObj(json: JsValue, location: Location) = {
+    (json \ "id").as[String]                  should be (location.id.id)
+    (json \ "name").as[String]                should be (location.name)
+    (json \ "street").as[String]              should be (location.street)
+    (json \ "city").as[String]                should be (location.city)
+    (json \ "province").as[String]            should be (location.province)
+    (json \ "postalCode").as[String]          should be (location.postalCode)
+    (json \ "countryIsoCode").as[String]      should be (location.countryIsoCode)
+    (json \ "poBoxNumber").as[Option[String]] should be (location.poBoxNumber)
+  }
+
 
 }

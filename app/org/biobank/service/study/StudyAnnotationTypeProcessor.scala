@@ -16,12 +16,18 @@ trait StudyAnnotationTypeProcessor[A <: StudyAnnotationType] extends Processor {
 
   val annotationTypeRepository: StudyAnnotationTypeRepository[A]
 
+  val errMsgNameExists = "annotation type with name already exists"
+
   protected def nameAvailable(name: String): DomainValidation[Boolean] = {
-    nameAvailableMatcher(name, annotationTypeRepository)(item => item.name.equals(name))
+    nameAvailableMatcher(name,annotationTypeRepository, errMsgNameExists){ item =>
+      item.name.equals(name)
+    }
   }
 
   protected def nameAvailable(name: String, excludeId: AnnotationTypeId): DomainValidation[Boolean] = {
-    nameAvailableMatcher(name, annotationTypeRepository)(item => item.name.equals(name) && (item.id != excludeId))
+    nameAvailableMatcher(name, annotationTypeRepository, errMsgNameExists){ item =>
+      item.name.equals(name) && (item.id != excludeId)
+    }
   }
 
 }

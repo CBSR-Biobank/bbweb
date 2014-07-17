@@ -8,7 +8,6 @@ import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
 import org.biobank.domain.AnnotationValueType._
-import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.Commands._
 
 object StudyCommands {

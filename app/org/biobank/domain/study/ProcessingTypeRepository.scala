@@ -13,8 +13,6 @@ trait ProcessingTypeRepositoryComponent {
 
   trait ProcessingTypeRepository extends ReadWriteRepository [ProcessingTypeId, ProcessingType] {
 
-    def nextIdentity: ProcessingTypeId
-
     def withId(
       studyId: StudyId,
       processingTypeId: ProcessingTypeId): DomainValidation[ProcessingType]
@@ -34,8 +32,7 @@ trait ProcessingTypeRepositoryComponentImpl extends ProcessingTypeRepositoryComp
 
     val log = LoggerFactory.getLogger(this.getClass)
 
-    def nextIdentity: ProcessingTypeId =
-      new ProcessingTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
+    def nextIdentity: ProcessingTypeId = new ProcessingTypeId(nextIdentityAsString)
 
     def withId(
       studyId: StudyId,

@@ -27,26 +27,26 @@ import scalaz.Scalaz._
 /**
   *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
   */
-object StudyController extends BbwebController {
+object StudiesController extends BbwebController {
 
-  private def studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
+  private def studiesService = Play.current.plugin[BbwebPlugin].map(_.studiesService).getOrElse {
     sys.error("Bbweb plugin is not registered")
   }
 
   def list = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    val json = Json.toJson(studyService.getAll.toList)
+    val json = Json.toJson(studiesService.getAll.toList)
     Ok(json)
   }
 
   def query(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    studyService.getStudy(id).fold(
+    studiesService.getStudy(id).fold(
       err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
       study => Ok(Json.toJson(study))
     )
   }
 
   def add = CommandAction { cmd: AddStudyCmd => implicit userId =>
-    val future = studyService.addStudy(cmd)
+    val future = studiesService.addStudy(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -56,7 +56,7 @@ object StudyController extends BbwebController {
   }
 
   def update(id: String) = CommandAction { cmd : UpdateStudyCmd => implicit userId =>
-    val future = studyService.updateStudy(cmd)
+    val future = studiesService.updateStudy(cmd)
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -66,7 +66,7 @@ object StudyController extends BbwebController {
   }
 
   def enable = CommandAction { cmd: EnableStudyCmd => implicit userId =>
-    val future = studyService.enableStudy(cmd)
+    val future = studiesService.enableStudy(cmd)
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -76,7 +76,7 @@ object StudyController extends BbwebController {
   }
 
   def disable = CommandAction { cmd: DisableStudyCmd => implicit userId =>
-    val future = studyService.disableStudy(cmd)
+    val future = studiesService.disableStudy(cmd)
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -86,7 +86,7 @@ object StudyController extends BbwebController {
   }
 
   def retire = CommandAction { cmd: RetireStudyCmd => implicit userId =>
-    val future = studyService.retireStudy(cmd)
+    val future = studiesService.retireStudy(cmd)
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -96,7 +96,7 @@ object StudyController extends BbwebController {
   }
 
   def unretire = CommandAction { cmd: UnretireStudyCmd => implicit userId =>
-    val future = studyService.unretireStudy(cmd)
+    val future = studiesService.unretireStudy(cmd)
     future.map { validation =>
       validation.fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -141,16 +141,16 @@ object StudyController extends BbwebController {
   def getProcessingDto(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
     Logger.debug(s"ProcessingTypeController.getProcessingDto: studyId: $studyId")
 
-    val processingTypes = studyService.processingTypesForStudy(studyId)
+    val processingTypes = studiesService.processingTypesForStudy(studyId)
     val specimenLinkTypes = processingTypes.flatMap { pt =>
-      studyService.specimenLinkTypesForProcessingType(pt.id.id)
+      studiesService.specimenLinkTypesForProcessingType(pt.id.id)
     }
 
     Ok(Json.obj(
       "processingTypes" -> Json.toJson(processingTypes.toList),
       "specimenLinkTypes" -> Json.toJson(specimenLinkTypes.toList),
-      "specimenLinkAnnotationTypes" -> studyService.specimenLinkAnnotationTypesForStudy(studyId).toList,
-      "specimenGroups" -> Json.toJson(studyService.specimenGroupsForStudy(studyId).toList)
+      "specimenLinkAnnotationTypes" -> studiesService.specimenLinkAnnotationTypesForStudy(studyId).toList,
+      "specimenGroups" -> Json.toJson(studiesService.specimenGroupsForStudy(studyId).toList)
     ))
   }
 

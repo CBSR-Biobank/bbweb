@@ -22,7 +22,7 @@ import scalaz.Scalaz._
 
 object CeventTypeController extends BbwebController  {
 
-  private def studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
+  private def studiesService = Play.current.plugin[BbwebPlugin].map(_.studiesService).getOrElse {
     sys.error("Bbweb plugin is not registered")
   }
 
@@ -30,17 +30,17 @@ object CeventTypeController extends BbwebController  {
     Logger.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
 
     ceventTypeId.fold {
-      Ok(Json.toJson(studyService.collectionEventTypesForStudy(studyId).toList))
+      Ok(Json.toJson(studiesService.collectionEventTypesForStudy(studyId).toList))
     } {
       id =>
-      studyService.collectionEventTypeWithId(studyId, id).fold(
+      studiesService.collectionEventTypeWithId(studyId, id).fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         ceventType => Ok(Json.toJson(ceventType))
       )
     }  }
 
   def addCollectionEventType = CommandAction { cmd: AddCollectionEventTypeCmd => implicit userId =>
-    val future = studyService.addCollectionEventType(cmd)
+    val future = studiesService.addCollectionEventType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -50,7 +50,7 @@ object CeventTypeController extends BbwebController  {
   }
 
   def updateCollectionEventType(id: String) = CommandAction { cmd: UpdateCollectionEventTypeCmd => implicit userId =>
-    val future = studyService.updateCollectionEventType(cmd)
+    val future = studiesService.updateCollectionEventType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -61,7 +61,7 @@ object CeventTypeController extends BbwebController  {
 
   def removeCollectionEventType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
     val cmd = RemoveCollectionEventTypeCmd(studyId, id, ver)
-    val future = studyService.removeCollectionEventType(cmd)
+    val future = studiesService.removeCollectionEventType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),

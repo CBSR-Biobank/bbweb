@@ -42,15 +42,17 @@ class NameGenerator(klass: Class[_]) {
   def uniqueName(reference: Any, name: String) = {
     val code = reference.hashCode
     val result = if (references.contains(code)) {
-      name + delimiter + references(code)
-    } else name
+      s"$name$delimiter${references(code)}"
+    } else {
+      name
+    }
     references(code) += 1
     result
   }
 
   def next[T: ClassTag]: String = {
     val className = implicitly[ClassTag[T]].runtimeClass.getSimpleName
-    uniqueName(s"$rootName-$className")
+    uniqueName(s"$rootSimpleName-$className")
   }
 
   def nextEmail[T: ClassTag]: String = {

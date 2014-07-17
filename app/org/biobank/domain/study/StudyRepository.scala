@@ -11,8 +11,6 @@ trait StudyRepositoryComponent {
 
   trait StudyRepository extends ReadWriteRepository[StudyId, Study] {
 
-    def nextIdentity: StudyId
-
     def allStudies(): Set[Study]
   }
 }
@@ -23,11 +21,9 @@ trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
 
   class StudyRepositoryImpl extends ReadWriteRepositoryRefImpl[StudyId, Study](v => v.id) with StudyRepository {
 
-    def nextIdentity: StudyId = new StudyId(java.util.UUID.randomUUID.toString.toUpperCase)
+    def nextIdentity: StudyId = new StudyId(nextIdentityAsString)
 
-    def allStudies(): Set[Study] = {
-      getValues.toSet
-    }
+    def allStudies(): Set[Study] = getValues.toSet
 
   }
 

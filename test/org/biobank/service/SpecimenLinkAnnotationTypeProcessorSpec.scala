@@ -13,7 +13,7 @@ import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
-class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
+class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
@@ -36,7 +36,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = AddSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]]
         .futureValue
 
@@ -74,7 +74,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = AddSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]]
         .futureValue
 
@@ -92,7 +92,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = AddSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]]
         .futureValue
 
@@ -112,7 +112,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version, annotType2.name,
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
 
@@ -156,7 +156,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
         annotType2.studyId.id, annotType2.id.id, annotType2.version, dupliacteName,
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
 
@@ -177,7 +177,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
         study2.id.id, annotType.id.id, annotType.version, annotType.name,
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
 
@@ -194,7 +194,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version - 1, annotType.name,
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
 
@@ -211,7 +211,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
 
       val cmd = RemoveSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
         .futureValue
 
@@ -225,7 +225,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudyProcessorFixture {
 
       val cmd = RemoveSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version - 1)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
         .futureValue
 

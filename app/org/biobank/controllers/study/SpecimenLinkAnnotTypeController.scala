@@ -3,7 +3,7 @@ package org.biobank.controllers.study
 import org.biobank.controllers._
 import org.biobank.service._
 import org.biobank.infrastructure._
-import org.biobank.service.{ ServiceComponent, ServiceComponentImpl }
+import org.biobank.service.{ ServicesComponent, ServicesComponentImpl }
 import org.biobank.service.json.Events._
 import org.biobank.service.json.SpecimenLinkAnnotationType._
 import org.biobank.infrastructure.command.StudyCommands._
@@ -24,7 +24,7 @@ import Scalaz._
 
 object SpecimenLinkAnnotTypeController extends BbwebController  {
 
-  private def studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
+  private def studiesService = Play.current.plugin[BbwebPlugin].map(_.studiesService).getOrElse {
     sys.error("Bbweb plugin is not registered")
   }
 
@@ -32,17 +32,17 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
     Logger.debug(s"SpecimenLinkAnnotTypeController.list: studyId: $studyId, annotTypeId: $annotTypeId")
 
     annotTypeId.fold {
-      Ok(Json.toJson(studyService.specimenLinkAnnotationTypesForStudy(studyId).toList))
+      Ok(Json.toJson(studiesService.specimenLinkAnnotationTypesForStudy(studyId).toList))
     } {
       id =>
-      studyService.specimenLinkAnnotationTypeWithId(studyId, id).fold(
+      studiesService.specimenLinkAnnotationTypeWithId(studyId, id).fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         annotType => Ok(Json.toJson(annotType))
       )
     }  }
 
   def addAnnotationType = CommandAction { cmd: AddSpecimenLinkAnnotationTypeCmd => implicit userId =>
-    val future = studyService.addSpecimenLinkAnnotationType(cmd)
+    val future = studiesService.addSpecimenLinkAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -52,7 +52,7 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
   }
 
   def updateAnnotationType(id: String) = CommandAction { cmd: UpdateSpecimenLinkAnnotationTypeCmd => implicit userId =>
-    val future = studyService.updateSpecimenLinkAnnotationType(cmd)
+    val future = studiesService.updateSpecimenLinkAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -63,7 +63,7 @@ object SpecimenLinkAnnotTypeController extends BbwebController  {
 
   def removeAnnotationType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
     val cmd = RemoveSpecimenLinkAnnotationTypeCmd(studyId, id, ver)
-    val future = studyService.removeSpecimenLinkAnnotationType(cmd)
+    val future = studiesService.removeSpecimenLinkAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),

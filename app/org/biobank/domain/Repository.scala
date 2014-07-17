@@ -10,6 +10,10 @@ import scalaz.Scalaz._
   */
 trait  ReadRepository[K, A] {
 
+  protected def nextIdentityAsString: String
+
+  def nextIdentity: K
+
   def isEmpty: Boolean
 
   def getByKey(key: K): DomainValidation[A]
@@ -35,11 +39,13 @@ trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
 /**
   * A read-only wrapper around an STM Ref of a Map.
   */
-class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepository[K, A] {
+abstract class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepository[K, A] {
 
   protected val internalMap: Ref[Map[K, A]] = Ref(Map.empty[K, A])
 
   protected def getMap = internalMap.single.get
+
+  protected def nextIdentityAsString: String = java.util.UUID.randomUUID.toString.toUpperCase
 
   def isEmpty: Boolean = getMap.isEmpty
 
@@ -59,7 +65,7 @@ class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepository[K,
   *
   * Used by processor actors.
   */
-private [domain] class ReadWriteRepositoryRefImpl[K, A](keyGetter: (A) => K)
+private [domain] abstract class ReadWriteRepositoryRefImpl[K, A](keyGetter: (A) => K)
     extends ReadRepositoryRefImpl[K, A](keyGetter)
     with ReadWriteRepository[K, A] {
 

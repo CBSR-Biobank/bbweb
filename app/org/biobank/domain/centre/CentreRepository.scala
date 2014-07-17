@@ -10,12 +10,7 @@ trait CentreRepositoryComponent {
 
   val centreRepository: CentreRepository
 
-  trait CentreRepository extends ReadWriteRepository[CentreId, Centre] {
-
-    def nextIdentity: CentreId
-
-    def allCentres(): Set[Centre]
-  }
+  trait CentreRepository extends ReadWriteRepository[CentreId, Centre]
 }
 
 trait CentreRepositoryComponentImpl extends CentreRepositoryComponent {
@@ -24,11 +19,7 @@ trait CentreRepositoryComponentImpl extends CentreRepositoryComponent {
 
   class CentreRepositoryImpl extends ReadWriteRepositoryRefImpl[CentreId, Centre](v => v.id) with CentreRepository {
 
-    def nextIdentity: CentreId = new CentreId(java.util.UUID.randomUUID.toString.toUpperCase)
-
-    def allCentres(): Set[Centre] = {
-      getValues.toSet
-    }
+    def nextIdentity: CentreId = new CentreId(nextIdentityAsString)
 
   }
 

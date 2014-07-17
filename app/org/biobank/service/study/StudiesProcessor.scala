@@ -6,12 +6,11 @@ import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
   DomainValidation,
   DomainError,
-  RepositoryComponent,
-  RepositoryComponentImpl,
+  RepositoriesComponent,
+  RepositoriesComponentImpl,
   UserId
 }
 import org.biobank.domain.study._
-import org.biobank.domain.study.Study
 
 import akka.actor. { ActorRef, Props }
 import akka.pattern.ask
@@ -20,9 +19,7 @@ import akka.persistence.SnapshotOffer
 import scalaz._
 import scalaz.Scalaz._
 
-case class StudyMessage(cmd: Any, userId: UserId, time: Long)
-
-trait StudyProcessorComponent
+trait StudiesProcessorComponent
     extends CollectionEventTypeProcessorComponent
     with CeventAnnotationTypeProcessorComponent
     with SpecimenGroupProcessorComponent
@@ -30,14 +27,14 @@ trait StudyProcessorComponent
     with ProcessingTypeProcessorComponent
     with SpecimenLinkTypeProcessorComponent
     with SpecimenLinkAnnotationTypeProcessorComponent {
-  self: RepositoryComponent =>
+  self: RepositoriesComponent =>
 
   /**
     * An actor that processes commands related to the [[org.biobank.domain.study.Study]] aggregate root.
     *
     * This implementation uses Akka persistence.
     */
-  sealed class StudyProcessor extends Processor {
+  sealed class StudiesProcessor extends Processor {
 
     override def persistenceId = "study-processor-id"
 
@@ -65,43 +62,33 @@ trait StudyProcessorComponent
       Props(new SpecimenLinkAnnotationTypeProcessor), "spcLinkAnnotTypeProc")
 
     val receiveRecover: Receive = {
-      case event: StudyAddedEvent => recoverEvent(event)
-      case event: StudyUpdatedEvent => recoverEvent(event)
-      case event: StudyEnabledEvent => recoverEvent(event)
-      case event: StudyDisabledEvent => recoverEvent(event)
-      case event: StudyRetiredEvent => recoverEvent(event)
+      case event: StudyAddedEvent =>     recoverEvent(event)
+      case event: StudyUpdatedEvent =>   recoverEvent(event)
+      case event: StudyEnabledEvent =>   recoverEvent(event)
+      case event: StudyDisabledEvent =>  recoverEvent(event)
+      case event: StudyRetiredEvent =>   recoverEvent(event)
       case event: StudyUnretiredEvent => recoverEvent(event)
+
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.studies.foreach{ study => studyRepository.put(study) }
     }
 
     val receiveCommand: Receive = {
-      case cmd: AddStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
-      case cmd: UpdateStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
-      case cmd: EnableStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
-      case cmd: DisableStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
-      case cmd: RetireStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
+      case cmd: AddStudyCmd =>      process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: UpdateStudyCmd =>   process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: EnableStudyCmd =>   process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: DisableStudyCmd =>  process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: RetireStudyCmd =>   process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: UnretireStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: SpecimenGroupCommand => validateAndForward(specimenGroupProcessor, cmd)
-
-      case cmd: CollectionEventTypeCommand => validateAndForward(collectionEventTypeProcessor, cmd)
-
+      case cmd: SpecimenGroupCommand =>                 validateAndForward(specimenGroupProcessor, cmd)
+      case cmd: CollectionEventTypeCommand =>           validateAndForward(collectionEventTypeProcessor, cmd)
       case cmd: CollectionEventAnnotationTypeCommand => validateAndForward(ceventAnnotationTypeProcessor, cmd)
-
-      case cmd: ParticipantAnnotationTypeCommand => validateAndForward(participantAnnotationTypeProcessor, cmd)
-
-      case cmd: ProcessingTypeCommand => validateAndForward(processingTypeProcessor, cmd)
-
-      case cmd: SpecimenLinkTypeCommand => validateAndForward(specimenLinkTypeProcessor, cmd)
-
-      case cmd: SpecimenLinkAnnotationTypeCommand => validateAndForward(specimenLinkAnnotationTypeProcessor,  cmd)
+      case cmd: ParticipantAnnotationTypeCommand =>     validateAndForward(participantAnnotationTypeProcessor, cmd)
+      case cmd: ProcessingTypeCommand =>                validateAndForward(processingTypeProcessor, cmd)
+      case cmd: SpecimenLinkTypeCommand =>              validateAndForward(specimenLinkTypeProcessor, cmd)
+      case cmd: SpecimenLinkAnnotationTypeCommand =>    validateAndForward(specimenLinkAnnotationTypeProcessor,  cmd)
 
       case other =>
         DomainError("invalid command received")
@@ -141,7 +128,7 @@ trait StudyProcessorComponent
       val studyId = studyRepository.nextIdentity
 
       if (studyRepository.getByKey(studyId).isSuccess) {
-        throw new IllegalStateException(s"study with id already exsits: $id")
+        throw new IllegalStateException(s"study with id already exsits: $studyId")
       }
 
       for {
@@ -152,7 +139,6 @@ trait StudyProcessorComponent
           newStudy.id.toString, newStudy.addedDate, newStudy.name, newStudy.description).success
        } yield event
     }
-
 
     private def validateCmd(cmd: UpdateStudyCmd): DomainValidation[StudyUpdatedEvent] = {
       val studyId = StudyId(cmd.id)
@@ -243,10 +229,12 @@ trait StudyProcessorComponent
 
     private def recoverEvent(event: StudyEnabledEvent) {
       val studyId = StudyId(event.id)
+      val specimenGroupCount = specimenGroupRepository.allForStudy(studyId).size
+      val collectionEventtypeCount = collectionEventTypeRepository.allForStudy(studyId).size
       val validation = for {
         disabledStudy <- isStudyDisabled(studyId)
         enabledStudy <- disabledStudy.enable(
-          disabledStudy.versionOption, event.dateTime, 1, 1)
+          disabledStudy.versionOption, event.dateTime, specimenGroupCount, collectionEventtypeCount)
         savedStudy <- studyRepository.put(enabledStudy).success
       } yield  enabledStudy
 
@@ -341,27 +329,17 @@ trait StudyProcessorComponent
       )
     }
 
-    private def nameAvailable(name: String): DomainValidation[Boolean] = {
-      val exists = studyRepository.getValues.exists { item =>
-        item.name.equals(name)
-      }
+    val errMsgNameExists = "study with name already exists"
 
-      if (exists) {
-        DomainError(s"study with name already exists: $name").failNel
-      } else {
-        true.successNel
+    private def nameAvailable(name: String): DomainValidation[Boolean] = {
+      nameAvailableMatcher(name, studyRepository, errMsgNameExists){ item =>
+        item.name.equals(name)
       }
     }
 
     private def nameAvailable(name: String, excludeStudyId: StudyId): DomainValidation[Boolean] = {
-      val exists = studyRepository.getValues.exists { item =>
+      nameAvailableMatcher(name, studyRepository, errMsgNameExists){ item =>
         item.name.equals(name) && (item.id != excludeStudyId)
-      }
-
-      if (exists) {
-        DomainError(s"study with name already exists: $name").failNel
-      } else {
-        true.successNel
       }
     }
   }

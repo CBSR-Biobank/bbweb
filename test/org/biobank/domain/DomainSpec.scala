@@ -2,7 +2,6 @@ package org.biobank.domain
 
 import org.biobank.fixture.TestComponentImpl
 import org.biobank.infrastructure._
-import org.biobank.fixture.NameGenerator
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
@@ -15,11 +14,12 @@ trait DomainSpec extends TestComponentImpl with FactoryComponent with WordSpecLi
 
   implicit override val system: ActorSystem = null
 
-  override val studyProcessor = null
-  override val userProcessor = null
+  override val studiesProcessor = null
+  override val centresProcessor = null
+  override val usersProcessor = null
 
-  override val studyService = null
-  override val userService = null
-
+  override val studiesService = null
+  override val centresService = null
+  override val usersService = null
 
 }

@@ -1,6 +1,6 @@
 package org.biobank.domain.centre
 
-import org.biobank.domain.{ IdentifiedValueObject, LocationId }
+import org.biobank.domain.{ LocationId }
 
 /** Used to link a center with a location.
   *

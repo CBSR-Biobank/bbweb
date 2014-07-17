@@ -2,7 +2,7 @@ package org.biobank.controllers.study
 
 import org.biobank.controllers._
 import org.biobank.service._
-import org.biobank.service.{ ServiceComponent, ServiceComponentImpl }
+import org.biobank.service.{ ServicesComponent, ServicesComponentImpl }
 import org.biobank.service.json.Events._
 import org.biobank.service.json.ParticipantAnnotationType._
 import org.biobank.infrastructure.command.StudyCommands._
@@ -21,7 +21,7 @@ import Scalaz._
 
 object ParticipantAnnotTypeController extends BbwebController  {
 
-  private def studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
+  private def studiesService = Play.current.plugin[BbwebPlugin].map(_.studiesService).getOrElse {
     sys.error("Bbweb plugin is not registered")
   }
 
@@ -38,10 +38,10 @@ object ParticipantAnnotTypeController extends BbwebController  {
     Logger.info(s"ParticipantAnnotTypeController.get: studyId: $studyId, annotTypeId: $annotTypeId")
 
     annotTypeId.fold {
-      Ok(Json.toJson(studyService.participantAnnotationTypesForStudy(studyId).toList))
+      Ok(Json.toJson(studiesService.participantAnnotationTypesForStudy(studyId).toList))
     } {
       id =>
-      studyService.participantAnnotationTypeWithId(studyId, id).fold(
+      studiesService.participantAnnotationTypeWithId(studyId, id).fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         annotType => Ok(Json.toJson(annotType))
       )
@@ -49,7 +49,7 @@ object ParticipantAnnotTypeController extends BbwebController  {
   }
 
   def addAnnotationType = CommandAction { cmd: AddParticipantAnnotationTypeCmd => implicit userId =>
-    val future = studyService.addParticipantAnnotationType(cmd)
+    val future = studiesService.addParticipantAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -59,7 +59,7 @@ object ParticipantAnnotTypeController extends BbwebController  {
   }
 
   def updateAnnotationType(id: String) = CommandAction { cmd: UpdateParticipantAnnotationTypeCmd => implicit userId =>
-    val future = studyService.updateParticipantAnnotationType(cmd)
+    val future = studiesService.updateParticipantAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -70,7 +70,7 @@ object ParticipantAnnotTypeController extends BbwebController  {
 
   def removeAnnotationType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
     val cmd = RemoveParticipantAnnotationTypeCmd(studyId, id, ver)
-    val future = studyService.removeParticipantAnnotationType(cmd)
+    val future = studiesService.removeParticipantAnnotationType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),

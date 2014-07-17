@@ -31,9 +31,9 @@ trait StudyQueryFixture extends TestFixture {
   //
   //  val studyView = system.actorOf(Props(new StudyViewImpl), "studyview")
 
-  override val studyProcessor = null
-  override val userProcessor = null
+  override val studiesProcessor = null
+  override val usersProcessor = null
 
-  override val studyService = null
-  override val userService = null
+  override val studiesService = null
+  override val usersService = null
 }

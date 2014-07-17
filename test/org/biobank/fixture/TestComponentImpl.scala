@@ -10,7 +10,7 @@ import com.typesafe.config.ConfigFactory
 import com.mongodb.casbah.Imports._
 import scala.language.postfixOps
 
-trait TestComponentImpl extends TopComponent with ServiceComponentImpl {
+trait TestComponentImpl extends TopComponent with ServicesComponentImpl {
 
   implicit val system: ActorSystem = ActorSystem("bbweb-test", TestComponentImpl.config())
   implicit val timeout = Timeout(5 seconds)

@@ -13,8 +13,6 @@ trait SpecimenLinkTypeRepositoryComponent {
 
   trait SpecimenLinkTypeRepository extends ReadWriteRepository [SpecimenLinkTypeId, SpecimenLinkType] {
 
-    def nextIdentity: SpecimenLinkTypeId
-
     def withId(processingTypeId: ProcessingTypeId, specimenLinkTypeId: SpecimenLinkTypeId): DomainValidation[SpecimenLinkType]
 
     def allForProcessingType(processingTypeId: ProcessingTypeId): Set[SpecimenLinkType]
@@ -36,8 +34,7 @@ trait SpecimenLinkTypeRepositoryComponentImpl extends SpecimenLinkTypeRepository
 
     val log = LoggerFactory.getLogger(this.getClass)
 
-    def nextIdentity: SpecimenLinkTypeId =
-      new SpecimenLinkTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
+    def nextIdentity: SpecimenLinkTypeId = new SpecimenLinkTypeId(nextIdentityAsString)
 
     def withId(
       processingTypeId: ProcessingTypeId,

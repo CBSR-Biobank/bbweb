@@ -25,7 +25,7 @@ trait ProcessingTypeProcessorComponent {
 
   /**
     * This is the Collection Event Type processor. It is a child actor of
-    * [[org.biobank.service.study.StudyProcessorComponent.StudyProcessor]].
+    * [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
     *
     * It handles commands that deal with a Collection Event Type.
     */
@@ -151,12 +151,16 @@ trait ProcessingTypeProcessorComponent {
       }
     }
 
+    val errMsgNameExists = "processing type with name already exists"
+
     private def nameAvailable(name: String): DomainValidation[Boolean] = {
-      nameAvailableMatcher(name, processingTypeRepository)(item => item.name.equals(name))
+      nameAvailableMatcher(name, processingTypeRepository, errMsgNameExists){ item =>
+        item.name.equals(name)
+      }
     }
 
     private def nameAvailable(name: String, excludeId: ProcessingTypeId): DomainValidation[Boolean] = {
-      nameAvailableMatcher(name, processingTypeRepository){ item =>
+      nameAvailableMatcher(name, processingTypeRepository, errMsgNameExists){ item =>
         item.name.equals(name) && (item.id != excludeId)
       }
     }

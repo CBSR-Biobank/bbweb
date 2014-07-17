@@ -16,10 +16,10 @@ import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
 
-trait UserServiceComponent {
-  self: RepositoryComponent =>
+trait UsersServiceComponent {
+  self: RepositoriesComponent =>
 
-  class UserService(userProcessor: ActorRef) extends ApplicationService {
+  class UsersService(usersProcessor: ActorRef) extends ApplicationService {
 
     val log = LoggerFactory.getLogger(this.getClass)
 
@@ -32,41 +32,41 @@ trait UserServiceComponent {
     }
 
     def register(cmd: RegisterUserCmd): Future[DomainValidation[UserRegisteredEvent]] = {
-      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserRegisteredEvent]])
+      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserRegisteredEvent]])
     }
 
     def activate(cmd: ActivateUserCmd): Future[DomainValidation[UserActivatedEvent]] = {
-      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserActivatedEvent]])
+      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserActivatedEvent]])
     }
 
     def update(cmd: UpdateUserCmd): Future[DomainValidation[UserUpdatedEvent]] = {
-      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserUpdatedEvent]])
+      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserUpdatedEvent]])
     }
 
     def lock(cmd: LockUserCmd): Future[DomainValidation[UserLockedEvent]] = {
-      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserLockedEvent]])
+      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserLockedEvent]])
     }
 
     def unlock(cmd: UnlockUserCmd): Future[DomainValidation[UserUnlockedEvent]] = {
-      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserUnlockedEvent]])
+      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserUnlockedEvent]])
     }
 
     def remove(cmd: RemoveUserCmd): Future[DomainValidation[UserRemovedEvent]] = {
-      userProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserRemovedEvent]])
+      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserRemovedEvent]])
     }
 
   }
 }
 
-trait UserProcessorComponent {
-  self: RepositoryComponent =>
+trait UsersProcessorComponent {
+  self: RepositoriesComponent =>
 
   case class SnapshotState(users: Set[User])
 
   /**
     * Handles the commands to configure users.
     */
-  class UserProcessor extends Processor {
+  class UsersProcessor extends Processor {
 
     override def persistenceId = "user-processor-id"
 

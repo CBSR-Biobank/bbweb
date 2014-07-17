@@ -15,7 +15,7 @@ import play.api.cache._
   */
 object Application extends Controller with Security {
 
-  private def userService = Play.current.plugin[BbwebPlugin].map(_.userService).getOrElse {
+  private def usersService = Play.current.plugin[BbwebPlugin].map(_.usersService).getOrElse {
     sys.error("Bbweb plugin is not registered")
   }
 
@@ -47,7 +47,7 @@ object Application extends Controller with Security {
       },
       loginCredentials => {
         Logger.info(s"login: $loginCredentials")
-        userService.getByEmail(loginCredentials.email).fold(
+        usersService.getByEmail(loginCredentials.email).fold(
           err => {
             BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))
           },

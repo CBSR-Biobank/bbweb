@@ -5,12 +5,14 @@ import org.biobank.service._
 import akka.actor.Props
 import akka.util.Timeout
 
-trait UserProcessorFixture extends TestFixture {
+trait UsersProcessorFixture extends TestFixture {
 
-  override val studyProcessor = null
-  override val userProcessor = system.actorOf(Props(new UserProcessor), "userproc")
+  override val studiesProcessor = null
+  override val centresProcessor = null
+  override val usersProcessor = system.actorOf(Props(new UsersProcessor), "userproc")
 
-  override val studyService = null
-  override val userService = null
+  override val studiesService = null
+  override val centresService = null
+  override val usersService = null
 
 }

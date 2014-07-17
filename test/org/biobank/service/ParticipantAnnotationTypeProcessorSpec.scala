@@ -13,7 +13,7 @@ import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import Scalaz._
 
-class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
+class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
@@ -36,7 +36,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = AddParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue
 
@@ -74,7 +74,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = AddParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue
 
@@ -92,7 +92,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = AddParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue
 
@@ -112,7 +112,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = UpdateParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version, annotType2.name,
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
 
@@ -156,7 +156,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = UpdateParticipantAnnotationTypeCmd(
         annotType2.studyId.id, annotType2.id.id, annotType2.version, dupliacteName,
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
 
@@ -177,7 +177,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = UpdateParticipantAnnotationTypeCmd(
         study2.id.id, annotType.id.id, annotType.version, annotType.name,
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
 
@@ -194,7 +194,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = UpdateParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version - 1, annotType.name,
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
 
@@ -211,7 +211,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
 
       val cmd = RemoveParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
         .futureValue
 
@@ -225,7 +225,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudyProcessorFixture {
 
       val cmd = RemoveParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version - 1)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
         .futureValue
 

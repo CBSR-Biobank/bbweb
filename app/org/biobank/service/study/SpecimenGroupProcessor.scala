@@ -31,7 +31,7 @@ trait SpecimenGroupProcessorComponent {
 
   /**
     * This is the Specimen Group processor. It is a child actor of
-    *  [[org.biobank.service.study.StudyProcessorComponent.StudyProcessor]].
+    *  [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
     *
     * It handles commands that deal with a Specimen Group.
     *
@@ -166,8 +166,10 @@ trait SpecimenGroupProcessorComponent {
       }
     }
 
+    val errMsgNameExists = "specimen group with name already exists"
+
     private def nameAvailable(specimenGroupName: String): DomainValidation[Boolean] = {
-      nameAvailableMatcher(specimenGroupName, specimenGroupRepository) { item =>
+      nameAvailableMatcher(specimenGroupName, specimenGroupRepository, errMsgNameExists) { item =>
         item.name.equals(specimenGroupName)
       }
     }
@@ -175,7 +177,7 @@ trait SpecimenGroupProcessorComponent {
     private def nameAvailable(
       specimenGroupName: String,
       id: SpecimenGroupId): DomainValidation[Boolean] = {
-      nameAvailableMatcher(specimenGroupName, specimenGroupRepository) { item =>
+      nameAvailableMatcher(specimenGroupName, specimenGroupRepository, errMsgNameExists) { item =>
         item.name.equals(specimenGroupName) && (item.id != id)
       }
     }

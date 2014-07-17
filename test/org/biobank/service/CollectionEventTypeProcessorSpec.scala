@@ -13,7 +13,7 @@ import org.biobank.domain.{
   DomainValidation,
   PreservationType,
   PreservationTemperatureType,
-  RepositoryComponent,
+  RepositoriesComponent,
   SpecimenType
 }
 import org.biobank.domain.study._
@@ -24,7 +24,7 @@ import akka.pattern.ask
 import scalaz._
 import scalaz.Scalaz._
 
-class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
+class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
@@ -49,7 +49,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       ceventType.recurring,
       ceventType.specimenGroupData,
       ceventType.annotationTypeData)
-    val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
+    val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeAddedEvent]]
       .futureValue
     resultFunc(validation)
   }
@@ -66,7 +66,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       ceventType.recurring,
       ceventType.specimenGroupData,
       ceventType.annotationTypeData)
-    val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
+    val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]]
       .futureValue
     resultFunc(validation)
   }
@@ -78,7 +78,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       ceventType.studyId.id,
       ceventType.id.id,
       ceventType.version)
-    val validation = ask(studyProcessor, cmd)
+    val validation = ask(studiesProcessor, cmd)
       .mapTo[DomainValidation[CollectionEventTypeRemovedEvent]]
       .futureValue
     resultFunc(validation)
@@ -301,7 +301,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = new UpdateSpecimenGroupCmd(sg.studyId.id, sg.id.id,
         sg.version, sg.name, sg.description, sg.units, sg.anatomicalSourceType,
         sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
-      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
       validation should be('failure)
 
@@ -339,7 +339,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       collectionEventTypeRepository.put(cet)
 
       val cmd = new RemoveSpecimenGroupCmd(sg.studyId.id, sg.id.id, sg.version)
-      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
+      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
         .futureValue
 
       validation should be('failure)
@@ -421,7 +421,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
       val cmd = UpdateCollectionEventAnnotationTypeCmd(
         annotationType.studyId.id, annotationType.id.id, annotationType.version,
         annotationType.name, annotationType.description, annotationType.valueType)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
         .futureValue
 
@@ -460,7 +460,7 @@ class CollectionEventTypeProcessorSpec extends StudyProcessorFixture {
 
       val cmd = RemoveCollectionEventAnnotationTypeCmd(
         annotationType.studyId.id, annotationType.id.id, annotationType.version)
-      val validation = ask(studyProcessor, cmd)
+      val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
         .futureValue
 

@@ -1,9 +1,14 @@
-package org.biobank.service
-package study
+package org.biobank.service.study
 
+import org.biobank.service.ApplicationService
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.domain._
+import org.biobank.domain.{
+  AnnotationTypeId,
+  DomainValidation,
+  DomainError,
+  RepositoriesComponent,
+  UserId }
 import org.biobank.domain.study._
 
 import akka.actor._
@@ -16,11 +21,11 @@ import ExecutionContext.Implicits.global
 import scalaz._
 import scalaz.Scalaz._
 
-trait StudyServiceComponent {
+trait StudiesServiceComponent {
 
-  val studyService: StudyService
+  val studiesService: StudiesService
 
-  trait StudyService extends ApplicationService {
+  trait StudiesService extends ApplicationService {
 
     def getAll: Set[Study]
 
@@ -188,13 +193,13 @@ trait StudyServiceComponent {
  * Handles the commands to configure studies. the commands are forwarded to the Study Aggregate
  * Processor.
  *
- * @param studyProcessor
+ * @param studiesProcessor
  *
  */
-trait StudyServiceComponentImpl extends StudyServiceComponent {
-  self: RepositoryComponent =>
+trait StudiesServiceComponentImpl extends StudiesServiceComponent {
+  self: RepositoriesComponent =>
 
-  class StudyServiceImpl(processor: ActorRef) extends StudyService {
+  class StudiesServiceImpl(processor: ActorRef) extends StudiesService {
 
     val log = LoggerFactory.getLogger(this.getClass)
 

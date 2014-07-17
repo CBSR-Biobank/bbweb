@@ -26,7 +26,7 @@ import scalaz.Scalaz._
  */
 object SpecimenGroupController extends BbwebController {
 
-  private def studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
+  private def studiesService = Play.current.plugin[BbwebPlugin].map(_.studiesService).getOrElse {
     sys.error("Bbweb plugin is not registered")
   }
 
@@ -34,10 +34,10 @@ object SpecimenGroupController extends BbwebController {
     Logger.debug(s"SpecimenGroupController.get: studyId: $studyId, sgId: $sgId")
 
     sgId.fold {
-      Ok(Json.toJson(studyService.specimenGroupsForStudy(studyId).toList))
+      Ok(Json.toJson(studiesService.specimenGroupsForStudy(studyId).toList))
     } {
       id =>
-      studyService.specimenGroupWithId(studyId, id).fold(
+      studiesService.specimenGroupWithId(studyId, id).fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         specimenGroup => Ok(Json.toJson(specimenGroup))
       )
@@ -45,7 +45,7 @@ object SpecimenGroupController extends BbwebController {
   }
 
   def addSpecimenGroup = CommandAction(numFields = 8) { cmd: AddSpecimenGroupCmd => implicit userId =>
-    val future = studyService.addSpecimenGroup(cmd)
+    val future = studiesService.addSpecimenGroup(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -55,7 +55,7 @@ object SpecimenGroupController extends BbwebController {
   }
 
   def updateSpecimenGroup(id: String) = CommandAction { cmd: UpdateSpecimenGroupCmd => implicit userId =>
-    val future = studyService.updateSpecimenGroup(cmd)
+    val future = studiesService.updateSpecimenGroup(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -66,7 +66,7 @@ object SpecimenGroupController extends BbwebController {
 
   def removeSpecimenGroup(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
     val cmd = RemoveSpecimenGroupCmd(studyId, id, ver)
-    val future = studyService.removeSpecimenGroup(cmd)
+    val future = studiesService.removeSpecimenGroup(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),

@@ -2,7 +2,7 @@ import PlayKeys._
 
 name := """bbweb"""
 
-organization := "org.biobank"
+organization in ThisBuild := "org.biobank"
 
 version := "0.1-SNAPSHOT"
 
@@ -10,7 +10,7 @@ scalaVersion := "2.11.1"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalacOptions ++= Seq(
+scalacOptions in ThisBuild ++= Seq(
   "-target:jvm-1.7",
   "-encoding", "UTF-8",
   "deprecation",        // warning and location for usages of deprecated APIs
@@ -89,11 +89,7 @@ net.virtualvoid.sbt.graph.Plugin.graphSettings
 // gzip = Zips all assets, Asset controller serves them automatically when client accepts them
 pipelineStages := Seq(rjs, digest, gzip)
 
-// RequireJS with sbt-rjs (https://github.com/sbt/sbt-rjs#sbt-rjs)
-// ~~~
-RjsKeys.paths += ("jsRoutes" -> ("/jsroutes" -> "empty:"))
-
 // To completely override the optimization process, use this config option:
 //requireNativePath := Some("node r.js -o name=main out=javascript-min/main.min.js")
 
-//com.jamesward.play.BrowserNotifierPlugin.livereload
+emojiLogs

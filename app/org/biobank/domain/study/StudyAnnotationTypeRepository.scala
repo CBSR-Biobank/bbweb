@@ -8,8 +8,6 @@ import scalaz.Scalaz._
 trait StudyAnnotationTypeRepository[A <: StudyAnnotationType]
     extends ReadWriteRepository [AnnotationTypeId, A] {
 
-  def nextIdentity: AnnotationTypeId
-
   def withId(studyId: StudyId, annotationTypeId: AnnotationTypeId): DomainValidation[A]
 
   def withId(studyId: StudyId, annotationTypeId: String): DomainValidation[A]
@@ -21,8 +19,7 @@ trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
   extends ReadWriteRepository[AnnotationTypeId, A]
   with StudyAnnotationTypeRepository[A] {
 
-  def nextIdentity: AnnotationTypeId =
-    new AnnotationTypeId(java.util.UUID.randomUUID.toString.toUpperCase)
+  def nextIdentity: AnnotationTypeId = new AnnotationTypeId(nextIdentityAsString)
 
   def withId(
     studyId: StudyId,

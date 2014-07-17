@@ -11,7 +11,7 @@ import org.biobank.domain.{
   DomainValidation,
   PreservationType,
   PreservationTemperatureType,
-  RepositoryComponentImpl,
+  RepositoriesComponentImpl,
   SpecimenType
 }
 import AnnotationValueType._
@@ -24,7 +24,7 @@ import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
-class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
+class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -46,7 +46,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       var cmd = AddSpecimenGroupCmd(disabledStudy.id.id, sg.name, sg.description, sg.units,
         sg.anatomicalSourceType, sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
 
-      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
         .futureValue
       validation should be ('success)
 
@@ -75,7 +75,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
 
       cmd = AddSpecimenGroupCmd(disabledStudy.id.id, name2, None, sg.units, sg.anatomicalSourceType,
         sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
-      val validation2 = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+      val validation2 = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
         .futureValue
       validation2 should be ('success)
 
@@ -108,7 +108,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       var cmd = AddSpecimenGroupCmd(study2.id.id, sg.name, sg.description, sg.units,
         sg.anatomicalSourceType, sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
 
-      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
         .futureValue
 
       validation should be('failure)
@@ -127,7 +127,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sg.id.id, sg.version,
         sg2.name, sg2.description, sg2.units, sg2.anatomicalSourceType, sg2.preservationType,
         sg2.preservationTemperatureType, sg2.specimenType)
-      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
       validation should be ('success)
 
@@ -160,7 +160,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
         item.description, item.units, item.anatomicalSourceType, item.preservationType,
         item.preservationTemperatureType, item.specimenType)
 
-      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
       validation should be ('failure)
 
@@ -177,7 +177,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       val cmd = AddSpecimenGroupCmd(disabledStudy.id.id, item.name,
         item.description, item.units, item.anatomicalSourceType, item.preservationType,
         item.preservationTemperatureType, item.specimenType)
-      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
         .futureValue
       validation should be ('failure)
 
@@ -199,7 +199,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sg2.id.id, sg2.version,
         sg1.name, sg1.description, sg1.units, sg1.anatomicalSourceType, sg1.preservationType,
         sg1.preservationTemperatureType, sg1.specimenType)
-      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
 
       validation should be ('failure)
@@ -219,7 +219,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       val cmd = new UpdateSpecimenGroupCmd(study2.id.id, item.id.id, item.version, item.name,
         item.description, item.units, item.anatomicalSourceType, item.preservationType,
         item.preservationTemperatureType, item.specimenType)
-      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
       validation should be ('failure)
 
@@ -234,7 +234,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       specimenGroupRepository.put(item)
 
       val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id, item.version)
-      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
+      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
         .futureValue
 
       validation should be ('success)
@@ -248,7 +248,7 @@ class SpecimenGroupProcessorSpec extends StudyProcessorFixture {
       specimenGroupRepository.put(item)
 
       val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id, item.version - 10)
-      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
+      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
         .futureValue
 
       validation should be ('failure)

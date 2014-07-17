@@ -31,9 +31,10 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
       extends ReadWriteRepositoryRefImpl[UserId, User](v => v.id)
       with UserRepository {
 
-    def allUsers(): Set[User] = {
-      getValues.toSet
-    }
+    // the email address is used for identity in this repository
+    def nextIdentity: UserId = throw new IllegalStateException("should not be used")
+
+    def allUsers(): Set[User] = getValues.toSet
 
     def emailAvailable(email: String): DomainValidation[Boolean] = {
       getByKey(new UserId(email)).fold(

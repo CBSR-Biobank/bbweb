@@ -28,7 +28,7 @@ trait CollectionEventTypeProcessorComponent {
 
   /**
     * This is the Collection Event Type processor. It is a child actor of
-    * [[org.biobank.service.study.StudyProcessorComponent.StudyProcessor]].
+    * [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
     *
     * It handles commands that deal with a Collection Event Type.
     */
@@ -164,12 +164,16 @@ trait CollectionEventTypeProcessorComponent {
       }
     }
 
+    val errMsgNameExists = "collection event type with name already exists"
+
     private def nameAvailable(name: String): DomainValidation[Boolean] = {
-      nameAvailableMatcher(name, collectionEventTypeRepository)(item => item.name.equals(name))
+      nameAvailableMatcher(name, collectionEventTypeRepository, errMsgNameExists) { item =>
+        item.name.equals(name)
+      }
     }
 
     private def nameAvailable(name: String, excludeId: CollectionEventTypeId): DomainValidation[Boolean] = {
-      nameAvailableMatcher(name, collectionEventTypeRepository){ item =>
+      nameAvailableMatcher(name, collectionEventTypeRepository, errMsgNameExists){ item =>
         item.name.equals(name) && (item.id != excludeId)
       }
     }

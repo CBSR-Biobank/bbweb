@@ -37,13 +37,14 @@ trait Processor extends PersistentActor with ActorLogging {
     */
   protected def nameAvailableMatcher[T <: ConcurrencySafeEntity[_]](
     name: String,
-    repository: ReadRepository[_, T])(
+    repository: ReadRepository[_, T],
+    errMsgPrefix: String)(
     matcher: T => Boolean): DomainValidation[Boolean] = {
     val exists = repository.getValues.exists { item =>
       matcher(item)
     }
     if (exists) {
-      DomainError(s"item with name already exists: $name").failNel
+      DomainError(s"$errMsgPrefix: $name").failNel
     } else {
       true.success
     }

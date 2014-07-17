@@ -9,12 +9,12 @@
 GET     /                                      org.biobank.controllers.Application.index
 
 # studies
-GET     /studies                               org.biobank.controllers.study.StudyController.list
-POST    /studies                               org.biobank.controllers.study.StudyController.add
-POST    /studies/enable                        org.biobank.controllers.study.StudyController.enable
-POST    /studies/disable                       org.biobank.controllers.study.StudyController.disable
-POST    /studies/retire                        org.biobank.controllers.study.StudyController.retire
-POST    /studies/unretire                      org.biobank.controllers.study.StudyController.unretire
+GET     /studies                               org.biobank.controllers.study.StudiesController.list
+POST    /studies                               org.biobank.controllers.study.StudiesController.add
+POST    /studies/enable                        org.biobank.controllers.study.StudiesController.enable
+POST    /studies/disable                       org.biobank.controllers.study.StudiesController.disable
+POST    /studies/retire                        org.biobank.controllers.study.StudiesController.retire
+POST    /studies/unretire                      org.biobank.controllers.study.StudiesController.unretire
 
 # specimen groups
 GET     /studies/sgroups/:studyId              org.biobank.controllers.study.SpecimenGroupController.get(studyId, sgId: Option[String])
@@ -59,31 +59,49 @@ PUT     /studies/sltypes/:id                   org.biobank.controllers.study.Spe
 DELETE  /studies/sltypes/:studyId/:id/:ver     org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(studyId, id, ver: Long)
 
 # value objects
-GET     /studies/valuetypes                    org.biobank.controllers.study.StudyController.valueTypes
-GET     /studies/anatomicalsrctypes            org.biobank.controllers.study.StudyController.anatomicalSourceTypes
-GET     /studies/specimentypes                 org.biobank.controllers.study.StudyController.specimenTypes
-GET     /studies/preservtypes                  org.biobank.controllers.study.StudyController.preservTypes
-GET     /studies/preservtemptypes              org.biobank.controllers.study.StudyController.preservTempTypes
-GET     /studies/sgvaluetypes                  org.biobank.controllers.study.StudyController.specimenGroupValueTypes
+GET     /studies/valuetypes                    org.biobank.controllers.study.StudiesController.valueTypes
+GET     /studies/anatomicalsrctypes            org.biobank.controllers.study.StudiesController.anatomicalSourceTypes
+GET     /studies/specimentypes                 org.biobank.controllers.study.StudiesController.specimenTypes
+GET     /studies/preservtypes                  org.biobank.controllers.study.StudiesController.preservTypes
+GET     /studies/preservtemptypes              org.biobank.controllers.study.StudiesController.preservTempTypes
+GET     /studies/sgvaluetypes                  org.biobank.controllers.study.StudiesController.specimenGroupValueTypes
 
 # DTOs
-GET     /studies/dto/processing/:studyId           org.biobank.controllers.study.StudyController.getProcessingDto(studyId)
+GET     /studies/dto/processing/:studyId           org.biobank.controllers.study.StudiesController.getProcessingDto(studyId)
 
 # study
-GET     /studies/:id                           org.biobank.controllers.study.StudyController.query(id)
-PUT     /studies/:id                           org.biobank.controllers.study.StudyController.update(id)
+GET     /studies/:id                           org.biobank.controllers.study.StudiesController.query(id)
+PUT     /studies/:id                           org.biobank.controllers.study.StudiesController.update(id)
+
+# centres
+GET     /centres                               org.biobank.controllers.centres.CentresController.list
+POST    /centres                               org.biobank.controllers.centres.CentresController.add
+POST    /centres/enable                        org.biobank.controllers.centres.CentresController.enable
+POST    /centres/disable                       org.biobank.controllers.centres.CentresController.disable
+GET     /centres/:id                           org.biobank.controllers.centres.CentresController.query(id)
+PUT     /centres/:id                           org.biobank.controllers.centres.CentresController.update(id)
+
+# centre location
+GET     /centres/locations/:centreId           org.biobank.controllers.centres.CentresController.getLocations(centreId, locationId: Option[String])
+POST    /centres/locations                     org.biobank.controllers.centres.CentresController.addLocation
+DELETE  /centres/locations/:centreId/:id       org.biobank.controllers.centres.CentresController.removeLocation(centreId, id)
+
+# centre to study link
+GET     /centres/studies/:centreId             org.biobank.controllers.centres.CentresController.getLinkedStudies(centreId)
+POST    /centres/studies                       org.biobank.controllers.centres.CentresController.addLinkedStudies
+DELETE  /centres/studies/:centreId/:studyId    org.biobank.controllers.centres.CentresController.removeLinkedStudy(centreId, studyId)
 
 # Users
-GET     /authuser                              org.biobank.controllers.UserController.authUser
-GET     /users                                 org.biobank.controllers.UserController.list
-GET     /users/:id                             org.biobank.controllers.UserController.user(id)
-POST    /users                                 org.biobank.controllers.UserController.addUser()
-PUT     /users/:id                             org.biobank.controllers.UserController.updateUser(id)
-DELETE  /users/:id/:ver                        org.biobank.controllers.UserController.removeUser(id, ver: Long)
+GET     /authuser                              org.biobank.controllers.UsersController.authUser
+GET     /users                                 org.biobank.controllers.UsersController.list
+GET     /users/:id                             org.biobank.controllers.UsersController.user(id)
+POST    /users                                 org.biobank.controllers.UsersController.addUser()
+PUT     /users/:id                             org.biobank.controllers.UsersController.updateUser(id)
+DELETE  /users/:id/:ver                        org.biobank.controllers.UsersController.removeUser(id, ver: Long)
 
-PUT     /users/activate/:id                    org.biobank.controllers.UserController.activateUser(id)
-PUT     /users/lock/:id                        org.biobank.controllers.UserController.lockUser(id)
-PUT     /users/unlock/:id                      org.biobank.controllers.UserController.unlockUser(id)
+PUT     /users/activate/:id                    org.biobank.controllers.UsersController.activateUser(id)
+PUT     /users/lock/:id                        org.biobank.controllers.UsersController.lockUser(id)
+PUT     /users/unlock/:id                      org.biobank.controllers.UsersController.unlockUser(id)
 
 # Authentication
 POST    /login                                 org.biobank.controllers.Application.login()

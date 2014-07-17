@@ -15,21 +15,21 @@ import play.api.libs.json._
 import scalaz._
 import Scalaz._
 
-object UserController extends BbwebController {
+object UsersController extends BbwebController {
 
-  private def userService = Play.current.plugin[BbwebPlugin].map(_.userService).getOrElse {
+  private def usersService = Play.current.plugin[BbwebPlugin].map(_.usersService).getOrElse {
     sys.error("Bbweb plugin is not registered")
   }
 
   def list = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    Ok(Json.toJson(userService.getAll.toList))
+    Ok(Json.toJson(usersService.getAll.toList))
   }
 
   /** Retrieves the currently logged in user if the token is valid.
     */
   def authUser() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Logger.info(s"authUser: userId: $userId")
-    userService.getByEmail(userId.id).fold(
+    usersService.getByEmail(userId.id).fold(
       err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
       user => Ok(Json.toJson(user))
     )
@@ -38,7 +38,7 @@ object UserController extends BbwebController {
   /** Retrieves the user for the given id as JSON */
   def user(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Logger.info(s"user: id: $id")
-    userService.getByEmail(id).fold(
+    usersService.getByEmail(id).fold(
       err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
       user => Ok(Json.toJson(user))
     )
@@ -46,7 +46,7 @@ object UserController extends BbwebController {
 
   def addUser() = CommandAction { cmd: RegisterUserCmd => implicit userId =>
     Logger.info(s"addUser: cmd: $cmd")
-    val future = userService.register(cmd)
+    val future = usersService.register(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -56,7 +56,7 @@ object UserController extends BbwebController {
   }
 
   def activateUser(id: String) =  CommandAction { cmd: ActivateUserCmd => implicit userId =>
-    val future = userService.activate(cmd)
+    val future = usersService.activate(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -66,7 +66,7 @@ object UserController extends BbwebController {
   }
 
   def updateUser(id: String) =  CommandAction { cmd: UpdateUserCmd => implicit userId =>
-    val future = userService.update(cmd)
+    val future = usersService.update(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -76,7 +76,7 @@ object UserController extends BbwebController {
   }
 
   def lockUser(id: String) =  CommandAction { cmd: LockUserCmd => implicit userId =>
-    val future = userService.lock(cmd)
+    val future = usersService.lock(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -87,7 +87,7 @@ object UserController extends BbwebController {
 
   def unlockUser(id: String) =  CommandAction { cmd: UnlockUserCmd => implicit userId =>
     Logger.info(s"unlockUser")
-    val future = userService.unlock(cmd)
+    val future = usersService.unlock(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -98,7 +98,7 @@ object UserController extends BbwebController {
 
   def removeUser(id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
     val cmd = RemoveUserCmd(id, ver)
-    val future = userService.remove(cmd)
+    val future = usersService.remove(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),

@@ -13,8 +13,6 @@ trait SpecimenGroupRepositoryComponent {
 
   trait SpecimenGroupRepository extends ReadWriteRepository[SpecimenGroupId, SpecimenGroup] {
 
-    def nextIdentity: SpecimenGroupId
-
     def allForStudy(studyId: StudyId): Set[SpecimenGroup]
 
     def withId(
@@ -34,8 +32,7 @@ trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryCompon
 
     val log = LoggerFactory.getLogger(this.getClass)
 
-    def nextIdentity: SpecimenGroupId =
-      new SpecimenGroupId(java.util.UUID.randomUUID.toString.toUpperCase)
+    def nextIdentity: SpecimenGroupId = new SpecimenGroupId(nextIdentityAsString)
 
     def allForStudy(studyId: StudyId): Set[SpecimenGroup] = {
       getValues.filter(x => x.studyId.equals(studyId)).toSet

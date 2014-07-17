@@ -10,7 +10,7 @@ import org.biobank.domain.{
   DomainValidation,
   PreservationType,
   PreservationTemperatureType,
-  RepositoryComponent,
+  RepositoriesComponent,
   SpecimenType
 }
 import org.biobank.domain.study._
@@ -23,7 +23,7 @@ import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
-class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
+class ProcessingTypeProcessorSpec extends StudiesProcessorFixture {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
@@ -39,7 +39,7 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       procType.name,
       procType.description,
       procType.enabled)
-    val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[ProcessingTypeAddedEvent]]
+    val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[ProcessingTypeAddedEvent]]
       .futureValue
     resultFunc(validation)
   }
@@ -54,7 +54,7 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       procType.name,
       procType.description,
       procType.enabled)
-    val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[ProcessingTypeUpdatedEvent]]
+    val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[ProcessingTypeUpdatedEvent]]
       .futureValue
     resultFunc(validation)
   }
@@ -66,7 +66,7 @@ class ProcessingTypeProcessorSpec extends StudyProcessorFixture {
       procType.studyId.id,
       procType.id.id,
       procType.version)
-    val validation = ask(studyProcessor, cmd)
+    val validation = ask(studiesProcessor, cmd)
       .mapTo[DomainValidation[ProcessingTypeRemovedEvent]]
       .futureValue
     resultFunc(validation)

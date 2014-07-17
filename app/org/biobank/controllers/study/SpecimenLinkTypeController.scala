@@ -24,7 +24,7 @@ import scalaz.Scalaz._
 
 object SpecimenLinkTypeController extends BbwebController  {
 
-  private def studyService = Play.current.plugin[BbwebPlugin].map(_.studyService).getOrElse {
+  private def studiesService = Play.current.plugin[BbwebPlugin].map(_.studiesService).getOrElse {
     sys.error("Bbweb plugin is not registered")
   }
 
@@ -32,10 +32,10 @@ object SpecimenLinkTypeController extends BbwebController  {
     Logger.debug(s"SpecimenLinkTypeController.get: processingTypeId: $processingTypeId, slTypeId: $slTypeId")
 
     slTypeId.fold {
-      Ok(Json.toJson(studyService.specimenLinkTypesForProcessingType(processingTypeId).toList))
+      Ok(Json.toJson(studiesService.specimenLinkTypesForProcessingType(processingTypeId).toList))
     } {
       id =>
-      studyService.specimenLinkTypeWithId(processingTypeId, id).fold(
+      studiesService.specimenLinkTypeWithId(processingTypeId, id).fold(
         err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
         slType => Ok(Json.toJson(slType))
       )
@@ -43,7 +43,7 @@ object SpecimenLinkTypeController extends BbwebController  {
   }
 
   def addSpecimenLinkType = CommandAction { cmd: AddSpecimenLinkTypeCmd => implicit userId =>
-    val future = studyService.addSpecimenLinkType(cmd)
+    val future = studiesService.addSpecimenLinkType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -53,7 +53,7 @@ object SpecimenLinkTypeController extends BbwebController  {
   }
 
   def updateSpecimenLinkType(id: String) = CommandAction { cmd: UpdateSpecimenLinkTypeCmd => implicit userId =>
-    val future = studyService.updateSpecimenLinkType(cmd)
+    val future = studiesService.updateSpecimenLinkType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
@@ -64,7 +64,7 @@ object SpecimenLinkTypeController extends BbwebController  {
 
   def removeSpecimenLinkType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
     val cmd = RemoveSpecimenLinkTypeCmd(studyId, id, ver)
-    val future = studyService.removeSpecimenLinkType(cmd)
+    val future = studiesService.removeSpecimenLinkType(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),

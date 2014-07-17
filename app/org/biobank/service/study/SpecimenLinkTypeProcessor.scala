@@ -31,7 +31,7 @@ trait SpecimenLinkTypeProcessorComponent {
 
   /**
     * This is the Collection Event Type processor. It is a child actor of
-    * [[org.biobank.service.study.StudyProcessorComponent.StudyProcessor]].
+    * [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
     *
     * It handles commands that deal with a Collection Event Type.
     */

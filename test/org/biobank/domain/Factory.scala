@@ -3,6 +3,7 @@ package org.biobank.domain
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.study._
+import org.biobank.domain.centre._
 import org.biobank.infrastructure.{
   CollectionEventTypeAnnotationTypeData,
   CollectionEventTypeSpecimenGroupData,
@@ -16,7 +17,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 trait FactoryComponent {
-  self: RepositoryComponent =>
+  self: RepositoriesComponent =>
 
   val factory: Factory = new Factory
 
@@ -265,6 +266,47 @@ trait FactoryComponent {
       specimenLinkTypeAnnotationType
     }
 
+    def createDisabledCentre: DisabledCentre = {
+      val id = centreRepository.nextIdentity
+      val name = nameGenerator.next[Centre]
+      val description = Some(nameGenerator.next[Centre])
+
+      val validation = DisabledCentre.create(id, -1L, DateTime.now, name, description)
+      if (validation.isFailure) {
+
+      }
+
+      validation.fold(
+        err => {
+          throw new Error("cannot add disabled centre")
+        },
+        centre => {
+          domainObjects = domainObjects + (classOf[DisabledCentre] -> centre)
+          centre
+        }
+      )
+    }
+
+    def createEnabledCentre: EnabledCentre = {
+      val disabledCentre = defaultDisabledCentre
+      val enabledCentre = disabledCentre.enable(disabledCentre.versionOption, DateTime.now) | null
+      domainObjects = domainObjects + (classOf[EnabledCentre] -> enabledCentre)
+      domainObjects = domainObjects - classOf[DisabledCentre]
+      enabledCentre
+    }
+
+    def createLocation: Location = {
+      Location(
+        LocationId(nameGenerator.next[Location]),
+        nameGenerator.next[Location],
+        nameGenerator.next[Location],
+        nameGenerator.next[Location],
+        nameGenerator.next[Location],
+        nameGenerator.next[Location],
+        Some(nameGenerator.next[Location]),
+        nameGenerator.next[Location])
+    }
+
     def defaultRegisteredUser: RegisteredUser = {
       defaultObject(classOf[RegisteredUser], createRegisteredUser)
     }
@@ -327,6 +369,18 @@ trait FactoryComponent {
       defaultObject(
         classOf[SpecimenLinkTypeAnnotationTypeData],
         createSpecimenLinkTypeAnnotationTypeData)
+    }
+
+    def defaultDisabledCentre: DisabledCentre = {
+      defaultObject(classOf[DisabledCentre], createDisabledCentre)
+    }
+
+    def defaultEnabledCentre: EnabledCentre = {
+      defaultObject(classOf[EnabledCentre], createEnabledCentre)
+    }
+
+    def defaultLocation: Location = {
+      defaultObject(classOf[Location], createLocation)
     }
 
     /** Retrieves the class from the map, or calls 'create' if value does not exist

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 /**
   * Tests the REST API for [[Study]].
   */
-class StudyControllerSpec extends ControllerFixture {
+class StudiesControllerSpec extends ControllerFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
 

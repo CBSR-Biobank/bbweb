@@ -10,7 +10,7 @@ import org.biobank.domain.{
   DomainValidation,
   PreservationType,
   PreservationTemperatureType,
-  RepositoryComponentImpl,
+  RepositoriesComponentImpl,
   SpecimenType
 }
 import org.biobank.domain.study._
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
 
-class StudyProcessorSpec extends StudyProcessorFixture {
+class StudiesProcessorSpec extends StudiesProcessorFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -38,7 +38,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
     val cmd = AddStudyCmd(
       study.name,
       study.description)
-    val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
+    val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
       .futureValue
     resultFunc(validation)
   }
@@ -51,7 +51,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       study.version,
       study.name,
       study.description)
-    val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]]
+    val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]]
       .futureValue
     resultFunc(validation)
   }
@@ -81,7 +81,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
 
-      val validation = ask(studyProcessor, AddStudyCmd(study.name, study.description))
+      val validation = ask(studiesProcessor, AddStudyCmd(study.name, study.description))
         .mapTo[DomainValidation[StudyAddedEvent]].futureValue
       validation should be ('failure)
 
@@ -190,7 +190,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val validation = ask(studyProcessor, EnableStudyCmd(study.id.toString, 0L))
+      val validation = ask(studiesProcessor, EnableStudyCmd(study.id.toString, 0L))
         .mapTo[DomainValidation[StudyEnabledEvent]]
         .futureValue
       validation should be ('success)
@@ -206,7 +206,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val enabledStudy = factory.createEnabledStudy
       studyRepository.put(enabledStudy)
 
-      val validation = ask(studyProcessor, DisableStudyCmd(enabledStudy.id.toString, 1L))
+      val validation = ask(studiesProcessor, DisableStudyCmd(enabledStudy.id.toString, 1L))
         .mapTo[DomainValidation[StudyDisabledEvent]]
         .futureValue
 
@@ -228,7 +228,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val validation = ask(studyProcessor, RetireStudyCmd(study.id.toString, 0L))
+      val validation = ask(studiesProcessor, RetireStudyCmd(study.id.toString, 0L))
         .mapTo[DomainValidation[StudyRetiredEvent]]
         .futureValue
       validation should be ('success)
@@ -248,7 +248,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val study = factory.createDisabledStudy
 
       var cmd: StudyCommand = AddStudyCmd(study.name, study.description)
-      val validation = ask(studyProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
+      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
         .futureValue
 
       validation should be ('success)
@@ -256,10 +256,10 @@ class StudyProcessorSpec extends StudyProcessorFixture {
 
       Thread.sleep(10)
 
-      Await.result(gracefulStop(studyProcessor, 5 seconds, PoisonPill), 6 seconds)
+      Await.result(gracefulStop(studiesProcessor, 5 seconds, PoisonPill), 6 seconds)
 
       // restart
-      val newStudyProcessor = system.actorOf(Props(new StudyProcessor), "studyproc")
+      val newStudiesProcessor = system.actorOf(Props(new StudiesProcessor), "studyproc")
 
       Thread.sleep(10)
 
@@ -267,7 +267,7 @@ class StudyProcessorSpec extends StudyProcessorFixture {
       val newDescription = some(nameGenerator.next[Study])
 
       cmd = UpdateStudyCmd(event.id, 0, newName, newDescription)
-      val validation2 = ask(newStudyProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]]
+      val validation2 = ask(newStudiesProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]]
         .futureValue
 
       validation2 should be ('success)
