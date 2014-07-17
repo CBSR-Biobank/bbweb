@@ -54,6 +54,59 @@ define(['angular', 'underscore'], function(angular, _) {
     };
   });
 
+  mod.factory('PanelSettings', [
+    'studyViewSettings', 'panelTableService',
+    function(studyViewSettings, panelTableService) {
+      function PanelSettings(data, panelStateName) {
+        this.data = data;
+        this.tableParams = panelTableService.getTableParams(data);
+
+        this.panelOpen = studyViewSettings.panelState(panelStateName);
+
+        this.panelToggle = function() {
+          return studyViewSettings.panelStateToggle(panelStateName);
+        };
+      }
+
+      return PanelSettings;
+    }]);
+
+  mod.factory('AnnotTypesPanelSettings', [
+    '$injector', 'studyViewSettings', 'panelTableService', 'annotTypeModalService', 'PanelSettings',
+    function($injector, studyViewSettings, panelTableService, annotTypeModalService, PanelSettings) {
+      function AnnotTypesPanelSettings(
+        panelStateName,
+        annotTypes,
+        title,
+        header,
+        hasRequiredField,
+        onAdd,
+        onUpdate,
+        removeService) {
+
+        this.title = title;
+        this.header = header;
+        this.hasRequired = hasRequiredField;
+        this.add = onAdd;
+        this.update = onUpdate;
+
+        this.information = function(annotType) {
+          annotTypeModalService.show(this.title, annotType);
+        };
+
+        this.remove = function(annotType) {
+          removeService.remove(annotType);
+        };
+
+        $injector.invoke(PanelSettings, this, {
+          data: annotTypes,
+          panelStateName: panelStateName
+        });
+      }
+
+      return AnnotTypesPanelSettings;
+    }]);
+
   mod.service('panelTableService', ['$filter', 'ngTableParams', function ($filter, ngTableParams) {
     this.getTableParams = function(data) {
       /* jshint ignore:start */

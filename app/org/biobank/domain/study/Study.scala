@@ -34,7 +34,7 @@ sealed trait Study
     with HasUniqueName
     with HasDescriptionOption {
 
-  /** Contains the current state of the object, one of: Disabled, Enalbed, or Retired. */
+  /** Contains the current state of the object, one of: Disabled, Enabled, or Retired. */
   val status: String
 
   override def toString =
@@ -82,7 +82,7 @@ case class DisabledStudy private (
     } yield updatedStudy
   }
 
-  /** Used to enable a study after the study has been configured, or had configuration changes made on it. */
+  /** Used to enable a study after it has been configured, or had configuration changes made on it. */
   def enable(
     expectedVersion: Option[Long],
     dateTime: DateTime,

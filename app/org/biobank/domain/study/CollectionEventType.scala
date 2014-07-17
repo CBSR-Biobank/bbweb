@@ -20,8 +20,9 @@ import scalaz.Scalaz._
   * Defines a classification name, unique to the Study, to a participant visit.
   *
   * A participant visit is a record of when specimens were collected from a
-  * [[org.biobank.domain.participant.Participant]] at a collection [[Centre]]. Each collection event type is
-  * assigned one or more [[SpecimenGroup]]s to specify the [[SpecimenType]]s that are collected.
+  * [[org.biobank.domain.participant.Participant]] at a collection [[org.biobank.domain.centre.Centre]].  Each
+  * collection event type is assigned one or more [[SpecimenGroup]]s to specify the [[SpecimenType]]s that are
+  * collected.
   *
   * A study must have at least one collection event type defined in order to record collected specimens.
   *
@@ -29,7 +30,7 @@ import scalaz.Scalaz._
   *        lifetime of the study. False otherwise.
 
   * @param specimenGroupData One or more [[SpecimenGroup]]s that need to be collected with this
-  *        type of collection event. See [[CollectionEventTypeSpecimenGroupData]].
+  *        type of collection event. See [[org.biobank.infrastructure.CollectionEventTypeSpecimenGroupData]].
 
   * @param annotationTypeData The [[AnnotationType]]s for a collection event type.
   *
