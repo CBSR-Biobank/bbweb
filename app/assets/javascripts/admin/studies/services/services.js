@@ -329,7 +329,7 @@ define(['angular', 'common'], function(angular) {
       },
       remove: function(spcLinkType) {
         return $http.delete(
-          '/studies/sltypes/' + spcLinkType.studyId +
+          '/studies/sltypes/' + spcLinkType.processingTypeId +
             '/' + spcLinkType.id +
             '/' + spcLinkType.version);
       }
