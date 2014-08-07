@@ -1,0 +1,46 @@
+<div class="page-header"><h1>{{centre.name}} <small>{{title}}</small></h1></div>
+<div class="clearfix">
+  <form class="form-horizontal"
+        name="centreForm"
+        ng-submit="centreForm.$valid && submit(centre)"
+        novalidate>
+
+    <!-- NAME -->
+    <div class="form-group">
+      <label for="name" class="col-sm-2 control-label">Name</label>
+      <div class="col-sm-10">
+        <input
+            name="name"
+            type="text"
+            class="form-control"
+            ng-model="centre.name"
+            ng-minlength="2"
+            placeholder="A short name for the centre"
+            required />
+      </div>
+      <div class="col-sm-offset-2 col-sm-10">
+        <p class="help-block" ng-show="centreForm.name.$error.minlength">Name is too short.</p>
+      </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="form-group">
+      <label for="description" class="col-sm-2 control-label">Description</label>
+      <div class="col-sm-10">
+        <textarea name="description"
+                  class="form-control"
+                  rows="10"
+                  ng-model="centre.description"
+                  placeholder="A description of the centre (optional)" />
+      </div>
+    </div>
+
+    <!-- BUTTONS  -->
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button class="btn btn-primary" data-ng-disabled="centreForm.$invalid">Submit</button>
+        <button class="btn" ng-click="cancel()">Cancel</button>
+      </div>
+    </div>
+  </form>
+</div>

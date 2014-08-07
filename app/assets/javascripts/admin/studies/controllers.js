@@ -36,8 +36,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
 
   /**
    * Displays a list of studies in an ng-table.
-   *
-   * "user" is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
   mod.controller('StudiesTableCtrl', [
     '$scope',
@@ -46,7 +44,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
     '$state',
     'ngTableParams',
     'StudyService',
-    'studyViewSettings',
     function($scope,
              $rootScope,
              $filter,
@@ -98,8 +95,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
   /**
    * Displays the study administrtion page, with a number of tabs. Each tab displays the configuration
    * for a different aspect of the study.
-   *
-   * See http://stackoverflow.com/questions/22881782/angularjs-tabset-does-not-show-the-correct-state-when-the-page-is-reloaded
    */
   mod.controller('StudySummaryTabCtrl', [
     '$scope', '$rootScope', '$state', '$filter', 'user', 'study',

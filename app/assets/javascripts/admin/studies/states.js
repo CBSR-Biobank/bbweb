@@ -104,8 +104,9 @@ define(['angular'], function(angular) {
                 }
 
                 /*
-                 * At the moment, static tabs overwrite whatever is passed to active when the directive is run,
-                 * which is a bug. As a kludge, a timeout with 0 seconds delay is used to set the active state.
+                 * At the moment, static tabs overwrite whatever is passed to active when the directive is
+                 * run, which is a bug. As a kludge, a timeout with 0 seconds delay is used to set the active
+                 * state.
                  *
                  */
                 $scope.tabActive = {

@@ -1,0 +1,29 @@
+<div class="page-header">
+  <h1>{{centre.name}} <small>Centre administration </small></h1>
+</div>
+<div class="clearfix">
+  <!--
+      The 'ui-sref' attribute has to go on the 'tab' tag to have the state change when any part
+      of the tab is clicked on, not just the link.
+  -->
+  <tabset>
+    <tab ui-sref="admin.centres.centre.summary">
+      <tab-heading>
+        <a ui-sref-active="active">Summary</a>
+      </tab-heading>
+    </tab>
+    <tab ui-sref="admin.centres.centre.locations" active="tabActive.locations">
+      <tab-heading>
+        <a ui-sref-active="active">Locations</a>
+      </tab-heading>
+    </tab>
+    <tab ui-sref="admin.centres.centre.studies" active="tabActive.studies">
+      <tab-heading>
+        <a ui-sref-active="active">Studies</a>
+      </tab-heading>
+    </tab>
+  </tabset>
+  <div class="row">
+    <div ui-view="centreDetails" style="margin-top: 10px;"></div>
+  </div>
+</div>

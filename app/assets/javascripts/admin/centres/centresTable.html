@@ -1,0 +1,43 @@
+<div class="page-header">
+  <h1>
+    Centre administration
+    <div class="btn-group pull-right">
+      <button class="btn btn-xs btn-primary"
+              ng-click="defaultView()"
+              title="More information"
+              ng-if="centres.length > 0">
+      Default view</button>
+      <button class="btn btn-xs btn-primary"
+              ng-click="addCentre()"
+              title="Add centre">
+      Add centre <i class="glyphicon glyphicon-plus"></i></button>
+    </div>
+  </h1>
+</div>
+<div class="clearfix">
+  <div ng-if="centres.length == 0">
+    <p>No centres have been added.</p>
+  </div>
+  <div ng-if="centres.length != 0">
+    <p>The following centres have been configured:</p>
+    <table ng-table="tableParams" class="table table-hover">
+      <tr ng-repeat="centre in $data">
+        <td data-title="'Name'" sortable="'name'">
+          {{centre.name}}
+        </td>
+        <td data-title="'Status'" sortable="'valueType'">
+          {{centre.status}}
+        </td>
+        <td data-title="'Description'" sortable="'description'">
+          {{centre.description === null ? "" : centre.description | truncate:20}}
+        </td>
+        <td>
+          <button class="btn btn-xs btn-primary"
+                  ng-click="centreInformation(centre)"
+                  title="More information">
+          <i class="glyphicon glyphicon-info-sign"></i></button>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>

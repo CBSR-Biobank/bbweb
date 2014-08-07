@@ -36,15 +36,6 @@ sealed trait Centre
     with HasUniqueName
     with HasDescriptionOption {
 
-  // /*** @param studyIds Links a centre and a study. When linked, the center can then participate in the study. */
-  // val studyIds: Set[StudyId]
-
-  // /** @param locations Used to record a location. A centre may have more than one location. */
-  // val locations: List[Location]
-
-  // /** @params comments A set of comments made by users. */
-  // val comments: List[Comment]
-
   /** @param status Contains the current state of the object, one of: Disabled, Enabled. */
   val status: String
 
@@ -62,11 +53,11 @@ sealed trait Centre
 
 
 /**
-  * This is the initial state for a centre.  In this state, only configuration changes are allowed.
-  * Collection and processing of specimens cannot be recorded.
+  * This is the initial state for a centre.  In this state, only configuration changes are allowed. Collection
+  * and processing of specimens cannot be recorded.
   *
-  * This class has a private constructor and instances of this class can only be created using
-  * the [[DisabledCentre.create]] method on the factory object.
+  * This class has a private constructor and instances of this class can only be created using the
+  * [[DisabledCentre.create]] method on the factory object.
   */
 case class DisabledCentre private (
   id: CentreId,

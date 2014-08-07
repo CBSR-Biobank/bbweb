@@ -3,12 +3,19 @@
 
  * Manages all sub-modules so other RequireJS modules only have to import the package.
  */
-define(['angular', './controllers', './states', './studies/main'], function(angular) {
+define([
+  'angular',
+  './controllers',
+  './states',
+  './centres/main',
+  './studies/main'
+], function(angular) {
   'use strict';
 
   return angular.module('biobank.admin', [
     'admin.controllers',
     'admin.states',
-    'biobank.admin.study'
+    'biobank.admin.centres',
+    'biobank.admin.studies'
   ]);
 });

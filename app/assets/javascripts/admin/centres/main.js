@@ -18,5 +18,7 @@ define([
     'ngTable',
     'admin.centres.controllers',
     'admin.centres.states',
-    'centres.services']);
+    'admin.centres.helpers',
+    'centres.services'
+  ]);
 });

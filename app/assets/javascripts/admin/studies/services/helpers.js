@@ -4,6 +4,9 @@ define(['angular', 'underscore'], function(angular, _) {
 
   var mod = angular.module('admin.studies.helpers', []);
 
+  /**
+   * Tracks wether each panel in the study view page is expanded or collapsed.
+   */
   mod.service('studyViewSettings', function() {
     var initialSettings = function() {
       return {

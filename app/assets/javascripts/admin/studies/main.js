@@ -17,7 +17,7 @@ define([
 ], function(angular) {
   'use strict';
 
-  return angular.module('biobank.admin.study', [
+  return angular.module('biobank.admin.studies', [
     'ngCookies',
     'ngRoute',
     'ui.bootstrap',
