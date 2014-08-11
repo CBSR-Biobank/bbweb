@@ -49,5 +49,37 @@ define(['angular', 'common'], function(angular) {
     };
   }]);
 
+  mod.factory('CentreLocationService', ['$http', function($http) {
+    return {
+      list : function() {
+        return $http.get('/centres/locations');
+      },
+      query: function(id) {
+        return $http.get('/centres/locations/' + id);
+      },
+      addOrUpdate: function(centre, location) {
+        var cmd = {
+          centreId:       centre.id,
+          name:           location.name,
+          street:         location.street,
+          city:           location.city,
+          province:       location.province,
+          postalCode:     location.postalCode,
+          poBoxNumber:    location.poBoxNumber,
+          countryIsoCode: location.countryIsoCode
+        };
+
+        if (centre.id) {
+          cmd.id = centre.id;
+          cmd.expectedVersion = centre.version;
+
+          return $http.put('/centres/locations/' + centre.id, cmd);
+        } else {
+          return $http.post('/centres/locations', cmd);
+        }
+      }
+    };
+  }]);
+
 });
 
