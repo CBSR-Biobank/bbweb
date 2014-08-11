@@ -79,7 +79,7 @@ libraryDependencies ++= Seq(
 
 JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
 
-net.virtualvoid.sbt.graph.Plugin.graphSettings
+//net.virtualvoid.sbt.graph.Plugin.graphSettings
 
 //MochaKeys.requires += "./setup.js"
 
