@@ -36,12 +36,12 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
   }
 
   def addOnNonDisabledStudy(
-    appRepositories: AppRepositories,
+    appComponents: AppComponents,
     study: Study) {
-    appRepositories.studyRepository.put(study)
+    appComponents.studyRepository.put(study)
 
     val sg = factory.createSpecimenGroup
-    appRepositories.specimenGroupRepository.put(sg)
+    appComponents.specimenGroupRepository.put(sg)
 
     val procType = factory.createProcessingType
 
@@ -56,12 +56,12 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
   }
 
   def updateOnNonDisabledStudy(
-    appRepositories: AppRepositories,
+    appComponents: AppComponents,
     study: Study) {
-    appRepositories.studyRepository.put(study)
+    appComponents.studyRepository.put(study)
 
     val procType = factory.createProcessingType
-    appRepositories.processingTypeRepository.put(procType)
+    appComponents.processingTypeRepository.put(procType)
 
     val procType2 = factory.createProcessingType
 
@@ -76,12 +76,12 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
   }
 
   def removeOnNonDisabledStudy(
-    appRepositories: AppRepositories,
+    appComponents: AppComponents,
     study: Study) {
-    appRepositories.studyRepository.put(study)
+    appComponents.studyRepository.put(study)
 
     val procType = factory.createProcessingType
-    appRepositories.processingTypeRepository.put(procType)
+    appComponents.processingTypeRepository.put(procType)
 
     val json = makeRequest(
       DELETE,
@@ -97,10 +97,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     "GET /studies/proctypes" should {
       "list none" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -111,13 +111,13 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     "GET /studies/proctypes" should {
       "list a single processing type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val procType = factory.createProcessingType
-        appRepositories.processingTypeRepository.put(procType)
+        appComponents.processingTypeRepository.put(procType)
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -129,13 +129,13 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     "GET /studies/proctypes" should {
       "get a single processing type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val procType = factory.createProcessingType
-        appRepositories.processingTypeRepository.put(procType)
+        appComponents.processingTypeRepository.put(procType)
 
         val jsonObj = makeRequest(GET, s"/studies/proctypes/${study.id.id}?procTypeId=${procType.id.id}").as[JsObject]
         compareObj(jsonObj, procType)
@@ -145,14 +145,14 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     "GET /studies/proctypes" should {
       "list multiple processing types" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val proctypes = List(factory.createProcessingType, factory.createProcessingType)
 
-        proctypes map { procType => appRepositories.processingTypeRepository.put(procType) }
+        proctypes map { procType => appComponents.processingTypeRepository.put(procType) }
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -166,10 +166,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     "POST /studies/proctypes" should {
       "add a processing type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val procType = factory.createProcessingType
         val json = makeRequest(
@@ -185,7 +185,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "not add a processing type to an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
       }
     }
@@ -194,7 +194,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "not add a processing type to an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
       }
     }
@@ -202,13 +202,13 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     "PUT /studies/proctypes" should {
       "update a processing type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val procType = factory.createProcessingType
-        appRepositories.processingTypeRepository.put(procType)
+        appComponents.processingTypeRepository.put(procType)
 
         val procType2 = factory.createProcessingType.copy(
           id = procType.id,
@@ -228,7 +228,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "not update a processing type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
       }
     }
@@ -237,7 +237,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "not update a processing type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
       }
     }
@@ -245,13 +245,13 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     "DELETE /studies/proctypes" should {
       "remove a processing type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val procType = factory.createProcessingType
-        appRepositories.processingTypeRepository.put(procType)
+        appComponents.processingTypeRepository.put(procType)
 
         val json = makeRequest(
           DELETE,
@@ -265,7 +265,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "not remove a processing type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
       }
     }
@@ -274,7 +274,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "not remove a processing type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
       }
     }

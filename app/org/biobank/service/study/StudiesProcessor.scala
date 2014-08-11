@@ -7,9 +7,9 @@ import org.biobank.domain.{
   DomainValidation,
   DomainError,
   RepositoriesComponent,
-  RepositoriesComponentImpl,
-  UserId
+  RepositoriesComponentImpl
 }
+import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 
 import akka.actor. { ActorRef, Props }

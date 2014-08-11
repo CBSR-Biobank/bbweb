@@ -3,7 +3,8 @@ package org.biobank.service.centre
 import org.biobank.service.ApplicationService
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
-import org.biobank.domain.{ DomainValidation, DomainError, Location, LocationId, RepositoriesComponent, UserId }
+import org.biobank.domain.{ DomainValidation, DomainError, Location, LocationId, RepositoriesComponent }
+import org.biobank.domain.user.UserId
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.centre._
 

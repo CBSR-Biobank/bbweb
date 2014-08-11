@@ -1,5 +1,7 @@
 package org.biobank.domain
 
+import org.biobank.domain.user.UserId
+
 import org.joda.time.DateTime
 
 /** Users can add comments to entities.

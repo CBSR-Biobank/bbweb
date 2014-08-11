@@ -1,6 +1,7 @@
 package org.biobank.service.json
 
 import org.biobank.domain._
+import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 

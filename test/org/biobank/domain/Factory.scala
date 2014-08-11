@@ -2,6 +2,7 @@ package org.biobank.domain
 
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
+import org.biobank.domain.user._
 import org.biobank.domain.study._
 import org.biobank.domain.centre._
 import org.biobank.infrastructure.{
@@ -35,12 +36,11 @@ trait FactoryComponent {
       val email = nameGenerator.nextEmail[User]
       val id = UserId(email)
       val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
+      val salt = nameGenerator.next[User]
       val avatarUrl = Some("http://test.com/")
 
       val validation = RegisteredUser.create(
-        id, version, DateTime.now, name, email, password, hasher, salt, avatarUrl)
+        id, version, DateTime.now, name, email, password, salt, avatarUrl)
       if (validation.isFailure) {
         throw new Error
       }

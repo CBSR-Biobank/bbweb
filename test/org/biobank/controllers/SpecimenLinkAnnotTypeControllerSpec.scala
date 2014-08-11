@@ -39,12 +39,12 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
   }
 
   private def addOnNonDisabledStudy(
-    appRepositories: AppRepositories,
+    appComponents: AppComponents,
     study: Study) {
-    appRepositories.studyRepository.put(study)
+    appComponents.studyRepository.put(study)
 
     val annotType = factory.createSpecimenLinkAnnotationType
-    appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
+    appComponents.specimenLinkAnnotationTypeRepository.put(annotType)
 
     val json = makeRequest(
       POST,
@@ -57,12 +57,12 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
   }
 
   private def updateOnNonDisabledStudy(
-    appRepositories: AppRepositories,
+    appComponents: AppComponents,
     study: Study) {
-    appRepositories.studyRepository.put(study)
+    appComponents.studyRepository.put(study)
 
     val annotType = factory.createSpecimenLinkAnnotationType
-    appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
+    appComponents.specimenLinkAnnotationTypeRepository.put(annotType)
 
     val json = makeRequest(
       PUT,
@@ -75,15 +75,15 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
   }
 
   def removeOnNonDisabledStudy(
-    appRepositories: AppRepositories,
+    appComponents: AppComponents,
     study: Study) {
-    appRepositories.studyRepository.put(study)
+    appComponents.studyRepository.put(study)
 
     val sg = factory.createSpecimenGroup
-    appRepositories.specimenGroupRepository.put(sg)
+    appComponents.specimenGroupRepository.put(sg)
 
     val annotType = factory.createSpecimenLinkAnnotationType
-    appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
+    appComponents.specimenLinkAnnotationTypeRepository.put(annotType)
 
     val json = makeRequest(
       DELETE,
@@ -99,10 +99,10 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     "GET /studies/slannottype" should {
       "list none" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/slannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -113,13 +113,13 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     "GET /studies/slannottype" should {
       "list a single collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val annotType = factory.createSpecimenLinkAnnotationType
-        appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
+        appComponents.specimenLinkAnnotationTypeRepository.put(annotType)
 
         val json = makeRequest(GET, s"/studies/slannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -131,13 +131,13 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     "GET /studies/slannottype" should {
       "get a single collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val annotType = factory.createSpecimenLinkAnnotationType
-        appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
+        appComponents.specimenLinkAnnotationTypeRepository.put(annotType)
 
         val jsonObj = makeRequest(GET, s"/studies/slannottype/${study.id.id}?annotTypeId=${annotType.id.id}").as[JsObject]
         compareObj(jsonObj, annotType)
@@ -147,15 +147,15 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     "GET /studies/slannottype" should {
       "list multiple collection event annotation types" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val annotTypes = List(
           factory.createSpecimenLinkAnnotationType,
           factory.createSpecimenLinkAnnotationType)
-        annotTypes map { annotType => appRepositories.specimenLinkAnnotationTypeRepository.put(annotType) }
+        annotTypes map { annotType => appComponents.specimenLinkAnnotationTypeRepository.put(annotType) }
 
         val json = makeRequest(GET, s"/studies/slannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -169,10 +169,10 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     "POST /studies/slannottype" should {
       "add a collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val annotType = factory.createSpecimenLinkAnnotationType
         val json = makeRequest(POST, "/studies/slannottype", json = annotTypeToAddCmdJson(annotType))
@@ -184,7 +184,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
       "not add a collection event annotation type to an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
       }
     }
@@ -193,7 +193,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
       "not add a collection event annotation type to an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
       }
     }
@@ -201,13 +201,13 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     "PUT /studies/slannottype" should {
       "update a collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val annotType = factory.createSpecimenLinkAnnotationType
-        appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
+        appComponents.specimenLinkAnnotationTypeRepository.put(annotType)
 
         val annotType2 = factory.createSpecimenLinkAnnotationType.copy(
           id = annotType.id,
@@ -226,7 +226,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
       "not update a collection event annotation type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
       }
     }
@@ -235,7 +235,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
       "not update a collection event annotation type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
       }
     }
@@ -243,13 +243,13 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     "DELETE /studies/slannottype" should {
       "remove a collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val annotType = factory.createSpecimenLinkAnnotationType
-        appRepositories.specimenLinkAnnotationTypeRepository.put(annotType)
+        appComponents.specimenLinkAnnotationTypeRepository.put(annotType)
 
         val json = makeRequest(
           DELETE,
@@ -263,7 +263,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
       "not remove a collection event annotation type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
       }
     }
@@ -272,7 +272,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
       "not remove a collection event annotation type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
       }
     }

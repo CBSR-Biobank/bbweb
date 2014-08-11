@@ -1,6 +1,7 @@
 package org.biobank.controllers
 
-import org.biobank.domain.{ DomainValidation, DomainError, UserId }
+import org.biobank.domain.{ DomainValidation, DomainError }
+import org.biobank.domain.user.UserId
 
 import scala.concurrent.Future
 import play.api._
@@ -19,8 +20,8 @@ trait Security { self: Controller =>
 
   implicit val app: play.api.Application = play.api.Play.current
 
-  val AuthTokenHeader = "X-XSRF-TOKEN"
   val AuthTokenCookieKey = "XSRF-TOKEN"
+  val AuthTokenHeader = "X-XSRF-TOKEN"
   val AuthTokenUrlKey = "auth"
 
   sealed case class AuthenticationInfo(token: String, userId: UserId)
@@ -35,30 +36,22 @@ trait Security { self: Controller =>
    *  - matches a token already stored in the play cache
    */
   private def validateToken[A](request: Request[A]): DomainValidation[AuthenticationInfo] = {
-    val xsrfTokenCookieOption = request.cookies.get(AuthTokenCookieKey)
-    val headerTokenOption = request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey))
-
-    if (xsrfTokenCookieOption == None) {
-      DomainError("Invalid XSRF Token cookie").failNel
-    } else if (headerTokenOption == None) {
-      DomainError("No Token").failNel
-    } else {
-      val token = headerTokenOption.get
-      val userIdOption = Cache.getAs[UserId](token)
-
-      if (userIdOption == None) {
-        DomainError("Token not found in cache").failNel
-      } else {
-        val xsrfTokenCookie = xsrfTokenCookieOption.get
-        val userId = userIdOption.get
-
-        if (xsrfTokenCookie.value.equals(token)) {
-          AuthenticationInfo(token, userId).successNel
-        } else {
-          DomainError("Token does not match cookie").failNel
-        }
-      }
-    }
+     request.cookies.get(AuthTokenCookieKey) match {
+       case None => DomainError("Invalid XSRF Token cookie").failNel
+       case Some(xsrfTokenCookie) =>
+         request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey)) match {
+           case None => DomainError("No token").failNel
+           case Some(token) =>
+             if (xsrfTokenCookie.value.equals(token)) {
+               Cache.getAs[UserId](token) match {
+                 case None => DomainError("invalid token").failNel
+                 case Some(userId) => AuthenticationInfo(token, userId).successNel
+               }
+             } else {
+               DomainError("Token mismatch").failNel
+             }
+         }
+     }
   }
 
   /**
@@ -68,7 +61,7 @@ trait Security { self: Controller =>
   def AuthAction[A](p: BodyParser[A] = parse.anyContent)(
     f: String => UserId => Request[A] => Result): Action[A] = Action(p) { implicit request =>
     validateToken(request).fold(
-      err => Unauthorized(Json.obj("message" -> err.list.mkString(", "))),
+      err => Unauthorized(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
       authInfo => f(authInfo.token)(authInfo.userId)(request))
   }
 
@@ -79,7 +72,7 @@ trait Security { self: Controller =>
   def AuthActionAsync[A](p: BodyParser[A] = parse.anyContent)(
     f: String => UserId => Request[A] => Future[Result]) = Action.async(p) { implicit request =>
     validateToken(request).fold(
-      err => Future.successful(Unauthorized(Json.obj("message" -> err.list.mkString(", ")))),
+      err => Future.successful(Unauthorized(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))),
       authInfo => f(authInfo.token)(authInfo.userId)(request))
   }
 

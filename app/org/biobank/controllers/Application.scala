@@ -1,6 +1,6 @@
 package org.biobank.controllers
 
-import org.biobank.domain.UserId
+import org.biobank.domain.user.UserId
 
 import scala.language.postfixOps
 import play.api._
@@ -46,13 +46,12 @@ object Application extends Controller with Security {
         BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors)))
       },
       loginCredentials => {
-        Logger.info(s"login: $loginCredentials")
-        usersService.getByEmail(loginCredentials.email).fold(
+        // TODO: token should be derived from salt
+        usersService.validatePassword(loginCredentials.email, loginCredentials.password).fold(
           err => {
             BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))
           },
           user => {
-            // TODO: token should be derived from salt
             val token = java.util.UUID.randomUUID().toString
             Cache.set(token, user.id)
             Ok(Json.obj("token" -> token))
@@ -71,7 +70,8 @@ object Application extends Controller with Security {
     */
   def logout() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Cache.remove(token)
-    Ok.discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
+    Ok(Json.obj("status" -> "success"))
+      .discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
   }
 }
 

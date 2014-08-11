@@ -1,5 +1,6 @@
-package org.biobank.domain
+package org.biobank.domain.user
 
+import org.biobank.domain._
 import org.biobank.domain.validation.UserValidationHelper
 import org.biobank.infrastructure.event.UserEvents._
 import com.github.nscala_time.time.Imports._
@@ -19,11 +20,8 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
   /** The user's password */
   val password: String
 
-  /** The string used to hash the password. */
-  val hasher: String
-
   /** The string used to salt the password. */
-  val salt: Option[String]
+  val salt: String
 
   /** An optional URL to the user's avatar icon. */
   val avatarUrl: Option[String]
@@ -59,8 +57,7 @@ case class RegisteredUser private (
   name: String,
   email: String,
   password: String,
-  hasher: String,
-  salt: Option[String],
+  salt: String,
   avatarUrl: Option[String]) extends User {
 
   /* Activates a registered user. */
@@ -86,8 +83,7 @@ object RegisteredUser extends UserValidationHelper {
     name: String,
     email: String,
     password: String,
-    hasher: String,
-    salt: Option[String],
+    salt: String,
     avatarUrl: Option[String]): DomainValidation[RegisteredUser] = {
 
     (validateId(id) |@|
@@ -95,10 +91,9 @@ object RegisteredUser extends UserValidationHelper {
       validateNonEmpty(name, "name is null or empty") |@|
       validateEmail(email) |@|
       validateNonEmpty(password, "password is null or empty") |@|
-      validateNonEmpty(hasher, "hasher is null or empty") |@|
-      validateNonEmptyOption(salt, "salt is null or empty") |@|
+      validateNonEmpty(salt, "salt is null or empty") |@|
       validateAvatarUrl(avatarUrl)) {
-        RegisteredUser(_, _, dateTime, None, _, _, _, _, _, _)
+        RegisteredUser(_, _, dateTime, None, _, _, _, _, _)
       }
   }
 
@@ -113,8 +108,7 @@ case class ActiveUser private (
   name: String,
   email: String,
   password: String,
-  hasher: String,
-  salt: Option[String],
+  salt: String,
   avatarUrl: Option[String]) extends User {
 
   /** Locks an active user. */
@@ -134,13 +128,12 @@ case class ActiveUser private (
     name: String,
     email: String,
     password: String,
-    hasher: String,
-    salt: Option[String],
+    salt: String,
     avatarUrl: Option[String]) = {
 
     for {
       validVersion <- requireVersion(expectedVersion)
-      validatedUser <- RegisteredUser.create(id, version, addedDate, name, email, password, hasher,
+      validatedUser <- RegisteredUser.create(id, version, addedDate, name, email, password,
         salt, avatarUrl)
       registeredUser <- validatedUser.activate(validatedUser.versionOption, dateTime)
       udpatedUser <- registeredUser.copy(
@@ -160,10 +153,9 @@ object ActiveUser extends UserValidationHelper {
       validateNonEmpty(user.name, "name is null or empty") |@|
       validateEmail(user.email) |@|
       validateNonEmpty(user.password, "password is null or empty") |@|
-      validateNonEmpty(user.hasher, "hasher is null or empty") |@|
-      validateNonEmptyOption(user.salt, "salt is null or empty") |@|
+      validateNonEmpty(user.salt, "salt is null or empty") |@|
       validateAvatarUrl(user.avatarUrl)) {
-        ActiveUser(_, _, user.addedDate, None, _, _, _, _, _, _)
+        ActiveUser(_, _, user.addedDate, None, _, _, _, _, _)
       }
   }
 
@@ -178,8 +170,7 @@ case class LockedUser private (
   name: String,
   email: String,
   password: String,
-  hasher: String,
-  salt: Option[String],
+  salt: String,
   avatarUrl: Option[String]) extends User {
 
   /** Unlocks a locked user. */
@@ -205,10 +196,9 @@ object LockedUser extends UserValidationHelper {
       validateNonEmpty(user.name, "name is null or empty") |@|
       validateEmail(user.email) |@|
       validateNonEmpty(user.password, "password is null or empty") |@|
-      validateNonEmpty(user.hasher, "hasher is null or empty") |@|
-      validateNonEmptyOption(user.salt, "salt is null or empty") |@|
+      validateNonEmpty(user.salt, "salt is null or empty") |@|
       validateAvatarUrl(user.avatarUrl)) {
-        LockedUser(_, _, user.addedDate, None, _, _, _, _, _, _)
+        LockedUser(_, _, user.addedDate, None, _, _, _, _, _)
       }
   }
 

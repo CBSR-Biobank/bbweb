@@ -51,15 +51,16 @@ trait ControllerFixture
 
   def doLogin() = {
     // Log in with test user
-    val request = Json.obj("email" -> "admin@admin.com", "password" -> "password")
+    val request = Json.obj("email" -> "admin@admin.com", "password" -> "administrator")
     route(FakeRequest(POST, "/login").withJsonBody(request)) match {
       case Some(result) =>
         status(result) should be(OK)
         contentType(result) should be(Some("application/json"))
         val json = Json.parse(contentAsString(result))
         token = (json \ "token").as[String]
+        token
       case _ =>
-        assert(false)
+        cancel("login failed")
     }
   }
 
@@ -83,7 +84,7 @@ trait ControllerFixture
     }
   }
 
-  class AppRepositories {
+  class AppComponents {
 
     val plugin = Play.current.plugin[BbwebPlugin]
 
@@ -99,9 +100,10 @@ trait ControllerFixture
       sys.error("Bbweb plugin is not registered")
     }
 
-    val collectionEventAnnotationTypeRepository = plugin.map(_.collectionEventAnnotationTypeRepository).getOrElse {
-      sys.error("Bbweb plugin is not registered")
-    }
+    val collectionEventAnnotationTypeRepository =
+      plugin.map(_.collectionEventAnnotationTypeRepository).getOrElse {
+        sys.error("Bbweb plugin is not registered")
+      }
 
     val participantAnnotationTypeRepository = plugin.map(_.participantAnnotationTypeRepository).getOrElse {
       sys.error("Bbweb plugin is not registered")
@@ -136,6 +138,10 @@ trait ControllerFixture
     }
 
     val userRepository = plugin.map(_.userRepository).getOrElse {
+      sys.error("Bbweb plugin is not registered")
+    }
+
+    val passwordHasher = plugin.map(_.passwordHasher).getOrElse {
       sys.error("Bbweb plugin is not registered")
     }
 

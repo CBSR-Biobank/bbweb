@@ -1,6 +1,6 @@
 package org.biobank.controllers
 
-import org.biobank.domain.{ RegisteredUser, UserId }
+import org.biobank.domain.user.{ RegisteredUser, UserId }
 import org.biobank.service.{ TopComponent, ServicesComponentImpl }
 
 import java.io.File
@@ -51,10 +51,18 @@ class BbwebPlugin(val app: play.api.Application)
         // for debug only - password is "administrator"
         val email = "admin@admin.com"
         val validation = RegisteredUser.create(
-          UserId(email), -1L, org.joda.time.DateTime.now, "admin", email,
-          "$2a$10$ErWon4hGrcvVRPa02YfaoOyqOCxvAfrrObubP7ZycS3eW/jgzOqQS", "bcrypt", None, None)
+          UserId(email), -1L,
+          org.joda.time.DateTime.now,
+          "admin",
+          email,
+          "$2a$10$5ND6n5oPFtuShMQVb/vx1eJP0DzX1nIcwvX3GWUXgJP8/XVr7tqPS",
+          "$2a$10$5ND6n5oPFtuShMQVb/vx1e",
+          None)
+
         if (validation.isFailure) {
-          throw new Error("could not add default user in development mode")
+          validation.swap.map { err =>
+            throw new Error("could not add default user in development mode: " + err)
+          }
         }
         validation map { user =>
           userRepository.put(user)

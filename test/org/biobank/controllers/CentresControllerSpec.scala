@@ -36,10 +36,10 @@ class CentresControllerSpec extends ControllerFixture {
 
       "list a centre" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val json = makeRequest(GET, "/centres")
         val jsonList = json.as[List[JsObject]]
@@ -49,13 +49,13 @@ class CentresControllerSpec extends ControllerFixture {
 
       "list multiple centres" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val centres = List(factory.createDisabledCentre, factory.createDisabledCentre)
           .map{ centre => (centre.id, centre) }.toMap
 
-        appRepositories.centreRepository.removeAll
-        centres.values.foreach(centre => appRepositories.centreRepository.put(centre))
+        appComponents.centreRepository.removeAll
+        centres.values.foreach(centre => appComponents.centreRepository.put(centre))
 
         val json = makeRequest(GET, "/centres")
         val jsonList = json.as[List[JsObject]]
@@ -70,7 +70,7 @@ class CentresControllerSpec extends ControllerFixture {
     "POST /centres" should {
       "add a centre" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
         val cmdJson = Json.obj("name" -> centre.name, "description" -> centre.description)
         val json = makeRequest(POST, "/centres", json = cmdJson)
@@ -78,7 +78,7 @@ class CentresControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventCentreId = (json \ "data" \ "event" \ "id").as[String]
-        val validation = appRepositories.centreRepository.getByKey(CentreId(eventCentreId))
+        val validation = appComponents.centreRepository.getByKey(CentreId(eventCentreId))
         validation should be ('success)
         validation map { repoCentre =>
           repoCentre.name should be ((json \ "data" \ "event" \ "name").as[String])
@@ -87,7 +87,7 @@ class CentresControllerSpec extends ControllerFixture {
 
       "add a centre with no description" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val cmdJson = Json.obj("name" -> nameGenerator.next[String])
         val json = makeRequest(POST, "/centres", json = cmdJson)
 
@@ -96,7 +96,7 @@ class CentresControllerSpec extends ControllerFixture {
 
       "not add a centre with a name that is too short" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val cmdJson = Json.obj("name" -> "A")
         val json = makeRequest(POST, "/centres", BAD_REQUEST, json = cmdJson)
 
@@ -105,9 +105,9 @@ class CentresControllerSpec extends ControllerFixture {
 
       "not add a centre with a duplicate name" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val cmdJson = Json.obj("name" -> centre.name)
         val json = makeRequest(POST, "/centres", BAD_REQUEST, json = cmdJson)
@@ -120,10 +120,10 @@ class CentresControllerSpec extends ControllerFixture {
     "PUT /centres/:id" should {
       "update a centre" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val cmdJson = Json.obj(
           "id"              -> centre.id.id,
@@ -135,7 +135,7 @@ class CentresControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventCentreId = (json \ "data" \ "event" \ "id").as[String]
-        val validation = appRepositories.centreRepository.getByKey(CentreId(eventCentreId))
+        val validation = appComponents.centreRepository.getByKey(CentreId(eventCentreId))
         validation should be ('success)
         validation map { repoCentre =>
           repoCentre.name should be ((json \ "data" \ "event" \ "name").as[String])
@@ -145,10 +145,10 @@ class CentresControllerSpec extends ControllerFixture {
 
       "update a centre with no description" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val cmdJson = Json.obj(
           "id"              -> centre.id.id,
@@ -175,10 +175,10 @@ class CentresControllerSpec extends ControllerFixture {
 
       "not update a centre with an invalid version" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val cmdJson = Json.obj(
           "id"              -> centre.id.id,
@@ -193,10 +193,10 @@ class CentresControllerSpec extends ControllerFixture {
 
       "not update a centre with a duplicate name" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centres = List(factory.createDisabledCentre, factory.createDisabledCentre)
         centres.foreach { centre =>
-          appRepositories.centreRepository.put(centre)
+          appComponents.centreRepository.put(centre)
         }
 
         val duplicateName = centres(0).name
@@ -217,10 +217,10 @@ class CentresControllerSpec extends ControllerFixture {
     "GET /centres/:id" should {
       "read a centre" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
         val json = makeRequest(GET, s"/centres/${centre.id.id}")
         compareObj(json, centre)
       }
@@ -237,10 +237,10 @@ class CentresControllerSpec extends ControllerFixture {
     "POST /centres/enable" should {
       "enable a centre" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val cmdJson = Json.obj(
           "id" -> centre.id.id,
@@ -250,7 +250,7 @@ class CentresControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventCentreId = (json \ "data" \ "event" \ "id").as[String]
-        val validation = appRepositories.centreRepository.getByKey(CentreId(eventCentreId))
+        val validation = appComponents.centreRepository.getByKey(CentreId(eventCentreId))
         validation should be ('success)
         validation map { repoCentre =>
           repoCentre.version should be ((json \ "data" \ "event" \ "version").as[Long])
@@ -273,10 +273,10 @@ class CentresControllerSpec extends ControllerFixture {
     "POST /centres/disable" should {
       "disable a centre" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val centre = factory.createDisabledCentre.enable(Some(0), org.joda.time.DateTime.now) | fail
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val cmdJson = Json.obj(
           "id" -> centre.id.id,
@@ -286,7 +286,7 @@ class CentresControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventCentreId = (json \ "data" \ "event" \ "id").as[String]
-        val validation = appRepositories.centreRepository.getByKey(CentreId(eventCentreId))
+        val validation = appComponents.centreRepository.getByKey(CentreId(eventCentreId))
         validation should be ('success)
         validation map { repoCentre =>
           repoCentre.version should be ((json \ "data" \ "event" \ "version").as[Long])
@@ -309,9 +309,9 @@ class CentresControllerSpec extends ControllerFixture {
       "list none"in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -321,13 +321,13 @@ class CentresControllerSpec extends ControllerFixture {
       "list a centre location"in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val location = factory.createLocation
-        appRepositories.locationRepository.put(location)
-        appRepositories.centreLocationRepository.put(CentreLocation(centre.id, location.id))
+        appComponents.locationRepository.put(location)
+        appComponents.centreLocationRepository.put(CentreLocation(centre.id, location.id))
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -338,16 +338,16 @@ class CentresControllerSpec extends ControllerFixture {
       "list multiple centre locations" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val locations = List(factory.createLocation, factory.createLocation)
           .map { loc => (loc.id, loc) }.toMap
 
         locations.values.foreach{ location =>
-          appRepositories.locationRepository.put(location)
-          appRepositories.centreLocationRepository.put(CentreLocation(centre.id, location.id))
+          appComponents.locationRepository.put(location)
+          appComponents.centreLocationRepository.put(CentreLocation(centre.id, location.id))
         }
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
@@ -362,16 +362,16 @@ class CentresControllerSpec extends ControllerFixture {
       "list a specific centre location" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val locations = List(factory.createLocation, factory.createLocation)
         val locationsMap = locations.map { loc => (loc.id, loc) }.toMap
 
         locations.foreach{ location =>
-          appRepositories.locationRepository.put(location)
-          appRepositories.centreLocationRepository.put(CentreLocation(centre.id, location.id))
+          appComponents.locationRepository.put(location)
+          appComponents.centreLocationRepository.put(CentreLocation(centre.id, location.id))
         }
 
         val jsonObj = makeRequest(GET, s"/centres/locations/${centre.id.id}?locationId=${locations(0).id}")
@@ -383,9 +383,9 @@ class CentresControllerSpec extends ControllerFixture {
       "does not list an invalid location" taggedAs(Tag("single")) in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val inavlidLocId = nameGenerator.next[String]
 
@@ -412,9 +412,9 @@ class CentresControllerSpec extends ControllerFixture {
     "POST /centres/location" should {
       "add a location" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val location = factory.createLocation
         val json = makeRequest(POST, "/centres/location",
@@ -422,7 +422,7 @@ class CentresControllerSpec extends ControllerFixture {
 
         val jsonEvent = (json \ "data" \ "event").as[JsObject]
         val eventLocationId = (json \ "data" \ "event" \ "locationId").as[String]
-        val validation = appRepositories.locationRepository.getByKey(LocationId(eventLocationId))
+        val validation = appComponents.locationRepository.getByKey(LocationId(eventLocationId))
         validation should be ('success)
         validation map { repoLocation =>
           repoLocation shouldBe a[Location]
@@ -437,7 +437,7 @@ class CentresControllerSpec extends ControllerFixture {
           )
         }
 
-        val validation2 = appRepositories.centreLocationRepository.getByKey(LocationId(eventLocationId))
+        val validation2 = appComponents.centreLocationRepository.getByKey(LocationId(eventLocationId))
         validation2 should be ('success)
         validation2 map { item =>
           item shouldBe a[CentreLocation]
@@ -451,7 +451,7 @@ class CentresControllerSpec extends ControllerFixture {
       "fail on attempt to add a location to an invalid centre" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val centreId = CentreId(nameGenerator.next[String])
         val location = factory.createLocation
@@ -466,14 +466,14 @@ class CentresControllerSpec extends ControllerFixture {
     "DELETE /centres/location" should {
       "delete a location from a centre" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val locations = List(factory.createLocation, factory.createLocation)
         locations.foreach{ location =>
-          appRepositories.locationRepository.put(location)
-          appRepositories.centreLocationRepository.put(CentreLocation(centre.id, location.id))
+          appComponents.locationRepository.put(location)
+          appComponents.centreLocationRepository.put(CentreLocation(centre.id, location.id))
         }
 
         locations.foreach { location =>
@@ -484,13 +484,13 @@ class CentresControllerSpec extends ControllerFixture {
 
       "delete a location from an invalid centre" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val location = factory.createLocation
-        appRepositories.locationRepository.put(location)
-        appRepositories.centreLocationRepository.put(CentreLocation(centre.id, location.id))
+        appComponents.locationRepository.put(location)
+        appComponents.centreLocationRepository.put(CentreLocation(centre.id, location.id))
 
         val centreId = CentreId(nameGenerator.next[String])
         val json = makeRequest(DELETE, s"/centres/locations/${centreId.id}/${location.id.id}", BAD_REQUEST)
@@ -500,9 +500,9 @@ class CentresControllerSpec extends ControllerFixture {
 
       "delete an invalid location from a centre" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val locationId = LocationId(nameGenerator.next[String])
         val json = makeRequest(DELETE, s"/centres/locations/${centre.id.id}/${locationId.id}", BAD_REQUEST)
@@ -516,9 +516,9 @@ class CentresControllerSpec extends ControllerFixture {
       "list none" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -528,14 +528,14 @@ class CentresControllerSpec extends ControllerFixture {
       "list a centre study" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
         val id = StudyCentreId(nameGenerator.next[String])
-        appRepositories.studyCentreRepository.put(StudyCentre(id, study.id, centre.id))
+        appComponents.studyCentreRepository.put(StudyCentre(id, study.id, centre.id))
 
         val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
         val studyIdList = json.as[List[String]]
@@ -546,15 +546,15 @@ class CentresControllerSpec extends ControllerFixture {
       "list multiple centre studies" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val studies = List(factory.createDisabledStudy, factory.createDisabledStudy)
         studies.foreach{ study =>
-          appRepositories.studyRepository.put(study)
+          appComponents.studyRepository.put(study)
           val id = StudyCentreId(nameGenerator.next[String])
-          appRepositories.studyCentreRepository.put(StudyCentre(id, study.id, centre.id))
+          appComponents.studyCentreRepository.put(StudyCentre(id, study.id, centre.id))
         }
 
         val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
@@ -568,12 +568,12 @@ class CentresControllerSpec extends ControllerFixture {
       "add a centre to study link" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val cmdJson = Json.obj(
           "centreId" -> centre.id.id,
@@ -582,7 +582,7 @@ class CentresControllerSpec extends ControllerFixture {
           (json \ "data" \ "event" \ "centreId").as[String] should be (centre.id.id)
           (json \ "data" \ "event" \ "studyId").as[String] should be (study.id.id)
 
-        val repoValues = appRepositories.studyCentreRepository.getValues.toList
+        val repoValues = appComponents.studyCentreRepository.getValues.toList
         repoValues should have size 1
         repoValues(0) should have (
           'centreId (centre.id),
@@ -596,14 +596,14 @@ class CentresControllerSpec extends ControllerFixture {
       "remove a centre to study link" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
         val id = StudyCentreId(nameGenerator.next[String])
-        appRepositories.studyCentreRepository.put(StudyCentre(id, study.id, centre.id))
+        appComponents.studyCentreRepository.put(StudyCentre(id, study.id, centre.id))
 
         val json = makeRequest(DELETE, s"/centres/studies/${centre.id.id}/${study.id.id}")
           (json \ "status").as[String] should include ("success")
@@ -612,9 +612,9 @@ class CentresControllerSpec extends ControllerFixture {
       "fail on attempt remove an invalid centre to study link" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
         val centre = factory.createDisabledCentre
-        appRepositories.centreRepository.put(centre)
+        appComponents.centreRepository.put(centre)
 
         val studyId = StudyCentreId(nameGenerator.next[String])
 

@@ -2,6 +2,7 @@ package org.biobank.domain
 
 import org.biobank.domain.study.{ StudyRepositoriesComponent, StudyRepositoriesComponentImpl }
 import org.biobank.domain.centre.{ CentreRepositoriesComponent, CentreRepositoriesComponentImpl }
+import org.biobank.domain.user.{ UserRepositoryComponent, UserRepositoryComponentImpl }
 
 trait RepositoriesComponent
     extends StudyRepositoriesComponent

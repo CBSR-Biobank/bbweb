@@ -1,5 +1,6 @@
 package org.biobank.service
 
+import org.biobank.domain.{ DomainComponent, DomainComponentImpl }
 import org.biobank.service.study.{
   CollectionEventTypeProcessorComponent,
   StudiesProcessorComponent,
@@ -11,15 +12,16 @@ import org.biobank.service.centre.{
   CentresServiceComponent,
   CentresServiceComponentImpl
 }
-import org.biobank.domain.{ RepositoriesComponent, RepositoriesComponentImpl }
 import org.biobank.query.{ QueryComponent, QueryComponentImpl }
 
 trait ProcessorsComponent
     extends StudiesProcessorComponent
     with CentresProcessorComponent
     with UsersProcessorComponent
-    with RepositoriesComponent
-    with RepositoriesComponentImpl
+    with DomainComponent
+    with DomainComponentImpl
+    with PasswordHasherComponent
+    with PasswordHasherComponentImpl
 
 trait ServicesComponent
     extends StudiesServiceComponent

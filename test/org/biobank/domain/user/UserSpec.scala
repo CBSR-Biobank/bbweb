@@ -1,5 +1,6 @@
-package org.biobank.domain
+package org.biobank.domain.user
 
+import org.biobank.domain.DomainSpec
 import org.biobank.fixture.NameGenerator
 
 import org.scalatest.WordSpecLike
@@ -31,14 +32,13 @@ class UserSpec extends DomainSpec {
       val email = nameGenerator.nextEmail[User]
       val id = UserId(email)
       val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
+      val salt = nameGenerator.next[User]
       val avatarUrl = Some("http://test.com/")
 
       val timeNow = DateTime.now
 
       val validation = RegisteredUser.create(
-        id, version, timeNow, name, email, password, hasher, salt, avatarUrl)
+        id, version, timeNow, name, email, password, salt, avatarUrl)
       validation should be ('success)
       validation map { user =>
         user shouldBe a[RegisteredUser]
@@ -48,7 +48,6 @@ class UserSpec extends DomainSpec {
           'name (name),
           'email (email),
           'password (password),
-          'hasher (hasher),
           'salt (salt),
           'avatarUrl (avatarUrl)
         )
@@ -93,11 +92,11 @@ class UserSpec extends DomainSpec {
       val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
+      val salt = nameGenerator.next[User]
       val avatarUrl = Some("http://test2.com/")
 
       val validation = user.update(
-        user.versionOption, DateTime.now, name, email, password, hasher, salt, avatarUrl)
+        user.versionOption, DateTime.now, name, email, password, salt, avatarUrl)
       validation should be ('success)
       validation map { user2 =>
         user2 shouldBe a[ActiveUser]
@@ -107,7 +106,6 @@ class UserSpec extends DomainSpec {
           'name (name),
           'email (email),
           'password (password),
-          'hasher (hasher),
           'salt (salt),
           'avatarUrl (avatarUrl)
         )
@@ -129,11 +127,11 @@ class UserSpec extends DomainSpec {
       val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
+      val salt = nameGenerator.next[User]
       val avatarUrl = Some("http://test.com/")
 
       RegisteredUser.create(
-        id, version, DateTime.now, name, email, password, hasher, salt, avatarUrl).fold(
+        id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => err.list should (have length 1 and contain("id is null or empty")),
         user => fail("id validation failed")
       )
@@ -146,11 +144,11 @@ class UserSpec extends DomainSpec {
       val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
+      val salt = nameGenerator.next[User]
       val avatarUrl = Some("http://test.com/")
 
       RegisteredUser.create(
-        id, version, DateTime.now, name, email, password, hasher, salt, avatarUrl).fold(
+        id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => err.list should (have length 1 and contain("invalid version value: -2")),
         user => fail("version validation failed")
       )
@@ -163,11 +161,11 @@ class UserSpec extends DomainSpec {
       val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
+      val salt = nameGenerator.next[User]
       val avatarUrl = Some("http://test3.com/")
 
       val validation = user.update(
-        Some(user.version - 1), DateTime.now, name, email, password, hasher, salt, avatarUrl)
+        Some(user.version - 1), DateTime.now, name, email, password, salt, avatarUrl)
       validation should be ('failure)
       validation.swap.map { err =>
         err.list should have length 1
@@ -182,11 +180,11 @@ class UserSpec extends DomainSpec {
       val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
+      val salt = nameGenerator.next[User]
       val avatarUrl = Some("http://test.com/")
 
       RegisteredUser.create(
-        id, version, DateTime.now, name, email, password, hasher, salt, avatarUrl).fold(
+        id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => err.list should (have length 1 and contain("name is null or empty")),
         user => fail("name validation failed")
       )
@@ -199,29 +197,13 @@ class UserSpec extends DomainSpec {
       val email = nameGenerator.nextEmail[User]
       val password = ""
       val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
+      val salt = nameGenerator.next[User]
       val avatarUrl = Some("http://test.com/")
 
       RegisteredUser.create(
-        id, version, DateTime.now, name, email, password, hasher, salt, avatarUrl).fold(
+        id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => err.list should (have length 1 and contain("password is null or empty")),
         user => fail("user password validation failed")
-      )
-    }
-
-    "not be created with an empty hasher" in {
-      val id = UserId(nameGenerator.next[User])
-      val version = 0L
-      val name = nameGenerator.next[User]
-      val email = nameGenerator.nextEmail[User]
-      val password = nameGenerator.next[User]
-      val hasher = ""
-      val salt = Some(nameGenerator.next[User])
-      val avatarUrl = Some("http://test.com/")
-
-      RegisteredUser.create(id, version, DateTime.now, name, email, password, hasher, salt, avatarUrl).fold(
-        err => err.list should (have length 1 and contain("hasher is null or empty")),
-        user => fail("user hasher validation failed")
       )
     }
 
@@ -232,10 +214,10 @@ class UserSpec extends DomainSpec {
       val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
-      val salt = Some("")
+      val salt = ""
       val avatarUrl = Some("http://test.com/")
 
-      RegisteredUser.create(id, version, DateTime.now, name, email, password, hasher, salt, avatarUrl).fold(
+      RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => err.list should (have length 1 and contain("salt is null or empty")),
         user => fail("user salt validation failed")
       )
@@ -248,10 +230,10 @@ class UserSpec extends DomainSpec {
       val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
+      val salt = nameGenerator.next[User]
       val avatarUrl = Some(nameGenerator.next[User])
 
-      RegisteredUser.create(id, version, DateTime.now, name, email, password, hasher, salt, avatarUrl).fold(
+      RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => {
           err.list should have length 1
           err.list.head should include("invalid avatar url")
@@ -267,10 +249,10 @@ class UserSpec extends DomainSpec {
       val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
+      val salt = nameGenerator.next[User]
       val avatarUrl = Some("http://test.com/")
 
-      val v = RegisteredUser.create(id, version, DateTime.now, name, email, password, hasher, salt, avatarUrl)
+      val v = RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl)
       val user = v.getOrElse(fail("could not create user"))
       val authenticatedUser = user.authenticate(email, password).getOrElse(fail("could authenticate user"))
       authenticatedUser should be(user)
@@ -283,12 +265,12 @@ class UserSpec extends DomainSpec {
       val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
+      val salt = nameGenerator.next[User]
       val avatarUrl = Some("http://test.com/")
 
       val badPassword = nameGenerator.next[User]
 
-      val v = RegisteredUser.create(id, version, DateTime.now, name, email, password, hasher, salt, avatarUrl)
+      val v = RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl)
       val user = v.getOrElse(fail("could not create user"))
       user.authenticate(email, badPassword).fold(
         err => err.list should (have length 1 and contain("authentication failure")),
@@ -303,12 +285,12 @@ class UserSpec extends DomainSpec {
       val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
       val hasher = nameGenerator.next[User]
-      val salt = Some(nameGenerator.next[User])
+      val salt = nameGenerator.next[User]
       val avatarUrl = Some("http://test.com/")
 
       val badPassword = nameGenerator.next[User]
 
-      RegisteredUser.create(id, version, DateTime.now, name, email, password, hasher, salt, avatarUrl).fold(
+      RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => {
           err.list should have length 2
           err.list.head should be ("invalid version value: -2")

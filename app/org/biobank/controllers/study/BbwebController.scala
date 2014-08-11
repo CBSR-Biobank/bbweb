@@ -1,6 +1,6 @@
 package org.biobank.controllers
 
-import org.biobank.domain.UserId
+import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.Commands._
 
 import scala.concurrent.Future

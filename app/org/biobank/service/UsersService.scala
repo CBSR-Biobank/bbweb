@@ -1,6 +1,7 @@
 package org.biobank.service
 
 import org.biobank.domain._
+import org.biobank.domain.user._
 import org.biobank.domain.validation.UserValidationHelper
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
@@ -17,7 +18,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 trait UsersServiceComponent {
-  self: RepositoriesComponent =>
+  self: RepositoriesComponent with PasswordHasherComponent =>
 
   class UsersService(usersProcessor: ActorRef) extends ApplicationService {
 
@@ -55,11 +56,24 @@ trait UsersServiceComponent {
       usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserRemovedEvent]])
     }
 
+    def validatePassword(email: String, enteredPwd: String): DomainValidation[User] = {
+      for {
+        user <- userRepository.getByKey(UserId(email))
+        validPwd <- {
+          if (passwordHasher.valid(user.password, user.salt, enteredPwd)) {
+            user.success
+          } else {
+            DomainError("invalid password").failNel
+          }
+        }
+      } yield user
+    }
+
   }
 }
 
 trait UsersProcessorComponent {
-  self: RepositoriesComponent =>
+  self: RepositoriesComponent with PasswordHasherComponent =>
 
   case class SnapshotState(users: Set[User])
 
@@ -110,14 +124,11 @@ trait UsersProcessorComponent {
     }
 
     def validateCmd(cmd: RegisterUserCmd): DomainValidation[UserRegisteredEvent] = {
-      // FIXME: need to set the hasher and the salt
-      val hasher = "hasher"
-      val salt = None
+      val salt = passwordHasher.generateSalt
       for {
         emailAvailable <- userRepository.emailAvailable(cmd.email)
         user <- RegisteredUser.create(
-          UserId(cmd.email), -1L, DateTime.now, cmd.name, cmd.email, cmd.password,
-          hasher, salt, cmd.avatarUrl)
+          UserId(cmd.email), -1L, DateTime.now, cmd.name, cmd.email, cmd.password, salt, cmd.avatarUrl)
         event <- UserRegisteredEvent(user.id.toString, DateTime.now, user.name, user.email,
           user.password, user.avatarUrl).success
       } yield {
@@ -145,7 +156,7 @@ trait UsersProcessorComponent {
         activeUser <- isUserActive(user)
         updatedUser <- activeUser.update(
           Some(cmd.expectedVersion), timeNow, cmd.name, cmd.email, cmd.password,
-          activeUser.hasher, activeUser.salt, cmd.avatarUrl)
+          activeUser.salt, cmd.avatarUrl)
         event <- UserUpdatedEvent(updatedUser.id.id, updatedUser.version, timeNow, updatedUser.name,
           updatedUser.email, updatedUser.password, updatedUser.avatarUrl).success
       } yield {
@@ -182,7 +193,7 @@ trait UsersProcessorComponent {
       val validation = for {
         // FIXME: add hasher and salt to user
         registeredUser <- RegisteredUser.create(UserId(event.email), -1L, event.dateTime, event.name,
-          event.email, event.password, "fixme-hasher", Some("fixme-salt"), event.avatarUrl)
+          event.email, event.password, "some-salt", event.avatarUrl)
         savedUser <- userRepository.put(registeredUser).success
       } yield savedUser
 
@@ -218,7 +229,7 @@ trait UsersProcessorComponent {
         activeUser <- isUserActive(user)
         updatedUser <- activeUser.update(
           Some(activeUser.version), event.dateTime, event.name, event.email,
-          event.password, activeUser.hasher, activeUser.salt, event.avatarUrl)
+          event.password, activeUser.salt, event.avatarUrl)
         savedUser <- userRepository.put(updatedUser).success
       } yield savedUser
 

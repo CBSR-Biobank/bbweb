@@ -1,6 +1,8 @@
 package org.biobank.controllers
 
 import org.biobank.domain._
+import org.biobank.domain.user._
+import org.biobank.fixture.NameGenerator
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.service.json.JsonHelper._
 import org.biobank.fixture.ControllerFixture
@@ -15,9 +17,11 @@ import org.joda.time.DateTime
 /**
   * Tests the REST API for [[User]].
   */
-class UserControllerSpec extends ControllerFixture {
+class UsersControllerSpec extends ControllerFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  val nameGenerator = new NameGenerator(this.getClass)
 
   "User REST API" should {
 
@@ -33,10 +37,10 @@ class UserControllerSpec extends ControllerFixture {
 
       "list a new user" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val user = factory.createRegisteredUser
-        appRepositories.userRepository.put(user)
+        appComponents.userRepository.put(user)
 
         val json = makeRequest(GET, "/users")
         val jsonList = json.as[List[JsObject]]
@@ -48,10 +52,10 @@ class UserControllerSpec extends ControllerFixture {
     "GET /users" should {
       "list multiple users" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val users = List(factory.createRegisteredUser, factory.createRegisteredUser)
-        users.map(user => appRepositories.userRepository.put(user))
+        users.map(user => appComponents.userRepository.put(user))
 
         val json = makeRequest(GET, "/users")
         val jsonList = json.as[List[JsObject]].filterNot { u =>
@@ -82,10 +86,10 @@ class UserControllerSpec extends ControllerFixture {
     "PUT /users/:id" should {
       "update a user" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val user = factory.createRegisteredUser.activate(Some(0), DateTime.now) | fail
-        appRepositories.userRepository.put(user)
+        appComponents.userRepository.put(user)
 
         val cmdJson = Json.obj(
           "id"              -> user.id.id,
@@ -103,10 +107,10 @@ class UserControllerSpec extends ControllerFixture {
     "GET /users/:id" should {
       "read a user" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val user = factory.createRegisteredUser.activate(Some(0), org.joda.time.DateTime.now) | fail
-        appRepositories.userRepository.put(user)
+        appComponents.userRepository.put(user)
         val json = makeRequest(GET, s"/users/${user.id.id}")
         compareObj(json, user)
       }
@@ -116,10 +120,10 @@ class UserControllerSpec extends ControllerFixture {
       "activate a user" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val user = factory.createRegisteredUser
-        appRepositories.userRepository.put(user)
+        appComponents.userRepository.put(user)
 
         val cmdJson = Json.obj(
           "expectedVersion" -> Some(user.version),
@@ -134,10 +138,10 @@ class UserControllerSpec extends ControllerFixture {
       "lock a user" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val user = factory.createRegisteredUser.activate(Some(0), DateTime.now) | fail
-        appRepositories.userRepository.put(user)
+        appComponents.userRepository.put(user)
 
         val cmdJson = Json.obj(
           "expectedVersion" -> Some(user.version),
@@ -152,11 +156,11 @@ class UserControllerSpec extends ControllerFixture {
       "should unlock a user" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val user = factory.createRegisteredUser.activate(Some(0), DateTime.now) | fail
         val lockedUser = user.lock(user.versionOption, DateTime.now) | fail
-        appRepositories.userRepository.put(lockedUser)
+        appComponents.userRepository.put(lockedUser)
 
         val cmdJson = Json.obj(
           "expectedVersion" -> Some(lockedUser.version),
@@ -166,6 +170,5 @@ class UserControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
       }
     }
-
   }
 }

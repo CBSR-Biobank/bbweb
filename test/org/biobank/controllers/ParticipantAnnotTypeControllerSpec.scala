@@ -41,12 +41,12 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
   }
 
   private def addOnNonDisabledStudy(
-    appRepositories: AppRepositories,
+    appComponents: AppComponents,
     study: Study) {
-    appRepositories.studyRepository.put(study)
+    appComponents.studyRepository.put(study)
 
     val annotType = factory.createParticipantAnnotationType
-    appRepositories.participantAnnotationTypeRepository.put(annotType)
+    appComponents.participantAnnotationTypeRepository.put(annotType)
 
     val json = makeRequest(
       POST,
@@ -59,12 +59,12 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
   }
 
   private def updateOnNonDisabledStudy(
-    appRepositories: AppRepositories,
+    appComponents: AppComponents,
     study: Study) {
-    appRepositories.studyRepository.put(study)
+    appComponents.studyRepository.put(study)
 
     val annotType = factory.createParticipantAnnotationType
-    appRepositories.participantAnnotationTypeRepository.put(annotType)
+    appComponents.participantAnnotationTypeRepository.put(annotType)
 
     val json = makeRequest(
       PUT,
@@ -77,15 +77,15 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
   }
 
   def removeOnNonDisabledStudy(
-    appRepositories: AppRepositories,
+    appComponents: AppComponents,
     study: Study) {
-    appRepositories.studyRepository.put(study)
+    appComponents.studyRepository.put(study)
 
     val sg = factory.createSpecimenGroup
-    appRepositories.specimenGroupRepository.put(sg)
+    appComponents.specimenGroupRepository.put(sg)
 
     val annotType = factory.createParticipantAnnotationType
-    appRepositories.participantAnnotationTypeRepository.put(annotType)
+    appComponents.participantAnnotationTypeRepository.put(annotType)
 
     val json = makeRequest(
       DELETE,
@@ -101,10 +101,10 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
     "GET /studies/pannottype" should {
       "list none" taggedAs(Tag("single")) in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/pannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -115,13 +115,13 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
     "GET /studies/pannottype" should {
       "list a single participant annotation type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val annotType = factory.createParticipantAnnotationType
-        appRepositories.participantAnnotationTypeRepository.put(annotType)
+        appComponents.participantAnnotationTypeRepository.put(annotType)
 
         val json = makeRequest(GET, s"/studies/pannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -133,15 +133,15 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
     "GET /studies/pannottype" should {
       "list multiple participant annotation types" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val annotTypes = List(
           factory.createParticipantAnnotationType,
           factory.createParticipantAnnotationType)
-        annotTypes map { annotType => appRepositories.participantAnnotationTypeRepository.put(annotType) }
+        annotTypes map { annotType => appComponents.participantAnnotationTypeRepository.put(annotType) }
 
         val json = makeRequest(GET, s"/studies/pannottype/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -155,10 +155,10 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
     "POST /studies/pannottype" should {
       "add a participant annotation type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val annotType = factory.createParticipantAnnotationType
         val json = makeRequest(POST, "/studies/pannottype", json = annotTypeToAddCmdJson(annotType))
@@ -170,7 +170,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "not add a participant annotation type to an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
       }
     }
@@ -179,7 +179,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "not add a participant annotation type to an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
       }
     }
@@ -187,13 +187,13 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
     "PUT /studies/pannottype" should {
       "update a participant annotation type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val annotType = factory.createParticipantAnnotationType
-        appRepositories.participantAnnotationTypeRepository.put(annotType)
+        appComponents.participantAnnotationTypeRepository.put(annotType)
 
         val annotType2 = factory.createParticipantAnnotationType.copy(
           id = annotType.id,
@@ -212,7 +212,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "not update a participant annotation type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
       }
     }
@@ -221,7 +221,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "not update a participant annotation type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
       }
     }
@@ -229,13 +229,13 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
     "DELETE /studies/pannottype" should {
       "remove a participant annotation type" in new WithApplication(fakeApplication()) {
         doLogin
-        val appRepositories = new AppRepositories
+        val appComponents = new AppComponents
 
         val study = factory.createDisabledStudy
-        appRepositories.studyRepository.put(study)
+        appComponents.studyRepository.put(study)
 
         val annotType = factory.createParticipantAnnotationType
-        appRepositories.participantAnnotationTypeRepository.put(annotType)
+        appComponents.participantAnnotationTypeRepository.put(annotType)
 
         val json = makeRequest(
           DELETE,
@@ -249,7 +249,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "not remove a participant annotation type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
-          new AppRepositories,
+          new AppComponents,
           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
       }
     }

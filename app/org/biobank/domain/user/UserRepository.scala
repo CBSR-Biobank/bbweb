@@ -1,4 +1,6 @@
-package org.biobank.domain
+package org.biobank.domain.user
+
+import org.biobank.domain.{ DomainValidation, DomainError, ReadWriteRepository, ReadWriteRepositoryRefImpl }
 
 import org.slf4j.LoggerFactory
 

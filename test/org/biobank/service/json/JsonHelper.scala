@@ -1,6 +1,7 @@
 package org.biobank.service.json
 
 import org.biobank.domain._
+import org.biobank.domain.user._
 import org.biobank.domain.study._
 import org.biobank.domain.centre._
 import org.biobank.infrastructure._

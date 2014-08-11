@@ -9,9 +9,9 @@ import org.biobank.domain.{
   Location,
   LocationId,
   RepositoriesComponent,
-  RepositoriesComponentImpl,
-  UserId
+  RepositoriesComponentImpl
 }
+import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 
