@@ -21,6 +21,7 @@ evolutions
 .idea*
 
 # Others
+email.conf
 .tern-port
 .cache
 .classpath
