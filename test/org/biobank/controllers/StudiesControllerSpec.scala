@@ -11,6 +11,8 @@ import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
+import com.typesafe.plugin._
+import play.api.Play.current
 
 /**
   * Tests the REST API for [[Study]].
@@ -31,10 +33,8 @@ class StudiesControllerSpec extends ControllerFixture {
 
       "list a study" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
 
         val json = makeRequest(GET, "/studies")
         val jsonList = json.as[List[JsObject]]
@@ -44,11 +44,9 @@ class StudiesControllerSpec extends ControllerFixture {
 
       "list multiple studies" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val studies = List(factory.createDisabledStudy, factory.createDisabledStudy)
-        appComponents.studyRepository.removeAll
-        studies.map(study => appComponents.studyRepository.put(study))
+        use[BbwebPlugin].studyRepository.removeAll
+        studies.map(study => use[BbwebPlugin].studyRepository.put(study))
 
         val json = makeRequest(GET, "/studies")
         val jsonList = json.as[List[JsObject]]
@@ -61,7 +59,6 @@ class StudiesControllerSpec extends ControllerFixture {
     "POST /studies" should {
       "add a study" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
         val study = factory.createDisabledStudy
         val cmdJson = Json.obj(
           "name" -> study.name,
@@ -71,7 +68,7 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
-        val validation = appComponents.studyRepository.getByKey(StudyId(eventStudyId))
+        val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
           repoStudy.name should be ((json \ "data" \ "event" \ "name").as[String])
@@ -82,10 +79,8 @@ class StudiesControllerSpec extends ControllerFixture {
     "PUT /studies/:id" should {
       "update a study" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
 
         val cmdJson = Json.obj(
           "id"              -> study.id.id,
@@ -97,7 +92,7 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
-        val validation = appComponents.studyRepository.getByKey(StudyId(eventStudyId))
+        val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
           repoStudy.name should be ((json \ "data" \ "event" \ "name").as[String])
@@ -109,10 +104,8 @@ class StudiesControllerSpec extends ControllerFixture {
     "GET /studies/:id" should {
       "read a study" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy.enable(Some(0), org.joda.time.DateTime.now, 1, 1) | fail
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
         val json = makeRequest(GET, s"/studies/${study.id.id}")
         compareObj(json, study)
       }
@@ -121,12 +114,10 @@ class StudiesControllerSpec extends ControllerFixture {
     "POST /studies/enable" should {
       "enable a study" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy
-        appComponents.studyRepository.put(study)
-        appComponents.specimenGroupRepository.put(factory.createSpecimenGroup)
-        appComponents.collectionEventTypeRepository.put(factory.createCollectionEventType)
+        use[BbwebPlugin].studyRepository.put(study)
+        use[BbwebPlugin].specimenGroupRepository.put(factory.createSpecimenGroup)
+        use[BbwebPlugin].collectionEventTypeRepository.put(factory.createCollectionEventType)
 
         val cmdJson = Json.obj(
           "id" -> study.id.id,
@@ -136,7 +127,7 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
-        val validation = appComponents.studyRepository.getByKey(StudyId(eventStudyId))
+        val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
           repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
@@ -147,10 +138,8 @@ class StudiesControllerSpec extends ControllerFixture {
     "POST /studies/enable" should {
       "not enable a study" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
 
         val cmdJson = Json.obj(
           "id" -> study.id.id,
@@ -165,10 +154,8 @@ class StudiesControllerSpec extends ControllerFixture {
     "POST /studies/disable" should {
       "disable a study" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy.enable(Some(0), org.joda.time.DateTime.now, 1, 1) | fail
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
 
         val cmdJson = Json.obj(
           "id" -> study.id.id,
@@ -178,7 +165,7 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
-        val validation = appComponents.studyRepository.getByKey(StudyId(eventStudyId))
+        val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
           repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
@@ -189,10 +176,8 @@ class StudiesControllerSpec extends ControllerFixture {
     "POST /studies/retire" should {
       "retire a study" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
 
         val cmdJson = Json.obj(
           "id" -> study.id.id,
@@ -202,7 +187,7 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
-        val validation = appComponents.studyRepository.getByKey(StudyId(eventStudyId))
+        val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
           repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
@@ -213,10 +198,8 @@ class StudiesControllerSpec extends ControllerFixture {
     "POST /studies/unretire" should {
       "unretire a study" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy.retire(Some(0), org.joda.time.DateTime.now) | fail
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
 
         val cmdJson = Json.obj(
           "id" -> study.id.id,
@@ -226,7 +209,7 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
-        val validation = appComponents.studyRepository.getByKey(StudyId(eventStudyId))
+        val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
           repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])

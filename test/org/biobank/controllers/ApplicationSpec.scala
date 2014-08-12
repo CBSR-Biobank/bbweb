@@ -9,6 +9,8 @@ import play.api.test.Helpers._
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
+import com.typesafe.plugin._
+import play.api.Play.current
 
 class ApplicationSpec extends ControllerFixture {
 
@@ -17,14 +19,13 @@ class ApplicationSpec extends ControllerFixture {
   val nameGenerator = new NameGenerator(this.getClass)
 
   def createUserInRepository(plainPassword: String): RegisteredUser = {
-    val appComponents = new AppComponents
-    val salt = appComponents.passwordHasher.generateSalt
+    val salt = use[BbwebPlugin].passwordHasher.generateSalt
 
     val user = factory.createRegisteredUser.copy(
       salt = salt,
-      password = appComponents.passwordHasher.encrypt(plainPassword, salt)
+      password = use[BbwebPlugin].passwordHasher.encrypt(plainPassword, salt)
     )
-    appComponents.userRepository.put(user)
+    use[BbwebPlugin].userRepository.put(user)
     user
   }
 
@@ -64,15 +65,14 @@ class ApplicationSpec extends ControllerFixture {
     }
 
     "prevent a user logging in with bad password" in new WithApplication(fakeApplication()) {
-      val appComponents = new AppComponents
       val plainPassword = nameGenerator.next[String]
-      val salt = appComponents.passwordHasher.generateSalt
+      val salt = use[BbwebPlugin].passwordHasher.generateSalt
 
       val user = factory.createRegisteredUser.copy(
         salt = salt,
-        password = appComponents.passwordHasher.encrypt(plainPassword, salt)
+        password = use[BbwebPlugin].passwordHasher.encrypt(plainPassword, salt)
       )
-      appComponents.userRepository.put(user)
+      use[BbwebPlugin].userRepository.put(user)
 
       val cmdJson = Json.obj(
         "email"     -> user.email,

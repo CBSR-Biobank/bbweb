@@ -49,28 +49,29 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  "com.typesafe.akka"      %% "akka-persistence-experimental"  % "2.3.4"              % "compile",
-  "com.typesafe.akka"      %% "akka-slf4j"                     % "2.3.2"              % "compile",
-  "org.scala-stm"          %% "scala-stm"                      % "0.7"                % "compile",
-  "org.scalaz"             %% "scalaz-core"                    % "7.0.6"              % "compile",
-  "org.scalaz"             %% "scalaz-typelevel"               % "7.0.6"              % "compile",
-  "com.github.t3hnar"      %% "scala-bcrypt"                   % "2.4",
+  "com.typesafe.akka"         %% "akka-persistence-experimental"  % "2.3.4"              % "compile",
+  "com.typesafe.akka"         %% "akka-slf4j"                     % "2.3.2"              % "compile",
+  "org.scala-stm"             %% "scala-stm"                      % "0.7"                % "compile",
+  "org.scalaz"                %% "scalaz-core"                    % "7.0.6"              % "compile",
+  "org.scalaz"                %% "scalaz-typelevel"               % "7.0.6"              % "compile",
+  "com.github.t3hnar"         %% "scala-bcrypt"                   % "2.4",
+  "com.typesafe.play.plugins" %% "play-plugins-mailer"            % "2.3.0",
   // WebJars infrastructure
-  "org.webjars"            %  "webjars-locator"                % "0.13",
-  "org.webjars"            %% "webjars-play"                   % "2.3.0",
+  "org.webjars"               %  "webjars-locator"                % "0.13",
+  "org.webjars"               %% "webjars-play"                   % "2.3.0",
   // WebJars dependencies
-  "org.webjars"            % "requirejs"                       % "2.1.14-1",
-  "org.webjars"            %  "underscorejs"                   % "1.6.0-3",
-  "org.webjars"            % "jasmine"                         % "2.0.0",
-  "org.webjars"            %  "jquery"                         % "2.1.1",
-  "org.webjars"            %  "bootstrap"                      % "3.2.0" exclude(
+  "org.webjars"               % "requirejs"                       % "2.1.14-1",
+  "org.webjars"               %  "underscorejs"                   % "1.6.0-3",
+  "org.webjars"               % "jasmine"                         % "2.0.0",
+  "org.webjars"               %  "jquery"                         % "2.1.1",
+  "org.webjars"               %  "bootstrap"                      % "3.2.0" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"            %  "angularjs"                      % "1.3.0-beta.2" exclude(
+  "org.webjars"               %  "angularjs"                      % "1.3.0-beta.2" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"            %  "angular-ui-bootstrap"           % "0.11.0-2",
-  "org.webjars"            %  "angular-ui-router"              % "0.2.10-1",
-  "org.webjars"            %  "ng-table"                       % "0.3.3",
-  "org.scalatest"          %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
+  "org.webjars"               %  "angular-ui-bootstrap"           % "0.11.0-2",
+  "org.webjars"               %  "angular-ui-router"              % "0.2.10-1",
+  "org.webjars"               %  "ng-table"                       % "0.3.3",
+  "org.scalatest"             %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
     ExclusionRule(organization = "org.junit", name = "junit")
   ),
   "com.github.ddevore"     %% "akka-persistence-mongo-casbah"  % "0.7.3-SNAPSHOT"     % "compile",

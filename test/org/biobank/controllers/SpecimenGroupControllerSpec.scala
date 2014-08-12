@@ -10,17 +10,18 @@ import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
+import com.typesafe.plugin._
+import play.api.Play.current
 
 class SpecimenGroupControllerSpec extends ControllerFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   def addToNonDisabledStudy(
-    appComponents: AppComponents,
     study: Study,
     sg: SpecimenGroup) = {
 
-    appComponents.studyRepository.put(study)
+    use[BbwebPlugin].studyRepository.put(study)
 
     val cmdJson = Json.obj(
       "studyId"                     -> study.id.id,
@@ -38,11 +39,10 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
   }
 
   def updateOnNonDisabledStudy(
-    appComponents: AppComponents,
     study: Study,
     sg: SpecimenGroup) = {
-    appComponents.studyRepository.put(study)
-    appComponents.specimenGroupRepository.put(sg)
+    use[BbwebPlugin].studyRepository.put(study)
+    use[BbwebPlugin].specimenGroupRepository.put(sg)
 
     val sg2 = factory.createSpecimenGroup
     val cmdJson = Json.obj(
@@ -63,11 +63,10 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
   }
 
   def removeOnNonDisabledStudy(
-    appComponents: AppComponents,
     study: Study,
     sg: SpecimenGroup) = {
-    appComponents.studyRepository.put(study)
-    appComponents.specimenGroupRepository.put(sg)
+    use[BbwebPlugin].studyRepository.put(study)
+    use[BbwebPlugin].specimenGroupRepository.put(sg)
 
     val json = makeRequest(
       DELETE,
@@ -83,10 +82,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     "GET /studies/sgroups" should {
       "list none" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -97,13 +94,11 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     "GET /studies/sgroups" should {
       "list a single specimen group" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
 
         val sg = factory.createSpecimenGroup
-        appComponents.specimenGroupRepository.put(sg)
+        use[BbwebPlugin].specimenGroupRepository.put(sg)
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -115,13 +110,11 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     "GET /studies/sgroups" should {
       "get a single specimen group" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
 
         val sg = factory.createSpecimenGroup
-        appComponents.specimenGroupRepository.put(sg)
+        use[BbwebPlugin].specimenGroupRepository.put(sg)
 
         val jsonObj = makeRequest(GET, s"/studies/sgroups/${study.id.id}?sgId=${sg.id.id}").as[JsObject]
         compareObj(jsonObj, sg)
@@ -131,13 +124,11 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     "GET /studies/sgroups" should {
       "list multiple specimen groups" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
 
         val sgroups = List(factory.createSpecimenGroup, factory.createSpecimenGroup)
-        sgroups map { sg => appComponents.specimenGroupRepository.put(sg) }
+        sgroups map { sg => use[BbwebPlugin].specimenGroupRepository.put(sg) }
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
         val jsonList = json.as[List[JsObject]]
@@ -149,10 +140,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     "POST /studies/sgroups" should {
       "add a specimen group" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
 
         val sg = factory.createSpecimenGroup
         val cmdJson = Json.obj(
@@ -174,7 +163,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "not add a specimen group to enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         addToNonDisabledStudy(
-          new AppComponents,
           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail,
           factory.createSpecimenGroup)
       }
@@ -184,7 +172,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "not add a specimen group to retired study" in new WithApplication(fakeApplication()) {
         doLogin
         addToNonDisabledStudy(
-          new AppComponents,
           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail,
           factory.createSpecimenGroup)
       }
@@ -193,13 +180,11 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     "PUT /studies/sgroups" should {
       "update a specimen group" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
 
         val sg = factory.createSpecimenGroup
-        appComponents.specimenGroupRepository.put(sg)
+        use[BbwebPlugin].specimenGroupRepository.put(sg)
 
         val sg2 = factory.createSpecimenGroup
         val cmdJson = Json.obj(
@@ -223,7 +208,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "not update a specimen group on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          new AppComponents,
           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail,
           factory.createSpecimenGroup)
       }
@@ -233,7 +217,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "not update a specimen group on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          new AppComponents,
           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail,
           factory.createSpecimenGroup)
       }
@@ -242,13 +225,11 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     "DELETE /studies/sgroups" should {
       "remove a specimen group" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val study = factory.createDisabledStudy
-        appComponents.studyRepository.put(study)
+        use[BbwebPlugin].studyRepository.put(study)
 
         val sg = factory.createSpecimenGroup
-        appComponents.specimenGroupRepository.put(sg)
+        use[BbwebPlugin].specimenGroupRepository.put(sg)
 
         val json = makeRequest(
           DELETE,
@@ -262,7 +243,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "not remove a specimen group from an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
-          new AppComponents,
           factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail,
           factory.createSpecimenGroup)
       }
@@ -272,7 +252,6 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "not remove a specimen group from an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
-          new AppComponents,
           factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail,
           factory.createSpecimenGroup)
       }

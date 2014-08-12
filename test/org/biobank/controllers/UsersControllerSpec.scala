@@ -13,6 +13,8 @@ import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
+import com.typesafe.plugin._
+import play.api.Play.current
 
 /**
   * Tests the REST API for [[User]].
@@ -37,10 +39,8 @@ class UsersControllerSpec extends ControllerFixture {
 
       "list a new user" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val user = factory.createRegisteredUser
-        appComponents.userRepository.put(user)
+        use[BbwebPlugin].userRepository.put(user)
 
         val json = makeRequest(GET, "/users")
         val jsonList = json.as[List[JsObject]]
@@ -52,10 +52,8 @@ class UsersControllerSpec extends ControllerFixture {
     "GET /users" should {
       "list multiple users" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val users = List(factory.createRegisteredUser, factory.createRegisteredUser)
-        users.map(user => appComponents.userRepository.put(user))
+        users.map(user => use[BbwebPlugin].userRepository.put(user))
 
         val json = makeRequest(GET, "/users")
         val jsonList = json.as[List[JsObject]].filterNot { u =>
@@ -86,10 +84,8 @@ class UsersControllerSpec extends ControllerFixture {
     "PUT /users/:id" should {
       "update a user" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val user = factory.createRegisteredUser.activate(Some(0), DateTime.now) | fail
-        appComponents.userRepository.put(user)
+        use[BbwebPlugin].userRepository.put(user)
 
         val cmdJson = Json.obj(
           "id"              -> user.id.id,
@@ -107,10 +103,8 @@ class UsersControllerSpec extends ControllerFixture {
     "GET /users/:id" should {
       "read a user" in new WithApplication(fakeApplication()) {
         doLogin
-        val appComponents = new AppComponents
-
         val user = factory.createRegisteredUser.activate(Some(0), org.joda.time.DateTime.now) | fail
-        appComponents.userRepository.put(user)
+        use[BbwebPlugin].userRepository.put(user)
         val json = makeRequest(GET, s"/users/${user.id.id}")
         compareObj(json, user)
       }
@@ -120,10 +114,8 @@ class UsersControllerSpec extends ControllerFixture {
       "activate a user" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appComponents = new AppComponents
-
         val user = factory.createRegisteredUser
-        appComponents.userRepository.put(user)
+        use[BbwebPlugin].userRepository.put(user)
 
         val cmdJson = Json.obj(
           "expectedVersion" -> Some(user.version),
@@ -138,10 +130,8 @@ class UsersControllerSpec extends ControllerFixture {
       "lock a user" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val appComponents = new AppComponents
-
         val user = factory.createRegisteredUser.activate(Some(0), DateTime.now) | fail
-        appComponents.userRepository.put(user)
+        use[BbwebPlugin].userRepository.put(user)
 
         val cmdJson = Json.obj(
           "expectedVersion" -> Some(user.version),
@@ -155,12 +145,9 @@ class UsersControllerSpec extends ControllerFixture {
     "PUT /users/unlock" should {
       "should unlock a user" in new WithApplication(fakeApplication()) {
         doLogin
-
-        val appComponents = new AppComponents
-
         val user = factory.createRegisteredUser.activate(Some(0), DateTime.now) | fail
         val lockedUser = user.lock(user.versionOption, DateTime.now) | fail
-        appComponents.userRepository.put(lockedUser)
+        use[BbwebPlugin].userRepository.put(lockedUser)
 
         val cmdJson = Json.obj(
           "expectedVersion" -> Some(lockedUser.version),
