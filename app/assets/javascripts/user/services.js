@@ -29,7 +29,6 @@ define(['angular', 'common'], function(angular) {
 
     return {
       loginUser: function(credentials) {
-        // FIXME: handle login failure
         return $http.post('/login', credentials).then(function(response) {
           token = response.data.token;
           return $http.get('/authuser');
