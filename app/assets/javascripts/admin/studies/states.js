@@ -5,7 +5,7 @@ define(['angular'], function(angular) {
   'use strict';
 
   var mod = angular.module('admin.studies.states', [
-    'ui.router', 'user.services', 'admin.studies.controllers', 'studies.services']);
+    'ui.router', 'users.services', 'admin.studies.controllers', 'studies.services']);
 
   mod.config([
     '$urlRouterProvider', '$stateProvider', 'userResolve',

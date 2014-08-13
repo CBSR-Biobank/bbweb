@@ -6,7 +6,7 @@ define(['angular'], function(angular) {
 
   var mod = angular.module('admin.centres.states', [
     'ui.router',
-    'user.services',
+    'users.services',
     //'admin.centres.controllers',
     //'centres.services'
   ]);

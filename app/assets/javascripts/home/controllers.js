@@ -4,7 +4,7 @@
 define(['angular'], function(angular) {
   'use strict';
 
-  var mod = angular.module('home.controllers', ['user.services']);
+  var mod = angular.module('home.controllers', ['users.services']);
 
   // For debugging
   //

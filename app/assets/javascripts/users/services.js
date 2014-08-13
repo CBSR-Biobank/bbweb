@@ -4,7 +4,7 @@
 define(['angular', 'common'], function(angular) {
   'use strict';
 
-  var mod = angular.module('user.services', ['biobank.common', 'ngCookies']);
+  var mod = angular.module('users.services', ['biobank.common', 'ngCookies']);
 
   mod.factory('userService', [
     '$http', '$q', '$cookies', '$log',

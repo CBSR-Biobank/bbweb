@@ -1,10 +1,11 @@
 /**
  * Configure routes of user module.
  */
-define(['angular', './controllers', 'common'], function(angular, controllers) {
+define(['angular', 'common'], function(angular, controllers) {
   'use strict';
 
-  var mod = angular.module('user.states', ['ui.router', 'user.services', 'biobank.common']);
+  var mod = angular.module('users.states', [
+    'ui.router', 'users.controllers', 'users.services', 'biobank.common']);
 
   mod.config([
     '$urlRouterProvider', '$stateProvider', 'userResolve',
@@ -12,12 +13,12 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
 
     $urlRouterProvider.otherwise('/');
 
-    $stateProvider.state('user', {
+    $stateProvider.state('users', {
         url: '/login',
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/user/login.html',
-            controller: controllers.LoginCtrl
+            templateUrl: '/assets/javascripts/users/login.html',
+            controller: 'LoginCtrl'
           }
         }
       });

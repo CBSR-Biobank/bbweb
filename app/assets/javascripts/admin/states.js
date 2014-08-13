@@ -4,7 +4,7 @@
 define(['angular', './controllers', 'common'], function(angular, controllers) {
   'use strict';
 
-  var mod = angular.module('admin.states', ['ui.router', 'user.services', 'biobank.common']);
+  var mod = angular.module('admin.states', ['ui.router', 'users.services', 'biobank.common']);
 
   mod.config([
     '$urlRouterProvider', '$stateProvider', 'userResolve',

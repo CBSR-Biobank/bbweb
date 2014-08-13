@@ -4,7 +4,7 @@
   // -- RequireJS config --
   requirejs.config({
     // Packages = top-level folders; loads a contained file named 'main.js'
-    packages: ['common', 'home', 'user', 'admin', 'dashboard'],
+    packages: ['common', 'home', 'users', 'admin', 'dashboard'],
     shim: {
       'jsRoutes' : {
         deps : [],
@@ -55,9 +55,9 @@
     'ng-table',
     'jquery',
     'bootstrap',
-    './app'],
-          function(angular) {
-            angular.bootstrap(document, ['app']);
-          }
+    './app'
+  ], function(angular) {
+    angular.bootstrap(document, ['app']);
+  }
          );
 })(requirejs);

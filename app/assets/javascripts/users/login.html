@@ -1,42 +1,49 @@
 <div class="page-header"><h1>Biobank Log In</h1></div>
 <div class="clearfix">
   <form class="form-horizontal"
-        name="login-form"
+        name="loginForm"
         autocomplete="on"
-        ng-login-submit="login">
+        ng-submit="loginForm.$valid && form.login(credentials)"
+        novalidate>
+
+    <!-- EMAIL -->
     <div class="form-group">
       <label for="email" class="col-sm-3 control-label">Email address</label>
       <div class="col-sm-5">
         <input
+            name="email"
             type="email"
             class="form-control"
-            id="email"
-            name="email"
+            ng-model="credentials.email"
             placeholder="Email"
             required/>
       </div>
     </div>
+
+    <!-- PASSWORD -->
     <div class="form-group">
       <label for="password" class="col-sm-3 control-label">Password</label>
       <div class="col-sm-5">
         <input
+            name="password"
             type="password"
             class="form-control"
-            id="password"
-            name="password"
-            placeholder="Password" required />
+            ng-model="credentials.password"
+            placeholder="Password"
+            required />
       </div>
     </div>
+
+    <!-- BUTTONS  -->
     <div class="form-group">
-      <div class="col-sm-offset-2 col-sm-10">
-        <button class="btn btn-primary" data-ng-disabled="form.$invalid">
-          Log In
-        </button>
+      <div class="col-sm-offset-3 col-sm-5">
+        <button class="btn btn-primary" ng-disabled="loginForm.$invalid">Log In</button>
       </div>
     </div>
   </form>
+
   <div class="col-sm-12">
-    <p><a href ng-click="forgotPassword()">Forgot password?</a></p>
-    <p>If you don't have an account yet you can <a href ng-click="register()">register here</a></p>
+    <p><a href ng-click="form.forgotPassword()">Forgot password?</a></p>
+    <p>If you don't have an account yet you can <a href ng-click="form.register()">register here</a>.</p>
   </div>
 </div>
