@@ -11,6 +11,7 @@ import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import com.typesafe.plugin._
 import play.api.Play.current
+import org.joda.time.DateTime
 
 class ApplicationSpec extends ControllerFixture {
 
@@ -54,9 +55,10 @@ class ApplicationSpec extends ControllerFixture {
       (json \ "token").as[String].length should be > 0
     }
 
-    "prevent an invalid user login request" in new WithApplication(fakeApplication()) {
+    "prevent an invalid user from logging in" in new WithApplication(fakeApplication()) {
+      val invalidUser = nameGenerator.nextEmail[String]
       val cmdJson = Json.obj(
-        "email"     -> nameGenerator.nextEmail[String],
+        "email"     -> invalidUser,
         "password"  -> nameGenerator.next[String])
       val json = makeRequest(POST, "/login", BAD_REQUEST, json = cmdJson)
 
@@ -65,18 +67,11 @@ class ApplicationSpec extends ControllerFixture {
     }
 
     "prevent a user logging in with bad password" in new WithApplication(fakeApplication()) {
-      val plainPassword = nameGenerator.next[String]
-      val salt = use[BbwebPlugin].passwordHasher.generateSalt
-
-      val user = factory.createRegisteredUser.copy(
-        salt = salt,
-        password = use[BbwebPlugin].passwordHasher.encrypt(plainPassword, salt)
-      )
-      use[BbwebPlugin].userRepository.put(user)
-
+      val user = createUserInRepository(nameGenerator.next[String])
+      val invalidPassword = nameGenerator.next[String]
       val cmdJson = Json.obj(
         "email"     -> user.email,
-        "password"  -> nameGenerator.next[String])
+        "password"  -> invalidPassword)
       val json = makeRequest(POST, "/login", BAD_REQUEST, json = cmdJson)
 
       (json \ "status").as[String] should include ("error")
@@ -100,6 +95,21 @@ class ApplicationSpec extends ControllerFixture {
 
       (json \ "status").as[String] should include ("error")
       (json \ "message").as[String] should include ("invalid token")
+    }
+
+    "not allow a locked user to log in" in new WithApplication(fakeApplication()) {
+      val plainPassword = nameGenerator.next[String]
+      val activeUser = createUserInRepository(plainPassword).activate(Some(0L), DateTime.now) | fail
+      val lockedUser = activeUser.lock(activeUser.versionOption, DateTime.now) | fail
+      use[BbwebPlugin].userRepository.put(lockedUser)
+
+      val cmdJson = Json.obj(
+        "email"     -> lockedUser.email,
+        "password"  -> plainPassword)
+      val json = makeRequest(POST, "/login", BAD_REQUEST, json = cmdJson)
+
+      (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("the user is locked")
     }
 
     "not allow a request with an invalid token" in new WithApplication(fakeApplication()) {
@@ -165,6 +175,34 @@ class ApplicationSpec extends ControllerFixture {
           (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("No token")
       }
+    }
+
+    "allow an active user to reset his/her password" in new WithApplication(fakeApplication()) {
+      val user = createUserInRepository(nameGenerator.next[String])
+      val activeUser = user.activate(Some(0L), DateTime.now) | fail
+      use[BbwebPlugin].userRepository.put(activeUser)
+
+      val cmdJson = Json.obj("email" -> activeUser.email)
+      val json = makeRequest(POST, "/passreset", json = cmdJson)
+        (json \ "status").as[String] should include ("success")
+    }
+
+    "not allow a registered user to reset his/her password" in new WithApplication(fakeApplication()) {
+      val user = createUserInRepository(nameGenerator.next[String])
+      val cmdJson = Json.obj("email" -> user.email)
+      val json = makeRequest(POST, "/passreset", BAD_REQUEST, json = cmdJson)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("user is not active")
+    }
+
+    "not allow a locked user to reset his/her password" in new WithApplication(fakeApplication()) {
+      val lockedUser = factory.createLockedUser
+      use[BbwebPlugin].userRepository.put(lockedUser)
+
+      val cmdJson = Json.obj("email" -> lockedUser.email)
+      val json = makeRequest(POST, "/passreset", BAD_REQUEST, json = cmdJson)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("user is not active")
     }
 
   }

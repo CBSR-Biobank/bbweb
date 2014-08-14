@@ -78,7 +78,7 @@ trait CentresProcessorComponent {
         newCentre <- DisabledCentre.create(
           centreId, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description)
         event <- CentreAddedEvent(
-          newCentre.id.toString, newCentre.addedDate, newCentre.name, newCentre.description).success
+          newCentre.id.id, newCentre.addedDate, newCentre.name, newCentre.description).success
       } yield event
     }
 

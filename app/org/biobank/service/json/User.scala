@@ -44,7 +44,7 @@ object User {
     (__ \ "expectedVersion").read[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "email").read[String](minLength[String](5)) and
-      (__ \ "password").read[String](minLength[String](2)) and
+      (__ \ "password").readNullable[String](minLength[String](2)) and
       (__ \ "avatarUrl").readNullable[String](minLength[String](2))
   )(UpdateUserCmd.apply _)
 
@@ -58,12 +58,16 @@ object User {
       (__ \ "expectedVersion").read[Long](min[Long](0))
   )(UnlockUserCmd.apply _)
 
+  implicit val resetUserPasswordCmdReads: Reads[ResetUserPasswordCmd] =
+      (__ \ "email").read[String](minLength[String](5)).map{ x => ResetUserPasswordCmd(x) }
+
   implicit val userRegisteredEventWrites: Writes[UserRegisteredEvent] = (
     (__ \ "id").write[String] and
       (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "email").write[String] and
       (__ \ "password").write[String] and
+      (__ \ "salt").write[String] and
       (__ \ "avatarUrl").writeNullable[String]
   )(unlift(UserRegisteredEvent.unapply))
 
@@ -100,5 +104,12 @@ object User {
       (__ \ "version").write[Long] and
       (__ \ "dateTime").write[DateTime]
   )(unlift(UserRemovedEvent.unapply))
+
+  implicit val userPasswordResetEventWrites: Writes[UserPasswordResetEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "salt").write[String] and
+      (__ \ "password").write[String] and
+      (__ \ "dateTime").write[DateTime]
+  )(unlift(UserPasswordResetEvent.unapply))
 
 }

@@ -92,7 +92,7 @@ POST    /centres/studies                       org.biobank.controllers.centres.C
 DELETE  /centres/studies/:centreId/:studyId    org.biobank.controllers.centres.CentresController.removeLinkedStudy(centreId, studyId)
 
 # Users
-GET     /authuser                              org.biobank.controllers.UsersController.authUser
+GET     /authenticate                          org.biobank.controllers.UsersController.authenticateUser
 GET     /users                                 org.biobank.controllers.UsersController.list
 GET     /users/:id                             org.biobank.controllers.UsersController.user(id)
 POST    /users                                 org.biobank.controllers.UsersController.addUser()
@@ -106,6 +106,7 @@ PUT     /users/unlock/:id                      org.biobank.controllers.UsersCont
 # Authentication
 POST    /login                                 org.biobank.controllers.Application.login()
 POST    /logout                                org.biobank.controllers.Application.logout()
+POST    /passreset                             org.biobank.controllers.Application.passwordReset()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                         controllers.Assets.versioned(path="/public", file: Asset)

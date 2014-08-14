@@ -1,2 +1,3 @@
-1500:com.typesafe.plugin.CommonsMailerPlugin
+# BbwebPlugin has to be before CommonsMailerPlugin for initialization to display errors in configuration
 2000:org.biobank.controllers.BbwebPlugin
+3000:com.typesafe.plugin.CommonsMailerPlugin

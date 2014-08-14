@@ -11,6 +11,7 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import com.typesafe.config.ConfigFactory
 import play.api.Play.current
+import org.joda.time.DateTime
 
 class BbwebPlugin(val app: play.api.Application)
     extends Plugin
@@ -31,6 +32,8 @@ class BbwebPlugin(val app: play.api.Application)
   private val DropScript = "drop-database.sql"
   private val ScriptHeader = "-- SQL DDL script\n-- Generated file - do not edit\n\n"
 
+  val defaultUserEmail = "admin@admin.com"
+
   /**
    *
    */
@@ -43,18 +46,35 @@ class BbwebPlugin(val app: play.api.Application)
     centresService
     usersService
 
+    checkEmailConfig
+
+    createDefaultUser
+
     createSqlDdlScripts
 
+    Logger.info(s"Bbweb Plugin started")
+    super.onStart
+  }
+
+  override def onStop() {
+    Logger.info(s"Bbweb Plugin stopped")
+  }
+
+  def checkEmailConfig = {
+    app.configuration.getString("smtp.host").getOrElse(
+      throw new RuntimeException("smtp server information needs to be set in email.conf"))
+  }
+
+  def createDefaultUser = {
     //if ((app.mode == Mode.Dev) || (app.mode == Mode.Test)) {
 
       if (userRepository.isEmpty) {
         // for debug only - password is "administrator"
-        val email = "admin@admin.com"
         val validation = RegisteredUser.create(
-          UserId(email), -1L,
-          org.joda.time.DateTime.now,
+          UserId(defaultUserEmail), -1L,
+          DateTime.now,
           "admin",
-          email,
+          defaultUserEmail,
           "$2a$10$5ND6n5oPFtuShMQVb/vx1eJP0DzX1nIcwvX3GWUXgJP8/XVr7tqPS",
           "$2a$10$5ND6n5oPFtuShMQVb/vx1e",
           None)
@@ -65,13 +85,19 @@ class BbwebPlugin(val app: play.api.Application)
           }
         }
         validation map { user =>
-          userRepository.put(user)
+          val validation2 = user.activate(Some(0), DateTime.now)
+          if (validation2.isFailure) {
+            validation.swap.map { err =>
+              throw new Error("could not activate default user in development mode: " + err)
+            }
+          }
+          validation2.map { activeUser =>
+            userRepository.put(activeUser)
+            Logger.info("default user created")
+          }
         }
       }
     //}
-
-    Logger.info(s"Bbweb Plugin started")
-    super.onStart
   }
 
   /**
@@ -108,10 +134,6 @@ class BbwebPlugin(val app: play.api.Application)
     // val createScript = new File(directory, fileName)
     // val createSql = ddlStatements.flatten.mkString("\n\n")
     // Files.writeFileIfChanged(createScript, ScriptHeader + createSql)
-  }
-
-  override def onStop() {
-    Logger.info(s"Bbweb Plugin stopped")
   }
 
 }

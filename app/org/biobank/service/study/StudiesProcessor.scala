@@ -136,7 +136,7 @@ trait StudiesProcessorComponent
         newStudy <- DisabledStudy.create(
           studyId, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description)
         event <- StudyAddedEvent(
-          newStudy.id.toString, newStudy.addedDate, newStudy.name, newStudy.description).success
+          newStudy.id.id, newStudy.addedDate, newStudy.name, newStudy.description).success
        } yield event
     }
 

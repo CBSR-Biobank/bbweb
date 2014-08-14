@@ -17,7 +17,7 @@ object UserCommands {
     expectedVersion: Long,
     name: String,
     email: String,
-    password: String,
+    password: Option[String],
     avatarUrl: Option[String])
     extends UserCommand
 
@@ -44,5 +44,7 @@ object UserCommands {
     expectedVersion: Long)
       extends UserCommand
       with HasExpectedVersion
+
+  case class ResetUserPasswordCmd(email: String) extends UserCommand
 
 }

@@ -13,7 +13,7 @@ define(['angular', 'common'], function(angular) {
 
     /* If the token is assigned, check that the token is still valid on the server */
     if (token) {
-      $http.get('/authuser')
+      $http.get('/authenticate')
         .success(function(data) {
           $log.info('Welcome back, ' + data.name);
           user = data;
@@ -31,7 +31,7 @@ define(['angular', 'common'], function(angular) {
       loginUser: function(credentials) {
         return $http.post('/login', credentials).then(function(response) {
           token = response.data.token;
-          return $http.get('/authuser');
+          return $http.get('/authenticate');
         }).then(function(response) {
           user = response.data;
           $log.info('Welcome ' + user.name);
@@ -40,12 +40,11 @@ define(['angular', 'common'], function(angular) {
       },
       logout: function() {
         // Logout on server in a real app
-        delete $cookies['XSRF-TOKEN'];
-        token = undefined;
-        user = undefined;
-        var dummyObj = {};
         return $http.post('/logout').then(function(response) {
           $log.info("Good bye ");
+          delete $cookies['XSRF-TOKEN'];
+          token = undefined;
+          user = undefined;
         });
       },
       getUser: function() {
@@ -70,7 +69,7 @@ define(['angular', 'common'], function(angular) {
         token = $cookies['XSRF-TOKEN'];
 
         if (token) {
-          $http.get('/authuser')
+          $http.get('/authenticate')
             .success(function(data) {
               deferred.resolve(data);
             })

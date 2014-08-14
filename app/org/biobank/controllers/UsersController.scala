@@ -25,12 +25,11 @@ object UsersController extends BbwebController {
     Ok(Json.toJson(usersService.getAll.toList))
   }
 
-  /** Retrieves the currently logged in user if the token is valid.
+  /** Retrieves the user associated with the token, if it is valid.
     */
-  def authUser() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    Logger.info(s"authUser: userId: $userId")
+  def authenticateUser() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     usersService.getByEmail(userId.id).fold(
-      err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+      err  => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
       user => Ok(Json.toJson(user))
     )
   }
@@ -99,6 +98,17 @@ object UsersController extends BbwebController {
   def removeUser(id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
     val cmd = RemoveUserCmd(id, ver)
     val future = usersService.remove(cmd)
+    future.map { validation =>
+      validation.fold(
+        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        event => Ok(eventToJsonReply(event))
+      )
+    }
+  }
+
+  def resetPassword(id: String) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    val cmd = ResetUserPasswordCmd(id)
+    val future = usersService.resetPassword(cmd)
     future.map { validation =>
       validation.fold(
         err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),

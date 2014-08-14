@@ -1,7 +1,7 @@
 package org.biobank.domain.validation
 
 import org.biobank.domain._
-import org.biobank.domain.User
+import org.biobank.domain.user.User
 
 import org.slf4j.LoggerFactory
 import scalaz._

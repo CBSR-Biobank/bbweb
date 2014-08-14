@@ -1,6 +1,9 @@
 package org.biobank.controllers
 
 import org.biobank.domain.user.UserId
+import org.biobank.infrastructure.command.UserCommands._
+import org.biobank.infrastructure.event.UserEvents._
+import org.biobank.service.json.User._
 
 import scala.language.postfixOps
 import play.api._
@@ -9,6 +12,8 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.cache._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 /**
   * Controller for the main page, and also the about and contact us pages.
@@ -70,8 +75,28 @@ object Application extends Controller with Security {
     */
   def logout() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Cache.remove(token)
-    Ok(Json.obj("status" -> "success"))
+    Ok(Json.obj("status" -> "success", "message" -> "user has been logged out"))
       .discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
+  }
+
+  /** Resets the user's password.
+    */
+  def passwordReset() = Action.async(parse.json) { implicit request =>
+    request.body.validate[ResetUserPasswordCmd].fold(
+      errors => {
+        Future.successful(
+          BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors))))
+      },
+      command => {
+        val future = usersService.resetPassword(command)
+        future.map { validation =>
+          validation.fold(
+            err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+            event => Ok(Json.obj("status" -> "success", "message" -> "password has been reset"))
+          )
+        }
+      }
+    )
   }
 }
 

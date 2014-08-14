@@ -141,6 +141,23 @@ case class ActiveUser private (
         lastUpdateDate = Some(dateTime)).success
     } yield udpatedUser
   }
+
+  def resetPassword(newPassword: String, newSalt: String, dateTime: DateTime): DomainValidation[ActiveUser] = {
+    if (newPassword.isEmpty) {
+      DomainError("password is null or empty").failNel
+    } else {
+      ActiveUser(
+        this.id,
+        this.version + 1,
+        this.addedDate,
+        Some(dateTime),
+        this.name,
+        this.email,
+        newPassword,
+        newSalt,
+        this.avatarUrl).success
+    }
+  }
 }
 
 /** Factory object. */
@@ -204,3 +221,33 @@ object LockedUser extends UserValidationHelper {
 
 }
 
+object UserHelper {
+
+  def isUserRegistered(user: User): DomainValidation[RegisteredUser] = {
+    user match {
+      case registeredUser: RegisteredUser => registeredUser.success
+      case _ => DomainError(s"the user is not registered").failNel
+    }
+  }
+
+  def isUserActive(user: User): DomainValidation[ActiveUser] = {
+    user match {
+      case activeUser: ActiveUser => activeUser.success
+      case _ => DomainError(s"the user is not active").failNel
+    }
+  }
+
+  def isUserLocked(user: User): DomainValidation[LockedUser] = {
+    user match {
+      case lockedUser: LockedUser => lockedUser.success
+      case _ => DomainError(s"the user is not active").failNel
+    }
+  }
+
+  def isUserNotLocked(user: User): DomainValidation[User] = {
+    user match {
+      case lockedUser: LockedUser => DomainError(s"the user is locked").failNel
+      case _ => user.success
+    }
+  }
+}

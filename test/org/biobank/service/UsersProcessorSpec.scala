@@ -35,9 +35,11 @@ class UsersProcessorSpec extends UsersProcessorFixture {
           'id (user.email),
           'name (user.name),
           'email (user.email),
-          'password (user.password),
           'avatarUrl (user.avatarUrl)
         )
+
+        // password should be encrypted
+        event.password should not be(user.password)
 
         userRepository.getByKey(UserId(event.id)) map { user =>
           user shouldBe a[RegisteredUser]
@@ -52,7 +54,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val user2 = factory.createActiveUser
 
       val cmd = UpdateUserCmd(
-        user.version, user2.name, user2.email, user2.password, user2.avatarUrl)
+        user.version, user2.name, user2.email, Some(user2.password), user2.avatarUrl)
       val validation = ask(usersProcessor, cmd).mapTo[DomainValidation[UserUpdatedEvent]]
         .futureValue
 
@@ -64,10 +66,11 @@ class UsersProcessorSpec extends UsersProcessorFixture {
           'version   (user.version + 1),
           'name      (user2.name),
           'email     (user2.email),
-          'password  (user2.password),
           'avatarUrl (user2.avatarUrl)
         )
 
+        // password should be encrypted
+        event.password should not be(user2.password)
         userRepository.getByKey(UserId(event.id)) map { user =>
           user shouldBe a[ActiveUser]
         }

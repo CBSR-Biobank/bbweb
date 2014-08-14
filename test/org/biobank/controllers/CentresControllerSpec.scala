@@ -18,7 +18,7 @@ import com.typesafe.plugin._
 import play.api.Play.current
 
 /**
-  * Tests the REST API for [[Centre]].
+  * Tests the REST API for [[Centre]]s.
   */
 class CentresControllerSpec extends ControllerFixture {
 

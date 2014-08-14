@@ -45,9 +45,9 @@ trait FactoryComponent {
         throw new Error
       }
 
-      val user = validation | null
-      domainObjects = domainObjects + (classOf[RegisteredUser] -> user)
-      user
+      val registeredUser = validation | null
+      domainObjects = domainObjects + (classOf[RegisteredUser] -> registeredUser)
+      registeredUser
     }
 
     def createActiveUser: ActiveUser = {
@@ -57,11 +57,22 @@ trait FactoryComponent {
         throw new Error
       }
 
-      val user = validation | null
-      domainObjects = domainObjects + (classOf[ActiveUser] -> user)
-      user
+      val activeUser = validation | null
+      domainObjects = domainObjects + (classOf[ActiveUser] -> activeUser)
+      activeUser
     }
 
+    def createLockedUser: LockedUser = {
+      val activeUser = defaultActiveUser
+      val validation = activeUser.lock(activeUser.versionOption, DateTime.now)
+      if (validation.isFailure) {
+        throw new Error
+      }
+
+      val lockedUser = validation | null
+      domainObjects = domainObjects + (classOf[LockedUser] -> lockedUser)
+      lockedUser
+    }
     def createDisabledStudy: DisabledStudy = {
       val id = studyRepository.nextIdentity
       val name = nameGenerator.next[Study]
@@ -311,8 +322,12 @@ trait FactoryComponent {
       defaultObject(classOf[RegisteredUser], createRegisteredUser)
     }
 
-    def defaultActivUser: ActiveUser = {
+    def defaultActiveUser: ActiveUser = {
       defaultObject(classOf[ActiveUser], createActiveUser)
+    }
+
+    def defaultLockedUser: LockedUser = {
+      defaultObject(classOf[LockedUser], createLockedUser)
     }
 
     def defaultDisabledStudy: DisabledStudy = {

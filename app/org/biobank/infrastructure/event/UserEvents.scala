@@ -15,6 +15,7 @@ object UserEvents {
     name: String,
     email: String,
     password: String,
+    salt: String,
     avatarUrl: Option[String])
       extends UserEvent
       with HasIdentity
@@ -61,5 +62,13 @@ object UserEvents {
       extends UserEvent
       with HasIdentity
       with HasVersion
+
+  case class UserPasswordResetEvent(
+    id: String,
+    salt: String,
+    password: String,
+    dateTime: DateTime)
+      extends UserEvent
+      with HasIdentity
 
 }
