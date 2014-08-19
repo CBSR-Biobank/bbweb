@@ -11,19 +11,20 @@ define(['angular'], function(angular) {
   var mod = angular.module('users.controllers', []);
 
   mod.controller('LoginCtrl', [
-    '$scope', '$location', '$log', 'userService', 'modalService',
-    function($scope, $location, $log, userService, modalService) {
+    '$scope', '$state', '$stateParams', '$location', '$log', 'userService', 'modalService',
+    function($scope, $state, $stateParams, $location, $log, userService, modalService) {
       $scope.form = {
         credentials: {
           email: "",
           password: ""
         },
         login: function(credentials) {
-          userService.loginUser(credentials).then(
+          userService.login(credentials).then(
             function(user) {
               $location.path('/dashboard');
             },
             function() {
+              // login failed
               var modalOptions = {
                 closeButtonText: 'Cancel',
                 actionButtonText: 'Retry',
@@ -31,17 +32,52 @@ define(['angular'], function(angular) {
                 bodyText: 'The email and / or password you entered were invalid'
               };
               modalService.showModal({}, modalOptions).then(function (result) {
-                $location.path('/login');
+                $state.go($state.current, $stateParams, {
+                  reload: true,
+                  inherit: false,
+                  notify: true
+                });
               }, function () {
                 $location.path('/');
               });
             });
         },
         forgotPassword: function() {
-          alert("send forgot password email");
+          $state.go("users.forgot");
         },
         register: function() {
           alert("register user");
+        }
+      };
+    }]);
+
+  mod.controller('ForgotPasswordCtrl', [
+    '$scope', '$state', '$stateParams', '$log', 'userService', 'emailNotFound',
+    function($scope, $state, $stateParams, $log, userService, emailNotFound) {
+      $scope.form = {
+        email: "",
+        emailNotFound: emailNotFound,
+        submit: function(email) {
+          userService.passwordReset(email).then(
+            function() {
+              // password reset, email sent
+              $state.go("users.forgot.passwordSent", { email: email });
+            },
+            function() {
+              // user not found
+              $state.go("users.forgot.emailNotFound");
+            });
+        }
+      };
+    }]);
+
+  mod.controller('ResetPasswordCtrl', [
+    '$scope', '$state', '$stateParams', '$log', 'userService',
+    function($scope, $state, $stateParams, $log, userService) {
+      $scope.page = {
+        email: $stateParams.email,
+        login: function() {
+          $state.go("users.login");
         }
       };
     }]);

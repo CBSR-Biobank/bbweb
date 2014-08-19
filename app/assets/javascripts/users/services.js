@@ -28,7 +28,7 @@ define(['angular', 'common'], function(angular) {
     }
 
     return {
-      loginUser: function(credentials) {
+      login: function(credentials) {
         return $http.post('/login', credentials).then(function(response) {
           token = response.data.token;
           return $http.get('/authenticate');
@@ -49,6 +49,9 @@ define(['angular', 'common'], function(angular) {
       },
       getUser: function() {
         return user;
+      },
+      passwordReset: function(email) {
+        return $http.post('/passreset', { email: email });
       }
     };
   }]);

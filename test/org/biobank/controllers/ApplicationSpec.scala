@@ -60,10 +60,10 @@ class ApplicationSpec extends ControllerFixture {
       val cmdJson = Json.obj(
         "email"     -> invalidUser,
         "password"  -> nameGenerator.next[String])
-      val json = makeRequest(POST, "/login", BAD_REQUEST, json = cmdJson)
+      val json = makeRequest(POST, "/login", FORBIDDEN, json = cmdJson)
 
       (json \ "status").as[String] should include ("error")
-        (json \ "message").as[String] should include ("not found")
+        (json \ "message").as[String] should include ("not registered")
     }
 
     "prevent a user logging in with bad password" in new WithApplication(fakeApplication()) {
@@ -72,7 +72,7 @@ class ApplicationSpec extends ControllerFixture {
       val cmdJson = Json.obj(
         "email"     -> user.email,
         "password"  -> invalidPassword)
-      val json = makeRequest(POST, "/login", BAD_REQUEST, json = cmdJson)
+      val json = makeRequest(POST, "/login", FORBIDDEN, json = cmdJson)
 
       (json \ "status").as[String] should include ("error")
         (json \ "message").as[String] should include ("invalid password")
@@ -106,7 +106,7 @@ class ApplicationSpec extends ControllerFixture {
       val cmdJson = Json.obj(
         "email"     -> lockedUser.email,
         "password"  -> plainPassword)
-      val json = makeRequest(POST, "/login", BAD_REQUEST, json = cmdJson)
+      val json = makeRequest(POST, "/login", NOT_FOUND, json = cmdJson)
 
       (json \ "status").as[String] should include ("error")
         (json \ "message").as[String] should include ("the user is locked")
@@ -190,7 +190,7 @@ class ApplicationSpec extends ControllerFixture {
     "not allow a registered user to reset his/her password" in new WithApplication(fakeApplication()) {
       val user = createUserInRepository(nameGenerator.next[String])
       val cmdJson = Json.obj("email" -> user.email)
-      val json = makeRequest(POST, "/passreset", BAD_REQUEST, json = cmdJson)
+      val json = makeRequest(POST, "/passreset", FORBIDDEN, json = cmdJson)
         (json \ "status").as[String] should include ("error")
         (json \ "message").as[String] should include ("user is not active")
     }
@@ -200,7 +200,7 @@ class ApplicationSpec extends ControllerFixture {
       use[BbwebPlugin].userRepository.put(lockedUser)
 
       val cmdJson = Json.obj("email" -> lockedUser.email)
-      val json = makeRequest(POST, "/passreset", BAD_REQUEST, json = cmdJson)
+      val json = makeRequest(POST, "/passreset", FORBIDDEN, json = cmdJson)
         (json \ "status").as[String] should include ("error")
         (json \ "message").as[String] should include ("user is not active")
     }

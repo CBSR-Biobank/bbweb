@@ -3,7 +3,7 @@
   <form class="form-horizontal"
         name="loginForm"
         autocomplete="on"
-        ng-submit="loginForm.$valid && form.login(credentials)"
+        ng-submit="loginForm.$valid && form.login(form.credentials)"
         novalidate>
 
     <!-- EMAIL -->
@@ -14,7 +14,7 @@
             name="email"
             type="email"
             class="form-control"
-            ng-model="credentials.email"
+            ng-model="form.credentials.email"
             placeholder="Email"
             required/>
       </div>
@@ -28,7 +28,7 @@
             name="password"
             type="password"
             class="form-control"
-            ng-model="credentials.password"
+            ng-model="form.credentials.password"
             placeholder="Password"
             required />
       </div>

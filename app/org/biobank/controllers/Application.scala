@@ -54,9 +54,17 @@ object Application extends Controller with Security {
         // TODO: token should be derived from salt
         usersService.validatePassword(loginCredentials.email, loginCredentials.password).fold(
           err => {
-            BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))
+            val errStr = err.list.mkString(", ")
+            if (errStr.contains("not found")) {
+              Forbidden(Json.obj("status" ->"error", "message" -> "not registered"))
+            } else if (errStr.contains("invalid password")) {
+              Forbidden(Json.obj("status" ->"error", "message" -> "invalid password"))
+            } else {
+              NotFound(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))
+            }
           },
           user => {
+            Logger.info(s"user logged in: ${user.email}")
             val token = java.util.UUID.randomUUID().toString
             Cache.set(token, user.id)
             Ok(Json.obj("token" -> token))
@@ -91,7 +99,16 @@ object Application extends Controller with Security {
         val future = usersService.resetPassword(command)
         future.map { validation =>
           validation.fold(
-            err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+            err   => {
+              val errStr = err.list.mkString(", ")
+              if (errStr.contains("not found")) {
+                NotFound(Json.obj("status" ->"error", "message" -> "email address not registered"))
+              } else if (errStr.contains("user is not active")) {
+                Forbidden(Json.obj("status" ->"error", "message" -> "user is not active"))
+              } else {
+                BadRequest(Json.obj("status" ->"error", "message" -> "email address not registered"))
+              }
+            },
             event => Ok(Json.obj("status" -> "success", "message" -> "password has been reset"))
           )
         }
