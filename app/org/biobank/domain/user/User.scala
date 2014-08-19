@@ -42,6 +42,8 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
         |  lastUpdateDate: $lastUpdateDate,
         |  name: $name,
         |  email: $email
+        |  password: $password
+        |  salt: $salt
         |  avatarUrl: $avatarUrl
         |}""".stripMargin
 }

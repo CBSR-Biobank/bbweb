@@ -61,6 +61,7 @@ trait UsersServiceComponent {
         user <- userRepository.getByKey(UserId(email))
         notLocked <- UserHelper.isUserNotLocked(user)
         validPwd <- {
+          log.debug(s"validatePassword: email: $email, user: $user")
           if (passwordHasher.valid(user.password, user.salt, enteredPwd)) {
             user.success
           } else {
@@ -162,13 +163,15 @@ trait UsersProcessorComponent {
     def validateCmd(cmd: UpdateUserCmd): DomainValidation[UserUpdatedEvent] = {
       val timeNow = DateTime.now
 
-      def getPassword(user: ActiveUser, newPlainPassword: Option[String]): (String, String) = {
+      case class PasswordInfo(password: String, salt: String)
+
+      def getPassword(user: ActiveUser, newPlainPassword: Option[String]): PasswordInfo = {
         newPlainPassword.fold {
-          (user.password, user.salt)
+          PasswordInfo(user.password, user.salt)
         } { plainPwd =>
           val newSalt = passwordHasher.generateSalt
           val newPwd = passwordHasher.encrypt(plainPwd, newSalt)
-          (newPwd, newSalt)
+          PasswordInfo(newPwd, newSalt)
         }
       }
 
@@ -177,8 +180,8 @@ trait UsersProcessorComponent {
         activeUser <- UserHelper.isUserActive(user)
         passwordInfo <- getPassword(activeUser, cmd.password).success
         updatedUser <- activeUser.update(
-          Some(cmd.expectedVersion), timeNow, cmd.name, cmd.email, passwordInfo._1, passwordInfo._2,
-          cmd.avatarUrl)
+          Some(cmd.expectedVersion), timeNow, cmd.name, cmd.email, passwordInfo.password,
+          passwordInfo.salt, cmd.avatarUrl)
         event <- UserUpdatedEvent(updatedUser.id.id, updatedUser.version, timeNow, updatedUser.name,
           updatedUser.email, updatedUser.password, updatedUser.avatarUrl).success
       } yield event
@@ -217,7 +220,7 @@ trait UsersProcessorComponent {
       for {
         user <- userRepository.getByKey(UserId(cmd.email))
         activeUser <- UserHelper.isUserActive(user)
-        event <- UserPasswordResetEvent(user.id.id, salt, encryptedPwd, timeNow).success
+        event <- UserPasswordResetEvent(user.id.id, encryptedPwd, salt, timeNow).success
         email <- EmailService.passwordResetEmail(user.email, plainPassword).success
       } yield event
     }
@@ -311,7 +314,7 @@ trait UsersProcessorComponent {
       val validation = for {
         user <- userRepository.getByKey(UserId(event.id))
         activeUser <- UserHelper.isUserActive(user)
-        updatedUser <- activeUser.resetPassword(event.salt, event.password, event.dateTime)
+        updatedUser <- activeUser.resetPassword(event.password, event.salt, event.dateTime)
         savedUser <- userRepository.put(updatedUser).success
       } yield savedUser
 

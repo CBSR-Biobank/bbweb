@@ -65,8 +65,8 @@ object UserEvents {
 
   case class UserPasswordResetEvent(
     id: String,
-    salt: String,
     password: String,
+    salt: String,
     dateTime: DateTime)
       extends UserEvent
       with HasIdentity
