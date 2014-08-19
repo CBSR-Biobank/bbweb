@@ -55,10 +55,8 @@ object Application extends Controller with Security {
         usersService.validatePassword(loginCredentials.email, loginCredentials.password).fold(
           err => {
             val errStr = err.list.mkString(", ")
-            if (errStr.contains("not found")) {
-              Forbidden(Json.obj("status" ->"error", "message" -> "not registered"))
-            } else if (errStr.contains("invalid password")) {
-              Forbidden(Json.obj("status" ->"error", "message" -> "invalid password"))
+            if (errStr.contains("not found") || errStr.contains("invalid password")) {
+              Forbidden(Json.obj("status" ->"error", "message" -> "invalid email or password"))
             } else {
               NotFound(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))
             }

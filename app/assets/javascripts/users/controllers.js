@@ -23,7 +23,7 @@ define(['angular'], function(angular) {
             function(user) {
               $location.path('/dashboard');
             },
-            function() {
+            function(response) {
               // login failed
               var modalOptions = {
                 closeButtonText: 'Cancel',
