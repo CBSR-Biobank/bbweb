@@ -25,6 +25,25 @@ define(['angular', 'common'], function(angular, controllers) {
 
       $stateProvider.state('users.login', {
         url: '^/login',
+        resolve: {
+          notifications: function() { return null; }
+        },
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/users/login.html',
+            controller: 'LoginCtrl'
+          }
+        }
+      });
+
+      $stateProvider.state('users.login.registered', {
+        // does not define URL here so that it appears that shis is same page to the user as
+        // "users.login"
+        resolve: {
+          notifications: function() {
+            return 'Your account was created and is now pending administrator approval.';
+          }
+        },
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/users/login.html',
@@ -69,6 +88,35 @@ define(['angular', 'common'], function(angular, controllers) {
           'main@': {
             templateUrl: '/assets/javascripts/users/passwordSent.html',
             controller: 'ResetPasswordCtrl'
+          }
+        }
+      });
+
+      $stateProvider.state('users.register', {
+        url: '^/register',
+        resolve: {
+          notifications: function() { return null; }
+        },
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/users/registerUserForm.html',
+            controller: 'RegisterUserCtrl'
+          }
+        }
+      });
+
+      $stateProvider.state('users.register.failed', {
+        // does not define URL here so that it appears that shis is same page to the user as
+        // "users.register"
+        resolve: {
+          notifications: ['$stateParams', function() {
+            return 'That email address is already registered.';
+          }]
+        },
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/users/registerUserForm.html',
+            controller: 'RegisterUserCtrl'
           }
         }
       });

@@ -154,6 +154,9 @@ define(['angular'], function(angular) {
             templateUrl: '/assets/javascripts/admin/studies/studyForm.html',
             controller: 'StudyUpdateCtrl'
           }
+        },
+        data: {
+          displayName: "Update"
         }
       });
 

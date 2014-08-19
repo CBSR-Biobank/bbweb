@@ -42,8 +42,8 @@ testOptions in Test := Nil
 
 resolvers ++= Seq(
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-  "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
-  "Typesafe Snapshots" at "http://repo.akka.io/snapshots/"
+  "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
+  "Typesafe Snapshots" at "https://repo.akka.io/snapshots/"
 )
 
 libraryDependencies ++= Seq(

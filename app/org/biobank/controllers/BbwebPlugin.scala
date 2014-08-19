@@ -49,7 +49,7 @@ class BbwebPlugin(val app: play.api.Application)
     checkEmailConfig
 
     createDefaultUser
-    createTestUser
+    //createTestUser
 
     createSqlDdlScripts
 
@@ -66,6 +66,8 @@ class BbwebPlugin(val app: play.api.Application)
       throw new RuntimeException("smtp server information needs to be set in email.conf"))
   }
 
+  /** Used for debugging only.
+    */
   def createTestUser = {
     val email = "test@biosample.ca"
     val validation = RegisteredUser.create(

@@ -63,7 +63,7 @@ class ApplicationSpec extends ControllerFixture {
       val json = makeRequest(POST, "/login", FORBIDDEN, json = cmdJson)
 
       (json \ "status").as[String] should include ("error")
-        (json \ "message").as[String] should include ("not registered")
+        (json \ "message").as[String] should include ("invalid email or password")
     }
 
     "prevent a user logging in with bad password" in new WithApplication(fakeApplication()) {
@@ -75,7 +75,7 @@ class ApplicationSpec extends ControllerFixture {
       val json = makeRequest(POST, "/login", FORBIDDEN, json = cmdJson)
 
       (json \ "status").as[String] should include ("error")
-        (json \ "message").as[String] should include ("invalid password")
+        (json \ "message").as[String] should include ("invalid email or password")
     }
 
     "disallow access to logged out users" in new WithApplication(fakeApplication()) {

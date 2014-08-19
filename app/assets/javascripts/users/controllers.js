@@ -11,9 +11,10 @@ define(['angular'], function(angular) {
   var mod = angular.module('users.controllers', []);
 
   mod.controller('LoginCtrl', [
-    '$scope', '$state', '$stateParams', '$location', '$log', 'stateHelper', 'userService', 'modalService',
-    function($scope, $state, $stateParams, $location, $log, stateHelper, userService, modalService) {
+    '$scope', '$state', '$stateParams', 'stateHelper', 'userService', 'modalService', 'notifications',
+    function($scope, $state, $stateParams, stateHelper, userService, modalService, notifications) {
       $scope.form = {
+        notifications: notifications,
         credentials: {
           email: "",
           password: ""
@@ -21,7 +22,7 @@ define(['angular'], function(angular) {
         login: function(credentials) {
           userService.login(credentials).then(
             function(user) {
-              $location.path('/dashboard');
+              $state.go("dashboard");
             },
             function(response) {
               // login failed
@@ -34,7 +35,7 @@ define(['angular'], function(angular) {
               modalService.showModal({}, modalOptions).then(function (result) {
                 stateHelper.reloadAndReinit();
               }, function () {
-                $location.path('/');
+                $state.go("home");
               });
             });
         },
@@ -42,7 +43,7 @@ define(['angular'], function(angular) {
           $state.go("users.forgot");
         },
         register: function() {
-          alert("register user");
+          $state.go("users.register");
         }
       };
     }]);
@@ -86,12 +87,42 @@ define(['angular'], function(angular) {
     }]);
 
   mod.controller('ResetPasswordCtrl', [
-    '$scope', '$state', '$stateParams', '$log', 'userService',
-    function($scope, $state, $stateParams, $log, userService) {
+    '$scope', '$state', '$stateParams', 'userService',
+    function($scope, $state, $stateParams, userService) {
       $scope.page = {
         email: $stateParams.email,
         login: function() {
           $state.go("users.login");
+        }
+      };
+    }]);
+
+  mod.controller('RegisterUserCtrl', [
+    '$scope', '$state', '$stateParams', 'userService', 'notifications',
+    function($scope, $state, $stateParams, userService, notifications) {
+      $scope.form = {
+        notifications: notifications,
+        user: {
+          name: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          avatarUrl: ''
+        },
+        submit: function(user) {
+          userService.addUser(user).then(
+            function() {
+              // user has been registerd
+              $state.go("users.login.registered");
+            },
+            function(response) {
+              // registration failed
+              $state.go("users.register.failed");
+            }
+          );
+        },
+        cancel: function() {
+          $state.go("home");
         }
       };
     }]);

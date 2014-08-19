@@ -11,37 +11,37 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
 
       $urlRouterProvider.otherwise('/');
 
-      $stateProvider
-        .state('dashboard', {
-          url: '/dashboard',
-          views: {
-            'main@': {
-              templateUrl: '/assets/javascripts/dashboard/dashboard.html',
-              controller:controllers.DashboardCtrl
-            }
-          },
-          resolve: {
-            user: userResolve.user
-          },
-          data: {
-            displayName: false
+      $stateProvider.state('dashboard', {
+        url: '/dashboard',
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/dashboard/dashboard.html',
+            controller:controllers.DashboardCtrl
           }
-        })
-        .state('dashboard.admin', {
-          url: '/dashboard/admin',
-          views: {
-            'main@': {
-              templateUrl: '/assets/javascripts/dashboard/dashboard.html',
-              controller:controllers.AdminDashboardCtrl
-            }
-          },
-          resolve: {
-            user: userResolve.user
-          },
-          data: {
-            displayName: false
+        },
+        resolve: {
+          user: userResolve.user
+        },
+        data: {
+          displayName: 'Dashboard'
+        }
+      });
+
+      $stateProvider.state('dashboard.admin', {
+        url: '/admin',
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/dashboard/dashboard.html',
+            controller:controllers.AdminDashboardCtrl
           }
-        });
+        },
+        resolve: {
+          user: userResolve.user
+        },
+        data: {
+          displayName: 'Admin'
+        }
+      });
     }]);
   return mod;
 });

@@ -43,15 +43,30 @@ object UsersController extends BbwebController {
     )
   }
 
-  def addUser() = CommandAction { cmd: RegisterUserCmd => implicit userId =>
-    Logger.info(s"addUser: cmd: $cmd")
-    val future = usersService.register(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event))
-      )
-    }
+  def addUser() = Action.async(parse.json) { implicit request =>
+    request.body.validate[RegisterUserCmd].fold(
+      errors => {
+        Future.successful(
+          BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors))))
+      },
+      cmd => {
+        Logger.info(s"addUser: cmd: $cmd")
+        val future = usersService.register(cmd)
+        future.map { validation =>
+          validation.fold(
+            err   => {
+              val errs = err.list.mkString(", ")
+              if (errs.contains("")) {
+                Forbidden(Json.obj("status" ->"error", "message" -> "already registered"))
+              } else {
+                BadRequest(Json.obj("status" ->"error", "message" -> errs))
+              }
+            },
+            event => Ok(eventToJsonReply(event))
+          )
+        }
+      }
+    )
   }
 
   def activateUser(id: String) =  CommandAction { cmd: ActivateUserCmd => implicit userId =>

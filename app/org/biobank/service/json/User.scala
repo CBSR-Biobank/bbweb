@@ -61,25 +61,30 @@ object User {
   implicit val resetUserPasswordCmdReads: Reads[ResetUserPasswordCmd] =
       (__ \ "email").read[String](minLength[String](5)).map{ x => ResetUserPasswordCmd(x) }
 
-  implicit val userRegisteredEventWrites: Writes[UserRegisteredEvent] = (
-    (__ \ "id").write[String] and
-      (__ \ "dateTime").write[DateTime] and
-      (__ \ "name").write[String] and
-      (__ \ "email").write[String] and
-      (__ \ "password").write[String] and
-      (__ \ "salt").write[String] and
-      (__ \ "avatarUrl").writeNullable[String]
-  )(unlift(UserRegisteredEvent.unapply))
+  /** Does not convert password or salt to JSON.
+    */
+  implicit val userRegisteredEventWrites = new Writes[UserRegisteredEvent] {
+    def writes(event: UserRegisteredEvent) = Json.obj(
+      "id"             -> event.id,
+      "dateTime"       -> event.dateTime,
+      "name"           -> event.name,
+      "email"          -> event.email,
+      "avatarUrl"      -> event.avatarUrl
+    )
+  }
 
-  implicit val userUpdatedEventWrites: Writes[UserUpdatedEvent] = (
-    (__ \ "id").write[String] and
-      (__ \ "version").write[Long] and
-      (__ \ "dateTime").write[DateTime] and
-      (__ \ "name").write[String] and
-      (__ \ "email").write[String] and
-      (__ \ "password").write[String] and
-      (__ \ "avatarUrl").writeNullable[String]
-  )(unlift(UserUpdatedEvent.unapply))
+  /** Does not convert password or salt to JSON.
+    */
+  implicit val userUpdatedEventWrites = new Writes[UserUpdatedEvent] {
+    def writes(event: UserUpdatedEvent) = Json.obj(
+      "id"             -> event.id,
+      "version"        -> event.version,
+      "dateTime"       -> event.dateTime,
+      "name"           -> event.name,
+      "email"          -> event.email,
+      "avatarUrl"      -> event.avatarUrl
+    )
+  }
 
   implicit val userActivatedEventWrites: Writes[UserActivatedEvent] = (
     (__ \ "id").write[String] and

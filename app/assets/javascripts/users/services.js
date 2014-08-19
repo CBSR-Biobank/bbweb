@@ -50,6 +50,15 @@ define(['angular', 'common'], function(angular) {
       getUser: function() {
         return user;
       },
+      addUser: function(newUser) {
+        var cmd = {
+          name:      newUser.name,
+          email:     newUser.email,
+          password:  newUser.password,
+          avatarUrl: newUser.avatarUrl
+        };
+        return $http.post('/users', cmd);
+      },
       passwordReset: function(email) {
         return $http.post('/passreset', { email: email });
       }
@@ -86,6 +95,7 @@ define(['angular', 'common'], function(angular) {
       return deferred.promise;
     }]
   });
+
   /**
    * If the current route does not resolve, go back to the start page.
    */

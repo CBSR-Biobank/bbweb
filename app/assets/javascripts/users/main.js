@@ -5,15 +5,15 @@
 define([
   'angular',
   './controllers',
+  './directives',
   './states',
   './services'
 ], function(angular) {
   'use strict';
 
   return angular.module('biobank.users', [
-    'ngCookies',
-    'ngRoute',
     'users.controllers',
+    'users.directives',
     'users.states',
     'users.services'
   ]);
