@@ -1,49 +1,59 @@
-<div class="page-header"><h1>Biobank Log In</h1></div>
 <div class="clearfix">
-  <form class="form-horizontal"
-        name="loginForm"
-        autocomplete="on"
-        ng-submit="loginForm.$valid && form.login(form.credentials)"
-        novalidate>
+  <div class="row">
+    <div class="col-sm-offset-2 col-md-8">
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <h3 class="panel-title">Login</h3>
+        </div>
+        <div class="panel-body">
+          <form class="form-horizontal"
+                name="loginForm"
+                autocomplete="on"
+                ng-submit="loginForm.$valid && form.login(form.credentials)"
+                novalidate>
 
-    <!-- EMAIL -->
-    <div class="form-group">
-      <label for="email" class="col-sm-3 control-label">Email address</label>
-      <div class="col-sm-5">
-        <input
-            name="email"
-            type="email"
-            class="form-control"
-            ng-model="form.credentials.email"
-            placeholder="Email"
-            required/>
+            <!-- EMAIL -->
+            <div class="form-group">
+              <label for="email" class="col-sm-3 control-label">Email address</label>
+              <div class="col-sm-8">
+                <input
+                    name="email"
+                    type="email"
+                    class="form-control"
+                    ng-model="form.credentials.email"
+                    placeholder="Email"
+                    required/>
+              </div>
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="form-group">
+              <label for="password" class="col-sm-3 control-label">Password</label>
+              <div class="col-sm-8">
+                <input
+                    name="password"
+                    type="password"
+                    class="form-control"
+                    ng-model="form.credentials.password"
+                    placeholder="Password"
+                    required />
+              </div>
+            </div>
+
+            <!-- BUTTONS  -->
+            <div class="form-group">
+              <div class="col-sm-offset-3 col-sm-8">
+                <button class="btn btn-primary" ng-disabled="loginForm.$invalid">Log In</button>
+              </div>
+            </div>
+          </form>
+
+          <div class="col-sm-12">
+            <p><a href ng-click="form.forgotPassword()">Forgot password?</a></p>
+            <p>If you don't have an account yet you can <a href ng-click="form.register()">register here</a>.</p>
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- PASSWORD -->
-    <div class="form-group">
-      <label for="password" class="col-sm-3 control-label">Password</label>
-      <div class="col-sm-5">
-        <input
-            name="password"
-            type="password"
-            class="form-control"
-            ng-model="form.credentials.password"
-            placeholder="Password"
-            required />
-      </div>
-    </div>
-
-    <!-- BUTTONS  -->
-    <div class="form-group">
-      <div class="col-sm-offset-3 col-sm-5">
-        <button class="btn btn-primary" ng-disabled="loginForm.$invalid">Log In</button>
-      </div>
-    </div>
-  </form>
-
-  <div class="col-sm-12">
-    <p><a href ng-click="form.forgotPassword()">Forgot password?</a></p>
-    <p>If you don't have an account yet you can <a href ng-click="form.register()">register here</a>.</p>
   </div>
 </div>

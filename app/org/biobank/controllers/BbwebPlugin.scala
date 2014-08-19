@@ -35,8 +35,8 @@ class BbwebPlugin(val app: play.api.Application)
   val defaultUserEmail = "admin@admin.com"
 
   /**
-   *
-   */
+    *
+    */
   override def onStart() {
     // evaluate the lazy variabled declared up top
     studiesProcessor
@@ -49,6 +49,7 @@ class BbwebPlugin(val app: play.api.Application)
     checkEmailConfig
 
     createDefaultUser
+    createTestUser
 
     createSqlDdlScripts
 
@@ -65,44 +66,67 @@ class BbwebPlugin(val app: play.api.Application)
       throw new RuntimeException("smtp server information needs to be set in email.conf"))
   }
 
+  def createTestUser = {
+    val email = "test@biosample.ca"
+    val validation = RegisteredUser.create(
+      UserId(email),
+      -1L,
+      DateTime.now,
+      "testuser",
+      email,
+      "$2a$10$5ND6n5oPFtuShMQVb/vx1eJP0DzX1nIcwvX3GWUXgJP8/XVr7tqPS",
+      "$2a$10$5ND6n5oPFtuShMQVb/vx1e",
+      None)
+
+    if (validation.isFailure) {
+      validation.swap.map { err =>
+        throw new RuntimeException("could not add default user in development mode: " + err)
+      }
+    }
+    validation map { user =>
+      userRepository.put(user)
+    }
+  }
+
   def createDefaultUser = {
     //if ((app.mode == Mode.Dev) || (app.mode == Mode.Test)) {
 
-      if (userRepository.isEmpty) {
-        // for debug only - password is "administrator"
-        val validation = RegisteredUser.create(
-          UserId(defaultUserEmail), -1L,
-          DateTime.now,
-          "admin",
-          defaultUserEmail,
-          "$2a$10$5ND6n5oPFtuShMQVb/vx1eJP0DzX1nIcwvX3GWUXgJP8/XVr7tqPS",
-          "$2a$10$5ND6n5oPFtuShMQVb/vx1e",
-          None)
+    if (userRepository.isEmpty) {
+      // for debug only - password is "administrator"
+      val validation = RegisteredUser.create(
+        UserId(defaultUserEmail),
+        -1L,
+        DateTime.now,
+        "admin",
+        defaultUserEmail,
+        "$2a$10$5ND6n5oPFtuShMQVb/vx1eJP0DzX1nIcwvX3GWUXgJP8/XVr7tqPS",
+        "$2a$10$5ND6n5oPFtuShMQVb/vx1e",
+        None)
 
-        if (validation.isFailure) {
-          validation.swap.map { err =>
-            throw new Error("could not add default user in development mode: " + err)
-          }
-        }
-        validation map { user =>
-          val validation2 = user.activate(Some(0), DateTime.now)
-          if (validation2.isFailure) {
-            validation.swap.map { err =>
-              throw new Error("could not activate default user in development mode: " + err)
-            }
-          }
-          validation2.map { activeUser =>
-            userRepository.put(activeUser)
-            Logger.info("default user created")
-          }
+      if (validation.isFailure) {
+        validation.swap.map { err =>
+          throw new RuntimeException("could not add default user in development mode: " + err)
         }
       }
+      validation map { user =>
+        val validation2 = user.activate(Some(0), DateTime.now)
+        if (validation2.isFailure) {
+          validation.swap.map { err =>
+            throw new RuntimeException("could not activate default user in development mode: " + err)
+          }
+        }
+        validation2.map { activeUser =>
+          userRepository.put(activeUser)
+          Logger.info("default user created")
+        }
+      }
+    }
     //}
   }
 
   /**
-   * Creates SQL DDL scripts on application start-up.
-   */
+    * Creates SQL DDL scripts on application start-up.
+    */
   private def createSqlDdlScripts(): Unit = {
     // if (app.mode != Mode.Prod) {
     //   app.configuration.getConfig(configKey).foreach { configuration =>
@@ -125,8 +149,8 @@ class BbwebPlugin(val app: play.api.Application)
   }
 
   /**
-   * Writes the given DDL statements to a file.
-   */
+    * Writes the given DDL statements to a file.
+    */
   private def writeScript(
     ddlStatements: Seq[Iterator[String]],
     directory: File,

@@ -319,7 +319,7 @@ trait UsersProcessorComponent {
         // this should never happen because the only way to get here is when the
         // command passed validation
         validation.swap.map { err =>
-          throw new IllegalStateException("resetting password from event failed: " + err)
+          throw new RuntimeException(s"resetting password from event failed: event: $event, err: $err")
         }
         ()
       }

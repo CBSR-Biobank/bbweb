@@ -11,8 +11,8 @@ define(['angular'], function(angular) {
   var mod = angular.module('users.controllers', []);
 
   mod.controller('LoginCtrl', [
-    '$scope', '$state', '$stateParams', '$location', '$log', 'userService', 'modalService',
-    function($scope, $state, $stateParams, $location, $log, userService, modalService) {
+    '$scope', '$state', '$stateParams', '$location', '$log', 'stateHelper', 'userService', 'modalService',
+    function($scope, $state, $stateParams, $location, $log, stateHelper, userService, modalService) {
       $scope.form = {
         credentials: {
           email: "",
@@ -28,15 +28,11 @@ define(['angular'], function(angular) {
               var modalOptions = {
                 closeButtonText: 'Cancel',
                 actionButtonText: 'Retry',
-                headerText: 'Invalid logon credentials',
-                bodyText: 'The email and / or password you entered were invalid'
+                headerText: 'Invalid login credentials',
+                bodyText: 'The email and / or password you entered are invalid.'
               };
               modalService.showModal({}, modalOptions).then(function (result) {
-                $state.go($state.current, $stateParams, {
-                  reload: true,
-                  inherit: false,
-                  notify: true
-                });
+                stateHelper.reloadAndReinit();
               }, function () {
                 $location.path('/');
               });
@@ -52,8 +48,8 @@ define(['angular'], function(angular) {
     }]);
 
   mod.controller('ForgotPasswordCtrl', [
-    '$scope', '$state', '$stateParams', '$log', 'userService', 'emailNotFound',
-    function($scope, $state, $stateParams, $log, userService, emailNotFound) {
+    '$scope', '$state', '$stateParams', '$log', 'userService', 'modalService', 'emailNotFound',
+    function($scope, $state, $stateParams, $log, userService, modalService, emailNotFound) {
       $scope.form = {
         email: "",
         emailNotFound: emailNotFound,
@@ -63,9 +59,27 @@ define(['angular'], function(angular) {
               // password reset, email sent
               $state.go("users.forgot.passwordSent", { email: email });
             },
-            function() {
+            function(response) {
               // user not found
-              $state.go("users.forgot.emailNotFound");
+              var status = response.status;
+              if (status == 404) {
+                $state.go("users.forgot.emailNotFound");
+              } else {
+                // user not active
+                var modalDefaults = {
+                  templateUrl: '/assets/javascripts/common/modalOk.html'
+                };
+                var modalOptions = {
+                  headerText: 'Cannot reset your password',
+                  bodyText: 'The account associated with that email is not active in the system. ' +
+                    'Please contact your system administrator for more information.'
+                };
+                modalService.showModal(modalDefaults, modalOptions).then(function (result) {
+                  $state.go("home");
+                }, function () {
+                  $state.go("home");
+                });
+              }
             });
         }
       };
