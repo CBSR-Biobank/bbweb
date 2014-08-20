@@ -3,28 +3,91 @@
 </div>
 <div class="clearfix">
   <div class="row">
+
+    <!-- STUDY ADMIN -->
     <div class="col-md-4">
       <div class="panel panel-default" style="margin-top: 10px;">
         <div class="panel-heading">
-          <h3 class="panel-title">Study Administration</h3>
+          <h3 class="panel-title">
+            Study Administration
+
+            <div class="btn-group pull-right">
+              <button class="btn btn-xs btn-primary"
+                      ng-click="page.studiesAdmin()"
+                      title="Add study">
+              Select</button>
+            </div>
+
+          </h3>
         </div>
         <div class="panel-body">
-          <p>Add a study or modify existing one.</p>
-          <a ui-sref="admin.studies" class="btn btn-sm btn-primary" type="button">Select</a>
+          <p>Add a new study or make changes to existing studies.</p>
         </div>
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="badge">{{page.counts.studies}}</span>
+            Configured studies
+          </li>
+        </ul>
       </div>
     </div>
+
+    <!-- CENTRE ADMIN -->
     <div class="col-md-4">
       <div class="panel panel-default" style="margin-top: 10px;">
         <div class="panel-heading">
-          <h3 class="panel-title">Center Administration</h3>
+          <h3 class="panel-title">
+            Center Administration
+
+            <div class="btn-group pull-right">
+              <button class="btn btn-xs btn-primary"
+                      ng-click="page.centresAdmin()"
+                      title="Add study">
+              Select</button>
+            </div>
+
+          </h3>
         </div>
         <div class="panel-body">
-          <p>Add a center or modify an existing one.</p>
-          <a ui-sref="admin.centres" class="btn btn-sm btn-primary" type="button">Select</a>
+          <p>Add a new centre or make changes to existing centres.</p>
         </div>
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="badge">{{page.counts.centres}}</span>
+            Configured centres
+          </li>
+        </ul>
       </div>
     </div>
+
+    <!-- USER ADMIN -->
+    <div class="col-md-4">
+      <div class="panel panel-default" style="margin-top: 10px;">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            User Administration
+
+            <div class="btn-group pull-right">
+              <button class="btn btn-xs btn-primary"
+                      ng-click="page.usersAdmin()"
+                      title="Add study">
+              Select</button>
+            </div>
+
+          </h3>
+        </div>
+        <div class="panel-body">
+          <p>Activate users, lock out existing users, or manage user permissions.</p>
+        </div>
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="badge">{{page.counts.users}}</span>
+            Active users
+          </li>
+        </ul>
+      </div>
+    </div>
+
   </div>
   <div ui-view></div>
 </div>

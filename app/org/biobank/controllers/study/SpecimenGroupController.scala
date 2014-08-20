@@ -24,7 +24,7 @@ import scalaz.Scalaz._
 /**
  * Handles all operations user can perform on a Specimen Group.
  */
-object SpecimenGroupController extends BbwebController {
+object SpecimenGroupController extends CommandController {
 
   private def studiesService = Play.current.plugin[BbwebPlugin].map(_.studiesService).getOrElse {
     sys.error("Bbweb plugin is not registered")

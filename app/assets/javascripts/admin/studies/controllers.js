@@ -17,8 +17,8 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       $rootScope.pageTitle = 'Biobank studies';
       $scope.studies = [];
 
-      StudyService.list().then(function(response) {
-        $scope.studies = _.sortBy(response.data, function(study) { return study.name; });
+      StudyService.list().then(function(data) {
+        $scope.studies = _.sortBy(data, function(study) { return study.name; });
       });
 
       $scope.addStudy = function() {
@@ -38,23 +38,13 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
    * Displays a list of studies in an ng-table.
    */
   mod.controller('StudiesTableCtrl', [
-    '$scope',
-    '$rootScope',
-    '$filter',
-    '$state',
-    'ngTableParams',
-    'StudyService',
-    function($scope,
-             $rootScope,
-             $filter,
-             $state,
-             ngTableParams,
-             StudyService) {
+    '$scope', '$rootScope', '$filter', '$state', 'ngTableParams', 'StudyService',
+    function($scope, $rootScope, $filter, $state, ngTableParams, StudyService) {
       $rootScope.pageTitle = 'Biobank studies';
       $scope.studies = [];
 
-      StudyService.list().then(function(response) {
-        $scope.studies = response.data;
+      StudyService.list().then(function(data) {
+        $scope.studies = data;
 
         /* jshint ignore:start */
         $scope.tableParams = new ngTableParams({

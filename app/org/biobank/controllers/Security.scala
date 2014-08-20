@@ -4,10 +4,10 @@ import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.user.UserId
 
 import scala.concurrent.Future
-import play.api._
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.cache._
+import play.api.Play.current
 
 import scalaz._
 import scalaz.Scalaz._
@@ -17,8 +17,6 @@ import scalaz.Scalaz._
  * Can be composed to fine-tune access control.
  */
 trait Security { self: Controller =>
-
-  implicit val app: play.api.Application = play.api.Play.current
 
   val AuthTokenCookieKey = "XSRF-TOKEN"
   val AuthTokenHeader = "X-XSRF-TOKEN"
@@ -72,7 +70,9 @@ trait Security { self: Controller =>
   def AuthActionAsync[A](p: BodyParser[A] = parse.anyContent)(
     f: String => UserId => Request[A] => Future[Result]) = Action.async(p) { implicit request =>
     validateToken(request).fold(
-      err => Future.successful(Unauthorized(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))),
+      err => Future.successful(Unauthorized(Json.obj(
+        "status" ->"error",
+        "message" -> err.list.mkString(", ")))),
       authInfo => f(authInfo.token)(authInfo.userId)(request))
   }
 

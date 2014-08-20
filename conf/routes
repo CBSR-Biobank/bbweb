@@ -66,9 +66,6 @@ GET     /studies/preservtypes                  org.biobank.controllers.study.Stu
 GET     /studies/preservtemptypes              org.biobank.controllers.study.StudiesController.preservTempTypes
 GET     /studies/sgvaluetypes                  org.biobank.controllers.study.StudiesController.specimenGroupValueTypes
 
-# DTOs
-GET     /studies/dto/processing/:studyId           org.biobank.controllers.study.StudiesController.getProcessingDto(studyId)
-
 # study
 GET     /studies/:id                           org.biobank.controllers.study.StudiesController.query(id)
 PUT     /studies/:id                           org.biobank.controllers.study.StudiesController.update(id)
@@ -93,7 +90,7 @@ DELETE  /centres/studies/:centreId/:studyId    org.biobank.controllers.centres.C
 
 # Users
 GET     /authenticate                          org.biobank.controllers.UsersController.authenticateUser
-GET     /users                                 org.biobank.controllers.UsersController.list
+GET     /users                                 org.biobank.controllers.UsersController.list()
 GET     /users/:id                             org.biobank.controllers.UsersController.user(id)
 POST    /users                                 org.biobank.controllers.UsersController.addUser()
 PUT     /users/:id                             org.biobank.controllers.UsersController.updateUser(id)
@@ -104,9 +101,13 @@ PUT     /users/lock/:id                        org.biobank.controllers.UsersCont
 PUT     /users/unlock/:id                      org.biobank.controllers.UsersController.unlockUser(id)
 
 # Authentication
-POST    /login                                 org.biobank.controllers.Application.login()
-POST    /logout                                org.biobank.controllers.Application.logout()
-POST    /passreset                             org.biobank.controllers.Application.passwordReset()
+POST    /login                                 org.biobank.controllers.UsersController.login()
+POST    /logout                                org.biobank.controllers.UsersController.logout()
+POST    /passreset                             org.biobank.controllers.UsersController.passwordReset()
+
+# DTOs
+GET     /studies/dto/processing/:studyId       org.biobank.controllers.study.StudiesController.getProcessingDto(studyId)
+GET     /counts                                org.biobank.controllers.Application.aggregateCounts()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                         controllers.Assets.versioned(path="/public", file: Asset)

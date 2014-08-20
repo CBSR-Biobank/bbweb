@@ -20,12 +20,13 @@ import org.scalatest.time._
  */
 trait TestFixture
     extends TestComponentImpl
-    with FactoryComponent
     with ScalaFutures
     with WordSpecLike
     with Matchers
     with BeforeAndAfterEach
     with BeforeAndAfterAll {
+
+  val factory = new Factory
 
   // need to configure scalatest to have more patience when waiting for future results
   implicit val defaultPatience =

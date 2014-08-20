@@ -4,7 +4,7 @@
 <div class="clearfix">
   <div ng-if="form.notifications">
     <div class="row">
-      <div class="col-sm-offset-1 col-md-10">
+      <div class="col-md-offset-1 col-md-10">
         <div class="alert alert-danger alert-dismissible" role="alert">
           <button type="button" class="close" data-dismiss="alert">
             <span aria-hidden="true">&times;</span>
@@ -22,8 +22,8 @@
 
       <!-- NAME -->
       <div class="form-group">
-        <label for="name" class="col-sm-3 control-label">Name</label>
-        <div class="col-sm-7">
+        <label for="name" class="col-md-3 control-label">Name</label>
+        <div class="col-md-7">
           <input name="name"
                  type="text"
                  class="form-control"
@@ -32,15 +32,15 @@
                  placeholder="given name(s) followed by surname(s) separated by spaces"
                  required/>
         </div>
-        <div class="col-sm-offset-3 col-sm-7">
+        <div class="col-md-offset-3 col-md-7">
           <p class="help-block" ng-show="userRegForm.name.$error.minlength">Name is too short.</p>
         </div>
       </div>
 
       <!-- NAME -->
       <div class="form-group">
-        <label for="email" class="col-sm-3 control-label">Email address</label>
-        <div class="col-sm-7">
+        <label for="email" class="col-md-3 control-label">Email address</label>
+        <div class="col-md-7">
           <input
               name="email"
               type="email"
@@ -49,7 +49,7 @@
               placeholder="Email"
               required/>
         </div>
-        <div class="col-sm-offset-3 col-sm-7">
+        <div class="col-md-offset-3 col-md-7">
           <p ng-show="userRegForm.email.$invalid && !userRegForm.email.$pristine"
              class="help-block">
           Valid email address is required.</p>
@@ -58,8 +58,8 @@
 
       <!-- PASSWORD -->
       <div class="form-group">
-        <label for="password" class="col-sm-3 control-label">Password</label>
-        <div class="col-sm-7">
+        <label for="password" class="col-md-3 control-label">Password</label>
+        <div class="col-md-7">
           <input
               name="password"
               type="password"
@@ -69,7 +69,7 @@
               ng-minlength="8"
               required />
         </div>
-        <div class="col-sm-offset-3 col-sm-7">
+        <div class="col-md-offset-3 col-md-7">
           <p class="help-block" ng-show="userRegForm.password.$error.minlength">
             Password too short. It should be minimum 8 characters.
           </p>
@@ -78,8 +78,8 @@
 
       <!-- CONFIRM PASSWORD -->
       <div class="form-group">
-        <label for="password" class="col-sm-3 control-label">Confirm password</label>
-        <div class="col-sm-7">
+        <label for="password" class="col-md-3 control-label">Confirm password</label>
+        <div class="col-md-7">
           <input
               name="confirmPassword"
               type="password"
@@ -89,7 +89,7 @@
               password-check="form.user.password"
               ng-required />
         </div>
-        <div class="col-sm-offset-3 col-sm-7">
+        <div class="col-md-offset-3 col-md-7">
           <p ng-show="userRegForm.confirmPassword.$error.passwordmatch"
              class="help-block">
           Passwords do not match</p>
@@ -98,7 +98,7 @@
 
       <!-- BUTTONS -->
       <div class="form-group">
-        <div class="col-sm-offset-3 col-sm-9">
+        <div class="col-md-offset-3 col-md-9">
           <button class="btn btn-primary"
                   ng-disabled="userRegForm.$invalid"
                   ng-click="form.submit(form.user)">Submit</button>

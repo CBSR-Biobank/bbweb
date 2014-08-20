@@ -9,7 +9,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
   /**
    * Displays a list of centres with each in its own mini-panel.
    *
-   * "user" is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
   mod.controller('CentresCtrl', [
     '$rootScope', '$scope', '$state', 'CentreService',
@@ -148,7 +147,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       };
 
     }]);
-
 
   return mod;
 });

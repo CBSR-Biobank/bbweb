@@ -50,6 +50,11 @@ define(['angular', 'common'], function(angular) {
       getUser: function() {
         return user;
       },
+      getAllUsers: function() {
+        return $http.get('/users').then(function(response) {
+          return response.data;
+        });
+      },
       addUser: function(newUser) {
         var cmd = {
           name:      newUser.name,

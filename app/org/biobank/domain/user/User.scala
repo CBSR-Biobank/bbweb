@@ -26,6 +26,9 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
   /** An optional URL to the user's avatar icon. */
   val avatarUrl: Option[String]
 
+  /** Contains the current state of the object, one of: Registered, Active, Locked. */
+  val status: String
+
   /**
    * Authenticate a user.
    */
@@ -41,10 +44,11 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
         |  addedDate: $addedDate,
         |  lastUpdateDate: $lastUpdateDate,
         |  name: $name,
-        |  email: $email
-        |  password: $password
-        |  salt: $salt
-        |  avatarUrl: $avatarUrl
+        |  email: $email,
+        |  password: $password,
+        |  salt: $salt,
+        |  avatarUrl: $avatarUrl,
+        |  status: $status
         |}""".stripMargin
 }
 
@@ -61,6 +65,8 @@ case class RegisteredUser private (
   password: String,
   salt: String,
   avatarUrl: Option[String]) extends User {
+
+  override val status: String = "Registered"
 
   /* Activates a registered user. */
   def activate(
@@ -112,6 +118,8 @@ case class ActiveUser private (
   password: String,
   salt: String,
   avatarUrl: Option[String]) extends User {
+
+  override val status: String = "Active"
 
   /** Locks an active user. */
   def lock(
@@ -191,6 +199,8 @@ case class LockedUser private (
   password: String,
   salt: String,
   avatarUrl: Option[String]) extends User {
+
+  override val status: String = "Locked"
 
   /** Unlocks a locked user. */
   def unlock(

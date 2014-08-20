@@ -24,7 +24,8 @@ object User {
       "lastUpdateDate" -> user.lastUpdateDate,
       "name"           -> user.name,
       "email"          -> user.email,
-      "avatarUrl"      -> user.avatarUrl
+      "avatarUrl"      -> user.avatarUrl,
+      "status"         -> user.status
     )
   }
 

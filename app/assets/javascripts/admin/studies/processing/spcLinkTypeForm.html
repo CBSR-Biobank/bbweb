@@ -6,8 +6,8 @@
 
     <!-- PROCESSING TYPE -->
     <div class="form-group">
-      <label for="procTypeId" class="col-sm-3 control-label">Processing Type</label>
-      <div class="col-sm-9">
+      <label for="procTypeId" class="col-md-3 control-label">Processing Type</label>
+      <div class="col-md-9">
         <select class="form-control"
                 name="procTypeId"
                 ng-model="spcLinkType.processingTypeId"
@@ -17,7 +17,7 @@
         </select>
       </div>
     </div>
-    <div class="col-sm-offset-3 col-sm-9">
+    <div class="col-md-offset-3 col-md-9">
       <p class="help-block"
          ng-show="spcLinkTypeForm.procTypeName.$error.required && !spcLinkTypeForm.procTypeName.$pristine">
         Please select a processing type
@@ -26,8 +26,8 @@
 
     <!-- INPUT SPECIMEN GROUP -->
     <div class="form-group">
-      <label for="inputGroupId" class="col-sm-3 control-label">Input Specimen Group</label>
-      <div class="col-sm-9">
+      <label for="inputGroupId" class="col-md-3 control-label">Input Specimen Group</label>
+      <div class="col-md-9">
         <select class="form-control"
                 name="inputGroupId"
                 ng-model="spcLinkType.inputGroupId"
@@ -37,7 +37,7 @@
         </select>
       </div>
     </div>
-    <div class="col-sm-offset-3 col-sm-9">
+    <div class="col-md-offset-3 col-md-9">
       <p class="help-block"
          ng-show="spcLinkTypeForm.inputGroupName.$error.required && !spcLinkTypeForm.inputGroupName.$pristine">
         Please select a specimen group
@@ -46,8 +46,8 @@
 
     <!-- INPUT COUNT -->
     <div class="form-group">
-      <label for="inputCount" class="col-sm-3 control-label">Input count</label>
-      <div class="col-sm-2">
+      <label for="inputCount" class="col-md-3 control-label">Input count</label>
+      <div class="col-md-2">
         <input type="number"
                min="1"
                name="inputCount"
@@ -58,7 +58,7 @@
                required />
         </div>
     </div>
-    <div class="col-sm-offset-3 col-sm-9">
+    <div class="col-md-offset-3 col-md-9">
       <p class="help-block"
          ng-show="spcLinkTypeForm.inputCount.$error.validCount">
         Input count should be a positive integer number greater than 1
@@ -67,8 +67,8 @@
 
     <!-- EXPECTED INPUT CHANGE -->
     <div class="form-group">
-      <label for="expectedInputChange" class="col-sm-3 control-label">Expected Input change</label>
-      <div class="col-sm-2">
+      <label for="expectedInputChange" class="col-md-3 control-label">Expected Input change</label>
+      <div class="col-md-2">
         <input type="number"
                min="0"
                name="expectedInputChange"
@@ -78,11 +78,11 @@
                valid-amount
                required />
         </div>
-        <div class="col-sm-2">
+        <div class="col-md-2">
           amount
         </div>
     </div>
-    <div class="col-sm-offset-3 col-sm-9">
+    <div class="col-md-offset-3 col-md-9">
       <p class="help-block"
          ng-show="spcLinkTypeForm.expectedInputChange.$error.validAmount">
         Input change should be a positive floating point number greater than zero
@@ -91,8 +91,8 @@
 
     <!-- INPUT CONTAINER TYPE -->
     <div class="form-group">
-      <label for="inputContainertypeId" class="col-sm-3 control-label">Input Container Type</label>
-      <div class="col-sm-9">
+      <label for="inputContainertypeId" class="col-md-3 control-label">Input Container Type</label>
+      <div class="col-md-9">
         <select class="form-control"
                 name="inputContainertypeId"
                 ng-model="spcLinkType.inputContainertypeName"
@@ -104,8 +104,8 @@
 
     <!-- OUTPUT SPECIMEN GROUP -->
     <div class="form-group">
-      <label for="outputGroupId" class="col-sm-3 control-label">Output Specimen Group</label>
-      <div class="col-sm-9">
+      <label for="outputGroupId" class="col-md-3 control-label">Output Specimen Group</label>
+      <div class="col-md-9">
         <select class="form-control"
                 name="outputGroupId"
                 ng-model="spcLinkType.outputGroupId"
@@ -115,7 +115,7 @@
         </select>
       </div>
     </div>
-    <div class="col-sm-offset-3 col-sm-9">
+    <div class="col-md-offset-3 col-md-9">
       <p class="help-block"
          ng-show="spcLinkTypeForm.outputGroupName.$error.required && !spcLinkTypeForm.outputGroupName.$pristine">
         Please select a specimen group
@@ -124,8 +124,8 @@
 
     <!-- OUTPUT COUNT -->
     <div class="form-group">
-      <label for="outputCount" class="col-sm-3 control-label">Output count</label>
-        <div class="col-sm-2">
+      <label for="outputCount" class="col-md-3 control-label">Output count</label>
+        <div class="col-md-2">
           <input type="number"
                  min="1"
                  name="outputCount"
@@ -136,7 +136,7 @@
                  required />
         </div>
     </div>
-    <div class="col-sm-offset-3 col-sm-9">
+    <div class="col-md-offset-3 col-md-9">
       <p class="help-block" ng-show="spcLinkTypeForm.outputCount.$error.validCount">
         Output count should be a positive an integer number greater than 1
       </p>
@@ -144,8 +144,8 @@
 
     <!-- EXPECTED OUTPUT CHANGE -->
     <div class="form-group">
-      <label for="expectedOutputChange" class="col-sm-3 control-label">Expected Output change</label>
-      <div class="col-sm-2">
+      <label for="expectedOutputChange" class="col-md-3 control-label">Expected Output change</label>
+      <div class="col-md-2">
         <input type="number"
                min="0"
                name="expectedOutputChange"
@@ -155,11 +155,11 @@
                valid-amount
                required />
         </div>
-        <div class="col-sm-2">
+        <div class="col-md-2">
           amount
         </div>
     </div>
-    <div class="col-sm-offset-3 col-sm-9">
+    <div class="col-md-offset-3 col-md-9">
       <p class="help-block"
          ng-show="spcLinkTypeForm.expectedOutputChange.$error.validAmount">
         Input change should be a positive floating point number greater than zero
@@ -168,8 +168,8 @@
 
     <!-- OUTPUT CONTAINER TYPE -->
     <div class="form-group">
-      <label for="outputContainertypeId" class="col-sm-3 control-label">Output Container Type</label>
-      <div class="col-sm-9">
+      <label for="outputContainertypeId" class="col-md-3 control-label">Output Container Type</label>
+      <div class="col-md-9">
         <select class="form-control"
                 name="outputContainertypeId"
                 ng-model="spcLinkType.outputContainertypeId"
@@ -182,10 +182,10 @@
     <!-- ANNOTATION TYPE DATA -->
     <div class="form-group" ng-repeat="atData in spcLinkType.annotationTypeData track by $index">
       <ng-form name="atSubForm">
-        <div class="col-sm-3 control-label">
+        <div class="col-md-3 control-label">
           <label>Annotation Type {{$index + 1}}</label>
         </div>
-        <div class="col-sm-4">
+        <div class="col-md-4">
           <select class="form-control"
                   name="annotTypeName"
                   ng-model="spcLinkType.annotationTypeData[$index].annotationTypeId"
@@ -194,16 +194,16 @@
             <option value="">-- choose annotation type --</option>
           </select>
         </div>
-        <div class="col-sm-2">
+        <div class="col-md-2">
           <input name="required" type="checkbox" ng-model="spcLinkType.annotationTypeData[$index].required"/> Required
         </div>
-        <div class="col-sm-1">
+        <div class="col-md-1">
           <button class="btn btn-xs btn-warning"
                   ng-click="form.removeAnnotType(atData)">
             <i class="glyphicon glyphicon-minus"></i> Remove
           </button>
         </div>
-        <div class="col-sm-offset-3 col-sm-9">
+        <div class="col-md-offset-3 col-md-9">
           <p class="help-block" ng-show="atSubForm.name.$error.required && !atSubForm.name.$pristine">
             Please select an annotation type
           </p>
@@ -213,7 +213,7 @@
 
     <!-- ANNOTATION TYPE DATA ADD -->
     <div class="form-group">
-      <div class="col-sm-3">
+      <div class="col-md-3">
         <button class="btn btn-sm btn-primary pull-right"
                 ng-disabled="annotTypeNames == 0"
                 ng-click="form.addAnnotType()">
@@ -224,7 +224,7 @@
 
     <!-- BUTTONS  -->
     <div class="form-group">
-      <div class="col-sm-offset-3 col-sm-9">
+      <div class="col-md-offset-3 col-md-9">
         <button class="btn btn-primary"
                 ng-disabled="spcLinkTypeForm.$invalid"
                 ng-click="form.submit(spcLinkType)">Submit</button>

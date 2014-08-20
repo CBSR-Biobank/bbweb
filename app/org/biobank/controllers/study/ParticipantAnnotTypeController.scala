@@ -19,7 +19,7 @@ import play.api.mvc.Results._
 import scalaz._
 import Scalaz._
 
-object ParticipantAnnotTypeController extends BbwebController  {
+object ParticipantAnnotTypeController extends CommandController  {
 
   private def studiesService = Play.current.plugin[BbwebPlugin].map(_.studiesService).getOrElse {
     sys.error("Bbweb plugin is not registered")

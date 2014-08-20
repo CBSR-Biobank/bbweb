@@ -22,6 +22,7 @@
   <logger name="org.biobank.controllers" level="INFO" />
   <logger name="org.biobank.domain" level="INFO" />
   <logger name="org.biobank.service" level="DEBUG" />
+  <logger name="org.biobank.service.UsersServiceComponent" level="info" />
   <logger name="org.biobank.query" level="INFO" />
 
   <root level="INFO">

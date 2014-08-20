@@ -10,7 +10,7 @@ import org.scalatest.Matchers
 import scalaz._
 import scalaz.Scalaz._
 
-trait DomainSpec extends TestComponentImpl with FactoryComponent with WordSpecLike with Matchers {
+trait DomainSpec extends TestComponentImpl with WordSpecLike with Matchers {
 
   implicit override val system: ActorSystem = null
 
@@ -21,5 +21,7 @@ trait DomainSpec extends TestComponentImpl with FactoryComponent with WordSpecLi
   override val studiesService = null
   override val centresService = null
   override val usersService = null
+
+  val factory = new Factory
 
 }

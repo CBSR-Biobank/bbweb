@@ -16,7 +16,8 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
         url: '/admin',
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/adminDetails.html'
+            templateUrl: '/assets/javascripts/admin/adminDetails.html',
+            controller: 'AdminCtrl'
           }
         },
         resolve: {

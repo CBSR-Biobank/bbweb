@@ -11,8 +11,7 @@ import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
-import com.typesafe.plugin._
-import play.api.Play.current
+import com.typesafe.plugin.use
 
 /**
   * Tests the REST API for [[Study]].
@@ -24,20 +23,26 @@ class StudiesControllerSpec extends ControllerFixture {
   "Study REST API" when {
 
     "GET /studies" should {
-      "list none" in new WithApplication(fakeApplication()) {
+      "list none" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
         doLogin
         val json = makeRequest(GET, "/studies")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
+
+        log.info(s"repo: ${use[BbwebPlugin]}")
       }
 
-      "list a study" in new WithApplication(fakeApplication()) {
+      "list a study" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
 
+        log.info(s"repo: ${use[BbwebPlugin]}")
+
         val json = makeRequest(GET, "/studies")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have length 1
         compareObj(jsonList(0), study)
       }
@@ -49,7 +54,8 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => use[BbwebPlugin].studyRepository.put(study))
 
         val json = makeRequest(GET, "/studies")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size studies.size
 
         (jsonList zip studies).map { item => compareObj(item._1, item._2) }
@@ -67,11 +73,11 @@ class StudiesControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] should include ("success")
 
-        val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
+        val eventStudyId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
-          repoStudy.name should be ((json \ "data" \ "event" \ "name").as[String])
+          repoStudy.name should be ((json \ "data" \ "name").as[String])
         }
       }
     }
@@ -91,12 +97,12 @@ class StudiesControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] should include ("success")
 
-        val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
+        val eventStudyId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
-          repoStudy.name should be ((json \ "data" \ "event" \ "name").as[String])
-          repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
+          repoStudy.name should be ((json \ "data" \ "name").as[String])
+          repoStudy.version should be ((json \ "data" \ "version").as[Long])
         }
       }
     }
@@ -107,7 +113,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy.enable(Some(0), org.joda.time.DateTime.now, 1, 1) | fail
         use[BbwebPlugin].studyRepository.put(study)
         val json = makeRequest(GET, s"/studies/${study.id.id}")
-        compareObj(json, study)
+        compareObj((json \ "data"), study)
       }
     }
 
@@ -126,11 +132,11 @@ class StudiesControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] should include ("success")
 
-        val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
+        val eventStudyId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
-          repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
+          repoStudy.version should be ((json \ "data" \ "version").as[Long])
         }
       }
     }
@@ -164,11 +170,11 @@ class StudiesControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] should include ("success")
 
-        val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
+        val eventStudyId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
-          repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
+          repoStudy.version should be ((json \ "data" \ "version").as[Long])
         }
       }
     }
@@ -186,11 +192,11 @@ class StudiesControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] should include ("success")
 
-        val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
+        val eventStudyId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
-          repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
+          repoStudy.version should be ((json \ "data" \ "version").as[Long])
         }
       }
     }
@@ -208,11 +214,11 @@ class StudiesControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] should include ("success")
 
-        val eventStudyId = (json \ "data" \ "event" \ "id").as[String]
+        val eventStudyId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
         validation should be ('success)
         validation map { repoStudy =>
-          repoStudy.version should be ((json \ "data" \ "event" \ "version").as[Long])
+          repoStudy.version should be ((json \ "data" \ "version").as[Long])
         }
       }
     }
@@ -221,7 +227,7 @@ class StudiesControllerSpec extends ControllerFixture {
       "list all" in new WithApplication(fakeApplication()) {
         doLogin
         val json = makeRequest(GET, "/studies/valuetypes")
-        val values = json.as[List[String]]
+        val values = (json \ "data").as[List[String]]
         values.size should be > 0
       }
     }
@@ -231,7 +237,7 @@ class StudiesControllerSpec extends ControllerFixture {
       "list all" in new WithApplication(fakeApplication()) {
         doLogin
         val json = makeRequest(GET, "/studies/anatomicalsrctypes")
-        val values = json.as[List[String]]
+        val values = (json \ "data").as[List[String]]
         values.size should be > 0
       }
     }
@@ -240,7 +246,7 @@ class StudiesControllerSpec extends ControllerFixture {
       "list all" in new WithApplication(fakeApplication()) {
         doLogin
         val json = makeRequest(GET, "/studies/specimentypes")
-        val values = json.as[List[String]]
+        val values = (json \ "data").as[List[String]]
         values.size should be > 0
       }
     }
@@ -249,7 +255,7 @@ class StudiesControllerSpec extends ControllerFixture {
       "list all" in new WithApplication(fakeApplication()) {
         doLogin
         val json = makeRequest(GET, "/studies/preservtypes")
-        val values = json.as[List[String]]
+        val values = (json \ "data").as[List[String]]
         values.size should be > 0
       }
     }
@@ -258,7 +264,7 @@ class StudiesControllerSpec extends ControllerFixture {
       "list all" in new WithApplication(fakeApplication()) {
         doLogin
         val json = makeRequest(GET, "/studies/preservtemptypes")
-        val values = json.as[List[String]]
+        val values = (json \ "data").as[List[String]]
         values.size should be > 0
       }
     }
@@ -266,12 +272,47 @@ class StudiesControllerSpec extends ControllerFixture {
     "GET /studies/sgvaluetypes " should {
       "list all" in new WithApplication(fakeApplication()) {
         doLogin
-        val jsonReq = makeRequest(GET, "/studies/sgvaluetypes")
-        val json = jsonReq.as[JsObject]
-        (json \ "anatomicalSourceType").as[List[String]].size        should be > 0
-        (json \ "preservationType").as[List[String]].size            should be > 0
-        (json \ "preservationTemperatureType").as[List[String]].size should be > 0
-        (json \ "specimenType").as[List[String]].size                should be > 0
+        val json = makeRequest(GET, "/studies/sgvaluetypes")
+        val jsonObj = (json \ "data").as[JsObject]
+        (jsonObj \ "anatomicalSourceType").as[List[String]].size        should be > 0
+        (jsonObj \ "preservationType").as[List[String]].size            should be > 0
+        (jsonObj \ "preservationTemperatureType").as[List[String]].size should be > 0
+        (jsonObj \ "specimenType").as[List[String]].size                should be > 0
+      }
+    }
+
+    "GET /studies/dto/processing " should {
+      "return empty results for new study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val study = factory.createDisabledStudy
+        use[BbwebPlugin].studyRepository.put(study)
+
+        val json = makeRequest(GET, s"/studies/dto/processing/${study.id}")
+        val jsonObj = (json \ "data").as[JsObject]
+
+        (jsonObj \ "processingTypes").as[List[JsObject]].size should be (0)
+        (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size should be (0)
+        (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size should be (0)
+        (jsonObj \ "specimenGroups").as[List[JsObject]].size should be (0)
+      }
+
+      "return valid results for study" in new WithApplication(fakeApplication()) {
+        doLogin
+        val study = factory.createDisabledStudy
+        use[BbwebPlugin].studyRepository.put(study)
+
+        use[BbwebPlugin].processingTypeRepository.put(factory.createProcessingType)
+        use[BbwebPlugin].specimenLinkTypeRepository.put(factory.createSpecimenLinkType)
+        use[BbwebPlugin].specimenLinkAnnotationTypeRepository.put(factory.createSpecimenLinkAnnotationType)
+        use[BbwebPlugin].specimenGroupRepository.put(factory.createSpecimenGroup)
+
+        val json = makeRequest(GET, s"/studies/dto/processing/${study.id}")
+        val jsonObj = (json \ "data").as[JsObject]
+
+        (jsonObj \ "processingTypes").as[List[JsObject]].size should be (1)
+        (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size should be (1)
+        (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size should be (1)
+        (jsonObj \ "specimenGroups").as[List[JsObject]].size should be (1)
       }
     }
 

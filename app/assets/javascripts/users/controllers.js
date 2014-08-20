@@ -38,12 +38,6 @@ define(['angular'], function(angular) {
                 $state.go("home");
               });
             });
-        },
-        forgotPassword: function() {
-          $state.go("users.forgot");
-        },
-        register: function() {
-          $state.go("users.register");
         }
       };
     }]);

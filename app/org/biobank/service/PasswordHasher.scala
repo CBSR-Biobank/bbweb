@@ -35,9 +35,8 @@ trait PasswordHasherComponentImpl
     }
 
     def valid(encryptedPwd: String, salt: String, enteredPwd: String): Boolean = {
-//      encryptedPwd == enteredPwd.bcrypt(salt)
       val encryptedEnteredPwd = enteredPwd.bcrypt(salt)
-      log.debug(s"validatePassword: $encryptedPwd, $encryptedEnteredPwd")
+      //log.debug(s"validatePassword: $encryptedPwd, $encryptedEnteredPwd")
       encryptedPwd == encryptedEnteredPwd
     }
   }

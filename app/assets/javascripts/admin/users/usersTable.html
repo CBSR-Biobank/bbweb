@@ -1,0 +1,34 @@
+<div class="page-header">
+  <h1>User administration</h1>
+</div>
+
+<div class="clearfix">
+  <div ng-if="users.length == 0">
+    <p>No users have been added.</p>
+  </div>
+  <div ng-if="users.length != 0">
+    <p>The following users have been configured:</p>
+    <table ng-table="tableParams" class="table table-hover">
+      <tr ng-repeat="user in $data">
+        <td data-title="'Name'" sortable="'name'">
+          {{user.name}}
+        </td>
+        <td data-title="'Email'" sortable="'email'">
+          {{user.email}}
+        </td>
+        <td data-title="'Added'" sortable="'addedDate'">
+          {{user.addedDate}}
+        </td>
+        <td data-title="'Status'" sortable="'status'">
+          {{user.email}}
+        </td>
+        <td>
+          <button class="btn btn-xs btn-primary"
+                  ng-click="userInformation(user)"
+                  title="More information">
+          <i class="glyphicon glyphicon-info-sign"></i></button>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>

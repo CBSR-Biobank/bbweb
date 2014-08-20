@@ -24,7 +24,7 @@ import scalaz.Scalaz._
 /**
   *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
   */
-object CentresController extends BbwebController {
+object CentresController extends CommandController {
 
   private def centresService = Play.current.plugin[BbwebPlugin].map(_.centresService).getOrElse {
     sys.error("Bbweb plugin is not registered")

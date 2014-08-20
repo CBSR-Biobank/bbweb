@@ -20,7 +20,9 @@ define(['angular', 'common'], function(angular) {
 
     return {
       list : function() {
-        return $http.get('/studies');
+        return $http.get('/studies').then(function(response) {
+          return response.data.data;
+          });
       },
       query: function(id) {
         return $http.get('/studies/' + id);

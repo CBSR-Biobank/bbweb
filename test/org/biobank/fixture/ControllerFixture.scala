@@ -1,8 +1,6 @@
 package org.biobank.fixture
 
-import org.biobank.controllers.BbwebPlugin
-import org.biobank.domain.study.{ Study, StudyId }
-import org.biobank.domain.{ FactoryComponent, RepositoriesComponentImpl, ReadWriteRepository }
+import org.biobank.domain.Factory
 
 import org.scalatest.WordSpec
 import org.scalatest.BeforeAndAfterEach
@@ -26,13 +24,13 @@ import play.api.Logger
 trait ControllerFixture
   extends WordSpec
   with Matchers
-  with BeforeAndAfterEach
-  with FactoryComponent
-  with RepositoriesComponentImpl {
+  with BeforeAndAfterEach {
 
   private val dbName = "bbweb-test"
 
   var token: String = ""
+
+  val factory = new Factory
 
   /**
    * tests will not work with EhCache, need alternate implementation
