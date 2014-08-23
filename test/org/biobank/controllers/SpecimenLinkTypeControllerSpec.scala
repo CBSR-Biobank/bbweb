@@ -133,7 +133,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].processingTypeRepository.put(procType)
 
         val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
     }
@@ -150,7 +151,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].specimenLinkTypeRepository.put(slType)
 
         val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), slType)
       }
@@ -167,7 +169,9 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].specimenGroupRepository.put(outputSg)
         use[BbwebPlugin].specimenLinkTypeRepository.put(slType)
 
-        val jsonObj = makeRequest(GET, s"/studies/sltypes/${procType.id.id}?slTypeId=${slType.id.id}").as[JsObject]
+        val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}?slTypeId=${slType.id.id}")
+        (json \ "status").as[String] should include ("success")
+        val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, slType)
       }
     }
@@ -183,7 +187,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         sltypes map { slType => use[BbwebPlugin].specimenLinkTypeRepository.put(slType) }
 
         val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
 
         jsonList should have size sltypes.size
           (jsonList zip sltypes).map { item => compareObj(item._1, item._2) }

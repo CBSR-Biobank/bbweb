@@ -1,5 +1,6 @@
 package org.biobank.controllers
 
+import org.biobank.domain.{ DomainValidation }
 import org.biobank.infrastructure.event.Events._
 import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.Commands._
@@ -10,10 +11,11 @@ import play.api.mvc._
 import play.api.libs.json._
 import play.api.mvc.Results._
 import play.mvc.Http
+import play.api.libs.concurrent.Execution.Implicits._
 
 trait CommandController extends Controller with Security {
 
-  def CommandAction[A, T <: Command](
+  def commandAction[A, T <: Command](
     func: T => UserId => Future[Result])(implicit reads: Reads[T]) = {
     AuthActionAsync(parse.json) { token => implicit userId => implicit request =>
         val cmdResult = request.body.validate[T]
@@ -23,14 +25,14 @@ trait CommandController extends Controller with Security {
               BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors))))
           },
           cmd => {
-            Logger.info(s"CommandAction: $cmd")
+            Logger.info(s"commandAction: $cmd")
             func(cmd)(userId)
           }
         )
     }
   }
 
-  def CommandAction[A, T <: Command](numFields: Integer)(
+  def commandAction[A, T <: Command](numFields: Integer)(
     func: T => UserId => Future[Result])(implicit reads: Reads[T]) = {
     AuthActionAsync(parse.json) { token => implicit userId => implicit request =>
       if (request.body.as[JsObject].keys.size == numFields) {
@@ -41,7 +43,7 @@ trait CommandController extends Controller with Security {
               BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors))))
           },
           cmd => {
-            Logger.info(s"CommandAction: $cmd")
+            Logger.info(s"commandAction: $cmd")
             func(cmd)(userId)
           }
         )
@@ -67,6 +69,10 @@ trait JsonController extends Controller {
     def apply(message: String): Result = Results.BadRequest(errorReplyJson(message))
   }
 
+  override val Forbidden = new Status(Http.Status.FORBIDDEN) {
+    def apply(message: String): Result = Results.Forbidden(errorReplyJson(message))
+  }
+
   override val NotFound = new Status(Http.Status.NOT_FOUND) {
     def apply(message: String): Result = Results.NotFound(errorReplyJson(message))
   }
@@ -74,10 +80,25 @@ trait JsonController extends Controller {
   override val Ok = new Status(Http.Status.OK) {
 
     def apply[T](obj: T)(implicit writes: Writes[T]): Result =
-      Results.Ok(Json.obj(
-      "status" ->"success",
-      "data" -> Json.toJson(obj)))
+      Results.Ok(Json.obj("status" ->"success", "data" -> Json.toJson(obj)))
 
+  }
+
+  protected def domainValidationReply[T](
+    future: Future[DomainValidation[T]])(implicit writes: Writes[T]) = {
+    future.map { validation =>
+      validation.fold(
+        err   => {
+          val errMsgs = err.list.mkString(", ")
+          if (errMsgs.contains("not found")) {
+            NotFound(errMsgs)
+          } else {
+            BadRequest(errMsgs)
+          }
+        },
+        event => Ok(event)
+      )
+    }
   }
 
 }

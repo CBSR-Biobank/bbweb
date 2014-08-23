@@ -55,7 +55,7 @@ trait ControllerFixture
         status(result) should be(OK)
         contentType(result) should be(Some("application/json"))
         val json = Json.parse(contentAsString(result))
-        token = (json \ "token").as[String]
+        token = (json \ "data").as[String]
         token
       case _ =>
         cancel("login failed")

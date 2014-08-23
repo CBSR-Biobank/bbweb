@@ -101,7 +101,8 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/pannottype/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
     }
@@ -116,7 +117,8 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].participantAnnotationTypeRepository.put(annotType)
 
         val json = makeRequest(GET, s"/studies/pannottype/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), annotType)
       }
@@ -134,7 +136,8 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         annotTypes map { annotType => use[BbwebPlugin].participantAnnotationTypeRepository.put(annotType) }
 
         val json = makeRequest(GET, s"/studies/pannottype/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
 
         jsonList should have size annotTypes.size
           (jsonList zip annotTypes).map { item => compareObj(item._1, item._2) }

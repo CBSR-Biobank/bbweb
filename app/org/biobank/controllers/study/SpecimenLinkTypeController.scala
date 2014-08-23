@@ -11,66 +11,54 @@ import org.biobank.domain._
 import org.biobank.domain.study._
 import views._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import scala.language.postfixOps
-import play.api.{ Logger, Play }
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.mvc.Results._
+import com.typesafe.plugin.use
+import play.api.Logger
+import play.api.Play.current
+import scala.language.reflectiveCalls
 
 import scalaz._
 import scalaz.Scalaz._
 
-object SpecimenLinkTypeController extends CommandController  {
+object SpecimenLinkTypeController extends CommandController with JsonController {
 
-  private def studiesService = Play.current.plugin[BbwebPlugin].map(_.studiesService).getOrElse {
-    sys.error("Bbweb plugin is not registered")
-  }
+  private def studiesService = use[BbwebPlugin].studiesService
 
-  def get(processingTypeId: String, slTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
+  def get(
+    processingTypeId: String,
+    slTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
     Logger.debug(s"SpecimenLinkTypeController.get: processingTypeId: $processingTypeId, slTypeId: $slTypeId")
 
     slTypeId.fold {
-      Ok(Json.toJson(studiesService.specimenLinkTypesForProcessingType(processingTypeId).toList))
+      Ok(studiesService.specimenLinkTypesForProcessingType(processingTypeId).toList)
     } {
       id =>
       studiesService.specimenLinkTypeWithId(processingTypeId, id).fold(
-        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        slType => Ok(Json.toJson(slType))
+        err => BadRequest(err.list.mkString(", ")),
+        slType => Ok(slType)
       )
     }
   }
 
-  def addSpecimenLinkType = CommandAction { cmd: AddSpecimenLinkTypeCmd => implicit userId =>
+  def addSpecimenLinkType = commandAction { cmd: AddSpecimenLinkTypeCmd => implicit userId =>
     val future = studiesService.addSpecimenLinkType(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event))
-      )
-    }
+    domainValidationReply(future)
   }
 
-  def updateSpecimenLinkType(id: String) = CommandAction { cmd: UpdateSpecimenLinkTypeCmd => implicit userId =>
+  def updateSpecimenLinkType(id: String) = commandAction { cmd: UpdateSpecimenLinkTypeCmd => implicit userId =>
     val future = studiesService.updateSpecimenLinkType(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event))
-      )
-    }
+    domainValidationReply(future)
   }
 
   def removeSpecimenLinkType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
     val cmd = RemoveSpecimenLinkTypeCmd(studyId, id, ver)
     val future = studiesService.removeSpecimenLinkType(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event))
-      )
-    }
+    domainValidationReply(future)
   }
 
 }

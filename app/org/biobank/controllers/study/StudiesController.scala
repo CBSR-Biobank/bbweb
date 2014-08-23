@@ -46,64 +46,34 @@ object StudiesController extends CommandController with JsonController {
     )
   }
 
-  def add = CommandAction { cmd: AddStudyCmd => implicit userId =>
+  def add = commandAction { cmd: AddStudyCmd => implicit userId =>
     val future = studiesService.addStudy(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(err.list.mkString(", ")),
-        event => Ok(event)
-      )
-    }
+    domainValidationReply(future)
   }
 
-  def update(id: String) = CommandAction { cmd : UpdateStudyCmd => implicit userId =>
+  def update(id: String) = commandAction { cmd : UpdateStudyCmd => implicit userId =>
     val future = studiesService.updateStudy(cmd)
-    future.map { validation =>
-      validation.fold(
-        err => BadRequest(err.list.mkString(", ")),
-        event => Ok(event)
-      )
-    }
+    domainValidationReply(future)
   }
 
-  def enable = CommandAction { cmd: EnableStudyCmd => implicit userId =>
+  def enable = commandAction { cmd: EnableStudyCmd => implicit userId =>
     val future = studiesService.enableStudy(cmd)
-    future.map { validation =>
-      validation.fold(
-        err => BadRequest(err.list.mkString(", ")),
-        event => Ok(event)
-      )
-    }
+    domainValidationReply(future)
   }
 
-  def disable = CommandAction { cmd: DisableStudyCmd => implicit userId =>
+  def disable = commandAction { cmd: DisableStudyCmd => implicit userId =>
     val future = studiesService.disableStudy(cmd)
-    future.map { validation =>
-      validation.fold(
-        err => BadRequest(err.list.mkString(", ")),
-        event => Ok(event)
-      )
-    }
+    domainValidationReply(future)
   }
 
-  def retire = CommandAction { cmd: RetireStudyCmd => implicit userId =>
+  def retire = commandAction { cmd: RetireStudyCmd => implicit userId =>
     val future = studiesService.retireStudy(cmd)
-    future.map { validation =>
-      validation.fold(
-        err => BadRequest(err.list.mkString(", ")),
-        event => Ok(event)
-      )
-    }
+    domainValidationReply(future)
   }
 
-  def unretire = CommandAction { cmd: UnretireStudyCmd => implicit userId =>
+  def unretire = commandAction { cmd: UnretireStudyCmd => implicit userId =>
     val future = studiesService.unretireStudy(cmd)
-    future.map { validation =>
-      validation.fold(
-        err => BadRequest(err.list.mkString(", ")),
-        event => Ok(event)
-      )
-    }
+    domainValidationReply(future)
   }
 
   def valueTypes = Action(parse.empty) { request =>

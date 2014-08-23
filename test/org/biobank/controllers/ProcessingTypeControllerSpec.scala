@@ -97,7 +97,8 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
     }
@@ -112,7 +113,8 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].processingTypeRepository.put(procType)
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), procType)
       }
@@ -127,7 +129,9 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         use[BbwebPlugin].processingTypeRepository.put(procType)
 
-        val jsonObj = makeRequest(GET, s"/studies/proctypes/${study.id.id}?procTypeId=${procType.id.id}").as[JsObject]
+        val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}?procTypeId=${procType.id.id}").as[JsObject]
+        (json \ "status").as[String] should include ("success")
+        val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, procType)
       }
     }
@@ -143,7 +147,8 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         proctypes map { procType => use[BbwebPlugin].processingTypeRepository.put(procType) }
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
 
         jsonList should have size proctypes.size
           (jsonList zip proctypes).map { item => compareObj(item._1, item._2) }

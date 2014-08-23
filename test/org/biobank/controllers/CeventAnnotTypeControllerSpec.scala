@@ -97,7 +97,8 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
     }
@@ -112,7 +113,8 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].collectionEventAnnotationTypeRepository.put(annotType)
 
         val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), annotType)
       }
@@ -127,7 +129,9 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createCollectionEventAnnotationType
         use[BbwebPlugin].collectionEventAnnotationTypeRepository.put(annotType)
 
-        val jsonObj = makeRequest(GET, s"/studies/ceannottype/${study.id.id}?annotTypeId=${annotType.id.id}").as[JsObject]
+        val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}?annotTypeId=${annotType.id.id}").as[JsObject]
+        (json \ "status").as[String] should include ("success")
+        val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, annotType)
       }
     }
@@ -144,7 +148,8 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         annotTypes map { annotType => use[BbwebPlugin].collectionEventAnnotationTypeRepository.put(annotType) }
 
         val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
 
         jsonList should have size annotTypes.size
           (jsonList zip annotTypes).map { item => compareObj(item._1, item._2) }

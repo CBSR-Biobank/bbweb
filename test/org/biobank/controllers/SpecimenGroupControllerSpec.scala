@@ -86,7 +86,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         use[BbwebPlugin].studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
     }
@@ -101,7 +102,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         use[BbwebPlugin].specimenGroupRepository.put(sg)
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), sg)
       }
@@ -116,7 +118,9 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val sg = factory.createSpecimenGroup
         use[BbwebPlugin].specimenGroupRepository.put(sg)
 
-        val jsonObj = makeRequest(GET, s"/studies/sgroups/${study.id.id}?sgId=${sg.id.id}").as[JsObject]
+        val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}?sgId=${sg.id.id}").as[JsObject]
+        (json \ "status").as[String] should include ("success")
+        val jsonObj = (json \ "data")
         compareObj(jsonObj, sg)
       }
     }
@@ -131,7 +135,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         sgroups map { sg => use[BbwebPlugin].specimenGroupRepository.put(sg) }
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size sgroups.size
           (jsonList zip sgroups).map { item => compareObj(item._1, item._2) }
       }

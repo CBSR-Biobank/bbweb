@@ -43,7 +43,7 @@ class UsersControllerSpec extends ControllerFixture {
       "list the default user in the test environment" in new WithApplication(fakeApplication()) {
         doLogin
         val json = makeRequest(GET, "/users")
-        val jsonList = json.as[List[JsObject]]
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 1
         val jsonDefaultUser = jsonList(0)
           (jsonDefaultUser \ "email").as[String] should be ("admin@admin.com")
@@ -55,7 +55,7 @@ class UsersControllerSpec extends ControllerFixture {
         use[BbwebPlugin].userRepository.put(user)
 
         val json = makeRequest(GET, "/users")
-        val jsonList = json.as[List[JsObject]]
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have length 2
         compareObj(jsonList(1), user)
       }
@@ -68,7 +68,7 @@ class UsersControllerSpec extends ControllerFixture {
         users.map(user => use[BbwebPlugin].userRepository.put(user))
 
         val json = makeRequest(GET, "/users")
-        val jsonList = json.as[List[JsObject]].filterNot { u =>
+        val jsonList = (json \ "data").as[List[JsObject]].filterNot { u =>
           (u \ "id").as[String].equals("admin@admin.com")
         }
 
@@ -118,7 +118,8 @@ class UsersControllerSpec extends ControllerFixture {
         val user = factory.createRegisteredUser.activate(Some(0), org.joda.time.DateTime.now) | fail
         use[BbwebPlugin].userRepository.put(user)
         val json = makeRequest(GET, s"/users/${user.id.id}")
-        compareObj(json, user)
+        val jsonObj = (json \ "data").as[JsObject]
+        compareObj(jsonObj, user)
       }
     }
 
@@ -180,7 +181,7 @@ class UsersControllerSpec extends ControllerFixture {
           "password"  -> plainPassword)
         val json = makeRequest(POST, "/login", json = cmdJson)
 
-        (json \ "token").as[String].length should be > 0
+        (json \ "data").as[String].length should be > 0
       }
 
       "prevent an invalid user from logging in" in new WithApplication(fakeApplication()) {
@@ -295,7 +296,7 @@ class UsersControllerSpec extends ControllerFixture {
 
         // this request is valid since user is logged in
         var json = makeRequest(GET, "/users")
-        val jsonList = json.as[List[JsObject]]
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 1
 
         // the user is now logged out

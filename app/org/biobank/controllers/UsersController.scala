@@ -5,7 +5,7 @@ import org.biobank.service.json.User._
 import org.biobank.service.json.Events._
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits._
 import play.api.{ Logger, Play }
 import play.api.Play.current
 import play.api.mvc._
@@ -14,11 +14,12 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.cache.Cache
+import scala.language.reflectiveCalls
 
 import scalaz._
 import Scalaz._
 
-object UsersController extends CommandController {
+object UsersController extends CommandController with JsonController {
 
   private def usersService = Play.current.plugin[BbwebPlugin].map(_.usersService).getOrElse {
     sys.error("Bbweb plugin is not registered")
@@ -44,26 +45,25 @@ object UsersController extends CommandController {
   def login() = Action(parse.json) { implicit request =>
     request.body.validate[LoginCredentials].fold(
       errors => {
-        BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors)))
+        BadRequest(JsError.toFlatJson(errors))
       },
       loginCredentials => {
         // TODO: token should be derived from salt
         usersService.validatePassword(loginCredentials.email, loginCredentials.password).fold(
           err => {
-            val errStr = err.list.mkString(", ")
             Logger.debug(s"login: error: $err")
+            val errStr = err.list.mkString(", ")
             if (errStr.contains("not found") || errStr.contains("invalid password")) {
-              Forbidden(Json.obj("status" ->"error", "message" -> "invalid email or password"))
+              Forbidden("invalid email or password")
             } else {
-              NotFound(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))
+              NotFound(err.list.mkString(", "))
             }
           },
           user => {
             Logger.info(s"user logged in: ${user.email}")
             val token = java.util.UUID.randomUUID().toString
             Cache.set(token, user.id)
-            Ok(Json.obj("status" -> "success", "token" -> token))
-              .withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
+            Ok(token).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
           }
         )
       }
@@ -78,8 +78,7 @@ object UsersController extends CommandController {
     */
   def logout() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Cache.remove(token)
-    Ok(Json.obj("status" -> "success", "message" -> "user has been logged out"))
-      .discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
+    Ok("user has been logged out").discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
   }
 
   /** Resets the user's password.
@@ -87,8 +86,7 @@ object UsersController extends CommandController {
   def passwordReset() = Action.async(parse.json) { implicit request =>
     request.body.validate[ResetUserPasswordCmd].fold(
       errors => {
-        Future.successful(
-          BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors))))
+        Future.successful(BadRequest(JsError.toFlatJson(errors)))
       },
       command => {
         val future = usersService.resetPassword(command)
@@ -97,14 +95,14 @@ object UsersController extends CommandController {
             err => {
               val errStr = err.list.mkString(", ")
               if (errStr.contains("not found")) {
-                NotFound(Json.obj("status" ->"error", "message" -> "email address not registered"))
+                NotFound("email address not registered")
               } else if (errStr.contains("user is not active")) {
-                Forbidden(Json.obj("status" ->"error", "message" -> "user is not active"))
+                Forbidden("user is not active")
               } else {
-                BadRequest(Json.obj("status" ->"error", "message" -> "email address not registered"))
+                BadRequest("email address not registered")
               }
             },
-            event => Ok(Json.obj("status" -> "success", "message" -> "password has been reset"))
+            event => Ok("password has been reset")
           )
         }
       }
@@ -112,15 +110,15 @@ object UsersController extends CommandController {
   }
 
   def list = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    Ok(Json.toJson(usersService.getAll.toList))
+    Ok(usersService.getAll.toList)
   }
 
   /** Retrieves the user associated with the token, if it is valid.
     */
   def authenticateUser() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     usersService.getByEmail(userId.id).fold(
-      err  => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-      user => Ok(Json.toJson(user))
+      err  => BadRequest(err.list.mkString(", ")),
+      user => Ok(user)
     )
   }
 
@@ -128,16 +126,15 @@ object UsersController extends CommandController {
   def user(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Logger.info(s"user: id: $id")
     usersService.getByEmail(id).fold(
-      err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-      user => Ok(Json.toJson(user))
+      err => BadRequest(err.list.mkString(", ")),
+      user => Ok(user)
     )
   }
 
   def addUser() = Action.async(parse.json) { implicit request =>
     request.body.validate[RegisterUserCmd].fold(
       errors => {
-        Future.successful(
-          BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors))))
+        Future.successful(BadRequest(JsError.toFlatJson(errors)))
       },
       cmd => {
         Logger.info(s"addUser: cmd: $cmd")
@@ -146,80 +143,50 @@ object UsersController extends CommandController {
           validation.fold(
             err   => {
               val errs = err.list.mkString(", ")
-              if (errs.contains("")) {
-                Forbidden(Json.obj("status" ->"error", "message" -> "already registered"))
+              if (errs.contains("exists")) {
+                Forbidden("already registered")
               } else {
-                BadRequest(Json.obj("status" ->"error", "message" -> errs))
+                BadRequest(errs)
               }
             },
-            event => Ok(eventToJsonReply(event))
+            event => Ok(event)
           )
         }
       }
     )
   }
 
-  def activateUser(id: String) =  CommandAction { cmd: ActivateUserCmd => implicit userId =>
+  def activateUser(id: String) =  commandAction { cmd: ActivateUserCmd => implicit userId =>
     val future = usersService.activate(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event))
-      )
-    }
+    domainValidationReply(future)
   }
 
-  def updateUser(id: String) =  CommandAction { cmd: UpdateUserCmd => implicit userId =>
+  def updateUser(id: String) =  commandAction { cmd: UpdateUserCmd => implicit userId =>
     val future = usersService.update(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event))
-      )
-    }
+    domainValidationReply(future)
   }
 
-  def lockUser(id: String) =  CommandAction { cmd: LockUserCmd => implicit userId =>
+  def lockUser(id: String) =  commandAction { cmd: LockUserCmd => implicit userId =>
     val future = usersService.lock(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event))
-      )
-    }
+    domainValidationReply(future)
   }
 
-  def unlockUser(id: String) =  CommandAction { cmd: UnlockUserCmd => implicit userId =>
+  def unlockUser(id: String) =  commandAction { cmd: UnlockUserCmd => implicit userId =>
     Logger.info(s"unlockUser")
     val future = usersService.unlock(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event))
-      )
-    }
+    domainValidationReply(future)
   }
 
   def removeUser(id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
     val cmd = RemoveUserCmd(id, ver)
     val future = usersService.remove(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event))
-      )
-    }
+    domainValidationReply(future)
   }
 
   def resetPassword(id: String) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
     val cmd = ResetUserPasswordCmd(id)
     val future = usersService.resetPassword(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event))
-      )
-    }
+    domainValidationReply(future)
   }
 
 }

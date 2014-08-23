@@ -128,7 +128,8 @@ class CeventTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
     }
@@ -143,7 +144,8 @@ class CeventTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].collectionEventTypeRepository.put(cet)
 
         val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), cet)
       }
@@ -158,7 +160,9 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val cet = factory.createCollectionEventType
         use[BbwebPlugin].collectionEventTypeRepository.put(cet)
 
-        val jsonObj = makeRequest(GET, s"/studies/cetypes/${study.id.id}?cetId=${cet.id.id}").as[JsObject]
+        val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}?cetId=${cet.id.id}")
+        (json \ "status").as[String] should include ("success")
+        val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, cet)
       }
     }
@@ -181,7 +185,8 @@ class CeventTypeControllerSpec extends ControllerFixture {
         cetypes map { cet => use[BbwebPlugin].collectionEventTypeRepository.put(cet) }
 
         val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
 
         jsonList should have size cetypes.size
           (jsonList zip cetypes).map { item => compareObj(item._1, item._2) }

@@ -32,7 +32,8 @@ class CentresControllerSpec extends ControllerFixture {
       "list none" in new WithApplication(fakeApplication()) {
         doLogin
         val json = makeRequest(GET, "/centres")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
 
@@ -42,7 +43,8 @@ class CentresControllerSpec extends ControllerFixture {
         use[BbwebPlugin].centreRepository.put(centre)
 
         val json = makeRequest(GET, "/centres")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have length 1
         compareObj(jsonList(0), centre)
       }
@@ -56,7 +58,8 @@ class CentresControllerSpec extends ControllerFixture {
         centres.values.foreach(centre => use[BbwebPlugin].centreRepository.put(centre))
 
         val json = makeRequest(GET, "/centres")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size centres.size
         jsonList.foreach{ jsonObj =>
           val jsonId = CentreId((jsonObj \ "id").as[String])
@@ -74,11 +77,11 @@ class CentresControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] should include ("success")
 
-        val eventCentreId = (json \ "data" \ "event" \ "id").as[String]
+        val eventCentreId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].centreRepository.getByKey(CentreId(eventCentreId))
         validation should be ('success)
         validation map { repoCentre =>
-          repoCentre.name should be ((json \ "data" \ "event" \ "name").as[String])
+          repoCentre.name should be ((json \ "data" \ "name").as[String])
         }
       }
 
@@ -126,12 +129,12 @@ class CentresControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] should include ("success")
 
-        val eventCentreId = (json \ "data" \ "event" \ "id").as[String]
+        val eventCentreId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].centreRepository.getByKey(CentreId(eventCentreId))
         validation should be ('success)
         validation map { repoCentre =>
-          repoCentre.name should be ((json \ "data" \ "event" \ "name").as[String])
-          repoCentre.version should be ((json \ "data" \ "event" \ "version").as[Long])
+          repoCentre.name should be ((json \ "data" \ "name").as[String])
+          repoCentre.version should be ((json \ "data" \ "version").as[Long])
         }
       }
 
@@ -207,7 +210,9 @@ class CentresControllerSpec extends ControllerFixture {
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
         val json = makeRequest(GET, s"/centres/${centre.id.id}")
-        compareObj(json, centre)
+        (json \ "status").as[String] should include ("success")
+        val jsonObj = (json \ "data").as[JsObject]
+        compareObj(jsonObj, centre)
       }
 
       "not read an invalid centre" in new WithApplication(fakeApplication()) {
@@ -232,11 +237,11 @@ class CentresControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] should include ("success")
 
-        val eventCentreId = (json \ "data" \ "event" \ "id").as[String]
+        val eventCentreId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].centreRepository.getByKey(CentreId(eventCentreId))
         validation should be ('success)
         validation map { repoCentre =>
-          repoCentre.version should be ((json \ "data" \ "event" \ "version").as[Long])
+          repoCentre.version should be ((json \ "data" \ "version").as[Long])
         }
       }
 
@@ -266,11 +271,11 @@ class CentresControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] should include ("success")
 
-        val eventCentreId = (json \ "data" \ "event" \ "id").as[String]
+        val eventCentreId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].centreRepository.getByKey(CentreId(eventCentreId))
         validation should be ('success)
         validation map { repoCentre =>
-          repoCentre.version should be ((json \ "data" \ "event" \ "version").as[Long])
+          repoCentre.version should be ((json \ "data" \ "version").as[Long])
         }
       }
 
@@ -294,7 +299,8 @@ class CentresControllerSpec extends ControllerFixture {
         use[BbwebPlugin].centreRepository.put(centre)
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
 
@@ -309,7 +315,8 @@ class CentresControllerSpec extends ControllerFixture {
         use[BbwebPlugin].centreLocationRepository.put(CentreLocation(centre.id, location.id))
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), location)
       }
@@ -328,7 +335,8 @@ class CentresControllerSpec extends ControllerFixture {
         }
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size locations.size
         jsonList.foreach{ jsonObj =>
           val jsonId = LocationId((jsonObj \ "id").as[String])
@@ -349,8 +357,9 @@ class CentresControllerSpec extends ControllerFixture {
           use[BbwebPlugin].centreLocationRepository.put(CentreLocation(centre.id, location.id))
         }
 
-        val jsonObj = makeRequest(GET, s"/centres/locations/${centre.id.id}?locationId=${locations(0).id}")
-          .as[JsObject]
+        val json = makeRequest(GET, s"/centres/locations/${centre.id.id}?locationId=${locations(0).id}")
+        (json \ "status").as[String] should include ("success")
+        val jsonObj = (json \ "data").as[JsObject]
         val jsonId = LocationId((jsonObj \ "id").as[String])
         compareObj(jsonObj, locationsMap(jsonId))
       }
@@ -392,8 +401,8 @@ class CentresControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, "/centres/locations",
           json = jsonAddCentreLocationCmd(location, centre.id))
 
-        val jsonEvent = (json \ "data" \ "event").as[JsObject]
-        val eventLocationId = (json \ "data" \ "event" \ "locationId").as[String]
+        val jsonEvent = (json \ "data").as[JsObject]
+        val eventLocationId = (json \ "data" \ "locationId").as[String]
         val validation = use[BbwebPlugin].locationRepository.getByKey(LocationId(eventLocationId))
         validation should be ('success)
         validation map { repoLocation =>
@@ -472,7 +481,7 @@ class CentresControllerSpec extends ControllerFixture {
         use[BbwebPlugin].centreRepository.put(centre)
 
         val locationId = LocationId(nameGenerator.next[String])
-        val json = makeRequest(DELETE, s"/centres/locations/${centre.id.id}/${locationId.id}", BAD_REQUEST)
+        val json = makeRequest(DELETE, s"/centres/locations/${centre.id.id}/${locationId.id}", NOT_FOUND)
           (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("not found")
       }
@@ -487,7 +496,8 @@ class CentresControllerSpec extends ControllerFixture {
         use[BbwebPlugin].centreRepository.put(centre)
 
         val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
-        val jsonList = json.as[List[JsObject]]
+        (json \ "status").as[String] should include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
 
@@ -503,7 +513,8 @@ class CentresControllerSpec extends ControllerFixture {
         use[BbwebPlugin].studyCentreRepository.put(StudyCentre(id, study.id, centre.id))
 
         val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
-        val studyIdList = json.as[List[String]]
+        (json \ "status").as[String] should include ("success")
+        val studyIdList = (json \ "data").as[List[String]]
         studyIdList should have size 1
         studyIdList(0) should be (study.id.id)
       }
@@ -522,7 +533,8 @@ class CentresControllerSpec extends ControllerFixture {
         }
 
         val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
-        val studyIdList = json.as[List[String]]
+        (json \ "status").as[String] should include ("success")
+        val studyIdList = (json \ "data").as[List[String]]
         studyIdList should have size studies.size
         studies.foreach{ study => studyIdList should contain (study.id.id) }
       }
@@ -542,8 +554,8 @@ class CentresControllerSpec extends ControllerFixture {
           "centreId" -> centre.id.id,
           "studyId"  -> study.id.id)
         val json = makeRequest(POST, "/centres/studies", json = cmdJson)
-          (json \ "data" \ "event" \ "centreId").as[String] should be (centre.id.id)
-          (json \ "data" \ "event" \ "studyId").as[String] should be (study.id.id)
+          (json \ "data" \ "centreId").as[String] should be (centre.id.id)
+          (json \ "data" \ "studyId").as[String] should be (study.id.id)
 
         val repoValues = use[BbwebPlugin].studyCentreRepository.getValues.toList
         repoValues should have size 1

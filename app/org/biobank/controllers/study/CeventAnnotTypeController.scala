@@ -11,64 +11,52 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain.study._
 import org.biobank.domain.AnnotationValueType._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
-import play.api.{ Logger, Play }
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.mvc.Results._
+import com.typesafe.plugin.use
+import play.api.Logger
+import play.api.Play.current
+import scala.language.reflectiveCalls
 
 import scalaz._
 import Scalaz._
 
-object CeventAnnotTypeController extends CommandController  {
+object CeventAnnotTypeController extends CommandController with JsonController {
 
-  private def studiesService = Play.current.plugin[BbwebPlugin].map(_.studiesService).getOrElse {
-    sys.error("Bbweb plugin is not registered")
-  }
+  private def studiesService = use[BbwebPlugin].studiesService
 
-  def get(studyId: String, annotTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
+  def get(
+    studyId: String,
+    annotTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
     Logger.debug(s"CeventAnnotTypeController.list: studyId: $studyId, annotTypeId: $annotTypeId")
 
     annotTypeId.fold {
-      Ok(Json.toJson(studiesService.collectionEventAnnotationTypesForStudy(studyId).toList))
+      Ok(studiesService.collectionEventAnnotationTypesForStudy(studyId).toList)
     } {
       id =>
       studiesService.collectionEventAnnotationTypeWithId(studyId, id).fold(
-        err => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        annotType => Ok(Json.toJson(annotType))
+        err => BadRequest(err.list.mkString(", ")),
+        annotType => Ok(annotType)
       )
     }  }
 
-  def addAnnotationType = CommandAction { cmd: AddCollectionEventAnnotationTypeCmd => implicit userId =>
+  def addAnnotationType = commandAction { cmd: AddCollectionEventAnnotationTypeCmd => implicit userId =>
     val future = studiesService.addCollectionEventAnnotationType(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event))
-      )
-    }
+    domainValidationReply(future)
   }
 
-  def updateAnnotationType(id: String) = CommandAction { cmd: UpdateCollectionEventAnnotationTypeCmd => implicit userId =>
+  def updateAnnotationType(id: String) = commandAction { cmd: UpdateCollectionEventAnnotationTypeCmd => implicit userId =>
     val future = studiesService.updateCollectionEventAnnotationType(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event))
-      )
-    }
+    domainValidationReply(future)
   }
 
   def removeAnnotationType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
     val cmd =  RemoveCollectionEventAnnotationTypeCmd(studyId, id, ver)
     val future = studiesService.removeCollectionEventAnnotationType(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(eventToJsonReply(event))
-      )
-    }
+    domainValidationReply(future)
   }
 
 }
