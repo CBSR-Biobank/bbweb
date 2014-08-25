@@ -9,7 +9,9 @@ define(['angular', 'common'], function(angular) {
   mod.factory('AdminService', ['$http', function($http) {
     return {
       aggregateCounts : function() {
-        return $http.get('/counts');
+        return $http.get('/counts').then(function(response) {
+          return response.data.data;
+        });
       }
     };
   }]);

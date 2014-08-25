@@ -2,7 +2,7 @@
   <h1>Register as a user</h1>
 </div>
 <div class="clearfix">
-  <div ng-if="form.notifications">
+  <div data-ng-if="form.notifications">
     <div class="row">
       <div class="col-md-offset-1 col-md-10">
         <div class="alert alert-danger alert-dismissible" role="alert">
@@ -27,13 +27,13 @@
           <input name="name"
                  type="text"
                  class="form-control"
-                 ng-model="form.user.name"
-                 ng-minlength="2"
+                 data-ng-model="form.user.name"
+                 data-ng-minlength="2"
                  placeholder="given name(s) followed by surname(s) separated by spaces"
                  required/>
         </div>
         <div class="col-md-offset-3 col-md-7">
-          <p class="help-block" ng-show="userRegForm.name.$error.minlength">Name is too short.</p>
+          <p class="help-block" data-ng-show="userRegForm.name.$error.minlength">Name is too short.</p>
         </div>
       </div>
 
@@ -45,12 +45,12 @@
               name="email"
               type="email"
               class="form-control"
-              ng-model="form.user.email"
+              data-ng-model="form.user.email"
               placeholder="Email"
               required/>
         </div>
         <div class="col-md-offset-3 col-md-7">
-          <p ng-show="userRegForm.email.$invalid && !userRegForm.email.$pristine"
+          <p data-ng-show="userRegForm.email.$invalid && !userRegForm.email.$pristine"
              class="help-block">
           Valid email address is required.</p>
         </div>
@@ -64,13 +64,13 @@
               name="password"
               type="password"
               class="form-control"
-              ng-model="form.user.password"
+              data-ng-model="form.user.password"
               placeholder="Password"
-              ng-minlength="8"
+              data-ng-minlength="8"
               required />
         </div>
         <div class="col-md-offset-3 col-md-7">
-          <p class="help-block" ng-show="userRegForm.password.$error.minlength">
+          <p class="help-block" data-ng-show="userRegForm.password.$error.minlength">
             Password too short. It should be minimum 8 characters.
           </p>
         </div>
@@ -84,13 +84,13 @@
               name="confirmPassword"
               type="password"
               class="form-control"
-              ng-model="form.user.confirmPassword"
+              data-ng-model="form.user.confirmPassword"
               placeholder="Password"
               password-check="form.user.password"
-              ng-required />
+              data-ng-required />
         </div>
         <div class="col-md-offset-3 col-md-7">
-          <p ng-show="userRegForm.confirmPassword.$error.passwordmatch"
+          <p data-ng-show="userRegForm.confirmPassword.$error.passwordmatch"
              class="help-block">
           Passwords do not match</p>
         </div>
@@ -100,9 +100,9 @@
       <div class="form-group">
         <div class="col-md-offset-3 col-md-9">
           <button class="btn btn-primary"
-                  ng-disabled="userRegForm.$invalid"
-                  ng-click="form.submit(form.user)">Submit</button>
-          <button class="btn" ng-click="form.cancel()">Cancel</button>
+                  data-ng-disabled="userRegForm.$invalid"
+                  data-ng-click="form.submit(form.user)">Submit</button>
+          <button class="btn" data-ng-click="form.cancel()">Cancel</button>
         </div>
       </div>
     </form>

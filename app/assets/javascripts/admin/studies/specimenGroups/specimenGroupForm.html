@@ -5,19 +5,19 @@
         novalidate>
 
     <!-- NAME -->
-    <div class="form-group" ng-class="{ 'has-error' : sgForm.name.$invalid && !sgForm.name.$pristine }">
+    <div class="form-group" data-ng-class="{ 'has-error' : sgForm.name.$invalid && !sgForm.name.$pristine }">
       <label for="name" class="col-md-2 control-label">Name</label>
       <div class="col-md-10">
         <input name="name"
                type="text"
                class="form-control"
-               ng-model="specimenGroup.name"
-               ng-minlength="2"
+               data-ng-model="specimenGroup.name"
+               data-ng-minlength="2"
                placeholder="A short name for the specimen group"
                required />
       </div>
       <div class="col-md-offset-2 col-md-10">
-        <p class="help-block" ng-show="sgForm.name.$error.minlength">Name is too short.</p>
+        <p class="help-block" data-ng-show="sgForm.name.$error.minlength">Name is too short.</p>
       </div>
     </div>
 
@@ -28,7 +28,7 @@
         <textarea name="description"
                   class="form-control"
                   rows="10"
-                  ng-model="specimenGroup.description"
+                  data-ng-model="specimenGroup.description"
                   placeholder="A description of the specimen group (optional)" />
       </div>
     </div>
@@ -40,12 +40,12 @@
         <input name="units"
                type="text"
                class="form-control"
-               ng-model="specimenGroup.units"
+               data-ng-model="specimenGroup.units"
                placeholder="the units the specimens are measured in (eg. mL, cm, etc.)"
                required/>
       </div>
       <div class="col-md-offset-2 col-md-10">
-        <p ng-show="sgForm.units.$invalid && !sgForm.units.$pristine"
+        <p data-ng-show="sgForm.units.$invalid && !sgForm.units.$pristine"
            class="help-block">
           Units are required.</p>
       </div>
@@ -57,14 +57,14 @@
       <div class="col-md-10">
         <select class="form-control"
                 name="anatomicalSourceType"
-                ng-model="specimenGroup.anatomicalSourceType"
-                ng-options="source for source in anatomicalSourceTypes"
+                data-ng-model="specimenGroup.anatomicalSourceType"
+                data-ng-options="source for source in anatomicalSourceTypes"
                 required>
           <option value="">-- make a selection --</option>
         </select>
       </div>
       <div class="col-md-offset-2 col-md-10">
-        <p ng-show="sgForm.anatomicalSourceType.$invalid && !sgForm.anatomicalSourceType.$pristine"
+        <p data-ng-show="sgForm.anatomicalSourceType.$invalid && !sgForm.anatomicalSourceType.$pristine"
            class="help-block">
           Anatomical source is required.</p>
       </div>
@@ -76,14 +76,14 @@
       <div class="col-md-10">
         <select class="form-control"
                 name="perservationType"
-                ng-model="specimenGroup.preservationType"
-                ng-options="preserv for preserv in preservTypes"
+                data-ng-model="specimenGroup.preservationType"
+                data-ng-options="preserv for preserv in preservTypes"
                 required>
           <option value="">-- make a selection --</option>
         </select>
       </div>
       <div class="col-md-offset-2 col-md-10">
-        <p ng-show="sgForm.perservationType.$invalid && !sgForm.perservationType.$pristine"
+        <p data-ng-show="sgForm.perservationType.$invalid && !sgForm.perservationType.$pristine"
            class="help-block">
           Preservation type is required.</p>
       </div>
@@ -95,14 +95,14 @@
       <div class="col-md-10">
         <select class="form-control"
                 name="perservationTempType"
-                ng-model="specimenGroup.preservationTemperatureType"
-                ng-options="temp for temp in preservTempTypes"
+                data-ng-model="specimenGroup.preservationTemperatureType"
+                data-ng-options="temp for temp in preservTempTypes"
                 required>
           <option value="">-- make a selection --</option>
         </select>
       </div>
       <div class="col-md-offset-2 col-md-10">
-        <p ng-show="sgForm.perservationTempType.$invalid && !sgForm.perservationTempType.$pristine"
+        <p data-ng-show="sgForm.perservationTempType.$invalid && !sgForm.perservationTempType.$pristine"
            class="help-block">
           Preservation temperature is required.</p>
       </div>
@@ -114,14 +114,14 @@
       <div class="col-md-10">
         <select class="form-control"
                 name="specimenType"
-                ng-model="specimenGroup.specimenType"
-                ng-options="type for type in specimenTypes"
+                data-ng-model="specimenGroup.specimenType"
+                data-ng-options="type for type in specimenTypes"
                 required>
           <option value="">-- make a selection --</option>
         </select>
       </div>
       <div class="col-md-offset-2 col-md-10">
-        <p ng-show="sgForm.specimenType.$invalid && !sgForm.specimenType.$pristine"
+        <p data-ng-show="sgForm.specimenType.$invalid && !sgForm.specimenType.$pristine"
            class="help-block">
           Specimen type is required.</p>
       </div>
@@ -131,9 +131,9 @@
     <div class="form-group">
       <div class="col-md-offset-2 col-md-10">
         <button class="btn btn-primary"
-                ng-disabled="sgForm.$invalid"
-                ng-click="submit(specimenGroup)">Submit</button>
-        <button class="btn" ng-click="cancel()">Cancel</button>
+                data-ng-disabled="sgForm.$invalid"
+                data-ng-click="submit(specimenGroup)">Submit</button>
+        <button class="btn" data-ng-click="cancel()">Cancel</button>
       </div>
     </div>
   </form>

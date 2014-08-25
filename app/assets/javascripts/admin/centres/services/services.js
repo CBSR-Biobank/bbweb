@@ -6,24 +6,32 @@ define(['angular', 'common'], function(angular) {
 
   var mod = angular.module('centres.services', ['biobank.common']);
 
+  var onHttpPromiseSuccess = function(data) {
+    return data.data;
+  };
+
+  var onHttpPromiseError = function(data) {
+    return data.message;
+  };
+
   /**
    * Service to acccess centres.
    */
   mod.factory('CentreService', ['$http', function($http) {
     var changeStatus = function(status, centre) {
-        var cmd = {
-          id: centre.id,
-          expectedVersion: centre.version
-        };
-        return $http.post('/centres/' + status, cmd);
+      var cmd = {
+        id: centre.id,
+        expectedVersion: centre.version
+      };
+      return $http.post('/centres/' + status, cmd).success(onHttpPromiseSuccess).error(onHttpPromiseError);
     };
 
     return {
       list : function() {
-        return $http.get('/centres');
+        return $http.get('/centres').success(onHttpPromiseSuccess).error(onHttpPromiseError);
       },
       query: function(id) {
-        return $http.get('/centres/' + id);
+        return $http.get('/centres/' + id).success(onHttpPromiseSuccess).error(onHttpPromiseError);
       },
       addOrUpdate: function(centre) {
         var cmd = {
@@ -35,16 +43,16 @@ define(['angular', 'common'], function(angular) {
           cmd.id = centre.id;
           cmd.expectedVersion = centre.version;
 
-          return $http.put('/centres/' + centre.id, cmd);
+          return $http.put('/centres/' + centre.id, cmd).success(onHttpPromiseSuccess).error(onHttpPromiseError);
         } else {
-          return $http.post('/centres', cmd);
+          return $http.post('/centres', cmd).success(onHttpPromiseSuccess).error(onHttpPromiseError);
         }
       },
       enable: function(centre) {
-        return changeStatus('enabled', centre);
+        return changeStatus('enabled', centre).success(onHttpPromiseSuccess).error(onHttpPromiseError);
       },
       disable: function(centre) {
-        return changeStatus('disabled', centre);
+        return changeStatus('disabled', centre).success(onHttpPromiseSuccess).error(onHttpPromiseError);
       }
     };
   }]);
@@ -52,10 +60,10 @@ define(['angular', 'common'], function(angular) {
   mod.factory('CentreLocationService', ['$http', function($http) {
     return {
       list : function() {
-        return $http.get('/centres/locations');
+        return $http.get('/centres/locations').success(onHttpPromiseSuccess).error(onHttpPromiseError);
       },
       query: function(id) {
-        return $http.get('/centres/locations/' + id);
+        return $http.get('/centres/locations/' + id).success(onHttpPromiseSuccess).error(onHttpPromiseError);
       },
       addOrUpdate: function(centre, location) {
         var cmd = {
@@ -73,9 +81,10 @@ define(['angular', 'common'], function(angular) {
           cmd.id = centre.id;
           cmd.expectedVersion = centre.version;
 
-          return $http.put('/centres/locations/' + centre.id, cmd);
+          return $http.put('/centres/locations/' + centre.id, cmd)
+            .success(onHttpPromiseSuccess).error(onHttpPromiseError);
         } else {
-          return $http.post('/centres/locations', cmd);
+          return $http.post('/centres/locations', cmd).success(onHttpPromiseSuccess).error(onHttpPromiseError);
         }
       }
     };

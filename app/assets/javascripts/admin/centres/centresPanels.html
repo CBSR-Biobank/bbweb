@@ -3,25 +3,25 @@
     Centre administration
     <div class="btn-group pull-right">
       <button class="btn btn-xs btn-primary"
-              ng-click="tableView()"
+              data-ng-click="tableView()"
               title="More information"
-              ng-if="centres.length > 0">
+              data-ng-if="centres.length > 0">
       Table view</button>
       <button class="btn btn-xs btn-primary"
-              ng-click="addCentre()"
+              data-ng-click="addCentre()"
               title="Add centre">
       Add centre <i class="glyphicon glyphicon-plus"></i></button>
     </div>
   </h1>
 </div>
 <div class="clearfix">
-  <div ng-if="centres.length == 0">
+  <div data-ng-if="centres.length == 0">
     <p>No centres have been added.</p>
   </div>
-  <div ng-if="centres.length != 0">
+  <div data-ng-if="centres.length != 0">
     <p>The following centres have been configured:</p>
-    <div class="row" ng-repeat="rows in centres | partition:3">
-      <div class="col-md-4" ng-repeat="centre in rows">
+    <div class="row" data-ng-repeat="rows in centres | partition:3">
+      <div class="col-md-4" data-ng-repeat="centre in rows">
         <div class="panel panel-default" style="margin-top: 10px;">
           <div class="panel-heading">
             <h3 class="panel-title">{{centre.name}}</h3>
@@ -31,14 +31,14 @@
             <p>
               <small class="text-info"><strong>Status:</strong> {{centre.status}}</small><br>
               <small class="text-muted"><strong>Added:</strong> {{centre.addedDate}}</small><br>
-              <span ng-if="centre.lastUpdateDate != null">
+              <span data-ng-if="centre.lastUpdateDate != null">
                 <small class="text-muted"><strong>Last updated:</strong> {{centre.lastUpdateDate}}</small>
               </span>
             </br>
             <p>
               <div class="btn-group">
                 <button class="btn btn-xs btn-primary"
-                        ng-click="centreInformation(centre)"
+                        data-ng-click="centreInformation(centre)"
                         title="More information">
                 More information <i class="glyphicon glyphicon-info-sign"></i></button>
               </div>

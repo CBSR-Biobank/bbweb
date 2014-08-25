@@ -8,18 +8,18 @@
     </panel-buttons>
   </accordion-heading>
   <p>{{panel.ceventTypes.header}}</p>
-  <div class="panel panel-warning" ng-if="panel.ceventTypes.data.length == 0">
+  <div class="panel panel-warning" data-ng-if="panel.ceventTypes.data.length == 0">
     <div class="panel-heading">
       Collection event types have not been defined for this study yet.
     </div>
   </div>
-  <p ng-if="panel.ceventTypes.data.length != 0">
+  <p data-ng-if="panel.ceventTypes.data.length != 0">
     The following collection event types are defined:
   </p>
-  <table ng-show="panel.ceventTypes.data.length != 0"
+  <table data-ng-show="panel.ceventTypes.data.length != 0"
          class="table table-condensed table-hover"
-         ng-table="panel.ceventTypes.tableParams">
-    <tr ng-repeat="ceventType in $data">
+         data-ng-table="panel.ceventTypes.tableParams">
+    <tr data-ng-repeat="ceventType in $data">
       <td data-title="'Name'" sortable="'name'">
         {{ceventType.name}}
       </td>

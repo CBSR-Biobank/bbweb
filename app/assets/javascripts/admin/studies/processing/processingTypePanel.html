@@ -8,19 +8,19 @@
     </panel-buttons>
   </accordion-heading>
   <p>{{panel.processingTypes.header}}</p>
-  <div class="panel panel-warning" ng-if="panel.processingTypes.data.length == 0">
+  <div class="panel panel-warning" data-ng-if="panel.processingTypes.data.length == 0">
     <div class="panel-heading">
       Processing types have not been defined for this study yet.
     </div>
   </div>
-  <p ng-if="panel.processingTypes.data.length != 0">
+  <p data-ng-if="panel.processingTypes.data.length != 0">
     The following processing types are defined:
   </p>
-  <table ng-show="panel.processingTypes.data.length != 0"
+  <table data-ng-show="panel.processingTypes.data.length != 0"
          class="table table-condensed table-hover"
-         ng-table="panel.processingTypes.tableParams">
-    <tr ng-repeat="processingType in $data"
-        ng-class="{'active': user.$selected}" >
+         data-ng-table="panel.processingTypes.tableParams">
+    <tr data-ng-repeat="processingType in $data"
+        data-ng-class="{'active': user.$selected}" >
       <td data-title="'Name'" sortable="'name'">
         {{processingType.name}}
       </td>

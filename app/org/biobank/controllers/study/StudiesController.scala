@@ -41,7 +41,14 @@ object StudiesController extends CommandController with JsonController {
 
   def query(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     studiesService.getStudy(id).fold(
-      err => BadRequest(err.list.mkString(", ")),
+      err => {
+        val errStr = err.list.mkString(", ")
+        if (errStr.contains("not found")) {
+          BadRequest(s"study with id not found: $id")
+        } else {
+          BadRequest(errStr)
+        }
+      },
       study => Ok(study)
     )
   }

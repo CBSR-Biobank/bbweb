@@ -53,10 +53,7 @@ define(['angular'], function(angular) {
             '$stateParams', 'CeventTypeService', 'study',
             function($stateParams, CeventTypeService, study) {
               if ($stateParams.ceventTypeId) {
-                return CeventTypeService.get(study.id, $stateParams.ceventTypeId)
-                  .then(function(response) {
-                    return response.data;
-                  });
+                return CeventTypeService.get(study.id, $stateParams.ceventTypeId);
               }
               throw new Error('state parameter ceventTypeId is invalid');
             }]
@@ -111,10 +108,7 @@ define(['angular'], function(angular) {
             '$stateParams', 'CeventAnnotTypeService', 'study',
             function($stateParams, CeventAnnotTypeService, study) {
               if ($stateParams.annotTypeId) {
-                return CeventAnnotTypeService.get(study.id, $stateParams.annotTypeId)
-                  .then(function(response) {
-                    return response.data;
-                  });
+                return CeventAnnotTypeService.get(study.id, $stateParams.annotTypeId);
               }
               throw new Error("state parameter annotTypeId is invalid");
             }]

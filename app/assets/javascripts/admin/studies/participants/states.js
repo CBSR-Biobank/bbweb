@@ -55,10 +55,7 @@ define(['angular'], function(angular) {
           '$stateParams', 'ParticipantAnnotTypeService', 'study',
           function($stateParams, ParticipantAnnotTypeService, study) {
             if ($stateParams.annotTypeId) {
-              return ParticipantAnnotTypeService.get(study.id, $stateParams.annotTypeId)
-                .then(function(response) {
-                  return response.data;
-                });
+              return ParticipantAnnotTypeService.get(study.id, $stateParams.annotTypeId);
             }
             throw new Error("state parameter annotTypeId is invalid");
           }]

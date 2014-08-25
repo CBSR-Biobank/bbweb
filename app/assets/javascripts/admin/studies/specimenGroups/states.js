@@ -49,10 +49,7 @@ define(['angular'], function(angular) {
             '$stateParams', 'SpecimenGroupService', 'study',
             function($stateParams, SpecimenGroupService, study) {
               if ($stateParams.specimenGroupId) {
-                return SpecimenGroupService.get(study.id, $stateParams.specimenGroupId)
-                  .then(function(response) {
-                    return response.data;
-                  });
+                return SpecimenGroupService.get(study.id, $stateParams.specimenGroupId);
               }
               throw new Error('state parameter specimenGroupId is invalid');
             }]

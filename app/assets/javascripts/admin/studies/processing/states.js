@@ -53,10 +53,7 @@ define(['angular'], function(angular) {
             '$stateParams', 'ProcessingTypeService', 'study',
             function($stateParams, ProcessingTypeService, study) {
               if ($stateParams.processingTypeId) {
-                return ProcessingTypeService.get(study.id, $stateParams.processingTypeId)
-                  .then(function(response) {
-                    return response.data;
-                  });
+                return ProcessingTypeService.get(study.id, $stateParams.processingTypeId);
               }
               throw new Error('state parameter processingTypeId is invalid');
             }]
@@ -112,10 +109,7 @@ define(['angular'], function(angular) {
             '$stateParams', 'SpcLinkAnnotTypeService', 'study',
             function($stateParams, SpcLinkAnnotTypeService, study) {
               if ($stateParams.annotTypeId) {
-                return SpcLinkAnnotTypeService.get(study.id, $stateParams.annotTypeId)
-                  .then(function(response) {
-                    return response.data;
-                  });
+                return SpcLinkAnnotTypeService.get(study.id, $stateParams.annotTypeId);
               }
               throw new Error("state parameter annotTypeId is invalid");
             }]
@@ -170,10 +164,7 @@ define(['angular'], function(angular) {
           spcLinkType: [
             '$stateParams', 'SpcLinkTypeService', 'study',
             function($stateParams, SpcLinkTypeService, study) {
-              return SpcLinkTypeService.get($stateParams.procTypeId, $stateParams.spcLinkTypeId)
-                .then(function(response) {
-                  return response.data;
-                });
+              return SpcLinkTypeService.get($stateParams.procTypeId, $stateParams.spcLinkTypeId);
             }]
         },
         views: {

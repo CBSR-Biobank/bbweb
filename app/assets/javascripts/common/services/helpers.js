@@ -4,6 +4,30 @@ define(['angular'], function(angular) {
 
   var mod = angular.module('common.helpers', []);
 
+  mod.factory('BbwebRestApi', ['$http', '$q', '$log', function($http, $q, $log) {
+    return {
+      call: function(method, url, data) {
+        var deferred = $q.defer();
+        var config = { method: method, url: url };
+
+        if (data) {
+          config.data = data;
+        }
+
+        $http(config).then(
+          function(response) {
+            deferred.resolve(response.data.data);
+          },
+          function(response) {
+            $log.error(response.data);
+            deferred.reject(response.data);
+          }
+        );
+        return deferred.promise;
+      }
+    };
+  }]);
+
   /**
    * Hack to reload state and re-initialize the controller.
    */

@@ -3,11 +3,11 @@
     <h3 class="panel-title">{{study.name}}
     <div class="btn-group pull-right">
       <button class="btn btn-xs btn-primary"
-              ng-click="updateStudy(study)"
+              data-ng-click="updateStudy(study)"
               title="Update">
       <i class="glyphicon glyphicon-edit"></i></button>
       <button class="btn btn-xs btn-success"
-              ng-click="changeStatus(study)"
+              data-ng-click="changeStatus(study)"
               title="Change status">
       <i class="glyphicon glyphicon-cog"></i></button>
     </div>
@@ -18,9 +18,9 @@
       <div class="col-md-2">
         <strong>Description: </strong>
         <i class="glyphicon"
-           ng-class="{'glyphicon-plus': !descriptionToggle, 'glyphicon-minus': descriptionToggle}"
-           ng-click="truncateDescriptionToggle()"
-           ng-if="study.description.length > descriptionToggleLength"></i>
+           data-ng-class="{'glyphicon-plus': !descriptionToggle, 'glyphicon-minus': descriptionToggle}"
+           data-ng-click="truncateDescriptionToggle()"
+           data-ng-if="study.description.length > descriptionToggleLength"></i>
       </div>
       <div class="col-md-10">
         {{description}}
@@ -43,7 +43,7 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-2" ng-if="study.lastUpdateDate != null">
+      <div class="col-md-2" data-ng-if="study.lastUpdateDate != null">
         <p class="text-muted"><strong>Last updated:</strong></p>
       </div>
       <div class="col-md-10">

@@ -1,12 +1,12 @@
 <div class="modal-header">
   <button type="button"
           class="close"
-          ng-click="modalOptions.ok()">&times;</button>
+          data-ng-click="modalOptions.ok()">&times;</button>
   <h3 class="modal-title">{{modalOptions.title}}</h3>
 </div>
 <div class="modal-body">
-  <table ng-table="modalOptions.tableParams" class="table table-hover">
-    <tr ng-repeat="rowData in $data">
+  <table data-ng-table="modalOptions.tableParams" class="table table-hover">
+    <tr data-ng-repeat="rowData in $data">
       <td>
         <strong>{{rowData.name}}</strong>
       </td>

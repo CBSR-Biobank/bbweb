@@ -9,25 +9,25 @@ define(['angular', 'common'], function(angular) {
   /**
    * Service to acccess studies.
    */
-  mod.factory('StudyService', ['$http', function($http) {
+  mod.factory('StudyService', [
+    '$http', 'BbwebRestApi', function($http, BbwebRestApi) {
+
     var changeStatus = function(status, study) {
-        var cmd = {
-          id: study.id,
-          expectedVersion: study.version
-        };
-        return $http.post('/studies/' + status, cmd);
+      var cmd = {
+        id: study.id,
+        expectedVersion: study.version
+      };
+      return BbwebRestApi.call('POST', '/studies/', cmd);
     };
 
     return {
       list : function() {
-        return $http.get('/studies').then(function(response) {
-          return response.data.data;
-          });
+        return BbwebRestApi.call('GET', '/studies');
       },
       query: function(id) {
-        return $http.get('/studies/' + id);
+        return BbwebRestApi.call('GET', '/studies/' + id);
       },
-      addOrUpdate: function(study) {
+      addOrUpdate: function(study, onSuccess, onError) {
         var cmd = {
           name: study.name,
           description: study.description
@@ -37,9 +37,9 @@ define(['angular', 'common'], function(angular) {
           cmd.id = study.id;
           cmd.expectedVersion = study.version;
 
-          return $http.put('/studies/' + study.id, cmd);
+          return BbwebRestApi.call('PUT', '/studies/' + study.id, cmd);
         } else {
-          return $http.post('/studies', cmd);
+          return BbwebRestApi.call('POST', '/studies', cmd);
         }
       },
       enable: function(study) {
@@ -56,7 +56,7 @@ define(['angular', 'common'], function(angular) {
       },
       dto: {
         processing: function(study) {
-          return $http.get('/studies/dto/processing/' + study.id);
+          return BbwebRestApi.call('GET', '/studies/dto/processing/' + study.id);
         }
       }
     };
@@ -65,13 +65,13 @@ define(['angular', 'common'], function(angular) {
   /**
    * Service to access study annotation types.
    */
-  mod.factory('StudyAnnotTypeService', ['$http', function($http) {
+  mod.factory('StudyAnnotTypeService', ['BbwebRestApi', function(BbwebRestApi) {
     return {
       getAll: function(baseUrl, studyId) {
-        return $http.get(baseUrl + '/' + studyId);
+        return BbwebRestApi.call('GET', baseUrl + '/' + studyId);
       },
       get: function(baseUrl, studyId, annotTypeId) {
-        return $http.get(baseUrl + '/'  + studyId + '?annotTypeId=' + annotTypeId);
+        return BbwebRestApi.call('GET', baseUrl + '/'  + studyId + '?annotTypeId=' + annotTypeId);
       },
       addOrUpdate: function(baseUrl, annotType) {
         var cmd = {
@@ -90,16 +90,18 @@ define(['angular', 'common'], function(angular) {
         if (annotType.id) {
           cmd.id = annotType.id;
           cmd.expectedVersion = annotType.version;
-          return $http.put(baseUrl + '/'  + annotType.id, cmd);
+          return BbwebRestApi.call('PUT', baseUrl + '/'  + annotType.id, cmd);
         } else {
-          return $http.post(baseUrl, cmd);
+          return BbwebRestApi.call('POST', baseUrl, cmd);
         }
       },
       remove: function(baseUrl, annotType) {
-        return $http.delete(baseUrl + '/'  + annotType.studyId + '/' + annotType.id + '/' + annotType.version);
+        return BbwebRestApi.call(
+          'DELETE',
+          baseUrl + '/' + annotType.studyId + '/' + annotType.id + '/' + annotType.version);
       },
       valueTypes : function() {
-        return $http.get('/studies/valuetypes');
+        return BbwebRestApi.call('GET', '/studies/valuetypes');
       }
     };
   }]);
@@ -128,13 +130,13 @@ define(['angular', 'common'], function(angular) {
   /**
    * Service to access specimen groups.
    */
-  mod.factory('SpecimenGroupService', ['$http', function($http) {
+  mod.factory('SpecimenGroupService', ['BbwebRestApi', function(BbwebRestApi) {
     return {
       getAll: function(studyId) {
-        return $http.get('/studies/sgroups/' + studyId);
+        return BbwebRestApi.call('GET', '/studies/sgroups/' + studyId);
       },
       get: function(studyId, specimenGroupId) {
-        return $http.get('/studies/sgroups/' + studyId + '?sgId=' + specimenGroupId);
+        return BbwebRestApi.call('GET', '/studies/sgroups/' + studyId + '?sgId=' + specimenGroupId);
       },
       addOrUpdate: function(specimenGroup) {
         var cmd = {
@@ -151,31 +153,30 @@ define(['angular', 'common'], function(angular) {
         if (specimenGroup.id) {
           cmd.id = specimenGroup.id;
           cmd.expectedVersion = specimenGroup.version;
-          return $http.put('/studies/sgroups/' + specimenGroup.id, cmd);
+          return BbwebRestApi.call('PUT', '/studies/sgroups/' + specimenGroup.id, cmd);
         } else {
-          return $http.post('/studies/sgroups', cmd);
+          return BbwebRestApi.call('POST', '/studies/sgroups', cmd);
         }
       },
       remove: function(specimenGroup) {
-        return $http.delete(
-          '/studies/sgroups/' + specimenGroup.studyId +
-            '/' + specimenGroup.id +
-            '/' + specimenGroup.version);
+        return BbwebRestApi.call(
+          'DELETE',
+          '/studies/sgroups/' + specimenGroup.studyId + '/' + specimenGroup.id + '/' + specimenGroup.version);
       },
       anatomicalSourceTypes : function() {
-        return $http.get('/studies/anatomicalsrctypes');
+        return BbwebRestApi.call('GET', '/studies/anatomicalsrctypes');
       },
       specimenTypes : function() {
-        return $http.get('/studies/specimentypes');
+        return BbwebRestApi.call('GET', '/studies/specimentypes');
       },
       preservTypes : function() {
-        return $http.get('/studies/preservtypes');
+        return BbwebRestApi.call('GET', '/studies/preservtypes');
       },
       preservTempTypes : function() {
-        return $http.get('/studies/preservtemptypes');
+        return BbwebRestApi.call('GET', '/studies/preservtemptypes');
       },
       specimenGroupValueTypes : function() {
-        return $http.get('/studies/sgvaluetypes');
+        return BbwebRestApi.call('GET', '/studies/sgvaluetypes');
       }
     };
   }]);
@@ -183,13 +184,13 @@ define(['angular', 'common'], function(angular) {
   /**
    * Service to access Collection Event Types.
    */
-  mod.factory('CeventTypeService', ['$http', function($http) {
+  mod.factory('CeventTypeService', ['BbwebRestApi', function(BbwebRestApi) {
     return {
       getAll: function(studyId) {
-        return $http.get('/studies/cetypes/' + studyId);
+        return BbwebRestApi.call('GET', '/studies/cetypes/' + studyId);
       },
       get: function(studyId, collectionEventTypeId) {
-        return $http.get('/studies/cetypes/' + studyId + '?cetId=' + collectionEventTypeId);
+        return BbwebRestApi.call('GET', '/studies/cetypes/' + studyId + '?cetId=' + collectionEventTypeId);
       },
       addOrUpdate: function(collectionEventType) {
         var cmd = {
@@ -204,13 +205,14 @@ define(['angular', 'common'], function(angular) {
         if (collectionEventType.id) {
           cmd.id = collectionEventType.id;
           cmd.expectedVersion = collectionEventType.version;
-          return $http.put('/studies/cetypes/' + collectionEventType.id, cmd);
+          return BbwebRestApi.call('PUT', '/studies/cetypes/' + collectionEventType.id, cmd);
         } else {
-          return $http.post('/studies/cetypes', cmd);
+          return BbwebRestApi.call('POST', '/studies/cetypes', cmd);
         }
       },
       remove: function(collectionEventType) {
-        return $http.delete(
+        return BbwebRestApi.call(
+          'DELETE',
           '/studies/cetypes/' + collectionEventType.studyId +
             '/' + collectionEventType.id +
             '/' + collectionEventType.version);
@@ -263,13 +265,13 @@ define(['angular', 'common'], function(angular) {
   /**
    * Service to access Processing Types.
    */
-  mod.factory('ProcessingTypeService', ['$http', function($http) {
+  mod.factory('ProcessingTypeService', ['BbwebRestApi', function(BbwebRestApi) {
     return {
       getAll: function(studyId) {
-        return $http.get('/studies/proctypes/' + studyId);
+        return BbwebRestApi.call('GET', '/studies/proctypes/' + studyId);
       },
       get: function(studyId, processingTypeId) {
-        return $http.get('/studies/proctypes/' + studyId + '?procTypeId=' + processingTypeId);
+        return BbwebRestApi.call('GET', '/studies/proctypes/' + studyId + '?procTypeId=' + processingTypeId);
       },
       addOrUpdate: function(processingType) {
         var cmd = {
@@ -282,13 +284,14 @@ define(['angular', 'common'], function(angular) {
         if (processingType.id) {
           cmd.id = processingType.id;
           cmd.expectedVersion = processingType.version;
-          return $http.put('/studies/proctypes/' + processingType.id, cmd);
+          return BbwebRestApi.call('PUT', '/studies/proctypes/' + processingType.id, cmd);
         } else {
-          return $http.post('/studies/proctypes', cmd);
+          return BbwebRestApi.call('POST', '/studies/proctypes', cmd);
         }
       },
       remove: function(processingType) {
-        return $http.delete(
+        return BbwebRestApi.call(
+          'DELETE',
           '/studies/proctypes/' + processingType.studyId +
             '/' + processingType.id +
             '/' + processingType.version);
@@ -299,13 +302,13 @@ define(['angular', 'common'], function(angular) {
   /**
    * Service to access Spcecimen Link Types.
    */
-  mod.factory('SpcLinkTypeService', ['$http', function($http) {
+  mod.factory('SpcLinkTypeService', ['BbwebRestApi', function(BbwebRestApi) {
     return {
       getAll: function(studyId) {
-        return $http.get('/studies/sltypes/' + studyId);
+        return BbwebRestApi.call('GET', '/studies/sltypes/' + studyId);
       },
       get: function(studyId, spcLinkTypeId) {
-        return $http.get('/studies/sltypes/' + studyId + '?slTypeId=' + spcLinkTypeId);
+        return BbwebRestApi.call('GET', '/studies/sltypes/' + studyId + '?slTypeId=' + spcLinkTypeId);
       },
       addOrUpdate: function(spcLinkType) {
         var cmd = {
@@ -324,13 +327,14 @@ define(['angular', 'common'], function(angular) {
         if (spcLinkType.id) {
           cmd.id = spcLinkType.id;
           cmd.expectedVersion = spcLinkType.version;
-          return $http.put('/studies/sltypes/' + spcLinkType.id, cmd);
+          return BbwebRestApi.call('PUT', '/studies/sltypes/' + spcLinkType.id, cmd);
         } else {
-          return $http.post('/studies/sltypes', cmd);
+          return BbwebRestApi.call('POST', '/studies/sltypes', cmd);
         }
       },
       remove: function(spcLinkType) {
-        return $http.delete(
+        return BbwebRestApi.call(
+          'DELETE',
           '/studies/sltypes/' + spcLinkType.processingTypeId +
             '/' + spcLinkType.id +
             '/' + spcLinkType.version);

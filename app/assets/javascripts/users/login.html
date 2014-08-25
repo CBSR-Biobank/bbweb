@@ -1,6 +1,6 @@
 <div class="clearfix">
 
-  <div ng-if="form.notifications">
+  <div data-ng-if="form.notifications">
     <div class="row">
       <div class="col-md-offset-1 col-md-10">
         <div class="alert alert-danger alert-dismissible" role="alert">
@@ -25,7 +25,7 @@
           <form class="form-horizontal"
                 name="loginForm"
                 autocomplete="on"
-                ng-submit="loginForm.$valid && form.login(form.credentials)"
+                data-ng-submit="loginForm.$valid && form.login(form.credentials)"
                 novalidate>
 
             <!-- EMAIL -->
@@ -36,7 +36,7 @@
                     name="email"
                     type="email"
                     class="form-control"
-                    ng-model="form.credentials.email"
+                    data-ng-model="form.credentials.email"
                     placeholder="Email"
                     required/>
               </div>
@@ -50,7 +50,7 @@
                     name="password"
                     type="password"
                     class="form-control"
-                    ng-model="form.credentials.password"
+                    data-ng-model="form.credentials.password"
                     placeholder="Password"
                     required />
               </div>
@@ -59,7 +59,7 @@
             <!-- BUTTONS  -->
             <div class="form-group">
               <div class="col-md-offset-3 col-md-8">
-                <button class="btn btn-primary" ng-disabled="loginForm.$invalid">Log In</button>
+                <button class="btn btn-primary" data-ng-disabled="loginForm.$invalid">Log In</button>
               </div>
             </div>
           </form>

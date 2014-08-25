@@ -11,14 +11,14 @@ define(['angular'], function(angular) {
         edit: function ($scope) {
 
           var onSubmit = function (annotType) {
-            ParticipantAnnotTypeService.addOrUpdate(annotType)
-              .success(function() {
+            ParticipantAnnotTypeService.addOrUpdate(annotType).then(
+              function(event) {
                 $state.transitionTo(
                   'admin.studies.study.participants',
                   $stateParams,
                   { reload: true, inherit: false, notify: true });
-              })
-              .error(function(error) {
+              },
+              function(message) {
                 studyAnnotTypeEditService.onError($scope, error, 'admin.studies.study.participants');
               });
           };
@@ -44,13 +44,11 @@ define(['angular'], function(angular) {
             'Remove Participant Annotation Type',
             'Are you sure you want to remove annotation type ' + annotType.name + '?',
             function (result) {
-              ParticipantAnnotTypeService.remove(annotType)
-
-                .success(function() {
+              ParticipantAnnotTypeService.remove(annotType).then(
+                function() {
                   stateHelper.reloadAndReinit();
-                })
-
-                .error(function(error) {
+                },
+                function(error) {
                   var bodyText = 'Annotation type ' + annotType.name + ' cannot be removed: ' + error.message;
                   studyRemoveModalService.orError(
                     bodyText,

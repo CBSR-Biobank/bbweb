@@ -82,9 +82,7 @@ define(['angular'], function(angular) {
           user: userResolve.user,
           study: ['$stateParams', 'StudyService', function($stateParams, StudyService) {
             if ($stateParams.studyId) {
-              return StudyService.query($stateParams.studyId).then(function(response) {
-                return response.data;
-              });
+              return StudyService.query($stateParams.studyId);
             }
             throw new Error("state parameter studyId is invalid");
           }]
@@ -204,9 +202,7 @@ define(['angular'], function(angular) {
           annotTypes: [
             'ParticipantAnnotTypeService', 'study',
             function(ParticipantAnnotTypeService, study) {
-              return ParticipantAnnotTypeService.getAll(study.id).then(function(response) {
-                return response.data;
-              });
+              return ParticipantAnnotTypeService.getAll(study.id);
             }]
         },
         views: {
@@ -232,9 +228,7 @@ define(['angular'], function(angular) {
           specimenGroups: [
             'SpecimenGroupService', 'study',
             function(SpecimenGroupService, study) {
-              return SpecimenGroupService.getAll(study.id).then(function(response) {
-                return response.data;
-              });
+              return SpecimenGroupService.getAll(study.id);
             }]
         },
         views: {
@@ -260,23 +254,17 @@ define(['angular'], function(angular) {
           ceventTypes: [
             'CeventTypeService', 'study',
             function( CeventTypeService, study) {
-              return CeventTypeService.getAll(study.id).then(function(response) {
-                return response.data;
-              });
+              return CeventTypeService.getAll(study.id);
             }],
           annotTypes: [
             'CeventAnnotTypeService', 'study',
             function(CeventAnnotTypeService, study) {
-              return CeventAnnotTypeService.getAll(study.id).then(function(response) {
-                return response.data;
-              });
+              return CeventAnnotTypeService.getAll(study.id);
             }],
           specimenGroups: [
             'SpecimenGroupService', 'study',
             function(SpecimenGroupService, study) {
-              return SpecimenGroupService.getAll(study.id).then(function(response) {
-                return response.data;
-              });
+              return SpecimenGroupService.getAll(study.id);
             }]
         },
         views: {
@@ -300,9 +288,7 @@ define(['angular'], function(angular) {
           dtoProcessing: [
             'StudyService', 'study',
             function( StudyService, study) {
-              return StudyService.dto.processing(study).then(function(response) {
-                return response.data;
-              });
+              return StudyService.dto.processing(study);
             }]
         },
         views: {

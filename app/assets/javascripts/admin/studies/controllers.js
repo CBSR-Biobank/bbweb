@@ -12,14 +12,15 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
    * "user" is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
   mod.controller('StudiesCtrl', [
-    '$rootScope', '$scope', '$state', 'StudyService',
-    function($rootScope, $scope, $state, StudyService) {
+    '$rootScope', '$scope', '$state', '$log', 'StudyService',
+    function($rootScope, $scope, $state, $log, StudyService) {
       $rootScope.pageTitle = 'Biobank studies';
       $scope.studies = [];
 
-      StudyService.list().then(function(data) {
-        $scope.studies = _.sortBy(data, function(study) { return study.name; });
-      });
+      StudyService.list().then(
+        function(data) {
+          $scope.studies = _.sortBy(data, function(study) { return study.name; });
+        });
 
       $scope.addStudy = function() {
         $state.go('admin.studies.add');
@@ -149,7 +150,8 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       $scope.study = study;
 
       var callback = function () {
-        $state.go('admin.studies.study', { studyId: $scope.study.id });
+        // the state we go to needs to reload the study since it has changed
+        $state.go('admin.studies.study', { studyId: $scope.study.id }, { reload: true });
       };
 
       studyEditService.edit($scope, callback, callback, callback);
@@ -205,7 +207,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
     'studyViewSettings',
     'PanelSettings',
     'specimenGroupModalService',
-    'SpecimenGroupService',
     'specimenGroupRemoveService',
     'specimenGroups',
     function(
@@ -215,7 +216,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       studyViewSettings,
       PanelSettings,
       specimenGroupModalService,
-      SpecimenGroupService,
       specimenGroupRemoveService,
       specimenGroups) {
 

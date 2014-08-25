@@ -1,5 +1,5 @@
 <div class="clearfix">
-  <div ng-if="form.emailNotFound">
+  <div data-ng-if="form.emailNotFound">
     <div class="row">
       <div class="col-md-offset-1 col-md-10">
         <div class="alert alert-danger alert-dismissible" role="alert">
@@ -22,7 +22,7 @@
           <form role="form"
                 name="forgotForm"
                 autocomplete="on"
-                ng-submit="forgotForm.$valid && form.submit(form.email)"
+                data-ng-submit="forgotForm.$valid && form.submit(form.email)"
                 novalidate>
 
             <!-- EMAIL -->
@@ -33,14 +33,14 @@
               <input name="email"
                      type="email"
                      class="form-control"
-                     ng-model="form.email"
+                     data-ng-model="form.email"
                      placeholder="Email"
                      required/>
             </div>
 
             <!-- BUTTONS  -->
             <div class="form-group">
-              <button class="btn btn-primary" ng-disabled="forgotForm.$invalid">Submit</button>
+              <button class="btn btn-primary" data-ng-disabled="forgotForm.$invalid">Submit</button>
             </div>
           </form>
         </div>

@@ -86,9 +86,7 @@ define(['angular'], function(angular) {
           user: userResolve.user,
           centre: ['$stateParams', 'CentreService', function($stateParams, CentreService) {
             if ($stateParams.centreId) {
-              return CentreService.query($stateParams.centreId).then(function(response) {
-                return response.data;
-              });
+              return CentreService.query($stateParams.centreId);
             }
             throw new Error("state parameter centreId is invalid");
           }]
@@ -162,9 +160,7 @@ define(['angular'], function(angular) {
           annotTypes: [
             'CentreLocationService', 'centre',
             function(CentreLocationService, centre) {
-              return CentreLocationService.getAll(centre.id).then(function(response) {
-                return response.data;
-              });
+              return CentreLocationService.getAll(centre.id);
             }]
         },
         views: {

@@ -6,69 +6,76 @@ define(['angular', 'common'], function(angular) {
 
   var mod = angular.module('users.services', ['biobank.common', 'ngCookies']);
 
+  var onHttpPromiseSuccess = function(data) {
+    return data.data;
+  };
+
+  var onHttpPromiseError = function(data) {
+    return data.message;
+  };
+
   mod.factory('userService', [
     '$http', '$q', '$cookies', '$log',
     function($http, $q, $cookies, $log) {
-    var user, token = $cookies['XSRF-TOKEN'];
+      var user, token = $cookies['XSRF-TOKEN'];
 
-    /* If the token is assigned, check that the token is still valid on the server */
-    if (token) {
-      $http.get('/authenticate')
-        .success(function(data) {
-          $log.info('Welcome back, ' + data.name);
-          user = data;
-        })
-        .error(function() {
-          /* the token is no longer valid */
-          $log.info('Token no longer valid, please log in.');
-          token = undefined;
-          delete $cookies['XSRF-TOKEN'];
-          return $q.reject("Token invalid");
-        });
-    }
-
-    return {
-      login: function(credentials) {
-        return $http.post('/login', credentials).then(function(response) {
-          token = response.data.token;
-          return $http.get('/authenticate');
-        }).then(function(response) {
-          user = response.data;
-          $log.info('Welcome ' + user.name);
-          return user;
-        });
-      },
-      logout: function() {
-        // Logout on server in a real app
-        return $http.post('/logout').then(function(response) {
-          $log.info("Good bye ");
-          delete $cookies['XSRF-TOKEN'];
-          token = undefined;
-          user = undefined;
-        });
-      },
-      getUser: function() {
-        return user;
-      },
-      getAllUsers: function() {
-        return $http.get('/users').then(function(response) {
-          return response.data;
-        });
-      },
-      addUser: function(newUser) {
-        var cmd = {
-          name:      newUser.name,
-          email:     newUser.email,
-          password:  newUser.password,
-          avatarUrl: newUser.avatarUrl
-        };
-        return $http.post('/users', cmd);
-      },
-      passwordReset: function(email) {
-        return $http.post('/passreset', { email: email });
+      /* If the token is assigned, check that the token is still valid on the server */
+      if (token) {
+        $http.get('/authenticate').then(
+          function(data) {
+            user = data.data;
+            $log.info('Welcome back, ' + user.name);
+          },
+          function() {
+            /* the token is no longer valid */
+            $log.info('Token no longer valid, please log in.');
+            token = undefined;
+            delete $cookies['XSRF-TOKEN'];
+            return $q.reject("Token invalid");
+          });
       }
-    };
-  }]);
+
+      return {
+        login: function(credentials) {
+          return $http.post('/login', credentials).then(function(response) {
+            token = response.data.token;
+            return $http.get('/authenticate');
+          }).then(function(response) {
+            user = response.data.data;
+            $log.info('Welcome ' + user.name);
+            return user;
+          });
+        },
+        logout: function() {
+          // Logout on server in a real app
+          return $http.post('/logout').then(function(response) {
+            $log.info("Good bye ");
+            delete $cookies['XSRF-TOKEN'];
+            token = undefined;
+            user = undefined;
+          });
+        },
+        getUser: function() {
+          return user;
+        },
+        getAllUsers: function() {
+          return $http.get('/users').success(onHttpPromiseSuccess).error(onHttpPromiseError);
+        },
+        addUser: function(newUser) {
+          var cmd = {
+            name:      newUser.name,
+            email:     newUser.email,
+            password:  newUser.password,
+            avatarUrl: newUser.avatarUrl
+          };
+          return $http.post('/users', cmd).success(onHttpPromiseSuccess).error(onHttpPromiseError);
+        },
+        passwordReset: function(email) {
+          return $http.post('/passreset', { email: email })
+            .success(onHttpPromiseSuccess).error(onHttpPromiseError);
+        }
+      };
+    }]);
 
   /**
    * Add this object to a route definition to only allow resolving the route if the user is

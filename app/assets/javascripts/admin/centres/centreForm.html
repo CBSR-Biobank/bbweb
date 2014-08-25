@@ -2,7 +2,7 @@
 <div class="clearfix">
   <form class="form-horizontal"
         name="centreForm"
-        ng-submit="centreForm.$valid && submit(centre)"
+        data-ng-submit="centreForm.$valid && submit(centre)"
         novalidate>
 
     <!-- NAME -->
@@ -13,13 +13,13 @@
             name="name"
             type="text"
             class="form-control"
-            ng-model="centre.name"
-            ng-minlength="2"
+            data-ng-model="centre.name"
+            data-ng-minlength="2"
             placeholder="A short name for the centre"
             required />
       </div>
       <div class="col-md-offset-2 col-md-10">
-        <p class="help-block" ng-show="centreForm.name.$error.minlength">Name is too short.</p>
+        <p class="help-block" data-ng-show="centreForm.name.$error.minlength">Name is too short.</p>
       </div>
     </div>
 
@@ -30,7 +30,7 @@
         <textarea name="description"
                   class="form-control"
                   rows="10"
-                  ng-model="centre.description"
+                  data-ng-model="centre.description"
                   placeholder="A description of the centre (optional)" />
       </div>
     </div>
@@ -38,8 +38,8 @@
     <!-- BUTTONS  -->
     <div class="form-group">
       <div class="col-md-offset-2 col-md-10">
-        <button class="btn btn-primary" data-ng-disabled="centreForm.$invalid">Submit</button>
-        <button class="btn" ng-click="cancel()">Cancel</button>
+        <button class="btn btn-primary" data-data-ng-disabled="centreForm.$invalid">Submit</button>
+        <button class="btn" data-ng-click="cancel()">Cancel</button>
       </div>
     </div>
   </form>

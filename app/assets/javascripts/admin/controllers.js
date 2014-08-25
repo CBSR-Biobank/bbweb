@@ -27,10 +27,10 @@ define(['angular'], function(angular) {
         }
       };
 
-      AdminService.aggregateCounts().then(function(response) {
-        $scope.page.counts.studies = response.data.studies;
-        $scope.page.counts.centres = response.data.centres;
-        $scope.page.counts.users = response.data.users;
+      AdminService.aggregateCounts().then(function(counts) {
+        $scope.page.counts.studies = counts.studies;
+        $scope.page.counts.centres = counts.centres;
+        $scope.page.counts.users   = counts.users;
       });
     }]);
 

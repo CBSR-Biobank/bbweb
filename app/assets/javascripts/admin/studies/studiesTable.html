@@ -3,25 +3,25 @@
     Study administration
     <div class="btn-group pull-right">
       <button class="btn btn-xs btn-primary"
-              ng-click="defaultView()"
+              data-ng-click="defaultView()"
               title="More information"
-              ng-if="studies.length > 0">
+              data-ng-if="studies.length > 0">
       Default view</button>
       <button class="btn btn-xs btn-primary"
-              ng-click="addStudy()"
+              data-ng-click="addStudy()"
               title="Add study">
       Add study <i class="glyphicon glyphicon-plus"></i></button>
     </div>
   </h1>
 </div>
 <div class="clearfix">
-  <div ng-if="studies.length == 0">
+  <div data-ng-if="studies.length == 0">
     <p>No studies have been added.</p>
   </div>
-  <div ng-if="studies.length != 0">
+  <div data-ng-if="studies.length != 0">
     <p>The following studies have been configured:</p>
-    <table ng-table="tableParams" class="table table-hover">
-      <tr ng-repeat="study in $data">
+    <table data-ng-table="tableParams" class="table table-hover">
+      <tr data-ng-repeat="study in $data">
         <td data-title="'Name'" sortable="'name'">
           {{study.name}}
         </td>
@@ -33,7 +33,7 @@
         </td>
         <td>
           <button class="btn btn-xs btn-primary"
-                  ng-click="studyInformation(study)"
+                  data-ng-click="studyInformation(study)"
                   title="More information">
           <i class="glyphicon glyphicon-info-sign"></i></button>
         </td>

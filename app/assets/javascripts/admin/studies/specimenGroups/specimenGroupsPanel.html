@@ -8,18 +8,18 @@
     </panel-buttons>
   </accordion-heading>
   <p>{{panel.specimenGroups.header}}</p>
-  <div class="panel panel-warning" ng-if="panel.specimenGroups.data.length == 0">
+  <div class="panel panel-warning" data-ng-if="panel.specimenGroups.data.length == 0">
     <div class="panel-heading">
       Specimen groups have not been defined for this study yet.
     </div>
   </div>
-  <p ng-if="panel.specimenGroups.data.length != 0">
+  <p data-ng-if="panel.specimenGroups.data.length != 0">
     The following specimen groups are defined:
   </p>
-  <table ng-show="panel.specimenGroups.data.length != 0"
+  <table data-ng-show="panel.specimenGroups.data.length != 0"
          class="table table-hover table-condensed"
-         ng-table="panel.specimenGroups.tableParams">
-    <tr ng-repeat="specimenGroup in $data">
+         data-ng-table="panel.specimenGroups.tableParams">
+    <tr data-ng-repeat="specimenGroup in $data">
       <td data-title="'Name'" sortable="'name'">
         {{specimenGroup.name}}
       </td>

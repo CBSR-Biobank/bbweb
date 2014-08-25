@@ -60,23 +60,24 @@ define(['angular'], function(angular) {
 
       return {
         edit: function($scope) {
-          SpecimenGroupService.specimenGroupValueTypes().then(function(response) {
-            $scope.anatomicalSourceTypes = response.data.anatomicalSourceType.sort();
-            $scope.preservTypes = response.data.preservationType.sort();
-            $scope.preservTempTypes = response.data.preservationTemperatureType.sort();
-            $scope.specimenTypes = response.data.specimenType.sort();
-          });
+          SpecimenGroupService.specimenGroupValueTypes().then(
+            function(valueTypes) {
+              $scope.anatomicalSourceTypes = valueTypes.anatomicalSourceType.sort();
+              $scope.preservTypes          = valueTypes.preservationType.sort();
+              $scope.preservTempTypes      = valueTypes.preservationTemperatureType.sort();
+              $scope.specimenTypes         = valueTypes.specimenType.sort();
+            });
 
           $scope.submit = function(specimenGroup) {
-            SpecimenGroupService.addOrUpdate(specimenGroup)
-              .success(function() {
+            SpecimenGroupService.addOrUpdate(specimenGroup).then(
+              function(event) {
                 $state.transitionTo(
                   'admin.studies.study.specimens',
                   $stateParams,
                   { reload: true, inherit: false, notify: true });
-              })
-              .error(function(error) {
-                saveError($scope, specimenGroup, error);
+              },
+              function(errMessage) {
+                saveError($scope, specimenGroup, errMessage);
               });
           };
 
@@ -100,13 +101,11 @@ define(['angular'], function(angular) {
             'Remove Specimen Group',
             'Are you sure you want to remove specimen group ' + specimenGroup.name + '?',
             function (result) {
-              SpecimenGroupService.remove(specimenGroup)
-
-                .success(function() {
+              SpecimenGroupService.remove(specimenGroup).then(
+                function(sgInfo) {
                   stateHelper.reloadAndReinit();
-                })
-
-                .error(function(error) {
+                },
+                function(error) {
                   var bodyText = 'Specimen group ' + specimenGroup.name + ' cannot be removed: ' + error.message;
                   studyRemoveModalService.orError(
                     bodyText,

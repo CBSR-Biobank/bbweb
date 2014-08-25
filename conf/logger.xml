@@ -24,7 +24,7 @@
   <logger name="play" level="DEBUG" />
 
   <logger name="org.biobank.domain" level="INFO" />
-  <logger name="org.biobank.service" level="DEBUG" />
+  <logger name="org.biobank.service" level="INFO" />
   <logger name="org.biobank.query" level="INFO" />
 
   <root level="INFO">

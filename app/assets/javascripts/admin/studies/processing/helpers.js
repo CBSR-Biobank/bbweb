@@ -28,8 +28,8 @@ define(['angular'], function(angular) {
    * Common code to add or edit a processing type.
    */
   mod.service('processingTypeEditService', [
-    '$state', '$stateParams', '$filter', 'stateHelper', 'modalService', 'StudyService', 'ProcessingTypeService',
-    function($state, $stateParams, $filter, stateHelper, modalService, StudyService, ProcessingTypeService) {
+    '$state', '$stateParams', '$filter', 'stateHelper', 'modalService', 'ProcessingTypeService',
+    function($state, $stateParams, $filter, stateHelper, modalService, ProcessingTypeService) {
 
       /*
        * Called when the submission failed due to an error.
@@ -63,14 +63,14 @@ define(['angular'], function(angular) {
         edit: function($scope) {
           $scope.form = {
             submit: function(processingType) {
-              ProcessingTypeService.addOrUpdate(processingType)
-                .success(function() {
+              ProcessingTypeService.addOrUpdate(processingType).then(
+                function() {
                   $state.transitionTo(
                     'admin.studies.study.processing',
                     $stateParams,
                     { reload: true, inherit: false, notify: true });
-                })
-                .error(function(error) {
+                },
+                function(error) {
                   saveError($scope, processingType, error);
                 });
             },
@@ -94,13 +94,11 @@ define(['angular'], function(angular) {
             'Remove Processing Type',
             'Are you sure you want to remove processing type ' + processingType.name + '?',
             function (result) {
-              ProcessingTypeService.remove(processingType)
-
-                .success(function() {
+              ProcessingTypeService.remove(processingType).then(
+                function() {
                   stateHelper.reloadAndReinit();
-                })
-
-                .error(function(error) {
+                },
+                function(error) {
                   var bodyText = 'Processing type ' + processingType.name + ' cannot be removed: ' + error.message;
                   studyRemoveModalService.orError(
                     bodyText,
@@ -122,14 +120,14 @@ define(['angular'], function(angular) {
         edit: function ($scope) {
 
           var onSubmit = function (annotType) {
-            SpcLinkAnnotTypeService.addOrUpdate(annotType)
-              .success(function() {
+            SpcLinkAnnotTypeService.addOrUpdate(annotType).then(
+              function() {
                 $state.transitionTo(
                   'admin.studies.study.processing',
                   $stateParams,
                   { reload: true, inherit: false, notify: true });
-              })
-              .error(function(error) {
+              },
+              function(error) {
                 studyAnnotTypeEditService.onError($scope, error, 'admin.studies.study.processing');
               });
           };
@@ -155,13 +153,11 @@ define(['angular'], function(angular) {
             'Remove Specimen Link Annotation Type',
             'Are you sure you want to remove annotation type ' + annotType.name + '?',
             function (result) {
-              SpcLinkAnnotTypeService.remove(annotType)
-
-                .success(function() {
+              SpcLinkAnnotTypeService.remove(annotType).then(
+                function() {
                   stateHelper.reloadAndReinit();
-                })
-
-                .error(function(error) {
+                },
+                function(error) {
                   var bodyText = 'Annotation type ' + annotType.name + ' cannot be removed: ' + error.message;
                   studyRemoveModalService.orError(
                     bodyText,
@@ -218,14 +214,12 @@ define(['angular'], function(angular) {
     '$filter',
     'stateHelper',
     'modalService',
-    'StudyService',
     'SpcLinkTypeService',
     function($state,
              $stateParams,
              $filter,
              stateHelper,
              modalService,
-             StudyService,
              SpcLinkTypeService) {
       /*
        * Called when the submission failed due to an error.
@@ -270,14 +264,14 @@ define(['angular'], function(angular) {
                 spcLinkType.annotationTypeData = [];
               }
 
-              SpcLinkTypeService.addOrUpdate(spcLinkType)
-                .success(function() {
+              SpcLinkTypeService.addOrUpdate(spcLinkType).then(
+                function() {
                   $state.transitionTo(
                     'admin.studies.study.processing',
                     $stateParams,
                     { reload: true, inherit: false, notify: true });
-                })
-                .error(function(error) {
+                },
+                function(error) {
                   saveError($scope, spcLinkType, error);
                 });
             },
@@ -314,13 +308,11 @@ define(['angular'], function(angular) {
             'Remove Specimen Link Type',
             'Are you sure you want to remove specimen link type ' + spcLinkType.name + '?',
             function (result) {
-              SpcLinkTypeService.remove(spcLinkType)
-
-                .success(function() {
+              SpcLinkTypeService.remove(spcLinkType).then(
+                function() {
                   stateHelper.reloadAndReinit();
-                })
-
-                .error(function(error) {
+                },
+                function(error) {
                   var bodyText = 'specimen link type ' + spcLinkType.name + ' cannot be removed: ' + error.message;
                   studyRemoveModalService.orError(
                     bodyText,

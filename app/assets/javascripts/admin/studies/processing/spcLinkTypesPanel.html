@@ -8,31 +8,31 @@
     </panel-buttons>
   </accordion-heading>
   <p>{{panel.spcLinkTypes.header}}</p>
-  <div class="panel panel-warning" ng-if="panel.spcLinkTypes.data.length == 0">
+  <div class="panel panel-warning" data-ng-if="panel.spcLinkTypes.data.length == 0">
     <div class="panel-heading">
       Specimen link types have not been defined for this study yet.
     </div>
   </div>
-  <p ng-if="panel.spcLinkTypes.data.length != 0">
+  <p data-ng-if="panel.spcLinkTypes.data.length != 0">
     The following specimen link types are defined:
   </p>
-  <table ng-show="panel.spcLinkTypes.data.length != 0"
+  <table data-ng-show="panel.spcLinkTypes.data.length != 0"
          class="table table-condensed table-hover"
-         ng-table="panel.spcLinkTypes.tableParams">
-    <tr ng-repeat="tableData in $data">
+         data-ng-table="panel.spcLinkTypes.tableParams">
+    <tr data-ng-repeat="tableData in $data">
       <td data-title="'Processing Type'"
           sortable="'processingTypeName'"
-          ng-click="panel.spcLinkTypes.showProcessingType(tableData.specimenLinkType.processingTypeId)">
+          data-ng-click="panel.spcLinkTypes.showProcessingType(tableData.specimenLinkType.processingTypeId)">
         <a href>{{tableData.processingTypeName}}</a>
       </td>
       <td data-title="'Input Specimen Group'"
           sortable="'inputGroupName'"
-          ng-click="panel.spcLinkTypes.showSpecimenGroup(tableData.specimenLinkType.inputGroupId)">
+          data-ng-click="panel.spcLinkTypes.showSpecimenGroup(tableData.specimenLinkType.inputGroupId)">
         <a href>{{tableData.inputGroupName}}</a>
       </td>
       <td data-title="'Output Specimen Group'"
           sortable="'outputGroupName'"
-          ng-click="panel.spcLinkTypes.showSpecimenGroup(tableData.specimenLinkType.outputGroupId)">
+          data-ng-click="panel.spcLinkTypes.showSpecimenGroup(tableData.specimenLinkType.outputGroupId)">
         <a href>{{tableData.outputGroupName}}</a>
       </td>
       <td data-title="'Annotation Types'"

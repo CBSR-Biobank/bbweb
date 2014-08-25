@@ -156,25 +156,25 @@ define(['angular', 'underscore'], function(angular, _) {
         } else {
           /* some other error */
           modalOptions.headerText = 'Cannot ' + (study.id ?  'update' : 'add') + ' study';
-          modalOptions.bodyText = 'Error: ' + error.message;
+          modalOptions.bodyText = error.message;
         }
 
-        modalService.showModal({}, modalOptions).then(function (result) {
-          stateHelper.reloadAndReinit();
-        }, function () {
-          onCancel();
-        });
+        modalService.showModal({}, modalOptions).then(
+          function (result) {
+            stateHelper.reloadAndReinit();
+          },
+          function () {
+            onCancel();
+          });
       };
 
       return {
         edit : function($scope, onSubmitSuccess, onSubmitErrorCancel, onCancel) {
           $scope.submit = function(study) {
-            StudyService.addOrUpdate(study)
-              .success(function() {
-                onSubmitSuccess();
-              })
-              .error(function(error) {
-                onError($scope.study, error, onSubmitErrorCancel);
+            StudyService.addOrUpdate(study).then(
+              onSubmitSuccess,
+              function(message) {
+                onError($scope.study, message, onSubmitErrorCancel);
               });
           };
 
@@ -251,8 +251,8 @@ define(['angular', 'underscore'], function(angular, _) {
         edit: function($scope, onSubmit, onCancel) {
           $scope.hasRequiredField = (typeof $scope.annotType.required !== 'undefined');
 
-          StudyAnnotTypeService.valueTypes().then(function(response) {
-            $scope.valueTypes = response.data.sort();
+          StudyAnnotTypeService.valueTypes().then(function(valueTypes) {
+            $scope.valueTypes = valueTypes;
           });
 
           $scope.optionAdd = function() {

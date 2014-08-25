@@ -49,14 +49,14 @@ define(['angular', 'underscore'], function(angular, _) {
         edit: function ($scope) {
 
           var onSubmit = function (annotType) {
-            CeventAnnotTypeService.addOrUpdate(annotType)
-              .success(function() {
+            CeventAnnotTypeService.addOrUpdate(annotType).then(
+              function() {
                 $state.transitionTo(
                   'admin.studies.study.collection',
                   $stateParams,
                   { reload: true, inherit: false, notify: true });
-              })
-              .error(function(error) {
+              },
+              function(error) {
                 studyAnnotTypeEditService.onError($scope, error, 'admin.studies.study.collection');
               });
           };
@@ -82,13 +82,11 @@ define(['angular', 'underscore'], function(angular, _) {
             'Remove Collection Event Annotation Type',
             'Are you sure you want to remove collection event annotation type ' + ceventAnnotType.name + '?',
             function (result) {
-              CeventAnnotTypeService.remove(ceventAnnotType)
-
-                .success(function() {
+              CeventAnnotTypeService.remove(ceventAnnotType).then(
+                function() {
                   stateHelper.reloadAndReinit();
-                })
-
-                .error(function(error) {
+                },
+                function(error) {
                   var bodyText = 'Collection event annotation type ' + ceventAnnotType.name + ' cannot be removed: ' + error.message;
                   studyRemoveModalService.orError(
                     bodyText,
@@ -142,14 +140,14 @@ define(['angular', 'underscore'], function(angular, _) {
         edit: function($scope) {
           $scope.form = {
             submit: function(ceventType) {
-              CeventTypeService.addOrUpdate(ceventType)
-                .success(function() {
+              CeventTypeService.addOrUpdate(ceventType).then(
+                function() {
                   $state.transitionTo(
                     'admin.studies.study.collection',
                     $stateParams,
                     { reload: true, inherit: false, notify: true });
-                })
-                .error(function(error) {
+                },
+                function(error) {
                   saveError($scope, ceventType, error);
                 });
             },
@@ -205,13 +203,11 @@ define(['angular', 'underscore'], function(angular, _) {
             'Remove Collection Event Type',
             'Are you sure you want to remove collection event type ' + ceventType.name + '?',
             function (result) {
-              CeventTypeService.remove(ceventType)
-
-                .success(function() {
+              CeventTypeService.remove(ceventType).then(
+                function() {
                   stateHelper.reloadAndReinit();
-                })
-
-                .error(function(error) {
+                },
+                function(error) {
                   var bodyText = 'Collection event type ' + ceventType.name + ' cannot be removed: ' + error.message;
                   studyRemoveModalService.orError(
                     bodyText,

@@ -1,14 +1,12 @@
-import PlayKeys._
-
-name := """bbweb"""
+name := "bbweb"
 
 organization in ThisBuild := "org.biobank"
 
 version := "0.1-SNAPSHOT"
 
-scalaVersion := "2.11.1"
-
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
+
+scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.1")
 
 scalacOptions in ThisBuild ++= Seq(
   "-target:jvm-1.7",
