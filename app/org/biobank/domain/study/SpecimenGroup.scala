@@ -81,7 +81,7 @@ case class SpecimenGroup private (
     for {
       validVersion <- requireVersion(expectedVersion)
       validatedSpecimenGroup <- SpecimenGroup.create(
-        studyId, id, version, dateTime, name, description, units, anatomicalSourceType,
+        studyId, id, version, addedDate, name, description, units, anatomicalSourceType,
         preservationType, preservationTemperatureType, specimenType)
       updatedSpecimenGroup <- validatedSpecimenGroup.copy(lastUpdateDate = Some(dateTime)).success
     } yield updatedSpecimenGroup

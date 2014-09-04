@@ -6,32 +6,24 @@ define(['angular', 'common'], function(angular) {
 
   var mod = angular.module('centres.services', ['biobank.common']);
 
-  var onHttpPromiseSuccess = function(data) {
-    return data.data;
-  };
-
-  var onHttpPromiseError = function(data) {
-    return data.message;
-  };
-
   /**
    * Service to acccess centres.
    */
-  mod.factory('CentreService', ['$http', function($http) {
+  mod.factory('CentreService', ['BbwebRestApi', function(BbwebRestApi) {
     var changeStatus = function(status, centre) {
       var cmd = {
         id: centre.id,
         expectedVersion: centre.version
       };
-      return $http.post('/centres/' + status, cmd).success(onHttpPromiseSuccess).error(onHttpPromiseError);
+      return BbwebRestApi.call('POST', '/centres/' + status, cmd);
     };
 
     return {
       list : function() {
-        return $http.get('/centres').success(onHttpPromiseSuccess).error(onHttpPromiseError);
+        return BbwebRestApi.call('GET','/centres');
       },
       query: function(id) {
-        return $http.get('/centres/' + id).success(onHttpPromiseSuccess).error(onHttpPromiseError);
+        return BbwebRestApi.call('GET','/centres/' + id);
       },
       addOrUpdate: function(centre) {
         var cmd = {
@@ -43,27 +35,27 @@ define(['angular', 'common'], function(angular) {
           cmd.id = centre.id;
           cmd.expectedVersion = centre.version;
 
-          return $http.put('/centres/' + centre.id, cmd).success(onHttpPromiseSuccess).error(onHttpPromiseError);
+          return BbwebRestApi.call('PUT', '/centres/' + centre.id, cmd);
         } else {
-          return $http.post('/centres', cmd).success(onHttpPromiseSuccess).error(onHttpPromiseError);
+          return BbwebRestApi.call('POST', '/centres', cmd);
         }
       },
       enable: function(centre) {
-        return changeStatus('enabled', centre).success(onHttpPromiseSuccess).error(onHttpPromiseError);
+        return changeStatus('enabled', centre);
       },
       disable: function(centre) {
-        return changeStatus('disabled', centre).success(onHttpPromiseSuccess).error(onHttpPromiseError);
+        return changeStatus('disabled', centre);
       }
     };
   }]);
 
-  mod.factory('CentreLocationService', ['$http', function($http) {
+  mod.factory('CentreLocationService', ['BbwebRestApi', function(BbwebRestApi) {
     return {
       list : function() {
-        return $http.get('/centres/locations').success(onHttpPromiseSuccess).error(onHttpPromiseError);
+        return BbwebRestApi.call('GET', '/centres/locations');
       },
       query: function(id) {
-        return $http.get('/centres/locations/' + id).success(onHttpPromiseSuccess).error(onHttpPromiseError);
+        return BbwebRestApi.call('GET', '/centres/locations/' + id);
       },
       addOrUpdate: function(centre, location) {
         var cmd = {
@@ -81,10 +73,9 @@ define(['angular', 'common'], function(angular) {
           cmd.id = centre.id;
           cmd.expectedVersion = centre.version;
 
-          return $http.put('/centres/locations/' + centre.id, cmd)
-            .success(onHttpPromiseSuccess).error(onHttpPromiseError);
+          return BbwebRestApi.call('PUT', '/centres/locations/' + centre.id, cmd);
         } else {
-          return $http.post('/centres/locations', cmd).success(onHttpPromiseSuccess).error(onHttpPromiseError);
+          return BbwebRestApi.call('POST', '/centres/locations', cmd);
         }
       }
     };

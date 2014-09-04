@@ -6,12 +6,10 @@ define(['angular', 'common'], function(angular) {
 
   var mod = angular.module('admin.services', ['biobank.common']);
 
-  mod.factory('AdminService', ['$http', function($http) {
+  mod.factory('AdminService', ['BbwebRestApi', function(BbwebRestApi) {
     return {
       aggregateCounts : function() {
-        return $http.get('/counts').then(function(response) {
-          return response.data.data;
-        });
+        return BbwebRestApi.call('GET', '/counts');
       }
     };
   }]);

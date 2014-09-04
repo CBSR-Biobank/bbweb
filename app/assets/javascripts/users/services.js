@@ -15,18 +15,18 @@ define(['angular', 'common'], function(angular) {
   };
 
   mod.factory('userService', [
-    '$http', '$q', '$cookies', '$log',
-    function($http, $q, $cookies, $log) {
+    '$http', '$q', '$cookies', '$log', 'BbwebRestApi',
+    function($http, $q, $cookies, $log, BbwebRestApi) {
       var user, token = $cookies['XSRF-TOKEN'];
 
       /* If the token is assigned, check that the token is still valid on the server */
       if (token) {
         $http.get('/authenticate').then(
-          function(data) {
-            user = data.data;
+          function(response) {
+            user = response.data.data;
             $log.info('Welcome back, ' + user.name);
           },
-          function() {
+          function(response) {
             /* the token is no longer valid */
             $log.info('Token no longer valid, please log in.');
             token = undefined;
@@ -59,7 +59,7 @@ define(['angular', 'common'], function(angular) {
           return user;
         },
         getAllUsers: function() {
-          return $http.get('/users').success(onHttpPromiseSuccess).error(onHttpPromiseError);
+        return BbwebRestApi.call('GET', '/users');
         },
         addUser: function(newUser) {
           var cmd = {
@@ -68,11 +68,10 @@ define(['angular', 'common'], function(angular) {
             password:  newUser.password,
             avatarUrl: newUser.avatarUrl
           };
-          return $http.post('/users', cmd).success(onHttpPromiseSuccess).error(onHttpPromiseError);
+          return BbwebRestApi.call('POST', '/users', cmd);
         },
         passwordReset: function(email) {
-          return $http.post('/passreset', { email: email })
-            .success(onHttpPromiseSuccess).error(onHttpPromiseError);
+          return BbwebRestApi.call('POST', '/passreset', { email: email });
         }
       };
     }]);
@@ -116,6 +115,7 @@ define(['angular', 'common'], function(angular) {
       $state.go('home');
     });
   };
+
   handleRouteError.$inject = ['$rootScope', '$state'];
   mod.run(handleRouteError);
   return mod;

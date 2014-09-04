@@ -17,6 +17,7 @@ import org.joda.time.DateTime
 import scala.collection.immutable.Map
 
 object SpecimenLinkType {
+  import JsonUtils._
   import ProcessingType._
   import SpecimenGroup._
 

@@ -14,22 +14,32 @@ define(['angular', 'underscore'], function(angular, _) {
       return {
         show: function (ceventType, specimenGroups, annotTypes) {
           var title = 'Collection Event Type';
+          var specimenGroupsById = _.indexBy(specimenGroups, 'id');
+          var annotTypesById = _.indexBy(annotTypes, 'id');
 
           var sgDataStrings = [];
           ceventType.specimenGroupData.forEach(function (sgItem) {
-            sgDataStrings.push(sgItem.name + ' (' + sgItem.maxCount + ': ' + sgItem.amount +
-                               ' ' + sgItem.units + ')');
+            var specimenGroup = specimenGroupsById[sgItem.specimenGroupId];
+            if (!specimenGroup) {
+              throw new Error("specimen group not found");
+            }
+            sgDataStrings.push(specimenGroup.name + ' (' + sgItem.maxCount + ', ' + sgItem.amount +
+                               ' ' + specimenGroup.units + ')');
           });
 
           var atDataStrings = [];
           ceventType.annotationTypeData.forEach(function (atItem) {
-            atDataStrings.push(atItem.name + ' (' + (atItem.required ? 'Req' : 'N/R')+ ')');
+            var annotType = annotTypesById[atItem.annotationTypeId];
+            if (!annotType) {
+              throw new Error("annotation type not found");
+            }
+            atDataStrings.push(annotType.name + (atItem.required ? ' (Req)' : ' (N/R)'));
           });
 
           var data = [];
           data.push({name: 'Name:', value: ceventType.name});
-          data.push({name: 'Recurring:', value: ceventType.recurring});
-          data.push({name: 'Specimen Groups (Count: Amount):', value: sgDataStrings.join(", ")});
+          data.push({name: 'Recurring:', value: ceventType.recurring ? 'Yes' : 'No'});
+          data.push({name: 'Specimen Groups (Count, Amount):', value: sgDataStrings.join(", ")});
           data.push({name: 'Annotation Types:', value: atDataStrings.join(", ")});
           data.push({name: 'Description:', value: ceventType.description});
           data = data.concat(addTimeStampsService.get(ceventType));

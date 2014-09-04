@@ -18,8 +18,8 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       $scope.studies = [];
 
       StudyService.list().then(
-        function(data) {
-          $scope.studies = _.sortBy(data, function(study) { return study.name; });
+        function(studies) {
+          $scope.studies = _.sortBy(studies, function(study) { return study.name; });
         });
 
       $scope.addStudy = function() {
@@ -261,7 +261,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
     'ceventTypeModalService',
     'ceventTypeRemoveService',
     'ceventAnnotTypeRemoveService',
-    'annotTypeModalService',
     'ceventTypes',
     'annotTypes',
     'specimenGroups',
@@ -275,7 +274,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       ceventTypeModalService,
       ceventTypeRemoveService,
       ceventAnnotTypeRemoveService,
-      annotTypeModalService,
       ceventTypes,
       annotTypes,
       specimenGroups) {

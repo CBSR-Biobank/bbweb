@@ -38,11 +38,9 @@ define(['angular', 'underscore'], function(angular, _) {
       return {
         edit : function($scope, onSubmitSuccess, onSubmitErrorCancel, onCancel) {
           $scope.submit = function(centre) {
-            CentreService.addOrUpdate(centre)
-              .success(function() {
-                onSubmitSuccess();
-              })
-              .error(function(error) {
+            CentreService.addOrUpdate(centre).then(
+              onSubmitSuccess,
+              function(error) {
                 onError($scope.centre, error, onSubmitErrorCancel);
               });
           };

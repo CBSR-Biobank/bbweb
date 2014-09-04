@@ -62,7 +62,7 @@ case class CollectionEventType private (
     for {
       validVersion <- requireVersion(expectedVersion)
       validatedCeventType <- CollectionEventType.create(
-        studyId, id, version, dateTime, name, description, recurring, specimenGroupData, annotationTypeData)
+        studyId, id, version, addedDate, name, description, recurring, specimenGroupData, annotationTypeData)
       updatedCeventType <- validatedCeventType.copy(lastUpdateDate = Some(dateTime)).success
     } yield updatedCeventType
   }

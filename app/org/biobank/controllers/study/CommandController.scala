@@ -92,6 +92,8 @@ trait JsonController extends Controller {
           val errMsgs = err.list.mkString(", ")
           if (errMsgs.contains("not found")) {
             NotFound(errMsgs)
+          } else if (errMsgs.contains("already exists")) {
+            Forbidden(errMsgs)
           } else {
             BadRequest(errMsgs)
           }

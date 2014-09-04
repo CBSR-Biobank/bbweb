@@ -16,8 +16,8 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       $rootScope.pageTitle = 'Biobank centres';
       $scope.centres = [];
 
-      CentreService.list().then(function(response) {
-        $scope.centres = _.sortBy(response.data, function(centre) { return centre.name; });
+      CentreService.list().then(function(centres) {
+        $scope.centres = _.sortBy(centres, function(centre) { return centre.name; });
       });
 
       $scope.addCentre = function() {
@@ -52,8 +52,8 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       $rootScope.pageTitle = 'Biobank centres';
       $scope.centres = [];
 
-      CentreService.list().then(function(response) {
-        $scope.centres = response.data;
+      CentreService.list().then(function(centres) {
+        $scope.centres = centres;
 
         /* jshint ignore:start */
         $scope.tableParams = new ngTableParams({
