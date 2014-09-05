@@ -35,9 +35,12 @@
           data-ng-click="panel.spcLinkTypes.showSpecimenGroup(tableData.specimenLinkType.outputGroupId)">
         <a href>{{tableData.outputGroupName}}</a>
       </td>
-      <td data-title="'Annotation Types'"
-          sortable="'annotTypeNames'">
-        {{tableData.annotTypeNames.join(', ')}}
+      <td data-title="'Annotation Types'">
+        <span data-ng-repeat="at in tableData.annotationTypes"
+             data-ng-click="panel.spcLinkTypes.showAnnotationType(at.id)">
+          <a href>{{at.name}}</a><span data-ng-if="!$last">, </span>
+        </span>
+
       </td>
       <td>
         <info-update-remove-buttons

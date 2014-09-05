@@ -104,7 +104,7 @@ define(['angular'], function(angular) {
           avatarUrl: ''
         },
         submit: function(user) {
-          userService.addUser(user).then(
+          userService.add(user).then(
             function() {
               // user has been registerd
               $state.go("users.login.registered");

@@ -264,6 +264,7 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
     'ceventTypes',
     'annotTypes',
     'specimenGroups',
+    'specimenGroupModalService',
     function(
       $injector,
       $scope,
@@ -276,7 +277,8 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       ceventAnnotTypeRemoveService,
       ceventTypes,
       annotTypes,
-      specimenGroups) {
+      specimenGroups,
+      specimenGroupModalService) {
 
       $scope.panel = {
         annotTypes: new AnnotTypesPanelSettings(
@@ -299,6 +301,9 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       };
 
       function CeventTypesPanelSettings($injector, $scope, ceventTypes) {
+        // push all specimen groups names into an array for easy display
+        var specimenGroupsById = _.indexBy(specimenGroups, 'id');
+
         this.title = 'Collection Event Types';
         this.header = 'A Collection Event Type defines a classification name, unique to the Study, to a ' +
           'participant visit. A participant visit is a record of when specimens were collected ' +
@@ -321,12 +326,15 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
           studyViewSettings.panelState('ceventTypes');
         };
 
-        // push all specimen groups names into an array for easy display
-        var specimenGroupsById = _.indexBy(specimenGroups, 'id');
+        this.showSpecimenGroup = function (specimenGroupId) {
+          specimenGroupModalService.show(specimenGroupsById[specimenGroupId]);
+        };
+
         ceventTypes.forEach(function (cet) {
-          cet.sgNames = [];
+          cet.specimenGroups = [];
           cet.specimenGroupData.forEach(function (sgItem) {
-            cet.sgNames.push(specimenGroupsById[sgItem.specimenGroupId].name);
+            var sg = specimenGroupsById[sgItem.specimenGroupId];
+            cet.specimenGroups.push({ id: sgItem.specimenGroupId, name: sg.name });
           });
         });
 
@@ -464,19 +472,24 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
           specimenGroupModalService.show(specimenGroupsById[specimenGroupId]);
         };
 
+        this.showAnnotationType = function (annotTypeId) {
+          annotTypeModalService.show("Specimen Link Annotation Type", annotTypesById[annotTypeId]);
+        };
+
         var tableData = [];
         dtoProcessing.specimenLinkTypes.forEach(function(slt) {
-          var annotTypeNames = [];
+          var annotationTypes = [];
           slt.annotationTypeData.forEach(function (annotTypeItem) {
-            annotTypeNames.push(annotTypesById[annotTypeItem.annotationTypeId].name);
+            var at = annotTypesById[annotTypeItem.annotationTypeId];
+            annotationTypes.push({id: annotTypeItem.annotationTypeId, name: at.name });
           });
 
           tableData.push({
             specimenLinkType: slt,
             processingTypeName: processingTypesById[slt.processingTypeId].name,
-            inputGroupName: specimenGroupsById[slt.inputGroupId].name,
-            outputGroupName: specimenGroupsById[slt.outputGroupId].name,
-            annotTypeNames: annotTypeNames
+            inputGroupName:     specimenGroupsById[slt.inputGroupId].name,
+            outputGroupName:    specimenGroupsById[slt.outputGroupId].name,
+            annotationTypes:    annotationTypes
           });
         });
 

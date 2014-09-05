@@ -76,8 +76,7 @@ define(['angular'], function(angular) {
   });
 
   /**
-   * Displays a right justified button with a 'plus' icon. Meant to be used in table displaying
-   * domain object information.
+   * Displays a right justified button group with an information, an update and a remove button.
    */
   mod.directive("infoUpdateRemoveButtons", function () {
     return {
@@ -89,6 +88,21 @@ define(['angular'], function(angular) {
         'remove': '&onRemove'
       },
       templateUrl: '/assets/javascripts/common/directives/infoUpdateRemoveButtons.html'
+    };
+  });
+
+  /**
+   * Displays a right justified button group with an update and a remove button.
+   */
+  mod.directive("updateRemoveButtons", function () {
+    return {
+      restrict: "E",
+      replace: 'true',
+      scope: {
+        'update': '&onUpdate',
+        'remove': '&onRemove'
+      },
+      templateUrl: '/assets/javascripts/common/directives/updateRemoveButtons.html'
     };
   });
 

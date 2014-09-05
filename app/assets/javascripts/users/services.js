@@ -58,17 +58,38 @@ define(['angular', 'common'], function(angular) {
         getUser: function() {
           return user;
         },
-        getAllUsers: function() {
-        return BbwebRestApi.call('GET', '/users');
+        query: function(userId) {
+          return BbwebRestApi.call('GET', '/users/' + userId);
         },
-        addUser: function(newUser) {
+        getAllUsers: function() {
+          return BbwebRestApi.call('GET', '/users');
+        },
+        add: function(newUser) {
           var cmd = {
-            name:      newUser.name,
-            email:     newUser.email,
-            password:  newUser.password,
-            avatarUrl: newUser.avatarUrl
+            name:     newUser.name,
+            email:    newUser.email,
+            password: newUser.password
           };
+          if (newUser.avatarUrl) {
+            cmd.avatarUrl = newUser.avatarUrl;
+          }
           return BbwebRestApi.call('POST', '/users', cmd);
+        },
+        update: function(user, newPassword) {
+          var cmd = {
+            expectedVersion: user.version,
+            name:            user.name,
+            email:           user.email
+          };
+
+          if (user.password) {
+            cmd.password = newPassword;
+          }
+
+          if (user.avatarUrl) {
+            cmd.avatarUrl = user.avatarUrl;
+          }
+          return BbwebRestApi.call('PUT', '/users/' + user.id, cmd);
         },
         passwordReset: function(email) {
           return BbwebRestApi.call('POST', '/passreset', { email: email });
@@ -92,12 +113,12 @@ define(['angular', 'common'], function(angular) {
         token = $cookies['XSRF-TOKEN'];
 
         if (token) {
-          $http.get('/authenticate')
-            .success(function(data) {
-              deferred.resolve(data);
-            })
-            .error(function() {
-              deferred.reject();
+          $http.get('/authenticate').then(
+            function(response) {
+              deferred.resolve(response.data.data);
+            },
+            function(response) {
+              deferred.reject(response.data);
             });
         } else {
           deferred.reject();

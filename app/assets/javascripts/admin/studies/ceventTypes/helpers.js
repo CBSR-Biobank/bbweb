@@ -1,4 +1,5 @@
-/** Common helpers */
+/** Collection Event Type helpers
+  */
 define(['angular', 'underscore'], function(angular, _) {
   'use strict';
 

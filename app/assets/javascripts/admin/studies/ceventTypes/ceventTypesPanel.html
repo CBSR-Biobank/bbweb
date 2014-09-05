@@ -21,10 +21,15 @@
          data-ng-table="panel.ceventTypes.tableParams">
     <tr data-ng-repeat="ceventType in $data">
       <td data-title="'Name'" sortable="'name'">
-        {{ceventType.name}}
+        <span data-ng-click="panel.ceventTypes.information(ceventType)">
+          <a href>{{ceventType.name}}</a>
+        </span>
       </td>
       <td data-title="'Specimen Groups'">
-        {{ceventType.sgNames.join(", ")}}
+        <span data-ng-repeat="sg in ceventType.specimenGroups"
+             data-ng-click="panel.ceventTypes.showSpecimenGroup(sg.id)">
+          <a href>{{sg.name}}</a><span data-ng-if="!$last">, </span>
+        </span>
       </td>
       <td data-title="'Recurring'" sortable="'recurring'">
         {{ceventType.recurring ? 'Y' : 'N'}}
@@ -33,11 +38,10 @@
         {{ceventType.description === null ? "" : ceventType.description | truncate:40}}
       </td>
       <td>
-        <info-update-remove-buttons
-            on-info="panel.ceventTypes.information(ceventType)"
+        <update-remove-buttons
             on-update="panel.ceventTypes.update(ceventType)"
             on-remove="panel.ceventTypes.remove(ceventType)">
-        </info-update-remove-buttons>
+        </update-remove-buttons>
       </td>
     </tr>
   </table>

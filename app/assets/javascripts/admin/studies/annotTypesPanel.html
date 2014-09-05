@@ -20,22 +20,23 @@
          class="table table-condensed table-hover"
          data-ng-table="panel.annotTypes.tableParams">
     <tr data-ng-repeat="annotType in $data">
-      <td data-title="'Name'" sortable="'name'">{{annotType.name}}</td>
+      <td data-title="'Name'" sortable="'name'">
+        <span data-ng-click="panel.annotTypes.information(annotType)">
+          <a href>{{annotType.name}}</a>
+        </span>
+      </td>
       <td data-title="'Type'" sortable="'valueType'">{{annotType.valueType}}</td>
-      <td data-title="'Required'"
-          sortable="'required'"
-          data-ng-show="panel.annotTypes.hasRequired">
+      <td data-title="'Required'" sortable="'required'">
         {{annotType.required ? "Yes" : "No"}}
       </td>
       <td data-title="'Description'" sortable="'description'">
         {{annotType.description === null ? "" : annotType.description | truncate:40}}
       </td>
       <td>
-        <info-update-remove-buttons
-            on-info="panel.annotTypes.information(annotType)"
+        <update-remove-buttons
             on-update="panel.annotTypes.update(annotType)"
             on-remove="panel.annotTypes.remove(annotType)">
-        </info-update-remove-buttons>
+        </update-remove-buttons>
       </td>
     </tr>
   </table>

@@ -8,8 +8,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
 
   /**
    * Displays a list of users in a table.
-   *
-   * "user" is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
   mod.controller('UsersTableCtrl', [
     '$rootScope', '$scope', '$state', '$filter', 'ngTableParams', 'userService',
@@ -43,7 +41,61 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
         $scope.userInformation = function(user) {
           $state.go("admin.users.user", { userId: user.id });
         };
+
+        $scope.update = function(user) {
+          $state.go("admin.users.user", { userId: user.id });
+        };
       });
+    }]);
+
+  /**
+   * Displays a list of users in a table.
+   */
+  mod.controller('UserUpdateCtrl', [
+    '$rootScope', '$scope', '$state', '$filter', 'userService', 'modalService', 'userToModify',
+    function($rootScope, $scope, $state, $filter, userService, modalService, userToModify) {
+
+      var onError = function (error) {
+        var modalOptions = {
+          closeButtonText: 'Cancel',
+          actionButtonText: 'OK'
+        };
+
+        if (error.message.indexOf("expected version doesn't match current version") > -1) {
+          /* concurrent change error */
+          modalOptions.headerText = 'Modified by another user';
+          modalOptions.bodyText = 'Another user already made changes to this user. Press OK to make ' +
+            ' your changes again, or Cancel to dismiss your changes.';
+        } else {
+          /* some other error */
+          modalOptions.headerText = 'Cannot update user';
+          modalOptions.bodyText = error.message;
+        }
+
+        modalService.showModal({}, modalOptions).then(
+          function (result) {
+            stateHelper.reloadAndReinit();
+          },
+          function () {
+            $state.go("admin.users");
+          });
+      };
+
+      $scope.form = {
+        user: userToModify,
+        password: '',
+        confirmPassword: '',
+        submit: function(user, password) {
+          userService.update(user, password).then(
+            function(event) {
+              $state.go("admin.users");
+            },
+            onError
+          );
+        },
+        cancel: function() {
+        }
+      };
     }]);
 
   return mod;

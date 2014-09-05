@@ -21,7 +21,9 @@
          data-ng-table="panel.specimenGroups.tableParams">
     <tr data-ng-repeat="specimenGroup in $data">
       <td data-title="'Name'" sortable="'name'">
-        {{specimenGroup.name}}
+        <span data-ng-click="panel.specimenGroups.information(specimenGroup)">
+          <a href>{{specimenGroup.name}}</a>
+        </span>
       </td>
       <td data-title="'Anatomical Source'" sortable="'anatomicalSourceType'">
         {{specimenGroup.anatomicalSourceType}}
@@ -33,11 +35,10 @@
         {{specimenGroup.description === null ? "" : specimenGroup.description | truncate:40}}
       </td>
       <td>
-        <info-update-remove-buttons
-            on-info="panel.specimenGroups.information(specimenGroup)"
+        <update-remove-buttons
             on-update="panel.specimenGroups.update(specimenGroup)"
             on-remove="panel.specimenGroups.remove(specimenGroup)">
-        </info-update-remove-buttons>
+        </update-remove-buttons>
       </td>
     </tr>
   </table>
