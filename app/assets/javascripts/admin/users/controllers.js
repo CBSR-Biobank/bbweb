@@ -10,8 +10,26 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
    * Displays a list of users in a table.
    */
   mod.controller('UsersTableCtrl', [
-    '$rootScope', '$scope', '$state', '$filter', 'ngTableParams', 'userService',
-    function($rootScope, $scope, $state, $filter, ngTableParams, userService) {
+    '$q',
+    '$rootScope',
+    '$scope',
+    '$state',
+    '$filter',
+    'stateHelper',
+    'modalService',
+    'ngTableParams',
+    'userService',
+    'UserModalService',
+    function($q,
+             $rootScope,
+             $scope,
+             $state,
+             $filter,
+             stateHelper,
+             modalService,
+             ngTableParams,
+             userService,
+             UserModalService) {
       $rootScope.pageTitle = 'Biobank users';
       $scope.users = [];
       userService.getAllUsers().then(function(data) {
@@ -37,23 +55,65 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
           }
         });
         /* jshint ignore:end */
-
-        $scope.userInformation = function(user) {
-          $state.go("admin.users.user", { userId: user.id });
-        };
-
-        $scope.update = function(user) {
-          $state.go("admin.users.user", { userId: user.id });
-        };
       });
+
+      var changeStatusModal = function(user, status) {
+        var modalOptions = {
+          closeButtonText: 'Cancel',
+          actionButtonText: 'OK'
+        };
+
+        modalOptions.headerText = 'Change user status';
+        modalOptions.bodyText = 'Please confirm that you want to ' + status + ' user "' +
+          user.name + '"?';
+
+        return modalService.showModal({}, modalOptions);
+      };
+
+      //$state.go("admin.users.user", { userId: user.id });
+
+      $scope.userInformation = function(user) {
+        UserModalService.show(user);
+      };
+
+      $scope.activate = function(user) {
+        changeStatusModal(user, 'activate').then(
+          function(result) {
+            userService.activate(user);
+            stateHelper.reloadAndReinit();
+          },
+          stateHelper.reloadAndReinit()
+        );
+      };
+
+      $scope.lock = function(user) {
+        changeStatusModal(user, 'lock').then(
+          function(result) {
+            userService.lock(user);
+            stateHelper.reloadAndReinit();
+          },
+          stateHelper.reloadAndReinit()
+        );
+      };
+
+      $scope.unlock = function(user) {
+        changeStatusModal(user, 'unlock').then(
+          function(result) {
+            userService.unlock(user);
+            stateHelper.reloadAndReinit();
+          },
+          stateHelper.reloadAndReinit()
+        );
+      };
+
     }]);
 
   /**
    * Displays a list of users in a table.
    */
   mod.controller('UserUpdateCtrl', [
-    '$rootScope', '$scope', '$state', '$filter', 'userService', 'modalService', 'userToModify',
-    function($rootScope, $scope, $state, $filter, userService, modalService, userToModify) {
+    '$rootScope', '$scope', '$state', '$filter', 'userService', 'modalService', 'user',
+    function($rootScope, $scope, $state, $filter, userService, modalService, user) {
 
       var onError = function (error) {
         var modalOptions = {
@@ -82,7 +142,7 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       };
 
       $scope.form = {
-        user: userToModify,
+        user: user,
         password: '',
         confirmPassword: '',
         submit: function(user, password) {

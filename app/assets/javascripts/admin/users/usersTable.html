@@ -20,22 +20,21 @@
           {{user.addedDate}}
         </td>
         <td data-title="'Status'" sortable="'status'">
-          {{user.status}}
+          <span class="badge">{{user.status}}</span>
         </td>
         <td>
           <div class="btn-group pull-right">
             <button class="btn btn-xs btn-primary"
-                    data-ng-click="update(user)"
-                    title="Update"
-                    data-ng-if="user.status == 'Active'">
-              <i class="glyphicon glyphicon-edit"></i>
+                    data-ng-click="userInformation(user)"
+                    title="Update">
+              <i class="glyphicon glyphicon-info-sign"></i>
             </button>
             <button class="btn btn-xs btn-success"
                     data-ng-click="activate(user)"
                     data-toggle="tooltip"
                     title="Activate user"
                     data-ng-if="user.status == 'Registered'">
-              <i class="glyphicon glyphicon-plus"></i>
+              <i class="glyphicon glyphicon-check"></i>
             </button>
             <button class="btn btn-xs btn-warning"
                     data-ng-click="lock(user)"
@@ -44,12 +43,12 @@
                     data-ng-if="user.status == 'Active'">
               <i class="glyphicon glyphicon-lock"></i>
             </button>
-            <button class="btn btn-xs btn-warning"
+            <button class="btn btn-xs btn-danger"
                     data-ng-click="unlock(user)"
                     data-toggle="tooltip"
                     title="Unlock user"
                     data-ng-if="user.status == 'Locked'">
-              <i class="glyphicon glyphicon-backward"></i>
+              <i class="glyphicon glyphicon-plus"></i>
             </button>
           </div>
         </td>

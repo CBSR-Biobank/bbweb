@@ -89,16 +89,15 @@ POST    /centres/studies                       org.biobank.controllers.centres.C
 DELETE  /centres/studies/:centreId/:studyId    org.biobank.controllers.centres.CentresController.removeLinkedStudy(centreId, studyId)
 
 # Users
+POST    /users/activate                        org.biobank.controllers.UsersController.activateUser
+POST    /users/lock                            org.biobank.controllers.UsersController.lockUser
+POST    /users/unlock                          org.biobank.controllers.UsersController.unlockUser
 GET     /authenticate                          org.biobank.controllers.UsersController.authenticateUser
 GET     /users                                 org.biobank.controllers.UsersController.list()
 GET     /users/:id                             org.biobank.controllers.UsersController.user(id)
-POST    /users                                 org.biobank.controllers.UsersController.addUser()
+POST    /users                                 org.biobank.controllers.UsersController.registerUser()
 PUT     /users/:id                             org.biobank.controllers.UsersController.updateUser(id)
 DELETE  /users/:id/:ver                        org.biobank.controllers.UsersController.removeUser(id, ver: Long)
-
-PUT     /users/activate/:id                    org.biobank.controllers.UsersController.activateUser(id)
-PUT     /users/lock/:id                        org.biobank.controllers.UsersController.lockUser(id)
-PUT     /users/unlock/:id                      org.biobank.controllers.UsersController.unlockUser(id)
 
 # Authentication
 POST    /login                                 org.biobank.controllers.UsersController.login()

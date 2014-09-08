@@ -25,18 +25,37 @@ define(['angular'], function(angular) {
               $state.go("dashboard");
             },
             function(response) {
-              // login failed
-              var modalOptions = {
-                closeButtonText: 'Cancel',
-                actionButtonText: 'Retry',
-                headerText: 'Invalid login credentials',
-                bodyText: 'The email and / or password you entered are invalid.'
-              };
-              modalService.showModal({}, modalOptions).then(function (result) {
-                stateHelper.reloadAndReinit();
-              }, function () {
-                $state.go("home");
-              });
+              var modalDefaults = {};
+              var modalOptions = {};
+
+              if (response.data.message === 'invalid email or password') {
+                modalOptions.closeButtonText = 'Cancel';
+                modalOptions.actionButtonText = 'Retry';
+                modalOptions.headerText = 'Invalid login credentials';
+                modalOptions.bodyText = 'The email and / or password you entered are invalid.';
+              } else if (response.data.message === 'the user is not active') {
+                modalOptions.headerText = 'Login not active';
+                modalOptions.bodyText = 'Your login is not active yet. ' +
+                  'Please contact your system admnistrator for more information.';
+                modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
+              } else if (response.data.message === 'the user is locked') {
+                modalOptions.headerText = 'Login is locked';
+                modalOptions.bodyText = 'Your login is locked. ' +
+                  'Please contact your system admnistrator for more information.';
+                modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
+              } else {
+                modalOptions.headerText = 'Login error';
+                modalOptions.bodyText = 'Cannot login: ' + response.data.message;
+                modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
+              }
+              modalService.showModal(modalDefaults, modalOptions).then(
+                function(result) {
+                  stateHelper.reloadAndReinit();
+                },
+                function() {
+                  $state.go("home");
+                }
+              );
             });
         }
       };

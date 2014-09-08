@@ -1,13 +1,14 @@
 package org.biobank.controllers
 
 import org.biobank.domain.{ DomainValidation, DomainError }
-import org.biobank.domain.user.UserId
+import org.biobank.domain.user.{ UserId, UserHelper }
 
 import scala.concurrent.Future
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.cache._
 import play.api.Play.current
+import com.typesafe.plugin.use
 
 import scalaz._
 import scalaz.Scalaz._
@@ -17,6 +18,8 @@ import scalaz.Scalaz._
  * Can be composed to fine-tune access control.
  */
 trait Security { self: Controller =>
+
+  private def usersService = use[BbwebPlugin].usersService
 
   val AuthTokenCookieKey = "XSRF-TOKEN"
   val AuthTokenHeader = "X-XSRF-TOKEN"
@@ -43,7 +46,13 @@ trait Security { self: Controller =>
              if (xsrfTokenCookie.value.equals(token)) {
                Cache.getAs[UserId](token) match {
                  case None => DomainError("invalid token").failNel
-                 case Some(userId) => AuthenticationInfo(token, userId).successNel
+                 case Some(userId) => {
+                   for {
+                     user       <- usersService.getByEmail(userId.id)
+                     activeUser <- UserHelper.isUserActive(user)
+                     auth       <- AuthenticationInfo(token, userId).successNel
+                   } yield auth
+                 }
                }
              } else {
                DomainError("Token mismatch").failNel

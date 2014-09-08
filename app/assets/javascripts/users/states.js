@@ -121,6 +121,25 @@ define(['angular', 'common'], function(angular, controllers) {
         }
       });
 
+      /**
+       * Allows changes to be made to a user
+       */
+      $stateProvider.state('users.settings', {
+        url: '^/settings',
+        resolve: {
+          user: userResolve.user
+        },
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/users/userSettingsForm.html',
+            controller: 'UserUpdateCtrl'
+          }
+        },
+        data: {
+          displayName: 'User Settings'
+        }
+      });
+
       //.when('/users', {templateUrl:'/assets/javascripts/user/users.html', controller:controllers.UserCtrl})
       //.when('/users/:id', {templateUrl:'/assets/javascripts/user/editUser.html', controller:controllers.UserCtrl});
     }]);

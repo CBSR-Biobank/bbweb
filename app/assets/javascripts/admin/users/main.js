@@ -5,16 +5,16 @@
 define([
   'angular',
   './states',
-  './controllers' //,
+  './controllers',
+  './helpers'
   //'./services/services',
-  //'./services/helpers'
 ], function(angular) {
   'use strict';
 
   return angular.module('biobank.admin.users', [
     'admin.users.controllers',
-    'admin.users.states'//,
-    // 'admin.users.helpers',
+    'admin.users.states',
+    'admin.users.helpers',
     // 'users.services'
   ]);
 });

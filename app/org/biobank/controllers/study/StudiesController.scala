@@ -14,15 +14,15 @@ import org.biobank.service.json.SpecimenLinkType._
 import org.biobank.service.json.Study._
 
 import com.typesafe.plugin.use
-import play.api.libs.json._
+import play.api.Logger
+import play.api.Play.current
+import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 import play.api.mvc.Results._
 import play.api.mvc._
-import play.api.{ Logger, Play }
-import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import scala.language.reflectiveCalls
-import play.api.Play.current
 
 import scalaz._
 import scalaz.Scalaz._

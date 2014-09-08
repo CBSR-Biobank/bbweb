@@ -12,55 +12,55 @@ define(['angular', 'common'], function(angular) {
   mod.factory('StudyService', [
     '$http', 'BbwebRestApi', function($http, BbwebRestApi) {
 
-    var changeStatus = function(status, study) {
-      var cmd = {
-        id: study.id,
-        expectedVersion: study.version
-      };
-      return BbwebRestApi.call('POST', '/studies/', cmd);
-    };
-
-    return {
-      list : function() {
-        return BbwebRestApi.call('GET', '/studies');
-      },
-      query: function(id) {
-        return BbwebRestApi.call('GET', '/studies/' + id);
-      },
-      addOrUpdate: function(study, onSuccess, onError) {
+      var changeStatus = function(study, status) {
         var cmd = {
-          name: study.name,
-          description: study.description
+          id: study.id,
+          expectedVersion: study.version
         };
+        return BbwebRestApi.call('POST', '/studies/' + status, cmd);
+      };
 
-        if (study.id) {
-          cmd.id = study.id;
-          cmd.expectedVersion = study.version;
+      return {
+        list : function() {
+          return BbwebRestApi.call('GET', '/studies');
+        },
+        query: function(id) {
+          return BbwebRestApi.call('GET', '/studies/' + id);
+        },
+        addOrUpdate: function(study, onSuccess, onError) {
+          var cmd = {
+            name: study.name,
+            description: study.description
+          };
 
-          return BbwebRestApi.call('PUT', '/studies/' + study.id, cmd);
-        } else {
-          return BbwebRestApi.call('POST', '/studies', cmd);
+          if (study.id) {
+            cmd.id = study.id;
+            cmd.expectedVersion = study.version;
+
+            return BbwebRestApi.call('PUT', '/studies/' + study.id, cmd);
+          } else {
+            return BbwebRestApi.call('POST', '/studies', cmd);
+          }
+        },
+        enable: function(study) {
+          return changeStatus(study, 'enable');
+        },
+        disable: function(study) {
+          return changeStatus(study, 'disable');
+        },
+        retire: function(study) {
+          return changeStatus(study, 'retire');
+        },
+        unretire: function(study) {
+          return changeStatus(study, 'unretire');
+        },
+        dto: {
+          processing: function(study) {
+            return BbwebRestApi.call('GET', '/studies/dto/processing/' + study.id);
+          }
         }
-      },
-      enable: function(study) {
-        return changeStatus('enabled', study);
-      },
-      disable: function(study) {
-        return changeStatus('disabled', study);
-      },
-      retire: function(study) {
-        return changeStatus('retire', study);
-      },
-      unretire: function(study) {
-        return changeStatus('unretire', study);
-      },
-      dto: {
-        processing: function(study) {
-          return BbwebRestApi.call('GET', '/studies/dto/processing/' + study.id);
-        }
-      }
-    };
-  }]);
+      };
+    }]);
 
   /**
    * Service to access study annotation types.

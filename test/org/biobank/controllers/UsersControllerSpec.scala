@@ -133,7 +133,7 @@ class UsersControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "expectedVersion" -> Some(user.version),
           "email"           -> user.id.id)
-        val json = makeRequest(PUT, s"/users/activate/${user.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, s"/users/activate", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
       }
@@ -149,7 +149,7 @@ class UsersControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "expectedVersion" -> Some(user.version),
           "email"           -> user.id.id)
-        val json = makeRequest(PUT, s"/users/lock/${user.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, s"/users/lock", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
       }
@@ -165,7 +165,7 @@ class UsersControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "expectedVersion" -> Some(lockedUser.version),
           "email"           -> lockedUser.id.id)
-        val json = makeRequest(PUT, s"/users/unlock/${lockedUser.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, s"/users/unlock", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
       }

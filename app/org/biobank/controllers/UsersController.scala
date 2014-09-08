@@ -4,16 +4,17 @@ import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.service.json.User._
 import org.biobank.service.json.Events._
 
-import scala.concurrent.Future
-import play.api.libs.concurrent.Execution.Implicits._
-import play.api.{ Logger, Play }
+import com.typesafe.plugin.use
+import play.api.Logger
 import play.api.Play.current
-import play.api.mvc._
-import play.api.mvc.Results._
-import play.api.libs.json._
-import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
 import play.api.cache.Cache
+import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Reads._
+import play.api.libs.json._
+import play.api.mvc.Results._
+import play.api.mvc._
+import scala.concurrent.Future
 import scala.language.reflectiveCalls
 
 import scalaz._
@@ -21,9 +22,7 @@ import Scalaz._
 
 object UsersController extends CommandController with JsonController {
 
-  private def usersService = Play.current.plugin[BbwebPlugin].map(_.usersService).getOrElse {
-    sys.error("Bbweb plugin is not registered")
-  }
+  private def usersService = use[BbwebPlugin].usersService
 
   /** Used for obtaining the email and password from the HTTP login request */
   case class LoginCredentials(email: String, password: String)
@@ -55,6 +54,8 @@ object UsersController extends CommandController with JsonController {
             val errStr = err.list.mkString(", ")
             if (errStr.contains("not found") || errStr.contains("invalid password")) {
               Forbidden("invalid email or password")
+            } else if (errStr.contains("not active") || errStr.contains("is locked")) {
+              Forbidden(err.list.mkString(", "))
             } else {
               NotFound(err.list.mkString(", "))
             }
@@ -131,7 +132,7 @@ object UsersController extends CommandController with JsonController {
     )
   }
 
-  def addUser() = Action.async(parse.json) { implicit request =>
+  def registerUser() = Action.async(parse.json) { implicit request =>
     request.body.validate[RegisterUserCmd].fold(
       errors => {
         Future.successful(BadRequest(JsError.toFlatJson(errors)))
@@ -156,22 +157,22 @@ object UsersController extends CommandController with JsonController {
     )
   }
 
-  def activateUser(id: String) =  commandAction { cmd: ActivateUserCmd => implicit userId =>
-    val future = usersService.activate(cmd)
-    domainValidationReply(future)
-  }
-
   def updateUser(id: String) =  commandAction { cmd: UpdateUserCmd => implicit userId =>
     val future = usersService.update(cmd)
     domainValidationReply(future)
   }
 
-  def lockUser(id: String) =  commandAction { cmd: LockUserCmd => implicit userId =>
+  def activateUser =  commandAction { cmd: ActivateUserCmd => implicit userId =>
+    val future = usersService.activate(cmd)
+    domainValidationReply(future)
+  }
+
+  def lockUser =  commandAction { cmd: LockUserCmd => implicit userId =>
     val future = usersService.lock(cmd)
     domainValidationReply(future)
   }
 
-  def unlockUser(id: String) =  commandAction { cmd: UnlockUserCmd => implicit userId =>
+  def unlockUser =  commandAction { cmd: UnlockUserCmd => implicit userId =>
     Logger.info(s"unlockUser")
     val future = usersService.unlock(cmd)
     domainValidationReply(future)

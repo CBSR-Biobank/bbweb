@@ -36,11 +36,6 @@ object User {
       (__ \ "avatarUrl").readNullable[String](minLength[String](2))
   )(RegisterUserCmd.apply _)
 
-  implicit val activateUserCmdReads = (
-      (__ \ "email").read[String](minLength[String](5)) and
-    (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(ActivateUserCmd.apply _)
-
   implicit val updateUserCmdReads = (
     (__ \ "expectedVersion").read[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
@@ -48,6 +43,11 @@ object User {
       (__ \ "password").readNullable[String](minLength[String](2)) and
       (__ \ "avatarUrl").readNullable[String](minLength[String](2))
   )(UpdateUserCmd.apply _)
+
+  implicit val activateUserCmdReads = (
+      (__ \ "email").read[String](minLength[String](5)) and
+    (__ \ "expectedVersion").read[Long](min[Long](0))
+  )(ActivateUserCmd.apply _)
 
   implicit val lockUserCmdReads = (
     (__ \ "email").read[String](minLength[String](5)) and

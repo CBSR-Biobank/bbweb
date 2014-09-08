@@ -59,15 +59,14 @@ trait UsersServiceComponent {
     def validatePassword(email: String, enteredPwd: String): DomainValidation[User] = {
       for {
         user <- userRepository.getByKey(UserId(email))
-        notLocked <- UserHelper.isUserNotLocked(user)
         validPwd <- {
-          log.debug(s"validatePassword: email: $email, user: $user")
           if (passwordHasher.valid(user.password, user.salt, enteredPwd)) {
             user.success
           } else {
             DomainError("invalid password").failNel
           }
         }
+        notLocked <- UserHelper.isUserNotLocked(user)
       } yield user
     }
 
@@ -253,7 +252,10 @@ trait UsersProcessorComponent {
       if (validation.isFailure) {
         // this should never happen because the only way to get here is when the
         // command passed validation
-        throw new IllegalStateException("activating user from event failed")
+        validation.swap.map { err =>
+          throw new IllegalStateException(s"activating user from event failed: $err")
+        }
+        ()
       }
     }
 
@@ -272,7 +274,10 @@ trait UsersProcessorComponent {
       if (validation.isFailure) {
         // this should never happen because the only way to get here is when the
         // command passed validation
-        throw new IllegalStateException("activating user from event failed")
+        validation.swap.map { err =>
+          throw new IllegalStateException(s"activating user from event failed: $err")
+        }
+        ()
       }
     }
 

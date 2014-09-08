@@ -35,6 +35,14 @@ define(['angular', 'common'], function(angular) {
           });
       }
 
+      var changeStatus = function(user, status) {
+        var cmd = {
+          email: user.id,
+          expectedVersion: user.version
+        };
+        return BbwebRestApi.call('POST', '/users/' + status, cmd);
+      };
+
       return {
         login: function(credentials) {
           return $http.post('/login', credentials).then(function(response) {
@@ -93,6 +101,15 @@ define(['angular', 'common'], function(angular) {
         },
         passwordReset: function(email) {
           return BbwebRestApi.call('POST', '/passreset', { email: email });
+        },
+        activate: function(user) {
+          changeStatus(user, 'activate');
+        },
+        lock: function(user) {
+          changeStatus(user, 'lock');
+        },
+        unlock: function(user) {
+          changeStatus(user, 'unlock');
         }
       };
     }]);

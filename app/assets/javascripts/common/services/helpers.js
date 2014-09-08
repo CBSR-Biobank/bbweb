@@ -62,7 +62,7 @@ define(['angular'], function(angular) {
     };
 
     var modalOptions = {
-      closeButtonText: 'Close',
+      //closeButtonText: 'Close',
       actionButtonText: 'OK',
       headerText: 'Proceed?',
       bodyText: 'Perform this action?'

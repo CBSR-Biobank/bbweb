@@ -1,4 +1,4 @@
-/** Common helpers */
+/** Specimen Group helpers */
 define(['angular'], function(angular) {
   'use strict';
 
