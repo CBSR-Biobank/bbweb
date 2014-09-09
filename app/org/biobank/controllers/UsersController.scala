@@ -110,7 +110,12 @@ object UsersController extends CommandController with JsonController {
     )
   }
 
-  def list = AuthAction(parse.empty) { token => implicit userId => implicit request =>
+  def list(
+    query: Option[String],
+    sort: Option[String],
+    order: Option[String]
+  ) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
+
     Ok(usersService.getAll.toList)
   }
 

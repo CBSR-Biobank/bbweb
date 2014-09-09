@@ -93,7 +93,7 @@ POST    /users/activate                        org.biobank.controllers.UsersCont
 POST    /users/lock                            org.biobank.controllers.UsersController.lockUser
 POST    /users/unlock                          org.biobank.controllers.UsersController.unlockUser
 GET     /authenticate                          org.biobank.controllers.UsersController.authenticateUser
-GET     /users                                 org.biobank.controllers.UsersController.list()
+GET     /users                                 org.biobank.controllers.UsersController.list(query: Option[String], sort: Option[String], order: Option[String])
 GET     /users/:id                             org.biobank.controllers.UsersController.user(id)
 POST    /users                                 org.biobank.controllers.UsersController.registerUser()
 PUT     /users/:id                             org.biobank.controllers.UsersController.updateUser(id)

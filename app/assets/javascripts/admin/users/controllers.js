@@ -154,6 +154,7 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
           );
         },
         cancel: function() {
+            $state.go("home");
         }
       };
     }]);

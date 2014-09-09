@@ -72,6 +72,11 @@ define(['angular', 'common'], function(angular) {
         getAllUsers: function() {
           return BbwebRestApi.call('GET', '/users');
         },
+        getUsers: function(query, sort, order) {
+          return BbwebRestApi.call(
+            'GET',
+            '/users?' + query + '&sort=' + sort + '&order=' + order);
+        },
         add: function(newUser) {
           var cmd = {
             name:     newUser.name,
