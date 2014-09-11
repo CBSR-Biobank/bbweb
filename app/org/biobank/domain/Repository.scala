@@ -45,7 +45,7 @@ abstract class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepo
 
   protected def getMap = internalMap.single.get
 
-  protected def nextIdentityAsString: String = java.util.UUID.randomUUID.toString.toUpperCase
+  protected def nextIdentityAsString: String = java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase
 
   def isEmpty: Boolean = getMap.isEmpty
 

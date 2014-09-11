@@ -16,8 +16,6 @@ trait UserRepositoryComponent {
 
     def allUsers(): Set[User]
 
-    def emailAvailable(email: String): DomainValidation[Boolean]
-
   }
 }
 
@@ -33,16 +31,9 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
       extends ReadWriteRepositoryRefImpl[UserId, User](v => v.id)
       with UserRepository {
 
-    // the email address is used for identity in this repository
-    def nextIdentity: UserId = throw new IllegalStateException("should not be used")
+    def nextIdentity: UserId = new UserId(nextIdentityAsString)
 
     def allUsers(): Set[User] = getValues.toSet
 
-    def emailAvailable(email: String): DomainValidation[Boolean] = {
-      getByKey(new UserId(email)).fold(
-        err => true.success,
-        user => DomainError(s"user already exists: $email").failNel
-      )
-    }
   }
 }

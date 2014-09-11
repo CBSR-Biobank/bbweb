@@ -133,27 +133,20 @@ trait UsersProcessorComponent {
     }
 
     def validateCmd(cmd: RegisterUserCmd): DomainValidation[UserRegisteredEvent] = {
+      val userId = userRepository.nextIdentity
+
+      if (userRepository.getByKey(userId).isSuccess) {
+        throw new IllegalStateException(s"user with id already exsits: $userId")
+      }
+
       val salt = passwordHasher.generateSalt
       val encryptedPwd = passwordHasher.encrypt(cmd.password, salt)
       for {
-        emailAvailable <- userRepository.emailAvailable(cmd.email)
+        emailAvailable <- emailAvailable(cmd.email)
         user <- RegisteredUser.create(
-          UserId(cmd.email), -1L, DateTime.now, cmd.name, cmd.email, encryptedPwd, salt, cmd.avatarUrl)
+          userId, -1L, DateTime.now, cmd.name, cmd.email, encryptedPwd, salt, cmd.avatarUrl)
         event <- UserRegisteredEvent(
           user.id.id, DateTime.now, user.name, user.email, encryptedPwd, salt, user.avatarUrl).success
-      } yield {
-        event
-      }
-    }
-
-    def validateCmd(cmd: ActivateUserCmd): DomainValidation[UserActivatedEvent] = {
-      val timeNow = DateTime.now
-      for {
-        user <- userRepository.getByKey(UserId(cmd.email))
-        registeredUser <- UserHelper.isUserRegistered(user)
-        activatedUser <- registeredUser.activate(Some(cmd.expectedVersion), timeNow)
-        event <- UserActivatedEvent(
-          activatedUser.id.id, activatedUser.version, timeNow).success
       } yield {
         event
       }
@@ -175,8 +168,9 @@ trait UsersProcessorComponent {
       }
 
       for {
-        user <- userRepository.getByKey(UserId(cmd.email))
+        user <- userRepository.getByKey(UserId(cmd.id))
         activeUser <- UserHelper.isUserActive(user)
+        emailAvailable <- emailAvailable(cmd.email, user.id)
         passwordInfo <- getPassword(activeUser, cmd.password).success
         updatedUser <- activeUser.update(
           Some(cmd.expectedVersion), timeNow, cmd.name, cmd.email, passwordInfo.password,
@@ -186,10 +180,23 @@ trait UsersProcessorComponent {
       } yield event
     }
 
+    def validateCmd(cmd: ActivateUserCmd): DomainValidation[UserActivatedEvent] = {
+      val timeNow = DateTime.now
+      for {
+        user <- userRepository.getByKey(UserId(cmd.id))
+        registeredUser <- UserHelper.isUserRegistered(user)
+        activatedUser <- registeredUser.activate(Some(cmd.expectedVersion), timeNow)
+        event <- UserActivatedEvent(
+          activatedUser.id.id, activatedUser.version, timeNow).success
+      } yield {
+        event
+      }
+    }
+
     def validateCmd(cmd: LockUserCmd): DomainValidation[UserLockedEvent] = {
       val timeNow = DateTime.now
       for {
-        user <- userRepository.getByKey(UserId(cmd.email))
+        user <- userRepository.getByKey(UserId(cmd.id))
         activeUser <- UserHelper.isUserActive(user)
         lockedUser <- activeUser.lock(Some(cmd.expectedVersion), timeNow)
         event <- UserLockedEvent(lockedUser.id.id, lockedUser.version, timeNow).success
@@ -201,7 +208,7 @@ trait UsersProcessorComponent {
     def validateCmd(cmd: UnlockUserCmd): DomainValidation[UserUnlockedEvent] = {
       val timeNow = DateTime.now
       for {
-        user <- userRepository.getByKey(UserId(cmd.email))
+        user <- userRepository.getByKey(UserId(cmd.id))
         lockedUser <- UserHelper.isUserLocked(user)
         unlockedUser <- lockedUser.unlock(Some(cmd.expectedVersion), timeNow)
         event <- UserUnlockedEvent(lockedUser.id.id, lockedUser.version, timeNow).success
@@ -332,5 +339,34 @@ trait UsersProcessorComponent {
         ()
       }
     }
+
+    /** Searches the repository for a matching item.
+      */
+    protected def emailAvailableMatcher(
+      email: String)(matcher: User => Boolean): DomainValidation[Boolean] = {
+      val exists = userRepository.getValues.exists { item =>
+        matcher(item)
+      }
+      if (exists) {
+        DomainError(s"user with email already exists: $email").failNel
+      } else {
+        true.success
+      }
+    }
+
+    val errMsgNameExists = "user with email already exists"
+
+    private def emailAvailable(email: String): DomainValidation[Boolean] = {
+      emailAvailableMatcher(email){ item =>
+        item.email.equals(email)
+      }
+    }
+
+    private def emailAvailable(email: String, excludeUserId: UserId): DomainValidation[Boolean] = {
+      emailAvailableMatcher(email){ item =>
+        item.email.equals(email) && (item.id != excludeUserId)
+      }
+    }
+
   }
 }

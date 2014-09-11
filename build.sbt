@@ -6,7 +6,7 @@ version := "0.1-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.1")
+scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.2")
 
 scalacOptions in ThisBuild ++= Seq(
   "-target:jvm-1.7",

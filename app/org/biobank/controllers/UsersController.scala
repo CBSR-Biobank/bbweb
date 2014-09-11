@@ -62,7 +62,7 @@ object UsersController extends CommandController with JsonController {
           },
           user => {
             Logger.info(s"user logged in: ${user.email}")
-            val token = java.util.UUID.randomUUID().toString
+            val token = java.util.UUID.randomUUID.toString.replaceAll("-","")
             Cache.set(token, user.id)
             Ok(token).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
           }

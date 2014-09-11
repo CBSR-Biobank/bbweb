@@ -37,6 +37,7 @@ object User {
   )(RegisterUserCmd.apply _)
 
   implicit val updateUserCmdReads = (
+    (__ \ "id").read[String](minLength[String](2)) and
     (__ \ "expectedVersion").read[Long](min[Long](0)) and
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "email").read[String](minLength[String](5)) and
@@ -45,17 +46,17 @@ object User {
   )(UpdateUserCmd.apply _)
 
   implicit val activateUserCmdReads = (
-      (__ \ "email").read[String](minLength[String](5)) and
+    (__ \ "id").read[String](minLength[String](2)) and
     (__ \ "expectedVersion").read[Long](min[Long](0))
   )(ActivateUserCmd.apply _)
 
   implicit val lockUserCmdReads = (
-    (__ \ "email").read[String](minLength[String](5)) and
+    (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").read[Long](min[Long](0))
   )(LockUserCmd.apply _)
 
   implicit val unlockUserCmdReads = (
-    (__ \ "email").read[String](minLength[String](5)) and
+    (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").read[Long](min[Long](0))
   )(UnlockUserCmd.apply _)
 

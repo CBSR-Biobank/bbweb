@@ -35,10 +35,10 @@ object Application extends Controller with Security with JsonController {
 
   def aggregateCounts = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Ok(AggregateCountsDto(
-        use[BbwebPlugin].studiesService.getAll.size,
-        use[BbwebPlugin].centresService.getAll.size,
-        use[BbwebPlugin].usersService.getAll.size
-      ))
+      use[BbwebPlugin].studiesService.getAll.size,
+      use[BbwebPlugin].centresService.getAll.size,
+      use[BbwebPlugin].usersService.getAll.size
+    ))
   }
 
 }

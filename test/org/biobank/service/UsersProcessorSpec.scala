@@ -32,7 +32,6 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       validation map { event =>
         event shouldBe a [UserRegisteredEvent]
         event should have (
-          'id (user.email),
           'name (user.name),
           'email (user.email),
           'avatarUrl (user.avatarUrl)
@@ -40,6 +39,9 @@ class UsersProcessorSpec extends UsersProcessorFixture {
 
         // password should be encrypted
         event.password should not be(user.password)
+
+        // salt should not be empty
+        event.salt.size should be > 0
 
         userRepository.getByKey(UserId(event.id)) map { user =>
           user shouldBe a[RegisteredUser]
@@ -54,7 +56,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val user2 = factory.createActiveUser
 
       val cmd = UpdateUserCmd(
-        user.version, user2.name, user2.email, Some(user2.password), user2.avatarUrl)
+        user.id.id, user.version, user2.name, user2.email, Some(user2.password), user2.avatarUrl)
       val validation = ask(usersProcessor, cmd).mapTo[DomainValidation[UserUpdatedEvent]]
         .futureValue
 
@@ -88,7 +90,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
 
       validation2.swap.map { err =>
         err.list should have length 1
-        err.list.head should include ("user already exists")
+        err.list.head should include ("user with email already exists")
       }
     }
 
