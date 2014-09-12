@@ -3,8 +3,6 @@ package org.biobank.controllers.study
 import org.biobank.controllers._
 import org.biobank.service._
 import org.biobank.service.{ ServicesComponent, ServicesComponentImpl }
-import org.biobank.service.json.Events._
-import org.biobank.service.json.ParticipantAnnotationType._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain.study._
 import org.biobank.domain.AnnotationValueType._

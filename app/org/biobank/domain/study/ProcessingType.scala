@@ -8,7 +8,10 @@ import org.biobank.domain.{
   HasDescriptionOption
 }
 import org.biobank.domain.validation.StudyValidationHelper
+import org.biobank.infrastructure.JsonUtils._
 
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
@@ -84,4 +87,15 @@ object ProcessingType extends StudyValidationHelper {
       ProcessingType(_, _, _, dateTime, None, _, _, enabled)
     }
   }
+
+  implicit val processingTypeWrites: Writes[ProcessingType] = (
+    (__ \ "studyId").write[StudyId] and
+      (__ \ "id").write[ProcessingTypeId] and
+      (__ \ "version").write[Long] and
+      (__ \ "addedDate").write[DateTime] and
+      (__ \ "lastUpdateDate").write[Option[DateTime]] and
+      (__ \ "name").write[String] and
+      (__ \ "description").write[Option[String]] and
+      (__ \ "enabled").write[Boolean]
+  )(unlift(org.biobank.domain.study.ProcessingType.unapply))
 }

@@ -1,5 +1,8 @@
 package org.biobank.domain
 
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
+
 /** A Location is a street address.
   *
   * @param name the name to refer to this location.
@@ -26,3 +29,18 @@ case class Location(
   poBoxNumber: Option[String],
   countryIsoCode: String)
     extends IdentifiedValueObject[LocationId]
+
+object Location {
+
+  implicit val locationWriter: Writes[Location] = (
+    (__ \ "id").write[LocationId] and
+      (__ \ "name").write[String] and
+      (__ \ "street").write[String] and
+      (__ \ "city").write[String] and
+      (__ \ "province").write[String] and
+      (__ \ "postalCode").write[String] and
+      (__ \ "poBoxNumber").writeNullable[String] and
+      (__ \ "countryIsoCode").write[String]
+  )(unlift(Location.unapply))
+
+}

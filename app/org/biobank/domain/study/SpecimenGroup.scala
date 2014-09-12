@@ -13,6 +13,11 @@ import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
+import org.biobank.infrastructure.JsonUtils._
+import org.biobank.infrastructure.command.StudyCommands._
+
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 import com.github.nscala_time.time.Imports._
 import scalaz._
@@ -20,12 +25,12 @@ import Scalaz._
 
 /** Used to configure a [[SpecimenType]] used by a [[Study]].
   *
-  * It records ownership, summary, storage, and classification information that applies to an entire group or
-  * collection of [[Specimen]]s. A specimen group is defined either for specimen types collected from
-  * participants, or for specimen types that are processed.
+  * It records ownership, summary, storage, and classification information that applies to an
+  * entire group or collection of [[Specimen]]s. A specimen group is defined either for
+  * specimen types collected from participants, or for specimen types that are processed.
   *
-  * This class has a private constructor and instances of this class can only be created using the
-  * [[SpecimenGroup.create]] method on the factory object.
+  * This class has a private constructor and instances of this class can only be created using
+  * the [[SpecimenGroup.create]] method on the factory object.
   *
   * @param name A short identifying name that is unique to the study.
   * @param units Specifies how the specimen amount is measured (e.g. volume, weight, length, etc.).
@@ -124,4 +129,21 @@ object SpecimenGroup extends StudyValidationHelper {
         preservationTemperatureType, specimenType)
     }
   }
+
+  implicit val specimenGroupWrites: Writes[SpecimenGroup] = (
+    (__ \ "studyId").write[StudyId] and
+      (__ \ "id").write[SpecimenGroupId] and
+      (__ \ "version").write[Long] and
+      (__ \ "addedDate").write[DateTime] and
+      (__ \ "lastUpdateDate").write[Option[DateTime]] and
+      (__ \ "name").write[String] and
+      (__ \ "description").write[Option[String]] and
+      (__ \ "units").write[String] and
+      (__ \ "anatomicalSourceType").write[AnatomicalSourceType] and
+      (__ \ "preservationType").write[PreservationType] and
+      (__ \ "preservationTemperatureType").write[PreservationTemperatureType] and
+      (__ \ "specimenType").write[SpecimenType]
+  )(unlift(org.biobank.domain.study.SpecimenGroup.unapply))
+
+
 }

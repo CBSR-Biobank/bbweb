@@ -2,9 +2,6 @@ package org.biobank.controllers.centres
 
 import org.biobank.controllers._
 import org.biobank.domain._
-import org.biobank.service.json.Events._
-import org.biobank.service.json.Centre._
-import org.biobank.service.json.Study._
 import org.biobank.service._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._

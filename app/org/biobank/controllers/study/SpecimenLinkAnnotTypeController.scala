@@ -4,13 +4,10 @@ import org.biobank.controllers._
 import org.biobank.service._
 import org.biobank.infrastructure._
 import org.biobank.service.{ ServicesComponent, ServicesComponentImpl }
-import org.biobank.service.json.Events._
-import org.biobank.service.json.SpecimenLinkAnnotationType._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain._
 import AnnotationValueType._
 import org.biobank.domain.study._
-import views._
 
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future

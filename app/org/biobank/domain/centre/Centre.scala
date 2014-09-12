@@ -11,6 +11,10 @@ import org.biobank.domain.{
 }
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.validation.ValidationHelper
+import org.biobank.infrastructure.JsonUtils._
+
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 import org.joda.time.DateTime
 
@@ -94,6 +98,23 @@ case class DisabledCentre private (
     } yield enabledCentre
   }
 }
+
+object Centre {
+
+  implicit val centreWrites = new Writes[Centre] {
+    def writes(centre: Centre) = Json.obj(
+      "id"             -> centre.id,
+      "version"        -> centre.version,
+      "addedDate"      -> centre.addedDate,
+      "lastUpdateDate" -> centre.lastUpdateDate,
+      "name"           -> centre.name,
+      "description"    -> centre.description,
+      "status"         -> centre.status
+    )
+  }
+
+}
+
 
 /**
   * Factory object used to create a centre.

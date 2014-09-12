@@ -16,14 +16,16 @@ import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
 import org.biobank.domain.validation.StudyValidationHelper
+import org.biobank.infrastructure.JsonUtils._
 
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
 
-/**
-  * A Study represents a collection of participants and specimens collected for a particular
-  * research study. This is an aggregate root.
+/** A Study represents a collection of participants and specimens collected for a particular research
+  * study. This is an aggregate root.
   *
   * A study can be in one of 3 states: diabled, enabled, or retired. These are represented by
   * the sub classes.
@@ -114,6 +116,22 @@ case class DisabledStudy private (
   }
 
 }
+
+object Study {
+
+  implicit val studyWrites = new Writes[Study] {
+    def writes(study: Study) = Json.obj(
+      "id"             -> study.id,
+      "version"        -> study.version,
+      "addedDate"      -> study.addedDate,
+      "lastUpdateDate" -> study.lastUpdateDate,
+      "name"           -> study.name,
+      "description"    -> study.description,
+      "status"         -> study.status
+    )
+  }
+}
+
 
 /**
   * Factory object used to create a study.

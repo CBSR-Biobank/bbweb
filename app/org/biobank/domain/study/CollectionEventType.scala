@@ -12,6 +12,11 @@ import org.biobank.domain.{
 }
 
 import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
+import org.biobank.infrastructure.JsonUtils._
+
+import play.api.libs.json._
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
 import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
@@ -123,6 +128,19 @@ object CollectionEventType extends StudyAnnotationTypeValidationHelper {
 
     specimenGroupData.map(validateSpecimenGroupItem).sequenceU
   }
+
+  implicit val collectionEventTypeWrites: Writes[CollectionEventType] = (
+    (__ \ "studyId").write[StudyId] and
+      (__ \ "id").write[CollectionEventTypeId] and
+      (__ \ "version").write[Long] and
+      (__ \ "addedDate").write[DateTime] and
+      (__ \ "lastUpdateDate").write[Option[DateTime]] and
+      (__ \ "name").write[String] and
+      (__ \ "description").write[Option[String]] and
+      (__ \ "recurring").write[Boolean] and
+      (__ \ "specimenGroupData").write[List[CollectionEventTypeSpecimenGroupData]] and
+      (__ \ "annotationTypeData").write[List[CollectionEventTypeAnnotationTypeData]]
+  )(unlift(org.biobank.domain.study.CollectionEventType.unapply))
 
 }
 

@@ -6,12 +6,6 @@ import org.biobank.domain.study.Study
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service._
-import org.biobank.service.json.Events._
-import org.biobank.service.json.ProcessingType._
-import org.biobank.service.json.SpecimenGroup._
-import org.biobank.service.json.SpecimenLinkAnnotationType._
-import org.biobank.service.json.SpecimenLinkType._
-import org.biobank.service.json.Study._
 
 import com.typesafe.plugin.use
 import play.api.Logger

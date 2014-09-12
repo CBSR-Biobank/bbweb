@@ -4,6 +4,10 @@ import org.biobank.domain._
 import org.biobank.domain.validation.UserValidationHelper
 import org.biobank.infrastructure.event.UserEvents._
 import com.github.nscala_time.time.Imports._
+import org.biobank.infrastructure.JsonUtils._
+
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -262,4 +266,21 @@ object UserHelper {
       case _ => user.success
     }
   }
+}
+
+object User {
+
+  implicit val userWrites = new Writes[User] {
+    def writes(user: User) = Json.obj(
+      "id"             -> user.id,
+      "version"        -> user.version,
+      "addedDate"      -> user.addedDate,
+      "lastUpdateDate" -> user.lastUpdateDate,
+      "name"           -> user.name,
+      "email"          -> user.email,
+      "avatarUrl"      -> user.avatarUrl,
+      "status"         -> user.status
+    )
+  }
+
 }

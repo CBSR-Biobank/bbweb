@@ -12,7 +12,7 @@ import org.scalatest.Assertions._
 import com.github.nscala_time.time.Imports._
 
 object JsonHelper extends Matchers {
-  import org.biobank.service.json.JsonUtils._
+  import org.biobank.infrastructure.JsonUtils._
 
   private def compareEntity[T <: IdentifiedDomainObject[_]](json: JsValue, entity: ConcurrencySafeEntity[T])  = {
     (json \ "id").as[String]    should be (entity.id.toString)

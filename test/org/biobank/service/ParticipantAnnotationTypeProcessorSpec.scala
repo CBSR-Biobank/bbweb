@@ -30,7 +30,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
 
   "A study processor" can {
 
-    "add a participant annotation type" in {
+    "add a participant annotation type" taggedAs(Tag("1")) in {
       val annotType = factory.createParticipantAnnotationType
 
       val cmd = AddParticipantAnnotationTypeCmd(

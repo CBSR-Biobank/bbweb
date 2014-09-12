@@ -7,7 +7,6 @@ import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 import org.biobank.service.json.JsonHelper._
 import org.biobank.fixture.ControllerFixture
-import org.biobank.service.json.Centre._
 
 import play.api.test.Helpers._
 import play.api.test.WithApplication
@@ -107,7 +106,7 @@ class CentresControllerSpec extends ControllerFixture {
         use[BbwebPlugin].centreRepository.put(centre)
 
         val cmdJson = Json.obj("name" -> centre.name)
-        val json = makeRequest(POST, "/centres", BAD_REQUEST, json = cmdJson)
+        val json = makeRequest(POST, "/centres", FORBIDDEN, json = cmdJson)
 
         (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("centre with name already exists")
@@ -196,7 +195,7 @@ class CentresControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(centres(1).version),
           "name"            -> duplicateName,
           "description"     -> centres(1).description)
-        val json = makeRequest(PUT, s"/centres/${centres(1).id.id}", BAD_REQUEST, json = cmdJson)
+        val json = makeRequest(PUT, s"/centres/${centres(1).id.id}", FORBIDDEN, json = cmdJson)
 
         (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("centre with name already exists")

@@ -43,8 +43,8 @@ trait ParticipantAnnotationTypeProcessorComponent {
 
       case cmd: RemoveParticipantAnnotationTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case _ =>
-        throw new Error("invalid message received")
+      case cmd =>
+        log.error(s"invalid message received: $cmd")
     }
 
     private def validateCmd(cmd: AddParticipantAnnotationTypeCmd):

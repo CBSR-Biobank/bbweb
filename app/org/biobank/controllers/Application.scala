@@ -3,7 +3,6 @@ package org.biobank.controllers
 import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
-import org.biobank.service.json.User._
 
 import play.api.mvc._
 import play.api.libs.json._

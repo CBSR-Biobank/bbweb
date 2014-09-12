@@ -1,5 +1,9 @@
 package org.biobank
 
+import play.api.libs.json._
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
+
 package infrastructure {
 
   trait HasIdentity {
@@ -7,7 +11,7 @@ package infrastructure {
     /** An event that includes the ID of the object it references. */
     val id: String
 
-   }
+  }
 
   /** Used to define annotation types associate annotation types to objects that use them.
     *
@@ -54,5 +58,48 @@ package infrastructure {
     specimenGroupId: String,
     maxCount: Int,
     amount: Option[BigDecimal])
+
+  object CollectionEventTypeAnnotationTypeData {
+
+    implicit val annotationTypeDataReads: Reads[CollectionEventTypeAnnotationTypeData] = (
+      (__ \ "annotationTypeId").read[String](minLength[String](2)) and
+        (__ \ "required").read[Boolean]
+    )(CollectionEventTypeAnnotationTypeData.apply _)
+
+    implicit val annotationTypeDataWrites: Writes[CollectionEventTypeAnnotationTypeData] = (
+      (__ \ "annotationTypeId").write[String] and
+        (__ \ "required").write[Boolean]
+    )(unlift(CollectionEventTypeAnnotationTypeData.unapply))
+
+  }
+
+  object CollectionEventTypeSpecimenGroupData {
+
+    implicit val specimenGroupDataReads: Reads[CollectionEventTypeSpecimenGroupData]= (
+      (__ \ "specimenGroupId").read[String](minLength[String](2)) and
+        (__ \ "maxCount").read[Int] and
+        (__ \ "amount").readNullable[BigDecimal]
+    )(CollectionEventTypeSpecimenGroupData.apply _)
+
+    implicit val specimenGroupDataWrites: Writes[CollectionEventTypeSpecimenGroupData] = (
+      (__ \ "specimenGroupId").write[String] and
+        (__ \ "maxCount").write[Int] and
+        (__ \ "amount").write[Option[BigDecimal]]
+    )(unlift(CollectionEventTypeSpecimenGroupData.unapply))
+  }
+
+  object SpecimenLinkTypeAnnotationTypeData {
+
+    implicit val annotationTypeDataReads: Reads[SpecimenLinkTypeAnnotationTypeData] = (
+      (__ \ "annotationTypeId").read[String](minLength[String](2)) and
+        (__ \ "required").read[Boolean]
+    )(SpecimenLinkTypeAnnotationTypeData.apply _)
+
+    implicit val annotationTypeDataWrites: Writes[SpecimenLinkTypeAnnotationTypeData] = (
+      (__ \ "annotationTypeId").write[String] and
+        (__ \ "required").write[Boolean]
+    )(unlift(SpecimenLinkTypeAnnotationTypeData.unapply))
+
+  }
 
 }

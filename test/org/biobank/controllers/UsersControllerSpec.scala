@@ -5,7 +5,6 @@ import org.biobank.domain.user._
 import org.biobank.fixture.{ ControllerFixture, NameGenerator }
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.service.json.JsonHelper._
-import org.biobank.service.json.User._
 
 import com.typesafe.plugin._
 import org.joda.time.DateTime

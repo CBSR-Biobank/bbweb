@@ -10,7 +10,10 @@ import org.biobank.domain.{
 }
 import org.biobank.infrastructure._
 import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
+import org.biobank.infrastructure.JsonUtils._
 
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import com.github.nscala_time.time.Imports._
 import scalaz._
 import Scalaz._
@@ -180,5 +183,22 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
       true.success
     }
   }
+
+  implicit val specimenLinkTypeWrites: Writes[SpecimenLinkType] = (
+    (__ \ "processingTypeId").write[ProcessingTypeId] and
+      (__ \ "id").write[SpecimenLinkTypeId] and
+      (__ \ "version").write[Long] and
+      (__ \ "addedDate").write[DateTime] and
+      (__ \ "lastUpdateDate").write[Option[DateTime]] and
+      (__ \ "expectedInputChange").write[BigDecimal] and
+      (__ \ "expectedOutputChange").write[BigDecimal] and
+      (__ \ "inputCount").write[Int] and
+      (__ \ "outputCount").write[Int] and
+      (__ \ "inputGroupId").write[SpecimenGroupId] and
+      (__ \ "outputGroupId").write[SpecimenGroupId] and
+      (__ \ "inputContainerTypeId").write[Option[ContainerTypeId]] and
+      (__ \ "outputContainerTypeId").write[Option[ContainerTypeId]] and
+      (__ \ "annotationTypeData").write[List[SpecimenLinkTypeAnnotationTypeData]]
+  )(unlift(org.biobank.domain.study.SpecimenLinkType.unapply))
 
 }

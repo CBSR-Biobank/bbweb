@@ -1,8 +1,6 @@
 package org.biobank.controllers
 
 import org.biobank.infrastructure.command.UserCommands._
-import org.biobank.service.json.User._
-import org.biobank.service.json.Events._
 
 import com.typesafe.plugin.use
 import play.api.Logger
