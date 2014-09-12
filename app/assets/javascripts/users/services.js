@@ -37,7 +37,7 @@ define(['angular', 'common'], function(angular) {
 
       var changeStatus = function(user, status) {
         var cmd = {
-          email: user.id,
+          id: user.id,
           expectedVersion: user.version
         };
         return BbwebRestApi.call('POST', '/users/' + status, cmd);

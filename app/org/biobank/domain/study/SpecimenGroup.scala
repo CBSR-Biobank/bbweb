@@ -143,7 +143,7 @@ object SpecimenGroup extends StudyValidationHelper {
       (__ \ "preservationType").write[PreservationType] and
       (__ \ "preservationTemperatureType").write[PreservationTemperatureType] and
       (__ \ "specimenType").write[SpecimenType]
-  )(unlift(org.biobank.domain.study.SpecimenGroup.unapply))
+  )(unlift(SpecimenGroup.unapply))
 
 
 }
