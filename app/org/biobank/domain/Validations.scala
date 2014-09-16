@@ -95,6 +95,10 @@ object CommonValidations {
 
   case object IdRequired extends ValidationKey
 
+  case object NameRequired extends ValidationKey
+
+  case object NonEmptyDescription extends ValidationKey
+
   def validateString(s: String, err: ValidationKey): DomainValidation[String] = {
     if ((s == null) || s.isEmpty()) err.failNel else s.success
   }

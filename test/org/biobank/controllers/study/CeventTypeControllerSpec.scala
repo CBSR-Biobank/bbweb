@@ -238,7 +238,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "not add a collection event type to an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+          factory.createDisabledStudy.enable(1, 1) | fail)
       }
     }
 
@@ -246,7 +246,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "not add a collection event type to an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
-          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+          factory.createDisabledStudy.retire | fail)
       }
     }
 
@@ -299,7 +299,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "not update a collection event type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+          factory.createDisabledStudy.enable(1, 1) | fail)
       }
     }
 
@@ -307,7 +307,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "not update a collection event type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+          factory.createDisabledStudy.retire | fail)
       }
     }
 
@@ -340,7 +340,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "not remove a collection event type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+          factory.createDisabledStudy.enable(1, 1) | fail)
       }
     }
 
@@ -348,7 +348,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "not remove a collection event type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
-          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+          factory.createDisabledStudy.retire | fail)
       }
     }
   }

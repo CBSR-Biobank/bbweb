@@ -222,7 +222,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "not add a specimen link type to an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         val study = use[BbwebPlugin].studyRepository.put(
-          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+          factory.createDisabledStudy.enable(1, 1) | fail)
         addOnNonDisabledStudy(study, factory.createProcessingType)
       }
     }
@@ -231,7 +231,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "not add a specimen link type to an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         val study = use[BbwebPlugin].studyRepository.put(
-          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+          factory.createDisabledStudy.retire | fail)
         addOnNonDisabledStudy(study, factory.createProcessingType)
       }
     }
@@ -270,7 +270,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "not update a specimen link type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         val study = use[BbwebPlugin].studyRepository.put(
-          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+          factory.createDisabledStudy.enable(1, 1) | fail)
         updateOnNonDisabledStudy(study, factory.createProcessingType)
       }
     }
@@ -279,7 +279,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "not update a specimen link type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         val study = use[BbwebPlugin].studyRepository.put(
-          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+          factory.createDisabledStudy.retire | fail)
         updateOnNonDisabledStudy(study, factory.createProcessingType)
       }
     }
@@ -310,7 +310,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "not remove a specimen link type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         val study = use[BbwebPlugin].studyRepository.put(
-          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+          factory.createDisabledStudy.enable(1, 1) | fail)
         removeOnNonDisabledStudy(study, factory.createProcessingType)
       }
     }
@@ -319,7 +319,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "not remove a specimen link type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         val study = use[BbwebPlugin].studyRepository.put(
-          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+          factory.createDisabledStudy.retire | fail)
         removeOnNonDisabledStudy(study, factory.createProcessingType)
       }
     }

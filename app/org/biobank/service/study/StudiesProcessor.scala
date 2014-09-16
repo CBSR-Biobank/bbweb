@@ -16,6 +16,7 @@ import akka.actor. { ActorRef, Props }
 import akka.pattern.ask
 import org.slf4j.LoggerFactory
 import akka.persistence.SnapshotOffer
+import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
 
@@ -96,31 +97,53 @@ trait StudiesProcessorComponent
     }
 
     private def validateAndForward(childActor: ActorRef, cmd: StudyCommandWithId) = {
-      val studyId = StudyId(cmd.studyId)
-      val validation = for {
-        study <- studyRepository.getByKey(studyId)
-        disabledStudy <- isStudyDisabled(studyId)
-      } yield {
-        childActor forward cmd
-      }
-
-      if (validation.isFailure) {
-        context.sender ! validation
-      }
+      studyRepository.getDisabled(StudyId(cmd.id)).fold(
+        err => context.sender ! err,
+        study => childActor forward cmd
+      )
     }
 
     private def validateAndForward(childActor: ActorRef, cmd: SpecimenLinkTypeCommand) = {
       val processingTypeId = ProcessingTypeId(cmd.processingTypeId)
       val validation = for {
         processingType <- processingTypeRepository.getByKey(processingTypeId)
-        study <- studyRepository.getByKey(processingType.studyId)
-        disabledStudy <- isStudyDisabled(study.id)
-      } yield {
-        childActor forward cmd
-      }
+        study <- studyRepository.getDisabled(processingType.studyId)
+      } yield study
 
-      if (validation.isFailure) {
-        context.sender ! validation
+      validation.fold(
+        err => context.sender ! err,
+        study => childActor forward cmd
+      )
+    }
+
+    def updateStudy[T <: Study](cmd: StudyCommand)(fn: Study => DomainValidation[T]): DomainValidation[T] = {
+      studyRepository.getByKey(StudyId(cmd.id)).fold(
+        err => s"study for $cmd does not exist".failNel,
+        study => study.requireVersion(study, cmd.expectedVersion).fold(
+          err => err.failure,
+          validStudy => fn(validStudy)
+        )
+      )
+    }
+
+    def updateDisabled[T <: Study](cmd: StudyCommand)(fn: DisabledStudy => DomainValidation[T]): DomainValidation[T] = {
+      updateStudy(cmd) {
+        case study: DisabledStudy => fn(study)
+        case study => s"$study for $cmd is not disabled".failNel
+      }
+    }
+
+    def updateEnabled[T <: Study](cmd: StudyCommand)(fn: EnabledStudy => DomainValidation[T]): DomainValidation[T] = {
+      updateStudy(cmd) {
+        case study: EnabledStudy => fn(study)
+        case study => s"$study for $cmd is not enabled".failNel
+      }
+    }
+
+    def updateRetired[T <: Study](cmd: StudyCommand)(fn: RetiredStudy => DomainValidation[T]): DomainValidation[T] = {
+      updateStudy(cmd) {
+        case study: RetiredStudy => fn(study)
+        case study => s"$study for $cmd is not retired".failNel
       }
     }
 
@@ -141,153 +164,108 @@ trait StudiesProcessorComponent
     }
 
     private def validateCmd(cmd: UpdateStudyCmd): DomainValidation[StudyUpdatedEvent] = {
-      val studyId = StudyId(cmd.id)
-      for {
-        nameAvailable <- nameAvailable(cmd.name, studyId)
-        prevStudy <- isStudyDisabled(studyId)
-        updatedStudy <- prevStudy.update(
-         Some(cmd.expectedVersion), org.joda.time.DateTime.now, cmd.name, cmd.description)
-        event <- StudyUpdatedEvent(
-          cmd.id, updatedStudy.version, updatedStudy.lastUpdateDate.get, updatedStudy.name,
-          updatedStudy.description).success
-      } yield event
+      val timeNow = DateTime.now
+      val v = updateDisabled(cmd) { s =>
+        for {
+          nameAvailable <- nameAvailable(cmd.name, StudyId(cmd.id))
+          updatedStudy <- s.update(cmd.name, cmd.description)
+        } yield updatedStudy
+      }
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        study => StudyUpdatedEvent(cmd.id, study.version, timeNow, study.name, study.description).success
+      )
     }
 
     private def validateCmd(cmd: EnableStudyCmd): DomainValidation[StudyEnabledEvent] = {
+      val timeNow = DateTime.now
       val studyId = StudyId(cmd.id)
       val specimenGroupCount = specimenGroupRepository.allForStudy(studyId).size
       val collectionEventtypeCount = collectionEventTypeRepository.allForStudy(studyId).size
-
-      for {
-        disabledStudy <- isStudyDisabled(studyId)
-        enabledStudy <- disabledStudy.enable(
-         Some(cmd.expectedVersion), org.joda.time.DateTime.now, specimenGroupCount, collectionEventtypeCount)
-        event <- StudyEnabledEvent(
-          studyId.id, enabledStudy.version, enabledStudy.lastUpdateDate.get).success
-      } yield event
+      val v = updateDisabled(cmd) { s => s.enable(specimenGroupCount, collectionEventtypeCount) }
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        study => StudyEnabledEvent(cmd.id, study.version, timeNow).success
+      )
     }
 
     private def validateCmd(cmd: DisableStudyCmd): DomainValidation[StudyDisabledEvent] = {
-      val studyId = StudyId(cmd.id)
-      for {
-        enabledStudy <- isStudyEnabled(studyId)
-        disabledStudy <- enabledStudy.disable(Some(cmd.expectedVersion), org.joda.time.DateTime.now)
-        event <- StudyDisabledEvent(
-          cmd.id, disabledStudy.version, disabledStudy.lastUpdateDate.get).success
-      } yield event
+      val timeNow = DateTime.now
+      val v = updateEnabled(cmd) { s => s.disable }
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        study => StudyDisabledEvent(cmd.id, study.version, timeNow).success
+      )
     }
 
     private def validateCmd(cmd: RetireStudyCmd): DomainValidation[StudyRetiredEvent] = {
-      val studyId = StudyId(cmd.id)
-      for {
-        disabledStudy <- isStudyDisabled(studyId)
-        retiredStudy <- disabledStudy.retire(Some(cmd.expectedVersion), org.joda.time.DateTime.now)
-        event <- StudyRetiredEvent(
-          cmd.id, retiredStudy.version, retiredStudy.lastUpdateDate.get).success
-      } yield event
+      val timeNow = DateTime.now
+      val v = updateDisabled(cmd) { s => s.retire }
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        study => StudyRetiredEvent(cmd.id, study.version, timeNow).success
+      )
     }
 
     private def validateCmd(cmd: UnretireStudyCmd): DomainValidation[StudyUnretiredEvent] = {
-      val studyId = StudyId(cmd.id)
-      for {
-        retiredStudy <- isStudyRetired(studyId)
-        unretiredStudy <- retiredStudy.unretire(Some(cmd.expectedVersion), org.joda.time.DateTime.now)
-        event <- StudyUnretiredEvent(
-          studyId.id, unretiredStudy.version, unretiredStudy.lastUpdateDate.get).success
-      } yield event
+      val timeNow = DateTime.now
+      val v = updateRetired(cmd) { s => s.unretire }
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        study => StudyUnretiredEvent(cmd.id, study.version, timeNow).success
+      )
     }
 
     private def recoverEvent(event: StudyAddedEvent) {
-      val studyId = StudyId(event.id)
-      val validation = for {
-        study <- DisabledStudy.create(
-          studyId, -1L, event.dateTime, event.name, event.description)
-        savedStudy <- studyRepository.put(study).success
-      } yield study
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering study from event failed")
-      }
+      studyRepository.put(DisabledStudy(
+        StudyId(event.id), 0L, event.dateTime, None, event.name, event.description))
+      ()
     }
 
     private def recoverEvent(event: StudyUpdatedEvent) {
-      val validation = for {
-        disabledStudy <- isStudyDisabled(StudyId(event.id))
-        updatedStudy <- disabledStudy.update(
-          disabledStudy.versionOption, event.dateTime, event.name, event.description)
-        savedStudy <- studyRepository.put(updatedStudy).success
-      } yield savedStudy
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering study from event failed")
-      }
+      studyRepository.getDisabled(StudyId(event.id)).fold(
+        err => throw new IllegalStateException(s"updating study from event failed: $err"),
+        s => studyRepository.put(s.copy(
+          version = event.version, name = event.name, description = event.description,
+          lastUpdateDate = Some(event.dateTime)))
+      )
+      ()
     }
 
     private def recoverEvent(event: StudyEnabledEvent) {
-      val studyId = StudyId(event.id)
-      val specimenGroupCount = specimenGroupRepository.allForStudy(studyId).size
-      val collectionEventtypeCount = collectionEventTypeRepository.allForStudy(studyId).size
-      val validation = for {
-        disabledStudy <- isStudyDisabled(studyId)
-        enabledStudy <- disabledStudy.enable(
-          disabledStudy.versionOption, event.dateTime, specimenGroupCount, collectionEventtypeCount)
-        savedStudy <- studyRepository.put(enabledStudy).success
-      } yield  enabledStudy
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering study from event failed")
-      }
+      studyRepository.getDisabled(StudyId(event.id)).fold(
+        err => throw new IllegalStateException(s"enabling study from event failed: $err"),
+        s => studyRepository.put(EnabledStudy(s.id, event.version, s.addedDate, Some(event.dateTime),
+          s.name, s.description))
+      )
+      ()
     }
 
     private def recoverEvent(event: StudyDisabledEvent) {
-      val studyId = StudyId(event.id)
-      val validation = for {
-        enabledStudy <- isStudyEnabled(studyId)
-        disabledStudy <- enabledStudy.disable(enabledStudy.versionOption, event.dateTime)
-        savedStudy <- studyRepository.put(disabledStudy).success
-      } yield disabledStudy
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering study from event failed")
-      }
+      studyRepository.getEnabled(StudyId(event.id)).fold(
+        err => throw new IllegalStateException(s"disabling study from event failed: $err"),
+        s => studyRepository.put(DisabledStudy(s.id, event.version, s.addedDate, Some(event.dateTime),
+          s.name, s.description))
+      )
+      ()
     }
 
     private def recoverEvent(event: StudyRetiredEvent) {
-      val studyId = StudyId(event.id)
-      val validation = for {
-        disabledStudy <- isStudyDisabled(studyId)
-        retiredStudy <- disabledStudy.retire(disabledStudy.versionOption, event.dateTime)
-        savedStudy <- studyRepository.put(retiredStudy).success
-      } yield retiredStudy
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering study from event failed")
-      }
+      studyRepository.getDisabled(StudyId(event.id)).fold(
+        err => throw new IllegalStateException(s"retiring study from event failed: $err"),
+        s => studyRepository.put(RetiredStudy(s.id, event.version, s.addedDate, Some(event.dateTime),
+          s.name, s.description))
+      )
+      ()
     }
 
     private def recoverEvent(event: StudyUnretiredEvent) {
-      val studyId = StudyId(event.id)
-      val validation = for {
-        retiredStudy <- isStudyRetired(studyId)
-        disabledStudy <- retiredStudy.unretire(retiredStudy.versionOption, event.dateTime)
-        savedstudy <- studyRepository.put(disabledStudy).success
-      } yield disabledStudy
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering study from event failed")
-      }
+      studyRepository.getRetired(StudyId(event.id)).fold(
+        err => throw new IllegalStateException(s"disabling study from event failed: $err"),
+        s => studyRepository.put(DisabledStudy(s.id, event.version, s.addedDate, Some(event.dateTime),
+          s.name, s.description))
+      )
+      ()
     }
 
     /**

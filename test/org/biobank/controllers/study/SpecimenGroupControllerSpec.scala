@@ -168,7 +168,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "not add a specimen group to enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         addToNonDisabledStudy(
-          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail,
+          factory.createDisabledStudy.enable(1, 1) | fail,
           factory.createSpecimenGroup)
       }
     }
@@ -177,7 +177,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "not add a specimen group to retired study" in new WithApplication(fakeApplication()) {
         doLogin
         addToNonDisabledStudy(
-          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail,
+          factory.createDisabledStudy.retire | fail,
           factory.createSpecimenGroup)
       }
     }
@@ -213,7 +213,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "not update a specimen group on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail,
+          factory.createDisabledStudy.enable(1, 1) | fail,
           factory.createSpecimenGroup)
       }
     }
@@ -222,7 +222,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "not update a specimen group on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail,
+          factory.createDisabledStudy.retire | fail,
           factory.createSpecimenGroup)
       }
     }
@@ -248,7 +248,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "not remove a specimen group from an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail,
+          factory.createDisabledStudy.enable(1, 1) | fail,
           factory.createSpecimenGroup)
       }
     }
@@ -257,7 +257,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "not remove a specimen group from an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
-          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail,
+          factory.createDisabledStudy.retire | fail,
           factory.createSpecimenGroup)
       }
     }

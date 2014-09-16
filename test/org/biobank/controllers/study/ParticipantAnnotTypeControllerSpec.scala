@@ -161,7 +161,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "not add a participant annotation type to an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+          factory.createDisabledStudy.enable(1, 1) | fail)
       }
     }
 
@@ -169,7 +169,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "not add a participant annotation type to an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
-          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+          factory.createDisabledStudy.retire | fail)
       }
     }
 
@@ -199,7 +199,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "not update a participant annotation type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+          factory.createDisabledStudy.enable(1, 1) | fail)
       }
     }
 
@@ -207,7 +207,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "not update a participant annotation type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
-          factory.createDisabledStudy.retire(Some(0), DateTime.now) | fail)
+          factory.createDisabledStudy.retire | fail)
       }
     }
 
@@ -232,7 +232,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "not remove a participant annotation type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(Some(0), DateTime.now, 1, 1) | fail)
+          factory.createDisabledStudy.enable(1, 1) | fail)
       }
     }
   }

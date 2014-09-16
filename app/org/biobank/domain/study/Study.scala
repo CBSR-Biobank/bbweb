@@ -5,6 +5,7 @@ import org.biobank.infrastructure.{
   CollectionEventTypeAnnotationTypeData}
 import org.biobank.domain.{
   AnnotationTypeId,
+  CommonValidations,
   ConcurrencySafeEntity,
   DomainError,
   DomainValidation,
@@ -20,7 +21,7 @@ import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import com.github.nscala_time.time.Imports._
+import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
 
@@ -51,72 +52,6 @@ sealed trait Study
 
 }
 
-/**
-  * This is the initial state for a study.  In this state, only configuration changes are allowed.
-  * Collection and processing of specimens cannot be recorded.
-  *
-  * This class has a private constructor and instances of this class can only be created using
-  * the [[DisabledStudy.create]] method on the factory object.
-  */
-case class DisabledStudy private (
-  id: StudyId,
-  version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
-  name: String,
-  description: Option[String])
-    extends Study {
-
-  override val status: String = "Disabled"
-
-
-  /** Used to change the name or the description. */
-  def update(
-    expectedVersion: Option[Long],
-    dateTime: DateTime,
-    name: String,
-    description: Option[String]): DomainValidation[DisabledStudy] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedStudy <- DisabledStudy.create(id, version, addedDate, name, description)
-      updatedStudy <- validatedStudy.copy(
-        lastUpdateDate = Some(dateTime)).success
-    } yield updatedStudy
-  }
-
-  /** Used to enable a study after it has been configured, or had configuration changes made on it. */
-  def enable(
-    expectedVersion: Option[Long],
-    dateTime: DateTime,
-    specimenGroupCount: Int,
-    collectionEventTypeCount: Int): DomainValidation[EnabledStudy] = {
-
-    def checkSpecimenGroupCount =
-      if (specimenGroupCount > 0) true.success else DomainError("no specimen groups").failNel
-
-    def checkCollectionEventTypeCount =
-      if (collectionEventTypeCount > 0) true.success else DomainError("no collection event types").failNel
-
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      sgCount <- checkSpecimenGroupCount
-      cetCount <- checkCollectionEventTypeCount
-      enabledStudy <- EnabledStudy.create(this, dateTime)
-    } yield enabledStudy
-  }
-
-  /** When a study will no longer collect specimens from participants it can be retired. */
-  def retire(
-    expectedVersion: Option[Long],
-    dateTime: DateTime): DomainValidation[RetiredStudy] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      retiredStudy <- RetiredStudy.create(this, dateTime)
-    } yield retiredStudy
-  }
-
-}
-
 object Study {
 
   implicit val studyWrites = new Writes[Study] {
@@ -132,11 +67,63 @@ object Study {
   }
 }
 
+/**
+  * This is the initial state for a study.  In this state, only configuration changes are allowed.
+  * Collection and processing of specimens cannot be recorded.
+  *
+  * This class has a private constructor and instances of this class can only be created using
+  * the [[DisabledStudy.create]] method on the factory object.
+  */
+case class DisabledStudy(
+  id: StudyId,
+  version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
+  name: String,
+  description: Option[String])
+    extends Study {
+  import CommonValidations._
+
+  override val status: String = "Disabled"
+
+  /** Used to change the name or the description. */
+  def update(name: String, description: Option[String]): DomainValidation[DisabledStudy] = {
+    (validateString(name, NameRequired) |@|
+      validateNonEmptyOption(description, NonEmptyDescription)) {
+      case(n, d) => copy(version = version + 1, name = n, description = d)
+    }
+  }
+
+  /** Used to enable a study after it has been configured, or had configuration changes made on it. */
+  def enable(
+    specimenGroupCount: Int,
+    collectionEventTypeCount: Int): DomainValidation[EnabledStudy] = {
+
+    def checkSpecimenGroupCount =
+      if (specimenGroupCount > 0) true.success else DomainError("no specimen groups").failNel
+
+    def checkCollectionEventTypeCount =
+      if (collectionEventTypeCount > 0) true.success else DomainError("no collection event types").failNel
+
+    for {
+      sgCount <- checkSpecimenGroupCount
+      cetCount <- checkCollectionEventTypeCount
+      enabledStudy <- EnabledStudy.create(this)
+    } yield enabledStudy
+  }
+
+  /** When a study will no longer collect specimens from participants it can be retired. */
+  def retire: DomainValidation[RetiredStudy] = {
+    RetiredStudy.create(this)
+  }
+
+}
 
 /**
   * Factory object used to create a study.
   */
-object DisabledStudy extends StudyValidationHelper {
+object DisabledStudy {
+  import CommonValidations._
 
   /**
     * The factory method to create a study.
@@ -151,8 +138,8 @@ object DisabledStudy extends StudyValidationHelper {
     description: Option[String]): DomainValidation[DisabledStudy] = {
     (validateId(id) |@|
       validateAndIncrementVersion(version) |@|
-      validateNonEmpty(name, "name is null or empty") |@|
-      validateNonEmptyOption(description, "description is null or empty")) {
+      validateString(name, NameRequired) |@|
+      validateNonEmptyOption(description, NonEmptyDescription)) {
         DisabledStudy(_, _, dateTime, None, _, _)
       }
   }
@@ -164,7 +151,7 @@ object DisabledStudy extends StudyValidationHelper {
   * This class has a private constructor and instances of this class can only be created using
   * the [[EnabledStudy.create]] method on the factory object.
   */
-case class EnabledStudy private (
+case class EnabledStudy(
   id: StudyId,
   version: Long,
   addedDate: DateTime,
@@ -175,32 +162,24 @@ case class EnabledStudy private (
 
   override val status: String = "Enabled"
 
-  def disable(
-    expectedVersion: Option[Long],
-    dateTime: DateTime): DomainValidation[DisabledStudy] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedStudy <- DisabledStudy.create(id, version, addedDate, name, description)
-      disabledStudy <- validatedStudy.copy(
-        lastUpdateDate = Some(dateTime)).success
-    } yield disabledStudy
+  def disable: DomainValidation[DisabledStudy] = {
+    DisabledStudy.create(id, version, addedDate, name, description)
   }
 }
 
 /**
   * Factory object used to enable a study.
   */
-object EnabledStudy extends StudyValidationHelper {
+object EnabledStudy {
+  import CommonValidations._
 
   /** A study must be in a disabled state before it can be enabled. */
-  def create(
-    study: DisabledStudy,
-    dateTime: DateTime): DomainValidation[EnabledStudy] = {
+  def create(study: DisabledStudy): DomainValidation[EnabledStudy] = {
     (validateId(study.id) |@|
       validateAndIncrementVersion(study.version) |@|
-      validateNonEmpty(study.name, "name is null or empty") |@|
-      validateNonEmptyOption(study.description, "description is null or empty")) {
-        EnabledStudy(_, _, study.addedDate, Some(dateTime), _, _)
+      validateString(study.name, NameRequired) |@|
+      validateNonEmptyOption(study.description, NonEmptyDescription)) {
+        EnabledStudy(_, _, study.addedDate, None, _, _)
       }
   }
 }
@@ -211,7 +190,7 @@ object EnabledStudy extends StudyValidationHelper {
   * This class has a private constructor and instances of this class can only be created using
   * the [[RetiredStudy.create]] method on the factory object.
  */
-case class RetiredStudy private (
+case class RetiredStudy(
   id: StudyId,
   version: Long,
   addedDate: DateTime,
@@ -222,32 +201,24 @@ case class RetiredStudy private (
 
   override val status: String = "Retired"
 
-  def unretire(
-    expectedVersion: Option[Long],
-    dateTime: DateTime): DomainValidation[DisabledStudy] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedStudy <- DisabledStudy.create(id, version, addedDate, name, description)
-      disabledStudy <- validatedStudy.copy(
-        lastUpdateDate = Some(dateTime)).success
-    } yield disabledStudy
+  def unretire: DomainValidation[DisabledStudy] = {
+    DisabledStudy.create(id, version, addedDate, name, description)
   }
 }
 
 /**
   * Factory object used to retire a study.
   */
-object RetiredStudy extends StudyValidationHelper {
+object RetiredStudy {
+  import CommonValidations._
 
   /** A study must be in a disabled state before it can be retired. */
-  def create(
-    study: DisabledStudy,
-    dateTime: DateTime): DomainValidation[RetiredStudy] = {
+  def create(study: DisabledStudy): DomainValidation[RetiredStudy] = {
     (validateId(study.id) |@|
       validateAndIncrementVersion(study.version) |@|
-      validateNonEmpty(study.name, "name is null or empty") |@|
-      validateNonEmptyOption(study.description, "description is null or empty")) {
-        RetiredStudy(_, _, study.addedDate, Some(dateTime), _, _)
+      validateString(study.name, NameRequired) |@|
+      validateNonEmptyOption(study.description, NonEmptyDescription)) {
+        RetiredStudy(_, _, study.addedDate, None, _, _)
       }
   }
 }

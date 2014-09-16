@@ -50,7 +50,7 @@ class StudySpec extends DomainSpec {
       val name2 = nameGenerator.next[Study]
       val description2 = some(nameGenerator.next[Study])
 
-      val updatedStudy = study.update(Some(0L), org.joda.time.DateTime.now, name2, description2) | fail
+      val updatedStudy = study.update(name2, description2) | fail
 
       updatedStudy should have (
         'id (id),
@@ -60,8 +60,6 @@ class StudySpec extends DomainSpec {
       )
 
       updatedStudy.addedDate should be (study.addedDate)
-      val updateDate = updatedStudy.lastUpdateDate | fail
-      (updateDate to DateTime.now).millis should be < 100L
     }
 
     "be enabled" in {
@@ -73,12 +71,10 @@ class StudySpec extends DomainSpec {
       val study = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description) | fail
       study shouldBe a[DisabledStudy]
 
-      val enabledStudy = study.enable(Some(0L), org.joda.time.DateTime.now, 1, 1) | fail
+      val enabledStudy = study.enable(1, 1) | fail
       enabledStudy shouldBe a[EnabledStudy]
 
       enabledStudy.addedDate should be (study.addedDate)
-      var updateDate = enabledStudy.lastUpdateDate | fail
-      (updateDate to DateTime.now).millis should be < 100L
     }
 
     "disable an enabled study" in {
@@ -90,14 +86,12 @@ class StudySpec extends DomainSpec {
       val study = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description) | fail
       study shouldBe a[DisabledStudy]
 
-      val enabledStudy = study.enable(Some(0L), org.joda.time.DateTime.now, 1, 1) | fail
+      val enabledStudy = study.enable(1, 1) | fail
 
-      val disabledStudy = enabledStudy.disable(Some(1L), org.joda.time.DateTime.now) | fail
+      val disabledStudy = enabledStudy.disable | fail
       disabledStudy shouldBe a[DisabledStudy]
 
       disabledStudy.addedDate should be (study.addedDate)
-      val updateDate = disabledStudy.lastUpdateDate | fail
-      (updateDate to DateTime.now).millis should be < 100L
     }
 
     "be retired" in {
@@ -109,12 +103,10 @@ class StudySpec extends DomainSpec {
       val study = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description) | fail
       study shouldBe a[DisabledStudy]
 
-      val retiredStudy = study.retire(Some(0L), org.joda.time.DateTime.now) | fail
+      val retiredStudy = study.retire | fail
       retiredStudy shouldBe a[RetiredStudy]
 
       retiredStudy.addedDate should be (study.addedDate)
-      val updateDate = retiredStudy.lastUpdateDate | fail
-      (updateDate to DateTime.now).millis should be < 100L
     }
 
     "unretire a study" in {
@@ -126,13 +118,11 @@ class StudySpec extends DomainSpec {
       val study = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description) | fail
       study shouldBe a[DisabledStudy]
 
-      val retiredStudy = study.retire(Some(0L), org.joda.time.DateTime.now) | fail
-      val disabledStudy =retiredStudy.unretire(Some(1L), org.joda.time.DateTime.now) | fail
+      val retiredStudy = study.retire | fail
+      val disabledStudy =retiredStudy.unretire | fail
       disabledStudy shouldBe a[DisabledStudy]
 
       disabledStudy.addedDate should be (study.addedDate)
-      val updateDate = disabledStudy.lastUpdateDate | fail
-      (updateDate to DateTime.now).millis should be < 100L
     }
 
   }
@@ -146,7 +136,7 @@ class StudySpec extends DomainSpec {
       val description = some(nameGenerator.next[Study])
 
       DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description).fold(
-        err => err.list should (have length 1 and contain("id is null or empty")),
+        err => err.list should (have length 1 and contain("IdRequired")),
         user => fail
       )
     }
@@ -170,13 +160,13 @@ class StudySpec extends DomainSpec {
       val description = some(nameGenerator.next[Study])
 
       DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description).fold(
-        err => err.list should (have length 1 and contain("name is null or empty")),
+        err => err.list should (have length 1 and contain("NameRequired")),
         user => fail
       )
 
       name = ""
       DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description).fold(
-        err => err.list should (have length 1 and contain("name is null or empty")),
+        err => err.list should (have length 1 and contain("NameRequired")),
         user => fail
       )
     }
@@ -188,36 +178,15 @@ class StudySpec extends DomainSpec {
       var description: Option[String] = Some(null)
 
       DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description).fold(
-        err => err.list should (have length 1 and contain("description is null or empty")),
+        err => err.list should (have length 1 and contain("NonEmptyDescription")),
         user => fail
       )
 
       description = Some("")
       DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description).fold(
-        err => err.list should (have length 1 and contain("description is null or empty")),
+        err => err.list should (have length 1 and contain("NonEmptyDescription")),
         user => fail
       )
-    }
-
-    "not be updated with an invalid version" in {
-      val id = StudyId(nameGenerator.next[Study])
-      val version = -1L
-      val name = nameGenerator.next[Study]
-      val description = some(nameGenerator.next[Study])
-
-      val study = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description) | fail
-      study shouldBe a[DisabledStudy]
-
-      val name2 = nameGenerator.next[Study]
-      val description2 = some(nameGenerator.next[Study])
-
-      val validation = study.update(Some(10L), org.joda.time.DateTime.now, name2, description2)
-      validation should be ('failure)
-
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include ("expected version doesn't match current version")
-      }
     }
 
     "have more than one validation fail" in {
@@ -232,7 +201,7 @@ class StudySpec extends DomainSpec {
       validation.swap.map { err =>
         err.list should have length 2
         err.list.head should be ("invalid version value: -2")
-        err.list.tail.head should be ("name is null or empty")
+        err.list.tail.head should be ("NameRequired")
       }
     }
 
@@ -243,7 +212,7 @@ class StudySpec extends DomainSpec {
       validation should be ('success)
 
       val study = validation | fail
-      val validation2 = study.enable(Some(0L), org.joda.time.DateTime.now, 0, 0)
+      val validation2 = study.enable(0, 0)
       validation2 should be ('failure)
 
       validation2.swap.map { err =>

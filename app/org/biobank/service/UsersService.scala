@@ -291,7 +291,7 @@ trait UsersProcessorComponent {
 
     def recoverEvent(event: UserRegisteredEvent): Unit = {
       log.debug(s"recoverEvent: $event")
-      userRepository.put(RegisteredUser(UserId(event.email), 0L, event.dateTime, None, event.name,
+      userRepository.put(RegisteredUser(UserId(event.id), 0L, event.dateTime, None, event.name,
         event.email, event.password, event.salt, event.avatarUrl))
       ()
     }
@@ -312,7 +312,7 @@ trait UsersProcessorComponent {
       userRepository.getActive(UserId(event.id)).fold(
         err => throw new IllegalStateException(s"updating name on user from event failed: $err"),
         u => userRepository.put(u.copy(
-          version = u.version, name = event.name, lastUpdateDate = Some(event.dateTime)))
+          version = event.version, name = event.name, lastUpdateDate = Some(event.dateTime)))
       )
       ()
     }
@@ -322,7 +322,7 @@ trait UsersProcessorComponent {
       userRepository.getActive(UserId(event.id)).fold(
         err => throw new IllegalStateException(s"updating email on user from event failed: $err"),
         u => userRepository.put(u.copy(
-          version = u.version, email = event.email, lastUpdateDate = Some(event.dateTime)))
+          version = event.version, email = event.email, lastUpdateDate = Some(event.dateTime)))
       )
       ()
     }
@@ -332,7 +332,7 @@ trait UsersProcessorComponent {
       userRepository.getActive(UserId(event.id)).fold(
         err => throw new IllegalStateException(s"updating password on user from event failed: $err"),
         u => userRepository.put(u.copy(
-          version = u.version, password = event.password, salt = event.salt,
+          version = event.version, password = event.password, salt = event.salt,
           lastUpdateDate = Some(event.dateTime)))
       )
       ()
@@ -343,7 +343,7 @@ trait UsersProcessorComponent {
       userRepository.getActive(UserId(event.id)).fold(
         err => throw new IllegalStateException(s"resetting password on user from event failed: $err"),
         u => userRepository.put(u.copy(
-          version = u.version, password = event.password, salt = event.salt,
+          version = event.version, password = event.password, salt = event.salt,
           lastUpdateDate = Some(event.dateTime)))
       )
       ()
@@ -353,8 +353,9 @@ trait UsersProcessorComponent {
       log.debug(s"recoverEvent: $event")
       userRepository.getActive(UserId(event.id)).fold(
         err => throw new IllegalStateException(s"locking user from event failed: $err"),
-        u => userRepository.put(LockedUser(u.id, event.version, u.addedDate, Some(event.dateTime),
-          u.name, u.email, u.password, u.salt, u.avatarUrl))
+        u => userRepository.put(LockedUser(
+          u.id, event.version, u.addedDate, Some(event.dateTime), u.name, u.email, u.password, u.salt,
+          u.avatarUrl))
       )
       ()
     }
@@ -363,8 +364,9 @@ trait UsersProcessorComponent {
       log.debug(s"recoverEvent: $event")
       userRepository.getLocked(UserId(event.id)).fold(
         err => throw new IllegalStateException(s"unlocking user from event failed: $err"),
-        u => userRepository.put(ActiveUser(u.id, event.version, u.addedDate, Some(event.dateTime),
-          u.name, u.email, u.password, u.salt, u.avatarUrl))
+        u => userRepository.put(ActiveUser(
+          u.id, event.version, u.addedDate, Some(event.dateTime), u.name, u.email, u.password, u.salt,
+          u.avatarUrl))
       )
       ()
     }

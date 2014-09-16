@@ -73,11 +73,10 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventStudyId = (json \ "data" \ "id").as[String]
-        val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
-        validation should be ('success)
-        validation map { repoStudy =>
-          repoStudy.name should be ((json \ "data" \ "name").as[String])
-        }
+        use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId)).fold(
+          err => fail(err.list.mkString),
+          repoStudy => repoStudy.name should be ((json \ "data" \ "name").as[String])
+        )
       }
     }
 
@@ -97,19 +96,20 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventStudyId = (json \ "data" \ "id").as[String]
-        val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
-        validation should be ('success)
-        validation map { repoStudy =>
-          repoStudy.name should be ((json \ "data" \ "name").as[String])
-          repoStudy.version should be ((json \ "data" \ "version").as[Long])
-        }
+        use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId)).fold(
+          err => fail(err.list.mkString),
+          repoStudy => {
+            repoStudy.name should be ((json \ "data" \ "name").as[String])
+            repoStudy.version should be ((json \ "data" \ "version").as[Long])
+          }
+        )
       }
     }
 
     "GET /studies/:id" should {
       "read a study" in new WithApplication(fakeApplication()) {
         doLogin
-        val study = factory.createDisabledStudy.enable(Some(0), org.joda.time.DateTime.now, 1, 1) | fail
+        val study = factory.createDisabledStudy.enable(1, 1) | fail
         use[BbwebPlugin].studyRepository.put(study)
         val json = makeRequest(GET, s"/studies/${study.id.id}")
         compareObj((json \ "data"), study)
@@ -132,11 +132,10 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventStudyId = (json \ "data" \ "id").as[String]
-        val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
-        validation should be ('success)
-        validation map { repoStudy =>
-          repoStudy.version should be ((json \ "data" \ "version").as[Long])
-        }
+         use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId)).fold(
+          err => fail(err.list.mkString),
+           repoStudy => repoStudy.version should be ((json \ "data" \ "version").as[Long])
+         )
       }
     }
 
@@ -159,7 +158,7 @@ class StudiesControllerSpec extends ControllerFixture {
     "POST /studies/disable" should {
       "disable a study" in new WithApplication(fakeApplication()) {
         doLogin
-        val study = factory.createDisabledStudy.enable(Some(0), org.joda.time.DateTime.now, 1, 1) | fail
+        val study = factory.createDisabledStudy.enable(1, 1) | fail
         use[BbwebPlugin].studyRepository.put(study)
 
         val cmdJson = Json.obj(
@@ -170,11 +169,10 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventStudyId = (json \ "data" \ "id").as[String]
-        val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
-        validation should be ('success)
-        validation map { repoStudy =>
-          repoStudy.version should be ((json \ "data" \ "version").as[Long])
-        }
+        use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId)).fold(
+          err => fail(err.list.mkString),
+          repoStudy => repoStudy.version should be ((json \ "data" \ "version").as[Long])
+        )
       }
     }
 
@@ -192,18 +190,17 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventStudyId = (json \ "data" \ "id").as[String]
-        val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
-        validation should be ('success)
-        validation map { repoStudy =>
-          repoStudy.version should be ((json \ "data" \ "version").as[Long])
-        }
+        use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId)).fold(
+          err => fail(err.list.mkString),
+          repoStudy => repoStudy.version should be ((json \ "data" \ "version").as[Long])
+        )
       }
     }
 
     "POST /studies/unretire" should {
       "unretire a study" in new WithApplication(fakeApplication()) {
         doLogin
-        val study = factory.createDisabledStudy.retire(Some(0), org.joda.time.DateTime.now) | fail
+        val study = factory.createDisabledStudy.retire | fail
         use[BbwebPlugin].studyRepository.put(study)
 
         val cmdJson = Json.obj(
@@ -214,11 +211,10 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] should include ("success")
 
         val eventStudyId = (json \ "data" \ "id").as[String]
-        val validation = use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId))
-        validation should be ('success)
-        validation map { repoStudy =>
-          repoStudy.version should be ((json \ "data" \ "version").as[Long])
-        }
+        use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId)).fold(
+          err => fail(err.list.mkString),
+          repoStudy => repoStudy.version should be ((json \ "data" \ "version").as[Long])
+        )
       }
     }
 

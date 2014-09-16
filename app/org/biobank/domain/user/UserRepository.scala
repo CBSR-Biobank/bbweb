@@ -16,11 +16,11 @@ trait UserRepositoryComponent {
 
     def allUsers(): Set[User]
 
-    def getRegistered(id: UserId) = getByKey(id).map(_.asInstanceOf[RegisteredUser])
+    def getRegistered(id: UserId): DomainValidation[RegisteredUser]
 
-    def getActive(id: UserId) = getByKey(id).map(_.asInstanceOf[ActiveUser])
+    def getActive(id: UserId): DomainValidation[ActiveUser]
 
-    def getLocked(id: UserId) = getByKey(id).map(_.asInstanceOf[LockedUser])
+    def getLocked(id: UserId): DomainValidation[LockedUser]
 
   }
 }
@@ -41,5 +41,10 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
 
     def allUsers(): Set[User] = getValues.toSet
 
+    def getRegistered(id: UserId) = getByKey(id).map(_.asInstanceOf[RegisteredUser])
+
+    def getActive(id: UserId) = getByKey(id).map(_.asInstanceOf[ActiveUser])
+
+    def getLocked(id: UserId) = getByKey(id).map(_.asInstanceOf[LockedUser])
   }
 }

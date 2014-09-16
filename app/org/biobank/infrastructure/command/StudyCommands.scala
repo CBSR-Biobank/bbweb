@@ -19,14 +19,25 @@ import play.api.libs.functional.syntax._
 
 object StudyCommands {
   // study commands
-  trait StudyCommand extends Command
+  trait StudyCommand extends Command {
+    val id: String
+    val expectedVersion: Long
+  }
+
   trait HasStudyIdentity { val studyId: String }
   trait HasProcessingTypeIdentity { val processingTypeId: String }
 
   case class AddStudyCmd(
+    id: String,               // don't care
+    expectedVersion: Long,    // don't care
     name: String,
     description: Option[String] = None)
       extends StudyCommand
+
+  object AddStudyCmd {
+    def apply(name: String, description: Option[String]): AddStudyCmd =
+      AddStudyCmd("", 0L, name, description)
+  }
 
   case class UpdateStudyCmd(
     id: String,
@@ -72,6 +83,8 @@ object StudyCommands {
 
   case class AddSpecimenGroupCmd(
     studyId: String,
+    id: String,
+    expectedVersion: Long,
     name: String,
     description: Option[String],
     units: String,
@@ -80,6 +93,20 @@ object StudyCommands {
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType)
       extends SpecimenGroupCommand with HasStudyIdentity
+
+  object AddSpecimenGroupCmd{
+    def apply(
+    studyId: String,
+    name: String,
+    description: Option[String],
+    units: String,
+    anatomicalSourceType: AnatomicalSourceType,
+    preservationType: PreservationType,
+    preservationTemperatureType: PreservationTemperatureType,
+    specimenType: SpecimenType): AddSpecimenGroupCmd =
+      AddSpecimenGroupCmd(studyId, "", 0L, name, description, units, anatomicalSourceType,
+        preservationType, preservationTemperatureType, specimenType)
+  }
 
   case class UpdateSpecimenGroupCmd(
     studyId: String,
@@ -109,12 +136,26 @@ object StudyCommands {
 
   case class AddCollectionEventTypeCmd(
     studyId: String,
+    id: String,
+    expectedVersion: Long,
     name: String,
     description: Option[String],
     recurring: Boolean,
     specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
     annotationTypeData: List[CollectionEventTypeAnnotationTypeData])
       extends CollectionEventTypeCommand with HasStudyIdentity
+
+  object AddCollectionEventTypeCmd {
+    def apply(
+      studyId: String,
+      name: String,
+      description: Option[String],
+      recurring: Boolean,
+      specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
+      annotationTypeData: List[CollectionEventTypeAnnotationTypeData]): AddCollectionEventTypeCmd =
+      AddCollectionEventTypeCmd(
+        studyId, "", 0L, name, description, recurring, specimenGroupData, annotationTypeData)
+  }
 
   case class UpdateCollectionEventTypeCmd(
     studyId: String,
@@ -143,13 +184,28 @@ object StudyCommands {
   // collection event annotation type commands
   trait CollectionEventAnnotationTypeCommand extends StudyAnnotationTypeCommand
 
-  case class AddCollectionEventAnnotationTypeCmd(studyId: String,
+  case class AddCollectionEventAnnotationTypeCmd(
+    studyId: String,
+    id: String,
+    expectedVersion: Long,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
     options: Option[Seq[String]] = None)
       extends CollectionEventAnnotationTypeCommand
+
+  object AddCollectionEventAnnotationTypeCmd {
+    def apply(
+      studyId: String,
+      name: String,
+      description: Option[String],
+      valueType: AnnotationValueType,
+      maxValueCount: Option[Int],
+      options: Option[Seq[String]]): AddCollectionEventAnnotationTypeCmd =
+      AddCollectionEventAnnotationTypeCmd(
+        studyId, "", 0L, name, description, valueType, maxValueCount, options)
+  }
 
   case class UpdateCollectionEventAnnotationTypeCmd(
     studyId: String,
@@ -179,6 +235,8 @@ object StudyCommands {
 
   case class AddParticipantAnnotationTypeCmd(
     studyId: String,
+    id: String,                   // don't care
+    expectedVersion: Long,        // don't care
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -187,6 +245,19 @@ object StudyCommands {
     required: Boolean = false)
       extends ParticipantAnnotationTypeCommand
       with HasStudyIdentity
+
+  object AddParticipantAnnotationTypeCmd {
+    def apply(
+      studyId: String,
+      name: String,
+      description: Option[String],
+      valueType: AnnotationValueType,
+      maxValueCount: Option[Int],
+      options: Option[Seq[String]],
+      required: Boolean): AddParticipantAnnotationTypeCmd =
+      AddParticipantAnnotationTypeCmd(
+        studyId, "", 0L, name, description, valueType, maxValueCount, options, required)
+  }
 
   case class UpdateParticipantAnnotationTypeCmd(
     studyId: String,
@@ -216,6 +287,8 @@ object StudyCommands {
 
   case class AddSpecimenLinkAnnotationTypeCmd(
     studyId: String,
+    id: String,
+    expectedVersion: Long,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -223,6 +296,18 @@ object StudyCommands {
     options: Option[Seq[String]] = None)
       extends SpecimenLinkAnnotationTypeCommand
       with HasStudyIdentity
+
+  object AddSpecimenLinkAnnotationTypeCmd {
+    def apply(
+      studyId: String,
+      name: String,
+      description: Option[String],
+      valueType: AnnotationValueType,
+      maxValueCount: Option[Int],
+      options: Option[Seq[String]]): AddSpecimenLinkAnnotationTypeCmd =
+      AddSpecimenLinkAnnotationTypeCmd(
+        studyId, "", 0L, name, description, valueType, maxValueCount, options)
+  }
 
   case class UpdateSpecimenLinkAnnotationTypeCmd(
     studyId: String,
@@ -252,10 +337,21 @@ object StudyCommands {
 
   case class AddProcessingTypeCmd(
     studyId: String,
+    id: String,
+    expectedVersion: Long,
     name: String,
     description: Option[String],
     enabled: Boolean)
       extends ProcessingTypeCommand with HasStudyIdentity
+
+  object AddProcessingTypeCmd {
+    def apply(
+      studyId: String,
+      name: String,
+      description: Option[String],
+      enabled: Boolean): AddProcessingTypeCmd =
+      AddProcessingTypeCmd(studyId, "", 0L, name, description, enabled)
+  }
 
   case class UpdateProcessingTypeCmd(
     studyId: String,
@@ -281,6 +377,8 @@ object StudyCommands {
 
   case class AddSpecimenLinkTypeCmd(
     processingTypeId: String,
+    id: String,
+    expectedVersion: Long,
     expectedInputChange: BigDecimal,
     expectedOutputChange: BigDecimal,
     inputCount: Int,
@@ -292,6 +390,23 @@ object StudyCommands {
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
       extends SpecimenLinkTypeCommand
       with HasProcessingTypeIdentity
+
+  object AddSpecimenLinkTypeCmd {
+    def apply(
+      processingTypeId: String,
+      expectedInputChange: BigDecimal,
+      expectedOutputChange: BigDecimal,
+      inputCount: Int,
+      outputCount: Int,
+      inputGroupId: String,
+      outputGroupId: String,
+      inputContainerTypeId: Option[String],
+      outputContainerTypeId: Option[String],
+      annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData]): AddSpecimenLinkTypeCmd =
+      AddSpecimenLinkTypeCmd(
+        processingTypeId, "", 0L, expectedInputChange, expectedOutputChange, inputCount, outputCount,
+        inputGroupId, outputGroupId, inputContainerTypeId, outputContainerTypeId, annotationTypeData)
+  }
 
   case class UpdateSpecimenLinkTypeCmd(
     processingTypeId: String,
@@ -336,7 +451,7 @@ object StudyCommands {
   implicit val addStudyCmdReads = (
     (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String]
-  )(AddStudyCmd.apply _ )
+  ){ AddStudyCmd("", 0L, _, _) }
 
   implicit val updateStudyCmdReads: Reads[UpdateStudyCmd] = (
     (__ \ "id").read[String](minLength[String](2)) and
@@ -373,7 +488,7 @@ object StudyCommands {
       (__ \ "maxValueCount").readNullable[Int] and
       (__ \ "options").readNullable[Seq[String]] and
       (__ \ "required").read[Boolean]
-  )(AddParticipantAnnotationTypeCmd.apply _)
+  ){ AddParticipantAnnotationTypeCmd(_, "", 0L, _, _, _, _, _, _) }
 
   implicit val updateParticipantAnnotationTypeCmdReads: Reads[UpdateParticipantAnnotationTypeCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
@@ -396,7 +511,7 @@ object StudyCommands {
       (__ \ "preservationType").read[PreservationType] and
       (__ \ "preservationTemperatureType").read[PreservationTemperatureType] and
       (__ \ "specimenType").read[SpecimenType]
-  )(AddSpecimenGroupCmd.apply _)
+  ){ AddSpecimenGroupCmd(_, "", 0L, _, _, _, _, _, _, _) }
 
   implicit val updateSpecimenGroupCmdReads: Reads[UpdateSpecimenGroupCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
@@ -424,7 +539,7 @@ object StudyCommands {
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
       (__ \ "options").readNullable[Seq[String]]
-  )(AddCollectionEventAnnotationTypeCmd.apply _)
+  ){ AddCollectionEventAnnotationTypeCmd(_, "", 0L, _, _, _, _, _) }
 
   implicit val updateCollectionEventAnnotationTypeCmdReads: Reads[UpdateCollectionEventAnnotationTypeCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
@@ -450,7 +565,7 @@ object StudyCommands {
       (__ \ "recurring").read[Boolean] and
       (__ \ "specimenGroupData").read[List[CollectionEventTypeSpecimenGroupData]] and
       (__ \ "annotationTypeData").read[List[CollectionEventTypeAnnotationTypeData]]
-  )(AddCollectionEventTypeCmd.apply _)
+  ){ AddCollectionEventTypeCmd(_, "", 0L, _, _, _, _, _) }
 
   implicit val updateCollectionEventTypeCmdReads: Reads[UpdateCollectionEventTypeCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
@@ -474,7 +589,7 @@ object StudyCommands {
       (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String] and
       (__ \ "enabled").read[Boolean]
-  )(AddProcessingTypeCmd.apply _)
+  ){ AddProcessingTypeCmd(_, "", 0L, _, _, _) }
 
   implicit val updateProcessingTypeCmdReads: Reads[UpdateProcessingTypeCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
@@ -498,7 +613,7 @@ object StudyCommands {
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
       (__ \ "options").readNullable[Seq[String]]
-  )(AddSpecimenLinkAnnotationTypeCmd.apply _)
+  ){ AddSpecimenLinkAnnotationTypeCmd(_, "", 0L, _, _, _, _, _) }
 
   implicit val updateSpecimenLinkAnnotationTypeCmdReads: Reads[UpdateSpecimenLinkAnnotationTypeCmd] = (
     (__ \ "studyId").read[String](minLength[String](2)) and
@@ -528,7 +643,7 @@ object StudyCommands {
       (__ \ "inputContainerTypeId").read[Option[String]] and
       (__ \ "outputContainerTypeId").read[Option[String]] and
       (__ \ "annotationTypeData").read[List[SpecimenLinkTypeAnnotationTypeData]]
-  )(AddSpecimenLinkTypeCmd.apply _)
+  ){ AddSpecimenLinkTypeCmd(_, "", 0L, _, _, _, _, _, _, _, _, _) }
 
   implicit val updateSpecimenLinkTypeCmdReads: Reads[UpdateSpecimenLinkTypeCmd] = (
     (__ \ "processingTypeId").read[String](minLength[String](2)) and

@@ -85,8 +85,7 @@ class Factory {
 
   def createEnabledStudy: EnabledStudy = {
     val disabledStudy = defaultDisabledStudy
-    val enabledStudy = disabledStudy.enable(
-      disabledStudy.versionOption, DateTime.now, 1, 1) | null
+    val enabledStudy = disabledStudy.enable(1, 1) | null
     domainObjects = domainObjects + (classOf[EnabledStudy] -> enabledStudy)
     domainObjects = domainObjects - classOf[DisabledStudy]
     enabledStudy

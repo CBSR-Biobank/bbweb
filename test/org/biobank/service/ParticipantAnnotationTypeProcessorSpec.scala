@@ -35,7 +35,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
 
       val cmd = AddParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
-        annotType.maxValueCount, annotType.options)
+        annotType.maxValueCount, annotType.options, false)
       val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue
@@ -73,7 +73,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
 
       val cmd = AddParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
-        annotType.maxValueCount, annotType.options)
+        annotType.maxValueCount, annotType.options, false)
       val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue
@@ -91,7 +91,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
 
       val cmd = AddParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
-        annotType.maxValueCount, annotType.options)
+        annotType.maxValueCount, annotType.options, true)
       val validation = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue

@@ -80,8 +80,6 @@ object User {
 
 trait UserValidations {
 
-  case object NameRequired extends ValidationKey
-
   case object PasswordRequired extends ValidationKey
 
   case object SaltRequired extends ValidationKey
