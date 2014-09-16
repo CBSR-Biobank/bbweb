@@ -60,62 +60,21 @@ class UserSpec extends DomainSpec {
     "can be activated, locked, and unlocked" in {
       val user = factory.createRegisteredUser
 
-      val activeUser = user.activate(user.versionOption, DateTime.now)  | fail
+      val activeUser = user.activate  | fail
       activeUser shouldBe a[ActiveUser]
       activeUser.version should be(user.version + 1)
       activeUser.addedDate should be (user.addedDate)
-      var updateDate = activeUser.lastUpdateDate | fail
-        (updateDate to DateTime.now).millis should be < 200L
 
-      val lockedUser = activeUser.lock(activeUser.versionOption, DateTime.now) | fail
+      val lockedUser = activeUser.lock | fail
       lockedUser shouldBe a[LockedUser]
       lockedUser.version should be(activeUser.version + 1)
       lockedUser.addedDate should be (user.addedDate)
-      updateDate = lockedUser.lastUpdateDate | fail
-        (updateDate to DateTime.now).millis should be < 200L
 
-      val unlockedUser = lockedUser.unlock(lockedUser.versionOption, DateTime.now) | fail
+      val unlockedUser = lockedUser.unlock | fail
       unlockedUser shouldBe a[ActiveUser]
       unlockedUser.version should be(lockedUser.version + 1)
       unlockedUser.addedDate should be (user.addedDate)
-      updateDate = unlockedUser.lastUpdateDate | fail
-        (updateDate to DateTime.now).millis should be < 200L
     }
-  }
-
-  "An active user" can {
-
-    "be updated" in {
-      val user = factory.createActiveUser
-
-      val name = nameGenerator.next[User]
-      val email = nameGenerator.nextEmail[User]
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = nameGenerator.next[User]
-      val avatarUrl = Some("http://test2.com/")
-
-      val validation = user.update(
-        user.versionOption, DateTime.now, name, email, password, salt, avatarUrl)
-      validation should be ('success)
-      validation map { user2 =>
-        user2 shouldBe a[ActiveUser]
-        user2 should have (
-          'id (user.id),
-          'version (user.version + 1),
-          'name (name),
-          'email (email),
-          'password (password),
-          'salt (salt),
-          'avatarUrl (avatarUrl)
-        )
-
-        user2.addedDate should be (user.addedDate)
-        val updateDate = user2.lastUpdateDate | fail
-          (updateDate to DateTime.now).millis should be < 200L
-      }
-    }
-
   }
 
   "A user" should {
@@ -132,7 +91,7 @@ class UserSpec extends DomainSpec {
 
       RegisteredUser.create(
         id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list should (have length 1 and contain("id is null or empty")),
+        err => err.list should (have length 1 and contain("IdRequired")),
         user => fail("id validation failed")
       )
     }
@@ -154,25 +113,6 @@ class UserSpec extends DomainSpec {
       )
     }
 
-    "not be updated with an invalid version" taggedAs(Tag("single")) in {
-      val user = factory.createActiveUser
-
-      val name = nameGenerator.next[User]
-      val email = nameGenerator.nextEmail[User]
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = nameGenerator.next[User]
-      val avatarUrl = Some("http://test3.com/")
-
-      val validation = user.update(
-        Some(user.version - 1), DateTime.now, name, email, password, salt, avatarUrl)
-      validation should be ('failure)
-      validation.swap.map { err =>
-        err.list should have length 1
-              err.list.head should include ("expected version doesn't match current version")
-      }
-    }
-
     "not be created with an empty name" in {
       val id = UserId(nameGenerator.next[User])
       val version = 0L
@@ -185,7 +125,47 @@ class UserSpec extends DomainSpec {
 
       RegisteredUser.create(
         id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list should (have length 1 and contain("name is null or empty")),
+        err => err.list should (have length 1 and contain("NameRequired")),
+        user => fail("name validation failed")
+      )
+    }
+
+    "not be created with an empty email" in {
+      val id = UserId(nameGenerator.next[User])
+      val version = 0L
+      val name = nameGenerator.nextEmail[User]
+      val email = ""
+      val password = nameGenerator.next[User]
+      val hasher = nameGenerator.next[User]
+      val salt = nameGenerator.next[User]
+      val avatarUrl = Some("http://test.com/")
+
+      RegisteredUser.create(
+        id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
+        err => {
+          err.list should have length 1
+          err.list.head should include("email invalid")
+        },
+        user => fail("name validation failed")
+      )
+    }
+
+    "not be created with an invalid email" in {
+      val id = UserId(nameGenerator.next[User])
+      val version = 0L
+      val name = nameGenerator.nextEmail[User]
+      val email = "abcdef"
+      val password = nameGenerator.next[User]
+      val hasher = nameGenerator.next[User]
+      val salt = nameGenerator.next[User]
+      val avatarUrl = Some("http://test.com/")
+
+      RegisteredUser.create(
+        id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
+        err => {
+          err.list should have length 1
+          err.list.head should include("email invalid")
+        },
         user => fail("name validation failed")
       )
     }
@@ -202,7 +182,7 @@ class UserSpec extends DomainSpec {
 
       RegisteredUser.create(
         id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list should (have length 1 and contain("password is null or empty")),
+        err => err.list should (have length 1 and contain("PasswordRequired")),
         user => fail("user password validation failed")
       )
     }
@@ -218,7 +198,7 @@ class UserSpec extends DomainSpec {
       val avatarUrl = Some("http://test.com/")
 
       RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list should (have length 1 and contain("salt is null or empty")),
+        err => err.list should (have length 1 and contain("SaltRequired")),
         user => fail("user salt validation failed")
       )
     }
@@ -294,7 +274,7 @@ class UserSpec extends DomainSpec {
         err => {
           err.list should have length 2
           err.list.head should be ("invalid version value: -2")
-          err.list.tail.head should be ("name is null or empty")
+          err.list.tail.head should be ("NameRequired")
         },
         user => fail
       )

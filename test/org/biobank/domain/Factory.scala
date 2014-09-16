@@ -47,7 +47,7 @@ class Factory {
 
   def createActiveUser: ActiveUser = {
     val registeredUser = defaultRegisteredUser
-    val validation = registeredUser.activate(registeredUser.versionOption, DateTime.now)
+    val validation = registeredUser.activate
     if (validation.isFailure) {
       throw new Error
     }
@@ -59,7 +59,7 @@ class Factory {
 
   def createLockedUser: LockedUser = {
     val activeUser = defaultActiveUser
-    val validation = activeUser.lock(activeUser.versionOption, DateTime.now)
+    val validation = activeUser.lock
     if (validation.isFailure) {
       throw new Error
     }

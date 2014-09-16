@@ -5,6 +5,7 @@ import org.biobank.domain.user._
 import org.biobank.fixture.{ ControllerFixture, NameGenerator }
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.service.json.JsonHelper._
+import org.biobank.service.PasswordHasherComponentImpl
 
 import com.typesafe.plugin._
 import org.joda.time.DateTime
@@ -19,7 +20,7 @@ import play.api.test._
 /**
   * Tests the REST API for [[User]].
   */
-class UsersControllerSpec extends ControllerFixture {
+class UsersControllerSpec extends ControllerFixture with PasswordHasherComponentImpl {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -92,29 +93,64 @@ class UsersControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /users/:id" should {
-      "update a user" in new WithApplication(fakeApplication()) {
+    "PUT /users/:id/name" should {
+      "update a user's name" in new WithApplication(fakeApplication()) {
         doLogin
-        val user = factory.createRegisteredUser.activate(Some(0), DateTime.now) | fail
+        val user = factory.createRegisteredUser.activate | fail
         use[BbwebPlugin].userRepository.put(user)
 
         val cmdJson = Json.obj(
           "id"              -> user.id.id,
           "expectedVersion" -> Some(user.version),
-          "name"            -> user.name,
-          "email"           -> user.email,
-          "password"        -> "testpassword",
-          "avatarUrl"       -> user.avatarUrl)
-        val json = makeRequest(PUT, s"/users/${user.id.id}", json = cmdJson)
+          "name"            -> user.name)
+        val json = makeRequest(PUT, s"/users/${user.id.id}/name", json = cmdJson)
 
         (json \ "status").as[String] should include ("success")
+      }
+    }
+
+    "PUT /users/:id/email" should {
+      "update a user's email" in new WithApplication(fakeApplication()) {
+        doLogin
+        val user = factory.createRegisteredUser.activate | fail
+        use[BbwebPlugin].userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "id"              -> user.id.id,
+          "expectedVersion" -> Some(user.version),
+          "email"            -> user.email)
+        val json = makeRequest(PUT, s"/users/${user.id.id}/email", json = cmdJson)
+
+        (json \ "status").as[String] should include ("success")
+      }
+    }
+
+    "PUT /users/:id/password" should {
+      "update a user's email" in new WithApplication(fakeApplication()) {
+        doLogin
+        val plainPassword = nameGenerator.next[User]
+        val newPassword = nameGenerator.next[User]
+        val salt = passwordHasher.generateSalt
+        val encryptedPassword = passwordHasher.encrypt(plainPassword, salt)
+        val user = factory.createActiveUser.copy(password = encryptedPassword, salt = salt)
+        use[BbwebPlugin].userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "id"              -> user.id.id,
+          "expectedVersion" -> Some(user.version),
+          "oldPassword"     -> plainPassword,
+          "newPassword"     -> newPassword)
+        val json = makeRequest(PUT, s"/users/${user.id.id}/password", json = cmdJson)
+
+        (json \ "status").as[String] should include ("success")
+        (json \ "data" \ "password").as[String] should not be (newPassword)
       }
     }
 
     "GET /users/:id" should {
       "read a user" in new WithApplication(fakeApplication()) {
         doLogin
-        val user = factory.createRegisteredUser.activate(Some(0), org.joda.time.DateTime.now) | fail
+        val user = factory.createRegisteredUser.activate | fail
         use[BbwebPlugin].userRepository.put(user)
         val json = makeRequest(GET, s"/users/${user.id.id}")
         val jsonObj = (json \ "data").as[JsObject]
@@ -142,7 +178,7 @@ class UsersControllerSpec extends ControllerFixture {
       "lock a user" in new WithApplication(fakeApplication()) {
         doLogin
 
-        val user = factory.createRegisteredUser.activate(Some(0), DateTime.now) | fail
+        val user = factory.createRegisteredUser.activate | fail
         use[BbwebPlugin].userRepository.put(user)
 
         val cmdJson = Json.obj(
@@ -157,8 +193,8 @@ class UsersControllerSpec extends ControllerFixture {
     "PUT /users/unlock" should {
       "should unlock a user" in new WithApplication(fakeApplication()) {
         doLogin
-        val user = factory.createRegisteredUser.activate(Some(0), DateTime.now) | fail
-        val lockedUser = user.lock(user.versionOption, DateTime.now) | fail
+        val user = factory.createRegisteredUser.activate | fail
+        val lockedUser = user.lock | fail
         use[BbwebPlugin].userRepository.put(lockedUser)
 
         val cmdJson = Json.obj(
@@ -208,8 +244,8 @@ class UsersControllerSpec extends ControllerFixture {
 
       "not allow a locked user to log in" in new WithApplication(fakeApplication()) {
         val plainPassword = nameGenerator.next[String]
-        val activeUser = createUserInRepository(plainPassword).activate(Some(0L), DateTime.now) | fail
-        val lockedUser = activeUser.lock(activeUser.versionOption, DateTime.now) | fail
+        val activeUser = createUserInRepository(plainPassword).activate | fail
+        val lockedUser = activeUser.lock | fail
         use[BbwebPlugin].userRepository.put(lockedUser)
 
         val cmdJson = Json.obj(
@@ -314,17 +350,21 @@ class UsersControllerSpec extends ControllerFixture {
 
       "allow an active user to reset his/her password" in new WithApplication(fakeApplication()) {
         val user = createUserInRepository(nameGenerator.next[String])
-        val activeUser = user.activate(Some(0L), DateTime.now) | fail
+        val activeUser = user.activate | fail
         use[BbwebPlugin].userRepository.put(activeUser)
 
-        val cmdJson = Json.obj("email" -> activeUser.email)
+        val cmdJson = Json.obj(
+          "id"              -> activeUser.id,
+          "expectedVersion" -> activeUser.version)
         val json = makeRequest(POST, "/passreset", json = cmdJson)
           (json \ "status").as[String] should include ("success")
       }
 
       "not allow a registered user to reset his/her password" in new WithApplication(fakeApplication()) {
         val user = createUserInRepository(nameGenerator.next[String])
-        val cmdJson = Json.obj("email" -> user.email)
+        val cmdJson = Json.obj(
+          "id"              -> user.id,
+          "expectedVersion" -> user.version)
         val json = makeRequest(POST, "/passreset", FORBIDDEN, json = cmdJson)
           (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("user is not active")
@@ -334,10 +374,22 @@ class UsersControllerSpec extends ControllerFixture {
         val lockedUser = factory.createLockedUser
         use[BbwebPlugin].userRepository.put(lockedUser)
 
-        val cmdJson = Json.obj("email" -> lockedUser.email)
+        val cmdJson = Json.obj(
+          "id"              -> lockedUser.id,
+          "expectedVersion" -> lockedUser.version)
         val json = makeRequest(POST, "/passreset", FORBIDDEN, json = cmdJson)
           (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("user is not active")
+      }
+
+      "not allow a password reset on an invalid email address" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
+
+        val cmdJson = Json.obj(
+          "id"              -> nameGenerator.next[User],
+          "expectedVersion" -> 0L)
+        val json = makeRequest(POST, "/passreset", NOT_FOUND, json = cmdJson)
+          (json \ "status").as[String] should include ("error")
+          (json \ "message").as[String] should include ("email address not registered")
       }
 
     }

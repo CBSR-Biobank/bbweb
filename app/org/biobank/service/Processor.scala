@@ -17,11 +17,11 @@ trait Processor extends PersistentActor with ActorLogging {
     *
     * @see http://helenaedelson.com/?p=879
     */
-  protected def process[T](validation: DomainValidation[T])(onSuccess: T => Unit) {
+  protected def process[T](validation: DomainValidation[T])(successFn: T => Unit) {
     val originalSender = context.sender
     validation map { event =>
       persist(event) { e =>
-        onSuccess(e)
+        successFn(e)
         // inform the sender of the successful command with the event
         originalSender ! e.success
       }

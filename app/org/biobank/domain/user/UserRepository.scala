@@ -16,6 +16,12 @@ trait UserRepositoryComponent {
 
     def allUsers(): Set[User]
 
+    def getRegistered(id: UserId) = getByKey(id).map(_.asInstanceOf[RegisteredUser])
+
+    def getActive(id: UserId) = getByKey(id).map(_.asInstanceOf[ActiveUser])
+
+    def getLocked(id: UserId) = getByKey(id).map(_.asInstanceOf[LockedUser])
+
   }
 }
 

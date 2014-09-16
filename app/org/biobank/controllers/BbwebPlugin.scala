@@ -1,6 +1,6 @@
 package org.biobank.controllers
 
-import org.biobank.domain.user.{ RegisteredUser, UserId }
+import org.biobank.domain.user.{ RegisteredUser, User, UserId }
 import org.biobank.service.{ TopComponent, ServicesComponentImpl }
 
 import java.io.File
@@ -90,40 +90,32 @@ class BbwebPlugin(val app: play.api.Application)
     }
   }
 
-  def createDefaultUser = {
+  def createDefaultUser: User = {
     //if ((app.mode == Mode.Dev) || (app.mode == Mode.Test)) {
 
-    if (userRepository.isEmpty) {
-      // for debug only - password is "administrator"
-      val validation = RegisteredUser.create(
-        UserId(defaultUserEmail),
-        -1L,
-        DateTime.now,
-        "admin",
-        defaultUserEmail,
-        "$2a$10$5ND6n5oPFtuShMQVb/vx1eJP0DzX1nIcwvX3GWUXgJP8/XVr7tqPS",
-        "$2a$10$5ND6n5oPFtuShMQVb/vx1e",
-        None)
+    // for debug only - password is "administrator"
+    val validation = RegisteredUser.create(
+      UserId(defaultUserEmail),
+      -1L,
+      DateTime.now,
+      "admin",
+      defaultUserEmail,
+      "$2a$10$5ND6n5oPFtuShMQVb/vx1eJP0DzX1nIcwvX3GWUXgJP8/XVr7tqPS",
+      "$2a$10$5ND6n5oPFtuShMQVb/vx1e",
+      None)
 
-      if (validation.isFailure) {
-        validation.swap.map { err =>
-          throw new RuntimeException("could not add default user in development mode: " + err)
-        }
-      }
-      validation map { user =>
-        val validation2 = user.activate(Some(0), DateTime.now)
-        if (validation2.isFailure) {
-          validation.swap.map { err =>
-            throw new RuntimeException("could not activate default user in development mode: " + err)
+    validation.fold(
+      err => throw new RuntimeException("could not add default user in development mode: " + err),
+      user => {
+        user.activate.fold(
+          err => throw new RuntimeException("could not activate default user in development mode: " + err),
+          activeUser => {
+            Logger.info("default user created")
+            userRepository.put(activeUser)
           }
-        }
-        validation2.map { activeUser =>
-          userRepository.put(activeUser)
-          Logger.info("default user created")
-        }
+        )
       }
-    }
-    //}
+    )
   }
 
   /**

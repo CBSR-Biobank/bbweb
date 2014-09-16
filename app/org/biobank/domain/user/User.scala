@@ -1,9 +1,14 @@
 package org.biobank.domain.user
 
-import org.biobank.domain._
-import org.biobank.domain.validation.UserValidationHelper
+import org.biobank.domain.{
+  CommonValidations,
+  ConcurrencySafeEntity,
+  DomainValidation,
+  DomainError,
+  ValidationKey }
 import org.biobank.infrastructure.event.UserEvents._
-import com.github.nscala_time.time.Imports._
+//import com.github.nscala_time.time.Imports._
+import org.joda.time.DateTime
 import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
@@ -56,10 +61,59 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
         |}""".stripMargin
 }
 
+object User {
+
+  implicit val userWrites = new Writes[User] {
+    def writes(user: User) = Json.obj(
+      "id"             -> user.id,
+      "version"        -> user.version,
+      "addedDate"      -> user.addedDate,
+      "lastUpdateDate" -> user.lastUpdateDate,
+      "name"           -> user.name,
+      "email"          -> user.email,
+      "avatarUrl"      -> user.avatarUrl,
+      "status"         -> user.status
+    )
+  }
+
+}
+
+trait UserValidations {
+
+  case object NameRequired extends ValidationKey
+
+  case object PasswordRequired extends ValidationKey
+
+  case object SaltRequired extends ValidationKey
+
+  val emailRegex = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?".r
+  val urlRegex = "^((https?|ftp)://|(www|ftp)\\.)[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$".r
+
+  def validateEmail(email: String): DomainValidation[String] = {
+    emailRegex.findFirstIn(email) match {
+      case Some(e) => email.success
+      case None => s"email invalid: $email".failNel
+    }
+  }
+
+  def validateAvatarUrl(url: Option[String]): DomainValidation[Option[String]] = {
+    url match {
+      case Some(url) =>
+        urlRegex.findFirstIn(url) match {
+          case Some(e) => some(url).success
+          case None => s"invalid avatar url: $url".failNel
+        }
+      case None =>
+        none.success
+    }
+  }
+}
+
+
 /** A user that just registered with the system. This user does not yet have full access
   * the system.
   */
-case class RegisteredUser private (
+case class RegisteredUser (
   id: UserId,
   version: Long,
   addedDate: DateTime,
@@ -68,24 +122,20 @@ case class RegisteredUser private (
   email: String,
   password: String,
   salt: String,
-  avatarUrl: Option[String]) extends User {
+  avatarUrl: Option[String]) extends User with UserValidations {
+  import CommonValidations._
 
   override val status: String = "Registered"
 
   /* Activates a registered user. */
-  def activate(
-    expectedVersion: Option[Long],
-    dateTime: DateTime): DomainValidation[ActiveUser] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedUser <- ActiveUser.create(this)
-      activatedUser <- validatedUser.copy(lastUpdateDate = Some(dateTime)).success
-    } yield activatedUser
+  def activate: DomainValidation[ActiveUser] = {
+    ActiveUser.create(this)
   }
 }
 
 /** Factory object. */
-object RegisteredUser extends UserValidationHelper {
+object RegisteredUser extends UserValidations {
+  import CommonValidations._
 
   /** Creates a registered user. */
   def create(
@@ -100,10 +150,10 @@ object RegisteredUser extends UserValidationHelper {
 
     (validateId(id) |@|
       validateAndIncrementVersion(version) |@|
-      validateNonEmpty(name, "name is null or empty") |@|
+      validateString(name, NameRequired) |@|
       validateEmail(email) |@|
-      validateNonEmpty(password, "password is null or empty") |@|
-      validateNonEmpty(salt, "salt is null or empty") |@|
+      validateString(password, PasswordRequired) |@|
+      validateString(salt, SaltRequired) |@|
       validateAvatarUrl(avatarUrl)) {
         RegisteredUser(_, _, dateTime, None, _, _, _, _, _)
       }
@@ -112,7 +162,7 @@ object RegisteredUser extends UserValidationHelper {
 }
 
 /** A user that has access to the system. */
-case class ActiveUser private (
+case class ActiveUser (
   id: UserId,
   version: Long = -1,
   addedDate: DateTime,
@@ -121,70 +171,52 @@ case class ActiveUser private (
   email: String,
   password: String,
   salt: String,
-  avatarUrl: Option[String]) extends User {
+  avatarUrl: Option[String])
+    extends User
+    with UserValidations {
+  import CommonValidations._
 
   override val status: String = "Active"
 
+  def updateName(name: String): DomainValidation[ActiveUser] = {
+    validateString(name, NameRequired).fold(
+      err => err.failure,
+      x => copy(version = version + 1, name = x).success
+    )
+  }
+
+  def updateEmail(email: String): DomainValidation[ActiveUser] = {
+    validateEmail(email).fold(
+      err => err.failure,
+      x => copy(version = version + 1, email = x).success
+    )
+  }
+
+  def updatePassword(password: String, salt: String): DomainValidation[ActiveUser] = {
+    validateString(password, PasswordRequired).fold(
+      err => err.failure,
+      pwd => copy(version = version + 1, password = pwd, salt = salt).success
+    )
+  }
+
   /** Locks an active user. */
-  def lock(
-    expectedVersion: Option[Long],
-    dateTime: DateTime): DomainValidation[LockedUser] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedUser <- LockedUser.create(this)
-      lockedUser <- validatedUser.copy(lastUpdateDate = Some(dateTime)).success
-    } yield lockedUser
-  }
-
-  def update(
-    expectedVersion: Option[Long],
-    dateTime: DateTime,
-    name: String,
-    email: String,
-    password: String,
-    salt: String,
-    avatarUrl: Option[String]) = {
-
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedUser <- RegisteredUser.create(id, version, addedDate, name, email, password,
-        salt, avatarUrl)
-      registeredUser <- validatedUser.activate(validatedUser.versionOption, dateTime)
-      udpatedUser <- registeredUser.copy(
-        version = version + 1,
-        lastUpdateDate = Some(dateTime)).success
-    } yield udpatedUser
-  }
-
-  def resetPassword(newPassword: String, newSalt: String, dateTime: DateTime): DomainValidation[ActiveUser] = {
-    if (newPassword.isEmpty) {
-      DomainError("password is null or empty").failNel
-    } else {
-      ActiveUser(
-        this.id,
-        this.version + 1,
-        this.addedDate,
-        Some(dateTime),
-        this.name,
-        this.email,
-        newPassword,
-        newSalt,
-        this.avatarUrl).success
-    }
+  def lock: DomainValidation[LockedUser] = {
+    LockedUser.create(this)
   }
 }
 
 /** Factory object. */
-object ActiveUser extends UserValidationHelper {
+object ActiveUser extends UserValidations {
+  import CommonValidations._
 
   /** Creates an active user from a registered user. */
   def create[T <: User](user: T): DomainValidation[ActiveUser] = {
     (validateId(user.id) |@|
       validateAndIncrementVersion(user.version) |@|
-      validateNonEmpty(user.name, "name is null or empty") |@|
+      validateString(user.name, NameRequired) |@|
       validateEmail(user.email) |@|
-      validateNonEmpty(user.password, "password is null or empty") |@|
-      validateNonEmpty(user.salt, "salt is null or empty") |@|
+      validateString(user.password, PasswordRequired) |@|
+      validateString(user.salt, SaltRequired) |@|
       validateAvatarUrl(user.avatarUrl)) {
         ActiveUser(_, _, user.addedDate, None, _, _, _, _, _)
       }
@@ -193,7 +225,7 @@ object ActiveUser extends UserValidationHelper {
 }
 
 /** A user who no longer has access to the system. */
-case class LockedUser private (
+case class LockedUser (
   id: UserId,
   version: Long = -1,
   addedDate: DateTime,
@@ -207,29 +239,24 @@ case class LockedUser private (
   override val status: String = "Locked"
 
   /** Unlocks a locked user. */
-  def unlock(
-    expectedVersion: Option[Long],
-    dateTime: DateTime): DomainValidation[ActiveUser] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedUser <- ActiveUser.create(this)
-      activeUser <- validatedUser.copy(lastUpdateDate = Some(dateTime)).success
-    } yield activeUser
+  def unlock: DomainValidation[ActiveUser] = {
+    ActiveUser.create(this)
   }
 
 }
 
 /** Factory object. */
-object LockedUser extends UserValidationHelper {
+object LockedUser extends UserValidations {
+  import CommonValidations._
 
   /** Creates an active user from a locked user. */
   def create(user: ActiveUser): DomainValidation[LockedUser] = {
     (validateId(user.id) |@|
       validateAndIncrementVersion(user.version) |@|
-      validateNonEmpty(user.name, "name is null or empty") |@|
+      validateString(user.name, NameRequired) |@|
       validateEmail(user.email) |@|
-      validateNonEmpty(user.password, "password is null or empty") |@|
-      validateNonEmpty(user.salt, "salt is null or empty") |@|
+      validateString(user.password, PasswordRequired) |@|
+      validateString(user.salt, SaltRequired) |@|
       validateAvatarUrl(user.avatarUrl)) {
         LockedUser(_, _, user.addedDate, None, _, _, _, _, _)
       }
@@ -266,21 +293,4 @@ object UserHelper {
       case _ => user.success
     }
   }
-}
-
-object User {
-
-  implicit val userWrites = new Writes[User] {
-    def writes(user: User) = Json.obj(
-      "id"             -> user.id,
-      "version"        -> user.version,
-      "addedDate"      -> user.addedDate,
-      "lastUpdateDate" -> user.lastUpdateDate,
-      "name"           -> user.name,
-      "email"          -> user.email,
-      "avatarUrl"      -> user.avatarUrl,
-      "status"         -> user.status
-    )
-  }
-
 }

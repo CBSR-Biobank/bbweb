@@ -2,7 +2,6 @@ package org.biobank.service
 
 import org.biobank.domain._
 import org.biobank.domain.user._
-import org.biobank.domain.validation.UserValidationHelper
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 
@@ -36,12 +35,24 @@ trait UsersServiceComponent {
       usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserRegisteredEvent]])
     }
 
-    def activate(cmd: ActivateUserCmd): Future[DomainValidation[UserActivatedEvent]] = {
-      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserActivatedEvent]])
+    def updateName(cmd: UpdateUserNameCmd): Future[DomainValidation[UserNameUpdatedEvent]] = {
+      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserNameUpdatedEvent]])
     }
 
-    def update(cmd: UpdateUserCmd): Future[DomainValidation[UserUpdatedEvent]] = {
-      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserUpdatedEvent]])
+    def updateEmail(cmd: UpdateUserEmailCmd): Future[DomainValidation[UserEmailUpdatedEvent]] = {
+      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserEmailUpdatedEvent]])
+    }
+
+    def updatePassword(cmd: UpdateUserPasswordCmd): Future[DomainValidation[UserPasswordUpdatedEvent]] = {
+      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserPasswordUpdatedEvent]])
+    }
+
+    def resetPassword(cmd: ResetUserPasswordCmd): Future[DomainValidation[UserPasswordResetEvent]] = {
+      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserPasswordResetEvent]])
+    }
+
+    def activate(cmd: ActivateUserCmd): Future[DomainValidation[UserActivatedEvent]] = {
+      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserActivatedEvent]])
     }
 
     def lock(cmd: LockUserCmd): Future[DomainValidation[UserLockedEvent]] = {
@@ -70,10 +81,6 @@ trait UsersServiceComponent {
       } yield user
     }
 
-    def resetPassword(cmd: ResetUserPasswordCmd): Future[DomainValidation[UserPasswordResetEvent]] = {
-      usersProcessor ? cmd map (_.asInstanceOf[DomainValidation[UserPasswordResetEvent]])
-    }
-
   }
 }
 
@@ -89,18 +96,28 @@ trait UsersProcessorComponent {
 
     override def persistenceId = "user-processor-id"
 
+    case class PasswordInfo(password: String, salt: String)
+
+    def encryptPassword(user: ActiveUser, newPlainPassword: String): PasswordInfo = {
+      val newSalt = passwordHasher.generateSalt
+      val newPwd = passwordHasher.encrypt(newPlainPassword, newSalt)
+      PasswordInfo(newPwd, newSalt)
+    }
+
     val receiveRecover: Receive = {
       case event: UserRegisteredEvent => recoverEvent(event)
 
       case event: UserActivatedEvent => recoverEvent(event)
 
-      case event: UserUpdatedEvent => recoverEvent(event)
+      case event: UserNameUpdatedEvent => recoverEvent(event)
+
+      case event: UserEmailUpdatedEvent => recoverEvent(event)
+
+      case event: UserPasswordUpdatedEvent => recoverEvent(event)
 
       case event: UserLockedEvent => recoverEvent(event)
 
       case event: UserUnlockedEvent => recoverEvent(event)
-
-      case event: UserPasswordResetEvent => recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.users.foreach(i => userRepository.put(i))
@@ -116,13 +133,17 @@ trait UsersProcessorComponent {
 
       case cmd: ActivateUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: UpdateUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: UpdateUserNameCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+
+      case cmd: UpdateUserEmailCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+
+      case cmd: UpdateUserPasswordCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+
+      case cmd: ResetUserPasswordCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
       case cmd: LockUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
       case cmd: UnlockUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
-      case cmd: ResetUserPasswordCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
       case "snap" =>
         saveSnapshot(SnapshotState(userRepository.allUsers))
@@ -147,197 +168,205 @@ trait UsersProcessorComponent {
           userId, -1L, DateTime.now, cmd.name, cmd.email, encryptedPwd, salt, cmd.avatarUrl)
         event <- UserRegisteredEvent(
           user.id.id, DateTime.now, user.name, user.email, encryptedPwd, salt, user.avatarUrl).success
-      } yield {
-        event
-      }
-    }
-
-    def validateCmd(cmd: UpdateUserCmd): DomainValidation[UserUpdatedEvent] = {
-      val timeNow = DateTime.now
-
-      case class PasswordInfo(password: String, salt: String)
-
-      def getPassword(user: ActiveUser, newPlainPassword: Option[String]): PasswordInfo = {
-        newPlainPassword.fold {
-          PasswordInfo(user.password, user.salt)
-        } { plainPwd =>
-          val newSalt = passwordHasher.generateSalt
-          val newPwd = passwordHasher.encrypt(plainPwd, newSalt)
-          PasswordInfo(newPwd, newSalt)
-        }
-      }
-
-      for {
-        user <- userRepository.getByKey(UserId(cmd.id))
-        activeUser <- UserHelper.isUserActive(user)
-        emailAvailable <- emailAvailable(cmd.email, user.id)
-        passwordInfo <- getPassword(activeUser, cmd.password).success
-        updatedUser <- activeUser.update(
-          Some(cmd.expectedVersion), timeNow, cmd.name, cmd.email, passwordInfo.password,
-          passwordInfo.salt, cmd.avatarUrl)
-        event <- UserUpdatedEvent(updatedUser.id.id, updatedUser.version, timeNow, updatedUser.name,
-          updatedUser.email, updatedUser.password, updatedUser.avatarUrl).success
       } yield event
     }
 
     def validateCmd(cmd: ActivateUserCmd): DomainValidation[UserActivatedEvent] = {
       val timeNow = DateTime.now
-      for {
-        user <- userRepository.getByKey(UserId(cmd.id))
-        registeredUser <- UserHelper.isUserRegistered(user)
-        activatedUser <- registeredUser.activate(Some(cmd.expectedVersion), timeNow)
-        event <- UserActivatedEvent(
-          activatedUser.id.id, activatedUser.version, timeNow).success
-      } yield {
-        event
-      }
+      val v = updateRegistered(cmd) { u => u.activate }
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        user => UserActivatedEvent(user.id.id, user.version, timeNow).success
+      )
     }
 
-    def validateCmd(cmd: LockUserCmd): DomainValidation[UserLockedEvent] = {
+    def validateCmd(cmd: UpdateUserNameCmd): DomainValidation[UserNameUpdatedEvent] = {
       val timeNow = DateTime.now
-      for {
-        user <- userRepository.getByKey(UserId(cmd.id))
-        activeUser <- UserHelper.isUserActive(user)
-        lockedUser <- activeUser.lock(Some(cmd.expectedVersion), timeNow)
-        event <- UserLockedEvent(lockedUser.id.id, lockedUser.version, timeNow).success
-      } yield {
-        event
-      }
+      val v = updateActive(cmd) { u => u.updateName(cmd.name) }
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        user => UserNameUpdatedEvent(user.id.id, user.version, timeNow, user.name).success
+      )
     }
 
-    def validateCmd(cmd: UnlockUserCmd): DomainValidation[UserUnlockedEvent] = {
+    def validateCmd(cmd: UpdateUserEmailCmd): DomainValidation[UserEmailUpdatedEvent] = {
       val timeNow = DateTime.now
-      for {
-        user <- userRepository.getByKey(UserId(cmd.id))
-        lockedUser <- UserHelper.isUserLocked(user)
-        unlockedUser <- lockedUser.unlock(Some(cmd.expectedVersion), timeNow)
-        event <- UserUnlockedEvent(lockedUser.id.id, lockedUser.version, timeNow).success
-      } yield {
-        event
+
+      val v = updateActive(cmd) { user =>
+        for {
+          emailAvailable <- emailAvailable(cmd.email, user.id)
+          updatedUser <- user.updateEmail(cmd.email)
+        } yield updatedUser
       }
+
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        user => UserEmailUpdatedEvent(user.id.id, user.version, timeNow, user.email).success
+      )
+    }
+
+    def validateCmd(cmd: UpdateUserPasswordCmd): DomainValidation[UserPasswordUpdatedEvent] = {
+      val timeNow = DateTime.now
+
+      val v = updateActive(cmd) { user =>
+        if (passwordHasher.valid(user.password, user.salt, cmd.oldPassword)) {
+          val passwordInfo = encryptPassword(user, cmd.newPassword)
+          user.updatePassword(passwordInfo.password, passwordInfo.salt)
+        } else {
+          DomainError("invalid password").failNel
+        }
+      }
+
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        user => UserPasswordUpdatedEvent(user.id.id, user.version, timeNow, user.password, user.salt).success
+      )
     }
 
     // only active users can request a password reset
     def validateCmd(cmd: ResetUserPasswordCmd): DomainValidation[UserPasswordResetEvent] = {
-      val salt = passwordHasher.generateSalt
-      val plainPassword = Utils.randomString(8)
-      val encryptedPwd = passwordHasher.encrypt(plainPassword, salt)
       val timeNow = DateTime.now
-      for {
-        user <- userRepository.getByKey(UserId(cmd.email))
-        activeUser <- UserHelper.isUserActive(user)
-        event <- UserPasswordResetEvent(user.id.id, encryptedPwd, salt, timeNow).success
-        email <- EmailService.passwordResetEmail(user.email, plainPassword).success
-      } yield event
+
+      val v = updateActive(cmd) { user =>
+        val plainPassword = Utils.randomString(8)
+        val passwordInfo = encryptPassword(user, plainPassword)
+        EmailService.passwordResetEmail(user.email, plainPassword)
+        user.updatePassword(passwordInfo.password, passwordInfo.salt)
+      }
+
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        user => UserPasswordResetEvent(user.id.id, user.version, user.password, user.salt, timeNow).success
+      )
     }
 
-    def recoverEvent(event: UserRegisteredEvent) = {
-      log.debug(s"recoverEvent: $event")
-      val validation = for {
-        registeredUser <- RegisteredUser.create(UserId(event.email), -1L, event.dateTime, event.name,
-          event.email, event.password, event.salt, event.avatarUrl)
-        savedUser <- userRepository.put(registeredUser).success
-      } yield savedUser
+    def validateCmd(cmd: LockUserCmd): DomainValidation[UserLockedEvent] = {
+      val timeNow = DateTime.now
+      val v = updateActive(cmd) { u => u.lock }
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        user => UserLockedEvent(user.id.id, user.version, timeNow).success
+      )
+    }
 
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("creating user from event failed")
+    def validateCmd(cmd: UnlockUserCmd): DomainValidation[UserUnlockedEvent] = {
+      val timeNow = DateTime.now
+      val v = updateLocked(cmd) { u => u.unlock }
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        user => UserUnlockedEvent(user.id.id, user.version, timeNow).success
+      )
+    }
+
+    def updateUser[T <: User](cmd: UserCommand)(fn: User => DomainValidation[T]): DomainValidation[T] = {
+      userRepository.getByKey(UserId(cmd.id)).fold(
+        err => s"user for $cmd does not exist".failNel,
+        user => user.requireVersion(user, cmd.expectedVersion).fold(
+          err => err.failure,
+          validUser => fn(validUser)
+        )
+      )
+    }
+
+    def updateRegistered[T <: User](cmd: UserCommand)(fn: RegisteredUser => DomainValidation[T]): DomainValidation[T] = {
+      updateUser(cmd) {
+        case user: RegisteredUser => fn(user)
+        case user => s"$user for $cmd is not registered".failNel
       }
+    }
+
+    def updateActive[T <: User](cmd: UserCommand)(fn: ActiveUser => DomainValidation[T]): DomainValidation[T] = {
+      updateUser(cmd) {
+        case user: ActiveUser => fn(user)
+        case user => s"$user for $cmd is not active".failNel
+      }
+    }
+
+    def updateLocked[T <: User](cmd: UserCommand)(fn: LockedUser => DomainValidation[T]): DomainValidation[T] = {
+      updateUser(cmd) {
+        case user: LockedUser => fn(user)
+        case user => s"$user for $cmd is not locked".failNel
+      }
+    }
+
+    def recoverEvent(event: UserRegisteredEvent): Unit = {
+      log.debug(s"recoverEvent: $event")
+      userRepository.put(RegisteredUser(UserId(event.email), 0L, event.dateTime, None, event.name,
+        event.email, event.password, event.salt, event.avatarUrl))
+      ()
     }
 
     def recoverEvent(event: UserActivatedEvent): Unit = {
       log.debug(s"recoverEvent: $event")
-
-      val validation = for {
-        user <- userRepository.getByKey(UserId(event.id))
-        registeredUser <- UserHelper.isUserRegistered(user)
-        activatedUser <- registeredUser.activate(Some(registeredUser.version), event.dateTime)
-        savedUser <- userRepository.put(activatedUser).success
-      } yield savedUser
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        validation.swap.map { err =>
-          throw new IllegalStateException(s"activating user from event failed: $err")
-        }
-        ()
-      }
+      userRepository.getRegistered(UserId(event.id)).fold(
+        err => throw new IllegalStateException(s"activating user from event failed: $err"),
+        u =>
+        userRepository.put(ActiveUser(u.id, event.version, u.addedDate, Some(event.dateTime),
+          u.name, u.email, u.password, u.salt, u.avatarUrl))
+      )
+      ()
     }
 
-    def recoverEvent(event: UserUpdatedEvent): Unit = {
+    def recoverEvent(event: UserNameUpdatedEvent): Unit = {
       log.debug(s"recoverEvent: $event")
+      userRepository.getActive(UserId(event.id)).fold(
+        err => throw new IllegalStateException(s"updating name on user from event failed: $err"),
+        u => userRepository.put(u.copy(
+          version = u.version, name = event.name, lastUpdateDate = Some(event.dateTime)))
+      )
+      ()
+    }
 
-      val validation = for {
-        user <- userRepository.getByKey(UserId(event.id))
-        activeUser <- UserHelper.isUserActive(user)
-        updatedUser <- activeUser.update(
-          Some(activeUser.version), event.dateTime, event.name, event.email,
-          event.password, activeUser.salt, event.avatarUrl)
-        savedUser <- userRepository.put(updatedUser).success
-      } yield savedUser
+    def recoverEvent(event: UserEmailUpdatedEvent): Unit = {
+      log.debug(s"recoverEvent: $event")
+      userRepository.getActive(UserId(event.id)).fold(
+        err => throw new IllegalStateException(s"updating email on user from event failed: $err"),
+        u => userRepository.put(u.copy(
+          version = u.version, email = event.email, lastUpdateDate = Some(event.dateTime)))
+      )
+      ()
+    }
 
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        validation.swap.map { err =>
-          throw new IllegalStateException(s"activating user from event failed: $err")
-        }
-        ()
-      }
+    def recoverEvent(event: UserPasswordUpdatedEvent): Unit = {
+      log.debug(s"recoverEvent: $event")
+      userRepository.getActive(UserId(event.id)).fold(
+        err => throw new IllegalStateException(s"updating password on user from event failed: $err"),
+        u => userRepository.put(u.copy(
+          version = u.version, password = event.password, salt = event.salt,
+          lastUpdateDate = Some(event.dateTime)))
+      )
+      ()
+    }
+
+    def recoverEvent(event: UserPasswordResetEvent): Unit = {
+      log.debug(s"recoverEvent: $event")
+      userRepository.getActive(UserId(event.id)).fold(
+        err => throw new IllegalStateException(s"resetting password on user from event failed: $err"),
+        u => userRepository.put(u.copy(
+          version = u.version, password = event.password, salt = event.salt,
+          lastUpdateDate = Some(event.dateTime)))
+      )
+      ()
     }
 
     def recoverEvent(event: UserLockedEvent): Unit = {
       log.debug(s"recoverEvent: $event")
-
-      val validation = for {
-        user <- userRepository.getByKey(UserId(event.id))
-        activeUser <- UserHelper.isUserActive(user)
-        lockedUser <- activeUser.lock(Some(activeUser.version), event.dateTime)
-        savedUser <- userRepository.put(lockedUser).success
-      } yield savedUser
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("locking user from event failed")
-      }
+      userRepository.getActive(UserId(event.id)).fold(
+        err => throw new IllegalStateException(s"locking user from event failed: $err"),
+        u => userRepository.put(LockedUser(u.id, event.version, u.addedDate, Some(event.dateTime),
+          u.name, u.email, u.password, u.salt, u.avatarUrl))
+      )
+      ()
     }
 
     def recoverEvent(event: UserUnlockedEvent): Unit = {
       log.debug(s"recoverEvent: $event")
-
-      val validation = for {
-        user <- userRepository.getByKey(UserId(event.id))
-        lockedUser <- UserHelper.isUserLocked(user)
-        unlockedUser <- lockedUser.unlock(Some(lockedUser.version), event.dateTime)
-        savedUser <- userRepository.put(unlockedUser).success
-      } yield savedUser
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("unlocking user from event failed")
-      }
-    }
-
-    def recoverEvent(event: UserPasswordResetEvent): Unit = {
-      val validation = for {
-        user <- userRepository.getByKey(UserId(event.id))
-        activeUser <- UserHelper.isUserActive(user)
-        updatedUser <- activeUser.resetPassword(event.password, event.salt, event.dateTime)
-        savedUser <- userRepository.put(updatedUser).success
-      } yield savedUser
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        validation.swap.map { err =>
-          throw new RuntimeException(s"resetting password from event failed: event: $event, err: $err")
-        }
-        ()
-      }
+      userRepository.getLocked(UserId(event.id)).fold(
+        err => throw new IllegalStateException(s"unlocking user from event failed: $err"),
+        u => userRepository.put(ActiveUser(u.id, event.version, u.addedDate, Some(event.dateTime),
+          u.name, u.email, u.password, u.salt, u.avatarUrl))
+      )
+      ()
     }
 
     /** Searches the repository for a matching item.

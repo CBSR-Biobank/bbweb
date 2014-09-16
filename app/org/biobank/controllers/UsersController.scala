@@ -93,9 +93,9 @@ object UsersController extends CommandController with JsonController {
           validation.fold(
             err => {
               val errStr = err.list.mkString(", ")
-              if (errStr.contains("not found")) {
+              if (errStr.contains("does not exist")) {
                 NotFound("email address not registered")
-              } else if (errStr.contains("user is not active")) {
+              } else if (errStr.contains("not active")) {
                 Forbidden("user is not active")
               } else {
                 BadRequest("email address not registered")
@@ -160,8 +160,18 @@ object UsersController extends CommandController with JsonController {
     )
   }
 
-  def updateUser(id: String) =  commandAction { cmd: UpdateUserCmd => implicit userId =>
-    val future = usersService.update(cmd)
+  def updateName(id: String) =  commandAction { cmd: UpdateUserNameCmd => implicit userId =>
+    val future = usersService.updateName(cmd)
+    domainValidationReply(future)
+  }
+
+  def updateEmail(id: String) =  commandAction { cmd: UpdateUserEmailCmd => implicit userId =>
+    val future = usersService.updateEmail(cmd)
+    domainValidationReply(future)
+  }
+
+  def updatePassword(id: String) =  commandAction { cmd: UpdateUserPasswordCmd => implicit userId =>
+    val future = usersService.updatePassword(cmd)
     domainValidationReply(future)
   }
 
@@ -187,8 +197,10 @@ object UsersController extends CommandController with JsonController {
     domainValidationReply(future)
   }
 
-  def resetPassword(id: String) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-    val cmd = ResetUserPasswordCmd(id)
+  def resetPassword(
+    id: String,
+    ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    val cmd = ResetUserPasswordCmd(id, ver)
     val future = usersService.resetPassword(cmd)
     domainValidationReply(future)
   }

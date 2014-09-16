@@ -96,7 +96,9 @@ GET     /authenticate                          org.biobank.controllers.UsersCont
 GET     /users                                 org.biobank.controllers.UsersController.list(query: Option[String], sort: Option[String], order: Option[String])
 GET     /users/:id                             org.biobank.controllers.UsersController.user(id)
 POST    /users                                 org.biobank.controllers.UsersController.registerUser()
-PUT     /users/:id                             org.biobank.controllers.UsersController.updateUser(id)
+PUT     /users/:id/name                        org.biobank.controllers.UsersController.updateName(id)
+PUT     /users/:id/email                       org.biobank.controllers.UsersController.updateEmail(id)
+PUT     /users/:id/password                    org.biobank.controllers.UsersController.updatePassword(id)
 DELETE  /users/:id/:ver                        org.biobank.controllers.UsersController.removeUser(id, ver: Long)
 
 # Authentication

@@ -75,7 +75,7 @@ trait ControllerFixture
     route(fakeRequest).fold {
       cancel("HTTP request returned NONE")
     } { result =>
-      Logger.info(s"makeRequest: result: ${contentAsString(result)}")
+      Logger.info(s"makeRequest: status: ${status(result)}, result: ${contentAsString(result)}")
       status(result) should be(expectedStatus)
       contentType(result) should be(Some("application/json"))
       Json.parse(contentAsString(result))

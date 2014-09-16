@@ -1,5 +1,6 @@
 package org.biobank.domain.validation
 
+import org.biobank.domain.Validations
 import org.biobank.domain.study.{
   ProcessingTypeId,
   SpecimenGroupId,
@@ -11,9 +12,7 @@ import org.biobank.infrastructure.AnnotationTypeData
 import scalaz._
 import scalaz.Scalaz._
 
-trait StudyValidationHelper extends ValidationHelper {
-
-}
+trait StudyValidationHelper extends Validations
 
 trait StudyAnnotationTypeValidationHelper extends StudyValidationHelper {
 

@@ -22,15 +22,45 @@ object UserEvents {
     avatarUrl: Option[String])
       extends UserEvent
       with HasIdentity
+      with HasDateTime
 
-  case class UserUpdatedEvent(
+  case class UserNameUpdatedEvent(
     id: String,
     version: Long,
     dateTime: DateTime,
-    name: String,
-    email: String,
+    name: String)
+      extends UserEvent
+      with HasIdentity
+      with HasVersion
+      with HasDateTime
+
+  case class UserEmailUpdatedEvent(
+    id: String,
+    version: Long,
+    dateTime: DateTime,
+    email: String)
+      extends UserEvent
+      with HasIdentity
+      with HasVersion
+      with HasDateTime
+
+  case class UserPasswordUpdatedEvent(
+    id: String,
+    version: Long,
+    dateTime: DateTime,
     password: String,
-    avatarUrl: Option[String])
+    salt: String)
+      extends UserEvent
+      with HasIdentity
+      with HasVersion
+      with HasDateTime
+
+  case class UserPasswordResetEvent(
+    id: String,
+    version: Long,
+    password: String,
+    salt: String,
+    dateTime: DateTime)
       extends UserEvent
       with HasIdentity
 
@@ -49,6 +79,7 @@ object UserEvents {
       extends UserEvent
       with HasIdentity
       with HasVersion
+      with HasDateTime
 
   case class UserUnlockedEvent(
     id: String,
@@ -57,6 +88,7 @@ object UserEvents {
       extends UserEvent
       with HasIdentity
       with HasVersion
+      with HasDateTime
 
   case class UserRemovedEvent(
     id: String,
@@ -65,14 +97,7 @@ object UserEvents {
       extends UserEvent
       with HasIdentity
       with HasVersion
-
-  case class UserPasswordResetEvent(
-    id: String,
-    password: String,
-    salt: String,
-    dateTime: DateTime)
-      extends UserEvent
-      with HasIdentity
+      with HasDateTime
 
   /** Does not convert password or salt to JSON.
     */
@@ -86,18 +111,35 @@ object UserEvents {
     )
   }
 
-  /** Does not convert password or salt to JSON.
-    */
-  implicit val userUpdatedEventWrites = new Writes[UserUpdatedEvent] {
-    def writes(event: UserUpdatedEvent) = Json.obj(
-      "id"             -> event.id,
-      "version"        -> event.version,
-      "dateTime"       -> event.dateTime,
-      "name"           -> event.name,
-      "email"          -> event.email,
-      "avatarUrl"      -> event.avatarUrl
-    )
-  }
+  implicit val userNameUpdatedEventWrites: Writes[UserNameUpdatedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "name").write[String]
+  )(unlift(UserNameUpdatedEvent.unapply))
+
+  implicit val userEmailUpdatedEventWrites: Writes[UserEmailUpdatedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "email").write[String]
+  )(unlift(UserEmailUpdatedEvent.unapply))
+
+  implicit val userPasswordUpdatedEventWrites: Writes[UserPasswordUpdatedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "dateTime").write[DateTime] and
+      (__ \ "password").write[String] and
+      (__ \ "salt").write[String]
+  )(unlift(UserPasswordUpdatedEvent.unapply))
+
+  implicit val userPasswordResetEventWrites: Writes[UserPasswordResetEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "salt").write[String] and
+      (__ \ "password").write[String] and
+      (__ \ "dateTime").write[DateTime]
+  )(unlift(UserPasswordResetEvent.unapply))
 
   implicit val userActivatedEventWrites: Writes[UserActivatedEvent] = (
     (__ \ "id").write[String] and
@@ -122,12 +164,5 @@ object UserEvents {
       (__ \ "version").write[Long] and
       (__ \ "dateTime").write[DateTime]
   )(unlift(UserRemovedEvent.unapply))
-
-  implicit val userPasswordResetEventWrites: Writes[UserPasswordResetEvent] = (
-    (__ \ "id").write[String] and
-      (__ \ "salt").write[String] and
-      (__ \ "password").write[String] and
-      (__ \ "dateTime").write[DateTime]
-  )(unlift(UserPasswordResetEvent.unapply))
 
 }

@@ -10,7 +10,7 @@ import org.biobank.domain.{
   Location
 }
 import org.biobank.domain.study.StudyId
-import org.biobank.domain.validation.ValidationHelper
+import org.biobank.domain.Validations
 import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
@@ -119,7 +119,7 @@ object Centre {
 /**
   * Factory object used to create a centre.
   */
-object DisabledCentre extends ValidationHelper {
+object DisabledCentre extends Validations {
 
   /**
     * The factory method to create a centre.
@@ -173,7 +173,7 @@ case class EnabledCentre private (
 /**
   * Factory object used to enable a centre.
   */
-object EnabledCentre extends ValidationHelper {
+object EnabledCentre extends Validations {
 
   /** A centre must be in a disabled state before it can be enabled. */
   def create(

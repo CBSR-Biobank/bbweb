@@ -9,23 +9,49 @@ import play.api.libs.functional.syntax._
 
 object UserCommands {
 
-  sealed trait UserCommand extends Command
+  sealed trait UserCommand extends Command {
+    val id: String
+    val expectedVersion: Long
+  }
 
   case class RegisterUserCmd(
+    id: String,               // don't care
+    expectedVersion: Long,    // don't care
     name: String,
     email: String,
     password: String,
     avatarUrl: Option[String])
-    extends UserCommand
+      extends UserCommand
 
-  case class UpdateUserCmd(
+  object RegisterUserCmd {
+    def apply(
+      name: String,
+      email: String,
+      password: String,
+      avatarUrl: Option[String]): RegisterUserCmd = RegisterUserCmd("", -1L, name, email, password, avatarUrl)
+  }
+
+  case class UpdateUserNameCmd(
     id: String,
     expectedVersion: Long,
-    name: String,
-    email: String,
-    password: Option[String],
-    avatarUrl: Option[String])
-    extends UserCommand
+    name: String)
+      extends UserCommand
+      with HasExpectedVersion
+
+  case class UpdateUserEmailCmd(
+    id: String,
+    expectedVersion: Long,
+    email: String)
+      extends UserCommand
+      with HasExpectedVersion
+
+  case class UpdateUserPasswordCmd(
+    id: String,
+    expectedVersion: Long,
+    oldPassword: String,
+    newPassword: String)
+      extends UserCommand
+      with HasExpectedVersion
 
   case class ActivateUserCmd(
     id: String,
@@ -51,23 +77,36 @@ object UserCommands {
       extends UserCommand
       with HasExpectedVersion
 
-  case class ResetUserPasswordCmd(email: String) extends UserCommand
+  case class ResetUserPasswordCmd(
+    id: String,
+    expectedVersion: Long)
+      extends UserCommand
 
   implicit val registerUserCmdReads = (
     (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "email").read[String](minLength[String](5)) and
       (__ \ "password").read[String](minLength[String](2)) and
       (__ \ "avatarUrl").readNullable[String](minLength[String](2))
-  )(RegisterUserCmd.apply _)
+  ){ RegisterUserCmd("", -1L, _, _, _, _) }
 
-  implicit val updateUserCmdReads = (
+  implicit val updateUserNameCmdReads = (
     (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "email").read[String](minLength[String](5)) and
-      (__ \ "password").readNullable[String](minLength[String](2)) and
-      (__ \ "avatarUrl").readNullable[String](minLength[String](2))
-  )(UpdateUserCmd.apply _)
+      (__ \ "name").read[String](minLength[String](2))
+  )(UpdateUserNameCmd.apply _)
+
+  implicit val updateUserEmailCmdReads = (
+    (__ \ "id").read[String](minLength[String](2)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0)) and
+      (__ \ "email").read[String](minLength[String](5))
+  )(UpdateUserEmailCmd.apply _)
+
+  implicit val updateUserPasswordCmdReads = (
+    (__ \ "id").read[String](minLength[String](2)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0)) and
+      (__ \ "oldPassword").read[String](minLength[String](2)) and
+      (__ \ "newPassword").read[String](minLength[String](2))
+  )(UpdateUserPasswordCmd.apply _)
 
   implicit val activateUserCmdReads = (
     (__ \ "id").read[String](minLength[String](2)) and
@@ -84,7 +123,9 @@ object UserCommands {
       (__ \ "expectedVersion").read[Long](min[Long](0))
   )(UnlockUserCmd.apply _)
 
-  implicit val resetUserPasswordCmdReads: Reads[ResetUserPasswordCmd] =
-    (__ \ "email").read[String](minLength[String](5)).map{ x => ResetUserPasswordCmd(x) }
+  implicit val resetUserPasswordCmdReads: Reads[ResetUserPasswordCmd] = (
+    (__ \ "id").read[String](minLength[String](2)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0))
+  ){ ResetUserPasswordCmd }
 
 }

@@ -3,6 +3,7 @@ package org.biobank
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
+import org.joda.time.DateTime
 
 package infrastructure {
 
@@ -10,6 +11,13 @@ package infrastructure {
 
     /** An event that includes the ID of the object it references. */
     val id: String
+
+  }
+
+  trait HasDateTime {
+
+    /** An event that includes the date and time that it took place. */
+    val dateTime: DateTime
 
   }
 
