@@ -7,7 +7,9 @@ import org.biobank.domain.AnatomicalSourceType
 import org.biobank.domain.PreservationType
 import org.biobank.domain.PreservationTemperatureType
 import org.biobank.domain.SpecimenType
+
 import com.github.nscala_time.time.Imports._
+import org.scalatest.OptionValues._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -63,8 +65,8 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.Plasma
 
       val updatedSg = specimenGroup.update(
-        specimenGroup.versionOption, org.joda.time.DateTime.now, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) | fail
+        name, description, units, anatomicalSourceType, preservationType, preservationTemperatureType,
+        specimenType) | fail
 
       updatedSg should have (
         'studyId                     (specimenGroup.studyId),
@@ -80,8 +82,7 @@ class SpecimenGroupSpec extends DomainSpec {
       )
 
       (specimenGroup.addedDate to updatedSg.addedDate).millis should be < 100L
-      val updateDate = updatedSg.lastUpdateDate | fail
-      (updateDate to DateTime.now).millis should be < 100L
+      updatedSg.lastUpdateDate should be (None)
     }
 
   }
@@ -103,7 +104,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val v = SpecimenGroup.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list should (have length 1 and contain("id is null or empty")),
+        err => err.list should (have length 1 and contain("IdRequired")),
         user => fail
       )
     }
@@ -123,7 +124,7 @@ class SpecimenGroupSpec extends DomainSpec {
       SpecimenGroup.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list should (have length 1 and contain("id is null or empty")),
+        err => err.list should (have length 1 and contain("IdRequired")),
         user => fail
       )
     }
@@ -146,33 +147,7 @@ class SpecimenGroupSpec extends DomainSpec {
       validation should be ('failure)
 
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("invalid version value: -2"))
-      }
-    }
-
-    "not be updated with an invalid version" in {
-      val studyId = StudyId(nameGenerator.next[SpecimenGroup])
-      val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
-      val version = -1L
-      val name = nameGenerator.next[SpecimenGroup]
-      val description = some(nameGenerator.next[SpecimenGroup])
-      val units = nameGenerator.next[SpecimenGroup]
-      val anatomicalSourceType = AnatomicalSourceType.Blood
-      val preservationType = PreservationType.FrozenSpecimen
-      val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
-      val specimenType = SpecimenType.BuffyCoat
-
-      val sg = SpecimenGroup.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) | fail
-
-      val validation = sg.update(Some(10L), org.joda.time.DateTime.now, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
-      validation should be ('failure)
-
-      validation.swap.map { err =>
-        err.list should have length 1
-        err.list.head should include ("expected version doesn't match current version")
+          err.list should (have length 1 and contain("InvalidVersion"))
       }
     }
 
@@ -191,7 +166,7 @@ class SpecimenGroupSpec extends DomainSpec {
       SpecimenGroup.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list should (have length 1 and contain("name is null or empty")),
+        err => err.list should (have length 1 and contain("NameRequired")),
         user => fail
       )
 
@@ -199,7 +174,7 @@ class SpecimenGroupSpec extends DomainSpec {
       SpecimenGroup.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list should (have length 1 and contain("name is null or empty")),
+        err => err.list should (have length 1 and contain("NameRequired")),
         user => fail
       )
     }
@@ -219,14 +194,14 @@ class SpecimenGroupSpec extends DomainSpec {
       SpecimenGroup.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list should (have length 1 and contain("description is null or empty")),
+        err => err.list should (have length 1 and contain("NonEmptyDescription")),
         user => fail
       )
 
       description = Some("")
       SpecimenGroup.create(studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list should (have length 1 and contain("description is null or empty")),
+        err => err.list should (have length 1 and contain("NonEmptyDescription")),
         user => fail
       )
     }
@@ -245,7 +220,7 @@ class SpecimenGroupSpec extends DomainSpec {
 
       SpecimenGroup.create(studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list should (have length 1 and contain("units is null or empty")),
+        err => err.list should (have length 1 and contain("UnitsRequired")),
         user => fail
       )
     }
@@ -266,8 +241,8 @@ class SpecimenGroupSpec extends DomainSpec {
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => {
           err.list should have length 2
-          err.list.head should be ("invalid version value: -2")
-          err.list.tail.head should be ("units is null or empty")
+          err.list.head should be ("InvalidVersion")
+          err.list.tail.head should be ("UnitsRequired")
         },
         user => fail
       )

@@ -20,6 +20,7 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 
 import akka.persistence.SnapshotOffer
+import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
 
@@ -30,10 +31,13 @@ trait SpecimenLinkTypeProcessorComponent {
       with SpecimenGroupRepositoryComponent =>
 
   /**
-    * This is the Collection Event Type processor. It is a child actor of
-    * [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
+    * The SpecimenLinkTypeProcessor is responsible for maintaining state changes for all
+    * [[org.biobank.domain.study.SpecimenLinkType]] aggregates. This particular processor uses
+    * Akka-Persistence's [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist
+    * the generated events, afterwhich it will updated the current state of the
+    * [[org.biobank.domain.study.SpecimenLinkType]] being processed.
     *
-    * It handles commands that deal with a Collection Event Type.
+    * It is a child actor of [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
     */
   class SpecimenLinkTypeProcessor extends Processor {
 
@@ -41,6 +45,10 @@ trait SpecimenLinkTypeProcessorComponent {
 
     case class SnapshotState(specimenLinkTypes: Set[SpecimenLinkType])
 
+    /**
+      * These are the events that are recovered during journal recovery. They cannot fail and must be
+      * processed to recreate the current state of the aggregate.
+      */
     val receiveRecover: Receive = {
       case event: SpecimenLinkTypeAddedEvent => recoverEvent(event)
 
@@ -53,7 +61,10 @@ trait SpecimenLinkTypeProcessorComponent {
           specimenLinkTypeRepository.put(ceType) }
     }
 
-
+    /**
+      * These are the commands that are requested. A command can fail, and will send the failure as a response
+      * back to the user. Each valid command generates one or more events and is journaled.
+      */
     val receiveCommand: Receive = {
 
       case cmd: AddSpecimenLinkTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
@@ -62,13 +73,26 @@ trait SpecimenLinkTypeProcessorComponent {
 
       case cmd: RemoveSpecimenLinkTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case _ =>
-        throw new Error("invalid message received")
+      case cmd => throw new Error(s"invalid message received: $cmd")
+    }
+
+    def update
+      (cmd: SpecimenLinkTypeCommand)
+      (fn: SpecimenLinkType => DomainValidation[SpecimenLinkType])
+        : DomainValidation[SpecimenLinkType] = {
+      for {
+        processingType <- processingTypeRepository.getByKey(ProcessingTypeId(cmd.processingTypeId))
+        slt <- specimenLinkTypeRepository.withId(
+          ProcessingTypeId(cmd.processingTypeId), SpecimenLinkTypeId(cmd.id))
+        notInUse <- checkNotInUse(slt)
+        validVersion <- slt.requireVersion(cmd.expectedVersion)
+        updatedSlt <- fn(slt)
+      } yield updatedSlt
     }
 
     private def validateCmd(
       cmd: AddSpecimenLinkTypeCmd): DomainValidation[SpecimenLinkTypeAddedEvent] = {
-
+      val timeNow = DateTime.now
       val processingTypeId = ProcessingTypeId(cmd.processingTypeId)
       val id = specimenLinkTypeRepository.nextIdentity
 
@@ -78,7 +102,7 @@ trait SpecimenLinkTypeProcessorComponent {
           processingTypeId,
           id,
           -1L,
-          org.joda.time.DateTime.now,
+          timeNow,
           cmd.expectedInputChange,
           cmd.expectedOutputChange,
           cmd.inputCount,
@@ -96,7 +120,7 @@ trait SpecimenLinkTypeProcessorComponent {
         event <- SpecimenLinkTypeAddedEvent(
           cmd.processingTypeId,
           id.id,
-          newItem.addedDate,
+          timeNow,
           newItem.expectedInputChange,
           newItem.expectedOutputChange,
           newItem.inputCount,
@@ -109,127 +133,106 @@ trait SpecimenLinkTypeProcessorComponent {
       } yield event
     }
 
-    private def validateCmd(
-      cmd: UpdateSpecimenLinkTypeCmd): DomainValidation[SpecimenLinkTypeUpdatedEvent] = {
-      val processingTypeId = ProcessingTypeId(cmd.processingTypeId)
-      val id = SpecimenLinkTypeId(cmd.id)
+    private def validateCmd(cmd: UpdateSpecimenLinkTypeCmd)
+        : DomainValidation[SpecimenLinkTypeUpdatedEvent] = {
+      val timeNow = DateTime.now
 
-      for {
-        oldItem <- specimenLinkTypeRepository.withId(processingTypeId,id)
-        processingType <- processingTypeRepository.getByKey(processingTypeId)
-        newItem <- oldItem.update(
-         Some(cmd.expectedVersion),
-          org.joda.time.DateTime.now,
-          cmd.expectedInputChange,
-          cmd.expectedOutputChange,
-          cmd.inputCount,
-          cmd.outputCount,
-          SpecimenGroupId(cmd.inputGroupId),
-          SpecimenGroupId(cmd.outputGroupId),
-          cmd.inputContainerTypeId.map(ContainerTypeId(_)),
-          cmd.outputContainerTypeId.map(ContainerTypeId(_)),
-          cmd.annotationTypeData)
-        inputSpecimenGroup <- validSpecimenGroup(processingType, newItem.inputGroupId)
-        outputSpecimenGroup <- validSpecimenGroup(processingType, newItem.outputGroupId)
-        // FIXME: check that container types are valid
-        validSpecimenGroups <- validateSpecimenGroups(newItem.inputGroupId, newItem.outputGroupId, newItem.id)
-        validAtData <- validateAnnotationTypeData(processingTypeId, cmd.annotationTypeData)
-        event <- SpecimenLinkTypeUpdatedEvent(
+      val v = update(cmd) { slt =>
+        for {
+          processingType <- processingTypeRepository.getByKey(slt.processingTypeId)
+          updatedSlt <- slt.update(
+            cmd.expectedInputChange,
+            cmd.expectedOutputChange,
+            cmd.inputCount,
+            cmd.outputCount,
+            SpecimenGroupId(cmd.inputGroupId),
+            SpecimenGroupId(cmd.outputGroupId),
+            cmd.inputContainerTypeId.map(ContainerTypeId(_)),
+            cmd.outputContainerTypeId.map(ContainerTypeId(_)),
+            cmd.annotationTypeData)
+
+          inputSpecimenGroup <- validSpecimenGroup(processingType, updatedSlt.inputGroupId)
+          outputSpecimenGroup <- validSpecimenGroup(processingType, updatedSlt.outputGroupId)
+          // FIXME: check that container types are valid
+          validSpecimenGroups <- validateSpecimenGroups(
+            updatedSlt.inputGroupId, updatedSlt.outputGroupId, updatedSlt.id)
+          validAtData <- validateAnnotationTypeData(processingType.id, cmd.annotationTypeData)
+        } yield updatedSlt
+      }
+
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        slt => SpecimenLinkTypeUpdatedEvent(
           cmd.processingTypeId,
-          newItem.id.id,
-          newItem.version,
-          newItem.lastUpdateDate.get,
-          newItem.expectedInputChange,
-          newItem.expectedOutputChange,
-          newItem.inputCount,
-          newItem.outputCount,
-          newItem.inputGroupId,
-          newItem.outputGroupId,
-          newItem.inputContainerTypeId,
-          newItem.outputContainerTypeId,
-          newItem.annotationTypeData).success
-      } yield event
+          slt.id.id,
+          slt.version,
+          timeNow,
+          slt.expectedInputChange,
+          slt.expectedOutputChange,
+          slt.inputCount,
+          slt.outputCount,
+          slt.inputGroupId,
+          slt.outputGroupId,
+          slt.inputContainerTypeId,
+          slt.outputContainerTypeId,
+          slt.annotationTypeData).success
+      )
     }
 
     private def validateCmd(
       cmd: RemoveSpecimenLinkTypeCmd): DomainValidation[SpecimenLinkTypeRemovedEvent] = {
-      val processingTypeId = ProcessingTypeId(cmd.processingTypeId)
-      val id = SpecimenLinkTypeId(cmd.id)
+      val v = update(cmd) { slt => slt.success }
 
-      for {
-        item <- specimenLinkTypeRepository.withId(processingTypeId, id)
-        validVersion <- validateVersion(item,Some(cmd.expectedVersion))
-        event <- SpecimenLinkTypeRemovedEvent(cmd.processingTypeId, cmd.id).success
-      } yield event
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        pt =>  SpecimenLinkTypeRemovedEvent(cmd.processingTypeId, cmd.id).success
+      )
     }
 
     private def recoverEvent(event: SpecimenLinkTypeAddedEvent): Unit = {
-      val processingTypeId = ProcessingTypeId(event.processingTypeId)
-      val validation = for {
-        newItem <- SpecimenLinkType.create(
-          processingTypeId,
-          SpecimenLinkTypeId(event.specimenLinkTypeId),
-          -1L,
-          event.dateTime,
-          event.expectedInputChange,
-          event.expectedOutputChange,
-          event.inputCount,
-          event.outputCount,
-          event.inputGroupId,
-          event.outputGroupId,
-          event.inputContainerTypeId,
-          event.outputContainerTypeId,
-          event.annotationTypeData)
-        savedItem <- specimenLinkTypeRepository.put(newItem).success
-      } yield newItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering collection event type from event failed")
-      }
+      specimenLinkTypeRepository.put(SpecimenLinkType(
+        ProcessingTypeId(event.processingTypeId),
+        SpecimenLinkTypeId(event.specimenLinkTypeId),
+        0L,
+        event.dateTime,
+        None,
+        event.expectedInputChange,
+        event.expectedOutputChange,
+        event.inputCount,
+        event.outputCount,
+        event.inputGroupId,
+        event.outputGroupId,
+        event.inputContainerTypeId,
+        event.outputContainerTypeId,
+        event.annotationTypeData))
+      ()
     }
 
     private def recoverEvent(event: SpecimenLinkTypeUpdatedEvent): Unit = {
-      val validation = for {
-        item <- specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId))
-        updatedItem <- item.update(
-          item.versionOption,
-          event.dateTime,
-          event.expectedInputChange,
-          event.expectedOutputChange,
-          event.inputCount,
-          event.outputCount,
-          event.inputGroupId,
-          event.outputGroupId,
-          event.inputContainerTypeId,
-          event.outputContainerTypeId,
-          event.annotationTypeData)
-        savedItem <- specimenLinkTypeRepository.put(updatedItem).success
-      } yield updatedItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        val err = validation.swap.getOrElse(List.empty)
-        throw new IllegalStateException(
-          s"recovering collection event type update from event failed: $err")
-      }
+      specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId)).fold(
+        err => throw new IllegalStateException(s"updating specimen link type from event failed: $err"),
+        slt => specimenLinkTypeRepository.put(slt.copy(
+          version               = event.version,
+          lastUpdateDate        = Some(event.dateTime),
+          expectedInputChange   = event.expectedInputChange,
+          expectedOutputChange  = event.expectedOutputChange,
+          inputCount            = event.inputCount,
+          outputCount           = event.outputCount,
+          inputGroupId          = event.inputGroupId,
+          outputGroupId         = event.outputGroupId,
+          inputContainerTypeId  = event.inputContainerTypeId,
+          outputContainerTypeId = event.outputContainerTypeId,
+          annotationTypeData    = event.annotationTypeData))
+      )
+      ()
     }
 
     private def recoverEvent(event: SpecimenLinkTypeRemovedEvent): Unit = {
-      val validation = for {
-        item <- specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId))
-        removedItem <- specimenLinkTypeRepository.remove(item).success
-      } yield removedItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        val err = validation.swap.getOrElse(List.empty)
-        throw new IllegalStateException(
-          s"recovering collection event type remove from event failed: $err")
-      }
+      specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId)).fold(
+        err => throw new IllegalStateException(s"updating specimen link type from event failed: $err"),
+        slt => specimenLinkTypeRepository.remove(slt)
+      )
+      ()
     }
 
     private def validSpecimenGroup(
@@ -305,6 +308,13 @@ trait SpecimenLinkTypeProcessorComponent {
        processingType <- processingTypeRepository.getByKey(processingTypeId)
         valid <- annotTypesValid(processingType)
       } yield valid
+    }
+
+    def checkNotInUse(specimenLinkType: SpecimenLinkType): DomainValidation[SpecimenLinkType] = {
+      // FIXME: this is a stub for now
+      //
+      // it needs to be replaced with the real check
+      specimenLinkType.success
     }
 
   }

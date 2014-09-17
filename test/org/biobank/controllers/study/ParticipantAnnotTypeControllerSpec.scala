@@ -1,8 +1,9 @@
-package org.biobank.controllers
+package org.biobank.controllers.study
 
+import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, ParticipantAnnotationType }
 import org.biobank.fixture.ControllerFixture
-import org.biobank.service.json.JsonHelper._
+import org.biobank.domain.JsonHelper._
 
 import play.api.test.Helpers._
 import play.api.test.WithApplication
@@ -55,7 +56,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       annotTypeToAddCmdJson(annotType))
 
     (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("study is not disabled")
+    (json \ "message").as[String] should include ("is not disabled")
   }
 
   private def updateOnNonDisabledStudy(study: Study) {
@@ -71,7 +72,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       annotTypeToUpdateCmdJson(annotType))
 
     (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("study is not disabled")
+    (json \ "message").as[String] should include ("is not disabled")
   }
 
   def removeOnNonDisabledStudy(study: Study) {
@@ -89,7 +90,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST)
 
     (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("study is not disabled")
+    (json \ "message").as[String] should include ("is not disabled")
   }
 
   "Participant Type REST API" when {
@@ -158,7 +159,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
     }
 
     "POST /studies/pannottype" should {
-      "not add a participant annotation type to an enabled study" in new WithApplication(fakeApplication()) {
+      "not add a participant annotation type to an enabled study" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail)

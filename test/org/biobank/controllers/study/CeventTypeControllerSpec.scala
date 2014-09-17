@@ -1,8 +1,9 @@
-package org.biobank.controllers
+package org.biobank.controllers.study
 
+import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, SpecimenGroup }
 import org.biobank.fixture.ControllerFixture
-import org.biobank.service.json.JsonHelper._
+import org.biobank.domain.JsonHelper._
 
 import play.api.test.Helpers._
 import play.api.test.WithApplication
@@ -51,7 +52,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
     val json = makeRequest(POST, "/studies/cetypes", BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("study is not disabled")
+    (json \ "message").as[String] should include ("is not disabled")
   }
 
   def updateOnNonDisabledStudy(study: Study) {
@@ -93,7 +94,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
     val json = makeRequest(PUT, s"/studies/cetypes/${cet.id.id}", BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("study is not disabled")
+    (json \ "message").as[String] should include ("is not disabled")
   }
 
   def removeOnNonDisabledStudy(study: Study) {
@@ -116,7 +117,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST)
 
     (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("study is not disabled")
+    (json \ "message").as[String] should include ("is not disabled")
   }
 
   "Collection Event Type REST API" when {

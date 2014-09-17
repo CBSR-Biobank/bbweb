@@ -9,12 +9,22 @@ import org.biobank.domain.study.Study
 import org.biobank.domain.AnnotationValueType._
 
 import akka.persistence.SnapshotOffer
+import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
 
 trait ParticipantAnnotationTypeProcessorComponent {
   self: ParticipantAnnotationTypeRepositoryComponent =>
 
+  /**
+    * The ParticipantAnnotationTypeProcessor is responsible for maintaining state changes for all
+    * [[org.biobank.domain.study.ParticipantAnnotationType]] aggregates. This particular processor uses
+    * Akka-Persistence's [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist
+    * the generated events, afterwhich it will updated the current state of the
+    * [[org.biobank.domain.study.ParticipantAnnotationType]] being processed.
+    *
+    * It is a child actor of [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
+    */
   class ParticipantAnnotationTypeProcessor extends StudyAnnotationTypeProcessor[ParticipantAnnotationType] {
 
     override def persistenceId = "participant-annotation-type-processor-id"
@@ -23,11 +33,13 @@ trait ParticipantAnnotationTypeProcessorComponent {
 
     case class SnapshotState(annotationTypes: Set[ParticipantAnnotationType])
 
+    /**
+      * These are the events that are recovered during journal recovery. They cannot fail and must be
+      * processed to recreate the current state of the aggregate.
+      */
     val receiveRecover: Receive = {
       case event: ParticipantAnnotationTypeAddedEvent => recoverEvent(event)
-
       case event: ParticipantAnnotationTypeUpdatedEvent => recoverEvent(event)
-
       case event: ParticipantAnnotationTypeRemovedEvent => recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -35,28 +47,47 @@ trait ParticipantAnnotationTypeProcessorComponent {
     }
 
 
+    /**
+      * These are the commands that are requested. A command can fail, and will send the failure as a response
+      * back to the user. Each valid command generates one or more events and is journaled.
+      */
     val receiveCommand: Receive = {
 
-      case cmd: AddParticipantAnnotationTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: AddParticipantAnnotationTypeCmd =>
+        process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: UpdateParticipantAnnotationTypeCmd =>
+        process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: RemoveParticipantAnnotationTypeCmd =>
+        process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: UpdateParticipantAnnotationTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd => log.error(s"invalid message received: $cmd")
+    }
 
-      case cmd: RemoveParticipantAnnotationTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
-      case cmd =>
-        log.error(s"invalid message received: $cmd")
+    /** Updates to annotation types only allowed if they are not being used by any participants.
+      */
+    def update
+      (cmd: ParticipantAnnotationTypeCommand)
+      (fn: ParticipantAnnotationType => DomainValidation[ParticipantAnnotationType])
+        : DomainValidation[ParticipantAnnotationType] = {
+      for {
+        annotType        <- annotationTypeRepository.withId(StudyId(cmd.studyId), cmd.id)
+        notInUse         <- checkNotInUse(annotType)
+        validVersion     <- annotType.requireVersion( cmd.expectedVersion)
+        updatedAnnotType <- fn(annotType)
+      } yield updatedAnnotType
     }
 
     private def validateCmd(cmd: AddParticipantAnnotationTypeCmd):
         DomainValidation[ParticipantAnnotationTypeAddedEvent] = {
+      val timeNow = DateTime.now
       val id = annotationTypeRepository.nextIdentity
       for {
         nameValid <- nameAvailable(cmd.name)
         newItem <- ParticipantAnnotationType.create(
-          StudyId(cmd.studyId), id, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.valueType,
-          cmd.maxValueCount, cmd.options, cmd.required)
+          StudyId(cmd.studyId), id, -1L, timeNow,
+          cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options, cmd.required)
         event <- ParticipantAnnotationTypeAddedEvent(
-          newItem.studyId.id, newItem.id.id, newItem.addedDate, newItem.name, newItem.description,
+          newItem.studyId.id, newItem.id.id, timeNow, newItem.name, newItem.description,
           newItem.valueType, newItem.maxValueCount, newItem.options, newItem.required).success
       } yield event
     }
@@ -64,88 +95,69 @@ trait ParticipantAnnotationTypeProcessorComponent {
 
     private def validateCmd(cmd: UpdateParticipantAnnotationTypeCmd):
         DomainValidation[ParticipantAnnotationTypeUpdatedEvent] = {
-      val id = AnnotationTypeId(cmd.id)
-      for {
-        oldItem <- annotationTypeRepository.withId(StudyId(cmd.studyId), id)
-        notUsed <- checkNotInUse(oldItem)
-        nameValid <- nameAvailable(cmd.name, id)
-        newItem <- oldItem.update(
-         Some(cmd.expectedVersion), org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.valueType,
-          cmd.maxValueCount, cmd.options, cmd.required)
-        event <- ParticipantAnnotationTypeUpdatedEvent(
-          newItem.studyId.id, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, newItem.name,
-          newItem.description, newItem.valueType, newItem.maxValueCount, newItem.options,
-          newItem.required).success
-      } yield event
+      val timeNow = DateTime.now
+      val v = update(cmd) { at =>
+        for {
+          nameAvailable <- nameAvailable(cmd.name, AnnotationTypeId(cmd.id))
+          newItem <- at.update(
+            cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options, cmd.required)
+        } yield newItem
+      }
+
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        at => ParticipantAnnotationTypeUpdatedEvent(
+          at.studyId.id, at.id.id, at.version, timeNow, at.name, at.description, at.valueType,
+          at.maxValueCount, at.options, at.required).success
+      )
     }
 
     private def validateCmd(cmd: RemoveParticipantAnnotationTypeCmd):
         DomainValidation[ParticipantAnnotationTypeRemovedEvent] = {
-      val id = AnnotationTypeId(cmd.id)
-      for {
-        item <- annotationTypeRepository.withId(StudyId(cmd.studyId), id)
-        notUsed <- checkNotInUse(item)
-        validVersion <- validateVersion(item,Some(cmd.expectedVersion))
-        event <- ParticipantAnnotationTypeRemovedEvent(item.studyId.id, item.id.id).success
-      } yield event
+      val v = update(cmd) { at => at.success }
+
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        at =>  ParticipantAnnotationTypeRemovedEvent(at.studyId.id, at.id.id).success
+      )
     }
 
 
-    private def recoverEvent(event: ParticipantAnnotationTypeAddedEvent): Unit = {
-      val studyId = StudyId(event.studyId)
-      val id = AnnotationTypeId(event.annotationTypeId)
-      val validation = for {
-        newItem <- ParticipantAnnotationType.create(
-          studyId, id, -1L, event.dateTime, event.name, event.description,
-          event.valueType, event.maxValueCount, event.options, event.required)
-        savedItem <- annotationTypeRepository.put(newItem).success
-      } yield newItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering collection event type from event failed")
-      }
+    private def recoverEvent(event: ParticipantAnnotationTypeAddedEvent) = {
+      log.info(s"recoverEvent: $event")
+      annotationTypeRepository.put(ParticipantAnnotationType(
+        StudyId(event.studyId), AnnotationTypeId(event.annotationTypeId), 0L, event.dateTime, None,
+        event.name, event.description, event.valueType, event.maxValueCount, event.options, event.required))
+      ()
     }
 
-    private def recoverEvent(event: ParticipantAnnotationTypeUpdatedEvent): Unit = {
-      val validation = for {
-        item <- annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId))
-        updatedItem <- item.update(
-          item.versionOption, event.dateTime, event.name, event.description, event.valueType,
-          event.maxValueCount, event.options, event.required)
-        savedItem <- annotationTypeRepository.put(updatedItem).success
-      } yield updatedItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        val err = validation.swap.getOrElse(List.empty)
-        throw new IllegalStateException(
-          s"recovering collection event type update from event failed: $err")
-      }
+    private def recoverEvent(event: ParticipantAnnotationTypeUpdatedEvent) = {
+      annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId)).fold(
+        err => throw new IllegalStateException(s"updating annotation type from event failed: $err"),
+        at => annotationTypeRepository.put(at.copy(
+          version       = event.version,
+          name          = event.name,
+          description   = event.description,
+          valueType     = event.valueType,
+          maxValueCount = event.maxValueCount,
+          options       = event.options,
+          required      = event.required,
+          lastUpdateDate = Some(event.dateTime)))
+      )
+      ()
     }
 
-    private def recoverEvent(event: ParticipantAnnotationTypeRemovedEvent): Unit = {
-      val validation = for {
-        item <- annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId))
-        removedItem <- annotationTypeRepository.remove(item).success
-      } yield removedItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        val err = validation.swap.getOrElse(List.empty)
-        throw new IllegalStateException(
-          s"recovering collection event type remove from event failed: $err")
-      }
+    protected def recoverEvent(event: ParticipantAnnotationTypeRemovedEvent): Unit = {
+      recoverEvent(AnnotationTypeId(event.annotationTypeId))
     }
 
-    def checkNotInUse(annotationType: ParticipantAnnotationType): DomainValidation[Boolean] = {
+    def checkNotInUse
+      (annotationType: ParticipantAnnotationType)
+        : DomainValidation[ParticipantAnnotationType] = {
       // FIXME: this is a stub for now
       //
       // it needs to be replaced with the real check on the participant repository
-      true.success
+      annotationType.success
     }
 
 

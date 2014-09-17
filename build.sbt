@@ -38,7 +38,10 @@ testOptions in Test := Nil
 
 (testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/report")
 
+(testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
+
 resolvers ++= Seq(
+  Classpaths.sbtPluginReleases,
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
   "Typesafe Snapshots" at "https://repo.akka.io/snapshots/"
@@ -70,7 +73,7 @@ libraryDependencies ++= Seq(
   "org.webjars"               %  "angular-ui-router"              % "0.2.10-1",
   "org.webjars"               %  "ng-table"                       % "0.3.3",
   // Testing
-  "org.scalatest"             %% "scalatest"                      % "2.1.5"              % "test->*" excludeAll(
+  "org.scalatest"             %% "scalatest"                      % "2.2.1"              % "test->*" excludeAll(
     ExclusionRule(organization = "org.junit", name = "junit")
   ),
   "com.typesafe.akka"         %% "akka-testkit"                   % "2.3.2"              % "test"
@@ -92,3 +95,5 @@ pipelineStages := Seq(rjs, digest, gzip)
 //requireNativePath := Some("node r.js -o name=main out=javascript-min/main.min.js")
 
 emojiLogs
+
+instrumentSettings // for sbt-scoverage

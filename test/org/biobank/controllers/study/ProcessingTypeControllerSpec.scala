@@ -1,8 +1,9 @@
-package org.biobank.controllers
+package org.biobank.controllers.study
 
+import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, ProcessingType }
 import org.biobank.fixture.ControllerFixture
-import org.biobank.service.json.JsonHelper._
+import org.biobank.domain.JsonHelper._
 
 import play.api.test.Helpers._
 import play.api.test.WithApplication
@@ -52,7 +53,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       procTypeToAddCmdJson(procType))
 
     (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("study is not disabled")
+    (json \ "message").as[String] should include ("is not disabled")
   }
 
   def updateOnNonDisabledStudy(study: Study) {
@@ -70,7 +71,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       procTypeToUpdateCmdJson(procType2))
 
     (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("study is not disabled")
+    (json \ "message").as[String] should include ("is not disabled")
   }
 
   def removeOnNonDisabledStudy(study: Study) {
@@ -85,7 +86,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST)
 
     (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("study is not disabled")
+    (json \ "message").as[String] should include ("is not disabled")
   }
 
   "Processing Type REST API" when {

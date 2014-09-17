@@ -1,7 +1,6 @@
 package org.biobank.domain.study
 
 import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
-import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
 import org.biobank.domain.AnnotationValueType._
 import org.biobank.infrastructure.JsonUtils._
 import org.biobank.infrastructure.EnumUtils._
@@ -16,7 +15,7 @@ import scalaz.Scalaz._
 /** Used to add custom annotations to processing specimens. The study can define multiple
   * annotation types on processed specimens to store different types of data.
   */
-case class SpecimenLinkAnnotationType private (
+case class SpecimenLinkAnnotationType (
   studyId: StudyId,
   id: AnnotationTypeId,
   version: Long = -1,
@@ -44,24 +43,19 @@ case class SpecimenLinkAnnotationType private (
         }""".stripMargin
 
   def update(
-    expectedVersion: Option[Long],
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
     options: Option[Seq[String]] = None): DomainValidation[SpecimenLinkAnnotationType] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedAnnotationType <- SpecimenLinkAnnotationType.create(
-        studyId, id, version, addedDate, name, description, valueType, maxValueCount, options)
-      newItem <- validatedAnnotationType.copy(lastUpdateDate = Some(dateTime)).success
-    } yield newItem
+    SpecimenLinkAnnotationType.create(
+      this.studyId, this.id, this.version, this.addedDate, name, description, valueType, maxValueCount, options)
   }
 
 }
 
-object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidationHelper {
+object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidations {
+  import org.biobank.domain.CommonValidations._
 
   def create(
     studyId: StudyId,
@@ -76,8 +70,8 @@ object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidationHelper {
     (validateId(studyId) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
-      validateNonEmpty(name, "name is null or empty") |@|
-      validateNonEmptyOption(description, "description is null or empty") |@|
+      validateString(name, NameRequired) |@|
+      validateNonEmptyOption(description, NonEmptyDescription) |@|
       validateMaxValueCount(maxValueCount) |@|
       validateOptions(options)) {
         SpecimenLinkAnnotationType(_, _, _, dateTime, None, _, _, valueType, _, _)

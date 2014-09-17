@@ -49,8 +49,7 @@ class ProcessingTypeSpec extends DomainSpec {
       val description = Some(nameGenerator.next[ProcessingType])
       val enabled = !processingType.enabled
 
-      val validation = processingType.update(
-        processingType.versionOption, org.joda.time.DateTime.now, name, description, enabled)
+      val validation = processingType.update(name, description, enabled)
       validation should be ('success)
       validation map { pt2 =>
         pt2 shouldBe a [ProcessingType]
@@ -64,8 +63,7 @@ class ProcessingTypeSpec extends DomainSpec {
         )
 
         pt2.addedDate should be (processingType.addedDate)
-        val updateDate = pt2.lastUpdateDate | fail
-          (updateDate to DateTime.now).millis should be < 100L
+        pt2.lastUpdateDate should be (None)
       }
     }
   }
@@ -83,7 +81,7 @@ class ProcessingTypeSpec extends DomainSpec {
         studyId, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("id is null or empty"))
+          err.list should (have length 1 and contain("IdRequired"))
       }
     }
 
@@ -99,7 +97,7 @@ class ProcessingTypeSpec extends DomainSpec {
         disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("id is null or empty"))
+          err.list should (have length 1 and contain("IdRequired"))
       }
     }
 
@@ -114,7 +112,7 @@ class ProcessingTypeSpec extends DomainSpec {
         disabledStudy.id, processingTypeId, -2L, org.joda.time.DateTime.now, name, description, enabled)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("invalid version value: -2"))
+          err.list should (have length 1 and contain("InvalidVersion"))
       }
     }
 
@@ -129,7 +127,7 @@ class ProcessingTypeSpec extends DomainSpec {
         disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("name is null or empty"))
+          err.list should (have length 1 and contain("NameRequired"))
       }
 
       name = ""
@@ -137,7 +135,7 @@ class ProcessingTypeSpec extends DomainSpec {
         disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
       validation2 should be ('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("name is null or empty"))
+          err.list should (have length 1 and contain("NameRequired"))
       }
     }
 
@@ -152,7 +150,7 @@ class ProcessingTypeSpec extends DomainSpec {
         disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
       validation should be ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("description is null or empty"))
+          err.list should (have length 1 and contain("NonEmptyDescription"))
       }
 
       description = Some("")
@@ -160,7 +158,7 @@ class ProcessingTypeSpec extends DomainSpec {
         disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
       validation2 should be ('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("description is null or empty"))
+          err.list should (have length 1 and contain("NonEmptyDescription"))
       }
     }
 
@@ -176,8 +174,8 @@ class ProcessingTypeSpec extends DomainSpec {
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should have length 2
-          err.list(0) should be ("invalid version value: -2")
-          err.list(1) should be ("description is null or empty")
+          err.list(0) should be ("InvalidVersion")
+          err.list(1) should be ("NonEmptyDescription")
       }
     }
   }

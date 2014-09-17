@@ -10,7 +10,6 @@ import org.biobank.domain.{
   Location
 }
 import org.biobank.domain.study.StudyId
-import org.biobank.domain.Validations
 import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
@@ -55,50 +54,6 @@ sealed trait Centre
 
 }
 
-
-/**
-  * This is the initial state for a centre.  In this state, only configuration changes are allowed. Collection
-  * and processing of specimens cannot be recorded.
-  *
-  * This class has a private constructor and instances of this class can only be created using the
-  * [[DisabledCentre.create]] method on the factory object.
-  */
-case class DisabledCentre private (
-  id: CentreId,
-  version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
-  name: String,
-  description: Option[String])
-    extends Centre {
-
-  override val status: String = "Disabled"
-
-  /** Used to change the name or the description. */
-  def update(
-    expectedVersion: Option[Long],
-    dateTime: DateTime,
-    name: String,
-    description: Option[String]): DomainValidation[DisabledCentre] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedCentre <- DisabledCentre.create(id, version, addedDate, name, description)
-      updatedCentre <- validatedCentre.copy(lastUpdateDate = Some(dateTime)).success
-    } yield updatedCentre
-  }
-
-  /** Used to enable a centre after it has been configured, or had configuration changes made on it. */
-  def enable(
-    expectedVersion: Option[Long],
-    dateTime: DateTime): DomainValidation[EnabledCentre] = {
-
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      enabledCentre <- EnabledCentre.create(this, dateTime)
-    } yield enabledCentre
-  }
-}
-
 object Centre {
 
   implicit val centreWrites = new Writes[Centre] {
@@ -115,11 +70,42 @@ object Centre {
 
 }
 
+/**
+  * This is the initial state for a centre.  In this state, only configuration changes are allowed. Collection
+  * and processing of specimens cannot be recorded.
+  *
+  * This class has a private constructor and instances of this class can only be created using the
+  * [[DisabledCentre.create]] method on the factory object.
+  */
+case class DisabledCentre(
+  id: CentreId,
+  version: Long,
+  addedDate: DateTime,
+  lastUpdateDate: Option[DateTime],
+  name: String,
+  description: Option[String])
+    extends Centre {
+
+  override val status: String = "Disabled"
+
+  /** Used to change the name or the description. */
+  def update(
+    name: String,
+    description: Option[String]): DomainValidation[DisabledCentre] = {
+    DisabledCentre.create(this.id, this.version, this.addedDate, name, description)
+  }
+
+  /** Used to enable a centre after it has been configured, or had configuration changes made on it. */
+  def enable: DomainValidation[EnabledCentre] = {
+    EnabledCentre.create(this)
+  }
+}
 
 /**
   * Factory object used to create a centre.
   */
-object DisabledCentre extends Validations {
+object DisabledCentre {
+  import org.biobank.domain.CommonValidations._
 
   /**
     * The factory method to create a centre.
@@ -134,8 +120,8 @@ object DisabledCentre extends Validations {
     description: Option[String]): DomainValidation[DisabledCentre] = {
     (validateId(id) |@|
       validateAndIncrementVersion(version) |@|
-      validateNonEmpty(name, "name is null or empty") |@|
-      validateNonEmptyOption(description, "description is null or empty")) {
+      validateString(name, NameRequired) |@|
+      validateNonEmptyOption(description, NonEmptyDescription)) {
         DisabledCentre(_, _, dateTime, None, _, _)
       }
   }
@@ -147,7 +133,7 @@ object DisabledCentre extends Validations {
   * This class has a private constructor and instances of this class can only be created using
   * the [[EnabledCentre.create]] method on the factory object.
   */
-case class EnabledCentre private (
+case class EnabledCentre(
   id: CentreId,
   version: Long,
   addedDate: DateTime,
@@ -158,14 +144,8 @@ case class EnabledCentre private (
 
   override val status: String = "Enabled"
 
-  def disable(
-    expectedVersion: Option[Long],
-    dateTime: DateTime): DomainValidation[DisabledCentre] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedCentre <- DisabledCentre.create(id, version, addedDate, name, description)
-      disabledCentre <- validatedCentre.copy(lastUpdateDate = Some(dateTime)).success
-    } yield disabledCentre
+  def disable: DomainValidation[DisabledCentre] = {
+    DisabledCentre.create(this.id, this.version, this.addedDate, name, description)
   }
 }
 
@@ -173,17 +153,16 @@ case class EnabledCentre private (
 /**
   * Factory object used to enable a centre.
   */
-object EnabledCentre extends Validations {
+object EnabledCentre {
+  import org.biobank.domain.CommonValidations._
 
   /** A centre must be in a disabled state before it can be enabled. */
-  def create(
-    centre: DisabledCentre,
-    dateTime: DateTime): DomainValidation[EnabledCentre] = {
+  def create(centre: DisabledCentre): DomainValidation[EnabledCentre] = {
     (validateId(centre.id) |@|
       validateAndIncrementVersion(centre.version) |@|
-      validateNonEmpty(centre.name, "name is null or empty") |@|
-      validateNonEmptyOption(centre.description, "description is null or empty")) {
-        EnabledCentre(_, _, centre.addedDate, Some(dateTime), _, _)
+      validateString(centre.name, NameRequired) |@|
+      validateNonEmptyOption(centre.description, NonEmptyDescription)) {
+        EnabledCentre(_, _, centre.addedDate, None, _, _)
       }
   }
 }

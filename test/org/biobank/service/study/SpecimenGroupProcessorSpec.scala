@@ -20,11 +20,18 @@ import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 
 import akka.pattern.ask
+import org.scalatest.OptionValues._
+import org.joda.time.DateTime
 import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
+/**
+  * Tests for actor SpecimenGroupProcessor. These are written using ScalaTest.
+  *
+  */
 class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
+  import org.biobank.TestUtils._
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -46,11 +53,10 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
       var cmd = AddSpecimenGroupCmd(disabledStudy.id.id, sg.name, sg.description, sg.units,
         sg.anatomicalSourceType, sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
 
-      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+      var v = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
         .futureValue
-      validation should be ('success)
 
-      validation map { event =>
+      v shouldSucceed { event =>
         event shouldBe a[SpecimenGroupAddedEvent]
         event should have (
           'name                        (sg.name),
@@ -62,12 +68,11 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
           'specimenType                (sg.specimenType)
         )
 
-        val validation2 = specimenGroupRepository.withId(
-          disabledStudy.id, SpecimenGroupId(event.specimenGroupId))
-        validation2 should be ('success)
-        validation2 map { sg =>
-          sg.version should be (0)
-          specimenGroupRepository.allForStudy(disabledStudy.id) should have size 1
+        specimenGroupRepository.allForStudy(disabledStudy.id) should have size 1
+        specimenGroupRepository.withId(
+          disabledStudy.id, SpecimenGroupId(event.specimenGroupId))  shouldSucceed { repoSg =>
+          repoSg.version should be (0)
+          checkTimeStamps(repoSg, DateTime.now, None)
         }
       }
 
@@ -75,11 +80,10 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
 
       cmd = AddSpecimenGroupCmd(disabledStudy.id.id, name2, None, sg.units, sg.anatomicalSourceType,
         sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
-      val validation2 = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+      v = ask(studiesProcessor, cmd)
+        .mapTo[DomainValidation[SpecimenGroupAddedEvent]]
         .futureValue
-      validation2 should be ('success)
-
-      validation2 map { event =>
+      v shouldSucceed { event =>
         event shouldBe a[SpecimenGroupAddedEvent]
         event should have (
           'name                        (name2),
@@ -91,12 +95,11 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
           'specimenType                (sg.specimenType)
         )
 
-        val validation3 = specimenGroupRepository.withId(
-          disabledStudy.id, SpecimenGroupId(event.specimenGroupId))
-        validation3 should be ('success)
-        validation3 map { sg  =>
-          sg.version should be (0)
-          specimenGroupRepository.allForStudy(disabledStudy.id) should have size 2
+        specimenGroupRepository.allForStudy(disabledStudy.id) should have size 2
+        specimenGroupRepository.withId(
+          disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) shouldSucceed { repoSg  =>
+          repoSg.version should be (0)
+          checkTimeStamps(repoSg, DateTime.now, None)
         }
       }
     }
@@ -108,14 +111,9 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
       var cmd = AddSpecimenGroupCmd(study2.id.id, sg.name, sg.description, sg.units,
         sg.anatomicalSourceType, sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
 
-      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+      val v = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
         .futureValue
-
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include regex s"${study2.id.id}.*not found"
-      }
+      v shouldFail s"${study2.id.id}.*not found"
     }
 
     "update a specimen group" in {
@@ -127,11 +125,11 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
       val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sg.id.id, sg.version,
         sg2.name, sg2.description, sg2.units, sg2.anatomicalSourceType, sg2.preservationType,
         sg2.preservationTemperatureType, sg2.specimenType)
-      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+      val v = ask(studiesProcessor, cmd)
+        .mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
-      validation should be ('success)
 
-      validation map { event =>
+      v shouldSucceed { event =>
         event shouldBe a[SpecimenGroupUpdatedEvent]
         event should have (
           'studyId                     (disabledStudy.id.id),
@@ -146,9 +144,12 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
           'specimenType                (sg2.specimenType)
         )
 
-        val sg3 = specimenGroupRepository.withId(
-          disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) | fail
-        sg3.version should be (sg.version + 1)
+        specimenGroupRepository.allForStudy(disabledStudy.id) should have size 1
+        specimenGroupRepository.withId(
+          disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) shouldSucceed { repoSg =>
+          repoSg.version should be (sg.version + 1)
+          checkTimeStamps(repoSg, sg.addedDate, DateTime.now)
+        }
       }
     }
 
@@ -160,14 +161,10 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
         item.description, item.units, item.anatomicalSourceType, item.preservationType,
         item.preservationTemperatureType, item.specimenType)
 
-      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+      val v = ask(studiesProcessor, cmd)
+        .mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
-      validation should be ('failure)
-
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include ("doesn't match current version")
-      }
+      v shouldFail "doesn't match current version"
     }
 
     "not be added if the name already exists" in {
@@ -177,14 +174,11 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
       val cmd = AddSpecimenGroupCmd(disabledStudy.id.id, item.name,
         item.description, item.units, item.anatomicalSourceType, item.preservationType,
         item.preservationTemperatureType, item.specimenType)
-      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
+      val v = ask(studiesProcessor, cmd)
+        .mapTo[DomainValidation[SpecimenGroupAddedEvent]]
         .futureValue
-      validation should be ('failure)
 
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include ("name already exists")
-      }
+      v shouldFail "name already exists"
     }
 
     "not be updated to name that already exists" in {
@@ -199,14 +193,10 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
       val cmd = new UpdateSpecimenGroupCmd(disabledStudy.id.id, sg2.id.id, sg2.version,
         sg1.name, sg1.description, sg1.units, sg1.anatomicalSourceType, sg1.preservationType,
         sg1.preservationTemperatureType, sg1.specimenType)
-      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+      val v = ask(studiesProcessor, cmd)
+        .mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
-
-      validation should be ('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include ("name already exists")
-      }
+      v shouldFail "name already exists"
     }
 
     "not be updated to wrong study" in {
@@ -219,27 +209,27 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
       val cmd = new UpdateSpecimenGroupCmd(study2.id.id, item.id.id, item.version, item.name,
         item.description, item.units, item.anatomicalSourceType, item.preservationType,
         item.preservationTemperatureType, item.specimenType)
-      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+      val v = ask(studiesProcessor, cmd)
+        .mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
-      validation should be ('failure)
-
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include ("study does not have specimen group")
-      }
+      v shouldFail "study does not have specimen group"
     }
 
     "can remove a specimen group" in {
-      val item = factory.createSpecimenGroup
-      specimenGroupRepository.put(item)
+      val sg = factory.createSpecimenGroup
+      specimenGroupRepository.put(sg)
 
-      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id, item.version)
-      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
+      val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, sg.id.id, sg.version)
+      val v = ask(studiesProcessor, cmd)
+        .mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
         .futureValue
 
-      validation should be ('success)
-      validation map { event =>
+      v shouldSucceed { event =>
         event shouldBe a[SpecimenGroupRemovedEvent]
+
+        val v2 = specimenGroupRepository.withId(
+          disabledStudy.id, SpecimenGroupId(event.specimenGroupId))
+        v2 shouldFail "specimen group does not exist"
       }
     }
 
@@ -248,14 +238,10 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
       specimenGroupRepository.put(item)
 
       val cmd = new RemoveSpecimenGroupCmd(disabledStudy.id.id, item.id.id, item.version - 10)
-      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
+      val v = ask(studiesProcessor, cmd)
+        .mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
         .futureValue
-
-      validation should be ('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include ("version mismatch")
-      }
+      v shouldFail "expected version doesn't match current version"
     }
   }
 }

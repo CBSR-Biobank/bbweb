@@ -27,6 +27,10 @@ import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
 
+/**
+  * Tests for actor StudiesProcessorSpec. These are written using ScalaTest.
+  *
+  */
 class StudiesProcessorSpec extends StudiesProcessorFixture {
   import org.biobank.TestUtils._
 
@@ -50,62 +54,41 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
     "add a study" in {
       val study = factory.createDisabledStudy
 
-      askAddCommand(study).fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a [StudyAddedEvent]
-          event should have (
-            'name (study.name),
-            'description (study.description)
-          )
+      askAddCommand(study) shouldSucceed { event =>
+        event shouldBe a [StudyAddedEvent]
+        event should have (
+          'name (study.name),
+          'description (study.description)
+        )
 
-          studyRepository.getDisabled(StudyId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoStudy => checkTimeStamps(repoStudy, DateTime.now, None)
-          )
+        studyRepository.getDisabled(StudyId(event.id)) shouldSucceed { repoStudy =>
+          checkTimeStamps(repoStudy, DateTime.now, None)
         }
-      )
+      }
     }
 
     "not add add a new study with a duplicate name" in {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
-
-      val validation = ask(studiesProcessor, AddStudyCmd(study.name, study.description))
-        .mapTo[DomainValidation[StudyAddedEvent]].futureValue
-      validation should be ('failure)
-
-      val study2 = study.copy()
-
-      askAddCommand(study2).fold(
-        err => {
-          err.list should have length 1
-          err.list.head should include ("study with name already exists")
-        },
-        event => fail("command should fail")
-      )
+      askAddCommand(study) shouldFail "study with name already exists"
     }
 
-    "update a study with the same name" in {
+    "update a study leaving name unchanged" in {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
 
       val study2 = study.copy(description = Some(nameGenerator.next[String]))
 
-      askUpdateCommand(study2).fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a[StudyUpdatedEvent]
-          event should have (
-            'name (study2.name),
-            'description (study2.description)
-          )
-          studyRepository.getDisabled(StudyId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoStudy => checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
-          )
+      askUpdateCommand(study2) shouldSucceed { event =>
+        event shouldBe a[StudyUpdatedEvent]
+        event should have (
+          'name (study2.name),
+          'description (study2.description)
+        )
+        studyRepository.getDisabled(StudyId(event.id)) shouldSucceed { repoStudy =>
+          checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
         }
-      )
+      }
     }
 
     "update a study with new a name or description" in {
@@ -114,43 +97,33 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
 
       val study2 = study.copy(name = nameGenerator.next[Study])
 
-      askUpdateCommand(study2).fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a[StudyUpdatedEvent]
-          event should have (
-            'name (study2.name),
-            'description (study2.description)
-          )
+      askUpdateCommand(study2) shouldSucceed { event =>
+        event shouldBe a[StudyUpdatedEvent]
+        event should have (
+          'name (study2.name),
+          'description (study2.description)
+        )
 
-          studyRepository.getDisabled(StudyId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoStudy => {
-              repoStudy.version should be (1L)
-              checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
-            }
-          )
+        studyRepository.getDisabled(StudyId(event.id)) shouldSucceed { repoStudy =>
+          repoStudy.version should be (1L)
+          checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
         }
-      )
+      }
 
       // update something other than the name
       val study3 = study2.copy(
         version = study.version + 1,
         description = Some(nameGenerator.next[Study]))
 
-      askUpdateCommand(study3).fold(
-        err => fail(err.list.mkString),
-        event => {
-          event should have (
-            'name (study3.name),
-            'description (study3.description)
-          )
-          studyRepository.getDisabled(StudyId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoStudy => checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
-          )
+      askUpdateCommand(study3) shouldSucceed { event =>
+        event should have (
+          'name (study3.name),
+          'description (study3.description)
+        )
+        studyRepository.getDisabled(StudyId(event.id)) shouldSucceed { repoStudy =>
+          checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
         }
-      )
+      }
     }
 
     "not update a study to name that is used by another study" in {
@@ -161,14 +134,7 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
       studyRepository.put(study2)
 
       val study3 = study2.copy(name = study.name)
-
-      askUpdateCommand(study3).fold(
-        err => {
-          err.list should have length 1
-          err.head should include ("name already exists")
-        },
-        event => fail("command should fail")
-      )
+      askUpdateCommand(study3) shouldFail "name already exists"
     }
 
     "not be updated with invalid version" in {
@@ -177,13 +143,7 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
 
       val study2 = study.copy(version = study.version + 1)
 
-      askUpdateCommand(study2).fold(
-        err => {
-          err.list should have length 1
-          err.list.head should include ("doesn't match current version")
-        },
-        event => fail("command should fail")
-      )
+      askUpdateCommand(study2) shouldFail "doesn't match current version"
     }
 
     "enable a study" in {
@@ -196,40 +156,31 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val v = ask(studiesProcessor, EnableStudyCmd(study.id.toString, 0L))
+      ask(studiesProcessor, EnableStudyCmd(study.id.toString, 0L))
         .mapTo[DomainValidation[StudyEnabledEvent]]
         .futureValue
-
-      v.fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a[StudyEnabledEvent]
-          studyRepository.getEnabled(StudyId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoStudy => checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
-          )
-        }
-      )
+        .shouldSucceed { event =>
+        event shouldBe a[StudyEnabledEvent]
+        studyRepository.getEnabled(StudyId(event.id)).fold(
+          err => fail(err.list.mkString),
+          repoStudy => checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
+        )
+      }
     }
 
     "disable an enabled study" in {
       val enabledStudy = factory.createEnabledStudy
       studyRepository.put(enabledStudy)
 
-      val v = ask(studiesProcessor, DisableStudyCmd(enabledStudy.id.toString, 1L))
+      ask(studiesProcessor, DisableStudyCmd(enabledStudy.id.toString, 1L))
         .mapTo[DomainValidation[StudyDisabledEvent]]
         .futureValue
-
-      v.fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a[StudyDisabledEvent]
-          studyRepository.getDisabled(StudyId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoStudy => checkTimeStamps(repoStudy, enabledStudy.addedDate, DateTime.now)
-          )
-        }
-      )
+        .shouldSucceed { event =>
+        event shouldBe a[StudyDisabledEvent]
+          studyRepository.getDisabled(StudyId(event.id)) shouldSucceed { repoStudy =>
+            checkTimeStamps(repoStudy, enabledStudy.addedDate, DateTime.now)
+          }
+      }
     }
 
     "retire a study" in {
@@ -239,16 +190,12 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
       val v = ask(studiesProcessor, RetireStudyCmd(study.id.toString, 0L))
         .mapTo[DomainValidation[StudyRetiredEvent]]
         .futureValue
-      v.fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a[StudyRetiredEvent]
-          studyRepository.getRetired(StudyId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoStudy => checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
-          )
+      v.shouldSucceed { event =>
+        event shouldBe a[StudyRetiredEvent]
+        studyRepository.getRetired(StudyId(event.id)) shouldSucceed { repoStudy =>
+          checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
         }
-      )
+      }
     }
 
 
@@ -281,8 +228,9 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
       val validation2 = ask(newStudiesProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]]
         .futureValue
 
-      validation2 should be ('success)
-      validation2 map { event => event shouldBe a[StudyUpdatedEvent] }
+      validation2 shouldSucceed { event =>
+        event shouldBe a[StudyUpdatedEvent]
+      }
     }
   }
 }

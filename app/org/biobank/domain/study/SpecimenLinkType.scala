@@ -6,10 +6,10 @@ import org.biobank.domain.{
   DomainError,
   DomainValidation,
   HasUniqueName,
-  HasDescriptionOption
+  HasDescriptionOption,
+  ValidationKey
 }
 import org.biobank.infrastructure._
-import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
 import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
@@ -18,6 +18,18 @@ import com.github.nscala_time.time.Imports._
 import scalaz._
 import Scalaz._
 import typelevel._
+
+trait SpecimenLinkTypeValidations {
+
+  case object ProcessingTypeIdRequired extends ValidationKey
+
+  case object SpecimenGroupIdRequired extends ValidationKey
+
+  case object ContainerTypeIdRequired extends ValidationKey
+
+  case object InvalidPositiveNumber extends ValidationKey
+
+}
 
 /** [[SpecimenLinkType]]s are assigned to a [[ProcessingType]], and are used to represent a regularly
   * performed processing procedure involving two [[Specimen]]s: an input, which must be in a specific
@@ -49,7 +61,7 @@ import typelevel._
   * @param outputContainerTypeId The specimen container type that the output specimens are stored
   *        into. This is an optional field.
   */
-case class SpecimenLinkType private (
+case class SpecimenLinkType(
   processingTypeId: ProcessingTypeId,
   id: SpecimenLinkTypeId,
   version: Long,
@@ -69,8 +81,6 @@ case class SpecimenLinkType private (
   /** Updates a specimen link type with one or more new values.
     */
   def update(
-    expectedVersion: Option[Long],
-    dateTime: DateTime,
     expectedInputChange: BigDecimal,
     expectedOutputChange: BigDecimal,
     inputCount: Int,
@@ -80,15 +90,10 @@ case class SpecimenLinkType private (
     inputContainerTypeId: Option[ContainerTypeId] = None,
     outputContainerTypeId: Option[ContainerTypeId] = None,
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData]): DomainValidation[SpecimenLinkType] = {
-
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedItem <- SpecimenLinkType.create(
-        processingTypeId, id, version, addedDate, expectedInputChange, expectedOutputChange, inputCount,
-        outputCount, inputGroupId, outputGroupId, inputContainerTypeId, outputContainerTypeId,
-        annotationTypeData)
-      newItem <- validatedItem.copy(lastUpdateDate = Some(dateTime)).success
-    } yield newItem
+    SpecimenLinkType.create(
+      this.processingTypeId, this.id, this.version, this.addedDate, expectedInputChange, expectedOutputChange,
+      inputCount, outputCount, inputGroupId, outputGroupId, inputContainerTypeId, outputContainerTypeId,
+      annotationTypeData)
   }
 
   override def toString: String =
@@ -110,7 +115,8 @@ case class SpecimenLinkType private (
         |}""".stripMargin
 }
 
-object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
+object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotationTypeValidations {
+  import org.biobank.domain.CommonValidations._
 
   def create(
     processingTypeId: ProcessingTypeId,
@@ -150,25 +156,17 @@ object SpecimenLinkType extends StudyAnnotationTypeValidationHelper {
         inputContainerTypeId, outputContainerTypeId, annotationTypeData)
     }
 
-    (validateId(processingTypeId) :^:
-      validateId(id) :^:
+    (validateId(processingTypeId, ProcessingTypeIdRequired) :^:
+      validateId(id, IdRequired) :^:
       validateAndIncrementVersion(version) :^:
-      validatePositiveNumber(
-        expectedInputChange,
-        "expected input change is not a positive number") :^:
-      validatePositiveNumber(
-        expectedOutputChange,
-        "expected output change is not a positive number") :^:
-      validatePositiveNumber(
-        inputCount,
-        "input count is not a positive number") :^:
-      validatePositiveNumber(
-        outputCount,
-        "output count is not a positive number") :^:
-      validateId(inputGroupId) :^:
-      validateId(outputGroupId) :^:
-      validateId(inputContainerTypeId) :^:
-      validateId(outputContainerTypeId) :^:
+      validatePositiveNumber(expectedInputChange, InvalidPositiveNumber) :^:
+      validatePositiveNumber(expectedOutputChange, InvalidPositiveNumber) :^:
+      validatePositiveNumber(inputCount, InvalidPositiveNumber) :^:
+      validatePositiveNumber(outputCount, InvalidPositiveNumber) :^:
+      validateId(inputGroupId, SpecimenGroupIdRequired) :^:
+      validateId(outputGroupId, SpecimenGroupIdRequired) :^:
+      validateId(inputContainerTypeId, ContainerTypeIdRequired) :^:
+      validateId(outputContainerTypeId, ContainerTypeIdRequired) :^:
       validateAnnotationTypeData(annotationTypeData) :^:
       validateSpecimenGroups(inputGroupId, outputGroupId) :^:
       KNil).applyP(applyFunc _ curried)

@@ -1,9 +1,10 @@
-package org.biobank.controllers
+package org.biobank.controllers.study
 
+import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.StudyId
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service.json.JsonHelper._
+import org.biobank.domain.JsonHelper._
 import org.biobank.fixture.ControllerFixture
 import play.api.test.Helpers._
 import play.api.test.WithApplication

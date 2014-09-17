@@ -9,6 +9,7 @@ import org.biobank.domain.study.Study
 import org.biobank.domain.AnnotationValueType._
 
 import akka.persistence.SnapshotOffer
+import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
 
@@ -16,6 +17,15 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
   self: SpecimenLinkAnnotationTypeRepositoryComponent
       with SpecimenLinkTypeRepositoryComponent =>
 
+  /**
+    * The SpecimenLinkAnnotationTypeProcessor is responsible for maintaining state changes for all
+    * [[org.biobank.domain.study.SpecimenLinkAnnotationType]] aggregates. This particular processor uses
+    * Akka-Persistence's [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist
+    * the generated events, afterwhich it will updated the current state of the
+    * [[org.biobank.domain.study.SpecimenLinkAnnotationType]] being processed.
+    *
+    * It is a child actor of [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
+    */
   class SpecimenLinkAnnotationTypeProcessor extends StudyAnnotationTypeProcessor[SpecimenLinkAnnotationType] {
 
     override def persistenceId = "specimen-link-annotation-type-processor-id"
@@ -24,6 +34,10 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
 
     case class SnapshotState(annotationTypes: Set[SpecimenLinkAnnotationType])
 
+    /**
+      * These are the events that are recovered during journal recovery. They cannot fail and must be
+      * processed to recreate the current state of the aggregate.
+      */
     val receiveRecover: Receive = {
       case event: SpecimenLinkAnnotationTypeAddedEvent => recoverEvent(event)
 
@@ -36,6 +50,10 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
     }
 
 
+    /**
+      * These are the commands that are requested. A command can fail, and will send the failure as a response
+      * back to the user. Each valid command generates one or more events and is journaled.
+      */
     val receiveCommand: Receive = {
 
       case cmd: AddSpecimenLinkAnnotationTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
@@ -44,108 +62,100 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
 
       case cmd: RemoveSpecimenLinkAnnotationTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case _ =>
-        throw new Error("invalid message received")
+      case cmd => throw new Error(s"invalid message received: $cmd")
     }
 
-    private def validateCmd(cmd: AddSpecimenLinkAnnotationTypeCmd):
-        DomainValidation[SpecimenLinkAnnotationTypeAddedEvent] = {
+    /** Updates to annotation types only allowed if they are not being used by any participants.
+      */
+    def update
+      (cmd: SpecimenLinkAnnotationTypeCommand)
+      (fn: SpecimenLinkAnnotationType => DomainValidation[SpecimenLinkAnnotationType])
+        : DomainValidation[SpecimenLinkAnnotationType] = {
+      for {
+        annotType        <- annotationTypeRepository.withId(StudyId(cmd.studyId), cmd.id)
+        notInUse         <- checkNotInUse(annotType)
+        validVersion     <- annotType.requireVersion( cmd.expectedVersion)
+        updatedAnnotType <- fn(annotType)
+      } yield updatedAnnotType
+    }
+
+  private def validateCmd(cmd: AddSpecimenLinkAnnotationTypeCmd)
+      : DomainValidation[SpecimenLinkAnnotationTypeAddedEvent] = {
+      val timeNow = DateTime.now
       val id = annotationTypeRepository.nextIdentity
       for {
         nameValid <- nameAvailable(cmd.name)
         newItem <- SpecimenLinkAnnotationType.create(
-          StudyId(cmd.studyId), id, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.valueType,
+          StudyId(cmd.studyId), id, -1L, timeNow, cmd.name, cmd.description, cmd.valueType,
           cmd.maxValueCount, cmd.options)
         event <- SpecimenLinkAnnotationTypeAddedEvent(
-          newItem.studyId.id, newItem.id.id, newItem.addedDate, newItem.name, newItem.description,
+          newItem.studyId.id, newItem.id.id, timeNow, newItem.name, newItem.description,
           newItem.valueType, newItem.maxValueCount, newItem.options).success
       } yield event
     }
 
 
-    private def validateCmd(cmd: UpdateSpecimenLinkAnnotationTypeCmd):
-        DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent] = {
-      val id = AnnotationTypeId(cmd.id)
-      for {
-        oldItem <- annotationTypeRepository.withId(StudyId(cmd.studyId), id)
-        notUsed <- checkNotInUse(oldItem)
-        nameValid <- nameAvailable(cmd.name, id)
-        newItem <- oldItem.update(
-         Some(cmd.expectedVersion), org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.valueType,
-          cmd.maxValueCount, cmd.options)
-        event <- SpecimenLinkAnnotationTypeUpdatedEvent(
-          newItem.studyId.id, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, newItem.name,
-          newItem.description, newItem.valueType, newItem.maxValueCount, newItem.options).success
-      } yield event
+    private def validateCmd(cmd: UpdateSpecimenLinkAnnotationTypeCmd)
+        : DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent] = {
+      val timeNow = DateTime.now
+      val v = update(cmd) { at =>
+        for {
+          nameAvailable <- nameAvailable(cmd.name, AnnotationTypeId(cmd.id))
+          newItem <- at.update(cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options)
+        } yield newItem
+      }
+
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        at => SpecimenLinkAnnotationTypeUpdatedEvent(
+          at.studyId.id, at.id.id, at.version, timeNow, at.name, at.description, at.valueType,
+          at.maxValueCount, at.options).success
+      )
     }
 
-    private def validateCmd(cmd: RemoveSpecimenLinkAnnotationTypeCmd):
-        DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent] = {
-      val id = AnnotationTypeId(cmd.id)
-      for {
-        item <- annotationTypeRepository.withId(StudyId(cmd.studyId), id)
-        notUsed <- checkNotInUse(item)
-        validVersion <- validateVersion(item,Some(cmd.expectedVersion))
-        event <- SpecimenLinkAnnotationTypeRemovedEvent(item.studyId.id, item.id.id).success
-      } yield event
+    private def validateCmd(cmd: RemoveSpecimenLinkAnnotationTypeCmd)
+        : DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent] = {
+      val v = update(cmd) { at => at.success }
+
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        at =>  SpecimenLinkAnnotationTypeRemovedEvent(at.studyId.id, at.id.id).success
+      )
     }
 
 
     private def recoverEvent(event: SpecimenLinkAnnotationTypeAddedEvent): Unit = {
-      val studyId = StudyId(event.studyId)
-      val id = AnnotationTypeId(event.annotationTypeId)
-      val validation = for {
-        newItem <- SpecimenLinkAnnotationType.create(
-          studyId, id, -1L, event.dateTime, event.name, event.description,
-          event.valueType, event.maxValueCount, event.options)
-        savedItem <- annotationTypeRepository.put(newItem).success
-      } yield newItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering collection event type from event failed")
-      }
+      annotationTypeRepository.put(SpecimenLinkAnnotationType(
+        StudyId(event.studyId), AnnotationTypeId(event.annotationTypeId), 0L, event.dateTime, None,
+        event.name, event.description, event.valueType, event.maxValueCount, event.options))
+      ()
     }
 
     private def recoverEvent(event: SpecimenLinkAnnotationTypeUpdatedEvent): Unit = {
-      val validation = for {
-        item <- annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId))
-        updatedItem <- item.update(
-          item.versionOption, event.dateTime, event.name, event.description, event.valueType,
-          event.maxValueCount, event.options)
-        savedItem <- annotationTypeRepository.put(updatedItem).success
-      } yield updatedItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        val err = validation.swap.getOrElse(List.empty)
-        throw new IllegalStateException(
-          s"recovering collection event type update from event failed: $err")
-      }
+      annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId)).fold(
+        err => throw new IllegalStateException(s"updating annotatiotn type from event failed: $err"),
+        at => annotationTypeRepository.put(at.copy(
+          version       = event.version,
+          name          = event.name,
+          description   = event.description,
+          valueType     = event.valueType,
+          maxValueCount = event.maxValueCount,
+          options       = event.options,
+          lastUpdateDate = Some(event.dateTime)))
+      )
+      ()
     }
 
     private def recoverEvent(event: SpecimenLinkAnnotationTypeRemovedEvent): Unit = {
-      val validation = for {
-        item <- annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId))
-        removedItem <- annotationTypeRepository.remove(item).success
-      } yield removedItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        val err = validation.swap.getOrElse(List.empty)
-        throw new IllegalStateException(
-          s"recovering collection event type remove from event failed: $err")
-      }
+      recoverEvent(AnnotationTypeId(event.annotationTypeId))
     }
 
-    def checkNotInUse(annotationType: SpecimenLinkAnnotationType): DomainValidation[Boolean] = {
+    def checkNotInUse(annotationType: SpecimenLinkAnnotationType)
+        : DomainValidation[SpecimenLinkAnnotationType] = {
       if (specimenLinkTypeRepository.annotationTypeInUse(annotationType)) {
         DomainError(s"annotation type is in use by specimen link type: ${annotationType.id}").failNel
       } else {
-        true.success
+        annotationType.success
       }
     }
 

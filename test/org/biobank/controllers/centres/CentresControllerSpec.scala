@@ -5,7 +5,7 @@ import org.biobank.domain.centre._
 import org.biobank.domain.{ Location, LocationId }
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
-import org.biobank.service.json.JsonHelper._
+import org.biobank.domain.JsonHelper._
 import org.biobank.fixture.ControllerFixture
 
 import play.api.test.Helpers._
@@ -159,7 +159,7 @@ class CentresControllerSpec extends ControllerFixture {
           "id"              -> centreId,
           "expectedVersion" -> Some(0L),
           "name"            -> nameGenerator.next[String])
-        val json = makeRequest(PUT, s"/centres/${centreId}", BAD_REQUEST, json = cmdJson)
+        val json = makeRequest(PUT, s"/centres/${centreId}", NOT_FOUND, json = cmdJson)
 
         (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("no centre with id")
@@ -250,7 +250,7 @@ class CentresControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "id" -> nameGenerator.next[String],
           "expectedVersion" -> Some(0L))
-        val json = makeRequest(POST, "/centres/enable", BAD_REQUEST, json = cmdJson)
+        val json = makeRequest(POST, "/centres/enable", NOT_FOUND, json = cmdJson)
 
         (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("no centre with id")
@@ -260,7 +260,7 @@ class CentresControllerSpec extends ControllerFixture {
     "POST /centres/disable" should {
       "disable a centre" in new WithApplication(fakeApplication()) {
         doLogin
-        val centre = factory.createDisabledCentre.enable(Some(0), org.joda.time.DateTime.now) | fail
+        val centre = factory.createDisabledCentre.enable | fail
         use[BbwebPlugin].centreRepository.put(centre)
 
         val cmdJson = Json.obj(
@@ -283,7 +283,7 @@ class CentresControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "id" -> nameGenerator.next[String],
           "expectedVersion" -> Some(0L))
-        val json = makeRequest(POST, "/centres/disable", BAD_REQUEST, json = cmdJson)
+        val json = makeRequest(POST, "/centres/disable", NOT_FOUND, json = cmdJson)
 
         (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("no centre with id")
@@ -433,7 +433,7 @@ class CentresControllerSpec extends ControllerFixture {
 
         val centreId = CentreId(nameGenerator.next[String])
         val location = factory.createLocation
-        val jsonResponse = makeRequest(POST, "/centres/locations", BAD_REQUEST,
+        val jsonResponse = makeRequest(POST, "/centres/locations", NOT_FOUND,
           json = jsonAddCentreLocationCmd(location, centreId))
 
         (jsonResponse \ "status").as[String] should include ("error")
@@ -469,7 +469,7 @@ class CentresControllerSpec extends ControllerFixture {
         use[BbwebPlugin].centreLocationRepository.put(CentreLocation(centre.id, location.id))
 
         val centreId = CentreId(nameGenerator.next[String])
-        val json = makeRequest(DELETE, s"/centres/locations/${centreId.id}/${location.id.id}", BAD_REQUEST)
+        val json = makeRequest(DELETE, s"/centres/locations/${centreId.id}/${location.id.id}", NOT_FOUND)
           (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("no centre with id")
       }
@@ -482,7 +482,7 @@ class CentresControllerSpec extends ControllerFixture {
         val locationId = LocationId(nameGenerator.next[String])
         val json = makeRequest(DELETE, s"/centres/locations/${centre.id.id}/${locationId.id}", NOT_FOUND)
           (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("not found")
+          (json \ "message").as[String] should include ("no location with id")
       }
 
     }

@@ -1,4 +1,4 @@
-package org.biobank.service.json
+package org.biobank.domain
 
 import org.biobank.domain._
 import org.biobank.domain.user._

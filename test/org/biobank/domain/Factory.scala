@@ -34,53 +34,48 @@ class Factory {
     val salt = nameGenerator.next[User]
     val avatarUrl = Some("http://test.com/")
 
-    val validation = RegisteredUser.create(
-      id, version, DateTime.now, name, email, password, salt, avatarUrl)
-    if (validation.isFailure) {
-      throw new Error
-    }
-
-    val registeredUser = validation | null
-    domainObjects = domainObjects + (classOf[RegisteredUser] -> registeredUser)
-    registeredUser
+    RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
+      err => throw new Error(err.list.mkString),
+      registeredUser => {
+        domainObjects = domainObjects + (classOf[RegisteredUser] -> registeredUser)
+        registeredUser
+      }
+    )
   }
 
   def createActiveUser: ActiveUser = {
     val registeredUser = defaultRegisteredUser
-    val validation = registeredUser.activate
-    if (validation.isFailure) {
-      throw new Error
-    }
-
-    val activeUser = validation | null
-    domainObjects = domainObjects + (classOf[ActiveUser] -> activeUser)
-    activeUser
+    registeredUser.activate.fold(
+      err => throw new Error(err.list.mkString),
+      activeUser => {
+        domainObjects = domainObjects + (classOf[ActiveUser] -> activeUser)
+        activeUser
+      }
+    )
   }
 
   def createLockedUser: LockedUser = {
     val activeUser = defaultActiveUser
-    val validation = activeUser.lock
-    if (validation.isFailure) {
-      throw new Error
-    }
-
-    val lockedUser = validation | null
-    domainObjects = domainObjects + (classOf[LockedUser] -> lockedUser)
-    lockedUser
+    activeUser.lock.fold(
+      err => throw new Error(err.list.mkString),
+      lockedUser => {
+        domainObjects = domainObjects + (classOf[LockedUser] -> lockedUser)
+        lockedUser
+      }
+    )
   }
   def createDisabledStudy: DisabledStudy = {
     val id = StudyId(nameGenerator.next[Study])
     val name = nameGenerator.next[Study]
     val description = Some(nameGenerator.next[Study])
 
-    val validation = DisabledStudy.create(id, -1L, DateTime.now, name, description)
-    if (validation.isFailure) {
-      throw new Error
-    }
-
-    val study = validation | null
-    domainObjects = domainObjects + (classOf[DisabledStudy] -> study)
-    study
+    DisabledStudy.create(id, -1L, DateTime.now, name, description).fold(
+      err => throw new Error(err.list.mkString),
+      study => {
+        domainObjects = domainObjects + (classOf[DisabledStudy] -> study)
+        study
+      }
+    )
   }
 
   def createEnabledStudy: EnabledStudy = {
@@ -102,16 +97,15 @@ class Factory {
     val specimenType = SpecimenType.FilteredUrine
 
     val disabledStudy = defaultDisabledStudy
-    val validation = SpecimenGroup.create(disabledStudy.id, sgId, -1L, DateTime.now,
+    SpecimenGroup.create(disabledStudy.id, sgId, -1L, DateTime.now,
       name, description, units, anatomicalSourceType, preservationType, preservationTempType,
-      specimenType)
-    if (validation.isFailure) {
-      throw new Error
-    }
-
-    val specimenGroup = validation | null
-    domainObjects = domainObjects + (classOf[SpecimenGroup] -> specimenGroup)
-    specimenGroup
+      specimenType).fold(
+      err => throw new Error(err.list.mkString),
+        specimenGroup => {
+          domainObjects = domainObjects + (classOf[SpecimenGroup] -> specimenGroup)
+          specimenGroup
+        }
+    )
   }
 
   def createCollectionEventType: CollectionEventType = {
@@ -120,16 +114,14 @@ class Factory {
     val description = Some(nameGenerator.next[CollectionEventType])
 
     val disabledStudy = defaultDisabledStudy
-    val validation = CollectionEventType.create(
-      disabledStudy.id, ceventTypeId, -1L, DateTime.now, name,
-      description, true, List.empty, List.empty)
-    if (validation.isFailure) {
-      throw new Error
-    }
-
-    val ceventType = validation | null
-    domainObjects = domainObjects + (classOf[CollectionEventType] -> ceventType)
-    ceventType
+    CollectionEventType.create(
+      disabledStudy.id, ceventTypeId, -1L, DateTime.now, name, description, true, List.empty, List.empty).fold(
+      err => throw new Error(err.list.mkString),
+        ceventType => {
+          domainObjects = domainObjects + (classOf[CollectionEventType] -> ceventType)
+          ceventType
+        }
+    )
   }
 
   def createCollectionEventAnnotationType: CollectionEventAnnotationType = {
@@ -141,16 +133,15 @@ class Factory {
       nameGenerator.next[String]))
 
     val disabledStudy = defaultDisabledStudy
-    val validation = CollectionEventAnnotationType.create(
+    CollectionEventAnnotationType.create(
       disabledStudy.id, id, -1L, DateTime.now, name, description,
-      AnnotationValueType.Select, Some(1), options)
-    if (validation.isFailure) {
-      throw new Error
-    }
-
-    val annotationType = validation | null
-    domainObjects = domainObjects + (classOf[CollectionEventAnnotationType] -> annotationType)
-    annotationType
+      AnnotationValueType.Select, Some(1), options).fold(
+      err => throw new Error(err.list.mkString),
+        annotationType => {
+          domainObjects = domainObjects + (classOf[CollectionEventAnnotationType] -> annotationType)
+          annotationType
+        }
+    )
   }
 
   def createCollectionEventTypeSpecimenGroupData: CollectionEventTypeSpecimenGroupData = {
@@ -166,7 +157,7 @@ class Factory {
     val ceventTypeAnnotationType = CollectionEventTypeAnnotationTypeData(
       annotationType.id.id, true)
     domainObjects = domainObjects +
-    (classOf[CollectionEventTypeAnnotationTypeData] -> ceventTypeAnnotationType)
+      (classOf[CollectionEventTypeAnnotationTypeData] -> ceventTypeAnnotationType)
     ceventTypeAnnotationType
   }
 
@@ -179,16 +170,15 @@ class Factory {
       nameGenerator.next[String]))
 
     val disabledStudy = defaultDisabledStudy
-    val validation = ParticipantAnnotationType.create(
-      disabledStudy.id, id, -1L, DateTime.now, name,
-      description, AnnotationValueType.Select, Some(1), options, required = true)
-    if (validation.isFailure) {
-      throw new Error
-    }
-
-    val annotationType = validation | null
-    domainObjects = domainObjects + (classOf[ParticipantAnnotationType] -> annotationType)
-    annotationType
+    ParticipantAnnotationType.create(
+      disabledStudy.id, id, -1L, DateTime.now, name, description, AnnotationValueType.Select,
+      Some(1), options, required = true).fold(
+      err => throw new Error(err.list.mkString),
+        annotationType => {
+          domainObjects = domainObjects + (classOf[ParticipantAnnotationType] -> annotationType)
+            annotationType
+        }
+    )
   }
 
   def createSpecimenLinkAnnotationType: SpecimenLinkAnnotationType = {
@@ -200,16 +190,15 @@ class Factory {
       nameGenerator.next[String]))
 
     val disabledStudy = defaultDisabledStudy
-    val validation = SpecimenLinkAnnotationType.create(
+    SpecimenLinkAnnotationType.create(
       disabledStudy.id, id, -1L, DateTime.now, name, description,
-      AnnotationValueType.Select, Some(1), options)
-    if (validation.isFailure) {
-      throw new Error
-    }
-
-    val annotationType = validation | null
-    domainObjects = domainObjects + (classOf[SpecimenLinkAnnotationType] -> annotationType)
-    annotationType
+      AnnotationValueType.Select, Some(1), options).fold(
+      err => throw new Error(err.list.mkString),
+        annotationType => {
+          domainObjects = domainObjects + (classOf[SpecimenLinkAnnotationType] -> annotationType)
+          annotationType
+        }
+    )
   }
 
   def createProcessingType: ProcessingType = {
@@ -218,15 +207,14 @@ class Factory {
     val description = Some(nameGenerator.next[ProcessingType])
 
     val disabledStudy = defaultDisabledStudy
-    val validation = ProcessingType.create(
-      disabledStudy.id, processingTypeId, -1L, DateTime.now, name, description, enabled = true)
-    if (validation.isFailure) {
-      throw new Error
-    }
-
-    val processingType = validation | null
-    domainObjects = domainObjects + (classOf[ProcessingType] -> processingType)
-    processingType
+    ProcessingType.create(
+      disabledStudy.id, processingTypeId, -1L, DateTime.now, name, description, enabled = true).fold(
+      err => throw new Error(err.list.mkString),
+        processingType => {
+          domainObjects = domainObjects + (classOf[ProcessingType] -> processingType)
+          processingType
+        }
+    )
   }
 
   def createSpecimenLinkType: SpecimenLinkType = {
@@ -239,20 +227,18 @@ class Factory {
 
     val disabledStudy = defaultDisabledStudy
 
-    val validation = SpecimenLinkType.create(
+    SpecimenLinkType.create(
       processingType.id, id, -1L, DateTime.now, expectedInputChange,
       expectedOutpuChange, inputCount, outputCount,
       SpecimenGroupId(nameGenerator.next[SpecimenGroup]),
       SpecimenGroupId(nameGenerator.next[SpecimenGroup]),
-      annotationTypeData = List.empty)
-
-    if (validation.isFailure) {
-      throw new Error
-    }
-
-    val annotationType = validation | null
-    domainObjects = domainObjects + (classOf[SpecimenLinkType] -> annotationType)
-    annotationType
+      annotationTypeData = List.empty).fold(
+      err => throw new Error(err.list.mkString),
+        slt => {
+          domainObjects = domainObjects + (classOf[SpecimenLinkType] -> slt)
+          slt
+        }
+    )
   }
 
   def createSpecimenLinkTypeAndSpecimenGroups: (SpecimenLinkType, SpecimenGroup, SpecimenGroup) = {
@@ -276,15 +262,8 @@ class Factory {
     val name = nameGenerator.next[Centre]
     val description = Some(nameGenerator.next[Centre])
 
-    val validation = DisabledCentre.create(id, -1L, DateTime.now, name, description)
-    if (validation.isFailure) {
-
-    }
-
-    validation.fold(
-      err => {
-        throw new Error("cannot add disabled centre")
-      },
+    DisabledCentre.create(id, -1L, DateTime.now, name, description).fold(
+      err => throw new Error(err.list.mkString),
       centre => {
         domainObjects = domainObjects + (classOf[DisabledCentre] -> centre)
         centre
@@ -294,7 +273,7 @@ class Factory {
 
   def createEnabledCentre: EnabledCentre = {
     val disabledCentre = defaultDisabledCentre
-    val enabledCentre = disabledCentre.enable(disabledCentre.versionOption, DateTime.now) | null
+    val enabledCentre = disabledCentre.enable | null
     domainObjects = domainObjects + (classOf[EnabledCentre] -> enabledCentre)
     domainObjects = domainObjects - classOf[DisabledCentre]
     enabledCentre

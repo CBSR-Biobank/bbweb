@@ -28,25 +28,25 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val user = factory.createRegisteredUser
 
       val cmd = RegisterUserCmd(user.name, user.email, user.password, user.avatarUrl)
-      ask(usersProcessor, cmd).mapTo[DomainValidation[UserRegisteredEvent]].futureValue.fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a [UserRegisteredEvent]
-          event should have (
-            'name (user.name),
-            'email (user.email),
-            'avatarUrl (user.avatarUrl)
-          )
+      val v = ask(usersProcessor, cmd)
+        .mapTo[DomainValidation[UserRegisteredEvent]]
+        .futureValue
 
-          event.password should not be(user.password)    // password should be encrypted
-          event.salt.size should be > 0                  // salt should not be empty
+      v shouldSucceed { event =>
+        event shouldBe a [UserRegisteredEvent]
+        event should have (
+          'name (user.name),
+          'email (user.email),
+          'avatarUrl (user.avatarUrl)
+        )
 
-          userRepository.getRegistered(UserId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoUser => checkTimeStamps(repoUser, DateTime.now, None)
-          )
+        event.password should not be(user.password)    // password should be encrypted
+        event.salt.size should be > 0                  // salt should not be empty
+
+        userRepository.getRegistered(UserId(event.id)) shouldSucceed { repoUser =>
+          checkTimeStamps(repoUser, DateTime.now, None)
         }
-      )
+      }
     }
 
     "not add a user with an already registered email address" in {
@@ -54,13 +54,8 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       userRepository.put(user)
 
       val cmd = RegisterUserCmd(user.name, user.email, user.password, user.avatarUrl)
-      ask(usersProcessor, cmd).mapTo[DomainValidation[UserRegisteredEvent]].futureValue.fold(
-        err => {
-          err.list should have length 1
-          err.list.head should include ("user with email already exists")
-        },
-        user => fail("command should fail")
-      )
+      val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserRegisteredEvent]].futureValue
+      v shouldFail "user with email already exists"
     }
 
     "activate a user" in {
@@ -71,16 +66,12 @@ class UsersProcessorSpec extends UsersProcessorFixture {
         .mapTo[DomainValidation[UserActivatedEvent]]
         .futureValue
 
-      v.fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a[UserActivatedEvent]
-          userRepository.getActive(UserId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoUser => checkTimeStamps(repoUser, user.addedDate, DateTime.now)
-          )
+      v shouldSucceed { event =>
+        event shouldBe a[UserActivatedEvent]
+        userRepository.getActive(UserId(event.id)) shouldSucceed { repoUser =>
+          checkTimeStamps(repoUser, user.addedDate, DateTime.now)
         }
-      )
+      }
     }
 
     "not activate a user with a bad version" in {
@@ -90,14 +81,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val v = ask(usersProcessor, ActivateUserCmd(user.email, user.version - 1))
         .mapTo[DomainValidation[UserActivatedEvent]]
         .futureValue
-
-      v.fold(
-        err =>  {
-          err.list should have length 1
-          err.list.head should include ("expected version doesn't match current version")
-        },
-        event => fail("user should not be activated")
-      )
+      v shouldFail "expected version doesn't match current version"
     }
 
     "update a user's name" in {
@@ -109,22 +93,18 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val cmd = UpdateUserNameCmd(user.id.id, user.version, newName)
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserNameUpdatedEvent]].futureValue
 
-      v.fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a [UserNameUpdatedEvent]
-          event should have (
-            'id        (user.email),
-            'version   (user.version + 1),
-            'name      (newName)
-          )
+      v shouldSucceed { event =>
+        event shouldBe a [UserNameUpdatedEvent]
+        event should have (
+          'id        (user.email),
+          'version   (user.version + 1),
+          'name      (newName)
+        )
 
-          userRepository.getActive(UserId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoUser => checkTimeStamps(repoUser, user.addedDate, DateTime.now)
-          )
+        userRepository.getActive(UserId(event.id)) shouldSucceed { repoUser =>
+          checkTimeStamps(repoUser, user.addedDate, DateTime.now)
         }
-      )
+      }
     }
 
     "not update a user's name with an invalid version" in {
@@ -135,14 +115,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
 
       val cmd = UpdateUserNameCmd(user.id.id, user.version - 1, newName)
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserNameUpdatedEvent]].futureValue
-
-      v.fold(
-        err =>  {
-          err.list should have length 1
-          err.list.head should include ("expected version doesn't match current version")
-        },
-        event => fail("user's name should not be updated")
-      )
+      v shouldFail "expected version doesn't match current version"
     }
 
     "update a user's email" in {
@@ -155,22 +128,18 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserEmailUpdatedEvent]]
         .futureValue
 
-      v.fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a [UserEmailUpdatedEvent]
-          event should have (
-            'id        (user.email),
-            'version   (user.version + 1),
-            'email     (newEmail)
-          )
+      v shouldSucceed { event =>
+        event shouldBe a [UserEmailUpdatedEvent]
+        event should have (
+          'id        (user.email),
+          'version   (user.version + 1),
+          'email     (newEmail)
+        )
 
-          userRepository.getActive(UserId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoUser => checkTimeStamps(repoUser, user.addedDate, DateTime.now)
-          )
+        userRepository.getActive(UserId(event.id)) shouldSucceed { repoUser =>
+          checkTimeStamps(repoUser, user.addedDate, DateTime.now)
         }
-      )
+      }
     }
 
     "not update a user's email with an invalid version" in {
@@ -181,14 +150,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
 
       val cmd = UpdateUserEmailCmd(user.id.id, user.version - 1, newEmail)
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserEmailUpdatedEvent]].futureValue
-
-      v.fold(
-        err =>  {
-          err.list should have length 1
-          err.list.head should include ("expected version doesn't match current version")
-        },
-        event => fail("user's email should not be updated")
-      )
+      v shouldFail "expected version doesn't match current version"
     }
 
     "update a user's password" in {
@@ -203,25 +165,21 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val cmd = UpdateUserPasswordCmd(user.id.id, user.version, plainPassword, newPassword)
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserPasswordUpdatedEvent]].futureValue
 
-      v.fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a [UserPasswordUpdatedEvent]
-          event should have (
-            'id        (user.email),
-            'version   (user.version + 1)
-          )
+      v shouldSucceed { event =>
+        event shouldBe a [UserPasswordUpdatedEvent]
+        event should have (
+          'id        (user.email),
+          'version   (user.version + 1)
+        )
 
-          // password should be encrypted
-          event.password should not be(newPassword)
-          event.salt.length should be > 0
+        // password should be encrypted
+        event.password should not be(newPassword)
+        event.salt.length should be > 0
 
-          userRepository.getActive(UserId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoUser => checkTimeStamps(repoUser, user.addedDate, DateTime.now)
-          )
+        userRepository.getActive(UserId(event.id)) shouldSucceed { repoUser =>
+          checkTimeStamps(repoUser, user.addedDate, DateTime.now)
         }
-      )
+      }
     }
 
     "not update a user's password with an invalid version" in {
@@ -235,14 +193,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
 
       val cmd = UpdateUserPasswordCmd(user.id.id, user.version - 1, plainPassword, newPassword)
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserPasswordUpdatedEvent]].futureValue
-
-      v.fold(
-        err =>  {
-          err.list should have length 1
-          err.list.head should include ("expected version doesn't match current version")
-        },
-        event => fail("user's password should not be updated")
-      )
+      v shouldFail "expected version doesn't match current version"
     }
 
     "reset a user's password" in {
@@ -254,25 +205,21 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val cmd = ResetUserPasswordCmd(user.id.id, user.version)
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserPasswordResetEvent]].futureValue
 
-      v.fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a [UserPasswordResetEvent]
-          event should have (
-            'id        (user.email),
-            'version   (user.version + 1)
-          )
+      v shouldSucceed { event =>
+        event shouldBe a [UserPasswordResetEvent]
+        event should have (
+          'id        (user.email),
+          'version   (user.version + 1)
+        )
 
-          // password should be encrypted
-          event.password.length should be> 0
-          event.salt.length should be > 0
+        // password should be encrypted
+        event.password.length should be> 0
+        event.salt.length should be > 0
 
-          userRepository.getActive(UserId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoUser => checkTimeStamps(repoUser, user.addedDate, DateTime.now)
-          )
+        userRepository.getActive(UserId(event.id)) shouldSucceed { repoUser =>
+          checkTimeStamps(repoUser, user.addedDate, DateTime.now)
         }
-      )
+      }
     }
 
     "not reset a user's password with a invalid version" in {
@@ -283,14 +230,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
 
       val cmd = ResetUserPasswordCmd(user.id.id, user.version - 1)
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserPasswordResetEvent]].futureValue
-
-      v.fold(
-        err =>  {
-          err.list should have length 1
-          err.list.head should include ("expected version doesn't match current version")
-        },
-        event => fail("user's password should not be reset")
-      )
+      v shouldFail "expected version doesn't match current version"
     }
 
     "lock an activated a user" in {
@@ -301,18 +241,14 @@ class UsersProcessorSpec extends UsersProcessorFixture {
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
 
-      v.fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a[UserLockedEvent]
-          event.id should be(activeUser.email)
+      v shouldSucceed { event =>
+        event shouldBe a[UserLockedEvent]
+        event.id should be(activeUser.email)
 
-          userRepository.getLocked(UserId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoUser => checkTimeStamps(repoUser, activeUser.addedDate, DateTime.now)
-          )
+        userRepository.getLocked(UserId(event.id)) shouldSucceed { repoUser =>
+          checkTimeStamps(repoUser, activeUser.addedDate, DateTime.now)
         }
-      )
+      }
     }
 
     "not lock an activated a user with a bad version" in {
@@ -322,14 +258,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val v = ask(usersProcessor, LockUserCmd(activeUser.email, activeUser.version - 1))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
-
-      v.fold(
-        err =>  {
-          err.list should have length 1
-          err.list.head should include ("expected version doesn't match current version")
-        },
-        event => fail("user's password should not be locked")
-      )
+      v shouldFail "expected version doesn't match current version"
     }
 
     "unlock a locked a user" in {
@@ -340,18 +269,14 @@ class UsersProcessorSpec extends UsersProcessorFixture {
         .mapTo[DomainValidation[UserUnlockedEvent]]
         .futureValue
 
-      v.fold(
-        err => fail(err.list.mkString),
-        event => {
-          event shouldBe a[UserUnlockedEvent]
-          event.id should be(lockedUser.email)
+      v shouldSucceed { event =>
+        event shouldBe a[UserUnlockedEvent]
+        event.id should be(lockedUser.email)
 
-          userRepository.getActive(UserId(event.id)).fold(
-            err => fail(err.list.mkString),
-            repoUser => checkTimeStamps(repoUser, lockedUser.addedDate, DateTime.now)
-          )
+        userRepository.getActive(UserId(event.id)) shouldSucceed { repoUser =>
+          checkTimeStamps(repoUser, lockedUser.addedDate, DateTime.now)
         }
-      )
+      }
     }
 
     "not unlock a locked a user with a bad version" in {
@@ -361,14 +286,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val v = ask(usersProcessor, UnlockUserCmd(lockedUser.email, lockedUser.version - 1))
         .mapTo[DomainValidation[UserUnlockedEvent]]
         .futureValue
-
-      v.fold(
-        err =>  {
-          err.list should have length 1
-          err.list.head should include ("expected version doesn't match current version")
-        },
-        event => fail("user should not be unlocked")
-      )
+      v shouldFail "expected version doesn't match current version"
     }
 
     "not lock a registered user" in {
@@ -378,14 +296,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val v = ask(usersProcessor, LockUserCmd(user.email, 0L))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
-
-      v.fold(
-        err => {
-          err.list should have length 1
-          err.list.head should include ("not active")
-        },
-        event => fail("should not be able to lock a registered user")
-      )
+      v shouldFail "not active"
     }
 
     "not unlock a registered user" in {
@@ -395,14 +306,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val v = ask(usersProcessor, UnlockUserCmd(user.email, user.version))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
-
-      v.fold(
-        err => {
-          err.list should have length 1
-          err.list.head should include ("not locked")
-        },
-        event => fail("should not be able to unlock a registered user")
-      )
+      v shouldFail "not locked"
     }
 
     "not unlock an active user" in {
@@ -413,13 +317,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
 
-      v.fold(
-        err => {
-          err.list should have length 1
-          err.list.head should include ("not locked")
-        },
-        event => fail("should not be able to unlock an active user")
-      )
+      v shouldFail "not locked"
     }
 
   }

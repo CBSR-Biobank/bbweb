@@ -50,7 +50,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
         slType.annotationTypeData should have length (0)
 
-        (slType.addedDate to DateTime.now).millis should be < 100L
+        (slType.addedDate to DateTime.now).millis should be < 200L
         slType.lastUpdateDate should be (None)
       }
     }
@@ -70,9 +70,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = slType.update(
-        slType.versionOption, org.joda.time.DateTime.now, expectedInputChange, expectedOutputChange,
-        inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
-        annotationTypeData = List.empty)
+        expectedInputChange, expectedOutputChange, inputCount, outputCount,
+        inputSpecimenGroup.id, outputSpecimenGroup.id, annotationTypeData = List.empty)
       validation should be ('success)
       validation map { slType2 =>
         slType2 should have (
@@ -92,9 +91,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         slType.annotationTypeData should have length (0)
 
         slType2.addedDate should be (slType.addedDate)
-        val updateDate = slType2.lastUpdateDate | fail
-
-        (updateDate to DateTime.now).millis should be < 100L
+        slType2.lastUpdateDate should be (None)
       }
     }
 
@@ -120,7 +117,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("id is null or empty"))
+          err.list should (have length 1 and contain("ProcessingTypeIdRequired"))
       }
     }
 
@@ -142,7 +139,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("id is null or empty"))
+          err.list should (have length 1 and contain("IdRequired"))
       }
     }
 
@@ -164,7 +161,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("id is null or empty"))
+          err.list should (have length 1 and contain("SpecimenGroupIdRequired"))
       }
 
       specimenGroupIdIn = specimenGroupRepository.nextIdentity
@@ -176,7 +173,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("id is null or empty"))
+          err.list should (have length 1 and contain("SpecimenGroupIdRequired"))
       }
     }
 
@@ -198,7 +195,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("invalid version value: -2"))
+          err.list should (have length 1 and contain("InvalidVersion"))
       }
     }
 
@@ -220,7 +217,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("expected input change is not a positive number"))
+          err.list should (have length 1 and contain("InvalidPositiveNumber"))
       }
 
       expectedInputChange = BigDecimal(1.0)
@@ -232,7 +229,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("expected output change is not a positive number"))
+          err.list should (have length 1 and contain("InvalidPositiveNumber"))
       }
     }
 
@@ -254,7 +251,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("input count is not a positive number"))
+          err.list should (have length 1 and contain("InvalidPositiveNumber"))
       }
 
       inputCount = 1
@@ -265,7 +262,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("output count is not a positive number"))
+          err.list should (have length 1 and contain("InvalidPositiveNumber"))
       }
     }
 
@@ -289,7 +286,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
       validation should be('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("id is null or empty"))
+          err.list should (have length 1 and contain("ContainerTypeIdRequired"))
       }
 
       containerTypeIdIn = Some(ContainerTypeId("abc"))
@@ -300,7 +297,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
       validation2 should be('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("id is null or empty"))
+          err.list should (have length 1 and contain("ContainerTypeIdRequired"))
       }
     }
 
@@ -323,8 +320,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       validation should be ('failure)
       validation.swap.map { err =>
           err.list should have length 2
-          err.list(0) should be ("id is null or empty")
-          err.list(1) should be ("invalid version value: -2")
+          err.list(0) should be ("IdRequired")
+          err.list(1) should be ("InvalidVersion")
       }
     }
 
@@ -348,7 +345,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       validation should be('failure)
       validation.swap.map { err =>
         err.list should have length 1
-        err.list(0) should include ("id is null or empty")
+        err.list(0) should include ("IdRequired")
       }
     }
 

@@ -5,10 +5,10 @@ import org.biobank.domain.{
   ConcurrencySafeEntity,
   DomainValidation,
   HasUniqueName,
-  HasDescriptionOption
+  HasDescriptionOption,
+  ValidationKey
 }
 import org.biobank.domain.study._
-import org.biobank.domain.validation.StudyValidationHelper
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
@@ -39,7 +39,7 @@ import Scalaz._
   * @param preservationTemperatureType see [[PreservationTemperatureType]].
   * @param specimenType see [[SpecimenType]].
   */
-case class SpecimenGroup private (
+case class SpecimenGroup(
   studyId: StudyId,
   id: SpecimenGroupId,
   version: Long,
@@ -74,8 +74,6 @@ case class SpecimenGroup private (
         |}""".stripMargin
 
   def update(
-    expectedVersion: Option[Long],
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     units: String,
@@ -83,20 +81,24 @@ case class SpecimenGroup private (
     preservationType: PreservationType,
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedSpecimenGroup <- SpecimenGroup.create(
-        studyId, id, version, addedDate, name, description, units, anatomicalSourceType,
-        preservationType, preservationTemperatureType, specimenType)
-      updatedSpecimenGroup <- validatedSpecimenGroup.copy(lastUpdateDate = Some(dateTime)).success
-    } yield updatedSpecimenGroup
+    SpecimenGroup.create(
+      this.studyId, this.id, this.version, this.addedDate, name, description, units, anatomicalSourceType,
+      preservationType, preservationTemperatureType, specimenType)
   }
 }
+
+trait SpecimenGroupValidations {
+
+  case object UnitsRequired extends ValidationKey
+
+}
+
 
 /**
   * Factory object used to create a [[SpecimenGroup]].
   */
-object SpecimenGroup extends StudyValidationHelper {
+object SpecimenGroup extends SpecimenGroupValidations with StudyAnnotationTypeValidations {
+  import org.biobank.domain.CommonValidations._
 
   /**
     * The factory method to create a specimen group. Note that it increments the version number
@@ -122,9 +124,9 @@ object SpecimenGroup extends StudyValidationHelper {
     (validateId(studyId) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
-      validateNonEmpty(name, "name is null or empty") |@|
-      validateNonEmptyOption(description, "description is null or empty") |@|
-      validateNonEmpty(units, "units is null or empty")) {
+      validateString(name, NameRequired) |@|
+      validateNonEmptyOption(description, NonEmptyDescription) |@|
+      validateString(units, UnitsRequired)) {
       SpecimenGroup(_, _, _, dateTime, None, _, _, _, anatomicalSourceType, preservationType,
         preservationTemperatureType, specimenType)
     }

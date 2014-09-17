@@ -18,6 +18,7 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 
 import akka.persistence.SnapshotOffer
+import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
 
@@ -27,10 +28,13 @@ trait CollectionEventTypeProcessorComponent {
       with SpecimenGroupRepositoryComponent =>
 
   /**
-    * This is the Collection Event Type processor. It is a child actor of
-    * [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
+    * The CollectionEventTypeProcessor is responsible for maintaining state changes for all
+    * [[org.biobank.domain.study.CollectionEventType]] aggregates. This particular processor uses
+    * Akka-Persistence's [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist
+    * the generated events, afterwhich it will updated the current state of the
+    * [[org.biobank.domain.study.CollectionEventType]] being processed.
     *
-    * It handles commands that deal with a Collection Event Type.
+    * It is a child actor of [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
     */
   class CollectionEventTypeProcessor extends Processor {
 
@@ -38,11 +42,13 @@ trait CollectionEventTypeProcessorComponent {
 
     case class SnapshotState(collectionEventTypes: Set[CollectionEventType])
 
+    /**
+      * These are the events that are recovered during journal recovery. They cannot fail and must be
+      * processed to recreate the current state of the aggregate.
+      */
     val receiveRecover: Receive = {
       case event: CollectionEventTypeAddedEvent => recoverEvent(event)
-
       case event: CollectionEventTypeUpdatedEvent => recoverEvent(event)
-
       case event: CollectionEventTypeRemovedEvent => recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -50,130 +56,122 @@ trait CollectionEventTypeProcessorComponent {
           collectionEventTypeRepository.put(ceType) }
     }
 
-
+    /**
+      * These are the commands that are requested. A command can fail, and will send the failure as a response
+      * back to the user. Each valid command generates one or more events and is journaled.
+      */
     val receiveCommand: Receive = {
-
       case cmd: AddCollectionEventTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: UpdateCollectionEventTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: RemoveCollectionEventTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case _ =>
-        throw new Error("invalid message received")
+      case cmd => throw new Error(s"invalid message received: $cmd")
     }
 
-    private def validateCmd(
-      cmd: AddCollectionEventTypeCmd): DomainValidation[CollectionEventTypeAddedEvent] = {
+    def update
+      (cmd: CollectionEventTypeCommand)
+      (fn: CollectionEventType => DomainValidation[CollectionEventType])
+        : DomainValidation[CollectionEventType] = {
+      for {
+        cet <- collectionEventTypeRepository.withId(StudyId(cmd.studyId), CollectionEventTypeId(cmd.id))
+        validVersion <-  cet.requireVersion(cmd.expectedVersion)
+        updatedCet   <- fn(cet)
+      } yield updatedCet
+    }
 
+    private def validateCmd(cmd: AddCollectionEventTypeCmd)
+        : DomainValidation[CollectionEventTypeAddedEvent] = {
+      val timeNow = DateTime.now
       val studyId = StudyId(cmd.studyId)
       val id = collectionEventTypeRepository.nextIdentity
 
       for {
         nameValid <- nameAvailable(cmd.name)
         newItem <- CollectionEventType.create(
-          studyId, id, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.recurring,
+          studyId, id, -1L, timeNow, cmd.name, cmd.description, cmd.recurring,
           cmd.specimenGroupData, cmd.annotationTypeData)
         validSgData <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
         validAtData <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
         event <- CollectionEventTypeAddedEvent(
-          cmd.studyId, id.id, newItem.addedDate, newItem.name, newItem.description,
+          cmd.studyId, id.id, timeNow, newItem.name, newItem.description,
           newItem.recurring, newItem.specimenGroupData, newItem.annotationTypeData).success
       } yield event
     }
 
     private def validateCmd(
       cmd: UpdateCollectionEventTypeCmd): DomainValidation[CollectionEventTypeUpdatedEvent] = {
+      val timeNow = DateTime.now
       val studyId = StudyId(cmd.studyId)
-      val id = CollectionEventTypeId(cmd.id)
+      val v = update(cmd) { cet =>
+        for {
+          nameAvailable <- nameAvailable(cmd.name, CollectionEventTypeId(cmd.id))
+          validSgData <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
+          validAtData <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
+          newItem <- cet.update(
+            cmd.name, cmd.description, cmd.recurring, cmd.specimenGroupData, cmd.annotationTypeData)
+        } yield newItem
+      }
 
-      for {
-        oldItem <- collectionEventTypeRepository.withId(studyId,id)
-        nameValid <- nameAvailable(cmd.name, id)
-        newItem <- oldItem.update(
-         Some(cmd.expectedVersion), org.joda.time.DateTime.now, cmd.name,
-          cmd.description, cmd.recurring, cmd.specimenGroupData, cmd.annotationTypeData)
-        validSgData <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
-        validAtData <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
-        event <- CollectionEventTypeUpdatedEvent(
-          cmd.studyId, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, newItem.name,
-          newItem.description, newItem.recurring, newItem.specimenGroupData,
-          newItem.annotationTypeData).success
-      } yield event
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        cet => CollectionEventTypeUpdatedEvent(
+          cmd.studyId, cet.id.id, cet.version, timeNow, cet.name, cet.description,
+          cet.recurring, cet.specimenGroupData, cet.annotationTypeData).success
+      )
     }
 
     private def validateCmd(
       cmd: RemoveCollectionEventTypeCmd): DomainValidation[CollectionEventTypeRemovedEvent] = {
-      val studyId = StudyId(cmd.studyId)
-      val id = CollectionEventTypeId(cmd.id)
+      val v = update(cmd) { at => at.success }
 
-      for {
-        item <- collectionEventTypeRepository.withId(studyId, id)
-        validVersion <- validateVersion(item,Some(cmd.expectedVersion))
-        event <- CollectionEventTypeRemovedEvent(cmd.studyId, cmd.id).success
-      } yield event
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        cet =>  CollectionEventTypeRemovedEvent(cet.studyId.id, cet.id.id).success
+      )
     }
 
     private def recoverEvent(event: CollectionEventTypeAddedEvent): Unit = {
-      val studyId = StudyId(event.studyId)
-      val validation = for {
-        newItem <- CollectionEventType.create(
-          studyId, CollectionEventTypeId(event.collectionEventTypeId), -1L, event.dateTime,
-          event.name, event.description, event.recurring, event.specimenGroupData,
-          event.annotationTypeData)
-        savedItem <- collectionEventTypeRepository.put(newItem).success
-      } yield newItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering collection event type from event failed")
-      }
+      collectionEventTypeRepository.put(CollectionEventType(
+        StudyId(event.studyId), CollectionEventTypeId(event.collectionEventTypeId), 0L, event.dateTime, None,
+        event.name, event.description, event.recurring, event.specimenGroupData,
+        event.annotationTypeData))
+      ()
     }
 
     private def recoverEvent(event: CollectionEventTypeUpdatedEvent): Unit = {
-      val validation = for {
-        item <- collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.collectionEventTypeId))
-        updatedItem <- item.update(
-          item.versionOption, event.dateTime, event.name,
-          event.description, event.recurring, event.specimenGroupData, event.annotationTypeData)
-        savedItem <- collectionEventTypeRepository.put(updatedItem).success
-      } yield updatedItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        val err = validation.swap.getOrElse(List.empty)
-        throw new IllegalStateException(
-          s"recovering collection event type update from event failed: $err")
-      }
+      collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.collectionEventTypeId)).fold(
+        err => throw new IllegalStateException(s"updating collection event type from event failed: $err"),
+        cet => collectionEventTypeRepository.put(cet.copy(
+          version            = event.version,
+          lastUpdateDate     = Some(event.dateTime),
+          name               = event.name,
+          description        = event.description,
+          recurring          = event.recurring,
+          specimenGroupData  = event.specimenGroupData,
+          annotationTypeData = event.annotationTypeData
+        ))
+      )
+      ()
     }
 
     private def recoverEvent(event: CollectionEventTypeRemovedEvent): Unit = {
-      val validation = for {
-        item <- collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.collectionEventTypeId))
-        removedItem <- collectionEventTypeRepository.remove(item).success
-      } yield removedItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        val err = validation.swap.getOrElse(List.empty)
-        throw new IllegalStateException(
-          s"recovering collection event type remove from event failed: $err")
-      }
+      collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.collectionEventTypeId)).fold(
+        err => throw new IllegalStateException(s"updating collection event type from event failed: $err"),
+        cet => collectionEventTypeRepository.remove(cet)
+      )
+      ()
     }
 
-    val errMsgNameExists = "collection event type with name already exists"
+    val ErrMsgNameExists = "collection event type with name already exists"
 
     private def nameAvailable(name: String): DomainValidation[Boolean] = {
-      nameAvailableMatcher(name, collectionEventTypeRepository, errMsgNameExists) { item =>
+      nameAvailableMatcher(name, collectionEventTypeRepository, ErrMsgNameExists) { item =>
         item.name.equals(name)
       }
     }
 
     private def nameAvailable(name: String, excludeId: CollectionEventTypeId): DomainValidation[Boolean] = {
-      nameAvailableMatcher(name, collectionEventTypeRepository, errMsgNameExists){ item =>
+      nameAvailableMatcher(name, collectionEventTypeRepository, ErrMsgNameExists){ item =>
         item.name.equals(name) && (item.id != excludeId)
       }
     }

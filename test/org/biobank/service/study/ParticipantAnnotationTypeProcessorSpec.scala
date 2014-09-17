@@ -8,12 +8,19 @@ import org.biobank.infrastructure.event.StudyEvents._
 
 import org.slf4j.LoggerFactory
 import akka.pattern.ask
+import org.scalatest.OptionValues._
 import org.scalatest.Tag
 import org.scalatest.BeforeAndAfterEach
+import org.joda.time.DateTime
 import scalaz._
 import Scalaz._
 
+/**
+  * Tests for actor ParticipantAnnotationTypeProcessorSpec. These are written using ScalaTest.
+  *
+  */
 class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
+  import org.biobank.TestUtils._
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
@@ -36,12 +43,11 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = AddParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options, false)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue
 
-      validation should be('success)
-      validation map { event =>
+      v shouldSucceed { event =>
         event shouldBe a[ParticipantAnnotationTypeAddedEvent]
         event should have(
           'studyId (annotType.studyId.id),
@@ -51,19 +57,18 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
           'maxValueCount (annotType.maxValueCount)
         )
 
-        val options = event.options map { eventOptions =>
-          val annotTypeOptions = annotType.options | fail
-          eventOptions should have size annotTypeOptions.size
-          // verify each option
-          annotTypeOptions.map { item =>
-            eventOptions should contain (item)
-          }
+        event.options should not be (None)
+        event.options.value should have size annotType.options.value.size
+        annotType.options.value.map { item =>
+          event.options.value should contain (item)
         }
 
-        val at = participantAnnotationTypeRepository.withId(
-          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
-        at.version should be(0)
         participantAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
+        participantAnnotationTypeRepository.withId(
+          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) shouldSucceed { at =>
+          at.version should be(0)
+          checkTimeStamps(at, DateTime.now, None)
+        }
       }
     }
 
@@ -74,15 +79,11 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = AddParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options, false)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue
 
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include regex s"${study2.id.id}.*not found"
-      }
+      v shouldFail s"${study2.id.id}.*not found"
     }
 
     "not add a participant annotation type if the name already exists" in {
@@ -92,15 +93,11 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = AddParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options, true)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue
 
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include("name already exists")
-      }
+      v  shouldFail "name already exists"
     }
 
     "update a participant annotation type" in {
@@ -112,12 +109,11 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = UpdateParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version, annotType2.name,
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
 
-      validation should be('success)
-      validation map { event =>
+      v shouldSucceed { event =>
         event shouldBe a[ParticipantAnnotationTypeUpdatedEvent]
         event should have(
           'studyId (annotType.studyId.id),
@@ -128,19 +124,19 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
           'maxValueCount (annotType2.maxValueCount)
         )
 
-        val options = event.options map { eventOptions =>
-          val annotTypeOptions = annotType2.options | fail
-          eventOptions should have size annotTypeOptions.size
-          // verify each option
-          annotTypeOptions.map { item =>
-            eventOptions should contain (item)
-          }
+        event.options should not be (None)
+        event.options.value should have size annotType2.options.value.size
+        // verify each option
+        annotType2.options.value.map { item =>
+          event.options.value should contain (item)
         }
 
-        val at = participantAnnotationTypeRepository.withId(
-          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
-        at.version should be(1)
         participantAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
+        participantAnnotationTypeRepository.withId(
+          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) shouldSucceed { at =>
+          at.version should be(1)
+          checkTimeStamps(at, annotType.addedDate, DateTime.now)
+        }
       }
     }
 
@@ -156,15 +152,11 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = UpdateParticipantAnnotationTypeCmd(
         annotType2.studyId.id, annotType2.id.id, annotType2.version, dupliacteName,
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
 
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include("name already exists")
-      }
+      v shouldFail "name already exists"
     }
 
     "not update a participant annotation type to the wrong study" in {
@@ -177,14 +169,11 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = UpdateParticipantAnnotationTypeCmd(
         study2.id.id, annotType.id.id, annotType.version, annotType.name,
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
 
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include("study does not have annotation type") }
+      v shouldFail "study does not have annotation type"
     }
 
     "not update a participant annotation type with an invalid version" in {
@@ -194,15 +183,11 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = UpdateParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version - 1, annotType.name,
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
 
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include("doesn't match current version")
-      }
+      v shouldFail "doesn't match current version"
     }
 
     "remove a participant annotation type" in {
@@ -211,12 +196,15 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
 
       val cmd = RemoveParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
         .futureValue
 
-      validation should be('success)
-      validation map { event => event shouldBe a[ParticipantAnnotationTypeRemovedEvent] }
+      v shouldSucceed { event =>
+        event shouldBe a[ParticipantAnnotationTypeRemovedEvent]
+        event.studyId should be (annotType.studyId.id)
+        event.annotationTypeId should be (annotType.id.id)
+      }
     }
 
     "not remove a participant annotation type with invalid version" in {
@@ -225,15 +213,11 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
 
       val cmd = RemoveParticipantAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version - 1)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
         .futureValue
 
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include("version mismatch")
-      }
+      v shouldFail "expected version doesn't match current version"
     }
 
   }

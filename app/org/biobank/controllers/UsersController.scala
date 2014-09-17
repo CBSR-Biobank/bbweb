@@ -93,7 +93,7 @@ object UsersController extends CommandController with JsonController {
           validation.fold(
             err => {
               val errStr = err.list.mkString(", ")
-              if (errStr.contains("does not exist")) {
+              if (errStr.contains("not found")) {
                 NotFound("email address not registered")
               } else if (errStr.contains("not active")) {
                 Forbidden("user is not active")

@@ -16,7 +16,6 @@ import org.biobank.domain.AnnotationValueType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
-import org.biobank.domain.validation.StudyValidationHelper
 import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._

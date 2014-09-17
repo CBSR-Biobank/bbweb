@@ -1,7 +1,6 @@
 package org.biobank.domain.study
 
 import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
-import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
 import org.biobank.domain.AnnotationValueType._
 import org.biobank.infrastructure.JsonUtils._
 import org.biobank.infrastructure.event.StudyEvents._
@@ -15,7 +14,7 @@ import scalaz.Scalaz._
 /** Used to add custom annotations to collection events. The study can define multiple
   * annotation types on collection events to store different types of data.
   */
-case class CollectionEventAnnotationType private (
+case class CollectionEventAnnotationType (
   studyId: StudyId,
   id: AnnotationTypeId,
   version: Long,
@@ -26,7 +25,8 @@ case class CollectionEventAnnotationType private (
   valueType: AnnotationValueType,
   maxValueCount: Option[Int],
   options: Option[Seq[String]])
-  extends StudyAnnotationType {
+    extends StudyAnnotationType
+    with StudyAnnotationTypeValidations {
 
   override def toString: String =
     s"""|CollectionEventAnnotationType:{
@@ -43,24 +43,19 @@ case class CollectionEventAnnotationType private (
         }""".stripMargin
 
   def update(
-    expectedVersion: Option[Long],
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
     options: Option[Seq[String]] = None): DomainValidation[CollectionEventAnnotationType] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedAnnotationType <- CollectionEventAnnotationType.create(
-        studyId, id, version, addedDate, name, description, valueType, maxValueCount, options)
-      updatedAnnotationType <- validatedAnnotationType.copy(lastUpdateDate = Some(dateTime)).success
-    } yield updatedAnnotationType
+    CollectionEventAnnotationType.create(
+      this.studyId, this.id, this.version, this.addedDate, name, description, valueType, maxValueCount, options)
   }
 }
 
 
-object CollectionEventAnnotationType extends StudyAnnotationTypeValidationHelper {
+object CollectionEventAnnotationType extends StudyAnnotationTypeValidations {
+  import org.biobank.domain.CommonValidations._
 
   def create(
     studyId: StudyId,
@@ -72,11 +67,11 @@ object CollectionEventAnnotationType extends StudyAnnotationTypeValidationHelper
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
     options: Option[Seq[String]] = None): DomainValidation[CollectionEventAnnotationType] = {
-    (validateId(studyId) |@|
+    (validateId(studyId, StudyIdRequired) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
-      validateNonEmpty(name, "name is null or empty") |@|
-      validateNonEmptyOption(description, "description is null or empty") |@|
+      validateString(name, NameRequired) |@|
+      validateNonEmptyOption(description, NonEmptyDescription) |@|
       validateMaxValueCount(maxValueCount) |@|
       validateOptions(options)) {
         CollectionEventAnnotationType(_, _, _, dateTime, None, _, _, valueType, _, _)

@@ -7,7 +7,6 @@ import org.biobank.domain.{
   HasUniqueName,
   HasDescriptionOption
 }
-import org.biobank.domain.validation.StudyValidationHelper
 import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
@@ -27,7 +26,7 @@ import scalaz.Scalaz._
   *         decided to stop a processing type in favour of another.  In this case enabled is set to false.
   *
   */
-case class ProcessingType private (
+case class ProcessingType(
   studyId: StudyId,
   id: ProcessingTypeId,
   version: Long,
@@ -44,16 +43,10 @@ case class ProcessingType private (
   /** Updates a processing type with new values.
     */
   def update(
-    expectedVersion: Option[Long],
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     enabled: Boolean): DomainValidation[ProcessingType] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedItem <- ProcessingType.create(studyId, id, version, addedDate, name, description, enabled)
-      newItem <- validatedItem.copy(lastUpdateDate = Some(dateTime)).success
-    } yield newItem
+    ProcessingType.create(this.studyId, this.id, this.version, this.addedDate, name, description, enabled)
   }
 
   override def toString: String =
@@ -69,7 +62,8 @@ case class ProcessingType private (
         |}""".stripMargin
 }
 
-object ProcessingType extends StudyValidationHelper {
+object ProcessingType {
+  import org.biobank.domain.CommonValidations._
 
   def create(
     studyId: StudyId,
@@ -82,8 +76,8 @@ object ProcessingType extends StudyValidationHelper {
     (validateId(studyId) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
-      validateNonEmpty(name, "name is null or empty") |@|
-      validateNonEmptyOption(description, "description is null or empty")) {
+      validateString(name, NameRequired) |@|
+      validateNonEmptyOption(description, NonEmptyDescription) ) {
       ProcessingType(_, _, _, dateTime, None, _, _, enabled)
     }
   }

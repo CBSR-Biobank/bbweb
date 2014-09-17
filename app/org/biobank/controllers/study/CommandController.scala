@@ -90,7 +90,7 @@ trait JsonController extends Controller {
       validation.fold(
         err   => {
           val errMsgs = err.list.mkString(", ")
-          if (errMsgs.contains("not found")) {
+          if ("no (centre|location) with id".r.findAllIn(errMsgs).length > 0) {
             NotFound(errMsgs)
           } else if (errMsgs.contains("already exists")) {
             Forbidden(errMsgs)

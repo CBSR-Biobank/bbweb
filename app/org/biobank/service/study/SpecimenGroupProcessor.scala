@@ -21,6 +21,7 @@ import org.biobank.domain.study.{
   StudyId }
 
 import akka.persistence.SnapshotOffer
+import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
 
@@ -30,8 +31,13 @@ trait SpecimenGroupProcessorComponent {
       with SpecimenLinkTypeRepositoryComponent =>
 
   /**
-    * This is the Specimen Group processor. It is a child actor of
-    *  [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
+    * The SpecimenGroupProcessor is responsible for maintaining state changes for all
+    * [[org.biobank.domain.study.SpecimenGroup]] aggregates. This particular processor uses Akka-Persistence's
+    * [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist the generated
+    * events, afterwhich it will updated the current state of the [[org.biobank.domain.study.SpecimenGroup]]
+    * being processed.
+    *
+    * It is a child actor of  [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
     *
     * It handles commands that deal with a Specimen Group.
     *
@@ -42,6 +48,10 @@ trait SpecimenGroupProcessorComponent {
 
     case class SnapshotState(specimenGroups: Set[SpecimenGroup])
 
+    /**
+      * These are the events that are recovered during journal recovery. They cannot fail and must be
+      * processed to recreate the current state of the aggregate.
+      */
     val receiveRecover: Receive = {
       case event: SpecimenGroupAddedEvent => recoverEvent(event)
 
@@ -53,6 +63,10 @@ trait SpecimenGroupProcessorComponent {
         snapshot.specimenGroups.foreach{ specimenGroup => specimenGroupRepository.put(specimenGroup) }
     }
 
+    /**
+      * These are the commands that are requested. A command can fail, and will send the failure as a response
+      * back to the user. Each valid command generates one or more events and is journaled.
+      */
     val receiveCommand: Receive = {
       case cmd: AddSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
@@ -63,7 +77,20 @@ trait SpecimenGroupProcessorComponent {
       case _ => throw new IllegalStateException("invalid command received")
     }
 
+    def update
+      (cmd: SpecimenGroupCommand)
+      (fn: SpecimenGroup => DomainValidation[SpecimenGroup])
+        : DomainValidation[SpecimenGroup] = {
+      for {
+        sg <- specimenGroupRepository.withId(StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
+        notInUse <- checkNotInUse(sg.studyId, sg.id)
+        validVersion <- sg.requireVersion(cmd.expectedVersion)
+        updatedSg <- fn(sg)
+      } yield updatedSg
+    }
+
     private def validateCmd(cmd: AddSpecimenGroupCmd): DomainValidation[SpecimenGroupAddedEvent] = {
+      val timeNow = DateTime.now
       val sgId = specimenGroupRepository.nextIdentity
 
       if (specimenGroupRepository.getByKey(sgId).isSuccess) {
@@ -73,11 +100,11 @@ trait SpecimenGroupProcessorComponent {
       for {
         nameValid <- nameAvailable(cmd.name)
         newItem <-SpecimenGroup.create(
-          StudyId(cmd.studyId), sgId, -1, org.joda.time.DateTime.now, cmd.name, cmd.description,
+          StudyId(cmd.studyId), sgId, -1, timeNow, cmd.name, cmd.description,
           cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
           cmd.preservationTemperatureType, cmd.specimenType)
         newEvent <- SpecimenGroupAddedEvent(
-          newItem.studyId.id, newItem.id.id, newItem.addedDate, newItem.name, newItem.description,
+          newItem.studyId.id, newItem.id.id, timeNow, newItem.name, newItem.description,
           newItem.units, newItem.anatomicalSourceType, newItem.preservationType,
           newItem.preservationTemperatureType, newItem.specimenType).success
       } yield newEvent
@@ -85,91 +112,75 @@ trait SpecimenGroupProcessorComponent {
 
     private def validateCmd(
       cmd: UpdateSpecimenGroupCmd): DomainValidation[SpecimenGroupUpdatedEvent] = {
+      val timeNow = DateTime.now
       val studyId = StudyId(cmd.studyId)
       val specimenGroupId = SpecimenGroupId(cmd.id)
 
-      for {
-        nameValid <- nameAvailable(cmd.name, specimenGroupId)
-        oldItem <- specimenGroupRepository.withId(studyId, specimenGroupId)
-        notInUse <- checkNotInUse(studyId, oldItem.id)
-        newItem <- oldItem.update(
-         Some(cmd.expectedVersion), org.joda.time.DateTime.now, cmd.name, cmd.description, cmd.units,
-          cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
-          cmd.specimenType)
-        newEvent <- SpecimenGroupUpdatedEvent(
-          cmd.studyId, newItem.id.id, newItem.version, newItem.lastUpdateDate.get, cmd.name, cmd.description,
+      val v = update(cmd) { sg =>
+        for {
+          nameAvailable <- nameAvailable(cmd.name, specimenGroupId)
+          updatedSg <- sg.update(
+            cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
+            cmd.preservationTemperatureType, cmd.specimenType)
+        } yield updatedSg
+      }
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        sg => SpecimenGroupUpdatedEvent(
+          cmd.studyId, sg.id.id, sg.version, timeNow, cmd.name, cmd.description,
           cmd.units, cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
           cmd.specimenType).success
-      } yield newEvent
+      )
     }
 
     private def validateCmd(
       cmd: RemoveSpecimenGroupCmd): DomainValidation[SpecimenGroupRemovedEvent] = {
-      val studyId = StudyId(cmd.studyId)
+      val v = update(cmd) { sg => sg.success }
 
-      for {
-        item <- specimenGroupRepository.withId(studyId, SpecimenGroupId(cmd.id))
-        notInUse <- checkNotInUse(studyId, item.id)
-        validVersion <- validateVersion(item,Some(cmd.expectedVersion))
-        newEvent <- SpecimenGroupRemovedEvent(item.studyId.id, item.id.id).success
-      } yield newEvent
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        sg =>  SpecimenGroupRemovedEvent(sg.studyId.id, sg.id.id).success
+      )
     }
 
     private def recoverEvent(event: SpecimenGroupAddedEvent): Unit = {
-      val studyId = StudyId(event.studyId)
-      val validation = for {
-        newItem <- SpecimenGroup.create(
-          studyId, SpecimenGroupId(event.specimenGroupId), -1, event.dateTime, event.name,
-          event.description, event.units, event.anatomicalSourceType, event.preservationType,
-          event.preservationTemperatureType, event.specimenType)
-        savedItem <- specimenGroupRepository.put(newItem).success
-      } yield newItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering specimen group from event failed")
-      }
+      specimenGroupRepository.put(SpecimenGroup(
+        StudyId(event.studyId), SpecimenGroupId(event.specimenGroupId), 0L, event.dateTime, None,
+        event.name, event.description, event.units, event.anatomicalSourceType, event.preservationType,
+        event.preservationTemperatureType, event.specimenType
+      ))
+      ()
     }
 
     private def recoverEvent(event: SpecimenGroupUpdatedEvent): Unit = {
-      val validation = for {
-        item <- specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId))
-        updatedItem <- item.update(
-          item.versionOption, event.dateTime, event.name, event.description, event.units,
-          event.anatomicalSourceType, event.preservationType, event.preservationTemperatureType,
-          event.specimenType)
-        savedItem <- specimenGroupRepository.put(updatedItem).success
-      } yield updatedItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        val err = validation.swap.getOrElse(List.empty)
-        throw new IllegalStateException(
-          s"recovering specimen group update from event failed: $err")
-      }
+      specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId)).fold(
+        err => throw new IllegalStateException(s"updating annotation type from event failed: $err"),
+        sg => specimenGroupRepository.put(sg.copy(
+          version                     = event.version,
+          lastUpdateDate              = Some(event.dateTime),
+          name                        = event.name,
+          description                 = event.description,
+          units                       = event.units,
+          anatomicalSourceType        = event.anatomicalSourceType,
+          preservationType            = event.preservationType,
+          preservationTemperatureType = event.preservationTemperatureType,
+          specimenType                = event.specimenType))
+      )
+      ()
     }
 
     private def recoverEvent(event: SpecimenGroupRemovedEvent): Unit = {
-      val validation = for {
-        item <- specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId))
-        removedItem <- specimenGroupRepository.remove(item).success
-      } yield removedItem
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        val err = validation.swap.getOrElse(List.empty)
-        throw new IllegalStateException(
-          s"recovering specimen group remove from event failed: $err")
-      }
+      specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId)).fold(
+        err => throw new IllegalStateException(s"updating annotation type from event failed: $err"),
+        sg => specimenGroupRepository.remove(sg)
+      )
+      ()
     }
 
-    val errMsgNameExists = "specimen group with name already exists"
+    val ErrMsgNameExists = "specimen group with name already exists"
 
     private def nameAvailable(specimenGroupName: String): DomainValidation[Boolean] = {
-      nameAvailableMatcher(specimenGroupName, specimenGroupRepository, errMsgNameExists) { item =>
+      nameAvailableMatcher(specimenGroupName, specimenGroupRepository, ErrMsgNameExists) { item =>
         item.name.equals(specimenGroupName)
       }
     }
@@ -177,7 +188,7 @@ trait SpecimenGroupProcessorComponent {
     private def nameAvailable(
       specimenGroupName: String,
       id: SpecimenGroupId): DomainValidation[Boolean] = {
-      nameAvailableMatcher(specimenGroupName, specimenGroupRepository, errMsgNameExists) { item =>
+      nameAvailableMatcher(specimenGroupName, specimenGroupRepository, ErrMsgNameExists) { item =>
         item.name.equals(specimenGroupName) && (item.id != id)
       }
     }

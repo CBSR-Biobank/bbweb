@@ -7,13 +7,20 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 
 import org.slf4j.LoggerFactory
+import org.joda.time.DateTime
 import akka.pattern.ask
+import org.scalatest.OptionValues._
 import org.scalatest.Tag
 import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
+/**
+  * Tests for actor SpecimenLinkAnnotationTypeProcessorSpec. These are written using ScalaTest.
+  *
+  */
 class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
+  import org.biobank.TestUtils._
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
@@ -36,12 +43,11 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = AddSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]]
         .futureValue
 
-      validation should be('success)
-      validation map { event =>
+      v shouldSucceed { event =>
         event shouldBe a[SpecimenLinkAnnotationTypeAddedEvent]
         event should have(
           'studyId (annotType.studyId.id),
@@ -51,19 +57,18 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
           'maxValueCount (annotType.maxValueCount)
         )
 
-        val options = event.options map { eventOptions =>
-          val annotTypeOptions = annotType.options | fail
-          eventOptions should have size annotTypeOptions.size
-          // verify each option
-          annotTypeOptions.map { item =>
-            eventOptions should contain (item)
-          }
+        event.options should not be (None)
+        event.options.value should have size annotType.options.value.size
+        annotType.options.value.map { item =>
+          event.options.value should contain (item)
         }
 
-        val at = specimenLinkAnnotationTypeRepository.withId(
-          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
-        at.version should be(0)
         specimenLinkAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
+        specimenLinkAnnotationTypeRepository.withId(
+          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) shouldSucceed { at =>
+          at.version should be(0)
+          checkTimeStamps(at, DateTime.now, None)
+        }
       }
     }
 
@@ -74,15 +79,10 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = AddSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]]
         .futureValue
-
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include regex s"${study2.id.id}.*not found"
-      }
+       v shouldFail s"${study2.id.id}.*not found"
     }
 
     "not add a specimen link annotation type if the name already exists" in {
@@ -92,15 +92,10 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = AddSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]]
         .futureValue
-
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include("name already exists")
-      }
+      v shouldFail "name already exists"
     }
 
     "update a specimen link annotation type" in {
@@ -112,12 +107,11 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version, annotType2.name,
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
 
-      validation should be('success)
-      validation map { event =>
+      v shouldSucceed { event =>
         event shouldBe a[SpecimenLinkAnnotationTypeUpdatedEvent]
         event should have(
           'studyId (annotType.studyId.id),
@@ -128,19 +122,19 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
           'maxValueCount (annotType2.maxValueCount)
         )
 
-        val options = event.options map { eventOptions =>
-          val annotTypeOptions = annotType2.options | fail
-          eventOptions should have size annotTypeOptions.size
-          // verify each option
-          annotTypeOptions.map { item =>
-            eventOptions should contain (item)
-          }
+        event.options should not be (None)
+        event.options.value should have size annotType2.options.value.size
+        // verify each option
+        annotType2.options.value.map { item =>
+          event.options.value should contain (item)
         }
 
-        val at = specimenLinkAnnotationTypeRepository.withId(
-          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) | fail
-        at.version should be(1)
         specimenLinkAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
+        specimenLinkAnnotationTypeRepository.withId(
+          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) shouldSucceed { at =>
+          at.version should be(1)
+          checkTimeStamps(at, annotType.addedDate, DateTime.now)
+        }
       }
     }
 
@@ -156,15 +150,10 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
         annotType2.studyId.id, annotType2.id.id, annotType2.version, dupliacteName,
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
-
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include("name already exists")
-      }
+      v shouldFail "name already exists"
     }
 
     "not update a specimen link annotation type to the wrong study" in {
@@ -177,14 +166,10 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
         study2.id.id, annotType.id.id, annotType.version, annotType.name,
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
-
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include("study does not have annotation type") }
+      v shouldFail "study does not have annotation type"
     }
 
     "not update a specimen link annotation type with an invalid version" in {
@@ -194,15 +179,10 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version - 1, annotType.name,
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
-
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include("doesn't match current version")
-      }
+      v shouldFail "doesn't match current version"
     }
 
     "remove a specimen link annotation type" in {
@@ -211,12 +191,15 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
 
       val cmd = RemoveSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
         .futureValue
 
-      validation should be('success)
-      validation map { event => event shouldBe a[SpecimenLinkAnnotationTypeRemovedEvent] }
+      v shouldSucceed { event =>
+        event shouldBe a[SpecimenLinkAnnotationTypeRemovedEvent]
+        event.studyId should be (annotType.studyId.id)
+        event.annotationTypeId should be (annotType.id.id)
+      }
     }
 
     "not remove a specimen link annotation type with invalid version" in {
@@ -225,15 +208,10 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
 
       val cmd = RemoveSpecimenLinkAnnotationTypeCmd(
         annotType.studyId.id, annotType.id.id, annotType.version - 1)
-      val validation = ask(studiesProcessor, cmd)
+      val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
         .futureValue
-
-      validation should be('failure)
-      validation.swap map { err =>
-        err.list should have length 1
-        err.list.head should include("version mismatch")
-      }
+      v shouldFail "expected version doesn't match current version"
     }
 
   }

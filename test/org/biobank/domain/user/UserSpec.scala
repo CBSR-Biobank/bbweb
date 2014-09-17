@@ -108,7 +108,7 @@ class UserSpec extends DomainSpec {
 
       RegisteredUser.create(
         id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list should (have length 1 and contain("invalid version value: -2")),
+        err => err.list should (have length 1 and contain("InvalidVersion")),
         user => fail("version validation failed")
       )
     }
@@ -144,7 +144,7 @@ class UserSpec extends DomainSpec {
         id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => {
           err.list should have length 1
-          err.list.head should include("email invalid")
+          err.list.head should include("InvalidEmail")
         },
         user => fail("name validation failed")
       )
@@ -164,7 +164,7 @@ class UserSpec extends DomainSpec {
         id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => {
           err.list should have length 1
-          err.list.head should include("email invalid")
+          err.list.head should include("InvalidEmail")
         },
         user => fail("name validation failed")
       )
@@ -216,7 +216,7 @@ class UserSpec extends DomainSpec {
       RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => {
           err.list should have length 1
-          err.list.head should include("invalid avatar url")
+          err.list.head should include("InvalidUrl")
         },
         user => fail("user avaltar url validation failed")
       )
@@ -273,7 +273,7 @@ class UserSpec extends DomainSpec {
       RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => {
           err.list should have length 2
-          err.list.head should be ("invalid version value: -2")
+          err.list.head should be ("InvalidVersion")
           err.list.tail.head should be ("NameRequired")
         },
         user => fail

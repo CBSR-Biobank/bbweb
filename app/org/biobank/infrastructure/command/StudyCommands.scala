@@ -373,7 +373,16 @@ object StudyCommands {
       with HasExpectedVersion
 
   // specimen link type commands
-  trait SpecimenLinkTypeCommand extends StudyCommand with HasProcessingTypeIdentity
+  trait SpecimenLinkTypeCommand extends StudyCommand with HasProcessingTypeIdentity {
+
+    /** the id of the processing type the specimen link type belongs to. */
+    val processingTypeId: String
+
+    /** The id for the specimen link type. */
+    val id: String
+
+  }
+
 
   case class AddSpecimenLinkTypeCmd(
     processingTypeId: String,

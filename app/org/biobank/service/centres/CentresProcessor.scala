@@ -16,6 +16,7 @@ import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 
 import akka.actor. { ActorRef, Props }
+import org.joda.time.DateTime
 import akka.pattern.ask
 import org.slf4j.LoggerFactory
 import akka.persistence.SnapshotOffer
@@ -67,6 +68,7 @@ trait CentresProcessorComponent {
     }
 
     private def validateCmd(cmd: AddCentreCmd): DomainValidation[CentreAddedEvent] = {
+      val timeNow = DateTime.now
       val centreId = centreRepository.nextIdentity
 
       if (centreRepository.getByKey(centreId).isSuccess) {
@@ -75,150 +77,121 @@ trait CentresProcessorComponent {
 
       for {
         nameAvailable <- nameAvailable(cmd.name)
-        newCentre <- DisabledCentre.create(
-          centreId, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description)
-        event <- CentreAddedEvent(
-          newCentre.id.id, newCentre.addedDate, newCentre.name, newCentre.description).success
+        newCentre <- DisabledCentre.create(centreId, -1L, timeNow, cmd.name, cmd.description)
+        event <- CentreAddedEvent(newCentre.id.id, timeNow, newCentre.name, newCentre.description).success
       } yield event
     }
 
     private def validateCmd(cmd: UpdateCentreCmd): DomainValidation[CentreUpdatedEvent] = {
-      val centreId = CentreId(cmd.id)
-      for {
-        nameAvailable <- nameAvailable(cmd.name, centreId)
-        prevCentre <- isCentreDisabled(centreId)
-        updatedCentre <- prevCentre.update(
-          Some(cmd.expectedVersion), org.joda.time.DateTime.now, cmd.name, cmd.description)
-        event <- CentreUpdatedEvent(
-          cmd.id, updatedCentre.version, updatedCentre.lastUpdateDate.get, updatedCentre.name,
-          updatedCentre.description).success
-      } yield event
+      val timeNow = DateTime.now
+      val v = updateDisabled(cmd) { centre =>
+        for {
+          nameAvailable <- nameAvailable(cmd.name, centre.id)
+          updatedCentre <- centre.update(cmd.name, cmd.description)
+        } yield updatedCentre
+      }
+
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        centre => CentreUpdatedEvent(cmd.id, centre.version, timeNow, centre.name, centre.description).success
+      )
     }
 
     private def validateCmd(cmd: EnableCentreCmd): DomainValidation[CentreEnabledEvent] = {
-      val centreId = CentreId(cmd.id)
+      val timeNow = DateTime.now
+      val v = updateDisabled(cmd) { c => c.enable }
 
-      for {
-        disabledCentre <- isCentreDisabled(centreId)
-        enabledCentre <- disabledCentre.enable(Some(cmd.expectedVersion), org.joda.time.DateTime.now)
-        event <- CentreEnabledEvent(
-          centreId.id, enabledCentre.version, enabledCentre.lastUpdateDate.get).success
-      } yield event
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        centre => CentreEnabledEvent(cmd.id, centre.version, timeNow).success
+      )
     }
 
     private def validateCmd(cmd: DisableCentreCmd): DomainValidation[CentreDisabledEvent] = {
-      val centreId = CentreId(cmd.id)
-      for {
-        enabledCentre <- isCentreEnabled(centreId)
-        disabledCentre <- enabledCentre.disable(Some(cmd.expectedVersion), org.joda.time.DateTime.now)
-        event <- CentreDisabledEvent(
-          cmd.id, disabledCentre.version, disabledCentre.lastUpdateDate.get).success
-      } yield event
+      val timeNow = DateTime.now
+      val v = updateEnabled(cmd) { c => c.disable }
+      v.fold(
+        err => DomainError(s"error $err occurred on $cmd").failNel,
+        centre => CentreDisabledEvent(cmd.id, centre.version, timeNow).success
+      )
     }
 
     private def validateCmd(cmd: AddCentreLocationCmd): DomainValidation[CentreLocationAddedEvent] = {
-      val centreId = CentreId(cmd.centreId)
       val locationId = locationRepository.nextIdentity
-
       for {
-        disabledCentre <- isCentreDisabled(centreId)
+        centre <- getDisabled(cmd.centreId)
         location <- Location(locationId, cmd.name, cmd.street, cmd.city, cmd.province,
-            cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode).success
+          cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode).success
         event <- CentreLocationAddedEvent(
-          centreId.id, locationId.id, location.name, location.street, location.city,
-          location.province, location.postalCode, location.poBoxNumber, location.countryIsoCode).success
+          cmd.centreId, locationId.id, cmd.name, cmd.street, cmd.city, cmd.province,
+          cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode).success
       } yield event
     }
 
     private def validateCmd(cmd: RemoveCentreLocationCmd): DomainValidation[CentreLocationRemovedEvent] = {
-      val centreId = CentreId(cmd.centreId)
-      val locationId = LocationId(cmd.locationId);
-      for {
-        disabledCentre <- isCentreDisabled(centreId)
-        centreLoc <- centreLocationRepository.getByKey(locationId)
-        location <- locationRepository.getByKey(locationId)
-        event <- CentreLocationRemovedEvent(cmd.centreId, cmd.locationId).success
-      } yield event
+
+      locationRepository.getByKey(LocationId(cmd.locationId)).fold(
+        err => DomainError(s"no location with id: $id").failNel,
+        location => for {
+          centre <- getDisabled(cmd.centreId)
+          event <- CentreLocationRemovedEvent(cmd.centreId, cmd.locationId).success
+        } yield event
+      )
     }
 
     private def validateCmd(cmd: AddCentreToStudyCmd): DomainValidation[CentreAddedToStudyEvent] = {
-      val centreId = CentreId(cmd.centreId)
-      val studyId = StudyId(cmd.studyId)
       for {
-        disabledCentre <- isCentreDisabled(centreId)
-        notExists <- centreStudyNotLinked(centreId, studyId)
+        centre <- getDisabled(cmd.centreId)
+        notLinked <- centreStudyNotLinked(centre.id, StudyId(cmd.studyId))
         event <- CentreAddedToStudyEvent(cmd.centreId, cmd.studyId).success
       } yield event
     }
 
-    private def validateCmd(cmd: RemoveCentreFromStudyCmd): DomainValidation[CentreRemovedFromStudyEvent] = {
-      val centreId = CentreId(cmd.centreId)
-      val studyId = StudyId(cmd.studyId);
+    private def validateCmd(cmd: RemoveCentreFromStudyCmd)
+        : DomainValidation[CentreRemovedFromStudyEvent] = {
       for {
-        disabledCentre <- isCentreDisabled(centreId)
-        item <- studyCentreRepository.withIds(studyId, centreId)
+        centre <- getDisabled(cmd.centreId)
+        item <- studyCentreRepository.withIds(StudyId(cmd.studyId), centre.id)
         event <- CentreRemovedFromStudyEvent(cmd.centreId, cmd.studyId).success
       } yield event
     }
 
     private def recoverEvent(event: CentreAddedEvent) {
-      val centreId = CentreId(event.id)
-      val validation = for {
-        centre <- DisabledCentre.create(
-          centreId, -1L, event.dateTime, event.name, event.description)
-        savedCentre <- centreRepository.put(centre).success
-      } yield centre
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering centre from event failed")
-      }
+      centreRepository.put(DisabledCentre(
+          CentreId(event.id), 0L, event.dateTime, None, event.name, event.description))
+      ()
     }
 
     private def recoverEvent(event: CentreUpdatedEvent) {
-      val validation = for {
-        disabledCentre <- isCentreDisabled(CentreId(event.id))
-        updatedCentre <- disabledCentre.update(
-          disabledCentre.versionOption, event.dateTime, event.name, event.description)
-        savedCentre <- centreRepository.put(updatedCentre).success
-      } yield savedCentre
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering centre from event failed")
-      }
+      getDisabled(event.id).fold(
+        err => throw new IllegalStateException(s"updating centre from event failed: $err"),
+        centre => centreRepository.put(centre.copy(
+          version = event.version,
+          lastUpdateDate = Some(event.dateTime),
+          name = event.name,
+          description = event.description))
+      )
+      ()
     }
 
     private def recoverEvent(event: CentreEnabledEvent) {
-      val centreId = CentreId(event.id)
-      val validation = for {
-        disabledCentre <- isCentreDisabled(centreId)
-        enabledCentre <- disabledCentre.enable(disabledCentre.versionOption, event.dateTime)
-        savedCentre <- centreRepository.put(enabledCentre).success
-      } yield  enabledCentre
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering centre from event failed")
-      }
+      getDisabled(event.id).fold(
+        err => throw new IllegalStateException(s"enabling centre from event failed: $err"),
+        centre => centreRepository.put(EnabledCentre(
+          CentreId(event.id), event.version, centre.addedDate, Some(event.dateTime),
+          centre.name, centre.description))
+      )
+      ()
     }
 
     private def recoverEvent(event: CentreDisabledEvent) {
-      val centreId = CentreId(event.id)
-      val validation = for {
-        enabledCentre <- isCentreEnabled(centreId)
-        disabledCentre <- enabledCentre.disable(enabledCentre.versionOption, event.dateTime)
-        savedCentre <- centreRepository.put(disabledCentre).success
-      } yield disabledCentre
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        throw new IllegalStateException("recovering centre from event failed")
-      }
+      getEnabled(event.id).fold(
+        err => throw new IllegalStateException(s"disabling centre from event failed: $err"),
+        centre => centreRepository.put(DisabledCentre(
+          CentreId(event.id), event.version, centre.addedDate, Some(event.dateTime),
+          centre.name, centre.description))
+      )
+      ()
     }
 
     private def recoverEvent(event: CentreLocationAddedEvent) {
@@ -237,7 +210,7 @@ trait CentresProcessorComponent {
       val validation = for {
         location <- locationRepository.getByKey(locationId)
         removed <- locationRepository.remove(location).success
-        removed2 <- centreLocationRepository.remove(CentreLocation(centreId, locationId)).success
+        link <- centreLocationRepository.remove(CentreLocation(centreId, locationId)).success
       } yield location
 
       if (validation.isFailure) {
@@ -251,8 +224,7 @@ trait CentresProcessorComponent {
       val centreId = CentreId(event.centreId)
       val studyId = StudyId(event.studyId)
       val studyCentreId = studyCentreRepository.nextIdentity
-      studyCentreRepository.put(
-        StudyCentre(studyCentreId, studyId, centreId))
+      studyCentreRepository.put(StudyCentre(studyCentreId, studyId, centreId))
       ()
     }
 
@@ -272,6 +244,9 @@ trait CentresProcessorComponent {
       }
     }
 
+    /** Returns true if the centre and study are not already linked.
+      *
+      */
     private def centreStudyNotLinked(centreId: CentreId, studyId: StudyId): DomainValidation[Boolean] = {
       val exists = studyCentreRepository.getValues.exists { x =>
         (x.centreId == centreId) && (x.studyId == studyId)
@@ -298,12 +273,12 @@ trait CentresProcessorComponent {
     /**
       * Utility method to validiate state of a centre
       */
-    private def isCentreDisabled(centreId: CentreId): DomainValidation[DisabledCentre] = {
-      centreRepository.getByKey(centreId).fold(
-        err => DomainError(s"no centre with id: $centreId").failNel,
+    private def getDisabled(id: String): DomainValidation[DisabledCentre] = {
+      centreRepository.getByKey(CentreId(id)).fold(
+        err => DomainError(s"no centre with id: $id").failNel,
         centre => centre match {
-          case dcentre: DisabledCentre => dcentre.success
-          case _ => DomainError(s"centre is not disabled: ${centre.name}").failNel
+          case centre: DisabledCentre => centre.success
+          case centre => DomainError(s"centre is not disabled: $centre").failNel
         }
       )
     }
@@ -311,14 +286,47 @@ trait CentresProcessorComponent {
     /**
       * Utility method to validiate state of a centre
       */
-    private def isCentreEnabled(centreId: CentreId): DomainValidation[EnabledCentre] = {
-      centreRepository.getByKey(centreId).fold(
-        err => DomainError(s"no centre with id: $centreId").failNel,
+    private def getEnabled(id: String): DomainValidation[EnabledCentre] = {
+      centreRepository.getByKey(CentreId(id)).fold(
+        err => DomainError(s"no centre with id: $id").failNel,
         centre => centre match {
-          case enabledCentre: EnabledCentre => enabledCentre.success
-          case _ => DomainError(s"centre is not enabled: ${centre.name}").failNel
+          case centre: EnabledCentre => centre.success
+          case centre => DomainError(s"centre is not enabled: $centre").failNel
         }
       )
+    }
+
+    private def updateCentre[T <: Centre]
+      (cmd: CentreCommand)
+      (fn: Centre => DomainValidation[T])
+        : DomainValidation[T] = {
+      centreRepository.getByKey(CentreId(cmd.id)).fold(
+        err => DomainError(s"no centre with id: $id").failNel,
+        centre => for {
+          validVersion  <-  centre.requireVersion(cmd.expectedVersion)
+          updatedCentre <- fn(centre)
+        } yield updatedCentre
+      )
+    }
+
+    private def updateDisabled[T <: Centre]
+      (cmd: CentreCommand)
+      (fn: DisabledCentre => DomainValidation[T])
+        : DomainValidation[T] = {
+      updateCentre(cmd) {
+        case centre: DisabledCentre => fn(centre)
+        case centre => s"$centre for $cmd is not disabled".failNel
+      }
+    }
+
+    private def updateEnabled[T <: Centre]
+      (cmd: CentreCommand)
+      (fn: EnabledCentre => DomainValidation[T])
+        : DomainValidation[T] = {
+      updateCentre(cmd) {
+        case centre: EnabledCentre => fn(centre)
+        case centre => s"$centre for $cmd is not enabled".failNel
+      }
     }
 
   }

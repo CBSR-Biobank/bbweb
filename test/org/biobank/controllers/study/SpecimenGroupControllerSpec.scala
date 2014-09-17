@@ -1,8 +1,9 @@
-package org.biobank.controllers
+package org.biobank.controllers.study
 
+import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, SpecimenGroup }
 import org.biobank.fixture.ControllerFixture
-import org.biobank.service.json.JsonHelper._
+import org.biobank.domain.JsonHelper._
 
 import play.api.test.Helpers._
 import play.api.test.WithApplication
@@ -35,7 +36,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     val json = makeRequest(POST, "/studies/sgroups", BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("study is not disabled")
+    (json \ "message").as[String] should include ("is not disabled")
   }
 
   def updateOnNonDisabledStudy(
@@ -59,7 +60,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     val json = makeRequest(PUT, s"/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("study is not disabled")
+    (json \ "message").as[String] should include ("is not disabled")
   }
 
   def removeOnNonDisabledStudy(
@@ -74,7 +75,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       BAD_REQUEST)
 
     (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("study is not disabled")
+    (json \ "message").as[String] should include ("is not disabled")
   }
 
   "Specimen Group REST API" when {

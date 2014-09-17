@@ -4,7 +4,9 @@ import org.biobank.domain.DomainSpec
 import org.biobank.domain.AnnotationTypeId
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain.AnnotationValueType
+
 import com.github.nscala_time.time.Imports._
+import org.scalatest.OptionValues._
 import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
@@ -62,9 +64,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
 
       //      log.info(s"$annotType")
 
-      val annotType2 = annotType.update(
-        annotType.versionOption, org.joda.time.DateTime.now, name, description, valueType,
-        maxValueCount, options) | fail
+      val annotType2 = annotType.update(name, description, valueType, maxValueCount, options) | fail
       annotType2 shouldBe a[SpecimenLinkAnnotationType]
 
       annotType2 should have (
@@ -79,8 +79,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       )
 
       annotType2.addedDate should be (annotType.addedDate)
-      val updateDate = annotType2.lastUpdateDate | fail
-        (updateDate to DateTime.now).millis should be < 100L
+      annotType2.lastUpdateDate should be (None)
     }
   }
 
@@ -100,7 +99,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
-        err => err.list should (have length 1 and contain("id is null or empty")),
+        err => err.list should (have length 1 and contain("IdRequired")),
           user => fail
       )
     }
@@ -119,7 +118,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
-        err => err.list should (have length 1 and contain("id is null or empty")),
+        err => err.list should (have length 1 and contain("IdRequired")),
           user => fail
       )
     }
@@ -138,7 +137,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
-        err => err.list should (have length 1 and contain("invalid version value: -2")),
+        err => err.list should (have length 1 and contain("InvalidVersion")),
           user => fail
       )
     }
@@ -157,14 +156,14 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
-        err => err.list should (have length 1 and contain("name is null or empty")),
+        err => err.list should (have length 1 and contain("NameRequired")),
           user => fail
       )
 
       name = ""
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
-        err => err.list should (have length 1 and contain("name is null or empty")),
+        err => err.list should (have length 1 and contain("NameRequired")),
           user => fail
       )
     }
@@ -183,14 +182,14 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
-        err => err.list should (have length 1 and contain("description is null or empty")),
+        err => err.list should (have length 1 and contain("NonEmptyDescription")),
           user => fail
       )
 
       description = Some("")
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
-        err => err.list should (have length 1 and contain("description is null or empty")),
+        err => err.list should (have length 1 and contain("NonEmptyDescription")),
           user => fail
       )
     }
@@ -209,7 +208,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
         description, valueType, maxValueCount, options).fold(
-        err => err.list should (have length 1 and contain("max value count is not a positive number")),
+        err => err.list should (have length 1 and contain("MaxValueCountError")),
           user => fail
       )
     }
@@ -228,7 +227,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       SpecimenLinkAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount,
         options).fold(
-        err => err.list should (have length 1 and contain("option is empty or null")),
+        err => err.list should (have length 1 and contain("OptionRequired")),
           user => fail
       )
 
@@ -236,7 +235,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       SpecimenLinkAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount,
         options).fold(
-        err => err.list should (have length 1 and contain("duplicate items in options")),
+        err => err.list should (have length 1 and contain("DuplicateOptionsError")),
           user => fail
       )
     }
@@ -258,8 +257,8 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
         options).fold(
         err => {
           err.list should have length 2
-          err.list.head should be ("invalid version value: -2")
-          err.list.tail.head should be ("name is null or empty")
+          err.list.head should be ("InvalidVersion")
+          err.list.tail.head should be ("NameRequired")
         },
           user => fail
       )

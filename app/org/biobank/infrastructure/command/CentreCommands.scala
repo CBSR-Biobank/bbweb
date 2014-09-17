@@ -9,13 +9,25 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
 object CentreCommands {
-  trait CentreCommand extends Command
+
+  trait CentreCommand extends Command {
+    val id: String
+    val expectedVersion: Long
+  }
+
   trait HasCentreIdentity { val centreId: String }
 
   case class AddCentreCmd(
+    id: String,               // don't care
+    expectedVersion: Long,    // don't care
     name: String,
     description: Option[String] = None)
       extends CentreCommand
+
+  object AddCentreCmd {
+    def apply(name: String, description: Option[String]): AddCentreCmd =
+      AddCentreCmd("", -1, name, description)
+  }
 
   case class UpdateCentreCmd(
     id: String,
@@ -40,6 +52,12 @@ object CentreCommands {
       with HasIdentity
       with HasExpectedVersion
 
+  // centre location commands
+
+  trait CentreLocationCmd extends Command {
+    val centreId: String
+  }
+
   case class AddCentreLocationCmd(
     centreId: String,
     name: String,
@@ -49,30 +67,30 @@ object CentreCommands {
     postalCode: String,
     poBoxNumber: Option[String],
     countryIsoCode: String)
-      extends CentreCommand
+      extends CentreLocationCmd
       with HasCentreIdentity
 
   case class RemoveCentreLocationCmd(
     centreId: String,
     locationId: String)
-      extends CentreCommand
+      extends CentreLocationCmd
       with HasCentreIdentity
 
   case class AddCentreToStudyCmd(
     centreId: String,
     studyId: String)
-      extends CentreCommand
+      extends CentreLocationCmd
       with HasCentreIdentity
 
   case class RemoveCentreFromStudyCmd(
     centreId: String,
     studyId: String)
-      extends CentreCommand
+      extends CentreLocationCmd
       with HasCentreIdentity
   implicit val addCentreCmdReads = (
     (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String]
-  )(AddCentreCmd.apply _ )
+  )(AddCentreCmd("", -1, _, _))
 
   implicit val updateCentreCmdReads: Reads[UpdateCentreCmd] = (
       (__ \ "id").read[String](minLength[String](2)) and
@@ -100,7 +118,7 @@ object CentreCommands {
       (__ \ "postalCode").read[String](minLength[String](2)) and
       (__ \ "poBoxNumber").readNullable[String](minLength[String](2)) and
       (__ \ "countryIsoCode").read[String](minLength[String](2))
-  )(AddCentreLocationCmd.apply _ )
+  )(AddCentreLocationCmd(_, _, _, _, _, _, _, _))
 
   implicit val removeCentreLocationCmdReads = (
     (__ \ "centreId").read[String](minLength[String](2)) and

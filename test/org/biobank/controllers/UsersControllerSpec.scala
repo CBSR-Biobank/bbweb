@@ -4,7 +4,7 @@ import org.biobank.domain._
 import org.biobank.domain.user._
 import org.biobank.fixture.{ ControllerFixture, NameGenerator }
 import org.biobank.infrastructure.command.UserCommands._
-import org.biobank.service.json.JsonHelper._
+import org.biobank.domain.JsonHelper._
 import org.biobank.service.PasswordHasherComponentImpl
 
 import com.typesafe.plugin._

@@ -31,9 +31,11 @@ trait StudiesProcessorComponent
   self: RepositoriesComponent =>
 
   /**
-    * An actor that processes commands related to the [[org.biobank.domain.study.Study]] aggregate root.
-    *
-    * This implementation uses Akka persistence.
+    * The StudiesProcessor is responsible for maintaining state changes for all
+    * [[org.biobank.domain.study.Study]] aggregates. This particular processor uses Akka-Persistence's
+    * [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist the generated
+    * events, afterwhich it will updated the current state of the [[org.biobank.domain.study.Study]] being
+    * processed.
     */
   sealed class StudiesProcessor extends Processor {
 
@@ -62,6 +64,10 @@ trait StudiesProcessorComponent
     val specimenLinkAnnotationTypeProcessor = context.actorOf(
       Props(new SpecimenLinkAnnotationTypeProcessor), "spcLinkAnnotTypeProc")
 
+    /**
+      * These are the events that are recovered during journal recovery. They cannot fail and must be
+      * processed to recreate the current state of the aggregate.
+      */
     val receiveRecover: Receive = {
       case event: StudyAddedEvent =>     recoverEvent(event)
       case event: StudyUpdatedEvent =>   recoverEvent(event)
@@ -75,6 +81,22 @@ trait StudiesProcessorComponent
         snapshot.studies.foreach{ study => studyRepository.put(study) }
     }
 
+    /**
+      * These are the commands that are requested. A command can fail, and will send the failure as a response
+      * back to the user. Each valid command generates one or more events and is journaled.
+      *
+      * Some commands are forwared to child actors for processing. The child actors are:
+      *
+      *  - [[CeventAnnotationTypeProcessor]]
+      *  - [[CollectionEventTypeProcessor]]
+      *  - [[ParticipantAnnotationTypeProcessor]]
+      *  - [[ProcessingTypeProcessor]]
+      *  - [[SpecimenGroupProcessor]]
+      *  - [[SpecimenLinkAnnotationTypeProcessor]]
+      *  - [[SpecimenLinkTypeProcessor]]
+      *  - [[StudiesProcessor]]
+      *  - [[StudyAnnotationTypeProcessor]]
+      */
     val receiveCommand: Receive = {
       case cmd: AddStudyCmd =>      process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: UpdateStudyCmd =>   process(validateCmd(cmd)){ event => recoverEvent(event) }
@@ -97,50 +119,65 @@ trait StudiesProcessorComponent
     }
 
     private def validateAndForward(childActor: ActorRef, cmd: StudyCommandWithId) = {
-      studyRepository.getDisabled(StudyId(cmd.id)).fold(
-        err => context.sender ! err,
-        study => childActor forward cmd
+      studyRepository.getByKey(StudyId(cmd.studyId)).fold(
+        err => context.sender ! err.failure,
+        study => study match {
+          case study: DisabledStudy => childActor forward cmd
+          case study => context.sender ! s"$study for $cmd is not disabled".failNel
+        }
       )
     }
 
     private def validateAndForward(childActor: ActorRef, cmd: SpecimenLinkTypeCommand) = {
-      val processingTypeId = ProcessingTypeId(cmd.processingTypeId)
       val validation = for {
-        processingType <- processingTypeRepository.getByKey(processingTypeId)
-        study <- studyRepository.getDisabled(processingType.studyId)
+        processingType <- processingTypeRepository.getByKey(ProcessingTypeId(cmd.processingTypeId))
+        study <- studyRepository.getByKey(processingType.studyId)
       } yield study
 
       validation.fold(
-        err => context.sender ! err,
-        study => childActor forward cmd
+        err => context.sender ! err.failure,
+        study => study match {
+          case study: DisabledStudy => childActor forward cmd
+          case study => context.sender ! s"$study for $cmd is not disabled".failNel
+        }
       )
     }
 
-    def updateStudy[T <: Study](cmd: StudyCommand)(fn: Study => DomainValidation[T]): DomainValidation[T] = {
-      studyRepository.getByKey(StudyId(cmd.id)).fold(
-        err => s"study for $cmd does not exist".failNel,
-        study => study.requireVersion(study, cmd.expectedVersion).fold(
-          err => err.failure,
-          validStudy => fn(validStudy)
-        )
-      )
+    def updateStudy[T <: Study]
+      (cmd: StudyCommand)
+      (fn: Study => DomainValidation[T])
+        : DomainValidation[T] = {
+      for {
+        study        <- studyRepository.getByKey(StudyId(cmd.id))
+        validVersion <-  study.requireVersion(cmd.expectedVersion)
+        updatedStudy <- fn(study)
+      } yield updatedStudy
     }
 
-    def updateDisabled[T <: Study](cmd: StudyCommand)(fn: DisabledStudy => DomainValidation[T]): DomainValidation[T] = {
+    def updateDisabled[T <: Study]
+      (cmd: StudyCommand)
+      (fn: DisabledStudy => DomainValidation[T])
+        : DomainValidation[T] = {
       updateStudy(cmd) {
         case study: DisabledStudy => fn(study)
         case study => s"$study for $cmd is not disabled".failNel
       }
     }
 
-    def updateEnabled[T <: Study](cmd: StudyCommand)(fn: EnabledStudy => DomainValidation[T]): DomainValidation[T] = {
+    def updateEnabled[T <: Study]
+      (cmd: StudyCommand)
+      (fn: EnabledStudy => DomainValidation[T])
+        : DomainValidation[T] = {
       updateStudy(cmd) {
         case study: EnabledStudy => fn(study)
         case study => s"$study for $cmd is not enabled".failNel
       }
     }
 
-    def updateRetired[T <: Study](cmd: StudyCommand)(fn: RetiredStudy => DomainValidation[T]): DomainValidation[T] = {
+    def updateRetired[T <: Study]
+      (cmd: StudyCommand)
+      (fn: RetiredStudy => DomainValidation[T])
+        : DomainValidation[T] = {
       updateStudy(cmd) {
         case study: RetiredStudy => fn(study)
         case study => s"$study for $cmd is not retired".failNel

@@ -148,7 +148,7 @@ class StudySpec extends DomainSpec {
       val description = some(nameGenerator.next[Study])
 
       DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description).fold(
-        err => err.list should (have length 1 and contain("invalid version value: -2")),
+        err => err.list should (have length 1 and contain("InvalidVersion")),
         user => fail
       )
     }
@@ -200,7 +200,7 @@ class StudySpec extends DomainSpec {
 
       validation.swap.map { err =>
         err.list should have length 2
-        err.list.head should be ("invalid version value: -2")
+        err.list.head should be ("InvalidVersion")
         err.list.tail.head should be ("NameRequired")
       }
     }

@@ -258,31 +258,41 @@ trait UsersProcessorComponent {
       )
     }
 
-    def updateUser[T <: User](cmd: UserCommand)(fn: User => DomainValidation[T]): DomainValidation[T] = {
-      userRepository.getByKey(UserId(cmd.id)).fold(
-        err => s"user for $cmd does not exist".failNel,
-        user => user.requireVersion(user, cmd.expectedVersion).fold(
-          err => err.failure,
-          validUser => fn(validUser)
-        )
-      )
+    def updateUser[T <: User]
+      (cmd: UserCommand)
+      (fn: User => DomainValidation[T])
+        : DomainValidation[T] = {
+      for {
+        user         <- userRepository.getByKey(UserId(cmd.id))
+        validVersion <- user.requireVersion(cmd.expectedVersion)
+        updatedUser  <- fn(user)
+      } yield updatedUser
     }
 
-    def updateRegistered[T <: User](cmd: UserCommand)(fn: RegisteredUser => DomainValidation[T]): DomainValidation[T] = {
+    def updateRegistered[T <: User]
+      (cmd: UserCommand)
+      (fn: RegisteredUser => DomainValidation[T])
+        : DomainValidation[T] = {
       updateUser(cmd) {
         case user: RegisteredUser => fn(user)
         case user => s"$user for $cmd is not registered".failNel
       }
     }
 
-    def updateActive[T <: User](cmd: UserCommand)(fn: ActiveUser => DomainValidation[T]): DomainValidation[T] = {
+    def updateActive[T <: User]
+      (cmd: UserCommand)
+      (fn: ActiveUser => DomainValidation[T])
+        : DomainValidation[T] = {
       updateUser(cmd) {
         case user: ActiveUser => fn(user)
         case user => s"$user for $cmd is not active".failNel
       }
     }
 
-    def updateLocked[T <: User](cmd: UserCommand)(fn: LockedUser => DomainValidation[T]): DomainValidation[T] = {
+    def updateLocked[T <: User]
+      (cmd: UserCommand)
+      (fn: LockedUser => DomainValidation[T])
+        : DomainValidation[T] = {
       updateUser(cmd) {
         case user: LockedUser => fn(user)
         case user => s"$user for $cmd is not locked".failNel

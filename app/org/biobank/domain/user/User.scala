@@ -84,13 +84,17 @@ trait UserValidations {
 
   case object SaltRequired extends ValidationKey
 
+  case object InvalidEmail extends ValidationKey
+
+  case object InvalidUrl extends ValidationKey
+
   val emailRegex = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?".r
   val urlRegex = "^((https?|ftp)://|(www|ftp)\\.)[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$".r
 
   def validateEmail(email: String): DomainValidation[String] = {
     emailRegex.findFirstIn(email) match {
       case Some(e) => email.success
-      case None => s"email invalid: $email".failNel
+      case None => InvalidEmail.failNel
     }
   }
 
@@ -99,7 +103,7 @@ trait UserValidations {
       case Some(url) =>
         urlRegex.findFirstIn(url) match {
           case Some(e) => some(url).success
-          case None => s"invalid avatar url: $url".failNel
+          case None => InvalidUrl.failNel
         }
       case None =>
         none.success

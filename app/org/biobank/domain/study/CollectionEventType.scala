@@ -8,10 +8,10 @@ import org.biobank.domain.{
   ConcurrencySafeEntity,
   DomainValidation,
   HasName,
-  HasDescriptionOption
+  HasDescriptionOption,
+  ValidationKey
 }
 
-import org.biobank.domain.validation.StudyAnnotationTypeValidationHelper
 import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
@@ -20,6 +20,14 @@ import play.api.libs.functional.syntax._
 import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
+
+trait CollectionEventTypeValidations {
+
+  case object MaxCountInvalid extends ValidationKey
+
+  case object AmountInvalid extends ValidationKey
+}
+
 
 /**
   * Defines a classification name, unique to the Study, to a participant visit.
@@ -40,7 +48,7 @@ import scalaz.Scalaz._
   * @param annotationTypeData The [[AnnotationType]]s for a collection event type.
   *
   */
-case class CollectionEventType private (
+case class CollectionEventType(
   studyId: StudyId,
   id: CollectionEventTypeId,
   version: Long,
@@ -57,19 +65,14 @@ case class CollectionEventType private (
     with HasStudyId {
 
   def update(
-    expectedVersion: Option[Long],
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     recurring: Boolean,
     specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
     annotationTypeData: List[CollectionEventTypeAnnotationTypeData]): DomainValidation[CollectionEventType] = {
-    for {
-      validVersion <- requireVersion(expectedVersion)
-      validatedCeventType <- CollectionEventType.create(
-        studyId, id, version, addedDate, name, description, recurring, specimenGroupData, annotationTypeData)
-      updatedCeventType <- validatedCeventType.copy(lastUpdateDate = Some(dateTime)).success
-    } yield updatedCeventType
+    CollectionEventType.create(
+      this.studyId, this.id, this.version, this.addedDate, name, description, recurring, specimenGroupData,
+      annotationTypeData)
   }
 
   override def toString: String =
@@ -88,7 +91,8 @@ case class CollectionEventType private (
 
 }
 
-object CollectionEventType extends StudyAnnotationTypeValidationHelper {
+object CollectionEventType extends CollectionEventTypeValidations with StudyAnnotationTypeValidations {
+  import org.biobank.domain.CommonValidations._
 
   def create(
     studyId: StudyId,
@@ -103,8 +107,8 @@ object CollectionEventType extends StudyAnnotationTypeValidationHelper {
     (validateId(studyId) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
-      validateNonEmpty(name, "name is null or empty") |@|
-      validateNonEmptyOption(description, "description is null or empty") |@|
+      validateString(name, NameRequired) |@|
+      validateNonEmptyOption(description, NonEmptyDescription) |@|
       validateSpecimenGroupData(specimenGroupData) |@|
       validateAnnotationTypeData(annotationTypeData)) {
       CollectionEventType(_, _, _, dateTime, None, _, _, recurring, _, _)
@@ -119,9 +123,9 @@ object CollectionEventType extends StudyAnnotationTypeValidationHelper {
 
     def validateSpecimenGroupItem(
       specimenGroupItem: CollectionEventTypeSpecimenGroupData): DomainValidation[CollectionEventTypeSpecimenGroupData] = {
-      (validateStringId(specimenGroupItem.specimenGroupId, "specimen group id is null or empty") |@|
-        validatePositiveNumber(specimenGroupItem.maxCount, "max count is not a positive number") |@|
-        validatePositiveNumberOption(specimenGroupItem.amount, "amount is not a positive number")) {
+      (validateString(specimenGroupItem.specimenGroupId, IdRequired) |@|
+        validatePositiveNumber(specimenGroupItem.maxCount, MaxCountInvalid) |@|
+        validatePositiveNumberOption(specimenGroupItem.amount, AmountInvalid)) {
         CollectionEventTypeSpecimenGroupData(_, _, _)
       }
     }

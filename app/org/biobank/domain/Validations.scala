@@ -3,85 +3,6 @@ package org.biobank.domain
 import scalaz._
 import scalaz.Scalaz._
 
-private[domain] trait Validations {
-
-  @deprecated("no longer used", "2014-09-16")
-  protected def validateNonEmptyOption(
-    option: Option[String],
-    errmsg: String): DomainValidation[Option[String]] = {
-    option match {
-      case Some(value) if ((value == null) || value.isEmpty()) => errmsg.failNel
-      case _ => option.success
-    }
-  }
-
-  @deprecated("no longer used", "2014-09-16")
-  protected def validateAndIncrementVersion(v: Long): DomainValidation[Long] =
-    if (v >= -1) (v + 1).success else s"invalid version value: $v".failNel
-
-  @deprecated("no longer used", "2014-09-16")
-  protected def validateId[T <: IdentifiedValueObject[String]](id: T): DomainValidation[T] = {
-    validateStringId(id.toString, "id is null or empty").fold(
-      err => err.fail,
-      idString => id.success)
-  }
-
-  @deprecated("no longer used", "2014-09-16")
-  protected def validateId[T <: IdentifiedValueObject[String]](
-    idOption: Option[T]): DomainValidation[Option[T]] = {
-    idOption match {
-      case Some(id) =>
-        validateId(id).fold(
-          err => err.fail,
-          id => idOption.success
-        )
-      case _ => idOption.success
-    }
-  }
-
-  @deprecated("no longer used", "2014-09-16")
-  protected def validateStringId(id: String, errmsg: String): DomainValidation[String] = {
-    if ((id == null) || id.isEmpty()) {
-      errmsg.failNel
-    } else {
-      id.success
-    }
-  }
-
-  @deprecated("no longer used", "2014-09-16")
-  protected def validateNonEmpty(value: String, errmsg: String): DomainValidation[String] = {
-    if ((value == null) || value.isEmpty()) {
-      errmsg.failNel
-    } else {
-      value.success
-    }
-  }
-
-  @deprecated("no longer used", "2014-09-16")
-  protected def validatePositiveNumber(number: Int, errmsg: String): DomainValidation[Int] = {
-    if (number < 0) {
-      errmsg.failNel
-    } else {
-      number.success
-    }
-  }
-
-  @deprecated("no longer used", "2014-09-16")
-  protected def validatePositiveNumber(
-    number: BigDecimal, errmsg: String): DomainValidation[BigDecimal] = {
-    if (number < 0) errmsg.failNel else number.success
-  }
-
-  @deprecated("no longer used", "2014-09-16")
-  protected def validatePositiveNumberOption(
-    option: Option[BigDecimal], errmsg: String): DomainValidation[Option[BigDecimal]] = {
-    option match {
-      case Some(number) if (number < 0) => errmsg.failNel
-      case _ => option.success
-    }
-  }
-}
-
 /**
   * Trait for validation errors
   */
@@ -94,6 +15,8 @@ trait ValidationKey {
 object CommonValidations {
 
   case object IdRequired extends ValidationKey
+
+  case object InvalidVersion extends ValidationKey
 
   case object NameRequired extends ValidationKey
 
@@ -130,12 +53,29 @@ object CommonValidations {
   }
 
   def validateAndIncrementVersion(v: Long): DomainValidation[Long] =
-    if (v < -1) s"invalid version value: $v".failNel else (v + 1).success
+    if (v < -1) InvalidVersion.failNel else (v + 1).success
+
+  def validateId[T <: IdentifiedValueObject[String]](
+    id: T, err: ValidationKey): DomainValidation[T] = {
+    validateString(id.id, err).fold(
+      err => err.fail,
+      idString => id.success)
+  }
 
   def validateId[T <: IdentifiedValueObject[String]](id: T): DomainValidation[T] = {
-    validateString(id.toString, IdRequired).fold(
-      err => err.failure,
-      idString => id.success)
+    validateId(id, IdRequired)
+  }
+
+  def validateId[T <: IdentifiedValueObject[String]](
+    idOption: Option[T], err: ValidationKey): DomainValidation[Option[T]] = {
+    idOption match {
+      case Some(id) =>
+        validateId(id, err).fold(
+          err => err.fail,
+          id => idOption.success
+        )
+      case _ => idOption.success
+    }
   }
 
 }
