@@ -168,11 +168,43 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
       }
     }
 
+    "not enable a study with no specimen groups" in {
+      val study = factory.createDisabledStudy
+      studyRepository.put(study)
+
+      val cet = factory.createCollectionEventType
+      collectionEventTypeRepository.put(cet)
+
+      val v = ask(studiesProcessor, EnableStudyCmd(study.id.toString, 0L))
+        .mapTo[DomainValidation[StudyEnabledEvent]]
+        .futureValue
+      v shouldFail "no specimen groups"
+    }
+
+    "not enable a study with no collection event types" in {
+      val study = factory.createDisabledStudy
+      studyRepository.put(study)
+
+      val sg = factory.createSpecimenGroup
+      specimenGroupRepository.put(sg)
+
+      val v = ask(studiesProcessor, EnableStudyCmd(study.id.toString, 0L))
+        .mapTo[DomainValidation[StudyEnabledEvent]]
+        .futureValue
+      v shouldFail "no collection event types"
+    }
+
+    "not update an enabled study" in {
+      val study = factory.createEnabledStudy
+      studyRepository.put(study)
+      askUpdateCommand(study) shouldFail "is not disabled"
+    }
+
     "disable an enabled study" in {
       val enabledStudy = factory.createEnabledStudy
       studyRepository.put(enabledStudy)
 
-      ask(studiesProcessor, DisableStudyCmd(enabledStudy.id.toString, 1L))
+      ask(studiesProcessor, DisableStudyCmd(enabledStudy.id.toString, enabledStudy.version))
         .mapTo[DomainValidation[StudyDisabledEvent]]
         .futureValue
         .shouldSucceed { event =>
@@ -196,6 +228,12 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
           checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
         }
       }
+    }
+
+    "not update a retired study" in {
+      val study = factory.createEnabledStudy
+      studyRepository.put(study)
+      askUpdateCommand(study) shouldFail "is not disabled"
     }
 
 

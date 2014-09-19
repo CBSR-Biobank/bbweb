@@ -27,8 +27,12 @@ trait UsersServiceComponent {
       userRepository.allUsers
     }
 
+    def getUser(id: String): DomainValidation[User] = {
+      userRepository.getByKey(UserId(id))
+    }
+
     def getByEmail(email: String): DomainValidation[User] = {
-      userRepository.getByKey(UserId(email))
+      userRepository.getByEmail(email)
     }
 
     def register(cmd: RegisterUserCmd): Future[DomainValidation[UserRegisteredEvent]] = {
@@ -69,7 +73,7 @@ trait UsersServiceComponent {
 
     def validatePassword(email: String, enteredPwd: String): DomainValidation[User] = {
       for {
-        user <- userRepository.getByKey(UserId(email))
+        user <- userRepository.getByEmail(email)
         validPwd <- {
           if (passwordHasher.valid(user.password, user.salt, enteredPwd)) {
             user.success
@@ -106,51 +110,35 @@ trait UsersProcessorComponent {
 
     val receiveRecover: Receive = {
       case event: UserRegisteredEvent => recoverEvent(event)
-
       case event: UserActivatedEvent => recoverEvent(event)
-
       case event: UserNameUpdatedEvent => recoverEvent(event)
-
       case event: UserEmailUpdatedEvent => recoverEvent(event)
-
       case event: UserPasswordUpdatedEvent => recoverEvent(event)
-
       case event: UserLockedEvent => recoverEvent(event)
-
       case event: UserUnlockedEvent => recoverEvent(event)
-
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.users.foreach(i => userRepository.put(i))
 
       case event: RecoveryCompleted =>
 
-      case msg =>
-        throw new IllegalStateException(s"message not handled: $msg")
+      case event => throw new IllegalStateException(s"event not handled: $event")
     }
 
     val receiveCommand: Receive = {
       case cmd: RegisterUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: ActivateUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: UpdateUserNameCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: UpdateUserEmailCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: UpdateUserPasswordCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: ResetUserPasswordCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: LockUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: UnlockUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
       case "snap" =>
         saveSnapshot(SnapshotState(userRepository.allUsers))
         stash()
 
-      case _ =>
-        throw new IllegalStateException("message not handled")
+      case cmd => throw new IllegalStateException(s"message not handled: $cmd")
     }
 
     def validateCmd(cmd: RegisterUserCmd): DomainValidation[UserRegisteredEvent] = {

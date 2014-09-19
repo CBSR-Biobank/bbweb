@@ -60,4 +60,9 @@ class NameGenerator(klass: Class[_]) {
     uniqueName(s"$rootSimpleName-$className") + "@test.com"
   }
 
+  def nextUrl[T: ClassTag]: String = {
+    val className = implicitly[ClassTag[T]].runtimeClass.getSimpleName
+    "http://" + uniqueName(s"$rootSimpleName$className").replace("_", "").toLowerCase + ".com/"
+  }
+
 }

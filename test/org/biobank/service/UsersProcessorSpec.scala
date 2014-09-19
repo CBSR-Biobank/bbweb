@@ -58,11 +58,11 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       v shouldFail "user with email already exists"
     }
 
-    "activate a user" in {
+    "activate a user" taggedAs(Tag("1")) in {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val v = ask(usersProcessor, ActivateUserCmd(user.email, user.version))
+      val v = ask(usersProcessor, ActivateUserCmd(user.id.id, user.version))
         .mapTo[DomainValidation[UserActivatedEvent]]
         .futureValue
 
@@ -78,7 +78,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val v = ask(usersProcessor, ActivateUserCmd(user.email, user.version - 1))
+      val v = ask(usersProcessor, ActivateUserCmd(user.id.id, user.version - 1))
         .mapTo[DomainValidation[UserActivatedEvent]]
         .futureValue
       v shouldFail "expected version doesn't match current version"
@@ -96,7 +96,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       v shouldSucceed { event =>
         event shouldBe a [UserNameUpdatedEvent]
         event should have (
-          'id        (user.email),
+          'id        (user.id.id),
           'version   (user.version + 1),
           'name      (newName)
         )
@@ -131,7 +131,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       v shouldSucceed { event =>
         event shouldBe a [UserEmailUpdatedEvent]
         event should have (
-          'id        (user.email),
+          'id        (user.id.id),
           'version   (user.version + 1),
           'email     (newEmail)
         )
@@ -168,7 +168,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       v shouldSucceed { event =>
         event shouldBe a [UserPasswordUpdatedEvent]
         event should have (
-          'id        (user.email),
+          'id        (user.id.id),
           'version   (user.version + 1)
         )
 
@@ -208,7 +208,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       v shouldSucceed { event =>
         event shouldBe a [UserPasswordResetEvent]
         event should have (
-          'id        (user.email),
+          'id        (user.id.id),
           'version   (user.version + 1)
         )
 
@@ -237,13 +237,13 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val activeUser = factory.createActiveUser
       userRepository.put(activeUser)
 
-      val v = ask(usersProcessor, LockUserCmd(activeUser.email, activeUser.version))
+      val v = ask(usersProcessor, LockUserCmd(activeUser.id.id, activeUser.version))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
 
       v shouldSucceed { event =>
         event shouldBe a[UserLockedEvent]
-        event.id should be(activeUser.email)
+        event.id should be(activeUser.id.id)
 
         userRepository.getLocked(UserId(event.id)) shouldSucceed { repoUser =>
           checkTimeStamps(repoUser, activeUser.addedDate, DateTime.now)
@@ -255,7 +255,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val activeUser = factory.createActiveUser
       userRepository.put(activeUser)
 
-      val v = ask(usersProcessor, LockUserCmd(activeUser.email, activeUser.version - 1))
+      val v = ask(usersProcessor, LockUserCmd(activeUser.id.id, activeUser.version - 1))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
       v shouldFail "expected version doesn't match current version"
@@ -265,13 +265,13 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val lockedUser = factory.createLockedUser
       userRepository.put(lockedUser)
 
-      val v = ask(usersProcessor, UnlockUserCmd(lockedUser.email, lockedUser.version))
+      val v = ask(usersProcessor, UnlockUserCmd(lockedUser.id.id, lockedUser.version))
         .mapTo[DomainValidation[UserUnlockedEvent]]
         .futureValue
 
       v shouldSucceed { event =>
         event shouldBe a[UserUnlockedEvent]
-        event.id should be(lockedUser.email)
+        event.id should be(lockedUser.id.id)
 
         userRepository.getActive(UserId(event.id)) shouldSucceed { repoUser =>
           checkTimeStamps(repoUser, lockedUser.addedDate, DateTime.now)
@@ -283,7 +283,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val lockedUser = factory.createLockedUser
       userRepository.put(lockedUser)
 
-      val v = ask(usersProcessor, UnlockUserCmd(lockedUser.email, lockedUser.version - 1))
+      val v = ask(usersProcessor, UnlockUserCmd(lockedUser.id.id, lockedUser.version - 1))
         .mapTo[DomainValidation[UserUnlockedEvent]]
         .futureValue
       v shouldFail "expected version doesn't match current version"
@@ -293,7 +293,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val v = ask(usersProcessor, LockUserCmd(user.email, 0L))
+      val v = ask(usersProcessor, LockUserCmd(user.id.id, user.version))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
       v shouldFail "not active"
@@ -303,7 +303,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
-      val v = ask(usersProcessor, UnlockUserCmd(user.email, user.version))
+      val v = ask(usersProcessor, UnlockUserCmd(user.id.id, user.version))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
       v shouldFail "not locked"
@@ -313,7 +313,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val user = factory.createActiveUser
       userRepository.put(user)
 
-      val v = ask(usersProcessor, UnlockUserCmd(user.email, user.version))
+      val v = ask(usersProcessor, UnlockUserCmd(user.id.id, user.version))
         .mapTo[DomainValidation[UserLockedEvent]]
         .futureValue
 

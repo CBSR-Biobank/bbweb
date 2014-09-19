@@ -148,7 +148,7 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
     }
 
     "GET /users/:id" should {
-      "read a user" in new WithApplication(fakeApplication()) {
+      "return a user" in new WithApplication(fakeApplication()) {
         doLogin
         val user = factory.createRegisteredUser.activate | fail
         use[BbwebPlugin].userRepository.put(user)
@@ -382,7 +382,7 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
           (json \ "message").as[String] should include ("user is not active")
       }
 
-      "not allow a password reset on an invalid email address" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
+      "not allow a password reset on an invalid email address" in new WithApplication(fakeApplication()) {
 
         val cmdJson = Json.obj(
           "id"              -> nameGenerator.next[User],

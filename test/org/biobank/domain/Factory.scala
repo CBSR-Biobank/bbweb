@@ -26,128 +26,146 @@ class Factory {
   var domainObjects: Map[Class[_], _] = Map.empty
 
   def createRegisteredUser: RegisteredUser = {
-    val version = -1L
-    val name = nameGenerator.next[User]
-    val email = nameGenerator.nextEmail[User]
-    val id = UserId(email)
-    val password = nameGenerator.next[User]
-    val salt = nameGenerator.next[User]
-    val avatarUrl = Some("http://test.com/")
-
-    RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-      err => throw new Error(err.list.mkString),
-      registeredUser => {
-        domainObjects = domainObjects + (classOf[RegisteredUser] -> registeredUser)
-        registeredUser
-      }
-    )
+    val user = RegisteredUser(
+      version        = 0L,
+      addedDate      = DateTime.now,
+      lastUpdateDate = None,
+      name           = nameGenerator.next[User],
+      email          = nameGenerator.nextEmail[User],
+      id             = UserId(nameGenerator.next[User]),
+      password       = nameGenerator.next[User],
+      salt           = nameGenerator.next[User],
+      avatarUrl      = Some(nameGenerator.nextUrl[User]))
+    domainObjects = domainObjects + (classOf[RegisteredUser] -> user)
+    user
   }
 
   def createActiveUser: ActiveUser = {
-    val registeredUser = defaultRegisteredUser
-    registeredUser.activate.fold(
-      err => throw new Error(err.list.mkString),
-      activeUser => {
-        domainObjects = domainObjects + (classOf[ActiveUser] -> activeUser)
-        activeUser
-      }
-    )
+    val user = ActiveUser(
+      version        = 0L,
+      addedDate      = DateTime.now,
+      lastUpdateDate = None,
+      name           = nameGenerator.next[User],
+      email          = nameGenerator.nextEmail[User],
+      id             = UserId(nameGenerator.next[User]),
+      password       = nameGenerator.next[User],
+      salt           = nameGenerator.next[User],
+      avatarUrl      = Some(nameGenerator.nextUrl[User]))
+    domainObjects = domainObjects + (classOf[ActiveUser] -> user)
+    user
   }
 
   def createLockedUser: LockedUser = {
-    val activeUser = defaultActiveUser
-    activeUser.lock.fold(
-      err => throw new Error(err.list.mkString),
-      lockedUser => {
-        domainObjects = domainObjects + (classOf[LockedUser] -> lockedUser)
-        lockedUser
-      }
-    )
+    val user = LockedUser(
+      version        = 0L,
+      addedDate      = DateTime.now,
+      lastUpdateDate = None,
+      name           = nameGenerator.next[User],
+      email          = nameGenerator.nextEmail[User],
+      id             = UserId(nameGenerator.next[User]),
+      password       = nameGenerator.next[User],
+      salt           = nameGenerator.next[User],
+      avatarUrl      = Some(nameGenerator.nextUrl[User]))
+    domainObjects = domainObjects + (classOf[LockedUser] -> user)
+    user
   }
   def createDisabledStudy: DisabledStudy = {
-    val id = StudyId(nameGenerator.next[Study])
-    val name = nameGenerator.next[Study]
-    val description = Some(nameGenerator.next[Study])
-
-    DisabledStudy.create(id, -1L, DateTime.now, name, description).fold(
-      err => throw new Error(err.list.mkString),
-      study => {
-        domainObjects = domainObjects + (classOf[DisabledStudy] -> study)
-        study
-      }
-    )
+    val study = DisabledStudy(
+      version        = 0L,
+      addedDate      = DateTime.now,
+      lastUpdateDate = None,
+      id             = StudyId(nameGenerator.next[Study]),
+      name           = nameGenerator.next[Study],
+      description    = Some(nameGenerator.next[Study]))
+    domainObjects = domainObjects + (classOf[DisabledStudy] -> study)
+    study
   }
 
   def createEnabledStudy: EnabledStudy = {
-    val disabledStudy = defaultDisabledStudy
-    val enabledStudy = disabledStudy.enable(1, 1) | null
+    val enabledStudy = EnabledStudy(
+      id             = StudyId(nameGenerator.next[Study]),
+      version        = 0L,
+      addedDate      = DateTime.now,
+      lastUpdateDate = None,
+      name           = nameGenerator.next[Study],
+      description    = Some(nameGenerator.next[Study]))
     domainObjects = domainObjects + (classOf[EnabledStudy] -> enabledStudy)
-    domainObjects = domainObjects - classOf[DisabledStudy]
     enabledStudy
   }
 
-  def createSpecimenGroup: SpecimenGroup = {
-    val sgId = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
-    val name = nameGenerator.next[SpecimenGroup]
-    val description = Some(nameGenerator.next[SpecimenGroup])
-    val units = nameGenerator.next[String]
-    val anatomicalSourceType = AnatomicalSourceType.Blood
-    val preservationType = PreservationType.FreshSpecimen
-    val preservationTempType = PreservationTemperatureType.Minus80celcius
-    val specimenType = SpecimenType.FilteredUrine
+  def createRetiredStudy: RetiredStudy = {
+    val retiredStudy = RetiredStudy(
+      id             = StudyId(nameGenerator.next[Study]),
+      version        = 0L,
+      addedDate      = DateTime.now,
+      lastUpdateDate = None,
+      name           = nameGenerator.next[Study],
+      description    = Some(nameGenerator.next[Study]))
+    domainObjects = domainObjects + (classOf[RetiredStudy] -> retiredStudy)
+    retiredStudy
+  }
 
+  def createSpecimenGroup: SpecimenGroup = {
     val disabledStudy = defaultDisabledStudy
-    SpecimenGroup.create(disabledStudy.id, sgId, -1L, DateTime.now,
-      name, description, units, anatomicalSourceType, preservationType, preservationTempType,
-      specimenType).fold(
-      err => throw new Error(err.list.mkString),
-        specimenGroup => {
-          domainObjects = domainObjects + (classOf[SpecimenGroup] -> specimenGroup)
-          specimenGroup
-        }
-    )
+    val specimenGroup = SpecimenGroup(
+      id                          = SpecimenGroupId(nameGenerator.next[SpecimenGroup]),
+      studyId                     = disabledStudy.id,
+      version                     = 0L,
+      addedDate                   = DateTime.now,
+      lastUpdateDate              = None,
+      name                        = nameGenerator.next[SpecimenGroup],
+      description                 = Some(nameGenerator.next[SpecimenGroup]),
+      units                       = nameGenerator.next[String],
+      anatomicalSourceType        = AnatomicalSourceType.Blood,
+      preservationType            = PreservationType.FreshSpecimen,
+      preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
+      specimenType                = SpecimenType.FilteredUrine)
+  domainObjects = domainObjects + (classOf[SpecimenGroup] -> specimenGroup)
+  specimenGroup
   }
 
   def createCollectionEventType: CollectionEventType = {
-    val ceventTypeId = CollectionEventTypeId(nameGenerator.next[CollectionEventType])
-    val name = nameGenerator.next[CollectionEventType]
-    val description = Some(nameGenerator.next[CollectionEventType])
-
     val disabledStudy = defaultDisabledStudy
-    CollectionEventType.create(
-      disabledStudy.id, ceventTypeId, -1L, DateTime.now, name, description, true, List.empty, List.empty).fold(
-      err => throw new Error(err.list.mkString),
-        ceventType => {
-          domainObjects = domainObjects + (classOf[CollectionEventType] -> ceventType)
-          ceventType
-        }
-    )
+    val ceventType = CollectionEventType(
+      id                 = CollectionEventTypeId(nameGenerator.next[CollectionEventType]),
+      studyId            = disabledStudy.id,
+      version            = 0L,
+      addedDate          = DateTime.now,
+      lastUpdateDate     = None,
+      name               = nameGenerator.next[CollectionEventType],
+      description        = Some(nameGenerator.next[CollectionEventType]),
+      recurring          = false,
+      specimenGroupData  = List.empty,
+      annotationTypeData = List.empty)
+
+    domainObjects = domainObjects + (classOf[CollectionEventType] -> ceventType)
+    ceventType
   }
 
   def createCollectionEventAnnotationType: CollectionEventAnnotationType = {
-    val id = AnnotationTypeId(nameGenerator.next[CollectionEventAnnotationType])
-    val name = nameGenerator.next[CollectionEventAnnotationType]
-    val description = Some(nameGenerator.next[CollectionEventAnnotationType])
-    val options = Some(Seq(
-      nameGenerator.next[String],
-      nameGenerator.next[String]))
-
     val disabledStudy = defaultDisabledStudy
-    CollectionEventAnnotationType.create(
-      disabledStudy.id, id, -1L, DateTime.now, name, description,
-      AnnotationValueType.Select, Some(1), options).fold(
-      err => throw new Error(err.list.mkString),
-        annotationType => {
-          domainObjects = domainObjects + (classOf[CollectionEventAnnotationType] -> annotationType)
-          annotationType
-        }
-    )
+    val annotationType = CollectionEventAnnotationType(
+      id             = AnnotationTypeId(nameGenerator.next[CollectionEventAnnotationType]),
+      studyId        = disabledStudy.id,
+      version        = 0L,
+      addedDate      = DateTime.now,
+      lastUpdateDate = None,
+      name           = nameGenerator.next[CollectionEventAnnotationType],
+      description    = Some(nameGenerator.next[CollectionEventAnnotationType]),
+      valueType      = AnnotationValueType.Select,
+      maxValueCount  = Some(1),
+      options        = Some(Seq(nameGenerator.next[String], nameGenerator.next[String])))
+
+    domainObjects = domainObjects + (classOf[CollectionEventAnnotationType] -> annotationType)
+    annotationType
   }
 
   def createCollectionEventTypeSpecimenGroupData: CollectionEventTypeSpecimenGroupData = {
     val sg = defaultSpecimenGroup
     val ceventTypeSpecimenGroup = CollectionEventTypeSpecimenGroupData(
-      sg.id.id, 1, Some(BigDecimal(1.0)))
+      specimenGroupId = sg.id.id,
+      maxCount = 1,
+      amount = Some(BigDecimal(1.0)))
     domainObjects = domainObjects + (classOf[CollectionEventTypeSpecimenGroupData] -> ceventTypeSpecimenGroup)
     ceventTypeSpecimenGroup
   }
@@ -155,90 +173,82 @@ class Factory {
   def createCollectionEventTypeAnnotationTypeData: CollectionEventTypeAnnotationTypeData = {
     val annotationType = defaultCollectionEventAnnotationType
     val ceventTypeAnnotationType = CollectionEventTypeAnnotationTypeData(
-      annotationType.id.id, true)
+      annotationTypeId = annotationType.id.id, required = true)
     domainObjects = domainObjects +
       (classOf[CollectionEventTypeAnnotationTypeData] -> ceventTypeAnnotationType)
     ceventTypeAnnotationType
   }
 
   def createParticipantAnnotationType: ParticipantAnnotationType = {
-    val id = AnnotationTypeId(nameGenerator.next[ParticipantAnnotationType])
-    val name = nameGenerator.next[ParticipantAnnotationType]
-    val description = Some(nameGenerator.next[ParticipantAnnotationType])
-    val options = Some(Seq(
-      nameGenerator.next[String],
-      nameGenerator.next[String]))
-
     val disabledStudy = defaultDisabledStudy
-    ParticipantAnnotationType.create(
-      disabledStudy.id, id, -1L, DateTime.now, name, description, AnnotationValueType.Select,
-      Some(1), options, required = true).fold(
-      err => throw new Error(err.list.mkString),
-        annotationType => {
-          domainObjects = domainObjects + (classOf[ParticipantAnnotationType] -> annotationType)
-            annotationType
-        }
-    )
+    val annotationType = ParticipantAnnotationType(
+      id             = AnnotationTypeId(nameGenerator.next[ParticipantAnnotationType]),
+      studyId        = disabledStudy.id,
+      version        = 0L,
+      addedDate      = DateTime.now,
+      lastUpdateDate = None,
+      name           = nameGenerator.next[ParticipantAnnotationType],
+      description    = Some(nameGenerator.next[ParticipantAnnotationType]),
+      valueType      = AnnotationValueType.Select,
+      maxValueCount  = Some(1),
+      options        = Some(Seq(nameGenerator.next[String], nameGenerator.next[String])),
+      required       = true)
+    domainObjects = domainObjects + (classOf[ParticipantAnnotationType] -> annotationType)
+    annotationType
   }
 
   def createSpecimenLinkAnnotationType: SpecimenLinkAnnotationType = {
-    val id = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType])
-    val name = nameGenerator.next[SpecimenLinkAnnotationType]
-    val description = Some(nameGenerator.next[SpecimenLinkAnnotationType])
-    val options = Some(Seq(
-      nameGenerator.next[String],
-      nameGenerator.next[String]))
-
     val disabledStudy = defaultDisabledStudy
-    SpecimenLinkAnnotationType.create(
-      disabledStudy.id, id, -1L, DateTime.now, name, description,
-      AnnotationValueType.Select, Some(1), options).fold(
-      err => throw new Error(err.list.mkString),
-        annotationType => {
-          domainObjects = domainObjects + (classOf[SpecimenLinkAnnotationType] -> annotationType)
-          annotationType
-        }
-    )
+    val annotationType = SpecimenLinkAnnotationType(
+      id             = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType]),
+      studyId        = disabledStudy.id,
+      version        = 0L,
+      addedDate      = DateTime.now,
+      lastUpdateDate = None,
+      name           = nameGenerator.next[SpecimenLinkAnnotationType],
+      description    = Some(nameGenerator.next[SpecimenLinkAnnotationType]),
+      valueType      = AnnotationValueType.Select,
+      maxValueCount  = Some(1),
+      options        = Some(Seq(nameGenerator.next[String], nameGenerator.next[String])))
+    domainObjects = domainObjects + (classOf[SpecimenLinkAnnotationType] -> annotationType)
+    annotationType
   }
 
   def createProcessingType: ProcessingType = {
-    val processingTypeId = ProcessingTypeId(nameGenerator.next[ProcessingType])
-    val name = nameGenerator.next[ProcessingType]
-    val description = Some(nameGenerator.next[ProcessingType])
-
     val disabledStudy = defaultDisabledStudy
-    ProcessingType.create(
-      disabledStudy.id, processingTypeId, -1L, DateTime.now, name, description, enabled = true).fold(
-      err => throw new Error(err.list.mkString),
-        processingType => {
-          domainObjects = domainObjects + (classOf[ProcessingType] -> processingType)
-          processingType
-        }
-    )
+    val processingType = ProcessingType(
+      id             = ProcessingTypeId(nameGenerator.next[ProcessingType]),
+      studyId        = disabledStudy.id,
+      version        = 0L,
+      addedDate      = DateTime.now,
+      lastUpdateDate = None,
+      name           = nameGenerator.next[ProcessingType],
+      description    = Some(nameGenerator.next[ProcessingType]),
+      enabled        = false)
+
+    domainObjects = domainObjects + (classOf[ProcessingType] -> processingType)
+    processingType
   }
 
   def createSpecimenLinkType: SpecimenLinkType = {
-    val processingType = defaultProcessingType
-    val id = SpecimenLinkTypeId(nameGenerator.next[SpecimenLinkType])
-    val expectedInputChange = BigDecimal(1.0)
-    val expectedOutpuChange = BigDecimal(1.0)
-    val inputCount = 1
-    val outputCount = 1
+    val slt = SpecimenLinkType(
+      id                    = SpecimenLinkTypeId(nameGenerator.next[SpecimenLinkType]),
+      processingTypeId      = defaultProcessingType.id,
+      version               = 0L,
+      addedDate             = DateTime.now,
+      lastUpdateDate        = None,
+      expectedInputChange   = BigDecimal(1.0),
+      expectedOutputChange  = BigDecimal(1.0),
+      inputCount            = 1,
+      outputCount           = 1,
+      inputGroupId          = SpecimenGroupId(nameGenerator.next[SpecimenLinkType]),
+      outputGroupId         = SpecimenGroupId(nameGenerator.next[SpecimenLinkType]),
+      inputContainerTypeId  = None,
+      outputContainerTypeId = None,
+      annotationTypeData    = List.empty)
 
-    val disabledStudy = defaultDisabledStudy
-
-    SpecimenLinkType.create(
-      processingType.id, id, -1L, DateTime.now, expectedInputChange,
-      expectedOutpuChange, inputCount, outputCount,
-      SpecimenGroupId(nameGenerator.next[SpecimenGroup]),
-      SpecimenGroupId(nameGenerator.next[SpecimenGroup]),
-      annotationTypeData = List.empty).fold(
-      err => throw new Error(err.list.mkString),
-        slt => {
-          domainObjects = domainObjects + (classOf[SpecimenLinkType] -> slt)
-          slt
-        }
-    )
+    domainObjects = domainObjects + (classOf[SpecimenLinkType] -> slt)
+    slt
   }
 
   def createSpecimenLinkTypeAndSpecimenGroups: (SpecimenLinkType, SpecimenGroup, SpecimenGroup) = {
@@ -251,36 +261,39 @@ class Factory {
   def createSpecimenLinkTypeAnnotationTypeData: SpecimenLinkTypeAnnotationTypeData = {
     val annotationType = defaultSpecimenLinkAnnotationType
     val specimenLinkTypeAnnotationType = SpecimenLinkTypeAnnotationTypeData(
-      annotationType.id.id, true)
+      annotationType.id.id, required = true)
     domainObjects = domainObjects +
     (classOf[SpecimenLinkTypeAnnotationTypeData] -> specimenLinkTypeAnnotationType)
     specimenLinkTypeAnnotationType
   }
 
   def createDisabledCentre: DisabledCentre = {
-    val id = CentreId(nameGenerator.next[Centre])
-    val name = nameGenerator.next[Centre]
-    val description = Some(nameGenerator.next[Centre])
+    val centre = DisabledCentre(
+      id             = CentreId(nameGenerator.next[Centre]),
+      version        = 0L,
+      addedDate      = DateTime.now,
+      lastUpdateDate = None,
+      name           = nameGenerator.next[Centre],
+      description    = Some(nameGenerator.next[Centre]))
 
-    DisabledCentre.create(id, -1L, DateTime.now, name, description).fold(
-      err => throw new Error(err.list.mkString),
-      centre => {
-        domainObjects = domainObjects + (classOf[DisabledCentre] -> centre)
-        centre
-      }
-    )
+    domainObjects = domainObjects + (classOf[DisabledCentre] -> centre)
+    centre
   }
 
   def createEnabledCentre: EnabledCentre = {
-    val disabledCentre = defaultDisabledCentre
-    val enabledCentre = disabledCentre.enable | null
-    domainObjects = domainObjects + (classOf[EnabledCentre] -> enabledCentre)
-    domainObjects = domainObjects - classOf[DisabledCentre]
-    enabledCentre
+    val centre = EnabledCentre(
+      id             = CentreId(nameGenerator.next[Centre]),
+      version        = 0L,
+      addedDate      = DateTime.now,
+      lastUpdateDate = None,
+      name           = nameGenerator.next[Centre],
+      description    = Some(nameGenerator.next[Centre]))
+    domainObjects = domainObjects + (classOf[EnabledCentre] -> centre)
+    centre
   }
 
   def createLocation: Location = {
-    Location(
+    val location = Location(
       LocationId(nameGenerator.next[Location]),
       nameGenerator.next[Location],
       nameGenerator.next[Location],
@@ -289,6 +302,8 @@ class Factory {
       nameGenerator.next[Location],
       Some(nameGenerator.next[Location]),
       nameGenerator.next[Location])
+    domainObjects = domainObjects + (classOf[Location] -> location)
+    location
   }
 
   def defaultRegisteredUser: RegisteredUser = {

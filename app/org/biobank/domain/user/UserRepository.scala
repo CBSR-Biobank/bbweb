@@ -22,6 +22,8 @@ trait UserRepositoryComponent {
 
     def getLocked(id: UserId): DomainValidation[LockedUser]
 
+    def getByEmail(email: String): DomainValidation[User]
+
   }
 }
 
@@ -46,5 +48,12 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
     def getActive(id: UserId) = getByKey(id).map(_.asInstanceOf[ActiveUser])
 
     def getLocked(id: UserId) = getByKey(id).map(_.asInstanceOf[LockedUser])
+
+    def getByEmail(email: String): DomainValidation[User] = {
+      getValues.find(_.email == email) match {
+        case Some(user) => user.success
+        case None => DomainError(s"user with email not found: $email").failNel
+      }
+    }
   }
 }

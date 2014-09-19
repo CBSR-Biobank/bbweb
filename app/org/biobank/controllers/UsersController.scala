@@ -129,7 +129,7 @@ object UsersController extends CommandController with JsonController {
   /** Retrieves the user for the given id as JSON */
   def user(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Logger.info(s"user: id: $id")
-    usersService.getByEmail(id).fold(
+    usersService.getUser(id).fold(
       err => BadRequest(err.list.mkString(", ")),
       user => Ok(user)
     )
