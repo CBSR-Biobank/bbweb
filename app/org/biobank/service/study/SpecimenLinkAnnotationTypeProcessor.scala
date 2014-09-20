@@ -40,9 +40,7 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
       */
     val receiveRecover: Receive = {
       case event: SpecimenLinkAnnotationTypeAddedEvent => recoverEvent(event)
-
       case event: SpecimenLinkAnnotationTypeUpdatedEvent => recoverEvent(event)
-
       case event: SpecimenLinkAnnotationTypeRemovedEvent => recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -55,14 +53,9 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
       * back to the user. Each valid command generates one or more events and is journaled.
       */
     val receiveCommand: Receive = {
-
       case cmd: AddSpecimenLinkAnnotationTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: UpdateSpecimenLinkAnnotationTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: RemoveSpecimenLinkAnnotationTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
-      case cmd => throw new Error(s"invalid message received: $cmd")
     }
 
     /** Updates to annotation types only allowed if they are not being used by any participants.

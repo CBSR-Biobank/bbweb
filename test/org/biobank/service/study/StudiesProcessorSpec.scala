@@ -48,7 +48,6 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
     ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]].futureValue
   }
 
-
   "A study processor" can {
 
     "add a study" in {
@@ -105,7 +104,7 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
         )
 
         studyRepository.getDisabled(StudyId(event.id)) shouldSucceed { repoStudy =>
-          repoStudy.version should be (1L)
+          repoStudy.version should be (study.version + 1)
           checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
         }
       }
@@ -156,7 +155,7 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      ask(studiesProcessor, EnableStudyCmd(study.id.toString, 0L))
+      ask(studiesProcessor, EnableStudyCmd(study.id.toString, study.version))
         .mapTo[DomainValidation[StudyEnabledEvent]]
         .futureValue
         .shouldSucceed { event =>
@@ -175,7 +174,7 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val v = ask(studiesProcessor, EnableStudyCmd(study.id.toString, 0L))
+      val v = ask(studiesProcessor, EnableStudyCmd(study.id.toString, study.version))
         .mapTo[DomainValidation[StudyEnabledEvent]]
         .futureValue
       v shouldFail "no specimen groups"
@@ -188,7 +187,7 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
       val sg = factory.createSpecimenGroup
       specimenGroupRepository.put(sg)
 
-      val v = ask(studiesProcessor, EnableStudyCmd(study.id.toString, 0L))
+      val v = ask(studiesProcessor, EnableStudyCmd(study.id.toString, study.version))
         .mapTo[DomainValidation[StudyEnabledEvent]]
         .futureValue
       v shouldFail "no collection event types"
@@ -215,14 +214,23 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
       }
     }
 
+    "not disable a study that does not exist" in {
+      val studyId = nameGenerator.next[Study]
+
+      val v = ask(studiesProcessor, DisableStudyCmd(studyId, 0L))
+        .mapTo[DomainValidation[StudyDisabledEvent]]
+        .futureValue
+      v  shouldFail "study with id does not exist"
+    }
+
     "retire a study" in {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
 
-      val v = ask(studiesProcessor, RetireStudyCmd(study.id.toString, 0L))
+      val v = ask(studiesProcessor, RetireStudyCmd(study.id.toString, study.version))
         .mapTo[DomainValidation[StudyRetiredEvent]]
         .futureValue
-      v.shouldSucceed { event =>
+      v shouldSucceed { event =>
         event shouldBe a[StudyRetiredEvent]
         studyRepository.getRetired(StudyId(event.id)) shouldSucceed { repoStudy =>
           checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
@@ -236,6 +244,40 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
       askUpdateCommand(study) shouldFail "is not disabled"
     }
 
+    "unretire a study" in {
+      val study = factory.createRetiredStudy
+      studyRepository.put(study)
+
+      val v = ask(studiesProcessor, UnretireStudyCmd(study.id.toString, study.version))
+        .mapTo[DomainValidation[StudyUnretiredEvent]]
+        .futureValue
+      v shouldSucceed { event =>
+        event shouldBe a[StudyUnretiredEvent]
+        studyRepository.getDisabled(StudyId(event.id)) shouldSucceed { repoStudy =>
+          checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
+        }
+      }
+    }
+
+    "not unretire a disabled study" in {
+      val study = factory.createDisabledStudy
+      studyRepository.put(study)
+
+      val v = ask(studiesProcessor, UnretireStudyCmd(study.id.toString, study.version))
+        .mapTo[DomainValidation[StudyUnretiredEvent]]
+        .futureValue
+      v shouldFail "is not retired"
+    }
+
+    "not unretire an enabled study" in {
+      val study = factory.createEnabledStudy
+      studyRepository.put(study)
+
+      val v = ask(studiesProcessor, UnretireStudyCmd(study.id.toString, study.version))
+        .mapTo[DomainValidation[StudyUnretiredEvent]]
+        .futureValue
+      v shouldFail "is not retired"
+    }
 
     "be recovered from journal" ignore {
       /*

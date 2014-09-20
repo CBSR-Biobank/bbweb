@@ -54,9 +54,7 @@ trait SpecimenGroupProcessorComponent {
       */
     val receiveRecover: Receive = {
       case event: SpecimenGroupAddedEvent => recoverEvent(event)
-
       case event: SpecimenGroupUpdatedEvent => recoverEvent(event)
-
       case event: SpecimenGroupRemovedEvent => recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -69,12 +67,8 @@ trait SpecimenGroupProcessorComponent {
       */
     val receiveCommand: Receive = {
       case cmd: AddSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: UpdateSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: RemoveSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
-      case _ => throw new IllegalStateException("invalid command received")
     }
 
     def update

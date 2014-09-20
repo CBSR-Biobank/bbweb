@@ -64,8 +64,6 @@ trait CollectionEventTypeProcessorComponent {
       case cmd: AddCollectionEventTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: UpdateCollectionEventTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: RemoveCollectionEventTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
-      case cmd => throw new Error(s"invalid message received: $cmd")
     }
 
     def update

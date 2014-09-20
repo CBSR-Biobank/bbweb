@@ -112,8 +112,6 @@ trait StudiesProcessorComponent
       case cmd: ProcessingTypeCommand =>                validateAndForward(processingTypeProcessor, cmd)
       case cmd: SpecimenLinkTypeCommand =>              validateAndForward(specimenLinkTypeProcessor, cmd)
       case cmd: SpecimenLinkAnnotationTypeCommand =>    validateAndForward(specimenLinkAnnotationTypeProcessor,  cmd)
-
-      case cmd => context.sender ! DomainError(s"invalid command received: $cmd")
     }
 
     private def validateAndForward(childActor: ActorRef, cmd: StudyCommandWithId) = {
@@ -145,11 +143,13 @@ trait StudiesProcessorComponent
       (cmd: StudyCommand)
       (fn: Study => DomainValidation[T])
         : DomainValidation[T] = {
-      for {
-        study        <- studyRepository.getByKey(StudyId(cmd.id))
-        validVersion <-  study.requireVersion(cmd.expectedVersion)
-        updatedStudy <- fn(study)
-      } yield updatedStudy
+      studyRepository.getByKey(StudyId(cmd.id)).fold(
+        err => DomainError(s"study with id does not exist ${cmd.id}").failNel,
+        study => for {
+          validVersion <-  study.requireVersion(cmd.expectedVersion)
+          updatedStudy <- fn(study)
+        } yield updatedStudy
+      )
     }
 
     def updateDisabled[T <: Study]
@@ -301,45 +301,6 @@ trait StudiesProcessorComponent
           s.name, s.description))
       )
       ()
-    }
-
-    /**
-      * Utility method to validiate state of a study
-      */
-    private def isStudyDisabled(studyId: StudyId): DomainValidation[DisabledStudy] = {
-      studyRepository.getByKey(studyId).fold(
-        err => DomainError(s"no study with id: $studyId").failNel,
-        study => study match {
-          case dstudy: DisabledStudy => dstudy.success
-          case _ => DomainError(s"study is not disabled: ${study.name}").failNel
-        }
-      )
-    }
-
-    /**
-      * Utility method to validiate state of a study
-      */
-    private def isStudyEnabled(studyId: StudyId): DomainValidation[EnabledStudy] = {
-      studyRepository.getByKey(studyId).fold(
-        err => DomainError(s"no study with id: $studyId").failNel,
-        study => study match {
-          case enabledStudy: EnabledStudy => enabledStudy.success
-          case _ => DomainError(s"study is not enabled: ${study.name}").failNel
-        }
-      )
-    }
-
-    /**
-      * Utility method to validiate state of a study
-      */
-    private def isStudyRetired(studyId: StudyId): DomainValidation[RetiredStudy] = {
-      studyRepository.getByKey(studyId).fold(
-        err => DomainError(s"no study with id: $studyId").failNel,
-        study => study match {
-          case retiredStudy: RetiredStudy => retiredStudy.success
-          case _ => DomainError(s"study is not retired: ${study.name}").failNel
-        }
-      )
     }
 
     val errMsgNameExists = "study with name already exists"

@@ -59,8 +59,6 @@ trait ParticipantAnnotationTypeProcessorComponent {
         process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: RemoveParticipantAnnotationTypeCmd =>
         process(validateCmd(cmd)){ event => recoverEvent(event) }
-
-      case cmd => log.error(s"invalid message received: $cmd")
     }
 
     /** Updates to annotation types only allowed if they are not being used by any participants.

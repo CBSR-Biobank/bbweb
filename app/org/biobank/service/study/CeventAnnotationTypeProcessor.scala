@@ -61,8 +61,6 @@ trait CeventAnnotationTypeProcessorComponent {
         process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: RemoveCollectionEventAnnotationTypeCmd =>
         process(validateCmd(cmd)){ event => recoverEvent(event) }
-
-      case cmd => throw new Error(s"invalid message received: $cmd")
     }
 
     /** Updates to annotation types only allowed if they are not being used by any collection event types.

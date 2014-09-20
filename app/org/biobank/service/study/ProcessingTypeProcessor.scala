@@ -63,8 +63,6 @@ trait ProcessingTypeProcessorComponent {
       case cmd: AddProcessingTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: UpdateProcessingTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: RemoveProcessingTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
-      case cmd => throw new Error(s"invalid message received: $cmd")
     }
 
     def update

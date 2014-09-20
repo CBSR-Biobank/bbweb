@@ -51,9 +51,7 @@ trait SpecimenLinkTypeProcessorComponent {
       */
     val receiveRecover: Receive = {
       case event: SpecimenLinkTypeAddedEvent => recoverEvent(event)
-
       case event: SpecimenLinkTypeUpdatedEvent => recoverEvent(event)
-
       case event: SpecimenLinkTypeRemovedEvent => recoverEvent(event)
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -66,14 +64,9 @@ trait SpecimenLinkTypeProcessorComponent {
       * back to the user. Each valid command generates one or more events and is journaled.
       */
     val receiveCommand: Receive = {
-
       case cmd: AddSpecimenLinkTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: UpdateSpecimenLinkTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
       case cmd: RemoveSpecimenLinkTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-
-      case cmd => throw new Error(s"invalid message received: $cmd")
     }
 
     def update
