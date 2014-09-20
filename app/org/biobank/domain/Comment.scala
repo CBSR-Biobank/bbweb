@@ -10,6 +10,6 @@ import org.joda.time.DateTime
   *
   * @param message The text entered by the user.
   *
-  * @param addedDate The date and time the comment was made.
+  * @param timeAdded The date and time the comment was made.
   */
-case class Comment(userId: UserId, message: String, addedDate: DateTime)
+case class Comment(userId: UserId, message: String, timeAdded: DateTime)

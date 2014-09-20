@@ -194,7 +194,7 @@ trait StudiesProcessorComponent
         newStudy <- DisabledStudy.create(
           studyId, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description)
         event <- StudyAddedEvent(
-          newStudy.id.id, newStudy.addedDate, newStudy.name, newStudy.description).success
+          newStudy.id.id, newStudy.timeAdded, newStudy.name, newStudy.description).success
        } yield event
     }
 
@@ -262,7 +262,7 @@ trait StudiesProcessorComponent
         err => throw new IllegalStateException(s"updating study from event failed: $err"),
         s => studyRepository.put(s.copy(
           version = event.version, name = event.name, description = event.description,
-          lastUpdateDate = Some(event.dateTime)))
+          timeModified = Some(event.dateTime)))
       )
       ()
     }
@@ -270,7 +270,7 @@ trait StudiesProcessorComponent
     private def recoverEvent(event: StudyEnabledEvent) {
       studyRepository.getDisabled(StudyId(event.id)).fold(
         err => throw new IllegalStateException(s"enabling study from event failed: $err"),
-        s => studyRepository.put(EnabledStudy(s.id, event.version, s.addedDate, Some(event.dateTime),
+        s => studyRepository.put(EnabledStudy(s.id, event.version, s.timeAdded, Some(event.dateTime),
           s.name, s.description))
       )
       ()
@@ -279,7 +279,7 @@ trait StudiesProcessorComponent
     private def recoverEvent(event: StudyDisabledEvent) {
       studyRepository.getEnabled(StudyId(event.id)).fold(
         err => throw new IllegalStateException(s"disabling study from event failed: $err"),
-        s => studyRepository.put(DisabledStudy(s.id, event.version, s.addedDate, Some(event.dateTime),
+        s => studyRepository.put(DisabledStudy(s.id, event.version, s.timeAdded, Some(event.dateTime),
           s.name, s.description))
       )
       ()
@@ -288,7 +288,7 @@ trait StudiesProcessorComponent
     private def recoverEvent(event: StudyRetiredEvent) {
       studyRepository.getDisabled(StudyId(event.id)).fold(
         err => throw new IllegalStateException(s"retiring study from event failed: $err"),
-        s => studyRepository.put(RetiredStudy(s.id, event.version, s.addedDate, Some(event.dateTime),
+        s => studyRepository.put(RetiredStudy(s.id, event.version, s.timeAdded, Some(event.dateTime),
           s.name, s.description))
       )
       ()
@@ -297,7 +297,7 @@ trait StudiesProcessorComponent
     private def recoverEvent(event: StudyUnretiredEvent) {
       studyRepository.getRetired(StudyId(event.id)).fold(
         err => throw new IllegalStateException(s"disabling study from event failed: $err"),
-        s => studyRepository.put(DisabledStudy(s.id, event.version, s.addedDate, Some(event.dateTime),
+        s => studyRepository.put(DisabledStudy(s.id, event.version, s.timeAdded, Some(event.dateTime),
           s.name, s.description))
       )
       ()

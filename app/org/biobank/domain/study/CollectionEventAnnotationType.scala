@@ -18,8 +18,8 @@ case class CollectionEventAnnotationType (
   studyId: StudyId,
   id: AnnotationTypeId,
   version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   name: String,
   description: Option[String],
   valueType: AnnotationValueType,
@@ -33,8 +33,8 @@ case class CollectionEventAnnotationType (
         |  studyId: $studyId,
         |  id: $id,
         |  version: $version,
-        |  addedDate: $addedDate,
-        |  lastUpdateDate: $lastUpdateDate,
+        |  timeAdded: $timeAdded,
+        |  timeModified: $timeModified,
         |  name: $name,
         |  description: $description,
         |  valueType: $valueType,
@@ -49,7 +49,7 @@ case class CollectionEventAnnotationType (
     maxValueCount: Option[Int] = None,
     options: Option[Seq[String]] = None): DomainValidation[CollectionEventAnnotationType] = {
     CollectionEventAnnotationType.create(
-      this.studyId, this.id, this.version, this.addedDate, name, description, valueType, maxValueCount, options)
+      this.studyId, this.id, this.version, this.timeAdded, name, description, valueType, maxValueCount, options)
   }
 }
 
@@ -82,8 +82,8 @@ object CollectionEventAnnotationType extends StudyAnnotationTypeValidations {
       (__ \ "studyId").write[StudyId] and
       (__ \ "id").write[AnnotationTypeId] and
       (__ \ "version").write[Long] and
-      (__ \ "addedDate").write[DateTime] and
-      (__ \ "lastUpdateDate").write[Option[DateTime]] and
+      (__ \ "timeAdded").write[DateTime] and
+      (__ \ "timeModified").write[Option[DateTime]] and
       (__ \ "name").write[String] and
       (__ \ "description").write[Option[String]] and
       (__ \ "valueType").write[AnnotationValueType] and

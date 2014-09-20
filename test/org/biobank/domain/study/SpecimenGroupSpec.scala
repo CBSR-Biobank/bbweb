@@ -49,8 +49,8 @@ class SpecimenGroupSpec extends DomainSpec {
         'specimenType                  (specimenType)
       )
 
-      (specimenGroup.addedDate to DateTime.now).millis should be < 100L
-      specimenGroup.lastUpdateDate should be (None)
+      (specimenGroup.timeAdded to DateTime.now).millis should be < 100L
+      specimenGroup.timeModified should be (None)
     }
 
     "be updated" in {
@@ -81,8 +81,8 @@ class SpecimenGroupSpec extends DomainSpec {
         'specimenType                (specimenType)
       )
 
-      (specimenGroup.addedDate to updatedSg.addedDate).millis should be < 100L
-      updatedSg.lastUpdateDate should be (None)
+      (specimenGroup.timeAdded to updatedSg.timeAdded).millis should be < 100L
+      updatedSg.timeModified should be (None)
     }
 
   }

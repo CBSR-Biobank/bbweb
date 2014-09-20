@@ -43,8 +43,8 @@ case class SpecimenGroup(
   studyId: StudyId,
   id: SpecimenGroupId,
   version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   name: String,
   description: Option[String],
   units: String,
@@ -63,8 +63,8 @@ case class SpecimenGroup(
         |  id: $id,
         |  version: $version,
         |  name: $name,
-        |  addedDate: $addedDate,
-        |  lastUpdateDate: $lastUpdateDate,
+        |  timeAdded: $timeAdded,
+        |  timeModified: $timeModified,
         |  description: $description,
         |  units: $units,
         |  anatomicalSourceType: $anatomicalSourceType,
@@ -82,7 +82,7 @@ case class SpecimenGroup(
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
     SpecimenGroup.create(
-      this.studyId, this.id, this.version, this.addedDate, name, description, units, anatomicalSourceType,
+      this.studyId, this.id, this.version, this.timeAdded, name, description, units, anatomicalSourceType,
       preservationType, preservationTemperatureType, specimenType)
   }
 }
@@ -136,8 +136,8 @@ object SpecimenGroup extends SpecimenGroupValidations with StudyAnnotationTypeVa
     (__ \ "studyId").write[StudyId] and
       (__ \ "id").write[SpecimenGroupId] and
       (__ \ "version").write[Long] and
-      (__ \ "addedDate").write[DateTime] and
-      (__ \ "lastUpdateDate").write[Option[DateTime]] and
+      (__ \ "timeAdded").write[DateTime] and
+      (__ \ "timeModified").write[Option[DateTime]] and
       (__ \ "name").write[String] and
       (__ \ "description").write[Option[String]] and
       (__ \ "units").write[String] and

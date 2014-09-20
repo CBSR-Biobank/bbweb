@@ -46,8 +46,8 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
         'required  (required)
       )
 
-      (annotType.addedDate to DateTime.now).millis should be < 200L
-      annotType.lastUpdateDate should be (None)
+      (annotType.timeAdded to DateTime.now).millis should be < 200L
+      annotType.timeModified should be (None)
     }
 
     "be updated" in {
@@ -76,9 +76,9 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
         'required  (required)
       )
 
-      annotType2.addedDate should be (annotType.addedDate)
+      annotType2.timeAdded should be (annotType.timeAdded)
       // last update date is assigned by the processor
-      annotType2.lastUpdateDate should be (None)
+      annotType2.timeModified should be (None)
     }
 
   }

@@ -182,7 +182,7 @@ class SpecimenLinkTypeProcessorSpec extends StudiesProcessorFixture {
         specimenLinkTypeRepository.withId(
           pt.id, SpecimenLinkTypeId(event.specimenLinkTypeId)) shouldSucceed { repoSlt =>
           repoSlt.version should be (1)
-          checkTimeStamps(repoSlt, slType.addedDate, DateTime.now)
+          checkTimeStamps(repoSlt, slType.timeAdded, DateTime.now)
         }
       }
     }

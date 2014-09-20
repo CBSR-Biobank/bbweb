@@ -52,8 +52,8 @@ class UserSpec extends DomainSpec {
           'avatarUrl (avatarUrl)
         )
 
-        user.addedDate should be (timeNow)
-        user.lastUpdateDate should be (None)
+        user.timeAdded should be (timeNow)
+        user.timeModified should be (None)
       }
     }
 
@@ -63,17 +63,17 @@ class UserSpec extends DomainSpec {
       val activeUser = user.activate  | fail
       activeUser shouldBe a[ActiveUser]
       activeUser.version should be(user.version + 1)
-      activeUser.addedDate should be (user.addedDate)
+      activeUser.timeAdded should be (user.timeAdded)
 
       val lockedUser = activeUser.lock | fail
       lockedUser shouldBe a[LockedUser]
       lockedUser.version should be(activeUser.version + 1)
-      lockedUser.addedDate should be (user.addedDate)
+      lockedUser.timeAdded should be (user.timeAdded)
 
       val unlockedUser = lockedUser.unlock | fail
       unlockedUser shouldBe a[ActiveUser]
       unlockedUser.version should be(lockedUser.version + 1)
-      unlockedUser.addedDate should be (user.addedDate)
+      unlockedUser.timeAdded should be (user.timeAdded)
     }
   }
 

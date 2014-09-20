@@ -140,7 +140,7 @@ trait ParticipantAnnotationTypeProcessorComponent {
           maxValueCount = event.maxValueCount,
           options       = event.options,
           required      = event.required,
-          lastUpdateDate = Some(event.dateTime)))
+          timeModified = Some(event.dateTime)))
       )
       ()
     }

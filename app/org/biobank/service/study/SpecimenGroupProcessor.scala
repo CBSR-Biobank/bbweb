@@ -151,7 +151,7 @@ trait SpecimenGroupProcessorComponent {
         err => throw new IllegalStateException(s"updating annotation type from event failed: $err"),
         sg => specimenGroupRepository.put(sg.copy(
           version                     = event.version,
-          lastUpdateDate              = Some(event.dateTime),
+          timeModified              = Some(event.dateTime),
           name                        = event.name,
           description                 = event.description,
           units                       = event.units,

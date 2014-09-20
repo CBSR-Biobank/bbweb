@@ -50,8 +50,8 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
     s"""|${this.getClass.getSimpleName}: {
         |  id: $id,
         |  version: $version,
-        |  addedDate: $addedDate,
-        |  lastUpdateDate: $lastUpdateDate,
+        |  timeAdded: $timeAdded,
+        |  timeModified: $timeModified,
         |  name: $name,
         |  email: $email,
         |  password: $password,
@@ -67,8 +67,8 @@ object User {
     def writes(user: User) = Json.obj(
       "id"             -> user.id,
       "version"        -> user.version,
-      "addedDate"      -> user.addedDate,
-      "lastUpdateDate" -> user.lastUpdateDate,
+      "timeAdded"      -> user.timeAdded,
+      "timeModified" -> user.timeModified,
       "name"           -> user.name,
       "email"          -> user.email,
       "avatarUrl"      -> user.avatarUrl,
@@ -118,8 +118,8 @@ trait UserValidations {
 case class RegisteredUser (
   id: UserId,
   version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   name: String,
   email: String,
   password: String,
@@ -167,8 +167,8 @@ object RegisteredUser extends UserValidations {
 case class ActiveUser (
   id: UserId,
   version: Long = -1,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   name: String,
   email: String,
   password: String,
@@ -220,7 +220,7 @@ object ActiveUser extends UserValidations {
       validateString(user.password, PasswordRequired) |@|
       validateString(user.salt, SaltRequired) |@|
       validateAvatarUrl(user.avatarUrl)) {
-        ActiveUser(_, _, user.addedDate, None, _, _, _, _, _)
+        ActiveUser(_, _, user.timeAdded, None, _, _, _, _, _)
       }
   }
 
@@ -230,8 +230,8 @@ object ActiveUser extends UserValidations {
 case class LockedUser (
   id: UserId,
   version: Long = -1,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   name: String,
   email: String,
   password: String,
@@ -260,7 +260,7 @@ object LockedUser extends UserValidations {
       validateString(user.password, PasswordRequired) |@|
       validateString(user.salt, SaltRequired) |@|
       validateAvatarUrl(user.avatarUrl)) {
-        LockedUser(_, _, user.addedDate, None, _, _, _, _, _)
+        LockedUser(_, _, user.timeAdded, None, _, _, _, _, _)
       }
   }
 

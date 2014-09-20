@@ -18,7 +18,7 @@ case class Participant(
   studyId: StudyId,
   id: ParticipantId,
   version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   uniqueId: String) extends ConcurrencySafeEntity[ParticipantId] {
 }

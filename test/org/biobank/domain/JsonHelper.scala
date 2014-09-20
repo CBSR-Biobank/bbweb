@@ -18,9 +18,9 @@ object JsonHelper extends Matchers {
     (json \ "id").as[String]    should be (entity.id.toString)
     (json \ "version").as[Long] should be (entity.version)
 
-    ((json \ "addedDate").as[DateTime] to entity.addedDate).millis should be < 1000L
-    (json \ "lastUpdateDate").as[Option[DateTime]] map { dateTime =>
-      (dateTime to entity.lastUpdateDate.get).millis should be < 1000L
+    ((json \ "timeAdded").as[DateTime] to entity.timeAdded).millis should be < 1000L
+    (json \ "timeModified").as[Option[DateTime]] map { dateTime =>
+      (dateTime to entity.timeModified.get).millis should be < 1000L
     }
   }
 

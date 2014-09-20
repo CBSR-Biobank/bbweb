@@ -132,7 +132,7 @@ class CeventAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
         collectionEventAnnotationTypeRepository.withId(
           disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) shouldSucceed { at =>
           at.version should be(1)
-          checkTimeStamps(at, annotType.addedDate, DateTime.now)
+          checkTimeStamps(at, annotType.timeAdded, DateTime.now)
         }
       }
     }

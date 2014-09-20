@@ -167,7 +167,7 @@ trait CentresProcessorComponent {
         err => throw new IllegalStateException(s"updating centre from event failed: $err"),
         centre => centreRepository.put(centre.copy(
           version = event.version,
-          lastUpdateDate = Some(event.dateTime),
+          timeModified = Some(event.dateTime),
           name = event.name,
           description = event.description))
       )
@@ -178,7 +178,7 @@ trait CentresProcessorComponent {
       getDisabled(event.id).fold(
         err => throw new IllegalStateException(s"enabling centre from event failed: $err"),
         centre => centreRepository.put(EnabledCentre(
-          CentreId(event.id), event.version, centre.addedDate, Some(event.dateTime),
+          CentreId(event.id), event.version, centre.timeAdded, Some(event.dateTime),
           centre.name, centre.description))
       )
       ()
@@ -188,7 +188,7 @@ trait CentresProcessorComponent {
       getEnabled(event.id).fold(
         err => throw new IllegalStateException(s"disabling centre from event failed: $err"),
         centre => centreRepository.put(DisabledCentre(
-          CentreId(event.id), event.version, centre.addedDate, Some(event.dateTime),
+          CentreId(event.id), event.version, centre.timeAdded, Some(event.dateTime),
           centre.name, centre.description))
       )
       ()

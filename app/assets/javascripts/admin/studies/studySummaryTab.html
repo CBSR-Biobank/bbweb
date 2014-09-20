@@ -39,15 +39,15 @@
         <p class="text-muted"><strong>Date Added:</strong></p>
       </div>
       <div class="col-md-10">
-        <p class="text-muted">{{study.addedDate}}</p>
+        <p class="text-muted">{{study.timeAdded}}</p>
       </div>
     </div>
     <div class="row">
-      <div class="col-md-2" data-ng-if="study.lastUpdateDate != null">
+      <div class="col-md-2" data-ng-if="study.timeModified != null">
         <p class="text-muted"><strong>Last updated:</strong></p>
       </div>
       <div class="col-md-10">
-        <p class="text-muted">{{study.lastUpdateDate}}</p>
+        <p class="text-muted">{{study.timeModified}}</p>
       </div>
     </div>
   </div>

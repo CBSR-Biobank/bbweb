@@ -123,7 +123,7 @@ class ProcessingTypeProcessorSpec extends StudiesProcessorFixture {
         processingTypeRepository.withId(
           disabledStudy.id, ProcessingTypeId(event.processingTypeId)) shouldSucceed { repoPt =>
           repoPt.version should be(1)
-          checkTimeStamps(repoPt, procType.addedDate, DateTime.now)
+          checkTimeStamps(repoPt, procType.timeAdded, DateTime.now)
         }
       }
     }

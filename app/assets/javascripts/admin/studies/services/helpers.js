@@ -193,9 +193,9 @@ define(['angular', 'underscore'], function(angular, _) {
     return {
       get: function(modelObj) {
         var data = [];
-        data.push({name: 'Date added:', value: modelObj.addedDate});
-        if (modelObj.lastUpdateDate !== null) {
-          data.push({name: 'Last updated:', value: modelObj.lastUpdateDate});
+        data.push({name: 'Date added:', value: modelObj.timeAdded});
+        if (modelObj.timeModified !== null) {
+          data.push({name: 'Last updated:', value: modelObj.timeModified});
         }
         return data;
       }

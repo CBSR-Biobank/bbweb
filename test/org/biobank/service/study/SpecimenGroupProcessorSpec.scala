@@ -148,7 +148,7 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
         specimenGroupRepository.withId(
           disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) shouldSucceed { repoSg =>
           repoSg.version should be (sg.version + 1)
-          checkTimeStamps(repoSg, sg.addedDate, DateTime.now)
+          checkTimeStamps(repoSg, sg.timeAdded, DateTime.now)
         }
       }
     }

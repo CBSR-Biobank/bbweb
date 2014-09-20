@@ -135,7 +135,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
         collectionEventTypeRepository.allForStudy(disabledStudy.id) should have size 1
         collectionEventTypeRepository.withId(
           disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) shouldSucceed { repoCet =>
-          checkTimeStamps(repoCet, cet.addedDate, DateTime.now)
+          checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
         }
       }
     }
@@ -242,7 +242,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
         collectionEventTypeRepository.withId(
           disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) shouldSucceed { repoCet =>
           repoCet.version should be(1)
-          checkTimeStamps(repoCet, cet.addedDate, DateTime.now)
+          checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
         }
       }
     }
@@ -280,7 +280,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
         collectionEventTypeRepository.withId(
           disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) shouldSucceed { repoCet =>
           repoCet.version should be(1)
-          checkTimeStamps(repoCet, cet.addedDate, DateTime.now)
+          checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
         }
       }
     }
@@ -382,7 +382,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
 
         collectionEventTypeRepository.withId(
           disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) shouldSucceed { repoCet =>
-          checkTimeStamps(repoCet, cet.addedDate, DateTime.now)
+          checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
         }
       }
     }

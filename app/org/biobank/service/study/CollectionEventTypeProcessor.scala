@@ -141,7 +141,7 @@ trait CollectionEventTypeProcessorComponent {
         err => throw new IllegalStateException(s"updating collection event type from event failed: $err"),
         cet => collectionEventTypeRepository.put(cet.copy(
           version            = event.version,
-          lastUpdateDate     = Some(event.dateTime),
+          timeModified     = Some(event.dateTime),
           name               = event.name,
           description        = event.description,
           recurring          = event.recurring,

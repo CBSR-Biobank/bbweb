@@ -30,9 +30,9 @@
             <p>{{centre.description === null ? "" : centre.description | truncate:100}}</p>
             <p>
               <small class="text-info"><strong>Status:</strong> {{centre.status}}</small><br>
-              <small class="text-muted"><strong>Added:</strong> {{centre.addedDate}}</small><br>
-              <span data-ng-if="centre.lastUpdateDate != null">
-                <small class="text-muted"><strong>Last updated:</strong> {{centre.lastUpdateDate}}</small>
+              <small class="text-muted"><strong>Added:</strong> {{centre.timeAdded}}</small><br>
+              <span data-ng-if="centre.timeModified != null">
+                <small class="text-muted"><strong>Last updated:</strong> {{centre.timeModified}}</small>
               </span>
             </br>
             <p>

@@ -37,8 +37,8 @@ class ProcessingTypeSpec extends DomainSpec {
           'enabled (enabled)
         )
 
-        (processingType.addedDate to DateTime.now).millis should be < 100L
-        processingType.lastUpdateDate should be (None)
+        (processingType.timeAdded to DateTime.now).millis should be < 100L
+        processingType.timeModified should be (None)
       }
     }
 
@@ -62,8 +62,8 @@ class ProcessingTypeSpec extends DomainSpec {
           'enabled (enabled)
         )
 
-        pt2.addedDate should be (processingType.addedDate)
-        pt2.lastUpdateDate should be (None)
+        pt2.timeAdded should be (processingType.timeAdded)
+        pt2.timeModified should be (None)
       }
     }
   }

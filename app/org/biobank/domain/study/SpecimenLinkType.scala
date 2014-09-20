@@ -65,8 +65,8 @@ case class SpecimenLinkType(
   processingTypeId: ProcessingTypeId,
   id: SpecimenLinkTypeId,
   version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   expectedInputChange: BigDecimal,
   expectedOutputChange: BigDecimal,
   inputCount: Int,
@@ -91,7 +91,7 @@ case class SpecimenLinkType(
     outputContainerTypeId: Option[ContainerTypeId] = None,
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData]): DomainValidation[SpecimenLinkType] = {
     SpecimenLinkType.create(
-      this.processingTypeId, this.id, this.version, this.addedDate, expectedInputChange, expectedOutputChange,
+      this.processingTypeId, this.id, this.version, this.timeAdded, expectedInputChange, expectedOutputChange,
       inputCount, outputCount, inputGroupId, outputGroupId, inputContainerTypeId, outputContainerTypeId,
       annotationTypeData)
   }
@@ -101,8 +101,8 @@ case class SpecimenLinkType(
         |  processingTypeId: $processingTypeId,
         |  id: $id,
         |  version: $version,
-        |  addedDate: $addedDate,
-        |  lastUpdateDate: $lastUpdateDate,
+        |  timeAdded: $timeAdded,
+        |  timeModified: $timeModified,
         |  expectedInputChange: $expectedInputChange,
         |  expectedOutputChange: $expectedOutputChange,
         |  inputCount: $inputCount,
@@ -186,8 +186,8 @@ object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotation
     (__ \ "processingTypeId").write[ProcessingTypeId] and
       (__ \ "id").write[SpecimenLinkTypeId] and
       (__ \ "version").write[Long] and
-      (__ \ "addedDate").write[DateTime] and
-      (__ \ "lastUpdateDate").write[Option[DateTime]] and
+      (__ \ "timeAdded").write[DateTime] and
+      (__ \ "timeModified").write[Option[DateTime]] and
       (__ \ "expectedInputChange").write[BigDecimal] and
       (__ \ "expectedOutputChange").write[BigDecimal] and
       (__ \ "inputCount").write[Int] and

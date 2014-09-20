@@ -34,8 +34,8 @@ class StudySpec extends DomainSpec {
         'description (description)
       )
 
-      (study.addedDate to DateTime.now).millis should be < 100L
-      study.lastUpdateDate should be (None)
+      (study.timeAdded to DateTime.now).millis should be < 100L
+      study.timeModified should be (None)
     }
 
     "be updated" in {
@@ -59,7 +59,7 @@ class StudySpec extends DomainSpec {
         'description (description2)
       )
 
-      updatedStudy.addedDate should be (study.addedDate)
+      updatedStudy.timeAdded should be (study.timeAdded)
     }
 
     "be enabled" in {
@@ -74,7 +74,7 @@ class StudySpec extends DomainSpec {
       val enabledStudy = study.enable(1, 1) | fail
       enabledStudy shouldBe a[EnabledStudy]
 
-      enabledStudy.addedDate should be (study.addedDate)
+      enabledStudy.timeAdded should be (study.timeAdded)
     }
 
     "disable an enabled study" in {
@@ -91,7 +91,7 @@ class StudySpec extends DomainSpec {
       val disabledStudy = enabledStudy.disable | fail
       disabledStudy shouldBe a[DisabledStudy]
 
-      disabledStudy.addedDate should be (study.addedDate)
+      disabledStudy.timeAdded should be (study.timeAdded)
     }
 
     "be retired" in {
@@ -106,7 +106,7 @@ class StudySpec extends DomainSpec {
       val retiredStudy = study.retire | fail
       retiredStudy shouldBe a[RetiredStudy]
 
-      retiredStudy.addedDate should be (study.addedDate)
+      retiredStudy.timeAdded should be (study.timeAdded)
     }
 
     "unretire a study" in {
@@ -122,7 +122,7 @@ class StudySpec extends DomainSpec {
       val disabledStudy =retiredStudy.unretire | fail
       disabledStudy shouldBe a[DisabledStudy]
 
-      disabledStudy.addedDate should be (study.addedDate)
+      disabledStudy.timeAdded should be (study.timeAdded)
     }
 
   }

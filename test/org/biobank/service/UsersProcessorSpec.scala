@@ -69,7 +69,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       v shouldSucceed { event =>
         event shouldBe a[UserActivatedEvent]
         userRepository.getActive(UserId(event.id)) shouldSucceed { repoUser =>
-          checkTimeStamps(repoUser, user.addedDate, DateTime.now)
+          checkTimeStamps(repoUser, user.timeAdded, DateTime.now)
         }
       }
     }
@@ -102,7 +102,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
         )
 
         userRepository.getActive(UserId(event.id)) shouldSucceed { repoUser =>
-          checkTimeStamps(repoUser, user.addedDate, DateTime.now)
+          checkTimeStamps(repoUser, user.timeAdded, DateTime.now)
         }
       }
     }
@@ -137,7 +137,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
         )
 
         userRepository.getActive(UserId(event.id)) shouldSucceed { repoUser =>
-          checkTimeStamps(repoUser, user.addedDate, DateTime.now)
+          checkTimeStamps(repoUser, user.timeAdded, DateTime.now)
         }
       }
     }
@@ -177,7 +177,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
         event.salt.length should be > 0
 
         userRepository.getActive(UserId(event.id)) shouldSucceed { repoUser =>
-          checkTimeStamps(repoUser, user.addedDate, DateTime.now)
+          checkTimeStamps(repoUser, user.timeAdded, DateTime.now)
         }
       }
     }
@@ -217,7 +217,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
         event.salt.length should be > 0
 
         userRepository.getActive(UserId(event.id)) shouldSucceed { repoUser =>
-          checkTimeStamps(repoUser, user.addedDate, DateTime.now)
+          checkTimeStamps(repoUser, user.timeAdded, DateTime.now)
         }
       }
     }
@@ -246,7 +246,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
         event.id should be(activeUser.id.id)
 
         userRepository.getLocked(UserId(event.id)) shouldSucceed { repoUser =>
-          checkTimeStamps(repoUser, activeUser.addedDate, DateTime.now)
+          checkTimeStamps(repoUser, activeUser.timeAdded, DateTime.now)
         }
       }
     }
@@ -274,7 +274,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
         event.id should be(lockedUser.id.id)
 
         userRepository.getActive(UserId(event.id)) shouldSucceed { repoUser =>
-          checkTimeStamps(repoUser, lockedUser.addedDate, DateTime.now)
+          checkTimeStamps(repoUser, lockedUser.timeAdded, DateTime.now)
         }
       }
     }

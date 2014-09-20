@@ -42,8 +42,8 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
         'options (options)
       )
 
-      (annotType.addedDate to DateTime.now).millis should be < 100L
-      annotType.lastUpdateDate should be (None)
+      (annotType.timeAdded to DateTime.now).millis should be < 100L
+      annotType.timeModified should be (None)
     }
 
     "be updated" in {
@@ -71,8 +71,8 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
         'options (options)
       )
 
-      annotType2.addedDate should be (annotType.addedDate)
-      annotType2.lastUpdateDate should be (None)
+      annotType2.timeAdded should be (annotType.timeAdded)
+      annotType2.timeModified should be (None)
     }
 
   }

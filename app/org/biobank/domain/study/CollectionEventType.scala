@@ -52,8 +52,8 @@ case class CollectionEventType(
   studyId: StudyId,
   id: CollectionEventTypeId,
   version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   name: String,
   description: Option[String],
   recurring: Boolean,
@@ -71,7 +71,7 @@ case class CollectionEventType(
     specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
     annotationTypeData: List[CollectionEventTypeAnnotationTypeData]): DomainValidation[CollectionEventType] = {
     CollectionEventType.create(
-      this.studyId, this.id, this.version, this.addedDate, name, description, recurring, specimenGroupData,
+      this.studyId, this.id, this.version, this.timeAdded, name, description, recurring, specimenGroupData,
       annotationTypeData)
   }
 
@@ -80,8 +80,8 @@ case class CollectionEventType(
         |  studyId: $studyId,
         |  id: $id,
         |  version: $version,
-        |  addedDate: $addedDate,
-        |  lastUpdateDate: $lastUpdateDate,
+        |  timeAdded: $timeAdded,
+        |  timeModified: $timeModified,
         |  name: $name,
         |  description: $description,
         |  recurring: $recurring,
@@ -137,8 +137,8 @@ object CollectionEventType extends CollectionEventTypeValidations with StudyAnno
     (__ \ "studyId").write[StudyId] and
       (__ \ "id").write[CollectionEventTypeId] and
       (__ \ "version").write[Long] and
-      (__ \ "addedDate").write[DateTime] and
-      (__ \ "lastUpdateDate").write[Option[DateTime]] and
+      (__ \ "timeAdded").write[DateTime] and
+      (__ \ "timeModified").write[Option[DateTime]] and
       (__ \ "name").write[String] and
       (__ \ "description").write[Option[String]] and
       (__ \ "recurring").write[Boolean] and

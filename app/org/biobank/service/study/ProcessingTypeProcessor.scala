@@ -130,7 +130,7 @@ trait ProcessingTypeProcessorComponent {
         err => throw new IllegalStateException(s"updating processing type from event failed: $err"),
         pt => processingTypeRepository.put(pt.copy(
           version        = event.version,
-          lastUpdateDate = Some(event.dateTime),
+          timeModified = Some(event.dateTime),
           name           = event.name,
           description    = event.description,
           enabled        = event.enabled))

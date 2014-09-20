@@ -142,7 +142,7 @@ trait CeventAnnotationTypeProcessorComponent {
           valueType     = event.valueType,
           maxValueCount = event.maxValueCount,
           options       = event.options,
-          lastUpdateDate = Some(event.dateTime)))
+          timeModified = Some(event.dateTime)))
       )
       ()
     }

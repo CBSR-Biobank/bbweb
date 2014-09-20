@@ -46,8 +46,8 @@ sealed trait Centre
     s"""|${this.getClass.getSimpleName}: {
         |  id: $id,
         |  version: $version,
-        |  addedDate: $addedDate,
-        |  lastUpdateDate: $lastUpdateDate,
+        |  timeAdded: $timeAdded,
+        |  timeModified: $timeModified,
         |  name: $name,
         |  description: $description
         |}""".stripMargin
@@ -60,8 +60,8 @@ object Centre {
     def writes(centre: Centre) = Json.obj(
       "id"             -> centre.id,
       "version"        -> centre.version,
-      "addedDate"      -> centre.addedDate,
-      "lastUpdateDate" -> centre.lastUpdateDate,
+      "timeAdded"      -> centre.timeAdded,
+      "timeModified" -> centre.timeModified,
       "name"           -> centre.name,
       "description"    -> centre.description,
       "status"         -> centre.status
@@ -80,8 +80,8 @@ object Centre {
 case class DisabledCentre(
   id: CentreId,
   version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   name: String,
   description: Option[String])
     extends Centre {
@@ -92,7 +92,7 @@ case class DisabledCentre(
   def update(
     name: String,
     description: Option[String]): DomainValidation[DisabledCentre] = {
-    DisabledCentre.create(this.id, this.version, this.addedDate, name, description)
+    DisabledCentre.create(this.id, this.version, this.timeAdded, name, description)
   }
 
   /** Used to enable a centre after it has been configured, or had configuration changes made on it. */
@@ -136,8 +136,8 @@ object DisabledCentre {
 case class EnabledCentre(
   id: CentreId,
   version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   name: String,
   description: Option[String])
   extends Centre {
@@ -145,7 +145,7 @@ case class EnabledCentre(
   override val status: String = "Enabled"
 
   def disable: DomainValidation[DisabledCentre] = {
-    DisabledCentre.create(this.id, this.version, this.addedDate, name, description)
+    DisabledCentre.create(this.id, this.version, this.timeAdded, name, description)
   }
 }
 
@@ -162,7 +162,7 @@ object EnabledCentre {
       validateAndIncrementVersion(centre.version) |@|
       validateString(centre.name, NameRequired) |@|
       validateNonEmptyOption(centre.description, NonEmptyDescription)) {
-        EnabledCentre(_, _, centre.addedDate, None, _, _)
+        EnabledCentre(_, _, centre.timeAdded, None, _, _)
       }
   }
 }

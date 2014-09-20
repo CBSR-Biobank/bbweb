@@ -43,8 +43,8 @@ sealed trait Study
     s"""|${this.getClass.getSimpleName}: {
         |  id: $id,
         |  version: $version,
-        |  addedDate: $addedDate,
-        |  lastUpdateDate: $lastUpdateDate,
+        |  timeAdded: $timeAdded,
+        |  timeModified: $timeModified,
         |  name: $name,
         |  description: $description
         |}""".stripMargin
@@ -57,8 +57,8 @@ object Study {
     def writes(study: Study) = Json.obj(
       "id"             -> study.id,
       "version"        -> study.version,
-      "addedDate"      -> study.addedDate,
-      "lastUpdateDate" -> study.lastUpdateDate,
+      "timeAdded"      -> study.timeAdded,
+      "timeModified" -> study.timeModified,
       "name"           -> study.name,
       "description"    -> study.description,
       "status"         -> study.status
@@ -76,8 +76,8 @@ object Study {
 case class DisabledStudy(
   id: StudyId,
   version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   name: String,
   description: Option[String])
     extends Study {
@@ -153,8 +153,8 @@ object DisabledStudy {
 case class EnabledStudy(
   id: StudyId,
   version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   name: String,
   description: Option[String])
   extends Study {
@@ -162,7 +162,7 @@ case class EnabledStudy(
   override val status: String = "Enabled"
 
   def disable: DomainValidation[DisabledStudy] = {
-    DisabledStudy.create(id, version, addedDate, name, description)
+    DisabledStudy.create(id, version, timeAdded, name, description)
   }
 }
 
@@ -178,7 +178,7 @@ object EnabledStudy {
       validateAndIncrementVersion(study.version) |@|
       validateString(study.name, NameRequired) |@|
       validateNonEmptyOption(study.description, NonEmptyDescription)) {
-        EnabledStudy(_, _, study.addedDate, None, _, _)
+        EnabledStudy(_, _, study.timeAdded, None, _, _)
       }
   }
 }
@@ -192,8 +192,8 @@ object EnabledStudy {
 case class RetiredStudy(
   id: StudyId,
   version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   name: String,
   description: Option[String])
   extends Study {
@@ -201,7 +201,7 @@ case class RetiredStudy(
   override val status: String = "Retired"
 
   def unretire: DomainValidation[DisabledStudy] = {
-    DisabledStudy.create(id, version, addedDate, name, description)
+    DisabledStudy.create(id, version, timeAdded, name, description)
   }
 }
 
@@ -217,7 +217,7 @@ object RetiredStudy {
       validateAndIncrementVersion(study.version) |@|
       validateString(study.name, NameRequired) |@|
       validateNonEmptyOption(study.description, NonEmptyDescription)) {
-        RetiredStudy(_, _, study.addedDate, None, _, _)
+        RetiredStudy(_, _, study.timeAdded, None, _, _)
       }
   }
 }

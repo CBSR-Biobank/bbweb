@@ -85,7 +85,7 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
           'description (study2.description)
         )
         studyRepository.getDisabled(StudyId(event.id)) shouldSucceed { repoStudy =>
-          checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
+          checkTimeStamps(repoStudy, study.timeAdded, DateTime.now)
         }
       }
     }
@@ -105,7 +105,7 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
 
         studyRepository.getDisabled(StudyId(event.id)) shouldSucceed { repoStudy =>
           repoStudy.version should be (study.version + 1)
-          checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
+          checkTimeStamps(repoStudy, study.timeAdded, DateTime.now)
         }
       }
 
@@ -120,7 +120,7 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
           'description (study3.description)
         )
         studyRepository.getDisabled(StudyId(event.id)) shouldSucceed { repoStudy =>
-          checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
+          checkTimeStamps(repoStudy, study.timeAdded, DateTime.now)
         }
       }
     }
@@ -162,7 +162,7 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
         event shouldBe a[StudyEnabledEvent]
         studyRepository.getEnabled(StudyId(event.id)).fold(
           err => fail(err.list.mkString),
-          repoStudy => checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
+          repoStudy => checkTimeStamps(repoStudy, study.timeAdded, DateTime.now)
         )
       }
     }
@@ -209,7 +209,7 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
         .shouldSucceed { event =>
         event shouldBe a[StudyDisabledEvent]
           studyRepository.getDisabled(StudyId(event.id)) shouldSucceed { repoStudy =>
-            checkTimeStamps(repoStudy, enabledStudy.addedDate, DateTime.now)
+            checkTimeStamps(repoStudy, enabledStudy.timeAdded, DateTime.now)
           }
       }
     }
@@ -233,7 +233,7 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
       v shouldSucceed { event =>
         event shouldBe a[StudyRetiredEvent]
         studyRepository.getRetired(StudyId(event.id)) shouldSucceed { repoStudy =>
-          checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
+          checkTimeStamps(repoStudy, study.timeAdded, DateTime.now)
         }
       }
     }
@@ -254,7 +254,7 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
       v shouldSucceed { event =>
         event shouldBe a[StudyUnretiredEvent]
         studyRepository.getDisabled(StudyId(event.id)) shouldSucceed { repoStudy =>
-          checkTimeStamps(repoStudy, study.addedDate, DateTime.now)
+          checkTimeStamps(repoStudy, study.timeAdded, DateTime.now)
         }
       }
     }

@@ -50,8 +50,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
         slType.annotationTypeData should have length (0)
 
-        (slType.addedDate to DateTime.now).millis should be < 200L
-        slType.lastUpdateDate should be (None)
+        (slType.timeAdded to DateTime.now).millis should be < 200L
+        slType.timeModified should be (None)
       }
     }
 
@@ -90,8 +90,8 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
         slType.annotationTypeData should have length (0)
 
-        slType2.addedDate should be (slType.addedDate)
-        slType2.lastUpdateDate should be (None)
+        slType2.timeAdded should be (slType.timeAdded)
+        slType2.timeModified should be (None)
       }
     }
 

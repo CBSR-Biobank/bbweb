@@ -206,7 +206,7 @@ trait SpecimenLinkTypeProcessorComponent {
         err => throw new IllegalStateException(s"updating specimen link type from event failed: $err"),
         slt => specimenLinkTypeRepository.put(slt.copy(
           version               = event.version,
-          lastUpdateDate        = Some(event.dateTime),
+          timeModified        = Some(event.dateTime),
           expectedInputChange   = event.expectedInputChange,
           expectedOutputChange  = event.expectedOutputChange,
           inputCount            = event.inputCount,

@@ -18,11 +18,11 @@ object TestUtils {
     entity: T,
     expectedAddedTime: DateTime,
     expectedLastUpdateTime: Option[DateTime]) = {
-    (entity.addedDate to expectedAddedTime).millis should be < TimeCoparisonMillis
+    (entity.timeAdded to expectedAddedTime).millis should be < TimeCoparisonMillis
     expectedLastUpdateTime.fold {
-      entity.lastUpdateDate should be (None)
+      entity.timeModified should be (None)
     } {
-      dateTime => (entity.lastUpdateDate.value to dateTime).millis should be < TimeCoparisonMillis
+      dateTime => (entity.timeModified.value to dateTime).millis should be < TimeCoparisonMillis
     }
   }
 
@@ -31,8 +31,8 @@ object TestUtils {
     expectedAddedTime: DateTime,
     expectedLastUpdateTime: DateTime) = {
     //log.info(s"entity: $entity, expectedAddedTime: $expectedAddedTime, expectedLastUpdateTime: $expectedLastUpdateTime")
-    (entity.addedDate to expectedAddedTime).millis should be < TimeCoparisonMillis
-    (entity.lastUpdateDate.value to expectedLastUpdateTime).millis should be < TimeCoparisonMillis
+    (entity.timeAdded to expectedAddedTime).millis should be < TimeCoparisonMillis
+    (entity.timeModified.value to expectedLastUpdateTime).millis should be < TimeCoparisonMillis
   }
 
   implicit class ValidationTests[T](val validation: DomainValidation[T]) {

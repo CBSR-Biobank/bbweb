@@ -49,8 +49,8 @@ class CollectionEventTypeSpec extends DomainSpec {
         cet.specimenGroupData should have length 1
         cet.annotationTypeData should have length 1
 
-        (cet.addedDate to DateTime.now).millis should be < 200L
-        cet.lastUpdateDate should be (None)
+        (cet.timeAdded to DateTime.now).millis should be < 200L
+        cet.timeModified should be (None)
       }
     }
 
@@ -80,8 +80,8 @@ class CollectionEventTypeSpec extends DomainSpec {
       cet2.specimenGroupData should have length 1
       cet2.annotationTypeData should have length 1
 
-      (cet.addedDate to cet2.addedDate).millis should be < 100L
-      cet2.lastUpdateDate should be (None)
+      (cet.timeAdded to cet2.timeAdded).millis should be < 100L
+      cet2.timeModified should be (None)
     }
 
   }

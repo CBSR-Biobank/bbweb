@@ -30,8 +30,8 @@ case class ProcessingType(
   studyId: StudyId,
   id: ProcessingTypeId,
   version: Long,
-  addedDate: DateTime,
-  lastUpdateDate: Option[DateTime],
+  timeAdded: DateTime,
+  timeModified: Option[DateTime],
   name: String,
   description: Option[String],
   enabled: Boolean)
@@ -46,15 +46,15 @@ case class ProcessingType(
     name: String,
     description: Option[String],
     enabled: Boolean): DomainValidation[ProcessingType] = {
-    ProcessingType.create(this.studyId, this.id, this.version, this.addedDate, name, description, enabled)
+    ProcessingType.create(this.studyId, this.id, this.version, this.timeAdded, name, description, enabled)
   }
 
   override def toString: String =
     s"""|ProcessingType:{
         |  studyId: $studyId,
         |  id: $id,
-        |  addedDate: $addedDate,
-        |  lastUpdateDate: $lastUpdateDate,
+        |  timeAdded: $timeAdded,
+        |  timeModified: $timeModified,
         |  version: $version,
         |  name: $name,
         |  description: $description,
@@ -86,8 +86,8 @@ object ProcessingType {
     (__ \ "studyId").write[StudyId] and
       (__ \ "id").write[ProcessingTypeId] and
       (__ \ "version").write[Long] and
-      (__ \ "addedDate").write[DateTime] and
-      (__ \ "lastUpdateDate").write[Option[DateTime]] and
+      (__ \ "timeAdded").write[DateTime] and
+      (__ \ "timeModified").write[Option[DateTime]] and
       (__ \ "name").write[String] and
       (__ \ "description").write[Option[String]] and
       (__ \ "enabled").write[Boolean]

@@ -19,10 +19,10 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
   val versionOption = if (version < 0) None else Some(version)
 
   /** The date and time when this entity was added to the system. */
-  val addedDate: DateTime
+  val timeAdded: DateTime
 
   /** The date and time when this entity was last updated. */
-  val lastUpdateDate: Option[DateTime]
+  val timeModified: Option[DateTime]
 
   // FIXME: move these to another object
   //  val addedBy: UserId
