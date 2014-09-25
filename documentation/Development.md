@@ -113,6 +113,16 @@ to download the modules.
 
 OR: `web-assets:web-node-modules`
 
+### ng-annotate
+
+ng-annotate adds and removes AngularJS dependency injection annotations.
+
+```sh
+cd app/assets/javascripts
+find . -name \*.js -exec echo "/usr/local/bin/ng-annotate --add {} -o {}.new && mv {}.new {}" \; | sed 's/\.\///g'  > tmp.sh
+sh tmp.sh
+```
+
 ---
 
 [Back to top](../README.md)

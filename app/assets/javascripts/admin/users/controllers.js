@@ -1,16 +1,15 @@
 /**
  * User administration controllers.
  */
-define(['angular', 'underscore', 'common'], function(angular, _, common) {
+define(['angular', 'underscore', 'common'], function(angular, _) {
   'use strict';
 
-  var mod = angular.module('admin.users.controllers', ['users.services']);
+  var mod = angular.module('admin.users.controllers', ['biobank.common', 'users.services']);
 
   /**
    * Displays a list of users in a table.
    */
   mod.controller('UsersTableCtrl', [
-    '$q',
     '$rootScope',
     '$scope',
     '$state',
@@ -20,9 +19,7 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
     'ngTableParams',
     'userService',
     'UserModalService',
-    '$log',
-    function($q,
-             $rootScope,
+    function($rootScope,
              $scope,
              $state,
              $filter,
@@ -30,26 +27,24 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
              modalService,
              ngTableParams,
              userService,
-             UserModalService,
-             $log) {
+             UserModalService) {
 
       var updateData = function() {
         userService.getAllUsers().then(function(data) {
           $scope.users = data;
           $scope.tableParams.reload();
-          $log.debug("users updated");
         });
       };
 
       var getTableData = function() {
-          return $scope.users;
+        return $scope.users;
       };
 
       var changeStatus = function(user, statusChangeFn, status) {
         var modalOptions = {
-          closeButtonText: 'Cancel',
-          actionButtonText: 'OK'
-        };
+                closeButtonText: 'Cancel',
+                actionButtonText: 'OK'
+              };
 
         modalOptions.headerText = 'Change user status';
         modalOptions.bodyText = 'Please confirm that you want to ' + status + ' user "' +
@@ -57,20 +52,15 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
 
          modalService.showModal({}, modalOptions).then(
            function(result) {
-             statusChangeFn(user).then(function() {
-               updateData();
-             });
+          statusChangeFn(user).then(function() {
+            updateData();
+          });
            }
          );
       };
 
       $rootScope.pageTitle = 'Biobank users';
       $scope.users = [];
-
-      // $scope.$watch("users", function () {
-      //   $scope.tableParams.reload();
-      //   $log.debug("table reloaded");
-      // });
 
       /* jshint ignore:start */
       $scope.tableParams = new ngTableParams({
@@ -161,7 +151,7 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
           );
         },
         cancel: function() {
-            $state.go("home");
+          $state.go("home");
         }
       };
     }]);

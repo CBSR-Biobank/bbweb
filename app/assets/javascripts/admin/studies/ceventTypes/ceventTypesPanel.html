@@ -1,13 +1,17 @@
 <accordion-group is-open="panel.ceventTypes.panelOpen" style="margin-top: 10px;">
   <accordion-heading>
-    {{panel.ceventTypes.title}}
+    Collection Event Types
     <panel-buttons on-add="panel.ceventTypes.add(study)"
                    add-button-title="add collection event type"
                      panel-open="panel.ceventTypes.panelOpen"
                      panel-toggle="panel.ceventTypes.panelToggle()">
     </panel-buttons>
   </accordion-heading>
-  <p>{{panel.ceventTypes.header}}</p>
+  <p>
+    A Collection Event Type defines a classification name, unique to the Study, to a
+    participant visit. A participant visit is a record of when specimens were collected
+    from a participant at a collection centre.
+  </p>
   <div class="panel panel-warning" data-ng-if="panel.ceventTypes.data.length == 0">
     <div class="panel-heading">
       Collection event types have not been defined for this study yet.

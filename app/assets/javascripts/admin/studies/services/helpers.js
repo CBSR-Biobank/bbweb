@@ -7,7 +7,7 @@ define(['angular', 'underscore'], function(angular, _) {
   /**
    * Tracks wether each panel in the study view page is expanded or collapsed.
    */
-  mod.service('studyViewSettings', function() {
+  mod.service('studyViewSettings', ['$log', function($log) {
     var initialSettings = function() {
       return {
         studyId: null,
@@ -42,6 +42,7 @@ define(['angular', 'underscore'], function(angular, _) {
           throw new Error("panel not defined: " + panel);
         }
         currentState.panelStates[panel] = !currentState.panelStates[panel];
+        $log.debug("panelStateToggle: ", panel, currentState.panelStates[panel]);
         return currentState.panelStates[panel];
       },
       initialize: function(studyId) {
@@ -55,60 +56,7 @@ define(['angular', 'underscore'], function(angular, _) {
         return currentState;
       }
     };
-  });
-
-  mod.factory('PanelSettings', [
-    'studyViewSettings', 'panelTableService',
-    function(studyViewSettings, panelTableService) {
-      function PanelSettings(data, panelStateName) {
-        this.data = data;
-        this.tableParams = panelTableService.getTableParams(data);
-
-        this.panelOpen = studyViewSettings.panelState(panelStateName);
-
-        this.panelToggle = function() {
-          return studyViewSettings.panelStateToggle(panelStateName);
-        };
-      }
-
-      return PanelSettings;
-    }]);
-
-  mod.factory('AnnotTypesPanelSettings', [
-    '$injector', 'studyViewSettings', 'panelTableService', 'annotTypeModalService', 'PanelSettings',
-    function($injector, studyViewSettings, panelTableService, annotTypeModalService, PanelSettings) {
-      function AnnotTypesPanelSettings(
-        panelStateName,
-        annotTypes,
-        title,
-        header,
-        hasRequiredField,
-        onAdd,
-        onUpdate,
-        removeService) {
-
-        this.title = title;
-        this.header = header;
-        this.hasRequired = hasRequiredField;
-        this.add = onAdd;
-        this.update = onUpdate;
-
-        this.information = function(annotType) {
-          annotTypeModalService.show(this.title, annotType);
-        };
-
-        this.remove = function(annotType) {
-          removeService.remove(annotType);
-        };
-
-        $injector.invoke(PanelSettings, this, {
-          data: annotTypes,
-          panelStateName: panelStateName
-        });
-      }
-
-      return AnnotTypesPanelSettings;
-    }]);
+  }]);
 
   mod.service('panelTableService', ['$filter', 'ngTableParams', function ($filter, ngTableParams) {
     this.getTableParams = function(data) {
@@ -340,6 +288,265 @@ define(['angular', 'underscore'], function(angular, _) {
           });
         }
       };
+    }]);
+
+  mod.factory('PanelSettings', [
+    'studyViewSettings', 'panelTableService',
+    function(studyViewSettings, panelTableService) {
+      var PanelSettings = function(panelStateName, data) {
+        if (arguments.length > 0) this.init(panelStateName, data);
+      };
+
+      PanelSettings.prototype.init = function(panelStateName, data) {
+        this.panelStateName = panelStateName;
+        this.data = data;
+        this.tableParams = panelTableService.getTableParams(this.data);
+        this.panelOpen = studyViewSettings.panelState(panelStateName);
+      };
+
+      PanelSettings.prototype.panelToggle = function() {
+        return studyViewSettings.panelStateToggle(this.panelStateName);
+      };
+
+      return PanelSettings;
+    }]);
+
+  mod.factory('AnnotTypesPanelSettings', [
+    'PanelSettings', 'annotTypeModalService',
+    function(PanelSettings, annotTypeModalService) {
+
+      var AnnotTypesPanelSettings = function (panelStateName,
+                                              annotTypes,
+                                              title,
+                                              header,
+                                              hasRequiredField,
+                                              onAdd,
+                                              onUpdate,
+                                              onRemove) {
+        if (arguments.length > 0) {
+          this.init(panelStateName, annotTypes);
+
+          this.title       = title;
+          this.header      = header;
+          this.hasRequired = hasRequiredField;
+          this.add         = onAdd;
+          this.update      = onUpdate;
+          this.remove      = onRemove;
+        }
+      };
+
+      AnnotTypesPanelSettings.prototype = new PanelSettings();
+      AnnotTypesPanelSettings.prototype.constructor = AnnotTypesPanelSettings;
+      AnnotTypesPanelSettings.constructor = PanelSettings.prototype.constructor;
+
+      AnnotTypesPanelSettings.prototype.information = function(annotType) {
+        annotTypeModalService.show(this.title, annotType);
+      };
+
+      AnnotTypesPanelSettings.prototype.remove = function(annotType) {
+        this.onRemove(annotType);
+      };
+
+      return AnnotTypesPanelSettings;
+    }]);
+
+  mod.factory('SpecimenGroupsPanelSettings',  [
+    '$state',
+    'PanelSettings',
+    'specimenGroupModalService',
+    'specimenGroupRemoveService',
+    'studyViewSettings',
+    function($state,
+             PanelSettings,
+             specimenGroupModalService,
+             specimenGroupRemoveService,
+             studyViewSettings) {
+
+      var SpecimenGroupsPanelSettings = function (panelStateName, specimenGroups) {
+        this.init(panelStateName, specimenGroups);
+        this.title = 'Specimen Groups';
+        this.header = ' A Specimen Group is used to configure a specimen type to be used by the study. ' +
+          'It records ownership, summary, storage, and classification information that applies ' +
+          'to an entire group or collection of Specimens.';
+      };
+
+      SpecimenGroupsPanelSettings.prototype = new PanelSettings();
+      SpecimenGroupsPanelSettings.prototype.constructor = SpecimenGroupsPanelSettings;
+      SpecimenGroupsPanelSettings.constructor = PanelSettings.prototype.constructor;
+
+      SpecimenGroupsPanelSettings.prototype.information = function(specimenGroup) {
+        specimenGroupModalService.show(specimenGroup);
+      };
+
+      SpecimenGroupsPanelSettings.prototype.add = function(study) {
+        $state.go('admin.studies.study.specimens.groupAdd');
+      };
+
+      SpecimenGroupsPanelSettings.prototype.update = function(specimenGroup) {
+        $state.go('admin.studies.study.specimens.groupUpdate', { specimenGroupId: specimenGroup.id });
+      };
+
+      SpecimenGroupsPanelSettings.prototype.remove = function(specimenGroup) {
+        specimenGroupRemoveService.remove(specimenGroup);
+      };
+
+      return SpecimenGroupsPanelSettings;
+    }]);
+
+  mod.factory('CeventTypesPanelSettings',  [
+    '$state',
+    'PanelSettings',
+    'ceventTypeModalService',
+    'ceventTypeRemoveService',
+    'specimenGroupModalService',
+    'studyViewSettings',
+    function($state,
+             PanelSettings,
+             ceventTypeModalService,
+             ceventTypeRemoveService,
+             specimenGroupModalService,
+             studyViewSettings) {
+
+      var CeventTypesPanelSettings = function(panelStateName, ceventTypes, specimenGroups, annotTypes) {
+        // push all specimen groups names into an array for easy display
+        var self = this;
+        this.specimenGroupsById = _.indexBy(specimenGroups, 'id');
+        this.init('ceventTypes', ceventTypes);
+        this.specimenGroups = specimenGroups;
+        this.annotTypes = annotTypes;
+        this.panelOpen = studyViewSettings.panelState('ceventTypes');
+
+        ceventTypes.forEach(function (cet) {
+          cet.specimenGroups = [];
+          cet.specimenGroupData.forEach(function (sgItem) {
+            var sg = self.specimenGroupsById[sgItem.specimenGroupId];
+            cet.specimenGroups.push({ id: sgItem.specimenGroupId, name: sg.name });
+          });
+        });
+      };
+
+      CeventTypesPanelSettings.prototype = new PanelSettings();
+      CeventTypesPanelSettings.prototype.constructor = CeventTypesPanelSettings;
+      CeventTypesPanelSettings.constructor = PanelSettings.prototype.constructor;
+
+      CeventTypesPanelSettings.prototype.information = function(ceventType) {
+        ceventTypeModalService.show(ceventType, this.specimenGroups, this.annotTypes);
+      };
+
+      CeventTypesPanelSettings.prototype.add = function(study) {
+        $state.go('admin.studies.study.collection.ceventTypeAdd', { studyId: study.id });
+      };
+
+      CeventTypesPanelSettings.prototype.update = function(ceventType) {
+        $state.go('admin.studies.study.collection.ceventTypeUpdate',
+                  { studyId: ceventType.studyId, ceventTypeId: ceventType.id });
+      };
+
+      CeventTypesPanelSettings.prototype.remove = function(ceventType) {
+        ceventTypeRemoveService.remove(ceventType);
+      };
+
+      CeventTypesPanelSettings.prototype.showSpecimenGroup = function (specimenGroupId) {
+        specimenGroupModalService.show(this.specimenGroupsById[specimenGroupId]);
+      };
+
+      return CeventTypesPanelSettings;
+    }]);
+
+  mod.factory('ProcessingTypesPanelSettings',  [
+    '$state', 'PanelSettings', 'processingTypeModalService', 'processingTypeRemoveService', 'studyViewSettings',
+    function($state, PanelSettings, processingTypeModalService, processingTypeRemoveService, studyViewSettings) {
+
+      var ProcessingTypesPanelSettings = function (panelStateName, processingTypes) {
+        this.init(panelStateName, processingTypes);
+        this.panelOpen = studyViewSettings.panelState('processingTypes');
+      };
+
+      ProcessingTypesPanelSettings.prototype = new PanelSettings();
+      ProcessingTypesPanelSettings.prototype.constructor = ProcessingTypesPanelSettings;
+      ProcessingTypesPanelSettings.constructor = PanelSettings.prototype.constructor;
+
+      ProcessingTypesPanelSettings.prototype.information = function(processingType) {
+        processingTypeModalService.show(processingType);
+      };
+
+      ProcessingTypesPanelSettings.prototype.add = function(study) {
+        $state.go('admin.studies.study.processing.processingTypeAdd', { studyId: study.id });
+      };
+
+      ProcessingTypesPanelSettings.prototype.update = function(processingType) {
+        $state.go('admin.studies.study.processing.processingTypeUpdate',
+                  { studyId: processingType.studyId, processingTypeId: processingType.id });
+      };
+
+      ProcessingTypesPanelSettings.prototype.remove = function(processingType) {
+        processingTypeRemoveService.remove(processingType);
+      };
+
+      return ProcessingTypesPanelSettings;
+    }]);
+
+  mod.factory('SpcLinkTypesPanelSettings',  [
+    '$state',
+    'PanelSettings',
+    'spcLinkTypeModalService',
+    'spcLinkTypeRemoveService',
+    'processingTypeModalService',
+    'specimenGroupModalService',
+    'annotTypeModalService',
+    'studyViewSettings',
+    function($state,
+             PanelSettings,
+             spcLinkTypeModalService,
+             spcLinkTypeRemoveService,
+             processingTypeModalService,
+             specimenGroupModalService,
+             annotTypeModalService,
+             studyViewSettings) {
+
+      var SpcLinkTypesPanelSettings = function (
+        panelStateName, processingTypesById, specimenGroupsById, annotTypesById, data) {
+        this.init(panelStateName, data);
+        this.panelOpen = studyViewSettings.panelState('spcLinkTypes');
+        this.processingTypesById = processingTypesById;
+        this.specimenGroupsById  = specimenGroupsById;
+        this.annotTypesById      = annotTypesById;
+      };
+
+      SpcLinkTypesPanelSettings.prototype = new PanelSettings();
+      SpcLinkTypesPanelSettings.prototype.constructor = SpcLinkTypesPanelSettings;
+      SpcLinkTypesPanelSettings.constructor = PanelSettings.prototype.constructor;
+
+      SpcLinkTypesPanelSettings.prototype.information = function(spcLinkType) {
+        spcLinkTypeModalService.show(spcLinkType, processingTypesById, specimenGroupsById);
+      };
+
+      SpcLinkTypesPanelSettings.prototype.add = function(study) {
+        $state.go('admin.studies.study.processing.spcLinkTypeAdd');
+      };
+
+      SpcLinkTypesPanelSettings.prototype.update = function(spcLinkType) {
+        $state.go('admin.studies.study.processing.spcLinkTypeUpdate',
+                  { procTypeId: spcLinkType.processingTypeId, spcLinkTypeId: spcLinkType.id });
+      };
+
+      SpcLinkTypesPanelSettings.prototype.remove = function(spcLinkType) {
+        spcLinkTypeRemoveService.remove(spcLinkType);
+      };
+
+      SpcLinkTypesPanelSettings.prototype.showProcessingType = function (processingTypeId) {
+        processingTypeModalService.show(this.processingTypesById[processingTypeId]);
+      };
+
+      SpcLinkTypesPanelSettings.prototype.showSpecimenGroup = function (specimenGroupId) {
+        specimenGroupModalService.show(this.specimenGroupsById[specimenGroupId]);
+      };
+
+      SpcLinkTypesPanelSettings.prototype.showAnnotationType = function (annotTypeId) {
+        annotTypeModalService.show("Specimen Link Annotation Type", this.annotTypesById[annotTypeId]);
+      };
+
+      return SpcLinkTypesPanelSettings;
     }]);
 
   return mod;

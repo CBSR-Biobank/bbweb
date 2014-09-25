@@ -42,9 +42,9 @@ testOptions in Test := Nil
 
 resolvers ++= Seq(
   Classpaths.sbtPluginReleases,
-  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-  "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
-  "Typesafe Snapshots" at "https://repo.akka.io/snapshots/"
+  "Sonatype OSS Snapshots"       at "https://oss.sonatype.org/content/repositories/snapshots",
+  "Typesafe repository"          at "https://repo.typesafe.com/typesafe/releases/",
+  "Akka Snapshots"               at "https://repo.akka.io/snapshots/"
 )
 
 libraryDependencies ++= Seq(
@@ -59,18 +59,18 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar"         %% "scala-bcrypt"                   % "2.4",
   "com.typesafe.play.plugins" %% "play-plugins-mailer"            % "2.3.0",
   // WebJars infrastructure
-  "org.webjars"               %  "webjars-locator"                % "0.13",
+  "org.webjars"               %  "webjars-locator"                % "0.19",
   "org.webjars"               %% "webjars-play"                   % "2.3.0",
   // WebJars dependencies
-  "org.webjars"               %  "requirejs"                      % "2.1.14-1",
+  "org.webjars"               %  "requirejs"                      % "2.1.14-3",
   "org.webjars"               %  "underscorejs"                   % "1.6.0-3",
   "org.webjars"               %  "jquery"                         % "2.1.1",
   "org.webjars"               %  "bootstrap"                      % "3.2.0" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angularjs"                      % "1.3.0-beta.18" exclude(
+  "org.webjars"               %  "angularjs"                      % "1.3.0-rc.2" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angular-ui-bootstrap"           % "0.11.0-2",
-  "org.webjars"               %  "angular-ui-router"              % "0.2.10-1",
+  "org.webjars"               %  "angular-ui-bootstrap"           % "0.11.0-3",
+  "org.webjars"               %  "angular-ui-router"              % "0.2.10",
   "org.webjars"               %  "ng-table"                       % "0.3.3",
   // Testing
   "org.scalatest"             %% "scalatest"                      % "2.2.1"              % "test->*" excludeAll(

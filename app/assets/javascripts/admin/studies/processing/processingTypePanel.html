@@ -1,13 +1,17 @@
 <accordion-group is-open="panel.processingTypes.panelOpen" style="margin-top: 10px;">
   <accordion-heading>
-    {{panel.processingTypes.title}}
+    Processing Types
     <panel-buttons on-add="panel.processingTypes.add(study)"
                    add-button-title="add processing type"
                      panel-open="panel.processingTypes.panelOpen"
                      panel-toggle="panel.processingTypes.panelToggle()">
     </panel-buttons>
   </accordion-heading>
-  <p>{{panel.processingTypes.header}}</p>
+  <p>
+    A Processing Type describes a regularly performed specimen processing procedure with a unique name (unique
+    to this study). There should be one or more associated Specimen Link Types that (1) further define legal
+    procedures and (2) allow recording of procedures performed on different types of Specimens.
+  </p>
   <div class="panel panel-warning" data-ng-if="panel.processingTypes.data.length == 0">
     <div class="panel-heading">
       Processing types have not been defined for this study yet.

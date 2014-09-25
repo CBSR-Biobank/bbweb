@@ -1,8 +1,8 @@
 /** Common helpers */
-define(['angular'], function(angular) {
+define(['angular', 'common'], function(angular) {
   'use strict';
 
-  var mod = angular.module('admin.studies.participants.helpers', []);
+  var mod = angular.module('admin.studies.participants.helpers', ['biobank.common']);
 
   mod.service('participantAnnotTypeEditService', [
     '$state', '$stateParams', 'modalService', 'studyAnnotTypeEditService', 'ParticipantAnnotTypeService',

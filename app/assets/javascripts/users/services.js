@@ -153,11 +153,11 @@ define(['angular', 'common'], function(angular) {
   /**
    * If the current route does not resolve, go back to the start page.
    */
-  var handleRouteError = function($rootScope, $state) {
+  var handleRouteError = ["$rootScope", "$state", function($rootScope, $state) {
     $rootScope.$on('$routeChangeError', function(e, next, current) {
       $state.go('home');
     });
-  };
+  }];
 
   handleRouteError.$inject = ['$rootScope', '$state'];
   mod.run(handleRouteError);

@@ -2,7 +2,7 @@
 define(['angular'], function(angular) {
   'use strict';
 
-  var mod = angular.module('common.helpers', []);
+  var mod = angular.module('common.helpers', ['ui.bootstrap']);
 
   mod.factory('BbwebRestApi', ['$http', '$q', '$log', function($http, $q, $log) {
     return {
@@ -86,7 +86,7 @@ define(['angular'], function(angular) {
       angular.extend(tempModalOptions, modalOptions, customModalOptions);
 
       if (!tempModalDefaults.controller) {
-        tempModalDefaults.controller = function ($scope, $modalInstance) {
+        tempModalDefaults.controller = ['$scope', '$modalInstance', function ($scope, $modalInstance) {
           $scope.modalOptions = tempModalOptions;
           $scope.modalOptions.ok = function (result) {
             $modalInstance.close(result);
@@ -94,7 +94,7 @@ define(['angular'], function(angular) {
           $scope.modalOptions.close = function (result) {
             $modalInstance.dismiss('cancel');
           };
-        };
+        }];
       }
 
       return $modal.open(tempModalDefaults).result;
@@ -140,7 +140,6 @@ define(['angular'], function(angular) {
 
       return $modal.open(tempModalDefaults).result;
     };
-
   }]);
 
   return mod;

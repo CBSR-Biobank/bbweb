@@ -1,13 +1,17 @@
 <accordion-group is-open="panel.spcLinkTypes.panelOpen" style="margin-top: 10px;">
   <accordion-heading>
-    {{panel.spcLinkTypes.title}}
+    Specimen Link Types
     <panel-buttons on-add="panel.spcLinkTypes.add(study)"
                    add-button-title="add specimen link type"
                      panel-open="panel.spcLinkTypes.panelOpen"
                      panel-toggle="panel.spcLinkTypes.panelToggle()">
     </panel-buttons>
   </accordion-heading>
-  <p>{{panel.spcLinkTypes.header}}</p>
+  <p>
+    Specimen Link Types are assigned to a processing type, and used to represent a regularly performed
+    processing procedure involving two Specimens: an input, which must be in a specific Specimen Group, and an
+    output, which must be in a specific Specimen Group.
+  </p>
   <div class="panel panel-warning" data-ng-if="panel.spcLinkTypes.data.length == 0">
     <div class="panel-heading">
       Specimen link types have not been defined for this study yet.
