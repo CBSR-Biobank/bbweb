@@ -108,13 +108,13 @@ define(['angular', 'common'], function(angular) {
           return BbwebRestApi.call('POST', '/passreset', { email: email });
         },
         activate: function(user) {
-          changeStatus(user, 'activate');
+          return changeStatus(user, 'activate');
         },
         lock: function(user) {
-          changeStatus(user, 'lock');
+          return changeStatus(user, 'lock');
         },
         unlock: function(user) {
-          changeStatus(user, 'unlock');
+          return changeStatus(user, 'unlock');
         }
       };
     }]);

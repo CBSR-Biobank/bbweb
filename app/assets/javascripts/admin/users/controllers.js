@@ -57,8 +57,9 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
 
          modalService.showModal({}, modalOptions).then(
            function(result) {
-             statusChangeFn(user);
-             updateData();
+             statusChangeFn(user).then(function() {
+               updateData();
+             });
            }
          );
       };

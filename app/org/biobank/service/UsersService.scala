@@ -21,7 +21,7 @@ trait UsersServiceComponent {
 
   class UsersService(usersProcessor: ActorRef) extends ApplicationService {
 
-    val log = LoggerFactory.getLogger(this.getClass)
+    val Log = LoggerFactory.getLogger(this.getClass)
 
     def getAll: Set[User] = {
       userRepository.allUsers

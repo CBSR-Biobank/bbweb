@@ -6,6 +6,7 @@ import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.Commands._
 
 import scala.concurrent.Future
+import org.slf4j.LoggerFactory
 import play.Logger
 import play.api.mvc._
 import play.api.libs.json._
@@ -25,7 +26,7 @@ trait CommandController extends Controller with Security {
               BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors))))
           },
           cmd => {
-            Logger.info(s"commandAction: $cmd")
+            Logger.debug(s"commandAction: $cmd")
             func(cmd)(userId)
           }
         )
@@ -43,7 +44,7 @@ trait CommandController extends Controller with Security {
               BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors))))
           },
           cmd => {
-            Logger.info(s"commandAction: $cmd")
+            Logger.debug(s"commandAction: $cmd")
             func(cmd)(userId)
           }
         )
@@ -62,6 +63,8 @@ trait CommandController extends Controller with Security {
 trait JsonController extends Controller {
 
   import scala.language.reflectiveCalls
+
+  val Log = LoggerFactory.getLogger(this.getClass)
 
   def errorReplyJson(message: String) = Json.obj("status" -> "error", "message" -> message)
 
@@ -98,7 +101,10 @@ trait JsonController extends Controller {
             BadRequest(errMsgs)
           }
         },
-        event => Ok(event)
+        event => {
+          Log.debug(s"domainValidationReply: $event")
+          Ok(event)
+        }
       )
     }
   }

@@ -114,8 +114,6 @@ object UsersController extends CommandController with JsonController {
     order: Option[String]
   ) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     val users = usersService.getAll.toList
-    val theUser = users.find(_.email == "test5@test.com")
-    Logger.info(s"user: $theUser")
     Ok(users)
   }
 
@@ -192,7 +190,8 @@ object UsersController extends CommandController with JsonController {
     domainValidationReply(future)
   }
 
-  def removeUser(id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+  def removeUser(id: String, ver: Long) = AuthActionAsync(parse.empty) {
+    token => implicit userId => implicit request =>
     val cmd = RemoveUserCmd(id, ver)
     val future = usersService.remove(cmd)
     domainValidationReply(future)
