@@ -41,33 +41,44 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
   mod.controller('StudiesTableCtrl', [
     '$scope', '$rootScope', '$filter', '$state', 'ngTableParams', 'StudyService',
     function($scope, $rootScope, $filter, $state, ngTableParams, StudyService) {
+
+      var updateData = function() {
+        StudyService.list().then(function(data) {
+          $scope.studies = data;
+          $scope.tableParams.reload();
+        });
+      };
+
+      var getTableData = function() {
+          return $scope.studies;
+      };
+
       $rootScope.pageTitle = 'Biobank studies';
       $scope.studies = [];
 
-      StudyService.list().then(function(data) {
-        $scope.studies = data;
-
-        /* jshint ignore:start */
-        $scope.tableParams = new ngTableParams({
-          page: 1,            // show first page
-          count: 10,          // count per page
-          sorting: {
-            name: 'asc'       // initial sorting
-          }
-        }, {
-          counts: [], // hide page counts control
-          total: $scope.studies.length,
-          getData: function($defer, params) {
-            var orderedData = params.sorting()
-              ? $filter('orderBy')($scope.studies, params.orderBy())
-              : $scope.studies;
-            $defer.resolve(orderedData.slice(
-              (params.page() - 1) * params.count(),
-              params.page() * params.count()));
-          }
-        });
-        /* jshint ignore:end */
+      /* jshint ignore:start */
+      $scope.tableParams = new ngTableParams({
+        page: 1,            // show first page
+        count: 10,          // count per page
+        sorting: {
+          name: 'asc'       // initial sorting
+        }
+      }, {
+        counts: [], // hide page counts control
+        total: $scope.studies.length,
+        getData: function($defer, params) {
+          var orderedData = params.sorting()
+            ? $filter('orderBy')($scope.studies, params.orderBy())
+            : $scope.studies;
+          $defer.resolve(orderedData.slice(
+            (params.page() - 1) * params.count(),
+            params.page() * params.count()));
+        }
       });
+      /* jshint ignore:end */
+
+      $scope.tableParams.settings().$scope = $scope;
+      updateData();
 
       $scope.addStudy = function() {
         $state.go("admin.studies.add");

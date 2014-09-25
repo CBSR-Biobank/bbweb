@@ -113,8 +113,10 @@ object UsersController extends CommandController with JsonController {
     sort: Option[String],
     order: Option[String]
   ) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-
-    Ok(usersService.getAll.toList)
+    val users = usersService.getAll.toList
+    val theUser = users.find(_.email == "test5@test.com")
+    Logger.info(s"user: $theUser")
+    Ok(users)
   }
 
   /** Retrieves the user associated with the token, if it is valid.
@@ -186,7 +188,6 @@ object UsersController extends CommandController with JsonController {
   }
 
   def unlockUser =  commandAction { cmd: UnlockUserCmd => implicit userId =>
-    Logger.info(s"unlockUser")
     val future = usersService.unlock(cmd)
     domainValidationReply(future)
   }

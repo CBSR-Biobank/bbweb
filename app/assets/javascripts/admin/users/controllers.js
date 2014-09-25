@@ -20,6 +20,7 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
     'ngTableParams',
     'userService',
     'UserModalService',
+    '$log',
     function($q,
              $rootScope,
              $scope,
@@ -29,35 +30,22 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
              modalService,
              ngTableParams,
              userService,
-             UserModalService) {
-      $rootScope.pageTitle = 'Biobank users';
-      $scope.users = [];
-      userService.getAllUsers().then(function(data) {
-        $scope.users = data;
+             UserModalService,
+             $log) {
 
-        /* jshint ignore:start */
-        $scope.tableParams = new ngTableParams({
-          page: 1,            // show first page
-          count: 10,          // count per page
-          sorting: {
-            name: 'asc'       // initial sorting
-          }
-        }, {
-          counts: [], // hide page counts control
-          total: $scope.users.length,
-          getData: function($defer, params) {
-            var orderedData = params.sorting()
-              ? $filter('orderBy')($scope.users, params.orderBy())
-              : $scope.users;
-            $defer.resolve(orderedData.slice(
-              (params.page() - 1) * params.count(),
-              params.page() * params.count()));
-          }
+      var updateData = function() {
+        userService.getAllUsers().then(function(data) {
+          $scope.users = data;
+          $scope.tableParams.reload();
+          $log.debug("users updated");
         });
-        /* jshint ignore:end */
-      });
+      };
 
-      var changeStatusModal = function(user, status) {
+      var getTableData = function() {
+          return $scope.users;
+      };
+
+      var changeStatus = function(user, statusChangeFn, status) {
         var modalOptions = {
           closeButtonText: 'Cancel',
           actionButtonText: 'OK'
@@ -67,43 +55,61 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
         modalOptions.bodyText = 'Please confirm that you want to ' + status + ' user "' +
           user.name + '"?';
 
-        return modalService.showModal({}, modalOptions);
+         modalService.showModal({}, modalOptions).then(
+           function(result) {
+             statusChangeFn(user);
+             updateData();
+           }
+         );
       };
 
-      //$state.go("admin.users.user", { userId: user.id });
+      $rootScope.pageTitle = 'Biobank users';
+      $scope.users = [];
+
+      // $scope.$watch("users", function () {
+      //   $scope.tableParams.reload();
+      //   $log.debug("table reloaded");
+      // });
+
+      /* jshint ignore:start */
+      $scope.tableParams = new ngTableParams({
+        page: 1,            // show first page
+        count: 10,          // count per page
+        sorting: {
+          name: 'asc'       // initial sorting
+        }
+      }, {
+        counts: [], // hide page counts control
+        total: function () { return getTableData().length; },
+        getData: function($defer, params) {
+          var filteredData = getTableData();
+          var orderedData = params.sorting()
+            ? $filter('orderBy')(filteredData, params.orderBy())
+            : filteredData;
+          $defer.resolve(orderedData.slice(
+            (params.page() - 1) * params.count(),
+            params.page() * params.count()));
+        }
+      });
+      /* jshint ignore:end */
+
+      $scope.tableParams.settings().$scope = $scope;
+      updateData();
 
       $scope.userInformation = function(user) {
         UserModalService.show(user);
       };
 
       $scope.activate = function(user) {
-        changeStatusModal(user, 'activate').then(
-          function(result) {
-            userService.activate(user);
-            stateHelper.reloadAndReinit();
-          },
-          stateHelper.reloadAndReinit()
-        );
+        changeStatus(user, userService.activate, 'activate');
       };
 
       $scope.lock = function(user) {
-        changeStatusModal(user, 'lock').then(
-          function(result) {
-            userService.lock(user);
-            stateHelper.reloadAndReinit();
-          },
-          stateHelper.reloadAndReinit()
-        );
+        changeStatus(user, userService.lock, 'lock');
       };
 
       $scope.unlock = function(user) {
-        changeStatusModal(user, 'unlock').then(
-          function(result) {
-            userService.unlock(user);
-            stateHelper.reloadAndReinit();
-          },
-          stateHelper.reloadAndReinit()
-        );
+        changeStatus(user, userService.unlock, 'unlock');
       };
 
     }]);

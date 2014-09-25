@@ -49,33 +49,45 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
              $state,
              ngTableParams,
              CentreService) {
+
+      var updateData = function() {
+        CentreService.list().then(function(centres) {
+          $scope.centres = centres;
+          $scope.tableParams.reload();
+        });
+      };
+
+      var getTableData = function() {
+          return $scope.centres;
+      };
+
       $rootScope.pageTitle = 'Biobank centres';
       $scope.centres = [];
 
-      CentreService.list().then(function(centres) {
-        $scope.centres = centres;
-
-        /* jshint ignore:start */
-        $scope.tableParams = new ngTableParams({
-          page: 1,            // show first page
-          count: 10,          // count per page
-          sorting: {
-            name: 'asc'       // initial sorting
-          }
-        }, {
-          counts: [], // hide page counts control
-          total: $scope.centres.length,
-          getData: function($defer, params) {
-            var orderedData = params.sorting()
-              ? $filter('orderBy')($scope.centres, params.orderBy())
-              : $scope.centres;
-            $defer.resolve(orderedData.slice(
-              (params.page() - 1) * params.count(),
-              params.page() * params.count()));
-          }
-        });
-        /* jshint ignore:end */
+      /* jshint ignore:start */
+      $scope.tableParams = new ngTableParams({
+        page: 1,            // show first page
+        count: 10,          // count per page
+        sorting: {
+          name: 'asc'       // initial sorting
+        }
+      }, {
+        counts: [], // hide page counts control
+        total: function () { return getTableData().length; },
+        getData: function($defer, params) {
+          var filteredData = getTableData();
+          var orderedData = params.sorting()
+            ? $filter('orderBy')(filteredData, params.orderBy())
+            : filteredData;
+          $defer.resolve(orderedData.slice(
+            (params.page() - 1) * params.count(),
+            params.page() * params.count()));
+        }
       });
+      /* jshint ignore:end */
+
+      $scope.tableParams.settings().$scope = $scope;
+      updateData();
 
       $scope.addCentre = function() {
         $state.go("admin.centres.add");

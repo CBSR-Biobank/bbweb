@@ -13,10 +13,10 @@ import scalaz._
 import scalaz.Scalaz._
 
 /**
- * Note: to run from Eclipse uncomment the @RunWith line. To run from SBT the line should be
- * commented out.
- *
- */
+  * Note: to run from Eclipse uncomment the @RunWith line. To run from SBT the line should be
+  * commented out.
+  *
+  */
 //@RunWith(classOf[JUnitRunner])
 class UserSpec extends DomainSpec {
 
