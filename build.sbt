@@ -70,7 +70,7 @@ libraryDependencies ++= Seq(
   "org.webjars"               %  "angularjs"                      % "1.3.0-rc.2" exclude(
     "org.webjars", "jquery"),
   "org.webjars"               %  "angular-ui-bootstrap"           % "0.11.0-3",
-  "org.webjars"               %  "angular-ui-router"              % "0.2.10",
+  "org.webjars"               %  "angular-ui-router"              % "0.2.11",
   "org.webjars"               %  "ng-table"                       % "0.3.3",
   // Testing
   "org.scalatest"             %% "scalatest"                      % "2.2.1"              % "test->*" excludeAll(
