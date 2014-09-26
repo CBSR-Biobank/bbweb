@@ -23,19 +23,15 @@
     <table data-ng-table="tableParams" class="table table-hover">
       <tr data-ng-repeat="study in $data">
         <td data-title="'Name'" sortable="'name'">
-          {{study.name}}
+          <span data-ng-click="studyInformation(study)">
+            <a href>{{study.name}}</a>
+          </span>
         </td>
         <td data-title="'Status'" sortable="'valueType'">
           {{study.status}}
         </td>
         <td data-title="'Description'" sortable="'description'">
           {{study.description === null ? "" : study.description | truncate:20}}
-        </td>
-        <td>
-          <button class="btn btn-xs btn-primary"
-                  data-ng-click="studyInformation(study)"
-                  title="More information">
-          <i class="glyphicon glyphicon-info-sign"></i></button>
         </td>
       </tr>
     </table>
