@@ -15,15 +15,6 @@ define(['angular'], function(angular) {
           studies: 0,
           centres: 0,
           users: 0
-        },
-        studiesAdmin: function() {
-          $state.go("admin.studies");
-        },
-        centresAdmin: function() {
-          $state.go("admin.centres");
-        },
-        usersAdmin: function() {
-          $state.go("admin.users");
         }
       };
 

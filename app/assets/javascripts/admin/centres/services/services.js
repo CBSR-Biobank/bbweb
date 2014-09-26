@@ -51,11 +51,11 @@ define(['angular', 'common'], function(angular) {
 
   mod.factory('CentreLocationService', ['BbwebRestApi', function(BbwebRestApi) {
     return {
-      list : function() {
-        return BbwebRestApi.call('GET', '/centres/locations');
+      list : function(centreId) {
+        return BbwebRestApi.call('GET', '/centres/locations/' + centreId);
       },
-      query: function(id) {
-        return BbwebRestApi.call('GET', '/centres/locations/' + id);
+      query: function(centreId, locationId) {
+        return BbwebRestApi.call('GET', '/centres/locations/' + centreId + "?locationId=" + locationId);
       },
       addOrUpdate: function(centre, location) {
         var cmd = {

@@ -2,15 +2,12 @@
   <h1>
     Study administration
     <div class="btn-group pull-right">
-      <button class="btn btn-xs btn-primary"
-              data-ng-click="defaultView()"
-              title="More information"
-              data-ng-if="studies.length > 0">
-      Default view</button>
-      <button class="btn btn-xs btn-primary"
-              data-ng-click="addStudy()"
-              title="Add study">
-      Add study <i class="glyphicon glyphicon-plus"></i></button>
+
+      <a ui-sref="admin.studies" class="btn btn-xs btn-primary" type="button">Default view</a>
+      <a ui-sref="admin.studies.add" class="btn btn-xs btn-primary" type="button">
+        Add study <i class="glyphicon glyphicon-plus"></i>
+      </a>
+
     </div>
   </h1>
 </div>
@@ -23,9 +20,7 @@
     <table data-ng-table="tableParams" class="table table-hover">
       <tr data-ng-repeat="study in $data">
         <td data-title="'Name'" sortable="'name'">
-          <span data-ng-click="studyInformation(study)">
-            <a href>{{study.name}}</a>
-          </span>
+          <a ui-sref="admin.studies.study.summary({studyId: study.id})">{{study.name}}</a>
         </td>
         <td data-title="'Status'" sortable="'valueType'">
           {{study.status}}

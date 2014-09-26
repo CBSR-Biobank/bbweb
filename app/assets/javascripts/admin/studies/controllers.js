@@ -25,18 +25,6 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
         function(studies) {
           $scope.studies = _.sortBy(studies, function(study) { return study.name; });
         });
-
-      $scope.addStudy = function() {
-        $state.go('admin.studies.add');
-      };
-
-      $scope.studyInformation = function(study) {
-        $state.go('admin.studies.study', { studyId: study.id });
-      };
-
-      $scope.tableView = function() {
-        $state.go('admin.studies.table');
-      };
     }]);
 
   /**
@@ -83,19 +71,6 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
 
       $scope.tableParams.settings().$scope = $scope;
       updateData();
-
-      $scope.addStudy = function() {
-        $state.go("admin.studies.add");
-      };
-
-      $scope.studyInformation = function(study) {
-        $state.go("admin.studies.study.summary", { studyId: study.id });
-      };
-
-      $scope.defaultView = function() {
-        $state.go("admin.studies");
-      };
-
     }]);
 
   /**

@@ -2,15 +2,12 @@
   <h1>
     Centre administration
     <div class="btn-group pull-right">
-      <button class="btn btn-xs btn-primary"
-              data-ng-click="tableView()"
-              title="More information"
-              data-ng-if="centres.length > 0">
-      Table view</button>
-      <button class="btn btn-xs btn-primary"
-              data-ng-click="addCentre()"
-              title="Add centre">
-      Add centre <i class="glyphicon glyphicon-plus"></i></button>
+
+      <a ui-sref="admin.centres.table" class="btn btn-xs btn-primary" type="button">Table view</a>
+      <a ui-sref="admin.centres.add" class="btn btn-xs btn-primary" type="button">
+        Add centre <i class="glyphicon glyphicon-plus"></i>
+      </a>
+
     </div>
   </h1>
 </div>
@@ -24,7 +21,15 @@
       <div class="col-md-4" data-ng-repeat="centre in rows">
         <div class="panel panel-default" style="margin-top: 10px;">
           <div class="panel-heading">
-            <h3 class="panel-title">{{centre.name}}</h3>
+            <h3 class="panel-title">
+            {{centre.name}}
+            <div class="btn-group pull-right">
+              <a ui-sref="admin.centres.centre.summary({centreId: centre.id})"
+                 class="btn btn-xs btn-primary" type="button">
+                More information <i class="glyphicon glyphicon-info-sign"></i>
+              </a>
+            </div>
+            </h3>
           </div>
           <div class="panel-body">
             <p>{{centre.description === null ? "" : centre.description | truncate:100}}</p>
@@ -35,14 +40,6 @@
                 <small class="text-muted"><strong>Last updated:</strong> {{centre.timeModified}}</small>
               </span>
             </br>
-            <p>
-              <div class="btn-group">
-                <button class="btn btn-xs btn-primary"
-                        data-ng-click="centreInformation(centre)"
-                        title="More information">
-                More information <i class="glyphicon glyphicon-info-sign"></i></button>
-              </div>
-            </p>
           </div>
         </div>
       </div>

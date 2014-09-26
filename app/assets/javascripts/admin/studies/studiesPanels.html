@@ -2,15 +2,12 @@
   <h1>
     Study administration
     <div class="btn-group pull-right">
-      <button class="btn btn-xs btn-primary"
-              data-ng-click="tableView()"
-              title="More information"
-              data-ng-if="studies.length > 0">
-      Table view</button>
-      <button class="btn btn-xs btn-primary"
-              data-ng-click="addStudy()"
-              title="Add study">
-      Add study <i class="glyphicon glyphicon-plus"></i></button>
+
+      <a ui-sref="admin.studies.table" class="btn btn-xs btn-primary" type="button">Table view</a>
+      <a ui-sref="admin.studies.add" class="btn btn-xs btn-primary" type="button">
+        Add study <i class="glyphicon glyphicon-plus"></i>
+      </a>
+
     </div>
   </h1>
 </div>
@@ -24,7 +21,15 @@
       <div class="col-md-4" data-ng-repeat="study in rows">
         <div class="panel panel-default" style="margin-top: 10px;">
           <div class="panel-heading">
-            <h3 class="panel-title">{{study.name}}</h3>
+            <h3 class="panel-title">
+            {{study.name}}
+            <div class="btn-group pull-right">
+              <a ui-sref="admin.studies.study({studyId: study.id})"
+                 class="btn btn-xs btn-primary" type="button">
+                More information <i class="glyphicon glyphicon-info-sign"></i>
+              </a>
+            </div>
+            </h3>
           </div>
           <div class="panel-body">
             <p>{{study.description === null ? "" : study.description | truncate:100}}</p>
@@ -34,15 +39,6 @@
               <span data-ng-if="study.timeModified != null">
                 <small class="text-muted"><strong>Last updated:</strong> {{study.timeModified}}</small>
               </span>
-            </br>
-            <p>
-              <div class="btn-group">
-                <button class="btn btn-xs btn-primary"
-                        data-ng-click="studyInformation(study)"
-                        title="More information">
-                More information <i class="glyphicon glyphicon-info-sign"></i></button>
-              </div>
-            </p>
           </div>
         </div>
       </div>

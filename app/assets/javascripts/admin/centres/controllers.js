@@ -19,18 +19,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       CentreService.list().then(function(centres) {
         $scope.centres = _.sortBy(centres, function(centre) { return centre.name; });
       });
-
-      $scope.addCentre = function() {
-        $state.go('admin.centres.add');
-      };
-
-      $scope.centreInformation = function(centre) {
-        $state.go('admin.centres.centre', { centreId: centre.id });
-      };
-
-      $scope.tableView = function() {
-        $state.go('admin.centres.table');
-      };
     }]);
 
   /**
@@ -58,7 +46,7 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       };
 
       var getTableData = function() {
-          return $scope.centres;
+        return $scope.centres;
       };
 
       $rootScope.pageTitle = 'Biobank centres';
@@ -88,19 +76,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
 
       $scope.tableParams.settings().$scope = $scope;
       updateData();
-
-      $scope.addCentre = function() {
-        $state.go("admin.centres.add");
-      };
-
-      $scope.centreInformation = function(centre) {
-        $state.go("admin.centres.centre.summary", { centreId: centre.id });
-      };
-
-      $scope.defaultView = function() {
-        $state.go("admin.centres");
-      };
-
     }]);
 
   /**
@@ -132,14 +107,6 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       $scope.descriptionToggle = true;
       $scope.descriptionToggleLength = 100;
 
-      $scope.updateCentre = function(centre) {
-        if (centre.id) {
-          $state.go("admin.centres.centre.update", { centreId: centre.id });
-          return;
-        }
-        throw new Error("centre does not have an ID");
-      };
-
       $scope.changeStatus = function(centre) {
         if (centre.id) {
           alert("change status of " + centre.name);
@@ -159,6 +126,17 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       };
 
     }]);
+
+  /**
+   * Displays the centre administrtion page, with a number of tabs. Each tab displays the configuration
+   * for a different aspect of the centre.
+   */
+  mod.controller('CentreLocationTabCtrl', [
+    '$scope', '$rootScope', '$state', 'centre',
+    function($scope, $rootScope, $state, centre) {
+
+    }]);
+
 
   return mod;
 });

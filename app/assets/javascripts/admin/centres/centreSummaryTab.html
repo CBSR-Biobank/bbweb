@@ -1,16 +1,16 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">{{centre.name}}
-    <div class="btn-group pull-right">
-      <button class="btn btn-xs btn-primary"
-              data-ng-click="updateCentre(centre)"
-              title="Update">
-      <i class="glyphicon glyphicon-edit"></i></button>
+    <span class="btn-group pull-right">
+      <a ui-sref="admin.centres.centre.update({centreId: centre.id})" class="btn btn-xs btn-primary"
+         type="button">
+        <i class="glyphicon glyphicon-edit"></i>
+      </a>
       <button class="btn btn-xs btn-success"
               data-ng-click="changeStatus(centre)"
               title="Change status">
       <i class="glyphicon glyphicon-cog"></i></button>
-    </div>
+    </span>
     </h3>
   </div>
   <div class="panel-body">

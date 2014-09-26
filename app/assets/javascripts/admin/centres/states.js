@@ -157,10 +157,10 @@ define(['angular'], function(angular) {
         url: '/locations',
         resolve: {
           user: userResolve.user,
-          annotTypes: [
+          locations: [
             'CentreLocationService', 'centre',
             function(CentreLocationService, centre) {
-              return CentreLocationService.getAll(centre.id);
+              return CentreLocationService.list(centre.id);
             }]
         },
         views: {
