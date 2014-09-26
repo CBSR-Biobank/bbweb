@@ -23,6 +23,8 @@ object UserCommands {
     avatarUrl: Option[String])
       extends UserCommand
 
+  // The id and expectedVersion fields are don't care in ResetUserPasswordCmd
+  // use this object to create this command
   object RegisterUserCmd {
     def apply(
       name: String,
@@ -79,8 +81,14 @@ object UserCommands {
 
   case class ResetUserPasswordCmd(
     id: String,
-    expectedVersion: Long)
-      extends UserCommand
+    expectedVersion: Long,
+    email: String) extends UserCommand
+
+  // The id and expectedVersion fields are don't care in ResetUserPasswordCmd
+  // use this object to create this command
+  object ResetUserPasswordCmd {
+    def apply(email: String): ResetUserPasswordCmd = ResetUserPasswordCmd("", -1, email)
+  }
 
   implicit val registerUserCmdReads = (
     (__ \ "name").read[String](minLength[String](2)) and
@@ -124,8 +132,7 @@ object UserCommands {
   )(UnlockUserCmd.apply _)
 
   implicit val resetUserPasswordCmdReads: Reads[ResetUserPasswordCmd] = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  ){ ResetUserPasswordCmd }
+    (__ \ "email").read[String](minLength[String](5))
+  ).map { ResetUserPasswordCmd(_) }
 
 }

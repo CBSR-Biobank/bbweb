@@ -202,7 +202,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
 
       val newPassword = nameGenerator.nextEmail[User]
 
-      val cmd = ResetUserPasswordCmd(user.id.id, user.version)
+      val cmd = ResetUserPasswordCmd(user.email)
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserPasswordResetEvent]].futureValue
 
       v shouldSucceed { event =>
@@ -222,15 +222,15 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       }
     }
 
-    "not reset a user's password with a invalid version" in {
+    "not reset a password with an invalid email" in {
       val user = factory.createActiveUser
       userRepository.put(user)
 
       val newPassword = nameGenerator.nextEmail[User]
 
-      val cmd = ResetUserPasswordCmd(user.id.id, user.version - 1)
+      val cmd = ResetUserPasswordCmd(nameGenerator.nextEmail[User])
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserPasswordResetEvent]].futureValue
-      v shouldFail "expected version doesn't match current version"
+      v shouldFail "user with email not found"
     }
 
     "lock an activated a user" in {

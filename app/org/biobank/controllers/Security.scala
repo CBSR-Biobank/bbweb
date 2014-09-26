@@ -48,7 +48,7 @@ trait Security { self: Controller =>
                  case None => DomainError("invalid token").failNel
                  case Some(userId) => {
                    for {
-                     user       <- usersService.getByEmail(userId.id)
+                     user       <- usersService.getUser(userId.id)
                      activeUser <- UserHelper.isUserActive(user)
                      auth       <- AuthenticationInfo(token, userId).successNel
                    } yield auth

@@ -48,7 +48,7 @@ object UsersController extends CommandController with JsonController {
         // TODO: token should be derived from salt
         usersService.validatePassword(loginCredentials.email, loginCredentials.password).fold(
           err => {
-            Logger.debug(s"login: error: $err")
+            Logger.info(s"login: error: $err")
             val errStr = err.list.mkString(", ")
             if (errStr.contains("not found") || errStr.contains("invalid password")) {
               Forbidden("invalid email or password")
@@ -66,6 +66,15 @@ object UsersController extends CommandController with JsonController {
           }
         )
       }
+    )
+  }
+
+  /** Retrieves the user associated with the token, if it is valid.
+    */
+  def authenticateUser() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
+    usersService.getUser(userId.id).fold(
+      err  => BadRequest(err.list.mkString(", ")),
+      user => Ok(user)
     )
   }
 
@@ -115,15 +124,6 @@ object UsersController extends CommandController with JsonController {
   ) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     val users = usersService.getAll.toList
     Ok(users)
-  }
-
-  /** Retrieves the user associated with the token, if it is valid.
-    */
-  def authenticateUser() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    usersService.getByEmail(userId.id).fold(
-      err  => BadRequest(err.list.mkString(", ")),
-      user => Ok(user)
-    )
   }
 
   /** Retrieves the user for the given id as JSON */
@@ -194,14 +194,6 @@ object UsersController extends CommandController with JsonController {
     token => implicit userId => implicit request =>
     val cmd = RemoveUserCmd(id, ver)
     val future = usersService.remove(cmd)
-    domainValidationReply(future)
-  }
-
-  def resetPassword(
-    id: String,
-    ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-    val cmd = ResetUserPasswordCmd(id, ver)
-    val future = usersService.resetPassword(cmd)
     domainValidationReply(future)
   }
 

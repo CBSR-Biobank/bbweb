@@ -109,13 +109,15 @@ trait UsersProcessorComponent {
     }
 
     val receiveRecover: Receive = {
-      case event: UserRegisteredEvent => recoverEvent(event)
-      case event: UserActivatedEvent => recoverEvent(event)
-      case event: UserNameUpdatedEvent => recoverEvent(event)
-      case event: UserEmailUpdatedEvent => recoverEvent(event)
+      case event: UserRegisteredEvent      => recoverEvent(event)
+      case event: UserActivatedEvent       => recoverEvent(event)
+      case event: UserNameUpdatedEvent     => recoverEvent(event)
+      case event: UserEmailUpdatedEvent    => recoverEvent(event)
       case event: UserPasswordUpdatedEvent => recoverEvent(event)
-      case event: UserLockedEvent => recoverEvent(event)
-      case event: UserUnlockedEvent => recoverEvent(event)
+      case event: UserLockedEvent          => recoverEvent(event)
+      case event: UserUnlockedEvent        => recoverEvent(event)
+      case event: UserPasswordResetEvent   => recoverEvent(event)
+
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.users.foreach(i => userRepository.put(i))
 
@@ -125,14 +127,14 @@ trait UsersProcessorComponent {
     }
 
     val receiveCommand: Receive = {
-      case cmd: RegisterUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: ActivateUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UpdateUserNameCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UpdateUserEmailCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: RegisterUserCmd       => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: ActivateUserCmd       => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: UpdateUserNameCmd     => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: UpdateUserEmailCmd    => process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: UpdateUserPasswordCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: ResetUserPasswordCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: LockUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UnlockUserCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: ResetUserPasswordCmd  => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: LockUserCmd           => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: UnlockUserCmd         => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
       case "snap" =>
         saveSnapshot(SnapshotState(userRepository.allUsers))
@@ -215,12 +217,16 @@ trait UsersProcessorComponent {
     def validateCmd(cmd: ResetUserPasswordCmd): DomainValidation[UserPasswordResetEvent] = {
       val timeNow = DateTime.now
 
-      val v = updateActive(cmd) { user =>
-        val plainPassword = Utils.randomString(8)
-        val passwordInfo = encryptPassword(user, plainPassword)
-        EmailService.passwordResetEmail(user.email, plainPassword)
-        user.updatePassword(passwordInfo.password, passwordInfo.salt)
-      }
+      val v = for {
+        userWithEmail <- userRepository.getByEmail(cmd.email)
+        user <- userRepository.getActive(userWithEmail.id)
+        updatedUser <- {
+          val plainPassword = Utils.randomString(8)
+          val passwordInfo = encryptPassword(user, plainPassword)
+          EmailService.passwordResetEmail(user.email, plainPassword)
+          user.updatePassword(passwordInfo.password, passwordInfo.salt)
+        }
+      } yield updatedUser
 
       v.fold(
         err => DomainError(s"error $err occurred on $cmd").failNel,
