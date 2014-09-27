@@ -38,18 +38,18 @@
     </div>
     <div class="row">
       <div class="col-md-2">
-        <p class="text-muted"><strong>Date Added:</strong></p>
+        <p class="text-muted"><strong>Added:</strong></p>
       </div>
       <div class="col-md-10">
-        <p class="text-muted">{{study.timeAdded}}</p>
+        <p class="text-muted">{{study.timeAdded | timeago}}</p>
       </div>
     </div>
     <div class="row">
       <div class="col-md-2" data-ng-if="study.timeModified != null">
-        <p class="text-muted"><strong>Last updated:</strong></p>
+        <p class="text-muted"><strong>Updated:</strong></p>
       </div>
       <div class="col-md-10">
-        <p class="text-muted">{{study.timeModified}}</p>
+        <p class="text-muted">{{study.timeModified | timeago}}</p>
       </div>
     </div>
   </div>

@@ -113,7 +113,6 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
   mod.controller('StudySummaryTabCtrl', [
     '$scope', '$state', '$filter', 'user', 'study',
     function($scope, $state, $filter, user, study) {
-
       $scope.study = study;
       $scope.description = $scope.study.description;
       $scope.descriptionToggle = true;

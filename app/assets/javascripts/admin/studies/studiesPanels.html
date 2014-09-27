@@ -35,9 +35,9 @@
             <p>{{study.description === null ? "" : study.description | truncate:100}}</p>
             <p>
               <small class="text-info"><strong>Status:</strong> {{study.status}}</small><br>
-              <small class="text-muted"><strong>Added:</strong> {{study.timeAdded}}</small><br>
+              <small class="text-muted"><strong>Added:</strong> {{study.timeAdded | timeago}}</small><br>
               <span data-ng-if="study.timeModified != null">
-                <small class="text-muted"><strong>Last updated:</strong> {{study.timeModified}}</small>
+                <small class="text-muted"><strong>Updated:</strong> {{study.timeModified | timeago}}</small>
               </span>
           </div>
         </div>
