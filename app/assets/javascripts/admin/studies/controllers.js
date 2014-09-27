@@ -74,47 +74,6 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
     }]);
 
   /**
-   * Displays the study administrtion page, with a number of tabs. Each tab displays the configuration
-   * for a different aspect of the study.
-   */
-  mod.controller('StudySummaryTabCtrl', [
-    '$scope', '$rootScope', '$state', '$filter', 'user', 'study',
-    function($scope, $rootScope, $state, $filter, user, study) {
-
-      $scope.study = study;
-      $scope.description = $scope.study.description;
-      $scope.descriptionToggle = true;
-      $scope.descriptionToggleLength = 100;
-
-      $scope.updateStudy = function(study) {
-        if (study.id) {
-          $state.go("admin.studies.study.update", { studyId: study.id });
-          return;
-        }
-        throw new Error("study does not have an ID");
-      };
-
-      $scope.changeStatus = function(study) {
-        if (study.id) {
-          alert("change status of " + study.name);
-          return;
-        }
-        throw new Error("study does not have an ID");
-      };
-
-      $scope.truncateDescriptionToggle = function() {
-        if ($scope.descriptionToggle) {
-          $scope.description = $filter('truncate')(
-            $scope.study.description, $scope.descriptionToggleLength);
-        } else {
-          $scope.description = $scope.study.description;
-        }
-        $scope.descriptionToggle = !$scope.descriptionToggle;
-      };
-
-    }]);
-
-  /**
    * Called to add a study.
    */
   mod.controller('StudyAddCtrl', [
@@ -148,21 +107,63 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
     }]);
 
   /**
+   * Displays the study administrtion page, with a number of tabs. Each tab displays the configuration
+   * for a different aspect of the study.
+   */
+  mod.controller('StudySummaryTabCtrl', [
+    '$scope', '$state', '$filter', 'user', 'study',
+    function($scope, $state, $filter, user, study) {
+
+      $scope.study = study;
+      $scope.description = $scope.study.description;
+      $scope.descriptionToggle = true;
+      $scope.descriptionToggleLength = 100;
+
+      $scope.updateStudy = function(study) {
+        if (study.id) {
+          $state.go("admin.studies.study.update", { studyId: study.id });
+          return;
+        }
+        throw new Error("study does not have an ID");
+      };
+
+      $scope.changeStatus = function(study) {
+        if (study.id) {
+          alert("change status of " + study.name);
+          return;
+        }
+        throw new Error("study does not have an ID");
+      };
+
+      $scope.truncateDescriptionToggle = function() {
+        if ($scope.descriptionToggle) {
+          $scope.description = $filter('truncate')(
+            $scope.study.description, $scope.descriptionToggleLength);
+        } else {
+          $scope.description = $scope.study.description;
+        }
+        $scope.descriptionToggle = !$scope.descriptionToggle;
+      };
+    }]);
+
+  /**
    * Displays study participant information in a table.
    */
   mod.controller('ParticipantsTabCtrl', [
+    '$rootScope',
     '$scope',
     '$state',
+    '$timeout',
     'AnnotTypesPanelSettings',
     'participantAnnotTypeRemoveService',
     'annotTypes',
-    function (
-      $scope,
-      $state,
-      AnnotTypesPanelSettings,
-      participantAnnotTypeRemoveService,
-      annotTypes) {
-
+    function ($rootScope,
+              $scope,
+              $state,
+              $timeout,
+              AnnotTypesPanelSettings,
+              participantAnnotTypeRemoveService,
+              annotTypes) {
       $scope.panel = {
         annotTypes: new AnnotTypesPanelSettings(
           'participantAnnotTypes',
@@ -182,6 +183,8 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
           participantAnnotTypeRemoveService.remove
         )
       };
+
+      $rootScope.$emit('studyTabChanged', 'participantTab');
     }]);
 
 
@@ -191,7 +194,6 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
   mod.controller('SpecimensTabCtrl', [
     '$scope', 'SpecimenGroupsPanelSettings', 'specimenGroups',
     function($scope, SpecimenGroupsPanelSettings, specimenGroups) {
-
       $scope.panel = {
         specimenGroups: new SpecimenGroupsPanelSettings('specimenGroups', specimenGroups)
       };
@@ -209,15 +211,14 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
     'ceventTypes',
     'annotTypes',
     'specimenGroups',
-    function(
-      $scope,
-      $state,
-      AnnotTypesPanelSettings,
-      CeventTypesPanelSettings,
-      ceventAnnotTypeRemoveService,
-      ceventTypes,
-      annotTypes,
-      specimenGroups) {
+    function($scope,
+             $state,
+             AnnotTypesPanelSettings,
+             CeventTypesPanelSettings,
+             ceventAnnotTypeRemoveService,
+             ceventTypes,
+             annotTypes,
+             specimenGroups) {
 
       $scope.panel = {
         ceventTypes: new CeventTypesPanelSettings(
@@ -306,7 +307,6 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
           spcLinkAnnotTypeRemoveService.remove
         )
       };
-
     }]);
 
   return mod;

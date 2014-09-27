@@ -21,6 +21,7 @@ define(['angular'], function(angular) {
     //   console.log('$stateChangeStart to '+ toState.name + ' from ' + fromState.name +
     //               ' - fired when the transition begins. toState, toParams : \n', toState, toParams);
     // });
+
     // $rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
     //   console.log('$stateChangeSuccess to '+ toState.name +
     //               '- fired once the state transition is complete.');

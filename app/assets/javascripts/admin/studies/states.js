@@ -77,6 +77,7 @@ define(['angular'], function(angular) {
        * Study view
        */
       $stateProvider.state('admin.studies.study', {
+        abstract: true,
         url: '/{studyId}',
         resolve: {
           user: userResolve.user,
@@ -89,53 +90,12 @@ define(['angular'], function(angular) {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/studyView.html',
-            controller: [
-              '$scope', '$state', '$timeout', 'studyViewSettings', 'study',
-              function($scope, $state, $timeout, studyViewSettings, study) {
-                $scope.study = study;
-
-                if ($state.current.name === 'admin.studies.study') {
-                  studyViewSettings.initialize(study.id);
-                  $state.go('admin.studies.study.summary', { studyId: study.id });
-                  return;
-                }
-
-                /*
-                 * At the moment, static tabs overwrite whatever is passed to active when the directive is
-                 * run, which is a bug. As a kludge, a timeout with 0 seconds delay is used to set the active
-                 * state.
-                 *
-                 */
-                $scope.tabActive = {
-                  participants: false,
-                  specimens: false,
-                  collection: false,
-                  processing: false
-                };
-
-                if ($state.current.name === 'admin.studies.study.participants') {
-                  $timeout(function() {
-                    $scope.tabActive.participants = true;
-                  }, 0);
-                } else if ($state.current.name === 'admin.studies.study.specimens') {
-                  $timeout(function() {
-                    $scope.tabActive.specimens = true;
-                  }, 0);
-                } else if ($state.current.name === 'admin.studies.study.collection') {
-                  $timeout(function() {
-                    $scope.tabActive.collection = true;
-                  }, 0);
-                } else if ($state.current.name === 'admin.studies.study.processing') {
-                  $timeout(function() {
-                    $scope.tabActive.processing = true;
-                  }, 0);
-                }
-              }]
+            templateUrl: '/assets/javascripts/admin/studies/studyView.html'
+            //controller: 'StudyViewCtrl'
           }
         },
         data: {
-          displayName: "{{study.name}}"
+          displayName: '{{study.name}}'
         }
       });
 
@@ -154,7 +114,7 @@ define(['angular'], function(angular) {
           }
         },
         data: {
-          displayName: "Update"
+          displayName: 'Update'
         }
       });
 

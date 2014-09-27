@@ -7,31 +7,11 @@
       of the tab is clicked on, not just the link.
   -->
   <tabset>
-    <tab ui-sref="admin.studies.study.summary">
-      <tab-heading>
-        <a>Summary</a>
-      </tab-heading>
-    </tab>
-    <tab ui-sref="admin.studies.study.participants" active="tabActive.participants">
-      <tab-heading>
-        <a>Participants</a>
-      </tab-heading>
-    </tab>
-    <tab ui-sref="admin.studies.study.specimens" active="tabActive.specimens">
-      <tab-heading>
-        <a>Specimens</a>
-      </tab-heading>
-    </tab>
-    <tab ui-sref="admin.studies.study.collection" active="tabActive.collection">
-      <tab-heading>
-        <a>Collection</a>
-      </tab-heading>
-    </tab>
-    <tab ui-sref="admin.studies.study.processing" active="tabActive.processing">
-      <tab-heading>
-        <a>Processing</a>
-      </tab-heading>
-    </tab>
+    <tab heading="Summary" ui-sref="admin.studies.study.summary" ui-sref-active="active"></tab>
+    <tab heading="Participants" ui-sref="admin.studies.study.participants" ui-sref-active="active"></tab>
+    <tab heading="Specimens" ui-sref="admin.studies.study.specimens" ui-sref-active="active"></tab>
+    <tab heading="Collection" ui-sref="admin.studies.study.collection" ui-sref-active="active"></tab>
+    <tab heading="Processing" ui-sref="admin.studies.study.processing" ui-sref-active="active"></tab>
   </tabset>
   <div class="row">
     <div ui-view="studyDetails" style="margin-top: 10px;"></div>
