@@ -1,18 +1,18 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">{{study.name}}
-    <div class="btn-group pull-right">
+      <span class="btn-group pull-right">
 
-      <a ui-sref="admin.studies.study.update({studyId: study.id})" class="btn btn-xs btn-primary"
-         type="button" title="update">
-        <i class="glyphicon glyphicon-edit"></i>
-      </a>
+        <a ui-sref="admin.studies.study.update({studyId: study.id})" class="btn btn-xs btn-primary"
+           type="button" title="update">
+          <i class="glyphicon glyphicon-edit"></i>
+        </a>
 
-      <button class="btn btn-xs btn-success"
-              data-ng-click="changeStatus(study)"
-              title="Change status">
-      <i class="glyphicon glyphicon-cog"></i></button>
-    </div>
+        <button class="btn btn-xs btn-success"
+                data-ng-click="changeStatus(study)"
+                title="Change status">
+          <i class="glyphicon glyphicon-cog"></i>
+      </span>
     </h3>
   </div>
   <div class="panel-body">
