@@ -81,6 +81,7 @@ define(['angular'], function(angular) {
        * Centre view
        */
       $stateProvider.state('admin.centres.centre', {
+        abstract: true,
         url: '/{centreId}',
         resolve: {
           user: userResolve.user,
@@ -93,37 +94,7 @@ define(['angular'], function(angular) {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/centres/centreView.html',
-            controller: [
-              '$scope', '$state', '$timeout', 'centre',
-              function($scope, $state, $timeout, centre) {
-                $scope.centre = centre;
-
-                if ($state.current.name === 'admin.centres.centre') {
-                  $state.go('admin.centres.centre.summary', { centreId: centre.id });
-                  return;
-                }
-
-                /*
-                 * At the moment, static tabs overwrite whatever is passed to active when the directive is
-                 * run, which is a bug. As a kludge, a timeout with 0 seconds delay is used to set the active
-                 * state.
-                 */
-                $scope.tabActive = {
-                  locations: false,
-                  studies: false
-                };
-
-                if ($state.current.name === 'admin.centres.centre.locations') {
-                  $timeout(function() {
-                    $scope.tabActive.participants = true;
-                  }, 0);
-                } else if ($state.current.name === 'admin.centres.centre.studies') {
-                  $timeout(function() {
-                    $scope.tabActive.specimens = true;
-                  }, 0);
-                }
-              }]
+            templateUrl: '/assets/javascripts/admin/centres/centreView.html'
           }
         },
         data: {
