@@ -22,7 +22,8 @@ define(['angular'], function(angular) {
           modelObjModalService.show(title, data);
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Common code to add or edit a processing type.
@@ -40,7 +41,7 @@ define(['angular'], function(angular) {
           actionButtonText: 'OK'
         };
 
-        if (error.message.indexOf("expected version doesn't match current version") > -1) {
+        if (error.message.indexOf('expected version doesn\'t match current version') > -1) {
           /* concurrent change error */
           modalOptions.headerText = 'Modified by another user';
           modalOptions.bodyText = 'Another user already made changes to this processing type. Press OK to make ' +
@@ -52,7 +53,7 @@ define(['angular'], function(angular) {
           modalOptions.bodyText = 'Error: ' + error.message;
         }
 
-        modalService.showModal({}, modalOptions).then(function (result) {
+        modalService.showModal({}, modalOptions).then(function () {
           stateHelper.reloadAndReinit();
         }, function () {
           $state.go('admin.studies.study.processing');
@@ -80,20 +81,21 @@ define(['angular'], function(angular) {
           };
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Removes a processing type.
    */
   mod.service('processingTypeRemoveService', [
-    '$state', 'stateHelper', 'studyRemoveModalService', 'ProcessingTypeService', 'modalService',
-    function ($state, stateHelper, studyRemoveModalService, ProcessingTypeService, modalService) {
+    '$state', 'stateHelper', 'studyRemoveModalService', 'ProcessingTypeService',
+    function ($state, stateHelper, studyRemoveModalService, ProcessingTypeService) {
       return {
         remove: function(processingType) {
           studyRemoveModalService.remove(
             'Remove Processing Type',
             'Are you sure you want to remove processing type ' + processingType.name + '?',
-            function (result) {
+            function () {
               ProcessingTypeService.remove(processingType).then(
                 function() {
                   stateHelper.reloadAndReinit();
@@ -111,7 +113,8 @@ define(['angular'], function(angular) {
             });
         }
       };
-    }]);
+    }
+  ]);
 
   mod.service('spcLinkAnnotTypeEditService', [
     '$state', '$stateParams', 'modalService', 'studyAnnotTypeEditService', 'SpcLinkAnnotTypeService',
@@ -139,20 +142,21 @@ define(['angular'], function(angular) {
           studyAnnotTypeEditService.edit($scope, onSubmit, onCancel);
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Removes a participant annotation type.
    */
   mod.service('spcLinkAnnotTypeRemoveService', [
-    '$state', 'stateHelper', 'studyRemoveModalService', 'SpcLinkAnnotTypeService', 'modalService',
-    function ($state, stateHelper, studyRemoveModalService, SpcLinkAnnotTypeService, modalService) {
+    '$state', 'stateHelper', 'studyRemoveModalService', 'SpcLinkAnnotTypeService',
+    function ($state, stateHelper, studyRemoveModalService, SpcLinkAnnotTypeService) {
       return {
         remove: function(annotType) {
           studyRemoveModalService.remove(
             'Remove Specimen Link Annotation Type',
             'Are you sure you want to remove annotation type ' + annotType.name + '?',
-            function (result) {
+            function () {
               SpcLinkAnnotTypeService.remove(annotType).then(
                 function() {
                   stateHelper.reloadAndReinit();
@@ -170,7 +174,8 @@ define(['angular'], function(angular) {
             });
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Displays a specimen link type in a modal. The information is displayed in an ng-table.
@@ -202,7 +207,8 @@ define(['angular'], function(angular) {
           modelObjModalService.show(title, data);
         }
       };
-    }]);
+    }
+  ]);
 
 
   /**
@@ -230,7 +236,7 @@ define(['angular'], function(angular) {
           actionButtonText: 'OK'
         };
 
-        if (error.message.indexOf("expected version doesn't match current version") > -1) {
+        if (error.message.indexOf('expected version doesn\'t match current version') > -1) {
           /* concurrent change error */
           modalOptions.headerText = 'Modified by another user';
           modalOptions.bodyText = 'Another user already made changes to this specimen link type. Press OK to make ' +
@@ -242,11 +248,12 @@ define(['angular'], function(angular) {
           modalOptions.bodyText = 'Error: ' + error.message;
         }
 
-        modalService.showModal({}, modalOptions).then(function (result) {
-          stateHelper.reloadAndReinit();
-        }, function () {
-          $state.go('admin.studies.study.processing');
-        });
+        modalService.showModal({}, modalOptions).then(
+          function () {
+            stateHelper.reloadAndReinit();
+          }, function () {
+            $state.go('admin.studies.study.processing');
+          });
       };
 
       return {
@@ -283,7 +290,7 @@ define(['angular'], function(angular) {
             },
             removeAnnotType: function (atData) {
               if ($scope.spcLinkType.annotationTypeData.length < 1) {
-                throw new Error("invalid length for annotation type data");
+                throw new Error('invalid length for annotation type data');
               }
 
               var index = $scope.spcLinkType.annotationTypeData.indexOf(atData);
@@ -294,20 +301,21 @@ define(['angular'], function(angular) {
           };
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Removes a specimen link type.
    */
   mod.service('spcLinkTypeRemoveService', [
-    '$state', 'stateHelper', 'studyRemoveModalService', 'SpcLinkTypeService', 'modalService',
-    function ($state, stateHelper, studyRemoveModalService, SpcLinkTypeService, modalService) {
+    '$state', 'stateHelper', 'studyRemoveModalService', 'SpcLinkTypeService',
+    function ($state, stateHelper, studyRemoveModalService, SpcLinkTypeService) {
       return {
         remove: function(spcLinkType) {
           studyRemoveModalService.remove(
             'Remove Specimen Link Type',
             'Are you sure you want to remove specimen link type ' + spcLinkType.name + '?',
-            function (result) {
+            function () {
               SpcLinkTypeService.remove(spcLinkType).then(
                 function() {
                   stateHelper.reloadAndReinit();
@@ -325,7 +333,8 @@ define(['angular'], function(angular) {
             });
         }
       };
-    }]);
+    }
+  ]);
 
   return mod;
 });

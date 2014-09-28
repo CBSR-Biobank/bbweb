@@ -27,7 +27,7 @@ define(['angular', 'common'], function(angular) {
         query: function(id) {
           return BbwebRestApi.call('GET', '/studies/' + id);
         },
-        addOrUpdate: function(study, onSuccess, onError) {
+        addOrUpdate: function(study) {
           var cmd = {
             name: study.name,
             description: study.description
@@ -60,7 +60,8 @@ define(['angular', 'common'], function(angular) {
           }
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Service to access study annotation types.

@@ -6,14 +6,6 @@ define(['angular', 'common'], function(angular) {
 
   var mod = angular.module('users.services', ['biobank.common', 'ngCookies']);
 
-  var onHttpPromiseSuccess = function(data) {
-    return data.data;
-  };
-
-  var onHttpPromiseError = function(data) {
-    return data.message;
-  };
-
   mod.factory('userService', [
     '$http', '$q', '$cookies', '$log', 'BbwebRestApi',
     function($http, $q, $cookies, $log, BbwebRestApi) {
@@ -26,12 +18,12 @@ define(['angular', 'common'], function(angular) {
             user = response.data.data;
             $log.info('Welcome back, ' + user.name);
           },
-          function(response) {
+          function() {
             /* the token is no longer valid */
             $log.info('Token no longer valid, please log in.');
             token = undefined;
             delete $cookies['XSRF-TOKEN'];
-            return $q.reject("Token invalid");
+            return $q.reject('Token invalid');
           });
       }
 
@@ -56,8 +48,8 @@ define(['angular', 'common'], function(angular) {
         },
         logout: function() {
           // Logout on server in a real app
-          return $http.post('/logout').then(function(response) {
-            $log.info("Good bye ");
+          return $http.post('/logout').then(function() {
+            $log.info('Good bye');
             delete $cookies['XSRF-TOKEN'];
             token = undefined;
             user = undefined;
@@ -117,7 +109,8 @@ define(['angular', 'common'], function(angular) {
           return changeStatus(user, 'unlock');
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Add this object to a route definition to only allow resolving the route if the user is
@@ -153,8 +146,8 @@ define(['angular', 'common'], function(angular) {
   /**
    * If the current route does not resolve, go back to the start page.
    */
-  var handleRouteError = ["$rootScope", "$state", function($rootScope, $state) {
-    $rootScope.$on('$routeChangeError', function(e, next, current) {
+  var handleRouteError = ['$rootScope', '$state', function($rootScope, $state) {
+    $rootScope.$on('$routeChangeError', function() {
       $state.go('home');
     });
   }];

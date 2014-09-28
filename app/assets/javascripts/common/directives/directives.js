@@ -61,9 +61,9 @@ define(['angular'], function(angular) {
    * Displays a right justified button with a 'plus' icon. Meant to be used in a pane to add a
    * domain object.
    */
-  mod.directive("panelButtons", function () {
+  mod.directive('panelButtons', function () {
     return {
-      restrict: "E",
+      restrict: 'E',
       replace: 'true',
       scope: {
         add: '&onAdd',
@@ -78,9 +78,9 @@ define(['angular'], function(angular) {
   /**
    * Displays a right justified button group with an information, an update and a remove button.
    */
-  mod.directive("infoUpdateRemoveButtons", function () {
+  mod.directive('infoUpdateRemoveButtons', function () {
     return {
-      restrict: "E",
+      restrict: 'E',
       replace: 'true',
       scope: {
         'info': '&onInfo',
@@ -94,9 +94,9 @@ define(['angular'], function(angular) {
   /**
    * Displays a right justified button group with an update and a remove button.
    */
-  mod.directive("updateRemoveButtons", function () {
+  mod.directive('updateRemoveButtons', function () {
     return {
-      restrict: "E",
+      restrict: 'E',
       replace: 'true',
       scope: {
         'update': '&onUpdate',

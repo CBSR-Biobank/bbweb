@@ -24,7 +24,8 @@ define(['angular'], function(angular) {
         data = data.concat(addTimeStampsService.get(specimenGroup));
         modelObjModalService.show(title, data);
       };
-    }]);
+    }
+  ]);
 
   /**
    * Common code to add or edit an specimen Group.
@@ -39,7 +40,7 @@ define(['angular'], function(angular) {
           actionButtonText: 'OK'
         };
 
-        if (error.message.indexOf("expected version doesn't match current version") > -1) {
+        if (error.message.indexOf('expected version doesn\'t match current version') > -1) {
           /* concurrent change error */
           modalOptions.headerText = 'Modified by another user';
           modalOptions.bodyText = 'Another user already made changes to this Specimen Group. Press OK to make ' +
@@ -51,7 +52,8 @@ define(['angular'], function(angular) {
           modalOptions.bodyText = 'Error: ' + error.message;
         }
 
-        modalService.showModal({}, modalOptions).then(function (result) {
+        modalService.showModal({}, modalOptions).then(
+          function () {
           stateHelper.reloadAndReinit();
         }, function () {
           $state.go('admin.studies.study.specimens');
@@ -70,7 +72,7 @@ define(['angular'], function(angular) {
 
           $scope.submit = function(specimenGroup) {
             SpecimenGroupService.addOrUpdate(specimenGroup).then(
-              function(event) {
+              function() {
                 $state.transitionTo(
                   'admin.studies.study.specimens',
                   $stateParams,
@@ -86,23 +88,24 @@ define(['angular'], function(angular) {
           };
         }
       };
-    }]);
+    }
+  ]);
 
 
   /**
    * Removes a specimen group.
    */
   mod.service('specimenGroupRemoveService', [
-    '$state', 'stateHelper', 'studyRemoveModalService', 'SpecimenGroupService', 'modalService',
-    function ($state, stateHelper, studyRemoveModalService, SpecimenGroupService, modalService) {
+    '$state', 'stateHelper', 'studyRemoveModalService', 'SpecimenGroupService',
+    function ($state, stateHelper, studyRemoveModalService, SpecimenGroupService) {
       return {
         remove: function(specimenGroup) {
           studyRemoveModalService.remove(
             'Remove Specimen Group',
             'Are you sure you want to remove specimen group ' + specimenGroup.name + '?',
-            function (result) {
+            function () {
               SpecimenGroupService.remove(specimenGroup).then(
-                function(sgInfo) {
+                function() {
                   stateHelper.reloadAndReinit();
                 },
                 function(error) {
@@ -118,7 +121,8 @@ define(['angular'], function(angular) {
             });
         }
       };
-    }]);
+    }
+  ]);
 
   return mod;
 });

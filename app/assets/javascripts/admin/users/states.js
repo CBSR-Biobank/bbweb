@@ -35,7 +35,8 @@ define(['angular'], function(angular) {
           displayName: 'Users'
         }
       });
-    }]);
+    }
+  ]);
 
   return mod;
 });

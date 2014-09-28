@@ -8,11 +8,11 @@ define(['angular'], function(angular) {
 
   // For debugging
   //
-  mod.run(['$rootScope', '$state', '$stateParams', function ($rootScope, $state, $stateParams) {
+  mod.run(['$rootScope', '$state', '$stateParams', function ($rootScope /*, $state, $stateParams */) {
     // $rootScope.$state = $state;
     // $rootScope.$stateParams = $stateParams;
 
-    $rootScope.$on('$stateChangeError',function(event, toState, toParams, fromState, fromParams){
+    $rootScope.$on('$stateChangeError',function(/* event, toState, toParams, fromState , fromParams */){
       console.log('$stateChangeError - fired when an error occurs during transition.');
       console.log(arguments);
     });
@@ -27,7 +27,7 @@ define(['angular'], function(angular) {
     //               '- fired once the state transition is complete.');
     // });
     // // $rootScope.$on('$viewContentLoading',function(event, viewConfig){
-    // //   // runs on individual scopes, so putting it in "run" doesn't work.
+    // //   // runs on individual scopes, so putting it in 'run' doesn't work.
     // //   console.log('$viewContentLoading - view begins loading - dom not rendered',viewConfig);
     // // });
     // $rootScope.$on('$viewContentLoaded',function(event){
@@ -62,7 +62,8 @@ define(['angular'], function(angular) {
         $scope.user = undefined;
         $state.go('home');
       };
-    }]);
+    }
+  ]);
 
   /** Controls the footer */
   mod.controller('FooterCtrl', function(/*$scope*/) {

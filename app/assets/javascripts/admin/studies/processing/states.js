@@ -56,7 +56,8 @@ define(['angular'], function(angular) {
                 return ProcessingTypeService.get(study.id, $stateParams.processingTypeId);
               }
               throw new Error('state parameter processingTypeId is invalid');
-            }]
+            }
+          ]
         },
         views: {
           'main@': {
@@ -79,10 +80,10 @@ define(['angular'], function(angular) {
           annotType: ['study', function(study) {
             return {
               studyId: study.id,
-              name: "",
+              name: '',
               description: null,
               required: false,
-              valueType: "",
+              valueType: '',
               options: []
             };
           }]
@@ -111,8 +112,9 @@ define(['angular'], function(angular) {
               if ($stateParams.annotTypeId) {
                 return SpcLinkAnnotTypeService.get(study.id, $stateParams.annotTypeId);
               }
-              throw new Error("state parameter annotTypeId is invalid");
-            }]
+              throw new Error('state parameter annotTypeId is invalid');
+            }
+          ]
         },
         views: {
           'main@': {
@@ -132,7 +134,7 @@ define(['angular'], function(angular) {
         url: '/sltype/add',
         resolve: {
           user: userResolve.user,
-          spcLinkType: ['study', function(study) {
+          spcLinkType: function() {
             return {
               processingTypeId:      null,
               inputGroupId:          null,
@@ -141,7 +143,7 @@ define(['angular'], function(angular) {
               outputContainerTypeId: null,
               annotationTypeData:    []
             };
-          }]
+          }
         },
         views: {
           'main@': {
@@ -163,9 +165,10 @@ define(['angular'], function(angular) {
           user: userResolve.user,
           spcLinkType: [
             '$stateParams', 'SpcLinkTypeService', 'study',
-            function($stateParams, SpcLinkTypeService, study) {
+            function($stateParams, SpcLinkTypeService) {
               return SpcLinkTypeService.get($stateParams.procTypeId, $stateParams.spcLinkTypeId);
-            }]
+            }
+          ]
         },
         views: {
           'main@': {
@@ -178,6 +181,7 @@ define(['angular'], function(angular) {
         }
       });
 
-    }]);
+    }
+  ]);
   return mod;
 });

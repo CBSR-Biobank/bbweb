@@ -16,13 +16,13 @@ define(['angular'], function(angular) {
       $scope.form = {
         notifications: notifications,
         credentials: {
-          email: "",
-          password: ""
+          email: '',
+          password: ''
         },
         login: function(credentials) {
           userService.login(credentials).then(
-            function(user) {
-              $state.go("dashboard");
+            function() {
+              $state.go('dashboard');
             },
             function(response) {
               var modalDefaults = {};
@@ -49,35 +49,36 @@ define(['angular'], function(angular) {
                 modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
               }
               modalService.showModal(modalDefaults, modalOptions).then(
-                function(result) {
+                function() {
                   stateHelper.reloadAndReinit();
                 },
                 function() {
-                  $state.go("home");
+                  $state.go('home');
                 }
               );
             });
         }
       };
-    }]);
+    }
+  ]);
 
   mod.controller('ForgotPasswordCtrl', [
     '$scope', '$state', '$stateParams', '$log', 'userService', 'modalService', 'emailNotFound',
     function($scope, $state, $stateParams, $log, userService, modalService, emailNotFound) {
       $scope.form = {
-        email: "",
+        email: '',
         emailNotFound: emailNotFound,
         submit: function(email) {
           userService.passwordReset(email).then(
             function() {
               // password reset, email sent
-              $state.go("users.forgot.passwordSent", { email: email });
+              $state.go('users.forgot.passwordSent', { email: email });
             },
             function(response) {
               // user not found
               var status = response.status;
-              if (status == 404) {
-                $state.go("users.forgot.emailNotFound");
+              if (status === 404) {
+                $state.go('users.forgot.emailNotFound');
               } else {
                 // user not active
                 var modalDefaults = {
@@ -88,27 +89,30 @@ define(['angular'], function(angular) {
                   bodyText: 'The account associated with that email is not active in the system. ' +
                     'Please contact your system administrator for more information.'
                 };
-                modalService.showModal(modalDefaults, modalOptions).then(function (result) {
-                  $state.go("home");
-                }, function () {
-                  $state.go("home");
-                });
+                modalService.showModal(modalDefaults, modalOptions).then(
+                  function () {
+                    $state.go('home');
+                  }, function () {
+                    $state.go('home');
+                  });
               }
             });
         }
       };
-    }]);
+    }
+  ]);
 
   mod.controller('ResetPasswordCtrl', [
-    '$scope', '$state', '$stateParams', 'userService',
-    function($scope, $state, $stateParams, userService) {
+    '$scope', '$state', '$stateParams',
+    function($scope, $state, $stateParams) {
       $scope.page = {
         email: $stateParams.email,
         login: function() {
-          $state.go("users.login");
+          $state.go('users.login');
         }
       };
-    }]);
+    }
+  ]);
 
   mod.controller('RegisterUserCtrl', [
     '$scope', '$state', '$stateParams', 'userService', 'notifications',
@@ -126,18 +130,19 @@ define(['angular'], function(angular) {
           userService.add(user).then(
             function() {
               // user has been registerd
-              $state.go("users.login.registered");
+              $state.go('users.login.registered');
             },
-            function(response) {
+            function() {
               // registration failed
-              $state.go("users.register.failed");
+              $state.go('users.register.failed');
             }
           );
         },
         cancel: function() {
-          $state.go("home");
+          $state.go('home');
         }
       };
-    }]);
+    }
+  ]);
 
 });

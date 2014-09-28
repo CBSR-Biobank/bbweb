@@ -8,12 +8,13 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
     'biobank.common',
     'studies.services',
     'admin.studies.helpers',
-    'admin.studies.participants.helpers']);
+    'admin.studies.participants.helpers'
+  ]);
 
   /**
    * Displays a list of studies with each in its own mini-panel.
    *
-   * "user" is not a service, but stems from userResolve (Check ../user/services.js) object.
+   * 'user' is not a service, but stems from userResolve (Check ../user/services.js) object.
    */
   mod.controller('StudiesCtrl', [
     '$rootScope', '$scope', '$state', '$log', 'StudyService',
@@ -25,7 +26,8 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
         function(studies) {
           $scope.studies = _.sortBy(studies, function(study) { return study.name; });
         });
-    }]);
+    }
+  ]);
 
   /**
    * Displays a list of studies in an ng-table.
@@ -48,7 +50,7 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
       $rootScope.pageTitle = 'Biobank studies';
       $scope.studies = [];
 
-      /* jshint ignore:start */
+      /* jshint -W055 */
       $scope.tableParams = new ngTableParams({
         page: 1,            // show first page
         count: 10,          // count per page
@@ -57,21 +59,22 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
         }
       }, {
         counts: [], // hide page counts control
-        total: $scope.studies.length,
+        total: function () { return getTableData().length; },
         getData: function($defer, params) {
-          var orderedData = params.sorting()
-            ? $filter('orderBy')($scope.studies, params.orderBy())
-            : $scope.studies;
+          var filteredData = getTableData();
+          var orderedData = params.sorting() ?
+              $filter('orderBy')(filteredData, params.orderBy()) : $scope.studies;
           $defer.resolve(orderedData.slice(
             (params.page() - 1) * params.count(),
             params.page() * params.count()));
         }
       });
-      /* jshint ignore:end */
+      /* jshint +W055 */
 
       $scope.tableParams.settings().$scope = $scope;
       updateData();
-    }]);
+    }
+  ]);
 
   /**
    * Called to add a study.
@@ -79,7 +82,7 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
   mod.controller('StudyAddCtrl', [
     '$scope', '$state', 'studyEditService', 'user', 'study',
     function($scope, $state, studyEditService, user, study) {
-      $scope.title =  "Add new study";
+      $scope.title =  'Add new study';
       $scope.study = study;
 
       var callback = function () {
@@ -87,7 +90,8 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
       };
 
       studyEditService.edit($scope, callback, callback, callback);
-    }]);
+    }
+  ]);
 
   /**
    * Called to update the summary information for study.
@@ -95,7 +99,7 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
   mod.controller('StudyUpdateCtrl', [
     '$scope', '$state', 'studyEditService', 'user', 'study',
     function($scope, $state, studyEditService, user, study) {
-      $scope.title = "Update study";
+      $scope.title = 'Update study';
       $scope.study = study;
 
       var callback = function () {
@@ -104,7 +108,8 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
       };
 
       studyEditService.edit($scope, callback, callback, callback);
-    }]);
+    }
+  ]);
 
   /**
    * Displays the study administrtion page, with a number of tabs. Each tab displays the configuration
@@ -120,18 +125,18 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
 
       $scope.updateStudy = function(study) {
         if (study.id) {
-          $state.go("admin.studies.study.update", { studyId: study.id });
+          $state.go('admin.studies.study.update', { studyId: study.id });
           return;
         }
-        throw new Error("study does not have an ID");
+        throw new Error('study does not have an ID');
       };
 
       $scope.changeStatus = function(study) {
         if (study.id) {
-          alert("change status of " + study.name);
+          alert('change status of ' + study.name);
           return;
         }
-        throw new Error("study does not have an ID");
+        throw new Error('study does not have an ID');
       };
 
       $scope.truncateDescriptionToggle = function() {
@@ -143,7 +148,8 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
         }
         $scope.descriptionToggle = !$scope.descriptionToggle;
       };
-    }]);
+    }
+  ]);
 
   /**
    * Displays study participant information in a table.
@@ -184,7 +190,8 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
       };
 
       $rootScope.$emit('studyTabChanged', 'participantTab');
-    }]);
+    }
+  ]);
 
 
   /**
@@ -196,7 +203,8 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
       $scope.panel = {
         specimenGroups: new SpecimenGroupsPanelSettings('specimenGroups', specimenGroups)
       };
-    }]);
+    }
+  ]);
 
   /**
    * Displays study specimen configuration information in a table.
@@ -240,7 +248,8 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
           ceventAnnotTypeRemoveService.remove
         )
       };
-    }]);
+    }
+  ]);
 
 
   /**
@@ -306,7 +315,8 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
           spcLinkAnnotTypeRemoveService.remove
         )
       };
-    }]);
+    }
+  ]);
 
   return mod;
 });

@@ -45,7 +45,8 @@ define(['angular'], function(angular) {
           });
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Code originally taken from:
@@ -69,7 +70,7 @@ define(['angular'], function(angular) {
     };
 
     this.showModal = function (customModalDefaults, customModalOptions) {
-      if (!customModalDefaults) customModalDefaults = {};
+      if (!customModalDefaults) { customModalDefaults = {}; }
       customModalDefaults.backdrop = 'static';
       return this.show(customModalDefaults, customModalOptions);
     };
@@ -91,7 +92,7 @@ define(['angular'], function(angular) {
           $scope.modalOptions.ok = function (result) {
             $modalInstance.close(result);
           };
-          $scope.modalOptions.close = function (result) {
+          $scope.modalOptions.close = function () {
             $modalInstance.dismiss('cancel');
           };
         }];
@@ -120,20 +121,20 @@ define(['angular'], function(angular) {
           data: data
         };
 
-        /* jshint ignore:start */
+        /* jshint -W055 */
         $scope.modalOptions.tableParams = new ngTableParams({
           page:1,
           count: 20
         }, {
           counts: [],                                       // hide page counts control
           total: $scope.modalOptions.data.length,           // length of data
-          getData: function($defer, params) {
+          getData: function($defer) {
             $defer.resolve($scope.modalOptions.data);
           }
         });
-        /* jshint ignore:end */
+        /* jshint +W055 */
 
-        $scope.modalOptions.ok = function (result) {
+        $scope.modalOptions.ok = function () {
           $modalInstance.close();
         };
       }];

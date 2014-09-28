@@ -1,11 +1,12 @@
 /**
  * Configure routes of user module.
  */
-define(['angular', 'common'], function(angular, controllers) {
+define(['angular', 'common'], function(angular) {
   'use strict';
 
   var mod = angular.module('users.states', [
-    'ui.router', 'users.controllers', 'users.services', 'biobank.common']);
+    'ui.router', 'users.controllers', 'users.services', 'biobank.common'
+  ]);
 
   mod.config([
     '$urlRouterProvider', '$stateProvider', 'userResolve',
@@ -38,7 +39,7 @@ define(['angular', 'common'], function(angular, controllers) {
 
       $stateProvider.state('users.login.registered', {
         // does not define URL here so that it appears that shis is same page to the user as
-        // "users.login"
+        // 'users.login'
         resolve: {
           notifications: function() {
             return 'Your account was created and is now pending administrator approval.';
@@ -107,7 +108,7 @@ define(['angular', 'common'], function(angular, controllers) {
 
       $stateProvider.state('users.register.failed', {
         // does not define URL here so that it appears that shis is same page to the user as
-        // "users.register"
+        // 'users.register'
         resolve: {
           notifications: ['$stateParams', function() {
             return 'That email address is already registered.';
@@ -142,7 +143,8 @@ define(['angular', 'common'], function(angular, controllers) {
 
       //.when('/users', {templateUrl:'/assets/javascripts/user/users.html', controller:controllers.UserCtrl})
       //.when('/users/:id', {templateUrl:'/assets/javascripts/user/editUser.html', controller:controllers.UserCtrl});
-    }]);
+    }
+  ]);
 
   return mod;
 });

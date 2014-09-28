@@ -22,7 +22,7 @@ define(['angular', 'underscore'], function(angular, _) {
           ceventType.specimenGroupData.forEach(function (sgItem) {
             var specimenGroup = specimenGroupsById[sgItem.specimenGroupId];
             if (!specimenGroup) {
-              throw new Error("specimen group not found");
+              throw new Error('specimen group not found');
             }
             sgDataStrings.push(specimenGroup.name + ' (' + sgItem.maxCount + ', ' + sgItem.amount +
                                ' ' + specimenGroup.units + ')');
@@ -32,7 +32,7 @@ define(['angular', 'underscore'], function(angular, _) {
           ceventType.annotationTypeData.forEach(function (atItem) {
             var annotType = annotTypesById[atItem.annotationTypeId];
             if (!annotType) {
-              throw new Error("annotation type not found");
+              throw new Error('annotation type not found');
             }
             atDataStrings.push(annotType.name + (atItem.required ? ' (Req)' : ' (N/R)'));
           });
@@ -40,14 +40,15 @@ define(['angular', 'underscore'], function(angular, _) {
           var data = [];
           data.push({name: 'Name:', value: ceventType.name});
           data.push({name: 'Recurring:', value: ceventType.recurring ? 'Yes' : 'No'});
-          data.push({name: 'Specimen Groups (Count, Amount):', value: sgDataStrings.join(", ")});
-          data.push({name: 'Annotation Types:', value: atDataStrings.join(", ")});
+          data.push({name: 'Specimen Groups (Count, Amount):', value: sgDataStrings.join(', ')});
+          data.push({name: 'Annotation Types:', value: atDataStrings.join(', ')});
           data.push({name: 'Description:', value: ceventType.description});
           data = data.concat(addTimeStampsService.get(ceventType));
           modelObjModalService.show(title, data);
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Common code to edit a collection event annotation type.
@@ -79,20 +80,21 @@ define(['angular', 'underscore'], function(angular, _) {
           studyAnnotTypeEditService.edit($scope, onSubmit, onCancel);
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Removes a collection event annotation type.
    */
   mod.service('ceventAnnotTypeRemoveService', [
-    '$state', 'stateHelper', 'studyRemoveModalService', 'CeventAnnotTypeService', 'modalService',
-    function ($state, stateHelper, studyRemoveModalService, CeventAnnotTypeService, modalService) {
+    '$state', 'stateHelper', 'studyRemoveModalService', 'CeventAnnotTypeService',
+    function ($state, stateHelper, studyRemoveModalService, CeventAnnotTypeService) {
       return {
         remove: function(ceventAnnotType) {
           studyRemoveModalService.remove(
             'Remove Collection Event Annotation Type',
             'Are you sure you want to remove collection event annotation type ' + ceventAnnotType.name + '?',
-            function (result) {
+            function () {
               CeventAnnotTypeService.remove(ceventAnnotType).then(
                 function() {
                   stateHelper.reloadAndReinit();
@@ -110,7 +112,8 @@ define(['angular', 'underscore'], function(angular, _) {
             });
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Common code to add or edit a collection event type.
@@ -128,7 +131,7 @@ define(['angular', 'underscore'], function(angular, _) {
           actionButtonText: 'OK'
         };
 
-        if (error.message.indexOf("expected version doesn't match current version") > -1) {
+        if (error.message.indexOf('expected version doesn\'t match current version') > -1) {
           /* concurrent change error */
           modalOptions.headerText = 'Modified by another user';
           modalOptions.bodyText = 'Another user already made changes to this collection event type. Press OK to make ' +
@@ -140,11 +143,12 @@ define(['angular', 'underscore'], function(angular, _) {
           modalOptions.bodyText = 'Error: ' + error.message;
         }
 
-        modalService.showModal({}, modalOptions).then(function (result) {
-          stateHelper.reloadAndReinit();
-        }, function () {
-          $state.go('admin.studies.study.collection');
-        });
+        modalService.showModal({}, modalOptions).then(
+          function () {
+            stateHelper.reloadAndReinit();
+          }, function () {
+            $state.go('admin.studies.study.collection');
+          });
       };
 
       return {
@@ -173,7 +177,7 @@ define(['angular', 'underscore'], function(angular, _) {
             },
             removeSpecimenGroup: function (sgData) {
               if ($scope.ceventType.specimenGroupData.length <= 1) {
-                throw new Error("invalid length for specimen group data");
+                throw new Error('invalid length for specimen group data');
               }
 
               var index = $scope.ceventType.specimenGroupData.indexOf(sgData);
@@ -186,7 +190,7 @@ define(['angular', 'underscore'], function(angular, _) {
             },
             removeAnnotType: function (atData) {
               if ($scope.ceventType.annotationTypeData.length < 1) {
-                throw new Error("invalid length for annotation type data");
+                throw new Error('invalid length for annotation type data');
               }
 
               var index = $scope.ceventType.annotationTypeData.indexOf(atData);
@@ -200,20 +204,21 @@ define(['angular', 'underscore'], function(angular, _) {
           $scope.specimenGroupsById = _.indexBy($scope.specimenGroups, 'id');
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Removes a collection event type.
    */
   mod.service('ceventTypeRemoveService', [
-    '$state', 'stateHelper', 'studyRemoveModalService', 'CeventTypeService', 'modalService',
-    function ($state, stateHelper, studyRemoveModalService, CeventTypeService, modalService) {
+    '$state', 'stateHelper', 'studyRemoveModalService', 'CeventTypeService',
+    function ($state, stateHelper, studyRemoveModalService, CeventTypeService) {
       return {
         remove: function(ceventType) {
           studyRemoveModalService.remove(
             'Remove Collection Event Type',
             'Are you sure you want to remove collection event type ' + ceventType.name + '?',
-            function (result) {
+            function () {
               CeventTypeService.remove(ceventType).then(
                 function() {
                   stateHelper.reloadAndReinit();
@@ -231,7 +236,8 @@ define(['angular', 'underscore'], function(angular, _) {
             });
         }
       };
-    }]);
+    }
+  ]);
 
   return mod;
 });

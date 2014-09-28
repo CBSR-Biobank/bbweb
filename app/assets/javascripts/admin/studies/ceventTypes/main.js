@@ -13,5 +13,6 @@ define([
   return angular.module('admin.studies.ceventTypes', [
     'admin.studies.ceventTypes.controllers',
     'admin.studies.ceventTypes.states',
-    'admin.studies.ceventTypes.helpers']);
+    'admin.studies.ceventTypes.helpers'
+  ]);
 });

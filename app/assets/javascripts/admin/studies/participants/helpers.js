@@ -12,14 +12,14 @@ define(['angular', 'common'], function(angular) {
 
           var onSubmit = function (annotType) {
             ParticipantAnnotTypeService.addOrUpdate(annotType).then(
-              function(event) {
+              function() {
                 $state.transitionTo(
                   'admin.studies.study.participants',
                   $stateParams,
                   { reload: true, inherit: false, notify: true });
               },
               function(message) {
-                studyAnnotTypeEditService.onError($scope, error, 'admin.studies.study.participants');
+                studyAnnotTypeEditService.onError($scope, message, 'admin.studies.study.participants');
               });
           };
 
@@ -30,20 +30,21 @@ define(['angular', 'common'], function(angular) {
           studyAnnotTypeEditService.edit($scope, onSubmit, onCancel);
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Removes a participant annotation type.
    */
   mod.service('participantAnnotTypeRemoveService', [
-    '$state', 'stateHelper', 'studyRemoveModalService', 'ParticipantAnnotTypeService', 'modalService',
-    function ($state, stateHelper, studyRemoveModalService, ParticipantAnnotTypeService, modalService) {
+    '$state', 'stateHelper', 'studyRemoveModalService', 'ParticipantAnnotTypeService',
+    function ($state, stateHelper, studyRemoveModalService, ParticipantAnnotTypeService) {
       return {
         remove: function(annotType) {
           studyRemoveModalService.remove(
             'Remove Participant Annotation Type',
             'Are you sure you want to remove annotation type ' + annotType.name + '?',
-            function (result) {
+            function () {
               ParticipantAnnotTypeService.remove(annotType).then(
                 function() {
                   stateHelper.reloadAndReinit();
@@ -61,7 +62,8 @@ define(['angular', 'common'], function(angular) {
             });
         }
       };
-    }]);
+    }
+  ]);
 
   return mod;
 });

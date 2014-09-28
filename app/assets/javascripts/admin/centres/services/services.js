@@ -55,7 +55,7 @@ define(['angular', 'common'], function(angular) {
         return BbwebRestApi.call('GET', '/centres/locations/' + centreId);
       },
       query: function(centreId, locationId) {
-        return BbwebRestApi.call('GET', '/centres/locations/' + centreId + "?locationId=" + locationId);
+        return BbwebRestApi.call('GET', '/centres/locations/' + centreId + '?locationId=' + locationId);
       },
       addOrUpdate: function(centre, location) {
         var cmd = {

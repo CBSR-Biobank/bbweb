@@ -13,7 +13,7 @@ define(['angular'], function(angular) {
     *
     * https://egghead.io/lessons/angularjs-using-ngmodel-in-custom-directives
     */
-  mod.directive("passwordCheck", [function() {
+  mod.directive('passwordCheck', [function() {
     return {
       restrict: 'A',
       require: 'ngModel',

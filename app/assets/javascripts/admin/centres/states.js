@@ -63,7 +63,7 @@ define(['angular'], function(angular) {
         resolve: {
           user: userResolve.user,
           centre: function() {
-            return { name: "", description: null };
+            return { name: '', description: null };
           }
         },
         views: {
@@ -89,7 +89,7 @@ define(['angular'], function(angular) {
             if ($stateParams.centreId) {
               return CentreService.query($stateParams.centreId);
             }
-            throw new Error("state parameter centreId is invalid");
+            throw new Error('state parameter centreId is invalid');
           }]
         },
         views: {
@@ -98,7 +98,7 @@ define(['angular'], function(angular) {
           }
         },
         data: {
-          displayName: "{{centre.name}}"
+          displayName: '{{centre.name}}'
         }
       });
 
@@ -132,7 +132,8 @@ define(['angular'], function(angular) {
             'CentreLocationService', 'centre',
             function(CentreLocationService, centre) {
               return CentreLocationService.list(centre.id);
-            }]
+            }
+          ]
         },
         views: {
           'centreDetails': {
@@ -147,6 +148,7 @@ define(['angular'], function(angular) {
         }
       });
 
-    }]);
+    }
+  ]);
   return mod;
 });

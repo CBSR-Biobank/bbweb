@@ -5,7 +5,8 @@ define(['angular'], function(angular) {
   'use strict';
 
   var mod = angular.module('admin.studies.ceventTypes.states', [
-    'ui.router', 'admin.studies.controllers']);
+    'ui.router', 'admin.studies.controllers'
+  ]);
 
   mod.config([
     '$urlRouterProvider', '$stateProvider', 'userResolve',
@@ -56,7 +57,8 @@ define(['angular'], function(angular) {
                 return CeventTypeService.get(study.id, $stateParams.ceventTypeId);
               }
               throw new Error('state parameter ceventTypeId is invalid');
-            }]
+            }
+          ]
         },
         views: {
           'main@': {
@@ -79,9 +81,9 @@ define(['angular'], function(angular) {
           annotType: ['study', function(study) {
             return {
               studyId: study.id,
-              name: "",
+              name: '',
               description: null,
-              valueType: "",
+              valueType: '',
               options: []
             };
           }]
@@ -110,8 +112,9 @@ define(['angular'], function(angular) {
               if ($stateParams.annotTypeId) {
                 return CeventAnnotTypeService.get(study.id, $stateParams.annotTypeId);
               }
-              throw new Error("state parameter annotTypeId is invalid");
-            }]
+              throw new Error('state parameter annotTypeId is invalid');
+            }
+          ]
         },
         views: {
           'main@': {
@@ -124,6 +127,7 @@ define(['angular'], function(angular) {
         }
       });
 
-    }]);
+    }
+  ]);
   return mod;
 });

@@ -31,5 +31,6 @@ define([
     'admin.studies.participants',
     'admin.studies.specimenGroups',
     'admin.studies.ceventTypes',
-    'admin.studies.processing']);
+    'admin.studies.processing'
+  ]);
 });

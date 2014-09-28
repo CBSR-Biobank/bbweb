@@ -10,7 +10,7 @@ define(['angular'], function(angular) {
    * (user | property:'name')
    * }}}
    */
-  mod.filter('property', ["value", "property", function(value, property) {
+  mod.filter('property', ['value', 'property', function(value, property) {
     if (angular.isObject(value)) {
       if (value.hasOwnProperty(property)) {
         return value[property];
@@ -21,11 +21,13 @@ define(['angular'], function(angular) {
 
   mod.filter('truncate', function () {
     return function (text, length, end) {
-      if (isNaN(length))
+      if (isNaN(length)) {
         length = 10;
+      }
 
-      if (end === undefined)
+      if (end === undefined) {
         end = '...';
+      }
 
       if (text.length <= length || text.length - end.length <= length) {
         return text;
@@ -44,7 +46,7 @@ define(['angular'], function(angular) {
     var cache = {};
     return function(arr, size) {
       if (!arr) {
-        throw new Error("arr is an invalid argument");
+        throw new Error('arr is an invalid argument');
       }
       var newArr = [];
       for (var i=0; i<arr.length; i+=size) {
@@ -93,7 +95,7 @@ define(['angular'], function(angular) {
     /*
      * time: the time
      * local: compared to what time? default: now
-     * raw: wheter you want in a format of "5 minutes ago", or "5 minutes"
+     * raw: wheter you want in a format of '5 minutes ago', or '5 minutes'
      */
 
     // get difference between UTC and local time in milliseconds
@@ -103,7 +105,9 @@ define(['angular'], function(angular) {
 
     return function (time, local, raw) {
 
-      if (!time) return "never";
+      if (!time) {
+        return 'never';
+      }
 
       if (!local) {
         (local = Date.now());
@@ -111,7 +115,7 @@ define(['angular'], function(angular) {
 
       if (angular.isDate(time)) {
         time = time.getTime();
-      } else if (typeof time === "string") {
+      } else if (typeof time === 'string') {
         time = new Date(time);
       }
 
@@ -120,12 +124,12 @@ define(['angular'], function(angular) {
 
       if (angular.isDate(local)) {
         local = local.getTime();
-      } else if (typeof local === "string") {
+      } else if (typeof local === 'string') {
         local = new Date(local).getTime();
       }
 
       if (typeof time !== 'number' || typeof local !== 'number') {
-        throw new Error("invalid format for time or local");
+        throw new Error('invalid format for time or local');
       }
 
       var span = [],
@@ -133,21 +137,21 @@ define(['angular'], function(angular) {
       HOUR = 3600,
       DAY = 86400,
       WEEK = 604800,
-      MONTH = 2629744,
+      /* MONTH = 2629744, */
       YEAR = 31556926,
       DECADE = 315569260;
 
 
       var offset = Math.abs((local - time) / 1000);
 
-      if (offset <= MINUTE)              span = [ '', raw ? 'now' : 'a minute' ];
-      else if (offset < (MINUTE * 60))   span = [ Math.round(Math.abs(offset / MINUTE)), 'min' ];
-      else if (offset < (HOUR * 24))     span = [ Math.round(Math.abs(offset / HOUR)), 'hour' ];
-      else if (offset < (DAY * 7))       span = [ Math.round(Math.abs(offset / DAY)), 'day' ];
-      else if (offset < (WEEK * 52))     span = [ Math.round(Math.abs(offset / WEEK)), 'week' ];
-      else if (offset < (YEAR * 10))     span = [ Math.round(Math.abs(offset / YEAR)), 'year' ];
-      else if (offset < (DECADE * 100))  span = [ Math.round(Math.abs(offset / DECADE)), 'decade' ];
-      else                               span = [ '', 'a long time' ];
+      if (offset <= MINUTE)              { span = [ '', raw ? 'now' : 'a minute' ]; }
+      else if (offset < (MINUTE * 60))   { span = [ Math.round(Math.abs(offset / MINUTE)), 'min' ]; }
+      else if (offset < (HOUR * 24))     { span = [ Math.round(Math.abs(offset / HOUR)), 'hour' ]; }
+      else if (offset < (DAY * 7))       { span = [ Math.round(Math.abs(offset / DAY)), 'day' ]; }
+      else if (offset < (WEEK * 52))     { span = [ Math.round(Math.abs(offset / WEEK)), 'week' ]; }
+      else if (offset < (YEAR * 10))     { span = [ Math.round(Math.abs(offset / YEAR)), 'year' ]; }
+      else if (offset < (DECADE * 100))  { span = [ Math.round(Math.abs(offset / DECADE)), 'decade' ]; }
+      else                               { span = [ '', 'a long time' ]; }
 
       span[1] += (span[0] === 0 || span[0] > 1) ? 's' : '';
       span = span.join(' ');

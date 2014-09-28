@@ -1,5 +1,5 @@
 /** Common helpers */
-define(['angular', 'underscore'], function(angular, _) {
+define(['angular'], function(angular) {
   'use strict';
 
   var mod = angular.module('admin.centres.helpers', []);
@@ -17,7 +17,7 @@ define(['angular', 'underscore'], function(angular, _) {
           actionButtonText: 'OK'
         };
 
-        if (error.message.indexOf("expected version doesn't match current version") > -1) {
+        if (error.message.indexOf('expected version doesn\'t match current version') > -1) {
           /* concurrent change error */
           modalOptions.headerText = 'Modified by another user';
           modalOptions.bodyText = 'Another user already made changes to this centre. Press OK to make ' +
@@ -28,11 +28,12 @@ define(['angular', 'underscore'], function(angular, _) {
           modalOptions.bodyText = 'Error: ' + error.message;
         }
 
-        modalService.showModal({}, modalOptions).then(function (result) {
-          stateHelper.reloadAndReinit();
-        }, function () {
-          onCancel();
-        });
+        modalService.showModal({}, modalOptions).then(
+          function () {
+            stateHelper.reloadAndReinit();
+          }, function () {
+            onCancel();
+          });
       };
 
       return {
@@ -45,13 +46,13 @@ define(['angular', 'underscore'], function(angular, _) {
               });
           };
 
-          $scope.cancel = function(centre) {
+          $scope.cancel = function() {
             onCancel();
           };
         }
       };
-    }]);
-
+    }
+  ]);
 
   return mod;
 });

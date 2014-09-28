@@ -28,7 +28,7 @@ define(['angular', 'underscore'], function(angular, _) {
     return {
       panelState: function(panel, state) {
         if (typeof currentState.panelStates[panel] === 'undefined') {
-          throw new Error("panel not defined: " + panel);
+          throw new Error('panel not defined: ' + panel);
         }
 
         if (state === undefined) {
@@ -39,14 +39,14 @@ define(['angular', 'underscore'], function(angular, _) {
       },
       panelStateToggle: function(panel) {
         if (typeof currentState.panelStates[panel] === 'undefined') {
-          throw new Error("panel not defined: " + panel);
+          throw new Error('panel not defined: ' + panel);
         }
         currentState.panelStates[panel] = !currentState.panelStates[panel];
-        $log.debug("panelStateToggle: ", panel, currentState.panelStates[panel]);
+        $log.debug('panelStateToggle: ', panel, currentState.panelStates[panel]);
         return currentState.panelStates[panel];
       },
       initialize: function(studyId) {
-        if (studyId != currentState.studyId) {
+        if (studyId !== currentState.studyId) {
           // initialize state only when a new study is selected
           currentState = initialSettings();
           currentState.studyId = studyId;
@@ -60,7 +60,8 @@ define(['angular', 'underscore'], function(angular, _) {
 
   mod.service('panelTableService', ['$filter', 'ngTableParams', function ($filter, ngTableParams) {
     this.getTableParams = function(data) {
-      /* jshint ignore:start */
+
+      /* jshint -W055 */
       return new ngTableParams({
         page: 1,            // show first page
         count: 10,          // count per page
@@ -71,15 +72,14 @@ define(['angular', 'underscore'], function(angular, _) {
         counts: [], // hide page counts control
         total: data.length,
         getData: function($defer, params) {
-          var orderedData = params.sorting()
-            ? $filter('orderBy')(data, params.orderBy())
-            : data;
+          var orderedData = params.sorting() ?
+              $filter('orderBy')(data, params.orderBy()) : data;
           $defer.resolve(orderedData.slice(
             (params.page() - 1) * params.count(),
             params.page() * params.count()));
         }
       });
-      /* jshint ignore:end */
+      /* jshint +W055 */
     };
   }]);
 
@@ -96,7 +96,7 @@ define(['angular', 'underscore'], function(angular, _) {
           actionButtonText: 'OK'
         };
 
-        if (error.message.indexOf("expected version doesn't match current version") > -1) {
+        if (error.message.indexOf('expected version doesn\'t match current version') > -1) {
           /* concurrent change error */
           modalOptions.headerText = 'Modified by another user';
           modalOptions.bodyText = 'Another user already made changes to this study. Press OK to make ' +
@@ -108,7 +108,7 @@ define(['angular', 'underscore'], function(angular, _) {
         }
 
         modalService.showModal({}, modalOptions).then(
-          function (result) {
+          function () {
             stateHelper.reloadAndReinit();
           },
           function () {
@@ -126,12 +126,13 @@ define(['angular', 'underscore'], function(angular, _) {
               });
           };
 
-          $scope.cancel = function(study) {
+          $scope.cancel = function() {
             onCancel();
           };
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Displays a study annotation type in a modal. The information is displayed in an ng-table.
@@ -164,21 +165,23 @@ define(['angular', 'underscore'], function(angular, _) {
           data.push({name: 'Type:', value: annotType.valueType});
 
           if (typeof annotType.required !== 'undefined') {
-            data.push({name: 'Required:', value: annotType.required ? "Yes" : "No"});
+            data.push({name: 'Required:', value: annotType.required ? 'Yes' : 'No'});
           }
 
           if (annotType.valueType === 'Select') {
             var optionValues = [];
-            for (var name in annotType.options) {
+            _.each(annotType.options, function(name) {
               optionValues.push(annotType.options[name]);
-            }
+            });
 
             data.push({
               name: '# Selections Allowed:',
-              value: annotType.maxValueCount === 1 ? "Single" : "Multiple"});
+              value: annotType.maxValueCount === 1 ? 'Single' : 'Multiple'
+            });
             data.push({
               name: 'Selections:',
-              value: optionValues.join(", ")});
+              value: optionValues.join(', ')
+            });
           }
 
           data.push({name: 'Description:', value: annotType.description});
@@ -187,7 +190,8 @@ define(['angular', 'underscore'], function(angular, _) {
           modelObjModalService.show(title, data);
         }
       };
-    }]);
+    }
+  ]);
 
   /**
    * Common code to add or edit an annotation type.
@@ -204,13 +208,12 @@ define(['angular', 'underscore'], function(angular, _) {
           });
 
           $scope.optionAdd = function() {
-            var newOptionId = $scope.annotType.options.length;
-            $scope.annotType.options.push("");
+            $scope.annotType.options.push('');
           };
 
           $scope.removeOption = function(option) {
             if ($scope.annotType.options.length <= 1) {
-              throw new Error("invalid length for options");
+              throw new Error('invalid length for options');
             }
 
             var index = $scope.annotType.options.indexOf(option);
@@ -237,7 +240,7 @@ define(['angular', 'underscore'], function(angular, _) {
             actionButtonText: 'OK'
           };
 
-          if (error.message.indexOf("expected version doesn't match current version") > -1) {
+          if (error.message.indexOf('expected version doesn\'t match current version') > -1) {
             /* concurrent change error */
             modalOptions.headerText = 'Modified by another user';
             modalOptions.bodyText = 'Another user already made changes to this annotation type. ' +
@@ -249,14 +252,16 @@ define(['angular', 'underscore'], function(angular, _) {
             modalOptions.bodyText = 'Error: ' + error.message;
           }
 
-          modalService.showModal({}, modalOptions).then(function (result) {
-            stateHelper.reloadAndReinit();
-          }, function () {
-            $state.go(stateOnCancel);
-          });
+          modalService.showModal({}, modalOptions).then(
+            function () {
+              stateHelper.reloadAndReinit();
+            }, function () {
+              $state.go(stateOnCancel);
+            });
         }
       };
-    }]);
+    }
+  ]);
 
   mod.service('studyRemoveModalService', [
     '$state', 'modalService', function ($state, modalService) {
@@ -268,11 +273,12 @@ define(['angular', 'underscore'], function(angular, _) {
             bodyText: message
           };
 
-          modalService.showModal({}, modalOptions).then(function (result) {
-            onConfirm();
-          }, function() {
-            onCancel();
-          });
+          modalService.showModal({}, modalOptions).then(
+            function () {
+              onConfirm();
+            }, function() {
+              onCancel();
+            });
         },
         onError: function(bodyText, onModalOkState, onModalCancelState) {
           var modalOptions = {
@@ -281,20 +287,24 @@ define(['angular', 'underscore'], function(angular, _) {
             bodyText: bodyText
           };
 
-          modalService.showModal({}, modalOptions).then(function (result) {
+          modalService.showModal({}, modalOptions).then(
+            function () {
             $state.go(onModalOkState);
           }, function () {
             $state.go(onModalCancelState);
           });
         }
       };
-    }]);
+    }
+  ]);
 
   mod.factory('PanelSettings', [
     'studyViewSettings', 'panelTableService',
     function(studyViewSettings, panelTableService) {
       var PanelSettings = function(panelStateName, data) {
-        if (arguments.length > 0) this.init(panelStateName, data);
+        if (arguments.length > 0) {
+          this.init(panelStateName, data);
+        }
       };
 
       PanelSettings.prototype.init = function(panelStateName, data) {
@@ -309,7 +319,8 @@ define(['angular', 'underscore'], function(angular, _) {
       };
 
       return PanelSettings;
-    }]);
+    }
+  ]);
 
   mod.factory('AnnotTypesPanelSettings', [
     'PanelSettings', 'annotTypeModalService',
@@ -348,19 +359,18 @@ define(['angular', 'underscore'], function(angular, _) {
       };
 
       return AnnotTypesPanelSettings;
-    }]);
+    }
+  ]);
 
   mod.factory('SpecimenGroupsPanelSettings',  [
     '$state',
     'PanelSettings',
     'specimenGroupModalService',
     'specimenGroupRemoveService',
-    'studyViewSettings',
     function($state,
              PanelSettings,
              specimenGroupModalService,
-             specimenGroupRemoveService,
-             studyViewSettings) {
+             specimenGroupRemoveService) {
 
       var SpecimenGroupsPanelSettings = function (panelStateName, specimenGroups) {
         this.init(panelStateName, specimenGroups);
@@ -378,7 +388,7 @@ define(['angular', 'underscore'], function(angular, _) {
         specimenGroupModalService.show(specimenGroup);
       };
 
-      SpecimenGroupsPanelSettings.prototype.add = function(study) {
+      SpecimenGroupsPanelSettings.prototype.add = function() {
         $state.go('admin.studies.study.specimens.groupAdd');
       };
 
@@ -391,7 +401,8 @@ define(['angular', 'underscore'], function(angular, _) {
       };
 
       return SpecimenGroupsPanelSettings;
-    }]);
+    }
+  ]);
 
   mod.factory('CeventTypesPanelSettings',  [
     '$state',
@@ -451,7 +462,8 @@ define(['angular', 'underscore'], function(angular, _) {
       };
 
       return CeventTypesPanelSettings;
-    }]);
+    }
+  ]);
 
   mod.factory('ProcessingTypesPanelSettings',  [
     '$state', 'PanelSettings', 'processingTypeModalService', 'processingTypeRemoveService', 'studyViewSettings',
@@ -484,7 +496,8 @@ define(['angular', 'underscore'], function(angular, _) {
       };
 
       return ProcessingTypesPanelSettings;
-    }]);
+    }
+  ]);
 
   mod.factory('SpcLinkTypesPanelSettings',  [
     '$state',
@@ -518,10 +531,10 @@ define(['angular', 'underscore'], function(angular, _) {
       SpcLinkTypesPanelSettings.constructor = PanelSettings.prototype.constructor;
 
       SpcLinkTypesPanelSettings.prototype.information = function(spcLinkType) {
-        spcLinkTypeModalService.show(spcLinkType, processingTypesById, specimenGroupsById);
+        spcLinkTypeModalService.show(spcLinkType, this.processingTypesById, this.specimenGroupsById);
       };
 
-      SpcLinkTypesPanelSettings.prototype.add = function(study) {
+      SpcLinkTypesPanelSettings.prototype.add = function() {
         $state.go('admin.studies.study.processing.spcLinkTypeAdd');
       };
 
@@ -543,11 +556,12 @@ define(['angular', 'underscore'], function(angular, _) {
       };
 
       SpcLinkTypesPanelSettings.prototype.showAnnotationType = function (annotTypeId) {
-        annotTypeModalService.show("Specimen Link Annotation Type", this.annotTypesById[annotTypeId]);
+        annotTypeModalService.show('Specimen Link Annotation Type', this.annotTypesById[annotTypeId]);
       };
 
       return SpcLinkTypesPanelSettings;
-    }]);
+    }
+  ]);
 
   return mod;
 });

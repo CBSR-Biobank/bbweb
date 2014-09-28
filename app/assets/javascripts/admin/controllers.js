@@ -23,7 +23,8 @@ define(['angular'], function(angular) {
         $scope.page.counts.centres = counts.centres;
         $scope.page.counts.users   = counts.users;
       });
-    }]);
+    }
+  ]);
 
   return mod;
 

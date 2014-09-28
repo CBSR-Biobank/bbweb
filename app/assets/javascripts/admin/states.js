@@ -1,7 +1,7 @@
 /**
  * Configure routes for the administraiotn module.
  */
-define(['angular', './controllers', 'common'], function(angular, controllers) {
+define(['angular', 'common'], function(angular) {
   'use strict';
 
   var mod = angular.module('admin.states', ['ui.router', 'users.services', 'biobank.common']);
@@ -30,7 +30,8 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
 
       //.when('/users', {templateUrl:'/assets/javascripts/user/users.html', controller:controllers.UserCtrl})
       //.when('/users/:id', {templateUrl:'/assets/javascripts/user/editUser.html', controller:controllers.UserCtrl});
-    }]);
+    }
+  ]);
 
   return mod;
 });

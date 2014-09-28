@@ -1,7 +1,7 @@
 /**
  * Home routes.
  */
-define(['angular'], function(angular, controllers) {
+define(['angular'], function(angular) {
   'use strict';
 
   var mod = angular.module('home.states', ['ui.router', 'home.controllers', 'biobank.common']);

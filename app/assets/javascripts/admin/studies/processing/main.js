@@ -13,5 +13,6 @@ define([
   return angular.module('admin.studies.processing', [
     'admin.studies.processing.controllers',
     'admin.studies.processing.states',
-    'admin.studies.processing.helpers']);
+    'admin.studies.processing.helpers'
+  ]);
 });

@@ -1,7 +1,7 @@
 /**
  * Tabs used when displaying a study.
  *
- * FIXME: See https://docs.angularjs.org/guide/directive, section "Creating Directives that Communicate" to
+ * FIXME: See https://docs.angularjs.org/guide/directive, section 'Creating Directives that Communicate' to
  * improve this code.
  */
 define(['angular'], function(angular) {

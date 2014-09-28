@@ -42,6 +42,7 @@ define(['angular', './controllers', 'common'], function(angular, controllers) {
           displayName: 'Admin'
         }
       });
-    }]);
+    }
+  ]);
   return mod;
 });

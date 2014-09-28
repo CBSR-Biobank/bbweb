@@ -13,5 +13,6 @@ define([
   return angular.module('admin.studies.specimenGroups', [
     'admin.studies.specimenGroups.controllers',
     'admin.studies.specimenGroups.states',
-    'admin.studies.specimenGroups.helpers']);
+    'admin.studies.specimenGroups.helpers'
+  ]);
 });

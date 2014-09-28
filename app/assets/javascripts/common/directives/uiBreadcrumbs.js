@@ -19,19 +19,11 @@ define(['angular'], function(angular) {
         abstractProxyProperty: '@?'
       },
       link: function(scope) {
-        scope.breadcrumbs = [];
-        if ($state.$current.name !== '') {
-          updateBreadcrumbsArray();
-        }
-        scope.$on('$stateChangeSuccess', function() {
-          updateBreadcrumbsArray();
-        });
-
         /**
          * Start with the current state and traverse up the path to build the
          * array of breadcrumbs that can be used in an ng-repeat in the template.
          */
-        function updateBreadcrumbsArray() {
+        var updateBreadcrumbsArray = function() {
           var workingState;
           var displayName;
           var breadcrumbs = [];
@@ -53,7 +45,7 @@ define(['angular'], function(angular) {
           }
           breadcrumbs.reverse();
           scope.breadcrumbs = breadcrumbs;
-        }
+        };
 
         /**
          * Get the state to put in the breadcrumbs array, taking into account that if the current state is abstract,
@@ -62,7 +54,7 @@ define(['angular'], function(angular) {
          * @param currentState
          * @returns {*}
          */
-        function getWorkingState(currentState) {
+        var getWorkingState = function (currentState) {
           var proxyStateName;
           var workingState = currentState;
           if (currentState.abstract === true) {
@@ -78,7 +70,7 @@ define(['angular'], function(angular) {
             }
           }
           return workingState;
-        }
+        };
 
         /**
          * Resolve the displayName of the specified state. Take the property specified by the `displayname-property`
@@ -87,7 +79,7 @@ define(['angular'], function(angular) {
          * @param currentState
          * @returns {*}
          */
-        function getDisplayName(currentState) {
+        var getDisplayName = function (currentState) {
           var interpolationContext;
           var propertyReference;
           var displayName;
@@ -108,7 +100,7 @@ define(['angular'], function(angular) {
             displayName = $interpolate(propertyReference)(interpolationContext);
             return displayName;
           }
-        }
+        };
 
         /**
          * Given a string of the type 'object.property.property', traverse the given context (eg the current $state object) and return the
@@ -118,7 +110,7 @@ define(['angular'], function(angular) {
          * @param context
          * @returns {*}
          */
-        function getObjectValue(objectPath, context) {
+        var getObjectValue = function (objectPath, context) {
           var i;
           var propertyArray = objectPath.split('.');
           var propertyReference = context;
@@ -132,7 +124,7 @@ define(['angular'], function(angular) {
             }
           }
           return propertyReference;
-        }
+        };
 
         /**
          * Check whether the current `state` has already appeared in the current breadcrumbs array. This check is necessary
@@ -141,7 +133,7 @@ define(['angular'], function(angular) {
          * @param breadcrumbs
          * @returns {boolean}
          */
-        function stateAlreadyInBreadcrumbs(state, breadcrumbs) {
+        var stateAlreadyInBreadcrumbs = function (state, breadcrumbs) {
           var i;
           var alreadyUsed = false;
           for(i = 0; i < breadcrumbs.length; i++) {
@@ -150,7 +142,15 @@ define(['angular'], function(angular) {
             }
           }
           return alreadyUsed;
+        };
+
+        scope.breadcrumbs = [];
+        if ($state.$current.name !== '') {
+          updateBreadcrumbsArray();
         }
+        scope.$on('$stateChangeSuccess', function() {
+          updateBreadcrumbsArray();
+        });
       }
     };
   }]);

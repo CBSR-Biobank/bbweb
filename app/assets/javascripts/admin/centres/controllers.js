@@ -1,7 +1,7 @@
 /**
  * Centre administration controllers.
  */
-define(['angular', 'underscore', 'common'], function(angular, _, common) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
 
   var mod = angular.module('admin.centres.controllers', ['centres.services']);
@@ -19,7 +19,8 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       CentreService.list().then(function(centres) {
         $scope.centres = _.sortBy(centres, function(centre) { return centre.name; });
       });
-    }]);
+    }
+  ]);
 
   /**
    * Displays a list of centres in an ng-table.
@@ -52,7 +53,7 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       $rootScope.pageTitle = 'Biobank centres';
       $scope.centres = [];
 
-      /* jshint ignore:start */
+      /* jshint -W055 */
       $scope.tableParams = new ngTableParams({
         page: 1,            // show first page
         count: 10,          // count per page
@@ -64,19 +65,19 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
         total: function () { return getTableData().length; },
         getData: function($defer, params) {
           var filteredData = getTableData();
-          var orderedData = params.sorting()
-            ? $filter('orderBy')(filteredData, params.orderBy())
-            : filteredData;
+          var orderedData = params.sorting() ?
+              $filter('orderBy')(filteredData, params.orderBy()) : filteredData;
           $defer.resolve(orderedData.slice(
             (params.page() - 1) * params.count(),
             params.page() * params.count()));
         }
       });
-      /* jshint ignore:end */
+      /* jshint +W055 */
 
       $scope.tableParams.settings().$scope = $scope;
       updateData();
-    }]);
+    }
+  ]);
 
   /**
    * Called to add a centre.
@@ -84,7 +85,7 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
   mod.controller('CentreAddCtrl', [
     '$scope', '$state', 'centreEditService', 'user', 'centre',
     function($scope, $state, centreEditService, user, centre) {
-      $scope.title =  "Add new centre";
+      $scope.title =  'Add new centre';
       $scope.centre = centre;
 
       var callback = function () {
@@ -92,7 +93,8 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
       };
 
       centreEditService.edit($scope, callback, callback, callback);
-    }]);
+    }
+  ]);
 
   /**
    * Displays the centre administrtion page, with a number of tabs. Each tab displays the configuration
@@ -109,10 +111,10 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
 
       $scope.changeStatus = function(centre) {
         if (centre.id) {
-          alert("change status of " + centre.name);
+          alert('change status of ' + centre.name);
           return;
         }
-        throw new Error("centre does not have an ID");
+        throw new Error('centre does not have an ID');
       };
 
       $scope.truncateDescriptionToggle = function() {
@@ -125,17 +127,18 @@ define(['angular', 'underscore', 'common'], function(angular, _, common) {
         $scope.descriptionToggle = !$scope.descriptionToggle;
       };
 
-    }]);
+    }
+  ]);
 
   /**
    * Displays the centre administrtion page, with a number of tabs. Each tab displays the configuration
    * for a different aspect of the centre.
    */
-  mod.controller('CentreLocationTabCtrl', [
-    '$scope', '$rootScope', '$state', 'centre',
-    function($scope, $rootScope, $state, centre) {
+  // mod.controller('CentreLocationTabCtrl', [
+  //   '$scope', '$rootScope', '$state', 'centre',
+  //   function($scope, $rootScope, $state, centre) {
 
-    }]);
+  //   }]);
 
 
   return mod;

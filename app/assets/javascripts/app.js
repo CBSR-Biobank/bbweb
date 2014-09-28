@@ -14,5 +14,6 @@ define(['angular', 'home', 'users', 'admin', 'dashboard'], function(angular) {
     'biobank.home',
     'biobank.users',
     'biobank.admin',
-    'biobank.dashboard']);
+    'biobank.dashboard'
+  ]);
 });

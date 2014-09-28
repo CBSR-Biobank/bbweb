@@ -22,7 +22,8 @@ define(['angular'], function(angular) {
         data = data.concat(addTimeStampsService.get(user));
         modelObjModalService.show(title, data);
       };
-    }]);
+    }
+  ]);
 
   return mod;
 });

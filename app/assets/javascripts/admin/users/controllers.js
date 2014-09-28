@@ -1,7 +1,7 @@
 /**
  * User administration controllers.
  */
-define(['angular', 'underscore', 'common'], function(angular, _) {
+define(['angular', 'underscore', 'common'], function(angular) {
   'use strict';
 
   var mod = angular.module('admin.users.controllers', ['biobank.common', 'users.services']);
@@ -42,27 +42,27 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
 
       var changeStatus = function(user, statusChangeFn, status) {
         var modalOptions = {
-                closeButtonText: 'Cancel',
-                actionButtonText: 'OK'
-              };
+          closeButtonText: 'Cancel',
+          actionButtonText: 'OK'
+        };
 
         modalOptions.headerText = 'Change user status';
         modalOptions.bodyText = 'Please confirm that you want to ' + status + ' user "' +
           user.name + '"?';
 
-         modalService.showModal({}, modalOptions).then(
-           function(result) {
-          statusChangeFn(user).then(function() {
-            updateData();
-          });
-           }
-         );
+        modalService.showModal({}, modalOptions).then(
+          function() {
+            statusChangeFn(user).then(function() {
+              updateData();
+            });
+          }
+        );
       };
 
       $rootScope.pageTitle = 'Biobank users';
       $scope.users = [];
 
-      /* jshint ignore:start */
+      /* jshint -W055 */
       $scope.tableParams = new ngTableParams({
         page: 1,            // show first page
         count: 10,          // count per page
@@ -74,15 +74,14 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
         total: function () { return getTableData().length; },
         getData: function($defer, params) {
           var filteredData = getTableData();
-          var orderedData = params.sorting()
-            ? $filter('orderBy')(filteredData, params.orderBy())
-            : filteredData;
+          var orderedData = params.sorting() ?
+              $filter('orderBy')(filteredData, params.orderBy()) : filteredData;
           $defer.resolve(orderedData.slice(
             (params.page() - 1) * params.count(),
             params.page() * params.count()));
         }
       });
-      /* jshint ignore:end */
+      /* jshint +W055 */
 
       $scope.tableParams.settings().$scope = $scope;
       updateData();
@@ -103,14 +102,15 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
         changeStatus(user, userService.unlock, 'unlock');
       };
 
-    }]);
+    }
+  ]);
 
   /**
    * Displays a list of users in a table.
    */
   mod.controller('UserUpdateCtrl', [
-    '$rootScope', '$scope', '$state', '$filter', 'userService', 'modalService', 'user',
-    function($rootScope, $scope, $state, $filter, userService, modalService, user) {
+    '$rootScope', '$scope', '$state', '$filter', 'userService', 'modalService', 'stateHelper', 'user',
+    function($rootScope, $scope, $state, $filter, userService, modalService, stateHelper, user) {
 
       var onError = function (error) {
         var modalOptions = {
@@ -118,7 +118,7 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
           actionButtonText: 'OK'
         };
 
-        if (error.message.indexOf("expected version doesn't match current version") > -1) {
+        if (error.message.indexOf('expected version doesn\'t match current version') > -1) {
           /* concurrent change error */
           modalOptions.headerText = 'Modified by another user';
           modalOptions.bodyText = 'Another user already made changes to this user. Press OK to make ' +
@@ -130,11 +130,11 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
         }
 
         modalService.showModal({}, modalOptions).then(
-          function (result) {
+          function () {
             stateHelper.reloadAndReinit();
           },
           function () {
-            $state.go("admin.users");
+            $state.go('admin.users');
           });
       };
 
@@ -144,17 +144,18 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
         confirmPassword: '',
         submit: function(user, password) {
           userService.update(user, password).then(
-            function(event) {
-              $state.go("admin.users");
+            function() {
+              $state.go('admin.users');
             },
             onError
           );
         },
         cancel: function() {
-          $state.go("home");
+          $state.go('home');
         }
       };
-    }]);
+    }
+  ]);
 
   return mod;
 });
