@@ -348,23 +348,19 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
 
     "POST /passreset" should {
 
-      "allow an active user to reset his/her password" in new WithApplication(fakeApplication()) {
+      "allow an active user to reset his/her password" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
         val user = createUserInRepository(nameGenerator.next[String])
         val activeUser = user.activate | fail
         use[BbwebPlugin].userRepository.put(activeUser)
 
-        val cmdJson = Json.obj(
-          "id"              -> activeUser.id,
-          "expectedVersion" -> activeUser.version)
+        val cmdJson = Json.obj("email" -> activeUser.email)
         val json = makeRequest(POST, "/passreset", json = cmdJson)
           (json \ "status").as[String] should include ("success")
       }
 
       "not allow a registered user to reset his/her password" in new WithApplication(fakeApplication()) {
         val user = createUserInRepository(nameGenerator.next[String])
-        val cmdJson = Json.obj(
-          "id"              -> user.id,
-          "expectedVersion" -> user.version)
+        val cmdJson = Json.obj("email" -> user.email)
         val json = makeRequest(POST, "/passreset", FORBIDDEN, json = cmdJson)
           (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("user is not active")
@@ -374,9 +370,7 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
         val lockedUser = factory.createLockedUser
         use[BbwebPlugin].userRepository.put(lockedUser)
 
-        val cmdJson = Json.obj(
-          "id"              -> lockedUser.id,
-          "expectedVersion" -> lockedUser.version)
+        val cmdJson = Json.obj("email" -> lockedUser.email)
         val json = makeRequest(POST, "/passreset", FORBIDDEN, json = cmdJson)
           (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("user is not active")
@@ -384,9 +378,7 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
 
       "not allow a password reset on an invalid email address" in new WithApplication(fakeApplication()) {
 
-        val cmdJson = Json.obj(
-          "id"              -> nameGenerator.next[User],
-          "expectedVersion" -> 0L)
+        val cmdJson = Json.obj("email" -> nameGenerator.nextEmail[User])
         val json = makeRequest(POST, "/passreset", NOT_FOUND, json = cmdJson)
           (json \ "status").as[String] should include ("error")
           (json \ "message").as[String] should include ("email address not registered")

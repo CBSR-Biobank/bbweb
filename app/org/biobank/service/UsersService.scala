@@ -217,20 +217,25 @@ trait UsersProcessorComponent {
     def validateCmd(cmd: ResetUserPasswordCmd): DomainValidation[UserPasswordResetEvent] = {
       val timeNow = DateTime.now
 
-      val v = for {
-        userWithEmail <- userRepository.getByEmail(cmd.email)
-        user <- userRepository.getActive(userWithEmail.id)
-        updatedUser <- {
-          val plainPassword = Utils.randomString(8)
-          val passwordInfo = encryptPassword(user, plainPassword)
-          EmailService.passwordResetEmail(user.email, plainPassword)
-          user.updatePassword(passwordInfo.password, passwordInfo.salt)
+      userRepository.getByEmail(cmd.email).fold(
+        err => err.failure,
+        user => {
+          user match {
+            case activeUser: ActiveUser =>
+              val plainPassword = Utils.randomString(8)
+              val passwordInfo = encryptPassword(activeUser, plainPassword)
+              activeUser.updatePassword(passwordInfo.password, passwordInfo.salt).fold(
+                err => err.failure,
+                updatedUser => {
+                  EmailService.passwordResetEmail(user.email, plainPassword)
+                  UserPasswordResetEvent(
+                    updatedUser.id.id, updatedUser.version, updatedUser.password,
+                    updatedUser.salt, timeNow).success
+                }
+              )
+            case user => s"$user for $cmd is not active".failNel
+          }
         }
-      } yield updatedUser
-
-      v.fold(
-        err => DomainError(s"error $err occurred on $cmd").failNel,
-        user => UserPasswordResetEvent(user.id.id, user.version, user.password, user.salt, timeNow).success
       )
     }
 
