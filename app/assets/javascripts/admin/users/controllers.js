@@ -1,7 +1,7 @@
 /**
  * User administration controllers.
  */
-define(['angular', 'underscore', 'common'], function(angular) {
+define(['angular', 'underscore', 'common'], function(angular, _) {
   'use strict';
 
   var mod = angular.module('admin.users.controllers', ['biobank.common', 'users.services']);
@@ -31,7 +31,11 @@ define(['angular', 'underscore', 'common'], function(angular) {
 
       var updateData = function() {
         userService.getAllUsers().then(function(data) {
-          $scope.users = data;
+          $scope.users = [];
+          _.each(data, function(user) {
+            $scope.users.push(angular.extend(
+              user, {timeAddedLocal: (new Date(user.timeAdded)).toLocaleString()}));
+          });
           $scope.tableParams.reload();
         });
       };

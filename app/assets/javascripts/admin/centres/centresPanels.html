@@ -35,9 +35,9 @@
             <p>{{centre.description === null ? "" : centre.description | truncate:100}}</p>
             <p>
               <small class="text-info"><strong>Status:</strong> {{centre.status}}</small><br>
-              <small class="text-muted"><strong>Added:</strong> {{centre.timeAdded}}</small><br>
+              <small class="text-muted"><strong>Added:</strong> {{centre.timeAdded | timeago}}</small><br>
               <span data-ng-if="centre.timeModified != null">
-                <small class="text-muted"><strong>Last updated:</strong> {{centre.timeModified}}</small>
+                <small class="text-muted"><strong>Last updated:</strong> {{centre.timeModified | timeago}}</small>
               </span>
             </br>
           </div>

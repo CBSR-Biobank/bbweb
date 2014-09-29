@@ -45,10 +45,10 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-2" data-ng-if="study.timeModified != null">
+      <div class="col-md-2" data-ng-if="study.timeModified !== null">
         <p class="text-muted"><strong>Updated:</strong></p>
       </div>
-      <div class="col-md-10">
+      <div class="col-md-10" data-ng-if="study.timeModified !== null">
         <p class="text-muted">{{study.timeModified | timeago}}</p>
       </div>
     </div>

@@ -6,6 +6,12 @@ define(['angular', 'common'], function(angular) {
 
   var mod = angular.module('studies.services', ['biobank.common']);
 
+  var setDescription = function (cmd, description) {
+    if (description && (description.length > 0)) {
+      cmd.description = description;
+    }
+  };
+
   /**
    * Service to acccess studies.
    */
@@ -29,9 +35,10 @@ define(['angular', 'common'], function(angular) {
         },
         addOrUpdate: function(study) {
           var cmd = {
-            name: study.name,
-            description: study.description
+            name: study.name
           };
+
+          setDescription(cmd, study.description);
 
           if (study.id) {
             cmd.id = study.id;
@@ -278,9 +285,10 @@ define(['angular', 'common'], function(angular) {
         var cmd = {
           studyId:     processingType.studyId,
           name:        processingType.name,
-          description: processingType.description,
           enabled:     processingType.enabled
         };
+
+        setDescription(cmd, processingType.description);
 
         if (processingType.id) {
           cmd.id = processingType.id;

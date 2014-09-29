@@ -1,5 +1,5 @@
 /** Common helpers */
-define(['angular', 'underscore'], function(angular, _) {
+define(['angular', 'underscore', 'common'], function(angular, _) {
   'use strict';
 
   var mod = angular.module('admin.studies.helpers', []);
@@ -138,18 +138,18 @@ define(['angular', 'underscore'], function(angular, _) {
    * Displays a study annotation type in a modal. The information is displayed in an ng-table.
    *
    */
-  mod.service('addTimeStampsService', function() {
+  mod.service('addTimeStampsService', ['$filter', function($filter) {
     return {
       get: function(modelObj) {
         var data = [];
-        data.push({name: 'Date added:', value: modelObj.timeAdded});
+        data.push({name: 'Added:', value: $filter('timeago')(modelObj.timeAdded)});
         if (modelObj.timeModified !== null) {
-          data.push({name: 'Last updated:', value: modelObj.timeModified});
+          data.push({name: 'Last updated:', value: $filter('timeago')(modelObj.timeModified)});
         }
         return data;
       }
     };
-  });
+  }]);
 
   /**
    * Displays a study annotation type in a modal. The information is displayed in an ng-table.
@@ -482,8 +482,8 @@ define(['angular', 'underscore'], function(angular, _) {
         processingTypeModalService.show(processingType);
       };
 
-      ProcessingTypesPanelSettings.prototype.add = function(study) {
-        $state.go('admin.studies.study.processing.processingTypeAdd', { studyId: study.id });
+      ProcessingTypesPanelSettings.prototype.add = function() {
+        $state.go('admin.studies.study.processing.processingTypeAdd');
       };
 
       ProcessingTypesPanelSettings.prototype.update = function(processingType) {

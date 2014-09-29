@@ -12,7 +12,7 @@ define(['angular'], function(angular) {
     'modelObjModalService', 'addTimeStampsService',
     function (modelObjModalService, addTimeStampsService) {
       this.show = function (user) {
-        var title = 'Specimen Group';
+        var title = 'User';
         var data = [];
 
         data.push({name: 'Name:',   value: user.name});

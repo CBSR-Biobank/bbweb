@@ -26,65 +26,6 @@ define(['angular'], function(angular) {
   ]);
 
   /**
-   * Common code to add or edit a processing type.
-   */
-  mod.service('processingTypeEditService', [
-    '$state', '$stateParams', '$filter', 'stateHelper', 'modalService', 'ProcessingTypeService',
-    function($state, $stateParams, $filter, stateHelper, modalService, ProcessingTypeService) {
-
-      /*
-       * Called when the submission failed due to an error.
-       */
-      var saveError = function ($scope, processingType, error) {
-        var modalOptions = {
-          closeButtonText: 'Cancel',
-          actionButtonText: 'OK'
-        };
-
-        if (error.message.indexOf('expected version doesn\'t match current version') > -1) {
-          /* concurrent change error */
-          modalOptions.headerText = 'Modified by another user';
-          modalOptions.bodyText = 'Another user already made changes to this processing type. Press OK to make ' +
-            'your changes again, or Cancel to dismiss your changes.';
-        } else {
-          /* some other error */
-          modalOptions.headerText =
-            'Cannot ' +  (processingType.id ?  'update' : 'add ') + ' Processing Type';
-          modalOptions.bodyText = 'Error: ' + error.message;
-        }
-
-        modalService.showModal({}, modalOptions).then(function () {
-          stateHelper.reloadAndReinit();
-        }, function () {
-          $state.go('admin.studies.study.processing');
-        });
-      };
-
-      return {
-        edit: function($scope) {
-          $scope.form = {
-            submit: function(processingType) {
-              ProcessingTypeService.addOrUpdate(processingType).then(
-                function() {
-                  $state.transitionTo(
-                    'admin.studies.study.processing',
-                    $stateParams,
-                    { reload: true, inherit: false, notify: true });
-                },
-                function(error) {
-                  saveError($scope, processingType, error);
-                });
-            },
-            cancel: function() {
-              $state.go('admin.studies.study.processing', { studyId: $scope.study.id });
-            }
-          };
-        }
-      };
-    }
-  ]);
-
-  /**
    * Removes a processing type.
    */
   mod.service('processingTypeRemoveService', [

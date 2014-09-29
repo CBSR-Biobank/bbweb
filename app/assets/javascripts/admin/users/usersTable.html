@@ -10,25 +10,24 @@
     <p>The following users have been configured:</p>
     <table data-ng-table="tableParams" class="table table-hover">
       <tr data-ng-repeat="user in $data">
+        <td data-title="'Email'" sortable="'email'">
+          <span data-ng-click="userInformation(user)">
+            <a href>{{user.email}}</a>
+          </span>
+        </td>
         <td data-title="'Name'" sortable="'name'">
           {{user.name}}
         </td>
-        <td data-title="'Email'" sortable="'email'">
-          {{user.email}}
-        </td>
         <td data-title="'Added'" sortable="'timeAdded'">
-          {{user.timeAdded}}
+          <a href tooltip="{{user.timeAddedLocal}}">
+            {{user.timeAdded | timeago}}
+          </a>
         </td>
         <td data-title="'Status'" sortable="'status'">
           <span class="badge">{{user.status}}</span>
         </td>
-        <td>
+        <td data-title="'Action'">
           <div class="btn-group pull-right">
-            <button class="btn btn-xs btn-primary"
-                    data-ng-click="userInformation(user)"
-                    title="Update">
-              <i class="glyphicon glyphicon-info-sign"></i>
-            </button>
             <button class="btn btn-xs btn-success"
                     data-ng-click="activate(user)"
                     data-toggle="tooltip"
