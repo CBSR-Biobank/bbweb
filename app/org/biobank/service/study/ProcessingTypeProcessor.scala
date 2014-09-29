@@ -60,9 +60,15 @@ trait ProcessingTypeProcessorComponent {
       * back to the user. Each valid command generates one or more events and is journaled.
       */
     val receiveCommand: Receive = {
-      case cmd: AddProcessingTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case cmd: AddProcessingTypeCmd =>    process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: UpdateProcessingTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: RemoveProcessingTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+
+      case "snap" =>
+        saveSnapshot(SnapshotState(processingTypeRepository.getValues.toSet))
+        stash()
+
+      case cmd => log.error(s"message not handled: $cmd")
     }
 
     def update

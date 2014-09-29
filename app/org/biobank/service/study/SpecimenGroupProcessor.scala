@@ -69,6 +69,13 @@ trait SpecimenGroupProcessorComponent {
       case cmd: AddSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: UpdateSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: RemoveSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+
+      case "snap" =>
+        saveSnapshot(SnapshotState(specimenGroupRepository.getValues.toSet))
+        stash()
+
+      case cmd => log.error(s"message not handled: $cmd")
+
     }
 
     def update

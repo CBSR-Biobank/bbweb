@@ -62,9 +62,13 @@ trait CentresProcessorComponent {
       case cmd: RemoveCentreLocationCmd =>  process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: AddCentreToStudyCmd =>      process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: RemoveCentreFromStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case other =>
-        DomainError("invalid command received")
-        ()
+
+      case "snap" =>
+        saveSnapshot(SnapshotState(centreRepository.getValues.toSet))
+        stash()
+
+      case cmd => log.error(s"message not handled: $cmd")
+
     }
 
     private def validateCmd(cmd: AddCentreCmd): DomainValidation[CentreAddedEvent] = {

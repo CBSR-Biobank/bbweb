@@ -137,10 +137,10 @@ trait UsersProcessorComponent {
       case cmd: UnlockUserCmd         => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
       case "snap" =>
-        saveSnapshot(SnapshotState(userRepository.allUsers))
+        saveSnapshot(SnapshotState(userRepository.getValues.toSet))
         stash()
 
-      case cmd => throw new IllegalStateException(s"message not handled: $cmd")
+      case cmd => log.error(s"message not handled: $cmd")
     }
 
     def validateCmd(cmd: RegisterUserCmd): DomainValidation[UserRegisteredEvent] = {

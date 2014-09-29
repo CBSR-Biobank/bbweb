@@ -105,13 +105,27 @@ trait StudiesProcessorComponent
       case cmd: RetireStudyCmd =>   process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: UnretireStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
 
-      case cmd: SpecimenGroupCommand =>                 validateAndForward(specimenGroupProcessor, cmd)
-      case cmd: CollectionEventTypeCommand =>           validateAndForward(collectionEventTypeProcessor, cmd)
-      case cmd: CollectionEventAnnotationTypeCommand => validateAndForward(ceventAnnotationTypeProcessor, cmd)
-      case cmd: ParticipantAnnotationTypeCommand =>     validateAndForward(participantAnnotationTypeProcessor, cmd)
-      case cmd: ProcessingTypeCommand =>                validateAndForward(processingTypeProcessor, cmd)
-      case cmd: SpecimenLinkTypeCommand =>              validateAndForward(specimenLinkTypeProcessor, cmd)
-      case cmd: SpecimenLinkAnnotationTypeCommand =>    validateAndForward(specimenLinkAnnotationTypeProcessor,  cmd)
+      case cmd: SpecimenGroupCommand =>
+        validateAndForward(specimenGroupProcessor, cmd)
+      case cmd: CollectionEventTypeCommand =>
+        validateAndForward(collectionEventTypeProcessor, cmd)
+      case cmd: CollectionEventAnnotationTypeCommand =>
+        validateAndForward(ceventAnnotationTypeProcessor, cmd)
+      case cmd: ParticipantAnnotationTypeCommand =>
+        validateAndForward(participantAnnotationTypeProcessor, cmd)
+      case cmd: ProcessingTypeCommand =>
+        validateAndForward(processingTypeProcessor, cmd)
+      case cmd: SpecimenLinkTypeCommand =>
+        validateAndForward(specimenLinkTypeProcessor, cmd)
+      case cmd: SpecimenLinkAnnotationTypeCommand =>
+        validateAndForward(specimenLinkAnnotationTypeProcessor,  cmd)
+
+      case "snap" =>
+        saveSnapshot(SnapshotState(studyRepository.getValues.toSet))
+        stash()
+
+      case cmd => log.error(s"message not handled: $cmd")
+
     }
 
     private def validateAndForward(childActor: ActorRef, cmd: StudyCommandWithId) = {

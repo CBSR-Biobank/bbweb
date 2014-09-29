@@ -67,6 +67,13 @@ trait SpecimenLinkTypeProcessorComponent {
       case cmd: AddSpecimenLinkTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: UpdateSpecimenLinkTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
       case cmd: RemoveSpecimenLinkTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+
+      case "snap" =>
+        saveSnapshot(SnapshotState(specimenLinkTypeRepository.getValues.toSet))
+        stash()
+
+      case cmd => log.error(s"message not handled: $cmd")
+
     }
 
     def update
