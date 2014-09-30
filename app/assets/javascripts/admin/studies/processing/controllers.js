@@ -5,147 +5,80 @@ define(['angular'], function(angular) {
   'use strict';
 
   var mod = angular.module('admin.studies.processing.controllers', [
-    'studies.services', 'admin.studies.helpers'
+    'studies.services', 'admin.studies.controllers', 'admin.studies.helpers'
   ]);
 
 
-  /** Common class fro editing a Processing Type
-   */
-  var ProcessingTypeEditCtrl = function(
-    $scope,
-    $state,
-    $stateParams,
-    stateHelper,
-    modalService,
-    ProcessingTypeService,
-    title,
-    study,
-    processingType) {
-    $scope.title =  title;
-    $scope.study = study;
-    $scope.processingType = processingType;
+  mod.controller('ProcessingTypeEditCtrl', [
+    '$scope',
+    '$state',
+    '$stateParams',
+    'stateHelper',
+    'modalService',
+    'ProcessingTypeService',
+    'study',
+    'processingType',
+    function ($scope,
+              $state,
+              $stateParams,
+              stateHelper,
+              modalService,
+              ProcessingTypeService,
+              study,
+              processingType) {
 
-    var saveError = function ($scope, processingType, error) {
-      var modalDefaults = {};
-      var modalOptions = {
-        closeButtonText: 'Cancel',
-        actionButtonText: 'OK'
+      var action = (processingType.id) ? 'Update' : 'Add';
+      $scope.title =  action  + ' Processing Type';
+      $scope.study = study;
+      $scope.processingType = processingType;
+
+      /**
+       * This function handles the error when the processing type could not be saved.
+       */
+      var saveError = function ($scope, processingType, error) {
+        var modalDefaults = {};
+        var modalOptions = {
+          closeButtonText: 'Cancel',
+          actionButtonText: 'OK'
+        };
+
+        if (error.message.indexOf('expected version doesn\'t match current version') > -1) {
+          /* concurrent change error */
+          modalDefaults.templateUrl = '/assets/javascripts/common/modalConcurrencyError.html';
+          modalOptions.domainType = 'processing type';
+        } else {
+          /* some other error */
+          modalOptions.headerText =
+            'Cannot ' +  (processingType.id ?  'update' : 'add ') + ' Processing Type';
+          modalOptions.bodyText = 'Error: ' + error.message;
+        }
+
+        modalService.showModal(modalDefaults, modalOptions).then(
+          function () {
+            stateHelper.reloadAndReinit();
+          },
+          function () {
+            $state.go('admin.studies.study.processing');
+          });
       };
 
-      if (error.message.indexOf('expected version doesn\'t match current version') > -1) {
-        /* concurrent change error */
-        modalDefaults.templateUrl = '/assets/javascripts/common/modalConcurrencyError.html';
-        modalOptions.domainType = 'processing type';
-      } else {
-        /* some other error */
-        modalOptions.headerText =
-          'Cannot ' +  (processingType.id ?  'update' : 'add ') + ' Processing Type';
-        modalOptions.bodyText = 'Error: ' + error.message;
-      }
-
-      modalService.showModal(modalDefaults, modalOptions).then(
-        function () {
-          stateHelper.reloadAndReinit();
+      $scope.form = {
+        submit: function(processingType) {
+          ProcessingTypeService.addOrUpdate(processingType).then(
+            function() {
+              $state.transitionTo(
+                'admin.studies.study.processing',
+                $stateParams,
+                { reload: true, inherit: false, notify: true });
+            },
+            function(error) {
+              saveError($scope, processingType, error);
+            });
         },
-        function () {
-          $state.go('admin.studies.study.processing');
-        });
-    };
-
-    $scope.form = {
-      submit: function(processingType) {
-        ProcessingTypeService.addOrUpdate(processingType).then(
-          function() {
-            $state.transitionTo(
-              'admin.studies.study.processing',
-              $stateParams,
-              { reload: true, inherit: false, notify: true });
-          },
-          function(error) {
-            saveError($scope, processingType, error);
-          });
-      },
-      cancel: function() {
-        $state.go('admin.studies.study.processing', { studyId: $scope.study.id });
-      }
-    };
-  };
-
-  /**
-   * Add Processing Type
-   */
-  mod.controller('ProcessingTypeAddCtrl', [
-    '$scope',
-    '$state',
-    '$stateParams',
-    'stateHelper',
-    'modalService',
-    'ProcessingTypeService',
-    'study',
-    'processingType',
-    function ($scope,
-              $state,
-              $stateParams,
-              stateHelper,
-              modalService,
-              ProcessingTypeService,
-              study,
-              processingType) {
-      angular.extend(this, new ProcessingTypeEditCtrl(
-        $scope, $state, $stateParams, stateHelper, modalService, ProcessingTypeService, 'Add Processing Type',
-        study, processingType));
-    }
-  ]);
-
-  /**
-   * Update Processing Type
-   */
-  mod.controller('ProcessingTypeUpdateCtrl', [
-    '$scope',
-    '$state',
-    '$stateParams',
-    'stateHelper',
-    'modalService',
-    'ProcessingTypeService',
-    'study',
-    'processingType',
-    function ($scope,
-              $state,
-              $stateParams,
-              stateHelper,
-              modalService,
-              ProcessingTypeService,
-              study,
-              processingType) {
-      angular.extend(this, new ProcessingTypeEditCtrl(
-        $scope, $state, $stateParams, stateHelper, modalService, ProcessingTypeService, 'Update Processing Type',
-        study, processingType));
-    }
-  ]);
-
-  /**
-   * Add Specimen Link Annotation Type
-   */
-  mod.controller('spcLinkAnnotationTypeAddCtrl', [
-    '$scope', 'spcLinkAnnotTypeEditService', 'study', 'annotType',
-    function ($scope, spcLinkAnnotTypeEditService, study, annotType) {
-      $scope.title =  'Add Annotation Type';
-      $scope.study = study;
-      $scope.annotType = annotType;
-      spcLinkAnnotTypeEditService.edit($scope);
-    }
-  ]);
-
-  /**
-   * Update Specimen Link Annotation Type
-   */
-  mod.controller('spcLinkAnnotationTypeUpdateCtrl', [
-    '$scope', 'spcLinkAnnotTypeEditService', 'study', 'annotType',
-    function ($scope, spcLinkAnnotTypeEditService, study, annotType) {
-      $scope.title =  'Update Annotation Type';
-      $scope.study = study;
-      $scope.annotType = annotType;
-      spcLinkAnnotTypeEditService.edit($scope);
+        cancel: function() {
+          $state.go('admin.studies.study.processing', { studyId: $scope.study.id });
+        }
+      };
     }
   ]);
 

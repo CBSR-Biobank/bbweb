@@ -34,7 +34,7 @@ define(['angular'], function(angular) {
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/admin/studies/processing/processingTypeForm.html',
-            controller: 'ProcessingTypeAddCtrl'
+            controller: 'ProcessingTypeEditCtrl'
           }
         },
         data: {
@@ -62,7 +62,7 @@ define(['angular'], function(angular) {
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/admin/studies/processing/processingTypeForm.html',
-            controller: 'ProcessingTypeUpdateCtrl'
+            controller: 'ProcessingTypeEditCtrl'
           }
         },
         data: {
@@ -74,7 +74,7 @@ define(['angular'], function(angular) {
        * Specimen Link Annotation Type Add
        */
       $stateProvider.state('admin.studies.study.processing.spcLinkAnnotTypeAdd', {
-        url: '/processing/annottype/add',
+        url: '/annottype/add',
         resolve: {
           user: userResolve.user,
           annotType: ['study', function(study) {
@@ -90,8 +90,8 @@ define(['angular'], function(angular) {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/annotTypeForm.html',
-            controller: 'spcLinkAnnotationTypeAddCtrl'
+            templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
+            controller: 'SpcLinkAnnotationTypeEditCtrl'
           }
         },
         data: {
@@ -103,7 +103,7 @@ define(['angular'], function(angular) {
        * Prticipant Annotation Type Update
        */
       $stateProvider.state('admin.studies.study.processing.spcLinkAnnotTypeUpdate', {
-        url: '/processing/annottype/update/{annotTypeId}',
+        url: '/annottype/update/{annotTypeId}',
         resolve: {
           user: userResolve.user,
           annotType: [
@@ -118,8 +118,8 @@ define(['angular'], function(angular) {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/annotTypeForm.html',
-            controller: 'spcLinkAnnotationTypeUpdateCtrl'
+            templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
+            controller: 'SpcLinkAnnotationTypeEditCtrl'
           }
         },
         data: {

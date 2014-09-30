@@ -13,7 +13,7 @@ define(['angular'], function(angular) {
     return {
       require: '^tab',
       restrict: 'E',
-      templateUrl: '/assets/javascripts/admin/studies/annotTypesPanel.html'
+      templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypesPanel.html'
     };
   });
 
@@ -21,7 +21,7 @@ define(['angular'], function(angular) {
     return {
       require: '^tab',
       restrict: 'E',
-      templateUrl: '/assets/javascripts/admin/studies/annotTypesPanel.html'
+      templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypesPanel.html'
     };
   });
 
@@ -29,7 +29,7 @@ define(['angular'], function(angular) {
     return {
       require: '^tab',
       restrict: 'E',
-      templateUrl: '/assets/javascripts/admin/studies/annotTypesPanel.html'
+      templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypesPanel.html'
     };
   });
 

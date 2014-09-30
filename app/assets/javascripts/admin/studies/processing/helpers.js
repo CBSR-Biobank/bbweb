@@ -57,67 +57,6 @@ define(['angular'], function(angular) {
     }
   ]);
 
-  mod.service('spcLinkAnnotTypeEditService', [
-    '$state', '$stateParams', 'modalService', 'studyAnnotTypeEditService', 'SpcLinkAnnotTypeService',
-    function($state, $stateParams, modalService, studyAnnotTypeEditService, SpcLinkAnnotTypeService) {
-      return {
-        edit: function ($scope) {
-
-          var onSubmit = function (annotType) {
-            SpcLinkAnnotTypeService.addOrUpdate(annotType).then(
-              function() {
-                $state.transitionTo(
-                  'admin.studies.study.processing',
-                  $stateParams,
-                  { reload: true, inherit: false, notify: true });
-              },
-              function(error) {
-                studyAnnotTypeEditService.onError($scope, error, 'admin.studies.study.processing');
-              });
-          };
-
-          var onCancel = function () {
-            $state.go('admin.studies.study.processing');
-          };
-
-          studyAnnotTypeEditService.edit($scope, onSubmit, onCancel);
-        }
-      };
-    }
-  ]);
-
-  /**
-   * Removes a participant annotation type.
-   */
-  mod.service('spcLinkAnnotTypeRemoveService', [
-    '$state', 'stateHelper', 'studyRemoveModalService', 'SpcLinkAnnotTypeService',
-    function ($state, stateHelper, studyRemoveModalService, SpcLinkAnnotTypeService) {
-      return {
-        remove: function(annotType) {
-          studyRemoveModalService.remove(
-            'Remove Specimen Link Annotation Type',
-            'Are you sure you want to remove annotation type ' + annotType.name + '?',
-            function () {
-              SpcLinkAnnotTypeService.remove(annotType).then(
-                function() {
-                  stateHelper.reloadAndReinit();
-                },
-                function(error) {
-                  var bodyText = 'Annotation type ' + annotType.name + ' cannot be removed: ' + error.message;
-                  studyRemoveModalService.orError(
-                    bodyText,
-                    'admin.studies.study.processing',
-                    'admin.studies.study.processing');
-                });
-            },
-            function() {
-              $state.go('admin.studies.study.processing');
-            });
-        }
-      };
-    }
-  ]);
-
   /**
    * Displays a specimen link type in a modal. The information is displayed in an ng-table.
    *

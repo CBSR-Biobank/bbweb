@@ -266,19 +266,14 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
   mod.service('studyRemoveModalService', [
     '$state', 'modalService', function ($state, modalService) {
       return {
-        remove: function (title, message, onConfirm, onCancel) {
+        remove: function (title, message) {
           var modalOptions = {
             closeButtonText: 'Cancel',
             headerText: title,
             bodyText: message
           };
 
-          modalService.showModal({}, modalOptions).then(
-            function () {
-              onConfirm();
-            }, function() {
-              onCancel();
-            });
+          return modalService.showModal({}, modalOptions);
         },
         onError: function(bodyText, onModalOkState, onModalCancelState) {
           var modalOptions = {
@@ -343,6 +338,17 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
           this.add         = onAdd;
           this.update      = onUpdate;
           this.remove      = onRemove;
+
+          this.columns = [
+            { title: 'Name', field: 'name', filter: { 'name': 'text' } },
+            { title: 'Type', field: 'valueType', filter: { 'valueType': 'text' } },
+          ];
+          if (hasRequiredField) {
+            this.columns.push(
+              { title: 'Required', field: 'required', filter: { 'required': 'text' } });
+          }
+          this.columns.push(
+            { title: 'Description', field: 'description', filter: { 'description': 'text' } });
         }
       };
 
@@ -444,8 +450,8 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
         ceventTypeModalService.show(ceventType, this.specimenGroups, this.annotTypes);
       };
 
-      CeventTypesPanelSettings.prototype.add = function(study) {
-        $state.go('admin.studies.study.collection.ceventTypeAdd', { studyId: study.id });
+      CeventTypesPanelSettings.prototype.add = function() {
+        $state.go('admin.studies.study.collection.ceventTypeAdd');
       };
 
       CeventTypesPanelSettings.prototype.update = function(ceventType) {

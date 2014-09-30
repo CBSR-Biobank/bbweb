@@ -5,7 +5,7 @@ define(['angular'], function(angular) {
   'use strict';
 
   var mod = angular.module('admin.studies.ceventTypes.states', [
-    'ui.router', 'admin.studies.controllers'
+    'ui.router', 'admin.studies.controllers', 'admin.studies.annotationTypes.controllers'
   ]);
 
   mod.config([
@@ -90,8 +90,8 @@ define(['angular'], function(angular) {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/annotTypeForm.html',
-            controller: 'ceventAnnotationTypeAddCtrl'
+            templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
+            controller: 'CeventAnnotationTypeEditCtrl'
           }
         },
         data: {
@@ -118,8 +118,8 @@ define(['angular'], function(angular) {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/annotTypeForm.html',
-            controller: 'ceventAnnotationTypeUpdateCtrl'
+            templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
+            controller: 'CeventAnnotationTypeEditCtrl'
           }
         },
         data: {

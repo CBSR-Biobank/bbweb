@@ -7,8 +7,7 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
   var mod = angular.module('admin.studies.controllers', [
     'biobank.common',
     'studies.services',
-    'admin.studies.helpers',
-    'admin.studies.participants.helpers'
+    'admin.studies.helpers'
   ]);
 
   /**
@@ -250,7 +249,6 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
       };
     }
   ]);
-
 
   /**
    * Displays study specimen configuration information in a table.

@@ -6,26 +6,6 @@ define(['angular'], function(angular) {
 
   var mod = angular.module('admin.studies.ceventTypes.controllers', ['studies.services']);
 
-  mod.controller('ceventAnnotationTypeAddCtrl', [
-    '$scope', 'ceventAnnotTypeEditService', 'study', 'annotType',
-    function ($scope, ceventAnnotTypeEditService, study, annotType) {
-      $scope.title =  'Add Annotation Type';
-      $scope.study = study;
-      $scope.annotType = annotType;
-      ceventAnnotTypeEditService.edit($scope);
-    }
-  ]);
-
-  mod.controller('ceventAnnotationTypeUpdateCtrl', [
-    '$scope', 'ceventAnnotTypeEditService', 'study', 'annotType',
-    function ($scope, ceventAnnotTypeEditService, study, annotType) {
-      $scope.title =  'Update Annotation Type';
-      $scope.study = study;
-      $scope.annotType = annotType;
-      ceventAnnotTypeEditService.edit($scope);
-    }
-  ]);
-
   mod.controller('CeventTypeAddCtrl', [
     '$scope', 'ceventTypeEditService', 'study', 'ceventType', 'annotTypes', 'specimenGroups',
     function ($scope, ceventTypeEditService, study, ceventType, annotTypes, specimenGroups) {

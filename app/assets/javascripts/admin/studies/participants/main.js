@@ -4,15 +4,11 @@
  */
 define([
   'angular',
-  './controllers',
-  './states',
-  './helpers'
+  './states'
 ], function(angular) {
   'use strict';
 
   return angular.module('admin.studies.participants', [
-    'admin.studies.participants.controllers',
-    'admin.studies.participants.states',
-    'admin.studies.participants.helpers'
+    'admin.studies.participants.states'
   ]);
 });

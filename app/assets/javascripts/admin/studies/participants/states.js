@@ -5,8 +5,7 @@ define(['angular'], function(angular) {
   'use strict';
 
   var mod = angular.module('admin.studies.participants.states', [
-    'ui.router',
-    'admin.studies.participants.controllers'
+    'ui.router'
   ]);
 
   mod.config([
@@ -35,8 +34,8 @@ define(['angular'], function(angular) {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/annotTypeForm.html',
-            controller: 'participantAnnotationTypeAddCtrl'
+            templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
+            controller: 'ParticipantAnnotationTypeEditCtrl'
           }
         },
         data: {
@@ -63,8 +62,8 @@ define(['angular'], function(angular) {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/annotTypeForm.html',
-            controller: 'participantAnnotationTypeUpdateCtrl'
+            templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
+            controller: 'ParticipantAnnotationTypeEditCtrl'
           }
         },
         data: {
