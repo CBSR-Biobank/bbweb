@@ -91,10 +91,7 @@ define(['angular'], function(angular) {
     $scope.submit = function (annotType) {
       addOrUpdateFn(annotType).then(
         function() {
-          $state.transitionTo(
-            returnState,
-            $stateParams,
-            { reload: true, inherit: false, notify: true });
+          stateHelper.reloadStateAndReinit(returnState);
         },
         function(error) {
           $scope.updateError(error, returnState);
@@ -106,6 +103,33 @@ define(['angular'], function(angular) {
     };
   }
 
+  function studyAnnotationTypeRemove($state,
+                                     stateHelper,
+                                     studyRemoveModalService,
+                                     removeFn,
+                                     annotType,
+                                     returnState) {
+    studyRemoveModalService.remove(
+      'Remove Annotation Type',
+      'Are you sure you want to remove annotation type ' + annotType.name + '?').then(
+        function () {
+          removeFn(annotType).then(
+            function() {
+              stateHelper.reloadAndReinit();
+            },
+            function(error) {
+              var bodyText = 'Annotation type ' +
+                  annotType.name +
+                  ' cannot be removed: ' +
+                  error.message;
+              studyRemoveModalService.orError(bodyText, returnState, returnState);
+            });
+        },
+        function() {
+          $state.go(returnState);
+        });
+  }
+
   /**
    * Removes a collection event annotation type.
    */
@@ -113,26 +137,14 @@ define(['angular'], function(angular) {
     '$state', 'stateHelper', 'studyRemoveModalService', 'CeventAnnotTypeService',
     function ($state, stateHelper, studyRemoveModalService, CeventAnnotTypeService) {
       return {
-        remove: function(ceventAnnotType) {
-          studyRemoveModalService.remove(
-            'Remove Collection Event Annotation Type',
-            'Are you sure you want to remove collection event annotation type ' + ceventAnnotType.name + '?').then(
-              function () {
-                CeventAnnotTypeService.remove(ceventAnnotType).then(
-                  function() {
-                    stateHelper.reloadAndReinit();
-                  },
-                  function(error) {
-                    var bodyText = 'Collection event annotation type ' + ceventAnnotType.name + ' cannot be removed: ' + error.message;
-                    studyRemoveModalService.orError(
-                      bodyText,
-                      'admin.studies.study.collection',
-                      'admin.studies.study.collection');
-                  });
-              },
-              function() {
-                $state.go('admin.studies.study.collection');
-              });
+        remove: function(annotType) {
+          studyAnnotationTypeRemove(
+            $state,
+            stateHelper,
+            studyRemoveModalService,
+            CeventAnnotTypeService.remove,
+            annotType,
+            'admin.studies.study.collection');
         }
       };
     }
@@ -152,25 +164,13 @@ define(['angular'], function(angular) {
                                                studyRemoveModalService) {
       return {
         remove: function(annotType) {
-          studyRemoveModalService.remove(
-            'Remove Participant Annotation Type',
-            'Are you sure you want to remove annotation type ' + annotType.name + '?').then(
-              function () {
-                ParticipantAnnotTypeService.remove(annotType).then(
-                  function() {
-                    stateHelper.reloadAndReinit();
-                  },
-                  function(error) {
-                    var bodyText = 'Annotation type ' + annotType.name + ' cannot be removed: ' + error.message;
-                    studyRemoveModalService.orError(
-                      bodyText,
-                      'admin.studies.study.participants',
-                      'admin.studies.study.participants');
-                  });
-              },
-              function() {
-                $state.go('admin.studies.study.participants');
-              });
+          studyAnnotationTypeRemove(
+            $state,
+            stateHelper,
+            studyRemoveModalService,
+            ParticipantAnnotTypeService.remove,
+            annotType,
+            'admin.studies.study.participants');
         }
       };
     }
@@ -184,25 +184,13 @@ define(['angular'], function(angular) {
     function ($state, stateHelper, studyRemoveModalService, SpcLinkAnnotTypeService) {
       return {
         remove: function(annotType) {
-          studyRemoveModalService.remove(
-            'Remove Specimen Link Annotation Type',
-            'Are you sure you want to remove annotation type ' + annotType.name + '?').then(
-              function () {
-                SpcLinkAnnotTypeService.remove(annotType).then(
-                  function() {
-                    stateHelper.reloadAndReinit();
-                  },
-                  function(error) {
-                    var bodyText = 'Annotation type ' + annotType.name + ' cannot be removed: ' + error.message;
-                    studyRemoveModalService.orError(
-                      bodyText,
-                      'admin.studies.study.processing',
-                      'admin.studies.study.processing');
-                  });
-              },
-              function() {
-                $state.go('admin.studies.study.processing');
-              });
+          studyAnnotationTypeRemove(
+            $state,
+            stateHelper,
+            studyRemoveModalService,
+            SpcLinkAnnotTypeService.remove,
+            annotType,
+            'admin.studies.study.processing');
         }
       };
     }

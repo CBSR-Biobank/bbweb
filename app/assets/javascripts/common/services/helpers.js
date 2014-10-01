@@ -34,15 +34,20 @@ define(['angular'], function(angular) {
   mod.service('stateHelper', [
     '$state', '$stateParams',
     function ($state, $stateParams) {
+
+      function reloadState(stateName) {
+        $state.transitionTo(
+          stateName,
+          $stateParams,
+          {reload: true, inherit: false, notify: true});
+      }
+
       return {
         reloadAndReinit: function() {
-          // could use $state.reload() here but it does not re-initialize the
-          // controller
-          $state.transitionTo($state.current, $stateParams, {
-            reload: true,
-            inherit: false,
-            notify: true
-          });
+          return reloadState($state.current);
+        },
+        reloadStateAndReinit: function(stateName) {
+          return reloadState(stateName);
         }
       };
     }
