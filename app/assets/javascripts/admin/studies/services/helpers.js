@@ -1,62 +1,8 @@
-/** Common helpers */
+/** Study helpers */
 define(['angular', 'underscore', 'common'], function(angular, _) {
   'use strict';
 
   var mod = angular.module('admin.studies.helpers', []);
-
-  /**
-   * Tracks wether each panel in the study view page is expanded or collapsed.
-   */
-  mod.service('studyViewSettings', ['$log', function($log) {
-    var initialSettings = function() {
-      return {
-        studyId: null,
-        panelStates: {
-          participantAnnotTypes: true,
-          specimenGroups:        true,
-          ceventAnnotTypes:      true,
-          ceventTypes:           true,
-          processingTypes:       true,
-          spcLinkAnnotTypes:     true,
-          spcLinkTypes:          true
-        }
-      };
-    };
-
-    var currentState = initialSettings();
-
-    return {
-      panelState: function(panel, state) {
-        if (typeof currentState.panelStates[panel] === 'undefined') {
-          throw new Error('panel not defined: ' + panel);
-        }
-
-        if (state === undefined) {
-          return currentState.panelStates[panel];
-        }
-        currentState.panelStates[panel] = state;
-        return state;
-      },
-      panelStateToggle: function(panel) {
-        if (typeof currentState.panelStates[panel] === 'undefined') {
-          throw new Error('panel not defined: ' + panel);
-        }
-        currentState.panelStates[panel] = !currentState.panelStates[panel];
-        $log.debug('panelStateToggle: ', panel, currentState.panelStates[panel]);
-        return currentState.panelStates[panel];
-      },
-      initialize: function(studyId) {
-        if (studyId !== currentState.studyId) {
-          // initialize state only when a new study is selected
-          currentState = initialSettings();
-          currentState.studyId = studyId;
-        }
-      },
-      getState: function() {
-        return currentState;
-      }
-    };
-  }]);
 
   mod.service('panelTableService', ['$filter', 'ngTableParams', function ($filter, ngTableParams) {
     this.getTableParams = function(data) {
@@ -183,76 +129,6 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
           data = data.concat(addTimeStampsService.get(annotType));
 
           modelObjModalService.show(title, data);
-        }
-      };
-    }
-  ]);
-
-  /**
-   * Common code to add or edit an annotation type.
-   */
-  mod.service('studyAnnotTypeEditService', [
-    '$state', 'stateHelper', 'StudyAnnotTypeService', 'modalService',
-    function($state, stateHelper, StudyAnnotTypeService, modalService) {
-      return {
-        edit: function($scope, onSubmit, onCancel) {
-          $scope.hasRequiredField = (typeof $scope.annotType.required !== 'undefined');
-
-          StudyAnnotTypeService.valueTypes().then(function(valueTypes) {
-            $scope.valueTypes = valueTypes;
-          });
-
-          $scope.optionAdd = function() {
-            $scope.annotType.options.push('');
-          };
-
-          $scope.removeOption = function(option) {
-            if ($scope.annotType.options.length <= 1) {
-              throw new Error('invalid length for options');
-            }
-
-            var index = $scope.annotType.options.indexOf(option);
-            if (index > -1) {
-              $scope.annotType.options.splice(index, 1);
-            }
-          };
-
-          $scope.removeButtonDisabled = function() {
-            return $scope.annotType.options.length <= 1;
-          };
-
-          $scope.submit = function(annotType) {
-            onSubmit(annotType);
-          };
-
-          $scope.cancel = function() {
-            onCancel();
-          };
-        },
-        onError: function($scope, error, stateOnCancel) {
-          var modalOptions = {
-            closeButtonText: 'Cancel',
-            actionButtonText: 'OK'
-          };
-
-          if (error.message.indexOf('expected version doesn\'t match current version') > -1) {
-            /* concurrent change error */
-            modalOptions.headerText = 'Modified by another user';
-            modalOptions.bodyText = 'Another user already made changes to this annotation type. ' +
-              'Press OK to make your changes again, or Cancel to dismiss your changes.';
-          } else {
-            /* some other error */
-            modalOptions.headerText =
-              'Cannot ' + $scope.annotType.id ?  'update' : 'add' + ' annotation type';
-            modalOptions.bodyText = 'Error: ' + error.message;
-          }
-
-          modalService.showModal({}, modalOptions).then(
-            function () {
-              stateHelper.reloadAndReinit();
-            }, function () {
-              $state.go(stateOnCancel);
-            });
         }
       };
     }
