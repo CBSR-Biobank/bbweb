@@ -30,13 +30,13 @@ define(['angular', 'underscore'], function(angular, _) {
     '$rootScope',
     '$filter',
     '$state',
-    'ngTableParams',
+    'panelTableService',
     'CentreService',
     function($scope,
              $rootScope,
              $filter,
              $state,
-             ngTableParams,
+             panelTableService,
              CentreService) {
 
       var updateData = function() {
@@ -52,29 +52,8 @@ define(['angular', 'underscore'], function(angular, _) {
 
       $rootScope.pageTitle = 'Biobank centres';
       $scope.centres = [];
-
-      /* jshint -W055 */
-      $scope.tableParams = new ngTableParams({
-        page: 1,            // show first page
-        count: 10,          // count per page
-        sorting: {
-          name: 'asc'       // initial sorting
-        }
-      }, {
-        counts: [], // hide page counts control
-        total: function () { return getTableData().length; },
-        getData: function($defer, params) {
-          var filteredData = getTableData();
-          var orderedData = params.sorting() ?
-              $filter('orderBy')(filteredData, params.orderBy()) : filteredData;
-          $defer.resolve(orderedData.slice(
-            (params.page() - 1) * params.count(),
-            params.page() * params.count()));
-        }
-      });
-      /* jshint +W055 */
-
-      $scope.tableParams.settings().$scope = $scope;
+      $scope.tableParams = panelTableService.getTableParamsWithCallback(getTableData);
+      $scope.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
       updateData();
     }
   ]);

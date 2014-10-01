@@ -2,32 +2,7 @@
 define(['angular', 'underscore', 'common'], function(angular, _) {
   'use strict';
 
-  var mod = angular.module('admin.studies.helpers', []);
-
-  mod.service('panelTableService', ['$filter', 'ngTableParams', function ($filter, ngTableParams) {
-    this.getTableParams = function(data) {
-
-      /* jshint -W055 */
-      return new ngTableParams({
-        page: 1,            // show first page
-        count: 10,          // count per page
-        sorting: {
-          name: 'asc'       // initial sorting
-        }
-      },{
-        counts: [], // hide page counts control
-        total: data.length,
-        getData: function($defer, params) {
-          var orderedData = params.sorting() ?
-              $filter('orderBy')(data, params.orderBy()) : data;
-          $defer.resolve(orderedData.slice(
-            (params.page() - 1) * params.count(),
-            params.page() * params.count()));
-        }
-      });
-      /* jshint +W055 */
-    };
-  }]);
+  var mod = angular.module('admin.studies.helpers', ['biobank.common']);
 
   /**
    * Called where there was an error on attempting to add or update a study.
@@ -165,8 +140,8 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
   ]);
 
   mod.factory('PanelSettings', [
-    'studyViewSettings', 'panelTableService',
-    function(studyViewSettings, panelTableService) {
+    'studyViewSettingsService', 'panelTableService',
+    function(studyViewSettingsService, panelTableService) {
       var PanelSettings = function(panelStateName, data) {
         if (arguments.length > 0) {
           this.init(panelStateName, data);
@@ -177,11 +152,11 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
         this.panelStateName = panelStateName;
         this.data = data;
         this.tableParams = panelTableService.getTableParams(this.data);
-        this.panelOpen = studyViewSettings.panelState(panelStateName);
+        this.panelOpen = studyViewSettingsService.panelState(panelStateName);
       };
 
       PanelSettings.prototype.panelToggle = function() {
-        return studyViewSettings.panelStateToggle(this.panelStateName);
+        return studyViewSettingsService.panelStateToggle(this.panelStateName);
       };
 
       return PanelSettings;
@@ -287,13 +262,13 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
     'ceventTypeModalService',
     'ceventTypeRemoveService',
     'specimenGroupModalService',
-    'studyViewSettings',
+    'studyViewSettingsService',
     function($state,
              PanelSettings,
              ceventTypeModalService,
              ceventTypeRemoveService,
              specimenGroupModalService,
-             studyViewSettings) {
+             studyViewSettingsService) {
 
       var CeventTypesPanelSettings = function(panelStateName, ceventTypes, specimenGroups, annotTypes) {
         // push all specimen groups names into an array for easy display
@@ -302,7 +277,7 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
         this.init('ceventTypes', ceventTypes);
         this.specimenGroups = specimenGroups;
         this.annotTypes = annotTypes;
-        this.panelOpen = studyViewSettings.panelState('ceventTypes');
+        this.panelOpen = studyViewSettingsService.panelState('ceventTypes');
 
         ceventTypes.forEach(function (cet) {
           cet.specimenGroups = [];
@@ -343,12 +318,12 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
   ]);
 
   mod.factory('ProcessingTypesPanelSettings',  [
-    '$state', 'PanelSettings', 'processingTypeModalService', 'processingTypeRemoveService', 'studyViewSettings',
-    function($state, PanelSettings, processingTypeModalService, processingTypeRemoveService, studyViewSettings) {
+    '$state', 'PanelSettings', 'processingTypeModalService', 'processingTypeRemoveService', 'studyViewSettingsService',
+    function($state, PanelSettings, processingTypeModalService, processingTypeRemoveService, studyViewSettingsService) {
 
       var ProcessingTypesPanelSettings = function (panelStateName, processingTypes) {
         this.init(panelStateName, processingTypes);
-        this.panelOpen = studyViewSettings.panelState('processingTypes');
+        this.panelOpen = studyViewSettingsService.panelState('processingTypes');
       };
 
       ProcessingTypesPanelSettings.prototype = new PanelSettings();
@@ -384,7 +359,7 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
     'processingTypeModalService',
     'specimenGroupModalService',
     'annotTypeModalService',
-    'studyViewSettings',
+    'studyViewSettingsService',
     function($state,
              PanelSettings,
              spcLinkTypeModalService,
@@ -392,12 +367,12 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
              processingTypeModalService,
              specimenGroupModalService,
              annotTypeModalService,
-             studyViewSettings) {
+             studyViewSettingsService) {
 
       var SpcLinkTypesPanelSettings = function (
         panelStateName, processingTypesById, specimenGroupsById, annotTypesById, data) {
         this.init(panelStateName, data);
-        this.panelOpen = studyViewSettings.panelState('spcLinkTypes');
+        this.panelOpen = studyViewSettingsService.panelState('spcLinkTypes');
         this.processingTypesById = processingTypesById;
         this.specimenGroupsById  = specimenGroupsById;
         this.annotTypesById      = annotTypesById;

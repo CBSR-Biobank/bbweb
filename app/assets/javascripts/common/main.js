@@ -4,6 +4,7 @@
 define([
   'angular',
   './services/helpers',
+  './services/panelTableService',
   './controllers/controllers',
   './filters',
   './directives/directives',
@@ -16,6 +17,7 @@ define([
       'common.helpers',
       'common.filters',
       'common.directives.directives',
-      'common.directives.uiBreadcrumbs'
+      'common.directives.uiBreadcrumbs',
+      'common.services',
     ]);
 });

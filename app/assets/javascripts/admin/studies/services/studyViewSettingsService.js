@@ -2,16 +2,16 @@
 define(['./module'], function(module) {
   'use strict';
 
-  module.service('studyViewSettings', StudyViewSettings);
+  module.service('studyViewSettingsService', StudyViewSettingsService);
 
-  StudyViewSettings.$inject = ['$log'];
+  StudyViewSettingsService.$inject = ['$log'];
 
   /**
    * Tracks wether each panel in the study view page is expanded or collapsed.
    *
    * TODO: save settings in local storage to remember them accross sessions.
    */
-  function StudyViewSettings($log) {
+  function StudyViewSettingsService($log) {
     var currentState = initialSettings();
     var service = {
       initialSettings:  initialSettings,

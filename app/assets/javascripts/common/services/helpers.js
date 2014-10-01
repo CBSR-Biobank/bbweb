@@ -108,7 +108,7 @@ define(['angular'], function(angular) {
   }]);
 
 
-  mod.service('modelObjModalService', ['$modal', 'ngTableParams', function ($modal, ngTableParams) {
+  mod.service('modelObjModalService', ['$modal', 'panelTableService', function ($modal, panelTableService) {
     var modalDefaults = {
       backdrop: true,
       keyboard: true,
@@ -121,23 +121,15 @@ define(['angular'], function(angular) {
       angular.extend(tempModalDefaults, modalDefaults);
 
       tempModalDefaults.controller = ['$scope', '$modalInstance', function ($scope, $modalInstance) {
+        var tableParameters = { count: 20, sorting: {} };
+
         $scope.modalOptions = {
           title: title,
           data: data
         };
 
-        /* jshint -W055 */
-        $scope.modalOptions.tableParams = new ngTableParams({
-          page:1,
-          count: 20
-        }, {
-          counts: [],                                       // hide page counts control
-          total: $scope.modalOptions.data.length,           // length of data
-          getData: function($defer) {
-            $defer.resolve($scope.modalOptions.data);
-          }
-        });
-        /* jshint +W055 */
+        $scope.modalOptions.tableParams =
+          panelTableService.getTableParams($scope.modalOptions.data, tableParameters);
 
         $scope.modalOptions.ok = function () {
           $modalInstance.close();

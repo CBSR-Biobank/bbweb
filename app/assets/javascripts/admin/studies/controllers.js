@@ -32,8 +32,8 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
    * Displays a list of studies in an ng-table.
    */
   mod.controller('StudiesTableCtrl', [
-    '$scope', '$rootScope', '$filter', '$state', 'ngTableParams', 'StudyService',
-    function($scope, $rootScope, $filter, $state, ngTableParams, StudyService) {
+    '$scope', '$rootScope', '$filter', '$state', 'panelTableService', 'StudyService',
+    function($scope, $rootScope, $filter, $state, panelTableService, StudyService) {
 
       var updateData = function() {
         StudyService.list().then(function(data) {
@@ -49,28 +49,8 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
       $rootScope.pageTitle = 'Biobank studies';
       $scope.studies = [];
 
-      /* jshint -W055 */
-      $scope.tableParams = new ngTableParams({
-        page: 1,            // show first page
-        count: 10,          // count per page
-        sorting: {
-          name: 'asc'       // initial sorting
-        }
-      }, {
-        counts: [], // hide page counts control
-        total: function () { return getTableData().length; },
-        getData: function($defer, params) {
-          var filteredData = getTableData();
-          var orderedData = params.sorting() ?
-              $filter('orderBy')(filteredData, params.orderBy()) : $scope.studies;
-          $defer.resolve(orderedData.slice(
-            (params.page() - 1) * params.count(),
-            params.page() * params.count()));
-        }
-      });
-      /* jshint +W055 */
-
-      $scope.tableParams.settings().$scope = $scope;
+      $scope.tableParams = panelTableService.getTableParamsWithCallback(getTableData);
+      $scope.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
       updateData();
     }
   ]);
