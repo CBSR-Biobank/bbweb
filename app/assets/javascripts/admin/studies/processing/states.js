@@ -86,12 +86,18 @@ define(['angular'], function(angular) {
               valueType: '',
               options: []
             };
+          }],
+          returnState: function() {
+            return 'admin.studies.study.processing';
+          },
+          addOrUpdateFn: ['SpcLinkAnnotTypeService', function(SpcLinkAnnotTypeService) {
+            return SpcLinkAnnotTypeService.addOrUpdate;
           }]
         },
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
-            controller: 'SpcLinkAnnotationTypeEditCtrl'
+            controller: 'StudyAnnotationTypeEditCtrl'
           }
         },
         data: {
@@ -114,12 +120,18 @@ define(['angular'], function(angular) {
               }
               throw new Error('state parameter annotTypeId is invalid');
             }
-          ]
+          ],
+          returnState: function() {
+            return 'admin.studies.study.processing';
+          },
+          addOrUpdateFn: ['SpcLinkAnnotTypeService', function(SpcLinkAnnotTypeService) {
+            return SpcLinkAnnotTypeService.addOrUpdate;
+          }]
         },
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
-            controller: 'SpcLinkAnnotationTypeEditCtrl'
+            controller: 'StudyAnnotationTypeEditCtrl'
           }
         },
         data: {

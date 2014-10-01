@@ -30,12 +30,18 @@ define(['angular'], function(angular) {
               valueType: '',
               options: []
             };
+          }],
+          returnState: function() {
+            return 'admin.studies.study.participants';
+          },
+          addOrUpdateFn: ['ParticipantAnnotTypeService', function(ParticipantAnnotTypeService) {
+            return ParticipantAnnotTypeService.addOrUpdate;
           }]
         },
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
-            controller: 'ParticipantAnnotationTypeEditCtrl'
+            controller: 'StudyAnnotationTypeEditCtrl'
           }
         },
         data: {
@@ -58,12 +64,18 @@ define(['angular'], function(angular) {
               }
               throw new Error('state parameter annotTypeId is invalid');
             }
-          ]
+          ],
+          returnState: function() {
+            return 'admin.studies.study.participants';
+          },
+          addOrUpdateFn: ['ParticipantAnnotTypeService', function(ParticipantAnnotTypeService) {
+            return ParticipantAnnotTypeService.addOrUpdate;
+          }]
         },
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
-            controller: 'ParticipantAnnotationTypeEditCtrl'
+            controller: 'StudyAnnotationTypeEditCtrl'
           }
         },
         data: {

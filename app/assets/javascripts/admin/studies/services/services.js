@@ -237,8 +237,8 @@ define(['angular', 'common'], function(angular) {
       getAll: function(studyId) {
         return StudyAnnotTypeService.getAll(baseUrl, studyId);
       },
-      get: function(studyId, participantAnnotTypeId) {
-        return StudyAnnotTypeService.get(baseUrl, studyId, participantAnnotTypeId);
+      get: function(studyId, annotTypeId) {
+        return StudyAnnotTypeService.get(baseUrl, studyId, annotTypeId);
       },
       addOrUpdate: function(annotType) {
         return StudyAnnotTypeService.addOrUpdate(baseUrl, annotType);
@@ -258,8 +258,8 @@ define(['angular', 'common'], function(angular) {
       getAll: function(studyId) {
         return StudyAnnotTypeService.getAll(baseUrl, studyId);
       },
-      get: function(studyId, participantAnnotTypeId) {
-        return StudyAnnotTypeService.get(baseUrl, studyId, participantAnnotTypeId);
+      get: function(studyId, annotTypeId) {
+        return StudyAnnotTypeService.get(baseUrl, studyId, annotTypeId);
       },
       addOrUpdate: function(annotType) {
         return StudyAnnotTypeService.addOrUpdate(baseUrl, annotType);

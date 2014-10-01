@@ -5,15 +5,33 @@ define(['angular'], function(angular) {
     'biobank.common', 'admin.studies.helpers', 'studies.services'
   ]);
 
-  /** A mixin.
+  mod.controller('StudyAnnotationTypeEditCtrl', StudyAnnotationTypeEditCtrl);
+
+  StudyAnnotationTypeEditCtrl.$inject = [
+    '$scope',
+    '$state',
+    '$stateParams',
+    'stateHelper',
+    'modalService',
+    'StudyAnnotTypeService',
+    'study',
+    'annotType',
+    'returnState',
+    'addOrUpdateFn'
+  ];
+
+  /** Used for all 3 different study annotation types.
    */
   function StudyAnnotationTypeEditCtrl($scope,
                                        $state,
+                                       $stateParams,
                                        stateHelper,
-                                       StudyAnnotTypeService,
                                        modalService,
+                                       StudyAnnotTypeService,
                                        study,
-                                       annotType) {
+                                       annotType,
+                                       returnState,
+                                       addOrUpdateFn) {
     var action = (annotType.id) ? 'Update' : 'Add';
     $scope.study = study;
     $scope.annotType = annotType;
@@ -44,7 +62,7 @@ define(['angular'], function(angular) {
       return $scope.annotType.options.length <= 1;
     };
 
-    $scope.onError = function(error, stateOnCancel) {
+    $scope.updateError = function(error, stateOnCancel) {
       var modalDefaults = {};
       var modalOptions = {
         closeButtonText: 'Cancel',
@@ -69,58 +87,22 @@ define(['angular'], function(angular) {
           $state.go(stateOnCancel);
         });
     };
-  }
 
-  mod.controller('CeventAnnotationTypeEditCtrl', CeventAnnotationTypeEditCtrl);
-
-  CeventAnnotationTypeEditCtrl.$inject = [
-    '$scope',
-    '$injector',
-    '$state',
-    '$stateParams',
-    'stateHelper',
-    'modalService',
-    'StudyAnnotTypeService',
-    'CeventAnnotTypeService',
-    'study',
-    'annotType',
-  ];
-
-  /**
-   * Add or update a Specimen Link Annotation Type using a form.
-   */
-  function CeventAnnotationTypeEditCtrl($scope,
-                                        $injector,
-                                        $state,
-                                        $stateParams,
-                                        stateHelper,
-                                        modalService,
-                                        StudyAnnotTypeService,
-                                        CeventAnnotTypeService,
-                                        study,
-                                        annotType) {
-    angular.extend($scope, new StudyAnnotationTypeEditCtrl($scope,
-                                                           $state,
-                                                           stateHelper,
-                                                           StudyAnnotTypeService,
-                                                           modalService,
-                                                           study,
-                                                           annotType));
     $scope.submit = function (annotType) {
-      CeventAnnotTypeService.addOrUpdate(annotType).then(
+      addOrUpdateFn(annotType).then(
         function() {
           $state.transitionTo(
-            'admin.studies.study.collection',
+            returnState,
             $stateParams,
             { reload: true, inherit: false, notify: true });
         },
         function(error) {
-          $scope.onError(error, 'admin.studies.study.collection');
+          $scope.updateError(error, returnState);
         });
     };
 
     $scope.cancel = function () {
-      $state.go('admin.studies.study.collection');
+      $state.go(returnState);
     };
   }
 
@@ -155,59 +137,6 @@ define(['angular'], function(angular) {
       };
     }
   ]);
-
-  mod.controller('ParticipantAnnotationTypeEditCtrl', ParticipantAnnotationTypeEditCtrl);
-
-  ParticipantAnnotationTypeEditCtrl.$inject = [
-    '$scope',
-    '$injector',
-    '$state',
-    '$stateParams',
-    'stateHelper',
-    'modalService',
-    'StudyAnnotTypeService',
-    'ParticipantAnnotTypeService',
-    'study',
-    'annotType',
-  ];
-
-  /**
-   * Add or update a Specimen Link Annotation Type using a form.
-   */
-  function ParticipantAnnotationTypeEditCtrl($scope,
-                                             $injector,
-                                             $state,
-                                             $stateParams,
-                                             stateHelper,
-                                             modalService,
-                                             StudyAnnotTypeService,
-                                             ParticipantAnnotTypeService,
-                                             study,
-                                             annotType) {
-    angular.extend($scope, new StudyAnnotationTypeEditCtrl($scope,
-                                                           $state,
-                                                           stateHelper,
-                                                           StudyAnnotTypeService,
-                                                           modalService,
-                                                           study,
-                                                           annotType));
-    $scope.submit = function (annotType) {
-      ParticipantAnnotTypeService.addOrUpdate(annotType).then(
-        function() {
-          $state.transitionTo(
-            'admin.studies.study.participants',
-            $stateParams,
-            { reload: true, inherit: false, notify: true });
-        },
-        function(error) {
-          $scope.onError(error, 'admin.studies.study.participants');
-        });
-    };
-
-    $scope.cancel = function () {
-      $state.go('admin.studies.study.participants');
-    };
-  }
 
   /**
    * Removes a participant annotation type.
@@ -246,60 +175,6 @@ define(['angular'], function(angular) {
       };
     }
   ]);
-
-
-  mod.controller('SpcLinkAnnotationTypeEditCtrl', SpcLinkAnnotationTypeEditCtrl);
-
-  SpcLinkAnnotationTypeEditCtrl.$inject = [
-    '$scope',
-    '$injector',
-    '$state',
-    '$stateParams',
-    'stateHelper',
-    'modalService',
-    'StudyAnnotTypeService',
-    'SpcLinkAnnotTypeService',
-    'study',
-    'annotType',
-  ];
-
-  /**
-   * Add or update a Specimen Link Annotation Type using a form.
-   */
-  function SpcLinkAnnotationTypeEditCtrl($scope,
-                                         $injector,
-                                         $state,
-                                         $stateParams,
-                                         stateHelper,
-                                         modalService,
-                                         StudyAnnotTypeService,
-                                         SpcLinkAnnotTypeService,
-                                         study,
-                                         annotType) {
-    angular.extend($scope, new StudyAnnotationTypeEditCtrl($scope,
-                                                           $state,
-                                                           stateHelper,
-                                                           StudyAnnotTypeService,
-                                                           modalService,
-                                                           study,
-                                                           annotType));
-    $scope.submit = function (annotType) {
-      SpcLinkAnnotTypeService.addOrUpdate(annotType).then(
-        function() {
-          $state.transitionTo(
-            'admin.studies.study.processing',
-            $stateParams,
-            { reload: true, inherit: false, notify: true });
-        },
-        function(error) {
-          $scope.onError(error, 'admin.studies.study.processing');
-        });
-    };
-
-    $scope.cancel = function () {
-      $state.go('admin.studies.study.processing');
-    };
-  }
 
   /**
    * Removes a specimen link annotation type.

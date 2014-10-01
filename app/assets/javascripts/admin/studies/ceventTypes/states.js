@@ -5,12 +5,12 @@ define(['angular'], function(angular) {
   'use strict';
 
   var mod = angular.module('admin.studies.ceventTypes.states', [
-    'ui.router', 'admin.studies.controllers', 'admin.studies.annotationTypes.controllers'
+    'ui.router', 'admin.studies.controllers', 'admin.studies.annotationTypes.controllers', 'studies.services'
   ]);
 
   mod.config([
     '$urlRouterProvider', '$stateProvider', 'userResolve',
-    function($urlRouterProvider, $stateProvider, userResolve ) {
+    function($urlRouterProvider, $stateProvider, userResolve) {
 
       $urlRouterProvider.otherwise('/');
 
@@ -86,12 +86,18 @@ define(['angular'], function(angular) {
               valueType: '',
               options: []
             };
+          }],
+          returnState: function() {
+            return 'admin.studies.study.collection';
+          },
+          addOrUpdateFn: ['CeventAnnotTypeService', function(CeventAnnotTypeService) {
+            return CeventAnnotTypeService.addOrUpdate;
           }]
         },
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
-            controller: 'CeventAnnotationTypeEditCtrl'
+            controller: 'StudyAnnotationTypeEditCtrl'
           }
         },
         data: {
@@ -114,12 +120,18 @@ define(['angular'], function(angular) {
               }
               throw new Error('state parameter annotTypeId is invalid');
             }
-          ]
+          ],
+          returnState: function() {
+            return 'admin.studies.study.collection';
+          },
+          addOrUpdateFn: ['CeventAnnotTypeService', function(CeventAnnotTypeService) {
+            return CeventAnnotTypeService.addOrUpdate;
+          }]
         },
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
-            controller: 'CeventAnnotationTypeEditCtrl'
+            controller: 'StudyAnnotationTypeEditCtrl'
           }
         },
         data: {
