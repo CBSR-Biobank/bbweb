@@ -7,10 +7,10 @@ define(['./module'], function(module) {
   module.controller('UserUpdateCtrl', UserUpdateCtrl);
 
   UserUpdateCtrl.$inject = [
-    '$state', '$filter', 'modelObjUpdateError', 'userService', 'modalService', 'stateHelper', 'user'
+    '$state', '$filter', 'domainEntityUpdateError', 'userService', 'modalService', 'stateHelper', 'user'
   ];
 
-  function UserUpdateCtrl($state, $filter, modelObjUpdateError, userService, modalService, stateHelper, user) {
+  function UserUpdateCtrl($state, $filter, domainEntityUpdateError, userService, modalService, stateHelper, user) {
     var vm = this;
     var returnState = $state.current.data.returnState;
 
@@ -30,7 +30,7 @@ define(['./module'], function(module) {
       userService.update(user, password).then(
         gotoReturnState,
         function(error) {
-          modelObjUpdateError(error, 'user', returnState);
+          domainEntityUpdateError(error, 'user', returnState);
         });
     }
 

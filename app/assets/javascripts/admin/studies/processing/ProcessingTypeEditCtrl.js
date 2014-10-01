@@ -7,7 +7,7 @@ define(['../../module'], function(module) {
     '$state',
     '$stateParams',
     'stateHelper',
-    'modelObjUpdateError',
+    'domainEntityUpdateError',
     'ProcessingTypeService',
     'study',
     'processingType'
@@ -19,7 +19,7 @@ define(['../../module'], function(module) {
   function ProcessingTypeEditCtrl($state,
                                   $stateParams,
                                   stateHelper,
-                                  modelObjUpdateError,
+                                  domainEntityUpdateError,
                                   ProcessingTypeService,
                                   study,
                                   processingType) {
@@ -42,7 +42,7 @@ define(['../../module'], function(module) {
       ProcessingTypeService.addOrUpdate(processingType)
         .then(gotoReturnState)
         .catch(function(error) {
-          modelObjUpdateError.handleError(
+          domainEntityUpdateError.handleError(
             error,
             'processing type',
             'admin.studies.study.processing',

@@ -3,12 +3,12 @@ define(['./module'], function(module) {
 
   module.service('StudyAnnotTypeService', StudyAnnotTypeService);
 
-  StudyAnnotTypeService.$inject = ['biobankXhrReqService', 'modelObjService'];
+  StudyAnnotTypeService.$inject = ['biobankXhrReqService', 'domainEntityService'];
 
   /**
    * Service to access study annotation types.
    */
-  function StudyAnnotTypeService(biobankXhrReqService, modelObjService) {
+  function StudyAnnotTypeService(biobankXhrReqService, domainEntityService) {
     var services = {
       getAll      : getAll,
       get         : get,
@@ -37,7 +37,7 @@ define(['./module'], function(module) {
         options:       annotType.options
       };
 
-      modelObjService.setDescription(cmd, annotType.description);
+      domainEntityService.setDescription(cmd, annotType.description);
 
       if (typeof annotType.required !== 'undefined') {
         cmd.required = annotType.required;

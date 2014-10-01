@@ -3,12 +3,12 @@ define(['./module'], function(module) {
 
   module.service('ProcessingTypeService', ProcessingTypeService);
 
-  ProcessingTypeService.$inject = ['biobankXhrReqService', 'modelObjService',];
+  ProcessingTypeService.$inject = ['biobankXhrReqService', 'domainEntityService',];
 
   /**
    * Service to access Processing Types.
    */
-  function ProcessingTypeService(biobankXhrReqService, modelObjService) {
+  function ProcessingTypeService(biobankXhrReqService, domainEntityService) {
     var service = {
       getAll      : getAll,
       get         : get,
@@ -33,7 +33,7 @@ define(['./module'], function(module) {
         enabled:     processingType.enabled
       };
 
-      modelObjService.setDescription(cmd, processingType.description);
+      domainEntityService.setDescription(cmd, processingType.description);
 
       if (processingType.id) {
         cmd.id = processingType.id;

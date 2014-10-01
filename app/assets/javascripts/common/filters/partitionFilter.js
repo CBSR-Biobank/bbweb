@@ -36,4 +36,3 @@ define(['../module'], function(module) {
   }
 
 });
-

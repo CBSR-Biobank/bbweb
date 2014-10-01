@@ -4,13 +4,13 @@ define(['../../module', 'underscore'], function(module, _) {
   module.controller('CeventTypeEditCtrl', CeventTypeEditCtrl);
 
   CeventTypeEditCtrl.$inject = [
-    '$state', 'modelObjUpdateError', 'CeventTypeService', 'study', 'ceventType', 'annotTypes', 'specimenGroups'
+    '$state', 'domainEntityUpdateError', 'CeventTypeService', 'study', 'ceventType', 'annotTypes', 'specimenGroups'
   ];
 
   /**
    * Used to add or update a collection event type.
    */
-  function CeventTypeEditCtrl($state, modelObjUpdateError, CeventTypeService, study, ceventType, annotTypes, specimenGroups) {
+  function CeventTypeEditCtrl($state, domainEntityUpdateError, CeventTypeService, study, ceventType, annotTypes, specimenGroups) {
     var action = ceventType.id ? 'Update' : 'Add';
 
     var vm = this;
@@ -41,7 +41,7 @@ define(['../../module', 'underscore'], function(module, _) {
       CeventTypeService.addOrUpdate(ceventType)
         .then(gotoReturnState)
         .catch(function(error) {
-          modelObjUpdateError.handleError(
+          domainEntityUpdateError.handleError(
             error,
             'collection event type',
             'admin.studies.study.collection',

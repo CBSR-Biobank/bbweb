@@ -7,7 +7,7 @@ define(['../module'], function(module) {
 
   /**
    * All domain objects have 'timeAdded' and 'timeModified' fields. This service will return these fields
-   * in an array so that they can be displayed in a table (see modelObjModalService).
+   * in an array so that they can be displayed in a table (see domainEntityModalService).
    */
   function addTimeStamps($filter) {
     var service = {
@@ -17,11 +17,11 @@ define(['../module'], function(module) {
 
     //-------
 
-    function get(modelObj) {
+    function get(domainEntity) {
       var data = [];
-      data.push({name: 'Added:', value: $filter('timeago')(modelObj.timeAdded)});
-      if (modelObj.timeModified !== null) {
-        data.push({name: 'Last updated:', value: $filter('timeago')(modelObj.timeModified)});
+      data.push({name: 'Added:', value: $filter('timeago')(domainEntity.timeAdded)});
+      if (domainEntity.timeModified !== null) {
+        data.push({name: 'Last updated:', value: $filter('timeago')(domainEntity.timeModified)});
       }
       return data;
     }

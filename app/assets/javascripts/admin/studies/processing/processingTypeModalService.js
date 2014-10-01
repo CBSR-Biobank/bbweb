@@ -3,12 +3,12 @@ define(['../../module'], function(module) {
 
   module.service('processingTypeModalService', processingTypeModalService);
 
-  processingTypeModalService.$inject = ['$filter', 'modelObjModalService', 'addTimeStamps'];
+  processingTypeModalService.$inject = ['$filter', 'domainEntityModalService', 'addTimeStamps'];
 
   /**
    * Displays a processing type in a modal. The information is displayed in an ng-table.
    */
-  function processingTypeModalService($filter, modelObjModalService, addTimeStamps) {
+  function processingTypeModalService($filter, domainEntityModalService, addTimeStamps) {
     var service = {
       show: show
     };
@@ -22,7 +22,7 @@ define(['../../module'], function(module) {
       data.push({name: 'Enabled:', value: processingType.enabled ? 'Yes' : 'No'});
       data.push({name: 'Description:', value: processingType.description});
       data = data.concat(addTimeStamps.get(processingType));
-      modelObjModalService.show(title, data);
+      domainEntityModalService.show(title, data);
     }
   }
 

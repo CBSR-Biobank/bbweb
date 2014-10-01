@@ -53,6 +53,6 @@ define([
   './studies/validAmountDirective',
   './studies/validCountDirective',
   './users/UsersTableCtrl',
-  './users/helpers',
+  './users/UserModalService',
   './users/states'
 ], function () {});

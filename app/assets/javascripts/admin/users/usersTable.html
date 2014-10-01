@@ -11,7 +11,7 @@
     <table data-ng-table="vm.tableParams" class="table table-hove">
       <tr data-ng-repeat="user in $data">
         <td data-title="'Email'" sortable="'email'">
-          <span data-ng-click="userInformation(user)">
+          <span data-ng-click="vm.userInformation(user)">
             <a href>{{user.email}}</a>
           </span>
         </td>

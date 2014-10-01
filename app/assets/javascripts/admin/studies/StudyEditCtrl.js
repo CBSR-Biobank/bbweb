@@ -8,10 +8,10 @@ define(['../module'], function(module) {
   module.controller('StudyEditCtrl', StudyEditCtrl);
 
   StudyEditCtrl.$inject = [
-    '$scope', '$state', 'stateHelper', 'StudyService', 'modelObjUpdateError', 'user', 'study', 'returnState',
+    '$scope', '$state', 'stateHelper', 'StudyService', 'domainEntityUpdateError', 'user', 'study', 'returnState',
   ];
 
-  function StudyEditCtrl($scope, $state, stateHelper, StudyService, modelObjUpdateError, user, study, returnState) {
+  function StudyEditCtrl($scope, $state, stateHelper, StudyService, domainEntityUpdateError, user, study, returnState) {
     var action = (study.id) ? 'Update' : 'Add';
     $scope.title =  action + ' study';
     $scope.study = study;
@@ -30,7 +30,7 @@ define(['../module'], function(module) {
       StudyService.addOrUpdate(study)
         .then(gotoReturnState)
         .catch(function(error) {
-          modelObjUpdateError.handleError(
+          domainEntityUpdateError.handleError(
             error,
             'study',
             returnState.name,
@@ -45,4 +45,3 @@ define(['../module'], function(module) {
   }
 
 });
-

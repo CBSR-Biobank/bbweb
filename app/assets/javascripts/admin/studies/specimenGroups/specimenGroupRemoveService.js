@@ -3,12 +3,12 @@ define(['../../module'], function(module) {
 
   module.service('specimenGroupRemoveService', specimenGroupRemoveService);
 
-  specimenGroupRemoveService.$inject = ['modelObjRemoveService', 'SpecimenGroupService'];
+  specimenGroupRemoveService.$inject = ['domainEntityRemoveService', 'SpecimenGroupService'];
 
   /**
    * Removes a specimen group.
    */
-  function specimenGroupRemoveService(modelObjRemoveService, SpecimenGroupService) {
+  function specimenGroupRemoveService(domainEntityRemoveService, SpecimenGroupService) {
     var service = {
       remove: remove
     };
@@ -17,7 +17,7 @@ define(['../../module'], function(module) {
     //-------
 
     function remove(specimenGroup) {
-      modelObjRemoveService.remove(
+      domainEntityRemoveService.remove(
         'Remove Specimen Group',
         'Are you sure you want to remove specimen group ' + specimenGroup.name + '?',
         'Specimen group ' + specimenGroup.name + ' cannot be removed: ',

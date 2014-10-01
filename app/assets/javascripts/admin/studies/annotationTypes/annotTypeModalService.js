@@ -3,12 +3,12 @@ define(['../../module'], function(module) {
 
   module.service('annotTypeModalService', annotTypeModalService);
 
-  annotTypeModalService.$inject = ['modelObjModalService', 'addTimeStamps'];
+  annotTypeModalService.$inject = ['domainEntityModalService', 'addTimeStamps'];
 
   /**
    *
    */
-  function annotTypeModalService(modelObjModalService, addTimeStamps) {
+  function annotTypeModalService(domainEntityModalService, addTimeStamps) {
     var service = {
       show: show
     };
@@ -41,10 +41,9 @@ define(['../../module'], function(module) {
       data.push({name: 'Description:', value: annotType.description});
       data = data.concat(addTimeStamps.get(annotType));
 
-      modelObjModalService.show(title, data);
+      domainEntityModalService.show(title, data);
     }
 
   }
 
 });
-

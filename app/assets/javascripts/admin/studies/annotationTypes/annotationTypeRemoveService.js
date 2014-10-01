@@ -3,12 +3,12 @@ define(['../../module'], function(module) {
 
   module.service('annotationTypeRemoveService', annotationTypeRemoveService);
 
-  annotationTypeRemoveService.$inject = ['modelObjRemoveService'];
+  annotationTypeRemoveService.$inject = ['domainEntityRemoveService'];
 
   /**
    *
    */
-  function annotationTypeRemoveService(modelObjRemoveService) {
+  function annotationTypeRemoveService(domainEntityRemoveService) {
     var service = {
       remove : remove
     };
@@ -17,7 +17,7 @@ define(['../../module'], function(module) {
     //-------
 
     function remove(removeFn, annotType, returnState) {
-      modelObjRemoveService.remove(
+      domainEntityRemoveService.remove(
         'Remove Annotation Type',
         'Are you sure you want to remove annotation type ' + annotType.name + '?',
         'Annotation type ' + annotType.name + ' cannot be removed: ',

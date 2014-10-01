@@ -7,7 +7,7 @@ define(['../../module'], function(module) {
     '$state',
     '$stateParams',
     'stateHelper',
-    'modelObjUpdateError',
+    'domainEntityUpdateError',
     'study',
     'annotType',
     'addOrUpdateFn',
@@ -19,7 +19,7 @@ define(['../../module'], function(module) {
   function AnnotationTypeEditCtrl($state,
                                   $stateParams,
                                   stateHelper,
-                                  modelObjUpdateError,
+                                  domainEntityUpdateError,
                                   study,
                                   annotType,
                                   addOrUpdateFn,
@@ -73,7 +73,7 @@ define(['../../module'], function(module) {
       addOrUpdateFn(annotType)
         .then(gotoReturnState)
         .catch(function(error) {
-          modelObjUpdateError.handleError(error, 'study', returnState);
+          domainEntityUpdateError.handleError(error, 'study', returnState);
         });
     }
 

@@ -19,7 +19,7 @@ define(['../module'], function(module) {
 
     //--
 
-    function panel(panelId, addStateName, modelObjModalService, modelObjModalTitle) {
+    function panel(panelId, addStateName, domainEntityModalService, domainEntityModalTitle) {
       if ($window.localStorage.getItem(panelId) === null) {
         $window.localStorage.setItem(panelId, 'true');
       }
@@ -33,11 +33,11 @@ define(['../module'], function(module) {
       };
       return panelFunctions;
 
-      function information(modelObj) {
-        if (modelObjModalService === undefined) {
+      function information(domainEntity) {
+        if (domainEntityModalService === undefined) {
           throw new Error('domain object modal service not defined');
         }
-        modelObjModalService.show(modelObjModalTitle, modelObj);
+        domainEntityModalService.show(domainEntityModalTitle, domainEntity);
       }
 
       function add() {

@@ -5,7 +5,7 @@ define(['../../module'], function(module) {
 
   SpecimenGroupEditCtrl.$inject = [
     '$state',
-    'modelObjUpdateError',
+    'domainEntityUpdateError',
     'SpecimenGroupService',
     'valueTypes',
     'study',
@@ -16,7 +16,7 @@ define(['../../module'], function(module) {
    * Add or update an specimen Group.
    */
   function SpecimenGroupEditCtrl($state,
-                                 modelObjUpdateError,
+                                 domainEntityUpdateError,
                                  SpecimenGroupService,
                                  valueTypes,
                                  study,
@@ -46,7 +46,7 @@ define(['../../module'], function(module) {
       SpecimenGroupService.addOrUpdate(specimenGroup)
         .then(gotoReturnState)
         .catch(function(error) {
-          modelObjUpdateError.handleError(
+          domainEntityUpdateError.handleError(
             error,
             'specimen link type',
             'admin.studies.study.specimens',

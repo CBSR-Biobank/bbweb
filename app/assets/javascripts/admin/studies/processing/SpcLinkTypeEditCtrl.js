@@ -12,7 +12,7 @@ define(['../../module'], function(module) {
   SpcLinkTypeEditCtrl.$inject = [
     '$state',
     'SpcLinkTypeService',
-    'modelObjUpdateError',
+    'domainEntityUpdateError',
     'study',
     'spcLinkType',
     'dtoProcessing'
@@ -20,7 +20,7 @@ define(['../../module'], function(module) {
 
   function SpcLinkTypeEditCtrl($state,
                                SpcLinkTypeService,
-                               modelObjUpdateError,
+                               domainEntityUpdateError,
                                study,
                                spcLinkType,
                                dtoProcessing) {
@@ -60,7 +60,7 @@ define(['../../module'], function(module) {
       SpcLinkTypeService.addOrUpdate(spcLinkType)
         .then(gotoReturnState)
         .catch(function(error) {
-          modelObjUpdateError.handleError(
+          domainEntityUpdateError.handleError(
             error,
             'collection event type',
             'admin.studies.study.processing',

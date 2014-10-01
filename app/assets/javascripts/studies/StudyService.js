@@ -3,12 +3,12 @@ define(['./module'], function(module) {
 
   module.service('StudyService', StudyService);
 
-  StudyService.$inject = ['biobankXhrReqService', 'modelObjService'];
+  StudyService.$inject = ['biobankXhrReqService', 'domainEntityService'];
 
   /**
    * Service to acccess studies.
    */
-  function StudyService(biobankXhrReqService, modelObjService) {
+  function StudyService(biobankXhrReqService, domainEntityService) {
     var service = {
       list          : list,
       query         : query,
@@ -43,7 +43,7 @@ define(['./module'], function(module) {
         name: study.name
       };
 
-      modelObjService.setDescription(cmd, study.description);
+      domainEntityService.setDescription(cmd, study.description);
 
       if (study.id) {
         cmd.id = study.id;

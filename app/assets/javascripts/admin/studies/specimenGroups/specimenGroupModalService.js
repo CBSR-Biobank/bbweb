@@ -9,10 +9,10 @@ define(['../../module'], function(module) {
   module.service('specimenGroupModalService', specimenGroupModalService);
 
   specimenGroupModalService.$inject = [
-    'modelObjModalService', 'addTimeStamps'
+    'domainEntityModalService', 'addTimeStamps'
   ];
 
-  function specimenGroupModalService(modelObjModalService, addTimeStamps) {
+  function specimenGroupModalService(domainEntityModalService, addTimeStamps) {
     var service = {
       show: show
     };
@@ -32,7 +32,7 @@ define(['../../module'], function(module) {
         {name: 'Description:',              value: specimenGroup.description}
       ];
       data = data.concat(addTimeStamps.get(specimenGroup));
-      modelObjModalService.show(title, data);
+      domainEntityModalService.show(title, data);
     }
   }
 

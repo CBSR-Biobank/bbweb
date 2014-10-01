@@ -4,13 +4,13 @@ define(['./module'], function(module) {
   module.controller('CentreEditCtrl', CentreEditCtrl);
 
   CentreEditCtrl.$inject = [
-    '$scope', '$state', 'stateHelper', 'centreService', 'modelObjUpdateError', 'user', 'centre',
+    '$scope', '$state', 'stateHelper', 'centreService', 'domainEntityUpdateError', 'user', 'centre',
   ];
 
   /**
    *
    */
-  function CentreEditCtrl($scope, $state, stateHelper, centreService, modelObjUpdateError, user, centre) {
+  function CentreEditCtrl($scope, $state, stateHelper, centreService, domainEntityUpdateError, user, centre) {
     var vm = this;
     var action = centre.id ? 'Update' : 'Add';
     var returnState = $state.current.data.returnState;
@@ -30,7 +30,7 @@ define(['./module'], function(module) {
       centreService.addOrUpdate(centre).then(
         gotoReturnState,
         function(error) {
-          modelObjUpdateError(error, 'centre', returnState);
+          domainEntityUpdateError(error, 'centre', returnState);
         });
     }
 

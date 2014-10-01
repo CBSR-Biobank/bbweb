@@ -3,12 +3,12 @@ define(['../../module', 'underscore'], function(module, _) {
 
   module.service('ceventTypeModalService', ceventTypeModalService);
 
-  ceventTypeModalService.$inject = ['$filter', 'modelObjModalService', 'addTimeStamps'];
+  ceventTypeModalService.$inject = ['$filter', 'domainEntityModalService', 'addTimeStamps'];
 
   /**
    * Displays a collection event type in a modal. The information is displayed in an ng-table.
    */
-  function ceventTypeModalService($filter, modelObjModalService, addTimeStamps) {
+  function ceventTypeModalService($filter, domainEntityModalService, addTimeStamps) {
     var service = {
       show: show
     };
@@ -46,7 +46,7 @@ define(['../../module', 'underscore'], function(module, _) {
       data.push({name: 'Annotation Types:', value: atDataStrings.join(', ')});
       data.push({name: 'Description:', value: ceventType.description});
       data = data.concat(addTimeStamps.get(ceventType));
-      modelObjModalService.show(title, data);
+      domainEntityModalService.show(title, data);
     }
 
   }

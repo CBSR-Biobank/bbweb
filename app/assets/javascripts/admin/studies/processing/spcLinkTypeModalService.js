@@ -3,12 +3,12 @@ define(['../../module'], function(module) {
 
   module.service('spcLinkTypeModalService', spcLinkTypeModalService);
 
-  spcLinkTypeModalService.$inject = ['$filter', 'modelObjModalService', 'addTimeStamps'];
+  spcLinkTypeModalService.$inject = ['$filter', 'domainEntityModalService', 'addTimeStamps'];
 
   /**
    * Displays a specimen link type in a modal. The information is displayed in an ng-table.
    */
-  function spcLinkTypeModalService($filter, modelObjModalService, addTimeStamps) {
+  function spcLinkTypeModalService($filter, domainEntityModalService, addTimeStamps) {
     var service = {
       show: show
     };
@@ -35,7 +35,7 @@ define(['../../module'], function(module) {
       data.push({name: 'Output count:', value: spcLinkType.outputCount});
       data.push({name: 'Output Container Type:', value: 'None'});
       data = data.concat(addTimeStamps.get(spcLinkType));
-      modelObjModalService.show(title, data);
+      domainEntityModalService.show(title, data);
     }
 
   }

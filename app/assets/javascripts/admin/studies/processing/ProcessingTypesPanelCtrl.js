@@ -42,8 +42,8 @@ define(['../../module'], function(module) {
 
     //--
 
-    function information(modelObj) {
-      processingTypeModalService.show(modelObj);
+    function information(domainEntity) {
+      processingTypeModalService.show(domainEntity);
     }
 
     function update(processingType) {
