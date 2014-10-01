@@ -298,7 +298,7 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
         annotTypes: new AnnotTypesPanelSettings(
           'spcLinkAnnotTypes',
           dtoProcessing.specimenLinkAnnotationTypes,
-          'Specimen Link Annotation Types',
+          'Specimen Link Annotation Type',
           'Specimen link annotations allow a study to collect custom named and defined ' +
             'pieces of data when processing specimens. Annotations are optional and are not ' +
             'required to be defined.',

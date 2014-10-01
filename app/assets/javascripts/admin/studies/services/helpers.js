@@ -169,18 +169,13 @@ define(['angular', 'underscore', 'common'], function(angular, _) {
           }
 
           if (annotType.valueType === 'Select') {
-            var optionValues = [];
-            _.each(annotType.options, function(name) {
-              optionValues.push(annotType.options[name]);
-            });
-
             data.push({
               name: '# Selections Allowed:',
               value: annotType.maxValueCount === 1 ? 'Single' : 'Multiple'
             });
             data.push({
               name: 'Selections:',
-              value: optionValues.join(', ')
+              value: annotType.options.join(', ')
             });
           }
 

@@ -87,7 +87,7 @@ define(['angular'], function(angular) {
   });
 
 
-  // originally taken from
+  // Originally taken from link below and then modified.
   //
   // https://gist.github.com/constellates/314cdede9d3097e23d3e
   mod.filter('timeago', function () {
@@ -97,9 +97,6 @@ define(['angular'], function(angular) {
      * local: compared to what time? default: now
      * raw: wheter you want in a format of '5 minutes ago', or '5 minutes'
      */
-
-    // get difference between UTC and local time in milliseconds
-    var timeZoneOffset = (new Date().getTimezoneOffset()) * 60000;
 
     // filter -----------------------------------------------------------------------------
 
@@ -116,11 +113,8 @@ define(['angular'], function(angular) {
       if (angular.isDate(time)) {
         time = time.getTime();
       } else if (typeof time === 'string') {
-        time = new Date(time);
+        time = Date.parse(time);
       }
-
-      // convert UTC to local
-      time = time - timeZoneOffset;
 
       if (angular.isDate(local)) {
         local = local.getTime();
