@@ -1,25 +1,18 @@
 package org.biobank.domain
 
-import org.biobank.fixture.TestComponentImpl
+import org.biobank.fixture.TestModule
 import org.biobank.infrastructure._
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
 import org.scalatest._
+import scaldi.akka.AkkaInjectable
 import scalaz._
 import scalaz.Scalaz._
 
-trait DomainSpec extends WordSpec with MustMatchers with TestComponentImpl {
+trait DomainSpec extends WordSpec with MustMatchers with AkkaInjectable {
 
-  implicit override val system: ActorSystem = null
-
-  override val studiesProcessor = null
-  override val centresProcessor = null
-  override val usersProcessor = null
-
-  override val studiesService = null
-  override val centresService = null
-  override val usersService = null
+  implicit val appModule = new TestModule
 
   val factory = new Factory
 

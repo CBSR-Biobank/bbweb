@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.service.study
 
 import org.biobank.fixture._
 import org.biobank.domain._
@@ -17,10 +17,16 @@ import scalaz.Scalaz._
   * Tests for actor SpecimenLinkAnnotationTypeProcessorSpec. These are written using ScalaTest.
   *
   */
-class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
+class SpecimenLinkAnnotationTypeProcessorSpec extends TestFixture {
   import org.biobank.TestUtils._
 
   private val log = LoggerFactory.getLogger(this.getClass)
+
+  val studyRepository = inject [StudyRepository]
+
+  val specimenLinkAnnotationTypeRepository = inject [SpecimenLinkAnnotationTypeRepository]
+
+  val studiesProcessor = injectActorRef [StudiesProcessor]
 
   val nameGenerator = new NameGenerator(this.getClass)
 

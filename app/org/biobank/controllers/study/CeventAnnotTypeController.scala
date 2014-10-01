@@ -2,7 +2,8 @@ package org.biobank.controllers.study
 
 import org.biobank.controllers._
 import org.biobank.service._
-import org.biobank.service.{ ServicesComponent, ServicesComponentImpl }
+import org.biobank.service.users.UsersService
+import org.biobank.service.study.StudiesService
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain.study._
 import org.biobank.domain.AnnotationValueType._
@@ -16,13 +17,19 @@ import com.typesafe.plugin.use
 import play.api.Logger
 import play.api.Play.current
 import scala.language.reflectiveCalls
+import scaldi.{Injectable, Injector}
 
 import scalaz._
 import Scalaz._
 
-object CeventAnnotTypeController extends CommandController with JsonController {
+class CeventAnnotTypeController(implicit inj: Injector)
+    extends CommandController
+    with JsonController
+    with Injectable {
 
-  private def studiesService = use[BbwebPlugin].studiesService
+  implicit val usersService = inject [UsersService]
+
+  private def studiesService = inject[StudiesService]
 
   def get(studyId: String, annotTypeId : Option[String]) =
     AuthAction(parse.empty) { token => userId => implicit request =>

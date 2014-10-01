@@ -5,23 +5,12 @@ import org.biobank.domain._
 import scalaz._
 import Scalaz._
 
-trait LocationRepositoryComponent {
+trait LocationRepository extends ReadWriteRepository[LocationId, Location]
 
-  val locationRepository: LocationRepository
+class LocationRepositoryImpl
+    extends ReadWriteRepositoryRefImpl[LocationId, Location](v => v.id)
+    with LocationRepository {
 
-  trait LocationRepository extends ReadWriteRepository[LocationId, Location]
-}
-
-trait LocationRepositoryComponentImpl extends LocationRepositoryComponent {
-
-  override val locationRepository: LocationRepository = new LocationRepositoryImpl
-
-  class LocationRepositoryImpl
-      extends ReadWriteRepositoryRefImpl[LocationId, Location](v => v.id)
-      with LocationRepository {
-
-    def nextIdentity: LocationId = new LocationId(nextIdentityAsString)
-
-  }
+  def nextIdentity: LocationId = new LocationId(nextIdentityAsString)
 
 }

@@ -21,6 +21,7 @@ import org.scalatestplus.play._
   * Tests the REST API for [[Centre]]s.
   */
 class CentresControllerSpec extends ControllerFixture {
+  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -40,7 +41,7 @@ class CentresControllerSpec extends ControllerFixture {
       "list a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val json = makeRequest(GET, "/centres")
         (json \ "status").as[String] must include ("success")
@@ -54,8 +55,8 @@ class CentresControllerSpec extends ControllerFixture {
         val centres = List(factory.createDisabledCentre, factory.createDisabledCentre)
           .map{ centre => (centre.id, centre) }.toMap
 
-        use[BbwebPlugin].centreRepository.removeAll
-        centres.values.foreach(centre => use[BbwebPlugin].centreRepository.put(centre))
+        centreRepository.removeAll
+        centres.values.foreach(centre => centreRepository.put(centre))
 
         val json = makeRequest(GET, "/centres")
         (json \ "status").as[String] must include ("success")
@@ -78,7 +79,7 @@ class CentresControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("success")
 
         val eventCentreId = (json \ "data" \ "id").as[String]
-        val validation = use[BbwebPlugin].centreRepository.getByKey(CentreId(eventCentreId))
+        val validation = centreRepository.getByKey(CentreId(eventCentreId))
         validation mustBe ('success)
         validation map { repoCentre =>
           repoCentre.name mustBe ((json \ "data" \ "name").as[String])
@@ -104,7 +105,7 @@ class CentresControllerSpec extends ControllerFixture {
       "not add a centre with a duplicate name" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val cmdJson = Json.obj("name" -> centre.name)
         val json = makeRequest(POST, "/centres", FORBIDDEN, json = cmdJson)
@@ -118,7 +119,7 @@ class CentresControllerSpec extends ControllerFixture {
       "update a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val cmdJson = Json.obj(
           "id"              -> centre.id.id,
@@ -130,7 +131,7 @@ class CentresControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("success")
 
         val eventCentreId = (json \ "data" \ "id").as[String]
-        val validation = use[BbwebPlugin].centreRepository.getByKey(CentreId(eventCentreId))
+        val validation = centreRepository.getByKey(CentreId(eventCentreId))
         validation mustBe ('success)
         validation map { repoCentre =>
           repoCentre.name mustBe ((json \ "data" \ "name").as[String])
@@ -141,7 +142,7 @@ class CentresControllerSpec extends ControllerFixture {
       "update a centre with no description" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val cmdJson = Json.obj(
           "id"              -> centre.id.id,
@@ -169,7 +170,7 @@ class CentresControllerSpec extends ControllerFixture {
       "not update a centre with an invalid version" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val cmdJson = Json.obj(
           "id"              -> centre.id.id,
@@ -186,7 +187,7 @@ class CentresControllerSpec extends ControllerFixture {
         doLogin
         val centres = List(factory.createDisabledCentre, factory.createDisabledCentre)
         centres.foreach { centre =>
-          use[BbwebPlugin].centreRepository.put(centre)
+          centreRepository.put(centre)
         }
 
         val duplicateName = centres(0).name
@@ -208,7 +209,7 @@ class CentresControllerSpec extends ControllerFixture {
       "read a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
         val json = makeRequest(GET, s"/centres/${centre.id.id}")
         (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
@@ -228,7 +229,7 @@ class CentresControllerSpec extends ControllerFixture {
       "enable a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val cmdJson = Json.obj(
           "id" -> centre.id.id,
@@ -238,7 +239,7 @@ class CentresControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("success")
 
         val eventCentreId = (json \ "data" \ "id").as[String]
-        val validation = use[BbwebPlugin].centreRepository.getByKey(CentreId(eventCentreId))
+        val validation = centreRepository.getByKey(CentreId(eventCentreId))
         validation mustBe ('success)
         validation map { repoCentre =>
           repoCentre.version mustBe ((json \ "data" \ "version").as[Long])
@@ -262,7 +263,7 @@ class CentresControllerSpec extends ControllerFixture {
       "disable a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre.enable | fail
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val cmdJson = Json.obj(
           "id" -> centre.id.id,
@@ -272,7 +273,7 @@ class CentresControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("success")
 
         val eventCentreId = (json \ "data" \ "id").as[String]
-        val validation = use[BbwebPlugin].centreRepository.getByKey(CentreId(eventCentreId))
+        val validation = centreRepository.getByKey(CentreId(eventCentreId))
         validation mustBe ('success)
         validation map { repoCentre =>
           repoCentre.version mustBe ((json \ "data" \ "version").as[Long])
@@ -296,7 +297,7 @@ class CentresControllerSpec extends ControllerFixture {
         doLogin
 
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -308,11 +309,11 @@ class CentresControllerSpec extends ControllerFixture {
         doLogin
 
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val location = factory.createLocation
-        use[BbwebPlugin].locationRepository.put(location)
-        use[BbwebPlugin].centreLocationRepository.put(CentreLocation(centre.id, location.id))
+        locationRepository.put(location)
+        centreLocationsRepository.put(CentreLocation(centre.id, location.id))
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -324,14 +325,14 @@ class CentresControllerSpec extends ControllerFixture {
       "list multiple centre locations" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val locations = List(factory.createLocation, factory.createLocation)
           .map { loc => (loc.id, loc) }.toMap
 
         locations.values.foreach{ location =>
-          use[BbwebPlugin].locationRepository.put(location)
-          use[BbwebPlugin].centreLocationRepository.put(CentreLocation(centre.id, location.id))
+          locationRepository.put(location)
+          centreLocationsRepository.put(CentreLocation(centre.id, location.id))
         }
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
@@ -347,14 +348,14 @@ class CentresControllerSpec extends ControllerFixture {
       "list a specific centre location" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val locations = List(factory.createLocation, factory.createLocation)
         val locationsMap = locations.map { loc => (loc.id, loc) }.toMap
 
         locations.foreach{ location =>
-          use[BbwebPlugin].locationRepository.put(location)
-          use[BbwebPlugin].centreLocationRepository.put(CentreLocation(centre.id, location.id))
+          locationRepository.put(location)
+          centreLocationsRepository.put(CentreLocation(centre.id, location.id))
         }
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}?locationId=${locations(0).id}")
@@ -367,7 +368,7 @@ class CentresControllerSpec extends ControllerFixture {
       "does not list an invalid location" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val inavlidLocId = nameGenerator.next[String]
 
@@ -395,7 +396,7 @@ class CentresControllerSpec extends ControllerFixture {
       "add a location" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val location = factory.createLocation
         val json = makeRequest(POST, "/centres/locations",
@@ -403,7 +404,7 @@ class CentresControllerSpec extends ControllerFixture {
 
         val jsonEvent = (json \ "data").as[JsObject]
         val eventLocationId = (json \ "data" \ "locationId").as[String]
-        val validation = use[BbwebPlugin].locationRepository.getByKey(LocationId(eventLocationId))
+        val validation = locationRepository.getByKey(LocationId(eventLocationId))
         validation mustBe ('success)
         validation map { repoLocation =>
           repoLocation mustBe a[Location]
@@ -418,7 +419,7 @@ class CentresControllerSpec extends ControllerFixture {
           )
         }
 
-        val validation2 = use[BbwebPlugin].centreLocationRepository.getByKey(LocationId(eventLocationId))
+        val validation2 = centreLocationsRepository.getByKey(LocationId(eventLocationId))
         validation2 mustBe ('success)
         validation2 map { item =>
           item mustBe a[CentreLocation]
@@ -446,12 +447,12 @@ class CentresControllerSpec extends ControllerFixture {
       "delete a location from a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val locations = List(factory.createLocation, factory.createLocation)
         locations.foreach{ location =>
-          use[BbwebPlugin].locationRepository.put(location)
-          use[BbwebPlugin].centreLocationRepository.put(CentreLocation(centre.id, location.id))
+          locationRepository.put(location)
+          centreLocationsRepository.put(CentreLocation(centre.id, location.id))
         }
 
         locations.foreach { location =>
@@ -463,11 +464,11 @@ class CentresControllerSpec extends ControllerFixture {
       "delete a location from an invalid centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val location = factory.createLocation
-        use[BbwebPlugin].locationRepository.put(location)
-        use[BbwebPlugin].centreLocationRepository.put(CentreLocation(centre.id, location.id))
+        locationRepository.put(location)
+        centreLocationsRepository.put(CentreLocation(centre.id, location.id))
 
         val centreId = CentreId(nameGenerator.next[String])
         val json = makeRequest(DELETE, s"/centres/locations/${centreId.id}/${location.id.id}", NOT_FOUND)
@@ -478,7 +479,7 @@ class CentresControllerSpec extends ControllerFixture {
       "delete an invalid location from a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val locationId = LocationId(nameGenerator.next[String])
         val json = makeRequest(DELETE, s"/centres/locations/${centre.id.id}/${locationId.id}", NOT_FOUND)
@@ -493,7 +494,7 @@ class CentresControllerSpec extends ControllerFixture {
         doLogin
 
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -505,12 +506,12 @@ class CentresControllerSpec extends ControllerFixture {
         doLogin
 
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
         val id = StudyCentreId(nameGenerator.next[String])
-        use[BbwebPlugin].studyCentreRepository.put(StudyCentre(id, study.id, centre.id))
+        centreStudiesRepository.put(StudyCentre(id, study.id, centre.id))
 
         val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -523,13 +524,13 @@ class CentresControllerSpec extends ControllerFixture {
         doLogin
 
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val studies = List(factory.createDisabledStudy, factory.createDisabledStudy)
         studies.foreach{ study =>
-          use[BbwebPlugin].studyRepository.put(study)
-          val id = StudyCentreId(nameGenerator.next[String])
-          use[BbwebPlugin].studyCentreRepository.put(StudyCentre(id, study.id, centre.id))
+          studyRepository.put(study)
+          val id = StudyCentreId(nameGenerator.next[StudyCentreId])
+          centreStudiesRepository.put(StudyCentre(id, study.id, centre.id))
         }
 
         val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
@@ -545,10 +546,10 @@ class CentresControllerSpec extends ControllerFixture {
         doLogin
 
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val cmdJson = Json.obj(
           "centreId" -> centre.id.id,
@@ -557,7 +558,7 @@ class CentresControllerSpec extends ControllerFixture {
           (json \ "data" \ "centreId").as[String] mustBe (centre.id.id)
           (json \ "data" \ "studyId").as[String] mustBe (study.id.id)
 
-        val repoValues = use[BbwebPlugin].studyCentreRepository.getValues.toList
+        val repoValues = centreStudiesRepository.getValues.toList
         repoValues must have size 1
         repoValues(0) must have (
           'centreId (centre.id),
@@ -572,12 +573,12 @@ class CentresControllerSpec extends ControllerFixture {
         doLogin
 
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
-        val id = StudyCentreId(nameGenerator.next[String])
-        use[BbwebPlugin].studyCentreRepository.put(StudyCentre(id, study.id, centre.id))
+        studyRepository.put(study)
+        val id = StudyCentreId(nameGenerator.next[StudyCentreId])
+        centreStudiesRepository.put(StudyCentre(id, study.id, centre.id))
 
         val json = makeRequest(DELETE, s"/centres/studies/${centre.id.id}/${study.id.id}")
           (json \ "status").as[String] must include ("success")
@@ -587,9 +588,9 @@ class CentresControllerSpec extends ControllerFixture {
         doLogin
 
         val centre = factory.createDisabledCentre
-        use[BbwebPlugin].centreRepository.put(centre)
+        centreRepository.put(centre)
 
-        val studyId = StudyCentreId(nameGenerator.next[String])
+        val studyId = StudyCentreId(nameGenerator.next[StudyCentreId])
 
         val json = makeRequest(DELETE, s"/centres/studies/${centre.id.id}/${studyId}", BAD_REQUEST)
           (json \ "status").as[String] must include ("error")

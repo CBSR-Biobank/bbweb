@@ -1,7 +1,6 @@
 package org.biobank.controllers.study
 
 import org.biobank.fixture._
-import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, ProcessingType, SpecimenLinkType }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper._
@@ -17,6 +16,7 @@ import play.api.Play.current
 import org.scalatestplus.play._
 
 class SpecimenLinkTypeControllerSpec extends ControllerFixture {
+  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -68,13 +68,13 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
   def addOnNonDisabledStudy(
     study: Study,
     procType: ProcessingType) {
-    use[BbwebPlugin].studyRepository.put(study)
-    use[BbwebPlugin].processingTypeRepository.put(procType)
+    studyRepository.put(study)
+    processingTypeRepository.put(procType)
 
     val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-    use[BbwebPlugin].specimenGroupRepository.put(inputSg)
-    use[BbwebPlugin].specimenGroupRepository.put(outputSg)
-    use[BbwebPlugin].specimenLinkTypeRepository.put(slType)
+    specimenGroupRepository.put(inputSg)
+    specimenGroupRepository.put(outputSg)
+    specimenLinkTypeRepository.put(slType)
 
     val json = makeRequest(
       POST,
@@ -89,13 +89,13 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
   def updateOnNonDisabledStudy(
     study: Study,
     procType: ProcessingType) {
-    use[BbwebPlugin].studyRepository.put(study)
-    use[BbwebPlugin].processingTypeRepository.put(procType)
+    studyRepository.put(study)
+    processingTypeRepository.put(procType)
 
     val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-    use[BbwebPlugin].specimenGroupRepository.put(inputSg)
-    use[BbwebPlugin].specimenGroupRepository.put(outputSg)
-    use[BbwebPlugin].specimenLinkTypeRepository.put(slType)
+    specimenGroupRepository.put(inputSg)
+    specimenGroupRepository.put(outputSg)
+    specimenLinkTypeRepository.put(slType)
 
     val slType2 = factory.createSpecimenLinkType
 
@@ -112,13 +112,13 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
   def removeOnNonDisabledStudy(
     study: Study,
     procType: ProcessingType) {
-    use[BbwebPlugin].studyRepository.put(study)
-    use[BbwebPlugin].processingTypeRepository.put(procType)
+    studyRepository.put(study)
+    processingTypeRepository.put(procType)
 
     val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-    use[BbwebPlugin].specimenGroupRepository.put(inputSg)
-    use[BbwebPlugin].specimenGroupRepository.put(outputSg)
-    use[BbwebPlugin].specimenLinkTypeRepository.put(slType)
+    specimenGroupRepository.put(inputSg)
+    specimenGroupRepository.put(outputSg)
+    specimenLinkTypeRepository.put(slType)
 
     val json = makeRequest(
       DELETE,
@@ -135,7 +135,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "list none" in new App(fakeApp) {
         doLogin
         val procType = factory.createProcessingType
-        use[BbwebPlugin].processingTypeRepository.put(procType)
+        processingTypeRepository.put(procType)
 
         val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -146,12 +146,12 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "list a single specimen link type" in new App(fakeApp) {
         doLogin
         val procType = factory.createProcessingType
-        use[BbwebPlugin].processingTypeRepository.put(procType)
+        processingTypeRepository.put(procType)
 
         val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-        use[BbwebPlugin].specimenGroupRepository.put(inputSg)
-        use[BbwebPlugin].specimenGroupRepository.put(outputSg)
-        use[BbwebPlugin].specimenLinkTypeRepository.put(slType)
+        specimenGroupRepository.put(inputSg)
+        specimenGroupRepository.put(outputSg)
+        specimenLinkTypeRepository.put(slType)
 
         val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -163,12 +163,12 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "get a single specimen link type" in new App(fakeApp) {
         doLogin
         val procType = factory.createProcessingType
-        use[BbwebPlugin].processingTypeRepository.put(procType)
+        processingTypeRepository.put(procType)
 
         val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-        use[BbwebPlugin].specimenGroupRepository.put(inputSg)
-        use[BbwebPlugin].specimenGroupRepository.put(outputSg)
-        use[BbwebPlugin].specimenLinkTypeRepository.put(slType)
+        specimenGroupRepository.put(inputSg)
+        specimenGroupRepository.put(outputSg)
+        specimenLinkTypeRepository.put(slType)
 
         val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}?slTypeId=${slType.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -179,11 +179,11 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "list multiple specimen link types" in new App(fakeApp) {
         doLogin
         val procType = factory.createProcessingType
-        use[BbwebPlugin].processingTypeRepository.put(procType)
+        processingTypeRepository.put(procType)
 
         val sltypes = List(factory.createSpecimenLinkType, factory.createSpecimenLinkType)
 
-        sltypes map { slType => use[BbwebPlugin].specimenLinkTypeRepository.put(slType) }
+        sltypes map { slType => specimenLinkTypeRepository.put(slType) }
 
         val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -216,7 +216,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "fail for an invalid specimen link type id" in new App(fakeApp) {
         doLogin
         val procType = factory.createProcessingType
-        use[BbwebPlugin].processingTypeRepository.put(procType)
+        processingTypeRepository.put(procType)
 
         val slTypeId = nameGenerator.next[SpecimenLinkType]
 
@@ -231,14 +231,14 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "add a specimen link type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val procType = factory.createProcessingType
-        use[BbwebPlugin].processingTypeRepository.put(procType)
+        processingTypeRepository.put(procType)
 
         val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-        use[BbwebPlugin].specimenGroupRepository.put(inputSg)
-        use[BbwebPlugin].specimenGroupRepository.put(outputSg)
+        specimenGroupRepository.put(inputSg)
+        specimenGroupRepository.put(outputSg)
 
         val json = makeRequest(
           POST,
@@ -252,7 +252,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     "POST /studies/sltypes" must {
       "not add a specimen link type to an enabled study" in new App(fakeApp) {
         doLogin
-        val study = use[BbwebPlugin].studyRepository.put(
+        val study = studyRepository.put(
           factory.createDisabledStudy.enable(1, 1) | fail)
         addOnNonDisabledStudy(study, factory.createProcessingType)
       }
@@ -261,7 +261,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     "POST /studies/sltypes" must {
       "not add a specimen link type to an retired study" in new App(fakeApp) {
         doLogin
-        val study = use[BbwebPlugin].studyRepository.put(
+        val study = studyRepository.put(
           factory.createDisabledStudy.retire | fail)
         addOnNonDisabledStudy(study, factory.createProcessingType)
       }
@@ -271,15 +271,15 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "must update a specimen link type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val procType = factory.createProcessingType
-        use[BbwebPlugin].processingTypeRepository.put(procType)
+        processingTypeRepository.put(procType)
 
         val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-        use[BbwebPlugin].specimenGroupRepository.put(inputSg)
-        use[BbwebPlugin].specimenGroupRepository.put(outputSg)
-        use[BbwebPlugin].specimenLinkTypeRepository.put(slType)
+        specimenGroupRepository.put(inputSg)
+        specimenGroupRepository.put(outputSg)
+        specimenLinkTypeRepository.put(slType)
 
         val slType2 = factory.createSpecimenLinkType.copy(
           id = slType.id,
@@ -300,7 +300,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     "PUT /studies/sltypes" must {
       "not update a specimen link type on an enabled study" in new App(fakeApp) {
         doLogin
-        val study = use[BbwebPlugin].studyRepository.put(
+        val study = studyRepository.put(
           factory.createDisabledStudy.enable(1, 1) | fail)
         updateOnNonDisabledStudy(study, factory.createProcessingType)
       }
@@ -309,7 +309,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     "PUT /studies/sltypes" must {
       "not update a specimen link type on an retired study" in new App(fakeApp) {
         doLogin
-        val study = use[BbwebPlugin].studyRepository.put(
+        val study = studyRepository.put(
           factory.createDisabledStudy.retire | fail)
         updateOnNonDisabledStudy(study, factory.createProcessingType)
       }
@@ -319,15 +319,15 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "remove a specimen link type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val procType = factory.createProcessingType
-        use[BbwebPlugin].processingTypeRepository.put(procType)
+        processingTypeRepository.put(procType)
 
         val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-        use[BbwebPlugin].specimenGroupRepository.put(inputSg)
-        use[BbwebPlugin].specimenGroupRepository.put(outputSg)
-        use[BbwebPlugin].specimenLinkTypeRepository.put(slType)
+        specimenGroupRepository.put(inputSg)
+        specimenGroupRepository.put(outputSg)
+        specimenLinkTypeRepository.put(slType)
 
         val json = makeRequest(
           DELETE,
@@ -340,7 +340,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     "DELETE /studies/sltypes" must {
       "not remove a specimen link type on an enabled study" in new App(fakeApp) {
         doLogin
-        val study = use[BbwebPlugin].studyRepository.put(
+        val study = studyRepository.put(
           factory.createDisabledStudy.enable(1, 1) | fail)
         removeOnNonDisabledStudy(study, factory.createProcessingType)
       }
@@ -349,7 +349,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     "DELETE /studies/sltypes" must {
       "not remove a specimen link type on an retired study" in new App(fakeApp) {
         doLogin
-        val study = use[BbwebPlugin].studyRepository.put(
+        val study = studyRepository.put(
           factory.createDisabledStudy.retire | fail)
         removeOnNonDisabledStudy(study, factory.createProcessingType)
       }

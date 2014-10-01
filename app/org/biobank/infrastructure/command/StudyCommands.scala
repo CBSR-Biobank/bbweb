@@ -18,6 +18,7 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
 object StudyCommands {
+
   // study commands
   trait StudyCommand extends Command {
     val id: String
@@ -379,7 +380,6 @@ object StudyCommands {
     val id: String
 
   }
-
 
   case class AddSpecimenLinkTypeCmd(
     processingTypeId: String,

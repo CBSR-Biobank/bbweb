@@ -4,54 +4,54 @@
 
 -->
 <div class="panel panel-warning" data-ng-if="vm.data.length === 0">
-  <div class="panel-heading">
-    Annotation types have not been defined for this study yet.
+    <div class="panel-heading">
+      Annotation types have not been defined for this study yet.
+    </div>
   </div>
-</div>
 <div data-ng-if="vm.data.length !== 0">
-  <p>The following annotation types are defined:</p>
-  <table class="table table-condensed table-hover"
+    <p>The following annotation types are defined:</p>
+    <table class="table table-condensed table-hover"
          data-ng-table="vm.tableParams"
-         show-filter="true">
-    <!-- tried to put the th tag in a thead but they would not display on the page -->
-    <tbody>
-      <tr>
+           show-filter="true">
+      <!-- tried to put the th tag in a thead but they would not display on the page -->
+      <tbody>
+        <tr>
         <th ng-repeat="column in vm.columns"
-            class="text-center sortable"
-            ng-class="{
+              class="text-center sortable"
+              ng-class="{
                       'sort-asc': vm.tableParams.isSortBy(column.field, 'asc'),
                       'sort-desc': vm.tableParams.isSortBy(column.field, 'desc')
-                      }"
+                        }"
             ng-click="vm.tableParams.sorting(column.field, vm.tableParams.isSortBy(column.field, 'asc') ?
                       'desc' : 'asc')">
           <div>{{column.title}}</div>
-        </th>
-        <th><!-- heading for buttons: blank for now --></th>
-      </tr>
-      <tr data-ng-repeat="annotType in $data">
+          </th>
+          <th><!-- heading for buttons: blank for now --></th>
+        </tr>
+        <tr data-ng-repeat="annotType in $data">
         <td ng-repeat="column in vm.columns" sortable="column.field">
 
-          <span data-ng-if="column.field === 'name'"
+            <span data-ng-if="column.field === 'name'"
                 data-ng-click="vm.information(annotType)">
-            <a href>{{annotType[column.field]}}</a>
-          </span>
+              <a href>{{annotType[column.field]}}</a>
+            </span>
 
-          <span data-ng-if="(column.field !== 'name') && (column.field !== 'required')">
-            {{annotType[column.field]}}
-          </span>
+            <span data-ng-if="(column.field !== 'name') && (column.field !== 'required')">
+              {{annotType[column.field]}}
+            </span>
 
           <span data-ng-if="vm.hasRequired && (column.field === 'required')">
-            {{annotType[column.field] ? 'Yes' : 'No'}}
-          </span>
+              {{annotType[column.field] ? 'Yes' : 'No'}}
+            </span>
 
-        </td>
-        <td>
-          <update-remove-buttons
+          </td>
+          <td>
+            <update-remove-buttons
              on-update="vm.update(annotType)"
              on-remove="vm.remove(annotType)">
-          </update-remove-buttons>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+            </update-remove-buttons>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>

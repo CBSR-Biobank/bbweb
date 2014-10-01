@@ -13,13 +13,8 @@ import scala.concurrent.Future
 import scalaz._
 import scalaz.Scalaz._
 
-trait ParticipantServiceComponent {
+trait ParticipantService {
 
-  val participantService: ParticipantService
-
-  trait ParticipantService extends ApplicationService {
-
-    def getForStudy: Set[Participant]
-  }
+  def getForStudy: Set[Participant]
 
 }

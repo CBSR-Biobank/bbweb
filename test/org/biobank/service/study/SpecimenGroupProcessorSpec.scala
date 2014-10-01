@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.service.study
 
 import org.biobank.fixture._
 import org.biobank.infrastructure.event.StudyEvents._
@@ -11,7 +11,6 @@ import org.biobank.domain.{
   DomainValidation,
   PreservationType,
   PreservationTemperatureType,
-  RepositoriesComponentImpl,
   SpecimenType
 }
 import AnnotationValueType._
@@ -29,8 +28,14 @@ import scalaz.Scalaz._
   * Tests for actor SpecimenGroupProcessor. These are written using ScalaTest.
   *
   */
-class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
+class SpecimenGroupProcessorSpec extends TestFixture {
   import org.biobank.TestUtils._
+
+  val studyRepository = inject [StudyRepository]
+
+  val specimenGroupRepository = inject [SpecimenGroupRepository]
+
+  val studiesProcessor = injectActorRef [StudiesProcessor]
 
   val nameGenerator = new NameGenerator(this.getClass)
 

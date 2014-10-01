@@ -1,227 +1,222 @@
 package org.biobank.service.study
 
-import org.biobank.service.ApplicationService
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.infrastructure.ProcessingDto
 import org.biobank.domain.{
   AnnotationTypeId,
   DomainValidation,
-  DomainError,
-  RepositoriesComponent
+  DomainError
 }
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 
+import akka.util.Timeout
 import akka.actor._
 import akka.pattern.ask
 import scala.concurrent._
 import scala.concurrent.duration._
 import org.slf4j.LoggerFactory
 import ExecutionContext.Implicits.global
+import scaldi.akka.AkkaInjectable
+import scaldi.{Injectable, Injector}
 
 import scalaz._
 import scalaz.Scalaz._
 
-trait StudiesServiceComponent {
+trait StudiesService {
 
-  val studiesService: StudiesService
+  def getAll: Set[Study]
 
-  trait StudiesService extends ApplicationService {
+  def getStudy(id: String): DomainValidation[Study]
 
-    def getAll: Set[Study]
+  def specimenGroupWithId(studyId: String, specimenGroupId: String)
+      : DomainValidation[SpecimenGroup]
 
-    def getStudy(id: String): DomainValidation[Study]
+  def specimenGroupsForStudy(studyId: String): DomainValidation[Set[SpecimenGroup]]
 
-    def specimenGroupWithId(studyId: String, specimenGroupId: String)
-        : DomainValidation[SpecimenGroup]
+  def specimenGroupsInUse(studyId: String): DomainValidation[Set[SpecimenGroupId]]
 
-    def specimenGroupsForStudy(studyId: String): DomainValidation[Set[SpecimenGroup]]
+  def collectionEventAnnotationTypeWithId
+    (studyId: String, annotationTypeId: String)
+      : DomainValidation[CollectionEventAnnotationType]
 
-    def specimenGroupsInUse(studyId: String): DomainValidation[Set[SpecimenGroupId]]
+  def collectionEventAnnotationTypesForStudy(studyId: String)
+      : DomainValidation[Set[CollectionEventAnnotationType]]
 
-    def collectionEventAnnotationTypeWithId
-      (studyId: String, annotationTypeId: String)
-        : DomainValidation[CollectionEventAnnotationType]
+  def collectionEventTypeWithId
+    (studyId: String, collectionEventTypeId: String)
+      : DomainValidation[CollectionEventType]
 
-    def collectionEventAnnotationTypesForStudy(studyId: String)
-        : DomainValidation[Set[CollectionEventAnnotationType]]
+  def collectionEventTypesForStudy(studyId: String): DomainValidation[Set[CollectionEventType]]
 
-    def collectionEventTypeWithId
-      (studyId: String, collectionEventTypeId: String)
-        : DomainValidation[CollectionEventType]
+  def processingTypeWithId
+    (studyId: String, processingTypeId: String)
+      : DomainValidation[ProcessingType]
 
-    def collectionEventTypesForStudy(studyId: String): DomainValidation[Set[CollectionEventType]]
+  def processingTypesForStudy(studyId: String): DomainValidation[Set[ProcessingType]]
 
-    def processingTypeWithId
-      (studyId: String, processingTypeId: String)
-        : DomainValidation[ProcessingType]
+  def specimenLinkTypeWithId
+    (studyId: String, specimenLinkTypeId: String)
+      : DomainValidation[SpecimenLinkType]
 
-    def processingTypesForStudy(studyId: String): DomainValidation[Set[ProcessingType]]
+  def specimenLinkTypesForProcessingType(processingTypeId: String)
+      : DomainValidation[Set[SpecimenLinkType]]
 
-    def specimenLinkTypeWithId
-      (studyId: String, specimenLinkTypeId: String)
-        : DomainValidation[SpecimenLinkType]
+  def getProcessingDto(studyId: String): DomainValidation[ProcessingDto]
 
-    def specimenLinkTypesForProcessingType(processingTypeId: String)
-        : DomainValidation[Set[SpecimenLinkType]]
+  def addStudy(cmd: AddStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[StudyAddedEvent]]
 
-    def getProcessingDto(studyId: String): DomainValidation[ProcessingDto]
+  def updateStudy(cmd: UpdateStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[StudyUpdatedEvent]]
 
-    def addStudy(cmd: AddStudyCmd)(implicit userId: UserId)
-        : Future[DomainValidation[StudyAddedEvent]]
+  def enableStudy(cmd: EnableStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[StudyEnabledEvent]]
 
-    def updateStudy(cmd: UpdateStudyCmd)(implicit userId: UserId)
-        : Future[DomainValidation[StudyUpdatedEvent]]
+  def disableStudy(cmd: DisableStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[StudyDisabledEvent]]
 
-    def enableStudy(cmd: EnableStudyCmd)(implicit userId: UserId)
-        : Future[DomainValidation[StudyEnabledEvent]]
+  def retireStudy(cmd: RetireStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[StudyRetiredEvent]]
 
-    def disableStudy(cmd: DisableStudyCmd)(implicit userId: UserId)
-        : Future[DomainValidation[StudyDisabledEvent]]
+  def unretireStudy(cmd: UnretireStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[StudyUnretiredEvent]]
 
-    def retireStudy(cmd: RetireStudyCmd)(implicit userId: UserId)
-        : Future[DomainValidation[StudyRetiredEvent]]
+  // specimen groups
+  def specimenGroupInUse(studyId: String, specimenGroupId: String)
+      : DomainValidation[Boolean]
 
-    def unretireStudy(cmd: UnretireStudyCmd)(implicit userId: UserId)
-        : Future[DomainValidation[StudyUnretiredEvent]]
+  def addSpecimenGroup(cmd: AddSpecimenGroupCmd)(implicit userId: UserId)
+      : Future[DomainValidation[SpecimenGroupAddedEvent]]
 
-    // specimen groups
-    def specimenGroupInUse(studyId: String, specimenGroupId: String)
-        : DomainValidation[Boolean]
+  def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd)(implicit userId: UserId)
+      : Future[DomainValidation[SpecimenGroupUpdatedEvent]]
 
-    def addSpecimenGroup(cmd: AddSpecimenGroupCmd)(implicit userId: UserId)
-        : Future[DomainValidation[SpecimenGroupAddedEvent]]
+  def removeSpecimenGroup(cmd: RemoveSpecimenGroupCmd)(implicit userId: UserId)
+      : Future[DomainValidation[SpecimenGroupRemovedEvent]]
 
-    def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd)(implicit userId: UserId)
-        : Future[DomainValidation[SpecimenGroupUpdatedEvent]]
+  // collection event types
+  def addCollectionEventType
+    (cmd: AddCollectionEventTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[CollectionEventTypeAddedEvent]]
 
-    def removeSpecimenGroup(cmd: RemoveSpecimenGroupCmd)(implicit userId: UserId)
-        : Future[DomainValidation[SpecimenGroupRemovedEvent]]
+  def updateCollectionEventType
+    (cmd: UpdateCollectionEventTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[CollectionEventTypeUpdatedEvent]]
 
-    // collection event types
-    def addCollectionEventType
-      (cmd: AddCollectionEventTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[CollectionEventTypeAddedEvent]]
+  def removeCollectionEventType
+    (cmd: RemoveCollectionEventTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[CollectionEventTypeRemovedEvent]]
 
-    def updateCollectionEventType
-      (cmd: UpdateCollectionEventTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[CollectionEventTypeUpdatedEvent]]
+  // collection event annotation types
+  def isCollectionEventAnnotationTypeInUse
+    (studyId: String, annotationTypeId: String)
+      : DomainValidation[Boolean]
 
-    def removeCollectionEventType
-      (cmd: RemoveCollectionEventTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[CollectionEventTypeRemovedEvent]]
+  def addCollectionEventAnnotationType
+    (cmd: AddCollectionEventAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[CollectionEventAnnotationTypeAddedEvent]]
 
-    // collection event annotation types
-    def isCollectionEventAnnotationTypeInUse
-      (studyId: String, annotationTypeId: String)
-        : DomainValidation[Boolean]
+  def updateCollectionEventAnnotationType
+    (cmd: UpdateCollectionEventAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
 
-    def addCollectionEventAnnotationType
-      (cmd: AddCollectionEventAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[CollectionEventAnnotationTypeAddedEvent]]
+  def removeCollectionEventAnnotationType
+    (cmd: RemoveCollectionEventAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
 
-    def updateCollectionEventAnnotationType
-      (cmd: UpdateCollectionEventAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
+  // participant annotation types
+  def isParticipantAnnotationTypeInUse
+    (studyId: String, annotationTypeId: String)
+      : DomainValidation[Boolean]
 
-    def removeCollectionEventAnnotationType
-      (cmd: RemoveCollectionEventAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
+  def participantAnnotationTypesForStudy
+    (studyId: String)
+      : DomainValidation[Set[ParticipantAnnotationType]]
 
-    // participant annotation types
-    def isParticipantAnnotationTypeInUse
-      (studyId: String, annotationTypeId: String)
-        : DomainValidation[Boolean]
+  def participantAnnotationTypeWithId
+    (studyId: String, annotationTypeId: String)
+      : DomainValidation[ParticipantAnnotationType]
 
-    def participantAnnotationTypesForStudy
-      (studyId: String)
-        : DomainValidation[Set[ParticipantAnnotationType]]
+  def addParticipantAnnotationType
+    (cmd: AddParticipantAnnotationTypeCmd)(implicit userId: UserId)
+      : Future[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
 
-    def participantAnnotationTypeWithId
-      (studyId: String, annotationTypeId: String)
-        : DomainValidation[ParticipantAnnotationType]
+  def updateParticipantAnnotationType
+    (cmd: UpdateParticipantAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
 
-    def addParticipantAnnotationType
-      (cmd: AddParticipantAnnotationTypeCmd)(implicit userId: UserId)
-        : Future[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
+  def removeParticipantAnnotationType
+    (cmd: RemoveParticipantAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
 
-    def updateParticipantAnnotationType
-      (cmd: UpdateParticipantAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
+  // specimen link annotation types
+  def specimenLinkAnnotationTypeWithId
+    (studyId: String, annotationTypeId: String)
+      : DomainValidation[SpecimenLinkAnnotationType]
 
-    def removeParticipantAnnotationType
-      (cmd: RemoveParticipantAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
+  def isSpecimenLinkAnnotationTypeInUse
+    (studyId: String, annotationTypeId: String)
+      : DomainValidation[Boolean]
 
-    // specimen link annotation types
-    def specimenLinkAnnotationTypeWithId
-      (studyId: String, annotationTypeId: String)
-        : DomainValidation[SpecimenLinkAnnotationType]
+  def specimenLinkAnnotationTypesForStudy(id: String)
+      : DomainValidation[Set[SpecimenLinkAnnotationType]]
 
-    def isSpecimenLinkAnnotationTypeInUse
-      (studyId: String, annotationTypeId: String)
-        : DomainValidation[Boolean]
+  def addSpecimenLinkAnnotationType
+    (cmd: AddSpecimenLinkAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]]
 
-    def specimenLinkAnnotationTypesForStudy(id: String)
-        : DomainValidation[Set[SpecimenLinkAnnotationType]]
+  def updateSpecimenLinkAnnotationType
+    (cmd: UpdateSpecimenLinkAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
 
-    def addSpecimenLinkAnnotationType
-      (cmd: AddSpecimenLinkAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]]
+  def removeSpecimenLinkAnnotationType
+    (cmd: RemoveSpecimenLinkAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
 
-    def updateSpecimenLinkAnnotationType
-      (cmd: UpdateSpecimenLinkAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
+  // processing types
+  def addProcessingType
+    (cmd: AddProcessingTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[ProcessingTypeAddedEvent]]
 
-    def removeSpecimenLinkAnnotationType
-      (cmd: RemoveSpecimenLinkAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
+  def updateProcessingType
+    (cmd: UpdateProcessingTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[ProcessingTypeUpdatedEvent]]
 
-    // processing types
-    def addProcessingType
-      (cmd: AddProcessingTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[ProcessingTypeAddedEvent]]
+  def removeProcessingType
+    (cmd: RemoveProcessingTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[ProcessingTypeRemovedEvent]]
 
-    def updateProcessingType
-      (cmd: UpdateProcessingTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[ProcessingTypeUpdatedEvent]]
+  // specimen link types
+  def addSpecimenLinkType
+    (cmd: AddSpecimenLinkTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[SpecimenLinkTypeAddedEvent]]
 
-    def removeProcessingType
-      (cmd: RemoveProcessingTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[ProcessingTypeRemovedEvent]]
+  def updateSpecimenLinkType
+    (cmd: UpdateSpecimenLinkTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[SpecimenLinkTypeUpdatedEvent]]
 
-    // specimen link types
-    def addSpecimenLinkType
-      (cmd: AddSpecimenLinkTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[SpecimenLinkTypeAddedEvent]]
-
-    def updateSpecimenLinkType
-      (cmd: UpdateSpecimenLinkTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[SpecimenLinkTypeUpdatedEvent]]
-
-    def removeSpecimenLinkType
-      (cmd: RemoveSpecimenLinkTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[SpecimenLinkTypeRemovedEvent]]
-
-  }
+  def removeSpecimenLinkType
+    (cmd: RemoveSpecimenLinkTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[SpecimenLinkTypeRemovedEvent]]
 
 }
 
@@ -234,400 +229,418 @@ trait StudiesServiceComponent {
   * @param studiesProcessor
   *
   */
-trait StudiesServiceComponentImpl extends StudiesServiceComponent {
-  self: RepositoriesComponent =>
+class StudiesServiceImpl(implicit inj: Injector) extends StudiesService with AkkaInjectable {
 
-  class StudiesServiceImpl(processor: ActorRef) extends StudiesService {
+  val log = LoggerFactory.getLogger(this.getClass)
 
-    val log = LoggerFactory.getLogger(this.getClass)
+  implicit val system = inject [ActorSystem]
 
-    /**
-      * FIXME: use paging and sorting
-      */
-    def getAll: Set[Study] = {
-      studyRepository.allStudies
-    }
+  implicit val timeout = inject [Timeout] ('akkaTimeout)
 
-    def getStudy(id: String) : DomainValidation[Study] = {
-      studyRepository.getByKey(StudyId(id))
-    }
+  val processor = injectActorRef [StudiesProcessor]
 
-    def specimenGroupWithId(studyId: String, specimenGroupId: String)
-        : DomainValidation[SpecimenGroup] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => specimenGroupRepository.withId(study.id, SpecimenGroupId(specimenGroupId))
-      )
-    }
+  val studyRepository = inject [StudyRepository]
 
-    def specimenGroupsForStudy(studyId: String) : DomainValidation[Set[SpecimenGroup]] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => specimenGroupRepository.allForStudy(study.id).successNel
-      )
-    }
+  val processingTypeRepository = inject [ProcessingTypeRepository]
 
-    def specimenGroupsInUse(studyId: String)
-        : DomainValidation[Set[SpecimenGroupId]] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => {
-          val ceventTypes = collectionEventTypeRepository.allForStudy(study.id)
-          val processingTypes = processingTypeRepository.allForStudy(study.id)
+  val specimenGroupRepository = inject [SpecimenGroupRepository]
 
-          val cetSpecimenGroups = ceventTypes.flatMap { cet =>
-            cet.specimenGroupData.map { sgItem =>
-              SpecimenGroupId(sgItem.specimenGroupId)
-            }
-          }
+  val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
 
-          val sltSpecimenGroups = processingTypes.flatMap { pt =>
-            specimenLinkTypeRepository.allForProcessingType(pt.id).flatMap { slt =>
-              Set(slt.inputGroupId, slt.outputGroupId)
-            }
-          }
+  val specimenLinkTypeRepository = inject [SpecimenLinkTypeRepository]
 
-          (cetSpecimenGroups ++ sltSpecimenGroups).success
-        }
-      )
-    }
+  val collectionEventAnnotationTypeRepository = inject [CollectionEventAnnotationTypeRepository]
 
-    def collectionEventAnnotationTypeWithId(studyId: String, annotationTypeId: String)
-        : DomainValidation[CollectionEventAnnotationType] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => collectionEventAnnotationTypeRepository.withId(
-          study.id, AnnotationTypeId(annotationTypeId))
-      )
-    }
+  val participantAnnotationTypeRepository = inject [ParticipantAnnotationTypeRepository]
 
-    def collectionEventAnnotationTypesForStudy(studyId: String)
-        : DomainValidation[Set[CollectionEventAnnotationType]] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => collectionEventAnnotationTypeRepository.allForStudy(study.id).successNel
-      )
-    }
+  val specimenLinkAnnotationTypeRepository = inject [SpecimenLinkAnnotationTypeRepository]
 
-    def collectionEventTypeWithId(studyId: String, collectionEventTypeId: String)
-        : DomainValidation[CollectionEventType] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => collectionEventTypeRepository.withId(study.id, CollectionEventTypeId(collectionEventTypeId))
-      )
-    }
-
-    def collectionEventTypesForStudy(studyId: String)
-        : DomainValidation[Set[CollectionEventType]] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => collectionEventTypeRepository.allForStudy(study.id).success
-      )
-    }
-
-    def participantAnnotationTypesForStudy(studyId: String)
-        : DomainValidation[Set[ParticipantAnnotationType]] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => participantAnnotationTypeRepository.allForStudy(study.id).success
-      )
-    }
-
-    def participantAnnotationTypeWithId(studyId: String, annotationTypeId: String)
-        : DomainValidation[ParticipantAnnotationType] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => participantAnnotationTypeRepository.withId(study.id, AnnotationTypeId(annotationTypeId))
-      )
-    }
-
-    def specimenLinkAnnotationTypeWithId(studyId: String, annotationTypeId: String)
-        : DomainValidation[SpecimenLinkAnnotationType] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => specimenLinkAnnotationTypeRepository.withId(study.id, AnnotationTypeId(annotationTypeId))
-      )
-    }
-
-    def processingTypeWithId(studyId: String, processingTypeId: String)
-        : DomainValidation[ProcessingType] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => processingTypeRepository.withId(study.id, ProcessingTypeId(processingTypeId))
-      )
-    }
-
-    def processingTypesForStudy(studyId: String)
-        : DomainValidation[Set[ProcessingType]] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => processingTypeRepository.allForStudy(study.id).success
-      )
-    }
-
-    def specimenLinkTypeWithId(processingTypeId: String, specimenLinkTypeId: String)
-        : DomainValidation[SpecimenLinkType] = {
-      processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId)).fold(
-        err => DomainError(s"invalid processing type id: $processingTypeId").failNel,
-        pt => specimenLinkTypeRepository.withId(pt.id, SpecimenLinkTypeId(specimenLinkTypeId))
-      )
-    }
-
-    def specimenLinkTypesForProcessingType(processingTypeId: String)
-        : DomainValidation[Set[SpecimenLinkType]] = {
-      processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId)).fold(
-        err => DomainError(s"invalid processing type id: $processingTypeId").failNel,
-        pt => specimenLinkTypeRepository.allForProcessingType(pt.id).success
-      )
-    }
-
-    def getProcessingDto(studyId: String): DomainValidation[ProcessingDto] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => {
-          val specimenGroups  = specimenGroupRepository.allForStudy(study.id)
-          val processingTypes = processingTypeRepository.allForStudy(study.id)
-          val annotationTypes = specimenLinkAnnotationTypeRepository.allForStudy(study.id)
-
-          val specimenLinkTypes = processingTypes.flatMap { pt =>
-            specimenLinkTypeRepository.allForProcessingType(pt.id)
-          }
-
-          ProcessingDto(
-            processingTypes.toList,
-            specimenLinkTypes.toList,
-            annotationTypes.toList,
-            specimenGroups.toList).success
-        }
-      )
-    }
-
-    def addStudy(cmd: AddStudyCmd)(implicit userId: UserId)
-        : Future[DomainValidation[StudyAddedEvent]] = {
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[StudyAddedEvent]])
-    }
-
-    def updateStudy(cmd: UpdateStudyCmd)(implicit userId: UserId)
-        : Future[DomainValidation[StudyUpdatedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[StudyUpdatedEvent]])
-
-    def enableStudy(cmd: EnableStudyCmd)(implicit userId: UserId)
-        : Future[DomainValidation[StudyEnabledEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[StudyEnabledEvent]])
-
-    def disableStudy(cmd: DisableStudyCmd)(implicit userId: UserId)
-        : Future[DomainValidation[StudyDisabledEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[StudyDisabledEvent]])
-
-    def retireStudy(cmd: RetireStudyCmd)(implicit userId: UserId)
-        : Future[DomainValidation[StudyRetiredEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[StudyRetiredEvent]])
-
-    def unretireStudy(cmd: UnretireStudyCmd)(implicit userId: UserId)
-        : Future[DomainValidation[StudyUnretiredEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[StudyUnretiredEvent]])
-
-    // specimen groups
-    //
-    // FIXME: rename this to specimenGroupCanBeUpdated
-    def specimenGroupInUse(studyId: String, specimenGroupId: String)
-        : DomainValidation[Boolean] = {
-      for {
-        sg <- specimenGroupWithId(studyId, specimenGroupId)
-        inUse <- collectionEventTypeRepository.specimenGroupInUse(sg.studyId, sg.id).success
-      } yield inUse
-    }
-
-    def addSpecimenGroup(cmd: AddSpecimenGroupCmd)(implicit userId: UserId)
-        : Future[DomainValidation[SpecimenGroupAddedEvent]] = {
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[SpecimenGroupAddedEvent]])
-    }
-
-    def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd)(implicit userId: UserId)
-        : Future[DomainValidation[SpecimenGroupUpdatedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[SpecimenGroupUpdatedEvent]])
-
-    def removeSpecimenGroup(cmd: RemoveSpecimenGroupCmd)(implicit userId: UserId)
-        : Future[DomainValidation[SpecimenGroupRemovedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[SpecimenGroupRemovedEvent]])
-
-    // collection event types
-    def addCollectionEventType(cmd: AddCollectionEventTypeCmd)(implicit userId: UserId)
-        : Future[DomainValidation[CollectionEventTypeAddedEvent]] = {
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[CollectionEventTypeAddedEvent]])
-    }
-
-    def updateCollectionEventType(cmd: UpdateCollectionEventTypeCmd)(implicit userId: UserId)
-        : Future[DomainValidation[CollectionEventTypeUpdatedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[CollectionEventTypeUpdatedEvent]])
-
-    def removeCollectionEventType(cmd: RemoveCollectionEventTypeCmd)(implicit userId: UserId)
-        : Future[DomainValidation[CollectionEventTypeRemovedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[CollectionEventTypeRemovedEvent]])
-
-    // collection event annotation types
-    //
-    // FIXME: rename this to collectionEventAnnotationTypeCanBeUpdated
-    def isCollectionEventAnnotationTypeInUse(
-      studyId: String, annotationTypeId: String)
-        : DomainValidation[Boolean] = {
-      for {
-        at <- collectionEventAnnotationTypeWithId(studyId, annotationTypeId)
-        inUse <- collectionEventTypeRepository.annotationTypeInUse(at).success
-      } yield inUse
-    }
-
-    def addCollectionEventAnnotationType
-      (cmd: AddCollectionEventAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[CollectionEventAnnotationTypeAddedEvent]] = {
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeAddedEvent]])
-    }
-
-    def updateCollectionEventAnnotationType
-      (cmd: UpdateCollectionEventAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]])
-
-    def removeCollectionEventAnnotationType
-      (cmd: RemoveCollectionEventAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]])
-
-    // participant annotation types
-    //
-    // FIXME: rename this to participantAnnotationTypeCanBeUpdated
-    def isParticipantAnnotationTypeInUse(studyId: String, annotationTypeId: String)
-        : DomainValidation[Boolean] = {
-      // TODO: needs implementation
-      //
-      // return true if used by any participants
-      false.success
-    }
-
-    def addParticipantAnnotationType
-      (cmd: AddParticipantAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[ParticipantAnnotationTypeAddedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeAddedEvent]])
-
-    def updateParticipantAnnotationType
-      (cmd: UpdateParticipantAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]])
-
-    def removeParticipantAnnotationType
-      (cmd: RemoveParticipantAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[ParticipantAnnotationTypeRemovedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeRemovedEvent]])
-
-    // specimen link annotation types
-    def isSpecimenLinkAnnotationTypeInUse(
-      studyId: String, annotationTypeId: String)
-        : DomainValidation[Boolean] = {
-      for {
-        at <- specimenLinkAnnotationTypeRepository.withId(
-          StudyId(studyId), AnnotationTypeId(annotationTypeId))
-        inUse <- specimenLinkTypeRepository.annotationTypeInUse(at).success
-      } yield inUse
-    }
-
-    def specimenLinkAnnotationTypesForStudy(studyId: String)
-        : DomainValidation[Set[SpecimenLinkAnnotationType]] = {
-      studyRepository.getByKey(StudyId(studyId)).fold(
-        err => DomainError(s"invalid study id: $studyId").failNel,
-        study => specimenLinkAnnotationTypeRepository.allForStudy(StudyId(studyId)).success
-      )
-    }
-
-    def addSpecimenLinkAnnotationType
-      (cmd: AddSpecimenLinkAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]])
-
-    def updateSpecimenLinkAnnotationType
-      (cmd: UpdateSpecimenLinkAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]])
-
-    def removeSpecimenLinkAnnotationType
-      (cmd: RemoveSpecimenLinkAnnotationTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]])
-
-    // processing types
-    def addProcessingType
-      (cmd: AddProcessingTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[ProcessingTypeAddedEvent]] = {
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[ProcessingTypeAddedEvent]])
-    }
-
-    def updateProcessingType
-      (cmd: UpdateProcessingTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[ProcessingTypeUpdatedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[ProcessingTypeUpdatedEvent]])
-
-    def removeProcessingType
-      (cmd: RemoveProcessingTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[ProcessingTypeRemovedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[ProcessingTypeRemovedEvent]])
-
-    // specimen link types
-    def addSpecimenLinkType
-      (cmd: AddSpecimenLinkTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[SpecimenLinkTypeAddedEvent]] = {
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[SpecimenLinkTypeAddedEvent]])
-    }
-
-    def updateSpecimenLinkType
-      (cmd: UpdateSpecimenLinkTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[SpecimenLinkTypeUpdatedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[SpecimenLinkTypeUpdatedEvent]])
-
-    def removeSpecimenLinkType
-      (cmd: RemoveSpecimenLinkTypeCmd)
-      (implicit userId: UserId)
-        : Future[DomainValidation[SpecimenLinkTypeRemovedEvent]] =
-      processor ? cmd map (
-        _.asInstanceOf[DomainValidation[SpecimenLinkTypeRemovedEvent]])
-
+  /**
+    * FIXME: use paging and sorting
+    */
+  def getAll: Set[Study] = {
+    studyRepository.allStudies
   }
+
+  def getStudy(id: String) : DomainValidation[Study] = {
+    studyRepository.getByKey(StudyId(id))
+  }
+
+  def specimenGroupWithId(studyId: String, specimenGroupId: String)
+      : DomainValidation[SpecimenGroup] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => specimenGroupRepository.withId(study.id, SpecimenGroupId(specimenGroupId))
+    )
+  }
+
+  def specimenGroupsForStudy(studyId: String) : DomainValidation[Set[SpecimenGroup]] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => specimenGroupRepository.allForStudy(study.id).successNel
+    )
+  }
+
+  def specimenGroupsInUse(studyId: String)
+      : DomainValidation[Set[SpecimenGroupId]] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => {
+        val ceventTypes = collectionEventTypeRepository.allForStudy(study.id)
+        val processingTypes = processingTypeRepository.allForStudy(study.id)
+
+        val cetSpecimenGroups = ceventTypes.flatMap { cet =>
+          cet.specimenGroupData.map { sgItem =>
+            SpecimenGroupId(sgItem.specimenGroupId)
+          }
+        }
+
+        val sltSpecimenGroups = processingTypes.flatMap { pt =>
+          specimenLinkTypeRepository.allForProcessingType(pt.id).flatMap { slt =>
+            Set(slt.inputGroupId, slt.outputGroupId)
+          }
+        }
+
+        (cetSpecimenGroups ++ sltSpecimenGroups).success
+      }
+    )
+  }
+
+  def collectionEventAnnotationTypeWithId(studyId: String, annotationTypeId: String)
+      : DomainValidation[CollectionEventAnnotationType] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => collectionEventAnnotationTypeRepository.withId(
+        study.id, AnnotationTypeId(annotationTypeId))
+    )
+  }
+
+  def collectionEventAnnotationTypesForStudy(studyId: String)
+      : DomainValidation[Set[CollectionEventAnnotationType]] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => collectionEventAnnotationTypeRepository.allForStudy(study.id).successNel
+    )
+  }
+
+  def collectionEventTypeWithId(studyId: String, collectionEventTypeId: String)
+      : DomainValidation[CollectionEventType] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => collectionEventTypeRepository.withId(study.id, CollectionEventTypeId(collectionEventTypeId))
+    )
+  }
+
+  def collectionEventTypesForStudy(studyId: String)
+      : DomainValidation[Set[CollectionEventType]] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => collectionEventTypeRepository.allForStudy(study.id).success
+    )
+  }
+
+  def participantAnnotationTypesForStudy(studyId: String)
+      : DomainValidation[Set[ParticipantAnnotationType]] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => participantAnnotationTypeRepository.allForStudy(study.id).success
+    )
+  }
+
+  def participantAnnotationTypeWithId(studyId: String, annotationTypeId: String)
+      : DomainValidation[ParticipantAnnotationType] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => participantAnnotationTypeRepository.withId(study.id, AnnotationTypeId(annotationTypeId))
+    )
+  }
+
+  def specimenLinkAnnotationTypeWithId(studyId: String, annotationTypeId: String)
+      : DomainValidation[SpecimenLinkAnnotationType] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => specimenLinkAnnotationTypeRepository.withId(study.id, AnnotationTypeId(annotationTypeId))
+    )
+  }
+
+  def processingTypeWithId(studyId: String, processingTypeId: String)
+      : DomainValidation[ProcessingType] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => processingTypeRepository.withId(study.id, ProcessingTypeId(processingTypeId))
+    )
+  }
+
+  def processingTypesForStudy(studyId: String)
+      : DomainValidation[Set[ProcessingType]] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => processingTypeRepository.allForStudy(study.id).success
+    )
+  }
+
+  def specimenLinkTypeWithId(processingTypeId: String, specimenLinkTypeId: String)
+      : DomainValidation[SpecimenLinkType] = {
+    processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId)).fold(
+      err => DomainError(s"invalid processing type id: $processingTypeId").failNel,
+      pt => specimenLinkTypeRepository.withId(pt.id, SpecimenLinkTypeId(specimenLinkTypeId))
+    )
+  }
+
+  def specimenLinkTypesForProcessingType(processingTypeId: String)
+      : DomainValidation[Set[SpecimenLinkType]] = {
+    processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId)).fold(
+      err => DomainError(s"invalid processing type id: $processingTypeId").failNel,
+      pt => specimenLinkTypeRepository.allForProcessingType(pt.id).success
+    )
+  }
+
+  def getProcessingDto(studyId: String): DomainValidation[ProcessingDto] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => {
+        val specimenGroups  = specimenGroupRepository.allForStudy(study.id)
+        val processingTypes = processingTypeRepository.allForStudy(study.id)
+        val annotationTypes = specimenLinkAnnotationTypeRepository.allForStudy(study.id)
+
+        val specimenLinkTypes = processingTypes.flatMap { pt =>
+          specimenLinkTypeRepository.allForProcessingType(pt.id)
+        }
+
+        ProcessingDto(
+          processingTypes.toList,
+          specimenLinkTypes.toList,
+          annotationTypes.toList,
+          specimenGroups.toList).success
+      }
+    )
+  }
+
+  def addStudy(cmd: AddStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[StudyAddedEvent]] = {
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[StudyAddedEvent]])
+  }
+
+  def updateStudy(cmd: UpdateStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[StudyUpdatedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[StudyUpdatedEvent]])
+
+  def enableStudy(cmd: EnableStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[StudyEnabledEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[StudyEnabledEvent]])
+
+  def disableStudy(cmd: DisableStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[StudyDisabledEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[StudyDisabledEvent]])
+
+  def retireStudy(cmd: RetireStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[StudyRetiredEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[StudyRetiredEvent]])
+
+  def unretireStudy(cmd: UnretireStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[StudyUnretiredEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[StudyUnretiredEvent]])
+
+  // specimen groups
+  //
+  // FIXME: rename this to specimenGroupCanBeUpdated
+  def specimenGroupInUse(studyId: String, specimenGroupId: String)
+      : DomainValidation[Boolean] = {
+    for {
+      sg <- specimenGroupWithId(studyId, specimenGroupId)
+      inUse <- collectionEventTypeRepository.specimenGroupInUse(sg.studyId, sg.id).success
+    } yield inUse
+  }
+
+  def addSpecimenGroup(cmd: AddSpecimenGroupCmd)(implicit userId: UserId)
+      : Future[DomainValidation[SpecimenGroupAddedEvent]] = {
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[SpecimenGroupAddedEvent]])
+  }
+
+  def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd)(implicit userId: UserId)
+      : Future[DomainValidation[SpecimenGroupUpdatedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[SpecimenGroupUpdatedEvent]])
+
+  def removeSpecimenGroup(cmd: RemoveSpecimenGroupCmd)(implicit userId: UserId)
+      : Future[DomainValidation[SpecimenGroupRemovedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[SpecimenGroupRemovedEvent]])
+
+  // collection event types
+  def addCollectionEventType(cmd: AddCollectionEventTypeCmd)(implicit userId: UserId)
+      : Future[DomainValidation[CollectionEventTypeAddedEvent]] = {
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[CollectionEventTypeAddedEvent]])
+  }
+
+  def updateCollectionEventType(cmd: UpdateCollectionEventTypeCmd)(implicit userId: UserId)
+      : Future[DomainValidation[CollectionEventTypeUpdatedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[CollectionEventTypeUpdatedEvent]])
+
+  def removeCollectionEventType(cmd: RemoveCollectionEventTypeCmd)(implicit userId: UserId)
+      : Future[DomainValidation[CollectionEventTypeRemovedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[CollectionEventTypeRemovedEvent]])
+
+  // collection event annotation types
+  //
+  // FIXME: rename this to collectionEventAnnotationTypeCanBeUpdated
+  def isCollectionEventAnnotationTypeInUse(
+    studyId: String, annotationTypeId: String)
+      : DomainValidation[Boolean] = {
+    for {
+      at <- collectionEventAnnotationTypeWithId(studyId, annotationTypeId)
+      inUse <- collectionEventTypeRepository.annotationTypeInUse(at).success
+    } yield inUse
+  }
+
+  def addCollectionEventAnnotationType
+    (cmd: AddCollectionEventAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[CollectionEventAnnotationTypeAddedEvent]] = {
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeAddedEvent]])
+  }
+
+  def updateCollectionEventAnnotationType
+    (cmd: UpdateCollectionEventAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]])
+
+  def removeCollectionEventAnnotationType
+    (cmd: RemoveCollectionEventAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]])
+
+  // participant annotation types
+  //
+  // FIXME: rename this to participantAnnotationTypeCanBeUpdated
+  def isParticipantAnnotationTypeInUse(studyId: String, annotationTypeId: String)
+      : DomainValidation[Boolean] = {
+    // TODO: needs implementation
+    //
+    // return true if used by any participants
+    false.success
+  }
+
+  def addParticipantAnnotationType
+    (cmd: AddParticipantAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[ParticipantAnnotationTypeAddedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeAddedEvent]])
+
+  def updateParticipantAnnotationType
+    (cmd: UpdateParticipantAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]])
+
+  def removeParticipantAnnotationType
+    (cmd: RemoveParticipantAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[ParticipantAnnotationTypeRemovedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeRemovedEvent]])
+
+  // specimen link annotation types
+  def isSpecimenLinkAnnotationTypeInUse(
+    studyId: String, annotationTypeId: String)
+      : DomainValidation[Boolean] = {
+    for {
+      at <- specimenLinkAnnotationTypeRepository.withId(
+        StudyId(studyId), AnnotationTypeId(annotationTypeId))
+      inUse <- specimenLinkTypeRepository.annotationTypeInUse(at).success
+    } yield inUse
+  }
+
+  def specimenLinkAnnotationTypesForStudy(studyId: String)
+      : DomainValidation[Set[SpecimenLinkAnnotationType]] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => specimenLinkAnnotationTypeRepository.allForStudy(StudyId(studyId)).success
+    )
+  }
+
+  def addSpecimenLinkAnnotationType
+    (cmd: AddSpecimenLinkAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]])
+
+  def updateSpecimenLinkAnnotationType
+    (cmd: UpdateSpecimenLinkAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]])
+
+  def removeSpecimenLinkAnnotationType
+    (cmd: RemoveSpecimenLinkAnnotationTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]])
+
+  // processing types
+  def addProcessingType
+    (cmd: AddProcessingTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[ProcessingTypeAddedEvent]] = {
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[ProcessingTypeAddedEvent]])
+  }
+
+  def updateProcessingType
+    (cmd: UpdateProcessingTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[ProcessingTypeUpdatedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[ProcessingTypeUpdatedEvent]])
+
+  def removeProcessingType
+    (cmd: RemoveProcessingTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[ProcessingTypeRemovedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[ProcessingTypeRemovedEvent]])
+
+  // specimen link types
+  def addSpecimenLinkType
+    (cmd: AddSpecimenLinkTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[SpecimenLinkTypeAddedEvent]] = {
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[SpecimenLinkTypeAddedEvent]])
+  }
+
+  def updateSpecimenLinkType
+    (cmd: UpdateSpecimenLinkTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[SpecimenLinkTypeUpdatedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[SpecimenLinkTypeUpdatedEvent]])
+
+  def removeSpecimenLinkType
+    (cmd: RemoveSpecimenLinkTypeCmd)
+    (implicit userId: UserId)
+      : Future[DomainValidation[SpecimenLinkTypeRemovedEvent]] =
+    processor ? cmd map (
+      _.asInstanceOf[DomainValidation[SpecimenLinkTypeRemovedEvent]])
+
 }

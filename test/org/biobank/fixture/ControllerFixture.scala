@@ -1,18 +1,26 @@
 package org.biobank.fixture
 
-import org.biobank.domain.Factory
+import org.biobank.domain._
+import org.biobank.domain.user.{ UserRepository, UserRepositoryImpl }
+import org.biobank.domain.centre._
+import org.biobank.domain.study._
+import org.biobank.service.{
+  PasswordHasher,
+  PasswordHasherImpl
+}
+import org.biobank.modules._
+
+import com.mongodb.casbah.Imports._
 import org.scalatest._
+import org.scalatestplus.play._
+import play.api.Logger
 import play.api.Play
+import play.api.libs.json._
 import play.api.mvc.Cookie
 import play.api.test.FakeApplication
-import play.api.libs.json._
-import play.api.test.Helpers._
 import play.api.test.FakeRequest
-import com.mongodb.casbah.Imports._
-import play.api.Logger
-import org.scalatestplus.play._
-
-
+import play.api.test.Helpers._
+import scaldi.Module
 
 /**
   * This trait allows a test suite to run tests on a Play Framework fake application.
@@ -30,6 +38,36 @@ trait ControllerFixture
 
   private val dbName = "bbweb-test"
 
+  /** Overrides the injected dependencies and provides access to those dependecies so they can be used
+    * in tests.
+    */
+  object TestGlobal extends org.biobank.Global {
+
+    override def applicationModule = new TestModule ++ new WebModule ++ new UserModule
+
+    def passwordHasher = inject [PasswordHasher]
+
+    def collectionEventAnnotationTypeRepository  = inject [CollectionEventAnnotationTypeRepository]
+    def collectionEventTypeRepository            = inject [CollectionEventTypeRepository]
+    def participantAnnotationTypeRepository      = inject [ParticipantAnnotationTypeRepository]
+    def processingTypeRepository                 = inject [ProcessingTypeRepository]
+    def specimenGroupRepository                  = inject [SpecimenGroupRepository]
+    def specimenLinkAnnotationTypeRepository     = inject [SpecimenLinkAnnotationTypeRepository]
+    def specimenLinkTypeRepository               = inject [SpecimenLinkTypeRepository]
+    def studyRepository                          = inject [StudyRepository]
+
+    def userRepository = inject [UserRepository]
+
+    def centreRepository = inject [CentreRepository]
+
+    def centreLocationsRepository = inject [CentreLocationsRepository]
+
+    def centreStudiesRepository = inject [CentreStudiesRepository]
+
+    def locationRepository = inject [LocationRepository]
+
+  }
+
   var token: String = ""
 
   val factory = new Factory
@@ -41,6 +79,7 @@ trait ControllerFixture
     */
   def fakeApp: FakeApplication =
     FakeApplication(
+      withGlobal = Some(TestGlobal),
       additionalPlugins = List("org.biobank.controllers.FixedEhCachePlugin"),
       additionalConfiguration = Map("ehcacheplugin" -> "disabled"))
 

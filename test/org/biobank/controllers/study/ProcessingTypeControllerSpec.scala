@@ -1,7 +1,6 @@
 package org.biobank.controllers.study
 
 import org.biobank.fixture._
-import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, ProcessingType }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper._
@@ -17,6 +16,7 @@ import play.api.Play.current
 import org.scalatestplus.play._
 
 class ProcessingTypeControllerSpec extends ControllerFixture {
+  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -43,10 +43,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
   }
 
   def addOnNonDisabledStudy(study: Study) {
-    use[BbwebPlugin].studyRepository.put(study)
+    studyRepository.put(study)
 
     val sg = factory.createSpecimenGroup
-    use[BbwebPlugin].specimenGroupRepository.put(sg)
+    specimenGroupRepository.put(sg)
 
     val procType = factory.createProcessingType
 
@@ -61,10 +61,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
   }
 
   def updateOnNonDisabledStudy(study: Study) {
-    use[BbwebPlugin].studyRepository.put(study)
+    studyRepository.put(study)
 
     val procType = factory.createProcessingType
-    use[BbwebPlugin].processingTypeRepository.put(procType)
+    processingTypeRepository.put(procType)
 
     val procType2 = factory.createProcessingType
 
@@ -79,10 +79,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
   }
 
   def removeOnNonDisabledStudy(study: Study) {
-    use[BbwebPlugin].studyRepository.put(study)
+    studyRepository.put(study)
 
     val procType = factory.createProcessingType
-    use[BbwebPlugin].processingTypeRepository.put(procType)
+    processingTypeRepository.put(procType)
 
     val json = makeRequest(
       DELETE,
@@ -99,7 +99,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "list none" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -110,10 +110,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "list a single processing type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val procType = factory.createProcessingType
-        use[BbwebPlugin].processingTypeRepository.put(procType)
+        processingTypeRepository.put(procType)
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -125,10 +125,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "get a single processing type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val procType = factory.createProcessingType
-        use[BbwebPlugin].processingTypeRepository.put(procType)
+        processingTypeRepository.put(procType)
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}?procTypeId=${procType.id.id}").as[JsObject]
         (json \ "status").as[String] must include ("success")
@@ -139,11 +139,11 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "list multiple processing types" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val proctypes = List(factory.createProcessingType, factory.createProcessingType)
 
-        proctypes map { procType => use[BbwebPlugin].processingTypeRepository.put(procType) }
+        proctypes map { procType => processingTypeRepository.put(procType) }
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -163,7 +163,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("invalid study id")
       }
 
-      "fail for an invalid study ID when using an processing type id" taggedAs(Tag("1")) in new App(fakeApp) {
+      "fail for an invalid study ID when using an processing type id" in new App(fakeApp) {
         doLogin
         val studyId = nameGenerator.next[Study]
         val procTypeId = nameGenerator.next[ProcessingType]
@@ -173,10 +173,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("invalid study id")
       }
 
-      "fail for an invalid processing type id" taggedAs(Tag("1")) in new App(fakeApp) {
+      "fail for an invalid processing type id" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val procTypeId = nameGenerator.next[ProcessingType]
 
@@ -190,7 +190,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "add a processing type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val procType = factory.createProcessingType
         val json = makeRequest(
@@ -222,10 +222,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "update a processing type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val procType = factory.createProcessingType
-        use[BbwebPlugin].processingTypeRepository.put(procType)
+        processingTypeRepository.put(procType)
 
         val procType2 = factory.createProcessingType.copy(
           id = procType.id,
@@ -261,10 +261,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "remove a processing type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val procType = factory.createProcessingType
-        use[BbwebPlugin].processingTypeRepository.put(procType)
+        processingTypeRepository.put(procType)
 
         val json = makeRequest(
           DELETE,

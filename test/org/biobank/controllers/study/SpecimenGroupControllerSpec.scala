@@ -1,7 +1,6 @@
 package org.biobank.controllers.study
 
 import org.biobank.fixture._
-import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, SpecimenGroup }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper._
@@ -17,6 +16,7 @@ import play.api.Play.current
 import org.scalatestplus.play._
 
 class SpecimenGroupControllerSpec extends ControllerFixture {
+  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -24,7 +24,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
   def addToNonDisabledStudy(study: Study, sg: SpecimenGroup) = {
 
-    use[BbwebPlugin].studyRepository.put(study)
+    studyRepository.put(study)
 
     val cmdJson = Json.obj(
       "studyId"                     -> study.id.id,
@@ -44,8 +44,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
   def updateOnNonDisabledStudy(
     study: Study,
     sg: SpecimenGroup) = {
-    use[BbwebPlugin].studyRepository.put(study)
-    use[BbwebPlugin].specimenGroupRepository.put(sg)
+    studyRepository.put(study)
+    specimenGroupRepository.put(sg)
 
     val sg2 = factory.createSpecimenGroup
     val cmdJson = Json.obj(
@@ -68,8 +68,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
   def removeOnNonDisabledStudy(
     study: Study,
     sg: SpecimenGroup) = {
-    use[BbwebPlugin].studyRepository.put(study)
-    use[BbwebPlugin].specimenGroupRepository.put(sg)
+    studyRepository.put(study)
+    specimenGroupRepository.put(sg)
 
     val json = makeRequest(
       DELETE,
@@ -86,7 +86,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "list none" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -97,10 +97,10 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "list a single specimen group" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val sg = factory.createSpecimenGroup
-        use[BbwebPlugin].specimenGroupRepository.put(sg)
+        specimenGroupRepository.put(sg)
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -112,10 +112,10 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "get a single specimen group" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val sg = factory.createSpecimenGroup
-        use[BbwebPlugin].specimenGroupRepository.put(sg)
+        specimenGroupRepository.put(sg)
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}?sgId=${sg.id.id}").as[JsObject]
         (json \ "status").as[String] must include ("success")
@@ -126,10 +126,10 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "list multiple specimen groups" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val sgroups = List(factory.createSpecimenGroup, factory.createSpecimenGroup)
-        sgroups map { sg => use[BbwebPlugin].specimenGroupRepository.put(sg) }
+        sgroups map { sg => specimenGroupRepository.put(sg) }
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -160,7 +160,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "fail for an invalid specimen group id" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val sgId = nameGenerator.next[SpecimenGroup]
 
@@ -175,7 +175,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "add a specimen group" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val sg = factory.createSpecimenGroup
         val cmdJson = Json.obj(
@@ -215,10 +215,10 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "update a specimen group" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val sg = factory.createSpecimenGroup
-        use[BbwebPlugin].specimenGroupRepository.put(sg)
+        specimenGroupRepository.put(sg)
 
         val sg2 = factory.createSpecimenGroup
         val cmdJson = Json.obj(
@@ -260,10 +260,10 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "remove a specimen group" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val sg = factory.createSpecimenGroup
-        use[BbwebPlugin].specimenGroupRepository.put(sg)
+        specimenGroupRepository.put(sg)
 
         val json = makeRequest(
           DELETE,

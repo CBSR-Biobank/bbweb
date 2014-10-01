@@ -1,6 +1,8 @@
 package org.biobank.controllers
 
 import org.biobank.fixture.{ ControllerFixture, NameGenerator }
+import org.biobank.domain.user.UserRepository
+import org.biobank.Global
 
 import com.typesafe.plugin._
 import org.scalatest.Tag
@@ -13,6 +15,7 @@ import org.scalatest._
 import org.scalatestplus.play._
 
 class ApplicationSpec extends ControllerFixture {
+  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -44,9 +47,9 @@ class ApplicationSpec extends ControllerFixture {
     "return correct aggregate counts" in new App(fakeApp) {
       doLogin
 
-      use[BbwebPlugin].studyRepository.put(factory.createDisabledStudy)
-      use[BbwebPlugin].centreRepository.put(factory.createDisabledCentre)
-      use[BbwebPlugin].userRepository.put(factory.createRegisteredUser)
+      studyRepository.put(factory.createDisabledStudy)
+      centreRepository.put(factory.createDisabledCentre)
+      userRepository.put(factory.createRegisteredUser)
 
       val json = makeRequest(GET, "/counts")
       val jsonObj = (json \ "data").as[JsObject]

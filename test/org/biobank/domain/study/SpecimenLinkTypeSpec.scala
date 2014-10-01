@@ -14,6 +14,10 @@ class SpecimenLinkTypeSpec extends DomainSpec {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
+  val specimenLinkTypeRepository = inject [SpecimenLinkTypeRepository]
+
+  val specimenGroupRepository = inject [SpecimenGroupRepository]
+
   val nameGenerator = new NameGenerator(this.getClass)
 
   "A specimen link type" can {

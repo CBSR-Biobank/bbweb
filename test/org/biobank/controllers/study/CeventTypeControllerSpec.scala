@@ -1,7 +1,6 @@
 package org.biobank.controllers.study
 
 import org.biobank.fixture._
-import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ CollectionEventType, CollectionEventAnnotationType, Study, SpecimenGroup }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper._
@@ -17,19 +16,20 @@ import play.api.Play.current
 import org.scalatestplus.play._
 
 class CeventTypeControllerSpec extends ControllerFixture {
+  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
 
   def addOnNonDisabledStudy(study: Study) {
-    use[BbwebPlugin].studyRepository.put(study)
+    studyRepository.put(study)
 
     val sg = factory.createSpecimenGroup
-    use[BbwebPlugin].specimenGroupRepository.put(sg)
+    specimenGroupRepository.put(sg)
 
     val annotType = factory.createCollectionEventAnnotationType
-    use[BbwebPlugin].collectionEventAnnotationTypeRepository.put(annotType)
+    collectionEventAnnotationTypeRepository.put(annotType)
 
     val cet = factory.createCollectionEventType.copy(
       specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
@@ -60,16 +60,16 @@ class CeventTypeControllerSpec extends ControllerFixture {
   }
 
   def updateOnNonDisabledStudy(study: Study) {
-    use[BbwebPlugin].studyRepository.put(study)
+    studyRepository.put(study)
 
     val sg = factory.createSpecimenGroup
-    use[BbwebPlugin].specimenGroupRepository.put(sg)
+    specimenGroupRepository.put(sg)
 
     val annotType = factory.createCollectionEventAnnotationType
-    use[BbwebPlugin].collectionEventAnnotationTypeRepository.put(annotType)
+    collectionEventAnnotationTypeRepository.put(annotType)
 
     val cet = factory.createCollectionEventType
-    use[BbwebPlugin].collectionEventTypeRepository.put(cet)
+    collectionEventTypeRepository.put(cet)
 
     val cet2 = factory.createCollectionEventType.copy(
       specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
@@ -102,18 +102,18 @@ class CeventTypeControllerSpec extends ControllerFixture {
   }
 
   def removeOnNonDisabledStudy(study: Study) {
-    use[BbwebPlugin].studyRepository.put(study)
+    studyRepository.put(study)
 
     val sg = factory.createSpecimenGroup
-    use[BbwebPlugin].specimenGroupRepository.put(sg)
+    specimenGroupRepository.put(sg)
 
     val annotType = factory.createCollectionEventAnnotationType
-    use[BbwebPlugin].collectionEventAnnotationTypeRepository.put(annotType)
+    collectionEventAnnotationTypeRepository.put(annotType)
 
     val cet = factory.createCollectionEventType.copy(
       specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
       annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
-    use[BbwebPlugin].collectionEventTypeRepository.put(cet)
+    collectionEventTypeRepository.put(cet)
 
     val json = makeRequest(
       DELETE,
@@ -130,7 +130,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "list none" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -141,10 +141,10 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "list a single collection event type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val cet = factory.createCollectionEventType
-        use[BbwebPlugin].collectionEventTypeRepository.put(cet)
+        collectionEventTypeRepository.put(cet)
 
         val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -156,10 +156,10 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "get a single collection event type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val cet = factory.createCollectionEventType
-        use[BbwebPlugin].collectionEventTypeRepository.put(cet)
+        collectionEventTypeRepository.put(cet)
 
         val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}?cetId=${cet.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -170,7 +170,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "list multiple collection event types" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val cet1 = factory.createCollectionEventType.copy(
           specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
@@ -181,7 +181,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
         val cetypes = List(cet1, cet2)
-        cetypes map { cet => use[BbwebPlugin].collectionEventTypeRepository.put(cet) }
+        cetypes map { cet => collectionEventTypeRepository.put(cet) }
 
         val json = makeRequest(GET, s"/studies/cetypes/${study.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -201,7 +201,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("invalid study id")
       }
 
-      "fail for an invalid study ID when using a collection event type id" taggedAs(Tag("1")) in new App(fakeApp) {
+      "fail for an invalid study ID when using a collection event type id" in new App(fakeApp) {
         doLogin
         val studyId = nameGenerator.next[Study]
         val cetId = nameGenerator.next[CollectionEventType]
@@ -211,10 +211,10 @@ class CeventTypeControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("invalid study id")
       }
 
-      "fail for an invalid collection event type id" taggedAs(Tag("1")) in new App(fakeApp) {
+      "fail for an invalid collection event type id" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val cetId = nameGenerator.next[CollectionEventType]
 
@@ -229,13 +229,13 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "add a collection event type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val sg = factory.createSpecimenGroup
-        use[BbwebPlugin].specimenGroupRepository.put(sg)
+        specimenGroupRepository.put(sg)
 
         val annotType = factory.createCollectionEventAnnotationType
-        use[BbwebPlugin].collectionEventAnnotationTypeRepository.put(annotType)
+        collectionEventAnnotationTypeRepository.put(annotType)
 
         val cet = factory.createCollectionEventType.copy(
           specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
@@ -285,16 +285,16 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "update a collection event type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val sg = factory.createSpecimenGroup
-        use[BbwebPlugin].specimenGroupRepository.put(sg)
+        specimenGroupRepository.put(sg)
 
         val annotType = factory.createCollectionEventAnnotationType
-        use[BbwebPlugin].collectionEventAnnotationTypeRepository.put(annotType)
+        collectionEventAnnotationTypeRepository.put(annotType)
 
         val cet = factory.createCollectionEventType
-        use[BbwebPlugin].collectionEventTypeRepository.put(cet)
+        collectionEventTypeRepository.put(cet)
 
         val cet2 = factory.createCollectionEventType.copy(
           specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
@@ -346,18 +346,18 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "remove a collection event type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val sg = factory.createSpecimenGroup
-        use[BbwebPlugin].specimenGroupRepository.put(sg)
+        specimenGroupRepository.put(sg)
 
         val annotType = factory.createCollectionEventAnnotationType
-        use[BbwebPlugin].collectionEventAnnotationTypeRepository.put(annotType)
+        collectionEventAnnotationTypeRepository.put(annotType)
 
         val cet = factory.createCollectionEventType.copy(
           specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
-        use[BbwebPlugin].collectionEventTypeRepository.put(cet)
+        collectionEventTypeRepository.put(cet)
 
         val json = makeRequest(
           DELETE,

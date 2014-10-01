@@ -22,7 +22,7 @@ trait Processor extends PersistentActor with ActorLogging {
   protected def process[T <: Event]
     (validation: DomainValidation[T])
     (successFn: WrappedEvent[T] => Unit)
-    (implicit userId: UserId) {
+    (implicit userId: Option[UserId]) {
     val originalSender = context.sender
     validation map { event =>
       val wrappedEvent = WrappedEvent(event, userId, DateTime.now)

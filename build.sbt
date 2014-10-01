@@ -40,11 +40,11 @@ javaOptions in Test ++=  Seq(
   "-Dlogger.resource=logback-test.xml"
 )
 
-//testOptions in Test := Nil
+testOptions in Test := Nil
 
 (testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/report")
 
-(testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
+(testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-oDF")
 
 resolvers ++= Seq(
   Classpaths.sbtPluginReleases,
@@ -64,6 +64,8 @@ libraryDependencies ++= Seq(
   "com.github.ddevore"        %% "akka-persistence-mongo-casbah"  % "0.7.3-SNAPSHOT"     % "compile",
   "com.github.t3hnar"         %% "scala-bcrypt"                   % "2.4",
   "com.typesafe.play.plugins" %% "play-plugins-mailer"            % "2.3.0",
+  "org.scaldi"                %% "scaldi-play"                    % "0.4.1",
+  "org.scaldi"                %% "scaldi-akka"                    % "0.4",
   // WebJars infrastructure
   "org.webjars"               %  "webjars-locator"                % "0.19",
   "org.webjars"               %% "webjars-play"                   % "2.3.0",

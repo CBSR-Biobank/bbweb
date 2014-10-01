@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.service.study
 
 import org.biobank.fixture._
 import org.biobank.infrastructure.event.StudyEvents._
@@ -10,17 +10,14 @@ import org.biobank.domain.{
   DomainValidation,
   PreservationType,
   PreservationTemperatureType,
-  RepositoriesComponent,
   SpecimenType
 }
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
 
 import org.slf4j.LoggerFactory
-import akka.pattern.ask
 import org.joda.time.DateTime
 import org.scalatest.Tag
-import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
@@ -28,10 +25,16 @@ import scalaz.Scalaz._
   * Tests for actor ProcessingTypeProcessorSpec. These are written using ScalaTest.
   *
   */
-class ProcessingTypeProcessorSpec extends StudiesProcessorFixture {
+class ProcessingTypeProcessorSpec extends TestFixture {
   import org.biobank.TestUtils._
 
   private val log = LoggerFactory.getLogger(this.getClass)
+
+  val studyRepository = inject [StudyRepository]
+
+  val processingTypeRepository = inject [ProcessingTypeRepository]
+
+  val studiesProcessor = injectActorRef [StudiesProcessor]
 
   val nameGenerator = new NameGenerator(this.getClass)
 

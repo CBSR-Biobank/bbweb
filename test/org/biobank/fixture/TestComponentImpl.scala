@@ -2,26 +2,25 @@ package org.biobank.fixture
 
 import org.biobank.service._
 
-import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import akka.util.Timeout
-import akka.actor.ActorSystem
-import com.typesafe.config.ConfigFactory
 import com.mongodb.casbah.Imports._
+import com.typesafe.config.ConfigFactory
+import scala.concurrent.duration._
 import scala.language.postfixOps
+import scaldi.Module
+import scaldi.akka.AkkaInjectable
+import scaldi.MutableInjectorAggregation
 
-trait TestComponentImpl extends TopComponent with ServicesComponentImpl {
-
-  implicit val system: ActorSystem = ActorSystem("bbweb-test", TestComponentImpl.config())
-  implicit val timeout = Timeout(5 seconds)
+trait TestDbConfiguration {
 
   // clear the event store
-  MongoConnection()(TestComponentImpl.dbName)("messages").drop
-  MongoConnection()(TestComponentImpl.dbName)("snapshots").drop
+  MongoConnection()(TestDbConfiguration.dbName)("messages").drop
+  MongoConnection()(TestDbConfiguration.dbName)("snapshots").drop
 
 }
 
-object TestComponentImpl {
+object TestDbConfiguration {
 
   val dbName = "bbweb-test"
 

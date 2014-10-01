@@ -7,54 +7,44 @@ import org.slf4j.LoggerFactory
 import scalaz._
 import Scalaz._
 
-trait ProcessingTypeRepositoryComponent {
+trait ProcessingTypeRepository extends ReadWriteRepository [ProcessingTypeId, ProcessingType] {
 
-  val processingTypeRepository: ProcessingTypeRepository
+  def withId(
+    studyId: StudyId,
+    processingTypeId: ProcessingTypeId): DomainValidation[ProcessingType]
 
-  trait ProcessingTypeRepository extends ReadWriteRepository [ProcessingTypeId, ProcessingType] {
+  def allForStudy(studyId: StudyId): Set[ProcessingType]
 
-    def withId(
-      studyId: StudyId,
-      processingTypeId: ProcessingTypeId): DomainValidation[ProcessingType]
-
-    def allForStudy(studyId: StudyId): Set[ProcessingType]
-
-  }
 }
 
-trait ProcessingTypeRepositoryComponentImpl extends ProcessingTypeRepositoryComponent {
-
-  override val processingTypeRepository: ProcessingTypeRepository = new ProcessingTypeRepositoryImpl
-
-  class ProcessingTypeRepositoryImpl
+class ProcessingTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[ProcessingTypeId, ProcessingType](v => v.id)
     with ProcessingTypeRepository {
 
-    val log = LoggerFactory.getLogger(this.getClass)
+  val log = LoggerFactory.getLogger(this.getClass)
 
-    def nextIdentity: ProcessingTypeId = new ProcessingTypeId(nextIdentityAsString)
+  def nextIdentity: ProcessingTypeId = new ProcessingTypeId(nextIdentityAsString)
 
-    def withId(
-      studyId: StudyId,
-      processingTypeId: ProcessingTypeId): DomainValidation[ProcessingType] = {
-      getByKey(processingTypeId).fold(
-        err =>
+  def withId(
+    studyId: StudyId,
+    processingTypeId: ProcessingTypeId): DomainValidation[ProcessingType] = {
+    getByKey(processingTypeId).fold(
+      err =>
+      DomainError(
+        s"processing type does not exist: { studyId: $studyId, processingTypeId: $processingTypeId }")
+        .failNel,
+      cet =>
+      if (cet.studyId.equals(studyId)) {
+        cet.success
+      } else {
         DomainError(
-          s"processing type does not exist: { studyId: $studyId, processingTypeId: $processingTypeId }")
-          .failNel,
-        cet =>
-        if (cet.studyId.equals(studyId)) {
-          cet.success
-        } else {
-          DomainError(
-            s"study does not have processing type:{ studyId: $studyId, processingTypeId: $processingTypeId }")
-            .failNel
-        }
-      )
-    }
+          s"study does not have processing type:{ studyId: $studyId, processingTypeId: $processingTypeId }")
+          .failNel
+      }
+    )
+  }
 
-    def allForStudy(studyId: StudyId): Set[ProcessingType] = {
-      getValues.filter(x => x.studyId.equals(studyId)).toSet
-    }
+  def allForStudy(studyId: StudyId): Set[ProcessingType] = {
+    getValues.filter(x => x.studyId.equals(studyId)).toSet
   }
 }

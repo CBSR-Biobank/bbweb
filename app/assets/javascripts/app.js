@@ -28,7 +28,6 @@ define([
     'biobank.studies',
     'biobank.users'
   ]);
-
   // For debugging
   //
   app.run(debugFunc);

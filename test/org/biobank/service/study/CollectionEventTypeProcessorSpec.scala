@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.service.study
 
 import org.biobank.fixture._
 import org.biobank.infrastructure.CollectionEventTypeAnnotationTypeData
@@ -13,7 +13,6 @@ import org.biobank.domain.{
   DomainValidation,
   PreservationType,
   PreservationTemperatureType,
-  RepositoriesComponent,
   SpecimenType
 }
 import org.biobank.domain.study._
@@ -30,10 +29,20 @@ import scalaz.Scalaz._
   * Tests for actor CollectionEventTypeProcessor. These are written using ScalaTest.
   *
   */
-class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
+class CollectionEventTypeProcessorSpec extends TestFixture {
   import org.biobank.TestUtils._
 
   private val log = LoggerFactory.getLogger(this.getClass)
+
+  val studyRepository = inject [StudyRepository]
+
+  val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
+
+  val collectionEventAnnotationTypeRepository = inject [CollectionEventAnnotationTypeRepository]
+
+  val specimenGroupRepository = inject [SpecimenGroupRepository]
+
+  val studiesProcessor = injectActorRef [StudiesProcessor]
 
   val nameGenerator = new NameGenerator(this.getClass)
 

@@ -16,7 +16,7 @@ class StudySpec extends DomainSpec {
 
   "A study" can {
 
-    "be created" in {
+    "be created" in{
       val id = StudyId(nameGenerator.next[Study])
       val version = -1L
       val name = nameGenerator.next[Study]

@@ -1,67 +1,62 @@
-package org.biobank.controllers
+package org.biobank
 
-import org.biobank.domain.user.{ RegisteredUser, User, UserId }
-import org.biobank.service.{ TopComponent, ServicesComponentImpl }
+import org.biobank.domain.user.{
+  RegisteredUser,
+  User,
+  UserId,
+  UserRepository
+}
+import org.biobank.service.PasswordHasher
+import play.api.GlobalSettings
+import play.api.mvc.WithFilters
+import play.filters.gzip.GzipFilter
+import org.biobank.modules.{WebModule, UserModule}
+import play.api.libs.concurrent.Akka
+import play.api.Logger
 
-import java.io.File
-import play.api.libs.Files
-import play.api.{ Configuration, GlobalSettings, Logger, Mode, Plugin }
-import play.api.libs.concurrent._
 import akka.actor.ActorSystem
 import akka.actor.Props
-import com.typesafe.config.ConfigFactory
-import play.api.Play.current
+
+import java.io.File
 import org.joda.time.DateTime
+import scaldi.play.ScaldiSupport
+import scaldi.Module
+import scaldi.akka.AkkaInjectable
 
-class BbwebPlugin(val app: play.api.Application)
-    extends Plugin
-    with TopComponent
-    with ServicesComponentImpl {
+/** This is a trait so that it can be used by tests also.
+  */
+trait Global
+    extends GlobalSettings
+    with ScaldiSupport {
 
-  override lazy val studiesProcessor = Akka.system.actorOf(Props(new StudiesProcessor), "studyproc")
-  override lazy val centresProcessor = Akka.system.actorOf(Props(new CentresProcessor), "centresproc")
-  override lazy val usersProcessor = Akka.system.actorOf(Props(new UsersProcessor), "userproc")
-
-  override lazy val studiesService = new StudiesServiceImpl(studiesProcessor)
-  override lazy val centresService = new CentresServiceImpl(centresProcessor)
-  override lazy val usersService = new UsersService(usersProcessor)
-
-  private val configKey = "slick"
-  private val ScriptDirectory = "conf/evolutions/"
-  private val CreateScript = "create-database.sql"
-  private val DropScript = "drop-database.sql"
-  private val ScriptHeader = "-- SQL DDL script\n-- Generated file - do not edit\n\n"
+  def applicationModule = new WebModule :: new UserModule
 
   val defaultUserEmail = "admin@admin.com"
+
+  val defaultUserId = UserId(defaultUserEmail)
 
   /**
     *
     */
-  override def onStart() {
-    // evaluate the lazy variabled declared up top
-    studiesProcessor
-    centresProcessor
-    usersProcessor
-    studiesService
-    centresService
-    usersService
+  override def onStart(app: play.api.Application) {
+    super.onStart(app)
 
-    checkEmailConfig
+    checkEmailConfig(app)
 
     createDefaultUser
     //createTestUser
 
     createSqlDdlScripts
 
-    Logger.info(s"Bbweb Plugin started")
-    super.onStart
+    Logger.info(s"Play started")
   }
 
-  override def onStop() {
-    Logger.info(s"Bbweb Plugin stopped")
+  override def onStop(app: play.api.Application) {
+    super.onStop(app)
+    Logger.info(s"Play stopped")
   }
 
-  def checkEmailConfig = {
+  def checkEmailConfig(app: play.api.Application) = {
     app.configuration.getString("smtp.host").getOrElse(
       throw new RuntimeException("smtp server information needs to be set in email.conf"))
   }
@@ -71,6 +66,8 @@ class BbwebPlugin(val app: play.api.Application)
     * password is "testuser"
     */
   def createTestUser = {
+    val userRepository = inject [UserRepository]
+
     val email = "test@biosample.ca"
     val validation = RegisteredUser.create(
       UserId(email),
@@ -96,6 +93,9 @@ class BbwebPlugin(val app: play.api.Application)
     * for debug only - password is "testuser"
     */
   def createDefaultUser: User = {
+    val userRepository = inject [UserRepository]
+
+    Logger.info("createDefaultUser")
     //if ((app.mode == Mode.Dev) || (app.mode == Mode.Test)) {
 
     //
@@ -160,3 +160,12 @@ class BbwebPlugin(val app: play.api.Application)
   }
 
 }
+
+
+object Global
+    extends WithFilters(new GzipFilter(shouldGzip = (request, response) => {
+      val contentType = response.headers.get("Content-Type")
+      contentType.exists(_.startsWith("text/html")) || request.path.endsWith("jsroutes.js")
+    }))
+    with Global
+

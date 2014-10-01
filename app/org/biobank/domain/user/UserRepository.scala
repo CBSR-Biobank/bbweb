@@ -7,54 +7,44 @@ import org.slf4j.LoggerFactory
 import scalaz._
 import scalaz.Scalaz._
 
-trait UserRepositoryComponent {
+/** A repository that stores [[User]]s. */
+trait UserRepository extends ReadWriteRepository[UserId, User] {
 
-  val userRepository: UserRepository
+  def allUsers(): Set[User]
 
-  /** A repository that stores [[User]]s. */
-  trait UserRepository extends ReadWriteRepository[UserId, User] {
+  def getRegistered(id: UserId): DomainValidation[RegisteredUser]
 
-    def allUsers(): Set[User]
+  def getActive(id: UserId): DomainValidation[ActiveUser]
 
-    def getRegistered(id: UserId): DomainValidation[RegisteredUser]
+  def getLocked(id: UserId): DomainValidation[LockedUser]
 
-    def getActive(id: UserId): DomainValidation[ActiveUser]
+  def getByEmail(email: String): DomainValidation[User]
 
-    def getLocked(id: UserId): DomainValidation[LockedUser]
-
-    def getByEmail(email: String): DomainValidation[User]
-
-  }
 }
 
-trait UserRepositoryComponentImpl extends UserRepositoryComponent {
+/** An implementation of repository that stores [[User]]s.
+  *
+  * This repository uses the [[ReadWriteRepository]] implementation.
+  */
+class UserRepositoryImpl
+    extends ReadWriteRepositoryRefImpl[UserId, User](v => v.id)
+    with UserRepository {
 
-  val userRepository: UserRepository = new UserRepositoryImpl
+  def nextIdentity: UserId = new UserId(nextIdentityAsString)
 
-  /** An implementation of repository that stores [[User]]s.
-    *
-    * This repository uses the [[ReadWriteRepository]] implementation.
-    */
-  class UserRepositoryImpl
-      extends ReadWriteRepositoryRefImpl[UserId, User](v => v.id)
-      with UserRepository {
+  def allUsers(): Set[User] = getValues.toSet
 
-    def nextIdentity: UserId = new UserId(nextIdentityAsString)
+  def getRegistered(id: UserId) = getByKey(id).map(_.asInstanceOf[RegisteredUser])
 
-    def allUsers(): Set[User] = getValues.toSet
+  def getActive(id: UserId) = getByKey(id).map(_.asInstanceOf[ActiveUser])
 
-    def getRegistered(id: UserId) = getByKey(id).map(_.asInstanceOf[RegisteredUser])
+  def getLocked(id: UserId) = getByKey(id).map(_.asInstanceOf[LockedUser])
 
-    def getActive(id: UserId) = getByKey(id).map(_.asInstanceOf[ActiveUser])
-
-    def getLocked(id: UserId) = getByKey(id).map(_.asInstanceOf[LockedUser])
-
-    def getByEmail(email: String): DomainValidation[User] = {
-      getValues.find(_.email == email).fold {
-        DomainError(s"user with email not found: $email").failNel[User]
-      } { user =>
-        user.success
-      }
+  def getByEmail(email: String): DomainValidation[User] = {
+    getValues.find(_.email == email).fold {
+      DomainError(s"user with email not found: $email").failNel[User]
+    } { user =>
+      user.success
     }
   }
 }

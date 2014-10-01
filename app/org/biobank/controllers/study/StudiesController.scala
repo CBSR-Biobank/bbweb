@@ -2,10 +2,12 @@ package org.biobank.controllers.study
 
 import org.biobank.controllers._
 import org.biobank.domain._
+import org.biobank.service.users.UsersService
 import org.biobank.domain.study.Study
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service._
+import org.biobank.service.study.StudiesService
 
 import com.typesafe.plugin.use
 import play.api.Logger
@@ -17,6 +19,7 @@ import play.api.mvc.Results._
 import play.api.mvc._
 import scala.concurrent.Future
 import scala.language.reflectiveCalls
+import scaldi.{Injectable, Injector}
 
 import scalaz._
 import scalaz.Scalaz._
@@ -24,10 +27,14 @@ import scalaz.Scalaz._
 /**
   *
   */
-object StudiesController extends CommandController with JsonController {
+class StudiesController(implicit inj: Injector)
+    extends CommandController
+    with JsonController
+    with Injectable {
 
-  //private def studiesService = use[BbwebPlugin].studiesService
-  private def studiesService = use[BbwebPlugin].studiesService
+  implicit val usersService = inject [UsersService]
+
+  private def studiesService = inject[StudiesService]
 
   def list = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Ok(studiesService.getAll.toList)

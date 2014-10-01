@@ -10,11 +10,11 @@ package  service {
   /** A wrapper for a command to include the user that issued it.
     *
     */
-  case class WrappedCommand(command: Command, userId: UserId)
+  case class WrappedCommand(command: Command, userId: Option[UserId])
 
   /** A wrapper for an event to include the user that issued it and the time that it was created.
     *
     */
-  case class WrappedEvent[T <: Event](event: T, userId: UserId, dateTime: DateTime);
+  case class WrappedEvent[T <: Event](event: T, userId: Option[UserId], dateTime: DateTime);
 
 }

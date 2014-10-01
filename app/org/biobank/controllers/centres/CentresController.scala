@@ -3,6 +3,8 @@ package org.biobank.controllers.centres
 import org.biobank.controllers._
 import org.biobank.domain._
 import org.biobank.service._
+import org.biobank.service.users.UsersService
+import org.biobank.service.centre.CentresService
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 import org.biobank.domain.centre.Centre
@@ -17,6 +19,7 @@ import com.typesafe.plugin.use
 import play.api.Logger
 import play.api.Play.current
 import scala.language.reflectiveCalls
+import scaldi.{Injectable, Injector}
 
 import scalaz._
 import scalaz.Scalaz._
@@ -24,9 +27,14 @@ import scalaz.Scalaz._
 /**
   *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
   */
-object CentresController extends CommandController with JsonController {
+class CentresController(implicit inj: Injector)
+    extends CommandController
+    with JsonController
+    with Injectable {
 
-  private def centresService = use[BbwebPlugin].centresService
+  implicit val usersService = inject [UsersService]
+
+  private def centresService = inject [CentresService]
 
   def list = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Ok(centresService.getAll.toList)
@@ -59,21 +67,10 @@ object CentresController extends CommandController with JsonController {
     domainValidationReply(future)
   }
 
-  def getLocations(
-    centreId: String,
-    locationId: Option[String]) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    val locations = centresService.getCentreLocations(centreId)
-    locationId.fold {
-      Ok(locations)
-    } { locationId =>
-      val locList = locations.filter(x => x.id.id == locationId).toList
-      if (locList.size == 1) {
-        Ok(locList(0))
-      } else {
-        BadRequest(s"location does not exist: $locationId")
-      }
+  def getLocations(centreId: String, locationId: Option[String]) =
+    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+      domainValidationReply(centresService.getCentreLocations(centreId, locationId))
     }
-  }
 
   def addLocation = commandAction { cmd: AddCentreLocationCmd => implicit userId =>
     val future = centresService.addCentreLocation(cmd)
@@ -89,7 +86,7 @@ object CentresController extends CommandController with JsonController {
 
 
   def getLinkedStudies(centreId: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    Ok(centresService.getCentreStudies(centreId))
+    domainValidationReply(centresService.getCentreStudies(centreId))
   }
 
   def addLinkedStudies = commandAction { cmd: AddCentreToStudyCmd => implicit userId =>

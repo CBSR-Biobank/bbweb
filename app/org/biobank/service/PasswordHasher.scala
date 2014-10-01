@@ -3,9 +3,9 @@ package org.biobank.service
 import com.github.t3hnar.bcrypt._
 import org.slf4j.LoggerFactory
 
-trait PasswordHasherComponent {
+// trait PasswordHasherComponent {
 
-  val passwordHasher: PasswordHasher
+//   val passwordHasher: PasswordHasher
 
   trait PasswordHasher {
     def encrypt(password: String, salt: String): String
@@ -15,12 +15,12 @@ trait PasswordHasherComponent {
     def valid(encryptedPwd: String,  salt: String, enteredPwd: String): Boolean
   }
 
-}
+// }
 
-trait PasswordHasherComponentImpl
-    extends PasswordHasherComponent {
+// trait PasswordHasherComponentImpl
+//     extends PasswordHasherComponent {
 
-  val passwordHasher: PasswordHasher = new PasswordHasherImpl
+//   val passwordHasher: PasswordHasher = new PasswordHasherImpl
 
   class PasswordHasherImpl extends PasswordHasher {
 
@@ -41,4 +41,4 @@ trait PasswordHasherComponentImpl
     }
   }
 
-}
+//}

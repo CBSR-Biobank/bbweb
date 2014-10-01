@@ -1,9 +1,8 @@
 package org.biobank.domain.study
 
 import org.biobank.domain._
-
 import scalaz._
-import scalaz.Scalaz._
+import Scalaz._
 
 trait StudyAnnotationTypeRepository[A <: StudyAnnotationType]
     extends ReadWriteRepository [AnnotationTypeId, A] {

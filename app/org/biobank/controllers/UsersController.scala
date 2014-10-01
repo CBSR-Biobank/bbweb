@@ -1,6 +1,7 @@
 package org.biobank.controllers
 
 import org.biobank.infrastructure.command.UserCommands._
+import org.biobank.service.users.UsersService
 
 import com.typesafe.plugin.use
 import play.api.Logger
@@ -14,13 +15,17 @@ import play.api.mvc.Results._
 import play.api.mvc._
 import scala.concurrent.Future
 import scala.language.reflectiveCalls
+import scaldi.{Injectable, Injector}
 
 import scalaz._
 import Scalaz._
 
-object UsersController extends CommandController with JsonController {
+class UsersController(implicit inj: Injector)
+    extends CommandController
+    with JsonController
+    with Injectable {
 
-  private def usersService = use[BbwebPlugin].usersService
+  implicit val usersService = inject [UsersService]
 
   /** Used for obtaining the email and password from the HTTP login request */
   case class LoginCredentials(email: String, password: String)

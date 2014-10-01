@@ -1,28 +1,16 @@
 package org.biobank.domain.study
 
-import org.biobank.domain._
-
-import scalaz._
-import Scalaz._
-
-trait CollectionEventAnnotationTypeRepositoryComponent {
-
-  val collectionEventAnnotationTypeRepository: CollectionEventAnnotationTypeRepository
-
-  trait CollectionEventAnnotationTypeRepository
-    extends StudyAnnotationTypeRepository[CollectionEventAnnotationType] {
-  }
+import org.biobank.domain.{
+  AnnotationTypeId,
+  ReadWriteRepositoryRefImpl
 }
 
-trait CollectionEventAnnotationTypeRepositoryComponentImpl
-  extends CollectionEventAnnotationTypeRepositoryComponent {
+trait CollectionEventAnnotationTypeRepository
+    extends StudyAnnotationTypeRepository[CollectionEventAnnotationType] {
+}
 
-  override val collectionEventAnnotationTypeRepository: CollectionEventAnnotationTypeRepository =
-    new CollectionEventAnnotationTypeRepositoryImpl
-
-  class CollectionEventAnnotationTypeRepositoryImpl
+class CollectionEventAnnotationTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[AnnotationTypeId, CollectionEventAnnotationType](v => v.id)
     with StudyAnnotationTypeRepositoryImpl[CollectionEventAnnotationType]
     with CollectionEventAnnotationTypeRepository {
-  }
 }

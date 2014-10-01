@@ -3,56 +3,45 @@ package org.biobank.domain.study
 import org.biobank.domain._
 
 import org.slf4j.LoggerFactory
-
 import scalaz._
 import Scalaz._
 
-trait SpecimenGroupRepositoryComponent {
+trait SpecimenGroupRepository extends ReadWriteRepository[SpecimenGroupId, SpecimenGroup] {
 
-  val specimenGroupRepository: SpecimenGroupRepository
+  def allForStudy(studyId: StudyId): Set[SpecimenGroup]
 
-  trait SpecimenGroupRepository extends ReadWriteRepository[SpecimenGroupId, SpecimenGroup] {
+  def withId(
+    studyId: StudyId,
+    specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup]
 
-    def allForStudy(studyId: StudyId): Set[SpecimenGroup]
-
-    def withId(
-      studyId: StudyId,
-      specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup]
-
-  }
 }
 
-trait SpecimenGroupRepositoryComponentImpl extends SpecimenGroupRepositoryComponent {
+class SpecimenGroupRepositoryImpl
+    extends ReadWriteRepositoryRefImpl[SpecimenGroupId, SpecimenGroup](v => v.id)
+    with SpecimenGroupRepository {
 
-  override val specimenGroupRepository: SpecimenGroupRepository = new SpecimenGroupRepositoryImpl
+  val log = LoggerFactory.getLogger(this.getClass)
 
-  class SpecimenGroupRepositoryImpl
-      extends ReadWriteRepositoryRefImpl[SpecimenGroupId, SpecimenGroup](v => v.id)
-      with SpecimenGroupRepository {
+  def nextIdentity: SpecimenGroupId = new SpecimenGroupId(nextIdentityAsString)
 
-    val log = LoggerFactory.getLogger(this.getClass)
+  def allForStudy(studyId: StudyId): Set[SpecimenGroup] = {
+    getValues.filter(x => x.studyId.equals(studyId)).toSet
+  }
 
-    def nextIdentity: SpecimenGroupId = new SpecimenGroupId(nextIdentityAsString)
-
-    def allForStudy(studyId: StudyId): Set[SpecimenGroup] = {
-      getValues.filter(x => x.studyId.equals(studyId)).toSet
-    }
-
-    def withId(
-      studyId: StudyId,
-      specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
-      getByKey(specimenGroupId).fold(
-        err => DomainError(
-          s"specimen group does not exist: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
-          .failNel,
-        sg => if (sg.studyId.equals(studyId)) {
-          sg.success
-        } else {
-          DomainError(
-            s"study does not have specimen group: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
-            .failNel
-        }
-      )
-    }
+  def withId(
+    studyId: StudyId,
+    specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
+    getByKey(specimenGroupId).fold(
+      err => DomainError(
+        s"specimen group does not exist: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
+        .failNel,
+      sg => if (sg.studyId.equals(studyId)) {
+        sg.success
+      } else {
+        DomainError(
+          s"study does not have specimen group: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
+          .failNel
+      }
+    )
   }
 }

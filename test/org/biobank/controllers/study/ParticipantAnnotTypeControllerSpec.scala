@@ -1,7 +1,6 @@
 package org.biobank.controllers.study
 
 import org.biobank.fixture._
-import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, ParticipantAnnotationType }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper._
@@ -17,6 +16,7 @@ import play.api.Play.current
 import org.scalatestplus.play._
 
 class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
+  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -48,10 +48,10 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
   }
 
   private def addOnNonDisabledStudy(study: Study) {
-    use[BbwebPlugin].studyRepository.put(study)
+    studyRepository.put(study)
 
     val annotType = factory.createParticipantAnnotationType
-    use[BbwebPlugin].participantAnnotationTypeRepository.put(annotType)
+    participantAnnotationTypeRepository.put(annotType)
 
     val json = makeRequest(
       POST,
@@ -64,10 +64,10 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
   }
 
   private def updateOnNonDisabledStudy(study: Study) {
-    use[BbwebPlugin].studyRepository.put(study)
+    studyRepository.put(study)
 
     val annotType = factory.createParticipantAnnotationType
-    use[BbwebPlugin].participantAnnotationTypeRepository.put(annotType)
+    participantAnnotationTypeRepository.put(annotType)
 
     val json = makeRequest(
       PUT,
@@ -80,13 +80,13 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
   }
 
   def removeOnNonDisabledStudy(study: Study) {
-    use[BbwebPlugin].studyRepository.put(study)
+    studyRepository.put(study)
 
     val sg = factory.createSpecimenGroup
-    use[BbwebPlugin].specimenGroupRepository.put(sg)
+    specimenGroupRepository.put(sg)
 
     val annotType = factory.createParticipantAnnotationType
-    use[BbwebPlugin].participantAnnotationTypeRepository.put(annotType)
+    participantAnnotationTypeRepository.put(annotType)
 
     val json = makeRequest(
       DELETE,
@@ -103,7 +103,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "list none" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/pannottypes/${study.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -114,10 +114,10 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "list a single participant annotation type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val annotType = factory.createParticipantAnnotationType
-        use[BbwebPlugin].participantAnnotationTypeRepository.put(annotType)
+        participantAnnotationTypeRepository.put(annotType)
 
         val json = makeRequest(GET, s"/studies/pannottypes/${study.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -129,12 +129,12 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "list multiple participant annotation types" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val annotTypes = List(
           factory.createParticipantAnnotationType,
           factory.createParticipantAnnotationType)
-        annotTypes map { annotType => use[BbwebPlugin].participantAnnotationTypeRepository.put(annotType) }
+        annotTypes map { annotType => participantAnnotationTypeRepository.put(annotType) }
 
         val json = makeRequest(GET, s"/studies/pannottypes/${study.id.id}")
         (json \ "status").as[String] must include ("success")
@@ -154,7 +154,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("invalid study id")
       }
 
-      "fail for an invalid study ID when using an annotation type id" taggedAs(Tag("1")) in new App(fakeApp) {
+      "fail for an invalid study ID when using an annotation type id" in new App(fakeApp) {
         doLogin
         val studyId = nameGenerator.next[Study]
         val annotTypeId = nameGenerator.next[ParticipantAnnotationType]
@@ -164,10 +164,10 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("invalid study id")
       }
 
-      "fail for an invalid participant annotation type id" taggedAs(Tag("1")) in new App(fakeApp) {
+      "fail for an invalid participant annotation type id" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val annotTypeId = nameGenerator.next[ParticipantAnnotationType]
 
@@ -182,7 +182,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "add a participant annotation type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val annotType = factory.createParticipantAnnotationType
         val json = makeRequest(POST, "/studies/pannottypes", json = annotTypeToAddCmdJson(annotType))
@@ -210,10 +210,10 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "update a participant annotation type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val annotType = factory.createParticipantAnnotationType
-        use[BbwebPlugin].participantAnnotationTypeRepository.put(annotType)
+        participantAnnotationTypeRepository.put(annotType)
 
         val annotType2 = factory.createParticipantAnnotationType.copy(
           id = annotType.id,
@@ -248,10 +248,10 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       "remove a participant annotation type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
-        use[BbwebPlugin].studyRepository.put(study)
+        studyRepository.put(study)
 
         val annotType = factory.createParticipantAnnotationType
-        use[BbwebPlugin].participantAnnotationTypeRepository.put(annotType)
+        participantAnnotationTypeRepository.put(annotType)
 
         val json = makeRequest(
           DELETE,

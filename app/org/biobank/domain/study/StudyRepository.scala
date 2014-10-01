@@ -2,45 +2,31 @@ package org.biobank.domain.study
 
 import org.biobank.domain._
 
-import scalaz._
-import Scalaz._
+trait StudyRepository extends ReadWriteRepository[StudyId, Study] {
 
-trait StudyRepositoryComponent {
+  def allStudies(): Set[Study]
 
-  val studyRepository: StudyRepository
+  def getDisabled(id: StudyId): DomainValidation[DisabledStudy]
 
-  trait StudyRepository extends ReadWriteRepository[StudyId, Study] {
+  def getEnabled(id: StudyId): DomainValidation[EnabledStudy]
 
-    def allStudies(): Set[Study]
+  def getRetired(id: StudyId): DomainValidation[RetiredStudy]
 
-    def getDisabled(id: StudyId): DomainValidation[DisabledStudy]
-
-    def getEnabled(id: StudyId): DomainValidation[EnabledStudy]
-
-    def getRetired(id: StudyId): DomainValidation[RetiredStudy]
-
-  }
 }
 
-trait StudyRepositoryComponentImpl extends StudyRepositoryComponent {
+class StudyRepositoryImpl extends ReadWriteRepositoryRefImpl[StudyId, Study](v => v.id) with StudyRepository {
 
-  override val studyRepository: StudyRepository = new StudyRepositoryImpl
+  def nextIdentity: StudyId = new StudyId(nextIdentityAsString)
 
-  class StudyRepositoryImpl extends ReadWriteRepositoryRefImpl[StudyId, Study](v => v.id) with StudyRepository {
+  def allStudies(): Set[Study] = getValues.toSet
 
-    def nextIdentity: StudyId = new StudyId(nextIdentityAsString)
+  def getDisabled(id: StudyId): DomainValidation[DisabledStudy] =
+    getByKey(id).map(_.asInstanceOf[DisabledStudy])
 
-    def allStudies(): Set[Study] = getValues.toSet
+  def getEnabled(id: StudyId): DomainValidation[EnabledStudy] =
+    getByKey(id).map(_.asInstanceOf[EnabledStudy])
 
-    def getDisabled(id: StudyId): DomainValidation[DisabledStudy] =
-      getByKey(id).map(_.asInstanceOf[DisabledStudy])
-
-    def getEnabled(id: StudyId): DomainValidation[EnabledStudy] =
-      getByKey(id).map(_.asInstanceOf[EnabledStudy])
-
-    def getRetired(id: StudyId): DomainValidation[RetiredStudy] =
-      getByKey(id).map(_.asInstanceOf[RetiredStudy])
-
-  }
+  def getRetired(id: StudyId): DomainValidation[RetiredStudy] =
+    getByKey(id).map(_.asInstanceOf[RetiredStudy])
 
 }

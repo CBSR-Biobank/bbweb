@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.service.study
 
 import org.biobank.fixture._
 import org.biobank.domain._
@@ -18,10 +18,18 @@ import Scalaz._
   * Tests for actor ParticipantAnnotationTypeProcessorSpec. These are written using ScalaTest.
   *
   */
-class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
+class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
   import org.biobank.TestUtils._
 
   private val log = LoggerFactory.getLogger(this.getClass)
+
+  val studyRepository = inject [StudyRepository]
+
+  val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
+
+  val participantAnnotationTypeRepository = inject [ParticipantAnnotationTypeRepository]
+
+  val studiesProcessor = injectActorRef [StudiesProcessor]
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -36,7 +44,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
 
   "A study processor" can {
 
-    "add a participant annotation type" taggedAs(Tag("1")) in {
+    "add a participant annotation type" in {
       val annotType = factory.createParticipantAnnotationType
 
       val cmd = AddParticipantAnnotationTypeCmd(

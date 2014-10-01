@@ -2,6 +2,8 @@ package org.biobank.controllers.study
 
 import org.biobank.controllers._
 import org.biobank.service._
+import org.biobank.service.users.UsersService
+import org.biobank.service.study.StudiesService
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.domain.study._
 import org.biobank.domain.AnatomicalSourceType._
@@ -18,6 +20,7 @@ import play.api.libs.json._
 import play.api.mvc.Results._
 import play.api.Play.current
 import scala.language.reflectiveCalls
+import scaldi.{Injectable, Injector}
 
 import scalaz._
 import scalaz.Scalaz._
@@ -25,9 +28,14 @@ import scalaz.Scalaz._
 /**
  * Handles all operations user can perform on a Specimen Group.
  */
-object SpecimenGroupController extends CommandController with JsonController {
+class SpecimenGroupController(implicit inj: Injector)
+    extends CommandController
+    with JsonController
+    with Injectable {
 
-  private def studiesService = use[BbwebPlugin].studiesService
+  implicit val usersService = inject [UsersService]
+
+  private def studiesService = inject[StudiesService]
 
   def get(studyId: String, sgId: Option[String]) =
     AuthAction(parse.empty) { token => userId => implicit request =>
@@ -57,6 +65,7 @@ object SpecimenGroupController extends CommandController with JsonController {
 
     ???
   }
+
 
   def addSpecimenGroup = commandAction(numFields = 8) { cmd: AddSpecimenGroupCmd => implicit userId =>
     val future = studiesService.addSpecimenGroup(cmd)

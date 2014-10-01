@@ -13,6 +13,8 @@ class ProcessingTypeSpec extends DomainSpec {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
+  val processingTypeRepository = inject [ProcessingTypeRepository]
+
   val nameGenerator = new NameGenerator(this.getClass)
 
   "A processing type" can {

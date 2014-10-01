@@ -2,6 +2,7 @@ package org.biobank.controllers
 
 import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.user.{ UserId, UserHelper }
+import org.biobank.service.users.UsersService
 
 import scala.concurrent.Future
 import play.api.mvc._
@@ -9,6 +10,7 @@ import play.api.libs.json._
 import play.api.cache._
 import play.api.Play.current
 import com.typesafe.plugin.use
+import scaldi.{Injectable, Injector}
 
 import scalaz._
 import scalaz.Scalaz._
@@ -18,8 +20,6 @@ import scalaz.Scalaz._
  * Can be composed to fine-tune access control.
  */
 trait Security { self: Controller =>
-
-  private def usersService = use[BbwebPlugin].usersService
 
   val AuthTokenCookieKey = "XSRF-TOKEN"
   val AuthTokenHeader = "X-XSRF-TOKEN"
@@ -36,7 +36,10 @@ trait Security { self: Controller =>
    *
    *  - matches a token already stored in the play cache
    */
-  private def validateToken[A](request: Request[A]): DomainValidation[AuthenticationInfo] = {
+  private def validateToken[A]
+    (request: Request[A])
+    (implicit usersService: UsersService)
+      : DomainValidation[AuthenticationInfo] = {
      request.cookies.get(AuthTokenCookieKey).fold {
        DomainError("Invalid XSRF Token cookie").failNel[AuthenticationInfo]
      } { xsrfTokenCookie =>
@@ -64,24 +67,31 @@ trait Security { self: Controller =>
    * Ensures that the request has the proper authorization.
    *
    */
-  def AuthAction[A](p: BodyParser[A] = parse.anyContent)(
-    f: String => UserId => Request[A] => Result): Action[A] = Action(p) { implicit request =>
-    validateToken(request).fold(
-      err => Unauthorized(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-      authInfo => f(authInfo.token)(authInfo.userId)(request))
-  }
+  def AuthAction[A]
+    (p: BodyParser[A] = parse.anyContent)
+    (f: String => UserId => Request[A] => Result)
+    (implicit usersService: UsersService)
+      : Action[A] =
+    Action(p) { implicit request =>
+      validateToken(request).fold(
+        err => Unauthorized(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        authInfo => f(authInfo.token)(authInfo.userId)(request))
+    }
 
   /**
    * Ensures that the request has the proper authorization.
    *
    */
-  def AuthActionAsync[A](p: BodyParser[A] = parse.anyContent)(
-    f: String => UserId => Request[A] => Future[Result]) = Action.async(p) { implicit request =>
-    validateToken(request).fold(
-      err => Future.successful(Unauthorized(Json.obj(
-        "status" ->"error",
-        "message" -> err.list.mkString(", ")))),
-      authInfo => f(authInfo.token)(authInfo.userId)(request))
-  }
+  def AuthActionAsync[A]
+    (p: BodyParser[A] = parse.anyContent)
+    (f: String => UserId => Request[A] => Future[Result])
+    (implicit usersService: UsersService) =
+    Action.async(p) { implicit request =>
+      validateToken(request).fold(
+        err => Future.successful(Unauthorized(Json.obj(
+          "status" ->"error",
+          "message" -> err.list.mkString(", ")))),
+        authInfo => f(authInfo.token)(authInfo.userId)(request))
+    }
 
 }

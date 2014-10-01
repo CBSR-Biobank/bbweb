@@ -11,7 +11,7 @@ import net.sf.ehcache._
   * https://groups.google.com/d/msg/play-framework/PBIfeiwl5rU/-IWifSWhBlAJ
   *
   */
-class FixedEhCachePlugin(app: Application) extends CachePlugin {
+class FixedEhCachePlugin(app: play.api.Application) extends CachePlugin {
 
   lazy val cache = {
     val manager = CacheManager.getInstance()

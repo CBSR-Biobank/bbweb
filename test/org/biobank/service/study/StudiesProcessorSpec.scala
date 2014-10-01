@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.service.study
 
 import org.biobank.fixture._
 import org.biobank.infrastructure.command.StudyCommands._
@@ -10,16 +10,10 @@ import org.biobank.domain.{
   DomainValidation,
   PreservationType,
   PreservationTemperatureType,
-  RepositoriesComponentImpl,
   SpecimenType
 }
 import org.biobank.domain.study._
 
-import scala.concurrent.duration._
-import scala.language.postfixOps
-import scala.concurrent.Await
-import akka.pattern.{ ask, gracefulStop }
-import akka.actor.{ Props, PoisonPill }
 import org.joda.time.DateTime
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
@@ -31,10 +25,18 @@ import scalaz.Scalaz._
   * Tests for actor StudiesProcessorSpec. These are written using ScalaTest.
   *
   */
-class StudiesProcessorSpec extends StudiesProcessorFixture {
+class StudiesProcessorSpec extends TestFixture {
   import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  val studyRepository = inject [StudyRepository]
+
+  val specimenGroupRepository = inject [SpecimenGroupRepository]
+
+  val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
+
+  val studiesProcessor = injectActorRef [StudiesProcessor]
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -283,34 +285,35 @@ class StudiesProcessorSpec extends StudiesProcessorFixture {
       /*
        * Not sure if this is a good test, or how to do it correctly - ignoring it for now
        */
-      val study = factory.createDisabledStudy
+      // val study = factory.createDisabledStudy
 
-      var cmd: StudyCommand = AddStudyCmd(study.name, study.description)
-      val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
-        .futureValue
+      // var cmd: StudyCommand = AddStudyCmd(study.name, study.description)
+      // val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
+      //   .futureValue
 
-      validation mustBe ('success)
-      val event = validation.getOrElse(fail)
+      // validation mustBe ('success)
+      // val event = validation.getOrElse(fail)
 
-      Thread.sleep(10)
+      // Thread.sleep(10)
 
-      Await.result(gracefulStop(studiesProcessor, 5 seconds, PoisonPill), 6 seconds)
+      // Await.result(gracefulStop(studiesProcessor, 5 seconds, PoisonPill), 6 seconds)
 
-      // restart
-      val newStudiesProcessor = system.actorOf(Props(new StudiesProcessor), "studyproc")
+      // // restart
+      // val newStudiesProcessor = system.actorOf(Props(new StudiesProcessor), "studyproc")
 
-      Thread.sleep(10)
+      // Thread.sleep(10)
 
-      val newName = nameGenerator.next[Study]
-      val newDescription = some(nameGenerator.next[Study])
+      // val newName = nameGenerator.next[Study]
+      // val newDescription = some(nameGenerator.next[Study])
 
-      cmd = UpdateStudyCmd(event.id, 0, newName, newDescription)
-      val validation2 = ask(newStudiesProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]]
-        .futureValue
+      // cmd = UpdateStudyCmd(event.id, 0, newName, newDescription)
+      // val validation2 = ask(newStudiesProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]]
+      //   .futureValue
 
-      validation2 mustSucceed { event =>
-        event mustBe a[StudyUpdatedEvent]
-      }
+      // validation2 mustSucceed { event =>
+      //   event mustBe a[StudyUpdatedEvent]
+      // }
+      ???
     }
   }
 }

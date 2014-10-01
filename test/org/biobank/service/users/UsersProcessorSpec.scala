@@ -1,5 +1,6 @@
-package org.biobank.service
+package org.biobank.service.users
 
+import org.biobank.service.PasswordHasher
 import org.biobank.fixture._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
@@ -10,14 +11,20 @@ import akka.pattern.ask
 import org.joda.time.DateTime
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
-
+import scaldi.MutableInjectorAggregation
 import scalaz._
 import scalaz.Scalaz._
 
-class UsersProcessorSpec extends UsersProcessorFixture {
+class UsersProcessorSpec extends TestFixture {
   import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  val userRepository = inject [UserRepository]
+
+  val passwordHasher = inject [PasswordHasher]
+
+  val usersProcessor = injectActorRef [UsersProcessor]
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -27,7 +34,7 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       val user = factory.createRegisteredUser
 
       val cmd = RegisterUserCmd(user.name, user.email, user.password, user.avatarUrl)
-      val v = ask(usersProcessor, cmd)
+      val v = ask(usersProcessor, cmd, None)
         .mapTo[DomainValidation[UserRegisteredEvent]]
         .futureValue
 
@@ -53,11 +60,11 @@ class UsersProcessorSpec extends UsersProcessorFixture {
       userRepository.put(user)
 
       val cmd = RegisterUserCmd(user.name, user.email, user.password, user.avatarUrl)
-      val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserRegisteredEvent]].futureValue
+      val v = ask(usersProcessor, cmd, None).mapTo[DomainValidation[UserRegisteredEvent]].futureValue
       v mustFail "user with email already exists"
     }
 
-    "activate a user" taggedAs(Tag("1")) in {
+    "activate a user" in {
       val user = factory.createRegisteredUser
       userRepository.put(user)
 
