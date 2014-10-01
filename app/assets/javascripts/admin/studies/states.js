@@ -91,8 +91,25 @@ define(['angular'], function(angular) {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/studyView.html'
-            //controller: 'StudyViewCtrl'
+            templateUrl: '/assets/javascripts/admin/studies/studyView.html',
+            controller: [
+              '$scope', '$state', '$timeout',
+              function($scope, $state, $timeout) {
+                $scope.tabSummaryActive      = false;
+                $scope.tabParticipantsActive = false;
+                $scope.tabSpecimensActive    = false;
+                $scope.tabCollectionActive   = false;
+                $scope.tabProcessingActive   = false;
+
+                $timeout(function() {
+                  $scope.tabSummaryActive      = ($state.current.name === 'admin.studies.study.summary');
+                  $scope.tabParticipantsActive = ($state.current.name === 'admin.studies.study.participants');
+                  $scope.tabSpecimensActive    = ($state.current.name === 'admin.studies.study.specimens');
+                  $scope.tabCollectionActive   = ($state.current.name === 'admin.studies.study.collection');
+                  $scope.tabProcessingActive   = ($state.current.name === 'admin.studies.study.processing');
+                }, 0);
+              }
+            ]
           }
         },
         data: {

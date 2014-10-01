@@ -7,11 +7,21 @@
       of the tab is clicked on, not just the link.
   -->
   <tabset>
-    <tab heading="Summary" ui-sref="admin.studies.study.summary" ui-sref-active="active"></tab>
-    <tab heading="Participants" ui-sref="admin.studies.study.participants" ui-sref-active="active"></tab>
-    <tab heading="Specimens" ui-sref="admin.studies.study.specimens" ui-sref-active="active"></tab>
-    <tab heading="Collection" ui-sref="admin.studies.study.collection" ui-sref-active="active"></tab>
-    <tab heading="Processing" ui-sref="admin.studies.study.processing" ui-sref-active="active"></tab>
+    <tab heading="Summary"
+         ui-sref="admin.studies.study.summary"
+         active="tabSummaryActive"></tab>
+    <tab heading="Participants"
+         ui-sref="admin.studies.study.participants"
+         active="tabParticipantsActive"></tab>
+    <tab heading="Specimens"
+         ui-sref="admin.studies.study.specimens"
+         active="tabSpecimensActive"></tab>
+    <tab heading="Collection"
+         ui-sref="admin.studies.study.collection"
+         active="tabCollectionActive"></tab>
+    <tab heading="Processing"
+         ui-sref="admin.studies.study.processing"
+         active="tabProcessingActive"></tab>
   </tabset>
   <div class="row">
     <div ui-view="studyDetails" style="margin-top: 10px;"></div>
