@@ -2,22 +2,24 @@
  * Common functionality.
  */
 define([
-  'angular',
-  './services/helpers',
+  './directives/infoUpdateRemoveButtonsDirective',
+  './directives/integerDirective',
+  './directives/panelButtonsDirective',
+  './directives/smartFloatDirective',
+  './directives/str2integerDirective',
+  './directives/uiBreadcrumbsDirective',
+  './directives/updateRemoveButtonsDirective',
+  './filters/partitionFilter',
+  './filters/timeagoFilter',
+  './filters/truncateFilter',
+  './services/addTimeStampsService',
+  './services/biobankXhrReqService',
+  './services/modalService',
+  './services/modelObjModalService',
+  './services/modelObjService',
+  './services/modelObjRemoveService',
+  './services/modelObjUpdateErrorService',
+  './services/panelService',
   './services/panelTableService',
-  './controllers/controllers',
-  './filters',
-  './directives/directives',
-  './directives/uiBreadcrumbs'
-], function(angular) {
-  'use strict';
-
-  return angular.module(
-    'biobank.common', [
-      'common.helpers',
-      'common.filters',
-      'common.directives.directives',
-      'common.directives.uiBreadcrumbs',
-      'common.services',
-    ]);
-});
+  './services/stateHelperService',
+], function() {});

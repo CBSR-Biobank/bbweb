@@ -1,10 +1,10 @@
-<accordion-group is-open="panel.spcLinkTypes.panelOpen" style="margin-top: 10px;">
+<accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
   <accordion-heading>
     Specimen Link Types
-    <panel-buttons on-add="panel.spcLinkTypes.add(study)"
+    <panel-buttons on-add="vm.add(study)"
                    add-button-title="add specimen link type"
-                     panel-open="panel.spcLinkTypes.panelOpen"
-                     panel-toggle="panel.spcLinkTypes.panelToggle()">
+                     panel-open="vm.panelOpen"
+                     panel-toggle="vm.panelToggle()">
     </panel-buttons>
   </accordion-heading>
   <p>
@@ -12,45 +12,45 @@
     processing procedure involving two Specimens: an input, which must be in a specific Specimen Group, and an
     output, which must be in a specific Specimen Group.
   </p>
-  <div class="panel panel-warning" data-ng-if="panel.spcLinkTypes.data.length == 0">
+  <div class="panel panel-warning" data-ng-if="vm.tableData.length == 0">
     <div class="panel-heading">
       Specimen link types have not been defined for this study yet.
     </div>
   </div>
-  <p data-ng-if="panel.spcLinkTypes.data.length != 0">
+  <p data-ng-if="vm.tableData.length > 0">
     The following specimen link types are defined:
   </p>
-  <table data-ng-show="panel.spcLinkTypes.data.length != 0"
+  <table data-ng-show="vm.tableData.length > 0"
          class="table table-condensed table-hover"
-         data-ng-table="panel.spcLinkTypes.tableParams">
+         data-ng-table="vm.tableParams">
     <tr data-ng-repeat="tableData in $data">
       <td data-title="'Processing Type'"
           sortable="'processingTypeName'"
-          data-ng-click="panel.spcLinkTypes.showProcessingType(tableData.specimenLinkType.processingTypeId)">
+          data-ng-click="vm.showProcessingType(tableData.specimenLinkType.processingTypeId)">
         <a href>{{tableData.processingTypeName}}</a>
       </td>
       <td data-title="'Input Specimen Group'"
           sortable="'inputGroupName'"
-          data-ng-click="panel.spcLinkTypes.showSpecimenGroup(tableData.specimenLinkType.inputGroupId)">
+          data-ng-click="vm.showSpecimenGroup(tableData.specimenLinkType.inputGroupId)">
         <a href>{{tableData.inputGroupName}}</a>
       </td>
       <td data-title="'Output Specimen Group'"
           sortable="'outputGroupName'"
-          data-ng-click="panel.spcLinkTypes.showSpecimenGroup(tableData.specimenLinkType.outputGroupId)">
+          data-ng-click="vm.showSpecimenGroup(tableData.specimenLinkType.outputGroupId)">
         <a href>{{tableData.outputGroupName}}</a>
       </td>
       <td data-title="'Annotation Types'">
         <span data-ng-repeat="at in tableData.annotationTypes"
-             data-ng-click="panel.spcLinkTypes.showAnnotationType(at.id)">
+             data-ng-click="vm.showAnnotationType(at.id)">
           <a href>{{at.name}}</a><span data-ng-if="!$last">, </span>
         </span>
 
       </td>
       <td>
         <info-update-remove-buttons
-            on-info="panel.spcLinkTypes.information(tableData.specimenLinkType)"
-            on-update="panel.spcLinkTypes.update(tableData.specimenLinkType)"
-            on-remove="panel.spcLinkTypes.remove(tableData.specimenLinkType)">
+            on-info="vm.information(tableData.specimenLinkType)"
+            on-update="vm.update(tableData.specimenLinkType)"
+            on-remove="vm.remove(tableData.specimenLinkType)">
         </info-update-remove-buttons>
       </td>
     </tr>

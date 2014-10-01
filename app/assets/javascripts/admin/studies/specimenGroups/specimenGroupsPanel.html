@@ -1,27 +1,31 @@
-<accordion-group is-open="panel.specimenGroups.panelOpen" style="margin-top: 10px;">
+<accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
   <accordion-heading>
-    {{panel.specimenGroups.title}}
-    <panel-buttons on-add="panel.specimenGroups.add(study)"
+    Specimen Groups
+    <panel-buttons on-add="vm.add(study)"
                    add-button-title="add specimen group"
-                   panel-open="panel.specimenGroups.panelOpen"
-                   panel-toggle="panel.specimenGroups.panelToggle()">
+                   panel-open="vm.panelOpen"
+                   panel-toggle="vm.panelToggle()">
     </panel-buttons>
   </accordion-heading>
-  <p>{{panel.specimenGroups.header}}</p>
-  <div class="panel panel-warning" data-ng-if="panel.specimenGroups.data.length == 0">
+  <p>
+    A Specimen Group is used to configure a specimen type to be used by the study.  It records ownership,
+    summary, storage, and classification information that applies to an entire group or collection of
+    Specimens.
+  </p>
+  <div class="panel panel-warning" data-ng-if="vm.specimenGroups.length == 0">
     <div class="panel-heading">
       Specimen groups have not been defined for this study yet.
     </div>
   </div>
-  <p data-ng-if="panel.specimenGroups.data.length != 0">
+  <p data-ng-if="vm.specimenGroups.length != 0">
     The following specimen groups are defined:
   </p>
-  <table data-ng-show="panel.specimenGroups.data.length != 0"
+  <table data-ng-show="vm.specimenGroups.length != 0"
          class="table table-hover table-condensed"
-         data-ng-table="panel.specimenGroups.tableParams">
+         data-ng-table="vm.tableParams">
     <tr data-ng-repeat="specimenGroup in $data">
       <td data-title="'Name'" sortable="'name'">
-        <span data-ng-click="panel.specimenGroups.information(specimenGroup)">
+        <span data-ng-click="vm.information(specimenGroup)">
           <a href>{{specimenGroup.name}}</a>
         </span>
       </td>
@@ -36,8 +40,8 @@
       </td>
       <td>
         <update-remove-buttons
-            on-update="panel.specimenGroups.update(specimenGroup)"
-            on-remove="panel.specimenGroups.remove(specimenGroup)">
+            on-update="vm.update(specimenGroup)"
+            on-remove="vm.remove(specimenGroup)">
         </update-remove-buttons>
       </td>
     </tr>

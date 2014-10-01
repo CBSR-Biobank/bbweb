@@ -1,10 +1,10 @@
-<accordion-group is-open="panel.ceventTypes.panelOpen" style="margin-top: 10px;">
+<accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
   <accordion-heading>
     Collection Event Types
-    <panel-buttons on-add="panel.ceventTypes.add(study)"
+    <panel-buttons on-add="vm.add(study)"
                    add-button-title="add collection event type"
-                     panel-open="panel.ceventTypes.panelOpen"
-                     panel-toggle="panel.ceventTypes.panelToggle()">
+                     panel-open="vm.panelOpen"
+                     panel-toggle="vm.panelToggle()">
     </panel-buttons>
   </accordion-heading>
   <p>
@@ -12,26 +12,26 @@
     participant visit. A participant visit is a record of when specimens were collected
     from a participant at a collection centre.
   </p>
-  <div class="panel panel-warning" data-ng-if="panel.ceventTypes.data.length == 0">
+  <div class="panel panel-warning" data-ng-if="vm.data.length == 0">
     <div class="panel-heading">
       Collection event types have not been defined for this study yet.
     </div>
   </div>
-  <p data-ng-if="panel.ceventTypes.data.length != 0">
+  <p data-ng-if="vm.ceventTypes.length > 0">
     The following collection event types are defined:
   </p>
-  <table data-ng-show="panel.ceventTypes.data.length != 0"
+  <table data-ng-show="vm.ceventTypes.length > 0"
          class="table table-condensed table-hover"
-         data-ng-table="panel.ceventTypes.tableParams">
+         data-ng-table="vm.tableParams">
     <tr data-ng-repeat="ceventType in $data">
       <td data-title="'Name'" sortable="'name'">
-        <span data-ng-click="panel.ceventTypes.information(ceventType)">
+        <span data-ng-click="vm.information(ceventType)">
           <a href>{{ceventType.name}}</a>
         </span>
       </td>
       <td data-title="'Specimen Groups'">
         <span data-ng-repeat="sg in ceventType.specimenGroups"
-             data-ng-click="panel.ceventTypes.showSpecimenGroup(sg.id)">
+             data-ng-click="vm.showSpecimenGroup(sg.id)">
           <a href>{{sg.name}}</a><span data-ng-if="!$last">, </span>
         </span>
       </td>
@@ -43,8 +43,8 @@
       </td>
       <td>
         <update-remove-buttons
-            on-update="panel.ceventTypes.update(ceventType)"
-            on-remove="panel.ceventTypes.remove(ceventType)">
+            on-update="vm.update(ceventType)"
+            on-remove="vm.remove(ceventType)">
         </update-remove-buttons>
       </td>
     </tr>

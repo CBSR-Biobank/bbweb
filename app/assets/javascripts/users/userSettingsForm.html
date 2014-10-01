@@ -2,19 +2,6 @@
   <h1>Update your settings</h1>
 </div>
 <div class="clearfix">
-  <div data-ng-if="form.notifications">
-    <div class="row">
-      <div class="col-md-offset-1 col-md-10">
-        <div class="alert alert-danger alert-dismissible" role="alert">
-          <button type="button" class="close" data-dismiss="alert">
-            <span aria-hidden="true">&times;</span>
-            <span class="sr-only">Close</span>
-          </button>
-          {{form.notifications}}
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="row">
     <form class="form-horizontal"
           name="userRegForm"
@@ -28,7 +15,7 @@
           <input name="name"
                  type="text"
                  class="form-control"
-                 data-ng-model="form.user.name"
+                 data-ng-model="vm.user.name"
                  data-ng-minlength="2"
                  placeholder="given name(s) followed by surname(s) separated by spaces"
                  required/>
@@ -46,7 +33,7 @@
               name="email"
               type="email"
               class="form-control"
-              data-ng-model="form.user.email"
+              data-ng-model="vm.user.email"
               placeholder="Email"
               required/>
         </div>
@@ -65,7 +52,7 @@
               name="password"
               type="password"
               class="form-control"
-              data-ng-model="form.password"
+              data-ng-model="vm.password"
               placeholder="Enter a new password to change it (leave blank to not change it)"
               data-ng-minlength="8" />
         </div>
@@ -84,9 +71,9 @@
               name="confirmPassword"
               type="password"
               class="form-control"
-              data-ng-model="form.confirmPassword"
+              data-ng-model="vm.confirmPassword"
               placeholder="Password"
-              password-check="form.password"
+              password-check="vm.password"
               data-ng-required />
         </div>
         <div class="col-md-offset-3 col-md-7">
@@ -101,8 +88,8 @@
         <div class="col-md-offset-3 col-md-9">
           <button class="btn btn-primary"
                   data-ng-disabled="userRegForm.$invalid"
-                  data-ng-click="form.submit(form.user, form.password)">Submit</button>
-          <button class="btn" data-ng-click="form.cancel()">Cancel</button>
+                  data-ng-click="vm.submit(vm.user, vm.password)">Submit</button>
+          <button class="btn" data-ng-click="vm.cancel()">Cancel</button>
         </div>
       </div>
     </form>

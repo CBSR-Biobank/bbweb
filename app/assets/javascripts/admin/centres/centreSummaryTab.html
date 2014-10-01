@@ -1,13 +1,13 @@
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">{{centre.name}}
+    <h3 class="panel-title">{{vm.centre.name}}
     <span class="btn-group pull-right">
-      <a ui-sref="admin.centres.centre.update({centreId: centre.id})" class="btn btn-xs btn-primary"
+      <a ui-sref="admin.centres.centre.update({centreId: vm.centre.id})" class="btn btn-xs btn-primary"
          type="button">
         <i class="glyphicon glyphicon-edit"></i>
       </a>
       <button class="btn btn-xs btn-success"
-              data-ng-click="changeStatus(centre)"
+              data-ng-click="vm.changeStatus(centre)"
               title="Change status">
       <i class="glyphicon glyphicon-cog"></i></button>
     </span>
@@ -19,11 +19,11 @@
         <strong>Description: </strong>
         <i class="glyphicon"
            data-ng-class="{'glyphicon-plus': !descriptionToggle, 'glyphicon-minus': descriptionToggle}"
-           data-ng-click="truncateDescriptionToggle()"
-           data-ng-if="centre.description.length > descriptionToggleLength"></i>
+           data-ng-click="vm.truncateDescriptionToggle()"
+           data-ng-if="vm.centre.description.length >Tm.descriptionToggleLength"></i>
       </div>
       <div class="col-md-10">
-        {{description}}
+        {{vm.description}}
       </div>
     </div>
     <div class="row">
@@ -31,7 +31,7 @@
         <strong>Status:</strong>
       </div>
       <div class="col-md-10">
-        <p class="text-info">{{centre.status}}</p>
+        <p class="text-info">{{vm.centre.status}}</p>
       </div>
     </div>
     <div class="row">
@@ -39,7 +39,7 @@
         <p class="text-muted"><strong>Added:</strong></p>
       </div>
       <div class="col-md-10">
-        <p class="text-muted">{{centre.timeAdded | timeago}}</p>
+        <p class="text-muted">{{vm.centre.timeAdded | timeago}}</p>
       </div>
     </div>
     <div class="row">
@@ -47,7 +47,7 @@
         <p class="text-muted"><strong>Updated:</strong></p>
       </div>
       <div class="col-md-10" data-ng-if="centre.timeModified !== null">
-        <p class="text-muted">{{centre.timeModified | timeago}}</p>
+        <p class="text-muted">{{vm.centre.timeModified | timeago}}</p>
       </div>
     </div>
   </div>

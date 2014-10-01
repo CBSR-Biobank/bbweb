@@ -3,12 +3,12 @@
 </div>
 
 <div class="clearfix">
-  <div data-ng-if="users.length == 0">
+  <div data-ng-if="vm.users.length == 0">
     <p>No users have been added.</p>
   </div>
-  <div data-ng-if="users.length != 0">
+  <div data-ng-if="vm.users.length > 0">
     <p>The following users have been configured:</p>
-    <table data-ng-table="tableParams" class="table table-hover">
+    <table data-ng-table="vm.tableParams" class="table table-hove">
       <tr data-ng-repeat="user in $data">
         <td data-title="'Email'" sortable="'email'">
           <span data-ng-click="userInformation(user)">
@@ -26,24 +26,26 @@
         <td data-title="'Status'" sortable="'status'">
           <span class="badge">{{user.status}}</span>
         </td>
+
+        <!-- BUTTONS -->
         <td data-title="'Action'">
           <div class="btn-group pull-right">
             <button class="btn btn-xs btn-success"
-                    data-ng-click="activate(user)"
+                    data-ng-click="vm.activate(user)"
                     data-toggle="tooltip"
                     title="Activate user"
                     data-ng-if="user.status == 'Registered'">
               <i class="glyphicon glyphicon-check"></i>
             </button>
             <button class="btn btn-xs btn-warning"
-                    data-ng-click="lock(user)"
+                    data-ng-click="vm.lock(user)"
                     data-toggle="tooltip"
                     title="Lock user"
                     data-ng-if="user.status == 'Active'">
               <i class="glyphicon glyphicon-lock"></i>
             </button>
             <button class="btn btn-xs btn-danger"
-                    data-ng-click="unlock(user)"
+                    data-ng-click="vm.unlock(user)"
                     data-toggle="tooltip"
                     title="Unlock user"
                     data-ng-if="user.status == 'Locked'">
@@ -51,6 +53,7 @@
             </button>
           </div>
         </td>
+
       </tr>
     </table>
   </div>

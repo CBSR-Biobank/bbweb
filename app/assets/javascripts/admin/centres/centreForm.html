@@ -1,8 +1,8 @@
-<div class="page-header"><h1>{{centre.name}} <small>{{title}}</small></h1></div>
+<div class="page-header"><h1>{{vm.title}}</h1></div>
 <div class="clearfix">
   <form class="form-horizontal"
         name="centreForm"
-        data-ng-submit="centreForm.$valid && submit(centre)"
+        data-ng-submit="centreForm.$valid && vm.submit(vm.centre)"
         novalidate>
 
     <!-- NAME -->
@@ -13,7 +13,7 @@
             name="name"
             type="text"
             class="form-control"
-            data-ng-model="centre.name"
+            data-ng-model="vm.centre.name"
             data-ng-minlength="2"
             placeholder="A short name for the centre"
             required />
@@ -30,7 +30,7 @@
         <textarea name="description"
                   class="form-control"
                   rows="10"
-                  data-ng-model="centre.description"
+                  data-ng-model="vm.centre.description"
                   placeholder="A description of the centre (optional)" />
       </div>
     </div>
@@ -39,7 +39,7 @@
     <div class="form-group">
       <div class="col-md-offset-2 col-md-10">
         <button class="btn btn-primary" data-data-ng-disabled="centreForm.$invalid">Submit</button>
-        <button class="btn" data-ng-click="cancel()">Cancel</button>
+        <button class="btn" data-ng-click="vm.cancel()">Cancel</button>
       </div>
     </div>
   </form>

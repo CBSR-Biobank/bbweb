@@ -4,14 +4,8 @@
   // -- RequireJS config --
   requirejs.config({
     // Packages = top-level folders; loads a contained file named 'main.js'
-    packages: ['common', 'home', 'users', 'admin', 'dashboard'],
+    packages: ['common', 'home', 'studies', 'users', 'admin', 'dashboard'],
     shim: {
-      'jsRoutes' : {
-        deps : [],
-        // it's not a RequireJS module, so we have to tell it what var is returned
-        exports : 'jsRoutes'
-      },
-      // Hopefully this all will not be necessary but can be fetched from WebJars in the future
       'angular': {
         deps: ['jquery'],
         exports: 'angular'
@@ -24,7 +18,8 @@
       'bootstrap': ['jquery'],
       'angular-ui-router': ['angular'],
       'ui-bootstrap': ['angular', 'bootstrap'],
-      'ng-table': ['angular']
+      'ngTable': ['angular'],
+      'toastr': ['jquery']
     },
     paths: {
       'requirejs': ['../lib/requirejs/require'],
@@ -36,8 +31,8 @@
       'angular-ui-router': ['../lib/angular-ui-router/angular-ui-router'],
       'bootstrap': ['../lib/bootstrap/js/bootstrap'],
       'ui-bootstrap': ['../lib/angular-ui-bootstrap/ui-bootstrap-tpls'],
-      'ng-table': ['../lib/ng-table/ng-table'],
-      'jsRoutes': '/jsroutes'
+      'ngTable': ['../lib/ng-table/ng-table'],
+      'toastr': ['../lib/toastr/toastr']
     }
   });
 
@@ -52,12 +47,12 @@
     'angular-route',
     'angular-ui-router',
     'ui-bootstrap',
-    'ng-table',
+    'ngTable',
     'jquery',
     'bootstrap',
     './app'
   ], function(angular) {
     angular.bootstrap(document, ['app']);
-  }
-         );
+  });
+
 })(requirejs);

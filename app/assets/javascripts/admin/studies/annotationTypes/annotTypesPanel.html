@@ -1,62 +1,56 @@
-<accordion-group is-open="panel.annotTypes.panelOpen" style="margin-top: 10px;">
-  <accordion-heading>
-    {{panel.annotTypes.title}}
-    <panel-buttons on-add="panel.annotTypes.add()"
-                   add-button-title="Add annotation type"
-                   panel-open="panel.annotTypes.panelOpen"
-                   panel-toggle="panel.annotTypes.panelToggle()">
-    </panel-buttons>
-  </accordion-heading>
-  <p>{{panel.annotTypes.header}}</p>
-  <div class="panel panel-warning" data-ng-if="panel.annotTypes.data.length === 0">
-    <div class="panel-heading">
-      Annotation types have not been defined for this study yet.
-    </div>
+<!--
+
+  this file is included by a parent template
+
+-->
+<div class="panel panel-warning" data-ng-if="vm.data.length === 0">
+  <div class="panel-heading">
+    Annotation types have not been defined for this study yet.
   </div>
-  <div data-ng-if="panel.annotTypes.data.length !== 0">
-    <p>The following annotation types are defined:</p>
-    <table class="table table-condensed table-hover"
-           data-ng-table="panel.annotTypes.tableParams"
-           show-filter="true">
-      <!-- tried to put the th tag in a thead but they would not display on the page -->
-      <tbody>
-        <tr>
-          <th ng-repeat="column in panel.annotTypes.columns"
-              class="text-center sortable"
-              ng-class="{
-                        'sort-asc': panel.annotTypes.tableParams.isSortBy(column.field, 'asc'),
-                        'sort-desc': panel.annotTypes.tableParams.isSortBy(column.field, 'desc')
-                        }"
-              ng-click="panel.annotTypes.tableParams.sorting(column.field, panel.annotTypes.tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')">
-            {{column.title}}
-          </th>
-          <th><!-- heading for buttons: blank for now --></th>
-        </tr>
-        <tr data-ng-repeat="annotType in $data">
-          <td ng-repeat="column in panel.annotTypes.columns" sortable="column.field">
+</div>
+<div data-ng-if="vm.data.length !== 0">
+  <p>The following annotation types are defined:</p>
+  <table class="table table-condensed table-hover"
+         data-ng-table="vm.tableParams"
+         show-filter="true">
+    <!-- tried to put the th tag in a thead but they would not display on the page -->
+    <tbody>
+      <tr>
+        <th ng-repeat="column in vm.columns"
+            class="text-center sortable"
+            ng-class="{
+                      'sort-asc': vm.tableParams.isSortBy(column.field, 'asc'),
+                      'sort-desc': vm.tableParams.isSortBy(column.field, 'desc')
+                      }"
+            ng-click="vm.tableParams.sorting(column.field, vm.tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')">
+          {{column.title}}
+        </th>
+        <th><!-- heading for buttons: blank for now --></th>
+      </tr>
+      <tr data-ng-repeat="annotType in $data">
+        <td ng-repeat="column in vm.columns" sortable="column.field">
 
-            <span data-ng-if="column.field === 'name'"
-                  data-ng-click="panel.annotTypes.information(annotType)">
-              <a href>{{annotType[column.field]}}</a>
-            </span>
+          <span data-ng-if="column.field === 'name'"
+                data-ng-click="vm.information(annotType)">
+            <a href>{{annotType[column.field]}}</a>
+          </span>
 
-            <span data-ng-if="(column.field !== 'name') && (column.field !== 'required')">
-              {{annotType[column.field]}}
-            </span>
+          <span data-ng-if="(column.field !== 'name') && (column.field !== 'required')">
+            {{annotType[column.field]}}
+          </span>
 
-            <span data-ng-if="panel.annotTypes.hasRequired && (column.field === 'required')">
-              {{annotType[column.field] ? 'Yes' : 'No'}}
-            </span>
+          <span data-ng-if="vm.hasRequired && (column.field === 'required')">
+            {{annotType[column.field] ? 'Yes' : 'No'}}
+          </span>
 
-          </td>
-          <td>
-            <update-remove-buttons
-               on-update="panel.annotTypes.update(annotType)"
-               on-remove="panel.annotTypes.remove(annotType)">
-            </update-remove-buttons>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</accordion-group>
+        </td>
+        <td>
+          <update-remove-buttons
+             on-update="vm.update(annotType)"
+             on-remove="vm.remove(annotType)">
+          </update-remove-buttons>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

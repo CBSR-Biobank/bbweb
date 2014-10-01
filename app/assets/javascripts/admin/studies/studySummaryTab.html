@@ -1,15 +1,15 @@
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">{{study.name}}
+    <h3 class="panel-title">{{vm.study.name}}
       <span class="btn-group pull-right">
 
-        <a ui-sref="admin.studies.study.update({studyId: study.id})" class="btn btn-xs btn-primary"
+        <a ui-sref="admin.studies.study.summary.update({studyId: vm.study.id})" class="btn btn-xs btn-primary"
            type="button" title="update">
           <i class="glyphicon glyphicon-edit"></i>
         </a>
 
         <button class="btn btn-xs btn-success"
-                data-ng-click="changeStatus(study)"
+                data-ng-click="vm.changeStatus(study)"
                 title="Change status">
           <i class="glyphicon glyphicon-cog"></i>
       </span>
@@ -20,12 +20,12 @@
       <div class="col-md-2">
         <strong>Description: </strong>
         <i class="glyphicon"
-           data-ng-class="{'glyphicon-plus': !descriptionToggle, 'glyphicon-minus': descriptionToggle}"
-           data-ng-click="truncateDescriptionToggle()"
-           data-ng-if="study.description.length > descriptionToggleLength"></i>
+           data-ng-class="{'glyphicon-plus': !vm.descriptionToggle, 'glyphicon-minus': vm.descriptionToggle}"
+           data-ng-click="vm.truncateDescriptionToggle()"
+           data-ng-if="vm.study.description.length > vm.descriptionToggleLength"></i>
       </div>
       <div class="col-md-10">
-        {{description}}
+        {{vm.description}}
       </div>
     </div>
     <div class="row">
@@ -33,7 +33,7 @@
         <strong>Status:</strong>
       </div>
       <div class="col-md-10">
-        <p class="text-info">{{study.status}}</p>
+        <p class="text-info">{{vm.study.status}}</p>
       </div>
     </div>
     <div class="row">
@@ -41,15 +41,15 @@
         <p class="text-muted"><strong>Added:</strong></p>
       </div>
       <div class="col-md-10">
-        <p class="text-muted">{{study.timeAdded | timeago}}</p>
+        <p class="text-muted">{{vm.study.timeAdded | timeago}}</p>
       </div>
     </div>
     <div class="row">
-      <div class="col-md-2" data-ng-if="study.timeModified !== null">
+      <div class="col-md-2" data-ng-if="vm.study.timeModified !== null">
         <p class="text-muted"><strong>Updated:</strong></p>
       </div>
-      <div class="col-md-10" data-ng-if="study.timeModified !== null">
-        <p class="text-muted">{{study.timeModified | timeago}}</p>
+      <div class="col-md-10" data-ng-if="vm.study.timeModified !== null">
+        <p class="text-muted">{{vm.study.timeModified | timeago}}</p>
       </div>
     </div>
   </div>

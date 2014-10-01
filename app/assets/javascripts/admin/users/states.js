@@ -1,42 +1,35 @@
 /**
  * Configure routes of centres module.
  */
-define(['angular'], function(angular) {
+define(['../module'], function(module) {
   'use strict';
 
-  var mod = angular.module('admin.users.states', [
-    'ui.router',
-    'users.services',
-    //'admin.centres.controllers',
-    //'centres.services'
-  ]);
+  module.config(config);
 
-  mod.config([
-    '$urlRouterProvider', '$stateProvider', 'userResolve',
-    function($urlRouterProvider, $stateProvider, userResolve ) {
+  config.$inject = [
+    '$urlRouterProvider', '$stateProvider', 'userResolve'
+  ];
 
-      $urlRouterProvider.otherwise('/');
+  function config($urlRouterProvider, $stateProvider, userResolve ) {
+    $urlRouterProvider.otherwise('/');
 
-      /**
-       * Displays all users in a table
-       */
-      $stateProvider.state('admin.users', {
-        url: '/users',
-        resolve: {
-          user: userResolve.user
-        },
-        views: {
-          'main@': {
-            templateUrl: '/assets/javascripts/admin/users/usersTable.html',
-            controller: 'UsersTableCtrl'
-          }
-        },
-        data: {
-          displayName: 'Users'
+    /**
+     * Displays all users in a table
+     */
+    $stateProvider.state('admin.users', {
+      url: '/users',
+      resolve: {
+        user: userResolve.user
+      },
+      views: {
+        'main@': {
+          templateUrl: '/assets/javascripts/admin/users/usersTable.html',
+          controller: 'UsersTableCtrl as vm'
         }
-      });
-    }
-  ]);
-
-  return mod;
+      },
+      data: {
+        displayName: 'Users'
+      }
+    });
+  }
 });

@@ -11,7 +11,7 @@
         <input name="name"
                type="text"
                class="form-control"
-               data-ng-model="processingType.name"
+               data-ng-model="vm.processingType.name"
                data-ng-minlength="2"
                placeholder="A short name for the processing type"
                required />
@@ -28,7 +28,7 @@
         <textarea name="description"
                   class="form-control"
                   rows="10"
-                  data-ng-model="processingType.description"
+                  data-ng-model="vm.processingType.description"
                   placeholder="A description of the processing type (optional)" />
       </div>
     </div>
@@ -36,7 +36,7 @@
     <!-- ENABLED -->
     <div class="form-group">
       <div class="col-md-offset-2 col-md-10">
-        <input name="enabled" type="checkbox" data-ng-model="processingType.enabled"/> Enabled
+        <input name="enabled" type="checkbox" data-ng-model="vm.processingType.enabled"/> Enabled
       </div>
     </div>
 
@@ -45,8 +45,8 @@
       <div class="col-md-offset-2 col-md-10">
         <button class="btn btn-primary"
                 data-ng-disabled="ptForm.$invalid"
-                data-ng-click="form.submit(processingType)">Submit</button>
-        <button class="btn" data-ng-click="form.cancel()">Cancel</button>
+                data-ng-click="vm.submit(vm.processingType)">Submit</button>
+        <button class="btn" data-ng-click="vm.cancel()">Cancel</button>
       </div>
     </div>
   </form>

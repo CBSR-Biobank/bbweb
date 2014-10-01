@@ -13,7 +13,7 @@
         <input name="name"
                type="text"
                class="form-control"
-               data-ng-model="annotType.name"
+               data-ng-model="vm.annotType.name"
                data-ng-minlength="2"
                placeholder="A short name for the annotation type"
                required/>
@@ -30,7 +30,7 @@
         <textarea name="description"
                   class="form-control"
                   rows="10"
-                  data-ng-model="annotType.description"
+                  data-ng-model="vm.annotType.description"
                   placeholder="A description of the annotation type (optional)" />
       </div>
     </div>
@@ -41,7 +41,7 @@
       <div class="col-md-10">
         <input name="required"
                type="checkbox"
-               data-ng-model="annotType.required"/>
+               data-ng-model="vm.annotType.required"/>
       </div>
     </div>
 
@@ -51,8 +51,8 @@
       <div class="col-md-10">
         <select class="form-control"
                 name="valueType"
-                data-ng-model="annotType.valueType"
-                data-ng-options="valueType for valueType in valueTypes"
+                data-ng-model="vm.annotType.valueType"
+                data-ng-options="valueType for valueType in vm.valueTypes"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -65,18 +65,18 @@
     </div>
 
     <!-- SELECTIONS -->
-    <div class="form-group" data-ng-if="annotType.valueType === 'Select'">
+    <div class="form-group" data-ng-if="vm.annotType.valueType === 'Select'">
       <label for="maxValueCount" class="col-md-2 control-label">Selections</label>
       <div class="col-md-5">
         <input name="maxValueCount"
                type="radio"
-               data-ng-model="annotType.maxValueCount"
+               data-ng-model="vm.annotType.maxValueCount"
                value="1"
                str2integer /> Single selection only
       </div>
       <div class="col-md-5">
         <input type="radio"
-               data-ng-model="annotType.maxValueCount"
+               data-ng-model="vm.annotType.maxValueCount"
                value="2"
                str2integer /> Multiple selections allowed
       </div>
@@ -84,8 +84,8 @@
 
     <!-- SELECTION OPTIONS -->
     <div class="form-group"
-         data-ng-if="annotType.valueType === 'Select'"
-         data-ng-repeat="opt in annotType.options track by $index">
+         data-ng-if="vm.annotType.valueType === 'Select'"
+         data-ng-repeat="opt in vm.annotType.options track by $index">
       <data-ng-form name="subForm">
         <div class="col-md-2 control-label">
           <label>Selection Option {{$index + 1}}</label>
@@ -94,13 +94,13 @@
           <input type="text"
                  name="option"
                  class="form-control"
-                 data-ng-model="annotType.options[$index]"
+                 data-ng-model="vm.annotType.options[$index]"
                  placeholder="Enter an option"
                  required />
         </div>
         <div class="col-md-2">
           <button class="btn btn-sm btn-warning"
-                  data-ng-click="removeOption(opt)"
+                  data-ng-click="vm.removeOption(opt)"
                   data-ng-disabled="removeButtonDisabled()">
             <i class="glyphicon glyphicon-minus"></i> Remove
           </button>
@@ -115,10 +115,10 @@
 
     <!-- ADD SELECTION OPTION -->
     <div class="form-group"
-         data-ng-if="annotType.valueType === 'Select'">
+         data-ng-if="vm.annotType.valueType === 'Select'">
       <div class="col-md-2">
         <button class="btn btn-sm btn-primary pull-right"
-                data-ng-click="optionAdd()">
+                data-ng-click="vm.optionAdd()">
           Add option <i class="glyphicon glyphicon-plus"></i>
         </button>
       </div>
@@ -129,8 +129,8 @@
       <div class="col-md-offset-2 col-md-10">
         <button class="btn btn-primary"
                 data-ng-disabled="annotTypeForm.$invalid"
-                data-ng-click="submit(annotType)">Submit</button>
-        <button class="btn" data-ng-click="cancel()">Cancel</button>
+                data-ng-click="vm.submit(vm.annotType)">Submit</button>
+        <button class="btn" data-ng-click="vm.cancel()">Cancel</button>
       </div>
     </div>
   </form>

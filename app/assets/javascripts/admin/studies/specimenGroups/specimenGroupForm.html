@@ -11,7 +11,7 @@
         <input name="name"
                type="text"
                class="form-control"
-               data-ng-model="specimenGroup.name"
+               data-ng-model="vm.specimenGroup.name"
                data-ng-minlength="2"
                placeholder="A short name for the specimen group"
                required />
@@ -28,7 +28,7 @@
         <textarea name="description"
                   class="form-control"
                   rows="10"
-                  data-ng-model="specimenGroup.description"
+                  data-ng-model="vm.specimenGroup.description"
                   placeholder="A description of the specimen group (optional)" />
       </div>
     </div>
@@ -40,7 +40,7 @@
         <input name="units"
                type="text"
                class="form-control"
-               data-ng-model="specimenGroup.units"
+               data-ng-model="vm.specimenGroup.units"
                placeholder="the units the specimens are measured in (eg. mL, cm, etc.)"
                required/>
       </div>
@@ -57,8 +57,8 @@
       <div class="col-md-10">
         <select class="form-control"
                 name="anatomicalSourceType"
-                data-ng-model="specimenGroup.anatomicalSourceType"
-                data-ng-options="source for source in anatomicalSourceTypes"
+                data-ng-model="vm.specimenGroup.anatomicalSourceType"
+                data-ng-options="source for source in vm.anatomicalSourceTypes"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -76,8 +76,8 @@
       <div class="col-md-10">
         <select class="form-control"
                 name="perservationType"
-                data-ng-model="specimenGroup.preservationType"
-                data-ng-options="preserv for preserv in preservTypes"
+                data-ng-model="vm.specimenGroup.preservationType"
+                data-ng-options="preserv for preserv in vm.preservTypes"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -95,8 +95,8 @@
       <div class="col-md-10">
         <select class="form-control"
                 name="perservationTempType"
-                data-ng-model="specimenGroup.preservationTemperatureType"
-                data-ng-options="temp for temp in preservTempTypes"
+                data-ng-model="vm.specimenGroup.preservationTemperatureType"
+                data-ng-options="temp for temp in vm.preservTempTypes"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -114,8 +114,8 @@
       <div class="col-md-10">
         <select class="form-control"
                 name="specimenType"
-                data-ng-model="specimenGroup.specimenType"
-                data-ng-options="type for type in specimenTypes"
+                data-ng-model="vm.specimenGroup.specimenType"
+                data-ng-options="type for type in vm.specimenTypes"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -132,8 +132,8 @@
       <div class="col-md-offset-2 col-md-10">
         <button class="btn btn-primary"
                 data-ng-disabled="sgForm.$invalid"
-                data-ng-click="submit(specimenGroup)">Submit</button>
-        <button class="btn" data-ng-click="cancel()">Cancel</button>
+                data-ng-click="vm.submit(vm.specimenGroup)">Submit</button>
+        <button class="btn" data-ng-click="vm.cancel()">Cancel</button>
       </div>
     </div>
   </form>

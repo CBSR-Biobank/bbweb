@@ -1,11 +1,14 @@
 /**
  * Home routes.
  */
-define(['angular'], function(angular) {
+define(['./module'], function(module) {
   'use strict';
 
-  var mod = angular.module('home.states', ['ui.router', 'home.controllers', 'biobank.common']);
-  mod.config(['$urlRouterProvider', '$stateProvider', function($urlRouterProvider, $stateProvider) {
+  module.config(config);
+
+  config.$inject = ['$urlRouterProvider', '$stateProvider'];
+
+  function config($urlRouterProvider, $stateProvider) {
 
     $urlRouterProvider.otherwise('/');
 
@@ -15,7 +18,7 @@ define(['angular'], function(angular) {
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/home/home.html',
-            controller: 'HomeCtrl'
+            controller: 'HomeCtrl as vm'
           }
         },
         data: {
@@ -44,6 +47,6 @@ define(['angular'], function(angular) {
           displayName: false
         }
       });
-  }]);
-  return mod;
+  }
+
 });

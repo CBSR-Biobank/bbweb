@@ -12,12 +12,12 @@
   </h1>
 </div>
 <div class="clearfix">
-  <div data-ng-if="studies.length == 0">
+  <div data-ng-if="vm.studies.length <= 0">
     <p>No studies have been added.</p>
   </div>
-  <div data-ng-if="studies.length != 0">
+  <div data-ng-if="vm.studies.length > 0">
     <p>The following studies have been configured:</p>
-    <div class="row" data-ng-repeat="rows in studies | partition:3">
+    <div class="row" data-ng-repeat="rows in vm.studies | partition:3">
       <div class="col-md-4" data-ng-repeat="study in rows">
         <div class="panel panel-default" style="margin-top: 10px;">
           <div class="panel-heading">

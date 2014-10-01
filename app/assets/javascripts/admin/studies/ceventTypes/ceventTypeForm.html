@@ -11,7 +11,7 @@
         <input name="name"
                type="text"
                class="form-control"
-               data-ng-model="ceventType.name"
+               data-ng-model="vm.ceventType.name"
                data-ng-minlength="2"
                placeholder="A short name for the collection event type"
                required />
@@ -28,7 +28,7 @@
         <textarea name="description"
                   class="form-control"
                   rows="10"
-                  data-ng-model="ceventType.description"
+                  data-ng-model="vm.ceventType.description"
                   placeholder="A description of the collection event type (optional)" />
       </div>
     </div>
@@ -36,12 +36,12 @@
     <!-- RECURRING -->
     <div class="form-group">
       <div class="col-md-offset-2 col-md-10">
-        <input name="recurring" type="checkbox" data-ng-model="ceventType.recurring"/> Recurring
+        <input name="recurring" type="checkbox" data-ng-model="vm.ceventType.recurring"/> Recurring
       </div>
     </div>
 
     <!-- SPECIMEN GROUP DATA -->
-    <div class="form-group" data-ng-repeat="sgData in ceventType.specimenGroupData track by $index">
+    <div class="form-group" data-ng-repeat="sgData in vm.ceventType.specimenGroupData track by $index">
       <data-ng-form name="sgSubForm">
         <div class="col-md-2 control-label">
           <label>Specimen Group {{$index + 1}}</label>
@@ -49,8 +49,8 @@
         <div class="col-md-3">
           <select class="form-control"
                   name="sgId"
-                  data-ng-model="ceventType.specimenGroupData[$index].specimenGroupId"
-                  data-ng-options="sg.id as sg.name for sg in specimenGroups | orderBy: 'name'"
+                  data-ng-model="vm.ceventType.specimenGroupData[$index].specimenGroupId"
+                  data-ng-options="sg.id as sg.name for sg in vm.specimenGroups | orderBy: 'name'"
                   required>
             <option value="">-- make a selection --</option>
           </select>
@@ -63,7 +63,7 @@
                  min="1"
                  name="maxCount"
                  class="form-control input-sm"
-                 data-ng-model="ceventType.specimenGroupData[$index].maxCount"
+                 data-ng-model="vm.ceventType.specimenGroupData[$index].maxCount"
                  placeholder="max count"
                  valid-count
                  required/>
@@ -79,15 +79,15 @@
                  min="0"
                  name="amount"
                  class="form-control input-sm"
-                 data-ng-model="ceventType.specimenGroupData[$index].amount"
+                 data-ng-model="vm.ceventType.specimenGroupData[$index].amount"
                  placeholder="amount"
                  valid-amount
                  required />
         </div>
         <div class="col-md-1">
           <button class="btn btn-xs btn-warning"
-                  data-ng-click="form.removeSpecimenGroup(sgData)"
-                  data-ng-disabled="form.removeSpecimenGroupButtonDisabled()">
+                  data-ng-click="vm.removeSpecimenGroup(sgData)"
+                  data-ng-disabled="vm.removeSpecimenGroupButtonDisabled()">
             <i class="glyphicon glyphicon-minus"></i> Remove
           </button>
         </div>
@@ -110,14 +110,14 @@
     <!-- SPECIMEN GROUP DATA ADD -->
     <div class="form-group">
       <div class="col-md-2">
-        <button class="btn btn-sm btn-primary pull-right" data-ng-click="form.addSpecimenGroup()">
+        <button class="btn btn-sm btn-primary pull-right" data-ng-click="vm.addSpecimenGroup()">
            Add specimen group <i class="glyphicon glyphicon-plus"></i>
         </button>
       </div>
     </div>
 
     <!-- ANNOTATION TYPE DATA -->
-    <div class="form-group" data-ng-repeat="atData in ceventType.annotationTypeData track by $index">
+    <div class="form-group" data-ng-repeat="atData in vm.ceventType.annotationTypeData track by $index">
       <data-ng-form name="atSubForm">
         <div class="col-md-2 control-label">
           <label>Annotation Type {{$index + 1}}</label>
@@ -125,18 +125,18 @@
         <div class="col-md-3">
           <select class="form-control"
                   name="name"
-                  data-ng-model="ceventType.annotationTypeData[$index].annotationTypeId"
-                  data-ng-options="annotType.id as annotType.name for annotType in annotTypes | orderBy: 'name'"
+                  data-ng-model="vm.ceventType.annotationTypeData[$index].annotationTypeId"
+                  data-ng-options="annotType.id as annotType.name for annotType in vm.annotTypes | orderBy: 'name'"
                   required>
             <option value="">-- make a selection --</option>
           </select>
         </div>
         <div class="col-md-2">
-          <input name="required" type="checkbox" data-ng-model="ceventType.annotationTypeData[$index].required"/> Required
+          <input name="required" type="checkbox" data-ng-model="vm.ceventType.annotationTypeData[$index].required"/> Required
         </div>
         <div class="col-md-1">
           <button class="btn btn-xs btn-warning"
-                  data-ng-click="form.removeAnnotType(atData)">
+                  data-ng-click="vm.removeAnnotType(atData)">
             <i class="glyphicon glyphicon-minus"></i> Remove
           </button>
         </div>
@@ -153,7 +153,7 @@
       <div class="col-md-2">
         <button class="btn btn-sm btn-primary pull-right"
                 data-ng-disabled="annotTypeNames == 0"
-                data-ng-click="form.addAnnotType()">
+                data-ng-click="vm.addAnnotType()">
            Add annotation type <i class="glyphicon glyphicon-plus"></i>
         </button>
       </div>
@@ -164,8 +164,8 @@
       <div class="col-md-offset-2 col-md-10">
         <button class="btn btn-primary"
                 data-ng-disabled="cetForm.$invalid"
-                data-ng-click="form.submit(ceventType)">Submit</button>
-        <button class="btn" data-ng-click="form.cancel()">Cancel</button>
+                data-ng-click="vm.submit(vm.ceventType)">Submit</button>
+        <button class="btn" data-ng-click="vm.cancel()">Cancel</button>
       </div>
     </div>
   </form>

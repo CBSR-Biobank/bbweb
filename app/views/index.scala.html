@@ -3,23 +3,27 @@
   <head>
     <title data-ng-bind="pageTitle"></title>
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
-      @*-- Add More CSS here -- *@
+      @*-- CSS files go in this section -- *@
       <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.css")" />
       <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/ng-table/ng-table.css")" />
+      <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/toastr/toastr.css")" />
       <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
-        <script data-main="@routes.Assets.versioned("javascripts/main.js")" type="text/javascript" src="@routes.Assets.versioned("lib/requirejs/require.js")"></script>
+      @*-- Javascript files go in this section -- *@
+      <script data-main="@routes.Assets.versioned("javascripts/main.js")"
+              type="text/javascript"
+              src="@routes.Assets.versioned("lib/requirejs/require.js")"></script>
       </head>
       <body>
         @*-- Header -- *@
-        <div data-ng-controller="HeaderCtrl" data-ng-cloak>
+        <div data-ng-controller="HeaderCtrl as vm" data-ng-cloak>
           <header class="navbar navbar-inverse navbar-fixed-top basics-nav">
-            <div class="container" data-ng-switch="!!user" data-ng-cloak>
+            <div class="container" data-ng-switch="!!vm.user" data-ng-cloak>
               <a href="#/" class="navbar-brand">Biobank</a>
               <div data-ng-switch-when="true">
                 <ul class="nav navbar-nav navbar-right">
                   <li class="dropdown">
                     <a href class="dropdown-toggle">
-                      <span class="glyphicon glyphicon-user"></span> {{user.name}}
+                      <span class="glyphicon glyphicon-user"></span> {{vm.user.name}}
                       <b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
@@ -29,7 +33,7 @@
                         </a>
                       </li>
                       <li>
-                        <a href data-ng-click="logout()">
+                        <a href data-ng-click="vm.logout()">
                           <span class="glyphicon glyphicon-off"></span> Logout
                         </a>
                       </li>
@@ -42,7 +46,7 @@
               </ul>
             </div>
           </header>
-          <div data-ng-if="!!user">
+          <div data-ng-if="!!vm.user">
             <ui-breadcrumbs displayname-property="data.displayName"
                             abstract-proxy-property="data.breadcrumbProxy">
             </ui-breadcrumbs>
@@ -52,7 +56,7 @@
           <div data-ui-view="main"></div>
         </div>
         @*-- Footer -- *@
-        <footer data-ng-controller="FooterCtrl">
+        <footer data-ng-controller="FooterCtrl as vm">
         </footer>
       </body>
     </html>

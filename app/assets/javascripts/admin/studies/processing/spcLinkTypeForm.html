@@ -10,8 +10,8 @@
       <div class="col-md-9">
         <select class="form-control"
                 name="procTypeId"
-                data-ng-model="spcLinkType.processingTypeId"
-                data-ng-options="pt.id as pt.name for pt in processingTypes | orderBy: 'name'"
+                data-ng-model="vm.spcLinkType.processingTypeId"
+                data-ng-options="pt.id as pt.name for pt in vm.processingTypes | orderBy: 'name'"
                 required>
           <option value="">-- choose processing type --</option>
         </select>
@@ -30,8 +30,8 @@
       <div class="col-md-9">
         <select class="form-control"
                 name="inputGroupId"
-                data-ng-model="spcLinkType.inputGroupId"
-                data-ng-options="sg.id as sg.name for sg in specimenGroups | orderBy: 'name'"
+                data-ng-model="vm.spcLinkType.inputGroupId"
+                data-ng-options="sg.id as sg.name for sg in vm.specimenGroups | orderBy: 'name'"
                 required>
           <option value="">-- choose specimen group --</option>
         </select>
@@ -52,7 +52,7 @@
                min="1"
                name="inputCount"
                class="form-control input-sm"
-               data-ng-model="spcLinkType.inputCount"
+               data-ng-model="vm.spcLinkType.inputCount"
                placeholder="count"
                valid-count
                required />
@@ -73,7 +73,7 @@
                min="0"
                name="expectedInputChange"
                class="form-control input-sm"
-               data-ng-model="spcLinkType.expectedInputChange"
+               data-ng-model="vm.spcLinkType.expectedInputChange"
                placeholder="amount"
                valid-amount
                required />
@@ -95,8 +95,8 @@
       <div class="col-md-9">
         <select class="form-control"
                 name="inputContainertypeId"
-                data-ng-model="spcLinkType.inputContainertypeName"
-                data-ng-options="ct.id as ct.name for ct in containerTypes | orderBy: 'name'">
+                data-ng-model="vm.spcLinkType.inputContainertypeName"
+                data-ng-options="ct.id as ct.name for ct in vm.containerTypes | orderBy: 'name'">
           <option value="">None</option>
         </select>
       </div>
@@ -108,8 +108,8 @@
       <div class="col-md-9">
         <select class="form-control"
                 name="outputGroupId"
-                data-ng-model="spcLinkType.outputGroupId"
-                data-ng-options="sg.id as sg.name for sg in specimenGroups | orderBy: 'name'"
+                data-ng-model="vm.spcLinkType.outputGroupId"
+                data-ng-options="sg.id as sg.name for sg in vm.specimenGroups | orderBy: 'name'"
                 required>
           <option value="">-- choose specimen group --</option>
         </select>
@@ -130,7 +130,7 @@
                  min="1"
                  name="outputCount"
                  class="form-control input-sm"
-                 data-ng-model="spcLinkType.outputCount"
+                 data-ng-model="vm.spcLinkType.outputCount"
                  placeholder="count"
                  valid-count
                  required />
@@ -150,7 +150,7 @@
                min="0"
                name="expectedOutputChange"
                class="form-control input-sm"
-               data-ng-model="spcLinkType.expectedOutputChange"
+               data-ng-model="vm.spcLinkType.expectedOutputChange"
                placeholder="amount"
                valid-amount
                required />
@@ -172,15 +172,15 @@
       <div class="col-md-9">
         <select class="form-control"
                 name="outputContainertypeId"
-                data-ng-model="spcLinkType.outputContainertypeId"
-                data-ng-options="ct.id as ct.name for ct in containerTypes | orderBy: 'name'">
+                data-ng-model="vm.spcLinkType.outputContainertypeId"
+                data-ng-options="ct.id as ct.name for ct in vm.containerTypes | orderBy: 'name'">
           <option value="">None</option>
         </select>
       </div>
     </div>
 
     <!-- ANNOTATION TYPE DATA -->
-    <div class="form-group" data-ng-repeat="atData in spcLinkType.annotationTypeData track by $index">
+    <div class="form-group" data-ng-repeat="atData in vm.spcLinkType.annotationTypeData track by $index">
       <data-ng-form name="atSubForm">
         <div class="col-md-3 control-label">
           <label>Annotation Type {{$index + 1}}</label>
@@ -188,18 +188,18 @@
         <div class="col-md-4">
           <select class="form-control"
                   name="annotTypeName"
-                  data-ng-model="spcLinkType.annotationTypeData[$index].annotationTypeId"
-                  data-ng-options="annotType.id as annotType.name for annotType in annotTypes | orderBy: 'name'"
+                  data-ng-model="vm.spcLinkType.annotationTypeData[$index].annotationTypeId"
+                  data-ng-options="annotType.id as annotType.name for annotType in vm.annotTypes | orderBy: 'name'"
                   required>
             <option value="">-- choose annotation type --</option>
           </select>
         </div>
         <div class="col-md-2">
-          <input name="required" type="checkbox" data-ng-model="spcLinkType.annotationTypeData[$index].required"/> Required
+          <input name="required" type="checkbox" data-ng-model="vm.spcLinkType.annotationTypeData[$index].required"/> Required
         </div>
         <div class="col-md-1">
           <button class="btn btn-xs btn-warning"
-                  data-ng-click="form.removeAnnotType(atData)">
+                  data-ng-click="vm.removeAnnotType(atData)">
             <i class="glyphicon glyphicon-minus"></i> Remove
           </button>
         </div>
@@ -216,7 +216,7 @@
       <div class="col-md-3">
         <button class="btn btn-sm btn-primary pull-right"
                 data-ng-disabled="annotTypeNames == 0"
-                data-ng-click="form.addAnnotType()">
+                data-ng-click="vm.addAnnotType()">
            Add annotation type <i class="glyphicon glyphicon-plus"></i>
         </button>
       </div>
@@ -227,8 +227,8 @@
       <div class="col-md-offset-3 col-md-9">
         <button class="btn btn-primary"
                 data-ng-disabled="spcLinkTypeForm.$invalid"
-                data-ng-click="form.submit(spcLinkType)">Submit</button>
-        <button class="btn" data-ng-click="form.cancel()">Cancel</button>
+                data-ng-click="vm.submit(vm.spcLinkType)">Submit</button>
+        <button class="btn" data-ng-click="vm.cancel()">Cancel</button>
       </div>
     </div>
   </form>

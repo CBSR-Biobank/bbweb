@@ -1,72 +1,76 @@
 /**
- * Configure routes of specimen groups module.
+ * Configure states of specimen groups module.
  */
-define(['angular'], function(angular) {
+define(['../../module'], function(module) {
   'use strict';
 
-  var mod = angular.module('admin.studies.specimenGroups.states', [
-    'ui.router', 'admin.studies.controllers'
-  ]);
+  module.config(config);
 
-  mod.config([
-    '$urlRouterProvider', '$stateProvider', 'userResolve',
-    function($urlRouterProvider, $stateProvider, userResolve ) {
+  config.$inject = [
+    '$urlRouterProvider', '$stateProvider', 'userResolve'
+  ];
 
-      $urlRouterProvider.otherwise('/');
+  function config($urlRouterProvider, $stateProvider, userResolve ) {
+    // FIXME does this need to be in each state definition file?
+    $urlRouterProvider.otherwise('/');
 
-      $stateProvider
-        .state('admin.studies.study.specimens.groupAdd', {
-          url: '/spcgroup/add',
-          resolve: {
-            user: userResolve.user,
-            specimenGroup: ['study', function(study) {
-              return {
-                studyId: study.id,
-                name: '',
-                description: null,
-                units: '',
-                anatomicalSourceType: '',
-                preservationType: '',
-                preservationTemperatureType: '',
-                specimenType: ''
-              };
-            }]
-          },
-          views: {
-            'main@': {
-              templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
-              controller: 'SpecimenGroupAddCtrl'
-            }
-          },
-          data: {
-            displayName: 'Specimen Group'
+    $stateProvider
+      .state('admin.studies.study.specimens.groupAdd', {
+        url: '/spcgroup/add',
+        resolve: {
+          user: userResolve.user,
+          specimenGroup: ['study', function(study) {
+            return {
+              studyId: study.id,
+              name: '',
+              description: null,
+              units: '',
+              anatomicalSourceType: '',
+              preservationType: '',
+              preservationTemperatureType: '',
+              specimenType: ''
+            };
+          }],
+          valueTypes: ['SpecimenGroupService', function(SpecimenGroupService) {
+            return SpecimenGroupService.specimenGroupValueTypes();
+          }]
+        },
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
+            controller: 'SpecimenGroupEditCtrl as vm'
           }
-        })
-        .state('admin.studies.study.specimens.groupUpdate', {
-          url: '/spcgroup/update/{specimenGroupId}',
-          resolve: {
-            user: userResolve.user,
-            specimenGroup: [
-              '$stateParams', 'SpecimenGroupService', 'study',
-              function($stateParams, SpecimenGroupService, study) {
-                if ($stateParams.specimenGroupId) {
-                  return SpecimenGroupService.get(study.id, $stateParams.specimenGroupId);
-                }
-                throw new Error('state parameter specimenGroupId is invalid');
+        },
+        data: {
+          displayName: 'Specimen Group'
+        }
+      })
+      .state('admin.studies.study.specimens.groupUpdate', {
+        url: '/spcgroup/update/{specimenGroupId}',
+        resolve: {
+          user: userResolve.user,
+          specimenGroup: [
+            '$stateParams', 'SpecimenGroupService', 'study',
+            function($stateParams, SpecimenGroupService, study) {
+              if ($stateParams.specimenGroupId) {
+                return SpecimenGroupService.get(study.id, $stateParams.specimenGroupId);
               }
-            ]
-          },
-          views: {
-            'main@': {
-              templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
-              controller: 'SpecimenGroupUpdateCtrl'
+              throw new Error('state parameter specimenGroupId is invalid');
             }
-          },
-          data: {
-            displayName: 'Specimen Group'
+          ],
+          valueTypes: ['SpecimenGroupService', function(SpecimenGroupService) {
+            return SpecimenGroupService.specimenGroupValueTypes();
+          }]
+        },
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
+            controller: 'SpecimenGroupEditCtrl as vm'
           }
-        });
-    }
-  ]);
-  return mod;
+        },
+        data: {
+          displayName: 'Specimen Group'
+        }
+      });
+  }
 });

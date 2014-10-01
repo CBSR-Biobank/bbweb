@@ -1,4 +1,4 @@
-define(['angular', './module'], function(angular, module) {
+define(['../module', 'angular'], function(module, angular) {
   'use strict';
 
   module.service('panelTableService', PanelTableService);
@@ -23,19 +23,19 @@ define(['angular', './module'], function(angular, module) {
     function getTableParamsWithCallback(tableDataFn, customParameters, customSettings) {
       var defaultParameters = {
         page: 1,            // show first page
-        count: 10,          // count per page
-        sorting: {
-          name: 'asc'       // initial sorting
-        }
+        count: 10           // count per page
+        // sorting: {
+        //   name: 'asc'       // initial sorting
+        // }
       };
 
       var defaultSettings = {
-        counts: [], // hide page counts control
         total: function () { return tableDataFn().length; },
         getData: function($defer, params) {
           var filteredData = tableDataFn();
           var orderedData = params.sorting() ?
               $filter('orderBy')(filteredData, params.orderBy()) : filteredData;
+          params.total(filteredData.length);
           $defer.resolve(
             orderedData.slice(
               (params.page() - 1) * params.count(),
@@ -46,6 +46,7 @@ define(['angular', './module'], function(angular, module) {
       var parameters = {};
       var settings = {};
 
+      // merge defaults with those passed in the function arguments
       angular.extend(parameters, defaultParameters, customParameters);
       angular.extend(settings, defaultSettings, customSettings);
 

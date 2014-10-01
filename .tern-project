@@ -6,10 +6,12 @@
   "loadEagerly": [
   ],
   "plugins": {
-    "angular": "./",
+    "angular": "target/web/web-modules/main/webjars/lib/angularjs",
     "requirejs": {
-      "baseURL": "./",
+      "baseURL": "target/web/web-modules/main/webjars/lib/requirejs",
       "paths": {}
+    },
+    "node": {
     }
   }
 }

@@ -1,16 +1,15 @@
 /** Specimen Group helpers */
-define(['angular'], function(angular) {
+define(['../module'], function(module) {
   'use strict';
-
-  var mod = angular.module('admin.users.helpers', []);
 
   /**
    * Displays a study annotation type in a modal. The information is displayed in an ng-table.
    *
    */
-  mod.service('UserModalService', [
-    'modelObjModalService', 'addTimeStampsService',
-    function (modelObjModalService, addTimeStampsService) {
+  module.service('UserModalService', [
+    'modelObjModalService', 'addTimeStamps',
+
+    function (modelObjModalService, addTimeStamps) {
       this.show = function (user) {
         var title = 'User';
         var data = [];
@@ -19,11 +18,10 @@ define(['angular'], function(angular) {
         data.push({name: 'Email:',  value: user.email});
         data.push({name: 'Status:', value: user.status});
 
-        data = data.concat(addTimeStampsService.get(user));
+        data = data.concat(addTimeStamps.get(user));
         modelObjModalService.show(title, data);
       };
     }
   ]);
 
-  return mod;
 });

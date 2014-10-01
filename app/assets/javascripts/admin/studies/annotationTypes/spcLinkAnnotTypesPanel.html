@@ -1,0 +1,15 @@
+<accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
+  <accordion-heading>
+    Specimen Link Annotation Types
+    <panel-buttons on-add="vm.add()"
+                   add-button-title="Add annotation type"
+                   panel-open="vm.panelOpen"
+                   panel-toggle="vm.panelToggle()">
+    </panel-buttons>
+  </accordion-heading>
+  <p>
+    Specimen link annotations allow a study to collect custom named and defined pieces of data when processing
+    specimens. Annotations are optional and are not required to be defined.
+  </p>
+  <ng-include src="'/assets/javascripts/admin/studies/annotationTypes/annotTypesPanel.html'">
+</accordion-group>

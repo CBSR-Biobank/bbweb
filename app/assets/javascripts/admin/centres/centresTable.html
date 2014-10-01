@@ -12,12 +12,12 @@
   </h1>
 </div>
 <div class="clearfix">
-  <div data-ng-if="centres.length == 0">
+  <div data-ng-if="vm.centres.length == 0">
     <p>No centres have been added.</p>
   </div>
-  <div data-ng-if="centres.length != 0">
+  <div data-ng-if="vm.centres.length > 0">
     <p>The following centres have been configured:</p>
-    <table data-ng-table="tableParams" class="table table-hover">
+    <table data-ng-table="vm.tableParams" class="table table-hover">
       <tr data-ng-repeat="centre in $data">
         <td data-title="'Name'" sortable="'name'">
           <a ui-sref="admin.centres.centre.summary({centreId: centre.id})">{{centre.name}}</a>
