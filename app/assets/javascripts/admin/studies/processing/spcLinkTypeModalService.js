@@ -1,4 +1,4 @@
-define(['../../module'], function(module) {
+define(['../../module', 'underscore'], function(module, _) {
   'use strict';
 
   module.service('spcLinkTypeModalService', spcLinkTypeModalService);
@@ -16,24 +16,35 @@ define(['../../module'], function(module) {
 
     //-------
 
-    function show (spcLinkType, processingTypesById, specimenGropusById) {
+    function show (spcLinkType, processingTypesById, specimenGropusById, annotTypesById) {
       var title = 'Specimen Link Type';
-      var data = [];
       var inputGroup =  specimenGropusById[spcLinkType.inputGroupId];
       var outputGroup =  specimenGropusById[spcLinkType.outputGroupId];
 
-      data.push({name: 'Processing Type:',
-                 value: processingTypesById[spcLinkType.processingTypeId].name});
-      data.push({name: 'Input Group:', value: inputGroup.name});
-      data.push({name: 'Expected input change:',
-                 value: spcLinkType.expectedInputChange + ' ' + inputGroup.units});
-      data.push({name: 'Input count:', value: spcLinkType.inputCount});
-      data.push({name: 'Input Container Type:', value: 'None'});
-      data.push({name: 'Output Group:', value: outputGroup.name});
-      data.push({name: 'Expected output change:',
-                 value: spcLinkType.expectedInputChange + ' ' + outputGroup.units});
-      data.push({name: 'Output count:', value: spcLinkType.outputCount});
-      data.push({name: 'Output Container Type:', value: 'None'});
+      var atDataStrings = [];
+      _.each(spcLinkType.annotationTypeData, function (atItem) {
+        var annotType = annotTypesById[atItem.annotationTypeId];
+        if (!annotType) {
+          throw new Error('annotation type not found');
+        }
+        atDataStrings.push(annotType.name + (atItem.required ? ' (Req)' : ' (N/R)'));
+      });
+
+      var data = [
+        {name: 'Processing Type:',
+         value: processingTypesById[spcLinkType.processingTypeId].name},
+        {name: 'Input Group:', value: inputGroup.name},
+        {name: 'Expected input change:',
+         value: spcLinkType.expectedInputChange + ' ' + inputGroup.units},
+        {name: 'Input count:', value: spcLinkType.inputCount},
+        {name: 'Input Container Type:', value: 'None'},
+        {name: 'Output Group:', value: outputGroup.name},
+        {name: 'Expected output change:',
+         value: spcLinkType.expectedInputChange + ' ' + outputGroup.units},
+        {name: 'Output count:', value: spcLinkType.outputCount},
+        {name: 'Output Container Type:', value: 'None'},
+        {name: 'Annotation Types:', value: atDataStrings.join(', ')}
+      ];
       data = data.concat(addTimeStamps.get(spcLinkType));
       domainEntityModalService.show(title, data);
     }

@@ -77,7 +77,8 @@ define(['../../module', 'underscore'], function(module, _) {
     }
 
     function information(spcLinkType) {
-      spcLinkTypeModalService.show(spcLinkType, vm.processingTypesById, vm.specimenGroupsById);
+      spcLinkTypeModalService.show(
+        spcLinkType, vm.processingTypesById, vm.specimenGroupsById, vm.annotTypesById);
     }
 
     function update(spcLinkType) {

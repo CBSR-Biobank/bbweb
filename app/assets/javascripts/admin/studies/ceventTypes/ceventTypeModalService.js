@@ -31,7 +31,7 @@ define(['../../module', 'underscore'], function(module, _) {
       });
 
       var atDataStrings = [];
-      ceventType.annotationTypeData.forEach(function (atItem) {
+      _.each(ceventType.annotationTypeData, function (atItem) {
         var annotType = annotTypesById[atItem.annotationTypeId];
         if (!annotType) {
           throw new Error('annotation type not found');
