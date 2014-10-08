@@ -29,23 +29,6 @@ define(['./module'], function(module) {
           templateUrl: '/assets/javascripts/users/login.html',
           controller: 'LoginCtrl as vm'
         }
-      },
-      data: {
-        notifications: ''
-      }
-    });
-
-    $stateProvider.state('users.login.registered', {
-      // does not define URL here so that it appears that shis is same page to the user as
-      // 'users.login'
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/users/login.html',
-          controller: 'LoginCtrl as vm'
-        }
-      },
-      data: {
-        notifications: 'Your account was created and is now pending administrator approval.'
       }
     });
 
@@ -94,23 +77,6 @@ define(['./module'], function(module) {
           templateUrl: '/assets/javascripts/users/registerUserForm.html',
           controller: 'RegisterUserCtrl as vm'
         }
-      },
-      data: {
-        notifications: ''
-      }
-    });
-
-    $stateProvider.state('users.register.failed', {
-      // does not define URL here so that it appears that shis is same page to the user as
-      // 'users.login'
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/users/registerUserForm.html',
-          controller: 'RegisterUserCtrl as vm'
-        }
-      },
-      data: {
-        notifications: 'That email address is already registered.'
       }
     });
 

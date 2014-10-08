@@ -1,4 +1,4 @@
-define(['./module', 'toastr'], function(module, toastr) {
+define(['./module'], function(module) {
   'use strict';
 
   module.controller('LoginCtrl', LoginCtrl);
@@ -16,23 +16,17 @@ define(['./module', 'toastr'], function(module, toastr) {
    */
   function LoginCtrl($state, stateHelper, userService, modalService) {
     var vm = this;
+
+    if (userService.getUser()) {
+      // user already logged in, send him to home page
+      $state.go('home');
+    }
+
     vm.credentials = {
       email: '',
       password: ''
     };
     vm.login = login;
-
-    if ($state.current.data.notifications.length > 0) {
-      toastr.success(
-        $state.current.data.notifications,
-        'Registration success',
-        {
-          closeButton: true,
-          timeOut:  0,
-          extendedTimeOut: 0,
-          positionClass: 'toast-bottom-right'
-        });
-    }
 
     //--
 

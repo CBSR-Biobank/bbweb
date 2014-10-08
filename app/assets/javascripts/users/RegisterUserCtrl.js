@@ -1,7 +1,3 @@
-/**
- * User controllers.
- *
- */
 define(['./module', 'toastr'], function(module, toastr) {
   'use strict';
 
@@ -28,29 +24,36 @@ define(['./module', 'toastr'], function(module, toastr) {
     vm.submit = submit;
     vm.cancel = cancel;
 
-    if ($state.current.data.notifications.length > 0) {
-      toastr.error(
-        $state.current.data.notifications,
-        'Registration error',
-        {
-          closeButton: true,
-          timeOut:  0,
-          extendedTimeOut: 0,
-          positionClass: 'toast-bottom-right'
-        });
-    }
-
     //----
 
     function submit(user) {
       userService.add(user).then(
         function() {
           // user has been registerd
-          $state.go('users.login.registered');
+          toastr.success(
+            'Your account was created and is now pending administrator approval.',
+            'Registration success',
+            {
+              closeButton: true,
+              timeOut:  0,
+              extendedTimeOut: 0,
+              positionClass: 'toast-bottom-right'
+            });
+          $state.go('users.login', {}, {reload: true});
         },
         function() {
           // registration failed
-          $state.go('users.register.failed');
+          toastr.error(
+            'That email address is already registered.',
+            'Registration error',
+            {
+              closeButton: true,
+              timeOut:  0,
+              extendedTimeOut: 0,
+              positionClass: 'toast-bottom-right'
+            });
+
+          $state.go('users.register', {}, {reload: true});
         }
       );
     }
