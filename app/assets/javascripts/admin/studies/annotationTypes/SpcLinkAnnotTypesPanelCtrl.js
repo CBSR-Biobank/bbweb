@@ -42,7 +42,6 @@ define(['../../module'], function(module) {
     vm.columns = [
       { title: 'Name', field: 'name', filter: { 'name': 'text' } },
       { title: 'Type', field: 'valueType', filter: { 'valueType': 'text' } },
-      { title: 'Required', field: 'required', filter: { 'required': 'text' } },
       { title: 'Description', field: 'description', filter: { 'description': 'text' } }
     ];
 

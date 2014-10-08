@@ -22,8 +22,9 @@
                       'sort-asc': vm.tableParams.isSortBy(column.field, 'asc'),
                       'sort-desc': vm.tableParams.isSortBy(column.field, 'desc')
                       }"
-            ng-click="vm.tableParams.sorting(column.field, vm.tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')">
-          {{column.title}}
+            ng-click="vm.tableParams.sorting(column.field, vm.tableParams.isSortBy(column.field, 'asc') ?
+                      'desc' : 'asc')">
+          <div>{{column.title}}</div>
         </th>
         <th><!-- heading for buttons: blank for now --></th>
       </tr>

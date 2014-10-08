@@ -32,6 +32,7 @@ define(['../../module'], function(module) {
       'Participant Annotation Type');
 
     vm.annotTypes  = $scope.annotTypes;
+    vm.hasRequired = true;
     vm.update      = update;
     vm.remove      = participantAnnotTypeRemoveService.remove;
     vm.information = helper.information;
