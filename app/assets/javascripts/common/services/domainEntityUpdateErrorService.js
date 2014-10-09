@@ -27,14 +27,14 @@ define(['../module'], function(module) {
         actionButtonText: 'OK'
       };
 
-      if (error.message.indexOf('expected version doesn\'t match current version') > -1) {
+      if (error.data.message.indexOf('expected version doesn\'t match current version') > -1) {
         /* concurrent change error */
-        modalDefaults.templateUrl = '/assets/javascripts/common/services/modalConcurrencyError.html';
+        modalDefaults.templateUrl = '/assets/javascripts/common/modalConcurrencyError.html';
         modalOptions.domainType = domainObjTypeName;
       } else {
         /* some other error */
         modalOptions.headerText = 'An error happened when submitting this change.';
-        modalOptions.bodyText = 'Error: ' + error.message;
+        modalOptions.bodyText = 'Error: ' + error.data.message;
       }
 
       modalService.showModal(modalDefaults, modalOptions)

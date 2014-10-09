@@ -27,7 +27,7 @@ define(['../../module'], function(module) {
 
     var helper = panelService.panel(
       'study.panel.specimenLinkAnnotationTypes',
-      'admin.studies.study.spcLink.annotTypeAdd',
+      'admin.studies.study.processing.spcLinkAnnotTypeAdd',
       annotTypeModalService,
       'Specimen Link Annotation Type');
 
@@ -52,7 +52,7 @@ define(['../../module'], function(module) {
 
     function update(annotType) {
       $state.go(
-        'admin.studies.study.spcLink.annotTypeUpdate',
+        'admin.studies.study.processing.spcLinkAnnotTypeUpdate',
         { annotTypeId: annotType.id });
     }
 

@@ -29,17 +29,18 @@ define(['../module', 'angular'], function(module, angular) {
         var tableParameters = { count: 20, sorting: {} };
         var tableSettings = { counts: [] };
 
-        $scope.modalOptions = {
-          title: title,
-          data: data
-        };
-
+        $scope.modalOptions = {};
+        $scope.modalOptions.title = title;
+        $scope.modalOptions.data = data;
         $scope.modalOptions.tableParams =
           panelTableService.getTableParams($scope.modalOptions.data, tableParameters, tableSettings);
+        $scope.modalOptions.ok = ok;
 
-        $scope.modalOptions.ok = function () {
+        //--
+
+        function ok() {
           $modalInstance.close();
-        };
+        }
       }];
 
       return $modal.open(tempModalDefaults).result;

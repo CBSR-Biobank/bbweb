@@ -13,7 +13,7 @@ define([
   './studies/annotationTypes/ParticipantsAnnotTypesPanelCtrl',
   './studies/annotationTypes/SpcLinkAnnotTypesPanelCtrl',
   './studies/annotationTypes/annotTypeModalService',
-  './studies/annotationTypes/annotationTypeEditCtrl',
+  './studies/annotationTypes/AnnotationTypeEditCtrl',
   './studies/annotationTypes/annotationTypeRemoveService',
   './studies/annotationTypes/ceventAnnotTypeRemoveService',
   './studies/annotationTypes/ceventAnnotTypesPanelDirective',

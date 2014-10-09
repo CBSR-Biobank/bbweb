@@ -8,9 +8,10 @@
 define([
   'angular',
   'toastr',
+  'common/index',
   'home/index',
   'centres/index',
-  'studies',
+  'studies/index',
   'users/index',
   'admin/index',
   'dashboard/index'

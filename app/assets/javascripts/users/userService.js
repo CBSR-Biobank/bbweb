@@ -1,4 +1,4 @@
-define(['./module', 'common'], function(module) {
+define(['./module'], function(module) {
   'use strict';
 
   module.service('userService', UserService);
@@ -60,14 +60,15 @@ define(['./module', 'common'], function(module) {
     }
 
     function login(credentials) {
-      return biobankXhrReqService.call('POST', '/login', credentials).then(function(token) {
-        self.token = token;
-        return biobankXhrReqService.call('GET', '/authenticate');
-      }).then(function(user) {
-        self.user = user;
-        $log.info('Welcome ' + self.user.name);
-        return self.user;
-      });
+      return biobankXhrReqService.call('POST', '/login', credentials)
+        .then(function(token) {
+          self.token = token;
+          return biobankXhrReqService.call('GET', '/authenticate');
+        }).then(function(user) {
+          self.user = user;
+          $log.info('Welcome ' + self.user.name);
+          return self.user;
+        });
     }
 
     function logout() {
