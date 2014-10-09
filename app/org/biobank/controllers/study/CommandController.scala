@@ -87,25 +87,33 @@ trait JsonController extends Controller {
 
   }
 
-  protected def domainValidationReply[T](
-    future: Future[DomainValidation[T]])(implicit writes: Writes[T]) = {
-    future.map { validation =>
-      validation.fold(
-        err   => {
-          val errMsgs = err.list.mkString(", ")
-          if ("no (centre|location) with id".r.findAllIn(errMsgs).length > 0) {
-            NotFound(errMsgs)
-          } else if (errMsgs.contains("already exists")) {
-            Forbidden(errMsgs)
-          } else {
-            BadRequest(errMsgs)
-          }
-        },
-        event => {
-          Log.debug(s"domainValidationReply: $event")
-          Ok(event)
+  protected def domainValidationReply[T]
+    (validation: DomainValidation[T])
+    (implicit writes: Writes[T])
+      : Result = {
+    validation.fold(
+      err => {
+        val errMsgs = err.list.mkString(", ")
+        if ("no (centre|location) with id".r.findAllIn(errMsgs).length > 0) {
+          NotFound(errMsgs)
+        } else if (errMsgs.contains("already exists")) {
+          Forbidden(errMsgs)
+        } else {
+          BadRequest(errMsgs)
         }
-      )
+      },
+      event => {
+        Log.debug(s"domainValidationReply: $event")
+        Ok(event)
+      }
+    )
+  }
+
+  protected def domainValidationReply[T]
+    (future: Future[DomainValidation[T]])
+    (implicit writes: Writes[T])
+      : Future[Result] = {
+    future.map { validation => domainValidationReply(validation)
     }
   }
 

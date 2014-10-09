@@ -110,34 +110,9 @@ object StudiesController extends CommandController with JsonController {
     ))
   }
 
-  // FIXME move to DTO file
-  case class ProcessingDto(
-    processingTypes: List[org.biobank.domain.study.ProcessingType],
-    specimenLinkTypes: List[org.biobank.domain.study.SpecimenLinkType],
-    specimenLinkAnnotationTypes: List[org.biobank.domain.study.SpecimenLinkAnnotationType],
-    specimenGroups: List[org.biobank.domain.study.SpecimenGroup])
-
-  // FIXME move to DTO file
-  implicit val processingDtoWriter: Writes[ProcessingDto] = (
-    (__ \ "processingTypes").write[List[org.biobank.domain.study.ProcessingType]] and
-      (__ \ "specimenLinkTypes").write[List[org.biobank.domain.study.SpecimenLinkType]] and
-      (__ \ "specimenLinkAnnotationTypes").write[List[org.biobank.domain.study.SpecimenLinkAnnotationType]] and
-      (__ \ "specimenGroups").write[List[org.biobank.domain.study.SpecimenGroup]]
-  )(unlift(ProcessingDto.unapply))
-
   def getProcessingDto(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
     Logger.debug(s"ProcessingTypeController.getProcessingDto: studyId: $studyId")
-
-    val processingTypes = studiesService.processingTypesForStudy(studyId)
-    val specimenLinkTypes = processingTypes.flatMap { pt =>
-      studiesService.specimenLinkTypesForProcessingType(pt.id.id)
-    }
-
-    Ok(ProcessingDto(
-        processingTypes.toList,
-        specimenLinkTypes.toList,
-        studiesService.specimenLinkAnnotationTypesForStudy(studyId).toList,
-        studiesService.specimenGroupsForStudy(studyId).toList))
+    domainValidationReply(studiesService.getProcessingDto(studyId))
   }
 
 }

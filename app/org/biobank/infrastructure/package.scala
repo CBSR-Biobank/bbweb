@@ -110,4 +110,21 @@ package infrastructure {
 
   }
 
+  case class ProcessingDto(
+    processingTypes: List[org.biobank.domain.study.ProcessingType],
+    specimenLinkTypes: List[org.biobank.domain.study.SpecimenLinkType],
+    specimenLinkAnnotationTypes: List[org.biobank.domain.study.SpecimenLinkAnnotationType],
+    specimenGroups: List[org.biobank.domain.study.SpecimenGroup])
+
+  object ProcessingDto {
+
+    implicit val processingDtoWriter: Writes[ProcessingDto] = (
+      (__ \ "processingTypes").write[List[org.biobank.domain.study.ProcessingType]] and
+        (__ \ "specimenLinkTypes").write[List[org.biobank.domain.study.SpecimenLinkType]] and
+        (__ \ "specimenLinkAnnotationTypes").write[List[org.biobank.domain.study.SpecimenLinkAnnotationType]] and
+        (__ \ "specimenGroups").write[List[org.biobank.domain.study.SpecimenGroup]]
+    )(unlift(ProcessingDto.unapply))
+
+  }
+
 }

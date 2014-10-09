@@ -21,6 +21,7 @@ GET     /studies/sgroups/:studyId              org.biobank.controllers.study.Spe
 POST    /studies/sgroups                       org.biobank.controllers.study.SpecimenGroupController.addSpecimenGroup
 PUT     /studies/sgroups/:id                   org.biobank.controllers.study.SpecimenGroupController.updateSpecimenGroup(id)
 DELETE  /studies/sgroups/:studyId/:id/:ver     org.biobank.controllers.study.SpecimenGroupController.removeSpecimenGroup(studyId, id, ver: Long)
+GET     /studies/sgroups/inuse/:studyId        org.biobank.controllers.study.SpecimenGroupController.getInUse(studyId, sgId: Option[String])
 
 # collection event types
 GET     /studies/cetypes/:studyId              org.biobank.controllers.study.CeventTypeController.get(studyId, cetId: Option[String])

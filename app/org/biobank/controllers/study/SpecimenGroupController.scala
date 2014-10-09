@@ -43,6 +43,24 @@ object SpecimenGroupController extends CommandController with JsonController {
     }
   }
 
+  def getInUse(studyId: String, sgId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.debug(s"SpecimenGroupController.getInUse: studyId: $studyId, sgId: $sgId")
+
+    studiesService.specimenGroupsInUse(studyId)
+
+    // sgId.fold {
+    //   Ok(.toList)
+    // } {
+    //   id =>
+    //   studiesService.specimenGroupWithId(studyId, id).fold(
+    //     err => BadRequest(err.list.mkString(", ")),
+    //     specimenGroup => Ok(specimenGroup)
+    //   )
+    // }
+
+    ???
+  }
+
   def addSpecimenGroup = commandAction(numFields = 8) { cmd: AddSpecimenGroupCmd => implicit userId =>
     val future = studiesService.addSpecimenGroup(cmd)
     domainValidationReply(future)
