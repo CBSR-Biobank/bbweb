@@ -67,6 +67,8 @@ class BbwebPlugin(val app: play.api.Application)
   }
 
   /** Used for debugging only.
+    *
+    * password is "testuser"
     */
   def createTestUser = {
     val email = "test@biosample.ca"
@@ -76,8 +78,8 @@ class BbwebPlugin(val app: play.api.Application)
       DateTime.now,
       "testuser",
       email,
-      "$2a$10$5ND6n5oPFtuShMQVb/vx1eJP0DzX1nIcwvX3GWUXgJP8/XVr7tqPS",
-      "$2a$10$5ND6n5oPFtuShMQVb/vx1e",
+      "$2a$10$bkENUsLcxClf9gce/Mnv3OQcLcG6S5jP730MxGWSKNSKUmaJ/gdGq",
+      "$2a$10$bkENUsLcxClf9gce/Mnv3O",
       None)
 
     if (validation.isFailure) {
@@ -90,18 +92,21 @@ class BbwebPlugin(val app: play.api.Application)
     }
   }
 
+  /**
+    * for debug only - password is "testuser"
+    */
   def createDefaultUser: User = {
     //if ((app.mode == Mode.Dev) || (app.mode == Mode.Test)) {
 
-    // for debug only - password is "administrator"
+    //
     val validation = RegisteredUser.create(
       UserId(defaultUserEmail),
       -1L,
       DateTime.now,
       "admin",
       defaultUserEmail,
-      "$2a$10$5ND6n5oPFtuShMQVb/vx1eJP0DzX1nIcwvX3GWUXgJP8/XVr7tqPS",
-      "$2a$10$5ND6n5oPFtuShMQVb/vx1e",
+      "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
+      "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
       None)
 
     validation.fold(
