@@ -14,7 +14,7 @@ define(['../../module'], function(module) {
   ];
 
   /**
-   *
+   * A panel to display a study's specimen link annotation types.
    */
   function SpcLinkAnnotTypesPanelCtrl($scope,
                                       $state,
@@ -50,6 +50,9 @@ define(['../../module'], function(module) {
 
     //--
 
+    /**
+     * Switches state to update a specimen link annotation type.
+     */
     function update(annotType) {
       $state.go(
         'admin.studies.study.processing.spcLinkAnnotTypeUpdate',

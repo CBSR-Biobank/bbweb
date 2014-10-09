@@ -14,7 +14,7 @@ define(['../../module'], function(module) {
   ];
 
   /**
-   *
+   * A panel to display a study's participant annotation types.
    */
   function ParticipantsAnnotTypesPanelCtrl($scope,
                                            $state,
@@ -52,6 +52,9 @@ define(['../../module'], function(module) {
 
     //--
 
+    /**
+     * Switches state to update a participant annotation type.
+     */
     function update(annotType) {
       $state.go(
       'admin.studies.study.participants.annotTypeUpdate',

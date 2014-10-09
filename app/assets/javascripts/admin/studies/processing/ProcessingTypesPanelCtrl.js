@@ -14,7 +14,7 @@ define(['../../module'], function(module) {
   ];
 
   /**
-   *
+   * A panel to display a study's processing types.
    */
   function ProcessingTypesPanelCtrl($scope,
                                     $state,
@@ -42,10 +42,16 @@ define(['../../module'], function(module) {
 
     //--
 
-    function information(domainEntity) {
-      processingTypeModalService.show(domainEntity);
+    /**
+     * Displays a processing type in a modal.
+     */
+    function information(processingType) {
+      processingTypeModalService.show(processingType);
     }
 
+    /**
+     * Switches state to update a processing type.
+     */
     function update(processingType) {
       $state.go(
         'admin.studies.study.processing.processingTypeUpdate',

@@ -17,7 +17,7 @@ define(['../../module', 'underscore'], function(module, _) {
   ];
 
   /**
-   *
+   * A panel that displays a study's specimen link types.
    */
   function SpcLinkTypesPanelCtrl($scope,
                                  $state,
@@ -76,25 +76,40 @@ define(['../../module', 'underscore'], function(module, _) {
       });
     }
 
+    /**
+     * Displays a specimen link type in a modal.
+     */
     function information(spcLinkType) {
       spcLinkTypeModalService.show(
         spcLinkType, vm.processingTypesById, vm.specimenGroupsById, vm.annotTypesById);
     }
 
+    /**
+     * Switches state to update a specimen link type.
+     */
     function update(spcLinkType) {
       $state.go(
         'admin.studies.study.processing.spcLinkTypeUpdate',
         { procTypeId:spcLinkType.processingTypeId, spcLinkTypeId: spcLinkType.id });
     }
 
+    /**
+     * Displays a processing type in a modal.
+     */
     function showProcessingType(processingTypeId) {
       processingTypeModalService.show(vm.processingTypesById[processingTypeId]);
     }
 
+    /**
+     * Displays a specimen group in a modal.
+     */
     function showSpecimenGroup(specimenGroupId) {
       specimenGroupModalService.show(vm.specimenGroupsById[specimenGroupId]);
     }
 
+    /**
+     * Display a specimen link annotation type in a modal.
+     */
     function showAnnotationType(annotTypeId) {
       annotTypeModalService.show('Specimen Link Annotation Type', vm.annotTypesById[annotTypeId]);
     }

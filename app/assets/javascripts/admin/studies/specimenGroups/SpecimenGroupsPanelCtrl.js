@@ -14,7 +14,7 @@ define(['../../module'], function(module) {
   ];
 
   /**
-   *
+   * A panel to display a study's specimen groups.
    */
   function SpecimenGroupsPanelCtrl($scope,
                                    $state,
@@ -42,10 +42,16 @@ define(['../../module'], function(module) {
 
     //--
 
+    /**
+     * Displays a specimen group in a modal.
+     */
     function information(specimenGroup) {
       specimenGroupModalService.show(specimenGroup);
     }
 
+    /**
+     * Switches state to updte a specimen group.
+     */
     function update(specimenGroup) {
       $state.go(
         'admin.studies.study.specimens.groupUpdate',

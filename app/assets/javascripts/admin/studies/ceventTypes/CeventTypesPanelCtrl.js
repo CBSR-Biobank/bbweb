@@ -17,7 +17,7 @@ define(['../../module', 'underscore'], function(module, _) {
   ];
 
   /**
-   *
+   * A panel to display a study's collection event types.
    */
   function CeventTypesPanelCtrl($scope,
                                 $state,
@@ -56,7 +56,7 @@ define(['../../module', 'underscore'], function(module, _) {
     //--
 
     /**
-     * Gets all the collection event types for the study, and then all the specimen groups.
+     * Links the collection event with the specimen groups that they use.
      */
     function init() {
       vm.specimenGroupsById = _.indexBy(vm.specimenGroups, 'id');
@@ -70,18 +70,27 @@ define(['../../module', 'underscore'], function(module, _) {
       });
     }
 
+    /**
+     * Display a collection event type in a modal.
+     */
     function information(ceventType) {
       ceventTypeModalService.show(ceventType, vm.specimenGroups, vm.annotTypes);
     }
 
+    /**
+     * Displays a specimen group in a modal.
+     */
+    function showSpecimenGroup(specimenGroupId) {
+      specimenGroupModalService.show(vm.specimenGroupsById[specimenGroupId]);
+    }
+
+    /**
+     * Switches to the state to update a collection event type.
+     */
     function update(ceventType) {
       $state.go(
         'admin.studies.study.collection.ceventTypeUpdate',
         { ceventTypeId: ceventType.id });
-    }
-
-    function showSpecimenGroup(specimenGroupId) {
-      specimenGroupModalService.show(vm.specimenGroupsById[specimenGroupId]);
     }
   }
 

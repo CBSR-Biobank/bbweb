@@ -14,7 +14,7 @@ define(['../../module'], function(module) {
   ];
 
   /**
-   *
+   * A panel to display a study's collection event annotation types.
    */
   function CeventAnnotTypesPanelCtrl($scope,
                                      $state,
@@ -50,6 +50,9 @@ define(['../../module'], function(module) {
 
     //--
 
+    /**
+     * Switches state to update a collection event annotation type.
+     */
     function update(annotType) {
       $state.go(
         'admin.studies.study.collection.annotTypeUpdate',
