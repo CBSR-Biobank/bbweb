@@ -27,7 +27,7 @@ define(['../../module'], function(module) {
 
     var helper = panelService.panel(
       'study.panel.participantAnnottionTypes',
-      'admin.studies.study.collection.annotTypeAdd',
+      'admin.studies.study.collection.ceventAnnotTypeAdd',
       annotTypeModalService,
       'Collection Event Annotation Type');
 
@@ -55,7 +55,7 @@ define(['../../module'], function(module) {
      */
     function update(annotType) {
       $state.go(
-        'admin.studies.study.collection.annotTypeUpdate',
+        'admin.studies.study.collection.ceventAnnotTypeUpdate',
         { annotTypeId: annotType.id });
     }
 

@@ -35,6 +35,13 @@
           <a href>{{sg.name}}</a><span data-ng-if="!$last">, </span>
         </span>
       </td>
+      <td data-title="'Annotation Types'">
+        <span data-ng-repeat="at in ceventType.annotationTypes"
+             data-ng-click="vm.showAnnotationType(at.id)">
+          <a href>{{at.name}}</a><span data-ng-if="!$last">, </span>
+        </span>
+
+      </td>
       <td data-title="'Recurring'" sortable="'recurring'">
         {{ceventType.recurring ? 'Y' : 'N'}}
       </td>

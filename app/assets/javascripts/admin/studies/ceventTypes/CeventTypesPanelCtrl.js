@@ -12,6 +12,7 @@ define(['../../module', 'underscore'], function(module, _) {
     'SpecimenGroupService',
     'CeventAnnotTypeService',
     'ceventTypeModalService',
+    'annotTypeModalService',
     'specimenGroupModalService',
     'ceventTypeRemoveService'
   ];
@@ -27,6 +28,7 @@ define(['../../module', 'underscore'], function(module, _) {
                                 SpecimenGroupService,
                                 CeventAnnotTypeService,
                                 ceventTypeModalService,
+                                annotTypeModalService,
                                 specimenGroupModalService,
                                 ceventTypeRemoveService) {
     var vm = this;
@@ -35,18 +37,20 @@ define(['../../module', 'underscore'], function(module, _) {
       'study.panel.collectionEventTypes',
       'admin.studies.study.collection.ceventTypeAdd');
 
-    vm.ceventTypes        = $scope.ceventTypes;
-    vm.annotTypes         = $scope.annotTypes;
-    vm.specimenGroups     = $scope.specimenGroups;
-    vm.specimenGroupsById = [];
+    vm.ceventTypes         = $scope.ceventTypes;
+    vm.annotTypes          = $scope.annotTypes;
+    vm.specimenGroups      = $scope.specimenGroups;
+    vm.annotationTypesById = [];
+    vm.specimenGroupsById  = [];
 
-    vm.update            = update;
-    vm.remove            = ceventTypeRemoveService.remove;
-    vm.add               = helper.add;
-    vm.information       = information;
-    vm.showSpecimenGroup = showSpecimenGroup;
-    vm.panelOpen         = helper.panelOpen;
-    vm.panelToggle       = helper.panelToggle;
+    vm.update             = update;
+    vm.remove             = ceventTypeRemoveService.remove;
+    vm.add                = helper.add;
+    vm.information        = information;
+    vm.showAnnotationType = showAnnotationType;
+    vm.showSpecimenGroup  = showSpecimenGroup;
+    vm.panelOpen          = helper.panelOpen;
+    vm.panelToggle        = helper.panelToggle;
 
     init();
 
@@ -59,13 +63,20 @@ define(['../../module', 'underscore'], function(module, _) {
      * Links the collection event with the specimen groups that they use.
      */
     function init() {
+      vm.annotationTypesById = _.indexBy(vm.annotTypes, 'id');
       vm.specimenGroupsById = _.indexBy(vm.specimenGroups, 'id');
 
       _.each(vm.ceventTypes, function (cet) {
         cet.specimenGroups = [];
-        cet.specimenGroupData.forEach(function (sgItem) {
+        _.each(cet.specimenGroupData, function (sgItem) {
           var sg = vm.specimenGroupsById[sgItem.specimenGroupId];
           cet.specimenGroups.push({ id: sgItem.specimenGroupId, name: sg.name });
+        });
+
+        cet.annotationTypes = [];
+        _.each(cet.annotationTypeData, function (atItem) {
+          var at = vm.annotationTypesById[atItem.annotationTypeId];
+          cet.annotationTypes.push({ id: atItem.annotationTypeId, name: at.name });
         });
       });
     }
@@ -75,6 +86,13 @@ define(['../../module', 'underscore'], function(module, _) {
      */
     function information(ceventType) {
       ceventTypeModalService.show(ceventType, vm.specimenGroups, vm.annotTypes);
+    }
+
+    /**
+     * Display a collection event annotation type in a modal.
+     */
+    function showAnnotationType(annotTypeId) {
+      annotTypeModalService.show('Specimen Link Annotation Type', vm.annotationTypesById[annotTypeId]);
     }
 
     /**
