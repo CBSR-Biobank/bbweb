@@ -11,7 +11,8 @@ define(['../../module'], function(module) {
       require: '^tab',
       restrict: 'E',
       scope: {
-        annotTypes: '='
+        annotTypes: '=',
+        ceventTypes: '='
       },
       templateUrl: '/assets/javascripts/admin/studies/annotationTypes/ceventAnnotTypesPanel.html',
       controller: 'CeventAnnotTypesPanelCtrl as vm'
