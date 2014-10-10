@@ -10,10 +10,6 @@ import scalaz.Scalaz._
   */
 trait  ReadRepository[K, A] {
 
-  protected def nextIdentityAsString: String
-
-  def nextIdentity: K
-
   def isEmpty: Boolean
 
   def getByKey(key: K): DomainValidation[A]
@@ -27,6 +23,10 @@ trait  ReadRepository[K, A] {
 /** A read/write repository.
   */
 trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
+
+  protected def nextIdentityAsString: String
+
+  def nextIdentity: K
 
   def put(value: A): A
 
@@ -45,14 +45,14 @@ abstract class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepo
 
   protected def getMap = internalMap.single.get
 
-  protected def nextIdentityAsString: String = java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase
-
   def isEmpty: Boolean = getMap.isEmpty
 
   def getByKey(key: K): DomainValidation[A] = {
-    getMap.get(key).flatMap { value =>
-      some(value.successNel)
-    } getOrElse DomainError(s"${this.getClass.getSimpleName}: value with key $key not found").failNel
+    getMap.get(key).fold {
+      DomainError(s"${this.getClass.getSimpleName}: value with key $key not found").failNel[A]
+    } {
+      value => value.successNel
+    }
   }
 
   def getValues: Iterable[A] = getMap.values
@@ -68,6 +68,8 @@ abstract class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepo
 private [domain] abstract class ReadWriteRepositoryRefImpl[K, A](keyGetter: (A) => K)
     extends ReadRepositoryRefImpl[K, A](keyGetter)
     with ReadWriteRepository[K, A] {
+
+  protected def nextIdentityAsString: String = java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase
 
   def put(value: A): A = {
     internalMap.single.transform(map => map + (keyGetter(value) -> value))

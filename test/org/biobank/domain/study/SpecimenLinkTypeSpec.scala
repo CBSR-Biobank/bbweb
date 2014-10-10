@@ -10,6 +10,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 class SpecimenLinkTypeSpec extends DomainSpec {
+  import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -284,10 +285,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
-      validation should be('failure)
-      validation.swap.map { err =>
-          err.list should (have length 1 and contain("ContainerTypeIdRequired"))
-      }
+      validation shouldFail "ContainerTypeIdRequired"
 
       containerTypeIdIn = Some(ContainerTypeId("abc"))
       containerTypeIdOut = Some(ContainerTypeId(""))
@@ -295,10 +293,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
-      validation2 should be('failure)
-      validation2.swap.map { err =>
-          err.list should (have length 1 and contain("ContainerTypeIdRequired"))
-      }
+      validation2 shouldFail "ContainerTypeIdRequired"
     }
 
     "have more than one validation fail" in {

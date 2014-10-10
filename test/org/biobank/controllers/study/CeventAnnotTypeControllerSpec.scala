@@ -1,5 +1,6 @@
 package org.biobank.controllers.study
 
+import org.biobank.fixture._
 import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, CollectionEventAnnotationType }
 import org.biobank.fixture.ControllerFixture
@@ -17,6 +18,8 @@ import play.api.Play.current
 class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  val nameGenerator = new NameGenerator(this.getClass)
 
   private def annotTypeToAddCmdJson(annotType: CollectionEventAnnotationType) = {
     Json.obj(
@@ -48,7 +51,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       POST,
-      "/studies/ceannottype",
+      "/studies/ceannottypes",
       BAD_REQUEST,
       annotTypeToAddCmdJson(annotType))
 
@@ -64,7 +67,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       PUT,
-      s"/studies/ceannottype/${annotType.id.id}",
+      s"/studies/ceannottypes/${annotType.id.id}",
       BAD_REQUEST,
       annotTypeToUpdateCmdJson(annotType))
 
@@ -83,7 +86,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       DELETE,
-      s"/studies/ceannottype/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}",
+      s"/studies/ceannottypes/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}",
       BAD_REQUEST)
 
     (json \ "status").as[String] should include ("error")
@@ -91,20 +94,18 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
   }
 
   "Collection Event Type REST API" when {
-    "GET /studies/ceannottype" should {
+    "GET /studies/ceannottypes" should {
       "list none" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
 
-        val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}")
+        val json = makeRequest(GET, s"/studies/ceannottypes/${study.id.id}")
         (json \ "status").as[String] should include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
-    }
 
-    "GET /studies/ceannottype" should {
       "list a single collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -113,15 +114,13 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createCollectionEventAnnotationType
         use[BbwebPlugin].collectionEventAnnotationTypeRepository.put(annotType)
 
-        val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}")
+        val json = makeRequest(GET, s"/studies/ceannottypes/${study.id.id}")
         (json \ "status").as[String] should include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 1
         compareObj(jsonList(0), annotType)
       }
-    }
 
-    "GET /studies/ceannottype" should {
       "get a single collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -130,14 +129,12 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createCollectionEventAnnotationType
         use[BbwebPlugin].collectionEventAnnotationTypeRepository.put(annotType)
 
-        val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}?annotTypeId=${annotType.id.id}").as[JsObject]
+        val json = makeRequest(GET, s"/studies/ceannottypes/${study.id.id}?annotTypeId=${annotType.id.id}").as[JsObject]
         (json \ "status").as[String] should include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, annotType)
       }
-    }
 
-    "GET /studies/ceannottype" should {
       "list multiple collection event annotation types" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -148,7 +145,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
           factory.createCollectionEventAnnotationType)
         annotTypes map { annotType => use[BbwebPlugin].collectionEventAnnotationTypeRepository.put(annotType) }
 
-        val json = makeRequest(GET, s"/studies/ceannottype/${study.id.id}")
+        val json = makeRequest(GET, s"/studies/ceannottypes/${study.id.id}")
         (json \ "status").as[String] should include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
 
@@ -156,21 +153,53 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
           (jsonList zip annotTypes).map { item => compareObj(item._1, item._2) }
         ()
       }
+
+      "fail for an invalid study ID" in new WithApplication(fakeApplication()) {
+        doLogin
+        val studyId = nameGenerator.next[Study]
+
+        val json = makeRequest(GET, s"/studies/ceannottypes/$studyId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("invalid study id")
+      }
+
+      "fail for an invalid study ID when using an annotation type id" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
+        doLogin
+        val studyId = nameGenerator.next[Study]
+        val annotTypeId = nameGenerator.next[CollectionEventAnnotationType]
+
+        val json = makeRequest(GET, s"/studies/ceannottypes/$studyId?annotTypeId=$annotTypeId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("invalid study id")
+      }
+
+      "fail for an invalid collection event annotation type id" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
+        doLogin
+        val study = factory.createDisabledStudy
+        use[BbwebPlugin].studyRepository.put(study)
+
+        val annotTypeId = nameGenerator.next[CollectionEventAnnotationType]
+
+        val json = makeRequest(GET, s"/studies/ceannottypes/${study.id}?annotTypeId=$annotTypeId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("annotation type does not exist")
+      }
+
     }
 
-    "POST /studies/ceannottype" should {
+    "POST /studies/ceannottypes" should {
       "add a collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
 
         val annotType = factory.createCollectionEventAnnotationType
-        val json = makeRequest(POST, "/studies/ceannottype", json = annotTypeToAddCmdJson(annotType))
+        val json = makeRequest(POST, "/studies/ceannottypes", json = annotTypeToAddCmdJson(annotType))
           (json \ "status").as[String] should include ("success")
       }
     }
 
-    "POST /studies/ceannottype" should {
+    "POST /studies/ceannottypes" should {
       "not add a collection event annotation type to an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         addOnNonDisabledStudy(
@@ -178,15 +207,14 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /studies/ceannottype" should {
+    "POST /studies/ceannottypes" should {
       "not add a collection event annotation type to an retired study" in new WithApplication(fakeApplication()) {
         doLogin
-        addOnNonDisabledStudy(
-          factory.createDisabledStudy.retire | fail)
+        addOnNonDisabledStudy(factory.createDisabledStudy.retire | fail)
       }
     }
 
-    "PUT /studies/ceannottype" should {
+    "PUT /studies/ceannottypes" should {
       "update a collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -201,14 +229,14 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         )
 
         val json = makeRequest(PUT,
-          s"/studies/ceannottype/${annotType.id.id}",
+          s"/studies/ceannottypes/${annotType.id.id}",
           json = annotTypeToUpdateCmdJson(annotType2))
 
         (json \ "status").as[String] should include ("success")
       }
     }
 
-    "PUT /studies/ceannottype" should {
+    "PUT /studies/ceannottypes" should {
       "not update a collection event annotation type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
@@ -216,7 +244,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /studies/ceannottype" should {
+    "PUT /studies/ceannottypes" should {
       "not update a collection event annotation type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         updateOnNonDisabledStudy(
@@ -224,7 +252,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /studies/ceannottype" should {
+    "DELETE /studies/ceannottypes" should {
       "remove a collection event annotation type" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -235,13 +263,13 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(
           DELETE,
-          s"/studies/ceannottype/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}")
+          s"/studies/ceannottypes/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}")
 
         (json \ "status").as[String] should include ("success")
       }
     }
 
-    "DELETE /studies/ceannottype" should {
+    "DELETE /studies/ceannottypes" should {
       "not remove a collection event annotation type on an enabled study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(
@@ -249,7 +277,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /studies/ceannottype" should {
+    "DELETE /studies/ceannottypes" should {
       "not remove a collection event annotation type on an retired study" in new WithApplication(fakeApplication()) {
         doLogin
         removeOnNonDisabledStudy(

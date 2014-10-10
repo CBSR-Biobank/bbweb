@@ -44,7 +44,8 @@ trait StudiesServiceComponent {
       (studyId: String, annotationTypeId: String)
         : DomainValidation[CollectionEventAnnotationType]
 
-    def collectionEventAnnotationTypesForStudy(id: String): Set[CollectionEventAnnotationType]
+    def collectionEventAnnotationTypesForStudy(studyId: String)
+        : DomainValidation[Set[CollectionEventAnnotationType]]
 
     def collectionEventTypeWithId
       (studyId: String, collectionEventTypeId: String)
@@ -62,8 +63,7 @@ trait StudiesServiceComponent {
       (studyId: String, specimenLinkTypeId: String)
         : DomainValidation[SpecimenLinkType]
 
-    def specimenLinkTypesForProcessingType
-      (processingTypeId: String)
+    def specimenLinkTypesForProcessingType(processingTypeId: String)
         : DomainValidation[Set[SpecimenLinkType]]
 
     def getProcessingDto(studyId: String): DomainValidation[ProcessingDto]
@@ -248,29 +248,29 @@ trait StudiesServiceComponentImpl extends StudiesServiceComponent {
       studyRepository.allStudies
     }
 
-    def getStudy(id: String)
-        : DomainValidation[Study] = {
+    def getStudy(id: String) : DomainValidation[Study] = {
       studyRepository.getByKey(StudyId(id))
     }
 
     def specimenGroupWithId(studyId: String, specimenGroupId: String)
         : DomainValidation[SpecimenGroup] = {
-      specimenGroupRepository.withId(
-        StudyId(studyId), SpecimenGroupId(specimenGroupId))
+      studyRepository.getByKey(StudyId(studyId)).fold(
+        err => DomainError(s"invalid study id: $studyId").failNel,
+        study => specimenGroupRepository.withId(study.id, SpecimenGroupId(specimenGroupId))
+      )
     }
 
-    def specimenGroupsForStudy(studyId: String)
-        : DomainValidation[Set[SpecimenGroup]] = {
+    def specimenGroupsForStudy(studyId: String) : DomainValidation[Set[SpecimenGroup]] = {
       studyRepository.getByKey(StudyId(studyId)).fold(
-        err => err.failure,
-        study => specimenGroupRepository.allForStudy(study.id).success
+        err => DomainError(s"invalid study id: $studyId").failNel,
+        study => specimenGroupRepository.allForStudy(study.id).successNel
       )
     }
 
     def specimenGroupsInUse(studyId: String)
         : DomainValidation[Set[SpecimenGroupId]] = {
       studyRepository.getByKey(StudyId(studyId)).fold(
-        err => err.failure,
+        err => DomainError(s"invalid study id: $studyId").failNel,
         study => {
           val ceventTypes = collectionEventTypeRepository.allForStudy(study.id)
           val processingTypes = processingTypeRepository.allForStudy(study.id)
@@ -294,25 +294,33 @@ trait StudiesServiceComponentImpl extends StudiesServiceComponent {
 
     def collectionEventAnnotationTypeWithId(studyId: String, annotationTypeId: String)
         : DomainValidation[CollectionEventAnnotationType] = {
-      collectionEventAnnotationTypeRepository.withId(
-        StudyId(studyId), AnnotationTypeId(annotationTypeId))
+      studyRepository.getByKey(StudyId(studyId)).fold(
+        err => DomainError(s"invalid study id: $studyId").failNel,
+        study => collectionEventAnnotationTypeRepository.withId(
+          study.id, AnnotationTypeId(annotationTypeId))
+      )
     }
 
-    def collectionEventAnnotationTypesForStudy(id: String)
-        : Set[CollectionEventAnnotationType] = {
-      collectionEventAnnotationTypeRepository.allForStudy(StudyId(id))
+    def collectionEventAnnotationTypesForStudy(studyId: String)
+        : DomainValidation[Set[CollectionEventAnnotationType]] = {
+      studyRepository.getByKey(StudyId(studyId)).fold(
+        err => DomainError(s"invalid study id: $studyId").failNel,
+        study => collectionEventAnnotationTypeRepository.allForStudy(study.id).successNel
+      )
     }
 
     def collectionEventTypeWithId(studyId: String, collectionEventTypeId: String)
         : DomainValidation[CollectionEventType] = {
-      collectionEventTypeRepository.withId(
-        StudyId(studyId), CollectionEventTypeId(collectionEventTypeId))
+      studyRepository.getByKey(StudyId(studyId)).fold(
+        err => DomainError(s"invalid study id: $studyId").failNel,
+        study => collectionEventTypeRepository.withId(study.id, CollectionEventTypeId(collectionEventTypeId))
+      )
     }
 
     def collectionEventTypesForStudy(studyId: String)
         : DomainValidation[Set[CollectionEventType]] = {
       studyRepository.getByKey(StudyId(studyId)).fold(
-        err => err.failure,
+        err => DomainError(s"invalid study id: $studyId").failNel,
         study => collectionEventTypeRepository.allForStudy(study.id).success
       )
     }
@@ -320,55 +328,62 @@ trait StudiesServiceComponentImpl extends StudiesServiceComponent {
     def participantAnnotationTypesForStudy(studyId: String)
         : DomainValidation[Set[ParticipantAnnotationType]] = {
       studyRepository.getByKey(StudyId(studyId)).fold(
-        err => err.failure,
+        err => DomainError(s"invalid study id: $studyId").failNel,
         study => participantAnnotationTypeRepository.allForStudy(study.id).success
       )
     }
 
     def participantAnnotationTypeWithId(studyId: String, annotationTypeId: String)
         : DomainValidation[ParticipantAnnotationType] = {
-      participantAnnotationTypeRepository.withId(
-        StudyId(studyId), AnnotationTypeId(annotationTypeId))
+      studyRepository.getByKey(StudyId(studyId)).fold(
+        err => DomainError(s"invalid study id: $studyId").failNel,
+        study => participantAnnotationTypeRepository.withId(study.id, AnnotationTypeId(annotationTypeId))
+      )
     }
 
     def specimenLinkAnnotationTypeWithId(studyId: String, annotationTypeId: String)
         : DomainValidation[SpecimenLinkAnnotationType] = {
-      specimenLinkAnnotationTypeRepository.withId(
-        StudyId(studyId), AnnotationTypeId(annotationTypeId))
+      studyRepository.getByKey(StudyId(studyId)).fold(
+        err => DomainError(s"invalid study id: $studyId").failNel,
+        study => specimenLinkAnnotationTypeRepository.withId(study.id, AnnotationTypeId(annotationTypeId))
+      )
     }
 
     def processingTypeWithId(studyId: String, processingTypeId: String)
         : DomainValidation[ProcessingType] = {
-      processingTypeRepository.withId(
-        StudyId(studyId), ProcessingTypeId(processingTypeId))
+      studyRepository.getByKey(StudyId(studyId)).fold(
+        err => DomainError(s"invalid study id: $studyId").failNel,
+        study => processingTypeRepository.withId(study.id, ProcessingTypeId(processingTypeId))
+      )
     }
 
     def processingTypesForStudy(studyId: String)
         : DomainValidation[Set[ProcessingType]] = {
       studyRepository.getByKey(StudyId(studyId)).fold(
-        err => err.failure,
+        err => DomainError(s"invalid study id: $studyId").failNel,
         study => processingTypeRepository.allForStudy(study.id).success
       )
     }
 
     def specimenLinkTypeWithId(processingTypeId: String, specimenLinkTypeId: String)
         : DomainValidation[SpecimenLinkType] = {
-      specimenLinkTypeRepository.withId(
-        ProcessingTypeId(processingTypeId),
-        SpecimenLinkTypeId(specimenLinkTypeId))
+      processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId)).fold(
+        err => DomainError(s"invalid processing type id: $processingTypeId").failNel,
+        pt => specimenLinkTypeRepository.withId(pt.id, SpecimenLinkTypeId(specimenLinkTypeId))
+      )
     }
 
     def specimenLinkTypesForProcessingType(processingTypeId: String)
         : DomainValidation[Set[SpecimenLinkType]] = {
       processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId)).fold(
-        err => err.failure,
+        err => DomainError(s"invalid processing type id: $processingTypeId").failNel,
         pt => specimenLinkTypeRepository.allForProcessingType(pt.id).success
       )
     }
 
     def getProcessingDto(studyId: String): DomainValidation[ProcessingDto] = {
       studyRepository.getByKey(StudyId(studyId)).fold(
-        err => err.failure,
+        err => DomainError(s"invalid study id: $studyId").failNel,
         study => {
           val specimenGroups  = specimenGroupRepository.allForStudy(study.id)
           val processingTypes = processingTypeRepository.allForStudy(study.id)
@@ -542,7 +557,7 @@ trait StudiesServiceComponentImpl extends StudiesServiceComponent {
     def specimenLinkAnnotationTypesForStudy(studyId: String)
         : DomainValidation[Set[SpecimenLinkAnnotationType]] = {
       studyRepository.getByKey(StudyId(studyId)).fold(
-        err => err.failure,
+        err => DomainError(s"invalid study id: $studyId").failNel,
         study => specimenLinkAnnotationTypeRepository.allForStudy(StudyId(studyId)).success
       )
     }

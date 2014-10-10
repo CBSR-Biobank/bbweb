@@ -26,20 +26,16 @@ object SpecimenLinkAnnotTypeController extends CommandController with JsonContro
 
   private def studiesService = use[BbwebPlugin].studiesService
 
-  def get(
-    studyId: String,
-    annotTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.debug(s"SpecimenLinkAnnotTypeController.list: studyId: $studyId, annotTypeId: $annotTypeId")
+  def get(studyId: String, annotTypeId: Option[String]) =
+    AuthAction(parse.empty) { token => userId => implicit request =>
+      Logger.debug(s"SpecimenLinkAnnotTypeController.list: studyId: $studyId, annotTypeId: $annotTypeId")
 
-    annotTypeId.fold {
-      Ok(studiesService.specimenLinkAnnotationTypesForStudy(studyId).toList)
-    } {
-      id =>
-      studiesService.specimenLinkAnnotationTypeWithId(studyId, id).fold(
-        err => BadRequest(err.list.mkString(", ")),
-        annotType => Ok(annotType)
-      )
-    }  }
+      annotTypeId.fold {
+        domainValidationReply(studiesService.specimenLinkAnnotationTypesForStudy(studyId).map(_.toList))
+      } { id =>
+        domainValidationReply(studiesService.specimenLinkAnnotationTypeWithId(studyId, id))
+      }
+    }
 
   def addAnnotationType = commandAction { cmd: AddSpecimenLinkAnnotationTypeCmd => implicit userId =>
     val future = studiesService.addSpecimenLinkAnnotationType(cmd)

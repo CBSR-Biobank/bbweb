@@ -30,22 +30,22 @@ PUT     /studies/cetypes/:id                   org.biobank.controllers.study.Cev
 DELETE  /studies/cetypes/:studyId/:id/:ver     org.biobank.controllers.study.CeventTypeController.removeCollectionEventType(studyId, id, ver: Long)
 
 ## collection event annotation types
-GET     /studies/ceannottype/:studyId          org.biobank.controllers.study.CeventAnnotTypeController.get(studyId, annotTypeId: Option[String])
-POST    /studies/ceannottype                   org.biobank.controllers.study.CeventAnnotTypeController.addAnnotationType
-PUT     /studies/ceannottype/:id               org.biobank.controllers.study.CeventAnnotTypeController.updateAnnotationType(id)
-DELETE  /studies/ceannottype/:studyId/:id/:ver org.biobank.controllers.study.CeventAnnotTypeController.removeAnnotationType(studyId, id, ver: Long)
+GET     /studies/ceannottypes/:studyId          org.biobank.controllers.study.CeventAnnotTypeController.get(studyId, annotTypeId: Option[String])
+POST    /studies/ceannottypes                   org.biobank.controllers.study.CeventAnnotTypeController.addAnnotationType
+PUT     /studies/ceannottypes/:id               org.biobank.controllers.study.CeventAnnotTypeController.updateAnnotationType(id)
+DELETE  /studies/ceannottypes/:studyId/:id/:ver org.biobank.controllers.study.CeventAnnotTypeController.removeAnnotationType(studyId, id, ver: Long)
 
 # participant annotation types
-GET     /studies/pannottype/:studyId           org.biobank.controllers.study.ParticipantAnnotTypeController.get(studyId, annotTypeId: Option[String])
-POST    /studies/pannottype                    org.biobank.controllers.study.ParticipantAnnotTypeController.addAnnotationType
-PUT     /studies/pannottype/:id                org.biobank.controllers.study.ParticipantAnnotTypeController.updateAnnotationType(id)
-DELETE  /studies/pannottype/:studyId/:id/:ver  org.biobank.controllers.study.ParticipantAnnotTypeController.removeAnnotationType(studyId, id, ver: Long)
+GET     /studies/pannottypes/:studyId           org.biobank.controllers.study.ParticipantAnnotTypeController.get(studyId, annotTypeId: Option[String])
+POST    /studies/pannottypes                    org.biobank.controllers.study.ParticipantAnnotTypeController.addAnnotationType
+PUT     /studies/pannottypes/:id                org.biobank.controllers.study.ParticipantAnnotTypeController.updateAnnotationType(id)
+DELETE  /studies/pannottypes/:studyId/:id/:ver  org.biobank.controllers.study.ParticipantAnnotTypeController.removeAnnotationType(studyId, id, ver: Long)
 
 # specimenlink annotation types
-GET     /studies/slannottype/:studyId          org.biobank.controllers.study.SpecimenLinkAnnotTypeController.get(studyId, annotTypeId: Option[String])
-POST    /studies/slannottype                   org.biobank.controllers.study.SpecimenLinkAnnotTypeController.addAnnotationType
-PUT     /studies/slannottype/:id               org.biobank.controllers.study.SpecimenLinkAnnotTypeController.updateAnnotationType(id)
-DELETE  /studies/slannottype/:studyId/:id/:ver org.biobank.controllers.study.SpecimenLinkAnnotTypeController.removeAnnotationType(studyId, id, ver: Long)
+GET     /studies/slannottypes/:studyId          org.biobank.controllers.study.SpecimenLinkAnnotTypeController.get(studyId, annotTypeId: Option[String])
+POST    /studies/slannottypes                   org.biobank.controllers.study.SpecimenLinkAnnotTypeController.addAnnotationType
+PUT     /studies/slannottypes/:id               org.biobank.controllers.study.SpecimenLinkAnnotTypeController.updateAnnotationType(id)
+DELETE  /studies/slannottypes/:studyId/:id/:ver org.biobank.controllers.study.SpecimenLinkAnnotTypeController.removeAnnotationType(studyId, id, ver: Long)
 
 # processing types
 GET     /studies/proctypes/:studyId            org.biobank.controllers.study.ProcessingTypeController.get(studyId, procTypeId: Option[String])

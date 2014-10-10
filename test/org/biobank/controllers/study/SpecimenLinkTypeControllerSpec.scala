@@ -1,5 +1,6 @@
 package org.biobank.controllers.study
 
+import org.biobank.fixture._
 import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, ProcessingType, SpecimenLinkType }
 import org.biobank.fixture.ControllerFixture
@@ -17,6 +18,8 @@ import play.api.Play.current
 class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  val nameGenerator = new NameGenerator(this.getClass)
 
   private def annotTypeJson(slType: SpecimenLinkType) = {
     if (!slType.annotationTypeData.isEmpty) {
@@ -138,9 +141,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
-    }
 
-    "GET /studies/sltypes" should {
       "list a single specimen link type" in new WithApplication(fakeApplication()) {
         doLogin
         val procType = factory.createProcessingType
@@ -157,9 +158,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         jsonList should have size 1
         compareObj(jsonList(0), slType)
       }
-    }
 
-    "GET /studies/sltypes" should {
       "get a single specimen link type" in new WithApplication(fakeApplication()) {
         doLogin
         val procType = factory.createProcessingType
@@ -175,9 +174,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, slType)
       }
-    }
 
-    "GET /studies/sltypes" should {
       "list multiple specimen link types" in new WithApplication(fakeApplication()) {
         doLogin
         val procType = factory.createProcessingType
@@ -195,6 +192,38 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
           (jsonList zip sltypes).map { item => compareObj(item._1, item._2) }
         ()
       }
+
+      "fail for invalid processing type id" in new WithApplication(fakeApplication()) {
+        doLogin
+        val processingTypeId = nameGenerator.next[Study]
+
+        val json = makeRequest(GET, s"/studies/sltypes/$processingTypeId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("invalid processing type id")
+      }
+
+      "fail for an invalid study ID when using an specimen link type id" in new WithApplication(fakeApplication()) {
+        doLogin
+        val procTypeId = nameGenerator.next[ProcessingType]
+        val slTypeId = nameGenerator.next[SpecimenLinkType]
+
+        val json = makeRequest(GET, s"/studies/sltypes/$procTypeId?slTypeId=$slTypeId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("invalid processing type id")
+      }
+
+      "fail for an invalid specimen link type id" in new WithApplication(fakeApplication()) {
+        doLogin
+        val procType = factory.createProcessingType
+        use[BbwebPlugin].processingTypeRepository.put(procType)
+
+        val slTypeId = nameGenerator.next[SpecimenLinkType]
+
+        val json = makeRequest(GET, s"/studies/sltypes/${procType.id}?slTypeId=$slTypeId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("specimen link type does not exist")
+      }
+
     }
 
     "POST /studies/sltypes" should {

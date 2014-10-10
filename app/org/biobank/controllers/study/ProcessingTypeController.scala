@@ -24,19 +24,16 @@ object ProcessingTypeController extends CommandController with JsonController {
 
   private def studiesService = use[BbwebPlugin].studiesService
 
-  def get(studyId: String, procTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.debug(s"ProcessingTypeController.get: studyId: $studyId, procTypeId: $procTypeId")
+  def get(studyId: String, procTypeId: Option[String]) =
+    AuthAction(parse.empty) { token => userId => implicit request =>
+      Logger.debug(s"ProcessingTypeController.get: studyId: $studyId, procTypeId: $procTypeId")
 
-    procTypeId.fold {
-      Ok(studiesService.processingTypesForStudy(studyId).toList)
-    } {
-      id =>
-      studiesService.processingTypeWithId(studyId, id).fold(
-        err => BadRequest(err.list.mkString(", ")),
-        procType => Ok(procType)
-      )
+      procTypeId.fold {
+        domainValidationReply(studiesService.processingTypesForStudy(studyId).map(_.toList))
+      } { id =>
+        domainValidationReply(studiesService.processingTypeWithId(studyId, id))
+      }
     }
-  }
 
   def addProcessingType = commandAction { cmd: AddProcessingTypeCmd => implicit userId =>
     val future = studiesService.addProcessingType(cmd)
@@ -48,13 +45,11 @@ object ProcessingTypeController extends CommandController with JsonController {
     domainValidationReply(future)
   }
 
-  def removeProcessingType(
-    studyId: String,
-    id: String,
-    ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-    val cmd = RemoveProcessingTypeCmd(studyId, id, ver)
-    val future = studiesService.removeProcessingType(cmd)
-    domainValidationReply(future)
-  }
+  def removeProcessingType(studyId: String, id: String, ver: Long) =
+    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+      val cmd = RemoveProcessingTypeCmd(studyId, id, ver)
+      val future = studiesService.removeProcessingType(cmd)
+      domainValidationReply(future)
+    }
 
 }

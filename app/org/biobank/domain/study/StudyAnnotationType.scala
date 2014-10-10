@@ -27,9 +27,14 @@ trait StudyAnnotationTypeValidations {
   case object DuplicateOptionsError extends ValidationKey
 
   def validateMaxValueCount(option: Option[Int]): DomainValidation[Option[Int]] = {
-    option match {
-      case Some(n) => if (n > -1) option.success else MaxValueCountError.failNel
-      case None =>    none.success
+    option.fold {
+      none[Int].successNel[String]
+    } { n  =>
+      if (n > -1) {
+        option.successNel
+      } else {
+        MaxValueCountError.toString.failNel[Option[Int]]
+      }
     }
   }
 
@@ -37,17 +42,17 @@ trait StudyAnnotationTypeValidations {
     *  Validates each item in the map and returns all failures.
     */
   def validateOptions(options: Option[Seq[String]]): DomainValidation[Option[Seq[String]]] = {
-    options match {
-      case Some(optionsSeq) =>
-        if (optionsSeq.distinct.size == optionsSeq.size) {
-          optionsSeq.toList.map(validateString(_, OptionRequired)).sequenceU.fold(
-            err => err.fail,
-            list => Some(list.toSeq).success
-          )
-        } else {
-          DuplicateOptionsError.failNel
-        }
-      case None => none.success
+    options.fold {
+      none[Seq[String]].successNel[String]
+    } { optionsSeq =>
+      if (optionsSeq.distinct.size == optionsSeq.size) {
+        optionsSeq.toList.map(validateString(_, OptionRequired)).sequenceU.fold(
+          err => err.toList.mkString(",").failNel[Option[Seq[String]]],
+          list => Some(list.toSeq).successNel
+        )
+      } else {
+        DuplicateOptionsError.toString.failNel[Option[Seq[String]]]
+      }
     }
   }
 

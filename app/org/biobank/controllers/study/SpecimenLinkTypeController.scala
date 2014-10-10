@@ -24,36 +24,34 @@ object SpecimenLinkTypeController extends CommandController with JsonController 
 
   private def studiesService = use[BbwebPlugin].studiesService
 
-  def get(
-    processingTypeId: String,
-    slTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.debug(s"SpecimenLinkTypeController.get: processingTypeId: $processingTypeId, slTypeId: $slTypeId")
+  def get(processingTypeId: String, slTypeId: Option[String]) =
+    AuthAction(parse.empty) { token => userId => implicit request =>
+      Logger.debug(s"SpecimenLinkTypeController.get: processingTypeId: $processingTypeId, slTypeId: $slTypeId")
 
-    slTypeId.fold {
-      Ok(studiesService.specimenLinkTypesForProcessingType(processingTypeId).toList)
-    } {
-      id =>
-      studiesService.specimenLinkTypeWithId(processingTypeId, id).fold(
-        err => BadRequest(err.list.mkString(", ")),
-        slType => Ok(slType)
-      )
+      slTypeId.fold {
+        domainValidationReply(
+          studiesService.specimenLinkTypesForProcessingType(processingTypeId).map(_.toList))
+      } { id =>
+        domainValidationReply(studiesService.specimenLinkTypeWithId(processingTypeId, id))
+      }
     }
-  }
 
   def addSpecimenLinkType = commandAction { cmd: AddSpecimenLinkTypeCmd => implicit userId =>
     val future = studiesService.addSpecimenLinkType(cmd)
     domainValidationReply(future)
   }
 
-  def updateSpecimenLinkType(id: String) = commandAction { cmd: UpdateSpecimenLinkTypeCmd => implicit userId =>
-    val future = studiesService.updateSpecimenLinkType(cmd)
-    domainValidationReply(future)
-  }
+  def updateSpecimenLinkType(id: String) =
+    commandAction { cmd: UpdateSpecimenLinkTypeCmd => implicit userId =>
+      val future = studiesService.updateSpecimenLinkType(cmd)
+      domainValidationReply(future)
+    }
 
-  def removeSpecimenLinkType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-    val cmd = RemoveSpecimenLinkTypeCmd(studyId, id, ver)
-    val future = studiesService.removeSpecimenLinkType(cmd)
-    domainValidationReply(future)
-  }
+  def removeSpecimenLinkType(studyId: String, id: String, ver: Long) =
+    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+      val cmd = RemoveSpecimenLinkTypeCmd(studyId, id, ver)
+      val future = studiesService.removeSpecimenLinkType(cmd)
+      domainValidationReply(future)
+    }
 
 }

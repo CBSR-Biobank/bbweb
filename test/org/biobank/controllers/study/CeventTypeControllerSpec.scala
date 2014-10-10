@@ -1,7 +1,8 @@
 package org.biobank.controllers.study
 
+import org.biobank.fixture._
 import org.biobank.controllers.BbwebPlugin
-import org.biobank.domain.study.{ Study, SpecimenGroup }
+import org.biobank.domain.study.{ CollectionEventType, CollectionEventAnnotationType, Study, SpecimenGroup }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper._
 
@@ -17,6 +18,8 @@ import play.api.Play.current
 class CeventTypeControllerSpec extends ControllerFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  val nameGenerator = new NameGenerator(this.getClass)
 
   def addOnNonDisabledStudy(study: Study) {
     use[BbwebPlugin].studyRepository.put(study)
@@ -133,9 +136,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
-    }
 
-    "GET /studies/cetypes" should {
       "list a single collection event type" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -150,9 +151,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         jsonList should have size 1
         compareObj(jsonList(0), cet)
       }
-    }
 
-    "GET /studies/cetypes" should {
       "get a single collection event type" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -166,9 +165,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, cet)
       }
-    }
 
-    "GET /studies/cetypes" should {
       "list multiple collection event types" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -193,6 +190,38 @@ class CeventTypeControllerSpec extends ControllerFixture {
           (jsonList zip cetypes).map { item => compareObj(item._1, item._2) }
         ()
       }
+
+      "fail for invalid study id" in new WithApplication(fakeApplication()) {
+        doLogin
+        val studyId = nameGenerator.next[Study]
+
+        val json = makeRequest(GET, s"/studies/cetypes/$studyId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("invalid study id")
+      }
+
+      "fail for an invalid study ID when using a collection event type id" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
+        doLogin
+        val studyId = nameGenerator.next[Study]
+        val cetId = nameGenerator.next[CollectionEventType]
+
+        val json = makeRequest(GET, s"/studies/cetypes/$studyId?cetId=$cetId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("invalid study id")
+      }
+
+      "fail for an invalid collection event type id" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
+        doLogin
+        val study = factory.createDisabledStudy
+        use[BbwebPlugin].studyRepository.put(study)
+
+        val cetId = nameGenerator.next[CollectionEventType]
+
+        val json = makeRequest(GET, s"/studies/cetypes/${study.id}?cetId=$cetId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("collection event type does not exist")
+      }
+
     }
 
     "POST /studies/cetypes" should {

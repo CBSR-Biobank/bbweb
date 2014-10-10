@@ -50,9 +50,10 @@ trait UserRepositoryComponentImpl extends UserRepositoryComponent {
     def getLocked(id: UserId) = getByKey(id).map(_.asInstanceOf[LockedUser])
 
     def getByEmail(email: String): DomainValidation[User] = {
-      getValues.find(_.email == email) match {
-        case Some(user) => user.success
-        case None => DomainError(s"user with email not found: $email").failNel
+      getValues.find(_.email == email).fold {
+        DomainError(s"user with email not found: $email").failNel[User]
+      } { user =>
+        user.success
       }
     }
   }

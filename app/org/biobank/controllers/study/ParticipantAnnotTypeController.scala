@@ -33,30 +33,19 @@ object ParticipantAnnotTypeController extends CommandController with JsonControl
     *
     * If no matching annotation type is found then an error result is returned.
     */
-  def get(
-    studyId: String,
-    annotTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.info(s"ParticipantAnnotTypeController.get: studyId: $studyId, annotTypeId: $annotTypeId")
+  def get(studyId: String, annotTypeId: Option[String]) =
+    AuthAction(parse.empty) { token => userId => implicit request =>
+      Logger.info(s"ParticipantAnnotTypeController.get: studyId: $studyId, annotTypeId: $annotTypeId")
 
-    annotTypeId.fold {
-      Ok(studiesService.participantAnnotationTypesForStudy(studyId).toList)
-    } {
-      id =>
-      studiesService.participantAnnotationTypeWithId(studyId, id).fold(
-        err => BadRequest(err.list.mkString(", ")),
-        annotType => Ok(annotType)
-      )
-    }
+      annotTypeId.fold {
+        domainValidationReply(studiesService.participantAnnotationTypesForStudy(studyId).map(_.toList))
+      } { id =>
+        domainValidationReply(studiesService.participantAnnotationTypeWithId(studyId, id))
+      }
   }
 
   def addAnnotationType = commandAction { cmd: AddParticipantAnnotationTypeCmd => implicit userId =>
-    val future = studiesService.addParticipantAnnotationType(cmd)
-    future.map { validation =>
-      validation.fold(
-        err   => BadRequest(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        event => Ok(event)
-      )
-    }
+    domainValidationReply(studiesService.addParticipantAnnotationType(cmd))
   }
 
   def updateAnnotationType(

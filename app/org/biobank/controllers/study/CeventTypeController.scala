@@ -24,20 +24,16 @@ object CeventTypeController extends CommandController with JsonController {
 
   private def studiesService = use[BbwebPlugin].studiesService
 
-  def get(
-    studyId: String,
-    ceventTypeId: Option[String]) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    Logger.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
+  def get(studyId: String, ceventTypeId: Option[String]) =
+    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+      Logger.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
 
-    ceventTypeId.fold {
-      Ok(studiesService.collectionEventTypesForStudy(studyId).toList)
-    } {
-      id =>
-      studiesService.collectionEventTypeWithId(studyId, id).fold(
-        err => BadRequest(err.list.mkString(", ")),
-        ceventType => Ok(ceventType)
-      )
-    }  }
+      ceventTypeId.fold {
+        domainValidationReply(studiesService.collectionEventTypesForStudy(studyId).map(_.toList))
+      } { id =>
+        domainValidationReply(studiesService.collectionEventTypeWithId(studyId, id))
+      }
+    }
 
   def addCollectionEventType = commandAction { cmd: AddCollectionEventTypeCmd => implicit userId =>
     val future = studiesService.addCollectionEventType(cmd)

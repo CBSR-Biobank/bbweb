@@ -1,5 +1,6 @@
 package org.biobank.controllers.study
 
+import org.biobank.fixture._
 import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, SpecimenGroup }
 import org.biobank.fixture.ControllerFixture
@@ -18,9 +19,9 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  def addToNonDisabledStudy(
-    study: Study,
-    sg: SpecimenGroup) = {
+  val nameGenerator = new NameGenerator(this.getClass)
+
+  def addToNonDisabledStudy(study: Study, sg: SpecimenGroup) = {
 
     use[BbwebPlugin].studyRepository.put(study)
 
@@ -91,9 +92,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
-    }
 
-    "GET /studies/sgroups" should {
       "list a single specimen group" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -108,9 +107,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         jsonList should have size 1
         compareObj(jsonList(0), sg)
       }
-    }
 
-    "GET /studies/sgroups" should {
       "get a single specimen group" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -124,9 +121,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val jsonObj = (json \ "data")
         compareObj(jsonObj, sg)
       }
-    }
 
-    "GET /studies/sgroups" should {
       "list multiple specimen groups" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -141,6 +136,38 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         jsonList should have size sgroups.size
           (jsonList zip sgroups).map { item => compareObj(item._1, item._2) }
       }
+
+      "fail for an invalid study ID" in new WithApplication(fakeApplication()) {
+        doLogin
+        val studyId = nameGenerator.next[Study]
+
+        val json = makeRequest(GET, s"/studies/sgroups/$studyId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("invalid study id")
+      }
+
+      "fail for an invalid study ID when using an specimen group id" in new WithApplication(fakeApplication()) {
+        doLogin
+        val studyId = nameGenerator.next[Study]
+        val sgId = nameGenerator.next[SpecimenGroup]
+
+        val json = makeRequest(GET, s"/studies/sgroups/$studyId?sgId=$sgId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("invalid study id")
+      }
+
+      "fail for an invalid specimen group id" in new WithApplication(fakeApplication()) {
+        doLogin
+        val study = factory.createDisabledStudy
+        use[BbwebPlugin].studyRepository.put(study)
+
+        val sgId = nameGenerator.next[SpecimenGroup]
+
+        val json = makeRequest(GET, s"/studies/sgroups/${study.id}?sgId=$sgId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("specimen group does not exist")
+      }
+
     }
 
     "POST /studies/sgroups" should {

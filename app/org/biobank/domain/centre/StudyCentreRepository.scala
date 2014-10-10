@@ -36,10 +36,11 @@ trait StudyCentreRepositoryComponentImpl extends StudyCentreRepositoryComponent 
       val option = getValues.find { x =>
         (x.centreId == centreId) && (x.studyId == studyId)
       }
-      option match {
-        case Some(value) => value.successNel
-        case None =>
-          DomainError(s"centre and study not linked: { centreId: $centreId, studyId: $studyId }").failNel
+      option.fold {
+        DomainError(s"centre and study not linked: { centreId: $centreId, studyId: $studyId }")
+          .failNel[StudyCentre]
+      } { value  =>
+        value.successNel
       }
     }
 

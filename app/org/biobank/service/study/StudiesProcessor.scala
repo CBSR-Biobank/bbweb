@@ -130,7 +130,7 @@ trait StudiesProcessorComponent
 
     private def validateAndForward(childActor: ActorRef, cmd: StudyCommandWithId) = {
       studyRepository.getByKey(StudyId(cmd.studyId)).fold(
-        err => context.sender ! err.failure,
+        err => context.sender ! DomainError(s"invalid study id: ${cmd.studyId}").failNel,
         study => study match {
           case study: DisabledStudy => childActor forward cmd
           case study => context.sender ! s"$study for $cmd is not disabled".failNel
@@ -153,12 +153,10 @@ trait StudiesProcessorComponent
       )
     }
 
-    def updateStudy[T <: Study]
-      (cmd: StudyCommand)
-      (fn: Study => DomainValidation[T])
+    def updateStudy[T <: Study](cmd: StudyCommand)(fn: Study => DomainValidation[T])
         : DomainValidation[T] = {
       studyRepository.getByKey(StudyId(cmd.id)).fold(
-        err => DomainError(s"study with id does not exist ${cmd.id}").failNel,
+        err => DomainError(s"invalid study id: ${cmd.id}").failNel,
         study => for {
           validVersion <-  study.requireVersion(cmd.expectedVersion)
           updatedStudy <- fn(study)

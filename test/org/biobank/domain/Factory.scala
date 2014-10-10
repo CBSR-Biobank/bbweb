@@ -389,10 +389,7 @@ class Factory {
   /** Retrieves the class from the map, or calls 'create' if value does not exist
     */
   private def defaultObject[T](key: Class[T], create: => T): T = {
-    domainObjects get key match {
-      case Some(obj) => key.cast(obj)
-      case None => create
-    }
+    domainObjects.get(key).fold { create } { obj => key.cast(obj) }
   }
 }
 

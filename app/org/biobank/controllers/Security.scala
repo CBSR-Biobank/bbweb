@@ -37,27 +37,26 @@ trait Security { self: Controller =>
    *  - matches a token already stored in the play cache
    */
   private def validateToken[A](request: Request[A]): DomainValidation[AuthenticationInfo] = {
-     request.cookies.get(AuthTokenCookieKey) match {
-       case None => DomainError("Invalid XSRF Token cookie").failNel
-       case Some(xsrfTokenCookie) =>
-         request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey)) match {
-           case None => DomainError("No token").failNel
-           case Some(token) =>
-             if (xsrfTokenCookie.value.equals(token)) {
-               Cache.getAs[UserId](token) match {
-                 case None => DomainError("invalid token").failNel
-                 case Some(userId) => {
-                   for {
-                     user       <- usersService.getUser(userId.id)
-                     activeUser <- UserHelper.isUserActive(user)
-                     auth       <- AuthenticationInfo(token, userId).successNel
-                   } yield auth
-                 }
-               }
-             } else {
-               DomainError("Token mismatch").failNel
-             }
+     request.cookies.get(AuthTokenCookieKey).fold {
+       DomainError("Invalid XSRF Token cookie").failNel[AuthenticationInfo]
+     } { xsrfTokenCookie =>
+       request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey)).fold {
+         DomainError("No token").failNel[AuthenticationInfo]
+       } { token =>
+         if (!xsrfTokenCookie.value.equals(token)) {
+           DomainError("Token mismatch").failNel[AuthenticationInfo]
+         } else {
+           Cache.getAs[UserId](token).fold {
+             DomainError("invalid token").failNel[AuthenticationInfo]
+           } { userId =>
+             for {
+               user       <- usersService.getUser(userId.id)
+               activeUser <- UserHelper.isUserActive(user)
+               auth       <- AuthenticationInfo(token, userId).successNel
+             } yield auth
+           }
          }
+       }
      }
   }
 

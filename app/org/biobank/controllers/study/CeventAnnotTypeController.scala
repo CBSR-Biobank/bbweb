@@ -24,20 +24,16 @@ object CeventAnnotTypeController extends CommandController with JsonController {
 
   private def studiesService = use[BbwebPlugin].studiesService
 
-  def get(
-    studyId: String,
-    annotTypeId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.debug(s"CeventAnnotTypeController.list: studyId: $studyId, annotTypeId: $annotTypeId")
+  def get(studyId: String, annotTypeId : Option[String]) =
+    AuthAction(parse.empty) { token => userId => implicit request =>
+      Logger.debug(s"CeventAnnotTypeController.list: studyId: $studyId, annotTypeId: $annotTypeId")
 
-    annotTypeId.fold {
-      Ok(studiesService.collectionEventAnnotationTypesForStudy(studyId).toList)
-    } {
-      id =>
-      studiesService.collectionEventAnnotationTypeWithId(studyId, id).fold(
-        err => BadRequest(err.list.mkString(", ")),
-        annotType => Ok(annotType)
-      )
-    }  }
+      annotTypeId.fold {
+        domainValidationReply(studiesService.collectionEventAnnotationTypesForStudy(studyId).map(_.toList))
+      } { id =>
+        domainValidationReply(studiesService.collectionEventAnnotationTypeWithId(studyId, id))
+      }
+    }
 
   def addAnnotationType = commandAction { cmd: AddCollectionEventAnnotationTypeCmd => implicit userId =>
     val future = studiesService.addCollectionEventAnnotationType(cmd)

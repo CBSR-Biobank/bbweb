@@ -73,6 +73,7 @@ libraryDependencies ++= Seq(
   "org.webjars"               %  "angular-ui-router"              % "0.2.11",
   "org.webjars"               %  "ng-table"                       % "0.3.3",
   "org.webjars"               % "angularjs-toaster"               % "0.4.7-1",
+  "org.webjars"               % "angular-filter"                  % "0.4.6",
   // Testing
   "org.scalatest"             %% "scalatest"                      % "2.2.1"              % "test->*" excludeAll(
     ExclusionRule(organization = "org.junit", name = "junit")

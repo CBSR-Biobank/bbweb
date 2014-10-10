@@ -92,21 +92,18 @@ trait UserValidations {
   val urlRegex = "^((https?|ftp)://|(www|ftp)\\.)[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$".r
 
   def validateEmail(email: String): DomainValidation[String] = {
-    emailRegex.findFirstIn(email) match {
-      case Some(e) => email.success
-      case None => InvalidEmail.failNel
-    }
+    emailRegex.findFirstIn(email).fold { InvalidEmail.toString.failNel[String] } { e => email.successNel }
   }
 
-  def validateAvatarUrl(url: Option[String]): DomainValidation[Option[String]] = {
-    url match {
-      case Some(url) =>
-        urlRegex.findFirstIn(url) match {
-          case Some(e) => some(url).success
-          case None => InvalidUrl.failNel
-        }
-      case None =>
-        none.success
+  def validateAvatarUrl(urlOption: Option[String]): DomainValidation[Option[String]] = {
+    urlOption.fold {
+      none[String].successNel[String]
+    } { url  =>
+      urlRegex.findFirstIn(url).fold {
+        InvalidUrl.toString.failNel[Option[String]]
+      } { e =>
+        some(url).successNel
+      }
     }
   }
 }

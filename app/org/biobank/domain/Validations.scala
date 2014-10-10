@@ -34,21 +34,31 @@ object CommonValidations {
     if (number < 0) err.failNel else number.success
   }
 
-  def validatePositiveNumberOption(
-    option: Option[BigDecimal],
-    err: ValidationKey): DomainValidation[Option[BigDecimal]] = {
-    option match {
-      case Some(number) if (number < 0) => err.failNel
-      case _ => option.success
+  def validatePositiveNumberOption
+    (option: Option[BigDecimal], err: ValidationKey)
+      : DomainValidation[Option[BigDecimal]] = {
+    option.fold {
+      none[BigDecimal].successNel[String]
+    } { number =>
+      if (number < 0) {
+        err.toString.failNel[Option[BigDecimal]]
+      } else {
+        option.successNel
+      }
     }
   }
 
-  def validateNonEmptyOption(
-    option: Option[String],
-    err: ValidationKey): DomainValidation[Option[String]] = {
-    option match {
-      case Some(value) if ((value == null) || value.isEmpty()) => err.failNel
-      case _ => option.success
+  def validateNonEmptyOption
+    (option: Option[String], err: ValidationKey)
+      : DomainValidation[Option[String]] = {
+    option.fold {
+      none[String].successNel[String]
+    } { value =>
+      if ((value == null) || value.isEmpty()) {
+        err.toString.failNel[Option[String]]
+      } else {
+        option.successNel
+      }
     }
   }
 
@@ -66,15 +76,16 @@ object CommonValidations {
     validateId(id, IdRequired)
   }
 
-  def validateId[T <: IdentifiedValueObject[String]](
-    idOption: Option[T], err: ValidationKey): DomainValidation[Option[T]] = {
-    idOption match {
-      case Some(id) =>
-        validateId(id, err).fold(
-          err => err.fail,
-          id => idOption.success
-        )
-      case _ => idOption.success
+  def validateId[T <: IdentifiedValueObject[String]]
+    (idOption: Option[T], err: ValidationKey)
+      : DomainValidation[Option[T]] = {
+    idOption.fold {
+      none[T].successNel[String]
+    } { id =>
+      validateId(id, err).fold(
+        err => err.toString.failNel[Option[T]],
+        id => some(id).success
+      )
     }
   }
 

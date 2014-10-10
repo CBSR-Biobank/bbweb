@@ -29,19 +29,16 @@ object SpecimenGroupController extends CommandController with JsonController {
 
   private def studiesService = use[BbwebPlugin].studiesService
 
-  def get(studyId: String, sgId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.debug(s"SpecimenGroupController.get: studyId: $studyId, sgId: $sgId")
+  def get(studyId: String, sgId: Option[String]) =
+    AuthAction(parse.empty) { token => userId => implicit request =>
+      Logger.debug(s"SpecimenGroupController.get: studyId: $studyId, sgId: $sgId")
 
-    sgId.fold {
-      Ok(studiesService.specimenGroupsForStudy(studyId).toList)
-    } {
-      id =>
-      studiesService.specimenGroupWithId(studyId, id).fold(
-        err => BadRequest(err.list.mkString(", ")),
-        specimenGroup => Ok(specimenGroup)
-      )
+      sgId.fold {
+        domainValidationReply(studiesService.specimenGroupsForStudy(studyId).map(_.toList))
+      } { id =>
+        domainValidationReply(studiesService.specimenGroupWithId(studyId, id))
+      }
     }
-  }
 
   def getInUse(studyId: String, sgId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
     Logger.debug(s"SpecimenGroupController.getInUse: studyId: $studyId, sgId: $sgId")
@@ -71,13 +68,11 @@ object SpecimenGroupController extends CommandController with JsonController {
     domainValidationReply(future)
   }
 
-  def removeSpecimenGroup(
-    studyId: String,
-    id: String,
-    ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-    val cmd = RemoveSpecimenGroupCmd(studyId, id, ver)
-    val future = studiesService.removeSpecimenGroup(cmd)
-    domainValidationReply(future)
-  }
+  def removeSpecimenGroup(studyId: String, id: String, ver: Long) =
+    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+      val cmd = RemoveSpecimenGroupCmd(studyId, id, ver)
+      val future = studiesService.removeSpecimenGroup(cmd)
+      domainValidationReply(future)
+    }
 
 }

@@ -1,5 +1,6 @@
 package org.biobank.controllers.study
 
+import org.biobank.fixture._
 import org.biobank.controllers.BbwebPlugin
 import org.biobank.domain.study.{ Study, ProcessingType }
 import org.biobank.fixture.ControllerFixture
@@ -17,6 +18,8 @@ import play.api.Play.current
 class ProcessingTypeControllerSpec extends ControllerFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  val nameGenerator = new NameGenerator(this.getClass)
 
   private def procTypeToAddCmdJson(procType: ProcessingType) = {
     Json.obj(
@@ -102,9 +105,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList should have size 0
       }
-    }
 
-    "GET /studies/proctypes" should {
       "list a single processing type" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -119,9 +120,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         jsonList should have size 1
         compareObj(jsonList(0), procType)
       }
-    }
 
-    "GET /studies/proctypes" should {
       "get a single processing type" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -135,9 +134,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, procType)
       }
-    }
 
-    "GET /studies/proctypes" should {
       "list multiple processing types" in new WithApplication(fakeApplication()) {
         doLogin
         val study = factory.createDisabledStudy
@@ -154,6 +151,37 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         jsonList should have size proctypes.size
           (jsonList zip proctypes).map { item => compareObj(item._1, item._2) }
         ()
+      }
+
+      "fail for an invalid study ID" in new WithApplication(fakeApplication()) {
+        doLogin
+        val studyId = nameGenerator.next[Study]
+
+        val json = makeRequest(GET, s"/studies/proctypes/$studyId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("invalid study id")
+      }
+
+      "fail for an invalid study ID when using an processing type id" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
+        doLogin
+        val studyId = nameGenerator.next[Study]
+        val procTypeId = nameGenerator.next[ProcessingType]
+
+        val json = makeRequest(GET, s"/studies/proctypes/$studyId?procTypeId=$procTypeId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("invalid study id")
+      }
+
+      "fail for an invalid processing type id" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
+        doLogin
+        val study = factory.createDisabledStudy
+        use[BbwebPlugin].studyRepository.put(study)
+
+        val procTypeId = nameGenerator.next[ProcessingType]
+
+        val json = makeRequest(GET, s"/studies/proctypes/${study.id}?procTypeId=$procTypeId", BAD_REQUEST)
+        (json \ "status").as[String] should include ("error")
+        (json \ "message").as[String] should include ("processing type does not exist")
       }
     }
 
