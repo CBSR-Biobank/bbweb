@@ -11,10 +11,11 @@ import org.biobank.fixture.ControllerFixture
 import play.api.test.Helpers._
 import play.api.test.WithApplication
 import play.api.libs.json._
-import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import com.typesafe.plugin._
 import play.api.Play.current
+import org.scalatest.Tag
+import org.scalatestplus.play._
 
 /**
   * Tests the REST API for [[Centre]]s.
@@ -27,28 +28,28 @@ class CentresControllerSpec extends ControllerFixture {
 
   "Centre REST API" when {
 
-    "GET /centres" should {
-      "list none" in new WithApplication(fakeApplication()) {
+    "GET /centres" must {
+      "list none" in new App(fakeApp) {
         doLogin
         val json = makeRequest(GET, "/centres")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size 0
+        jsonList must have size 0
       }
 
-      "list a centre" in new WithApplication(fakeApplication()) {
+      "list a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
 
         val json = makeRequest(GET, "/centres")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have length 1
+        jsonList must have length 1
         compareObj(jsonList(0), centre)
       }
 
-      "list multiple centres" in new WithApplication(fakeApplication()) {
+      "list multiple centres" in new App(fakeApp) {
         doLogin
         val centres = List(factory.createDisabledCentre, factory.createDisabledCentre)
           .map{ centre => (centre.id, centre) }.toMap
@@ -57,9 +58,9 @@ class CentresControllerSpec extends ControllerFixture {
         centres.values.foreach(centre => use[BbwebPlugin].centreRepository.put(centre))
 
         val json = makeRequest(GET, "/centres")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size centres.size
+        jsonList must have size centres.size
         jsonList.foreach{ jsonObj =>
           val jsonId = CentreId((jsonObj \ "id").as[String])
           compareObj(jsonObj, centres(jsonId))
@@ -67,40 +68,40 @@ class CentresControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /centres" should {
-      "add a centre" in new WithApplication(fakeApplication()) {
+    "POST /centres" must {
+      "add a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         val cmdJson = Json.obj("name" -> centre.name, "description" -> centre.description)
         val json = makeRequest(POST, "/centres", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
 
         val eventCentreId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].centreRepository.getByKey(CentreId(eventCentreId))
-        validation should be ('success)
+        validation mustBe ('success)
         validation map { repoCentre =>
-          repoCentre.name should be ((json \ "data" \ "name").as[String])
+          repoCentre.name mustBe ((json \ "data" \ "name").as[String])
         }
       }
 
-      "add a centre with no description" in new WithApplication(fakeApplication()) {
+      "add a centre with no description" in new App(fakeApp) {
         doLogin
         val cmdJson = Json.obj("name" -> nameGenerator.next[String])
         val json = makeRequest(POST, "/centres", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
 
-      "not add a centre with a name that is too short" in new WithApplication(fakeApplication()) {
+      "not add a centre with a name that is too short" in new App(fakeApp) {
         doLogin
         val cmdJson = Json.obj("name" -> "A")
         val json = makeRequest(POST, "/centres", BAD_REQUEST, json = cmdJson)
 
-        (json \ "status").as[String] should include ("error")
+        (json \ "status").as[String] must include ("error")
       }
 
-      "not add a centre with a duplicate name" in new WithApplication(fakeApplication()) {
+      "not add a centre with a duplicate name" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
@@ -108,13 +109,13 @@ class CentresControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj("name" -> centre.name)
         val json = makeRequest(POST, "/centres", FORBIDDEN, json = cmdJson)
 
-        (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("centre with name already exists")
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("centre with name already exists")
       }
     }
 
-    "PUT /centres/:id" should {
-      "update a centre" in new WithApplication(fakeApplication()) {
+    "PUT /centres/:id" must {
+      "update a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
@@ -126,18 +127,18 @@ class CentresControllerSpec extends ControllerFixture {
           "description"     -> centre.description)
         val json = makeRequest(PUT, s"/centres/${centre.id.id}", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
 
         val eventCentreId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].centreRepository.getByKey(CentreId(eventCentreId))
-        validation should be ('success)
+        validation mustBe ('success)
         validation map { repoCentre =>
-          repoCentre.name should be ((json \ "data" \ "name").as[String])
-          repoCentre.version should be ((json \ "data" \ "version").as[Long])
+          repoCentre.name mustBe ((json \ "data" \ "name").as[String])
+          repoCentre.version mustBe ((json \ "data" \ "version").as[Long])
         }
       }
 
-      "update a centre with no description" in new WithApplication(fakeApplication()) {
+      "update a centre with no description" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
@@ -148,10 +149,10 @@ class CentresControllerSpec extends ControllerFixture {
           "name"            -> centre.name)
         val json = makeRequest(PUT, s"/centres/${centre.id.id}", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
 
-      "not update an invalid centre" in new WithApplication(fakeApplication()) {
+      "not update an invalid centre" in new App(fakeApp) {
         doLogin
 
         val centreId = nameGenerator.next[String]
@@ -161,11 +162,11 @@ class CentresControllerSpec extends ControllerFixture {
           "name"            -> nameGenerator.next[String])
         val json = makeRequest(PUT, s"/centres/${centreId}", NOT_FOUND, json = cmdJson)
 
-        (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("no centre with id")
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("no centre with id")
       }
 
-      "not update a centre with an invalid version" in new WithApplication(fakeApplication()) {
+      "not update a centre with an invalid version" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
@@ -177,11 +178,11 @@ class CentresControllerSpec extends ControllerFixture {
           "description"     -> centre.description)
         val json = makeRequest(PUT, s"/centres/${centre.id.id}", BAD_REQUEST, json = cmdJson)
 
-        (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("expected version doesn't match current version")
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("expected version doesn't match current version")
       }
 
-      "not update a centre with a duplicate name" in new WithApplication(fakeApplication()) {
+      "not update a centre with a duplicate name" in new App(fakeApp) {
         doLogin
         val centres = List(factory.createDisabledCentre, factory.createDisabledCentre)
         centres.foreach { centre =>
@@ -197,34 +198,34 @@ class CentresControllerSpec extends ControllerFixture {
           "description"     -> centres(1).description)
         val json = makeRequest(PUT, s"/centres/${centres(1).id.id}", FORBIDDEN, json = cmdJson)
 
-        (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("centre with name already exists")
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("centre with name already exists")
       }
 
     }
 
-    "GET /centres/:id" should {
-      "read a centre" in new WithApplication(fakeApplication()) {
+    "GET /centres/:id" must {
+      "read a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
         val json = makeRequest(GET, s"/centres/${centre.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, centre)
       }
 
-      "not read an invalid centre" in new WithApplication(fakeApplication()) {
+      "not read an invalid centre" in new App(fakeApp) {
         doLogin
         val json = makeRequest(GET, s"/centres/" + nameGenerator.next[String], BAD_REQUEST)
 
-        (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("not found")
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("not found")
       }
     }
 
-    "POST /centres/enable" should {
-      "enable a centre" in new WithApplication(fakeApplication()) {
+    "POST /centres/enable" must {
+      "enable a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
@@ -234,17 +235,17 @@ class CentresControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(centre.version))
         val json = makeRequest(POST, "/centres/enable", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
 
         val eventCentreId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].centreRepository.getByKey(CentreId(eventCentreId))
-        validation should be ('success)
+        validation mustBe ('success)
         validation map { repoCentre =>
-          repoCentre.version should be ((json \ "data" \ "version").as[Long])
+          repoCentre.version mustBe ((json \ "data" \ "version").as[Long])
         }
       }
 
-      "not enable an invalid centre" in new WithApplication(fakeApplication()) {
+      "not enable an invalid centre" in new App(fakeApp) {
         doLogin
 
         val cmdJson = Json.obj(
@@ -252,13 +253,13 @@ class CentresControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(0L))
         val json = makeRequest(POST, "/centres/enable", NOT_FOUND, json = cmdJson)
 
-        (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("no centre with id")
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("no centre with id")
       }
     }
 
-    "POST /centres/disable" should {
-      "disable a centre" in new WithApplication(fakeApplication()) {
+    "POST /centres/disable" must {
+      "disable a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre.enable | fail
         use[BbwebPlugin].centreRepository.put(centre)
@@ -268,42 +269,42 @@ class CentresControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(centre.version))
         val json = makeRequest(POST, "/centres/disable", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
 
         val eventCentreId = (json \ "data" \ "id").as[String]
         val validation = use[BbwebPlugin].centreRepository.getByKey(CentreId(eventCentreId))
-        validation should be ('success)
+        validation mustBe ('success)
         validation map { repoCentre =>
-          repoCentre.version should be ((json \ "data" \ "version").as[Long])
+          repoCentre.version mustBe ((json \ "data" \ "version").as[Long])
         }
       }
 
-      "not disable an invalid centre" in new WithApplication(fakeApplication()) {
+      "not disable an invalid centre" in new App(fakeApp) {
         doLogin
         val cmdJson = Json.obj(
           "id" -> nameGenerator.next[String],
           "expectedVersion" -> Some(0L))
         val json = makeRequest(POST, "/centres/disable", NOT_FOUND, json = cmdJson)
 
-        (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("no centre with id")
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("no centre with id")
       }
     }
 
-    "GET /centres/location" should {
-      "list none" in new WithApplication(fakeApplication()) {
+    "GET /centres/location" must {
+      "list none" in new App(fakeApp) {
         doLogin
 
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size 0
+        jsonList must have size 0
       }
 
-      "list a centre location" in new WithApplication(fakeApplication()) {
+      "list a centre location" in new App(fakeApp) {
         doLogin
 
         val centre = factory.createDisabledCentre
@@ -314,13 +315,13 @@ class CentresControllerSpec extends ControllerFixture {
         use[BbwebPlugin].centreLocationRepository.put(CentreLocation(centre.id, location.id))
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size 1
+        jsonList must have size 1
         compareObj(jsonList(0), location)
       }
 
-      "list multiple centre locations" in new WithApplication(fakeApplication()) {
+      "list multiple centre locations" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
@@ -334,16 +335,16 @@ class CentresControllerSpec extends ControllerFixture {
         }
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size locations.size
+        jsonList must have size locations.size
         jsonList.foreach{ jsonObj =>
           val jsonId = LocationId((jsonObj \ "id").as[String])
           compareObj(jsonObj, locations(jsonId))
         }
       }
 
-      "list a specific centre location" in new WithApplication(fakeApplication()) {
+      "list a specific centre location" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
@@ -357,13 +358,13 @@ class CentresControllerSpec extends ControllerFixture {
         }
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}?locationId=${locations(0).id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         val jsonId = LocationId((jsonObj \ "id").as[String])
         compareObj(jsonObj, locationsMap(jsonId))
       }
 
-      "does not list an invalid location" in new WithApplication(fakeApplication()) {
+      "does not list an invalid location" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
@@ -372,8 +373,8 @@ class CentresControllerSpec extends ControllerFixture {
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}?locationId=$inavlidLocId", BAD_REQUEST)
 
-        (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("location does not exist")
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("location does not exist")
 
       }
     }
@@ -390,8 +391,8 @@ class CentresControllerSpec extends ControllerFixture {
         "countryIsoCode" -> location.countryIsoCode)
     }
 
-    "POST /centres/location" should {
-      "add a location" in new WithApplication(fakeApplication()) {
+    "POST /centres/location" must {
+      "add a location" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
@@ -403,10 +404,10 @@ class CentresControllerSpec extends ControllerFixture {
         val jsonEvent = (json \ "data").as[JsObject]
         val eventLocationId = (json \ "data" \ "locationId").as[String]
         val validation = use[BbwebPlugin].locationRepository.getByKey(LocationId(eventLocationId))
-        validation should be ('success)
+        validation mustBe ('success)
         validation map { repoLocation =>
-          repoLocation shouldBe a[Location]
-          repoLocation should have (
+          repoLocation mustBe a[Location]
+          repoLocation must have (
             'name           (location.name),
             'street         (location.street),
             'city           (location.city),
@@ -418,17 +419,17 @@ class CentresControllerSpec extends ControllerFixture {
         }
 
         val validation2 = use[BbwebPlugin].centreLocationRepository.getByKey(LocationId(eventLocationId))
-        validation2 should be ('success)
+        validation2 mustBe ('success)
         validation2 map { item =>
-          item shouldBe a[CentreLocation]
-          item should have (
+          item mustBe a[CentreLocation]
+          item must have (
             'locationId (LocationId(eventLocationId)),
             'centreId   (centre.id)
           )
         }
       }
 
-      "fail on attempt to add a location to an invalid centre" in new WithApplication(fakeApplication()) {
+      "fail on attempt to add a location to an invalid centre" in new App(fakeApp) {
         doLogin
 
         val centreId = CentreId(nameGenerator.next[String])
@@ -436,13 +437,13 @@ class CentresControllerSpec extends ControllerFixture {
         val jsonResponse = makeRequest(POST, "/centres/locations", NOT_FOUND,
           json = jsonAddCentreLocationCmd(location, centreId))
 
-        (jsonResponse \ "status").as[String] should include ("error")
-          (jsonResponse \ "message").as[String] should include ("no centre with id")
+        (jsonResponse \ "status").as[String] must include ("error")
+          (jsonResponse \ "message").as[String] must include ("no centre with id")
       }
     }
 
-    "DELETE /centres/location" should {
-      "delete a location from a centre" in new WithApplication(fakeApplication()) {
+    "DELETE /centres/location" must {
+      "delete a location from a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
@@ -455,11 +456,11 @@ class CentresControllerSpec extends ControllerFixture {
 
         locations.foreach { location =>
           val json = makeRequest(DELETE, s"/centres/locations/${centre.id.id}/${location.id.id}")
-            (json \ "status").as[String] should include ("success")
+            (json \ "status").as[String] must include ("success")
         }
       }
 
-      "delete a location from an invalid centre" in new WithApplication(fakeApplication()) {
+      "delete a location from an invalid centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
@@ -470,37 +471,37 @@ class CentresControllerSpec extends ControllerFixture {
 
         val centreId = CentreId(nameGenerator.next[String])
         val json = makeRequest(DELETE, s"/centres/locations/${centreId.id}/${location.id.id}", NOT_FOUND)
-          (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("no centre with id")
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("no centre with id")
       }
 
-      "delete an invalid location from a centre" in new WithApplication(fakeApplication()) {
+      "delete an invalid location from a centre" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
 
         val locationId = LocationId(nameGenerator.next[String])
         val json = makeRequest(DELETE, s"/centres/locations/${centre.id.id}/${locationId.id}", NOT_FOUND)
-          (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("no location with id")
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("no location with id")
       }
 
     }
 
-    "GET /centres/studies" should {
-      "list none" in new WithApplication(fakeApplication()) {
+    "GET /centres/studies" must {
+      "list none" in new App(fakeApp) {
         doLogin
 
         val centre = factory.createDisabledCentre
         use[BbwebPlugin].centreRepository.put(centre)
 
         val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size 0
+        jsonList must have size 0
       }
 
-      "list a centre study" in new WithApplication(fakeApplication()) {
+      "list a centre study" in new App(fakeApp) {
         doLogin
 
         val centre = factory.createDisabledCentre
@@ -512,13 +513,13 @@ class CentresControllerSpec extends ControllerFixture {
         use[BbwebPlugin].studyCentreRepository.put(StudyCentre(id, study.id, centre.id))
 
         val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val studyIdList = (json \ "data").as[List[String]]
-        studyIdList should have size 1
-        studyIdList(0) should be (study.id.id)
+        studyIdList must have size 1
+        studyIdList(0) mustBe (study.id.id)
       }
 
-      "list multiple centre studies" in new WithApplication(fakeApplication()) {
+      "list multiple centre studies" in new App(fakeApp) {
         doLogin
 
         val centre = factory.createDisabledCentre
@@ -532,15 +533,15 @@ class CentresControllerSpec extends ControllerFixture {
         }
 
         val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val studyIdList = (json \ "data").as[List[String]]
-        studyIdList should have size studies.size
-        studies.foreach{ study => studyIdList should contain (study.id.id) }
+        studyIdList must have size studies.size
+        studies.foreach{ study => studyIdList must contain (study.id.id) }
       }
     }
 
-    "POST /centres/studies" should {
-      "add a centre to study link" in new WithApplication(fakeApplication()) {
+    "POST /centres/studies" must {
+      "add a centre to study link" in new App(fakeApp) {
         doLogin
 
         val centre = factory.createDisabledCentre
@@ -553,12 +554,12 @@ class CentresControllerSpec extends ControllerFixture {
           "centreId" -> centre.id.id,
           "studyId"  -> study.id.id)
         val json = makeRequest(POST, "/centres/studies", json = cmdJson)
-          (json \ "data" \ "centreId").as[String] should be (centre.id.id)
-          (json \ "data" \ "studyId").as[String] should be (study.id.id)
+          (json \ "data" \ "centreId").as[String] mustBe (centre.id.id)
+          (json \ "data" \ "studyId").as[String] mustBe (study.id.id)
 
         val repoValues = use[BbwebPlugin].studyCentreRepository.getValues.toList
-        repoValues should have size 1
-        repoValues(0) should have (
+        repoValues must have size 1
+        repoValues(0) must have (
           'centreId (centre.id),
           'studyId  (study.id)
         )
@@ -566,8 +567,8 @@ class CentresControllerSpec extends ControllerFixture {
 
     }
 
-    "DELETE /centres/studies" should {
-      "remove a centre to study link" in new WithApplication(fakeApplication()) {
+    "DELETE /centres/studies" must {
+      "remove a centre to study link" in new App(fakeApp) {
         doLogin
 
         val centre = factory.createDisabledCentre
@@ -579,10 +580,10 @@ class CentresControllerSpec extends ControllerFixture {
         use[BbwebPlugin].studyCentreRepository.put(StudyCentre(id, study.id, centre.id))
 
         val json = makeRequest(DELETE, s"/centres/studies/${centre.id.id}/${study.id.id}")
-          (json \ "status").as[String] should include ("success")
+          (json \ "status").as[String] must include ("success")
       }
 
-      "fail on attempt remove an invalid centre to study link" in new WithApplication(fakeApplication()) {
+      "fail on attempt remove an invalid centre to study link" in new App(fakeApp) {
         doLogin
 
         val centre = factory.createDisabledCentre
@@ -591,8 +592,8 @@ class CentresControllerSpec extends ControllerFixture {
         val studyId = StudyCentreId(nameGenerator.next[String])
 
         val json = makeRequest(DELETE, s"/centres/studies/${centre.id.id}/${studyId}", BAD_REQUEST)
-          (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("centre and study not linked")
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("centre and study not linked")
       }
 
     }

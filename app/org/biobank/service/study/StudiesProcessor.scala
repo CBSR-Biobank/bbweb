@@ -219,7 +219,7 @@ trait StudiesProcessorComponent
         } yield updatedStudy
       }
       v.fold(
-        err => DomainError(s"error $err occurred on $cmd").failNel,
+        err => err.fail,
         study => StudyUpdatedEvent(cmd.id, study.version, timeNow, study.name, study.description).success
       )
     }
@@ -231,7 +231,7 @@ trait StudiesProcessorComponent
       val collectionEventtypeCount = collectionEventTypeRepository.allForStudy(studyId).size
       val v = updateDisabled(cmd) { s => s.enable(specimenGroupCount, collectionEventtypeCount) }
       v.fold(
-        err => DomainError(s"error $err occurred on $cmd").failNel,
+        err => err.fail,
         study => StudyEnabledEvent(cmd.id, study.version, timeNow).success
       )
     }
@@ -240,7 +240,7 @@ trait StudiesProcessorComponent
       val timeNow = DateTime.now
       val v = updateEnabled(cmd) { s => s.disable }
       v.fold(
-        err => DomainError(s"error $err occurred on $cmd").failNel,
+        err => err.fail,
         study => StudyDisabledEvent(cmd.id, study.version, timeNow).success
       )
     }
@@ -249,7 +249,7 @@ trait StudiesProcessorComponent
       val timeNow = DateTime.now
       val v = updateDisabled(cmd) { s => s.retire }
       v.fold(
-        err => DomainError(s"error $err occurred on $cmd").failNel,
+        err => err.fail,
         study => StudyRetiredEvent(cmd.id, study.version, timeNow).success
       )
     }
@@ -258,7 +258,7 @@ trait StudiesProcessorComponent
       val timeNow = DateTime.now
       val v = updateRetired(cmd) { s => s.unretire }
       v.fold(
-        err => DomainError(s"error $err occurred on $cmd").failNel,
+        err => err.fail,
         study => StudyUnretiredEvent(cmd.id, study.version, timeNow).success
       )
     }

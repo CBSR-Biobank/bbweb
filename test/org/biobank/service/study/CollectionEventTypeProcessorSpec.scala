@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory
 import org.scalatest.OptionValues._
 import org.joda.time.DateTime
 import akka.pattern.ask
+
 import scalaz._
 import scalaz.Scalaz._
 
@@ -85,18 +86,18 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
     "add a collection event type" in {
       val cet = factory.createCollectionEventType
 
-      askAddCommand(cet) shouldSucceed { event =>
-        event shouldBe a[CollectionEventTypeAddedEvent]
-        event should have(
+      askAddCommand(cet) mustSucceed { event =>
+        event mustBe a[CollectionEventTypeAddedEvent]
+        event must have(
           'studyId     (cet.studyId.id),
           'name        (cet.name),
           'description (cet.description),
           'recurring   (cet.recurring))
 
-        collectionEventTypeRepository.allForStudy(disabledStudy.id) should have size 1
+        collectionEventTypeRepository.allForStudy(disabledStudy.id) must have size 1
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) shouldSucceed { repoCet =>
-          repoCet.version should be(0)
+          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
+          repoCet.version mustBe(0)
           checkTimeStamps(repoCet, DateTime.now, None)
         }
       }
@@ -106,13 +107,13 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
     "not add a collection event type to a study that does not exist" in {
       val study2 = factory.createDisabledStudy
       val cet = factory.createCollectionEventType
-      askAddCommand(cet) shouldFail s"${study2.id.id}.*not found"
+      askAddCommand(cet) mustFail s"invalid study id: ${study2.id.id}"
     }
 
     "not add a collection event type with a name that already exists" in {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
-      askAddCommand(cet) shouldFail "name already exists"
+      askAddCommand(cet) mustFail "name already exists"
     }
 
     "update a collection event type" in {
@@ -124,17 +125,17 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
         description = Some(nameGenerator.next[CollectionEventType]),
         recurring   = !cet.recurring)
 
-      askUpdateCommand(cet2) shouldSucceed { event =>
-        event shouldBe a[CollectionEventTypeUpdatedEvent]
-        event should have(
+      askUpdateCommand(cet2) mustSucceed { event =>
+        event mustBe a[CollectionEventTypeUpdatedEvent]
+        event must have(
           'version (cet.version + 1),
           'name (cet2.name),
           'description (cet2.description),
           'recurring (cet2.recurring))
 
-        collectionEventTypeRepository.allForStudy(disabledStudy.id) should have size 1
+        collectionEventTypeRepository.allForStudy(disabledStudy.id) must have size 1
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) shouldSucceed { repoCet =>
+          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
           checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
         }
       }
@@ -148,7 +149,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
       collectionEventTypeRepository.put(cet2)
 
       val cet3 = cet.copy(name = cet2.name)
-      askUpdateCommand(cet3) shouldFail "name already exists"
+      askUpdateCommand(cet3) mustFail "name already exists"
     }
 
     "not update a collection event type to wrong study" in {
@@ -159,7 +160,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
       studyRepository.put(study2)
 
       val cet2 = cet.copy(studyId = study2.id)
-      askUpdateCommand(cet2) shouldFail "study does not have collection event type"
+      askUpdateCommand(cet2) mustFail "study does not have collection event type"
     }
 
     "not update a collection event type with an invalid version" in {
@@ -167,14 +168,14 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
       collectionEventTypeRepository.put(cet)
 
       val cet2 = cet.copy(version = cet.version + 1)
-      askUpdateCommand(cet2) shouldFail "doesn't match current version"
+      askUpdateCommand(cet2) mustFail "doesn't match current version"
     }
 
     "remove a collection event type" in {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
-      askRemoveCommand(cet) shouldSucceed { event =>
-        event shouldBe a[CollectionEventTypeRemovedEvent]
+      askRemoveCommand(cet) mustSucceed { event =>
+        event mustBe a[CollectionEventTypeRemovedEvent]
       }
     }
 
@@ -183,7 +184,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
       collectionEventTypeRepository.put(cet)
 
       val cet2 = cet.copy(version = cet.version - 1)
-      askRemoveCommand(cet2) shouldFail "expected version doesn't match current version"
+      askRemoveCommand(cet2) mustFail "expected version doesn't match current version"
     }
 
     "add a specimen group to a collection event type" in {
@@ -198,23 +199,23 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
 
       val cet2 = cet.copy(specimenGroupData = sgData)
 
-      askAddCommand(cet2) shouldSucceed { event =>
-        event shouldBe a[CollectionEventTypeAddedEvent]
-        event.specimenGroupData should have length (2)
+      askAddCommand(cet2) mustSucceed { event =>
+        event mustBe a[CollectionEventTypeAddedEvent]
+        event.specimenGroupData must have length (2)
 
-        event.specimenGroupData(0) should have(
+        event.specimenGroupData(0) must have(
           'specimenGroupId (sg.id.id),
           'maxCount (sgData(0).maxCount),
           'amount (sgData(0).amount))
 
-        event.specimenGroupData(1) should have(
+        event.specimenGroupData(1) must have(
           'specimenGroupId(sg.id.id),
           'maxCount(sgData(1).maxCount),
           'amount(sgData(1).amount))
 
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) shouldSucceed { repoCet =>
-          repoCet.version should be(0)
+          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
+          repoCet.version mustBe(0)
           checkTimeStamps(repoCet, DateTime.now, None)
         }
       }
@@ -230,18 +231,18 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
       val sgData = List(factory.createCollectionEventTypeSpecimenGroupData)
 
       val cet2 = cet.copy(specimenGroupData = sgData)
-      askUpdateCommand(cet2) shouldSucceed { event =>
-        event shouldBe a[CollectionEventTypeUpdatedEvent]
-        event.specimenGroupData should have length (1)
+      askUpdateCommand(cet2) mustSucceed { event =>
+        event mustBe a[CollectionEventTypeUpdatedEvent]
+        event.specimenGroupData must have length (1)
 
-        event.specimenGroupData(0) should have(
+        event.specimenGroupData(0) must have(
           'specimenGroupId (sg.id.id),
           'maxCount (sgData(0).maxCount),
           'amount (sgData(0).amount))
 
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) shouldSucceed { repoCet =>
-          repoCet.version should be(1)
+          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
+          repoCet.version mustBe(1)
           checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
         }
       }
@@ -261,7 +262,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
-      v shouldFail "specimen group is in use by collection event type"
+      v mustFail "specimen group is in use by collection event type"
     }
 
     "remove a specimen group from collection event type" in {
@@ -273,13 +274,13 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
       collectionEventTypeRepository.put(cet)
 
       val cet2 = cet.copy(specimenGroupData = List.empty)
-      askUpdateCommand(cet2) shouldSucceed { event =>
-        event shouldBe a[CollectionEventTypeUpdatedEvent]
-        event.specimenGroupData should have length (0)
+      askUpdateCommand(cet2) mustSucceed { event =>
+        event mustBe a[CollectionEventTypeUpdatedEvent]
+        event.specimenGroupData must have length (0)
 
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) shouldSucceed { repoCet =>
-          repoCet.version should be(1)
+          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
+          repoCet.version mustBe(1)
           checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
         }
       }
@@ -297,7 +298,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
         .futureValue
-      v shouldFail "specimen group is in use by collection event type"
+      v mustFail "specimen group is in use by collection event type"
     }
 
     "not add a specimen group from a different study" in {
@@ -308,7 +309,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
 
       val cet = factory.createCollectionEventType.copy(
         specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData))
-      askAddCommand(cet) shouldFail "specimen group.+do not belong to study"
+      askAddCommand(cet) mustFail "specimen group.+do not belong to study"
     }
 
     "not update a collection event type with a specimen group from a different study" in {
@@ -322,7 +323,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
 
       val cet2 = cet.copy(
         specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData))
-      askUpdateCommand(cet2)  shouldFail "specimen group.+do not belong to study"
+      askUpdateCommand(cet2)  mustFail "specimen group.+do not belong to study"
     }
 
     "add an annotation type to a collection event" in {
@@ -334,16 +335,16 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
       val cet = factory.createCollectionEventType.copy(
         annotationTypeData = annotTypeData)
 
-      askAddCommand(cet) shouldSucceed { event =>
-        event shouldBe a[CollectionEventTypeAddedEvent]
-        event.annotationTypeData should have length (1)
+      askAddCommand(cet) mustSucceed { event =>
+        event mustBe a[CollectionEventTypeAddedEvent]
+        event.annotationTypeData must have length (1)
 
-        event.annotationTypeData(0) should have(
+        event.annotationTypeData(0) must have(
           'annotationTypeId (annotTypeData(0).annotationTypeId),
           'required (annotTypeData(0).required))
 
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) shouldSucceed { repoCet =>
+          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
           checkTimeStamps(repoCet, DateTime.now, None)
         }
       }
@@ -364,7 +365,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
         .futureValue
 
-      v shouldFail "annotation type is in use by collection event type"
+      v mustFail "annotation type is in use by collection event type"
     }
 
     "remove an annotation type from collection event type" in {
@@ -377,11 +378,11 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
 
       val cet2 = cet.copy(annotationTypeData = List.empty)
 
-      askUpdateCommand(cet2) shouldSucceed { event =>
-        event.annotationTypeData should have length 0
+      askUpdateCommand(cet2) mustSucceed { event =>
+        event.annotationTypeData must have length 0
 
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) shouldSucceed { repoCet =>
+          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
           checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
         }
       }
@@ -401,7 +402,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
         .futureValue
 
-      v shouldFail "annotation type is in use by collection event type"
+      v mustFail "annotation type is in use by collection event type"
     }
 
     "not add an annotation type if it is in wrong study" in {
@@ -417,7 +418,7 @@ class CollectionEventTypeProcessorSpec extends StudiesProcessorFixture {
       val cet2 = cet.copy(
         annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
-      askUpdateCommand(cet2) shouldFail "annotation type.+do not belong to study"
+      askUpdateCommand(cet2) mustFail "annotation type.+do not belong to study"
     }
   }
 }

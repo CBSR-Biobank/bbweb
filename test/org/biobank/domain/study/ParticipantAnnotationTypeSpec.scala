@@ -5,7 +5,6 @@ import org.biobank.domain.AnnotationTypeId
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain.AnnotationValueType
 
-import org.scalatest.OptionValues._
 import com.github.nscala_time.time.Imports._
 import scalaz._
 import scalaz.Scalaz._
@@ -33,8 +32,8 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val annotType = ParticipantAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required) | fail
-      annotType shouldBe a[ParticipantAnnotationType]
-      annotType should have (
+      annotType mustBe a[ParticipantAnnotationType]
+      annotType must have (
         'studyId (studyId),
         'id (id),
         'version (0L),
@@ -46,8 +45,8 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
         'required  (required)
       )
 
-      (annotType.timeAdded to DateTime.now).millis should be < 200L
-      annotType.timeModified should be (None)
+      (annotType.timeAdded to DateTime.now).millis must be < 200L
+      annotType.timeModified mustBe (None)
     }
 
     "be updated" in {
@@ -63,8 +62,8 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val required = !annotType.required
 
       val annotType2 = annotType.update(name, description, valueType, maxValueCount, options, required) | fail
-      annotType2 shouldBe a[ParticipantAnnotationType]
-      annotType2 should have (
+      annotType2 mustBe a[ParticipantAnnotationType]
+      annotType2 must have (
         'studyId (annotType.studyId),
         'id (annotType.id),
         'version (annotType.version + 1),
@@ -76,9 +75,9 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
         'required  (required)
       )
 
-      annotType2.timeAdded should be (annotType.timeAdded)
+      annotType2.timeAdded mustBe (annotType.timeAdded)
       // last update date is assigned by the processor
-      annotType2.timeModified should be (None)
+      annotType2.timeModified mustBe (None)
     }
 
   }
@@ -101,7 +100,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       ParticipantAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
-        err => err.list should (have length 1 and contain("IdRequired")),
+        err => err.list must (have length 1 and contain("IdRequired")),
         user => fail
       )
     }
@@ -121,7 +120,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
 
       ParticipantAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
-        err => err.list should (have length 1 and contain("IdRequired")),
+        err => err.list must (have length 1 and contain("IdRequired")),
         user => fail
       )
     }
@@ -141,7 +140,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
 
       ParticipantAnnotationType.create(studyId, id, version, DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
-        err => err.list should (have length 1 and contain("InvalidVersion")),
+        err => err.list must (have length 1 and contain("InvalidVersion")),
         user => fail
       )
     }
@@ -161,7 +160,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
 
       ParticipantAnnotationType.create(studyId, id, version, DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
-        err => err.list should (have length 1 and contain("NameRequired")),
+        err => err.list must (have length 1 and contain("NameRequired")),
         user => fail
       )
 
@@ -169,7 +168,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       ParticipantAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
-        err => err.list should (have length 1 and contain("NameRequired")),
+        err => err.list must (have length 1 and contain("NameRequired")),
         user => fail
       )
     }
@@ -190,7 +189,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       ParticipantAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
-        err => err.list should (have length 1 and contain("NonEmptyDescription")),
+        err => err.list must (have length 1 and contain("NonEmptyDescription")),
         user => fail
       )
 
@@ -198,7 +197,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       ParticipantAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
-        err => err.list should (have length 1 and contain("NonEmptyDescription")),
+        err => err.list must (have length 1 and contain("NonEmptyDescription")),
         user => fail
       )
     }
@@ -219,7 +218,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       ParticipantAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
-        err => err.list should (have length 1 and contain("MaxValueCountError")),
+        err => err.list must (have length 1 and contain("MaxValueCountError")),
         user => fail
       )
     }
@@ -238,7 +237,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       ParticipantAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
-        err => err.list should (have length 1 and contain("OptionRequired")),
+        err => err.list must (have length 1 and contain("OptionRequired")),
         user => fail
       )
 
@@ -246,7 +245,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       ParticipantAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
-        err => err.list should (have length 1 and contain("DuplicateOptionsError")),
+        err => err.list must (have length 1 and contain("DuplicateOptionsError")),
           user => fail
       )
     }
@@ -268,9 +267,9 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
         err => {
-          err.list should have length 2
-          err.list.head should be ("InvalidVersion")
-          err.list.tail.head should be ("NameRequired")
+          err.list must have length 2
+          err.list.head mustBe ("InvalidVersion")
+          err.list.tail.head mustBe ("NameRequired")
         },
         user => fail
       )

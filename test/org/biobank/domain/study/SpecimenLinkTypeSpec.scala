@@ -34,9 +34,9 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
-      validation should be ('success)
+      validation mustBe ('success)
       validation map { slType =>
-        slType should have (
+        slType must have (
           'processingTypeId (processingType.id),
           'id (id),
           'expectedInputChange (expectedInputChange),
@@ -49,10 +49,10 @@ class SpecimenLinkTypeSpec extends DomainSpec {
           'outputContainerTypeId (None)
         )
 
-        slType.annotationTypeData should have length (0)
+        slType.annotationTypeData must have length (0)
 
-        (slType.timeAdded to DateTime.now).millis should be < 200L
-        slType.timeModified should be (None)
+        (slType.timeAdded to DateTime.now).millis must be < 200L
+        slType.timeModified mustBe (None)
       }
     }
 
@@ -73,9 +73,9 @@ class SpecimenLinkTypeSpec extends DomainSpec {
       val validation = slType.update(
         expectedInputChange, expectedOutputChange, inputCount, outputCount,
         inputSpecimenGroup.id, outputSpecimenGroup.id, annotationTypeData = List.empty)
-      validation should be ('success)
+      validation mustBe ('success)
       validation map { slType2 =>
-        slType2 should have (
+        slType2 must have (
           'processingTypeId (slType.processingTypeId),
           'id (slType.id),
           'version (slType.version + 1),
@@ -89,16 +89,16 @@ class SpecimenLinkTypeSpec extends DomainSpec {
           'outputContainerTypeId (None)
         )
 
-        slType.annotationTypeData should have length (0)
+        slType.annotationTypeData must have length (0)
 
-        slType2.timeAdded should be (slType.timeAdded)
-        slType2.timeModified should be (None)
+        slType2.timeAdded mustBe (slType.timeAdded)
+        slType2.timeModified mustBe (None)
       }
     }
 
   }
 
-  "A specimen link type" should {
+  "A specimen link type" must {
 
     "not be created with an empty processing type id" in {
       val processingTypeId = ProcessingTypeId("")
@@ -116,9 +116,9 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingTypeId, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
-      validation should be('failure)
+      validation mustBe('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("ProcessingTypeIdRequired"))
+          err.list must (have length 1 and contain("ProcessingTypeIdRequired"))
       }
     }
 
@@ -138,9 +138,9 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
-      validation should be('failure)
+      validation mustBe('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("IdRequired"))
+          err.list must (have length 1 and contain("IdRequired"))
       }
     }
 
@@ -160,9 +160,9 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, specimenGroupIdIn, specimenGroupIdOut,
         annotationTypeData = List.empty)
-      validation should be('failure)
+      validation mustBe('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("SpecimenGroupIdRequired"))
+          err.list must (have length 1 and contain("SpecimenGroupIdRequired"))
       }
 
       specimenGroupIdIn = specimenGroupRepository.nextIdentity
@@ -172,9 +172,9 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, specimenGroupIdIn, specimenGroupIdOut,
         annotationTypeData = List.empty)
-      validation2 should be('failure)
+      validation2 mustBe('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("SpecimenGroupIdRequired"))
+          err.list must (have length 1 and contain("SpecimenGroupIdRequired"))
       }
     }
 
@@ -194,9 +194,9 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -2L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
-      validation should be('failure)
+      validation mustBe('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("InvalidVersion"))
+          err.list must (have length 1 and contain("InvalidVersion"))
       }
     }
 
@@ -216,9 +216,9 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
-      validation should be('failure)
+      validation mustBe('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("InvalidPositiveNumber"))
+          err.list must (have length 1 and contain("InvalidPositiveNumber"))
       }
 
       expectedInputChange = BigDecimal(1.0)
@@ -228,9 +228,9 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
-      validation2 should be('failure)
+      validation2 mustBe('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("InvalidPositiveNumber"))
+          err.list must (have length 1 and contain("InvalidPositiveNumber"))
       }
     }
 
@@ -250,9 +250,9 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
-      validation should be('failure)
+      validation mustBe('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("InvalidPositiveNumber"))
+          err.list must (have length 1 and contain("InvalidPositiveNumber"))
       }
 
       inputCount = 1
@@ -261,9 +261,9 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
-      validation2 should be('failure)
+      validation2 mustBe('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("InvalidPositiveNumber"))
+          err.list must (have length 1 and contain("InvalidPositiveNumber"))
       }
     }
 
@@ -285,7 +285,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
-      validation shouldFail "ContainerTypeIdRequired"
+      validation mustFail "ContainerTypeIdRequired"
 
       containerTypeIdIn = Some(ContainerTypeId("abc"))
       containerTypeIdOut = Some(ContainerTypeId(""))
@@ -293,7 +293,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
-      validation2 shouldFail "ContainerTypeIdRequired"
+      validation2 mustFail "ContainerTypeIdRequired"
     }
 
     "have more than one validation fail" in {
@@ -312,11 +312,11 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -2L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
-      validation should be ('failure)
+      validation mustBe ('failure)
       validation.swap.map { err =>
-          err.list should have length 2
-          err.list(0) should be ("IdRequired")
-          err.list(1) should be ("InvalidVersion")
+          err.list must have length 2
+          err.list(0) mustBe ("IdRequired")
+          err.list(1) mustBe ("InvalidVersion")
       }
     }
 
@@ -337,10 +337,10 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = annotationTypeData)
-      validation should be('failure)
+      validation mustBe('failure)
       validation.swap.map { err =>
-        err.list should have length 1
-        err.list(0) should include ("IdRequired")
+        err.list must have length 1
+        err.list(0) must include ("IdRequired")
       }
     }
 

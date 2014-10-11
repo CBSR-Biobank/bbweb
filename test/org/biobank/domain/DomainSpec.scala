@@ -5,12 +5,11 @@ import org.biobank.infrastructure._
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
-import org.scalatest.WordSpecLike
-import org.scalatest.Matchers
+import org.scalatest._
 import scalaz._
 import scalaz.Scalaz._
 
-trait DomainSpec extends TestComponentImpl with WordSpecLike with Matchers {
+trait DomainSpec extends WordSpec with MustMatchers with TestComponentImpl {
 
   implicit override val system: ActorSystem = null
 

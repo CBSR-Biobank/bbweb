@@ -8,7 +8,6 @@ import org.biobank.infrastructure.event.StudyEvents._
 
 import org.slf4j.LoggerFactory
 import akka.pattern.ask
-import org.scalatest.OptionValues._
 import org.scalatest.Tag
 import org.scalatest.BeforeAndAfterEach
 import org.joda.time.DateTime
@@ -47,9 +46,9 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue
 
-      v shouldSucceed { event =>
-        event shouldBe a[ParticipantAnnotationTypeAddedEvent]
-        event should have(
+      v mustSucceed { event =>
+        event mustBe a[ParticipantAnnotationTypeAddedEvent]
+        event must have (
           'studyId (annotType.studyId.id),
           'name (annotType.name),
           'description (annotType.description),
@@ -57,16 +56,16 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
           'maxValueCount (annotType.maxValueCount)
         )
 
-        event.options should not be (None)
-        event.options.value should have size annotType.options.value.size
+        event.options must not be (None)
+        event.options.value must have size annotType.options.value.size
         annotType.options.value.map { item =>
-          event.options.value should contain (item)
+          event.options.value must contain (item)
         }
 
-        participantAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
+        participantAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
         participantAnnotationTypeRepository.withId(
-          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) shouldSucceed { at =>
-          at.version should be(0)
+          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) mustSucceed { at =>
+          at.version mustBe(0)
           checkTimeStamps(at, DateTime.now, None)
         }
       }
@@ -83,7 +82,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue
 
-      v shouldFail s"${study2.id.id}.*not found"
+      v mustFail s"invalid study id: ${study2.id.id}"
     }
 
     "not add a participant annotation type if the name already exists" in {
@@ -97,7 +96,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
         .futureValue
 
-      v  shouldFail "name already exists"
+      v  mustFail "name already exists"
     }
 
     "update a participant annotation type" in {
@@ -113,9 +112,9 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
 
-      v shouldSucceed { event =>
-        event shouldBe a[ParticipantAnnotationTypeUpdatedEvent]
-        event should have(
+      v mustSucceed { event =>
+        event mustBe a[ParticipantAnnotationTypeUpdatedEvent]
+        event must have(
           'studyId (annotType.studyId.id),
           'version (annotType.version + 1),
           'name (annotType2.name),
@@ -124,17 +123,17 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
           'maxValueCount (annotType2.maxValueCount)
         )
 
-        event.options should not be (None)
-        event.options.value should have size annotType2.options.value.size
+        event.options must not be (None)
+        event.options.value must have size annotType2.options.value.size
         // verify each option
         annotType2.options.value.map { item =>
-          event.options.value should contain (item)
+          event.options.value must contain (item)
         }
 
-        participantAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
+        participantAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
         participantAnnotationTypeRepository.withId(
-          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) shouldSucceed { at =>
-          at.version should be(1)
+          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) mustSucceed { at =>
+          at.version mustBe(1)
           checkTimeStamps(at, annotType.timeAdded, DateTime.now)
         }
       }
@@ -156,7 +155,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
 
-      v shouldFail "name already exists"
+      v mustFail "name already exists"
     }
 
     "not update a participant annotation type to the wrong study" in {
@@ -173,7 +172,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
 
-      v shouldFail "study does not have annotation type"
+      v mustFail "study does not have annotation type"
     }
 
     "not update a participant annotation type with an invalid version" in {
@@ -187,7 +186,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
         .futureValue
 
-      v shouldFail "doesn't match current version"
+      v mustFail "doesn't match current version"
     }
 
     "remove a participant annotation type" in {
@@ -200,10 +199,10 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
         .futureValue
 
-      v shouldSucceed { event =>
-        event shouldBe a[ParticipantAnnotationTypeRemovedEvent]
-        event.studyId should be (annotType.studyId.id)
-        event.annotationTypeId should be (annotType.id.id)
+      v mustSucceed { event =>
+        event mustBe a[ParticipantAnnotationTypeRemovedEvent]
+        event.studyId mustBe (annotType.studyId.id)
+        event.annotationTypeId mustBe (annotType.id.id)
       }
     }
 
@@ -217,7 +216,7 @@ class ParticipantAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
         .futureValue
 
-      v shouldFail "expected version doesn't match current version"
+      v mustFail "expected version doesn't match current version"
     }
 
   }

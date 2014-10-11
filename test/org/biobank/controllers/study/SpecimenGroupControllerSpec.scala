@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 import com.typesafe.plugin._
 import play.api.Play.current
+import org.scalatestplus.play._
 
 class SpecimenGroupControllerSpec extends ControllerFixture {
 
@@ -36,8 +37,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "specimenType"                -> sg.specimenType.toString)
     val json = makeRequest(POST, "/studies/sgroups", BAD_REQUEST, cmdJson)
 
-    (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("is not disabled")
+    (json \ "status").as[String] must include ("error")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   def updateOnNonDisabledStudy(
@@ -60,8 +61,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "specimenType"                -> sg2.specimenType.toString)
     val json = makeRequest(PUT, s"/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
 
-    (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("is not disabled")
+    (json \ "status").as[String] must include ("error")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   def removeOnNonDisabledStudy(
@@ -75,25 +76,25 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       s"/studies/sgroups/${sg.studyId.id}/${sg.id.id}/${sg.version}",
       BAD_REQUEST)
 
-    (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("is not disabled")
+    (json \ "status").as[String] must include ("error")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   "Specimen Group REST API" when {
 
-    "GET /studies/sgroups" should {
-      "list none" in new WithApplication(fakeApplication()) {
+    "GET /studies/sgroups" must {
+      "list none" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size 0
+        jsonList must have size 0
       }
 
-      "list a single specimen group" in new WithApplication(fakeApplication()) {
+      "list a single specimen group" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -102,13 +103,13 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         use[BbwebPlugin].specimenGroupRepository.put(sg)
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size 1
+        jsonList must have size 1
         compareObj(jsonList(0), sg)
       }
 
-      "get a single specimen group" in new WithApplication(fakeApplication()) {
+      "get a single specimen group" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -117,12 +118,12 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         use[BbwebPlugin].specimenGroupRepository.put(sg)
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}?sgId=${sg.id.id}").as[JsObject]
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data")
         compareObj(jsonObj, sg)
       }
 
-      "list multiple specimen groups" in new WithApplication(fakeApplication()) {
+      "list multiple specimen groups" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -131,32 +132,32 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         sgroups map { sg => use[BbwebPlugin].specimenGroupRepository.put(sg) }
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size sgroups.size
+        jsonList must have size sgroups.size
           (jsonList zip sgroups).map { item => compareObj(item._1, item._2) }
       }
 
-      "fail for an invalid study ID" in new WithApplication(fakeApplication()) {
+      "fail for an invalid study ID" in new App(fakeApp) {
         doLogin
         val studyId = nameGenerator.next[Study]
 
         val json = makeRequest(GET, s"/studies/sgroups/$studyId", BAD_REQUEST)
-        (json \ "status").as[String] should include ("error")
-        (json \ "message").as[String] should include ("invalid study id")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("invalid study id")
       }
 
-      "fail for an invalid study ID when using an specimen group id" in new WithApplication(fakeApplication()) {
+      "fail for an invalid study ID when using an specimen group id" in new App(fakeApp) {
         doLogin
         val studyId = nameGenerator.next[Study]
         val sgId = nameGenerator.next[SpecimenGroup]
 
         val json = makeRequest(GET, s"/studies/sgroups/$studyId?sgId=$sgId", BAD_REQUEST)
-        (json \ "status").as[String] should include ("error")
-        (json \ "message").as[String] should include ("invalid study id")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("invalid study id")
       }
 
-      "fail for an invalid specimen group id" in new WithApplication(fakeApplication()) {
+      "fail for an invalid specimen group id" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -164,14 +165,14 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val sgId = nameGenerator.next[SpecimenGroup]
 
         val json = makeRequest(GET, s"/studies/sgroups/${study.id}?sgId=$sgId", BAD_REQUEST)
-        (json \ "status").as[String] should include ("error")
-        (json \ "message").as[String] should include ("specimen group does not exist")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("specimen group does not exist")
       }
 
     }
 
-    "POST /studies/sgroups" should {
-      "add a specimen group" in new WithApplication(fakeApplication()) {
+    "POST /studies/sgroups" must {
+      "add a specimen group" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -188,12 +189,12 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           "specimenType"                -> sg.specimenType.toString)
         val json = makeRequest(POST, "/studies/sgroups", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "POST /studies/sgroups" should {
-      "not add a specimen group to enabled study" in new WithApplication(fakeApplication()) {
+    "POST /studies/sgroups" must {
+      "not add a specimen group to enabled study" in new App(fakeApp) {
         doLogin
         addToNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail,
@@ -201,8 +202,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /studies/sgroups" should {
-      "not add a specimen group to retired study" in new WithApplication(fakeApplication()) {
+    "POST /studies/sgroups" must {
+      "not add a specimen group to retired study" in new App(fakeApp) {
         doLogin
         addToNonDisabledStudy(
           factory.createDisabledStudy.retire | fail,
@@ -210,8 +211,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /studies/sgroups" should {
-      "update a specimen group" in new WithApplication(fakeApplication()) {
+    "PUT /studies/sgroups" must {
+      "update a specimen group" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -233,12 +234,12 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           "specimenType"                -> sg2.specimenType.toString)
         val json = makeRequest(PUT, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "PUT /studies/sgroups" should {
-      "not update a specimen group on an enabled study" in new WithApplication(fakeApplication()) {
+    "PUT /studies/sgroups" must {
+      "not update a specimen group on an enabled study" in new App(fakeApp) {
         doLogin
         updateOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail,
@@ -246,8 +247,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /studies/sgroups" should {
-      "not update a specimen group on an retired study" in new WithApplication(fakeApplication()) {
+    "PUT /studies/sgroups" must {
+      "not update a specimen group on an retired study" in new App(fakeApp) {
         doLogin
         updateOnNonDisabledStudy(
           factory.createDisabledStudy.retire | fail,
@@ -255,8 +256,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /studies/sgroups" should {
-      "remove a specimen group" in new WithApplication(fakeApplication()) {
+    "DELETE /studies/sgroups" must {
+      "remove a specimen group" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -268,12 +269,12 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           DELETE,
           s"/studies/sgroups/${sg.studyId.id}/${sg.id.id}/${sg.version}")
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "DELETE /studies/sgroups" should {
-      "not remove a specimen group from an enabled study" in new WithApplication(fakeApplication()) {
+    "DELETE /studies/sgroups" must {
+      "not remove a specimen group from an enabled study" in new App(fakeApp) {
         doLogin
         removeOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail,
@@ -281,8 +282,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /studies/sgroups" should {
-      "not remove a specimen group from an retired study" in new WithApplication(fakeApplication()) {
+    "DELETE /studies/sgroups" must {
+      "not remove a specimen group from an retired study" in new App(fakeApp) {
         doLogin
         removeOnNonDisabledStudy(
           factory.createDisabledStudy.retire | fail,

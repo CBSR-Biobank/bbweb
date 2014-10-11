@@ -7,16 +7,15 @@ import org.biobank.infrastructure.event.StudyEvents._
 import java.util.UUID
 import org.junit.runner.RunWith
 import org.slf4j.LoggerFactory
-import org.scalatest.WordSpecLike
-import org.scalatest.Matchers
+import org.scalatest._
 //import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
 //import scala.slick.session.Session
 
-class StudyQuerySp extends WordSpecLike with Matchers {
+class StudyQuerySp extends WordSpecLike with MustMatchers {
 
   //  val log = LoggerFactory.getLogger(this.getClass)
   //
-  //  val nameGenerator = new NameGenerator[this.getClass]
+  //  vaameGenerator = new NameGenerator[this.getClass]
   //
   //  "Study" can {
   //

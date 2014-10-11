@@ -37,32 +37,32 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
     user
   }
 
-  "User REST API" should {
+  "User REST API" must {
 
-    "GET /users" should {
-      "list the default user in the test environment" in new WithApplication(fakeApplication()) {
+    "GET /users" must {
+      "list the default user in the test environment" in new App(fakeApp) {
         doLogin
         val json = makeRequest(GET, "/users")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size 1
+        jsonList must have size 1
         val jsonDefaultUser = jsonList(0)
-          (jsonDefaultUser \ "email").as[String] should be ("admin@admin.com")
+          (jsonDefaultUser \ "email").as[String] mustBe ("admin@admin.com")
       }
 
-      "list a new user" in new WithApplication(fakeApplication()) {
+      "list a new user" in new App(fakeApp) {
         doLogin
         val user = factory.createRegisteredUser
         use[BbwebPlugin].userRepository.put(user)
 
         val json = makeRequest(GET, "/users")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have length 2
+        jsonList must have length 2
         compareObj(jsonList(1), user)
       }
     }
 
-    "GET /users" should {
-      "list multiple users" in new WithApplication(fakeApplication()) {
+    "GET /users" must {
+      "list multiple users" in new App(fakeApp) {
         doLogin
         val users = List(factory.createRegisteredUser, factory.createRegisteredUser)
         users.map(user => use[BbwebPlugin].userRepository.put(user))
@@ -72,14 +72,14 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
           (u \ "id").as[String].equals("admin@admin.com")
         }
 
-        jsonList should have size users.size
+        jsonList must have size users.size
 
         (jsonList zip users).map { item => compareObj(item._1, item._2) }
       }
     }
 
-    "POST /users" should {
-      "add a user" in new WithApplication(fakeApplication()) {
+    "POST /users" must {
+      "add a user" in new App(fakeApp) {
         doLogin
         val user = factory.createRegisteredUser
         val cmdJson = Json.obj(
@@ -89,12 +89,12 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
           "avatarUrl" -> user.avatarUrl)
         val json = makeRequest(POST, "/users", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "PUT /users/:id/name" should {
-      "update a user's name" in new WithApplication(fakeApplication()) {
+    "PUT /users/:id/name" must {
+      "update a user's name" in new App(fakeApp) {
         doLogin
         val user = factory.createRegisteredUser.activate | fail
         use[BbwebPlugin].userRepository.put(user)
@@ -105,12 +105,12 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
           "name"            -> user.name)
         val json = makeRequest(PUT, s"/users/${user.id.id}/name", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "PUT /users/:id/email" should {
-      "update a user's email" in new WithApplication(fakeApplication()) {
+    "PUT /users/:id/email" must {
+      "update a user's email" in new App(fakeApp) {
         doLogin
         val user = factory.createRegisteredUser.activate | fail
         use[BbwebPlugin].userRepository.put(user)
@@ -121,17 +121,17 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
           "email"            -> user.email)
         val json = makeRequest(PUT, s"/users/${user.id.id}/email", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "PUT /users/:id/password" should {
-      "update a user's email" in new WithApplication(fakeApplication()) {
+    "PUT /users/:id/password" must {
+      "update a user's email" in new App(fakeApp) {
         doLogin
         val plainPassword = nameGenerator.next[User]
         val newPassword = nameGenerator.next[User]
-        val salt = passwordHasher.generateSalt
-        val encryptedPassword = passwordHasher.encrypt(plainPassword, salt)
+        val salt =  use[BbwebPlugin].passwordHasher.generateSalt
+        val encryptedPassword = use[BbwebPlugin].passwordHasher.encrypt(plainPassword, salt)
         val user = factory.createActiveUser.copy(password = encryptedPassword, salt = salt)
         use[BbwebPlugin].userRepository.put(user)
 
@@ -142,13 +142,13 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
           "newPassword"     -> newPassword)
         val json = makeRequest(PUT, s"/users/${user.id.id}/password", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
-        (json \ "data" \ "password").as[String] should not be (newPassword)
+        (json \ "status").as[String] must include ("success")
+        (json \ "data" \ "password").as[String] must not be (newPassword)
       }
     }
 
-    "GET /users/:id" should {
-      "return a user" in new WithApplication(fakeApplication()) {
+    "GET /users/:id" must {
+      "return a user" in new App(fakeApp) {
         doLogin
         val user = factory.createRegisteredUser.activate | fail
         use[BbwebPlugin].userRepository.put(user)
@@ -158,8 +158,8 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
       }
     }
 
-    "PUT /users/activate" should {
-      "activate a user" in new WithApplication(fakeApplication()) {
+    "PUT /users/activate" must {
+      "activate a user" in new App(fakeApp) {
         doLogin
 
         val user = factory.createRegisteredUser
@@ -170,12 +170,12 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
           "id"           -> user.id.id)
         val json = makeRequest(POST, s"/users/activate", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "PUT /users/lock" should {
-      "lock a user" in new WithApplication(fakeApplication()) {
+    "PUT /users/lock" must {
+      "lock a user" in new App(fakeApp) {
         doLogin
 
         val user = factory.createRegisteredUser.activate | fail
@@ -186,12 +186,12 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
           "id"           -> user.id.id)
         val json = makeRequest(POST, s"/users/lock", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "PUT /users/unlock" should {
-      "should unlock a user" in new WithApplication(fakeApplication()) {
+    "PUT /users/unlock" must {
+      "must unlock a user" in new App(fakeApp) {
         doLogin
         val user = factory.createRegisteredUser.activate | fail
         val lockedUser = user.lock | fail
@@ -202,12 +202,12 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
           "id"           -> lockedUser.id.id)
         val json = makeRequest(POST, s"/users/unlock", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "POST /login" should {
-      "allow a user to log in" in new WithApplication(fakeApplication()) {
+    "POST /login" must {
+      "allow a user to log in" in new App(fakeApp) {
         val plainPassword = nameGenerator.next[String]
         val user = createUserInRepository(plainPassword)
 
@@ -216,21 +216,21 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
           "password"  -> plainPassword)
         val json = makeRequest(POST, "/login", json = cmdJson)
 
-        (json \ "data").as[String].length should be > 0
+        (json \ "data").as[String].length must be > 0
       }
 
-      "prevent an invalid user from logging in" in new WithApplication(fakeApplication()) {
+      "prevent an invalid user from logging in" in new App(fakeApp) {
         val invalidUser = nameGenerator.nextEmail[String]
         val cmdJson = Json.obj(
           "email"     -> invalidUser,
           "password"  -> nameGenerator.next[String])
         val json = makeRequest(POST, "/login", FORBIDDEN, json = cmdJson)
 
-        (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("invalid email or password")
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("invalid email or password")
       }
 
-      "prevent a user logging in with bad password" in new WithApplication(fakeApplication()) {
+      "prevent a user logging in with bad password" in new App(fakeApp) {
         val user = createUserInRepository(nameGenerator.next[String])
         val invalidPassword = nameGenerator.next[String]
         val cmdJson = Json.obj(
@@ -238,11 +238,11 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
           "password"  -> invalidPassword)
         val json = makeRequest(POST, "/login", FORBIDDEN, json = cmdJson)
 
-        (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("invalid email or password")
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("invalid email or password")
       }
 
-      "not allow a locked user to log in" in new WithApplication(fakeApplication()) {
+      "not allow a locked user to log in" in new App(fakeApp) {
         val plainPassword = nameGenerator.next[String]
         val activeUser = createUserInRepository(plainPassword).activate | fail
         val lockedUser = activeUser.lock | fail
@@ -253,11 +253,11 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
           "password"  -> plainPassword)
         val json = makeRequest(POST, "/login", FORBIDDEN, json = cmdJson)
 
-        (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("the user is locked")
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("the user is locked")
       }
 
-      "not allow a request with an invalid token" in new WithApplication(fakeApplication()) {
+      "not allow a request with an invalid token" in new App(fakeApp) {
         doLogin
 
         val badToken = nameGenerator.next[String]
@@ -266,17 +266,17 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
         val resp = route(FakeRequest(GET, "/users")
           .withHeaders("X-XSRF-TOKEN" -> badToken)
           .withCookies(Cookie("XSRF-TOKEN", badToken)))
-        resp should not be (None)
+        resp must not be (None)
         resp.map{ result =>
-          status(result) should be(UNAUTHORIZED)
-          contentType(result) should be(Some("application/json"))
+          status(result) mustBe(UNAUTHORIZED)
+          contentType(result) mustBe(Some("application/json"))
           val json = Json.parse(contentAsString(result))
-            (json \ "status").as[String] should include ("error")
-            (json \ "message").as[String] should include ("invalid token")
+            (json \ "status").as[String] must include ("error")
+            (json \ "message").as[String] must include ("invalid token")
         }
       }
 
-      "not allow mismatched tokens in request" in new WithApplication(fakeApplication()) {
+      "not allow mismatched tokens in request" in new App(fakeApp) {
         val validToken = doLogin
         val badToken = nameGenerator.next[String]
 
@@ -284,104 +284,104 @@ class UsersControllerSpec extends ControllerFixture with PasswordHasherComponent
         val resp = route(FakeRequest(GET, "/users")
           .withHeaders("X-XSRF-TOKEN" -> validToken)
           .withCookies(Cookie("XSRF-TOKEN", badToken)))
-        resp should not be (None)
+        resp must not be (None)
         resp.map { result =>
-          status(result) should be(UNAUTHORIZED)
-          contentType(result) should be(Some("application/json"))
+          status(result) mustBe(UNAUTHORIZED)
+          contentType(result) mustBe(Some("application/json"))
           val json = Json.parse(contentAsString(result))
-            (json \ "status").as[String] should include ("error")
-            (json \ "message").as[String] should include ("Token mismatch")
+            (json \ "status").as[String] must include ("error")
+            (json \ "message").as[String] must include ("Token mismatch")
         }
       }
 
-      "not allow requests missing XSRF-TOKEN cookie" in new WithApplication(fakeApplication()) {
+      "not allow requests missing XSRF-TOKEN cookie" in new App(fakeApp) {
         doLogin
 
         val resp = route(FakeRequest(GET, "/users"))
-        resp should not be (None)
+        resp must not be (None)
         resp.map { result =>
-          status(result) should be(UNAUTHORIZED)
-          contentType(result) should be(Some("application/json"))
+          status(result) mustBe(UNAUTHORIZED)
+          contentType(result) mustBe(Some("application/json"))
           val json = Json.parse(contentAsString(result))
-            (json \ "status").as[String] should include ("error")
-            (json \ "message").as[String] should include ("Invalid XSRF Token cookie")
+            (json \ "status").as[String] must include ("error")
+            (json \ "message").as[String] must include ("Invalid XSRF Token cookie")
         }
       }
 
-      "not allow requests missing X-XSRF-TOKEN in header" in new WithApplication(fakeApplication()) {
+      "not allow requests missing X-XSRF-TOKEN in header" in new App(fakeApp) {
         val token = doLogin
 
         val resp = route(FakeRequest(GET, "/users").withCookies(Cookie("XSRF-TOKEN", token)))
-        resp should not be (None)
+        resp must not be (None)
         resp.map { result =>
-          status(result) should be(UNAUTHORIZED)
-          contentType(result) should be(Some("application/json"))
+          status(result) mustBe(UNAUTHORIZED)
+          contentType(result) mustBe(Some("application/json"))
           val json = Json.parse(contentAsString(result))
-            (json \ "status").as[String] should include ("error")
-            (json \ "message").as[String] should include ("No token")
+            (json \ "status").as[String] must include ("error")
+            (json \ "message").as[String] must include ("No token")
         }
       }
     }
 
 
-    "POST /logout" should {
+    "POST /logout" must {
 
-      "disallow access to logged out users" in new WithApplication(fakeApplication()) {
+      "disallow access to logged out users" in new App(fakeApp) {
         doLogin
 
         // this request is valid since user is logged in
         var json = makeRequest(GET, "/users")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size 1
+        jsonList must have size 1
 
         // the user is now logged out
         json = makeRequest(POST, "/logout")
-          (json \ "status").as[String] should include ("success")
+          (json \ "status").as[String] must include ("success")
 
-        // the following request should fail
+        // the following request must fail
         json = makeRequest(GET, "/users", UNAUTHORIZED)
 
-        (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("invalid token")
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("invalid token")
       }
     }
 
-    "POST /passreset" should {
+    "POST /passreset" must {
 
-      "allow an active user to reset his/her password" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
+      "allow an active user to reset his/her password" taggedAs(Tag("1")) in new App(fakeApp) {
         val user = createUserInRepository(nameGenerator.next[String])
         val activeUser = user.activate | fail
         use[BbwebPlugin].userRepository.put(activeUser)
 
         val cmdJson = Json.obj("email" -> activeUser.email)
         val json = makeRequest(POST, "/passreset", json = cmdJson)
-          (json \ "status").as[String] should include ("success")
+          (json \ "status").as[String] must include ("success")
       }
 
-      "not allow a registered user to reset his/her password" in new WithApplication(fakeApplication()) {
+      "not allow a registered user to reset his/her password" in new App(fakeApp) {
         val user = createUserInRepository(nameGenerator.next[String])
         val cmdJson = Json.obj("email" -> user.email)
         val json = makeRequest(POST, "/passreset", FORBIDDEN, json = cmdJson)
-          (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("user is not active")
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("user is not active")
       }
 
-      "not allow a locked user to reset his/her password" in new WithApplication(fakeApplication()) {
+      "not allow a locked user to reset his/her password" in new App(fakeApp) {
         val lockedUser = factory.createLockedUser
         use[BbwebPlugin].userRepository.put(lockedUser)
 
         val cmdJson = Json.obj("email" -> lockedUser.email)
         val json = makeRequest(POST, "/passreset", FORBIDDEN, json = cmdJson)
-          (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("user is not active")
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("user is not active")
       }
 
-      "not allow a password reset on an invalid email address" in new WithApplication(fakeApplication()) {
+      "not allow a password reset on an invalid email address" in new App(fakeApp) {
 
         val cmdJson = Json.obj("email" -> nameGenerator.nextEmail[User])
         val json = makeRequest(POST, "/passreset", NOT_FOUND, json = cmdJson)
-          (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("email address not registered")
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("email address not registered")
       }
 
     }

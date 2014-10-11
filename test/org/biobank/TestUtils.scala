@@ -2,27 +2,23 @@ package org.biobank
 
 import org.biobank.domain.{ ConcurrencySafeEntity, DomainValidation }
 
-import org.scalatest._
-import Matchers._
-import org.scalatest.OptionValues._
 import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
+import org.scalatest._
 
-object TestUtils {
+object TestUtils extends MustMatchers with OptionValues {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   val TimeCoparisonMillis = 600L
 
-  def checkTimeStamps[T <: ConcurrencySafeEntity[_]](
-    entity: T,
-    expectedAddedTime: DateTime,
-    expectedLastUpdateTime: Option[DateTime]) = {
-    (entity.timeAdded to expectedAddedTime).millis should be < TimeCoparisonMillis
+  def checkTimeStamps[T <: ConcurrencySafeEntity[_]]
+    (entity: T, expectedAddedTime: DateTime, expectedLastUpdateTime: Option[DateTime]) = {
+    (entity.timeAdded to expectedAddedTime).millis must be < TimeCoparisonMillis
     expectedLastUpdateTime.fold {
-      entity.timeModified should be (None)
+      entity.timeModified mustBe (None)
     } {
-      dateTime => (entity.timeModified.value to dateTime).millis should be < TimeCoparisonMillis
+      dateTime => (entity.timeModified.value to dateTime).millis must be < TimeCoparisonMillis
     }
   }
 
@@ -31,8 +27,8 @@ object TestUtils {
     expectedAddedTime: DateTime,
     expectedLastUpdateTime: DateTime) = {
     //log.info(s"entity: $entity, expectedAddedTime: $expectedAddedTime, expectedLastUpdateTime: $expectedLastUpdateTime")
-    (entity.timeAdded to expectedAddedTime).millis should be < TimeCoparisonMillis
-    (entity.timeModified.value to expectedLastUpdateTime).millis should be < TimeCoparisonMillis
+    (entity.timeAdded to expectedAddedTime).millis must be < TimeCoparisonMillis
+    (entity.timeModified.value to expectedLastUpdateTime).millis must be < TimeCoparisonMillis
   }
 
   implicit class ValidationTests[T](val validation: DomainValidation[T]) {
@@ -44,7 +40,7 @@ object TestUtils {
       *
       *  @param fn the function to execute.
       */
-    def shouldSucceed(fn: T => Unit) = {
+    def mustSucceed(fn: T => Unit) = {
       validation.fold(
         err => fail(err.list.mkString),
         entity => fn(entity)
@@ -58,13 +54,13 @@ object TestUtils {
       *
       *  @param expectedMessage a regular expression to look for in the error message.
       */
-    def shouldFail(expectedMessage: String) = {
+    def mustFail(expectedMessage: String) = {
       validation.fold(
         err => {
-          err.list should have length 1
-          err.list.head should include regex expectedMessage
+          err.list must have length 1
+          err.list.head must include regex expectedMessage
         },
-        event => fail(s"validation should have failed: $validation")
+        event => fail(s"validation must have failed: $validation")
       )
     }
 

@@ -6,7 +6,6 @@ import org.biobank.fixture.NameGenerator
 import org.biobank.domain.AnnotationValueType
 import com.github.nscala_time.time.Imports._
 
-import org.scalatest.OptionValues._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -15,7 +14,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  "A collection event annotation type" can {
+  "A collection event annotation type" must {
 
     "be created" in {
       val studyId = StudyId(nameGenerator.next[CollectionEventAnnotationType])
@@ -29,9 +28,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
 
       val annotType = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount, options) | fail
-      annotType shouldBe a[CollectionEventAnnotationType]
+      annotType mustBe a[CollectionEventAnnotationType]
 
-      annotType should have (
+      annotType must have (
         'studyId (studyId),
         'id (id),
         'version (0L),
@@ -42,8 +41,8 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
         'options (options)
       )
 
-      (annotType.timeAdded to DateTime.now).millis should be < 100L
-      annotType.timeModified should be (None)
+      (annotType.timeAdded to DateTime.now).millis must be < 100L
+      annotType.timeModified mustBe (None)
     }
 
     "be updated" in {
@@ -58,9 +57,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
         nameGenerator.next[String]))
 
       val annotType2 = annotType.update(name, description, valueType, maxValueCount, options) | fail
-      annotType2 shouldBe a[CollectionEventAnnotationType]
+      annotType2 mustBe a[CollectionEventAnnotationType]
 
-      annotType2 should have (
+      annotType2 must have (
         'studyId (annotType.studyId),
         'id (annotType.id),
         'version (annotType.version + 1),
@@ -71,8 +70,8 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
         'options (options)
       )
 
-      annotType2.timeAdded should be (annotType.timeAdded)
-      annotType2.timeModified should be (None)
+      annotType2.timeAdded mustBe (annotType.timeAdded)
+      annotType2.timeModified mustBe (None)
     }
 
   }
@@ -94,9 +93,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation should be ('failure)
+      validation mustBe ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("StudyIdRequired"))
+          err.list must (have length 1 and contain("StudyIdRequired"))
       }
     }
 
@@ -115,9 +114,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation should be ('failure)
+      validation mustBe ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("IdRequired"))
+          err.list must (have length 1 and contain("IdRequired"))
       }
     }
 
@@ -136,9 +135,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation should be ('failure)
+      validation mustBe ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("InvalidVersion"))
+          err.list must (have length 1 and contain("InvalidVersion"))
       }
     }
 
@@ -157,18 +156,18 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation should be ('failure)
+      validation mustBe ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("NameRequired"))
+          err.list must (have length 1 and contain("NameRequired"))
       }
 
       name = ""
       val validation2 = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description,
         valueType, maxValueCount, options)
-      validation2 should be ('failure)
+      validation2 mustBe ('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("NameRequired"))
+          err.list must (have length 1 and contain("NameRequired"))
       }
     }
 
@@ -187,18 +186,18 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation should be ('failure)
+      validation mustBe ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("NonEmptyDescription"))
+          err.list must (have length 1 and contain("NonEmptyDescription"))
       }
 
       description = Some("")
       val validation2 = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description,
         valueType, maxValueCount, options)
-      validation2 should be ('failure)
+      validation2 mustBe ('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("NonEmptyDescription"))
+          err.list must (have length 1 and contain("NonEmptyDescription"))
       }
     }
 
@@ -217,9 +216,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation should be ('failure)
+      validation mustBe ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("MaxValueCountError"))
+          err.list must (have length 1 and contain("MaxValueCountError"))
       }
     }
 
@@ -236,17 +235,17 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation should be ('failure)
+      validation mustBe ('failure)
       validation.swap.map { err =>
-          err.list should (have length 1 and contain("OptionRequired"))
+          err.list must (have length 1 and contain("OptionRequired"))
       }
 
       options = Some(Seq("duplicate", "duplicate"))
       val validation2 = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount, options)
-      validation2 should be ('failure)
+      validation2 mustBe ('failure)
       validation2.swap.map { err =>
-          err.list should (have length 1 and contain("DuplicateOptionsError"))
+          err.list must (have length 1 and contain("DuplicateOptionsError"))
       }
     }
 
@@ -264,11 +263,11 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
 
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount, options)
-      validation should be ('failure)
+      validation mustBe ('failure)
       validation.swap.map { err =>
-          err.list should have length 2
-          err.list.head should be ("InvalidVersion")
-          err.list.tail.head should be ("NameRequired")
+          err.list must have length 2
+          err.list.head mustBe ("InvalidVersion")
+          err.list.tail.head mustBe ("NameRequired")
       }
     }
 

@@ -11,8 +11,6 @@ import play.api.Mode
 import play.api.Mode._
 import akka.actor._
 import scala.concurrent._
-import org.specs2.mutable._
-import org.specs2.time._
 
 //import scala.slick.session.Database
 //import scala.slick.session.Database

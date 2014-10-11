@@ -4,7 +4,13 @@ organization in ThisBuild := "org.biobank"
 
 version := "0.1-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+def excludeSpecs2(module: ModuleID): ModuleID =
+  module.excludeAll(ExclusionRule(organization = "org.specs2"))
+    .exclude("com.novocode", "junit-interface")
+
+lazy val root = (project in file("."))
+  .enablePlugins(PlayScala)
+  .settings(libraryDependencies ~= (_.map(excludeSpecs2)))
 
 scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.2")
 
@@ -34,7 +40,7 @@ javaOptions in Test ++=  Seq(
   "-Dlogger.resource=logback-test.xml"
 )
 
-testOptions in Test := Nil
+//testOptions in Test := Nil
 
 (testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/report")
 
@@ -75,10 +81,9 @@ libraryDependencies ++= Seq(
   "org.webjars"               % "angularjs-toaster"               % "0.4.7-1",
   "org.webjars"               % "angular-filter"                  % "0.4.6",
   // Testing
-  "org.scalatest"             %% "scalatest"                      % "2.2.1"              % "test->*" excludeAll(
-    ExclusionRule(organization = "org.junit", name = "junit")
-  ),
-  "com.typesafe.akka"         %% "akka-testkit"                   % "2.3.2"              % "test"
+  "com.typesafe.akka"         %% "akka-testkit"                   % "2.3.2"              % "test",
+  "org.scalatestplus"         %% "play"                           % "1.2.0"              % "test",
+  "org.pegdown"               % "pegdown"                         % "1.0.2"              % "test"
 )
 
 JsEngineKeys.engineType := JsEngineKeys.EngineType.Node

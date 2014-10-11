@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 import com.typesafe.plugin._
 import play.api.Play.current
+import org.scalatestplus.play._
 
 class ProcessingTypeControllerSpec extends ControllerFixture {
 
@@ -55,8 +56,8 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       procTypeToAddCmdJson(procType))
 
-    (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("is not disabled")
+    (json \ "status").as[String] must include ("error")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   def updateOnNonDisabledStudy(study: Study) {
@@ -73,8 +74,8 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       procTypeToUpdateCmdJson(procType2))
 
-    (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("is not disabled")
+    (json \ "status").as[String] must include ("error")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   def removeOnNonDisabledStudy(study: Study) {
@@ -88,25 +89,25 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       s"/studies/proctypes/${procType.studyId.id}/${procType.id.id}/${procType.version}",
       BAD_REQUEST)
 
-    (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("is not disabled")
+    (json \ "status").as[String] must include ("error")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   "Processing Type REST API" when {
 
-    "GET /studies/proctypes" should {
-      "list none" in new WithApplication(fakeApplication()) {
+    "GET /studies/proctypes" must {
+      "list none" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size 0
+        jsonList must have size 0
       }
 
-      "list a single processing type" in new WithApplication(fakeApplication()) {
+      "list a single processing type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -115,13 +116,13 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].processingTypeRepository.put(procType)
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size 1
+        jsonList must have size 1
         compareObj(jsonList(0), procType)
       }
 
-      "get a single processing type" in new WithApplication(fakeApplication()) {
+      "get a single processing type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -130,12 +131,12 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].processingTypeRepository.put(procType)
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}?procTypeId=${procType.id.id}").as[JsObject]
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, procType)
       }
 
-      "list multiple processing types" in new WithApplication(fakeApplication()) {
+      "list multiple processing types" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -145,34 +146,34 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         proctypes map { procType => use[BbwebPlugin].processingTypeRepository.put(procType) }
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
 
-        jsonList should have size proctypes.size
+        jsonList must have size proctypes.size
           (jsonList zip proctypes).map { item => compareObj(item._1, item._2) }
         ()
       }
 
-      "fail for an invalid study ID" in new WithApplication(fakeApplication()) {
+      "fail for an invalid study ID" in new App(fakeApp) {
         doLogin
         val studyId = nameGenerator.next[Study]
 
         val json = makeRequest(GET, s"/studies/proctypes/$studyId", BAD_REQUEST)
-        (json \ "status").as[String] should include ("error")
-        (json \ "message").as[String] should include ("invalid study id")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("invalid study id")
       }
 
-      "fail for an invalid study ID when using an processing type id" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
+      "fail for an invalid study ID when using an processing type id" taggedAs(Tag("1")) in new App(fakeApp) {
         doLogin
         val studyId = nameGenerator.next[Study]
         val procTypeId = nameGenerator.next[ProcessingType]
 
         val json = makeRequest(GET, s"/studies/proctypes/$studyId?procTypeId=$procTypeId", BAD_REQUEST)
-        (json \ "status").as[String] should include ("error")
-        (json \ "message").as[String] should include ("invalid study id")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("invalid study id")
       }
 
-      "fail for an invalid processing type id" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
+      "fail for an invalid processing type id" taggedAs(Tag("1")) in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -180,13 +181,13 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val procTypeId = nameGenerator.next[ProcessingType]
 
         val json = makeRequest(GET, s"/studies/proctypes/${study.id}?procTypeId=$procTypeId", BAD_REQUEST)
-        (json \ "status").as[String] should include ("error")
-        (json \ "message").as[String] should include ("processing type does not exist")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("processing type does not exist")
       }
     }
 
-    "POST /studies/proctypes" should {
-      "add a processing type" in new WithApplication(fakeApplication()) {
+    "POST /studies/proctypes" must {
+      "add a processing type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -197,28 +198,28 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
           "/studies/proctypes",
           json = procTypeToAddCmdJson(procType))
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "POST /studies/proctypes" should {
-      "not add a processing type to an enabled study" in new WithApplication(fakeApplication()) {
+    "POST /studies/proctypes" must {
+      "not add a processing type to an enabled study" in new App(fakeApp) {
         doLogin
         addOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail)
       }
     }
 
-    "POST /studies/proctypes" should {
-      "not add a processing type to an retired study" in new WithApplication(fakeApplication()) {
+    "POST /studies/proctypes" must {
+      "not add a processing type to an retired study" in new App(fakeApp) {
         doLogin
         addOnNonDisabledStudy(
           factory.createDisabledStudy.retire | fail)
       }
     }
 
-    "PUT /studies/proctypes" should {
-      "update a processing type" in new WithApplication(fakeApplication()) {
+    "PUT /studies/proctypes" must {
+      "update a processing type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -236,28 +237,28 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
           s"/studies/proctypes/${procType.id.id}",
           json = procTypeToUpdateCmdJson(procType2))
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "PUT /studies/proctypes" should {
-      "not update a processing type on an enabled study" in new WithApplication(fakeApplication()) {
+    "PUT /studies/proctypes" must {
+      "not update a processing type on an enabled study" in new App(fakeApp) {
         doLogin
         updateOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail)
       }
     }
 
-    "PUT /studies/proctypes" should {
-      "not update a processing type on an retired study" in new WithApplication(fakeApplication()) {
+    "PUT /studies/proctypes" must {
+      "not update a processing type on an retired study" in new App(fakeApp) {
         doLogin
         updateOnNonDisabledStudy(
           factory.createDisabledStudy.retire | fail)
       }
     }
 
-    "DELETE /studies/proctypes" should {
-      "remove a processing type" in new WithApplication(fakeApplication()) {
+    "DELETE /studies/proctypes" must {
+      "remove a processing type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -269,20 +270,20 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
           DELETE,
           s"/studies/proctypes/${procType.studyId.id}/${procType.id.id}/${procType.version}")
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "DELETE /studies/proctypes" should {
-      "not remove a processing type on an enabled study" in new WithApplication(fakeApplication()) {
+    "DELETE /studies/proctypes" must {
+      "not remove a processing type on an enabled study" in new App(fakeApp) {
         doLogin
         removeOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail)
       }
     }
 
-    "DELETE /studies/proctypes" should {
-      "not remove a processing type on an retired study" in new WithApplication(fakeApplication()) {
+    "DELETE /studies/proctypes" must {
+      "not remove a processing type on an retired study" in new App(fakeApp) {
         doLogin
         removeOnNonDisabledStudy(
           factory.createDisabledStudy.retire | fail)

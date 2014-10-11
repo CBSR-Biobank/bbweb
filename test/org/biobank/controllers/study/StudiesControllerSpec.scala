@@ -12,6 +12,7 @@ import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import com.typesafe.plugin.use
+import org.scalatestplus.play._
 
 /**
   * Tests the REST API for [[Study]].
@@ -22,18 +23,18 @@ class StudiesControllerSpec extends ControllerFixture {
 
   "Study REST API" when {
 
-    "GET /studies" should {
-      "list none" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
+    "GET /studies" must {
+      "list none" taggedAs(Tag("1")) in new App(fakeApp) {
         doLogin
         val json = makeRequest(GET, "/studies")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size 0
+        jsonList must have size 0
 
         log.info(s"repo: ${use[BbwebPlugin]}")
       }
 
-      "list a study" taggedAs(Tag("1")) in new WithApplication(fakeApplication()) {
+      "list a study" taggedAs(Tag("1")) in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -41,29 +42,29 @@ class StudiesControllerSpec extends ControllerFixture {
         log.info(s"repo: ${use[BbwebPlugin]}")
 
         val json = makeRequest(GET, "/studies")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have length 1
+        jsonList must have length 1
         compareObj(jsonList(0), study)
       }
 
-      "list multiple studies" in new WithApplication(fakeApplication()) {
+      "list multiple studies" in new App(fakeApp) {
         doLogin
         val studies = List(factory.createDisabledStudy, factory.createDisabledStudy)
         use[BbwebPlugin].studyRepository.removeAll
         studies.map(study => use[BbwebPlugin].studyRepository.put(study))
 
         val json = makeRequest(GET, "/studies")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size studies.size
+        jsonList must have size studies.size
 
         (jsonList zip studies).map { item => compareObj(item._1, item._2) }
       }
     }
 
-    "POST /studies" should {
-      "add a study" in new WithApplication(fakeApplication()) {
+    "POST /studies" must {
+      "add a study" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         val cmdJson = Json.obj(
@@ -71,18 +72,18 @@ class StudiesControllerSpec extends ControllerFixture {
           "description" -> study.description)
         val json = makeRequest(POST, "/studies", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
 
         val eventStudyId = (json \ "data" \ "id").as[String]
         use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId)).fold(
           err => fail(err.list.mkString),
-          repoStudy => repoStudy.name should be ((json \ "data" \ "name").as[String])
+          repoStudy => repoStudy.name mustBe ((json \ "data" \ "name").as[String])
         )
       }
     }
 
-    "PUT /studies/:id" should {
-      "update a study" in new WithApplication(fakeApplication()) {
+    "PUT /studies/:id" must {
+      "update a study" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -94,21 +95,21 @@ class StudiesControllerSpec extends ControllerFixture {
           "description"     -> study.description)
         val json = makeRequest(PUT, s"/studies/${study.id.id}", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
 
         val eventStudyId = (json \ "data" \ "id").as[String]
         use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId)).fold(
           err => fail(err.list.mkString),
           repoStudy => {
-            repoStudy.name should be ((json \ "data" \ "name").as[String])
-            repoStudy.version should be ((json \ "data" \ "version").as[Long])
+            repoStudy.name mustBe ((json \ "data" \ "name").as[String])
+            repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
           }
         )
       }
     }
 
-    "GET /studies/:id" should {
-      "read a study" in new WithApplication(fakeApplication()) {
+    "GET /studies/:id" must {
+      "read a study" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy.enable(1, 1) | fail
         use[BbwebPlugin].studyRepository.put(study)
@@ -117,8 +118,8 @@ class StudiesControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /studies/enable" should {
-      "enable a study" in new WithApplication(fakeApplication()) {
+    "POST /studies/enable" must {
+      "enable a study" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -130,18 +131,18 @@ class StudiesControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/enable", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
 
         val eventStudyId = (json \ "data" \ "id").as[String]
          use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId)).fold(
           err => fail(err.list.mkString),
-           repoStudy => repoStudy.version should be ((json \ "data" \ "version").as[Long])
+           repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
          )
       }
     }
 
-    "POST /studies/enable" should {
-      "not enable a study" in new WithApplication(fakeApplication()) {
+    "POST /studies/enable" must {
+      "not enable a study" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -151,13 +152,13 @@ class StudiesControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/enable", BAD_REQUEST, cmdJson)
 
-        (json \ "status").as[String] should include ("error")
-          (json \ "message").as[String] should include ("no specimen groups")
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("no specimen groups")
       }
     }
 
-    "POST /studies/disable" should {
-      "disable a study" in new WithApplication(fakeApplication()) {
+    "POST /studies/disable" must {
+      "disable a study" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy.enable(1, 1) | fail
         use[BbwebPlugin].studyRepository.put(study)
@@ -167,18 +168,18 @@ class StudiesControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/disable", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
 
         val eventStudyId = (json \ "data" \ "id").as[String]
         use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId)).fold(
           err => fail(err.list.mkString),
-          repoStudy => repoStudy.version should be ((json \ "data" \ "version").as[Long])
+          repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
         )
       }
     }
 
-    "POST /studies/retire" should {
-      "retire a study" in new WithApplication(fakeApplication()) {
+    "POST /studies/retire" must {
+      "retire a study" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -188,18 +189,18 @@ class StudiesControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/retire", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
 
         val eventStudyId = (json \ "data" \ "id").as[String]
         use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId)).fold(
           err => fail(err.list.mkString),
-          repoStudy => repoStudy.version should be ((json \ "data" \ "version").as[Long])
+          repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
         )
       }
     }
 
-    "POST /studies/unretire" should {
-      "unretire a study" in new WithApplication(fakeApplication()) {
+    "POST /studies/unretire" must {
+      "unretire a study" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy.retire | fail
         use[BbwebPlugin].studyRepository.put(study)
@@ -209,76 +210,76 @@ class StudiesControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(study.version))
         val json = makeRequest(POST, "/studies/unretire", json = cmdJson)
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
 
         val eventStudyId = (json \ "data" \ "id").as[String]
         use[BbwebPlugin].studyRepository.getByKey(StudyId(eventStudyId)).fold(
           err => fail(err.list.mkString),
-          repoStudy => repoStudy.version should be ((json \ "data" \ "version").as[Long])
+          repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
         )
       }
     }
 
-    "GET /studies/valuetypes" should {
-      "list all" in new WithApplication(fakeApplication()) {
+    "GET /studies/valuetypes" must {
+      "list all" in new App(fakeApp) {
         doLogin
         val json = makeRequest(GET, "/studies/valuetypes")
         val values = (json \ "data").as[List[String]]
-        values.size should be > 0
+        values.size must be > 0
       }
     }
 
 
-    "GET /studies/anatomicalsrctypes" should {
-      "list all" in new WithApplication(fakeApplication()) {
+    "GET /studies/anatomicalsrctypes" must {
+      "list all" in new App(fakeApp) {
         doLogin
         val json = makeRequest(GET, "/studies/anatomicalsrctypes")
         val values = (json \ "data").as[List[String]]
-        values.size should be > 0
+        values.size must be > 0
       }
     }
 
-    "GET /studies/specimentypes" should {
-      "list all" in new WithApplication(fakeApplication()) {
+    "GET /studies/specimentypes" must {
+      "list all" in new App(fakeApp) {
         doLogin
         val json = makeRequest(GET, "/studies/specimentypes")
         val values = (json \ "data").as[List[String]]
-        values.size should be > 0
+        values.size must be > 0
       }
     }
 
-    "GET /studies/preservtypes" should {
-      "list all" in new WithApplication(fakeApplication()) {
+    "GET /studies/preservtypes" must {
+      "list all" in new App(fakeApp) {
         doLogin
         val json = makeRequest(GET, "/studies/preservtypes")
         val values = (json \ "data").as[List[String]]
-        values.size should be > 0
+        values.size must be > 0
       }
     }
 
-    "GET /studies/preservtemptypes " should {
-      "list all" in new WithApplication(fakeApplication()) {
+    "GET /studies/preservtemptypes " must {
+      "list all" in new App(fakeApp) {
         doLogin
         val json = makeRequest(GET, "/studies/preservtemptypes")
         val values = (json \ "data").as[List[String]]
-        values.size should be > 0
+        values.size must be > 0
       }
     }
 
-    "GET /studies/sgvaluetypes " should {
-      "list all" in new WithApplication(fakeApplication()) {
+    "GET /studies/sgvaluetypes " must {
+      "list all" in new App(fakeApp) {
         doLogin
         val json = makeRequest(GET, "/studies/sgvaluetypes")
         val jsonObj = (json \ "data").as[JsObject]
-        (jsonObj \ "anatomicalSourceType").as[List[String]].size        should be > 0
-        (jsonObj \ "preservationType").as[List[String]].size            should be > 0
-        (jsonObj \ "preservationTemperatureType").as[List[String]].size should be > 0
-        (jsonObj \ "specimenType").as[List[String]].size                should be > 0
+        (jsonObj \ "anatomicalSourceType").as[List[String]].size        must be > 0
+        (jsonObj \ "preservationType").as[List[String]].size            must be > 0
+        (jsonObj \ "preservationTemperatureType").as[List[String]].size must be > 0
+        (jsonObj \ "specimenType").as[List[String]].size                must be > 0
       }
     }
 
-    "GET /studies/dto/processing " should {
-      "return empty results for new study" in new WithApplication(fakeApplication()) {
+    "GET /studies/dto/processing " must {
+      "return empty results for new study" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -286,13 +287,13 @@ class StudiesControllerSpec extends ControllerFixture {
         val json = makeRequest(GET, s"/studies/dto/processing/${study.id}")
         val jsonObj = (json \ "data").as[JsObject]
 
-        (jsonObj \ "processingTypes").as[List[JsObject]].size should be (0)
-        (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size should be (0)
-        (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size should be (0)
-        (jsonObj \ "specimenGroups").as[List[JsObject]].size should be (0)
+        (jsonObj \ "processingTypes").as[List[JsObject]].size mustBe (0)
+        (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size mustBe (0)
+        (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size mustBe (0)
+        (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (0)
       }
 
-      "return valid results for study" in new WithApplication(fakeApplication()) {
+      "return valid results for study" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -305,10 +306,10 @@ class StudiesControllerSpec extends ControllerFixture {
         val json = makeRequest(GET, s"/studies/dto/processing/${study.id}")
         val jsonObj = (json \ "data").as[JsObject]
 
-        (jsonObj \ "processingTypes").as[List[JsObject]].size should be (1)
-        (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size should be (1)
-        (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size should be (1)
-        (jsonObj \ "specimenGroups").as[List[JsObject]].size should be (1)
+        (jsonObj \ "processingTypes").as[List[JsObject]].size mustBe (1)
+        (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size mustBe (1)
+        (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size mustBe (1)
+        (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (1)
       }
     }
 

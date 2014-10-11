@@ -9,9 +9,7 @@ import org.biobank.infrastructure.event.StudyEvents._
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 import akka.pattern.ask
-import org.scalatest.OptionValues._
 import org.scalatest.Tag
-import org.scalatest.BeforeAndAfterEach
 import scalaz._
 import scalaz.Scalaz._
 
@@ -47,9 +45,9 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]]
         .futureValue
 
-      v shouldSucceed { event =>
-        event shouldBe a[SpecimenLinkAnnotationTypeAddedEvent]
-        event should have(
+      v mustSucceed { event =>
+        event mustBe a[SpecimenLinkAnnotationTypeAddedEvent]
+        event must have(
           'studyId (annotType.studyId.id),
           'name (annotType.name),
           'description (annotType.description),
@@ -57,16 +55,16 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
           'maxValueCount (annotType.maxValueCount)
         )
 
-        event.options should not be (None)
-        event.options.value should have size annotType.options.value.size
+        event.options must not be (None)
+        event.options.value must have size annotType.options.value.size
         annotType.options.value.map { item =>
-          event.options.value should contain (item)
+          event.options.value must contain (item)
         }
 
-        specimenLinkAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
+        specimenLinkAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
         specimenLinkAnnotationTypeRepository.withId(
-          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) shouldSucceed { at =>
-          at.version should be(0)
+          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) mustSucceed { at =>
+          at.version mustBe(0)
           checkTimeStamps(at, DateTime.now, None)
         }
       }
@@ -82,7 +80,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]]
         .futureValue
-       v shouldFail s"${study2.id.id}.*not found"
+       v mustFail s"invalid study id: ${study2.id.id}"
     }
 
     "not add a specimen link annotation type if the name already exists" in {
@@ -95,7 +93,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]]
         .futureValue
-      v shouldFail "name already exists"
+      v mustFail "name already exists"
     }
 
     "update a specimen link annotation type" in {
@@ -111,9 +109,9 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
 
-      v shouldSucceed { event =>
-        event shouldBe a[SpecimenLinkAnnotationTypeUpdatedEvent]
-        event should have(
+      v mustSucceed { event =>
+        event mustBe a[SpecimenLinkAnnotationTypeUpdatedEvent]
+        event must have(
           'studyId (annotType.studyId.id),
           'version (annotType.version + 1),
           'name (annotType2.name),
@@ -122,17 +120,17 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
           'maxValueCount (annotType2.maxValueCount)
         )
 
-        event.options should not be (None)
-        event.options.value should have size annotType2.options.value.size
+        event.options must not be (None)
+        event.options.value must have size annotType2.options.value.size
         // verify each option
         annotType2.options.value.map { item =>
-          event.options.value should contain (item)
+          event.options.value must contain (item)
         }
 
-        specimenLinkAnnotationTypeRepository.allForStudy(disabledStudy.id) should have size 1
+        specimenLinkAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
         specimenLinkAnnotationTypeRepository.withId(
-          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) shouldSucceed { at =>
-          at.version should be(1)
+          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) mustSucceed { at =>
+          at.version mustBe(1)
           checkTimeStamps(at, annotType.timeAdded, DateTime.now)
         }
       }
@@ -153,7 +151,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
-      v shouldFail "name already exists"
+      v mustFail "name already exists"
     }
 
     "not update a specimen link annotation type to the wrong study" in {
@@ -169,7 +167,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
-      v shouldFail "study does not have annotation type"
+      v mustFail "study does not have annotation type"
     }
 
     "not update a specimen link annotation type with an invalid version" in {
@@ -182,7 +180,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
         .futureValue
-      v shouldFail "doesn't match current version"
+      v mustFail "doesn't match current version"
     }
 
     "remove a specimen link annotation type" in {
@@ -195,10 +193,10 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
         .futureValue
 
-      v shouldSucceed { event =>
-        event shouldBe a[SpecimenLinkAnnotationTypeRemovedEvent]
-        event.studyId should be (annotType.studyId.id)
-        event.annotationTypeId should be (annotType.id.id)
+      v mustSucceed { event =>
+        event mustBe a[SpecimenLinkAnnotationTypeRemovedEvent]
+        event.studyId mustBe (annotType.studyId.id)
+        event.annotationTypeId mustBe (annotType.id.id)
       }
     }
 
@@ -211,7 +209,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends StudiesProcessorFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]
         .futureValue
-      v shouldFail "expected version doesn't match current version"
+      v mustFail "expected version doesn't match current version"
     }
 
   }

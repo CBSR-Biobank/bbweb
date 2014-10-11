@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 import com.typesafe.plugin._
 import play.api.Play.current
+import org.scalatestplus.play._
 
 class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
@@ -81,8 +82,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       slTypeToAddCmdJson(slType))
 
-    (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("is not disabled")
+    (json \ "status").as[String] must include ("error")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   def updateOnNonDisabledStudy(
@@ -104,8 +105,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST,
       slTypeToUpdateCmdJson(slType2))
 
-    (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("is not disabled")
+    (json \ "status").as[String] must include ("error")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   def removeOnNonDisabledStudy(
@@ -124,25 +125,25 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       s"/studies/sltypes/${slType.processingTypeId.id}/${slType.id.id}/${slType.version}",
       BAD_REQUEST)
 
-    (json \ "status").as[String] should include ("error")
-    (json \ "message").as[String] should include ("is not disabled")
+    (json \ "status").as[String] must include ("error")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   "SpecimenLink Type REST API" when {
 
-    "GET /studies/sltypes" should {
-      "list none" in new WithApplication(fakeApplication()) {
+    "GET /studies/sltypes" must {
+      "list none" in new App(fakeApp) {
         doLogin
         val procType = factory.createProcessingType
         use[BbwebPlugin].processingTypeRepository.put(procType)
 
         val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size 0
+        jsonList must have size 0
       }
 
-      "list a single specimen link type" in new WithApplication(fakeApplication()) {
+      "list a single specimen link type" in new App(fakeApp) {
         doLogin
         val procType = factory.createProcessingType
         use[BbwebPlugin].processingTypeRepository.put(procType)
@@ -153,13 +154,13 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].specimenLinkTypeRepository.put(slType)
 
         val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList should have size 1
+        jsonList must have size 1
         compareObj(jsonList(0), slType)
       }
 
-      "get a single specimen link type" in new WithApplication(fakeApplication()) {
+      "get a single specimen link type" in new App(fakeApp) {
         doLogin
         val procType = factory.createProcessingType
         use[BbwebPlugin].processingTypeRepository.put(procType)
@@ -170,12 +171,12 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         use[BbwebPlugin].specimenLinkTypeRepository.put(slType)
 
         val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}?slTypeId=${slType.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, slType)
       }
 
-      "list multiple specimen link types" in new WithApplication(fakeApplication()) {
+      "list multiple specimen link types" in new App(fakeApp) {
         doLogin
         val procType = factory.createProcessingType
         use[BbwebPlugin].processingTypeRepository.put(procType)
@@ -185,34 +186,34 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         sltypes map { slType => use[BbwebPlugin].specimenLinkTypeRepository.put(slType) }
 
         val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
 
-        jsonList should have size sltypes.size
+        jsonList must have size sltypes.size
           (jsonList zip sltypes).map { item => compareObj(item._1, item._2) }
         ()
       }
 
-      "fail for invalid processing type id" in new WithApplication(fakeApplication()) {
+      "fail for invalid processing type id" in new App(fakeApp) {
         doLogin
         val processingTypeId = nameGenerator.next[Study]
 
         val json = makeRequest(GET, s"/studies/sltypes/$processingTypeId", BAD_REQUEST)
-        (json \ "status").as[String] should include ("error")
-        (json \ "message").as[String] should include ("invalid processing type id")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("invalid processing type id")
       }
 
-      "fail for an invalid study ID when using an specimen link type id" in new WithApplication(fakeApplication()) {
+      "fail for an invalid study ID when using an specimen link type id" in new App(fakeApp) {
         doLogin
         val procTypeId = nameGenerator.next[ProcessingType]
         val slTypeId = nameGenerator.next[SpecimenLinkType]
 
         val json = makeRequest(GET, s"/studies/sltypes/$procTypeId?slTypeId=$slTypeId", BAD_REQUEST)
-        (json \ "status").as[String] should include ("error")
-        (json \ "message").as[String] should include ("invalid processing type id")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("invalid processing type id")
       }
 
-      "fail for an invalid specimen link type id" in new WithApplication(fakeApplication()) {
+      "fail for an invalid specimen link type id" in new App(fakeApp) {
         doLogin
         val procType = factory.createProcessingType
         use[BbwebPlugin].processingTypeRepository.put(procType)
@@ -220,14 +221,14 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         val slTypeId = nameGenerator.next[SpecimenLinkType]
 
         val json = makeRequest(GET, s"/studies/sltypes/${procType.id}?slTypeId=$slTypeId", BAD_REQUEST)
-        (json \ "status").as[String] should include ("error")
-        (json \ "message").as[String] should include ("specimen link type does not exist")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("specimen link type does not exist")
       }
 
     }
 
-    "POST /studies/sltypes" should {
-      "add a specimen link type" in new WithApplication(fakeApplication()) {
+    "POST /studies/sltypes" must {
+      "add a specimen link type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -244,12 +245,12 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
           "/studies/sltypes",
           json = slTypeToAddCmdJson(slType))
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "POST /studies/sltypes" should {
-      "not add a specimen link type to an enabled study" in new WithApplication(fakeApplication()) {
+    "POST /studies/sltypes" must {
+      "not add a specimen link type to an enabled study" in new App(fakeApp) {
         doLogin
         val study = use[BbwebPlugin].studyRepository.put(
           factory.createDisabledStudy.enable(1, 1) | fail)
@@ -257,8 +258,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /studies/sltypes" should {
-      "not add a specimen link type to an retired study" in new WithApplication(fakeApplication()) {
+    "POST /studies/sltypes" must {
+      "not add a specimen link type to an retired study" in new App(fakeApp) {
         doLogin
         val study = use[BbwebPlugin].studyRepository.put(
           factory.createDisabledStudy.retire | fail)
@@ -266,8 +267,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /studies/sltypes" should {
-      "should update a specimen link type" in new WithApplication(fakeApplication()) {
+    "PUT /studies/sltypes" must {
+      "must update a specimen link type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -292,12 +293,12 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
           s"/studies/sltypes/${slType.id.id}",
           json = slTypeToUpdateCmdJson(slType2))
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "PUT /studies/sltypes" should {
-      "not update a specimen link type on an enabled study" in new WithApplication(fakeApplication()) {
+    "PUT /studies/sltypes" must {
+      "not update a specimen link type on an enabled study" in new App(fakeApp) {
         doLogin
         val study = use[BbwebPlugin].studyRepository.put(
           factory.createDisabledStudy.enable(1, 1) | fail)
@@ -305,8 +306,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /studies/sltypes" should {
-      "not update a specimen link type on an retired study" in new WithApplication(fakeApplication()) {
+    "PUT /studies/sltypes" must {
+      "not update a specimen link type on an retired study" in new App(fakeApp) {
         doLogin
         val study = use[BbwebPlugin].studyRepository.put(
           factory.createDisabledStudy.retire | fail)
@@ -314,8 +315,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /studies/sltypes" should {
-      "remove a specimen link type" in new WithApplication(fakeApplication()) {
+    "DELETE /studies/sltypes" must {
+      "remove a specimen link type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         use[BbwebPlugin].studyRepository.put(study)
@@ -332,12 +333,12 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
           DELETE,
           s"/studies/sltypes/${slType.processingTypeId.id}/${slType.id.id}/${slType.version}")
 
-        (json \ "status").as[String] should include ("success")
+        (json \ "status").as[String] must include ("success")
       }
     }
 
-    "DELETE /studies/sltypes" should {
-      "not remove a specimen link type on an enabled study" in new WithApplication(fakeApplication()) {
+    "DELETE /studies/sltypes" must {
+      "not remove a specimen link type on an enabled study" in new App(fakeApp) {
         doLogin
         val study = use[BbwebPlugin].studyRepository.put(
           factory.createDisabledStudy.enable(1, 1) | fail)
@@ -345,8 +346,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "DELETE /studies/sltypes" should {
-      "not remove a specimen link type on an retired study" in new WithApplication(fakeApplication()) {
+    "DELETE /studies/sltypes" must {
+      "not remove a specimen link type on an retired study" in new App(fakeApp) {
         doLogin
         val study = use[BbwebPlugin].studyRepository.put(
           factory.createDisabledStudy.retire | fail)

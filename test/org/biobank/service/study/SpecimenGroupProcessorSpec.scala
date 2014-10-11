@@ -20,7 +20,6 @@ import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 
 import akka.pattern.ask
-import org.scalatest.OptionValues._
 import org.joda.time.DateTime
 import org.scalatest.BeforeAndAfterEach
 import scalaz._
@@ -56,9 +55,9 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
       var v = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
         .futureValue
 
-      v shouldSucceed { event =>
-        event shouldBe a[SpecimenGroupAddedEvent]
-        event should have (
+      v mustSucceed { event =>
+        event mustBe a[SpecimenGroupAddedEvent]
+        event must have (
           'name                        (sg.name),
           'description                 (sg.description),
           'units                       (sg.units),
@@ -68,10 +67,10 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
           'specimenType                (sg.specimenType)
         )
 
-        specimenGroupRepository.allForStudy(disabledStudy.id) should have size 1
+        specimenGroupRepository.allForStudy(disabledStudy.id) must have size 1
         specimenGroupRepository.withId(
-          disabledStudy.id, SpecimenGroupId(event.specimenGroupId))  shouldSucceed { repoSg =>
-          repoSg.version should be (0)
+          disabledStudy.id, SpecimenGroupId(event.specimenGroupId))  mustSucceed { repoSg =>
+          repoSg.version mustBe (0)
           checkTimeStamps(repoSg, DateTime.now, None)
         }
       }
@@ -83,9 +82,9 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
       v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenGroupAddedEvent]]
         .futureValue
-      v shouldSucceed { event =>
-        event shouldBe a[SpecimenGroupAddedEvent]
-        event should have (
+      v mustSucceed { event =>
+        event mustBe a[SpecimenGroupAddedEvent]
+        event must have (
           'name                        (name2),
           'description                 (None),
           'units                       (sg.units),
@@ -95,10 +94,10 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
           'specimenType                (sg.specimenType)
         )
 
-        specimenGroupRepository.allForStudy(disabledStudy.id) should have size 2
+        specimenGroupRepository.allForStudy(disabledStudy.id) must have size 2
         specimenGroupRepository.withId(
-          disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) shouldSucceed { repoSg  =>
-          repoSg.version should be (0)
+          disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) mustSucceed { repoSg  =>
+          repoSg.version mustBe (0)
           checkTimeStamps(repoSg, DateTime.now, None)
         }
       }
@@ -113,7 +112,7 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
 
       val v = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupAddedEvent]]
         .futureValue
-      v shouldFail s"${study2.id.id}.*not found"
+      v mustFail s"invalid study id: ${study2.id.id}"
     }
 
     "update a specimen group" in {
@@ -129,9 +128,9 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
 
-      v shouldSucceed { event =>
-        event shouldBe a[SpecimenGroupUpdatedEvent]
-        event should have (
+      v mustSucceed { event =>
+        event mustBe a[SpecimenGroupUpdatedEvent]
+        event must have (
           'studyId                     (disabledStudy.id.id),
           'specimenGroupId             (sg.id.id),
           'version                     (sg.version + 1),
@@ -144,10 +143,10 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
           'specimenType                (sg2.specimenType)
         )
 
-        specimenGroupRepository.allForStudy(disabledStudy.id) should have size 1
+        specimenGroupRepository.allForStudy(disabledStudy.id) must have size 1
         specimenGroupRepository.withId(
-          disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) shouldSucceed { repoSg =>
-          repoSg.version should be (sg.version + 1)
+          disabledStudy.id, SpecimenGroupId(event.specimenGroupId)) mustSucceed { repoSg =>
+          repoSg.version mustBe (sg.version + 1)
           checkTimeStamps(repoSg, sg.timeAdded, DateTime.now)
         }
       }
@@ -164,7 +163,7 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
-      v shouldFail "doesn't match current version"
+      v mustFail "doesn't match current version"
     }
 
     "not be added if the name already exists" in {
@@ -178,7 +177,7 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[SpecimenGroupAddedEvent]]
         .futureValue
 
-      v shouldFail "name already exists"
+      v mustFail "name already exists"
     }
 
     "not be updated to name that already exists" in {
@@ -196,7 +195,7 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
-      v shouldFail "name already exists"
+      v mustFail "name already exists"
     }
 
     "not be updated to wrong study" in {
@@ -212,7 +211,7 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
         .futureValue
-      v shouldFail "study does not have specimen group"
+      v mustFail "study does not have specimen group"
     }
 
     "can remove a specimen group" in {
@@ -224,12 +223,12 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
         .mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
         .futureValue
 
-      v shouldSucceed { event =>
-        event shouldBe a[SpecimenGroupRemovedEvent]
+      v mustSucceed { event =>
+        event mustBe a[SpecimenGroupRemovedEvent]
 
         val v2 = specimenGroupRepository.withId(
           disabledStudy.id, SpecimenGroupId(event.specimenGroupId))
-        v2 shouldFail "specimen group does not exist"
+        v2 mustFail "specimen group does not exist"
       }
     }
 
@@ -241,7 +240,7 @@ class SpecimenGroupProcessorSpec extends StudiesProcessorFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
         .futureValue
-      v shouldFail "expected version doesn't match current version"
+      v mustFail "expected version doesn't match current version"
     }
   }
 }

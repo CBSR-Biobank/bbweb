@@ -3,9 +3,6 @@ package org.biobank.domain.user
 import org.biobank.domain.DomainSpec
 import org.biobank.fixture.NameGenerator
 
-import org.scalatest.WordSpecLike
-import org.scalatest.Matchers
-import org.scalatest.OptionValues._
 import org.scalatest.Tag
 import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
@@ -13,7 +10,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 /**
-  * Note: to run from Eclipse uncomment the @RunWith line. To run from SBT the line should be
+  * Note: to run from Eclipse uncomment the @RunWith line. To run from SBT the line mustBe
   * commented out.
   *
   */
@@ -39,10 +36,10 @@ class UserSpec extends DomainSpec {
 
       val validation = RegisteredUser.create(
         id, version, timeNow, name, email, password, salt, avatarUrl)
-      validation should be ('success)
+      validation mustBe ('success)
       validation map { user =>
-        user shouldBe a[RegisteredUser]
-        user should have (
+        user mustBe a[RegisteredUser]
+        user must have (
           'id (id),
           'version (0L),
           'name (name),
@@ -52,8 +49,8 @@ class UserSpec extends DomainSpec {
           'avatarUrl (avatarUrl)
         )
 
-        user.timeAdded should be (timeNow)
-        user.timeModified should be (None)
+        user.timeAdded mustBe (timeNow)
+        user.timeModified mustBe (None)
       }
     }
 
@@ -61,23 +58,23 @@ class UserSpec extends DomainSpec {
       val user = factory.createRegisteredUser
 
       val activeUser = user.activate  | fail
-      activeUser shouldBe a[ActiveUser]
-      activeUser.version should be(user.version + 1)
-      activeUser.timeAdded should be (user.timeAdded)
+      activeUser mustBe a[ActiveUser]
+      activeUser.version mustBe(user.version + 1)
+      activeUser.timeAdded mustBe (user.timeAdded)
 
       val lockedUser = activeUser.lock | fail
-      lockedUser shouldBe a[LockedUser]
-      lockedUser.version should be(activeUser.version + 1)
-      lockedUser.timeAdded should be (user.timeAdded)
+      lockedUser mustBe a[LockedUser]
+      lockedUser.version mustBe(activeUser.version + 1)
+      lockedUser.timeAdded mustBe (user.timeAdded)
 
       val unlockedUser = lockedUser.unlock | fail
-      unlockedUser shouldBe a[ActiveUser]
-      unlockedUser.version should be(lockedUser.version + 1)
-      unlockedUser.timeAdded should be (user.timeAdded)
+      unlockedUser mustBe a[ActiveUser]
+      unlockedUser.version mustBe(lockedUser.version + 1)
+      unlockedUser.timeAdded mustBe (user.timeAdded)
     }
   }
 
-  "A user" should {
+  "A user" must {
 
     "not be created with an empty id" in {
       val id = UserId("")
@@ -91,7 +88,7 @@ class UserSpec extends DomainSpec {
 
       RegisteredUser.create(
         id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list should (have length 1 and contain("IdRequired")),
+        err => err.list must (have length 1 and contain("IdRequired")),
         user => fail("id validation failed")
       )
     }
@@ -108,7 +105,7 @@ class UserSpec extends DomainSpec {
 
       RegisteredUser.create(
         id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list should (have length 1 and contain("InvalidVersion")),
+        err => err.list must (have length 1 and contain("InvalidVersion")),
         user => fail("version validation failed")
       )
     }
@@ -125,7 +122,7 @@ class UserSpec extends DomainSpec {
 
       RegisteredUser.create(
         id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list should (have length 1 and contain("NameRequired")),
+        err => err.list must (have length 1 and contain("NameRequired")),
         user => fail("name validation failed")
       )
     }
@@ -143,8 +140,8 @@ class UserSpec extends DomainSpec {
       RegisteredUser.create(
         id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => {
-          err.list should have length 1
-          err.list.head should include("InvalidEmail")
+          err.list must have length 1
+          err.list.head must include("InvalidEmail")
         },
         user => fail("name validation failed")
       )
@@ -163,8 +160,8 @@ class UserSpec extends DomainSpec {
       RegisteredUser.create(
         id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => {
-          err.list should have length 1
-          err.list.head should include("InvalidEmail")
+          err.list must have length 1
+          err.list.head must include("InvalidEmail")
         },
         user => fail("name validation failed")
       )
@@ -182,7 +179,7 @@ class UserSpec extends DomainSpec {
 
       RegisteredUser.create(
         id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list should (have length 1 and contain("PasswordRequired")),
+        err => err.list must (have length 1 and contain("PasswordRequired")),
         user => fail("user password validation failed")
       )
     }
@@ -198,7 +195,7 @@ class UserSpec extends DomainSpec {
       val avatarUrl = Some("http://test.com/")
 
       RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list should (have length 1 and contain("SaltRequired")),
+        err => err.list must (have length 1 and contain("SaltRequired")),
         user => fail("user salt validation failed")
       )
     }
@@ -215,8 +212,8 @@ class UserSpec extends DomainSpec {
 
       RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => {
-          err.list should have length 1
-          err.list.head should include("InvalidUrl")
+          err.list must have length 1
+          err.list.head must include("InvalidUrl")
         },
         user => fail("user avaltar url validation failed")
       )
@@ -235,7 +232,7 @@ class UserSpec extends DomainSpec {
       val v = RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl)
       val user = v.getOrElse(fail("could not create user"))
       val authenticatedUser = user.authenticate(email, password).getOrElse(fail("could authenticate user"))
-      authenticatedUser should be(user)
+      authenticatedUser mustBe(user)
     }
 
     "fail authentication for bad password" in {
@@ -253,8 +250,8 @@ class UserSpec extends DomainSpec {
       val v = RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl)
       val user = v.getOrElse(fail("could not create user"))
       user.authenticate(email, badPassword).fold(
-        err => err.list should (have length 1 and contain("authentication failure")),
-        x => fail("authentication should fail")
+        err => err.list must (have length 1 and contain("authentication failure")),
+        x => fail("authentication must fail")
       )
     }
 
@@ -272,9 +269,9 @@ class UserSpec extends DomainSpec {
 
       RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
         err => {
-          err.list should have length 2
-          err.list.head should be ("InvalidVersion")
-          err.list.tail.head should be ("NameRequired")
+          err.list must have length 2
+          err.list.head mustBe ("InvalidVersion")
+          err.list.tail.head mustBe ("NameRequired")
         },
         user => fail
       )
