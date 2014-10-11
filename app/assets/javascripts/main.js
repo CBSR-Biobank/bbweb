@@ -19,7 +19,7 @@
       'angular-ui-router': ['angular'],
       'ui-bootstrap': ['angular', 'bootstrap'],
       'ngTable': ['angular'],
-      'toastr': ['jquery']
+      'toastr': ['angular', 'jquery']
     },
     paths: {
       'requirejs': ['../lib/requirejs/require'],
@@ -32,7 +32,7 @@
       'bootstrap': ['../lib/bootstrap/js/bootstrap'],
       'ui-bootstrap': ['../lib/angular-ui-bootstrap/ui-bootstrap-tpls'],
       'ngTable': ['../lib/ng-table/ng-table'],
-      'toastr': ['../lib/toastr/toastr']
+      'toastr': ['../lib/angularjs-toaster/toaster']
     }
   });
 

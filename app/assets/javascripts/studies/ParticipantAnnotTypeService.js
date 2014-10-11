@@ -9,7 +9,7 @@ define(['./module'], function(module) {
    * Service to access participant annotation types.
    */
   function ParticipantAnnotTypeService(StudyAnnotTypeService) {
-    var baseUrl = '/studies/pannottype';
+    var baseUrl = '/studies/pannottypes';
     var service = {
       getAll      : getAll,
       get         : get,

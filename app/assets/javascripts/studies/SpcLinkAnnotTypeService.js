@@ -9,7 +9,7 @@ define(['./module'], function(module) {
    * Service to access Specimen Link Annotation Types.
    */
   function SpcLinkAnnotTypeService(StudyAnnotTypeService) {
-    var baseUrl = '/studies/slannottype';
+    var baseUrl = '/studies/slannottypes';
     var service = {
       getAll      : getAll,
       get         : get,

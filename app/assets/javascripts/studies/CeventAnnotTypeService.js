@@ -9,7 +9,7 @@ define(['./module'], function(module) {
    * Service to access Collection Event Annotation Types.
    */
   function CeventAnnotTypeService(StudyAnnotTypeService) {
-    var baseUrl = '/studies/ceannottype';
+    var baseUrl = '/studies/ceannottypes';
     var service = {
       getAll      : getAll,
       get         : get,
