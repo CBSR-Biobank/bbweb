@@ -1,6 +1,7 @@
 package org.biobank.service.study
 
 import org.biobank.domain._
+import org.biobank.domain.user.UserId
 import org.biobank.domain.study.{
   Study,
   StudyId,
@@ -11,7 +12,7 @@ import org.biobank.domain.study.{
   SpecimenGroupRepositoryComponent
 }
 import org.slf4j.LoggerFactory
-import org.biobank.service._
+import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
@@ -45,9 +46,14 @@ trait ProcessingTypeProcessorComponent {
       * processed to recreate the current state of the aggregate.
       */
     val receiveRecover: Receive = {
-      case event: ProcessingTypeAddedEvent => recoverEvent(event)
-      case event: ProcessingTypeUpdatedEvent => recoverEvent(event)
-      case event: ProcessingTypeRemovedEvent => recoverEvent(event)
+      case wevent: WrappedEvent[_] =>
+        wevent.event match {
+          case event: ProcessingTypeAddedEvent =>   recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: ProcessingTypeUpdatedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: ProcessingTypeRemovedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+
+          case event => throw new IllegalStateException(s"event not handled: $event")
+        }
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.processingTypes.foreach{ ceType =>
@@ -60,9 +66,13 @@ trait ProcessingTypeProcessorComponent {
       * back to the user. Each valid command generates one or more events and is journaled.
       */
     val receiveCommand: Receive = {
-      case cmd: AddProcessingTypeCmd =>    process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UpdateProcessingTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: RemoveProcessingTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case procCmd: WrappedCommand =>
+        implicit val userId = procCmd.userId
+        procCmd.command match {
+          case cmd: AddProcessingTypeCmd =>    process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: UpdateProcessingTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: RemoveProcessingTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        }
 
       case "snap" =>
         saveSnapshot(SnapshotState(processingTypeRepository.getValues.toSet))
@@ -124,14 +134,14 @@ trait ProcessingTypeProcessorComponent {
       )
     }
 
-    private def recoverEvent(event: ProcessingTypeAddedEvent): Unit = {
+    private def recoverEvent(event: ProcessingTypeAddedEvent, userId: UserId, dateTime: DateTime): Unit = {
       processingTypeRepository.put(ProcessingType(
         StudyId(event.studyId), ProcessingTypeId(event.processingTypeId), 0L, event.dateTime, None,
         event.name, event.description, event.enabled))
       ()
     }
 
-    private def recoverEvent(event: ProcessingTypeUpdatedEvent): Unit = {
+    private def recoverEvent(event: ProcessingTypeUpdatedEvent, userId: UserId, dateTime: DateTime): Unit = {
       processingTypeRepository.getByKey(ProcessingTypeId(event.processingTypeId)).fold(
         err => throw new IllegalStateException(s"updating processing type from event failed: $err"),
         pt => processingTypeRepository.put(pt.copy(
@@ -144,7 +154,7 @@ trait ProcessingTypeProcessorComponent {
       ()
     }
 
-    private def recoverEvent(event: ProcessingTypeRemovedEvent): Unit = {
+    private def recoverEvent(event: ProcessingTypeRemovedEvent, userId: UserId, dateTime: DateTime): Unit = {
       processingTypeRepository.getByKey(ProcessingTypeId(event.processingTypeId)).fold(
         err => throw new IllegalStateException(s"updating processing type from event failed: $err"),
         sg => processingTypeRepository.remove(sg)

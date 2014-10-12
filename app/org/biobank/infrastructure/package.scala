@@ -9,17 +9,33 @@ package infrastructure {
 
   trait HasIdentity {
 
-    /** An event that includes the ID of the object it references. */
+    /** A command or event that includes the ID of the object it references. */
     val id: String
 
   }
 
   trait HasDateTime {
 
-    /** An event that includes the date and time that it took place. */
+    /** An command or event that includes the date and time that it took place. */
     val dateTime: DateTime
 
   }
+
+  trait HasStudyIdentity {
+
+    /** An command or event that includes the study ID that it is related to. */
+    val studyId: String
+
+  }
+
+  trait HasProcessingTypeIdentity {
+
+    /** An command or event that includes the processing type ID that it is related to. */
+    val processingTypeId: String
+
+  }
+
+
 
   /** Used to define annotation types associate annotation types to objects that use them.
     *

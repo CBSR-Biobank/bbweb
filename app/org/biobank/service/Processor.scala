@@ -2,10 +2,12 @@ package org.biobank.service
 
 import org.biobank.infrastructure.event.Events._
 import org.biobank.domain._
+import org.biobank.domain.user.UserId
 
 import akka.actor.ActorLogging
 import org.slf4j.Logger
 import akka.persistence.PersistentActor
+import org.joda.time.DateTime
 
 import scalaz._
 import scalaz.Scalaz._
@@ -17,13 +19,17 @@ trait Processor extends PersistentActor with ActorLogging {
     *
     * @see http://helenaedelson.com/?p=879
     */
-  protected def process[T](validation: DomainValidation[T])(successFn: T => Unit) {
+  protected def process[T <: Event]
+    (validation: DomainValidation[T])
+    (successFn: WrappedEvent[T] => Unit)
+    (implicit userId: UserId) {
     val originalSender = context.sender
     validation map { event =>
-      persist(event) { e =>
-        successFn(e)
-        // inform the sender of the successful command with the event
-        originalSender ! e.success
+      val wrappedEvent = WrappedEvent(event, userId, DateTime.now)
+      persist(wrappedEvent) { we =>
+        successFn(we)
+        // inform the sender of the successful event resulting from a valid command
+        originalSender ! we.event.success
       }
     }
 
@@ -35,11 +41,10 @@ trait Processor extends PersistentActor with ActorLogging {
 
   /** Searches the repository for a matching item.
     */
-  protected def nameAvailableMatcher[T <: ConcurrencySafeEntity[_]](
-    name: String,
-    repository: ReadRepository[_, T],
-    errMsgPrefix: String)(
-    matcher: T => Boolean): DomainValidation[Boolean] = {
+  protected def nameAvailableMatcher[T <: ConcurrencySafeEntity[_]]
+    (name: String, repository: ReadRepository[_, T], errMsgPrefix: String)
+    (matcher: T => Boolean)
+      : DomainValidation[Boolean] = {
     val exists = repository.getValues.exists { item =>
       matcher(item)
     }

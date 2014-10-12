@@ -7,7 +7,7 @@ package org.biobank.query
 
 //import org.biobank.query.model._
 import org.biobank.infrastructure.event.StudyEvents._
-
+import org.biobank.service.WrappedEvent
 import play.api.Play.current
 import akka.actor.Actor
 import akka.actor.ActorLogging

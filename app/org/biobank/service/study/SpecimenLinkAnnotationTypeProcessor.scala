@@ -2,8 +2,9 @@ package org.biobank.service.study
 
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service._
+import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.domain._
+import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 import org.biobank.domain.study.Study
 import org.biobank.domain.AnnotationValueType._
@@ -39,9 +40,14 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
       * processed to recreate the current state of the aggregate.
       */
     val receiveRecover: Receive = {
-      case event: SpecimenLinkAnnotationTypeAddedEvent => recoverEvent(event)
-      case event: SpecimenLinkAnnotationTypeUpdatedEvent => recoverEvent(event)
-      case event: SpecimenLinkAnnotationTypeRemovedEvent => recoverEvent(event)
+      case wevent: WrappedEvent[_] =>
+        wevent.event match {
+          case event: SpecimenLinkAnnotationTypeAddedEvent =>   recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: SpecimenLinkAnnotationTypeUpdatedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: SpecimenLinkAnnotationTypeRemovedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+
+          case event => throw new IllegalStateException(s"event not handled: $event")
+        }
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.annotationTypes.foreach{ annotType => annotationTypeRepository.put(annotType) }
@@ -53,12 +59,13 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
       * back to the user. Each valid command generates one or more events and is journaled.
       */
     val receiveCommand: Receive = {
-      case cmd: AddSpecimenLinkAnnotationTypeCmd =>
-        process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UpdateSpecimenLinkAnnotationTypeCmd =>
-        process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: RemoveSpecimenLinkAnnotationTypeCmd =>
-        process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case procCmd: WrappedCommand =>
+        implicit val userId = procCmd.userId
+        procCmd.command match {
+          case cmd: AddSpecimenLinkAnnotationTypeCmd =>    process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: UpdateSpecimenLinkAnnotationTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: RemoveSpecimenLinkAnnotationTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        }
 
       case "snap" =>
         saveSnapshot(SnapshotState(annotationTypeRepository.getValues.toSet))
@@ -126,14 +133,14 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
     }
 
 
-    private def recoverEvent(event: SpecimenLinkAnnotationTypeAddedEvent): Unit = {
+    private def recoverEvent(event: SpecimenLinkAnnotationTypeAddedEvent, userId: UserId, dateTime: DateTime): Unit = {
       annotationTypeRepository.put(SpecimenLinkAnnotationType(
         StudyId(event.studyId), AnnotationTypeId(event.annotationTypeId), 0L, event.dateTime, None,
         event.name, event.description, event.valueType, event.maxValueCount, event.options))
       ()
     }
 
-    private def recoverEvent(event: SpecimenLinkAnnotationTypeUpdatedEvent): Unit = {
+    private def recoverEvent(event: SpecimenLinkAnnotationTypeUpdatedEvent, userId: UserId, dateTime: DateTime): Unit = {
       annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId)).fold(
         err => throw new IllegalStateException(s"updating annotatiotn type from event failed: $err"),
         at => annotationTypeRepository.put(at.copy(
@@ -148,7 +155,7 @@ trait SpecimenLinkAnnotationTypeProcessorComponent {
       ()
     }
 
-    private def recoverEvent(event: SpecimenLinkAnnotationTypeRemovedEvent): Unit = {
+    private def recoverEvent(event: SpecimenLinkAnnotationTypeRemovedEvent, userId: UserId, dateTime: DateTime): Unit = {
       recoverEvent(AnnotationTypeId(event.annotationTypeId))
     }
 

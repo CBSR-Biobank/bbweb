@@ -1,6 +1,6 @@
 package org.biobank.service.centre
 
-import org.biobank.service.Processor
+import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.domain.centre._
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.{
@@ -40,28 +40,37 @@ trait CentresProcessorComponent {
     val errMsgNameExists = "centre with name already exists"
 
     val receiveRecover: Receive = {
-      case event: CentreAddedEvent =>            recoverEvent(event)
-      case event: CentreUpdatedEvent =>          recoverEvent(event)
-      case event: CentreEnabledEvent =>          recoverEvent(event)
-      case event: CentreDisabledEvent =>         recoverEvent(event)
-      case event: CentreLocationAddedEvent =>    recoverEvent(event)
-      case event: CentreLocationRemovedEvent =>  recoverEvent(event)
-      case event: CentreAddedToStudyEvent =>     recoverEvent(event)
-      case event: CentreRemovedFromStudyEvent => recoverEvent(event)
+      case wevent: WrappedEvent[_] =>
+        wevent.event match {
+          case event: CentreAddedEvent =>            recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: CentreUpdatedEvent =>          recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: CentreEnabledEvent =>          recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: CentreDisabledEvent =>         recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: CentreLocationAddedEvent =>    recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: CentreLocationRemovedEvent =>  recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: CentreAddedToStudyEvent =>     recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: CentreRemovedFromStudyEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+
+          case event => throw new IllegalStateException(s"event not handled: $event")
+        }
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.centres.foreach{ centre => centreRepository.put(centre) }
     }
 
     val receiveCommand: Receive = {
-      case cmd: AddCentreCmd =>             process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UpdateCentreCmd =>          process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: EnableCentreCmd =>          process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: DisableCentreCmd =>         process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: AddCentreLocationCmd =>     process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: RemoveCentreLocationCmd =>  process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: AddCentreToStudyCmd =>      process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: RemoveCentreFromStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case procCmd: WrappedCommand =>
+        implicit val userId = procCmd.userId
+        procCmd.command match {
+          case cmd: AddCentreCmd =>             process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: UpdateCentreCmd =>          process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: EnableCentreCmd =>          process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: DisableCentreCmd =>         process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: AddCentreLocationCmd =>     process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: RemoveCentreLocationCmd =>  process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: AddCentreToStudyCmd =>      process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: RemoveCentreFromStudyCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        }
 
       case "snap" =>
         saveSnapshot(SnapshotState(centreRepository.getValues.toSet))
@@ -160,13 +169,13 @@ trait CentresProcessorComponent {
       } yield event
     }
 
-    private def recoverEvent(event: CentreAddedEvent) {
+    private def recoverEvent(event: CentreAddedEvent, userId: UserId, dateTime: DateTime) {
       centreRepository.put(DisabledCentre(
           CentreId(event.id), 0L, event.dateTime, None, event.name, event.description))
       ()
     }
 
-    private def recoverEvent(event: CentreUpdatedEvent) {
+    private def recoverEvent(event: CentreUpdatedEvent, userId: UserId, dateTime: DateTime) {
       getDisabled(event.id).fold(
         err => throw new IllegalStateException(s"updating centre from event failed: $err"),
         centre => centreRepository.put(centre.copy(
@@ -178,7 +187,7 @@ trait CentresProcessorComponent {
       ()
     }
 
-    private def recoverEvent(event: CentreEnabledEvent) {
+    private def recoverEvent(event: CentreEnabledEvent, userId: UserId, dateTime: DateTime) {
       getDisabled(event.id).fold(
         err => throw new IllegalStateException(s"enabling centre from event failed: $err"),
         centre => centreRepository.put(EnabledCentre(
@@ -188,7 +197,7 @@ trait CentresProcessorComponent {
       ()
     }
 
-    private def recoverEvent(event: CentreDisabledEvent) {
+    private def recoverEvent(event: CentreDisabledEvent, userId: UserId, dateTime: DateTime) {
       getEnabled(event.id).fold(
         err => throw new IllegalStateException(s"disabling centre from event failed: $err"),
         centre => centreRepository.put(DisabledCentre(
@@ -198,7 +207,7 @@ trait CentresProcessorComponent {
       ()
     }
 
-    private def recoverEvent(event: CentreLocationAddedEvent) {
+    private def recoverEvent(event: CentreLocationAddedEvent, userId: UserId, dateTime: DateTime) {
       val centreId = CentreId(event.centreId)
       val locationId = LocationId(event.locationId)
       locationRepository.put(
@@ -208,7 +217,7 @@ trait CentresProcessorComponent {
       ()
     }
 
-    private def recoverEvent(event: CentreLocationRemovedEvent) {
+    private def recoverEvent(event: CentreLocationRemovedEvent, userId: UserId, dateTime: DateTime) {
       val centreId = CentreId(event.centreId)
       val locationId = LocationId(event.locationId)
       val validation = for {
@@ -224,7 +233,7 @@ trait CentresProcessorComponent {
       }
     }
 
-    private def recoverEvent(event: CentreAddedToStudyEvent) {
+    private def recoverEvent(event: CentreAddedToStudyEvent, userId: UserId, dateTime: DateTime) {
       val centreId = CentreId(event.centreId)
       val studyId = StudyId(event.studyId)
       val studyCentreId = studyCentreRepository.nextIdentity
@@ -232,7 +241,7 @@ trait CentresProcessorComponent {
       ()
     }
 
-    private def recoverEvent(event: CentreRemovedFromStudyEvent) {
+    private def recoverEvent(event: CentreRemovedFromStudyEvent, userId: UserId, dateTime: DateTime) {
       val centreId = CentreId(event.centreId)
       val studyId = StudyId(event.studyId)
       val studyCentreId = studyCentreRepository.nextIdentity

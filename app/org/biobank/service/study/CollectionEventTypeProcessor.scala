@@ -1,6 +1,7 @@
 package org.biobank.service.study
 
 import org.biobank.domain._
+import org.biobank.domain.user.UserId
 import org.biobank.domain.study.{
   Study,
   StudyId,
@@ -12,7 +13,7 @@ import org.biobank.domain.study.{
   SpecimenGroupRepositoryComponent
 }
 import org.slf4j.LoggerFactory
-import org.biobank.service._
+import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
@@ -47,9 +48,14 @@ trait CollectionEventTypeProcessorComponent {
       * processed to recreate the current state of the aggregate.
       */
     val receiveRecover: Receive = {
-      case event: CollectionEventTypeAddedEvent => recoverEvent(event)
-      case event: CollectionEventTypeUpdatedEvent => recoverEvent(event)
-      case event: CollectionEventTypeRemovedEvent => recoverEvent(event)
+      case wevent: WrappedEvent[_] =>
+        wevent.event match {
+          case event: CollectionEventTypeAddedEvent =>   recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: CollectionEventTypeUpdatedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: CollectionEventTypeRemovedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+
+          case event => throw new IllegalStateException(s"event not handled: $event")
+        }
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.collectionEventTypes.foreach{ ceType =>
@@ -61,12 +67,13 @@ trait CollectionEventTypeProcessorComponent {
       * back to the user. Each valid command generates one or more events and is journaled.
       */
     val receiveCommand: Receive = {
-      case cmd: AddCollectionEventTypeCmd =>
-        process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UpdateCollectionEventTypeCmd =>
-        process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: RemoveCollectionEventTypeCmd =>
-        process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case procCmd: WrappedCommand =>
+        implicit val userId = procCmd.userId
+        procCmd.command match {
+          case cmd: AddCollectionEventTypeCmd =>    process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: UpdateCollectionEventTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: RemoveCollectionEventTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        }
 
       case "snap" =>
         saveSnapshot(SnapshotState(collectionEventTypeRepository.getValues.toSet))
@@ -137,7 +144,7 @@ trait CollectionEventTypeProcessorComponent {
       )
     }
 
-    private def recoverEvent(event: CollectionEventTypeAddedEvent): Unit = {
+    private def recoverEvent(event: CollectionEventTypeAddedEvent, userId: UserId, dateTime: DateTime): Unit = {
       collectionEventTypeRepository.put(CollectionEventType(
         StudyId(event.studyId), CollectionEventTypeId(event.collectionEventTypeId), 0L, event.dateTime, None,
         event.name, event.description, event.recurring, event.specimenGroupData,
@@ -145,7 +152,7 @@ trait CollectionEventTypeProcessorComponent {
       ()
     }
 
-    private def recoverEvent(event: CollectionEventTypeUpdatedEvent): Unit = {
+    private def recoverEvent(event: CollectionEventTypeUpdatedEvent, userId: UserId, dateTime: DateTime): Unit = {
       collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.collectionEventTypeId)).fold(
         err => throw new IllegalStateException(s"updating collection event type from event failed: $err"),
         cet => collectionEventTypeRepository.put(cet.copy(
@@ -161,7 +168,7 @@ trait CollectionEventTypeProcessorComponent {
       ()
     }
 
-    private def recoverEvent(event: CollectionEventTypeRemovedEvent): Unit = {
+    private def recoverEvent(event: CollectionEventTypeRemovedEvent, userId: UserId, dateTime: DateTime): Unit = {
       collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.collectionEventTypeId)).fold(
         err => throw new IllegalStateException(s"updating collection event type from event failed: $err"),
         cet => collectionEventTypeRepository.remove(cet)

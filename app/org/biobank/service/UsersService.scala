@@ -109,14 +109,19 @@ trait UsersProcessorComponent {
     }
 
     val receiveRecover: Receive = {
-      case event: UserRegisteredEvent      => recoverEvent(event)
-      case event: UserActivatedEvent       => recoverEvent(event)
-      case event: UserNameUpdatedEvent     => recoverEvent(event)
-      case event: UserEmailUpdatedEvent    => recoverEvent(event)
-      case event: UserPasswordUpdatedEvent => recoverEvent(event)
-      case event: UserLockedEvent          => recoverEvent(event)
-      case event: UserUnlockedEvent        => recoverEvent(event)
-      case event: UserPasswordResetEvent   => recoverEvent(event)
+      case wevent: WrappedEvent[_] =>
+        wevent.event match {
+          case event: UserRegisteredEvent      => recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: UserActivatedEvent       => recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: UserNameUpdatedEvent     => recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: UserEmailUpdatedEvent    => recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: UserPasswordUpdatedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: UserLockedEvent          => recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: UserUnlockedEvent        => recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: UserPasswordResetEvent   => recoverEvent(event, wevent.userId, wevent.dateTime)
+
+          case event => throw new IllegalStateException(s"event not handled: $event")
+        }
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.users.foreach(i => userRepository.put(i))
@@ -127,14 +132,18 @@ trait UsersProcessorComponent {
     }
 
     val receiveCommand: Receive = {
-      case cmd: RegisterUserCmd       => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: ActivateUserCmd       => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UpdateUserNameCmd     => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UpdateUserEmailCmd    => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UpdateUserPasswordCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: ResetUserPasswordCmd  => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: LockUserCmd           => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UnlockUserCmd         => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case procCmd: WrappedCommand =>
+        implicit val userId = procCmd.userId
+        procCmd.command match {
+          case cmd: RegisterUserCmd       => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: ActivateUserCmd       => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: UpdateUserNameCmd     => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: UpdateUserEmailCmd    => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: UpdateUserPasswordCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: ResetUserPasswordCmd  => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: LockUserCmd           => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: UnlockUserCmd         => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        }
 
       case "snap" =>
         saveSnapshot(SnapshotState(userRepository.getValues.toSet))
@@ -298,14 +307,14 @@ trait UsersProcessorComponent {
       }
     }
 
-    def recoverEvent(event: UserRegisteredEvent): Unit = {
+    def recoverEvent(event: UserRegisteredEvent, userId: UserId, dateTime: DateTime): Unit = {
       log.debug(s"recoverEvent: $event")
       userRepository.put(RegisteredUser(UserId(event.id), 0L, event.dateTime, None, event.name,
         event.email, event.password, event.salt, event.avatarUrl))
       ()
     }
 
-    def recoverEvent(event: UserActivatedEvent): Unit = {
+    def recoverEvent(event: UserActivatedEvent, userId: UserId, dateTime: DateTime): Unit = {
       log.debug(s"recoverEvent: $event")
       userRepository.getRegistered(UserId(event.id)).fold(
         err => throw new IllegalStateException(s"activating user from event failed: $err"),
@@ -316,7 +325,7 @@ trait UsersProcessorComponent {
       ()
     }
 
-    def recoverEvent(event: UserNameUpdatedEvent): Unit = {
+    def recoverEvent(event: UserNameUpdatedEvent, userId: UserId, dateTime: DateTime): Unit = {
       log.debug(s"recoverEvent: $event")
       userRepository.getActive(UserId(event.id)).fold(
         err => throw new IllegalStateException(s"updating name on user from event failed: $err"),
@@ -326,7 +335,7 @@ trait UsersProcessorComponent {
       ()
     }
 
-    def recoverEvent(event: UserEmailUpdatedEvent): Unit = {
+    def recoverEvent(event: UserEmailUpdatedEvent, userId: UserId, dateTime: DateTime): Unit = {
       log.debug(s"recoverEvent: $event")
       userRepository.getActive(UserId(event.id)).fold(
         err => throw new IllegalStateException(s"updating email on user from event failed: $err"),
@@ -336,7 +345,7 @@ trait UsersProcessorComponent {
       ()
     }
 
-    def recoverEvent(event: UserPasswordUpdatedEvent): Unit = {
+    def recoverEvent(event: UserPasswordUpdatedEvent, userId: UserId, dateTime: DateTime): Unit = {
       log.debug(s"recoverEvent: $event")
       userRepository.getActive(UserId(event.id)).fold(
         err => throw new IllegalStateException(s"updating password on user from event failed: $err"),
@@ -347,7 +356,7 @@ trait UsersProcessorComponent {
       ()
     }
 
-    def recoverEvent(event: UserPasswordResetEvent): Unit = {
+    def recoverEvent(event: UserPasswordResetEvent, userId: UserId, dateTime: DateTime): Unit = {
       log.debug(s"recoverEvent: $event")
       userRepository.getActive(UserId(event.id)).fold(
         err => throw new IllegalStateException(s"resetting password on user from event failed: $err"),
@@ -358,7 +367,7 @@ trait UsersProcessorComponent {
       ()
     }
 
-    def recoverEvent(event: UserLockedEvent): Unit = {
+    def recoverEvent(event: UserLockedEvent, userId: UserId, dateTime: DateTime): Unit = {
       log.debug(s"recoverEvent: $event")
       userRepository.getActive(UserId(event.id)).fold(
         err => throw new IllegalStateException(s"locking user from event failed: $err"),
@@ -369,7 +378,7 @@ trait UsersProcessorComponent {
       ()
     }
 
-    def recoverEvent(event: UserUnlockedEvent): Unit = {
+    def recoverEvent(event: UserUnlockedEvent, userId: UserId, dateTime: DateTime): Unit = {
       log.debug(s"recoverEvent: $event")
       userRepository.getLocked(UserId(event.id)).fold(
         err => throw new IllegalStateException(s"unlocking user from event failed: $err"),

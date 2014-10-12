@@ -1,6 +1,6 @@
 package org.biobank.service.study
 
-import org.biobank.service.Processor
+import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
@@ -69,12 +69,12 @@ trait StudiesProcessorComponent
       * processed to recreate the current state of the aggregate.
       */
     val receiveRecover: Receive = {
-      case event: StudyAddedEvent =>     recoverEvent(event)
-      case event: StudyUpdatedEvent =>   recoverEvent(event)
-      case event: StudyEnabledEvent =>   recoverEvent(event)
-      case event: StudyDisabledEvent =>  recoverEvent(event)
-      case event: StudyRetiredEvent =>   recoverEvent(event)
-      case event: StudyUnretiredEvent => recoverEvent(event)
+      case wevent: WrappedEvent[_] =>
+        wevent.event match {
+          case event: StudyEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+
+          case event => throw new IllegalStateException(s"event not handled: $event")
+        }
 
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -98,27 +98,19 @@ trait StudiesProcessorComponent
       *  - [[StudyAnnotationTypeProcessor]]
       */
     val receiveCommand: Receive = {
-      case cmd: AddStudyCmd =>      process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UpdateStudyCmd =>   process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: EnableStudyCmd =>   process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: DisableStudyCmd =>  process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: RetireStudyCmd =>   process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UnretireStudyCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case procCmd: WrappedCommand =>
+        implicit val userId = procCmd.userId
 
-      case cmd: SpecimenGroupCommand =>
-        validateAndForward(specimenGroupProcessor, cmd)
-      case cmd: CollectionEventTypeCommand =>
-        validateAndForward(collectionEventTypeProcessor, cmd)
-      case cmd: CollectionEventAnnotationTypeCommand =>
-        validateAndForward(ceventAnnotationTypeProcessor, cmd)
-      case cmd: ParticipantAnnotationTypeCommand =>
-        validateAndForward(participantAnnotationTypeProcessor, cmd)
-      case cmd: ProcessingTypeCommand =>
-        validateAndForward(processingTypeProcessor, cmd)
-      case cmd: SpecimenLinkTypeCommand =>
-        validateAndForward(specimenLinkTypeProcessor, cmd)
-      case cmd: SpecimenLinkAnnotationTypeCommand =>
-        validateAndForward(specimenLinkAnnotationTypeProcessor,  cmd)
+        // order is important in the pattern match used below
+        procCmd.command match {
+          case cmd : StudyCommandWithId =>
+            validateAndForward(cmd)
+
+          case cmd: StudyCommand =>
+            process(validateCmd(cmd)){ w => recoverEvent(w.event, w.userId, w.dateTime) }
+
+          case cmd => log.error(s"invalid command: $cmd")
+        }
 
       case "snap" =>
         saveSnapshot(SnapshotState(studyRepository.getValues.toSet))
@@ -128,12 +120,23 @@ trait StudiesProcessorComponent
 
     }
 
-    private def validateAndForward(childActor: ActorRef, cmd: StudyCommandWithId) = {
+    private def validateAndForward(cmd: StudyCommandWithId) = {
       studyRepository.getByKey(StudyId(cmd.studyId)).fold(
         err => context.sender ! DomainError(s"invalid study id: ${cmd.studyId}").failNel,
         study => study match {
-          case study: DisabledStudy => childActor forward cmd
-          case study => context.sender ! s"$study for $cmd is not disabled".failNel
+          case study: DisabledStudy => {
+            val childActor = cmd match {
+              case cmd: SpecimenGroupCommand                 => specimenGroupProcessor
+              case cmd: CollectionEventTypeCommand           => collectionEventTypeProcessor
+              case cmd: CollectionEventAnnotationTypeCommand => ceventAnnotationTypeProcessor
+              case cmd: ParticipantAnnotationTypeCommand     => participantAnnotationTypeProcessor
+              case cmd: ProcessingTypeCommand                => processingTypeProcessor
+              case cmd: SpecimenLinkTypeCommand              => specimenLinkTypeProcessor
+              case cmd: SpecimenLinkAnnotationTypeCommand    => specimenLinkAnnotationTypeProcessor
+            }
+            childActor forward cmd
+          }
+          case study => context.sender ! DomainError(s"$study for $cmd is not disabled").failNel
         }
       )
     }
@@ -191,6 +194,19 @@ trait StudiesProcessorComponent
       updateStudy(cmd) {
         case study: RetiredStudy => fn(study)
         case study => s"$study for $cmd is not retired".failNel
+      }
+    }
+
+    private def validateCmd(cmd: StudyCommand): DomainValidation[StudyAddedEvent] = {
+      cmd match {
+        case cmd: AddStudyCmd =>      validateCmd(cmd)
+        case cmd: UpdateStudyCmd =>   validateCmd(cmd)
+        case cmd: EnableStudyCmd =>   validateCmd(cmd)
+        case cmd: DisableStudyCmd =>  validateCmd(cmd)
+        case cmd: RetireStudyCmd =>   validateCmd(cmd)
+        case cmd: UnretireStudyCmd => validateCmd(cmd)
+
+        case cmd => DomainError(s"invalid command: $cmd").failNel
       }
     }
 
@@ -263,13 +279,26 @@ trait StudiesProcessorComponent
       )
     }
 
-    private def recoverEvent(event: StudyAddedEvent) {
+    private def recoverEvent(event: StudyEvent, userId: UserId, dateTime: DateTime) {
+      event match {
+        case event: StudyAddedEvent =>     recoverEvent(event, userId, dateTime)
+        case event: StudyUpdatedEvent =>   recoverEvent(event, userId, dateTime)
+        case event: StudyEnabledEvent =>   recoverEvent(event, userId, dateTime)
+        case event: StudyDisabledEvent =>  recoverEvent(event, userId, dateTime)
+        case event: StudyRetiredEvent =>   recoverEvent(event, userId, dateTime)
+        case event: StudyUnretiredEvent => recoverEvent(event, userId, dateTime)
+
+        case event => log.error(s"invalid event: $event")
+      }
+    }
+
+    private def recoverEvent(event: StudyAddedEvent, userId: UserId, dateTime: DateTime) {
       studyRepository.put(DisabledStudy(
         StudyId(event.id), 0L, event.dateTime, None, event.name, event.description))
       ()
     }
 
-    private def recoverEvent(event: StudyUpdatedEvent) {
+    private def recoverEvent(event: StudyUpdatedEvent, userId: UserId, dateTime: DateTime) {
       studyRepository.getDisabled(StudyId(event.id)).fold(
         err => throw new IllegalStateException(s"updating study from event failed: $err"),
         s => studyRepository.put(s.copy(
@@ -279,7 +308,7 @@ trait StudiesProcessorComponent
       ()
     }
 
-    private def recoverEvent(event: StudyEnabledEvent) {
+    private def recoverEvent(event: StudyEnabledEvent, userId: UserId, dateTime: DateTime) {
       studyRepository.getDisabled(StudyId(event.id)).fold(
         err => throw new IllegalStateException(s"enabling study from event failed: $err"),
         s => studyRepository.put(EnabledStudy(s.id, event.version, s.timeAdded, Some(event.dateTime),
@@ -288,7 +317,7 @@ trait StudiesProcessorComponent
       ()
     }
 
-    private def recoverEvent(event: StudyDisabledEvent) {
+    private def recoverEvent(event: StudyDisabledEvent, userId: UserId, dateTime: DateTime) {
       studyRepository.getEnabled(StudyId(event.id)).fold(
         err => throw new IllegalStateException(s"disabling study from event failed: $err"),
         s => studyRepository.put(DisabledStudy(s.id, event.version, s.timeAdded, Some(event.dateTime),
@@ -297,7 +326,7 @@ trait StudiesProcessorComponent
       ()
     }
 
-    private def recoverEvent(event: StudyRetiredEvent) {
+    private def recoverEvent(event: StudyRetiredEvent, userId: UserId, dateTime: DateTime) {
       studyRepository.getDisabled(StudyId(event.id)).fold(
         err => throw new IllegalStateException(s"retiring study from event failed: $err"),
         s => studyRepository.put(RetiredStudy(s.id, event.version, s.timeAdded, Some(event.dateTime),
@@ -306,7 +335,7 @@ trait StudiesProcessorComponent
       ()
     }
 
-    private def recoverEvent(event: StudyUnretiredEvent) {
+    private def recoverEvent(event: StudyUnretiredEvent, userId: UserId, dateTime: DateTime) {
       studyRepository.getRetired(StudyId(event.id)).fold(
         err => throw new IllegalStateException(s"disabling study from event failed: $err"),
         s => studyRepository.put(DisabledStudy(s.id, event.version, s.timeAdded, Some(event.dateTime),

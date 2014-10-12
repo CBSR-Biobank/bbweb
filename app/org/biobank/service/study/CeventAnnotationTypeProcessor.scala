@@ -1,11 +1,11 @@
 package org.biobank.service.study
 
+import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service._
 import org.biobank.domain._
+import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
-import org.biobank.domain.study.Study
 import org.biobank.domain.AnnotationValueType._
 
 import akka.persistence.SnapshotOffer
@@ -39,9 +39,14 @@ trait CeventAnnotationTypeProcessorComponent {
       * processed to recreate the current state of the aggregate.
       */
     val receiveRecover: Receive = {
-      case event: CollectionEventAnnotationTypeAddedEvent => recoverEvent(event)
-      case event: CollectionEventAnnotationTypeUpdatedEvent => recoverEvent(event)
-      case event: CollectionEventAnnotationTypeRemovedEvent => recoverEvent(event)
+      case wevent: WrappedEvent[_] =>
+        wevent.event match {
+          case event: CollectionEventAnnotationTypeAddedEvent =>   recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: CollectionEventAnnotationTypeUpdatedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: CollectionEventAnnotationTypeRemovedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+
+          case event => throw new IllegalStateException(s"event not handled: $event")
+        }
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.ceventAnnotationTypes.foreach{ annotType =>
@@ -54,16 +59,17 @@ trait CeventAnnotationTypeProcessorComponent {
       * back to the user. Each valid command generates one or more events and is journaled.
       */
     val receiveCommand: Receive = {
-      case cmd: AddCollectionEventAnnotationTypeCmd =>
-        process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UpdateCollectionEventAnnotationTypeCmd =>
-        process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: RemoveCollectionEventAnnotationTypeCmd =>
-        process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case procCmd: WrappedCommand =>
+        implicit val userId = procCmd.userId
+        procCmd.command match {
+          case cmd: AddCollectionEventAnnotationTypeCmd =>    process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: UpdateCollectionEventAnnotationTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: RemoveCollectionEventAnnotationTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        }
 
       case "snap" =>
         saveSnapshot(SnapshotState(annotationTypeRepository.getValues.toSet))
-        stash()
+          stash()
 
       case cmd => log.error(s"message not handled: $cmd")
     }
@@ -129,15 +135,15 @@ trait CeventAnnotationTypeProcessorComponent {
       )
     }
 
-    private def recoverEvent(event: CollectionEventAnnotationTypeAddedEvent): Unit = {
+    private def recoverEvent(event: CollectionEventAnnotationTypeAddedEvent, userId: UserId, dateTime: DateTime): Unit = {
       log.info(s"recoverEvent: $event")
-      annotationTypeRepository.put(CollectionEventAnnotationType(
-        StudyId(event.studyId), AnnotationTypeId(event.annotationTypeId), 0L, event.dateTime, None,
-        event.name, event.description, event.valueType, event.maxValueCount, event.options))
+        annotationTypeRepository.put(CollectionEventAnnotationType(
+          StudyId(event.studyId), AnnotationTypeId(event.annotationTypeId), 0L, event.dateTime, None,
+          event.name, event.description, event.valueType, event.maxValueCount, event.options))
       ()
     }
 
-    private def recoverEvent(event: CollectionEventAnnotationTypeUpdatedEvent): Unit = {
+    private def recoverEvent(event: CollectionEventAnnotationTypeUpdatedEvent, userId: UserId, dateTime: DateTime): Unit = {
       annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId)).fold(
         err => throw new IllegalStateException(s"updating annotation type from event failed: $err"),
         at => annotationTypeRepository.put(at.copy(
@@ -152,7 +158,7 @@ trait CeventAnnotationTypeProcessorComponent {
       ()
     }
 
-    protected def recoverEvent(event: CollectionEventAnnotationTypeRemovedEvent): Unit = {
+    protected def recoverEvent(event: CollectionEventAnnotationTypeRemovedEvent, userId: UserId, dateTime: DateTime): Unit = {
       recoverEvent(AnnotationTypeId(event.annotationTypeId))
     }
 

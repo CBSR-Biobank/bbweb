@@ -1,6 +1,7 @@
 package org.biobank.service.study
 
 import org.biobank.domain._
+import org.biobank.domain.user.UserId
 import org.biobank.domain.study.{
   ProcessingType,
   ProcessingTypeId,
@@ -14,7 +15,7 @@ import org.biobank.domain.study.{
   SpecimenGroupRepositoryComponent
 }
 import org.slf4j.LoggerFactory
-import org.biobank.service._
+import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
@@ -50,9 +51,14 @@ trait SpecimenLinkTypeProcessorComponent {
       * processed to recreate the current state of the aggregate.
       */
     val receiveRecover: Receive = {
-      case event: SpecimenLinkTypeAddedEvent => recoverEvent(event)
-      case event: SpecimenLinkTypeUpdatedEvent => recoverEvent(event)
-      case event: SpecimenLinkTypeRemovedEvent => recoverEvent(event)
+      case wevent: WrappedEvent[_] =>
+        wevent.event match {
+          case event: SpecimenLinkTypeAddedEvent =>   recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: SpecimenLinkTypeUpdatedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: SpecimenLinkTypeRemovedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+
+          case event => throw new IllegalStateException(s"event not handled: $event")
+        }
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.specimenLinkTypes.foreach{ ceType =>
@@ -64,9 +70,13 @@ trait SpecimenLinkTypeProcessorComponent {
       * back to the user. Each valid command generates one or more events and is journaled.
       */
     val receiveCommand: Receive = {
-      case cmd: AddSpecimenLinkTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UpdateSpecimenLinkTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: RemoveSpecimenLinkTypeCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+      case procCmd: WrappedCommand =>
+        implicit val userId = procCmd.userId
+        procCmd.command match {
+          case cmd: AddSpecimenLinkTypeCmd =>    process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: UpdateSpecimenLinkTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: RemoveSpecimenLinkTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        }
 
       case "snap" =>
         saveSnapshot(SnapshotState(specimenLinkTypeRepository.getValues.toSet))
@@ -189,7 +199,7 @@ trait SpecimenLinkTypeProcessorComponent {
       )
     }
 
-    private def recoverEvent(event: SpecimenLinkTypeAddedEvent): Unit = {
+    private def recoverEvent(event: SpecimenLinkTypeAddedEvent, userId: UserId, dateTime: DateTime): Unit = {
       specimenLinkTypeRepository.put(SpecimenLinkType(
         ProcessingTypeId(event.processingTypeId),
         SpecimenLinkTypeId(event.specimenLinkTypeId),
@@ -208,7 +218,7 @@ trait SpecimenLinkTypeProcessorComponent {
       ()
     }
 
-    private def recoverEvent(event: SpecimenLinkTypeUpdatedEvent): Unit = {
+    private def recoverEvent(event: SpecimenLinkTypeUpdatedEvent, userId: UserId, dateTime: DateTime): Unit = {
       specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId)).fold(
         err => throw new IllegalStateException(s"updating specimen link type from event failed: $err"),
         slt => specimenLinkTypeRepository.put(slt.copy(
@@ -227,7 +237,7 @@ trait SpecimenLinkTypeProcessorComponent {
       ()
     }
 
-    private def recoverEvent(event: SpecimenLinkTypeRemovedEvent): Unit = {
+    private def recoverEvent(event: SpecimenLinkTypeRemovedEvent, userId: UserId, dateTime: DateTime): Unit = {
       specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId)).fold(
         err => throw new IllegalStateException(s"updating specimen link type from event failed: $err"),
         slt => specimenLinkTypeRepository.remove(slt)

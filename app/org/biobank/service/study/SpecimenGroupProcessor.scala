@@ -1,12 +1,13 @@
 package org.biobank.service.study
 
-import org.biobank.service.Processor
+import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
   DomainValidation,
   DomainError
 }
+import org.biobank.domain.user.UserId
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
@@ -53,9 +54,14 @@ trait SpecimenGroupProcessorComponent {
       * processed to recreate the current state of the aggregate.
       */
     val receiveRecover: Receive = {
-      case event: SpecimenGroupAddedEvent => recoverEvent(event)
-      case event: SpecimenGroupUpdatedEvent => recoverEvent(event)
-      case event: SpecimenGroupRemovedEvent => recoverEvent(event)
+      case wevent: WrappedEvent[_] =>
+        wevent.event match {
+          case event: SpecimenGroupAddedEvent =>   recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: SpecimenGroupUpdatedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+          case event: SpecimenGroupRemovedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+
+          case event => throw new IllegalStateException(s"event not handled: $event")
+        }
 
       case SnapshotOffer(_, snapshot: SnapshotState) =>
         snapshot.specimenGroups.foreach{ specimenGroup => specimenGroupRepository.put(specimenGroup) }
@@ -66,9 +72,14 @@ trait SpecimenGroupProcessorComponent {
       * back to the user. Each valid command generates one or more events and is journaled.
       */
     val receiveCommand: Receive = {
-      case cmd: AddSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: UpdateSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
-      case cmd: RemoveSpecimenGroupCmd => process(validateCmd(cmd)){ event => recoverEvent(event) }
+
+      case procCmd: WrappedCommand =>
+        implicit val userId = procCmd.userId
+        procCmd.command match {
+          case cmd: AddSpecimenGroupCmd =>    process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: UpdateSpecimenGroupCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+          case cmd: RemoveSpecimenGroupCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        }
 
       case "snap" =>
         saveSnapshot(SnapshotState(specimenGroupRepository.getValues.toSet))
@@ -144,7 +155,7 @@ trait SpecimenGroupProcessorComponent {
       )
     }
 
-    private def recoverEvent(event: SpecimenGroupAddedEvent): Unit = {
+    private def recoverEvent(event: SpecimenGroupAddedEvent, userId: UserId, dateTime: DateTime): Unit = {
       specimenGroupRepository.put(SpecimenGroup(
         StudyId(event.studyId), SpecimenGroupId(event.specimenGroupId), 0L, event.dateTime, None,
         event.name, event.description, event.units, event.anatomicalSourceType, event.preservationType,
@@ -153,7 +164,7 @@ trait SpecimenGroupProcessorComponent {
       ()
     }
 
-    private def recoverEvent(event: SpecimenGroupUpdatedEvent): Unit = {
+    private def recoverEvent(event: SpecimenGroupUpdatedEvent, userId: UserId, dateTime: DateTime): Unit = {
       specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId)).fold(
         err => throw new IllegalStateException(s"updating annotation type from event failed: $err"),
         sg => specimenGroupRepository.put(sg.copy(
@@ -170,7 +181,7 @@ trait SpecimenGroupProcessorComponent {
       ()
     }
 
-    private def recoverEvent(event: SpecimenGroupRemovedEvent): Unit = {
+    private def recoverEvent(event: SpecimenGroupRemovedEvent, userId: UserId, dateTime: DateTime): Unit = {
       specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId)).fold(
         err => throw new IllegalStateException(s"updating annotation type from event failed: $err"),
         sg => specimenGroupRepository.remove(sg)

@@ -68,8 +68,10 @@ object StudyEvents {
     dateTime: DateTime)
       extends StudyStatusChangedEvent
 
+  trait StudyEventWithId extends StudyEvent with HasStudyIdentity
+
   // specimen group events
-  trait SpecimenGroupEvent extends StudyEvent
+  trait SpecimenGroupEvent extends StudyEventWithId
 
   case class SpecimenGroupAddedEvent(
     studyId: String,
@@ -113,7 +115,7 @@ object StudyEvents {
     recurring: Boolean,
     specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
     annotationTypeData: List[CollectionEventTypeAnnotationTypeData])
-      extends StudyEvent
+      extends StudyEventWithId
 
   case class CollectionEventTypeUpdatedEvent(
     studyId: String,
@@ -125,12 +127,12 @@ object StudyEvents {
     recurring: Boolean,
     specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
     annotationTypeData: List[CollectionEventTypeAnnotationTypeData])
-      extends StudyEvent
+      extends StudyEventWithId
 
   case class CollectionEventTypeRemovedEvent(
     studyId: String,
     collectionEventTypeId: String)
-      extends StudyEvent
+      extends StudyEventWithId
 
   case class CollectionEventAnnotationTypeAddedEvent(
     studyId: String,
@@ -141,7 +143,7 @@ object StudyEvents {
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
     options: Option[Seq[String]])
-      extends StudyEvent
+      extends StudyEventWithId
 
   case class CollectionEventAnnotationTypeUpdatedEvent(
     studyId: String,
@@ -153,12 +155,12 @@ object StudyEvents {
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
     options: Option[Seq[String]])
-      extends StudyEvent
+      extends StudyEventWithId
 
   case class CollectionEventAnnotationTypeRemovedEvent(
     studyId: String,
     annotationTypeId: String)
-      extends StudyEvent
+      extends StudyEventWithId
 
   // participant annotation types
 
@@ -172,7 +174,7 @@ object StudyEvents {
     maxValueCount: Option[Int],
     options: Option[Seq[String]],
     required: Boolean = false)
-      extends StudyEvent
+      extends StudyEventWithId
 
   case class ParticipantAnnotationTypeUpdatedEvent(
     studyId: String,
@@ -185,12 +187,12 @@ object StudyEvents {
     maxValueCount: Option[Int],
     options: Option[Seq[String]],
     required: Boolean = false)
-      extends StudyEvent
+      extends StudyEventWithId
 
   case class ParticipantAnnotationTypeRemovedEvent(
     studyId: String,
     annotationTypeId: String)
-      extends StudyEvent
+      extends StudyEventWithId
 
   // procesing type events
   case class ProcessingTypeAddedEvent(
@@ -200,7 +202,7 @@ object StudyEvents {
     name: String,
     description: Option[String],
     enabled: Boolean)
-      extends StudyEvent
+      extends StudyEventWithId
 
   case class ProcessingTypeUpdatedEvent(
     studyId: String,
@@ -210,14 +212,16 @@ object StudyEvents {
     name: String,
     description: Option[String],
     enabled: Boolean)
-      extends StudyEvent
+      extends StudyEventWithId
 
   case class ProcessingTypeRemovedEvent(
     studyId: String,
     processingTypeId: String)
-      extends StudyEvent
+      extends StudyEventWithId
 
   // specimen link type
+  trait SpecimenLinkTypeEvent extends StudyEvent with HasProcessingTypeIdentity
+
   case class SpecimenLinkTypeAddedEvent(
     processingTypeId: String,
     specimenLinkTypeId: String,
@@ -231,7 +235,7 @@ object StudyEvents {
     inputContainerTypeId: Option[ContainerTypeId],
     outputContainerTypeId: Option[ContainerTypeId],
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
-      extends StudyEvent
+      extends SpecimenLinkTypeEvent
 
   case class SpecimenLinkTypeUpdatedEvent(
     processingTypeId: String,
@@ -247,12 +251,12 @@ object StudyEvents {
     inputContainerTypeId: Option[ContainerTypeId],
     outputContainerTypeId: Option[ContainerTypeId],
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
-      extends StudyEvent
+      extends SpecimenLinkTypeEvent
 
   case class SpecimenLinkTypeRemovedEvent(
-    studyId: String,
+    processingTypeId: String,
     specimenLinkTypeId: String)
-      extends StudyEvent
+      extends SpecimenLinkTypeEvent
 
   // specimen link annotation types
   case class SpecimenLinkAnnotationTypeAddedEvent(
@@ -264,7 +268,7 @@ object StudyEvents {
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
     options: Option[Seq[String]])
-      extends StudyEvent
+      extends StudyEventWithId
 
   case class SpecimenLinkAnnotationTypeUpdatedEvent(
     studyId: String,
@@ -276,12 +280,12 @@ object StudyEvents {
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
     options: Option[Seq[String]])
-      extends StudyEvent
+      extends StudyEventWithId
 
   case class SpecimenLinkAnnotationTypeRemovedEvent(
     studyId: String,
     annotationTypeId: String)
-      extends StudyEvent
+      extends StudyEventWithId
 
   implicit val annotationValueTypeFormat: Format[AnnotationValueType] =
     enumFormat(org.biobank.domain.AnnotationValueType)

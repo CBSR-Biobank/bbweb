@@ -24,9 +24,6 @@ object StudyCommands {
     val expectedVersion: Long
   }
 
-  trait HasStudyIdentity { val studyId: String }
-  trait HasProcessingTypeIdentity { val processingTypeId: String }
-
   case class AddStudyCmd(
     id: String,               // don't care
     expectedVersion: Long,    // don't care
