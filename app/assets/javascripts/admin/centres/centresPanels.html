@@ -12,10 +12,10 @@
   </h1>
 </div>
 <div class="clearfix">
-  <div data-ng-if="centres.length == 0">
+  <div data-ng-if="vm.centres.length <= 0">
     <p>No centres have been added.</p>
   </div>
-  <div data-ng-if="centres.length != 0">
+  <div data-ng-if="vm.centres.length > 0">
     <p>The following centres have been configured:</p>
     <div class="row" data-ng-repeat="rows in vm.centres | partition:3">
       <div class="col-md-4" data-ng-repeat="centre in rows">

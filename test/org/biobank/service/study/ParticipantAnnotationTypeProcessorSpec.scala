@@ -29,7 +29,7 @@ class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
 
   val participantAnnotationTypeRepository = inject [ParticipantAnnotationTypeRepository]
 
-  val studiesProcessor = injectActorRef [StudiesProcessor]
+  val studiesProcessor = injectActorRef [StudiesProcessor] ("studies")
 
   val nameGenerator = new NameGenerator(this.getClass)
 

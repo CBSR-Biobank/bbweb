@@ -8,22 +8,34 @@ define(['../module'], function(module) {
   module.controller('StudyEditCtrl', StudyEditCtrl);
 
   StudyEditCtrl.$inject = [
-    '$scope', '$state', 'stateHelper', 'StudyService', 'domainEntityUpdateError', 'user', 'study', 'returnState',
+    '$scope',
+    '$state',
+    '$stateParams',
+    'stateHelper',
+    'StudyService',
+    'domainEntityUpdateError',
+    'study'
   ];
 
-  function StudyEditCtrl($scope, $state, stateHelper, StudyService, domainEntityUpdateError, user, study, returnState) {
+  function StudyEditCtrl($scope,
+                         $state,
+                         $stateParams,
+                         stateHelper,
+                         StudyService,
+                         domainEntityUpdateError,
+                         study) {
+    var vm = this;
     var action = (study.id) ? 'Update' : 'Add';
-    $scope.title =  action + ' study';
-    $scope.study = study;
-    $scope.submit = submit;
-    $scope.cancel = cancel;
+    vm.returnState = study.id ? 'admin.studies.study.summary' : 'admin.studies';
+    vm.title =  action + ' study';
+    vm.study = study;
+    vm.submit = submit;
+    vm.cancel = cancel;
 
     //--
 
     function gotoReturnState() {
-      var params = returnState.params || {};
-      var options = returnState.options || {};
-      return $state.go(returnState.name, params, options);
+      stateHelper.reloadStateAndReinit(vm.returnState, $stateParams, {reload: true});
     }
 
     function submit(study) {
@@ -33,9 +45,9 @@ define(['../module'], function(module) {
           domainEntityUpdateError.handleError(
             error,
             'study',
-            returnState.name,
-            returnState.params,
-            returnState.options);
+            vm.returnState,
+            $stateParams,
+            {reload: true});
         });
     }
 

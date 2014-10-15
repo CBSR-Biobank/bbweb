@@ -1,7 +1,7 @@
 /**
  * Configure routes of centres module.
  */
-define(['./module', 'underscore'], function(module, _) {
+define(['../module', 'underscore'], function(module, _) {
   'use strict';
 
   module.config(config);

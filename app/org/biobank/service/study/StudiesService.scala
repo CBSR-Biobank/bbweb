@@ -241,7 +241,7 @@ class StudiesServiceImpl(implicit inj: Injector)
 
   implicit val timeout = inject [Timeout] ('akkaTimeout)
 
-  val processor = injectActorRef [StudiesProcessor]
+  val processor = injectActorRef [StudiesProcessor] ("study")
 
   val studyRepository = inject [StudyRepository]
 

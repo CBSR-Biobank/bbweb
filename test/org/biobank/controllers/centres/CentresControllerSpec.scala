@@ -368,7 +368,7 @@ class CentresControllerSpec extends ControllerFixture {
         }
       }
 
-      "does not list an invalid location" taggedAs(Tag("1")) in new App(fakeApp) {
+      "does not list an invalid location" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)

@@ -3,12 +3,12 @@
   this file is included by a parent template
 
 -->
-<div class="panel panel-warning" data-ng-if="vm.data.length === 0">
+<div class="panel panel-warning" data-ng-if="vm.annotTypes.length <= 0">
     <div class="panel-heading">
       Annotation types have not been defined for this study yet.
     </div>
   </div>
-<div data-ng-if="vm.data.length !== 0">
+<div data-ng-if="vm.annotTypes.length > 0">
     <p>The following annotation types are defined:</p>
     <table class="table table-condensed table-hover"
          data-ng-table="vm.tableParams"

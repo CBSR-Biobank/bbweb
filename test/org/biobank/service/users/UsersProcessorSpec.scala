@@ -24,7 +24,7 @@ class UsersProcessorSpec extends TestFixture {
 
   val passwordHasher = inject [PasswordHasher]
 
-  val usersProcessor = injectActorRef [UsersProcessor]
+  val usersProcessor = injectActorRef [UsersProcessor] ("user")
 
   val nameGenerator = new NameGenerator(this.getClass)
 

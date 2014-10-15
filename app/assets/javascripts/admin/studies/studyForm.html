@@ -4,7 +4,7 @@
 <div class="clearfix">
   <form class="form-horizontal"
         name="studyForm"
-        data-ng-submit="studyForm.$valid && submit(study)"
+        data-ng-submit="studyForm.$valid && vm.submit(vm.study)"
         novalidate>
 
     <!-- NAME -->
@@ -15,7 +15,7 @@
             name="name"
             type="text"
             class="form-control"
-            data-ng-model="study.name"
+            data-ng-model="vm.study.name"
             data-ng-minlength="2"
             placeholder="A short name for the study"
             required />
@@ -32,7 +32,7 @@
         <textarea name="description"
                   class="form-control"
                   rows="10"
-                  data-ng-model="study.description"
+                  data-ng-model="vm.study.description"
                   placeholder="A description of the study (optional)" />
       </div>
     </div>
@@ -41,7 +41,7 @@
     <div class="form-group">
       <div class="col-md-offset-2 col-md-10">
         <button class="btn btn-primary" data-data-ng-disabled="studyForm.$invalid">Submit</button>
-        <button class="btn" data-ng-click="cancel()">Cancel</button>
+        <button class="btn" data-ng-click="vm.cancel()">Cancel</button>
       </div>
     </div>
   </form>

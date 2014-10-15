@@ -36,7 +36,7 @@ class StudiesProcessorSpec extends TestFixture {
 
   val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
 
-  val studiesProcessor = injectActorRef [StudiesProcessor]
+  val studiesProcessor = injectActorRef [StudiesProcessor] ("studies")
 
   val nameGenerator = new NameGenerator(this.getClass)
 

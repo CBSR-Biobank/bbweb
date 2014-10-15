@@ -4,10 +4,14 @@
  * Manages all sub-modules so other RequireJS modules only have to import the package.
  */
 define([
-  './adminCtrl',
+  './AdminCtrl',
   './adminService',
   './adminStates',
-  './centres/index',
+  './centres/CentreEditCtrl',
+  './centres/CentreSummaryTabCtrl',
+  './centres/CentresCtrl',
+  './centres/CentresTableCtrl',
+  './centres/states',
   './studies/StudyEditCtrl',
   './studies/annotationTypes/CeventAnnotTypesPanelCtrl',
   './studies/annotationTypes/ParticipantsAnnotTypesPanelCtrl',

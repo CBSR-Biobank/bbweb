@@ -65,19 +65,12 @@ define(['../module'], function(module) {
         user: userResolve.user,
         study: function() {
           return { name: '', description: null };
-        },
-        returnState: function() {
-          return {
-            name: 'admin.studies',
-            params:  {},
-            options: {}
-          };
         }
       },
       views: {
         'main@': {
           templateUrl: '/assets/javascripts/admin/studies/studyForm.html',
-          controller: 'StudyEditCtrl'
+          controller: 'StudyEditCtrl as vm'
         }
       },
       data: {
@@ -147,19 +140,12 @@ define(['../module'], function(module) {
     $stateProvider.state('admin.studies.study.summary.update', {
       url: '/update',
       resolve: {
-        user: userResolve.user,
-        returnState: ['$stateParams', function($stateParams) {
-          return {
-            name: 'admin.studies.study.summary',
-            params:  { studyId: $stateParams.studyId },
-            options: { reload: true }
-          };
-        }]
+        user: userResolve.user
       },
       views: {
         'main@': {
           templateUrl: '/assets/javascripts/admin/studies/studyForm.html',
-          controller: 'StudyEditCtrl'
+          controller: 'StudyEditCtrl as vm'
         }
       },
       data: {

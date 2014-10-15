@@ -36,7 +36,7 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
 
   val specimenLinkAnnotationTypeRepository = inject [SpecimenLinkAnnotationTypeRepository]
 
-  val studiesProcessor = injectActorRef [StudiesProcessor]
+  val studiesProcessor = injectActorRef [StudiesProcessor] ("studies")
 
   val nameGenerator = new NameGenerator(this.getClass)
 

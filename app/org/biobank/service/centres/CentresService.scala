@@ -82,7 +82,7 @@ class CentresServiceImpl(implicit inj: Injector)
 
   val centreLocationsRepository = inject [CentreLocationsRepository]
 
-  val processor = injectActorRef [CentresProcessor]
+  val processor = injectActorRef [CentresProcessor] ("centre")
 
   val log = LoggerFactory.getLogger(this.getClass)
 

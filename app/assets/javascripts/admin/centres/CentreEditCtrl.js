@@ -1,19 +1,33 @@
-define(['./module'], function(module) {
+define(['../module'], function(module) {
   'use strict';
 
   module.controller('CentreEditCtrl', CentreEditCtrl);
 
   CentreEditCtrl.$inject = [
-    '$scope', '$state', 'stateHelper', 'centreService', 'domainEntityUpdateError', 'user', 'centre',
+    '$scope',
+    '$state',
+    '$stateParams',
+    'stateHelper',
+    'centreService',
+    'domainEntityUpdateError',
+    'user',
+    'centre',
   ];
 
   /**
    *
    */
-  function CentreEditCtrl($scope, $state, stateHelper, centreService, domainEntityUpdateError, user, centre) {
+  function CentreEditCtrl($scope,
+                          $state,
+                          $stateParams,
+                          stateHelper,
+                          centreService,
+                          domainEntityUpdateError,
+                          user,
+                          centre) {
     var vm = this;
     var action = centre.id ? 'Update' : 'Add';
-    var returnState = $state.current.data.returnState;
+    var returnState = centre.id ? 'admin.centres.centre.summary' : 'admin.centres';
 
     vm.title = action + ' centre';
     vm.centre = centre;
@@ -23,7 +37,7 @@ define(['./module'], function(module) {
     //---
 
     function gotoReturnState() {
-      stateHelper.reloadStateAndReinit(returnState);
+      stateHelper.reloadStateAndReinit(returnState, $stateParams, {reload: true});
     }
 
     function submit(centre) {

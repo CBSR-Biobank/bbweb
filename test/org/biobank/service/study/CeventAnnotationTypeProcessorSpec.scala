@@ -25,7 +25,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
 
   val collectionEventAnnotationTypeRepository = inject [CollectionEventAnnotationTypeRepository]
 
-  val studiesProcessor = injectActorRef [StudiesProcessor]
+  val studiesProcessor = injectActorRef [StudiesProcessor] ("studies")
 
   val nameGenerator = new NameGenerator(this.getClass)
 

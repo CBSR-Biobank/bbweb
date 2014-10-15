@@ -29,7 +29,7 @@ class UsersService(implicit inj: Injector)
 
   implicit val timeout = inject [Timeout] ('akkaTimeout)
 
-  val usersProcessor = injectActorRef [UsersProcessor]
+  val usersProcessor = injectActorRef [UsersProcessor] ("user")
 
   val userRepository = inject [UserRepository]
 

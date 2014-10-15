@@ -34,7 +34,7 @@ class ProcessingTypeProcessorSpec extends TestFixture {
 
   val processingTypeRepository = inject [ProcessingTypeRepository]
 
-  val studiesProcessor = injectActorRef [StudiesProcessor]
+  val studiesProcessor = injectActorRef [StudiesProcessor] ("studies")
 
   val nameGenerator = new NameGenerator(this.getClass)
 

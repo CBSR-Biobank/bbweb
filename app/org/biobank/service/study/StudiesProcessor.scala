@@ -38,19 +38,26 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
   val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
 
-  val specimenGroupProcessor = injectActorRef [SpecimenGroupProcessor]
+  val specimenGroupProcessor =
+    injectActorRef [SpecimenGroupProcessor] ("specimenGroup")
 
-  val collectionEventTypeProcessor = injectActorRef [CollectionEventTypeProcessor]
+  val collectionEventTypeProcessor =
+    injectActorRef [CollectionEventTypeProcessor] ("collectionEventType")
 
-  val ceventAnnotationTypeProcessor = injectActorRef [CeventAnnotationTypeProcessor]
+  val ceventAnnotationTypeProcessor =
+    injectActorRef [CeventAnnotationTypeProcessor] ("ceventAnnotationType")
 
-  val participantAnnotationTypeProcessor = injectActorRef [ParticipantAnnotationTypeProcessor]
+  val participantAnnotationTypeProcessor =
+    injectActorRef [ParticipantAnnotationTypeProcessor] ("participantAnnotationType")
 
-  val processingTypeProcessor = injectActorRef [ProcessingTypeProcessor]
+  val processingTypeProcessor =
+    injectActorRef [ProcessingTypeProcessor] ("processingType")
 
-  val specimenLinkTypeProcessor = injectActorRef [SpecimenLinkTypeProcessor]
+  val specimenLinkTypeProcessor =
+    injectActorRef [SpecimenLinkTypeProcessor] ("specimenLinkType")
 
-  val specimenLinkAnnotationTypeProcessor = injectActorRef [SpecimenLinkAnnotationTypeProcessor]
+  val specimenLinkAnnotationTypeProcessor =
+    injectActorRef [SpecimenLinkAnnotationTypeProcessor] ("specimenLinkAnnotationType")
 
   /**
     * These are the events that are recovered during journal recovery. They cannot fail and must be
