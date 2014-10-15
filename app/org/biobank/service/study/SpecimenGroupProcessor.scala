@@ -87,7 +87,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
       saveSnapshot(SnapshotState(specimenGroupRepository.getValues.toSet))
       stash()
 
-    case cmd => log.error(s"message not handled: $cmd")
+    case cmd => log.error(s"SpecimenGroupProcessor: message not handled: $cmd")
 
   }
 

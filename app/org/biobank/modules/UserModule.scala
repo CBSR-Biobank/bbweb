@@ -15,14 +15,14 @@ class UserModule extends Module {
 
   bind [PasswordHasher] to new PasswordHasherImpl
 
-  bind[CollectionEventAnnotationTypeRepository]  to new CollectionEventAnnotationTypeRepositoryImpl
-  bind[CollectionEventTypeRepository]            to new CollectionEventTypeRepositoryImpl
-  bind[ParticipantAnnotationTypeRepository]      to new ParticipantAnnotationTypeRepositoryImpl
-  bind[ProcessingTypeRepository]                 to new ProcessingTypeRepositoryImpl
-  bind[SpecimenGroupRepository]                  to new SpecimenGroupRepositoryImpl
-  bind[SpecimenLinkAnnotationTypeRepository]     to new SpecimenLinkAnnotationTypeRepositoryImpl
-  bind[SpecimenLinkTypeRepository]               to new SpecimenLinkTypeRepositoryImpl
-  bind[StudyRepository]                          to new StudyRepositoryImpl
+  bind [CollectionEventAnnotationTypeRepository]  to new CollectionEventAnnotationTypeRepositoryImpl
+  bind [CollectionEventTypeRepository]            to new CollectionEventTypeRepositoryImpl
+  bind [ParticipantAnnotationTypeRepository]      to new ParticipantAnnotationTypeRepositoryImpl
+  bind [ProcessingTypeRepository]                 to new ProcessingTypeRepositoryImpl
+  bind [SpecimenGroupRepository]                  to new SpecimenGroupRepositoryImpl
+  bind [SpecimenLinkAnnotationTypeRepository]     to new SpecimenLinkAnnotationTypeRepositoryImpl
+  bind [SpecimenLinkTypeRepository]               to new SpecimenLinkTypeRepositoryImpl
+  bind [StudyRepository]                          to new StudyRepositoryImpl
 
   bind [UserRepository] to new UserRepositoryImpl
 

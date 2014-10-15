@@ -77,7 +77,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
       saveSnapshot(SnapshotState(centreRepository.getValues.toSet))
       stash()
 
-    case cmd => log.error(s"message not handled: $cmd")
+    case cmd => log.error(s"CentresProcessor: message not handled: $cmd")
 
   }
 

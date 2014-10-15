@@ -1,5 +1,6 @@
 package org.biobank.service.study
 
+import org.biobank.service.ApplicationService
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.infrastructure.ProcessingDto
@@ -229,7 +230,10 @@ trait StudiesService {
   * @param studiesProcessor
   *
   */
-class StudiesServiceImpl(implicit inj: Injector) extends StudiesService with AkkaInjectable {
+class StudiesServiceImpl(implicit inj: Injector)
+    extends StudiesService
+    with ApplicationService
+    with AkkaInjectable {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -418,33 +422,33 @@ class StudiesServiceImpl(implicit inj: Injector) extends StudiesService with Akk
 
   def addStudy(cmd: AddStudyCmd)(implicit userId: UserId)
       : Future[DomainValidation[StudyAddedEvent]] = {
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[StudyAddedEvent]])
   }
 
   def updateStudy(cmd: UpdateStudyCmd)(implicit userId: UserId)
       : Future[DomainValidation[StudyUpdatedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[StudyUpdatedEvent]])
 
   def enableStudy(cmd: EnableStudyCmd)(implicit userId: UserId)
       : Future[DomainValidation[StudyEnabledEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[StudyEnabledEvent]])
 
   def disableStudy(cmd: DisableStudyCmd)(implicit userId: UserId)
       : Future[DomainValidation[StudyDisabledEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[StudyDisabledEvent]])
 
   def retireStudy(cmd: RetireStudyCmd)(implicit userId: UserId)
       : Future[DomainValidation[StudyRetiredEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[StudyRetiredEvent]])
 
   def unretireStudy(cmd: UnretireStudyCmd)(implicit userId: UserId)
       : Future[DomainValidation[StudyUnretiredEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[StudyUnretiredEvent]])
 
   // specimen groups
@@ -460,35 +464,35 @@ class StudiesServiceImpl(implicit inj: Injector) extends StudiesService with Akk
 
   def addSpecimenGroup(cmd: AddSpecimenGroupCmd)(implicit userId: UserId)
       : Future[DomainValidation[SpecimenGroupAddedEvent]] = {
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[SpecimenGroupAddedEvent]])
   }
 
   def updateSpecimenGroup(cmd: UpdateSpecimenGroupCmd)(implicit userId: UserId)
       : Future[DomainValidation[SpecimenGroupUpdatedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[SpecimenGroupUpdatedEvent]])
 
   def removeSpecimenGroup(cmd: RemoveSpecimenGroupCmd)(implicit userId: UserId)
       : Future[DomainValidation[SpecimenGroupRemovedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[SpecimenGroupRemovedEvent]])
 
   // collection event types
   def addCollectionEventType(cmd: AddCollectionEventTypeCmd)(implicit userId: UserId)
       : Future[DomainValidation[CollectionEventTypeAddedEvent]] = {
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CollectionEventTypeAddedEvent]])
   }
 
   def updateCollectionEventType(cmd: UpdateCollectionEventTypeCmd)(implicit userId: UserId)
       : Future[DomainValidation[CollectionEventTypeUpdatedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CollectionEventTypeUpdatedEvent]])
 
   def removeCollectionEventType(cmd: RemoveCollectionEventTypeCmd)(implicit userId: UserId)
       : Future[DomainValidation[CollectionEventTypeRemovedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CollectionEventTypeRemovedEvent]])
 
   // collection event annotation types
@@ -507,7 +511,7 @@ class StudiesServiceImpl(implicit inj: Injector) extends StudiesService with Akk
     (cmd: AddCollectionEventAnnotationTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[CollectionEventAnnotationTypeAddedEvent]] = {
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeAddedEvent]])
   }
 
@@ -515,14 +519,14 @@ class StudiesServiceImpl(implicit inj: Injector) extends StudiesService with Akk
     (cmd: UpdateCollectionEventAnnotationTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]])
 
   def removeCollectionEventAnnotationType
     (cmd: RemoveCollectionEventAnnotationTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]])
 
   // participant annotation types
@@ -540,21 +544,21 @@ class StudiesServiceImpl(implicit inj: Injector) extends StudiesService with Akk
     (cmd: AddParticipantAnnotationTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[ParticipantAnnotationTypeAddedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeAddedEvent]])
 
   def updateParticipantAnnotationType
     (cmd: UpdateParticipantAnnotationTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]])
 
   def removeParticipantAnnotationType
     (cmd: RemoveParticipantAnnotationTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[ParticipantAnnotationTypeRemovedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeRemovedEvent]])
 
   // specimen link annotation types
@@ -580,21 +584,21 @@ class StudiesServiceImpl(implicit inj: Injector) extends StudiesService with Akk
     (cmd: AddSpecimenLinkAnnotationTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeAddedEvent]])
 
   def updateSpecimenLinkAnnotationType
     (cmd: UpdateSpecimenLinkAnnotationTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]])
 
   def removeSpecimenLinkAnnotationType
     (cmd: RemoveSpecimenLinkAnnotationTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]])
 
   // processing types
@@ -602,7 +606,7 @@ class StudiesServiceImpl(implicit inj: Injector) extends StudiesService with Akk
     (cmd: AddProcessingTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[ProcessingTypeAddedEvent]] = {
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[ProcessingTypeAddedEvent]])
   }
 
@@ -610,14 +614,14 @@ class StudiesServiceImpl(implicit inj: Injector) extends StudiesService with Akk
     (cmd: UpdateProcessingTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[ProcessingTypeUpdatedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[ProcessingTypeUpdatedEvent]])
 
   def removeProcessingType
     (cmd: RemoveProcessingTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[ProcessingTypeRemovedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[ProcessingTypeRemovedEvent]])
 
   // specimen link types
@@ -625,7 +629,7 @@ class StudiesServiceImpl(implicit inj: Injector) extends StudiesService with Akk
     (cmd: AddSpecimenLinkTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[SpecimenLinkTypeAddedEvent]] = {
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[SpecimenLinkTypeAddedEvent]])
   }
 
@@ -633,14 +637,14 @@ class StudiesServiceImpl(implicit inj: Injector) extends StudiesService with Akk
     (cmd: UpdateSpecimenLinkTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[SpecimenLinkTypeUpdatedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[SpecimenLinkTypeUpdatedEvent]])
 
   def removeSpecimenLinkType
     (cmd: RemoveSpecimenLinkTypeCmd)
     (implicit userId: UserId)
       : Future[DomainValidation[SpecimenLinkTypeRemovedEvent]] =
-    processor ? cmd map (
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[SpecimenLinkTypeRemovedEvent]])
 
 }

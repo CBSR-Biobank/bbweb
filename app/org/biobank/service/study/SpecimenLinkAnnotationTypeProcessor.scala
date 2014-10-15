@@ -73,7 +73,7 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
       saveSnapshot(SnapshotState(annotationTypeRepository.getValues.toSet))
       stash()
 
-    case cmd => log.error(s"message not handled: $cmd")
+    case cmd => log.error(s"SpecimenLinkAnnotationTypeProcessor: message not handled: $cmd")
   }
 
   /** Updates to annotation types only allowed if they are not being used by any participants.

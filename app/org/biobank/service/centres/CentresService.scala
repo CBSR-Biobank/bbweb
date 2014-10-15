@@ -1,5 +1,6 @@
 package org.biobank.service.centre
 
+import org.biobank.service.ApplicationService
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 import org.biobank.domain.{ DomainValidation, DomainError, Location, LocationId, LocationRepository }
@@ -64,7 +65,10 @@ trait CentresService {
   * @param centreProcessor
   *
   */
-class CentresServiceImpl(implicit inj: Injector) extends CentresService with AkkaInjectable {
+class CentresServiceImpl(implicit inj: Injector)
+    extends CentresService
+    with ApplicationService
+    with AkkaInjectable {
 
   implicit val system = inject [ActorSystem]
 
@@ -118,45 +122,45 @@ class CentresServiceImpl(implicit inj: Injector) extends CentresService with Akk
     )
   }
 
-  def addCentre(cmd: AddCentreCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreAddedEvent]] = {
-    processor ? cmd map (
+  def addCentre(cmd: AddCentreCmd)(implicit userId: UserId)
+      : Future[DomainValidation[CentreAddedEvent]] = {
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CentreAddedEvent]])
   }
 
-  def updateCentre(cmd: UpdateCentreCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreUpdatedEvent]] =
-    processor ? cmd map (
+  def updateCentre(cmd: UpdateCentreCmd)(implicit userId: UserId)
+      : Future[DomainValidation[CentreUpdatedEvent]] =
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CentreUpdatedEvent]])
 
-  def enableCentre(cmd: EnableCentreCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreEnabledEvent]] =
-    processor ? cmd map (
+  def enableCentre(cmd: EnableCentreCmd)(implicit userId: UserId)
+      : Future[DomainValidation[CentreEnabledEvent]] =
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CentreEnabledEvent]])
 
-  def disableCentre(cmd: DisableCentreCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreDisabledEvent]] =
-    processor ? cmd map (
+  def disableCentre(cmd: DisableCentreCmd)(implicit userId: UserId)
+      : Future[DomainValidation[CentreDisabledEvent]] =
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CentreDisabledEvent]])
 
-  def addCentreLocation(cmd: AddCentreLocationCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreLocationAddedEvent]] =
-    processor ? cmd map (
+  def addCentreLocation(cmd: AddCentreLocationCmd)(implicit userId: UserId)
+      : Future[DomainValidation[CentreLocationAddedEvent]] =
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CentreLocationAddedEvent]])
 
-  def removeCentreLocation(cmd: RemoveCentreLocationCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreLocationRemovedEvent]] =
-    processor ? cmd map (
+  def removeCentreLocation(cmd: RemoveCentreLocationCmd)(implicit userId: UserId)
+      : Future[DomainValidation[CentreLocationRemovedEvent]] =
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CentreLocationRemovedEvent]])
 
-  def addCentreToStudy(cmd: AddCentreToStudyCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreAddedToStudyEvent]] =
-    processor ? cmd map (
+  def addCentreToStudy(cmd: AddCentreToStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[CentreAddedToStudyEvent]] =
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CentreAddedToStudyEvent]])
 
-  def removeCentreFromStudy(cmd: RemoveCentreFromStudyCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreRemovedFromStudyEvent]] =
-    processor ? cmd map (
+  def removeCentreFromStudy(cmd: RemoveCentreFromStudyCmd)(implicit userId: UserId)
+      : Future[DomainValidation[CentreRemovedFromStudyEvent]] =
+    ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CentreRemovedFromStudyEvent]])
 
 

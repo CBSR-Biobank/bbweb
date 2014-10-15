@@ -72,7 +72,7 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
       saveSnapshot(SnapshotState(annotationTypeRepository.getValues.toSet))
       stash()
 
-    case msg => log.error(s"message not handled: $msg")
+    case msg => log.error(s"CeventAnnotationTypeProcessor: message not handled: $msg")
   }
 
   /** Updates to annotation types only allowed if they are not being used by any collection event types.

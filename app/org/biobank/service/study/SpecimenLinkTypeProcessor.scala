@@ -86,7 +86,7 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
       saveSnapshot(SnapshotState(specimenLinkTypeRepository.getValues.toSet))
       stash()
 
-    case cmd => log.error(s"message not handled: $cmd")
+    case cmd => log.error(s"SpecimenLinkTypeProcessor: message not handled: $cmd")
 
   }
 

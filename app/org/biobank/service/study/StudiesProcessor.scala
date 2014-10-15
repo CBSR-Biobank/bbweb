@@ -107,7 +107,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
       saveSnapshot(SnapshotState(studyRepository.getValues.toSet))
       stash()
 
-    case cmd => log.error(s"message not handled: $cmd")
+    case cmd => log.error(s"StudiesProcessor: message not handled: $cmd")
 
   }
 

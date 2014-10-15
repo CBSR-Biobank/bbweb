@@ -82,7 +82,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       saveSnapshot(SnapshotState(userRepository.getValues.toSet))
       stash()
 
-    case cmd => log.error(s"message not handled: $cmd")
+    case cmd => log.error(s"UsersProcessor: message not handled: $cmd")
   }
 
   def validateCmd(cmd: RegisterUserCmd): DomainValidation[UserRegisteredEvent] = {

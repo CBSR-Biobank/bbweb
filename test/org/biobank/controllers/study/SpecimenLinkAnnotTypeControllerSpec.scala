@@ -5,15 +5,15 @@ import org.biobank.domain.study.{ Study, SpecimenLinkAnnotationType }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper._
 
+import com.typesafe.plugin._
+import org.joda.time.DateTime
+import org.scalatest.Tag
+import org.scalatestplus.play._
+import org.slf4j.LoggerFactory
+import play.api.Play.current
+import play.api.libs.json._
 import play.api.test.Helpers._
 import play.api.test.WithApplication
-import play.api.libs.json._
-import org.scalatest.Tag
-import org.slf4j.LoggerFactory
-import org.joda.time.DateTime
-import com.typesafe.plugin._
-import play.api.Play.current
-import org.scalatestplus.play._
 
 class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
   import TestGlobal._
@@ -190,7 +190,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     }
 
     "POST /studies/slannottypes" must {
-      "add a collection event annotation type" in new App(fakeApp) {
+      "add a collection event annotation type" taggedAs(Tag("1")) in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         studyRepository.put(study)
@@ -199,17 +199,13 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, "/studies/slannottypes", json = annotTypeToAddCmdJson(annotType))
           (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "POST /studies/slannottypes" must {
       "not add a collection event annotation type to an enabled study" in new App(fakeApp) {
         doLogin
         addOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail)
       }
-    }
 
-    "POST /studies/slannottypes" must {
       "not add a collection event annotation type to an retired study" in new App(fakeApp) {
         doLogin
         addOnNonDisabledStudy(

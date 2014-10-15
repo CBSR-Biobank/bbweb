@@ -79,7 +79,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
       saveSnapshot(SnapshotState(processingTypeRepository.getValues.toSet))
       stash()
 
-    case cmd => log.error(s"message not handled: $cmd")
+    case cmd => log.error(s"ProcessingTypeProcessor: message not handled: $cmd")
   }
 
   def update

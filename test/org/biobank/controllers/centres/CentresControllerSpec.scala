@@ -221,7 +221,7 @@ class CentresControllerSpec extends ControllerFixture {
         val json = makeRequest(GET, s"/centres/" + nameGenerator.next[String], BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("not found")
+          (json \ "message").as[String] must include ("invalid centre id")
       }
     }
 

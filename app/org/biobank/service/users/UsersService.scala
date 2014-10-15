@@ -19,7 +19,9 @@ import scaldi.{Injectable, Injector}
 import scalaz._
 import scalaz.Scalaz._
 
-class UsersService(implicit inj: Injector) extends AkkaInjectable {
+class UsersService(implicit inj: Injector)
+    extends ApplicationService
+    with AkkaInjectable {
 
   val Log = LoggerFactory.getLogger(this.getClass)
 
@@ -61,55 +63,48 @@ class UsersService(implicit inj: Injector) extends AkkaInjectable {
 
   def resetPassword(cmd: ResetUserPasswordCmd)
       : Future[DomainValidation[UserPasswordResetEvent]] = {
-    var wcmd = WrappedCommand(cmd, None)
-    usersProcessor ? wcmd map (_.asInstanceOf[DomainValidation[UserPasswordResetEvent]])
+    ask(usersProcessor, cmd).map (
+      _.asInstanceOf[DomainValidation[UserPasswordResetEvent]])
   }
 
   def register(cmd: RegisterUserCmd): Future[DomainValidation[UserRegisteredEvent]] = {
-    var wcmd = WrappedCommand(cmd, None)
-    usersProcessor ? wcmd map (_.asInstanceOf[DomainValidation[UserRegisteredEvent]])
+    ask(usersProcessor, cmd).map (
+      _.asInstanceOf[DomainValidation[UserRegisteredEvent]])
   }
 
   def updateName(cmd: UpdateUserNameCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserNameUpdatedEvent]] = {
-    var wcmd = WrappedCommand(cmd, Some(userId))
-    usersProcessor ? wcmd map (_.asInstanceOf[DomainValidation[UserNameUpdatedEvent]])
+    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserNameUpdatedEvent]])
   }
 
   def updateEmail(cmd: UpdateUserEmailCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserEmailUpdatedEvent]] = {
-    var wcmd = WrappedCommand(cmd, Some(userId))
-    usersProcessor ? wcmd map (_.asInstanceOf[DomainValidation[UserEmailUpdatedEvent]])
+    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserEmailUpdatedEvent]])
   }
 
   def updatePassword(cmd: UpdateUserPasswordCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserPasswordUpdatedEvent]] = {
-    var wcmd = WrappedCommand(cmd, Some(userId))
-    usersProcessor ? wcmd map (_.asInstanceOf[DomainValidation[UserPasswordUpdatedEvent]])
+    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserPasswordUpdatedEvent]])
   }
 
   def activate(cmd: ActivateUserCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserActivatedEvent]] = {
-    var wcmd = WrappedCommand(cmd, Some(userId))
-    usersProcessor ? wcmd map (_.asInstanceOf[DomainValidation[UserActivatedEvent]])
+    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserActivatedEvent]])
   }
 
   def lock(cmd: LockUserCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserLockedEvent]] = {
-    var wcmd = WrappedCommand(cmd, Some(userId))
-    usersProcessor ? wcmd map (_.asInstanceOf[DomainValidation[UserLockedEvent]])
+    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserLockedEvent]])
   }
 
   def unlock(cmd: UnlockUserCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserUnlockedEvent]] = {
-    var wcmd = WrappedCommand(cmd, Some(userId))
-    usersProcessor ? wcmd map (_.asInstanceOf[DomainValidation[UserUnlockedEvent]])
+    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserUnlockedEvent]])
   }
 
   def remove(cmd: RemoveUserCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserRemovedEvent]] = {
-    var wcmd = WrappedCommand(cmd, Some(userId))
-    usersProcessor ? wcmd map (_.asInstanceOf[DomainValidation[UserRemovedEvent]])
+    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserRemovedEvent]])
   }
 
 }

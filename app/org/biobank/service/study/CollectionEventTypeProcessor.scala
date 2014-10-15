@@ -82,7 +82,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
       saveSnapshot(SnapshotState(collectionEventTypeRepository.getValues.toSet))
       stash()
 
-    case cmd => log.error(s"message not handled: $cmd")
+    case cmd => log.error(s"CollectionEventTypeProcessor: message not handled: $cmd")
   }
 
   def update
