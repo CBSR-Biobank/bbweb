@@ -290,22 +290,19 @@ class StudiesServiceImpl(implicit inj: Injector)
     studyRepository.getByKey(StudyId(studyId)).fold(
       err => DomainError(s"invalid study id: $studyId").failNel,
       study => {
-        val ceventTypes = collectionEventTypeRepository.allForStudy(study.id)
-        val processingTypes = processingTypeRepository.allForStudy(study.id)
 
-        val cetSpecimenGroups = ceventTypes.flatMap { cet =>
-          cet.specimenGroupData.map { sgItem =>
-            SpecimenGroupId(sgItem.specimenGroupId)
-          }
-        }
+        val cetSpecimenGroupIds = for {
+          ceventType <- collectionEventTypeRepository.allForStudy(study.id)
+          sgItem     <- ceventType.specimenGroupData
+        } yield SpecimenGroupId(sgItem.specimenGroupId)
 
-        val sltSpecimenGroups = processingTypes.flatMap { pt =>
-          specimenLinkTypeRepository.allForProcessingType(pt.id).flatMap { slt =>
-            Set(slt.inputGroupId, slt.outputGroupId)
-          }
-        }
+        val sltSpecimenGroupIds = for {
+          processingType   <- processingTypeRepository.allForStudy(study.id)
+          specimenLinkType <- specimenLinkTypeRepository.allForProcessingType(processingType.id)
+          sgId             <- Set(specimenLinkType.inputGroupId, specimenLinkType.outputGroupId)
+        } yield sgId
 
-        (cetSpecimenGroups ++ sltSpecimenGroups).success
+        (cetSpecimenGroupIds ++ sltSpecimenGroupIds).success
       }
     )
   }

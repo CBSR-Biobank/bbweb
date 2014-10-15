@@ -190,7 +190,7 @@ class SpecimenLinkAnnotTypeControllerSpec extends ControllerFixture {
     }
 
     "POST /studies/slannottypes" must {
-      "add a collection event annotation type" taggedAs(Tag("1")) in new App(fakeApp) {
+      "add a collection event annotation type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         studyRepository.put(study)

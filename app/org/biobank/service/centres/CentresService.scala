@@ -102,14 +102,24 @@ class CentresServiceImpl(implicit inj: Injector)
 
   def getCentreLocations(centreId: String, locationIdOpt: Option[String]): DomainValidation[Set[Location]] = {
     centreRepository.getByKey(CentreId(centreId)).fold(
-      err => DomainError(s"invalid centre id: $centreId").failNel,
+      err => DomainError(s"invalid centre id: $centreId").failNel[Set[Location]],
       centre => {
         val locationIds = centreLocationsRepository.withCentreId(centre.id).map { x => x.locationId }
         val locations = locationRepository.getValues.filter(x => locationIds.contains(x.id)).toSet
         locationIdOpt.fold {
-          locations.success
+          locations.successNel[String]
         } { locationId =>
-          locations.filter(_.id.id == locationId).success
+          locationRepository.getByKey(LocationId(locationId)).fold(
+            err => DomainError(s"invalid location id: $locationId").failNel[Set[Location]],
+            location => {
+              val locsFound = locations.filter(_.id.id == locationId)
+              if (locsFound.isEmpty) {
+                DomainError(s"centre does not have location with id: $locationId").failNel[Set[Location]]
+              } else {
+                Set(location).successNel[String]
+              }
+            }
+          )
         }
       }
     )

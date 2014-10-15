@@ -360,12 +360,15 @@ class CentresControllerSpec extends ControllerFixture {
 
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}?locationId=${locations(0).id}")
         (json \ "status").as[String] must include ("success")
-        val jsonObj = (json \ "data").as[JsObject]
-        val jsonId = LocationId((jsonObj \ "id").as[String])
-        compareObj(jsonObj, locationsMap(jsonId))
+        val jsonList = (json \ "data").as[List[JsObject]]
+        jsonList must have size 1
+        jsonList.foreach { jsonObj =>
+          val jsonId = LocationId((jsonObj \ "id").as[String])
+          compareObj(jsonObj, locationsMap(jsonId))
+        }
       }
 
-      "does not list an invalid location" in new App(fakeApp) {
+      "does not list an invalid location" taggedAs(Tag("1")) in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
@@ -375,7 +378,7 @@ class CentresControllerSpec extends ControllerFixture {
         val json = makeRequest(GET, s"/centres/locations/${centre.id.id}?locationId=$inavlidLocId", BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("location does not exist")
+          (json \ "message").as[String] must include ("invalid location id")
 
       }
     }
