@@ -139,7 +139,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
       } yield updatedSg
     }
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => err.fail[SpecimenGroupUpdatedEvent],
       sg => SpecimenGroupUpdatedEvent(
         cmd.studyId, sg.id.id, sg.version, timeNow, cmd.name, cmd.description,
         cmd.units, cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
@@ -152,7 +152,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     val v = update(cmd) { sg => sg.success }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => err.fail[SpecimenGroupRemovedEvent],
       sg =>  SpecimenGroupRemovedEvent(sg.studyId.id, sg.id.id).success
     )
   }

@@ -50,20 +50,7 @@ class SpecimenGroupController(implicit inj: Injector)
 
   def getInUse(studyId: String, sgId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
     Logger.debug(s"SpecimenGroupController.getInUse: studyId: $studyId, sgId: $sgId")
-
-    studiesService.specimenGroupsInUse(studyId)
-
-    // sgId.fold {
-    //   Ok(.toList)
-    // } {
-    //   id =>
-    //   studiesService.specimenGroupWithId(studyId, id).fold(
-    //     err => BadRequest(err.list.mkString(", ")),
-    //     specimenGroup => Ok(specimenGroup)
-    //   )
-    // }
-
-    ???
+    domainValidationReply(studiesService.specimenGroupsInUse(studyId))
   }
 
 

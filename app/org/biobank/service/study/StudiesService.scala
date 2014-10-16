@@ -290,7 +290,6 @@ class StudiesServiceImpl(implicit inj: Injector)
     studyRepository.getByKey(StudyId(studyId)).fold(
       err => DomainError(s"invalid study id: $studyId").failNel,
       study => {
-
         val cetSpecimenGroupIds = for {
           ceventType <- collectionEventTypeRepository.allForStudy(study.id)
           sgItem     <- ceventType.specimenGroupData

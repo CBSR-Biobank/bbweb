@@ -22,43 +22,40 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
+  def specimenGroupToAddCmd(sg: SpecimenGroup) = Json.obj(
+    "studyId"                     -> sg.studyId.id,
+    "name"                        -> sg.name,
+    "description"                 -> sg.description,
+    "units"                       -> sg.units,
+    "anatomicalSourceType"        -> sg.anatomicalSourceType.toString,
+    "preservationType"            -> sg.preservationType.toString,
+    "preservationTemperatureType" -> sg.preservationTemperatureType.toString,
+    "specimenType"                -> sg.specimenType.toString
+  )
+
+  def specimenGroupToUpdateCmd(sg: SpecimenGroup) = {
+    specimenGroupToAddCmd(sg) ++ Json.obj(
+      "id"                          -> sg.id.id,
+      "expectedVersion"             -> Some(sg.version)
+    )
+  }
+
   def addToNonDisabledStudy(study: Study, sg: SpecimenGroup) = {
-
     studyRepository.put(study)
-
-    val cmdJson = Json.obj(
-      "studyId"                     -> study.id.id,
-      "name"                        -> sg.name,
-      "description"                 -> sg.description,
-      "units"                       -> sg.units,
-      "anatomicalSourceType"        -> sg.anatomicalSourceType.toString,
-      "preservationType"            -> sg.preservationType.toString,
-      "preservationTemperatureType" -> sg.preservationTemperatureType.toString,
-      "specimenType"                -> sg.specimenType.toString)
+    val sg2 = sg.copy(studyId = study.id);
+    val cmdJson = specimenGroupToAddCmd(sg2);
     val json = makeRequest(POST, "/studies/sgroups", BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] must include ("error")
     (json \ "message").as[String] must include ("is not disabled")
   }
 
-  def updateOnNonDisabledStudy(
-    study: Study,
-    sg: SpecimenGroup) = {
+  def updateOnNonDisabledStudy(study: Study, sg: SpecimenGroup) = {
     studyRepository.put(study)
     specimenGroupRepository.put(sg)
 
-    val sg2 = factory.createSpecimenGroup
-    val cmdJson = Json.obj(
-      "studyId"                     -> study.id.id,
-      "id"                          -> sg.id.id,
-      "expectedVersion"             -> Some(sg.version),
-      "name"                        -> sg2.name,
-      "description"                 -> sg2.description,
-      "units"                       -> sg2.units,
-      "anatomicalSourceType"        -> sg2.anatomicalSourceType.toString,
-      "preservationType"            -> sg2.preservationType.toString,
-      "preservationTemperatureType" -> sg2.preservationTemperatureType.toString,
-      "specimenType"                -> sg2.specimenType.toString)
+    val sg2 = factory.createSpecimenGroup.copy(id = sg.id, studyId = study.id)
+    val cmdJson = specimenGroupToUpdateCmd(sg2);
     val json = makeRequest(PUT, s"/studies/sgroups/${sg.id.id}", BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] must include ("error")
@@ -177,32 +174,19 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val sg = factory.createSpecimenGroup
-        val cmdJson = Json.obj(
-          "studyId"                     -> sg.studyId.id,
-          "name"                        -> sg.name,
-          "description"                 -> sg.description,
-          "units"                       -> sg.units,
-          "anatomicalSourceType"        -> sg.anatomicalSourceType.toString,
-          "preservationType"            -> sg.preservationType.toString,
-          "preservationTemperatureType" -> sg.preservationTemperatureType.toString,
-          "specimenType"                -> sg.specimenType.toString)
+        val cmdJson = specimenGroupToAddCmd(factory.createSpecimenGroup)
         val json = makeRequest(POST, "/studies/sgroups", json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "POST /studies/sgroups" must {
       "not add a specimen group to enabled study" in new App(fakeApp) {
         doLogin
         addToNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail,
           factory.createSpecimenGroup)
       }
-    }
 
-    "POST /studies/sgroups" must {
       "not add a specimen group to retired study" in new App(fakeApp) {
         doLogin
         addToNonDisabledStudy(
@@ -220,39 +204,105 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val sg = factory.createSpecimenGroup
         specimenGroupRepository.put(sg)
 
-        val sg2 = factory.createSpecimenGroup
-        val cmdJson = Json.obj(
-          "studyId"                     -> study.id.id,
-          "id"                          -> sg.id.id,
-          "expectedVersion"             -> Some(sg.version),
-          "name"                        -> sg2.name,
-          "description"                 -> sg2.description,
-          "units"                       -> sg2.units,
-          "anatomicalSourceType"        -> sg2.anatomicalSourceType.toString,
-          "preservationType"            -> sg2.preservationType.toString,
-          "preservationTemperatureType" -> sg2.preservationTemperatureType.toString,
-          "specimenType"                -> sg2.specimenType.toString)
+        val sg2 = factory.createSpecimenGroup.copy(id = sg.id)
+        val cmdJson = specimenGroupToUpdateCmd(sg2)
         val json = makeRequest(PUT, s"/studies/sgroups/${sg.id.id}", json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "PUT /studies/sgroups" must {
       "not update a specimen group on an enabled study" in new App(fakeApp) {
         doLogin
         updateOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail,
           factory.createSpecimenGroup)
       }
-    }
 
-    "PUT /studies/sgroups" must {
       "not update a specimen group on an retired study" in new App(fakeApp) {
         doLogin
         updateOnNonDisabledStudy(
           factory.createDisabledStudy.retire | fail,
           factory.createSpecimenGroup)
+      }
+
+      "not update a specimen group in use by a collection event type" in new App(fakeApp) {
+        doLogin
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val sg = factory.createSpecimenGroup
+        specimenGroupRepository.put(sg)
+
+        val cet = factory.createCollectionEventType
+        val sgData = List(
+          factory.createCollectionEventTypeSpecimenGroupData,
+          factory.createCollectionEventTypeSpecimenGroupData)
+        val cet2 = cet.copy(specimenGroupData = sgData)
+        collectionEventTypeRepository.put(cet2);
+
+        val json = makeRequest(
+          PUT, s"/studies/sgroups/${sg.id.id}", BAD_REQUEST, json = specimenGroupToUpdateCmd(sg))
+
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("specimen group is in use by collection event type")
+      }
+
+      "not update a specimen group in use by a specimen link type" in new App(fakeApp) {
+        doLogin
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val pt = factory.createProcessingType
+        processingTypeRepository.put(pt)
+
+        val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
+        specimenLinkTypeRepository.put(slType)
+        specimenGroupRepository.put(inputSg)
+        specimenGroupRepository.put(outputSg)
+
+        // attempt to update inputSg
+        var jsonReply = makeRequest(
+          PUT, s"/studies/sgroups/${inputSg.id.id}", BAD_REQUEST, json = specimenGroupToUpdateCmd(inputSg))
+
+        (jsonReply \ "status").as[String] must include ("error")
+        (jsonReply \ "message").as[String] must include ("specimen group is in use by specimen link type")
+
+        // attempt to update outputSg
+        jsonReply = makeRequest(
+          PUT, s"/studies/sgroups/${outputSg.id.id}", BAD_REQUEST, json = specimenGroupToUpdateCmd(outputSg))
+
+        (jsonReply \ "status").as[String] must include ("error")
+        (jsonReply \ "message").as[String] must include ("specimen group is in use by specimen link type")
+      }
+
+      "not update a specimen group in use by a collection event type and a specimen link type" in new App(fakeApp) {
+        doLogin
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val pt = factory.createProcessingType
+        processingTypeRepository.put(pt)
+
+        val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
+        specimenLinkTypeRepository.put(slType)
+        specimenGroupRepository.put(inputSg)
+        specimenGroupRepository.put(outputSg)
+
+        // outputSg should be added to collection event
+        val cet = factory.createCollectionEventType
+        val sgData = List(
+          factory.createCollectionEventTypeSpecimenGroupData,
+          factory.createCollectionEventTypeSpecimenGroupData)
+        val cet2 = cet.copy(specimenGroupData = sgData)
+        collectionEventTypeRepository.put(cet2);
+
+        // attempt to update outputSg
+        val jsonReply = makeRequest(
+          PUT, s"/studies/sgroups/${outputSg.id.id}", BAD_REQUEST, json = specimenGroupToUpdateCmd(outputSg))
+
+        (jsonReply \ "status").as[String] must include ("error")
+        (jsonReply \ "message").as[String] must include ("specimen group is in use by collection event type")
+        (jsonReply \ "message").as[String] must include ("specimen group is in use by specimen link type")
       }
     }
 
@@ -271,23 +321,52 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "DELETE /studies/sgroups" must {
       "not remove a specimen group from an enabled study" in new App(fakeApp) {
         doLogin
         removeOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail,
           factory.createSpecimenGroup)
       }
-    }
 
-    "DELETE /studies/sgroups" must {
       "not remove a specimen group from an retired study" in new App(fakeApp) {
         doLogin
         removeOnNonDisabledStudy(
           factory.createDisabledStudy.retire | fail,
           factory.createSpecimenGroup)
+      }
+    }
+
+    "GET /studies/sgroups/inuse" must {
+      "reply with specimen group in use" taggedAs(Tag("1")) in new App(fakeApp) {
+        doLogin
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val pt = factory.createProcessingType
+        processingTypeRepository.put(pt)
+
+        val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
+        specimenLinkTypeRepository.put(slType)
+        specimenGroupRepository.put(inputSg)
+        specimenGroupRepository.put(outputSg)
+
+        // outputSg should be added to collection event
+        val cet = factory.createCollectionEventType
+        val sgData = List(
+          factory.createCollectionEventTypeSpecimenGroupData,
+          factory.createCollectionEventTypeSpecimenGroupData)
+        val cet2 = cet.copy(specimenGroupData = sgData)
+        collectionEventTypeRepository.put(cet2);
+
+        // attempt to update outputSg
+        val jsonReply = makeRequest(GET, s"/studies/sgroups/inuse/${study.id}")
+
+        (jsonReply \ "status").as[String] must include ("success")
+
+        val jsonList = (jsonReply \ "data").as[List[String]]
+        jsonList must contain (inputSg.id.id)
+        jsonList must contain (outputSg.id.id)
       }
     }
 
