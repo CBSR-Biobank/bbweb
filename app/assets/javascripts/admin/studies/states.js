@@ -183,16 +183,28 @@ define(['../module'], function(module) {
           function(SpecimenGroupService, study) {
             return SpecimenGroupService.getAll(study.id);
           }
+        ],
+        specimenGroupIdsInUse: [
+          'SpecimenGroupService', 'study',
+          function(SpecimenGroupService, study) {
+            return SpecimenGroupService.specimenGroupIdsInUse(study.id);
+          }
         ]
       },
       views: {
         'studyDetails': {
           template: '<accordion close-others="false">' +
-            '<specimen-groups-panel specimen-groups="specimenGroups"></specimen-groups-panel>' +
+            '<specimen-groups-panel ' +
+            '  specimen-groups="specimenGroups" ' +
+            '  specimen-group-ids-in-use="specimenGroupIdsInUse"></specimen-groups-panel>' +
             '</accordion>',
-          controller: ['$scope', 'specimenGroups', function($scope, specimenGroups) {
-            $scope.specimenGroups = specimenGroups;
-          }]
+          controller: [
+            '$scope', 'specimenGroups', 'specimenGroupIdsInUse',
+            function($scope, specimenGroups, specimenGroupIdsInUse) {
+              $scope.specimenGroups = specimenGroups;
+              $scope.specimenGroupIdsInUse = specimenGroupIdsInUse;
+            }
+          ]
         }
       },
       data: {

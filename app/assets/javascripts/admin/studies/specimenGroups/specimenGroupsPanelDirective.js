@@ -11,7 +11,8 @@ define(['../../module'], function(module) {
       require: '^tab',
       restrict: 'E',
       scope: {
-        specimenGroups: '='
+        specimenGroups: '=',
+        specimenGroupIdsInUse: '='
       },
       templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupsPanel.html',
       controller: 'SpecimenGroupsPanelCtrl as vm'

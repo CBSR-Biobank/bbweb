@@ -18,7 +18,8 @@ define(['./module'], function(module) {
       specimenTypes           : specimenTypes,
       preservTypes            : preservTypes,
       preservTempTypes        : preservTempTypes,
-      specimenGroupValueTypes : specimenGroupValueTypes
+      specimenGroupValueTypes : specimenGroupValueTypes,
+      specimenGroupIdsInUse   : specimenGroupIdsInUse
     };
     return service;
 
@@ -79,6 +80,9 @@ define(['./module'], function(module) {
       return biobankXhrReqService.call('GET', '/studies/sgvaluetypes');
     }
 
+    function  specimenGroupIdsInUse(studyId) {
+      return biobankXhrReqService.call('GET', '/studies/sgroups/inuse/' + studyId);
+    }
   }
 
 });

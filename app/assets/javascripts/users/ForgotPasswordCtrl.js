@@ -31,16 +31,10 @@ define(['./module'], function(module) {
       if (response.message === 'email address not registered') {
         $state.go('users.forgot.emailNotFound');
       } else {
-        // user not active
-        var modalDefaults = {
-          templateUrl: '/assets/javascripts/common/modalOk.html'
-        };
-        var modalOptions = {
-          headerText: 'Cannot reset your password',
-          bodyText: 'The account associated with that email is not active in the system. ' +
-            'Please contact your system administrator for more information.'
-        };
-        modalService.showModal(modalDefaults, modalOptions)
+        var headerText = 'Cannot reset your password';
+        var bodyText = 'The account associated with that email is not active in the system. ' +
+            'Please contact your system administrator for more information.';
+        modalService.modalOk(headerText, bodyText)
           .then(gotoReturnState)
           .catch(gotoReturnState);
       }

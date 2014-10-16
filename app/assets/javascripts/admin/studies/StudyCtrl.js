@@ -18,19 +18,10 @@ define(['../module'], function(module) {
     vm.tabCollectionActive   = false;
     vm.tabProcessingActive   = false;
 
-    $timeout(activeTabUpdate, 0);
-
     panelStateInit();
+    activeTabUpdateFix();
 
     //--
-
-    function activeTabUpdate() {
-      vm.tabSummaryActive      = ($state.current.name === 'admin.studies.study.summary');
-      vm.tabParticipantsActive = ($state.current.name === 'admin.studies.study.participants');
-      vm.tabSpecimensActive    = ($state.current.name === 'admin.studies.study.specimens');
-      vm.tabCollectionActive   = ($state.current.name === 'admin.studies.study.collection');
-      vm.tabProcessingActive   = ($state.current.name === 'admin.studies.study.processing');
-    }
 
     // initialize the panels to open state when viewing a new study
     function panelStateInit() {
@@ -48,6 +39,19 @@ define(['../module'], function(module) {
         $window.localStorage.setItem('study.panel.studyId', study.id);
       }
     }
+
+    function activeTabUpdateFix() {
+      $timeout(activeTabUpdate, 0);
+
+      function activeTabUpdate() {
+        vm.tabSummaryActive      = ($state.current.name === 'admin.studies.study.summary');
+        vm.tabParticipantsActive = ($state.current.name === 'admin.studies.study.participants');
+        vm.tabSpecimensActive    = ($state.current.name === 'admin.studies.study.specimens');
+        vm.tabCollectionActive   = ($state.current.name === 'admin.studies.study.collection');
+        vm.tabProcessingActive   = ($state.current.name === 'admin.studies.study.processing');
+      }
+    }
+
   }
 
 });

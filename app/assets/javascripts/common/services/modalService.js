@@ -26,7 +26,8 @@ define(['../module', 'angular'], function(module, angular) {
     };
     var service = {
       showModal: showModal,
-      show: show
+      show: show,
+      modalOk: modalOk
     };
 
     return service;
@@ -63,6 +64,17 @@ define(['../module', 'angular'], function(module, angular) {
       }
 
       return $modal.open(tempModalDefaults).result;
+    }
+
+    function modalOk(headerText, bodyText) {
+      var modalDefaults = {
+        templateUrl: '/assets/javascripts/common/modalOk.html'
+      };
+      var modalOptions = {
+        headerText: headerText,
+        bodyText: bodyText
+      };
+      return showModal(modalDefaults, modalOptions);
     }
   }
 

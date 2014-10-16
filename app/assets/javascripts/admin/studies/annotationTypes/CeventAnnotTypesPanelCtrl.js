@@ -69,16 +69,11 @@ define(['../../module', 'underscore'], function(module, _) {
     }
 
     function annotTypeInUseModal() {
-      var modalDefaults = {
-        templateUrl: '/assets/javascripts/common/modalOk.html'
-      };
-      var modalOptions = {
-        headerText: 'Cannot update this annotation type',
-        bodyText: 'This annotation type is in use by a collection event type. ' +
+      var headerText = 'Cannot update this annotation type';
+      var bodyText = 'This annotation type is in use by a collection event type. ' +
           'If you want to make changes to the annotation type, ' +
-          'it must first be removed from the collection even type(s) that use it.'
-      };
-      return modalService.showModal(modalDefaults, modalOptions);
+          'it must first be removed from the collection even type(s) that use it.';
+      return modalService.modalOk(headerText, bodyText);
     }
 
     /**
