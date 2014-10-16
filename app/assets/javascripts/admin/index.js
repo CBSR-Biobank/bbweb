@@ -12,6 +12,7 @@ define([
   './centres/CentresCtrl',
   './centres/CentresTableCtrl',
   './centres/states',
+  './studies/StudyCtrl',
   './studies/StudyEditCtrl',
   './studies/annotationTypes/CeventAnnotTypesPanelCtrl',
   './studies/annotationTypes/ParticipantsAnnotTypesPanelCtrl',

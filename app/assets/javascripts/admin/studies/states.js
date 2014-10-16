@@ -96,37 +96,7 @@ define(['../module'], function(module) {
       views: {
         'main@': {
           templateUrl: '/assets/javascripts/admin/studies/studyView.html',
-          controller: [
-            '$window', '$scope', '$state', '$timeout', 'study',
-            function($window, $scope, $state, $timeout, study) {
-              $scope.study = study;
-
-              // initialize the panels to open state
-              //
-              // this way when the user selects a new study, the panels always default to open
-              $window.localStorage.setItem('study.panel.collectionEventTypes',        true);
-              $window.localStorage.setItem('study.panel.participantAnnotationTypes',  true);
-              $window.localStorage.setItem('study.panel.participantAnnottionTypes',   true);
-              $window.localStorage.setItem('study.panel.processingTypes',             true);
-              $window.localStorage.setItem('study.panel.specimenGroups',              true);
-              $window.localStorage.setItem('study.panel.specimenLinkAnnotationTypes', true);
-              $window.localStorage.setItem('study.panel.specimenLinkTypes',           true);
-
-              $scope.tabSummaryActive      = false;
-              $scope.tabParticipantsActive = false;
-              $scope.tabSpecimensActive    = false;
-              $scope.tabCollectionActive   = false;
-              $scope.tabProcessingActive   = false;
-
-              $timeout(function() {
-                $scope.tabSummaryActive      = ($state.current.name === 'admin.studies.study.summary');
-                $scope.tabParticipantsActive = ($state.current.name === 'admin.studies.study.participants');
-                $scope.tabSpecimensActive    = ($state.current.name === 'admin.studies.study.specimens');
-                $scope.tabCollectionActive   = ($state.current.name === 'admin.studies.study.collection');
-                $scope.tabProcessingActive   = ($state.current.name === 'admin.studies.study.processing');
-              }, 0);
-            }
-          ]
+          controller: 'StudyCtrl as vm'
         }
       },
       data: {
