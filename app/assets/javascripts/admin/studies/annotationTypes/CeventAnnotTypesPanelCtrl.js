@@ -36,7 +36,7 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.annotTypes  = $scope.annotTypes;
     vm.ceventTypes = $scope.ceventTypes;
     vm.update      = update;
-    vm.remove      = ceventAnnotTypeRemoveService.remove;
+    vm.remove      = remove;
     vm.information = helper.information;
     vm.add         = helper.add;
     vm.panelOpen   = helper.panelOpen;
@@ -72,7 +72,7 @@ define(['../../module', 'underscore'], function(module, _) {
       var headerText = 'Cannot update this annotation type';
       var bodyText = 'This annotation type is in use by a collection event type. ' +
           'If you want to make changes to the annotation type, ' +
-          'it must first be removed from the collection even type(s) that use it.';
+          'it must first be removed from the collection event type(s) that use it.';
       return modalService.modalOk(headerText, bodyText);
     }
 
@@ -87,6 +87,10 @@ define(['../../module', 'underscore'], function(module, _) {
           'admin.studies.study.collection.ceventAnnotTypeUpdate',
           { annotTypeId: annotType.id });
       }
+    }
+
+    function remove(annotType) {
+      ceventAnnotTypeRemoveService.remove(annotType, vm.annotTypesInUse);
     }
 
   }

@@ -1,4 +1,4 @@
-define(['../../module'], function(module) {
+define(['../../module', 'underscore'], function(module, _) {
   'use strict';
 
   module.controller('ParticipantsAnnotTypesPanelCtrl', ParticipantsAnnotTypesPanelCtrl);
@@ -7,6 +7,7 @@ define(['../../module'], function(module) {
     '$scope',
     '$state',
     '$stateParams',
+    'modalService',
     'ParticipantAnnotTypeService',
     'participantAnnotTypeRemoveService',
     'annotTypeModalService',
@@ -19,6 +20,7 @@ define(['../../module'], function(module) {
   function ParticipantsAnnotTypesPanelCtrl($scope,
                                            $state,
                                            $stateParams,
+                                           modalService,
                                            ParticipantAnnotTypeService,
                                            participantAnnotTypeRemoveService,
                                            annotTypeModalService,
@@ -34,7 +36,7 @@ define(['../../module'], function(module) {
     vm.annotTypes  = $scope.annotTypes;
     vm.hasRequired = true;
     vm.update      = update;
-    vm.remove      = participantAnnotTypeRemoveService.remove;
+    vm.remove      = remove;
     vm.information = helper.information;
     vm.add         = helper.add;
     vm.panelOpen   = helper.panelOpen;
@@ -50,15 +52,34 @@ define(['../../module'], function(module) {
     vm.tableParams = helper.getTableParams(vm.annotTypes);
     vm.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
 
+    // FIXME this is set to empty array for now, but will have to call the correct method in the future
+    vm.annotTypesInUse = [];
+
     //--
+
+    function annotTypeInUseModal() {
+      var headerText = 'Cannot update this annotation type';
+      var bodyText = 'This annotation type is in use by participants. ' +
+          'If you want to make changes to the annotation type, ' +
+          'it must first be removed from the participants that use it.';
+      return modalService.modalOk(headerText, bodyText);
+    }
 
     /**
      * Switches state to update a participant annotation type.
      */
     function update(annotType) {
-      $state.go(
-      'admin.studies.study.participants.annotTypeUpdate',
-        { annotTypeId: annotType.id });
+      if (_.contains(vm.annotTypesInUse, annotType.id)) {
+        annotTypeInUseModal();
+      } else {
+        $state.go(
+          'admin.studies.study.participants.annotTypeUpdate',
+          { annotTypeId: annotType.id });
+      }
+    }
+
+    function remove(annotType) {
+      participantAnnotTypeRemoveService.remove(annotType, vm.annotTypesInUse);
     }
 
   }

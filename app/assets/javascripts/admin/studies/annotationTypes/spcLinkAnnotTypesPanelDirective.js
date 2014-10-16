@@ -11,7 +11,8 @@ define(['../../module'], function(module) {
       require: '^tab',
       restrict: 'E',
       scope: {
-        annotTypes: '='
+        annotTypes: '=',
+        spcLinkTypes: '='
       },
       templateUrl: '/assets/javascripts/admin/studies/annotationTypes/spcLinkAnnotTypesPanel.html',
       controller: 'SpcLinkAnnotTypesPanelCtrl as vm'
