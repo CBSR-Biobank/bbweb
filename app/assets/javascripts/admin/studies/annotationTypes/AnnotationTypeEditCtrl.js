@@ -26,7 +26,7 @@ define(['../../module'], function(module) {
                                   valueTypes) {
     var vm = this;
     var action = (annotType.id) ? 'Update' : 'Add';
-    var returnState = $state.current.data.returnState;
+    var returnState = determineReturnState();
 
     vm.study = study;
     vm.annotType = annotType;
@@ -42,12 +42,22 @@ define(['../../module'], function(module) {
 
     //--
 
-    function gotoReturnState() {
-      var stateParam = {};
-      if (annotType.studyId) {
-        stateParam.studyId = annotType.studyId;
+    function determineReturnState() {
+      if (($state.current.name === 'admin.studies.study.collection.ceventAnnotTypeAdd') ||
+          ($state.current.name === 'admin.studies.study.collection.ceventAnnotTypeUpdate')) {
+        return 'admin.studies.study.collection';
+      } else if (($state.current.name === 'admin.studies.study.participants.annotTypeAdd') ||
+          ($state.current.name === 'admin.studies.study.participants.annotTypeUpdate')) {
+        return 'admin.studies.study.participants';
+      } else if (($state.current.name === 'admin.studies.study.processing.spcLinkAnnotTypeAdd') ||
+          ($state.current.name === 'admin.studies.study.processing.spcLinkAnnotTypeUpdate')) {
+        return 'admin.studies.study.processing';
       }
-      return stateHelper.reloadStateAndReinit(returnState, stateParam, {reload: true});
+      throw new Error('invalid state: ' + $state.current.name);
+    }
+
+    function gotoReturnState() {
+      return stateHelper.reloadStateAndReinit(returnState, $stateParams, {reload: true});
     }
 
     function optionAdd() {

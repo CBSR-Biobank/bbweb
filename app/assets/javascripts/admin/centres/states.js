@@ -78,8 +78,7 @@ define(['../module', 'underscore'], function(module, _) {
         }
       },
       data: {
-        displayName: 'Add centre',
-        returnState: 'admin.centres'
+        displayName: 'Add centre'
       }
     });
 

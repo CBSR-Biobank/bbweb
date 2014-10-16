@@ -100,8 +100,7 @@ define(['../../module'], function(module) {
         }
       },
       data: {
-        displayName: 'Specimen Link Annotation Type',
-        returnState: 'admin.studies.study.processing' // need to use state date since child state resolves inherit from parent states
+        displayName: 'Specimen Link Annotation Type'
       }
     });
 
@@ -135,8 +134,7 @@ define(['../../module'], function(module) {
         }
       },
       data: {
-        displayName: 'Specimen Link Annotation Type',
-        returnState: 'admin.studies.study.processing' // need to use state date since child state resolves inherit from parent states
+        displayName: 'Specimen Link Annotation Type'
       }
     });
 

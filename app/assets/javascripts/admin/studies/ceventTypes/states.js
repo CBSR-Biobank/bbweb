@@ -131,8 +131,7 @@ define(['../../module'], function(module) {
         }
       },
       data: {
-        displayName: 'Collection Event Annotation Type',
-        returnState: 'admin.studies.study.collection'
+        displayName: 'Collection Event Annotation Type'
       }
     });
 
@@ -166,8 +165,7 @@ define(['../../module'], function(module) {
         }
       },
       data: {
-        displayName: 'Collection Event Annotation Type',
-        returnState: 'admin.studies.study.collection'
+        displayName: 'Collection Event Annotation Type'
       }
     });
 

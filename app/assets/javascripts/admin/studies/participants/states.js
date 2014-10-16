@@ -44,8 +44,7 @@ define(['../../module'], function(module) {
         }
       },
       data: {
-        displayName: 'Participant Annotation Type',
-        returnState: 'admin.studies.study.participants' // need to use state date since child state resolves inherit from parent states
+        displayName: 'Participant Annotation Type'
       }
     });
 
@@ -82,8 +81,7 @@ define(['../../module'], function(module) {
         }
       },
       data: {
-        displayName: 'Participant Annotation Type',
-        returnState: 'admin.studies.study.participants' // need to use state date since child state resolves inherit from parent states
+        displayName: 'Participant Annotation Type'
       }
     });
   }

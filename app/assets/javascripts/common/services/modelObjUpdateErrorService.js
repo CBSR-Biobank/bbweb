@@ -10,7 +10,7 @@ define(['../module'], function(module) {
    * and asks the user if he / she wishes to attempt the change again.
    *
    * If the user presses the OK button, then the current state is reloaded. If the Cancel button is pressed
-   * the users is takent to 'returnState'.
+   * the users is taken to 'returnState'.
    */
   function modelObjUpdateError(modalService, stateHelper) {
     var service = {
