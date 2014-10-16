@@ -110,7 +110,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
       validSgData <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
       validAtData <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
       event <- CollectionEventTypeAddedEvent(
-        cmd.studyId, id.id, timeNow, newItem.name, newItem.description,
+        cmd.studyId, id.id, newItem.name, newItem.description,
         newItem.recurring, newItem.specimenGroupData, newItem.annotationTypeData).success
     } yield event
   }
@@ -132,7 +132,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     v.fold(
       err => DomainError(s"error $err occurred on $cmd").failNel,
       cet => CollectionEventTypeUpdatedEvent(
-        cmd.studyId, cet.id.id, cet.version, timeNow, cet.name, cet.description,
+        cmd.studyId, cet.id.id, cet.version, cet.name, cet.description,
         cet.recurring, cet.specimenGroupData, cet.annotationTypeData).success
     )
   }
@@ -149,7 +149,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
 
   private def recoverEvent(event: CollectionEventTypeAddedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
     collectionEventTypeRepository.put(CollectionEventType(
-      StudyId(event.studyId), CollectionEventTypeId(event.collectionEventTypeId), 0L, event.dateTime, None,
+      StudyId(event.studyId), CollectionEventTypeId(event.collectionEventTypeId), 0L, dateTime, None,
       event.name, event.description, event.recurring, event.specimenGroupData,
       event.annotationTypeData))
     ()
@@ -160,7 +160,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
       err => throw new IllegalStateException(s"updating collection event type from event failed: $err"),
       cet => collectionEventTypeRepository.put(cet.copy(
         version            = event.version,
-        timeModified     = Some(event.dateTime),
+        timeModified     = Some(dateTime),
         name               = event.name,
         description        = event.description,
         recurring          = event.recurring,

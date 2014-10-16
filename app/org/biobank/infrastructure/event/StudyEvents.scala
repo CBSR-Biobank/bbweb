@@ -14,7 +14,6 @@ import org.biobank.infrastructure.EnumUtils._
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import org.joda.time.DateTime
 
 /**
   * Events used by the Study Aggregate.
@@ -25,7 +24,6 @@ object StudyEvents {
 
   case class StudyAddedEvent(
     id: String,
-    dateTime: DateTime,
     name: String,
     description: Option[String])
       extends StudyEvent
@@ -33,7 +31,6 @@ object StudyEvents {
   case class StudyUpdatedEvent(
     id: String,
     version: Long,
-    dateTime: DateTime,
     name: String,
     description: Option[String])
       extends StudyEvent
@@ -41,32 +38,15 @@ object StudyEvents {
   sealed trait StudyStatusChangedEvent extends StudyEvent {
     val id: String
     val version: Long
-    val dateTime: DateTime
   }
 
-  case class StudyEnabledEvent(
-    id: String,
-    version: Long,
-    dateTime: DateTime)
-      extends StudyStatusChangedEvent
+  case class StudyEnabledEvent(id: String, version: Long) extends StudyStatusChangedEvent
 
-  case class StudyDisabledEvent(
-    id: String,
-    version: Long,
-    dateTime: DateTime)
-      extends StudyStatusChangedEvent
+  case class StudyDisabledEvent(id: String, version: Long) extends StudyStatusChangedEvent
 
-  case class StudyRetiredEvent(
-    id: String,
-    version: Long,
-    dateTime: DateTime)
-      extends StudyStatusChangedEvent
+  case class StudyRetiredEvent(id: String, version: Long) extends StudyStatusChangedEvent
 
-  case class StudyUnretiredEvent(
-    id: String,
-    version: Long,
-    dateTime: DateTime)
-      extends StudyStatusChangedEvent
+  case class StudyUnretiredEvent(id: String, version: Long) extends StudyStatusChangedEvent
 
   trait StudyEventWithId extends StudyEvent with HasStudyIdentity
 
@@ -76,7 +56,6 @@ object StudyEvents {
   case class SpecimenGroupAddedEvent(
     studyId: String,
     specimenGroupId: String,
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     units: String,
@@ -90,7 +69,6 @@ object StudyEvents {
     studyId: String,
     specimenGroupId: String,
     version: Long,
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     units: String,
@@ -99,6 +77,7 @@ object StudyEvents {
     preservationTemperatureType: PreservationTemperatureType,
     specimenType: SpecimenType)
       extends SpecimenGroupEvent
+      with HasVersion
 
   case class SpecimenGroupRemovedEvent(
     studyId: String,
@@ -109,7 +88,6 @@ object StudyEvents {
   case class CollectionEventTypeAddedEvent(
     studyId: String,
     collectionEventTypeId: String,
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     recurring: Boolean,
@@ -121,13 +99,13 @@ object StudyEvents {
     studyId: String,
     collectionEventTypeId: String,
     version: Long,
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     recurring: Boolean,
     specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
     annotationTypeData: List[CollectionEventTypeAnnotationTypeData])
       extends StudyEventWithId
+      with HasVersion
 
   case class CollectionEventTypeRemovedEvent(
     studyId: String,
@@ -137,7 +115,6 @@ object StudyEvents {
   case class CollectionEventAnnotationTypeAddedEvent(
     studyId: String,
     annotationTypeId: String,
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -149,13 +126,13 @@ object StudyEvents {
     studyId: String,
     annotationTypeId: String,
     version: Long,
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
     options: Option[Seq[String]])
       extends StudyEventWithId
+      with HasVersion
 
   case class CollectionEventAnnotationTypeRemovedEvent(
     studyId: String,
@@ -167,7 +144,6 @@ object StudyEvents {
   case class ParticipantAnnotationTypeAddedEvent(
     studyId: String,
     annotationTypeId: String,
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -180,7 +156,6 @@ object StudyEvents {
     studyId: String,
     annotationTypeId: String,
     version: Long,
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -188,6 +163,7 @@ object StudyEvents {
     options: Option[Seq[String]],
     required: Boolean = false)
       extends StudyEventWithId
+      with HasVersion
 
   case class ParticipantAnnotationTypeRemovedEvent(
     studyId: String,
@@ -198,7 +174,6 @@ object StudyEvents {
   case class ProcessingTypeAddedEvent(
     studyId: String,
     processingTypeId: String,
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     enabled: Boolean)
@@ -208,11 +183,11 @@ object StudyEvents {
     studyId: String,
     processingTypeId: String,
     version: Long,
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     enabled: Boolean)
       extends StudyEventWithId
+      with HasVersion
 
   case class ProcessingTypeRemovedEvent(
     studyId: String,
@@ -225,7 +200,6 @@ object StudyEvents {
   case class SpecimenLinkTypeAddedEvent(
     processingTypeId: String,
     specimenLinkTypeId: String,
-    dateTime: DateTime,
     expectedInputChange: BigDecimal,
     expectedOutputChange: BigDecimal,
     inputCount: Int,
@@ -241,7 +215,6 @@ object StudyEvents {
     processingTypeId: String,
     specimenLinkTypeId: String,
     version: Long,
-    dateTime: DateTime,
     expectedInputChange: BigDecimal,
     expectedOutputChange: BigDecimal,
     inputCount: Int,
@@ -252,6 +225,7 @@ object StudyEvents {
     outputContainerTypeId: Option[ContainerTypeId],
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
       extends SpecimenLinkTypeEvent
+      with HasVersion
 
   case class SpecimenLinkTypeRemovedEvent(
     processingTypeId: String,
@@ -262,7 +236,6 @@ object StudyEvents {
   case class SpecimenLinkAnnotationTypeAddedEvent(
     studyId: String,
     annotationTypeId: String,
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
@@ -274,13 +247,13 @@ object StudyEvents {
     studyId: String,
     annotationTypeId: String,
     version: Long,
-    dateTime: DateTime,
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
     options: Option[Seq[String]])
       extends StudyEventWithId
+      with HasVersion
 
   case class SpecimenLinkAnnotationTypeRemovedEvent(
     studyId: String,
@@ -292,7 +265,6 @@ object StudyEvents {
 
   implicit val studyAddedEventWriter: Writes[StudyAddedEvent] = (
     (__ \ "id").write[String] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").writeNullable[String]
   )(unlift(StudyAddedEvent.unapply))
@@ -300,7 +272,6 @@ object StudyEvents {
   implicit val studyUpdatedEventWriter: Writes[StudyUpdatedEvent] = (
     (__ \ "id").write[String] and
       (__ \ "version").write[Long] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").writeNullable[String]
   )(unlift(StudyUpdatedEvent.unapply))
@@ -308,15 +279,13 @@ object StudyEvents {
   implicit val studyStatusChangeWrites = new Writes[StudyStatusChangedEvent] {
     def writes(event: StudyStatusChangedEvent) = Json.obj(
       "id"       -> event.id,
-      "version"  -> event.version,
-      "dateTime" -> event.dateTime
+      "version"  -> event.version
     )
   }
 
   implicit val participantAnnotationTypeAddedEventWriter: Writes[ParticipantAnnotationTypeAddedEvent] = (
     (__ \ "studyId").write[String] and
       (__ \ "annotationTypeId").write[String] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").writeNullable[String] and
       (__ \ "valueType").write[AnnotationValueType] and
@@ -329,7 +298,6 @@ object StudyEvents {
     (__ \ "studyId").write[String] and
       (__ \ "annotationTypeId").write[String] and
       (__ \ "version").write[Long] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").writeNullable[String] and
       (__ \ "valueType").write[AnnotationValueType] and
@@ -346,7 +314,6 @@ object StudyEvents {
   implicit val specimenGroupAddedEventWrites: Writes[SpecimenGroupAddedEvent] = (
     (__ \ "studyId").write[String] and
       (__ \ "specimenGroupId").write[String] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").write[Option[String]] and
       (__ \ "units").write[String] and
@@ -360,7 +327,6 @@ object StudyEvents {
     (__ \ "studyId").write[String] and
       (__ \ "specimenGroupId").write[String] and
       (__ \ "version").write[Long] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").write[Option[String]] and
       (__ \ "units").write[String] and
@@ -378,7 +344,6 @@ object StudyEvents {
   implicit val collectionEventAnnotationTypeAddedEventWriter: Writes[CollectionEventAnnotationTypeAddedEvent] = (
     (__ \ "studyId").write[String] and
       (__ \ "annotationTypeId").write[String] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").writeNullable[String] and
       (__ \ "valueType").write[AnnotationValueType] and
@@ -390,7 +355,6 @@ object StudyEvents {
     (__ \ "studyId").write[String] and
       (__ \ "annotationTypeId").write[String] and
       (__ \ "version").write[Long] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").writeNullable[String] and
       (__ \ "valueType").write[AnnotationValueType] and
@@ -406,7 +370,6 @@ object StudyEvents {
   implicit val collectionEventTypeAddedEventWriter: Writes[CollectionEventTypeAddedEvent] = (
     (__ \ "studyId").write[String] and
       (__ \ "collectionEventTypeId").write[String] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").writeNullable[String] and
       (__ \ "recurring").write[Boolean] and
@@ -418,7 +381,6 @@ object StudyEvents {
     (__ \ "studyId").write[String] and
       (__ \ "collectionEventTypeId").write[String] and
       (__ \ "version").write[Long] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").write[Option[String]] and
       (__ \ "recurring").write[Boolean] and
@@ -434,7 +396,6 @@ object StudyEvents {
   implicit val processingTypeAddedEventWrites: Writes[ProcessingTypeAddedEvent] = (
     (__ \ "studyId").write[String] and
       (__ \ "processingTypeId").write[String] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").write[Option[String]] and
       (__ \ "enabled").write[Boolean]
@@ -444,7 +405,6 @@ object StudyEvents {
     (__ \ "studyId").write[String] and
       (__ \ "processingTypeId").write[String] and
       (__ \ "version").write[Long] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").write[Option[String]] and
       (__ \ "enabled").write[Boolean]
@@ -458,7 +418,6 @@ object StudyEvents {
   implicit val specimenLinkAnnotationTypeAddedEventWrites: Writes[SpecimenLinkAnnotationTypeAddedEvent] = (
     (__ \ "studyId").write[String] and
       (__ \ "annotationTypeId").write[String] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").writeNullable[String] and
       (__ \ "valueType").write[AnnotationValueType] and
@@ -470,7 +429,6 @@ object StudyEvents {
     (__ \ "studyId").write[String] and
       (__ \ "annotationTypeId").write[String] and
       (__ \ "version").write[Long] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").writeNullable[String] and
       (__ \ "valueType").write[AnnotationValueType] and
@@ -486,7 +444,6 @@ object StudyEvents {
   implicit val specimenLinkTypeAddedEventWrites: Writes[SpecimenLinkTypeAddedEvent] = (
     (__ \ "processingTypeId").write[String] and
       (__ \ "specimenLinkTypeId").write[String] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "expectedInputChange").write[BigDecimal] and
       (__ \ "expectedOutputChange").write[BigDecimal] and
       (__ \ "inputCount").write[Int] and
@@ -502,7 +459,6 @@ object StudyEvents {
     (__ \ "processingTypeId").write[String] and
       (__ \ "specimenLinkTypeId").write[String] and
       (__ \ "version").write[Long] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "expectedInputChange").write[BigDecimal] and
       (__ \ "expectedOutputChange").write[BigDecimal] and
       (__ \ "inputCount").write[Int] and

@@ -103,7 +103,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
       nameValid <- nameAvailable(cmd.name)
       newItem <- ProcessingType.create(studyId, id, -1L, timeNow, cmd.name, cmd.description, cmd.enabled)
       event <- ProcessingTypeAddedEvent(
-        cmd.studyId, id.id, timeNow, newItem.name, newItem.description, newItem.enabled).success
+        cmd.studyId, id.id, newItem.name, newItem.description, newItem.enabled).success
     } yield event
   }
 
@@ -121,7 +121,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     v.fold(
       err => DomainError(s"error $err occurred on $cmd").failNel,
       pt => ProcessingTypeUpdatedEvent(
-        cmd.studyId, pt.id.id, pt.version, DateTime.now, pt.name, pt.description, pt.enabled).success
+        cmd.studyId, pt.id.id, pt.version, pt.name, pt.description, pt.enabled).success
     )
   }
 
@@ -137,7 +137,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
 
   private def recoverEvent(event: ProcessingTypeAddedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
     processingTypeRepository.put(ProcessingType(
-      StudyId(event.studyId), ProcessingTypeId(event.processingTypeId), 0L, event.dateTime, None,
+      StudyId(event.studyId), ProcessingTypeId(event.processingTypeId), 0L, dateTime, None,
       event.name, event.description, event.enabled))
     ()
   }
@@ -147,7 +147,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
       err => throw new IllegalStateException(s"updating processing type from event failed: $err"),
       pt => processingTypeRepository.put(pt.copy(
         version        = event.version,
-        timeModified = Some(event.dateTime),
+        timeModified = Some(dateTime),
         name           = event.name,
         description    = event.description,
         enabled        = event.enabled))

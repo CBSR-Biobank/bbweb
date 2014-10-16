@@ -14,13 +14,6 @@ package infrastructure {
 
   }
 
-  trait HasDateTime {
-
-    /** An command or event that includes the date and time that it took place. */
-    val dateTime: DateTime
-
-  }
-
   trait HasStudyIdentity {
 
     /** An command or event that includes the study ID that it is related to. */

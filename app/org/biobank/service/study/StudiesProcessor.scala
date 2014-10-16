@@ -214,7 +214,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
       newStudy <- DisabledStudy.create(
         studyId, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description)
       event <- StudyAddedEvent(
-        newStudy.id.id, newStudy.timeAdded, newStudy.name, newStudy.description).success
+        newStudy.id.id, newStudy.name, newStudy.description).success
     } yield event
   }
 
@@ -228,7 +228,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     }
     v.fold(
       err => err.fail,
-      study => StudyUpdatedEvent(cmd.id, study.version, timeNow, study.name, study.description).success
+      study => StudyUpdatedEvent(cmd.id, study.version, study.name, study.description).success
     )
   }
 
@@ -240,7 +240,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     val v = updateDisabled(cmd) { s => s.enable(specimenGroupCount, collectionEventtypeCount) }
     v.fold(
       err => err.fail,
-      study => StudyEnabledEvent(cmd.id, study.version, timeNow).success
+      study => StudyEnabledEvent(cmd.id, study.version).success
     )
   }
 
@@ -249,7 +249,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     val v = updateEnabled(cmd) { s => s.disable }
     v.fold(
       err => err.fail,
-      study => StudyDisabledEvent(cmd.id, study.version, timeNow).success
+      study => StudyDisabledEvent(cmd.id, study.version).success
     )
   }
 
@@ -258,7 +258,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     val v = updateDisabled(cmd) { s => s.retire }
     v.fold(
       err => err.fail,
-      study => StudyRetiredEvent(cmd.id, study.version, timeNow).success
+      study => StudyRetiredEvent(cmd.id, study.version).success
     )
   }
 
@@ -267,7 +267,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     val v = updateRetired(cmd) { s => s.unretire }
     v.fold(
       err => err.fail,
-      study => StudyUnretiredEvent(cmd.id, study.version, timeNow).success
+      study => StudyUnretiredEvent(cmd.id, study.version).success
     )
   }
 
@@ -286,7 +286,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
   private def recoverEvent(event: StudyAddedEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.put(DisabledStudy(
-      StudyId(event.id), 0L, event.dateTime, None, event.name, event.description))
+      StudyId(event.id), 0L, dateTime, None, event.name, event.description))
     ()
   }
 
@@ -295,7 +295,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
       err => throw new IllegalStateException(s"updating study from event failed: $err"),
       s => studyRepository.put(s.copy(
         version = event.version, name = event.name, description = event.description,
-        timeModified = Some(event.dateTime)))
+        timeModified = Some(dateTime)))
     )
     ()
   }
@@ -303,7 +303,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   private def recoverEvent(event: StudyEnabledEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getDisabled(StudyId(event.id)).fold(
       err => throw new IllegalStateException(s"enabling study from event failed: $err"),
-      s => studyRepository.put(EnabledStudy(s.id, event.version, s.timeAdded, Some(event.dateTime),
+      s => studyRepository.put(EnabledStudy(s.id, event.version, s.timeAdded, Some(dateTime),
         s.name, s.description))
     )
     ()
@@ -312,7 +312,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   private def recoverEvent(event: StudyDisabledEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getEnabled(StudyId(event.id)).fold(
       err => throw new IllegalStateException(s"disabling study from event failed: $err"),
-      s => studyRepository.put(DisabledStudy(s.id, event.version, s.timeAdded, Some(event.dateTime),
+      s => studyRepository.put(DisabledStudy(s.id, event.version, s.timeAdded, Some(dateTime),
         s.name, s.description))
     )
     ()
@@ -321,7 +321,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   private def recoverEvent(event: StudyRetiredEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getDisabled(StudyId(event.id)).fold(
       err => throw new IllegalStateException(s"retiring study from event failed: $err"),
-      s => studyRepository.put(RetiredStudy(s.id, event.version, s.timeAdded, Some(event.dateTime),
+      s => studyRepository.put(RetiredStudy(s.id, event.version, s.timeAdded, Some(dateTime),
         s.name, s.description))
     )
     ()
@@ -330,7 +330,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   private def recoverEvent(event: StudyUnretiredEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getRetired(StudyId(event.id)).fold(
       err => throw new IllegalStateException(s"disabling study from event failed: $err"),
-      s => studyRepository.put(DisabledStudy(s.id, event.version, s.timeAdded, Some(event.dateTime),
+      s => studyRepository.put(DisabledStudy(s.id, event.version, s.timeAdded, Some(dateTime),
         s.name, s.description))
     )
     ()

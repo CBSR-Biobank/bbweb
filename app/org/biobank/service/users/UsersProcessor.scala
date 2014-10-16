@@ -99,7 +99,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       user <- RegisteredUser.create(
         userId, -1L, DateTime.now, cmd.name, cmd.email, encryptedPwd, salt, cmd.avatarUrl)
       event <- UserRegisteredEvent(
-        user.id.id, DateTime.now, user.name, user.email, encryptedPwd, salt, user.avatarUrl).success
+        user.id.id, user.name, user.email, encryptedPwd, salt, user.avatarUrl).success
     } yield event
   }
 
@@ -108,16 +108,16 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     val v = updateRegistered(cmd) { u => u.activate }
     v.fold(
       err => DomainError(s"error $err occurred on $cmd").failNel,
-      user => UserActivatedEvent(user.id.id, user.version, timeNow).success
+      user => UserActivatedEvent(user.id.id, user.version).success
     )
   }
 
   def validateCmd(cmd: UpdateUserNameCmd): DomainValidation[UserNameUpdatedEvent] = {
     val timeNow = DateTime.now
-    val v = updateActive(cmd) { u => u.updateName(cmd.name) }
+    val v = updateActive(cmd) { _.updateName(cmd.name) }
     v.fold(
       err => DomainError(s"error $err occurred on $cmd").failNel,
-      user => UserNameUpdatedEvent(user.id.id, user.version, timeNow, user.name).success
+      user => UserNameUpdatedEvent(user.id.id, user.version, user.name).success
     )
   }
 
@@ -133,7 +133,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
 
     v.fold(
       err => DomainError(s"error $err occurred on $cmd").failNel,
-      user => UserEmailUpdatedEvent(user.id.id, user.version, timeNow, user.email).success
+      user => UserEmailUpdatedEvent(user.id.id, user.version, user.email).success
     )
   }
 
@@ -151,7 +151,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
 
     v.fold(
       err => DomainError(s"error $err occurred on $cmd").failNel,
-      user => UserPasswordUpdatedEvent(user.id.id, user.version, timeNow, user.password, user.salt).success
+      user => UserPasswordUpdatedEvent(user.id.id, user.version, user.password, user.salt).success
     )
   }
 
@@ -172,7 +172,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
                 EmailService.passwordResetEmail(user.email, plainPassword)
                 UserPasswordResetEvent(
                   updatedUser.id.id, updatedUser.version, updatedUser.password,
-                  updatedUser.salt, timeNow).success
+                  updatedUser.salt).success
               }
             )
           case user => s"$user for $cmd is not active".failNel
@@ -186,7 +186,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     val v = updateActive(cmd) { u => u.lock }
     v.fold(
       err => DomainError(s"error $err occurred on $cmd").failNel,
-      user => UserLockedEvent(user.id.id, user.version, timeNow).success
+      user => UserLockedEvent(user.id.id, user.version).success
     )
   }
 
@@ -195,7 +195,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     val v = updateLocked(cmd) { u => u.unlock }
     v.fold(
       err => DomainError(s"error $err occurred on $cmd").failNel,
-      user => UserUnlockedEvent(user.id.id, user.version, timeNow).success
+      user => UserUnlockedEvent(user.id.id, user.version).success
     )
   }
 
@@ -242,7 +242,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
 
   def recoverEvent(event: UserRegisteredEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
     log.debug(s"recoverEvent: $event")
-    userRepository.put(RegisteredUser(UserId(event.id), 0L, event.dateTime, None, event.name,
+    userRepository.put(RegisteredUser(UserId(event.id), 0L, dateTime, None, event.name,
       event.email, event.password, event.salt, event.avatarUrl))
     ()
   }
@@ -252,7 +252,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     userRepository.getRegistered(UserId(event.id)).fold(
       err => throw new IllegalStateException(s"activating user from event failed: $err"),
       u =>
-      userRepository.put(ActiveUser(u.id, event.version, u.timeAdded, Some(event.dateTime),
+      userRepository.put(ActiveUser(u.id, event.version, u.timeAdded, Some(dateTime),
         u.name, u.email, u.password, u.salt, u.avatarUrl))
     )
     ()
@@ -263,7 +263,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     userRepository.getActive(UserId(event.id)).fold(
       err => throw new IllegalStateException(s"updating name on user from event failed: $err"),
       u => userRepository.put(u.copy(
-        version = event.version, name = event.name, timeModified = Some(event.dateTime)))
+        version = event.version, name = event.name, timeModified = Some(dateTime)))
     )
     ()
   }
@@ -273,7 +273,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     userRepository.getActive(UserId(event.id)).fold(
       err => throw new IllegalStateException(s"updating email on user from event failed: $err"),
       u => userRepository.put(u.copy(
-        version = event.version, email = event.email, timeModified = Some(event.dateTime)))
+        version = event.version, email = event.email, timeModified = Some(dateTime)))
     )
     ()
   }
@@ -284,7 +284,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       err => throw new IllegalStateException(s"updating password on user from event failed: $err"),
       u => userRepository.put(u.copy(
         version = event.version, password = event.password, salt = event.salt,
-        timeModified = Some(event.dateTime)))
+        timeModified = Some(dateTime)))
     )
     ()
   }
@@ -295,7 +295,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       err => throw new IllegalStateException(s"resetting password on user from event failed: $err"),
       u => userRepository.put(u.copy(
         version = event.version, password = event.password, salt = event.salt,
-        timeModified = Some(event.dateTime)))
+        timeModified = Some(dateTime)))
     )
     ()
   }
@@ -305,7 +305,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     userRepository.getActive(UserId(event.id)).fold(
       err => throw new IllegalStateException(s"locking user from event failed: $err"),
       u => userRepository.put(LockedUser(
-        u.id, event.version, u.timeAdded, Some(event.dateTime), u.name, u.email, u.password, u.salt,
+        u.id, event.version, u.timeAdded, Some(dateTime), u.name, u.email, u.password, u.salt,
         u.avatarUrl))
     )
     ()
@@ -316,7 +316,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     userRepository.getLocked(UserId(event.id)).fold(
       err => throw new IllegalStateException(s"unlocking user from event failed: $err"),
       u => userRepository.put(ActiveUser(
-        u.id, event.version, u.timeAdded, Some(event.dateTime), u.name, u.email, u.password, u.salt,
+        u.id, event.version, u.timeAdded, Some(dateTime), u.name, u.email, u.password, u.salt,
         u.avatarUrl))
     )
     ()

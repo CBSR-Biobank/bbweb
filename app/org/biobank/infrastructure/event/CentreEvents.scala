@@ -6,7 +6,6 @@ import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import org.joda.time.DateTime
 
 /**
   * Events used by the Centre Aggregate.
@@ -17,7 +16,6 @@ object CentreEvents {
 
   case class CentreAddedEvent(
     id: String,
-    dateTime: DateTime,
     name: String,
     description: Option[String])
       extends CentreEvent
@@ -25,28 +23,23 @@ object CentreEvents {
   case class CentreUpdatedEvent(
     id: String,
     version: Long,
-    dateTime: DateTime,
     name: String,
     description: Option[String])
       extends CentreEvent
+      with HasVersion
 
   sealed trait CentreStatusChangedEvent extends CentreEvent {
     val id: String
     val version: Long
-    val dateTime: DateTime
   }
 
-  case class CentreEnabledEvent(
-    id: String,
-    version: Long,
-    dateTime: DateTime)
+  case class CentreEnabledEvent(id: String, version: Long)
       extends CentreStatusChangedEvent
+      with HasVersion
 
-  case class CentreDisabledEvent(
-    id: String,
-    version: Long,
-    dateTime: DateTime)
+  case class CentreDisabledEvent(id: String, version: Long)
       extends CentreStatusChangedEvent
+      with HasVersion
 
   case class CentreLocationAddedEvent(
     centreId: String,
@@ -60,24 +53,17 @@ object CentreEvents {
     countryIsoCode: String)
       extends CentreEvent
 
-  case class CentreLocationRemovedEvent(
-    centreId: String,
-    locationId: String)
+  case class CentreLocationRemovedEvent(centreId: String, locationId: String)
       extends CentreEvent
 
-  case class CentreAddedToStudyEvent(
-    centreId: String,
-    studyId: String)
+  case class CentreAddedToStudyEvent(centreId: String, studyId: String)
       extends CentreEvent
 
-  case class CentreRemovedFromStudyEvent(
-    centreId: String,
-    studyId: String)
+  case class CentreRemovedFromStudyEvent(centreId: String, studyId: String)
       extends CentreEvent
 
   implicit val centreAddedEventWriter: Writes[CentreAddedEvent] = (
     (__ \ "id").write[String] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").writeNullable[String]
   )(unlift(CentreAddedEvent.unapply))
@@ -85,7 +71,6 @@ object CentreEvents {
   implicit val centreUpdatedEventWriter: Writes[CentreUpdatedEvent] = (
     (__ \ "id").write[String] and
       (__ \ "version").write[Long] and
-      (__ \ "dateTime").write[DateTime] and
       (__ \ "name").write[String] and
       (__ \ "description").writeNullable[String]
   )(unlift(CentreUpdatedEvent.unapply))
@@ -93,8 +78,7 @@ object CentreEvents {
   implicit val centreStatusChangeWrites = new Writes[CentreStatusChangedEvent] {
     def writes(event: CentreStatusChangedEvent) = Json.obj(
       "id"       -> event.id,
-      "version"  -> event.version,
-      "dateTime" -> event.dateTime
+      "version"  -> event.version
     )
   }
 

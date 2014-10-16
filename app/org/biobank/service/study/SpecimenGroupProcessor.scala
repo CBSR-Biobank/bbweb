@@ -118,7 +118,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
         cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
         cmd.preservationTemperatureType, cmd.specimenType)
       newEvent <- SpecimenGroupAddedEvent(
-        newItem.studyId.id, newItem.id.id, timeNow, newItem.name, newItem.description,
+        newItem.studyId.id, newItem.id.id, newItem.name, newItem.description,
         newItem.units, newItem.anatomicalSourceType, newItem.preservationType,
         newItem.preservationTemperatureType, newItem.specimenType).success
     } yield newEvent
@@ -141,7 +141,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     v.fold(
       err => err.fail[SpecimenGroupUpdatedEvent],
       sg => SpecimenGroupUpdatedEvent(
-        cmd.studyId, sg.id.id, sg.version, timeNow, cmd.name, cmd.description,
+        cmd.studyId, sg.id.id, sg.version, cmd.name, cmd.description,
         cmd.units, cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
         cmd.specimenType).success
     )
@@ -159,7 +159,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
 
   private def recoverEvent(event: SpecimenGroupAddedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
     specimenGroupRepository.put(SpecimenGroup(
-      StudyId(event.studyId), SpecimenGroupId(event.specimenGroupId), 0L, event.dateTime, None,
+      StudyId(event.studyId), SpecimenGroupId(event.specimenGroupId), 0L, dateTime, None,
       event.name, event.description, event.units, event.anatomicalSourceType, event.preservationType,
       event.preservationTemperatureType, event.specimenType
     ))
@@ -171,7 +171,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
       err => throw new IllegalStateException(s"updating annotation type from event failed: $err"),
       sg => specimenGroupRepository.put(sg.copy(
         version                     = event.version,
-        timeModified              = Some(event.dateTime),
+        timeModified              = Some(dateTime),
         name                        = event.name,
         description                 = event.description,
         units                       = event.units,

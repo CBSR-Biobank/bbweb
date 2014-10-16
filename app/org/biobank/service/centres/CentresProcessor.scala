@@ -92,7 +92,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     for {
       nameAvailable <- nameAvailable(cmd.name)
       newCentre <- DisabledCentre.create(centreId, -1L, timeNow, cmd.name, cmd.description)
-      event <- CentreAddedEvent(newCentre.id.id, timeNow, newCentre.name, newCentre.description).success
+      event <- CentreAddedEvent(newCentre.id.id, newCentre.name, newCentre.description).success
     } yield event
   }
 
@@ -107,7 +107,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
     v.fold(
       err => DomainError(s"error $err occurred on $cmd").failNel,
-      centre => CentreUpdatedEvent(cmd.id, centre.version, timeNow, centre.name, centre.description).success
+      centre => CentreUpdatedEvent(cmd.id, centre.version, centre.name, centre.description).success
     )
   }
 
@@ -117,7 +117,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
     v.fold(
       err => DomainError(s"error $err occurred on $cmd").failNel,
-      centre => CentreEnabledEvent(cmd.id, centre.version, timeNow).success
+      centre => CentreEnabledEvent(cmd.id, centre.version).success
     )
   }
 
@@ -126,7 +126,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     val v = updateEnabled(cmd) { c => c.disable }
     v.fold(
       err => DomainError(s"error $err occurred on $cmd").failNel,
-      centre => CentreDisabledEvent(cmd.id, centre.version, timeNow).success
+      centre => CentreDisabledEvent(cmd.id, centre.version).success
     )
   }
 
@@ -172,7 +172,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
   private def recoverEvent(event: CentreAddedEvent, userId: Option[UserId], dateTime: DateTime) {
     centreRepository.put(DisabledCentre(
-      CentreId(event.id), 0L, event.dateTime, None, event.name, event.description))
+      CentreId(event.id), 0L, dateTime, None, event.name, event.description))
     ()
   }
 
@@ -181,7 +181,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
       err => throw new IllegalStateException(s"updating centre from event failed: $err"),
       centre => centreRepository.put(centre.copy(
         version = event.version,
-        timeModified = Some(event.dateTime),
+        timeModified = Some(dateTime),
         name = event.name,
         description = event.description))
     )
@@ -192,7 +192,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     getDisabled(event.id).fold(
       err => throw new IllegalStateException(s"enabling centre from event failed: $err"),
       centre => centreRepository.put(EnabledCentre(
-        CentreId(event.id), event.version, centre.timeAdded, Some(event.dateTime),
+        CentreId(event.id), event.version, centre.timeAdded, Some(dateTime),
         centre.name, centre.description))
     )
     ()
@@ -202,7 +202,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     getEnabled(event.id).fold(
       err => throw new IllegalStateException(s"disabling centre from event failed: $err"),
       centre => centreRepository.put(DisabledCentre(
-        CentreId(event.id), event.version, centre.timeAdded, Some(event.dateTime),
+        CentreId(event.id), event.version, centre.timeAdded, Some(dateTime),
         centre.name, centre.description))
     )
     ()

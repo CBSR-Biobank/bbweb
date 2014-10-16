@@ -134,7 +134,6 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
       event <- SpecimenLinkTypeAddedEvent(
         cmd.processingTypeId,
         id.id,
-        timeNow,
         newItem.expectedInputChange,
         newItem.expectedOutputChange,
         newItem.inputCount,
@@ -180,7 +179,6 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
         cmd.processingTypeId,
         slt.id.id,
         slt.version,
-        timeNow,
         slt.expectedInputChange,
         slt.expectedOutputChange,
         slt.inputCount,
@@ -208,7 +206,7 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
       ProcessingTypeId(event.processingTypeId),
       SpecimenLinkTypeId(event.specimenLinkTypeId),
       0L,
-      event.dateTime,
+      dateTime,
       None,
       event.expectedInputChange,
       event.expectedOutputChange,
@@ -227,7 +225,7 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
       err => throw new IllegalStateException(s"updating specimen link type from event failed: $err"),
       slt => specimenLinkTypeRepository.put(slt.copy(
         version               = event.version,
-        timeModified        = Some(event.dateTime),
+        timeModified        = Some(dateTime),
         expectedInputChange   = event.expectedInputChange,
         expectedOutputChange  = event.expectedOutputChange,
         inputCount            = event.inputCount,

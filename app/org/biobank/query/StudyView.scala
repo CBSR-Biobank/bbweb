@@ -8,14 +8,19 @@ package org.biobank.query
 //import org.biobank.query.model._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service.WrappedEvent
+
 import play.api.Play.current
-import akka.actor.Actor
-import akka.actor.ActorLogging
+import akka.persistence.PersistentView
+import akka.actor.{ Actor, ActorLogging }
 import org.slf4j.Logger
 
-class StudyViewImpl extends StudyView {
+class StudyView extends PersistentView with ActorLogging {
 
-  def receive = {
+  override def persistenceId: String = "study-processor-id"
+
+  override def viewId: String = "study-view-id"
+
+  def receive: Actor.Receive = {
     case event: StudyAddedEvent =>
     // DB.withSession { implicit s: Session =>
     //   Studies.insert(Study(event.id, 0L, event.name, event.description, false))

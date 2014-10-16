@@ -98,7 +98,7 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
         StudyId(cmd.studyId), id, -1L, timeNow,
         cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options, cmd.required)
       event <- ParticipantAnnotationTypeAddedEvent(
-        newItem.studyId.id, newItem.id.id, timeNow, newItem.name, newItem.description,
+        newItem.studyId.id, newItem.id.id, newItem.name, newItem.description,
         newItem.valueType, newItem.maxValueCount, newItem.options, newItem.required).success
     } yield event
   }
@@ -118,7 +118,7 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
     v.fold(
       err => DomainError(s"error $err occurred on $cmd").failNel,
       at => ParticipantAnnotationTypeUpdatedEvent(
-        at.studyId.id, at.id.id, at.version, timeNow, at.name, at.description, at.valueType,
+        at.studyId.id, at.id.id, at.version, at.name, at.description, at.valueType,
         at.maxValueCount, at.options, at.required).success
     )
   }
@@ -137,7 +137,7 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
   private def recoverEvent(event: ParticipantAnnotationTypeAddedEvent, userId: Option[UserId], dateTime: DateTime) = {
     log.info(s"recoverEvent: $event")
     annotationTypeRepository.put(ParticipantAnnotationType(
-      StudyId(event.studyId), AnnotationTypeId(event.annotationTypeId), 0L, event.dateTime, None,
+      StudyId(event.studyId), AnnotationTypeId(event.annotationTypeId), 0L, dateTime, None,
       event.name, event.description, event.valueType, event.maxValueCount, event.options, event.required))
     ()
   }
@@ -153,7 +153,7 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
         maxValueCount = event.maxValueCount,
         options       = event.options,
         required      = event.required,
-        timeModified = Some(event.dateTime)))
+        timeModified = Some(dateTime)))
     )
     ()
   }
