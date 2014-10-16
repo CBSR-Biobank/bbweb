@@ -24,6 +24,6 @@ class WebModule extends Module {
 
   binding to play.api.libs.concurrent.Akka.system(inject[play.api.Application])
 
-  binding identifiedBy 'akkaTimeout to Timeout(10 seconds)
+  binding identifiedBy 'akkaTimeout to Timeout(5 seconds)
 
 }
