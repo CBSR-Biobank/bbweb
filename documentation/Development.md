@@ -106,6 +106,30 @@ object MyTag extends Tag("MyTag")
 ...
 ```
 
+### Gtags
+
+Using helm-gtags in Emacs. To generate a tags file the following is required:
+
+1. Install [GNU Global](http://www.gnu.org/software/global/download.html) from source (in `/usr/local/src`).
+1. Install exuberant-ctags:
+
+    ```bash
+    sudo apt-get install exuberant-ctags
+    ```
+
+1. Add the following line to `/usr/local/share/gtags/gtags.conf` in the `exuberant-ctags` section.
+
+    ```
+    :langmap=Scala\:.scala:\
+    ```
+
+1. Create the tags files (at the project root):
+
+    ```bash
+    find app -type f -print > /tmp/bbwebfiles
+    gtags -v -f /tmp/bbwebfiles --gtagslabel ctags
+    ```
+
 ## NPM
 
 Add dependencies to `package.json` in the root directory. Use command `web-assets:jseNpmNodeModules`

@@ -1,5 +1,8 @@
 *.class
 *.log
+GPATH
+GRTAGS
+GTAGS
 
 # sbt specific
 dist/*
