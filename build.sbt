@@ -80,7 +80,6 @@ libraryDependencies ++= Seq(
   "org.webjars"               %  "angular-ui-bootstrap"           % "0.11.2",
   "org.webjars"               %  "angular-ui-router"              % "0.2.11-1",
   "org.webjars"               %  "ng-table"                       % "0.3.3",
-  "org.webjars"               % "angularjs-toaster"               % "0.4.7-1",
   "org.webjars"               % "toastr"                          % "2.0.1-1",
   "org.webjars"               % "angular-filter"                  % "0.4.6",
   // Testing

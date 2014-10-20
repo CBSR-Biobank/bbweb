@@ -1,4 +1,4 @@
-define(['./module', 'toaster'], function(module, toaster) {
+define(['./module', 'toastr'], function(module, toastr) {
   'use strict';
 
   module.controller('RegisterUserCtrl', RegisterUserCtrl);
@@ -30,7 +30,7 @@ define(['./module', 'toaster'], function(module, toaster) {
       userService.add(user).then(
         function() {
           // user has been registerd
-          toaster.success(
+          toastr.success(
             'Your account was created and is now pending administrator approval.',
             'Registration success',
             {
@@ -43,7 +43,7 @@ define(['./module', 'toaster'], function(module, toaster) {
         },
         function() {
           // registration failed
-          toaster.error(
+          toastr.error(
             'That email address is already registered.',
             'Registration error',
             {

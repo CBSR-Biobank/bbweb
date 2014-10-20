@@ -36,7 +36,29 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     vm.lock            = lock;
     vm.unlock          = unlock;
 
-    vm.tableParams = tableService.getTableParamsWithCallback(getTableData);
+    var tableParameters = {
+      page: 1,            // show first page
+      count: 15,           // count per page
+      sorting: {
+        name: 'asc'       // initial sorting
+      }
+    };
+
+    var tableSettings = {
+      total: function () { return getTableData().length; },
+      getData: function($defer, params) {
+        var filteredData = getTableData();
+        var orderedData = params.sorting() ?
+            $filter('orderBy')(filteredData, params.orderBy()) : filteredData;
+        params.total(filteredData.length);
+        $defer.resolve(
+          orderedData.slice(
+            (params.page() - 1) * params.count(),
+            params.page() * params.count()));
+      }
+    };
+
+    vm.tableParams = tableService.getTableParams(getTableData, tableParameters, tableSettings);
     vm.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
     updateData();
 

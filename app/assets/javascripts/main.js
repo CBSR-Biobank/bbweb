@@ -19,7 +19,6 @@
       'angular-ui-router': ['angular'],
       'ui-bootstrap':      ['angular', 'bootstrap'],
       'ngTable':           ['angular'],
-      'toaster':           ['angular', 'jquery'],
       'toastr':            ['angular', 'jquery']
     },
     paths: {
@@ -33,7 +32,6 @@
       'bootstrap':         '../lib/bootstrap/js/bootstrap',
       'ui-bootstrap':      '../lib/angular-ui-bootstrap/ui-bootstrap-tpls',
       'ngTable':           '../lib/ng-table/ng-table',
-      'toaster':           '../lib/angularjs-toaster/toaster',
       'toastr':            '../lib/toastr/toastr'
     }
   });
