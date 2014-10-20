@@ -10,9 +10,10 @@ define(['./module'], function(module) {
    */
   function centreLocationService(biobankXhrReqService) {
     var service = {
-      list:        list,
-      query:       query,
-      addOrUpdate: addOrUpdate
+      list:   list,
+      query:  query,
+      add:    add,
+      remove: remove
     };
     return service;
 
@@ -28,7 +29,7 @@ define(['./module'], function(module) {
         '/centres/locations/' + centreId + '?locationId=' + locationId);
     }
 
-    function addOrUpdate(centre, location) {
+    function add(centre, location) {
       var cmd = {
         centreId:       centre.id,
         name:           location.name,
@@ -40,14 +41,11 @@ define(['./module'], function(module) {
         countryIsoCode: location.countryIsoCode
       };
 
-      if (centre.id) {
-        cmd.id = centre.id;
-        cmd.expectedVersion = centre.version;
+      return biobankXhrReqService.call('POST', '/centres/locations', cmd);
+    }
 
-        return biobankXhrReqService.call('PUT', '/centres/locations/' + centre.id, cmd);
-      } else {
-        return biobankXhrReqService.call('POST', '/centres/locations', cmd);
-      }
+    function remove(centreId, locationId) {
+      return biobankXhrReqService.call('DELETE', '/centres/locations/' + centreId + '/' + locationId);
     }
 
   }

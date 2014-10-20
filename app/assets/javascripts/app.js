@@ -38,11 +38,11 @@ define([
     /*jshint unused: false*/
 
     // change these to true to have the information displayed in the console
-    var debugStateChangeStart = false;
+    var debugStateChangeStart   = false;
     var debugStateChangeSuccess = false;
     var debugViewContentLoading = false;
-    var debugViewContentLoaded = false;
-    var debugStateNotFound = false;
+    var debugViewContentLoaded  = false;
+    var debugStateNotFound      = false;
 
     // $rootScope.$state = $state;
     // $rootScope.$stateParams = $stateParams;

@@ -1,14 +1,14 @@
 define(['./module'], function(module) {
   'use strict';
 
-  module.service('centreService', centreService);
+  module.service('centresService', centresService);
 
-  centreService.$inject = ['biobankXhrReqService'];
+  centresService.$inject = ['biobankXhrReqService'];
 
   /**
    *
    */
-  function centreService(biobankXhrReqService) {
+  function centresService(biobankXhrReqService) {
     var service = {
       list:        list,
       query:       query,

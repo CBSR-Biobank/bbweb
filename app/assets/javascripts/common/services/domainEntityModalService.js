@@ -3,9 +3,9 @@ define(['../module', 'angular'], function(module, angular) {
 
   module.service('domainEntityModalService', domainEntityModalService);
 
-  domainEntityModalService.$inject = ['$modal', 'panelTableService'];
+  domainEntityModalService.$inject = ['$modal', 'tableService'];
 
-  function domainEntityModalService($modal, panelTableService) {
+  function domainEntityModalService($modal, tableService) {
     var modalDefaults = {
       backdrop: true,
       keyboard: true,
@@ -26,14 +26,14 @@ define(['../module', 'angular'], function(module, angular) {
       angular.extend(tempModalDefaults, modalDefaults);
 
       tempModalDefaults.controller = ['$scope', '$modalInstance', function ($scope, $modalInstance) {
-        var tableParameters = { count: 20, sorting: {} };
+        var tableParameters = { count: 20 };
         var tableSettings = { counts: [] };
 
         $scope.modalOptions = {};
         $scope.modalOptions.title = title;
         $scope.modalOptions.data = data;
         $scope.modalOptions.tableParams =
-          panelTableService.getTableParams($scope.modalOptions.data, tableParameters, tableSettings);
+          tableService.getTableParams($scope.modalOptions.data, tableParameters, tableSettings);
         $scope.modalOptions.ok = ok;
 
         //--

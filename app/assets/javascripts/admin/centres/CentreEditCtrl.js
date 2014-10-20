@@ -8,7 +8,7 @@ define(['../module'], function(module) {
     '$state',
     '$stateParams',
     'stateHelper',
-    'centreService',
+    'centresService',
     'domainEntityUpdateError',
     'user',
     'centre',
@@ -21,7 +21,7 @@ define(['../module'], function(module) {
                           $state,
                           $stateParams,
                           stateHelper,
-                          centreService,
+                          centresService,
                           domainEntityUpdateError,
                           user,
                           centre) {
@@ -41,7 +41,7 @@ define(['../module'], function(module) {
     }
 
     function submit(centre) {
-      centreService.addOrUpdate(centre).then(
+      centresService.addOrUpdate(centre).then(
         gotoReturnState,
         function(error) {
           domainEntityUpdateError(error, 'centre', returnState);

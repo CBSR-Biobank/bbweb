@@ -112,12 +112,12 @@ object CentreCommands {
   implicit val addCentreLocationCmdReads = (
     (__ \ "centreId").read[String](minLength[String](2)) and
       (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "street").read[String](minLength[String](2)) and
-      (__ \ "city").read[String](minLength[String](2)) and
-      (__ \ "province").read[String](minLength[String](2)) and
-      (__ \ "postalCode").read[String](minLength[String](2)) and
-      (__ \ "poBoxNumber").readNullable[String](minLength[String](2)) and
-      (__ \ "countryIsoCode").read[String](minLength[String](2))
+      (__ \ "street").read[String] and
+      (__ \ "city").read[String] and
+      (__ \ "province").read[String] and
+      (__ \ "postalCode").read[String] and
+      (__ \ "poBoxNumber").readNullable[String] and
+      (__ \ "countryIsoCode").read[String]
   )(AddCentreLocationCmd(_, _, _, _, _, _, _, _))
 
   implicit val removeCentreLocationCmdReads = (

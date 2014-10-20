@@ -1,0 +1,108 @@
+<div class="page-header"><h1>{{vm.title}}</h1></div>
+<div class="clearfix">
+  <form class="form-horizontal"
+        name="locationForm"
+        data-ng-submit="locationForm.$valid && vm.submit(vm.location)"
+        novalidate>
+
+    <!-- NAME -->
+    <div class="form-group">
+      <label for="name" class="col-md-2 control-label">Name</label>
+      <div class="col-md-10">
+        <input
+           name="name"
+           type="text"
+           class="form-control"
+           data-ng-model="vm.location.name"
+           data-ng-minlength="2"
+           placeholder="A short name for the location"
+           required />
+      </div>
+      <div class="col-md-offset-2 col-md-10">
+        <p class="help-block" data-ng-show="locationForm.name.$error.minlength">Name is too short.</p>
+      </div>
+    </div>
+
+    <!-- STREET -->
+    <div class="form-group">
+      <label for="street" class="col-md-2 control-label">Street</label>
+      <div class="col-md-10">
+        <input
+           name="street"
+           type="text"
+           class="form-control"
+           data-ng-model="vm.location.street"
+           placeholder="Street address for this location (including unit number)" />
+      </div>
+    </div>
+
+    <!-- CITY -->
+    <div class="form-group">
+      <label for="city" class="col-md-2 control-label">City</label>
+      <div class="col-md-10">
+        <input
+           name="city"
+           type="text"
+           class="form-control"
+           data-ng-model="vm.location.city" />
+      </div>
+    </div>
+
+    <!-- PROVINCE -->
+    <div class="form-group">
+      <label for="province" class="col-md-2 control-label">Province / State</label>
+      <div class="col-md-10">
+        <input
+           name="province"
+           type="text"
+           class="form-control"
+           data-ng-model="vm.location.province" />
+      </div>
+    </div>
+
+    <!-- POSTAL CODE -->
+    <div class="form-group">
+      <label for="postal_code" class="col-md-2 control-label">Postal / Zip code</label>
+      <div class="col-md-10">
+        <input
+           name="postalCode"
+           type="text"
+           class="form-control"
+           data-ng-model="vm.location.postalCode" />
+      </div>
+    </div>
+
+    <!-- PO BOX NUMBER -->
+    <div class="form-group">
+      <label for="po box number" class="col-md-2 control-label">PO box number</label>
+      <div class="col-md-10">
+        <input
+           name="poBoxNumber"
+           type="text"
+           class="form-control"
+           data-ng-model="vm.location.poBoxNumber" />
+      </div>
+    </div>
+
+    <!-- COUNTRY ISO CODE -->
+    <div class="form-group">
+      <label for="country iso code" class="col-md-2 control-label">Country ISO code</label>
+      <div class="col-md-10">
+        <input
+           name="countryIsoCode"
+           type="text"
+           class="form-control"
+           data-ng-model="vm.location.countryIsoCode"
+           placeholder="Optional" />
+      </div>
+    </div>
+
+    <!-- BUTTONS  -->
+    <div class="form-group">
+      <div class="col-md-offset-2 col-md-10">
+        <button class="btn btn-primary" data-ng-disabled="locationForm.$invalid">Submit</button>
+        <button class="btn" data-ng-click="vm.cancel()">Cancel</button>
+      </div>
+    </div>
+  </form>
+</div>

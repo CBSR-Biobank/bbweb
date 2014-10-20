@@ -19,8 +19,8 @@ define(['../module', 'underscore'], function(module, _) {
       url: '/centres',
       resolve: {
         user: userResolve.user,
-        centres: ['centreService', function(centreService) {
-          return centreService.list().then(function(centres) {
+        centres: ['centresService', function(centresService) {
+          return centresService.list().then(function(centres) {
             return _.sortBy(centres, function(centre) { return centre.name; });
           });
         }]
@@ -43,8 +43,8 @@ define(['../module', 'underscore'], function(module, _) {
       url: '',
       resolve: {
         user: userResolve.user,
-        centres: ['centreService', function(centreService) {
-          return centreService.list().then(function(centres) {
+        centres: ['centresService', function(centresService) {
+          return centresService.list().then(function(centres) {
             return _.sortBy(centres, function(centre) { return centre.name; });
           });
         }]
@@ -90,20 +90,40 @@ define(['../module', 'underscore'], function(module, _) {
       url: '/{centreId}',
       resolve: {
         user: userResolve.user,
-        centre: ['$stateParams', 'centreService', function($stateParams, centreService) {
+        centre: ['$stateParams', 'centresService', function($stateParams, centresService) {
           if ($stateParams.centreId) {
-            return centreService.query($stateParams.centreId);
+            return centresService.query($stateParams.centreId);
           }
           throw new Error('state parameter centreId is invalid');
         }]
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/centres/centreView.html'
+          templateUrl: '/assets/javascripts/admin/centres/centreView.html',
+          controller: 'CentreCtrl as vm'
         }
       },
       data: {
         breadcrumProxy: 'admin.studies.centre.summary'
+      }
+    });
+
+    /**
+     * Centre add
+     */
+    $stateProvider.state('admin.centres.centre.update', {
+      url: '/add',
+      resolve: {
+        user: userResolve.user
+      },
+      views: {
+        'main@': {
+          templateUrl: '/assets/javascripts/admin/centres/centreForm.html',
+          controller: 'CentreEditCtrl as vm'
+        }
+      },
+      data: {
+        displayName: 'Add centre'
       }
     });
 
@@ -143,9 +163,15 @@ define(['../module', 'underscore'], function(module, _) {
       views: {
         'centreDetails': {
           template: '<accordion close-others="false">' +
-            '<locations-annot-types-panel></locations-annot-types-panel>' +
+            '<locations-panel centre="centre" locations="locations"></locations-panel>' +
             '</accordion>',
-          controller: 'LocationsTabCtrl'
+          controller: [
+            '$scope', 'centre', 'locations',
+            function($scope, centre, locations) {
+              $scope.centre = centre;
+              $scope.locations = locations;
+            }
+          ]
         }
       },
       data: {
@@ -153,6 +179,60 @@ define(['../module', 'underscore'], function(module, _) {
       }
     });
 
+    /**
+     * Used to add a centre location.
+     */
+    $stateProvider.state('admin.centres.centre.locationAdd', {
+      url: '/location/add',
+      resolve: {
+        user: userResolve.user,
+        location: [function() {
+          return {
+            name           : '',
+            street         : '',
+            city           : '',
+            province       : '',
+            postalCode     : '',
+            poBoxNumber    : '',
+            countryIsoCode : ''
+          };
+        }]
+      },
+      views: {
+        'main@': {
+          templateUrl: '/assets/javascripts/admin/locationForm.html',
+          controller: 'LocationEditCtrl as vm'
+        }
+      },
+      data: {
+        displayName: 'Specimen Group'
+      }
+    });
+
+    /**
+     * Used to update a centre location.
+     */
+    $stateProvider.state('admin.centres.centre.locationUpdate', {
+      url: '/location/update/:locationId',
+      resolve: {
+        user: userResolve.user,
+        location: [
+          '$stateParams', 'centreLocationService', 'centre',
+          function($stateParams, centreLocationService, centre) {
+            return centreLocationService.query(centre.id, $stateParams.locationId);
+          }
+        ]
+      },
+      views: {
+        'main@': {
+          templateUrl: '/assets/javascripts/admin/locationForm.html',
+          controller: 'LocationEditCtrl as vm'
+        }
+      },
+      data: {
+        displayName: 'Specimen Group'
+      }
+    });
   }
 
 });

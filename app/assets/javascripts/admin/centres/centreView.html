@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h1>{{centre.name}} <small>Centre administration </small></h1>
+  <h1>{{vm.centre.name}} <small>Centre administration </small></h1>
 </div>
 <div class="clearfix">
   <!--
@@ -7,9 +7,15 @@
       of the tab is clicked on, not just the link.
   -->
   <tabset>
-    <tab heading="Summary" ui-sref="admin.centres.centre.summary" ui-sref-active="active"></tab>
-    <tab heading="Locations" ui-sref="admin.centres.centre.locations"  ui-sref-active="active"></tab>
-    <tab heading="Studies" ui-sref="admin.centres.centre.studies" active="tabActive.studies"></tab>
+    <tab heading="Summary"
+         ui-sref="admin.centres.centre.summary"
+         active="vm.tabSummaryActive"></tab>
+    <tab heading="Locations"
+         ui-sref="admin.centres.centre.locations"
+         active="vm.tabLocationsActive"></tab>
+    <tab heading="Studies"
+         ui-sref="admin.centres.centre.studies"
+         active="vm.tabStudiesActive"></tab>
   </tabset>
   <div class="row">
     <div ui-view="centreDetails" style="margin-top: 10px;"></div>

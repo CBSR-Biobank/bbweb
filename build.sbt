@@ -71,16 +71,17 @@ libraryDependencies ++= Seq(
   "org.webjars"               %% "webjars-play"                   % "2.3.0",
   // WebJars dependencies
   "org.webjars"               %  "requirejs"                      % "2.1.14-3",
-  "org.webjars"               %  "underscorejs"                   % "1.6.0-3",
+  "org.webjars"               %  "underscorejs"                   % "1.7.0",
   "org.webjars"               %  "jquery"                         % "2.1.1",
   "org.webjars"               %  "bootstrap"                      % "3.2.0" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angularjs"                      % "1.3.0-rc.2" exclude(
+  "org.webjars"               %  "angularjs"                      % "1.3.0" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angular-ui-bootstrap"           % "0.11.0-3",
-  "org.webjars"               %  "angular-ui-router"              % "0.2.11",
+  "org.webjars"               %  "angular-ui-bootstrap"           % "0.11.2",
+  "org.webjars"               %  "angular-ui-router"              % "0.2.11-1",
   "org.webjars"               %  "ng-table"                       % "0.3.3",
   "org.webjars"               % "angularjs-toaster"               % "0.4.7-1",
+  "org.webjars"               % "toastr"                          % "2.0.1-1",
   "org.webjars"               % "angular-filter"                  % "0.4.6",
   // Testing
   "com.typesafe.akka"         %% "akka-testkit"                   % "2.3.2"              % "test",

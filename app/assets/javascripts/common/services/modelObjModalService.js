@@ -3,9 +3,9 @@ define(['../module', 'angular'], function(module, angular) {
 
   module.service('modelObjModalService', modelObjModalService);
 
-  modelObjModalService.$inject = ['$modal', 'panelTableService'];
+  modelObjModalService.$inject = ['$modal', 'tableService'];
 
-  function modelObjModalService($modal, panelTableService) {
+  function modelObjModalService($modal, tableService) {
     var modalDefaults = {
       backdrop: true,
       keyboard: true,
@@ -35,7 +35,7 @@ define(['../module', 'angular'], function(module, angular) {
         };
 
         $scope.modalOptions.tableParams =
-          panelTableService.getTableParams($scope.modalOptions.data, tableParameters, tableSettings);
+          tableService.getTableParams($scope.modalOptions.data, tableParameters, tableSettings);
 
         $scope.modalOptions.ok = function () {
           $modalInstance.close();

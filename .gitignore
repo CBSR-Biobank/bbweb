@@ -3,6 +3,7 @@
 GPATH
 GRTAGS
 GTAGS
+TAGS
 
 # sbt specific
 dist/*

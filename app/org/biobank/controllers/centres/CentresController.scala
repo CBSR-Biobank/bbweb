@@ -69,7 +69,13 @@ class CentresController(implicit inj: Injector)
 
   def getLocations(centreId: String, locationId: Option[String]) =
     AuthAction(parse.empty) { token => implicit userId => implicit request =>
-      domainValidationReply(centresService.getCentreLocations(centreId, locationId))
+      val validation = centresService.getCentreLocations(centreId, locationId)
+      locationId.fold {
+        domainValidationReply(validation)
+      } { id =>
+        // return the first element
+        domainValidationReply(validation.map(_.head))
+      }
     }
 
   def addLocation = commandAction { cmd: AddCentreLocationCmd => implicit userId =>
@@ -77,29 +83,28 @@ class CentresController(implicit inj: Injector)
     domainValidationReply(future)
   }
 
-  def removeLocation(
-    centreId: String,
-    id: String) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-    val future = centresService.removeCentreLocation(RemoveCentreLocationCmd(centreId, id))
-    domainValidationReply(future)
-  }
+  def removeLocation(centreId: String, id: String) =
+    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+      val future = centresService.removeCentreLocation(RemoveCentreLocationCmd(centreId, id))
+      domainValidationReply(future)
+    }
 
 
-  def getLinkedStudies(centreId: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    domainValidationReply(centresService.getCentreStudies(centreId))
-  }
+  def getLinkedStudies(centreId: String) =
+    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+      domainValidationReply(centresService.getCentreStudies(centreId))
+    }
 
   def addLinkedStudies = commandAction { cmd: AddCentreToStudyCmd => implicit userId =>
     val future = centresService.addCentreToStudy(cmd)
     domainValidationReply(future)
   }
 
-  def removeLinkedStudy(
-    centreId: String,
-    studyId: String) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-    val future = centresService.removeCentreFromStudy(RemoveCentreFromStudyCmd(centreId, studyId))
-    domainValidationReply(future)
-  }
+  def removeLinkedStudy(centreId: String, studyId: String) =
+    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+      val future = centresService.removeCentreFromStudy(RemoveCentreFromStudyCmd(centreId, studyId))
+      domainValidationReply(future)
+    }
 
 }
 

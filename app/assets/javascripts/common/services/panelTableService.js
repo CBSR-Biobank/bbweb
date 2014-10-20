@@ -23,10 +23,10 @@ define(['../module', 'angular'], function(module, angular) {
     function getTableParamsWithCallback(tableDataFn, customParameters, customSettings) {
       var defaultParameters = {
         page: 1,            // show first page
-        count: 10           // count per page
-        // sorting: {
-        //   name: 'asc'       // initial sorting
-        // }
+        count: 10,           // count per page
+        sorting: {
+          name: 'asc'       // initial sorting
+        }
       };
 
       var defaultSettings = {
@@ -61,11 +61,11 @@ define(['../module', 'angular'], function(module, angular) {
      * Creates an ng-table for the data passed in.
      */
     function getTableParams(data, customParameters, customSettings) {
-      return getTableParamsWithCallback(tableData, customParameters, customSettings);
+      return getTableParamsWithCallback(getTableData, customParameters, customSettings);
 
       //--
 
-      function tableData() {
+      function getTableData() {
         return data;
       }
     }

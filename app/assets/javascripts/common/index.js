@@ -22,4 +22,5 @@ define([
   './services/panelService',
   './services/panelTableService',
   './services/stateHelperService',
+  './services/tableService'
 ], function() {});

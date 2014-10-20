@@ -13,26 +13,28 @@
       'underscore': {
         exports: '_'
       },
-      'angular-route': ['angular'],
-      'angular-cookies': ['angular'],
-      'bootstrap': ['jquery'],
+      'angular-route':     ['angular'],
+      'angular-cookies':   ['angular'],
+      'bootstrap':         ['jquery'],
       'angular-ui-router': ['angular'],
-      'ui-bootstrap': ['angular', 'bootstrap'],
-      'ngTable': ['angular'],
-      'toastr': ['angular', 'jquery']
+      'ui-bootstrap':      ['angular', 'bootstrap'],
+      'ngTable':           ['angular'],
+      'toaster':           ['angular', 'jquery'],
+      'toastr':            ['angular', 'jquery']
     },
     paths: {
-      'requirejs': ['../lib/requirejs/require'],
-      'jquery': ['../lib/jquery/jquery'],
-      'angular': ['../lib/angularjs/angular'],
-      'underscore': '../lib/underscorejs/underscore',
-      'angular-route': ['../lib/angularjs/angular-route'],
-      'angular-cookies': ['../lib/angularjs/angular-cookies'],
-      'angular-ui-router': ['../lib/angular-ui-router/angular-ui-router'],
-      'bootstrap': ['../lib/bootstrap/js/bootstrap'],
-      'ui-bootstrap': ['../lib/angular-ui-bootstrap/ui-bootstrap-tpls'],
-      'ngTable': ['../lib/ng-table/ng-table'],
-      'toastr': ['../lib/angularjs-toaster/toaster']
+      'requirejs':         '../lib/requirejs/require',
+      'jquery':            '../lib/jquery/jquery',
+      'angular':           '../lib/angularjs/angular',
+      'underscore':        '../lib/underscorejs/underscore',
+      'angular-route':     '../lib/angularjs/angular-route',
+      'angular-cookies':   '../lib/angularjs/angular-cookies',
+      'angular-ui-router': '../lib/angular-ui-router/angular-ui-router',
+      'bootstrap':         '../lib/bootstrap/js/bootstrap',
+      'ui-bootstrap':      '../lib/angular-ui-bootstrap/ui-bootstrap-tpls',
+      'ngTable':           '../lib/ng-table/ng-table',
+      'toaster':           '../lib/angularjs-toaster/toaster',
+      'toastr':            '../lib/toastr/toastr'
     }
   });
 
