@@ -14,7 +14,8 @@ define(['./module'], function(module) {
       query:       query,
       addOrUpdate: addOrUpdate,
       enable:      enable,
-      disable:     disable
+      disable:     disable,
+      linkedStudies: linkedStudies
     };
     return service;
 
@@ -55,6 +56,10 @@ define(['./module'], function(module) {
 
     function disable(centre) {
       return changeStatus('disabled', centre);
+    }
+
+    function linkedStudies(centreId) {
+      return biobankXhrReqService.call('GET','/centres/studies/' + centreId);
     }
   }
 

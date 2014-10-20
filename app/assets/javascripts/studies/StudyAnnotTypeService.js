@@ -1,4 +1,4 @@
-define(['./module'], function(module) {
+define(['./module', 'angular'], function(module, angular) {
   'use strict';
 
   module.service('StudyAnnotTypeService', StudyAnnotTypeService);
@@ -33,11 +33,11 @@ define(['./module'], function(module) {
         studyId:       annotType.studyId,
         name:          annotType.name,
         valueType:     annotType.valueType,
-        maxValueCount: annotType.maxValueCount,
-        options:       annotType.options
+        maxValueCount: annotType.maxValueCount
       };
 
-      domainEntityService.setDescription(cmd, annotType.description);
+      angular.extend(cmd, domainEntityService.getOptionalAttribute(annotType, 'description'));
+      angular.extend(cmd, domainEntityService.getOptionalAttribute(annotType, 'options'));
 
       if (typeof annotType.required !== 'undefined') {
         cmd.required = annotType.required;

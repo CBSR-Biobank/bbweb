@@ -6,9 +6,7 @@ define(['../module'], function(module) {
   LocationsPanelCtrl.$inject = [
     '$scope',
     '$state',
-    '$stateParams',
     'panelService',
-    'modalService',
     'domainEntityModalService',
     'domainEntityRemoveService',
     'centreLocationService'
@@ -19,9 +17,7 @@ define(['../module'], function(module) {
    */
   function LocationsPanelCtrl($scope,
                               $state,
-                              $stateParams,
                               panelService,
-                              modalService,
                               domainEntityModalService,
                               domainEntityRemoveService,
                               centreLocationService) {

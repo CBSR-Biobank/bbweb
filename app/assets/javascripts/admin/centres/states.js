@@ -147,7 +147,7 @@ define(['../module', 'underscore'], function(module, _) {
     });
 
     /**
-     * Centre view participatns information
+     * Centre view location information
      */
     $stateProvider.state('admin.centres.centre.locations', {
       url: '/locations',
@@ -231,6 +231,39 @@ define(['../module', 'underscore'], function(module, _) {
       },
       data: {
         displayName: 'Specimen Group'
+      }
+    });
+
+    /**
+     * Centre view studies information
+     */
+    $stateProvider.state('admin.centres.centre.studies', {
+      url: '/studies',
+      resolve: {
+        user: userResolve.user,
+        studies: [
+          'centresService', 'centre',
+          function(centresService, centre) {
+            return centresService.linkedStudies(centre.id);
+          }
+        ]
+      },
+      views: {
+        'centreDetails': {
+          template: '<accordion close-others="false">' +
+            '<centre-studies-panel centre="centre" studies="studies"></centre-studies-panel>' +
+            '</accordion>',
+          controller: [
+            '$scope', 'centre', 'studies',
+            function($scope, centre, studies) {
+              $scope.centre = centre;
+              $scope.studies = studies;
+            }
+          ]
+        }
+      },
+      data: {
+        displayName: '{{centre.name}}'
       }
     });
   }

@@ -43,7 +43,7 @@ define(['./module'], function(module) {
         name: study.name
       };
 
-      domainEntityService.setDescription(cmd, study.description);
+      domainEntityService.getOptionalAttribute(cmd, study.description);
 
       if (study.id) {
         cmd.id = study.id;

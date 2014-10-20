@@ -61,6 +61,9 @@ define(['../../module'], function(module) {
     }
 
     function optionAdd() {
+      if (!vm.annotType.options) {
+        vm.annotType.options = [];
+      }
       vm.annotType.options.push('');
     }
 

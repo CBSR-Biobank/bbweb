@@ -15,6 +15,8 @@ define([
   './centres/CentresTableCtrl',
   './centres/locationsPanelDirective',
   './centres/LocationsPanelCtrl',
+  './centres/CentreStudiesPanelCtrl',
+  './centres/centreStudiesPanelDirective',
   './centres/states',
   './studies/StudyCtrl',
   './studies/StudyEditCtrl',

@@ -33,7 +33,7 @@ define(['./module'], function(module) {
         enabled:     processingType.enabled
       };
 
-      domainEntityService.setDescription(cmd, processingType.description);
+      domainEntityService.getOptionalAttribute(cmd, processingType.description);
 
       if (processingType.id) {
         cmd.id = processingType.id;

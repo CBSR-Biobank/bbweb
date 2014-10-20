@@ -10,20 +10,20 @@ define(['../module'], function(module) {
    */
   function domainEntityService() {
     var service = {
-      setDescription: setDescription
+      getOptionalAttribute: getOptionalAttribute
     };
     return service;
 
     /**
-     * Does not set the description field in a command if it is null or length 0.
+     * Returns an object with the attribute set if it is not null or has length > 0 in "obj".
      */
-    function setDescription(cmd, description) {
-      if (description && (description.length > 0)) {
-        cmd.description = description;
+    function getOptionalAttribute(obj, attribute) {
+      var result = {};
+      if (obj[attribute] && (obj[attribute].length > 0)) {
+        result[attribute] = obj[attribute];
       }
+      return result;
     }
   }
-
-
 
 });

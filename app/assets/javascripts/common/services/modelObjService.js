@@ -10,14 +10,14 @@ define(['../module'], function(module) {
    */
   function modelObjService() {
     var service = {
-      setDescription: setDescription
+      getOptionalAttribute: getOptionalAttribute
     };
     return service;
 
     /**
      * Does not set the description field in a command if it is null or length 0.
      */
-    function setDescription(cmd, description) {
+    function getOptionalAttribute(cmd, description) {
       if (description && (description.length > 0)) {
         cmd.description = description;
       }
