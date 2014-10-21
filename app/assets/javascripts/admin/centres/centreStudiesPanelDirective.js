@@ -12,7 +12,8 @@ define(['../module'], function(module) {
       restrict: 'EA',
       scope: {
         centre: '=',
-        studies: '='
+        centreStudies: '=',
+        allStudies: '='
       },
       templateUrl: '/assets/javascripts/admin/centres/studiesPanel.html',
       controller: 'CentreStudiesPanelCtrl as vm'

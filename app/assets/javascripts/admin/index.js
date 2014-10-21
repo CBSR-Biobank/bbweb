@@ -20,6 +20,7 @@ define([
   './centres/states',
   './studies/StudyCtrl',
   './studies/StudyEditCtrl',
+  './studies/studyModalService',
   './studies/annotationTypes/CeventAnnotTypesPanelCtrl',
   './studies/annotationTypes/ParticipantsAnnotTypesPanelCtrl',
   './studies/annotationTypes/SpcLinkAnnotTypesPanelCtrl',

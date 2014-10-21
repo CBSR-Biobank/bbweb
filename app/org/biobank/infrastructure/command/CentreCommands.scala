@@ -76,17 +76,18 @@ object CentreCommands {
       extends CentreLocationCmd
       with HasCentreIdentity
 
-  case class AddCentreToStudyCmd(
+  case class AddStudyToCentreCmd(
     centreId: String,
     studyId: String)
       extends CentreLocationCmd
       with HasCentreIdentity
 
-  case class RemoveCentreFromStudyCmd(
+  case class RemoveStudyFromCentreCmd(
     centreId: String,
     studyId: String)
       extends CentreLocationCmd
       with HasCentreIdentity
+
   implicit val addCentreCmdReads = (
     (__ \ "name").read[String](minLength[String](2)) and
       (__ \ "description").readNullable[String]
@@ -125,14 +126,14 @@ object CentreCommands {
       (__ \ "locationId").read[String](minLength[String](2))
   )(RemoveCentreLocationCmd.apply _ )
 
-  implicit val addCentreToStudyCmdReads = (
+  implicit val addStudyToCentreCmdReads = (
     (__ \ "centreId").read[String](minLength[String](2)) and
       (__ \ "studyId").read[String](minLength[String](2))
-  )(AddCentreToStudyCmd.apply _ )
+  )(AddStudyToCentreCmd.apply _ )
 
-  implicit val removeCentreFromStudyCmdReads = (
+  implicit val removeStudyFromCentreCmdReads = (
     (__ \ "centreId").read[String](minLength[String](2)) and
       (__ \ "studyId").read[String](minLength[String](2))
-  )(RemoveCentreFromStudyCmd.apply _ )
+  )(RemoveStudyFromCentreCmd.apply _ )
 
 }

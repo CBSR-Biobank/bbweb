@@ -80,14 +80,14 @@ GET     /centres/:id                           @org.biobank.controllers.centres.
 PUT     /centres/:id                           @org.biobank.controllers.centres.CentresController.update(id)
 
 # centre location
-GET     /centres/locations/:centreId           @org.biobank.controllers.centres.CentresController.getLocations(centreId, locationId: Option[String])
-POST    /centres/locations                     @org.biobank.controllers.centres.CentresController.addLocation
-DELETE  /centres/locations/:centreId/:id       @org.biobank.controllers.centres.CentresController.removeLocation(centreId, id)
+GET     /centres/centre/:centreId/locations        @org.biobank.controllers.centres.CentresController.getLocations(centreId, locationId: Option[String])
+POST    /centres/centre/locations                  @org.biobank.controllers.centres.CentresController.addLocation
+DELETE  /centres/centre/:centreId/location/:id     @org.biobank.controllers.centres.CentresController.removeLocation(centreId, id)
 
 # centre to study link
-GET     /centres/studies/:centreId             @org.biobank.controllers.centres.CentresController.getLinkedStudies(centreId)
-POST    /centres/studies                       @org.biobank.controllers.centres.CentresController.addLinkedStudies
-DELETE  /centres/studies/:centreId/:studyId    @org.biobank.controllers.centres.CentresController.removeLinkedStudy(centreId, studyId)
+GET     /centres/centre/:centreId/studies          @org.biobank.controllers.centres.CentresController.getStudies(centreId)
+POST    /centres/centre/study                      @org.biobank.controllers.centres.CentresController.addStudy
+DELETE  /centres/centre/:centreId/study/:studyId   @org.biobank.controllers.centres.CentresController.removeStudy(centreId, studyId)
 
 # Users
 POST    /users/activate                        @org.biobank.controllers.UsersController.activateUser

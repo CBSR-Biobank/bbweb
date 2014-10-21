@@ -49,10 +49,10 @@ trait CentresService {
   def removeCentreLocation(cmd: RemoveCentreLocationCmd)(
     implicit userId: UserId): Future[DomainValidation[CentreLocationRemovedEvent]]
 
-  def addCentreToStudy(cmd: AddCentreToStudyCmd)(
+  def addStudyToCentre(cmd: AddStudyToCentreCmd)(
     implicit userId: UserId): Future[DomainValidation[CentreAddedToStudyEvent]]
 
-  def removeCentreFromStudy(cmd: RemoveCentreFromStudyCmd)(
+  def removeStudyFromCentre(cmd: RemoveStudyFromCentreCmd)(
     implicit userId: UserId): Future[DomainValidation[CentreRemovedFromStudyEvent]]
 }
 
@@ -163,12 +163,12 @@ class CentresServiceImpl(implicit inj: Injector)
     ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CentreLocationRemovedEvent]])
 
-  def addCentreToStudy(cmd: AddCentreToStudyCmd)(implicit userId: UserId)
+  def addStudyToCentre(cmd: AddStudyToCentreCmd)(implicit userId: UserId)
       : Future[DomainValidation[CentreAddedToStudyEvent]] =
     ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CentreAddedToStudyEvent]])
 
-  def removeCentreFromStudy(cmd: RemoveCentreFromStudyCmd)(implicit userId: UserId)
+  def removeStudyFromCentre(cmd: RemoveStudyFromCentreCmd)(implicit userId: UserId)
       : Future[DomainValidation[CentreRemovedFromStudyEvent]] =
     ask(processor, cmd, userId).map (
       _.asInstanceOf[DomainValidation[CentreRemovedFromStudyEvent]])

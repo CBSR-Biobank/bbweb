@@ -25,9 +25,9 @@ define(['../module'], function(module) {
 
     //----
 
-    function changeStatus(centre) {
-      if (centre.id) {
-        alert('change status of ' + centre.name);
+    function changeStatus() {
+      if (vm.centre.id) {
+        alert('change status of ' + vm.centre.name);
         return;
       }
       throw new Error('centre does not have an ID');

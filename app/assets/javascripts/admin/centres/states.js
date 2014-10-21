@@ -241,23 +241,33 @@ define(['../module', 'underscore'], function(module, _) {
       url: '/studies',
       resolve: {
         user: userResolve.user,
-        studies: [
+        centreStudies: [
           'centresService', 'centre',
           function(centresService, centre) {
-            return centresService.linkedStudies(centre.id);
+            return centresService.studies(centre.id);
+          }
+        ],
+        allStudies: [
+          'StudyService',
+          function(StudyService) {
+            return StudyService.list();
           }
         ]
       },
       views: {
         'centreDetails': {
           template: '<accordion close-others="false">' +
-            '<centre-studies-panel centre="centre" studies="studies"></centre-studies-panel>' +
+            '<centre-studies-panel  ' +
+            '  centre="centre" ' +
+            '  centre-studies="centreStudies" ' +
+            '  all-studies="allStudies"></centre-studies-panel>' +
             '</accordion>',
           controller: [
-            '$scope', 'centre', 'studies',
-            function($scope, centre, studies) {
+            '$scope', 'centre', 'centreStudies', 'allStudies',
+            function($scope, centre, centreStudies, allStudies) {
               $scope.centre = centre;
-              $scope.studies = studies;
+              $scope.centreStudies = centreStudies;
+              $scope.allStudies = allStudies;
             }
           ]
         }

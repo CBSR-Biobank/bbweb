@@ -20,13 +20,13 @@ define(['./module'], function(module) {
     //-------
 
     function list(centreId) {
-      return biobankXhrReqService.call('GET', '/centres/locations/' + centreId);
+      return biobankXhrReqService.call('GET', '/centres/centre/' + centreId + '/locations');
     }
 
     function query(centreId, locationId) {
       return biobankXhrReqService.call(
         'GET',
-        '/centres/locations/' + centreId + '?locationId=' + locationId);
+        '/centres/centre/' + centreId + '/locations/?locationId=' + locationId);
     }
 
     function add(centre, location) {
@@ -41,11 +41,11 @@ define(['./module'], function(module) {
         countryIsoCode: location.countryIsoCode
       };
 
-      return biobankXhrReqService.call('POST', '/centres/locations', cmd);
+      return biobankXhrReqService.call('POST', '/centres/centre/locations', cmd);
     }
 
     function remove(centreId, locationId) {
-      return biobankXhrReqService.call('DELETE', '/centres/locations/' + centreId + '/' + locationId);
+      return biobankXhrReqService.call('DELETE', '/centres/centre/' + centreId + '/locations/' + locationId);
     }
 
   }

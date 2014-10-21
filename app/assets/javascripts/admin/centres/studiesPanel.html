@@ -13,9 +13,46 @@
   <p>
     This centre is involved with these studies.
   </p>
-  <div class="panel panel-warning" data-ng-if="vm.studies.length <= 0">
+  <div class="panel panel-warning" data-ng-if="vm.centreStudies.length <= 0">
     <div class="panel-heading">
       No studies have been added yet.
+    </div>
+  </div>
+  <table data-ng-show="vm.centreStudies.length != 0"
+         class="table table-hover table-condensed"
+         data-ng-table="vm.tableParams">
+    <tr data-ng-repeat="study in $data">
+      <td data-title="'Name'" sortable="'name'">
+        <span data-ng-click="vm.information(study)">
+          <a href>{{study.name}}</a>
+        </span>
+      </td>
+      <td data-title="'Status'" sortable="'status'">
+        {{study.status}}
+      </td>
+      <td>
+        <div class="btn-group pull-right">
+          <button class="btn btn-xs btn-warning"
+                  data-ng-click="vm.remove(study)"
+                  data-toggle="tooltip"
+                  title="Remove">
+            <i class="glyphicon glyphicon-remove"></i>
+          </button>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div class="row">
+    <div class="col-md-2">
+      <p class="pull-right">Add Study:</p>
+    </div>
+    <div class="col-md-4">
+      <input type="text"
+             ng-model="vm.selected"
+             typeahead="study.name for study in vm.allStudies | filter:$viewValue | limitTo:8"
+             typeahead-on-select="vm.onSelect($item)"
+             placeholder="enter a study's name or partial name"
+             class="form-control">
     </div>
   </div>
 </accordion-group>

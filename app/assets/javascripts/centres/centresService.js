@@ -15,7 +15,9 @@ define(['./module'], function(module) {
       addOrUpdate: addOrUpdate,
       enable:      enable,
       disable:     disable,
-      linkedStudies: linkedStudies
+      studies:     studies,
+      addStudy:    addStudy,
+      removeStudy: removeStudy
     };
     return service;
 
@@ -58,8 +60,17 @@ define(['./module'], function(module) {
       return changeStatus('disabled', centre);
     }
 
-    function linkedStudies(centreId) {
-      return biobankXhrReqService.call('GET','/centres/studies/' + centreId);
+    function studies(centreId) {
+      return biobankXhrReqService.call('GET','/centres/centre/' + centreId + '/studies');
+    }
+
+    function addStudy(centreId, studyId) {
+      var cmd = {centreId: centreId, studyId: studyId};
+      return biobankXhrReqService.call('POST','/centres/centre/study', cmd);
+    }
+
+    function removeStudy(centreId, studyId) {
+      return biobankXhrReqService.call('DELETE','/centres/centre/' + centreId + '/study/' + studyId);
     }
   }
 

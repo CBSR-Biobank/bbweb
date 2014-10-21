@@ -69,8 +69,8 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
         case cmd: DisableCentreCmd =>         process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
         case cmd: AddCentreLocationCmd =>     process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
         case cmd: RemoveCentreLocationCmd =>  process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: AddCentreToStudyCmd =>      process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: RemoveCentreFromStudyCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        case cmd: AddStudyToCentreCmd =>      process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        case cmd: RemoveStudyFromCentreCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
       }
 
     case "snap" =>
@@ -153,7 +153,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     )
   }
 
-  private def validateCmd(cmd: AddCentreToStudyCmd): DomainValidation[CentreAddedToStudyEvent] = {
+  private def validateCmd(cmd: AddStudyToCentreCmd): DomainValidation[CentreAddedToStudyEvent] = {
     for {
       centre <- getDisabled(cmd.centreId)
       notLinked <- centreStudyNotLinked(centre.id, StudyId(cmd.studyId))
@@ -161,7 +161,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     } yield event
   }
 
-  private def validateCmd(cmd: RemoveCentreFromStudyCmd)
+  private def validateCmd(cmd: RemoveStudyFromCentreCmd)
       : DomainValidation[CentreRemovedFromStudyEvent] = {
     for {
       centre <- getDisabled(cmd.centreId)

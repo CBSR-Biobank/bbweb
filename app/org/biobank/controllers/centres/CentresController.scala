@@ -89,20 +89,20 @@ class CentresController(implicit inj: Injector)
       domainValidationReply(future)
     }
 
-
-  def getLinkedStudies(centreId: String) =
+  def getStudies(centreId: String) =
     AuthAction(parse.empty) { token => implicit userId => implicit request =>
       domainValidationReply(centresService.getCentreStudies(centreId))
     }
 
-  def addLinkedStudies = commandAction { cmd: AddCentreToStudyCmd => implicit userId =>
-    val future = centresService.addCentreToStudy(cmd)
+  def addStudy = commandAction { cmd: AddStudyToCentreCmd => implicit userId =>
+    val future = centresService.addStudyToCentre(cmd)
     domainValidationReply(future)
   }
 
-  def removeLinkedStudy(centreId: String, studyId: String) =
+  def removeStudy(centreId: String, studyId: String) =
     AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-      val future = centresService.removeCentreFromStudy(RemoveCentreFromStudyCmd(centreId, studyId))
+      Logger.debug(s"removeStudy: $centreId, $studyId")
+      val future = centresService.removeStudyFromCentre(RemoveStudyFromCentreCmd(centreId, studyId))
       domainValidationReply(future)
     }
 
