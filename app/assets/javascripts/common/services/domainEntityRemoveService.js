@@ -19,8 +19,8 @@ define(['../module'], function(module) {
     function remove(modalTitle, modalMsg, removeErrorMsgPrefix, removeFn, domainObj, returnState) {
       var modalOptions = {
         closeButtonText: 'Cancel',
-        headerText: modalTitle,
-        bodyText: modalMsg
+        headerHtml: modalTitle,
+        bodyHtml: modalMsg
       };
 
       modalService.showModal({}, modalOptions)
@@ -34,8 +34,8 @@ define(['../module'], function(module) {
       function removeFailed(error) {
         var modalOptions = {
           closeButtonText: 'Cancel',
-          headerText: 'Remove failed',
-          bodyText: removeErrorMsgPrefix + error
+          headerHtml: 'Remove failed',
+          bodyHtml: removeErrorMsgPrefix + error
         };
 
         modalService.showModal({}, modalOptions)

@@ -39,21 +39,21 @@ define(['./module'], function(module) {
       if (error.data.message === 'invalid email or password') {
         modalOptions.closeButtonText = 'Cancel';
         modalOptions.actionButtonText = 'Retry';
-        modalOptions.headerText = 'Invalid login credentials';
-        modalOptions.bodyText = 'The email and / or password you entered are invalid.';
+        modalOptions.headerHtml = 'Invalid login credentials';
+        modalOptions.bodyHtml = 'The email and / or password you entered are invalid.';
       } else if (error.data.message === 'the user is not active') {
-        modalOptions.headerText = 'Login not active';
-        modalOptions.bodyText = 'Your login is not active yet. ' +
+        modalOptions.headerHtml = 'Login not active';
+        modalOptions.bodyHtml = 'Your login is not active yet. ' +
           'Please contact your system admnistrator for more information.';
         modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
       } else if (error.data.message === 'the user is locked') {
-        modalOptions.headerText = 'Login is locked';
-        modalOptions.bodyText = 'Your login is locked. ' +
+        modalOptions.headerHtml = 'Login is locked';
+        modalOptions.bodyHtml = 'Your login is locked. ' +
           'Please contact your system admnistrator for more information.';
         modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
       } else {
-        modalOptions.headerText = 'Login error';
-        modalOptions.bodyText = 'Cannot login: ' + error.data.message;
+        modalOptions.headerHtml = 'Login error';
+        modalOptions.bodyHtml = 'Cannot login: ' + error.data.message;
         modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
       }
 

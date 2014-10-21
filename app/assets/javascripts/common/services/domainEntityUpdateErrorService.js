@@ -33,8 +33,8 @@ define(['../module'], function(module) {
         modalOptions.domainType = domainObjTypeName;
       } else {
         /* some other error */
-        modalOptions.headerText = 'An error happened when submitting this change.';
-        modalOptions.bodyText = 'Error: ' + error.data.message;
+        modalOptions.headerHtml = 'An error happened when submitting this change.';
+        modalOptions.bodyHtml = 'Error: ' + error.data.message;
       }
 
       modalService.showModal(modalDefaults, modalOptions)

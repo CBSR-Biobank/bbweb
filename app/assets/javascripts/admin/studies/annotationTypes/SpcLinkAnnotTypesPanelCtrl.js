@@ -69,11 +69,11 @@ define(['../../module', 'underscore'], function(module, _) {
     }
 
     function annotTypeInUseModal() {
-      var headerText = 'Cannot update this annotation type';
-      var bodyText = 'This annotation type is in use by a specimen link type. ' +
+      var headerHtml = 'Cannot update this annotation type';
+      var bodyHtml = 'This annotation type is in use by a specimen link type. ' +
           'If you want to make changes to the annotation type, ' +
           'it must first be removed from the specimen link type(s) that use it.';
-      return modalService.modalOk(headerText, bodyText);
+      return modalService.modalOk(headerHtml, bodyHtml);
     }
 
     /**

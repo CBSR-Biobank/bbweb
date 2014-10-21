@@ -1,14 +1,14 @@
-define(['./module'], function(module) {
+define(['./module', 'angular'], function(module, angular) {
   'use strict';
 
   module.service('SpcLinkTypeService', SpcLinkTypeService);
 
-  SpcLinkTypeService.$inject = ['biobankXhrReqService'];
+  SpcLinkTypeService.$inject = ['biobankXhrReqService', 'domainEntityService'];
 
   /**
    * Service to access Spcecimen Link Types.
    */
-  function SpcLinkTypeService(biobankXhrReqService) {
+  function SpcLinkTypeService(biobankXhrReqService, domainEntityService) {
     var service = {
       getAll      : getAll,
       get         : get,
@@ -36,9 +36,10 @@ define(['./module'], function(module) {
         inputGroupId:          spcLinkType.inputGroupId,
         outputGroupId:         spcLinkType.outputGroupId,
         inputContainerTypeId:  spcLinkType.inputContainerTypeId,
-        outputContainerTypeId: spcLinkType.outputContainerTypeId,
-        annotationTypeData:    spcLinkType.annotationTypeData
+        outputContainerTypeId: spcLinkType.outputContainerTypeId
       };
+
+      angular.extend(cmd, domainEntityService.getOptionalAttribute(spcLinkType, 'annotationTypeData'));
 
       if (spcLinkType.id) {
         cmd.id = spcLinkType.id;

@@ -1,14 +1,14 @@
-define(['./module'], function(module) {
+define(['./module', 'angular'], function(module, angular) {
   'use strict';
 
   module.service('SpecimenGroupService', SpecimenGroupService);
 
-  SpecimenGroupService.$inject = ['biobankXhrReqService'];
+  SpecimenGroupService.$inject = ['biobankXhrReqService', 'domainEntityService'];
 
   /**
    * Service to access specimen groups.
    */
-  function SpecimenGroupService(biobankXhrReqService) {
+  function SpecimenGroupService(biobankXhrReqService, domainEntityService) {
     var service = {
       getAll                  : getAll,
       get                     : get,
@@ -37,13 +37,14 @@ define(['./module'], function(module) {
       var cmd = {
         studyId:                     specimenGroup.studyId,
         name:                        specimenGroup.name,
-        description:                 specimenGroup.description,
         units:                       specimenGroup.units,
         anatomicalSourceType:        specimenGroup.anatomicalSourceType,
         preservationType:            specimenGroup.preservationType,
         preservationTemperatureType: specimenGroup.preservationTemperatureType,
         specimenType:                specimenGroup.specimenType
       };
+
+      angular.extend(cmd, domainEntityService.getOptionalAttribute(specimenGroup, 'description'));
 
       if (specimenGroup.id) {
         cmd.id = specimenGroup.id;

@@ -7,6 +7,7 @@ define(['../../module', 'underscore'], function(module, _) {
     '$scope',
     '$state',
     '$stateParams',
+    'modalService',
     'panelService',
     'StudyService',
     'spcLinkTypeModalService',
@@ -22,6 +23,7 @@ define(['../../module', 'underscore'], function(module, _) {
   function SpcLinkTypesPanelCtrl($scope,
                                  $state,
                                  $stateParams,
+                                 modalService,
                                  panelService,
                                  StudyService,
                                  spcLinkTypeModalService,
@@ -31,14 +33,12 @@ define(['../../module', 'underscore'], function(module, _) {
                                  annotTypeModalService) {
     var vm = this;
 
-    var helper = panelService.panel(
-      'study.panel.specimenLinkTypes',
-      'admin.studies.study.processing.spcLinkTypeAdd');
+    var helper = panelService.panel('study.panel.specimenLinkTypes');
 
     vm.tableData = [];
     vm.update      = update;
     vm.remove      = spcLinkTypeRemoveService.remove;
-    vm.add         = helper.add;
+    vm.add         = add;
     vm.information = information;
     vm.panelOpen   = helper.panelOpen;
     vm.panelToggle = helper.panelToggle;
@@ -82,6 +82,20 @@ define(['../../module', 'underscore'], function(module, _) {
     function information(spcLinkType) {
       spcLinkTypeModalService.show(
         spcLinkType, vm.processingTypesById, vm.specimenGroupsById, vm.annotTypesById);
+    }
+
+    /**
+     * Switches state to add a specimen link type.
+     */
+    function add() {
+      if ($scope.processingDto.specimenGroups.length <= 0) {
+        var headerHtml = 'Cannot add specimen link type';
+        var bodyHtml = 'No <em>specimen groups</em> have been added to this study yet. ' +
+            'Please add specimen groups first.';
+        return modalService.modalOk(headerHtml, bodyHtml);
+      } else {
+        return $state.go('admin.studies.study.processing.spcLinkTypeAdd');
+      }
     }
 
     /**

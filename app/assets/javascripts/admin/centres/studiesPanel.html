@@ -15,24 +15,7 @@
   </p>
   <div class="panel panel-warning" data-ng-if="vm.studies.length <= 0">
     <div class="panel-heading">
-      This centre is not involed with any studies yet.
+      No studies have been added yet.
     </div>
   </div>
-  <table data-ng-show="vm.studies.length > 0"
-         class="table table-hover table-condensed"
-         data-ng-table="vm.tableParams">
-    <tr data-ng-repeat="study in $data">
-      <td data-title="'Name'" sortable="'name'">
-        <span data-ng-click="vm.information(study)">
-          <a href>{{study.name}}</a>
-        </span>
-      </td>
-      <td>
-        <update-remove-buttons
-           on-update="vm.update(study)"
-           on-remove="vm.remove(study)">
-        </update-remove-buttons>
-      </td>
-    </tr>
-  </table>
 </accordion-group>

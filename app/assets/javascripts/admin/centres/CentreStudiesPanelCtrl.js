@@ -30,9 +30,6 @@ define(['../module'], function(module) {
     vm.panelOpen   = helper.panelOpen;
     vm.panelToggle = helper.panelToggle;
 
-    vm.tableParams = helper.getTableParams(vm.studies);
-    vm.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
-
     //--
 
     function add() {

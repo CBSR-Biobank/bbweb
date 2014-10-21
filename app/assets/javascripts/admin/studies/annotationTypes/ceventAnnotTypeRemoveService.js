@@ -24,11 +24,11 @@ define(['../../module', 'underscore'], function(module, _) {
 
     function remove(annotType, annotTypesInUse) {
       if (_.contains(annotTypesInUse, annotType.id)) {
-        var headerText = 'Cannot remove this annotation type';
-        var bodyText = 'This annotation type is in use by a collection event type. ' +
+        var headerHtml = 'Cannot remove this annotation type';
+        var bodyHtml = 'This annotation type is in use by a collection event type. ' +
             'If you want to remove the annotation type, ' +
             'it must first be removed from the collection event type(s) that use it.';
-        modalService.modalOk(headerText, bodyText);
+        modalService.modalOk(headerHtml, bodyHtml);
       } else {
         annotationTypeRemoveService.remove(
           CeventAnnotTypeService.remove,

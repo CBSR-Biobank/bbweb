@@ -19,7 +19,8 @@
       'angular-ui-router': ['angular'],
       'ui-bootstrap':      ['angular', 'bootstrap'],
       'ngTable':           ['angular'],
-      'toastr':            ['angular', 'jquery']
+      'toastr':            ['angular', 'jquery'],
+      'angular-sanitize':  ['angular']
     },
     paths: {
       'requirejs':         '../lib/requirejs/require',
@@ -32,7 +33,8 @@
       'bootstrap':         '../lib/bootstrap/js/bootstrap',
       'ui-bootstrap':      '../lib/angular-ui-bootstrap/ui-bootstrap-tpls',
       'ngTable':           '../lib/ng-table/ng-table',
-      'toastr':            '../lib/toastr/toastr'
+      'toastr':            '../lib/toastr/toastr',
+      'angular-sanitize':  '../lib/angular-sanitize/angular-sanitize'
     }
   });
 
@@ -50,6 +52,7 @@
     'ngTable',
     'jquery',
     'bootstrap',
+    'angular-sanitize',
     './app'
   ], function(angular) {
     angular.bootstrap(document, ['app']);

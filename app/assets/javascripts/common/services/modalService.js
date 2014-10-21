@@ -21,8 +21,8 @@ define(['../module', 'angular'], function(module, angular) {
     var modalOptions = {
       //closeButtonText: 'Close',
       actionButtonText: 'OK',
-      headerText: 'Proceed?',
-      bodyText: 'Perform this action?'
+      headerHtml: 'Proceed?',
+      bodyHtml: 'Perform this action?'
     };
     var service = {
       showModal: showModal,
@@ -66,13 +66,13 @@ define(['../module', 'angular'], function(module, angular) {
       return $modal.open(tempModalDefaults).result;
     }
 
-    function modalOk(headerText, bodyText) {
+    function modalOk(headerHtml, bodyHtml) {
       var modalDefaults = {
         templateUrl: '/assets/javascripts/common/modalOk.html'
       };
       var modalOptions = {
-        headerText: headerText,
-        bodyText: bodyText
+        headerHtml: headerHtml,
+        bodyHtml: bodyHtml
       };
       return showModal(modalDefaults, modalOptions);
     }

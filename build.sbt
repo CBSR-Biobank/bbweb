@@ -82,6 +82,7 @@ libraryDependencies ++= Seq(
   "org.webjars"               %  "ng-table"                       % "0.3.3",
   "org.webjars"               % "toastr"                          % "2.0.1-1",
   "org.webjars"               % "angular-filter"                  % "0.4.6",
+  "org.webjars"               % "angular-sanitize"                % "1.3.0-beta.18",
   // Testing
   "com.typesafe.akka"         %% "akka-testkit"                   % "2.3.2"              % "test",
   "org.scalatestplus"         %% "play"                           % "1.2.0"              % "test",

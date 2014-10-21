@@ -1,4 +1,4 @@
-define(['./module'], function(module) {
+define(['./module', 'angular'], function(module, angular) {
   'use strict';
 
   module.service('StudyService', StudyService);
@@ -39,11 +39,9 @@ define(['./module'], function(module) {
     }
 
     function addOrUpdate(study) {
-      var cmd = {
-        name: study.name
-      };
+      var cmd = {name: study.name };
 
-      domainEntityService.getOptionalAttribute(cmd, study.description);
+      angular.extend(cmd, domainEntityService.getOptionalAttribute(study, 'description'));
 
       if (study.id) {
         cmd.id = study.id;

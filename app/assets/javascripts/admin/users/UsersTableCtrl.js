@@ -85,8 +85,8 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
         actionButtonText: 'OK'
       };
 
-      modalOptions.headerText = 'Change user status';
-      modalOptions.bodyText = 'Please confirm that you want to ' + status + ' user "' +
+      modalOptions.headerHtml = 'Change user status';
+      modalOptions.bodyHtml = 'Please confirm that you want to ' + status + ' user "' +
         user.name + '"?';
 
       modalService.showModal({}, modalOptions).then(
