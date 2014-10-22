@@ -18,9 +18,9 @@
       <div class="col-md-2">
         <strong>Description: </strong>
         <i class="glyphicon"
-           data-ng-class="{'glyphicon-plus': !descriptionToggle, 'glyphicon-minus': descriptionToggle}"
+           data-ng-class="{'glyphicon-plus': !descriptionToggle, 'glyphicon-minus': vm.descriptionToggle}"
            data-ng-click="vm.truncateDescriptionToggle()"
-           data-ng-if="vm.centre.description.length >Tm.descriptionToggleLength"></i>
+           data-ng-if="vm.centre.description.length > vm.descriptionToggleLength"></i>
       </div>
       <div class="col-md-10">
         {{vm.description}}
