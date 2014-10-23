@@ -2,13 +2,13 @@
  * Loads the files that make up this module.
  */
 define([
-  './CeventAnnotTypeService',
-  './CeventTypeService',
-  './ParticipantAnnotTypeService',
-  './ProcessingTypeService',
-  './SpcLinkAnnotTypeService',
-  './SpcLinkTypeService',
-  './SpecimenGroupService',
-  './StudyAnnotTypeService',
-  './StudyService',
+  './ceventAnnotTypesService',
+  './ceventTypesService',
+  './participantAnnotTypesService',
+  './processingTypesService',
+  './spcLinkAnnotTypesService',
+  './spcLinkTypesService',
+  './specimenGroupsService',
+  './studyAnnotTypesService',
+  './studiesService',
 ], function () {});

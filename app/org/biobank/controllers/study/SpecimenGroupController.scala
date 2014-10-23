@@ -55,7 +55,7 @@ class SpecimenGroupController(implicit inj: Injector)
 
 
   def addSpecimenGroup(studyId: String) =
-    commandAction(numFields = 8) { cmd: AddSpecimenGroupCmd => implicit userId =>
+    commandAction { cmd: AddSpecimenGroupCmd => implicit userId =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else {

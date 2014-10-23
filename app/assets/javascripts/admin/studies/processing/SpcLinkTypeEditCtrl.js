@@ -11,7 +11,7 @@ define(['../../module'], function(module) {
 
   SpcLinkTypeEditCtrl.$inject = [
     '$state',
-    'SpcLinkTypeService',
+    'spcLinkTypesService',
     'domainEntityUpdateError',
     'study',
     'spcLinkType',
@@ -19,7 +19,7 @@ define(['../../module'], function(module) {
   ];
 
   function SpcLinkTypeEditCtrl($state,
-                               SpcLinkTypeService,
+                               spcLinkTypesService,
                                domainEntityUpdateError,
                                study,
                                spcLinkType,
@@ -57,7 +57,7 @@ define(['../../module'], function(module) {
         spcLinkType.annotationTypeData = [];
       }
 
-      SpcLinkTypeService.addOrUpdate(spcLinkType)
+      spcLinkTypesService.addOrUpdate(spcLinkType)
         .then(gotoReturnState)
         .catch(function(error) {
           domainEntityUpdateError.handleError(

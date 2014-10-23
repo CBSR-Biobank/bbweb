@@ -248,9 +248,9 @@ define(['../module', 'underscore'], function(module, _) {
           }
         ],
         allStudies: [
-          'StudyService',
-          function(StudyService) {
-            return StudyService.list();
+          'studiesService',
+          function(studiesService) {
+            return studiesService.getAll();
           }
         ]
       },

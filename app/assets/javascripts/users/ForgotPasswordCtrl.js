@@ -4,13 +4,13 @@ define(['./module'], function(module) {
   module.controller('ForgotPasswordCtrl', ForgotPasswordCtrl);
 
   ForgotPasswordCtrl.$inject = [
-    '$state', '$stateParams', 'userService', 'modalService',
+    '$state', '$stateParams', 'usersService', 'modalService',
   ];
 
   /**
    *
    */
-  function ForgotPasswordCtrl($state, $stateParams, userService, modalService) {
+  function ForgotPasswordCtrl($state, $stateParams, usersService, modalService) {
     var vm = this;
     vm.email = '';
     vm.submit = submit;
@@ -42,7 +42,7 @@ define(['./module'], function(module) {
 
     function submit(email) {
       vm.email = email;
-      userService.passwordReset(email).then(pwdResetSuccess).catch(pwdResetFailure);
+      usersService.passwordReset(email).then(pwdResetSuccess).catch(pwdResetFailure);
     }
 
   }

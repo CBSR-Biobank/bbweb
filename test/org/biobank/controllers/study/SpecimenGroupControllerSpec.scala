@@ -344,7 +344,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     }
 
     "GET /studies/sgroups/inuse" must {
-      "reply with specimen group in use" taggedAs(Tag("1")) in new App(fakeApp) {
+      "reply with specimen group in use" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         studyRepository.put(study)

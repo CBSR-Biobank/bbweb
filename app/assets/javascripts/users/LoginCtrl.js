@@ -4,7 +4,7 @@ define(['./module'], function(module) {
   module.controller('LoginCtrl', LoginCtrl);
 
   LoginCtrl.$inject = [
-    '$state', 'stateHelper', 'userService', 'modalService',
+    '$state', 'stateHelper', 'usersService', 'modalService',
   ];
 
   /**
@@ -14,9 +14,9 @@ define(['./module'], function(module) {
    *
    * http://timothy.userapp.io/post/63412334209/form-autocomplete-and-remember-password-with-angularjs
    */
-  function LoginCtrl($state, stateHelper, userService, modalService) {
+  function LoginCtrl($state, stateHelper, usersService, modalService) {
     var vm = this;
-    if (userService.getUser()) {
+    if (usersService.getUser()) {
       // user already logged in, send him to home page
       $state.go('home');
     }
@@ -65,7 +65,7 @@ define(['./module'], function(module) {
     }
 
     function login(credentials) {
-      userService.login(credentials).then(loginSuccess).catch(loginFailure);
+      usersService.login(credentials).then(loginSuccess).catch(loginFailure);
     }
   }
 

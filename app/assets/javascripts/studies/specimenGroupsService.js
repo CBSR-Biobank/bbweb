@@ -1,14 +1,14 @@
 define(['./module', 'angular'], function(module, angular) {
   'use strict';
 
-  module.service('SpecimenGroupService', SpecimenGroupService);
+  module.service('specimenGroupsService', SpecimenGroupsService);
 
-  SpecimenGroupService.$inject = ['biobankXhrReqService', 'domainEntityService'];
+  SpecimenGroupsService.$inject = ['biobankXhrReqService', 'domainEntityService'];
 
   /**
    * Service to access specimen groups.
    */
-  function SpecimenGroupService(biobankXhrReqService, domainEntityService) {
+  function SpecimenGroupsService(biobankXhrReqService, domainEntityService) {
     var service = {
       getAll                  : getAll,
       get                     : get,
@@ -25,12 +25,30 @@ define(['./module', 'angular'], function(module, angular) {
 
     //-------
 
+    function uri(studyId, ceventTypeId, version) {
+      var result = '/studies';
+      if (arguments.length <= 0) {
+        throw new Error('study id not specified');
+      } else {
+        result += '/' + studyId + '/sgroups';
+
+        if (arguments.length > 1) {
+          result += '/' + ceventTypeId;
+        }
+
+        if (arguments.length > 2) {
+          result += '/' + version;
+        }
+      }
+      return result;
+    }
+
     function getAll(studyId) {
-      return biobankXhrReqService.call('GET', '/studies/sgroups/' + studyId);
+      return biobankXhrReqService.call('GET', uri(studyId));
     }
 
     function get(studyId, specimenGroupId) {
-      return biobankXhrReqService.call('GET', '/studies/sgroups/' + studyId + '?sgId=' + specimenGroupId);
+      return biobankXhrReqService.call('GET', uri(studyId) + '?sgId=' + specimenGroupId);
     }
 
     function addOrUpdate(specimenGroup) {
@@ -49,16 +67,20 @@ define(['./module', 'angular'], function(module, angular) {
       if (specimenGroup.id) {
         cmd.id = specimenGroup.id;
         cmd.expectedVersion = specimenGroup.version;
-        return biobankXhrReqService.call('PUT', '/studies/sgroups/' + specimenGroup.id, cmd);
+        return biobankXhrReqService.call('PUT', uri(specimenGroup.studyId, specimenGroup.id), cmd);
       } else {
-        return biobankXhrReqService.call('POST', '/studies/sgroups', cmd);
+        return biobankXhrReqService.call('POST', uri(specimenGroup.studyId), cmd);
       }
     }
 
     function remove(specimenGroup) {
       return biobankXhrReqService.call(
         'DELETE',
-        '/studies/sgroups/' + specimenGroup.studyId + '/' + specimenGroup.id + '/' + specimenGroup.version);
+        uri(specimenGroup.studyId, specimenGroup.id, specimenGroup.version));
+    }
+
+    function  specimenGroupIdsInUse(studyId) {
+      return biobankXhrReqService.call('GET', uri(studyId) + '/inuse');
     }
 
     function  anatomicalSourceTypes() {
@@ -79,10 +101,6 @@ define(['./module', 'angular'], function(module, angular) {
 
     function  specimenGroupValueTypes() {
       return biobankXhrReqService.call('GET', '/studies/sgvaluetypes');
-    }
-
-    function  specimenGroupIdsInUse(studyId) {
-      return biobankXhrReqService.call('GET', '/studies/sgroups/inuse/' + studyId);
     }
   }
 

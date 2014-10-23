@@ -6,7 +6,7 @@ define(['../../module', 'underscore'], function(module, _) {
   participantAnnotTypeRemoveService.$inject = [
     'annotationTypeRemoveService',
     'modalService',
-    'ParticipantAnnotTypeService'
+    'participantAnnotTypesService'
   ];
 
   /**
@@ -14,7 +14,7 @@ define(['../../module', 'underscore'], function(module, _) {
    */
   function participantAnnotTypeRemoveService(annotationTypeRemoveService,
                                              modalService,
-                                             ParticipantAnnotTypeService) {
+                                             participantAnnotTypesService) {
     var service = {
       remove: remove
     };
@@ -31,7 +31,7 @@ define(['../../module', 'underscore'], function(module, _) {
         modalService.modalOk(headerHtml, bodyHtml);
       } else {
         annotationTypeRemoveService.remove(
-          ParticipantAnnotTypeService.remove,
+          participantAnnotTypesService.remove,
           annotType,
           'admin.studies.study.participants');
       }

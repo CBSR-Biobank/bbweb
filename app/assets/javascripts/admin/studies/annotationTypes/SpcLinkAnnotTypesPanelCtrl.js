@@ -8,7 +8,7 @@ define(['../../module', 'underscore'], function(module, _) {
     '$state',
     '$stateParams',
     'modalService',
-    'SpcLinkAnnotTypeService',
+    'spcLinkAnnotTypesService',
     'spcLinkAnnotTypeRemoveService',
     'annotTypeModalService',
     'panelService'
@@ -21,7 +21,7 @@ define(['../../module', 'underscore'], function(module, _) {
                                       $state,
                                       $stateParams,
                                       modalService,
-                                      SpcLinkAnnotTypeService,
+                                      spcLinkAnnotTypesService,
                                       spcLinkAnnotTypeRemoveService,
                                       annotTypeModalService,
                                       panelService) {

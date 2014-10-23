@@ -65,14 +65,14 @@ object User {
 
   implicit val userWrites = new Writes[User] {
     def writes(user: User) = Json.obj(
-      "id"             -> user.id,
-      "version"        -> user.version,
-      "timeAdded"      -> user.timeAdded,
+      "id"           -> user.id,
+      "version"      -> user.version,
+      "timeAdded"    -> user.timeAdded,
       "timeModified" -> user.timeModified,
-      "name"           -> user.name,
-      "email"          -> user.email,
-      "avatarUrl"      -> user.avatarUrl,
-      "status"         -> user.status
+      "name"         -> user.name,
+      "email"        -> user.email,
+      "avatarUrl"    -> user.avatarUrl,
+      "status"       -> user.status
     )
   }
 

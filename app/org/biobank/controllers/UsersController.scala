@@ -122,14 +122,11 @@ class UsersController(implicit inj: Injector)
     )
   }
 
-  def list(
-    query: Option[String],
-    sort: Option[String],
-    order: Option[String]
-  ) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    val users = usersService.getAll.toList
-    Ok(users)
-  }
+  def list(query: Option[String], sort: Option[String], order: Option[String]) =
+    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+      val users = usersService.getAll.toList
+      Ok(users)
+    }
 
   /** Retrieves the user for the given id as JSON */
   def user(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>

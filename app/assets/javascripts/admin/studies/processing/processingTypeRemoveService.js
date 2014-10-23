@@ -3,12 +3,12 @@ define(['../../module'], function(module) {
 
   module.service('processingTypeRemoveService', processingTypeRemoveService);
 
-  processingTypeRemoveService.$inject = ['domainEntityRemoveService', 'ProcessingTypeService'];
+  processingTypeRemoveService.$inject = ['domainEntityRemoveService', 'processingTypesService'];
 
   /**
    * Removes a processing type.
    */
-  function processingTypeRemoveService(domainEntityRemoveService, ProcessingTypeService) {
+  function processingTypeRemoveService(domainEntityRemoveService, processingTypesService) {
     var service = {
       remove: remove
     };
@@ -21,7 +21,7 @@ define(['../../module'], function(module) {
         'Remove Processing Type',
         'Are you sure you want to remove processing type ' + processingType.name + '?',
         'Processing type ' + processingType.name + ' cannot be removed: ',
-        ProcessingTypeService.remove,
+        processingTypesService.remove,
         processingType,
         'admin.studies.study.processing');
     }

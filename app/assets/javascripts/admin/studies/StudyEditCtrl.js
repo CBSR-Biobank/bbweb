@@ -12,7 +12,7 @@ define(['../module'], function(module) {
     '$state',
     '$stateParams',
     'stateHelper',
-    'StudyService',
+    'studiesService',
     'domainEntityUpdateError',
     'study'
   ];
@@ -21,7 +21,7 @@ define(['../module'], function(module) {
                          $state,
                          $stateParams,
                          stateHelper,
-                         StudyService,
+                         studiesService,
                          domainEntityUpdateError,
                          study) {
     var vm = this;
@@ -39,7 +39,7 @@ define(['../module'], function(module) {
     }
 
     function submit(study) {
-      StudyService.addOrUpdate(study)
+      studiesService.addOrUpdate(study)
         .then(gotoReturnState)
         .catch(function(error) {
           domainEntityUpdateError.handleError(

@@ -6,13 +6,13 @@ define(['../../module', 'underscore'], function(module, _) {
   specimenGroupRemoveService.$inject = [
     'domainEntityRemoveService',
     'modalService',
-    'SpecimenGroupService'
+    'specimenGroupsService'
   ];
 
   /**
    * Removes a specimen group.
    */
-  function specimenGroupRemoveService(domainEntityRemoveService, modalService, SpecimenGroupService) {
+  function specimenGroupRemoveService(domainEntityRemoveService, modalService, specimenGroupsService) {
     var service = {
       remove: remove
     };
@@ -31,7 +31,7 @@ define(['../../module', 'underscore'], function(module, _) {
           'Remove Specimen Group',
           'Are you sure you want to remove specimen group ' + specimenGroup.name + '?',
           'Specimen group ' + specimenGroup.name + ' cannot be removed: ',
-          SpecimenGroupService.remove,
+          specimenGroupsService.remove,
           specimenGroup,
           'admin.studies.study.specimens');
       }

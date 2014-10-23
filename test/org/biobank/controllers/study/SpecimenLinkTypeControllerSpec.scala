@@ -261,7 +261,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     }
 
     "PUT /studies/sltypes" must {
-      "must update a specimen link type" taggedAs(Tag("1")) in new App(fakeApp) {
+      "must update a specimen link type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         studyRepository.put(study)

@@ -33,8 +33,8 @@ define(['../../module'], function(module) {
             specimenType: ''
           };
         }],
-        valueTypes: ['SpecimenGroupService', function(SpecimenGroupService) {
-          return SpecimenGroupService.specimenGroupValueTypes();
+        valueTypes: ['specimenGroupsService', function(specimenGroupsService) {
+          return specimenGroupsService.specimenGroupValueTypes();
         }]
       },
       views: {
@@ -56,16 +56,16 @@ define(['../../module'], function(module) {
       resolve: {
         user: userResolve.user,
         specimenGroup: [
-          '$stateParams', 'SpecimenGroupService', 'study',
-          function($stateParams, SpecimenGroupService, study) {
+          '$stateParams', 'specimenGroupsService', 'study',
+          function($stateParams, specimenGroupsService, study) {
             if ($stateParams.specimenGroupId) {
-              return SpecimenGroupService.get(study.id, $stateParams.specimenGroupId);
+              return specimenGroupsService.get(study.id, $stateParams.specimenGroupId);
             }
             throw new Error('state parameter specimenGroupId is invalid');
           }
         ],
-        valueTypes: ['SpecimenGroupService', function(SpecimenGroupService) {
-          return SpecimenGroupService.specimenGroupValueTypes();
+        valueTypes: ['specimenGroupsService', function(specimenGroupsService) {
+          return specimenGroupsService.specimenGroupValueTypes();
         }]
       },
       views: {

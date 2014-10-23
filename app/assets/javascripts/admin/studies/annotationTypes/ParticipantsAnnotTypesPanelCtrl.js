@@ -8,7 +8,7 @@ define(['../../module', 'underscore'], function(module, _) {
     '$state',
     '$stateParams',
     'modalService',
-    'ParticipantAnnotTypeService',
+    'participantAnnotTypesService',
     'participantAnnotTypeRemoveService',
     'annotTypeModalService',
     'panelService'
@@ -21,7 +21,7 @@ define(['../../module', 'underscore'], function(module, _) {
                                            $state,
                                            $stateParams,
                                            modalService,
-                                           ParticipantAnnotTypeService,
+                                           participantAnnotTypesService,
                                            participantAnnotTypeRemoveService,
                                            annotTypeModalService,
                                            panelService) {

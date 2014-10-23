@@ -10,11 +10,11 @@ define(['./module'], function(module) {
    */
   module.constant('userResolve', { user: getUser });
 
-  getUser.$inject = ['$cookies', '$q', 'userService', 'biobankXhrReqService'];
+  getUser.$inject = ['$cookies', '$q', 'usersService', 'biobankXhrReqService'];
 
-  function getUser($cookies, $q, userService, biobankXhrReqService) {
+  function getUser($cookies, $q, usersService, biobankXhrReqService) {
     var deferred = $q.defer();
-    var user = userService.getUser();
+    var user = usersService.getUser();
     var token;
 
     if (user) {

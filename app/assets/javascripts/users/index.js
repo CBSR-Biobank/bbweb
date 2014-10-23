@@ -10,6 +10,6 @@ define([
   './RegisterUserCtrl',
   './states',
   './userResolveConstant',
-  './userService',
+  './usersService',
   './UserUpdateCtrl',
 ], function() {});

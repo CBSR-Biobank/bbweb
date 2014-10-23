@@ -1,14 +1,14 @@
-define(['./module'], function(module) {
+define(['./module', 'angular'], function(module, angular) {
   'use strict';
 
   module.service('centresService', centresService);
 
-  centresService.$inject = ['biobankXhrReqService'];
+  centresService.$inject = ['biobankXhrReqService', 'domainEntityService'];
 
   /**
    *
    */
-  function centresService(biobankXhrReqService) {
+  function centresService(biobankXhrReqService, domainEntityService) {
     var service = {
       list:        list,
       query:       query,
@@ -23,54 +23,61 @@ define(['./module'], function(module) {
 
     //----
 
+    function uri(centreId) {
+      var result = '/centres';
+      if (arguments.length > 0) {
+        result += '/' + centreId;
+      }
+      return result;
+    }
+
     function changeStatus(status, centre) {
       var cmd = { id: centre.id, expectedVersion: centre.version };
-      return biobankXhrReqService.call('POST', '/centres/' + status, cmd);
+      return biobankXhrReqService.call('POST', uri(centre.id) + '/' + status, cmd);
     }
 
     function list() {
-      return biobankXhrReqService.call('GET','/centres');
+      return biobankXhrReqService.call('GET', uri());
     }
 
     function query(id) {
-      return biobankXhrReqService.call('GET','/centres/' + id);
+      return biobankXhrReqService.call('GET', uri(id));
     }
 
     function addOrUpdate(centre) {
-      var cmd = {
-        name: centre.name,
-        description: centre.description
-      };
+      var cmd = {name: centre.name};
+
+      angular.extend(cmd, domainEntityService.getOptionalAttribute(centre, 'description'));
 
       if (centre.id) {
         cmd.id = centre.id;
         cmd.expectedVersion = centre.version;
 
-        return biobankXhrReqService.call('PUT', '/centres/' + centre.id, cmd);
+        return biobankXhrReqService.call('PUT', uri(centre.id), cmd);
       } else {
-        return biobankXhrReqService.call('POST', '/centres', cmd);
+        return biobankXhrReqService.call('POST', uri(), cmd);
       }
     }
 
     function enable(centre) {
-      return changeStatus('enabled', centre);
+      return changeStatus('enable', centre);
     }
 
     function disable(centre) {
-      return changeStatus('disabled', centre);
+      return changeStatus('disable', centre);
     }
 
     function studies(centreId) {
-      return biobankXhrReqService.call('GET','/centres/centre/' + centreId + '/studies');
+      return biobankXhrReqService.call('GET', uri(centreId) + '/studies');
     }
 
     function addStudy(centreId, studyId) {
       var cmd = {centreId: centreId, studyId: studyId};
-      return biobankXhrReqService.call('POST','/centres/centre/study', cmd);
+      return biobankXhrReqService.call('POST', uri(centreId) + '/study', cmd);
     }
 
     function removeStudy(centreId, studyId) {
-      return biobankXhrReqService.call('DELETE','/centres/centre/' + centreId + '/study/' + studyId);
+      return biobankXhrReqService.call('DELETE', uri(centreId) + '/study/' + studyId);
     }
   }
 

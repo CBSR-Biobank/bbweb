@@ -15,7 +15,7 @@ define(['../../module'], function(module) {
   function config($urlRouterProvider,
                   $stateProvider,
                   userResolve
-                  //CeventAnnotTypeService
+                  //ceventAnnotTypesService
                  ) {
 
     $urlRouterProvider.otherwise('/');
@@ -38,15 +38,15 @@ define(['../../module'], function(module) {
           };
         }],
         annotTypes: [
-          'CeventAnnotTypeService', 'study',
-          function(CeventAnnotTypeService, study) {
-            return CeventAnnotTypeService.getAll(study.id);
+          'ceventAnnotTypesService', 'study',
+          function(ceventAnnotTypesService, study) {
+            return ceventAnnotTypesService.getAll(study.id);
           }
         ],
         specimenGroups: [
-          'SpecimenGroupService', 'study',
-          function(SpecimenGroupService, study) {
-            return SpecimenGroupService.getAll(study.id);
+          'specimenGroupsService', 'study',
+          function(specimenGroupsService, study) {
+            return specimenGroupsService.getAll(study.id);
           }
         ]
       },
@@ -69,24 +69,24 @@ define(['../../module'], function(module) {
       resolve: {
         user: userResolve.user,
         ceventType: [
-          '$stateParams', 'CeventTypeService', 'study',
-          function($stateParams, CeventTypeService, study) {
+          '$stateParams', 'ceventTypesService', 'study',
+          function($stateParams, ceventTypesService, study) {
             if ($stateParams.ceventTypeId) {
-              return CeventTypeService.get(study.id, $stateParams.ceventTypeId);
+              return ceventTypesService.get(study.id, $stateParams.ceventTypeId);
             }
             throw new Error('state parameter ceventTypeId is invalid');
           }
         ],
         annotTypes: [
-          'CeventAnnotTypeService', 'study',
-          function(CeventAnnotTypeService, study) {
-            return CeventAnnotTypeService.getAll(study.id);
+          'ceventAnnotTypesService', 'study',
+          function(ceventAnnotTypesService, study) {
+            return ceventAnnotTypesService.getAll(study.id);
           }
         ],
         specimenGroups: [
-          'SpecimenGroupService', 'study',
-          function(SpecimenGroupService, study) {
-            return SpecimenGroupService.getAll(study.id);
+          'specimenGroupsService', 'study',
+          function(specimenGroupsService, study) {
+            return specimenGroupsService.getAll(study.id);
           }
         ]
       },
@@ -117,11 +117,11 @@ define(['../../module'], function(module) {
             options: []
           };
         }],
-        addOrUpdateFn: ['CeventAnnotTypeService', function(CeventAnnotTypeService) {
-          return CeventAnnotTypeService.addOrUpdate;
+        addOrUpdateFn: ['ceventAnnotTypesService', function(ceventAnnotTypesService) {
+          return ceventAnnotTypesService.addOrUpdate;
         }],
-        valueTypes: ['StudyAnnotTypeService', function(StudyAnnotTypeService) {
-          return StudyAnnotTypeService.valueTypes();
+        valueTypes: ['studyAnnotTypesService', function(studyAnnotTypesService) {
+          return studyAnnotTypesService.valueTypes();
         }]
       },
       views: {
@@ -143,19 +143,19 @@ define(['../../module'], function(module) {
       resolve: {
         user: userResolve.user,
         annotType: [
-          '$stateParams', 'CeventAnnotTypeService', 'study',
-          function($stateParams, CeventAnnotTypeService, study) {
+          '$stateParams', 'ceventAnnotTypesService', 'study',
+          function($stateParams, ceventAnnotTypesService, study) {
             if ($stateParams.annotTypeId) {
-              return CeventAnnotTypeService.get(study.id, $stateParams.annotTypeId);
+              return ceventAnnotTypesService.get(study.id, $stateParams.annotTypeId);
             }
             throw new Error('state parameter annotTypeId is invalid');
           }
         ],
-        addOrUpdateFn: ['CeventAnnotTypeService', function(CeventAnnotTypeService) {
-          return CeventAnnotTypeService.addOrUpdate;
+        addOrUpdateFn: ['ceventAnnotTypesService', function(ceventAnnotTypesService) {
+          return ceventAnnotTypesService.addOrUpdate;
         }],
-        valueTypes: ['StudyAnnotTypeService', function(StudyAnnotTypeService) {
-          return StudyAnnotTypeService.valueTypes();
+        valueTypes: ['studyAnnotTypesService', function(studyAnnotTypesService) {
+          return studyAnnotTypesService.valueTypes();
         }]
       },
       views: {

@@ -3,12 +3,12 @@ define(['./module'], function(module) {
 
   module.controller('HeaderCtrl', HeaderCtrl);
 
-  HeaderCtrl.$inject = ['$scope', '$state', 'userService'];
+  HeaderCtrl.$inject = ['$scope', '$state', 'usersService'];
 
   /**
    * Controller for the page header. Contains the navigation bar.
    */
-  function HeaderCtrl($scope, $state, userService) {
+  function HeaderCtrl($scope, $state, usersService) {
     var vm = this;
     vm.logout = logout;
     vm.user = undefined;
@@ -16,7 +16,7 @@ define(['./module'], function(module) {
     // Wrap the current user from the service in a watch expression to display the user's name in
     // the navigation bar
     $scope.$watch(function() {
-      var user = userService.getUser();
+      var user = usersService.getUser();
       return user;
     }, function(user) {
       vm.user = user;
@@ -25,7 +25,7 @@ define(['./module'], function(module) {
     //---
 
     function logout() {
-      userService.logout();
+      usersService.logout();
       $scope.user = undefined;
       $state.go('home');
     }

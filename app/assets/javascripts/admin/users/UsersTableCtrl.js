@@ -11,7 +11,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     'stateHelper',
     'modalService',
     'tableService',
-    'userService',
+    'usersService',
     'UserModalService'
   ];
 
@@ -25,7 +25,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
                           stateHelper,
                           modalService,
                           tableService,
-                          userService,
+                          usersService,
                           UserModalService) {
     var vm = this;
 
@@ -69,7 +69,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     }
 
     function updateData() {
-      userService.getAllUsers().then(function(data) {
+      usersService.getAllUsers().then(function(data) {
         vm.users = [];
         _.each(data, function(user) {
           vm.users.push(angular.extend(
@@ -103,15 +103,15 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     }
 
     function activate(user) {
-      changeStatus(user, userService.activate, 'activate');
+      changeStatus(user, usersService.activate, 'activate');
     }
 
     function lock(user) {
-      changeStatus(user, userService.lock, 'lock');
+      changeStatus(user, usersService.lock, 'lock');
     }
 
     function unlock(user) {
-      changeStatus(user, userService.unlock, 'unlock');
+      changeStatus(user, usersService.unlock, 'unlock');
     }
   }
 

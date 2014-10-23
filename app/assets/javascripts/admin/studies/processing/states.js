@@ -49,10 +49,10 @@ define(['../../module'], function(module) {
       resolve: {
         user: userResolve.user,
         processingType: [
-          '$stateParams', 'ProcessingTypeService', 'study',
-          function($stateParams, ProcessingTypeService, study) {
+          '$stateParams', 'processingTypesService', 'study',
+          function($stateParams, processingTypesService, study) {
             if ($stateParams.processingTypeId) {
-              return ProcessingTypeService.get(study.id, $stateParams.processingTypeId);
+              return processingTypesService.get(study.id, $stateParams.processingTypeId);
             }
             throw new Error('state parameter processingTypeId is invalid');
           }
@@ -86,11 +86,11 @@ define(['../../module'], function(module) {
             options: []
           };
         }],
-        addOrUpdateFn: ['SpcLinkAnnotTypeService', function(SpcLinkAnnotTypeService) {
-          return SpcLinkAnnotTypeService.addOrUpdate;
+        addOrUpdateFn: ['spcLinkAnnotTypesService', function(spcLinkAnnotTypesService) {
+          return spcLinkAnnotTypesService.addOrUpdate;
         }],
-        valueTypes: ['StudyAnnotTypeService', function(StudyAnnotTypeService) {
-          return StudyAnnotTypeService.valueTypes();
+        valueTypes: ['studyAnnotTypesService', function(studyAnnotTypesService) {
+          return studyAnnotTypesService.valueTypes();
         }]
       },
       views: {
@@ -112,19 +112,19 @@ define(['../../module'], function(module) {
       resolve: {
         user: userResolve.user,
         annotType: [
-          '$stateParams', 'SpcLinkAnnotTypeService', 'study',
-          function($stateParams, SpcLinkAnnotTypeService, study) {
+          '$stateParams', 'spcLinkAnnotTypesService', 'study',
+          function($stateParams, spcLinkAnnotTypesService, study) {
             if ($stateParams.annotTypeId) {
-              return SpcLinkAnnotTypeService.get(study.id, $stateParams.annotTypeId);
+              return spcLinkAnnotTypesService.get(study.id, $stateParams.annotTypeId);
             }
             throw new Error('state parameter annotTypeId is invalid');
           }
         ],
-        addOrUpdateFn: ['SpcLinkAnnotTypeService', function(SpcLinkAnnotTypeService) {
-          return SpcLinkAnnotTypeService.addOrUpdate;
+        addOrUpdateFn: ['spcLinkAnnotTypesService', function(spcLinkAnnotTypesService) {
+          return spcLinkAnnotTypesService.addOrUpdate;
         }],
-        valueTypes: ['StudyAnnotTypeService', function(StudyAnnotTypeService) {
-          return StudyAnnotTypeService.valueTypes();
+        valueTypes: ['studyAnnotTypesService', function(studyAnnotTypesService) {
+          return studyAnnotTypesService.valueTypes();
         }]
       },
       views: {
@@ -156,9 +156,9 @@ define(['../../module'], function(module) {
           };
         },
         dtoProcessing: [
-          'StudyService', 'study',
-          function( StudyService, study) {
-            return StudyService.processingDto(study.id);
+          'studiesService', 'study',
+          function( studiesService, study) {
+            return studiesService.processingDto(study.id);
           }
         ]
       },
@@ -181,15 +181,15 @@ define(['../../module'], function(module) {
       resolve: {
         user: userResolve.user,
         spcLinkType: [
-          '$stateParams', 'SpcLinkTypeService', 'study',
-          function($stateParams, SpcLinkTypeService) {
-            return SpcLinkTypeService.get($stateParams.procTypeId, $stateParams.spcLinkTypeId);
+          '$stateParams', 'spcLinkTypesService', 'study',
+          function($stateParams, spcLinkTypesService) {
+            return spcLinkTypesService.get($stateParams.procTypeId, $stateParams.spcLinkTypeId);
           }
         ],
         dtoProcessing: [
-          'StudyService', 'study',
-          function( StudyService, study) {
-            return StudyService.processingDto(study.id);
+          'studiesService', 'study',
+          function( studiesService, study) {
+            return studiesService.processingDto(study.id);
           }
         ]
       },

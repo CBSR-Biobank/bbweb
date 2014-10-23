@@ -1,14 +1,14 @@
 define(['./module', 'angular'], function(module, angular) {
   'use strict';
 
-  module.service('CeventTypeService', CeventTypeService);
+  module.service('ceventTypesService', CeventTypesService);
 
-  CeventTypeService.$inject = ['biobankXhrReqService', 'domainEntityService'];
+  CeventTypesService.$inject = ['biobankXhrReqService', 'domainEntityService'];
 
   /**
    * Service to access Collection Event Types.
    */
-  function CeventTypeService(biobankXhrReqService, domainEntityService) {
+  function CeventTypesService(biobankXhrReqService, domainEntityService) {
     var service = {
       getAll      : getAll,
       get         : get,
@@ -19,12 +19,30 @@ define(['./module', 'angular'], function(module, angular) {
 
     //-------
 
+    function uri(studyId, ceventTypeId, version) {
+      var result = '/studies';
+      if (arguments.length <= 0) {
+        throw new Error('study id not specified');
+      } else {
+        result += '/' + studyId + '/cetypes';
+
+        if (arguments.length > 1) {
+          result += '/' + ceventTypeId;
+        }
+
+        if (arguments.length > 2) {
+          result += '/' + version;
+        }
+      }
+      return result;
+    }
+
     function getAll(studyId) {
-      return biobankXhrReqService.call('GET', '/studies/cetypes/' + studyId);
+      return biobankXhrReqService.call('GET', uri(studyId));
     }
 
     function get(studyId, collectionEventTypeId) {
-      return biobankXhrReqService.call('GET', '/studies/cetypes/' + studyId + '?cetId=' + collectionEventTypeId);
+      return biobankXhrReqService.call('GET', uri(studyId) + '?cetId=' + collectionEventTypeId);
     }
 
     function addOrUpdate(ceventType) {
@@ -41,18 +59,15 @@ define(['./module', 'angular'], function(module, angular) {
       if (ceventType.id) {
         cmd.id = ceventType.id;
         cmd.expectedVersion = ceventType.version;
-        return biobankXhrReqService.call('PUT', '/studies/cetypes/' + ceventType.id, cmd);
+        return biobankXhrReqService.call('PUT', uri(ceventType.studyId, ceventType.id), cmd);
       } else {
-        return biobankXhrReqService.call('POST', '/studies/cetypes', cmd);
+        return biobankXhrReqService.call('POST', uri(ceventType.studyId), cmd);
       }
     }
 
     function remove(ceventType) {
       return biobankXhrReqService.call(
-        'DELETE',
-        '/studies/cetypes/' + ceventType.studyId +
-          '/' + ceventType.id +
-          '/' + ceventType.version);
+        'DELETE', uri(ceventType.studyId, ceventType.id, ceventType.version));
     }
 
   }

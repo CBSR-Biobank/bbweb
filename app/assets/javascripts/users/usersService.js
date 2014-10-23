@@ -1,31 +1,33 @@
 define(['./module'], function(module) {
   'use strict';
 
-  module.service('userService', UserService);
+  module.service('usersService', UsersService);
 
-  UserService.$inject = ['$q', '$cookies', '$log', 'biobankXhrReqService'];
+  UsersService.$inject = ['$q', '$cookies', '$log', 'biobankXhrReqService'];
 
   /**
    * Communicates with the server to get user related information and perform user related commands.
    */
-  function UserService($q, $cookies, $log, biobankXhrReqService) {
+  function UsersService($q, $cookies, $log, biobankXhrReqService) {
     var self = this;
     self.user = undefined;
     self.token = $cookies['XSRF-TOKEN'];
 
     var service = {
-      login:         login,
-      logout:        logout,
-      getUser:       getUser,
-      query:         query,
-      getAllUsers:   getAllUsers,
-      getUsers:      getUsers,
-      add:           add,
-      update:        update,
-      passwordReset: passwordReset,
-      activate:      activate,
-      lock:          lock,
-      unlock:        unlock
+      login:          login,
+      logout:         logout,
+      getUser:        getUser,
+      query:          query,
+      getAllUsers:    getAllUsers,
+      getUsers:       getUsers,
+      add:            add,
+      updateName:     updateName,
+      updateEmail:    updateEmail,
+      updatePassword: updatePassword,
+      passwordReset:  passwordReset,
+      activate:       activate,
+      lock:           lock,
+      unlock:         unlock
     };
 
     init();
@@ -51,12 +53,20 @@ define(['./module'], function(module) {
       }
     }
 
+    function uri(userId) {
+      var result = '/users';
+      if (arguments.length > 0) {
+        result += '/' + userId;
+      }
+      return result;
+    }
+
     function changeStatus(user, status) {
       var cmd = {
         id: user.id,
         expectedVersion: user.version
       };
-      return biobankXhrReqService.call('POST', '/users/' + status, cmd);
+      return biobankXhrReqService.call('POST', uri(user.id) + '/' + status, cmd);
     }
 
     function login(credentials) {
@@ -85,17 +95,21 @@ define(['./module'], function(module) {
     }
 
     function query(userId) {
-      return biobankXhrReqService.call('GET', '/users/' + userId);
+      return biobankXhrReqService.call('GET', uri(userId));
     }
 
     function getAllUsers() {
-      return biobankXhrReqService.call('GET', '/users');
+      return biobankXhrReqService.call('GET', uri());
     }
 
     function getUsers(query, sort, order) {
+      var q = query || '';
+      var s = sort || 'name';
+      var o = order || 'asc';
+
       return biobankXhrReqService.call(
         'GET',
-        '/users?' + query + '&sort=' + sort + '&order=' + order);
+        uri() + '?' + q + '&sort=' + s + '&order=' + o);
     }
 
     function add(newUser) {
@@ -107,24 +121,34 @@ define(['./module'], function(module) {
       if (newUser.avatarUrl) {
         cmd.avatarUrl = newUser.avatarUrl;
       }
-      return biobankXhrReqService.call('POST', '/users', cmd);
+      return biobankXhrReqService.call('POST', uri(), cmd);
     }
 
-    function update(user, newPassword) {
+    function updateName(user, newName) {
+      var cmd = {
+        id:              user.id,
+        expectedVersion: user.version,
+        name:            newName
+      };
+      return biobankXhrReqService.call('PUT', uri(user.id) + '/name', cmd);
+    }
+
+    function updateEmail(user, newEmail) {
+      var cmd = {
+        id:              user.id,
+        expectedVersion: user.version,
+        email:           newEmail
+      };
+      return biobankXhrReqService.call('PUT', uri(user.id) + '/email', cmd);
+    }
+
+    function updatePassword(user, newPassword) {
       var cmd = {
         expectedVersion: user.version,
         name:            user.name,
-        email:           user.email
+        password:        newPassword
       };
-
-      if (user.password) {
-        cmd.password = newPassword;
-      }
-
-      if (user.avatarUrl) {
-        cmd.avatarUrl = user.avatarUrl;
-      }
-      return biobankXhrReqService.call('PUT', '/users/' + user.id, cmd);
+      return biobankXhrReqService.call('PUT', uri(user.id) + '/password', cmd);
     }
 
     function passwordReset(email) {

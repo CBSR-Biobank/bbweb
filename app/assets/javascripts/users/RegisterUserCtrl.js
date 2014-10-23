@@ -3,7 +3,7 @@ define(['./module', 'toastr'], function(module, toastr) {
 
   module.controller('RegisterUserCtrl', RegisterUserCtrl);
 
-  RegisterUserCtrl.$inject = ['$state', '$stateParams', 'userService'];
+  RegisterUserCtrl.$inject = ['$state', '$stateParams', 'usersService'];
 
   /**
    * Allows the user to register.
@@ -11,7 +11,7 @@ define(['./module', 'toastr'], function(module, toastr) {
    * Template file: registerUserForm.html
    * State definition: states.js
    */
-  function RegisterUserCtrl($state, $stateParams, userService) {
+  function RegisterUserCtrl($state, $stateParams, usersService) {
     var vm = this;
 
     vm.user = {
@@ -27,7 +27,7 @@ define(['./module', 'toastr'], function(module, toastr) {
     //----
 
     function submit(user) {
-      userService.add(user).then(
+      usersService.add(user).then(
         function() {
           // user has been registerd
           toastr.success(

@@ -30,11 +30,11 @@ define(['../../module'], function(module) {
             options: []
           };
         }],
-        addOrUpdateFn: ['ParticipantAnnotTypeService', function(ParticipantAnnotTypeService) {
-          return ParticipantAnnotTypeService.addOrUpdate;
+        addOrUpdateFn: ['participantAnnotTypesService', function(participantAnnotTypesService) {
+          return participantAnnotTypesService.addOrUpdate;
         }],
-        valueTypes: ['StudyAnnotTypeService', function(StudyAnnotTypeService) {
-          return StudyAnnotTypeService.valueTypes();
+        valueTypes: ['studyAnnotTypesService', function(studyAnnotTypesService) {
+          return studyAnnotTypesService.valueTypes();
         }]
       },
       views: {
@@ -56,10 +56,10 @@ define(['../../module'], function(module) {
       resolve: {
         user: userResolve.user,
         annotType: [
-          '$stateParams', 'ParticipantAnnotTypeService', 'study',
-          function($stateParams, ParticipantAnnotTypeService, study) {
+          '$stateParams', 'participantAnnotTypesService', 'study',
+          function($stateParams, participantAnnotTypesService, study) {
             if ($stateParams.annotTypeId) {
-              return ParticipantAnnotTypeService.get(study.id, $stateParams.annotTypeId);
+              return participantAnnotTypesService.get(study.id, $stateParams.annotTypeId);
             }
             throw new Error('state parameter annotTypeId is invalid');
           }
@@ -67,11 +67,11 @@ define(['../../module'], function(module) {
         childReturnState: function() {
           return 'admin.studies.study.participants';
         },
-        addOrUpdateFn: ['ParticipantAnnotTypeService', function(ParticipantAnnotTypeService) {
-          return ParticipantAnnotTypeService.addOrUpdate;
+        addOrUpdateFn: ['participantAnnotTypesService', function(participantAnnotTypesService) {
+          return participantAnnotTypesService.addOrUpdate;
         }],
-        valueTypes: ['StudyAnnotTypeService', function(StudyAnnotTypeService) {
-          return StudyAnnotTypeService.valueTypes();
+        valueTypes: ['studyAnnotTypesService', function(studyAnnotTypesService) {
+          return studyAnnotTypesService.valueTypes();
         }]
       },
       views: {

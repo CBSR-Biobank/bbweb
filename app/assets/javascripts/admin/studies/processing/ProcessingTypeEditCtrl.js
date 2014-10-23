@@ -8,7 +8,7 @@ define(['../../module'], function(module) {
     '$stateParams',
     'stateHelper',
     'domainEntityUpdateError',
-    'ProcessingTypeService',
+    'processingTypesService',
     'study',
     'processingType'
   ];
@@ -20,7 +20,7 @@ define(['../../module'], function(module) {
                                   $stateParams,
                                   stateHelper,
                                   domainEntityUpdateError,
-                                  ProcessingTypeService,
+                                  processingTypesService,
                                   study,
                                   processingType) {
 
@@ -39,7 +39,7 @@ define(['../../module'], function(module) {
     }
 
     function submit(processingType) {
-      ProcessingTypeService.addOrUpdate(processingType)
+      processingTypesService.addOrUpdate(processingType)
         .then(gotoReturnState)
         .catch(function(error) {
           domainEntityUpdateError.handleError(

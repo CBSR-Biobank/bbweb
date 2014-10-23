@@ -22,8 +22,8 @@ define(['../module'], function(module) {
       url: '/studies',
       resolve: {
         user: userResolve.user,
-        studies: ['StudyService', function(StudyService) {
-          return StudyService.list();
+        studies: ['studiesService', function(studiesService) {
+          return studiesService.getAll();
         }]
       },
       views: {
@@ -86,9 +86,9 @@ define(['../module'], function(module) {
       url: '/{studyId}',
       resolve: {
         user: userResolve.user,
-        study: ['$stateParams', 'StudyService', function($stateParams, StudyService) {
+        study: ['$stateParams', 'studiesService', function($stateParams, studiesService) {
           if ($stateParams.studyId) {
-            return StudyService.query($stateParams.studyId);
+            return studiesService.get($stateParams.studyId);
           }
           throw new Error('state parameter studyId is invalid');
         }]
@@ -150,9 +150,9 @@ define(['../module'], function(module) {
       resolve: {
         user: userResolve.user,
         annotTypes: [
-          'ParticipantAnnotTypeService', 'study',
-          function(ParticipantAnnotTypeService, study) {
-            return ParticipantAnnotTypeService.getAll(study.id);
+          'participantAnnotTypesService', 'study',
+          function(participantAnnotTypesService, study) {
+            return participantAnnotTypesService.getAll(study.id);
           }
         ]
       },
@@ -179,15 +179,15 @@ define(['../module'], function(module) {
       resolve: {
         user: userResolve.user,
         specimenGroups: [
-          'SpecimenGroupService', 'study',
-          function(SpecimenGroupService, study) {
-            return SpecimenGroupService.getAll(study.id);
+          'specimenGroupsService', 'study',
+          function(specimenGroupsService, study) {
+            return specimenGroupsService.getAll(study.id);
           }
         ],
         specimenGroupIdsInUse: [
-          'SpecimenGroupService', 'study',
-          function(SpecimenGroupService, study) {
-            return SpecimenGroupService.specimenGroupIdsInUse(study.id);
+          'specimenGroupsService', 'study',
+          function(specimenGroupsService, study) {
+            return specimenGroupsService.specimenGroupIdsInUse(study.id);
           }
         ]
       },
@@ -221,21 +221,21 @@ define(['../module'], function(module) {
         user: userResolve.user,
         // FIXME: replace these with a single REST call like already done for processing state
         ceventTypes: [
-          'CeventTypeService', 'study',
-          function( CeventTypeService, study) {
-            return CeventTypeService.getAll(study.id);
+          'ceventTypesService', 'study',
+          function( ceventTypesService, study) {
+            return ceventTypesService.getAll(study.id);
           }
         ],
         annotTypes: [
-          'CeventAnnotTypeService', 'study',
-          function(CeventAnnotTypeService, study) {
-            return CeventAnnotTypeService.getAll(study.id);
+          'ceventAnnotTypesService', 'study',
+          function(ceventAnnotTypesService, study) {
+            return ceventAnnotTypesService.getAll(study.id);
           }
         ],
         specimenGroups: [
-          'SpecimenGroupService', 'study',
-          function(SpecimenGroupService, study) {
-            return SpecimenGroupService.getAll(study.id);
+          'specimenGroupsService', 'study',
+          function(specimenGroupsService, study) {
+            return specimenGroupsService.getAll(study.id);
           }
         ]
       },
@@ -265,9 +265,9 @@ define(['../module'], function(module) {
       resolve: {
         user: userResolve.user,
         processingDto: [
-          'StudyService', 'study',
-          function (StudyService, study) {
-            return StudyService.processingDto(study.id);
+          'studiesService', 'study',
+          function (studiesService, study) {
+            return studiesService.processingDto(study.id);
           }
         ]
       },

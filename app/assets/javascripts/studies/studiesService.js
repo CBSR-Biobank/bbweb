@@ -1,17 +1,17 @@
 define(['./module', 'angular'], function(module, angular) {
   'use strict';
 
-  module.service('StudyService', StudyService);
+  module.service('studiesService', StudiesService);
 
-  StudyService.$inject = ['biobankXhrReqService', 'domainEntityService'];
+  StudiesService.$inject = ['biobankXhrReqService', 'domainEntityService'];
 
   /**
    * Service to acccess studies.
    */
-  function StudyService(biobankXhrReqService, domainEntityService) {
+  function StudiesService(biobankXhrReqService, domainEntityService) {
     var service = {
-      list          : list,
-      query         : query,
+      getAll        : getAll,
+      get           : get,
       addOrUpdate   : addOrUpdate,
       enable        : enable,
       disable       : disable,
@@ -22,20 +22,29 @@ define(['./module', 'angular'], function(module, angular) {
     return service;
 
     //-------
+
+    function uri(studyId) {
+      var result = '/studies';
+      if (arguments.length > 0) {
+        result += '/' + studyId;
+      }
+      return result;
+    }
+
     function changeStatus(study, status) {
       var cmd = {
         id: study.id,
         expectedVersion: study.version
       };
-      return biobankXhrReqService.call('POST', '/studies/' + status, cmd);
+      return biobankXhrReqService.call('POST', uri(study.id) + '/' + status, cmd);
     }
 
-    function list() {
-      return biobankXhrReqService.call('GET', '/studies');
+    function getAll() {
+      return biobankXhrReqService.call('GET', uri());
     }
 
-    function query(id) {
-      return biobankXhrReqService.call('GET', '/studies/' + id);
+    function get(id) {
+      return biobankXhrReqService.call('GET', uri(id));
     }
 
     function addOrUpdate(study) {
@@ -47,9 +56,9 @@ define(['./module', 'angular'], function(module, angular) {
         cmd.id = study.id;
         cmd.expectedVersion = study.version;
 
-        return biobankXhrReqService.call('PUT', '/studies/' + study.id, cmd);
+        return biobankXhrReqService.call('PUT', uri(study.id), cmd);
       } else {
-        return biobankXhrReqService.call('POST', '/studies', cmd);
+        return biobankXhrReqService.call('POST', uri(), cmd);
       }
     }
 
@@ -70,7 +79,7 @@ define(['./module', 'angular'], function(module, angular) {
     }
 
     function processingDto(studyId) {
-      return biobankXhrReqService.call('GET', '/studies/dto/processing/' + studyId);
+      return biobankXhrReqService.call('GET', uri(studyId) + '/dto/processing');
     }
   }
 

@@ -8,7 +8,7 @@ define(['../../module'], function(module) {
     '$state',
     '$stateParams',
     'panelService',
-    'ProcessingTypeService',
+    'processingTypesService',
     'processingTypeModalService',
     'processingTypeRemoveService'
   ];
@@ -20,7 +20,7 @@ define(['../../module'], function(module) {
                                     $state,
                                     $stateParams,
                                     panelService,
-                                    ProcessingTypeService,
+                                    processingTypesService,
                                     processingTypeModalService,
                                     processingTypeRemoveService) {
     var vm = this;

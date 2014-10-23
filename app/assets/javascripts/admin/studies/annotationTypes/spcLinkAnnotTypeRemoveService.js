@@ -9,12 +9,12 @@ define(['../../module', 'underscore'], function(module, _) {
   spcLinkAnnotTypeRemoveService.$inject = [
     'annotationTypeRemoveService',
     'modalService',
-    'SpcLinkAnnotTypeService'
+    'spcLinkAnnotTypesService'
   ];
 
   function spcLinkAnnotTypeRemoveService(annotationTypeRemoveService,
                                          modalService,
-                                         SpcLinkAnnotTypeService) {
+                                         spcLinkAnnotTypesService) {
     var service = {
       remove: remove
     };
@@ -31,7 +31,7 @@ define(['../../module', 'underscore'], function(module, _) {
         modalService.modalOk(headerHtml, bodyHtml);
       } else {
         annotationTypeRemoveService.remove(
-          SpcLinkAnnotTypeService.remove,
+          spcLinkAnnotTypesService.remove,
           annotType,
           'admin.studies.study.processing',
           {studyId: annotType.studyId});

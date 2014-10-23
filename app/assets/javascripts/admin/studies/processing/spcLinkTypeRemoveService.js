@@ -8,10 +8,10 @@ define(['../../module'], function(module) {
   module.service('spcLinkTypeRemoveService', spcLinkTypeRemoveService);
 
   spcLinkTypeRemoveService.$inject = [
-    'domainEntityRemoveService', 'SpcLinkTypeService'
+    'domainEntityRemoveService', 'spcLinkTypesService'
   ];
 
-  function spcLinkTypeRemoveService (domainEntityRemoveService, SpcLinkTypeService) {
+  function spcLinkTypeRemoveService (domainEntityRemoveService, spcLinkTypesService) {
     var service = {
       remove: remove
     };
@@ -24,7 +24,7 @@ define(['../../module'], function(module) {
         'Remove Specimen Link Type',
         'Are you sure you want to remove specimen link type ' + spcLinkType.name + '?',
         'specimen link type ' + spcLinkType.name + ' cannot be removed: ',
-        SpcLinkTypeService.remove,
+        spcLinkTypesService.remove,
         spcLinkType,
         'admin.studies.study.processing');
     }

@@ -9,7 +9,7 @@ define(['../../module', 'underscore'], function(module, _) {
     '$stateParams',
     'panelService',
     'modalService',
-    'SpecimenGroupService',
+    'specimenGroupsService',
     'specimenGroupModalService',
     'specimenGroupRemoveService'
   ];
@@ -22,7 +22,7 @@ define(['../../module', 'underscore'], function(module, _) {
                                    $stateParams,
                                    panelService,
                                    modalService,
-                                   SpecimenGroupService,
+                                   specimenGroupsService,
                                    specimenGroupModalService,
                                    specimenGroupRemoveService) {
     var vm = this;

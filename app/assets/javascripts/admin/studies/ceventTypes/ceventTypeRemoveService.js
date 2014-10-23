@@ -6,9 +6,9 @@ define(['../../module'], function(module) {
    */
   module.service('ceventTypeRemoveService', ceventTypeRemoveService);
 
-  ceventTypeRemoveService.$inject = ['domainEntityRemoveService', 'CeventTypeService'];
+  ceventTypeRemoveService.$inject = ['domainEntityRemoveService', 'ceventTypesService'];
 
-  function ceventTypeRemoveService(domainEntityRemoveService, CeventTypeService) {
+  function ceventTypeRemoveService(domainEntityRemoveService, ceventTypesService) {
     var service = {
       remove: remove
     };
@@ -21,7 +21,7 @@ define(['../../module'], function(module) {
         'Remove Collection Event Type',
         'Are you sure you want to remove collection event type ' + ceventType.name + '?',
         'Collection event type ' + ceventType.name + ' cannot be removed: ',
-        CeventTypeService.remove,
+        ceventTypesService.remove,
         ceventType,
         'admin.studies.study.collection');
     }

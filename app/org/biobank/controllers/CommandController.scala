@@ -39,7 +39,9 @@ trait CommandController extends Controller with Security {
     (func: T => UserId => Future[Result])
     (implicit userService: UsersService, reads: Reads[T]) = {
     AuthActionAsync(parse.json) { token => implicit userId => implicit request =>
-      if (request.body.as[JsObject].keys.size == numFields) {
+      var jsonObj = request.body.as[JsObject]
+      Logger.debug(s"commandAction: $jsonObj")
+      if (jsonObj.keys.size == numFields) {
         val cmdResult = request.body.validate[T]
         cmdResult.fold(
           errors => {
@@ -53,7 +55,9 @@ trait CommandController extends Controller with Security {
         )
       } else {
         Future.successful(
-          BadRequest(Json.obj("status" ->"error", "message" -> "Invalid JSON object")))
+          BadRequest(Json.obj(
+            "status" ->"error",
+            "message" -> "Invalid JSON object - missing attributes: expected $numFields, got ${jsonObj.keys.size}")))
       }
     }
   }
