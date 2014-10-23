@@ -147,6 +147,15 @@ find . -name \*.js -exec echo "/usr/local/bin/ng-annotate --add {} -o {}.new && 
 sh tmp.sh
 ```
 
+### Client Tests
+
+Using Krama and Jasmine for client unit tests. Also using Grunt to run the tests.
+
+Client tests are found in the `jstest` directory since they don't pass Jshint inspection. Originally, they
+were placed in `tests/assets/javascripts`, but when running SBT, errors were generated. Currently sbt-jshint
+does not provide a way to use a `.jshintignore` file, so they had to be moved to the `jstest` directory.
+
+
 ---
 
 [Back to top](../README.md)

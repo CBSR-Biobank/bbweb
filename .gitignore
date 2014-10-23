@@ -34,3 +34,4 @@ email.conf
 .project
 .settings/
 .worksheet/
+node_modules/

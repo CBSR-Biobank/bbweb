@@ -20,7 +20,7 @@ define([
 
   // We must already declare most dependencies here (except for common), or the submodules' routes
   // will not be resolved
-  var app = angular.module('app', [
+  var app = angular.module('biobankApp', [
     'biobank.admin',
     'biobank.centres',
     'biobank.dashboard',
@@ -28,6 +28,7 @@ define([
     'biobank.studies',
     'biobank.users'
   ]);
+
   // For debugging
   //
   app.run(debugFunc);

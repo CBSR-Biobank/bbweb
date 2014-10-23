@@ -1,4 +1,4 @@
-/** Study service */
+/** centre module */
 define(['angular'], function(angular) {
   'use strict';
 

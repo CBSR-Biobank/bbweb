@@ -13,12 +13,11 @@
       'underscore': {
         exports: '_'
       },
-      'angular-route':     ['angular'],
       'angular-cookies':   ['angular'],
       'bootstrap':         ['jquery'],
       'angular-ui-router': ['angular'],
       'ui-bootstrap':      ['angular', 'bootstrap'],
-      'ngTable':           ['angular'],
+      'ngTable':          ['angular'],
       'toastr':            ['angular', 'jquery'],
       'angular-sanitize':  ['angular']
     },
@@ -27,7 +26,6 @@
       'jquery':            '../lib/jquery/jquery',
       'angular':           '../lib/angularjs/angular',
       'underscore':        '../lib/underscorejs/underscore',
-      'angular-route':     '../lib/angularjs/angular-route',
       'angular-cookies':   '../lib/angularjs/angular-cookies',
       'angular-ui-router': '../lib/angular-ui-router/angular-ui-router',
       'bootstrap':         '../lib/bootstrap/js/bootstrap',
@@ -46,7 +44,6 @@
   require([
     'angular',
     'angular-cookies',
-    'angular-route',
     'angular-ui-router',
     'ui-bootstrap',
     'ngTable',
@@ -55,6 +52,6 @@
     'angular-sanitize',
     './app'
   ], function(angular) {
-    angular.bootstrap(document, ['app']);
+    angular.bootstrap(document, ['biobankApp']);
   });
 })(requirejs);

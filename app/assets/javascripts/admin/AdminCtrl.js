@@ -1,7 +1,3 @@
-/**
- * Administration controllers.
- *
- */
 define(['./module'], function(module) {
   'use strict';
 
@@ -9,6 +5,10 @@ define(['./module'], function(module) {
 
   AdminCtrl.$inject = ['aggregateCounts'];
 
+  /**
+   * Administration controllers.
+   *
+   */
   function AdminCtrl(aggregateCounts) {
     var vm = this;
 

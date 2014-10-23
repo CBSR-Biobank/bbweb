@@ -25,12 +25,12 @@ define(['../module'], function(module) {
         config.data = data;
       }
 
-      $http(config).then(
-        function(response) {
+      $http(config)
+        .then(function(response) {
           // TODO: check status here and log it if it not 'success'
           deferred.resolve(response.data.data);
-        },
-        function(response) {
+        })
+        .catch(function(response) {
           $log.error(response);
           deferred.reject(response);
         }
