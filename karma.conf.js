@@ -15,12 +15,12 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'target/web/web-modules/main/webjars/lib/angularjs/angular.js',
-      'target/web/web-modules/main/webjars/lib/angularjs/angular-*.js',
       'target/web/web-modules/main/webjars/lib/underscorejs/underscore.js',
-      'target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router.js',
-      'target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls.js',
-      'target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize.js',
+      {pattern: 'target/web/web-modules/main/webjars/lib/angularjs/angular.js', included: false},
+      {pattern: 'target/web/web-modules/main/webjars/lib/angularjs/angular-*.js', included: false},
+      {pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router.js', included: false},
+      {pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls.js', included: false},
+      {pattern: 'target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/ng-table/ng-table.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/jquery/jquery.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/toastr/toastr.js', included: false},

@@ -1,5 +1,5 @@
 /** Study service */
-define(['angular'], function(angular) {
+define(['angular', 'angular-ui-router', 'angular-sanitize'], function(angular) {
   'use strict';
 
   return angular.module('biobank.admin', [

@@ -1,7 +1,7 @@
 /**
  * Common functionality.
  */
-define(['angular'], function(angular) {
+define(['angular', 'ngTable', 'ui-bootstrap'], function(angular) {
   'use strict';
 
   return angular.module('biobank.common', ['ui.bootstrap']);

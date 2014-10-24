@@ -13,13 +13,8 @@
       'underscore': {
         exports: '_'
       },
-      'angular-cookies':   ['angular'],
       'bootstrap':         ['jquery'],
-      'angular-ui-router': ['angular'],
-      'ui-bootstrap':      ['angular', 'bootstrap'],
-      'ngTable':          ['angular'],
-      'toastr':            ['angular', 'jquery'],
-      'angular-sanitize':  ['angular']
+      'toastr':            ['angular', 'jquery']
     },
     paths: {
       'requirejs':         '../lib/requirejs/require',
@@ -38,18 +33,18 @@
 
   requirejs.onError = function(err) {
     console.log(err);
+    if (err.requireType === 'timeout') {
+      console.log('modules: ' + err.requireModules);
+    }
+
+    throw err;
   };
 
   // Load the app. This is kept minimal so it doesn't need much updating.
   require([
     'angular',
-    'angular-cookies',
-    'angular-ui-router',
-    'ui-bootstrap',
-    'ngTable',
     'jquery',
     'bootstrap',
-    'angular-sanitize',
     './app'
   ], function(angular) {
     angular.bootstrap(document, ['biobankApp']);

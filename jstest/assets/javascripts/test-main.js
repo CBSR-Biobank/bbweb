@@ -26,26 +26,24 @@ require.config({
       deps: ['angular'],
       exports: 'angular.mock'
     },
-    'angular-ui-router': ['angular'],
+    'toastr':            ['jquery'],
     'biobankApp': {
       deps: ['angular'],
       exports: 'biobankApp'
-    },
-    'angular-cookies':   ['angular'],
-    'angular-ui-router': ['angular'],
-    'ui-bootstrap-tpls': ['angular'],
-    'toastr':            ['jquery'],
-    'angular-sanitize':  ['angular'],
-    'ngTable':           ['angular']
+    }
   },
 
   paths: {
     'jquery':            '../../../target/web/web-modules/main/webjars/lib/jquery/jquery',
     'angular':           '../../../target/web/web-modules/main/webjars/lib/angularjs/angular',
     'angularMocks':      '../../../target/web/web-modules/main/webjars/lib/angularjs/angular-mocks',
+    'angular-cookies':   '../../../target/web/web-modules/main/webjars/lib/angularjs/angular-cookies',
     'underscore':        '../../../target/web/web-modules/main/webjars/lib/underscorejs/underscore',
     'toastr':            '../../../target/web/web-modules/main/webjars/lib/toastr/toastr',
     'ngTable':           '../../../target/web/web-modules/main/webjars/lib/ng-table/ng-table',
+    'angular-ui-router': '../../../target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router',
+    'ui-bootstrap':      '../../../target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls',
+    'angular-sanitize':  '../../../target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize',
     'biobankApp':        'app'
   },
 
