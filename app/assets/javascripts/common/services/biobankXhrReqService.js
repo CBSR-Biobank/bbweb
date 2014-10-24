@@ -28,7 +28,11 @@ define(['../module'], function(module) {
       $http(config)
         .then(function(response) {
           // TODO: check status here and log it if it not 'success'
-          deferred.resolve(response.data.data);
+          if (method === 'DELETE') {
+            deferred.resolve(response.data);
+          } else {
+            deferred.resolve(response.data.data);
+          }
         })
         .catch(function(response) {
           $log.error(response);

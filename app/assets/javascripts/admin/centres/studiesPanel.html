@@ -42,17 +42,13 @@
       </td>
     </tr>
   </table>
-  <div class="row">
-    <div class="col-md-2">
-      <p class="pull-right">Add Study:</p>
-    </div>
-    <div class="col-md-4">
-      <input type="text"
-             ng-model="vm.selected"
-             typeahead="study.name for study in vm.allStudies | filter:$viewValue | limitTo:8"
-             typeahead-on-select="vm.onSelect($item)"
-             placeholder="enter a study's name or partial name"
-             class="form-control">
-    </div>
+  <div class="input-group">
+    <span class="input-group-addon">Add Study</span>
+    <input type="text"
+           ng-model="vm.selected"
+           typeahead="study.name for study in vm.allStudies | filter:$viewValue | limitTo:8"
+           typeahead-on-select="vm.onSelect($item)"
+           placeholder="enter a study's name or partial name"
+           class="form-control">
   </div>
 </accordion-group>

@@ -4,5 +4,5 @@
 define(['angular', 'ngTable', 'ui-bootstrap'], function(angular) {
   'use strict';
 
-  return angular.module('biobank.common', ['ui.bootstrap']);
+  return angular.module('biobank.common', ['ui.bootstrap', 'ngTable']);
 });
