@@ -54,15 +54,27 @@ class SpecimenGroupController(implicit inj: Injector)
   }
 
 
-  def addSpecimenGroup = commandAction(numFields = 8) { cmd: AddSpecimenGroupCmd => implicit userId =>
-    val future = studiesService.addSpecimenGroup(cmd)
-    domainValidationReply(future)
-  }
+  def addSpecimenGroup(studyId: String) =
+    commandAction(numFields = 8) { cmd: AddSpecimenGroupCmd => implicit userId =>
+      if (cmd.studyId != studyId) {
+        Future.successful(BadRequest("study id mismatch"))
+      } else {
+        val future = studiesService.addSpecimenGroup(cmd)
+        domainValidationReply(future)
+      }
+    }
 
-  def updateSpecimenGroup(id: String) = commandAction { cmd: UpdateSpecimenGroupCmd => implicit userId =>
-    val future = studiesService.updateSpecimenGroup(cmd)
-    domainValidationReply(future)
-  }
+  def updateSpecimenGroup(studyId: String, id: String) =
+    commandAction { cmd: UpdateSpecimenGroupCmd => implicit userId =>
+      if (cmd.studyId != studyId) {
+        Future.successful(BadRequest("study id mismatch"))
+      } else if (cmd.id != id) {
+        Future.successful(BadRequest("annotation type id mismatch"))
+      } else {
+        val future = studiesService.updateSpecimenGroup(cmd)
+        domainValidationReply(future)
+      }
+    }
 
   def removeSpecimenGroup(studyId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>

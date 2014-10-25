@@ -180,19 +180,31 @@ class UsersController(implicit inj: Injector)
     domainValidationReply(future)
   }
 
-  def activateUser =  commandAction { cmd: ActivateUserCmd => implicit userId =>
-    val future = usersService.activate(cmd)
-    domainValidationReply(future)
+  def activateUser(id: String) =  commandAction { cmd: ActivateUserCmd => implicit userId =>
+      if (cmd.id != id) {
+        Future.successful(BadRequest("user id mismatch"))
+      } else {
+        val future = usersService.activate(cmd)
+        domainValidationReply(future)
+      }
   }
 
-  def lockUser =  commandAction { cmd: LockUserCmd => implicit userId =>
-    val future = usersService.lock(cmd)
-    domainValidationReply(future)
+  def lockUser(id: String) =  commandAction { cmd: LockUserCmd => implicit userId =>
+      if (cmd.id != id) {
+        Future.successful(BadRequest("user id mismatch"))
+      } else {
+        val future = usersService.lock(cmd)
+        domainValidationReply(future)
+      }
   }
 
-  def unlockUser =  commandAction { cmd: UnlockUserCmd => implicit userId =>
-    val future = usersService.unlock(cmd)
-    domainValidationReply(future)
+  def unlockUser(id: String) =  commandAction { cmd: UnlockUserCmd => implicit userId =>
+      if (cmd.id != id) {
+        Future.successful(BadRequest("user id mismatch"))
+      } else {
+        val future = usersService.unlock(cmd)
+        domainValidationReply(future)
+      }
   }
 
   def removeUser(id: String, ver: Long) = AuthActionAsync(parse.empty) {

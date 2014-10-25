@@ -43,14 +43,26 @@ class ProcessingTypeController(implicit inj: Injector)
       }
     }
 
-  def addProcessingType = commandAction { cmd: AddProcessingTypeCmd => implicit userId =>
-    val future = studiesService.addProcessingType(cmd)
-    domainValidationReply(future)
+  def addProcessingType(studyId: String) =
+    commandAction { cmd: AddProcessingTypeCmd => implicit userId =>
+      if (cmd.studyId != studyId) {
+        Future.successful(BadRequest("study id mismatch"))
+      } else {
+        val future = studiesService.addProcessingType(cmd)
+        domainValidationReply(future)
+      }
   }
 
-  def updateProcessingType(id: String) = commandAction { cmd: UpdateProcessingTypeCmd => implicit userId =>
-    val future = studiesService.updateProcessingType(cmd)
-    domainValidationReply(future)
+  def updateProcessingType(studyId: String, id: String) =
+    commandAction { cmd: UpdateProcessingTypeCmd => implicit userId =>
+      if (cmd.studyId != studyId) {
+        Future.successful(BadRequest("study id mismatch"))
+      } else if (cmd.id != id) {
+        Future.successful(BadRequest("annotation type id mismatch"))
+      } else {
+        val future = studiesService.updateProcessingType(cmd)
+        domainValidationReply(future)
+      }
   }
 
   def removeProcessingType(studyId: String, id: String, ver: Long) =

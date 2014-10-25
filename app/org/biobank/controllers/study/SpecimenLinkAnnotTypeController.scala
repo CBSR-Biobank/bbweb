@@ -44,24 +44,33 @@ class SpecimenLinkAnnotTypeController(implicit inj: Injector)
       }
     }
 
-  def addAnnotationType = commandAction { cmd: AddSpecimenLinkAnnotationTypeCmd => implicit userId =>
-    val future = studiesService.addSpecimenLinkAnnotationType(cmd)
-    domainValidationReply(future)
-  }
+  def addAnnotationType(studyId: String) =
+    commandAction { cmd: AddSpecimenLinkAnnotationTypeCmd => implicit userId =>
+      if (cmd.studyId != studyId) {
+        Future.successful(BadRequest("study id mismatch"))
+      } else {
+        val future = studiesService.addSpecimenLinkAnnotationType(cmd)
+        domainValidationReply(future)
+      }
+    }
 
-  def updateAnnotationType(
-    id: String) = commandAction { cmd: UpdateSpecimenLinkAnnotationTypeCmd => implicit userId =>
-    val future = studiesService.updateSpecimenLinkAnnotationType(cmd)
-    domainValidationReply(future)
-  }
+  def updateAnnotationType(studyId: String, id: String) =
+    commandAction { cmd: UpdateSpecimenLinkAnnotationTypeCmd => implicit userId =>
+      if (cmd.studyId != studyId) {
+        Future.successful(BadRequest("study id mismatch"))
+      } else if (cmd.id != id) {
+        Future.successful(BadRequest("annotation type id mismatch"))
+      } else {
+        val future = studiesService.updateSpecimenLinkAnnotationType(cmd)
+        domainValidationReply(future)
+      }
+    }
 
-  def removeAnnotationType(
-    studyId: String,
-    id: String,
-    ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-    val cmd = RemoveSpecimenLinkAnnotationTypeCmd(studyId, id, ver)
-    val future = studiesService.removeSpecimenLinkAnnotationType(cmd)
-    domainValidationReply(future)
+  def removeAnnotationType(studyId: String, id: String, ver: Long) =
+    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+      val cmd = RemoveSpecimenLinkAnnotationTypeCmd(studyId, id, ver)
+      val future = studiesService.removeSpecimenLinkAnnotationType(cmd)
+      domainValidationReply(future)
   }
 
 }

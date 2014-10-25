@@ -44,20 +44,31 @@ class SpecimenLinkTypeController(implicit inj: Injector)
       }
     }
 
-  def addSpecimenLinkType = commandAction { cmd: AddSpecimenLinkTypeCmd => implicit userId =>
-    val future = studiesService.addSpecimenLinkType(cmd)
-    domainValidationReply(future)
-  }
-
-  def updateSpecimenLinkType(id: String) =
-    commandAction { cmd: UpdateSpecimenLinkTypeCmd => implicit userId =>
-      val future = studiesService.updateSpecimenLinkType(cmd)
-      domainValidationReply(future)
+  def addSpecimenLinkType(procTypeId: String) =
+    commandAction { cmd: AddSpecimenLinkTypeCmd => implicit userId =>
+      if (cmd.processingTypeId != procTypeId) {
+        Future.successful(BadRequest("processing type id mismatch"))
+      } else {
+        val future = studiesService.addSpecimenLinkType(cmd)
+        domainValidationReply(future)
+      }
     }
 
-  def removeSpecimenLinkType(studyId: String, id: String, ver: Long) =
+  def updateSpecimenLinkType(procTypeId: String, id: String) =
+    commandAction { cmd: UpdateSpecimenLinkTypeCmd => implicit userId =>
+      if (cmd.processingTypeId != procTypeId) {
+        Future.successful(BadRequest("processing type id mismatch"))
+      } else if (cmd.id != id) {
+        Future.successful(BadRequest("annotation type id mismatch"))
+      } else {
+        val future = studiesService.updateSpecimenLinkType(cmd)
+        domainValidationReply(future)
+      }
+    }
+
+  def removeSpecimenLinkType(processingTypeId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-      val cmd = RemoveSpecimenLinkTypeCmd(studyId, id, ver)
+      val cmd = RemoveSpecimenLinkTypeCmd(processingTypeId, id, ver)
       val future = studiesService.removeSpecimenLinkType(cmd)
       domainValidationReply(future)
     }

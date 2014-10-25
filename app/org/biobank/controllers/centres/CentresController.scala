@@ -18,6 +18,7 @@ import scala.concurrent.Future
 import com.typesafe.plugin.use
 import play.api.Logger
 import play.api.Play.current
+import scala.concurrent.Future
 import scala.language.reflectiveCalls
 import scaldi.{Injectable, Injector}
 
@@ -57,14 +58,22 @@ class CentresController(implicit inj: Injector)
     domainValidationReply(future)
   }
 
-  def enable = commandAction { cmd: EnableCentreCmd => implicit userId =>
-    val future = centresService.enableCentre(cmd)
-    domainValidationReply(future)
+  def enable(id: String) = commandAction { cmd: EnableCentreCmd => implicit userId =>
+      if (cmd.id != id) {
+        Future.successful(BadRequest("centre id mismatch"))
+      } else {
+        val future = centresService.enableCentre(cmd)
+        domainValidationReply(future)
+      }
   }
 
-  def disable = commandAction { cmd: DisableCentreCmd => implicit userId =>
-    val future = centresService.disableCentre(cmd)
-    domainValidationReply(future)
+  def disable(id: String) = commandAction { cmd: DisableCentreCmd => implicit userId =>
+      if (cmd.id != id) {
+        Future.successful(BadRequest("centre id mismatch"))
+      } else {
+        val future = centresService.disableCentre(cmd)
+        domainValidationReply(future)
+      }
   }
 
   def getLocations(centreId: String, locationId: Option[String]) =
@@ -78,7 +87,7 @@ class CentresController(implicit inj: Injector)
       }
     }
 
-  def addLocation = commandAction { cmd: AddCentreLocationCmd => implicit userId =>
+  def addLocation(centreId: String) = commandAction { cmd: AddCentreLocationCmd => implicit userId =>
     val future = centresService.addCentreLocation(cmd)
     domainValidationReply(future)
   }
@@ -94,10 +103,15 @@ class CentresController(implicit inj: Injector)
       domainValidationReply(centresService.getCentreStudies(centreId))
     }
 
-  def addStudy = commandAction { cmd: AddStudyToCentreCmd => implicit userId =>
-    val future = centresService.addStudyToCentre(cmd)
-    domainValidationReply(future)
-  }
+  def addStudy(centreId: String) =
+    commandAction { cmd: AddStudyToCentreCmd => implicit userId =>
+      if (cmd.centreId != centreId) {
+        Future.successful(BadRequest("centre id mismatch"))
+      } else {
+        val future = centresService.addStudyToCentre(cmd)
+        domainValidationReply(future)
+      }
+    }
 
   def removeStudy(centreId: String, studyId: String) =
     AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>

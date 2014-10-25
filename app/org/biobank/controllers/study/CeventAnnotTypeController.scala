@@ -42,14 +42,26 @@ class CeventAnnotTypeController(implicit inj: Injector)
       }
     }
 
-  def addAnnotationType = commandAction { cmd: AddCollectionEventAnnotationTypeCmd => implicit userId =>
-    val future = studiesService.addCollectionEventAnnotationType(cmd)
-    domainValidationReply(future)
-  }
+  def addAnnotationType(studyId: String) =
+    commandAction { cmd: AddCollectionEventAnnotationTypeCmd => implicit userId =>
+      if (cmd.studyId != studyId) {
+        Future.successful(BadRequest("study id mismatch"))
+      } else {
+        val future = studiesService.addCollectionEventAnnotationType(cmd)
+        domainValidationReply(future)
+      }
+    }
 
-  def updateAnnotationType(id: String) = commandAction { cmd: UpdateCollectionEventAnnotationTypeCmd => implicit userId =>
-    val future = studiesService.updateCollectionEventAnnotationType(cmd)
-    domainValidationReply(future)
+  def updateAnnotationType(studyId: String, id: String) =
+    commandAction { cmd: UpdateCollectionEventAnnotationTypeCmd => implicit userId =>
+      if (cmd.studyId != studyId) {
+        Future.successful(BadRequest("study id mismatch"))
+      } else if (cmd.id != id) {
+        Future.successful(BadRequest("annotation type id mismatch"))
+      } else {
+        val future = studiesService.updateCollectionEventAnnotationType(cmd)
+        domainValidationReply(future)
+      }
   }
 
   def removeAnnotationType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>

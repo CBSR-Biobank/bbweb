@@ -51,23 +51,32 @@ class ParticipantAnnotTypeController(implicit inj: Injector)
       }
   }
 
-  def addAnnotationType = commandAction { cmd: AddParticipantAnnotationTypeCmd => implicit userId =>
-    domainValidationReply(studiesService.addParticipantAnnotationType(cmd))
+  def addAnnotationType(studyId: String) =
+    commandAction { cmd: AddParticipantAnnotationTypeCmd => implicit userId =>
+      if (cmd.studyId != studyId) {
+        Future.successful(BadRequest("study id mismatch"))
+      } else {
+        domainValidationReply(studiesService.addParticipantAnnotationType(cmd))
+      }
+    }
+
+  def updateAnnotationType(studyId: String, id: String) =
+    commandAction { cmd: UpdateParticipantAnnotationTypeCmd => implicit userId =>
+      if (cmd.studyId != studyId) {
+        Future.successful(BadRequest("study id mismatch"))
+      } else if (cmd.id != id) {
+        Future.successful(BadRequest("annotation type id mismatch"))
+      } else {
+        val future = studiesService.updateParticipantAnnotationType(cmd)
+        domainValidationReply(future)
+      }
   }
 
-  def updateAnnotationType(
-    id: String) = commandAction { cmd: UpdateParticipantAnnotationTypeCmd => implicit userId =>
-    val future = studiesService.updateParticipantAnnotationType(cmd)
-    domainValidationReply(future)
-  }
-
-  def removeAnnotationType(
-    studyId: String,
-    id: String,
-    ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-    val cmd = RemoveParticipantAnnotationTypeCmd(studyId, id, ver)
-    val future = studiesService.removeParticipantAnnotationType(cmd)
-    domainValidationReply(future)
+  def removeAnnotationType(studyId: String, id: String, ver: Long) =
+    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+      val cmd = RemoveParticipantAnnotationTypeCmd(studyId, id, ver)
+      val future = studiesService.removeParticipantAnnotationType(cmd)
+      domainValidationReply(future)
   }
 
 }

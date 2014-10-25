@@ -60,28 +60,48 @@ class StudiesController(implicit inj: Injector)
   }
 
   def update(id: String) = commandAction { cmd : UpdateStudyCmd => implicit userId =>
-    val future = studiesService.updateStudy(cmd)
-    domainValidationReply(future)
+    if (cmd.id != id) {
+      Future.successful(BadRequest("study id mismatch"))
+    } else {
+      val future = studiesService.updateStudy(cmd)
+      domainValidationReply(future)
+    }
   }
 
-  def enable = commandAction { cmd: EnableStudyCmd => implicit userId =>
-    val future = studiesService.enableStudy(cmd)
-    domainValidationReply(future)
+  def enable(id: String) = commandAction { cmd: EnableStudyCmd => implicit userId =>
+    if (cmd.id != id) {
+      Future.successful(BadRequest("study id mismatch"))
+    } else {
+      val future = studiesService.enableStudy(cmd)
+      domainValidationReply(future)
+    }
   }
 
-  def disable = commandAction { cmd: DisableStudyCmd => implicit userId =>
-    val future = studiesService.disableStudy(cmd)
-    domainValidationReply(future)
+  def disable(id: String) = commandAction { cmd: DisableStudyCmd => implicit userId =>
+    if (cmd.id != id) {
+      Future.successful(BadRequest("study id mismatch"))
+    } else {
+      val future = studiesService.disableStudy(cmd)
+      domainValidationReply(future)
+    }
   }
 
-  def retire = commandAction { cmd: RetireStudyCmd => implicit userId =>
-    val future = studiesService.retireStudy(cmd)
-    domainValidationReply(future)
+  def retire(id: String) = commandAction { cmd: RetireStudyCmd => implicit userId =>
+    if (cmd.id != id) {
+      Future.successful(BadRequest("study id mismatch"))
+    } else {
+      val future = studiesService.retireStudy(cmd)
+      domainValidationReply(future)
+    }
   }
 
-  def unretire = commandAction { cmd: UnretireStudyCmd => implicit userId =>
-    val future = studiesService.unretireStudy(cmd)
-    domainValidationReply(future)
+  def unretire(id: String) = commandAction { cmd: UnretireStudyCmd => implicit userId =>
+    if (cmd.id != id) {
+      Future.successful(BadRequest("study id mismatch"))
+    } else {
+      val future = studiesService.unretireStudy(cmd)
+      domainValidationReply(future)
+    }
   }
 
   def valueTypes = Action(parse.empty) { request =>

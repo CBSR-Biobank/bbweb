@@ -43,15 +43,27 @@ class CeventTypeController(implicit inj: Injector)
       }
     }
 
-  def addCollectionEventType = commandAction { cmd: AddCollectionEventTypeCmd => implicit userId =>
-    val future = studiesService.addCollectionEventType(cmd)
-    domainValidationReply(future)
-  }
+  def addCollectionEventType(studyId: String) =
+    commandAction { cmd: AddCollectionEventTypeCmd => implicit userId =>
+      if (cmd.studyId != studyId) {
+        Future.successful(BadRequest("study id mismatch"))
+      } else {
+        val future = studiesService.addCollectionEventType(cmd)
+        domainValidationReply(future)
+      }
+    }
 
-  def updateCollectionEventType(id: String) = commandAction { cmd: UpdateCollectionEventTypeCmd => implicit userId =>
-    val future = studiesService.updateCollectionEventType(cmd)
-    domainValidationReply(future)
-  }
+  def updateCollectionEventType(studyId: String, id: String) =
+    commandAction { cmd: UpdateCollectionEventTypeCmd => implicit userId =>
+      if (cmd.studyId != studyId) {
+        Future.successful(BadRequest("study id mismatch"))
+      } else if (cmd.id != id) {
+        Future.successful(BadRequest("annotation type id mismatch"))
+      } else {
+        val future = studiesService.updateCollectionEventType(cmd)
+        domainValidationReply(future)
+      }
+    }
 
   def removeCollectionEventType(
     studyId: String,
