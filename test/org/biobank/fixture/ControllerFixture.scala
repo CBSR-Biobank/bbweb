@@ -115,7 +115,7 @@ trait ControllerFixture
       .withCookies(Cookie("XSRF-TOKEN", token))
     Logger.info(s"makeRequest: request: $fakeRequest, $json")
     route(fakeRequest).fold {
-      cancel("HTTP request returned NONE")
+      fail("HTTP request returned NONE")
     } { result =>
       Logger.info(s"makeRequest: status: ${status(result)}, result: ${contentAsString(result)}")
       status(result) mustBe(expectedStatus)

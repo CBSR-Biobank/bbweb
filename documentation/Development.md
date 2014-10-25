@@ -126,7 +126,7 @@ Using helm-gtags in Emacs. To generate a tags file the following is required:
 1. Create the tags files (at the project root):
 
     ```bash
-    find app -type f -print > /tmp/bbwebfiles
+    find app -type f -print > /tmp/bbwebfiles && find test -type f -print >> /tmp/bbwebfiles
     gtags -v -f /tmp/bbwebfiles --gtagslabel ctags
     ```
 

@@ -15,35 +15,15 @@ import com.typesafe.plugin._
 import play.api.Play.current
 import org.scalatestplus.play._
 
-class CeventAnnotTypeControllerSpec extends ControllerFixture {
+class CeventAnnotTypeControllerSpec
+    extends StudyAnnotTypeControllerSpec[CollectionEventAnnotationType] {
   import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  private def annotTypeToAddCmdJson(annotType: CollectionEventAnnotationType) = {
-    Json.obj(
-      "studyId"       -> annotType.studyId.id,
-      "name"          -> annotType.name,
-      "description"   -> annotType.description,
-      "valueType"     -> annotType.valueType.toString,
-      "maxValueCount" -> annotType.maxValueCount,
-      "options"       -> annotType.options
-    )
-  }
-
-  private def annotTypeToUpdateCmdJson(annotType: CollectionEventAnnotationType) = {
-    Json.obj(
-      "studyId"         -> annotType.studyId.id,
-      "id"              -> annotType.id.id,
-      "expectedVersion" -> Some(annotType.version),
-      "name"            -> annotType.name,
-      "valueType"       -> annotType.valueType.toString,
-      "maxValueCount"   -> annotType.maxValueCount,
-      "options"         -> annotType.options
-    )
-  }
+  def uri(study: Study): String = s"/studies/${study.id.id}/ceannottypes"
 
   private def addOnNonDisabledStudy(study: Study) {
     studyRepository.put(study)
@@ -52,7 +32,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       POST,
-      "/studies/ceannottypes",
+      uri(study),
       BAD_REQUEST,
       annotTypeToAddCmdJson(annotType))
 
@@ -68,7 +48,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       PUT,
-      s"/studies/ceannottypes/${annotType.id.id}",
+      uri(study, annotType),
       BAD_REQUEST,
       annotTypeToUpdateCmdJson(annotType))
 
@@ -87,7 +67,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       DELETE,
-      s"/studies/ceannottypes/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}",
+      uri(study, annotType, annotType.version),
       BAD_REQUEST)
 
     (json \ "status").as[String] must include ("error")
@@ -101,7 +81,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val json = makeRequest(GET, s"/studies/ceannottypes/${study.id.id}")
+        val json = makeRequest(GET, uri(study))
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
@@ -115,7 +95,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createCollectionEventAnnotationType
         collectionEventAnnotationTypeRepository.put(annotType)
 
-        val json = makeRequest(GET, s"/studies/ceannottypes/${study.id.id}")
+        val json = makeRequest(GET, uri(study))
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
@@ -130,7 +110,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createCollectionEventAnnotationType
         collectionEventAnnotationTypeRepository.put(annotType)
 
-        val json = makeRequest(GET, s"/studies/ceannottypes/${study.id.id}?annotTypeId=${annotType.id.id}").as[JsObject]
+        val json = makeRequest(GET, uriWithQuery(study, annotType)).as[JsObject]
         (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, annotType)
@@ -146,7 +126,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
           factory.createCollectionEventAnnotationType)
         annotTypes map { annotType => collectionEventAnnotationTypeRepository.put(annotType) }
 
-        val json = makeRequest(GET, s"/studies/ceannottypes/${study.id.id}")
+        val json = makeRequest(GET, uri(study))
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
 
@@ -157,19 +137,19 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
 
       "fail for an invalid study ID" in new App(fakeApp) {
         doLogin
-        val studyId = nameGenerator.next[Study]
+        val study = factory.createDisabledStudy
 
-        val json = makeRequest(GET, s"/studies/ceannottypes/$studyId", BAD_REQUEST)
+        val json = makeRequest(GET, uri(study), BAD_REQUEST)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid study id")
       }
 
       "fail for an invalid study ID when using an annotation type id" in new App(fakeApp) {
         doLogin
-        val studyId = nameGenerator.next[Study]
-        val annotTypeId = nameGenerator.next[CollectionEventAnnotationType]
+        val study = factory.createDisabledStudy
+        val annotType = factory.createCollectionEventAnnotationType
 
-        val json = makeRequest(GET, s"/studies/ceannottypes/$studyId?annotTypeId=$annotTypeId", BAD_REQUEST)
+        val json = makeRequest(GET, uriWithQuery(study, annotType), BAD_REQUEST)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid study id")
       }
@@ -179,9 +159,9 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val annotTypeId = nameGenerator.next[CollectionEventAnnotationType]
+        val annotType = factory.createCollectionEventAnnotationType
 
-        val json = makeRequest(GET, s"/studies/ceannottypes/${study.id}?annotTypeId=$annotTypeId", BAD_REQUEST)
+        val json = makeRequest(GET, uriWithQuery(study, annotType), BAD_REQUEST)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("annotation type does not exist")
       }
@@ -195,20 +175,16 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         studyRepository.put(study)
 
         val annotType = factory.createCollectionEventAnnotationType
-        val json = makeRequest(POST, "/studies/ceannottypes", json = annotTypeToAddCmdJson(annotType))
+        val json = makeRequest(POST, uri(study), json = annotTypeToAddCmdJson(annotType))
           (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "POST /studies/ceannottypes" must {
       "not add a collection event annotation type to an enabled study" in new App(fakeApp) {
         doLogin
         addOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail)
       }
-    }
 
-    "POST /studies/ceannottypes" must {
       "not add a collection event annotation type to an retired study" in new App(fakeApp) {
         doLogin
         addOnNonDisabledStudy(factory.createDisabledStudy.retire | fail)
@@ -229,23 +205,17 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
           version = annotType.version
         )
 
-        val json = makeRequest(PUT,
-          s"/studies/ceannottypes/${annotType.id.id}",
-          json = annotTypeToUpdateCmdJson(annotType2))
+        val json = makeRequest(PUT, uri(study, annotType), json = annotTypeToUpdateCmdJson(annotType2))
 
         (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "PUT /studies/ceannottypes" must {
       "not update a collection event annotation type on an enabled study" in new App(fakeApp) {
         doLogin
         updateOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail)
       }
-    }
 
-    "PUT /studies/ceannottypes" must {
       "not update a collection event annotation type on an retired study" in new App(fakeApp) {
         doLogin
         updateOnNonDisabledStudy(
@@ -262,9 +232,7 @@ class CeventAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createCollectionEventAnnotationType
         collectionEventAnnotationTypeRepository.put(annotType)
 
-        val json = makeRequest(
-          DELETE,
-          s"/studies/ceannottypes/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}")
+        val json = makeRequest(DELETE, uri(study, annotType, annotType.version))
 
         (json \ "status").as[String] must include ("success")
       }

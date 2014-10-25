@@ -1,6 +1,6 @@
 package org.biobank.controllers.study
 
-import org.biobank.domain.study.StudyId
+import org.biobank.domain.study.{ Study, StudyId }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.JsonHelper._
@@ -21,12 +21,16 @@ class StudiesControllerSpec extends ControllerFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
+  def uri: String = "/studies"
+
+  def uri(study: Study): String = uri + s"/${study.id.id}"
+
   "Study REST API" when {
 
     "GET /studies" must {
       "list none" in new App(fakeApp) {
         doLogin
-        val json = makeRequest(GET, "/studies")
+        val json = makeRequest(GET, uri)
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
@@ -41,7 +45,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
         log.info(s"repo: ${}")
 
-        val json = makeRequest(GET, "/studies")
+        val json = makeRequest(GET, uri)
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have length 1
@@ -54,7 +58,7 @@ class StudiesControllerSpec extends ControllerFixture {
         studyRepository.removeAll
         studies.map(study => studyRepository.put(study))
 
-        val json = makeRequest(GET, "/studies")
+        val json = makeRequest(GET, uri)
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size studies.size
@@ -70,7 +74,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "name" -> study.name,
           "description" -> study.description)
-        val json = makeRequest(POST, "/studies", json = cmdJson)
+        val json = makeRequest(POST, uri, json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -93,7 +97,7 @@ class StudiesControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(study.version),
           "name"            -> study.name,
           "description"     -> study.description)
-        val json = makeRequest(PUT, s"/studies/${study.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, uri(study), json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -113,7 +117,7 @@ class StudiesControllerSpec extends ControllerFixture {
         doLogin
         val study = factory.createDisabledStudy.enable(1, 1) | fail
         studyRepository.put(study)
-        val json = makeRequest(GET, s"/studies/${study.id.id}")
+        val json = makeRequest(GET, uri(study))
         compareObj((json \ "data"), study)
       }
     }
@@ -129,7 +133,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, "/studies/enable", json = cmdJson)
+        val json = makeRequest(POST, uri(study) + "/enable", json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -150,7 +154,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, "/studies/enable", BAD_REQUEST, cmdJson)
+        val json = makeRequest(POST, uri(study) + "/enable", BAD_REQUEST, cmdJson)
 
         (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("no specimen groups")
@@ -166,7 +170,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, "/studies/disable", json = cmdJson)
+        val json = makeRequest(POST, uri(study) + "/disable", json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -187,7 +191,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, "/studies/retire", json = cmdJson)
+        val json = makeRequest(POST, uri(study) + "/retire", json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -208,7 +212,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "id" -> study.id.id,
           "expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, "/studies/unretire", json = cmdJson)
+        val json = makeRequest(POST, uri(study) + "/unretire", json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -223,17 +227,16 @@ class StudiesControllerSpec extends ControllerFixture {
     "GET /studies/valuetypes" must {
       "list all" in new App(fakeApp) {
         doLogin
-        val json = makeRequest(GET, "/studies/valuetypes")
+        val json = makeRequest(GET, uri + "/valuetypes")
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
       }
     }
 
-
     "GET /studies/anatomicalsrctypes" must {
       "list all" in new App(fakeApp) {
         doLogin
-        val json = makeRequest(GET, "/studies/anatomicalsrctypes")
+        val json = makeRequest(GET, uri + "/anatomicalsrctypes")
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
       }
@@ -242,7 +245,7 @@ class StudiesControllerSpec extends ControllerFixture {
     "GET /studies/specimentypes" must {
       "list all" in new App(fakeApp) {
         doLogin
-        val json = makeRequest(GET, "/studies/specimentypes")
+        val json = makeRequest(GET, uri + "/specimentypes")
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
       }
@@ -251,7 +254,7 @@ class StudiesControllerSpec extends ControllerFixture {
     "GET /studies/preservtypes" must {
       "list all" in new App(fakeApp) {
         doLogin
-        val json = makeRequest(GET, "/studies/preservtypes")
+        val json = makeRequest(GET, uri + "/preservtypes")
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
       }
@@ -260,7 +263,7 @@ class StudiesControllerSpec extends ControllerFixture {
     "GET /studies/preservtemptypes " must {
       "list all" in new App(fakeApp) {
         doLogin
-        val json = makeRequest(GET, "/studies/preservtemptypes")
+        val json = makeRequest(GET, uri + "/preservtemptypes")
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
       }
@@ -269,7 +272,7 @@ class StudiesControllerSpec extends ControllerFixture {
     "GET /studies/sgvaluetypes " must {
       "list all" in new App(fakeApp) {
         doLogin
-        val json = makeRequest(GET, "/studies/sgvaluetypes")
+        val json = makeRequest(GET, uri + "/sgvaluetypes")
         val jsonObj = (json \ "data").as[JsObject]
         (jsonObj \ "anatomicalSourceType").as[List[String]].size        must be > 0
         (jsonObj \ "preservationType").as[List[String]].size            must be > 0
@@ -284,7 +287,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val json = makeRequest(GET, s"/studies/dto/processing/${study.id}")
+        val json = makeRequest(GET, uri(study) + s"/dto/processing")
         val jsonObj = (json \ "data").as[JsObject]
 
         (jsonObj \ "processingTypes").as[List[JsObject]].size mustBe (0)
@@ -303,7 +306,7 @@ class StudiesControllerSpec extends ControllerFixture {
         specimenLinkAnnotationTypeRepository.put(factory.createSpecimenLinkAnnotationType)
         specimenGroupRepository.put(factory.createSpecimenGroup)
 
-        val json = makeRequest(GET, s"/studies/dto/processing/${study.id}")
+        val json = makeRequest(GET, uri(study) + s"/dto/processing")
         val jsonObj = (json \ "data").as[JsObject]
 
         (jsonObj \ "processingTypes").as[List[JsObject]].size mustBe (1)

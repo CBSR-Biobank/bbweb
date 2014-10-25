@@ -22,6 +22,17 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
+  def uri(procType: ProcessingType): String = s"/studies/${procType.id.id}/sltypes"
+
+  def uri(procType: ProcessingType, slType: SpecimenLinkType): String =
+    uri(procType) + s"/${slType.id.id}"
+
+  def uriWithQuery(procType: ProcessingType, slType: SpecimenLinkType): String =
+    uri(procType) + s"?slTypeId=${slType.id.id}"
+
+  def uri(procType: ProcessingType, slType: SpecimenLinkType, version: Long): String =
+    uri(procType, slType) + s"/${version}"
+
   private def annotTypeJson(slType: SpecimenLinkType) = {
     if (!slType.annotationTypeData.isEmpty) {
       Json.obj(
@@ -38,7 +49,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     }
   }
 
-  private def slTypeCommonToAddCmdJson(slType: SpecimenLinkType) = {
+  private def slTypeToAddCmdJson(slType: SpecimenLinkType) = {
     Json.obj(
       "processingTypeId"      -> slType.processingTypeId.id,
       "expectedInputChange"   -> slType.expectedInputChange,
@@ -49,25 +60,17 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       "outputGroupId"         -> slType.outputGroupId.id,
       "inputContainerTypeId"  -> slType.inputContainerTypeId.map(_.id),
       "outputContainerTypeId" -> slType.outputContainerTypeId.map(_.id)
-    )
-  }
-
-  private def slTypeToAddCmdJson(slType: SpecimenLinkType) = {
-    slTypeCommonToAddCmdJson(slType) ++ annotTypeJson(slType)
+    ) ++ annotTypeJson(slType)
   }
 
   private def slTypeToUpdateCmdJson(slType: SpecimenLinkType) = {
-    val result = Json.obj(
+    slTypeToAddCmdJson(slType) ++ Json.obj(
       "id"              -> slType.id.id,
       "expectedVersion" -> Some(slType.version)
     )
-
-    result ++ slTypeCommonToAddCmdJson(slType) ++ annotTypeJson(slType)
   }
 
-  def addOnNonDisabledStudy(
-    study: Study,
-    procType: ProcessingType) {
+  def addOnNonDisabledStudy(study: Study, procType: ProcessingType) {
     studyRepository.put(study)
     processingTypeRepository.put(procType)
 
@@ -78,7 +81,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       POST,
-      "/studies/sltypes",
+      uri(procType),
       BAD_REQUEST,
       slTypeToAddCmdJson(slType))
 
@@ -97,11 +100,11 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     specimenGroupRepository.put(outputSg)
     specimenLinkTypeRepository.put(slType)
 
-    val slType2 = factory.createSpecimenLinkType
+    val slType2 = factory.createSpecimenLinkType.copy(id = slType.id)
 
     val json = makeRequest(
       PUT,
-      s"/studies/sltypes/${slType.id.id}",
+      uri(procType, slType),
       BAD_REQUEST,
       slTypeToUpdateCmdJson(slType2))
 
@@ -120,10 +123,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     specimenGroupRepository.put(outputSg)
     specimenLinkTypeRepository.put(slType)
 
-    val json = makeRequest(
-      DELETE,
-      s"/studies/sltypes/${slType.processingTypeId.id}/${slType.id.id}/${slType.version}",
-      BAD_REQUEST)
+    val json = makeRequest(DELETE, uri(procType, slType, slType.version), BAD_REQUEST)
 
     (json \ "status").as[String] must include ("error")
     (json \ "message").as[String] must include ("is not disabled")
@@ -137,7 +137,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         processingTypeRepository.put(procType)
 
-        val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
+        val json = makeRequest(GET, uri(procType))
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
@@ -153,7 +153,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         specimenGroupRepository.put(outputSg)
         specimenLinkTypeRepository.put(slType)
 
-        val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
+        val json = makeRequest(GET, uri(procType))
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
@@ -170,7 +170,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         specimenGroupRepository.put(outputSg)
         specimenLinkTypeRepository.put(slType)
 
-        val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}?slTypeId=${slType.id.id}")
+        val json = makeRequest(GET, uriWithQuery(procType, slType))
         (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, slType)
@@ -185,7 +185,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
         sltypes map { slType => specimenLinkTypeRepository.put(slType) }
 
-        val json = makeRequest(GET, s"/studies/sltypes/${procType.id.id}")
+        val json = makeRequest(GET, uri(procType))
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
 
@@ -196,19 +196,19 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
       "fail for invalid processing type id" in new App(fakeApp) {
         doLogin
-        val processingTypeId = nameGenerator.next[Study]
+        val procType = factory.createProcessingType
 
-        val json = makeRequest(GET, s"/studies/sltypes/$processingTypeId", BAD_REQUEST)
+        val json = makeRequest(GET, uri(procType), BAD_REQUEST)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid processing type id")
       }
 
       "fail for an invalid study ID when using an specimen link type id" in new App(fakeApp) {
         doLogin
-        val procTypeId = nameGenerator.next[ProcessingType]
-        val slTypeId = nameGenerator.next[SpecimenLinkType]
+        val procType = factory.createProcessingType
+        val slType = factory.createSpecimenLinkType
 
-        val json = makeRequest(GET, s"/studies/sltypes/$procTypeId?slTypeId=$slTypeId", BAD_REQUEST)
+        val json = makeRequest(GET, uriWithQuery(procType, slType), BAD_REQUEST)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid processing type id")
       }
@@ -218,9 +218,9 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         processingTypeRepository.put(procType)
 
-        val slTypeId = nameGenerator.next[SpecimenLinkType]
+        val slType = factory.createSpecimenLinkType
 
-        val json = makeRequest(GET, s"/studies/sltypes/${procType.id}?slTypeId=$slTypeId", BAD_REQUEST)
+        val json = makeRequest(GET, uriWithQuery(procType, slType), BAD_REQUEST)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("specimen link type does not exist")
       }
@@ -240,25 +240,18 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         specimenGroupRepository.put(inputSg)
         specimenGroupRepository.put(outputSg)
 
-        val json = makeRequest(
-          POST,
-          "/studies/sltypes",
-          json = slTypeToAddCmdJson(slType))
+        val json = makeRequest(POST, uri(procType), json = slTypeToAddCmdJson(slType))
 
         (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "POST /studies/sltypes" must {
       "not add a specimen link type to an enabled study" in new App(fakeApp) {
         doLogin
         val study = studyRepository.put(
           factory.createDisabledStudy.enable(1, 1) | fail)
         addOnNonDisabledStudy(study, factory.createProcessingType)
       }
-    }
 
-    "POST /studies/sltypes" must {
       "not add a specimen link type to an retired study" in new App(fakeApp) {
         doLogin
         val study = studyRepository.put(
@@ -268,7 +261,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     }
 
     "PUT /studies/sltypes" must {
-      "must update a specimen link type" in new App(fakeApp) {
+      "must update a specimen link type" taggedAs(Tag("1")) in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         studyRepository.put(study)
@@ -288,25 +281,17 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
           outputGroupId = slType.outputGroupId
         )
 
-        val json = makeRequest(
-          PUT,
-          s"/studies/sltypes/${slType.id.id}",
-          json = slTypeToUpdateCmdJson(slType2))
-
+        val json = makeRequest(PUT, uri(procType, slType2), json = slTypeToUpdateCmdJson(slType2))
         (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "PUT /studies/sltypes" must {
       "not update a specimen link type on an enabled study" in new App(fakeApp) {
         doLogin
         val study = studyRepository.put(
           factory.createDisabledStudy.enable(1, 1) | fail)
         updateOnNonDisabledStudy(study, factory.createProcessingType)
       }
-    }
 
-    "PUT /studies/sltypes" must {
       "not update a specimen link type on an retired study" in new App(fakeApp) {
         doLogin
         val study = studyRepository.put(
@@ -329,24 +314,18 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         specimenGroupRepository.put(outputSg)
         specimenLinkTypeRepository.put(slType)
 
-        val json = makeRequest(
-          DELETE,
-          s"/studies/sltypes/${slType.processingTypeId.id}/${slType.id.id}/${slType.version}")
+        val json = makeRequest(DELETE, uri(procType, slType, slType.version))
 
         (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "DELETE /studies/sltypes" must {
       "not remove a specimen link type on an enabled study" in new App(fakeApp) {
         doLogin
         val study = studyRepository.put(
           factory.createDisabledStudy.enable(1, 1) | fail)
         removeOnNonDisabledStudy(study, factory.createProcessingType)
       }
-    }
 
-    "DELETE /studies/sltypes" must {
       "not remove a specimen link type on an retired study" in new App(fakeApp) {
         doLogin
         val study = studyRepository.put(

@@ -15,35 +15,19 @@ import com.typesafe.plugin._
 import play.api.Play.current
 import org.scalatestplus.play._
 
-class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
+class ParticipantAnnotTypeControllerSpec
+    extends StudyAnnotTypeControllerSpec[ParticipantAnnotationType]  {
   import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  private def annotTypeToAddCmdJson(annotType: ParticipantAnnotationType) = {
-    Json.obj(
-      "studyId"       -> annotType.studyId.id,
-      "name"          -> annotType.name,
-      "description"   -> annotType.description,
-      "valueType"     -> annotType.valueType.toString,
-      "maxValueCount" -> annotType.maxValueCount,
-      "options"       -> annotType.options,
-      "required"      -> annotType.required
-    )
-  }
+  override protected def uri(study: Study): String = s"/studies/${study.id.id}/pannottypes"
 
-  private def annotTypeToUpdateCmdJson(annotType: ParticipantAnnotationType) = {
-    Json.obj(
-      "studyId"         -> annotType.studyId.id,
-      "id"              -> annotType.id.id,
-      "expectedVersion" -> Some(annotType.version),
-      "name"            -> annotType.name,
-      "valueType"       -> annotType.valueType.toString,
-      "maxValueCount"   -> annotType.maxValueCount,
-      "options"         -> annotType.options,
-      "required"        -> annotType.required
+  override protected def annotTypeToAddCmdJson(annotType: ParticipantAnnotationType) = {
+    super.annotTypeToAddCmdJson(annotType) ++ Json.obj(
+      "required"      -> annotType.required
     )
   }
 
@@ -53,11 +37,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
     val annotType = factory.createParticipantAnnotationType
     participantAnnotationTypeRepository.put(annotType)
 
-    val json = makeRequest(
-      POST,
-      "/studies/pannottypes",
-      BAD_REQUEST,
-      annotTypeToAddCmdJson(annotType))
+    val json = makeRequest(POST, uri(study), BAD_REQUEST, annotTypeToAddCmdJson(annotType))
 
     (json \ "status").as[String] must include ("error")
     (json \ "message").as[String] must include ("is not disabled")
@@ -69,11 +49,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
     val annotType = factory.createParticipantAnnotationType
     participantAnnotationTypeRepository.put(annotType)
 
-    val json = makeRequest(
-      PUT,
-      s"/studies/pannottypes/${annotType.id.id}",
-      BAD_REQUEST,
-      annotTypeToUpdateCmdJson(annotType))
+    val json = makeRequest(PUT, uri(study, annotType), BAD_REQUEST, annotTypeToUpdateCmdJson(annotType))
 
     (json \ "status").as[String] must include ("error")
     (json \ "message").as[String] must include ("is not disabled")
@@ -90,7 +66,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       DELETE,
-      s"/studies/pannottypes/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}",
+      s"/studies/${annotType.studyId.id}/pannottypes/${annotType.id.id}/${annotType.version}",
       BAD_REQUEST)
 
     (json \ "status").as[String] must include ("error")
@@ -99,13 +75,13 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
 
   "Participant Type REST API" when {
 
-    "GET /studies/pannottypes" must {
+    "GET /studies/:studyId/pannottypes" must {
       "list none" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val json = makeRequest(GET, s"/studies/pannottypes/${study.id.id}")
+        val json = makeRequest(GET, uri(study))
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
@@ -119,7 +95,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createParticipantAnnotationType
         participantAnnotationTypeRepository.put(annotType)
 
-        val json = makeRequest(GET, s"/studies/pannottypes/${study.id.id}")
+        val json = makeRequest(GET, uri(study))
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
@@ -136,7 +112,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
           factory.createParticipantAnnotationType)
         annotTypes map { annotType => participantAnnotationTypeRepository.put(annotType) }
 
-        val json = makeRequest(GET, s"/studies/pannottypes/${study.id.id}")
+        val json = makeRequest(GET, uri(study))
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
 
@@ -147,19 +123,19 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
 
       "fail for an invalid study ID" in new App(fakeApp) {
         doLogin
-        val studyId = nameGenerator.next[Study]
+        val study = factory.createDisabledStudy
 
-        val json = makeRequest(GET, s"/studies/pannottypes/$studyId", BAD_REQUEST)
+        val json = makeRequest(GET, uri(study), BAD_REQUEST)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid study id")
       }
 
       "fail for an invalid study ID when using an annotation type id" in new App(fakeApp) {
         doLogin
-        val studyId = nameGenerator.next[Study]
-        val annotTypeId = nameGenerator.next[ParticipantAnnotationType]
+        val study = factory.createDisabledStudy
+        val annotType = factory.createParticipantAnnotationType
 
-        val json = makeRequest(GET, s"/studies/pannottypes/$studyId?annotTypeId=$annotTypeId", BAD_REQUEST)
+        val json = makeRequest(GET, uriWithQuery(study, annotType), BAD_REQUEST)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid study id")
       }
@@ -169,36 +145,35 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val annotTypeId = nameGenerator.next[ParticipantAnnotationType]
+        val annotType = factory.createParticipantAnnotationType
 
-        val json = makeRequest(GET, s"/studies/pannottypes/${study.id}?annotTypeId=$annotTypeId", BAD_REQUEST)
+        val json = makeRequest(GET, uriWithQuery(study, annotType), BAD_REQUEST)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("annotation type does not exist")
       }
 
     }
 
-    "POST /studies/pannottypes" must {
+    "POST /studies/:studyId/pannottypes" must {
       "add a participant annotation type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
         val annotType = factory.createParticipantAnnotationType
-        val json = makeRequest(POST, "/studies/pannottypes", json = annotTypeToAddCmdJson(annotType))
+        val json = makeRequest(
+          POST,
+          uri(study),
+          json = annotTypeToAddCmdJson(annotType))
           (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "POST /studies/pannottypes" must {
       "not add a participant annotation type to an enabled study" in new App(fakeApp) {
         doLogin
         addOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail)
       }
-    }
 
-    "POST /studies/pannottypes" must {
       "not add a participant annotation type to an retired study" in new App(fakeApp) {
         doLogin
         addOnNonDisabledStudy(
@@ -206,7 +181,7 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /studies/pannottypes" must {
+    "PUT /studies/:studyId/pannottypes" must {
       "update a participant annotation type" in new App(fakeApp) {
         doLogin
         val study = factory.createDisabledStudy
@@ -220,23 +195,19 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
           version = annotType.version
         )
 
-        val json = makeRequest(PUT,
-          s"/studies/pannottypes/${annotType.id.id}",
-          json = annotTypeToUpdateCmdJson(annotType2))
+        val json = makeRequest(PUT, uri(study, annotType2), json = annotTypeToUpdateCmdJson(annotType2))
 
         (json \ "status").as[String] must include ("success")
       }
     }
 
-    "PUT /studies/pannottypes" must {
+    "PUT /studies/:studyId/pannottypes" must {
       "not update a participant annotation type on an enabled study" in new App(fakeApp) {
         doLogin
         updateOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail)
       }
-    }
 
-    "PUT /studies/pannottypes" must {
       "not update a participant annotation type on an retired study" in new App(fakeApp) {
         doLogin
         updateOnNonDisabledStudy(
@@ -253,15 +224,11 @@ class ParticipantAnnotTypeControllerSpec extends ControllerFixture {
         val annotType = factory.createParticipantAnnotationType
         participantAnnotationTypeRepository.put(annotType)
 
-        val json = makeRequest(
-          DELETE,
-          s"/studies/pannottypes/${annotType.studyId.id}/${annotType.id.id}/${annotType.version}")
+        val json = makeRequest(DELETE, uri(study, annotType, annotType.version))
 
         (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "DELETE /studies/pannottypes" must {
       "not remove a participant annotation type on an enabled study" in new App(fakeApp) {
         doLogin
         removeOnNonDisabledStudy(

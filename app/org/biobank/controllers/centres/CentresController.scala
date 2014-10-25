@@ -103,10 +103,12 @@ class CentresController(implicit inj: Injector)
       domainValidationReply(centresService.getCentreStudies(centreId))
     }
 
-  def addStudy(centreId: String) =
+  def addStudy(centreId: String, studyId: String) =
     commandAction { cmd: AddStudyToCentreCmd => implicit userId =>
       if (cmd.centreId != centreId) {
         Future.successful(BadRequest("centre id mismatch"))
+      } else if (cmd.studyId != studyId) {
+        Future.successful(BadRequest("study id mismatch"))
       } else {
         val future = centresService.addStudyToCentre(cmd)
         domainValidationReply(future)

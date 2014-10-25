@@ -27,12 +27,16 @@ class CentresControllerSpec extends ControllerFixture {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
+  def uri: String = "/centres"
+
+  def uri(centre: Centre): String = uri + s"/${centre.id.id}"
+
   "Centre REST API" when {
 
     "GET /centres" must {
       "list none" in new App(fakeApp) {
         doLogin
-        val json = makeRequest(GET, "/centres")
+        val json = makeRequest(GET, uri)
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
@@ -43,7 +47,7 @@ class CentresControllerSpec extends ControllerFixture {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
-        val json = makeRequest(GET, "/centres")
+        val json = makeRequest(GET, uri)
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have length 1
@@ -58,7 +62,7 @@ class CentresControllerSpec extends ControllerFixture {
         centreRepository.removeAll
         centres.values.foreach(centre => centreRepository.put(centre))
 
-        val json = makeRequest(GET, "/centres")
+        val json = makeRequest(GET, uri)
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size centres.size
@@ -74,7 +78,7 @@ class CentresControllerSpec extends ControllerFixture {
         doLogin
         val centre = factory.createDisabledCentre
         val cmdJson = Json.obj("name" -> centre.name, "description" -> centre.description)
-        val json = makeRequest(POST, "/centres", json = cmdJson)
+        val json = makeRequest(POST, uri, json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -89,7 +93,7 @@ class CentresControllerSpec extends ControllerFixture {
       "add a centre with no description" in new App(fakeApp) {
         doLogin
         val cmdJson = Json.obj("name" -> nameGenerator.next[String])
-        val json = makeRequest(POST, "/centres", json = cmdJson)
+        val json = makeRequest(POST, uri, json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
       }
@@ -97,7 +101,7 @@ class CentresControllerSpec extends ControllerFixture {
       "not add a centre with a name that is too short" in new App(fakeApp) {
         doLogin
         val cmdJson = Json.obj("name" -> "A")
-        val json = makeRequest(POST, "/centres", BAD_REQUEST, json = cmdJson)
+        val json = makeRequest(POST, uri, BAD_REQUEST, json = cmdJson)
 
         (json \ "status").as[String] must include ("error")
       }
@@ -108,7 +112,7 @@ class CentresControllerSpec extends ControllerFixture {
         centreRepository.put(centre)
 
         val cmdJson = Json.obj("name" -> centre.name)
-        val json = makeRequest(POST, "/centres", FORBIDDEN, json = cmdJson)
+        val json = makeRequest(POST, uri, FORBIDDEN, json = cmdJson)
 
         (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("centre with name already exists")
@@ -126,7 +130,7 @@ class CentresControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(centre.version),
           "name"            -> centre.name,
           "description"     -> centre.description)
-        val json = makeRequest(PUT, s"/centres/${centre.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, uri(centre), json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -148,7 +152,7 @@ class CentresControllerSpec extends ControllerFixture {
           "id"              -> centre.id.id,
           "expectedVersion" -> Some(centre.version),
           "name"            -> centre.name)
-        val json = makeRequest(PUT, s"/centres/${centre.id.id}", json = cmdJson)
+        val json = makeRequest(PUT, uri(centre), json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
       }
@@ -156,12 +160,12 @@ class CentresControllerSpec extends ControllerFixture {
       "not update an invalid centre" in new App(fakeApp) {
         doLogin
 
-        val centreId = nameGenerator.next[String]
+        val centre = factory.createDisabledCentre
         val cmdJson = Json.obj(
-          "id"              -> centreId,
+          "id"              -> centre.id.id,
           "expectedVersion" -> Some(0L),
           "name"            -> nameGenerator.next[String])
-        val json = makeRequest(PUT, s"/centres/${centreId}", NOT_FOUND, json = cmdJson)
+        val json = makeRequest(PUT, uri(centre), NOT_FOUND, json = cmdJson)
 
         (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("no centre with id")
@@ -177,7 +181,7 @@ class CentresControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(centre.version + 1),
           "name"            -> centre.name,
           "description"     -> centre.description)
-        val json = makeRequest(PUT, s"/centres/${centre.id.id}", BAD_REQUEST, json = cmdJson)
+        val json = makeRequest(PUT, uri(centre), BAD_REQUEST, json = cmdJson)
 
         (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("expected version doesn't match current version")
@@ -197,7 +201,7 @@ class CentresControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(centres(1).version),
           "name"            -> duplicateName,
           "description"     -> centres(1).description)
-        val json = makeRequest(PUT, s"/centres/${centres(1).id.id}", FORBIDDEN, json = cmdJson)
+        val json = makeRequest(PUT, uri(centres(1)), FORBIDDEN, json = cmdJson)
 
         (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("centre with name already exists")
@@ -210,7 +214,7 @@ class CentresControllerSpec extends ControllerFixture {
         doLogin
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
-        val json = makeRequest(GET, s"/centres/${centre.id.id}")
+        val json = makeRequest(GET, uri(centre))
         (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, centre)
@@ -218,7 +222,9 @@ class CentresControllerSpec extends ControllerFixture {
 
       "not read an invalid centre" in new App(fakeApp) {
         doLogin
-        val json = makeRequest(GET, s"/centres/" + nameGenerator.next[String], BAD_REQUEST)
+        val centre = factory.createDisabledCentre
+
+        val json = makeRequest(GET, uri(centre), BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("invalid centre id")
@@ -234,7 +240,7 @@ class CentresControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "id" -> centre.id.id,
           "expectedVersion" -> Some(centre.version))
-        val json = makeRequest(POST, "/centres/enable", json = cmdJson)
+        val json = makeRequest(POST, uri(centre) + "/enable", json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -248,11 +254,12 @@ class CentresControllerSpec extends ControllerFixture {
 
       "not enable an invalid centre" in new App(fakeApp) {
         doLogin
+        val centre = factory.createDisabledCentre
 
         val cmdJson = Json.obj(
-          "id" -> nameGenerator.next[String],
+          "id" -> centre.id.id,
           "expectedVersion" -> Some(0L))
-        val json = makeRequest(POST, "/centres/enable", NOT_FOUND, json = cmdJson)
+        val json = makeRequest(POST, uri(centre) + "/enable", NOT_FOUND, json = cmdJson)
 
         (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("no centre with id")
@@ -268,7 +275,7 @@ class CentresControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "id" -> centre.id.id,
           "expectedVersion" -> Some(centre.version))
-        val json = makeRequest(POST, "/centres/disable", json = cmdJson)
+        val json = makeRequest(POST, uri(centre) + "/disable", json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -282,10 +289,12 @@ class CentresControllerSpec extends ControllerFixture {
 
       "not disable an invalid centre" in new App(fakeApp) {
         doLogin
+        val centre = factory.createDisabledCentre
+
         val cmdJson = Json.obj(
-          "id" -> nameGenerator.next[String],
+          "id" -> centre.id.id,
           "expectedVersion" -> Some(0L))
-        val json = makeRequest(POST, "/centres/disable", NOT_FOUND, json = cmdJson)
+        val json = makeRequest(POST, uri(centre) + "/disable", NOT_FOUND, json = cmdJson)
 
         (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("no centre with id")
@@ -299,7 +308,7 @@ class CentresControllerSpec extends ControllerFixture {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
-        val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
+        val json = makeRequest(GET, uri(centre) + s"/locations")
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
@@ -315,7 +324,7 @@ class CentresControllerSpec extends ControllerFixture {
         locationRepository.put(location)
         centreLocationsRepository.put(CentreLocation(centre.id, location.id))
 
-        val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
+        val json = makeRequest(GET, uri(centre) + s"/locations")
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
@@ -335,7 +344,7 @@ class CentresControllerSpec extends ControllerFixture {
           centreLocationsRepository.put(CentreLocation(centre.id, location.id))
         }
 
-        val json = makeRequest(GET, s"/centres/locations/${centre.id.id}")
+        val json = makeRequest(GET, uri(centre) + "/locations")
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size locations.size
@@ -358,14 +367,11 @@ class CentresControllerSpec extends ControllerFixture {
           centreLocationsRepository.put(CentreLocation(centre.id, location.id))
         }
 
-        val json = makeRequest(GET, s"/centres/locations/${centre.id.id}?locationId=${locations(0).id}")
+        val json = makeRequest(GET, uri(centre) + s"/locations?locationId=${locations(0).id}")
         (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size 1
-        jsonList.foreach { jsonObj =>
-          val jsonId = LocationId((jsonObj \ "id").as[String])
-          compareObj(jsonObj, locationsMap(jsonId))
-        }
+        val jsonObj = (json \ "data").as[JsObject]
+        val jsonId = LocationId((jsonObj \ "id").as[String])
+        compareObj(jsonObj, locationsMap(jsonId))
       }
 
       "does not list an invalid location" in new App(fakeApp) {
@@ -375,7 +381,7 @@ class CentresControllerSpec extends ControllerFixture {
 
         val inavlidLocId = nameGenerator.next[String]
 
-        val json = makeRequest(GET, s"/centres/locations/${centre.id.id}?locationId=$inavlidLocId", BAD_REQUEST)
+        val json = makeRequest(GET, uri(centre) + s"/locations?locationId=$inavlidLocId", BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("invalid location id")
@@ -402,7 +408,7 @@ class CentresControllerSpec extends ControllerFixture {
         centreRepository.put(centre)
 
         val location = factory.createLocation
-        val json = makeRequest(POST, "/centres/locations",
+        val json = makeRequest(POST, uri(centre) + "/locations",
           json = jsonAddCentreLocationCmd(location, centre.id))
 
         val jsonEvent = (json \ "data").as[JsObject]
@@ -436,10 +442,10 @@ class CentresControllerSpec extends ControllerFixture {
       "fail on attempt to add a location to an invalid centre" in new App(fakeApp) {
         doLogin
 
-        val centreId = CentreId(nameGenerator.next[String])
+        val centre = factory.createDisabledCentre
         val location = factory.createLocation
-        val jsonResponse = makeRequest(POST, "/centres/locations", NOT_FOUND,
-          json = jsonAddCentreLocationCmd(location, centreId))
+        val jsonResponse = makeRequest(POST, uri(centre) + "/locations", NOT_FOUND,
+          json = jsonAddCentreLocationCmd(location, centre.id))
 
         (jsonResponse \ "status").as[String] must include ("error")
           (jsonResponse \ "message").as[String] must include ("no centre with id")
@@ -459,7 +465,7 @@ class CentresControllerSpec extends ControllerFixture {
         }
 
         locations.foreach { location =>
-          val json = makeRequest(DELETE, s"/centres/locations/${centre.id.id}/${location.id.id}")
+          val json = makeRequest(DELETE, uri(centre) + s"/locations/${location.id.id}")
             (json \ "status").as[String] must include ("success")
         }
       }
@@ -473,8 +479,8 @@ class CentresControllerSpec extends ControllerFixture {
         locationRepository.put(location)
         centreLocationsRepository.put(CentreLocation(centre.id, location.id))
 
-        val centreId = CentreId(nameGenerator.next[String])
-        val json = makeRequest(DELETE, s"/centres/locations/${centreId.id}/${location.id.id}", NOT_FOUND)
+        val centre2 = factory.createDisabledCentre
+        val json = makeRequest(DELETE, uri(centre2) + s"/locations/${location.id.id}", NOT_FOUND)
           (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("no centre with id")
       }
@@ -485,7 +491,7 @@ class CentresControllerSpec extends ControllerFixture {
         centreRepository.put(centre)
 
         val locationId = LocationId(nameGenerator.next[String])
-        val json = makeRequest(DELETE, s"/centres/locations/${centre.id.id}/${locationId.id}", NOT_FOUND)
+        val json = makeRequest(DELETE, uri(centre) + s"/locations/${locationId.id}", NOT_FOUND)
           (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("no location with id")
       }
@@ -499,7 +505,7 @@ class CentresControllerSpec extends ControllerFixture {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
-        val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
+        val json = makeRequest(GET, uri(centre) + s"/studies")
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
@@ -516,7 +522,7 @@ class CentresControllerSpec extends ControllerFixture {
         val id = StudyCentreId(nameGenerator.next[String])
         centreStudiesRepository.put(StudyCentre(id, study.id, centre.id))
 
-        val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
+        val json = makeRequest(GET, uri(centre) + "/studies")
         (json \ "status").as[String] must include ("success")
         val studyIdList = (json \ "data").as[List[String]]
         studyIdList must have size 1
@@ -536,7 +542,7 @@ class CentresControllerSpec extends ControllerFixture {
           centreStudiesRepository.put(StudyCentre(id, study.id, centre.id))
         }
 
-        val json = makeRequest(GET, s"/centres/studies/${centre.id.id}")
+        val json = makeRequest(GET, uri(centre) + "/studies")
         (json \ "status").as[String] must include ("success")
         val studyIdList = (json \ "data").as[List[String]]
         studyIdList must have size studies.size
@@ -545,7 +551,7 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "POST /centres/studies" must {
-      "add a centre to study link" in new App(fakeApp) {
+      "add a study to a centre" in new App(fakeApp) {
         doLogin
 
         val centre = factory.createDisabledCentre
@@ -557,7 +563,7 @@ class CentresControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "centreId" -> centre.id.id,
           "studyId"  -> study.id.id)
-        val json = makeRequest(POST, "/centres/studies", json = cmdJson)
+        val json = makeRequest(POST, uri(centre) + s"/studies/${study.id.id}", json = cmdJson)
           (json \ "data" \ "centreId").as[String] mustBe (centre.id.id)
           (json \ "data" \ "studyId").as[String] mustBe (study.id.id)
 
@@ -572,7 +578,7 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "DELETE /centres/studies" must {
-      "remove a centre to study link" in new App(fakeApp) {
+      "remove a study from a centre" in new App(fakeApp) {
         doLogin
 
         val centre = factory.createDisabledCentre
@@ -583,11 +589,11 @@ class CentresControllerSpec extends ControllerFixture {
         val id = StudyCentreId(nameGenerator.next[StudyCentreId])
         centreStudiesRepository.put(StudyCentre(id, study.id, centre.id))
 
-        val json = makeRequest(DELETE, s"/centres/studies/${centre.id.id}/${study.id.id}")
+        val json = makeRequest(DELETE, uri(centre) + s"/studies/${study.id.id}")
           (json \ "status").as[String] must include ("success")
       }
 
-      "fail on attempt remove an invalid centre to study link" in new App(fakeApp) {
+      "fail on attempt remove an invalid study from a centre" in new App(fakeApp) {
         doLogin
 
         val centre = factory.createDisabledCentre
@@ -595,7 +601,7 @@ class CentresControllerSpec extends ControllerFixture {
 
         val studyId = StudyCentreId(nameGenerator.next[StudyCentreId])
 
-        val json = makeRequest(DELETE, s"/centres/studies/${centre.id.id}/${studyId}", BAD_REQUEST)
+        val json = makeRequest(DELETE, uri(centre) + s"/studies/${studyId}", BAD_REQUEST)
           (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("centre and study not linked")
       }

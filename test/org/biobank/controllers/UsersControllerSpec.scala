@@ -24,14 +24,17 @@ import scaldi.Injectable
  * Tests the REST API for [[User]].
  */
 class UsersControllerSpec extends ControllerFixture {
+  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  def createUserInRepository(plainPassword: String)
-    (implicit userRepository: UserRepository)
-      : RegisteredUser = {
+  def uri: String = "/users"
+
+  def uri(user: User): String = uri + s"/${user.id.id}"
+
+  def createUserInRepository(plainPassword: String): RegisteredUser = {
     val passwordHasher =  TestGlobal.passwordHasher
 
     val salt = passwordHasher.generateSalt
@@ -50,7 +53,7 @@ class UsersControllerSpec extends ControllerFixture {
         implicit val userRepository: UserRepository = TestGlobal.userRepository
 
         doLogin
-        val json = makeRequest(GET, "/users")
+        val json = makeRequest(GET, uri)
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
         val jsonDefaultUser = jsonList(0)
@@ -64,7 +67,7 @@ class UsersControllerSpec extends ControllerFixture {
         val user = factory.createRegisteredUser
         userRepository.put(user)
 
-        val json = makeRequest(GET, "/users")
+        val json = makeRequest(GET, uri)
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have length 2
         compareObj(jsonList(1), user)
@@ -79,7 +82,7 @@ class UsersControllerSpec extends ControllerFixture {
         val users = List(factory.createRegisteredUser, factory.createRegisteredUser)
         users.map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, "/users")
+        val json = makeRequest(GET, uri)
         val jsonList = (json \ "data").as[List[JsObject]].filterNot { u =>
           (u \ "id").as[String].equals("admin@admin.com")
         }
@@ -99,7 +102,7 @@ class UsersControllerSpec extends ControllerFixture {
           "email" -> user.email,
           "password" -> "testpassword",
           "avatarUrl" -> user.avatarUrl)
-        val json = makeRequest(POST, "/users", json = cmdJson)
+        val json = makeRequest(POST, uri, json = cmdJson)
 
         (json \ "status").as[String] must include("success")
       }
@@ -117,7 +120,7 @@ class UsersControllerSpec extends ControllerFixture {
           "id" -> user.id.id,
           "expectedVersion" -> Some(user.version),
           "name" -> user.name)
-        val json = makeRequest(PUT, s"/users/${user.id.id}/name", json = cmdJson)
+        val json = makeRequest(PUT, uri(user) + "/name", json = cmdJson)
 
         (json \ "status").as[String] must include("success")
       }
@@ -135,7 +138,7 @@ class UsersControllerSpec extends ControllerFixture {
           "id" -> user.id.id,
           "expectedVersion" -> Some(user.version),
           "email" -> user.email)
-        val json = makeRequest(PUT, s"/users/${user.id.id}/email", json = cmdJson)
+        val json = makeRequest(PUT, uri(user) + "/email", json = cmdJson)
 
         (json \ "status").as[String] must include("success")
       }
@@ -159,7 +162,7 @@ class UsersControllerSpec extends ControllerFixture {
           "expectedVersion" -> Some(user.version),
           "oldPassword" -> plainPassword,
           "newPassword" -> newPassword)
-        val json = makeRequest(PUT, s"/users/${user.id.id}/password", json = cmdJson)
+        val json = makeRequest(PUT, uri(user) + "/password", json = cmdJson)
 
         (json \ "status").as[String] must include("success")
         (json \ "data" \ "password").as[String] must not be (newPassword)
@@ -173,7 +176,7 @@ class UsersControllerSpec extends ControllerFixture {
         doLogin
         val user = factory.createRegisteredUser.activate | fail
         userRepository.put(user)
-        val json = makeRequest(GET, s"/users/${user.id.id}")
+        val json = makeRequest(GET, uri(user))
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, user)
       }
@@ -191,7 +194,7 @@ class UsersControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "expectedVersion" -> Some(user.version),
           "id" -> user.id.id)
-        val json = makeRequest(POST, s"/users/activate", json = cmdJson)
+        val json = makeRequest(POST, uri(user) + "/activate", json = cmdJson)
 
         (json \ "status").as[String] must include("success")
       }
@@ -209,7 +212,7 @@ class UsersControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "expectedVersion" -> Some(user.version),
           "id" -> user.id.id)
-        val json = makeRequest(POST, s"/users/lock", json = cmdJson)
+        val json = makeRequest(POST, uri(user) + "/lock", json = cmdJson)
 
         (json \ "status").as[String] must include("success")
       }
@@ -227,7 +230,7 @@ class UsersControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "expectedVersion" -> Some(lockedUser.version),
           "id" -> lockedUser.id.id)
-        val json = makeRequest(POST, s"/users/unlock", json = cmdJson)
+        val json = makeRequest(POST, uri(user) + "/unlock", json = cmdJson)
 
         (json \ "status").as[String] must include("success")
       }
@@ -296,7 +299,7 @@ class UsersControllerSpec extends ControllerFixture {
         val badToken = nameGenerator.next[String]
 
         // this request is valid since user is logged in
-        val resp = route(FakeRequest(GET, "/users")
+        val resp = route(FakeRequest(GET, uri)
           .withHeaders("X-XSRF-TOKEN" -> badToken)
           .withCookies(Cookie("XSRF-TOKEN", badToken)))
         resp must not be (None)
@@ -314,7 +317,7 @@ class UsersControllerSpec extends ControllerFixture {
         val badToken = nameGenerator.next[String]
 
         // this request is valid since user is logged in
-        val resp = route(FakeRequest(GET, "/users")
+        val resp = route(FakeRequest(GET, uri)
           .withHeaders("X-XSRF-TOKEN" -> validToken)
           .withCookies(Cookie("XSRF-TOKEN", badToken)))
         resp must not be (None)
@@ -330,7 +333,7 @@ class UsersControllerSpec extends ControllerFixture {
       "not allow requests missing XSRF-TOKEN cookie" in new App(fakeApp) {
         doLogin
 
-        val resp = route(FakeRequest(GET, "/users"))
+        val resp = route(FakeRequest(GET, uri))
         resp must not be (None)
         resp.map { result =>
           status(result) mustBe (UNAUTHORIZED)
@@ -344,7 +347,7 @@ class UsersControllerSpec extends ControllerFixture {
       "not allow requests missing X-XSRF-TOKEN in header" in new App(fakeApp) {
         val token = doLogin
 
-        val resp = route(FakeRequest(GET, "/users").withCookies(Cookie("XSRF-TOKEN", token)))
+        val resp = route(FakeRequest(GET, uri).withCookies(Cookie("XSRF-TOKEN", token)))
         resp must not be (None)
         resp.map { result =>
           status(result) mustBe (UNAUTHORIZED)
@@ -362,7 +365,7 @@ class UsersControllerSpec extends ControllerFixture {
         doLogin
 
         // this request is valid since user is logged in
-        var json = makeRequest(GET, "/users")
+        var json = makeRequest(GET, uri)
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
 
@@ -371,7 +374,7 @@ class UsersControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include("success")
 
         // the following request must fail
-        json = makeRequest(GET, "/users", UNAUTHORIZED)
+        json = makeRequest(GET, uri, UNAUTHORIZED)
 
         (json \ "status").as[String] must include("error")
         (json \ "message").as[String] must include("invalid token")

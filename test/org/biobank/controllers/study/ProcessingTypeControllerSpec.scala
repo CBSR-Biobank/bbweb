@@ -22,6 +22,17 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
+  def uri(study: Study): String = s"/studies/${study.id.id}/proctypes"
+
+  def uri(study: Study, procType: ProcessingType): String =
+    uri(study) + s"/${procType.id.id}"
+
+  def uriWithQuery(study: Study, procType: ProcessingType): String =
+    uri(study) + s"?procTypeId=${procType.id.id}"
+
+  def uri(study: Study, procType: ProcessingType, version: Long): String =
+    uri(study, procType) + s"/${version}"
+
   private def procTypeToAddCmdJson(procType: ProcessingType) = {
     Json.obj(
       "studyId"     -> procType.studyId.id,
@@ -32,13 +43,9 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
   }
 
   private def procTypeToUpdateCmdJson(procType: ProcessingType) = {
-    Json.obj(
-      "studyId"         -> procType.studyId.id,
+    procTypeToAddCmdJson(procType) ++ Json.obj(
       "id"              -> procType.id.id,
-      "expectedVersion" -> Some(procType.version),
-      "name"            -> procType.name,
-      "description"     -> procType.description,
-      "enabled"         -> procType.enabled
+      "expectedVersion" -> Some(procType.version)
     )
   }
 
@@ -52,7 +59,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       POST,
-      "/studies/proctypes",
+      uri(study),
       BAD_REQUEST,
       procTypeToAddCmdJson(procType))
 
@@ -70,7 +77,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       PUT,
-      s"/studies/proctypes/${procType.id.id}",
+      uri(study, procType2),
       BAD_REQUEST,
       procTypeToUpdateCmdJson(procType2))
 
@@ -86,7 +93,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
     val json = makeRequest(
       DELETE,
-      s"/studies/proctypes/${procType.studyId.id}/${procType.id.id}/${procType.version}",
+      uri(study, procType, procType.version),
       BAD_REQUEST)
 
     (json \ "status").as[String] must include ("error")
@@ -101,7 +108,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
+        val json = makeRequest(GET, uri(study))
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
@@ -115,7 +122,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         processingTypeRepository.put(procType)
 
-        val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
+        val json = makeRequest(GET, uri(study))
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
@@ -130,7 +137,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         processingTypeRepository.put(procType)
 
-        val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}?procTypeId=${procType.id.id}").as[JsObject]
+        val json = makeRequest(GET, uriWithQuery(study, procType)).as[JsObject]
         (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, procType)
@@ -145,7 +152,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
         proctypes map { procType => processingTypeRepository.put(procType) }
 
-        val json = makeRequest(GET, s"/studies/proctypes/${study.id.id}")
+        val json = makeRequest(GET, uri(study))
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
 
@@ -156,19 +163,19 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
       "fail for an invalid study ID" in new App(fakeApp) {
         doLogin
-        val studyId = nameGenerator.next[Study]
+        val study = factory.createDisabledStudy
 
-        val json = makeRequest(GET, s"/studies/proctypes/$studyId", BAD_REQUEST)
+        val json = makeRequest(GET, uri(study), BAD_REQUEST)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid study id")
       }
 
       "fail for an invalid study ID when using an processing type id" in new App(fakeApp) {
         doLogin
-        val studyId = nameGenerator.next[Study]
-        val procTypeId = nameGenerator.next[ProcessingType]
+        val study = factory.createDisabledStudy
+        val procType = factory.createProcessingType
 
-        val json = makeRequest(GET, s"/studies/proctypes/$studyId?procTypeId=$procTypeId", BAD_REQUEST)
+        val json = makeRequest(GET, uriWithQuery(study, procType), BAD_REQUEST)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid study id")
       }
@@ -178,9 +185,9 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val procTypeId = nameGenerator.next[ProcessingType]
+        val procType = factory.createProcessingType
 
-        val json = makeRequest(GET, s"/studies/proctypes/${study.id}?procTypeId=$procTypeId", BAD_REQUEST)
+        val json = makeRequest(GET, uriWithQuery(study, procType), BAD_REQUEST)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("processing type does not exist")
       }
@@ -195,7 +202,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         val json = makeRequest(
           POST,
-          "/studies/proctypes",
+          uri(study),
           json = procTypeToAddCmdJson(procType))
 
         (json \ "status").as[String] must include ("success")
@@ -234,7 +241,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
         val json = makeRequest(
           PUT,
-          s"/studies/proctypes/${procType.id.id}",
+          uri(study, procType2),
           json = procTypeToUpdateCmdJson(procType2))
 
         (json \ "status").as[String] must include ("success")
@@ -266,9 +273,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         processingTypeRepository.put(procType)
 
-        val json = makeRequest(
-          DELETE,
-          s"/studies/proctypes/${procType.studyId.id}/${procType.id.id}/${procType.version}")
+        val json = makeRequest(DELETE, uri(study, procType, procType.version))
 
         (json \ "status").as[String] must include ("success")
       }
