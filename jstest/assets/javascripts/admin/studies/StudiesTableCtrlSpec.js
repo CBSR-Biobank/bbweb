@@ -3,7 +3,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  ddescribe('Controller: StudiesTableCtrl', function() {
+  describe('Controller: StudiesTableCtrl', function() {
     var scope, tableService;
 
     var studies = [

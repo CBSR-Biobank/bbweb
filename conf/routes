@@ -81,7 +81,7 @@ POST    /centres/:id/disable                   @org.biobank.controllers.centres.
 # centre location
 GET     /centres/:centreId/locations           @org.biobank.controllers.centres.CentresController.getLocations(centreId, locationId: Option[String])
 POST    /centres/:centreId/locations           @org.biobank.controllers.centres.CentresController.addLocation(centreId)
-DELETE  /centres/:centreId/location/:id        @org.biobank.controllers.centres.CentresController.removeLocation(centreId, id)
+DELETE  /centres/:centreId/locations/:id       @org.biobank.controllers.centres.CentresController.removeLocation(centreId, id)
 
 # centre to study link
 GET     /centres/:centreId/studies             @org.biobank.controllers.centres.CentresController.getStudies(centreId)

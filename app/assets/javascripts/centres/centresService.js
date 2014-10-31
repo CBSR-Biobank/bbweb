@@ -73,7 +73,7 @@ define(['./module', 'angular'], function(module, angular) {
 
     function addStudy(centreId, studyId) {
       var cmd = {centreId: centreId, studyId: studyId};
-      return biobankXhrReqService.call('POST', uri(centreId) + '/study', cmd);
+      return biobankXhrReqService.call('POST', uri(centreId) + '/study/' + studyId, cmd);
     }
 
     function removeStudy(centreId, studyId) {

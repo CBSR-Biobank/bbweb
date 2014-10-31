@@ -64,7 +64,7 @@ define(['../module'], function(module) {
         'Location ' + location.name + ' cannot be removed: ',
         removeCallback,
         location,
-        'admin.studies.cetnre.locations');
+        'admin.centres.centre.locations');
 
       function removeCallback(location) {
         return centreLocationService.remove(vm.centre.id, location.id);

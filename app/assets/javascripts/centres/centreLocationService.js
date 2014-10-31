@@ -19,14 +19,28 @@ define(['./module'], function(module) {
 
     //-------
 
+    function uri(centreId, locationId) {
+      var result = '/centres/' + centreId + '/locations';
+
+      if (arguments.length <= 0) {
+        throw new Error('invalid arguments');
+      }
+
+      if (arguments.length > 1) {
+        result += '/' + locationId;
+      }
+
+      return result;
+    }
+
     function list(centreId) {
-      return biobankXhrReqService.call('GET', '/centres/centre/' + centreId + '/locations');
+      return biobankXhrReqService.call('GET', uri(centreId));
     }
 
     function query(centreId, locationId) {
       return biobankXhrReqService.call(
         'GET',
-        '/centres/centre/' + centreId + '/locations/?locationId=' + locationId);
+        uri(centreId) + '?locationId=' + locationId);
     }
 
     function add(centre, location) {
@@ -41,11 +55,11 @@ define(['./module'], function(module) {
         countryIsoCode: location.countryIsoCode
       };
 
-      return biobankXhrReqService.call('POST', '/centres/centre/locations', cmd);
+      return biobankXhrReqService.call('POST', uri(centre.id), cmd);
     }
 
     function remove(centreId, locationId) {
-      return biobankXhrReqService.call('DELETE', '/centres/centre/' + centreId + '/locations/' + locationId);
+      return biobankXhrReqService.call('DELETE', uri(centreId, locationId));
     }
 
   }
