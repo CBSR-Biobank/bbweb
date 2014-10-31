@@ -3,10 +3,9 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  ddescribe('Controller: StudyCtrl', function() {
+  describe('Controller: StudyCtrl', function() {
     var windowService, stateService, scope, timeout;
     var study = {name: 'ST1'};
-
 
     beforeEach(mocks.module('biobankApp', function($provide) {
       windowService = {

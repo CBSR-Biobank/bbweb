@@ -132,7 +132,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('processingDto should return valid object', function() {
-      httpBackend.whenGET(uri(study.id) + '/dto/processing/').respond({
+      httpBackend.whenGET(uri(study.id) + '/dto/processing').respond({
         status: 'success',
         data: 'success'
       });

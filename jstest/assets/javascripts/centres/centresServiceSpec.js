@@ -120,7 +120,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       var studyId = 'a-study-id';
       var expectedCmd = {centreId: centre.id, studyId: studyId};
       var expectedResult = {status: 'success', data: 'success'};
-      httpBackend.expectPOST(uri(centre.id) + '/study', expectedCmd).respond(201, expectedResult);
+      httpBackend.expectPOST(uri(centre.id) + '/study/' + studyId, expectedCmd).respond(201, expectedResult);
       centresService.addStudy(centre.id, studyId).then(function(reply) {
         expect(reply).toEqual('success');
       });
