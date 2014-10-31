@@ -12,7 +12,8 @@ define(['../module'], function(module) {
     var vm = this;
     vm.studies = studies;
     vm.tableParams = tableService.getTableParams(vm.studies);
-    vm.tableParams.settings().vm = vm;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
+    console.log(vm.tableParams);
+    //vm.tableParams.settings().vm = vm;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
   }
 
 });

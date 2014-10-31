@@ -3,13 +3,13 @@ define(['../module'], function(module) {
 
   module.controller('StudiesCtrl', StudiesCtrl);
 
-  StudiesCtrl.$inject = ['$state', '$log', 'studies'];
+  StudiesCtrl.$inject = ['$state', 'studies'];
 
   /**
    * Displays a list of studies with each in its own mini-panel.
    *
    */
-  function StudiesCtrl($state, $log, studies) {
+  function StudiesCtrl($state, studies) {
     var vm = this;
     vm.studies = studies;
   }

@@ -144,8 +144,8 @@ define(['./module'], function(module) {
 
     function updatePassword(user, newPassword) {
       var cmd = {
+        id:              user.id,
         expectedVersion: user.version,
-        name:            user.name,
         password:        newPassword
       };
       return biobankXhrReqService.call('PUT', uri(user.id) + '/password', cmd);

@@ -26,7 +26,7 @@
     "grunt-protractor-runner": "~1.1.4",
     "grunt-rev": "~0.1.0",
     "grunt-usemin": "~2.5.1",
-    "karma-jasmine": "^0.1.5",
+    "karma-jasmine": "^0.2.2",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-spec-reporter": "0.0.13",
     "matchdep": "~0.3.0"

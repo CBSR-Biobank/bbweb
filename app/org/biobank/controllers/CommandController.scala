@@ -57,7 +57,7 @@ trait CommandController extends Controller with Security {
         Future.successful(
           BadRequest(Json.obj(
             "status" ->"error",
-            "message" -> "Invalid JSON object - missing attributes: expected $numFields, got ${jsonObj.keys.size}")))
+            "message" -> s"Invalid JSON object - missing attributes: expected $numFields, got ${jsonObj.keys.size}")))
       }
     }
   }

@@ -85,7 +85,7 @@ DELETE  /centres/:centreId/location/:id        @org.biobank.controllers.centres.
 
 # centre to study link
 GET     /centres/:centreId/studies             @org.biobank.controllers.centres.CentresController.getStudies(centreId)
-POST    /centres/:centreId/study               @org.biobank.controllers.centres.CentresController.addStudy(centreId)
+POST    /centres/:centreId/study/:studyId      @org.biobank.controllers.centres.CentresController.addStudy(centreId, studyId)
 DELETE  /centres/:centreId/study/:studyId      @org.biobank.controllers.centres.CentresController.removeStudy(centreId, studyId)
 
 # Users
