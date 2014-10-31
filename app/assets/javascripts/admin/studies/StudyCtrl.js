@@ -40,6 +40,11 @@ define(['../module'], function(module) {
       }
     }
 
+    /**
+     * At the moment the active tab does not initialize properly. Seems to be a ui-boostrap bug.
+     *
+     * See http://stackoverflow.com/questions/17695629/setting-the-initial-static-tab-in-angular-bootstrap
+     */
     function activeTabUpdateFix() {
       $timeout(activeTabUpdate, 0);
 
