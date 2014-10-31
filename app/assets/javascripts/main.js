@@ -13,14 +13,21 @@
       'underscore': {
         exports: '_'
       },
+      'angular-route':     ['angular'],
+      'angular-cookies':   ['angular'],
       'bootstrap':         ['jquery'],
-      'toastr':            ['angular', 'jquery']
+      'angular-ui-router': ['angular'],
+      'ui-bootstrap':      ['angular', 'bootstrap'],
+      'ngTable':           ['angular'],
+      'toastr':            ['angular', 'jquery'],
+      'angular-sanitize':  ['angular']
     },
     paths: {
       'requirejs':         '../lib/requirejs/require',
       'jquery':            '../lib/jquery/jquery',
       'angular':           '../lib/angularjs/angular',
       'underscore':        '../lib/underscorejs/underscore',
+      'angular-route':     '../lib/angularjs/angular-route',
       'angular-cookies':   '../lib/angularjs/angular-cookies',
       'angular-ui-router': '../lib/angular-ui-router/angular-ui-router',
       'bootstrap':         '../lib/bootstrap/js/bootstrap',
@@ -33,18 +40,19 @@
 
   requirejs.onError = function(err) {
     console.log(err);
-    if (err.requireType === 'timeout') {
-      console.log('modules: ' + err.requireModules);
-    }
-
-    throw err;
   };
 
   // Load the app. This is kept minimal so it doesn't need much updating.
   require([
     'angular',
+    'angular-cookies',
+    'angular-route',
+    'angular-ui-router',
+    'ui-bootstrap',
+    'ngTable',
     'jquery',
     'bootstrap',
+    'angular-sanitize',
     './app'
   ], function(angular) {
     angular.bootstrap(document, ['biobankApp']);

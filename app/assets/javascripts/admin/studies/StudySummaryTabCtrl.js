@@ -3,13 +3,13 @@ define(['../module'], function(module) {
 
   module.controller('StudySummaryTabCtrl', StudySummaryTabCtrl);
 
-  StudySummaryTabCtrl.$inject = ['$state', '$filter', 'study'];
+  StudySummaryTabCtrl.$inject = ['$filter', 'study'];
 
   /**
    * Displays the study administrtion page, with a number of tabs. Each tab displays the configuration
    * for a different aspect of the study.
    */
-  function StudySummaryTabCtrl($state, $filter, study) {
+  function StudySummaryTabCtrl($filter, study) {
     var vm = this;
 
     vm.study = study;

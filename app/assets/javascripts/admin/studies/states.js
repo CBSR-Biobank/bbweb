@@ -105,25 +105,6 @@ define(['../module'], function(module) {
     });
 
     /**
-     * Study summary information update
-     */
-    $stateProvider.state('admin.studies.study.summary.update', {
-      url: '/update',
-      resolve: {
-        user: userResolve.user
-      },
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/studyForm.html',
-          controller: 'StudyEditCtrl as vm'
-        }
-      },
-      data: {
-        displayName: 'Update'
-      }
-    });
-
-    /**
      * Study view summary information
      */
     $stateProvider.state('admin.studies.study.summary', {
@@ -139,6 +120,25 @@ define(['../module'], function(module) {
       },
       data: {
         displayName: '{{study.name}}'
+      }
+    });
+
+    /**
+     * Study summary information update
+     */
+    $stateProvider.state('admin.studies.study.summary.update', {
+      url: '/update',
+      resolve: {
+        user: userResolve.user
+      },
+      views: {
+        'main@': {
+          templateUrl: '/assets/javascripts/admin/studies/studyForm.html',
+          controller: 'StudyEditCtrl as vm'
+        }
+      },
+      data: {
+        displayName: 'Update'
       }
     });
 

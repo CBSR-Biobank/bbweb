@@ -10,11 +10,9 @@ define(['../module'], function(module) {
    */
   module.controller('CentreSummaryTabCtrl', CentreSummaryTabCtrl);
 
-  CentreSummaryTabCtrl.$inect = [
-    '$state', '$filter', 'user', 'centre'
-  ];
+  CentreSummaryTabCtrl.$inject = ['$filter', 'centre'];
 
-  function CentreSummaryTabCtrl($state, $filter, user, centre) {
+  function CentreSummaryTabCtrl($filter, centre) {
     var vm = this;
     vm.centre = centre;
     vm.description = centre.description;

@@ -29,6 +29,7 @@
     "karma-jasmine": "^0.2.2",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-spec-reporter": "0.0.13",
+    "grunt-ng-annotate": "^0.3.0",
     "matchdep": "~0.3.0"
   }
 }

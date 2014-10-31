@@ -10,6 +10,24 @@ module.exports = function(grunt) {
       }
     },
 
+    ngAnnotate: {
+      options: {
+        add: false,
+        remove: false,
+        singleQuotes: true
+      },
+      bbwebApp: {
+        files: [
+          {
+            expand: true,
+            src: ['app/assets/javascripts/**/*.js'],
+            ext: '.annotated.js', // Dest filepaths will have this extension.
+            extDot: 'last'       // Extensions in filenames begin after the last dot
+          },
+        ],
+      }
+    },
+
     protractor: {
       options: {
         configFile: "node_modules/protractor/referenceConf.js", // Default config file
@@ -31,5 +49,5 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-karma');
   grunt.registerTask('default', ['karma']);
-
+  grunt.loadNpmTasks('grunt-ng-annotate');
 };
