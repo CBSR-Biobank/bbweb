@@ -11,21 +11,20 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       {name: 'ST2'}
     ];
 
-    beforeEach(mocks.module('biobankApp', function($provide) {
-      tableService = {
-        settings: function () {
-          return {};
-        },
-        getTableParams: function(studies) {
-          return this.settings;
-        }
-      };
+    beforeEach(mocks.module('biobankApp'));
 
-      spyOn(tableService, 'getTableParams').and.callThrough();
-      $provide.value('tableService', tableService);
+    beforeEach(inject(function (_tableService_) {
+      tableService = _tableService_;
+      spyOn(tableService, 'getTableParams').and.callFake(function () {
+        return {
+          settings: function () {
+            return {};
+          }
+        };
+      });
     }));
 
-    beforeEach(inject(function($controller, $rootScope) {
+    beforeEach(inject(function($controller, $rootScope, tableService) {
       scope = $rootScope.$new();
       $controller('StudiesTableCtrl as vm', {$scope: scope, tableService: tableService, studies: studies });
       scope.$digest();

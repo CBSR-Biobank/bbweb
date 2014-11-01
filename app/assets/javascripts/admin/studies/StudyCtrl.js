@@ -3,12 +3,12 @@ define(['../module'], function(module) {
 
   module.controller('StudyCtrl', StudyCtrl);
 
-  StudyCtrl.$inject = ['$window', '$scope', '$state', '$timeout', 'study'];
+  StudyCtrl.$inject = ['$window', '$state', '$timeout', 'study'];
 
   /**
    *
    */
-  function StudyCtrl($window, $scope, $state, $timeout, study) {
+  function StudyCtrl($window, $state, $timeout, study) {
     var vm = this;
     vm.study = study;
 

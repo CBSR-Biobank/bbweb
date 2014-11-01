@@ -8,34 +8,38 @@ define(['../module'], function(module) {
   module.controller('StudyEditCtrl', StudyEditCtrl);
 
   StudyEditCtrl.$inject = [
-    '$scope',
-    '$state',
-    '$stateParams',
     'stateHelper',
     'studiesService',
     'domainEntityUpdateError',
     'study'
   ];
 
-  function StudyEditCtrl($scope,
-                         $state,
-                         $stateParams,
-                         stateHelper,
+  function StudyEditCtrl(stateHelper,
                          studiesService,
                          domainEntityUpdateError,
                          study) {
     var vm = this;
-    var action = (study.id) ? 'Update' : 'Add';
-    vm.returnState = study.id ? 'admin.studies.study.summary' : 'admin.studies';
-    vm.title =  action + ' study';
+    var action;
     vm.study = study;
     vm.submit = submit;
     vm.cancel = cancel;
 
+    vm.stateParams = {};
+    if (study.id) {
+      action = 'Update';
+      vm.returnState = 'admin.studies.study.summary';
+      vm.stateParams.studyId = study.id;
+    } else {
+      action = 'Add';
+      vm.returnState = 'admin.studies';
+    }
+
+    vm.title =  action + ' study';
+
     //--
 
     function gotoReturnState() {
-      stateHelper.reloadStateAndReinit(vm.returnState, $stateParams, {reload: true});
+      stateHelper.reloadStateAndReinit(vm.returnState, vm.stateParams, {reload: true});
     }
 
     function submit(study) {
@@ -46,7 +50,7 @@ define(['../module'], function(module) {
             error,
             'study',
             vm.returnState,
-            $stateParams,
+            vm.stateParams,
             {reload: true});
         });
     }
