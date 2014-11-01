@@ -53,8 +53,6 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       });
 
       studiesService.getAll().then(function(data) {
-        //console.log(JSON.stringify(data));
-
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });

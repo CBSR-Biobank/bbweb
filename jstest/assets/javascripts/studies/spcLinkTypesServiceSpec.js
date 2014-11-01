@@ -60,8 +60,6 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       });
 
       spcLinkTypesService.getAll(processingTypeId).then(function(data) {
-        //console.log(JSON.stringify(data));
-
         expect(data.length).toEqual(1);
         expect(_.isEqual(spcLinkType, data[0]));
       });

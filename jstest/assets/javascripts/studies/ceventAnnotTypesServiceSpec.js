@@ -55,8 +55,6 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       });
 
       ceventAnnotTypesService.getAll(studyId).then(function(data) {
-        //console.log(JSON.stringify(data));
-
         expect(data.length).toEqual(1);
         expect(_.isEqual(annotType, data[0]));
       });

@@ -54,8 +54,6 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       });
 
       processingTypesService.getAll(studyId).then(function(data) {
-        //console.log(JSON.stringify(data));
-
         expect(data.length).toEqual(1);
         expect(_.isEqual(processingType, data[0]));
       });
