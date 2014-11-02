@@ -1,54 +1,44 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">{{vm.centre.name}}
-    <span class="btn-group pull-right">
-      <a ui-sref="admin.centres.centre.update({centreId: vm.centre.id})" class="btn btn-xs btn-primary"
-         type="button">
-        <i class="glyphicon glyphicon-edit"></i>
-      </a>
-      <button class="btn btn-xs btn-success"
-              data-ng-click="vm.changeStatus()"
-              title="Change status">
-      <i class="glyphicon glyphicon-cog"></i></button>
-    </span>
+      <span class="btn-group pull-right">
+        <a ui-sref="admin.centres.centre.update({centreId: vm.centre.id})" class="btn btn-xs btn-primary"
+           type="button">
+          <i class="glyphicon glyphicon-edit"></i>
+        </a>
+        <button class="btn btn-xs btn-success"
+                data-ng-click="vm.changeStatus()"
+                title="Change status">
+          <i class="glyphicon glyphicon-cog"></i></button>
+      </span>
     </h3>
   </div>
   <div class="panel-body">
-    <div class="row">
-      <div class="col-md-2">
-        <strong>Description: </strong>
-        <i class="glyphicon"
-           data-ng-class="{'glyphicon-plus': !descriptionToggle, 'glyphicon-minus': vm.descriptionToggle}"
-           data-ng-click="vm.truncateDescriptionToggle()"
-           data-ng-if="vm.centre.description.length > vm.descriptionToggleLength"></i>
-      </div>
-      <div class="col-md-10">
-        {{vm.description}}
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2">
-        <strong>Status:</strong>
-      </div>
-      <div class="col-md-10">
-        <p class="text-info">{{vm.centre.status}}</p>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2">
-        <p class="text-muted"><strong>Added:</strong></p>
-      </div>
-      <div class="col-md-10">
-        <p class="text-muted">{{vm.centre.timeAdded | timeago}}</p>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2" data-ng-if="centre.timeModified !== null">
-        <p class="text-muted"><strong>Updated:</strong></p>
-      </div>
-      <div class="col-md-10" data-ng-if="centre.timeModified !== null">
-        <p class="text-muted">{{vm.centre.timeModified | timeago}}</p>
-      </div>
-    </div>
+    <truncate-toggle
+       text="vm.centre.description"
+       toggle-length="vm.descriptionToggleLength"></truncate-toggle>
   </div>
+  <table class="table table-bordered">
+    <tr>
+      <td>
+        <span class="center-block text-center text-muted"><small>Status</small></span>
+        <span class="center-block text-center"><strong>{{vm.centre.status}}</strong></span>
+      </td>
+      <td>
+        <span class="center-block text-center text-muted"><small>Added</small></span>
+        <span class="center-block text-center"><strong>{{vm.centre.timeAdded | timeago}}</strong></span>
+      </td>
+      <td>
+        <span class="center-block text-center text-muted"><small>Modified</small></span>
+        <span class="center-block text-center"
+              data-ng-if="centre.timeModified !== null">
+          <strong>{{vm.centre.timeModified | timeago}}</strong>
+        </span>
+        <span class="center-block text-center"
+              data-ng-if="centre.timeModified === null">
+          <strong>Never</strong>
+        </span>
+      </td>
+    </tr>
+  </table>
 </div>

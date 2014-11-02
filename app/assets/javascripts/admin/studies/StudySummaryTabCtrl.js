@@ -13,12 +13,11 @@ define(['../module'], function(module) {
     var vm = this;
 
     vm.study = study;
-    vm.description = study.description;
-    vm.descriptionToggle = true;
+    vm.descriptionToggleControl = {}; // for truncateToggle directive
+    vm.descriptionToggleState = true;
     vm.descriptionToggleLength = 100;
 
     vm.changeStatus = changeStatus;
-    vm.truncateDescriptionToggle = truncateDescriptionToggle;
 
     //--
 
@@ -28,15 +27,6 @@ define(['../module'], function(module) {
         return;
       }
       throw new Error('study does not have an ID');
-    }
-
-    function truncateDescriptionToggle() {
-      if (vm.descriptionToggle) {
-        vm.description = $filter('truncate')(vm.study.description, vm.descriptionToggleLength);
-      } else {
-        vm.description = vm.study.description;
-      }
-      vm.descriptionToggle = !vm.descriptionToggle;
     }
 
   }

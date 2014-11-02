@@ -7,6 +7,7 @@ define([
   './directives/panelButtonsDirective',
   './directives/smartFloatDirective',
   './directives/str2integerDirective',
+  './directives/truncateToggleDirective',
   './directives/uiBreadcrumbsDirective',
   './directives/updateRemoveButtonsDirective',
   './filters/partitionFilter',

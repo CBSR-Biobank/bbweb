@@ -15,11 +15,11 @@ define(['../module'], function(module) {
   function CentreSummaryTabCtrl($filter, centre) {
     var vm = this;
     vm.centre = centre;
-    vm.description = centre.description;
-    vm.descriptionToggle = true;
+    vm.descriptionToggleControl = {}; // for truncateToggle directive
+    vm.descriptionToggleState = true;
     vm.descriptionToggleLength = 100;
+
     vm.changeStatus = changeStatus;
-    vm.truncateDescriptionToggle = truncateDescriptionToggle;
 
     //----
 
@@ -29,16 +29,6 @@ define(['../module'], function(module) {
         return;
       }
       throw new Error('centre does not have an ID');
-    }
-
-    function truncateDescriptionToggle() {
-      if (vm.descriptionToggle) {
-        vm.description = $filter('truncate')(
-          centre.description, vm.descriptionToggleLength);
-      } else {
-        vm.description = centre.description;
-      }
-      vm.descriptionToggle = !vm.descriptionToggle;
     }
 
   }

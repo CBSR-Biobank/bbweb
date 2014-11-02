@@ -16,41 +16,31 @@
     </h3>
   </div>
   <div class="panel-body">
-    <div class="row">
-      <div class="col-md-2">
-        <strong>Description: </strong>
-        <i class="glyphicon"
-           data-ng-class="{'glyphicon-plus': !vm.descriptionToggle, 'glyphicon-minus': vm.descriptionToggle}"
-           data-ng-click="vm.truncateDescriptionToggle()"
-           data-ng-if="vm.study.description.length > vm.descriptionToggleLength"></i>
-      </div>
-      <div class="col-md-10">
-        {{vm.description}}
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2">
-        <strong>Status:</strong>
-      </div>
-      <div class="col-md-10">
-        <p class="text-info">{{vm.study.status}}</p>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2">
-        <p class="text-muted"><strong>Added:</strong></p>
-      </div>
-      <div class="col-md-10">
-        <p class="text-muted">{{vm.study.timeAdded | timeago}}</p>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2" data-ng-if="vm.study.timeModified !== null">
-        <p class="text-muted"><strong>Updated:</strong></p>
-      </div>
-      <div class="col-md-10" data-ng-if="vm.study.timeModified !== null">
-        <p class="text-muted">{{vm.study.timeModified | timeago}}</p>
-      </div>
-    </div>
+    <truncate-toggle
+       text="vm.study.description"
+       toggle-length="vm.descriptionToggleLength"></truncate-toggle>
   </div>
+  <table class="table table-bordered">
+    <tr>
+      <td>
+        <span class="center-block text-center text-muted"><small>Status</small></span>
+        <span class="center-block text-center"><strong>{{vm.study.status}}</strong></span>
+      </td>
+      <td>
+        <span class="center-block text-center text-muted"><small>Added</small></span>
+        <span class="center-block text-center"><strong>{{vm.study.timeAdded | timeago}}</strong></span>
+      </td>
+      <td>
+        <span class="center-block text-center text-muted"><small>Modified</small></span>
+        <span class="center-block text-center"
+              data-ng-if="centre.timeModified !== null">
+          <strong>{{vm.study.timeModified | timeago}}</strong>
+        </span>
+        <span class="center-block text-center"
+              data-ng-if="centre.timeModified === null">
+          <strong>Never</strong>
+        </span>
+      </td>
+    </tr>
+  </table>
 </div>

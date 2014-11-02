@@ -41,6 +41,8 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.panelToggle           = helper.panelToggle;
 
     vm.tableParams = helper.getTableParams(vm.specimenGroups);
+
+    // FIXME: is this kludge still needed?
     vm.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
 
     //--
