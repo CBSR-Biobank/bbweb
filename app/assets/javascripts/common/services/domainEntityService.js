@@ -1,4 +1,4 @@
-define(['../module'], function(module) {
+define(['../module', 'underscore'], function(module, _) {
   'use strict';
 
   module.service('domainEntityService', domainEntityService);
@@ -20,10 +20,18 @@ define(['../module'], function(module) {
     function getOptionalAttribute(obj, attribute) {
       var result = {};
       if (obj[attribute] && (obj[attribute].length > 0)) {
-        result[attribute] = obj[attribute];
+        if (obj[attribute] instanceof Array) {
+          var arr = _.compact(obj[attribute]);
+          if (arr.length > 0) {
+            result[attribute] = arr;
+          }
+        } else {
+          result[attribute] = obj[attribute];
+        }
       }
       return result;
     }
+
   }
 
 });

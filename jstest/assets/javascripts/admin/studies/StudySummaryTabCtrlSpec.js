@@ -3,7 +3,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  ddescribe('Controller: StudySummaryTabCtrl', function() {
+  describe('Controller: StudySummaryTabCtrl', function() {
     var scope;
     var study = {name: 'ST1', description: 'some description'};
 
@@ -20,14 +20,15 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       scope.$digest();
     }));
 
-    it('should contain valid settings to display a study', function() {
+    it('should contain valid settings to display the study summary', function() {
       expect(scope.vm.study).toBe(study);
-      expect(scope.vm.description).toContain(study.description);
-      expect(scope.vm.descriptionToggle).toBe(true);
+      expect(scope.vm.descriptionToggleLength).toBeDefined();
     });
 
-    xit('should allow toggling length of description', function() {
+    xit('should change the status for a study', function() {
+
     });
+
 
   });
 

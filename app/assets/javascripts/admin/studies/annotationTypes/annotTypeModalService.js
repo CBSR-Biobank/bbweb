@@ -27,6 +27,10 @@ define(['../../module'], function(module) {
       }
 
       if (annotType.valueType === 'Select') {
+        if (!annotType.options || annotType.options.length < 1) {
+          throw new Error('invalid annotation type options');
+        }
+
         data.push(
           {
             name: '# Selections Allowed:',

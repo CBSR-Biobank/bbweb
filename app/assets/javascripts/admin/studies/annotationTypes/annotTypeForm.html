@@ -53,6 +53,7 @@
                 name="valueType"
                 data-ng-model="vm.annotType.valueType"
                 data-ng-options="valueType for valueType in vm.valueTypes"
+                data-ng-change="vm.valueTypeChange()"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -72,12 +73,14 @@
                type="radio"
                data-ng-model="vm.annotType.maxValueCount"
                value="1"
+               ng-required="vm.maxValueCountRequired()"
                str2integer /> Single selection only
       </div>
       <div class="col-md-5">
         <input type="radio"
                data-ng-model="vm.annotType.maxValueCount"
                value="2"
+               ng-required="vm.maxValueCountRequired()"
                str2integer /> Multiple selections allowed
       </div>
     </div>
@@ -101,7 +104,7 @@
         <div class="col-md-2">
           <button class="btn btn-sm btn-warning"
                   data-ng-click="vm.removeOption(opt)"
-                  data-ng-disabled="removeButtonDisabled()">
+                  data-ng-disabled="vm.removeButtonDisabled()">
             <i class="glyphicon glyphicon-minus"></i> Remove
           </button>
         </div>

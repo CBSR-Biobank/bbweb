@@ -13,8 +13,6 @@ define(['../module'], function(module) {
     var vm = this;
 
     vm.study = study;
-    vm.descriptionToggleControl = {}; // for truncateToggle directive
-    vm.descriptionToggleState = true;
     vm.descriptionToggleLength = 100;
 
     vm.changeStatus = changeStatus;

@@ -5,7 +5,6 @@ define(['../../module'], function(module) {
 
   AnnotationTypeEditCtrl.$inject = [
     '$state',
-    '$stateParams',
     'stateHelper',
     'domainEntityUpdateError',
     'study',
@@ -14,10 +13,14 @@ define(['../../module'], function(module) {
     'valueTypes'
   ];
 
-  /** Used for all 3 different study annotation types.
+  /**
+   * Used for all 3 different study annotation types: collection event, participant and specimen link
+   * annotation types.
+   *
+   * Function 'addOrUpdateFn' is the function that is called when the user submits the form. This fuction
+   * should return a promise.
    */
   function AnnotationTypeEditCtrl($state,
-                                  $stateParams,
                                   stateHelper,
                                   domainEntityUpdateError,
                                   study,
@@ -33,7 +36,10 @@ define(['../../module'], function(module) {
     vm.title =  action + ' Annotation Type';
     vm.hasRequiredField = (typeof annotType.required !== 'undefined');
     vm.valueTypes = valueTypes;
+    vm.returnStateParams = {studyId: study.id};
 
+    vm.valueTypeChange = valueTypeChange;
+    vm.maxValueCountRequired = maxValueCountRequired;
     vm.optionAdd = optionAdd;
     vm.removeOption = removeOption;
     vm.removeButtonDisabled = removeButtonDisabled;
@@ -42,24 +48,53 @@ define(['../../module'], function(module) {
 
     //--
 
+    /**
+     * Determines the state to transition to when the user submits the form or cancels it.
+     */
     function determineReturnState() {
-      if (($state.current.name === 'admin.studies.study.collection.ceventAnnotTypeAdd') ||
-          ($state.current.name === 'admin.studies.study.collection.ceventAnnotTypeUpdate')) {
+      if ($state.current.name.indexOf('admin.studies.study.collection') >= 0) {
         return 'admin.studies.study.collection';
-      } else if (($state.current.name === 'admin.studies.study.participants.annotTypeAdd') ||
-          ($state.current.name === 'admin.studies.study.participants.annotTypeUpdate')) {
+      } else if ($state.current.name.indexOf('admin.studies.study.participants') >= 0) {
         return 'admin.studies.study.participants';
-      } else if (($state.current.name === 'admin.studies.study.processing.spcLinkAnnotTypeAdd') ||
-          ($state.current.name === 'admin.studies.study.processing.spcLinkAnnotTypeUpdate')) {
+      } else if ($state.current.name.indexOf('admin.studies.study.processing') >= 0) {
         return 'admin.studies.study.processing';
       }
       throw new Error('invalid state: ' + $state.current.name);
     }
 
+    /**
+     * Transitions to the return state.
+     */
     function gotoReturnState() {
-      return stateHelper.reloadStateAndReinit(returnState, $stateParams, {reload: true});
+      return stateHelper.reloadStateAndReinit(returnState, vm.returnStateParams, {reload: true});
     }
 
+    /**
+     * Called when the user changes the annotation type's value type.
+     */
+    function valueTypeChange() {
+      if (vm.annotType.valueType === 'Select') {
+        // add an option if none exist
+        if (!vm.annotType.options || (vm.annotType.options.length < 1)) {
+          optionAdd();
+        }
+      } else {
+        vm.annotType.options = undefined;
+        vm.annotType.maxValueCount = 0;
+      }
+    }
+
+    /**
+     * Used to disable the submit button if the user has not entered a value for the type
+     * of selection: either single selection or multiple selections.
+     */
+    function maxValueCountRequired() {
+      return ((vm.annotType.maxValueCount < 1) || (vm.annotType.maxValueCount > 2));
+    }
+
+    /**
+     * Used to add an option. Should only be called when the value type is 'Select'.
+     */
     function optionAdd() {
       if (!vm.annotType.options) {
         vm.annotType.options = [];
@@ -67,6 +102,9 @@ define(['../../module'], function(module) {
       vm.annotType.options.push('');
     }
 
+    /**
+     * Used to remove an option. Should only be called when the value type is 'Select'.
+     */
     function removeOption(option) {
       if (vm.annotType.options.length <= 1) {
         throw new Error('invalid length for options');
@@ -78,10 +116,22 @@ define(['../../module'], function(module) {
       }
     }
 
+    /**
+     * Determines if the remove button for an option is disabled.
+     *
+     * It is disabled only when there is a single option available.
+     */
     function removeButtonDisabled() {
-      return vm.annotType.options.length <= 1;
+      return (vm.annotType.options.length <= 1);
     }
 
+    /**
+     * Called when the user presses the submit button on the form.
+     *
+     * Since this form is used for collection event, participant and specimen link annotation types, the
+     * function to call to submit the  changes is passed in as a parameter to the controller. It is assumed
+     * that this function returns a promise.
+     */
     function submit (annotType) {
       addOrUpdateFn(annotType)
         .then(gotoReturnState)
@@ -90,6 +140,9 @@ define(['../../module'], function(module) {
         });
     }
 
+    /**
+     * Called when the user presses the cancel button on the form.
+     */
     function cancel () {
       gotoReturnState();
     }

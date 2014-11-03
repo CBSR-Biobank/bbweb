@@ -81,7 +81,6 @@ define(['../../module'], function(module) {
             studyId: study.id,
             name: '',
             description: null,
-            required: false,
             valueType: '',
             options: []
           };
