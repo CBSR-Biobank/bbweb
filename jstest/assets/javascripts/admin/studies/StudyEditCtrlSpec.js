@@ -3,7 +3,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  ddescribe('Controller: StudyEditCtrl', function() {
+  describe('Controller: StudyEditCtrl', function() {
     var scope, stateHelper, studiesService, domainEntityUpdateError;
 
     beforeEach(mocks.module('biobankApp'));

@@ -41,7 +41,7 @@ define(['../../module'], function(module) {
     vm.valueTypeChange = valueTypeChange;
     vm.maxValueCountRequired = maxValueCountRequired;
     vm.optionAdd = optionAdd;
-    vm.removeOption = removeOption;
+    vm.optionRemove = optionRemove;
     vm.removeButtonDisabled = removeButtonDisabled;
     vm.submit = submit;
     vm.cancel = cancel;
@@ -96,6 +96,10 @@ define(['../../module'], function(module) {
      * Used to add an option. Should only be called when the value type is 'Select'.
      */
     function optionAdd() {
+      if (vm.annotType.valueType !== 'Select') {
+        throw new Error('value type error: ' + vm.annotType.valueType);
+      }
+
       if (!vm.annotType.options) {
         vm.annotType.options = [];
       }
@@ -105,7 +109,7 @@ define(['../../module'], function(module) {
     /**
      * Used to remove an option. Should only be called when the value type is 'Select'.
      */
-    function removeOption(option) {
+    function optionRemove(option) {
       if (vm.annotType.options.length <= 1) {
         throw new Error('invalid length for options');
       }
@@ -132,7 +136,7 @@ define(['../../module'], function(module) {
      * function to call to submit the  changes is passed in as a parameter to the controller. It is assumed
      * that this function returns a promise.
      */
-    function submit (annotType) {
+    function submit(annotType) {
       addOrUpdateFn(annotType)
         .then(gotoReturnState)
         .catch(function(error) {
@@ -143,7 +147,7 @@ define(['../../module'], function(module) {
     /**
      * Called when the user presses the cancel button on the form.
      */
-    function cancel () {
+    function cancel() {
       gotoReturnState();
     }
   }
