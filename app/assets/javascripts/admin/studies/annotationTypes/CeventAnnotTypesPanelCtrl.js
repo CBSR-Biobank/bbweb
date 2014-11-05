@@ -31,14 +31,14 @@ define(['../../module', 'underscore'], function(module, _) {
       annotTypeModalService,
       'Collection Event Annotation Type');
 
-    vm.annotTypes  = $scope.annotTypes;
-    vm.ceventTypes = $scope.ceventTypes;
-    vm.update      = update;
-    vm.remove      = remove;
-    vm.information = helper.information;
-    vm.add         = helper.add;
-    vm.panelOpen   = helper.panelOpen;
-    vm.panelToggle = helper.panelToggle;
+    vm.annotTypes      = $scope.annotTypes;
+    vm.annotTypesInUse = $scope.annotTypesInUse;
+    vm.update          = update;
+    vm.remove          = remove;
+    vm.information     = helper.information;
+    vm.add             = helper.add;
+    vm.panelOpen       = helper.panelOpen;
+    vm.panelToggle     = helper.panelToggle;
 
     vm.columns = [
       { title: 'Name', field: 'name', filter: { 'name': 'text' } },
@@ -47,22 +47,8 @@ define(['../../module', 'underscore'], function(module, _) {
     ];
 
     vm.tableParams = helper.getTableParams(vm.annotTypes);
-    vm.annotTypesInUse = annotTypesInUse();
 
     //--
-
-    /**
-     * Returns the annotation types that are in use.
-     */
-    function annotTypesInUse() {
-      var result = [];
-      _.each(vm.ceventTypes, function(cet) {
-        _.each(cet.annotationTypeData, function (atItem) {
-          result.push(atItem.annotationTypeId);
-        });
-      });
-      return result;
-    }
 
     function annotTypeInUseModal() {
       var headerHtml = 'Cannot update this annotation type';

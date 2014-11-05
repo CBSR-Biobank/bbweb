@@ -219,23 +219,10 @@ define(['../module'], function(module) {
       url: '/collection',
       resolve: {
         user: userResolve.user,
-        // FIXME: replace these with a single REST call like already done for processing state
-        ceventTypes: [
-          'ceventTypesService', 'study',
-          function( ceventTypesService, study) {
-            return ceventTypesService.getAll(study.id);
-          }
-        ],
-        annotTypes: [
-          'ceventAnnotTypesService', 'study',
-          function(ceventAnnotTypesService, study) {
-            return ceventAnnotTypesService.getAll(study.id);
-          }
-        ],
-        specimenGroups: [
-          'specimenGroupsService', 'study',
-          function(specimenGroupsService, study) {
-            return specimenGroupsService.getAll(study.id);
+        collectionDto: [
+          'studiesService', 'study',
+          function (studiesService, study) {
+            return studiesService.collectionDto(study.id);
           }
         ]
       },
@@ -243,11 +230,12 @@ define(['../module'], function(module) {
         'studyDetails': {
           templateUrl: '/assets/javascripts/admin/studies/studyCollectionTab.html',
           controller: [
-            '$scope', 'ceventTypes', 'annotTypes', 'specimenGroups',
-            function($scope, ceventTypes, annotTypes, specimenGroups) {
-              $scope.ceventTypes = ceventTypes;
-              $scope.annotTypes  = annotTypes;
-              $scope.specimenGroups = specimenGroups;
+            '$scope', 'collectionDto',
+            function($scope, collectionDto) {
+              $scope.ceventTypes = collectionDto.collectionEventTypes;
+              $scope.annotTypes  = collectionDto.collectionEventAnnotationTypes;
+              $scope.annotTypesInUse = collectionDto.collectionEventAnnotationTypesInUse;
+              $scope.specimenGroups = collectionDto.specimenGroups;
             }
           ]
         }

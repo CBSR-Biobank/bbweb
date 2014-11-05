@@ -12,7 +12,7 @@ define(['../../module'], function(module) {
       restrict: 'E',
       scope: {
         annotTypes: '=',
-        ceventTypes: '='
+        annotTypesInUse: '='
       },
       templateUrl: '/assets/javascripts/admin/studies/annotationTypes/ceventAnnotTypesPanel.html',
       controller: 'CeventAnnotTypesPanelCtrl as vm'

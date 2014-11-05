@@ -129,6 +129,19 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       studyStatusChange('unretire', studiesService.unretire);
     });
 
+    it('collectionDto should return valid object', function() {
+      httpBackend.whenGET(uri(study.id) + '/dto/collection').respond({
+        status: 'success',
+        data: 'success'
+      });
+
+      studiesService.collectionDto(study.id).then(function(data) {
+        expect(data).toBe('success');
+      });
+
+      httpBackend.flush();
+    });
+
     it('processingDto should return valid object', function() {
       httpBackend.whenGET(uri(study.id) + '/dto/processing').respond({
         status: 'success',
