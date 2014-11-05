@@ -6,10 +6,9 @@ define(['../../module', 'underscore'], function(module, _) {
   CeventAnnotTypesPanelCtrl.$inject = [
     '$scope',
     '$state',
-    '$stateParams',
     'modalService',
     'ceventAnnotTypesService',
-    'ceventAnnotTypeRemoveService',
+    'annotationTypeRemoveService',
     'annotTypeModalService',
     'panelService'
   ];
@@ -19,10 +18,9 @@ define(['../../module', 'underscore'], function(module, _) {
    */
   function CeventAnnotTypesPanelCtrl($scope,
                                      $state,
-                                     $stateParams,
                                      modalService,
                                      ceventAnnotTypesService,
-                                     ceventAnnotTypeRemoveService,
+                                     annotationTypeRemoveService,
                                      annotTypeModalService,
                                      panelService) {
     var vm = this;
@@ -49,8 +47,6 @@ define(['../../module', 'underscore'], function(module, _) {
     ];
 
     vm.tableParams = helper.getTableParams(vm.annotTypes);
-    vm.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
-
     vm.annotTypesInUse = annotTypesInUse();
 
     //--
@@ -90,7 +86,19 @@ define(['../../module', 'underscore'], function(module, _) {
     }
 
     function remove(annotType) {
-      ceventAnnotTypeRemoveService.remove(annotType, vm.annotTypesInUse);
+      if (_.contains(vm.annotTypesInUse, annotType.id)) {
+        var headerHtml = 'Cannot remove this annotation type';
+        var bodyHtml = 'This annotation type is in use by a collection event type. ' +
+            'If you want to remove the annotation type, ' +
+            'it must first be removed from the collection event type(s) that use it.';
+        modalService.modalOk(headerHtml, bodyHtml);
+      } else {
+        annotationTypeRemoveService.remove(
+          ceventAnnotTypesService.remove,
+          annotType,
+          'admin.studies.study.collection',
+          {studyId: annotType.studyId});
+      }
     }
 
   }

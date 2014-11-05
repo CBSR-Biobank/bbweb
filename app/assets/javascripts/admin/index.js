@@ -27,7 +27,6 @@ define([
   './studies/annotationTypes/annotTypeModalService',
   './studies/annotationTypes/AnnotationTypeEditCtrl',
   './studies/annotationTypes/annotationTypeRemoveService',
-  './studies/annotationTypes/ceventAnnotTypeRemoveService',
   './studies/annotationTypes/ceventAnnotTypesPanelDirective',
   './studies/annotationTypes/participantAnnotTypeRemoveService',
   './studies/annotationTypes/participantsAnnotTypesPanelDirective',
