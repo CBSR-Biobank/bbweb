@@ -17,6 +17,7 @@ define(['./module', 'angular'], function(module, angular) {
       disable       : disable,
       retire        : retire,
       unretire      : unretire,
+      collectionDto : collectionDto,
       processingDto : processingDto
     };
     return service;
@@ -76,6 +77,10 @@ define(['./module', 'angular'], function(module, angular) {
 
     function unretire(study) {
       return changeStatus(study, 'unretire');
+    }
+
+    function collectionDto(studyId) {
+      return biobankXhrReqService.call('GET', uri(studyId) + '/dto/collection');
     }
 
     function processingDto(studyId) {

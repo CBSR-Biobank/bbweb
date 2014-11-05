@@ -281,6 +281,45 @@ class StudiesControllerSpec extends ControllerFixture {
       }
     }
 
+    "GET /studies/dto/collection " must {
+      "return empty results for new study" in new App(fakeApp) {
+        doLogin
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val json = makeRequest(GET, uri(study) + s"/dto/collection")
+        val jsonObj = (json \ "data").as[JsObject]
+
+        (jsonObj \ "collectionEventTypes").as[List[JsObject]].size mustBe (0)
+        (jsonObj \ "collectionEventAnnotationTypes").as[List[JsObject]].size mustBe (0)
+        (jsonObj \ "collectionEventAnnotationTypesInUse").as[List[String]].size mustBe (0)
+        (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (0)
+      }
+
+      "return valid results for study" taggedAs(Tag("1")) in new App(fakeApp) {
+        doLogin
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        collectionEventAnnotationTypeRepository.put(factory.createCollectionEventAnnotationType)
+        specimenGroupRepository.put(factory.createSpecimenGroup)
+
+        val cet = factory.createCollectionEventType.copy(
+          specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
+          annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
+
+        collectionEventTypeRepository.put(cet)
+
+        val json = makeRequest(GET, uri(study) + s"/dto/collection")
+        val jsonObj = (json \ "data").as[JsObject]
+
+        (jsonObj \ "collectionEventTypes").as[List[JsObject]].size mustBe (1)
+        (jsonObj \ "collectionEventAnnotationTypes").as[List[JsObject]].size mustBe (1)
+        (jsonObj \ "collectionEventAnnotationTypesInUse").as[List[String]].size mustBe (1)
+        (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (1)
+      }
+    }
+
     "GET /studies/dto/processing " must {
       "return empty results for new study" in new App(fakeApp) {
         doLogin

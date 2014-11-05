@@ -3,7 +3,7 @@ package org.biobank.service.study
 import org.biobank.service.ApplicationService
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.infrastructure.ProcessingDto
+import org.biobank.infrastructure.{ CollectionDto, ProcessingDto }
 import org.biobank.domain.{
   AnnotationTypeId,
   DomainValidation,
@@ -63,6 +63,8 @@ trait StudiesService {
 
   def specimenLinkTypesForProcessingType(processingTypeId: String)
       : DomainValidation[Set[SpecimenLinkType]]
+
+  def getCollectionDto(studyId: String): DomainValidation[CollectionDto]
 
   def getProcessingDto(studyId: String): DomainValidation[ProcessingDto]
 
@@ -392,6 +394,26 @@ class StudiesServiceImpl(implicit inj: Injector)
     processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId)).fold(
       err => DomainError(s"invalid processing type id: $processingTypeId").failNel,
       pt => specimenLinkTypeRepository.allForProcessingType(pt.id).success
+    )
+  }
+
+  def getCollectionDto(studyId: String): DomainValidation[CollectionDto] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failNel,
+      study => {
+        val collectionEventTypes = collectionEventTypeRepository.allForStudy(study.id)
+        val annotationTypes = collectionEventAnnotationTypeRepository.allForStudy(study.id)
+        val annotationTypesInUse = collectionEventTypes.flatMap { cet =>
+          cet.annotationTypeData.map(atd => atd.annotationTypeId)
+        }
+        val specimenGroups  = specimenGroupRepository.allForStudy(study.id)
+
+        CollectionDto(
+          collectionEventTypes.toList,
+          annotationTypes.toList,
+          annotationTypesInUse.toList,
+          specimenGroups.toList).success
+      }
     )
   }
 

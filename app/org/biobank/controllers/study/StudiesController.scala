@@ -137,8 +137,13 @@ class StudiesController(implicit inj: Injector)
     ))
   }
 
+  def getCollectionDto(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
+    Logger.debug(s"StudiesController.getCollectionDto: studyId: $studyId")
+    domainValidationReply(studiesService.getCollectionDto(studyId))
+  }
+
   def getProcessingDto(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
-    Logger.debug(s"ProcessingTypeController.getProcessingDto: studyId: $studyId")
+    Logger.debug(s"StudiesController.getProcessingDto: studyId: $studyId")
     domainValidationReply(studiesService.getProcessingDto(studyId))
   }
 

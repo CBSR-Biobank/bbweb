@@ -107,6 +107,7 @@ POST    /logout                                 @org.biobank.controllers.UsersCo
 POST    /passreset                              @org.biobank.controllers.UsersController.passwordReset()
 
 # DTOs
+GET     /studies/:studyId/dto/collection        @org.biobank.controllers.study.StudiesController.getCollectionDto(studyId)
 GET     /studies/:studyId/dto/processing        @org.biobank.controllers.study.StudiesController.getProcessingDto(studyId)
 GET     /counts                                 @org.biobank.controllers.Application.aggregateCounts()
 

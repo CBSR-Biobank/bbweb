@@ -119,6 +119,21 @@ package infrastructure {
 
   }
 
+  case class CollectionDto(
+    collectionEventTypes: List[org.biobank.domain.study.CollectionEventType],
+    collectionEventAnnotationTypes: List[org.biobank.domain.study.CollectionEventAnnotationType],
+    collectionEventAnnotationTypesInUse: List[String],
+    specimenGroups: List[org.biobank.domain.study.SpecimenGroup])
+
+  object CollectionDto {
+    implicit val collectionDtoWriter: Writes[CollectionDto] = (
+      (__ \ "collectionEventTypes").write[List[org.biobank.domain.study.CollectionEventType]] and
+        (__ \ "collectionEventAnnotationTypes").write[List[org.biobank.domain.study.CollectionEventAnnotationType]] and
+        (__ \ "collectionEventAnnotationTypesInUse").write[List[String]] and
+        (__ \ "specimenGroups").write[List[org.biobank.domain.study.SpecimenGroup]]
+    )(unlift(CollectionDto.unapply))
+  }
+
   case class ProcessingDto(
     processingTypes: List[org.biobank.domain.study.ProcessingType],
     specimenLinkTypes: List[org.biobank.domain.study.SpecimenLinkType],
@@ -126,14 +141,12 @@ package infrastructure {
     specimenGroups: List[org.biobank.domain.study.SpecimenGroup])
 
   object ProcessingDto {
-
     implicit val processingDtoWriter: Writes[ProcessingDto] = (
       (__ \ "processingTypes").write[List[org.biobank.domain.study.ProcessingType]] and
         (__ \ "specimenLinkTypes").write[List[org.biobank.domain.study.SpecimenLinkType]] and
         (__ \ "specimenLinkAnnotationTypes").write[List[org.biobank.domain.study.SpecimenLinkAnnotationType]] and
         (__ \ "specimenGroups").write[List[org.biobank.domain.study.SpecimenGroup]]
     )(unlift(ProcessingDto.unapply))
-
   }
 
 }
