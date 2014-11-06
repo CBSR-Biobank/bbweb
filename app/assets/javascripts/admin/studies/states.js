@@ -12,6 +12,14 @@ define(['../module'], function(module) {
 
   function config($urlRouterProvider, $stateProvider, userResolve ) {
 
+    resolveStudy.$inject = ['$stateParams', 'studiesService'];
+    function resolveStudy($stateParams, studiesService) {
+      if ($stateParams.studyId) {
+        return studiesService.get($stateParams.studyId);
+      }
+      throw new Error('state parameter studyId is invalid');
+    }
+
     $urlRouterProvider.otherwise('/');
 
     /**
@@ -85,13 +93,7 @@ define(['../module'], function(module) {
       abstract: true,
       url: '/{studyId}',
       resolve: {
-        user: userResolve.user,
-        study: ['$stateParams', 'studiesService', function($stateParams, studiesService) {
-          if ($stateParams.studyId) {
-            return studiesService.get($stateParams.studyId);
-          }
-          throw new Error('state parameter studyId is invalid');
-        }]
+        user: userResolve.user
       },
       views: {
         'main@': {
@@ -110,7 +112,8 @@ define(['../module'], function(module) {
     $stateProvider.state('admin.studies.study.summary', {
       url: '/summary',
       resolve: {
-        user: userResolve.user
+        user: userResolve.user,
+        study: resolveStudy
       },
       views: {
         'studyDetails': {
@@ -129,7 +132,8 @@ define(['../module'], function(module) {
     $stateProvider.state('admin.studies.study.summary.update', {
       url: '/update',
       resolve: {
-        user: userResolve.user
+        user: userResolve.user,
+        study: resolveStudy
       },
       views: {
         'main@': {
@@ -149,6 +153,7 @@ define(['../module'], function(module) {
       url: '/participants',
       resolve: {
         user: userResolve.user,
+        study: resolveStudy,
         annotTypes: [
           'participantAnnotTypesService', 'study',
           function(participantAnnotTypesService, study) {
@@ -158,10 +163,9 @@ define(['../module'], function(module) {
       },
       views: {
         'studyDetails': {
-          template: '<accordion close-others="false">' +
-            '<participants-annot-types-panel annot-types="annotTypes"></participants-annot-types-panel>' +
-            '</accordion>',
-          controller: ['$scope', 'annotTypes', function($scope, annotTypes) {
+          templateUrl: '/assets/javascripts/admin/studies/studyParticipantsTab.html',
+          controller: ['$scope', 'study', 'annotTypes', function($scope, study, annotTypes) {
+            $scope.study = study;
             $scope.annotTypes = annotTypes;
           }]
         }
@@ -178,6 +182,7 @@ define(['../module'], function(module) {
       url: '/specimens',
       resolve: {
         user: userResolve.user,
+        study: resolveStudy,
         specimenGroups: [
           'specimenGroupsService', 'study',
           function(specimenGroupsService, study) {
@@ -193,14 +198,11 @@ define(['../module'], function(module) {
       },
       views: {
         'studyDetails': {
-          template: '<accordion close-others="false">' +
-            '<specimen-groups-panel ' +
-            '  specimen-groups="specimenGroups" ' +
-            '  specimen-group-ids-in-use="specimenGroupIdsInUse"></specimen-groups-panel>' +
-            '</accordion>',
+          templateUrl: '/assets/javascripts/admin/studies/studySpecimensTab.html',
           controller: [
-            '$scope', 'specimenGroups', 'specimenGroupIdsInUse',
-            function($scope, specimenGroups, specimenGroupIdsInUse) {
+            '$scope', 'study', 'specimenGroups', 'specimenGroupIdsInUse',
+            function($scope, study, specimenGroups, specimenGroupIdsInUse) {
+              $scope.study = study;
               $scope.specimenGroups = specimenGroups;
               $scope.specimenGroupIdsInUse = specimenGroupIdsInUse;
             }
@@ -219,6 +221,7 @@ define(['../module'], function(module) {
       url: '/collection',
       resolve: {
         user: userResolve.user,
+        study: resolveStudy,
         collectionDto: [
           'studiesService', 'study',
           function (studiesService, study) {
@@ -230,8 +233,9 @@ define(['../module'], function(module) {
         'studyDetails': {
           templateUrl: '/assets/javascripts/admin/studies/studyCollectionTab.html',
           controller: [
-            '$scope', 'collectionDto',
-            function($scope, collectionDto) {
+            '$scope', 'study', 'collectionDto',
+            function($scope, study, collectionDto) {
+              $scope.study = study;
               $scope.ceventTypes = collectionDto.collectionEventTypes;
               $scope.annotTypes  = collectionDto.collectionEventAnnotationTypes;
               $scope.annotTypesInUse = collectionDto.collectionEventAnnotationTypesInUse;
@@ -252,6 +256,7 @@ define(['../module'], function(module) {
       url: '/processing',
       resolve: {
         user: userResolve.user,
+        study: resolveStudy,
         processingDto: [
           'studiesService', 'study',
           function (studiesService, study) {
@@ -263,8 +268,9 @@ define(['../module'], function(module) {
         'studyDetails': {
           templateUrl: '/assets/javascripts/admin/studies/studyProcessingTab.html',
           controller: [
-            '$scope', 'processingDto',
-            function($scope, processingDto) {
+            '$scope', 'study', 'processingDto',
+            function($scope, study, processingDto) {
+              $scope.study = study;
               $scope.processingDto = processingDto;
             }
           ]

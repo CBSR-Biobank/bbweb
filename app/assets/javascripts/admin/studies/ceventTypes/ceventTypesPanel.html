@@ -48,7 +48,7 @@
       <td data-title="'Description'" sortable="'description'">
         {{ceventType.description === null ? "" : ceventType.description | truncate:40}}
       </td>
-      <td>
+      <td ng-if="vm.study.status === 'Disabled'">
         <update-remove-buttons
            on-update="vm.update(ceventType)"
            on-remove="vm.remove(ceventType)">

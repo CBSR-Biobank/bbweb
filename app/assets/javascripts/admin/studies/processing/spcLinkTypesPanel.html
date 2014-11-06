@@ -48,9 +48,11 @@
       </td>
       <td>
         <info-update-remove-buttons
-            on-info="vm.information(tableData.specimenLinkType)"
-            on-update="vm.update(tableData.specimenLinkType)"
-            on-remove="vm.remove(tableData.specimenLinkType)">
+           on-info="vm.information(tableData.specimenLinkType)"
+           on-update="vm.update(tableData.specimenLinkType)"
+           on-remove="vm.remove(tableData.specimenLinkType)"
+           update-button-enabled="vm.study.status === 'Disabled'"
+           remove-button-enabled="vm.study.status === 'Disabled'">
         </info-update-remove-buttons>
       </td>
     </tr>

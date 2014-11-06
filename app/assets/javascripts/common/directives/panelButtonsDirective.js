@@ -14,6 +14,7 @@ define(['../module'], function(module) {
       scope: {
         add: '&onAdd',
         addButtonTitle: '@',
+        addButtonEnabled: '&',
         panelToggle: '&',
         panelOpen: '&'
       },

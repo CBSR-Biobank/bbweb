@@ -26,7 +26,7 @@
                       'desc' : 'asc')">
           <div>{{column.title}}</div>
         </th>
-        <th><!-- heading for buttons: blank for now --></th>
+        <th ng-if="vm.study.status === 'Disabled'"><!-- heading for buttons: blank for now --></th>
       </tr>
       <tr data-ng-repeat="annotType in $data">
         <td ng-repeat="column in vm.columns" sortable="column.field">
@@ -49,7 +49,7 @@
           </span>
 
         </td>
-        <td>
+        <td ng-if="vm.study.status === 'Disabled'">
           <update-remove-buttons
              on-update="vm.update(annotType)"
              on-remove="vm.remove(annotType)">

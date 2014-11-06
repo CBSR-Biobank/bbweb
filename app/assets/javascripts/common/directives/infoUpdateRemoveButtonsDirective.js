@@ -15,9 +15,11 @@ define(['../module'], function(module) {
       restrict: 'E',
       replace: 'true',
       scope: {
-        'info': '&onInfo',
-        'update': '&onUpdate',
-        'remove': '&onRemove'
+        info: '&onInfo',
+        update: '&onUpdate',
+        remove: '&onRemove',
+        updatedButtonEnabled: '&',
+        removeButtonEnabled: '&'
       },
       templateUrl: '/assets/javascripts/common/directives/infoUpdateRemoveButtons.html'
     };

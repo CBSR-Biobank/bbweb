@@ -90,7 +90,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
 
     val cet2 = factory.createCollectionEventType.copy(
       id = cet.id,
-      specimenGroupData = List(factory.stcreateCollectionEventTypeSpecimenGroupData),
+      specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
       annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
     val json = makeRequest(PUT, uri(study, cet2), BAD_REQUEST, cetToUpdateCmd(cet2))

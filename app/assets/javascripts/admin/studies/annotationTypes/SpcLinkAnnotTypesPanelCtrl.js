@@ -33,14 +33,16 @@ define(['../../module', 'underscore'], function(module, _) {
       annotTypeModalService,
       'Specimen Link Annotation Type');
 
-    vm.annotTypes   = $scope.annotTypes;
-    vm.spcLinkTypes = $scope.spcLinkTypes;
-    vm.update       = update;
-    vm.remove       = remove;
-    vm.information  = helper.information;
-    vm.add          = helper.add;
-    vm.panelOpen    = helper.panelOpen;
-    vm.panelToggle  = helper.panelToggle;
+    vm.study            = $scope.study;
+    vm.annotTypes       = $scope.annotTypes;
+    vm.spcLinkTypes     = $scope.spcLinkTypes;
+    vm.update           = update;
+    vm.remove           = remove;
+    vm.information      = helper.information;
+    vm.add              = helper.add;
+    vm.addButtonEnabled = vm.study.status === 'Disabled';
+    vm.panelOpen        = helper.panelOpen;
+    vm.panelToggle      = helper.panelToggle;
 
     vm.columns = [
       { title: 'Name', field: 'name', filter: { 'name': 'text' } },

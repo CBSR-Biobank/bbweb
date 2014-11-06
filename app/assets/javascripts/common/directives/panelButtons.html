@@ -1,5 +1,9 @@
 <div class="btn-group pull-right">
-  <button class="btn btn-xs btn-default" title="{{addButtonTitle}}" data-ng-click="add()">
+  <button
+     class="btn btn-xs btn-default"
+     title="{{addButtonTitle}}"
+     data-ng-if="addButtonEnabled()"
+     data-ng-click="add()">
     <i class="glyphicon glyphicon-plus"></i>
   </button>
   <button class="btn btn-xs btn-default"

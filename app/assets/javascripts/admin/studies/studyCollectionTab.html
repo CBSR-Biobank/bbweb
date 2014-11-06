@@ -1,12 +1,11 @@
+<ng-include src="'/assets/javascripts/admin/studies/studyNotDisabledWarning.html'"></ng-include>
 <accordion close-others="false">
-
   <cevent-annot-types-panel
+     study="study"
      annot-types="annotTypes"
      annot-types-in-use="annotTypesInUse"></cevent-annot-types-panel>
-
   <cevent-types-panel
      cevent-types="ceventTypes"
      annot-types="annotTypes"
      specimen-groups="specimenGroups"></cevent-types-panel>
-
 </accordion>

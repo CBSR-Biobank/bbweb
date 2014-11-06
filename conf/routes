@@ -85,8 +85,8 @@ DELETE  /centres/:centreId/locations/:id        @org.biobank.controllers.centres
 
 # centre to study link
 GET     /centres/:centreId/studies              @org.biobank.controllers.centres.CentresController.getStudies(centreId)
-POST    /centres/:centreId/study/:studyId       @org.biobank.controllers.centres.CentresController.addStudy(centreId, studyId)
-DELETE  /centres/:centreId/study/:studyId       @org.biobank.controllers.centres.CentresController.removeStudy(centreId, studyId)
+POST    /centres/:centreId/studies/:studyId     @org.biobank.controllers.centres.CentresController.addStudy(centreId, studyId)
+DELETE  /centres/:centreId/studies/:studyId     @org.biobank.controllers.centres.CentresController.removeStudy(centreId, studyId)
 
 # Users
 GET     /users                                  @org.biobank.controllers.UsersController.list(query: Option[String], sort: Option[String], order: Option[String])

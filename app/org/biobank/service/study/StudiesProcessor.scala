@@ -219,7 +219,6 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   }
 
   private def validateCmd(cmd: UpdateStudyCmd): DomainValidation[StudyUpdatedEvent] = {
-    val timeNow = DateTime.now
     val v = updateDisabled(cmd) { s =>
       for {
         nameAvailable <- nameAvailable(cmd.name, StudyId(cmd.id))
@@ -233,7 +232,6 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   }
 
   private def validateCmd(cmd: EnableStudyCmd): DomainValidation[StudyEnabledEvent] = {
-    val timeNow = DateTime.now
     val studyId = StudyId(cmd.id)
     val specimenGroupCount = specimenGroupRepository.allForStudy(studyId).size
     val collectionEventtypeCount = collectionEventTypeRepository.allForStudy(studyId).size
@@ -245,7 +243,6 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   }
 
   private def validateCmd(cmd: DisableStudyCmd): DomainValidation[StudyDisabledEvent] = {
-    val timeNow = DateTime.now
     val v = updateEnabled(cmd) { s => s.disable }
     v.fold(
       err => err.fail,
@@ -254,7 +251,6 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   }
 
   private def validateCmd(cmd: RetireStudyCmd): DomainValidation[StudyRetiredEvent] = {
-    val timeNow = DateTime.now
     val v = updateDisabled(cmd) { s => s.retire }
     v.fold(
       err => err.fail,
@@ -263,7 +259,6 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   }
 
   private def validateCmd(cmd: UnretireStudyCmd): DomainValidation[StudyUnretiredEvent] = {
-    val timeNow = DateTime.now
     val v = updateRetired(cmd) { s => s.unretire }
     v.fold(
       err => err.fail,

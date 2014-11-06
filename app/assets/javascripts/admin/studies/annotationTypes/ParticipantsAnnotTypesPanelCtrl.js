@@ -33,14 +33,16 @@ define(['../../module', 'underscore'], function(module, _) {
       annotTypeModalService,
       'Participant Annotation Type');
 
-    vm.annotTypes  = $scope.annotTypes;
-    vm.hasRequired = true;
-    vm.update      = update;
-    vm.remove      = remove;
-    vm.information = helper.information;
-    vm.add         = helper.add;
-    vm.panelOpen   = helper.panelOpen;
-    vm.panelToggle = helper.panelToggle;
+    vm.study            = $scope.study;
+    vm.annotTypes       = $scope.annotTypes;
+    vm.hasRequired      = true;
+    vm.update           = update;
+    vm.remove           = remove;
+    vm.information      = helper.information;
+    vm.add              = helper.add;
+    vm.addButtonEnabled = vm.study.status === 'Disabled';
+    vm.panelOpen        = helper.panelOpen;
+    vm.panelToggle      = helper.panelToggle;
 
     vm.columns = [
       { title: 'Name', field: 'name', filter: { 'name': 'text' } },
@@ -69,6 +71,10 @@ define(['../../module', 'underscore'], function(module, _) {
      * Switches state to update a participant annotation type.
      */
     function update(annotType) {
+      if (vm.study.status !== 'Disabled') {
+        throw new Error('study is not disabled');
+      }
+
       if (_.contains(vm.annotTypesInUse, annotType.id)) {
         annotTypeInUseModal();
       } else {
@@ -79,6 +85,10 @@ define(['../../module', 'underscore'], function(module, _) {
     }
 
     function remove(annotType) {
+      if (vm.study.status !== 'Disabled') {
+        throw new Error('study is not disabled');
+      }
+
       participantAnnotTypeRemoveService.remove(annotType, vm.annotTypesInUse);
     }
 

@@ -9,9 +9,33 @@
         </a>
 
         <button class="btn btn-xs btn-success"
-                data-ng-click="vm.changeStatus(study)"
-                title="Change status">
-          <i class="glyphicon glyphicon-cog"></i>
+                data-ng-click="vm.changeStatus('enable')"
+                title="Enable"
+                ng-if="vm.study.status === 'Disabled'">
+          <i class="glyphicon glyphicon-ok-circle"></i>
+        </button>
+
+        <button class="btn btn-xs btn-danger"
+                data-ng-click="vm.changeStatus('disable')"
+                title="Disable"
+                ng-if="vm.study.status === 'Enabled'">
+          <i class="glyphicon glyphicon-remove-sign"></i>
+        </button>
+
+        <button class="btn btn-xs btn-danger"
+                data-ng-click="vm.changeStatus('retire')"
+                title="Retire"
+                ng-if="vm.study.status === 'Disabled'">
+          <i class="glyphicon glyphicon-arrow-down"></i>
+        </button>
+
+        <button class="btn btn-xs btn-danger"
+                data-ng-click="vm.changeStatus('unretire')"
+                title="Unretire"
+                ng-if="vm.study.status === 'Retired'">
+          <i class="glyphicon glyphicon-arrow-up"></i>
+        </button>
+
       </span>
     </h3>
   </div>
