@@ -5,7 +5,7 @@ organization in ThisBuild := "org.biobank"
 version := "0.1-SNAPSHOT"
 
 def excludeSpecs2(module: ModuleID): ModuleID =
-  module.excludeAll(ExclusionRule(organization = "org.specs2"))
+  module.excludeAll(ExclusionRule(organization = "org.specs2", name = "specs2"))
     .exclude("com.novocode", "junit-interface")
 
 lazy val root = (project in file("."))
@@ -48,9 +48,9 @@ testOptions in Test := Nil
 
 resolvers ++= Seq(
   Classpaths.sbtPluginReleases,
-  "Sonatype OSS Snapshots"       at "https://oss.sonatype.org/content/repositories/snapshots",
   "Typesafe repository"          at "https://repo.typesafe.com/typesafe/releases/",
-  "Akka Snapshots"               at "https://repo.akka.io/snapshots/"
+  //"Akka Snapshots"               at "https://repo.akka.io/snapshots/",
+  "Sonatype OSS Snapshots"       at "https://oss.sonatype.org/content/repositories/snapshots"
 )
 
 libraryDependencies ++= Seq(
@@ -67,21 +67,21 @@ libraryDependencies ++= Seq(
   "org.scaldi"                %% "scaldi-play"                    % "0.4.1",
   "org.scaldi"                %% "scaldi-akka"                    % "0.4",
   // WebJars infrastructure
-  "org.webjars"               %  "webjars-locator"                % "0.19",
-  "org.webjars"               %% "webjars-play"                   % "2.3.0",
+  "org.webjars"               %  "webjars-locator"                % "0.19" ,
+  "org.webjars"               %% "webjars-play"                   % "2.3.0-2",
   // WebJars dependencies
   "org.webjars"               %  "requirejs"                      % "2.1.14-3",
   "org.webjars"               %  "underscorejs"                   % "1.7.0",
   "org.webjars"               %  "jquery"                         % "2.1.1",
-  "org.webjars"               %  "bootstrap"                      % "3.2.0" exclude(
+  "org.webjars"               %  "bootstrap"                      % "3.3.0" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angularjs"                      % "1.3.0" exclude(
+  "org.webjars"               %  "angularjs"                      % "1.3.1" exclude(
     "org.webjars", "jquery"),
   "org.webjars"               %  "angular-ui-bootstrap"           % "0.11.2",
   "org.webjars"               %  "angular-ui-router"              % "0.2.11-1",
   "org.webjars"               %  "ng-table"                       % "0.3.3",
-  "org.webjars"               % "toastr"                          % "2.0.1-1",
-  "org.webjars"               % "angular-filter"                  % "0.4.6",
+  "org.webjars"               % "toastr"                          % "2.0.3"exclude(
+    "org.webjars", "jquery"),
   "org.webjars"               % "angular-sanitize"                % "1.3.0-beta.18",
   // Testing
   "com.typesafe.akka"         %% "akka-testkit"                   % "2.3.2"              % "test",
