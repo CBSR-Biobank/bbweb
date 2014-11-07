@@ -11,6 +11,7 @@ import scalaz.Scalaz._
 
 
 class CollectionEventAnnotationTypeSpec extends DomainSpec {
+  import org.biobank.TestUtils._
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -93,10 +94,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-          err.list must (have length 1 and contain("StudyIdRequired"))
-      }
+      validation mustFail "StudyIdRequired"
     }
 
     "not be created with an empty id" in {
@@ -114,10 +112,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-          err.list must (have length 1 and contain("IdRequired"))
-      }
+      validation mustFail "IdRequired"
     }
 
     "not be created with an invalid version" in {
@@ -135,10 +130,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-          err.list must (have length 1 and contain("InvalidVersion"))
-      }
+      validation mustFail "InvalidVersion"
     }
 
     "not be created with an null or empty name" in {
@@ -156,19 +148,13 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-          err.list must (have length 1 and contain("NameRequired"))
-      }
+      validation mustFail "NameRequired"
 
       name = ""
       val validation2 = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description,
         valueType, maxValueCount, options)
-      validation2 mustBe ('failure)
-      validation2.swap.map { err =>
-          err.list must (have length 1 and contain("NameRequired"))
-      }
+      validation2 mustFail "NameRequired"
     }
 
     "not be created with an empty description option" in {
@@ -186,19 +172,13 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-          err.list must (have length 1 and contain("NonEmptyDescription"))
-      }
+      validation mustFail "NonEmptyDescription"
 
       description = Some("")
       val validation2 = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description,
         valueType, maxValueCount, options)
-      validation2 mustBe ('failure)
-      validation2.swap.map { err =>
-          err.list must (have length 1 and contain("NonEmptyDescription"))
-      }
+      validation2 mustFail "NonEmptyDescription"
     }
 
     "not be created with an negative max value count" in {
@@ -216,10 +196,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-          err.list must (have length 1 and contain("MaxValueCountError"))
-      }
+      validation mustFail "MaxValueCountError"
     }
 
     "not be created with an invalid options" in {
@@ -235,18 +212,12 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-          err.list must (have length 1 and contain("OptionRequired"))
-      }
+      validation mustFail "OptionRequired"
 
       options = Some(Seq("duplicate", "duplicate"))
       val validation2 = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount, options)
-      validation2 mustBe ('failure)
-      validation2.swap.map { err =>
-          err.list must (have length 1 and contain("DuplicateOptionsError"))
-      }
+      validation2 mustFail "DuplicateOptionsError"
     }
 
     "have more than one validation fail" in {
@@ -263,12 +234,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
 
       val validation = CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount, options)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-          err.list must have length 2
-          err.list.head mustBe ("InvalidVersion")
-          err.list.tail.head mustBe ("NameRequired")
-      }
+      validation.mustFail("InvalidVersion", "NameRequired")
     }
 
   }

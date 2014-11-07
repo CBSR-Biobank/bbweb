@@ -54,11 +54,14 @@ object TestUtils extends MustMatchers with OptionValues {
       *
       *  @param expectedMessage a regular expression to look for in the error message.
       */
-    def mustFail(expectedMessage: String) = {
+    def mustFail(expectedMessages: String*) = {
       validation.fold(
         err => {
-          err.list must have length 1
-          err.list.head must include regex expectedMessage
+          err.list must have length expectedMessages.size
+          val errMsgs = err.list.mkString(",")
+          expectedMessages.foreach { em =>
+            errMsgs must include regex em
+          }
         },
         event => fail(s"validation must have failed: $validation")
       )

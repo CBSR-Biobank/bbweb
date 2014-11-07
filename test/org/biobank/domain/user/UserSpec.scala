@@ -16,6 +16,7 @@ import scalaz.Scalaz._
   */
 //@RunWith(classOf[JUnitRunner])
 class UserSpec extends DomainSpec {
+  import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -36,8 +37,7 @@ class UserSpec extends DomainSpec {
 
       val validation = RegisteredUser.create(
         id, version, timeNow, name, email, password, salt, avatarUrl)
-      validation mustBe ('success)
-      validation map { user =>
+      validation mustSucceed  { user =>
         user mustBe a[RegisteredUser]
         user must have (
           'id (id),

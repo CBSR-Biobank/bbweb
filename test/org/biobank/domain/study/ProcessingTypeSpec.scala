@@ -10,6 +10,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 class ProcessingTypeSpec extends DomainSpec {
+  import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -28,8 +29,7 @@ class ProcessingTypeSpec extends DomainSpec {
 
       val validation = ProcessingType.create(
         disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
-      validation mustBe ('success)
-      validation map { processingType =>
+      validation mustSucceed { processingType =>
         processingType mustBe a [ProcessingType]
         processingType must have (
           'studyId (disabledStudy.id),
@@ -52,8 +52,7 @@ class ProcessingTypeSpec extends DomainSpec {
       val enabled = !processingType.enabled
 
       val validation = processingType.update(name, description, enabled)
-      validation mustBe ('success)
-      validation map { pt2 =>
+      validation mustSucceed { pt2 =>
         pt2 mustBe a [ProcessingType]
         pt2 must have (
           'studyId (processingType.studyId),
@@ -81,10 +80,7 @@ class ProcessingTypeSpec extends DomainSpec {
 
       val validation = ProcessingType.create(
         studyId, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
-      validation mustBe('failure)
-      validation.swap.map { err =>
-          err.list must (have length 1 and contain("IdRequired"))
-      }
+      validation mustFail "IdRequired"
     }
 
 
@@ -97,10 +93,7 @@ class ProcessingTypeSpec extends DomainSpec {
 
       val validation = ProcessingType.create(
         disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
-      validation mustBe('failure)
-      validation.swap.map { err =>
-          err.list must (have length 1 and contain("IdRequired"))
-      }
+      validation mustFail "IdRequired"
     }
 
     "not be created with an invalid version" in {
@@ -112,10 +105,7 @@ class ProcessingTypeSpec extends DomainSpec {
 
       val validation = ProcessingType.create(
         disabledStudy.id, processingTypeId, -2L, org.joda.time.DateTime.now, name, description, enabled)
-      validation mustBe('failure)
-      validation.swap.map { err =>
-          err.list must (have length 1 and contain("InvalidVersion"))
-      }
+      validation mustFail "InvalidVersion"
     }
 
     "not be created with an null or empty name" in {
@@ -127,18 +117,12 @@ class ProcessingTypeSpec extends DomainSpec {
 
       val validation = ProcessingType.create(
         disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-          err.list must (have length 1 and contain("NameRequired"))
-      }
+      validation mustFail "NameRequired"
 
       name = ""
       val validation2 = ProcessingType.create(
         disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
-      validation2 mustBe ('failure)
-      validation2.swap.map { err =>
-          err.list must (have length 1 and contain("NameRequired"))
-      }
+      validation2 mustFail "NameRequired"
     }
 
     "not be created with an empty description option" in {
@@ -150,18 +134,12 @@ class ProcessingTypeSpec extends DomainSpec {
 
       val validation = ProcessingType.create(
         disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-          err.list must (have length 1 and contain("NonEmptyDescription"))
-      }
+      validation mustFail "NonEmptyDescription"
 
       description = Some("")
       val validation2 = ProcessingType.create(
         disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
-      validation2 mustBe ('failure)
-      validation2.swap.map { err =>
-          err.list must (have length 1 and contain("NonEmptyDescription"))
-      }
+      validation2 mustFail "NonEmptyDescription"
     }
 
     "have more than one validation fail" in {
@@ -173,12 +151,7 @@ class ProcessingTypeSpec extends DomainSpec {
 
       val validation = ProcessingType.create(
         disabledStudy.id, processingTypeId, -2L, org.joda.time.DateTime.now, name, description, enabled)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-          err.list must have length 2
-          err.list(0) mustBe ("InvalidVersion")
-          err.list(1) mustBe ("NonEmptyDescription")
-      }
+      validation.mustFail("InvalidVersion", "NonEmptyDescription")
     }
   }
 

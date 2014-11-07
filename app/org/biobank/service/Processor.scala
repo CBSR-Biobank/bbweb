@@ -26,6 +26,7 @@ trait Processor extends PersistentActor with ActorLogging {
     val originalSender = context.sender
     validation map { event =>
       val wrappedEvent = WrappedEvent(event, userId, DateTime.now)
+      // FIXME: change this call to a peristAsync()?
       persist(wrappedEvent) { we =>
         successFn(we)
         // inform the sender of the successful event resulting from a valid command

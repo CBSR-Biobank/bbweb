@@ -13,6 +13,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 class SpecimenGroupSpec extends DomainSpec {
+  import org.biobank.TestUtils._
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -143,11 +144,7 @@ class SpecimenGroupSpec extends DomainSpec {
        val validation = SpecimenGroup.create(
          studyId, id, version, org.joda.time.DateTime.now, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
-      validation mustBe ('failure)
-
-      validation.swap.map { err =>
-          err.list must (have length 1 and contain("InvalidVersion"))
-      }
+      validation mustFail "InvalidVersion"
     }
 
     "not be created with an null or empty name" in {

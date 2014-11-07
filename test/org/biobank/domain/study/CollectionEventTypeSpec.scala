@@ -10,6 +10,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 class CollectionEventTypeSpec extends DomainSpec {
+  import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -32,8 +33,7 @@ class CollectionEventTypeSpec extends DomainSpec {
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
 
-      validation mustBe ('success)
-      validation map { cet =>
+      validation mustSucceed { cet =>
         cet mustBe a[CollectionEventType]
 
         cet must have (
@@ -101,10 +101,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-        err.list must (have length 1 and contain("IdRequired"))
-      }
+      validation mustFail "IdRequired"
     }
 
     "not be created with an empty id" in {
@@ -121,10 +118,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-        err.list must (have length 1 and contain("IdRequired"))
-      }
+      validation mustFail "IdRequired"
     }
 
     "not be created with an invalid version" in {
@@ -141,10 +135,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-        err.list must (have length 1 and contain("InvalidVersion"))
-      }
+      validation mustFail "InvalidVersion"
     }
 
     "not be created with an null or empty name" in {
@@ -161,19 +152,13 @@ class CollectionEventTypeSpec extends DomainSpec {
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-        err.list must (have length 1 and contain("NameRequired"))
-      }
+      validation mustFail "NameRequired"
 
       name = ""
       val validation2 = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation2 mustBe ('failure)
-      validation2.swap.map { err =>
-        err.list must (have length 1 and contain("NameRequired"))
-      }
+      validation2 mustFail "NameRequired"
     }
 
     "not be created with an empty description option" in {
@@ -190,19 +175,13 @@ class CollectionEventTypeSpec extends DomainSpec {
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-        err.list must (have length 1 and contain("NonEmptyDescription"))
-      }
+      validation mustFail "NonEmptyDescription"
 
       description = Some("")
       val validation2 = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation2 mustBe ('failure)
-      validation2.swap.map { err =>
-        err.list must (have length 1 and contain("NonEmptyDescription"))
-      }
+      validation2 mustFail "NonEmptyDescription"
     }
 
     "not be created with an empty specimen group id" in {
@@ -219,11 +198,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-        err.list must have length 1
-        err.list(0) must include ("IdRequired")
-      }
+      validation mustFail "IdRequired"
     }
 
     "not be created with an negative specimen group max count" in {
@@ -240,10 +215,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-        err.list must (have length 1 and contain("MaxCountInvalid"))
-      }
+      validation mustFail "MaxCountInvalid"
     }
 
     "not be created with an negative specimen group amount" in {
@@ -260,10 +232,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-        err.list must (have length 1 and contain("AmountInvalid"))
-      }
+      validation mustFail "AmountInvalid"
     }
 
     "not be created with an invalid annotation type id" in {
@@ -280,11 +249,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-        err.list must have length 1
-        err.list(0) must include ("IdRequired")
-      }
+      validation mustFail "IdRequired"
     }
 
     "have more than one validation fail" in {
@@ -301,12 +266,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val validation = CollectionEventType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation mustBe ('failure)
-      validation.swap.map { err =>
-        err.list must have length 2
-        err.list.head mustBe ("InvalidVersion")
-        err.list.tail.head mustBe ("NameRequired")
-      }
+      validation.mustFail("InvalidVersion", "NameRequired")
     }
 
   }
