@@ -3,10 +3,11 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  ddescribe('Controller: CeventAnnotTypesPanelCtrl', function() {
+  describe('Controller: CeventAnnotTypesPanelCtrl', function() {
     var scope, state, modalService, ceventAnnotTypesService;
     var annotationTypeRemoveService, annotTypeModalService, panelService;
     var panelFns;
+    var study = {id: 'study-id', name: 'ST1'};
     var annotTypes = [
       {id: 'dummy-annot-type-id-1', name: 'CEAT1', valueType: 'DateTime'},
       {id: 'dummy-annot-type-id-2', name: 'CEAT2', valueType: 'Name'},
@@ -49,6 +50,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     beforeEach(inject(function($controller, $rootScope, $filter) {
       scope = $rootScope.$new();
+      scope.study = study;
       scope.annotTypes = annotTypes;
       scope.annotTypesInUse = annotTypesInUse;
 

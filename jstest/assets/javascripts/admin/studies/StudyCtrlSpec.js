@@ -4,8 +4,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
   'use strict';
 
   describe('Controller: StudyCtrl', function() {
-    var windowService, stateService, scope, timeout;
-    var study = {name: 'ST1'};
+    var windowService, stateService, scope, state, studiesService, timeout;
+    var study = {id: 'dummy-study-id', name: 'ST1'};
 
     beforeEach(mocks.module('biobankApp', function($provide) {
       windowService = {
@@ -27,14 +27,25 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       $provide.value('$state', stateService);
     }));
 
-    beforeEach(inject(function($controller, $rootScope, $window, $state, $timeout) {
+    beforeEach(inject(function($controller, $rootScope, $q, $window, $timeout, _studiesService_) {
+      state = {
+        params: {studyId: study.id},
+        current: {name: 'admin.studies.study.processing'}
+      };
       timeout = $timeout;
       scope = $rootScope.$new();
+      studiesService = _studiesService_;
+
+      spyOn(studiesService, 'get').and.callFake(function () {
+        var deferred = $q.defer();
+        deferred.resolve(study);
+        return deferred.promise;
+      });
 
       $controller('StudyCtrl as vm', {
         $window:  $window,
         $scope:   scope,
-        $state:   $state,
+        $state:   state,
         $timeout: $timeout,
         study:    study
       });
