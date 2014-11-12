@@ -29,6 +29,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       }
       return result;
     }
+
     beforeEach(mocks.module('biobankApp'));
 
     beforeEach(inject(function (_participantAnnotTypesService_, $httpBackend) {

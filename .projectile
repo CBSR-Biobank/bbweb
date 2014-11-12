@@ -16,3 +16,7 @@
 -/project/target
 -/target
 -/node_modules
+-GRTAGS
+-GTAGS
+-GPATH
+-TAGS
