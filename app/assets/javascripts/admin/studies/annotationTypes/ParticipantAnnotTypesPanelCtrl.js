@@ -1,9 +1,9 @@
 define(['../../module', 'underscore'], function(module, _) {
   'use strict';
 
-  module.controller('ParticipantsAnnotTypesPanelCtrl', ParticipantsAnnotTypesPanelCtrl);
+  module.controller('ParticipantAnnotTypesPanelCtrl', ParticipantAnnotTypesPanelCtrl);
 
-  ParticipantsAnnotTypesPanelCtrl.$inject = [
+  ParticipantAnnotTypesPanelCtrl.$inject = [
     '$scope',
     '$state',
     '$stateParams',
@@ -17,14 +17,14 @@ define(['../../module', 'underscore'], function(module, _) {
   /**
    * A panel to display a study's participant annotation types.
    */
-  function ParticipantsAnnotTypesPanelCtrl($scope,
-                                           $state,
-                                           $stateParams,
-                                           modalService,
-                                           participantAnnotTypesService,
-                                           participantAnnotTypeRemoveService,
-                                           annotTypeModalService,
-                                           panelService) {
+  function ParticipantAnnotTypesPanelCtrl($scope,
+                                          $state,
+                                          $stateParams,
+                                          modalService,
+                                          participantAnnotTypesService,
+                                          participantAnnotTypeRemoveService,
+                                          annotTypeModalService,
+                                          panelService) {
     var vm = this;
 
     var helper = panelService.panel(
@@ -52,7 +52,6 @@ define(['../../module', 'underscore'], function(module, _) {
     ];
 
     vm.tableParams = helper.getTableParams(vm.annotTypes);
-    vm.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
 
     // FIXME this is set to empty array for now, but will have to call the correct method in the future
     vm.annotTypesInUse = [];

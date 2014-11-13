@@ -15,7 +15,7 @@ define(['../../module'], function(module) {
         annotTypes: '='
       },
       templateUrl: '/assets/javascripts/admin/studies/annotationTypes/participantAnnotTypesPanel.html',
-      controller: 'ParticipantsAnnotTypesPanelCtrl as vm'
+      controller: 'ParticipantAnnotTypesPanelCtrl as vm'
     };
     return directive;
   }

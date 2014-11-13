@@ -132,6 +132,8 @@ Using helm-gtags in Emacs. To generate a tags file the following is required:
     gtags -v -f /tmp/bbwebfiles --gtagslabel ctags
     ```
 
+See: https://gist.github.com/tsdeng/8451067
+
 ## NPM
 
 Add dependencies to `package.json` in the root directory. Use command `web-assets:jseNpmNodeModules`

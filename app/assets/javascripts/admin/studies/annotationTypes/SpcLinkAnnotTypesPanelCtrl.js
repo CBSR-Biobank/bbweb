@@ -51,7 +51,6 @@ define(['../../module', 'underscore'], function(module, _) {
     ];
 
     vm.tableParams = helper.getTableParams(vm.annotTypes);
-    vm.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
 
     vm.annotTypesInUse = annotTypesInUse();
 
@@ -62,8 +61,8 @@ define(['../../module', 'underscore'], function(module, _) {
      */
     function annotTypesInUse() {
       var result = [];
-      _.each(vm.spcLinkTypes, function(cet) {
-        _.each(cet.annotationTypeData, function (atItem) {
+      _.each(vm.spcLinkTypes, function(slt) {
+        _.each(slt.annotationTypeData, function (atItem) {
           result.push(atItem.annotationTypeId);
         });
       });

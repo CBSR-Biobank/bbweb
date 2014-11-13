@@ -4,6 +4,12 @@
 -.cache
 -.classpath
 -.project
+-GRTAGS
+-GTAGS
+-GPATH
+-TAGS
+-*.png
+-*.odg
 -/.ensime
 -/.ensime_lucene
 -/.git
@@ -16,7 +22,4 @@
 -/project/target
 -/target
 -/node_modules
--GRTAGS
--GTAGS
--GPATH
--TAGS
+-/documentation/images
