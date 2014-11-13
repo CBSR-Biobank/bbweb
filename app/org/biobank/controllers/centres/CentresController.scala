@@ -15,7 +15,6 @@ import play.api.mvc.Results._
 import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
-import com.typesafe.plugin.use
 import play.api.Logger
 import play.api.Play.current
 import scala.concurrent.Future

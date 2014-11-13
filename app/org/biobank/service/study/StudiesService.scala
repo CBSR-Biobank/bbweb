@@ -245,21 +245,15 @@ class StudiesServiceImpl(implicit inj: Injector)
 
   val processor = injectActorRef [StudiesProcessor] ("study")
 
-  val studyRepository = inject [StudyRepository]
-
-  val processingTypeRepository = inject [ProcessingTypeRepository]
-
-  val specimenGroupRepository = inject [SpecimenGroupRepository]
-
-  val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
-
-  val specimenLinkTypeRepository = inject [SpecimenLinkTypeRepository]
-
+  val studyRepository                         = inject [StudyRepository]
+  val processingTypeRepository                = inject [ProcessingTypeRepository]
+  val specimenGroupRepository                 = inject [SpecimenGroupRepository]
+  val collectionEventTypeRepository           = inject [CollectionEventTypeRepository]
+  val specimenLinkTypeRepository              = inject [SpecimenLinkTypeRepository]
   val collectionEventAnnotationTypeRepository = inject [CollectionEventAnnotationTypeRepository]
-
-  val participantAnnotationTypeRepository = inject [ParticipantAnnotationTypeRepository]
-
-  val specimenLinkAnnotationTypeRepository = inject [SpecimenLinkAnnotationTypeRepository]
+  val participantAnnotationTypeRepository     = inject [ParticipantAnnotationTypeRepository]
+  val specimenLinkAnnotationTypeRepository    = inject [SpecimenLinkAnnotationTypeRepository]
+  val participantRepository                   = inject [ParticipantRepository]
 
   /**
     * FIXME: use paging and sorting

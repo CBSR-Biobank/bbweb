@@ -11,7 +11,6 @@ import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import scala.concurrent.Future
-import com.typesafe.plugin.use
 import play.api.Play.current
 import scala.language.reflectiveCalls
 import scaldi.{Injectable, Injector}

@@ -11,7 +11,6 @@ import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
 
-import com.typesafe.plugin.use
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.Logger

@@ -23,6 +23,7 @@ class UserModule extends Module {
   bind [SpecimenLinkAnnotationTypeRepository]     to new SpecimenLinkAnnotationTypeRepositoryImpl
   bind [SpecimenLinkTypeRepository]               to new SpecimenLinkTypeRepositoryImpl
   bind [StudyRepository]                          to new StudyRepositoryImpl
+  bind [ParticipantRepository]                    to new ParticipantRepositoryImpl
 
   bind [UserRepository] to new UserRepositoryImpl
 

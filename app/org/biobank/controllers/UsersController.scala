@@ -3,7 +3,6 @@ package org.biobank.controllers
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.service.users.UsersService
 
-import com.typesafe.plugin.use
 import play.api.Logger
 import play.api.Play.current
 import play.api.cache.Cache

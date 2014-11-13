@@ -267,6 +267,10 @@ class Factory {
     specimenLinkTypeAnnotationType
   }
 
+  def createParticipant: Participant = {
+    ???
+  }
+
   def createDisabledCentre: DisabledCentre = {
     val centre = DisabledCentre(
       id             = CentreId(nameGenerator.next[Centre]),
@@ -372,6 +376,10 @@ class Factory {
     defaultObject(
       classOf[SpecimenLinkTypeAnnotationTypeData],
       createSpecimenLinkTypeAnnotationTypeData)
+  }
+
+  def defaultParticipant: Participant = {
+    defaultObject(classOf[Participant], createParticipant)
   }
 
   def defaultDisabledCentre: DisabledCentre = {

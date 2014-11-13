@@ -9,7 +9,6 @@ import play.api.mvc._
 import play.api.libs.json._
 import play.api.cache._
 import play.api.Play.current
-import com.typesafe.plugin.use
 import scaldi.{Injectable, Injector}
 
 import scalaz._

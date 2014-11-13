@@ -14,7 +14,6 @@ import scala.language.postfixOps
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.mvc.Results._
-import com.typesafe.plugin.use
 import play.api.Logger
 import play.api.Play.current
 import scala.language.reflectiveCalls
@@ -58,7 +57,7 @@ class ProcessingTypeController(implicit inj: Injector)
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else if (cmd.id != id) {
-        Future.successful(BadRequest("annotation type id mismatch"))
+        Future.successful(BadRequest("processing type id mismatch"))
       } else {
         val future = studiesService.updateProcessingType(cmd)
         domainValidationReply(future)

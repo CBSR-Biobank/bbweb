@@ -75,14 +75,16 @@ libraryDependencies ++= Seq(
   "org.webjars"               %  "jquery"                         % "2.1.1",
   "org.webjars"               %  "bootstrap"                      % "3.3.0" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angularjs"                      % "1.3.1" exclude(
+  "org.webjars"               %  "angularjs"                      % "1.3.2" exclude(
     "org.webjars", "jquery"),
   "org.webjars"               %  "angular-ui-bootstrap"           % "0.11.2",
-  "org.webjars"               %  "angular-ui-router"              % "0.2.11-1",
+  "org.webjars"               %  "angular-ui-router"              % "0.2.11-1" exclude(
+    "org.webjars", "angularjs"),
   "org.webjars"               %  "ng-table"                       % "0.3.3",
   "org.webjars"               % "toastr"                          % "2.0.3"exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               % "angular-sanitize"                % "1.3.0-beta.18",
+  "org.webjars"               % "angular-sanitize"                % "1.3.0-beta.18" exclude(
+    "org.webjars", "angularjs"),
   // Testing
   "com.typesafe.akka"         %% "akka-testkit"                   % "2.3.2"              % "test",
   "org.scalatestplus"         %% "play"                           % "1.2.0"              % "test",

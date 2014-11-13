@@ -55,13 +55,13 @@ object Study {
 
   implicit val studyWrites = new Writes[Study] {
     def writes(study: Study) = Json.obj(
-      "id"             -> study.id,
-      "version"        -> study.version,
-      "timeAdded"      -> study.timeAdded,
+      "id"           -> study.id,
+      "version"      -> study.version,
+      "timeAdded"    -> study.timeAdded,
       "timeModified" -> study.timeModified,
-      "name"           -> study.name,
-      "description"    -> study.description,
-      "status"         -> study.status
+      "name"         -> study.name,
+      "description"  -> study.description,
+      "status"       -> study.status
     )
   }
 }

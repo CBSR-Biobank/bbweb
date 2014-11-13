@@ -55,6 +55,7 @@ trait ControllerFixture
     def specimenLinkAnnotationTypeRepository     = inject [SpecimenLinkAnnotationTypeRepository]
     def specimenLinkTypeRepository               = inject [SpecimenLinkTypeRepository]
     def studyRepository                          = inject [StudyRepository]
+    def participantRepository                    = inject [ParticipantRepository]
 
     def userRepository = inject [UserRepository]
 

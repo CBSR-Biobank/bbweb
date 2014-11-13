@@ -439,6 +439,28 @@ object StudyCommands {
       with HasIdentity
       with HasExpectedVersion
 
+  //--
+
+  trait ParticipantCommand extends StudyCommandWithId
+
+  case class AddParticipantCmd(
+    studyId: String,
+    id: String,
+    expectedVersion: Long,
+    uniqueId: String,
+    annotations: List[ParticipantAnnotation])
+      extends ParticipantCommand
+
+  case class UpdateParticipantCmd(
+    studyId: String,
+    id: String,
+    expectedVersion: Long,
+    uniqueId: String,
+    annotations: List[ParticipantAnnotation])
+      extends ParticipantCommand
+
+  //--
+
   implicit val annotationValueTypeFormat: Format[AnnotationValueType] =
     enumFormat(org.biobank.domain.AnnotationValueType)
 
@@ -671,5 +693,21 @@ object StudyCommands {
       (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").read[Long](min[Long](0))
   )(RemoveSpecimenLinkTypeCmd.apply _)
+
+  implicit val addParticipantCmdReads: Reads[AddParticipantCmd] = (
+    (__ \ "studyId").read[String](minLength[String](2)) and
+      (__ \ "id").read[String](minLength[String](2)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0)) and
+      (__ \ "uniqueId").read[String](minLength[String](2)) and
+      (__ \ "annotations").read[List[ParticipantAnnotation]]
+  ){ AddParticipantCmd(_, _, _, _, _) }
+
+  implicit val updateParticipantCmdReads: Reads[UpdateParticipantCmd] = (
+    (__ \ "studyId").read[String](minLength[String](2)) and
+      (__ \ "id").read[String](minLength[String](2)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0)) and
+      (__ \ "uniqueId").read[String](minLength[String](2)) and
+      (__ \ "annotations").read[List[ParticipantAnnotation]]
+  ){ UpdateParticipantCmd(_, _, _, _, _) }
 
 }

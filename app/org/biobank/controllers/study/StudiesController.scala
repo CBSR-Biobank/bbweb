@@ -9,7 +9,6 @@ import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service._
 import org.biobank.service.study.StudiesService
 
-import com.typesafe.plugin.use
 import play.api.Logger
 import play.api.Play.current
 import play.api.libs.concurrent.Execution.Implicits._

@@ -10,8 +10,6 @@ import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
-import com.typesafe.plugin.use
-import org.scalatestplus.play._
 
 /**
   * Tests the REST API for [[Study]].
@@ -34,8 +32,6 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
-
-        log.info(s"repo: ${}")
       }
 
       "list a study" in new App(fakeApp) {
