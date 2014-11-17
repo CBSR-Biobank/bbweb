@@ -11,9 +11,9 @@ define(['./module'], function(module) {
     *
     * https://egghead.io/lessons/angularjs-using-ngmodel-in-custom-directives
     */
-  module.directive('passwordCheckDirective', passwordCheckDirective);
+  module.directive('passwordCheck', passwordCheck);
 
-  function passwordCheckDirective() {
+  function passwordCheck() {
     return {
       restrict: 'A',
       require: 'ngModel',
