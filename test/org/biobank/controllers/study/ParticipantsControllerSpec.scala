@@ -14,7 +14,7 @@ import org.scalatestplus.play._
 /**
   * Tests the REST API for [[Study]].
   */
-class ParticipantsControllerSpec extends ControllerFixture {
+class ParticipantsControllerSpec(ignore: String) extends ControllerFixture {
   import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)

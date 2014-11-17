@@ -79,7 +79,7 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
   /** Updates to annotation types only allowed if they are not being used by any participants.
     */
   def update
-    (cmd: SpecimenLinkAnnotationTypeCommand)
+    (cmd: StudyAnnotationTypeModifyCommand)
     (fn: SpecimenLinkAnnotationType => DomainValidation[SpecimenLinkAnnotationType])
       : DomainValidation[SpecimenLinkAnnotationType] = {
     for {

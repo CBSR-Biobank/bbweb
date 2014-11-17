@@ -78,7 +78,7 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
   /** Updates to annotation types only allowed if they are not being used by any collection event types.
     */
   def update
-    (cmd: CollectionEventAnnotationTypeCommand)
+    (cmd: StudyAnnotationTypeModifyCommand)
     (fn: CollectionEventAnnotationType => DomainValidation[CollectionEventAnnotationType])
       : DomainValidation[CollectionEventAnnotationType] = {
     for {

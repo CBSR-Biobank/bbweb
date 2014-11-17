@@ -92,7 +92,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
   }
 
   def update
-    (cmd: SpecimenGroupCommand)
+    (cmd: SpecimenGroupModifyCommand)
     (fn: SpecimenGroup => DomainValidation[SpecimenGroup])
       : DomainValidation[SpecimenGroup] = {
     for {

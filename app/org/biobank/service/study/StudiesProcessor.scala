@@ -98,7 +98,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
       // order is important in the pattern match used below
       procCmd.command match {
-        case _: StudyCommandWithId | _: SpecimenLinkTypeCommand => validateAndForward(procCmd)
+        case _: StudyCommandWithStudyId | _: SpecimenLinkTypeCommand => validateAndForward(procCmd)
 
         case cmd: AddStudyCmd =>      process(validateCmd(cmd)){ w => recoverEvent(w.event, w.userId, w.dateTime) }
         case cmd: UpdateStudyCmd =>   process(validateCmd(cmd)){ w => recoverEvent(w.event, w.userId, w.dateTime) }
@@ -120,19 +120,29 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
   private def validateAndForward(procCmd: WrappedCommand) = {
     procCmd.command match {
-      case cmd: StudyCommandWithId =>
+      case cmd: StudyCommandWithStudyId =>
         studyRepository.getByKey(StudyId(cmd.studyId)).fold(
           err => context.sender ! DomainError(s"invalid study id: ${cmd.studyId}").failNel,
           study => study match {
             case study: DisabledStudy => {
               val childActor = cmd match {
-                case cmd: SpecimenGroupCommand                 => specimenGroupProcessor
-                case cmd: CollectionEventTypeCommand           => collectionEventTypeProcessor
-                case cmd: CollectionEventAnnotationTypeCommand => ceventAnnotationTypeProcessor
-                case cmd: ParticipantAnnotationTypeCommand     => participantAnnotationTypeProcessor
-                case cmd: ProcessingTypeCommand                => processingTypeProcessor
-                case cmd: SpecimenLinkTypeCommand              => specimenLinkTypeProcessor
-                case cmd: SpecimenLinkAnnotationTypeCommand    => specimenLinkAnnotationTypeProcessor
+                case _: SpecimenGroupCommand                 => specimenGroupProcessor
+                case _: CollectionEventTypeCommand           => collectionEventTypeProcessor
+                case _: ProcessingTypeCommand                => processingTypeProcessor
+                case _: SpecimenLinkTypeCommand              => specimenLinkTypeProcessor
+
+                case _: AddCollectionEventAnnotationTypeCmd
+                   | _: UpdateCollectionEventAnnotationTypeCmd
+                   | _: RemoveCollectionEventAnnotationTypeCmd => ceventAnnotationTypeProcessor
+
+                case _: AddParticipantAnnotationTypeCmd
+                   | _: UpdateParticipantAnnotationTypeCmd
+                   | _: RemoveParticipantAnnotationTypeCmd => participantAnnotationTypeProcessor
+
+                case _: AddSpecimenLinkAnnotationTypeCmd
+                   | _: UpdateSpecimenLinkAnnotationTypeCmd
+                   | _: RemoveSpecimenLinkAnnotationTypeCmd => specimenLinkAnnotationTypeProcessor
+
               }
               childActor forward procCmd
             }
@@ -161,7 +171,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   private def validateAndForward(childActor: ActorRef, cmd: SpecimenLinkTypeCommand) = {
   }
 
-  def updateStudy[T <: Study](cmd: StudyCommand)(fn: Study => DomainValidation[T])
+  def updateStudy[T <: Study](cmd: StudyModifyCommand)(fn: Study => DomainValidation[T])
       : DomainValidation[T] = {
     studyRepository.getByKey(StudyId(cmd.id)).fold(
       err => DomainError(s"invalid study id: ${cmd.id}").failNel,
@@ -173,7 +183,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   }
 
   def updateDisabled[T <: Study]
-    (cmd: StudyCommand)
+    (cmd: StudyModifyCommand)
     (fn: DisabledStudy => DomainValidation[T])
       : DomainValidation[T] = {
     updateStudy(cmd) {
@@ -183,7 +193,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   }
 
   def updateEnabled[T <: Study]
-    (cmd: StudyCommand)
+    (cmd: StudyModifyCommand)
     (fn: EnabledStudy => DomainValidation[T])
       : DomainValidation[T] = {
     updateStudy(cmd) {
@@ -193,7 +203,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   }
 
   def updateRetired[T <: Study]
-    (cmd: StudyCommand)
+    (cmd: StudyModifyCommand)
     (fn: RetiredStudy => DomainValidation[T])
       : DomainValidation[T] = {
     updateStudy(cmd) {

@@ -77,7 +77,7 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
   /** Updates to annotation types only allowed if they are not being used by any participants.
     */
   def update
-    (cmd: ParticipantAnnotationTypeCommand)
+    (cmd: StudyAnnotationTypeModifyCommand)
     (fn: ParticipantAnnotationType => DomainValidation[ParticipantAnnotationType])
       : DomainValidation[ParticipantAnnotationType] = {
     for {

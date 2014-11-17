@@ -91,7 +91,7 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
   }
 
   def update
-    (cmd: SpecimenLinkTypeCommand)
+    (cmd: SpecimenLinkTypeModifyCommand)
     (fn: SpecimenLinkType => DomainValidation[SpecimenLinkType])
       : DomainValidation[SpecimenLinkType] = {
     for {

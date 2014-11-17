@@ -83,7 +83,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
   }
 
   def update
-    (cmd: ProcessingTypeCommand)
+    (cmd: ProcessingTypeModifyCommand)
     (fn: ProcessingType => DomainValidation[ProcessingType])
       : DomainValidation[ProcessingType] = {
     for {
@@ -107,8 +107,8 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     } yield event
   }
 
-  private def validateCmd(
-    cmd: UpdateProcessingTypeCmd): DomainValidation[ProcessingTypeUpdatedEvent] = {
+  private def validateCmd(cmd: UpdateProcessingTypeCmd)
+      : DomainValidation[ProcessingTypeUpdatedEvent] = {
     val timeNow = DateTime.now
 
     val v = update(cmd) { pt =>

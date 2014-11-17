@@ -108,7 +108,7 @@ class ProcessingTypeProcessorSpec extends TestFixture {
       askAddCommand(procType) mustFail "name already exists"
     }
 
-    "update a processing type" in {
+    "update a processing type" taggedAs(Tag("1")) in {
       val procType = factory.createProcessingType
       processingTypeRepository.put(procType)
 

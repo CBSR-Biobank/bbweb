@@ -86,7 +86,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
   }
 
   def update
-    (cmd: CollectionEventTypeCommand)
+    (cmd: CollectionEventTypeModifyCommand)
     (fn: CollectionEventType => DomainValidation[CollectionEventType])
       : DomainValidation[CollectionEventType] = {
     for {
