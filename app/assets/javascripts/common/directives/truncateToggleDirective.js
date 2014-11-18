@@ -12,20 +12,23 @@ define(['../module'], function(module) {
       replace: 'true',
       scope: {
         text: '=',
-        toggleLength: '='
+        toggleLength: '=',
+        textEmptyWarning: '='
       },
-      template : '<div><p>{{displayText}}</p>' +
-        '<button class="btn btn-xs btn-primary" ng-click="toggleText()">{{buttonLabel}}</button></div>',
+      templateUrl : '/assets/javascripts/common/directives/truncateToggle.html',
       controller: controller
     };
 
     controller.$inject = ['$scope', '$filter'];
 
     function controller($scope, $filter) {
-      $scope.displayText = $scope.text;
-      $scope.toggleState = true;
-      $scope.buttonLabel = 'Collapse';
-      $scope.toggleText = toggleText;
+      if (! $scope.text) {
+        $scope.text = '';
+      }
+      $scope.displayText      = $scope.text || '';
+      $scope.toggleState      = true;
+      $scope.buttonLabel      = 'Collapse';
+      $scope.toggleText       = toggleText;
 
       //---
 

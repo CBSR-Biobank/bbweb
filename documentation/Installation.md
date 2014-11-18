@@ -32,6 +32,14 @@ sudo apt-get update
 sudo apt-get install mongodb-10gen
 ```
 
+### NodeJS
+
+Install NodeJS following these instructions:
+
+```
+https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-an-ubuntu-14-04-server
+```
+
 ### To Start the Application
 
 ```bash

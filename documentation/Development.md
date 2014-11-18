@@ -3,9 +3,9 @@
 ## MongoDB
                                       | shell command
 --------------------------------------|----------------------------------------------
-Drop the Evensourced Journal databse: | `mongo biobank-web --eval "db.dropDatabase()"`
-Dump the Biobank database:            | `mongodump --db biobank-web --out ~/tmp`
-Restore the Biobank database:         | `mongorestore ~/tmp/biobank-web/bbweb.bson`
+Drop the Evensourced Journal databse: | `mongo bbweb --eval "db.dropDatabase()"`
+Dump the Biobank database:            | `mongodump --db bbweb --out ~/tmp`
+Restore the Biobank database:         | `mongorestore ~/tmp/bbweb/bbweb.bson`
 
 ## Eclipse
 
