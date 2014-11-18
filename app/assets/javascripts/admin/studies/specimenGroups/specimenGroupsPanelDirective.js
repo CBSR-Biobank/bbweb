@@ -11,6 +11,7 @@ define(['../../module'], function(module) {
       require: '^tab',
       restrict: 'E',
       scope: {
+        study: '=',
         specimenGroups: '=',
         specimenGroupIdsInUse: '='
       },

@@ -11,6 +11,7 @@ define(['../../module'], function(module) {
       require: '^tab',
       restrict: 'E',
       scope: {
+        study: '=',
         processingDto: '='
       },
       templateUrl: '/assets/javascripts/admin/studies/processing/spcLinkTypesPanel.html',

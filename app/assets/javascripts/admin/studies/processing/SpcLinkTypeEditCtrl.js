@@ -1,7 +1,7 @@
 /**
  * Study administration controllers.
  */
-define(['../../module'], function(module) {
+define(['../../module', 'underscore'], function(module, _) {
   'use strict';
 
   /**
@@ -38,6 +38,9 @@ define(['../../module'], function(module) {
     vm.cancel = cancel;
     vm.addAnnotType = addAnnotType;
     vm.removeAnnotType = removeAnnotType;
+
+    // used to display the specimen group units label in the form
+    vm.specimenGroupsById = _.indexBy(vm.specimenGroups, 'id');
 
     //---
 

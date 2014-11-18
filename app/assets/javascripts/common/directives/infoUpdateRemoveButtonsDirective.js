@@ -18,7 +18,7 @@ define(['../module'], function(module) {
         info: '&onInfo',
         update: '&onUpdate',
         remove: '&onRemove',
-        updatedButtonEnabled: '&',
+        updateButtonEnabled: '&',
         removeButtonEnabled: '&'
       },
       templateUrl: '/assets/javascripts/common/directives/infoUpdateRemoveButtons.html'

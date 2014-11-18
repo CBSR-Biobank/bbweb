@@ -29,16 +29,17 @@ define(['../../module'], function(module) {
       'study.panel.processingTypes',
       'admin.studies.study.processing.processingTypeAdd');
 
-    vm.processingTypes = $scope.processingDto.processingTypes;
-    vm.update      = update;
-    vm.remove      = processingTypeRemoveService.remove;
-    vm.add         = helper.add;
-    vm.information = information;
-    vm.panelOpen   = helper.panelOpen;
-    vm.panelToggle = helper.panelToggle;
+    vm.study            = $scope.study;
+    vm.processingTypes  = $scope.processingDto.processingTypes;
+    vm.update           = update;
+    vm.remove           = processingTypeRemoveService.remove;
+    vm.add              = helper.add;
+    vm.addButtonEnabled = vm.study.status === 'Disabled';
+    vm.information      = information;
+    vm.panelOpen        = helper.panelOpen;
+    vm.panelToggle      = helper.panelToggle;
 
     vm.tableParams = helper.getTableParams(vm.processingTypes);
-    vm.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
 
     //--
 

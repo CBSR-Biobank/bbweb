@@ -35,17 +35,19 @@ define(['../../module', 'underscore'], function(module, _) {
 
     var helper = panelService.panel('study.panel.specimenLinkTypes');
 
-    vm.tableData = [];
-    vm.update      = update;
-    vm.remove      = spcLinkTypeRemoveService.remove;
-    vm.add         = add;
-    vm.information = information;
-    vm.panelOpen   = helper.panelOpen;
-    vm.panelToggle = helper.panelToggle;
+    vm.study               = $scope.study;
+    vm.tableData           = [];
+    vm.update              = update;
+    vm.remove              = spcLinkTypeRemoveService.remove;
+    vm.add                 = add;
+    vm.addButtonEnabled    = vm.study.status === 'Disabled';
+    vm.information         = information;
+    vm.panelOpen           = helper.panelOpen;
+    vm.panelToggle         = helper.panelToggle;
 
     vm.processingTypesById = _.indexBy($scope.processingDto.processingTypes, 'id');
-    vm.specimenGroupsById = _.indexBy($scope.processingDto.specimenGroups, 'id');
-    vm.annotTypesById = _.indexBy($scope.processingDto.specimenLinkAnnotationTypes, 'id');
+    vm.specimenGroupsById  = _.indexBy($scope.processingDto.specimenGroups, 'id');
+    vm.annotTypesById      = _.indexBy($scope.processingDto.specimenLinkAnnotationTypes, 'id');
 
     vm.showProcessingType  = showProcessingType;
     vm.showSpecimenGroup   = showSpecimenGroup;

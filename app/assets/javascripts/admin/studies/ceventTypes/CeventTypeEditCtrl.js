@@ -14,19 +14,18 @@ define(['../../module', 'underscore'], function(module, _) {
     var action = ceventType.id ? 'Update' : 'Add';
 
     var vm = this;
-    vm.title =  action + ' Collection Event Type';
-    vm.study = study;
-    vm.ceventType = ceventType;
-    vm.annotTypes = annotTypes;
+    vm.title          =  action + ' Collection Event Type';
+    vm.study          = study;
+    vm.ceventType     = ceventType;
+    vm.annotTypes     = annotTypes;
     vm.specimenGroups = specimenGroups;
 
-    vm.submit = submit;
-    vm.cancel = cancel;
-    vm.addSpecimenGroup = addSpecimenGroup;
-    vm.removeSpecimenGroupButtonDisabled = removeSpecimenGroupButtonDisabled;
+    vm.submit              = submit;
+    vm.cancel              = cancel;
+    vm.addSpecimenGroup    = addSpecimenGroup;
     vm.removeSpecimenGroup = removeSpecimenGroup;
-    vm.addAnnotType = addAnnotType;
-    vm.removeAnnotType = removeAnnotType;
+    vm.addAnnotType        = addAnnotType;
+    vm.removeAnnotType     = removeAnnotType;
 
     // used to display the specimen group units label in the form
     vm.specimenGroupsById = _.indexBy(vm.specimenGroups, 'id');
@@ -58,15 +57,7 @@ define(['../../module', 'underscore'], function(module, _) {
       vm.ceventType.specimenGroupData.push({name:'', specimenGroupId:'', maxCount: '', amount: ''});
     }
 
-    function removeSpecimenGroupButtonDisabled() {
-      return vm.ceventType.specimenGroupData.length <= 1;
-    }
-
     function removeSpecimenGroup(sgData) {
-      if (vm.ceventType.specimenGroupData.length <= 1) {
-        throw new Error('invalid length for specimen group data');
-      }
-
       var index = vm.ceventType.specimenGroupData.indexOf(sgData);
       if (index > -1) {
         vm.ceventType.specimenGroupData.splice(index, 1);

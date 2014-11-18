@@ -78,8 +78,9 @@
                valid-amount
                required />
         </div>
-        <div class="col-md-2">
-          amount
+      <div class="col-md-2">
+        {{vm.specimenGroupsById[vm.spcLinkType.inputGroupId]
+        ? vm.specimenGroupsById[vm.spcLinkType.inputGroupId].units : 'amount'}}
         </div>
     </div>
     <div class="col-md-offset-3 col-md-9">
@@ -156,7 +157,8 @@
                required />
         </div>
         <div class="col-md-2">
-          amount
+          {{vm.specimenGroupsById[vm.spcLinkType.outputGroupId]
+          ? vm.specimenGroupsById[vm.spcLinkType.outputGroupId].units : 'amount'}}
         </div>
     </div>
     <div class="col-md-offset-3 col-md-9">

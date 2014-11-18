@@ -70,8 +70,8 @@
         </div>
         <div class="col-md-1 control-label">
           <label class="small">
-          {{(specimenGroupsById[sgData.specimenGroupId]
-                ? specimenGroupsById[sgData.specimenGroupId].units : 'Amount') + ':'}}
+          {{(vm.specimenGroupsById[sgData.specimenGroupId]
+                ? vm.specimenGroupsById[sgData.specimenGroupId].units : 'Amount') + ':'}}
           </label>
         </div>
         <div class="col-md-2">
@@ -86,8 +86,7 @@
         </div>
         <div class="col-md-1">
           <button class="btn btn-xs btn-warning"
-                  data-ng-click="vm.removeSpecimenGroup(sgData)"
-                  data-ng-disabled="vm.removeSpecimenGroupButtonDisabled()">
+                  data-ng-click="vm.removeSpecimenGroup(sgData)">
             <i class="glyphicon glyphicon-minus"></i> Remove
           </button>
         </div>

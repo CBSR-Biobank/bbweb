@@ -31,19 +31,18 @@ define(['../../module', 'underscore'], function(module, _) {
       'study.panel.specimenGroups',
       'admin.studies.study.specimens.groupAdd');
 
+    vm.study                 = $scope.study;
     vm.specimenGroups        = $scope.specimenGroups;
     vm.specimenGroupIdsInUse = $scope.specimenGroupIdsInUse;
     vm.update                = update;
     vm.remove                = remove;
     vm.add                   = helper.add;
+    vm.addButtonEnabled      = vm.study.status === 'Disabled';
     vm.information           = information;
     vm.panelOpen             = helper.panelOpen;
     vm.panelToggle           = helper.panelToggle;
 
     vm.tableParams = helper.getTableParams(vm.specimenGroups);
-
-    // FIXME: is this kludge still needed?
-    vm.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
 
     //--
 

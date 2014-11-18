@@ -1,8 +1,9 @@
 <accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
   <accordion-heading>
     Collection Event Types
-    <panel-buttons on-add="vm.add(study)"
+    <panel-buttons on-add="vm.add()"
                    add-button-title="add collection event type"
+                   add-button-enabled="vm.addButtonEnabled"
                    panel-open="vm.panelOpen"
                    panel-toggle="vm.panelToggle()">
     </panel-buttons>
