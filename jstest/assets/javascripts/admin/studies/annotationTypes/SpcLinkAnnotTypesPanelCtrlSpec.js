@@ -3,7 +3,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  ddescribe('Controller: SpcLinkAnnotTypesPanelCtrl', function() {
+  describe('Controller: SpcLinkAnnotTypesPanelCtrl', function() {
     var scope, state, modalService, spcLinkAnnotTypesService;
     var spcLinkAnnotTypeRemoveService, annotTypeModalService, panelService;
     var panelFns;

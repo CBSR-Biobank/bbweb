@@ -35,7 +35,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     it('should have the following functions', function () {
       expect(angular.isFunction(centresService.list)).toBe(true);
-      expect(angular.isFunction(centresService.query)).toBe(true);
+      expect(angular.isFunction(centresService.get)).toBe(true);
       expect(angular.isFunction(centresService.addOrUpdate)).toBe(true);
       expect(angular.isFunction(centresService.enable)).toBe(true);
       expect(angular.isFunction(centresService.disable)).toBe(true);
@@ -60,13 +60,13 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       httpBackend.flush();
     });
 
-    it('query should return valid object', function() {
+    it('get should return valid object', function() {
       httpBackend.whenGET(uri(centre.id)).respond({
         status: 'success',
         data: centre
       });
 
-      centresService.query(centre.id).then(function(data) {
+      centresService.get(centre.id).then(function(data) {
         expect(_.isEqual(centre, data));
       });
 
@@ -120,7 +120,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       var studyId = 'a-study-id';
       var expectedCmd = {centreId: centre.id, studyId: studyId};
       var expectedResult = {status: 'success', data: 'success'};
-      httpBackend.expectPOST(uri(centre.id) + '/study/' + studyId, expectedCmd).respond(201, expectedResult);
+      httpBackend.expectPOST(uri(centre.id) + '/studies/' + studyId, expectedCmd).respond(201, expectedResult);
       centresService.addStudy(centre.id, studyId).then(function(reply) {
         expect(reply).toEqual('success');
       });
@@ -131,7 +131,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       var studyId = 'a-study-id';
       var expectedCmd = {centreId: centre.id, studyId: studyId};
       var expectedResult = {status: 'success', data: 'success'};
-      httpBackend.expectDELETE(uri(centre.id) + '/study/' + studyId).respond(201);
+      httpBackend.expectDELETE(uri(centre.id) + '/studies/' + studyId).respond(201);
       centresService.removeStudy(centre.id, studyId);
       httpBackend.flush();
     });
