@@ -10,6 +10,14 @@ define(['../module', 'underscore'], function(module, _) {
 
   function config($urlRouterProvider, $stateProvider, userResolve ) {
 
+    resolveCentre.$inject = ['$stateParams', 'centresService'];
+    function resolveCentre($stateParams, centresService) {
+      if ($stateParams.centreId) {
+        return centresService.get($stateParams.centreId);
+      }
+      throw new Error('state parameter centreId is invalid');
+    }
+
     $urlRouterProvider.otherwise('/');
 
     /**
@@ -89,13 +97,7 @@ define(['../module', 'underscore'], function(module, _) {
       abstract: true,
       url: '/{centreId}',
       resolve: {
-        user: userResolve.user,
-        centre: ['$stateParams', 'centresService', function($stateParams, centresService) {
-          if ($stateParams.centreId) {
-            return centresService.query($stateParams.centreId);
-          }
-          throw new Error('state parameter centreId is invalid');
-        }]
+        user: userResolve.user
       },
       views: {
         'main@': {
@@ -133,7 +135,8 @@ define(['../module', 'underscore'], function(module, _) {
     $stateProvider.state('admin.centres.centre.summary', {
       url: '/summary',
       resolve: {
-        user: userResolve.user
+        user: userResolve.user,
+        centre: resolveCentre
       },
       views: {
         'centreDetails': {
@@ -153,6 +156,7 @@ define(['../module', 'underscore'], function(module, _) {
       url: '/locations',
       resolve: {
         user: userResolve.user,
+        centre: resolveCentre,
         locations: [
           'centreLocationService', 'centre',
           function(centreLocationService, centre) {
@@ -186,6 +190,7 @@ define(['../module', 'underscore'], function(module, _) {
       url: '/location/add',
       resolve: {
         user: userResolve.user,
+        centre: resolveCentre,
         location: [function() {
           return {
             name           : '',
@@ -216,6 +221,7 @@ define(['../module', 'underscore'], function(module, _) {
       url: '/location/update/:locationId',
       resolve: {
         user: userResolve.user,
+        centre: resolveCentre,
         location: [
           '$stateParams', 'centreLocationService', 'centre',
           function($stateParams, centreLocationService, centre) {
@@ -241,6 +247,7 @@ define(['../module', 'underscore'], function(module, _) {
       url: '/studies',
       resolve: {
         user: userResolve.user,
+        centre: resolveCentre,
         centreStudies: [
           'centresService', 'centre',
           function(centresService, centre) {

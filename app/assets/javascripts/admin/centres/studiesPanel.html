@@ -1,3 +1,4 @@
+<ng-include src="'/assets/javascripts/admin/centres/centreNotDisabledWarning.html'"></ng-include>
 <accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
   <accordion-heading>
     Studies
@@ -31,7 +32,7 @@
         {{study.status}}
       </td>
       <td>
-        <div class="btn-group pull-right">
+        <div class="btn-group pull-right" ng-if="vm.centre.status === 'Disabled'">
           <button class="btn btn-xs btn-warning"
                   data-ng-click="vm.remove(study)"
                   data-toggle="tooltip"
@@ -42,7 +43,7 @@
       </td>
     </tr>
   </table>
-  <div class="input-group">
+  <div class="input-group" ng-if="vm.centre.status === 'Disabled'">
     <span class="input-group-addon">Add Study</span>
     <input type="text"
            ng-model="vm.selected"

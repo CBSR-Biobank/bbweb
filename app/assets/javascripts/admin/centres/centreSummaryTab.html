@@ -6,10 +6,21 @@
            type="button">
           <i class="glyphicon glyphicon-edit"></i>
         </a>
+
         <button class="btn btn-xs btn-success"
-                data-ng-click="vm.changeStatus()"
-                title="Change status">
-          <i class="glyphicon glyphicon-cog"></i></button>
+                data-ng-click="vm.changeStatus('enable')"
+                title="Enable"
+                ng-if="vm.centre.status === 'Disabled'">
+          <i class="glyphicon glyphicon-ok-circle"></i>
+        </button>
+
+        <button class="btn btn-xs btn-danger"
+                data-ng-click="vm.changeStatus('disable')"
+                title="Disable"
+                ng-if="vm.centre.status === 'Enabled'">
+          <i class="glyphicon glyphicon-remove-sign"></i>
+        </button>
+
       </span>
     </h3>
   </div>
@@ -26,7 +37,7 @@
         <span class="center-block text-center"><strong>{{vm.centre.status}}</strong></span>
       </td>
       <td>
-        <span class="centre-block text-center text-muted"><small>Added</small></span>
+        <span class="center-block text-center text-muted"><small>Added</small></span>
         <span class="center-block text-center"><strong>{{vm.centre.timeAdded | timeago}}</strong></span>
       </td>
       <td>

@@ -1,8 +1,10 @@
+<ng-include src="'/assets/javascripts/admin/centres/centreNotDisabledWarning.html'"></ng-include>
 <accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
   <accordion-heading>
     Locations
     <panel-buttons on-add="vm.add()"
                    add-button-title="add location"
+                   add-button-enabled="vm.addButtonEnabled"
                    panel-open="vm.panelOpen"
                    panel-toggle="vm.panelToggle()">
     </panel-buttons>

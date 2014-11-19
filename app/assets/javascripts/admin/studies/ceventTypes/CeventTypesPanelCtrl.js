@@ -57,7 +57,6 @@ define(['../../module', 'underscore'], function(module, _) {
     init();
 
     vm.tableParams = helper.getTableParams(vm.ceventTypes);
-    vm.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
 
     //--
 

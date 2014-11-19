@@ -10,9 +10,9 @@ define(['../module'], function(module) {
    */
   module.controller('CentreSummaryTabCtrl', CentreSummaryTabCtrl);
 
-  CentreSummaryTabCtrl.$inject = ['$filter', 'centre'];
+  CentreSummaryTabCtrl.$inject = ['$filter', 'centresService', 'modalService', 'centre'];
 
-  function CentreSummaryTabCtrl($filter, centre) {
+  function CentreSummaryTabCtrl($filter, centresService, modalService, centre) {
     var vm = this;
     vm.centre = centre;
     vm.descriptionToggleControl = {}; // for truncateToggle directive
@@ -23,12 +23,32 @@ define(['../module'], function(module) {
 
     //----
 
-    function changeStatus() {
-      if (vm.centre.id) {
-        alert('change status of ' + vm.centre.name);
-        return;
+    function changeStatus(status) {
+      var serviceFn;
+      var modalOptions = {
+        closeButtonText: 'Cancel',
+        headerHtml: 'Confirm centre ',
+        bodyHtml: 'Are you sure you want to '
+      };
+
+      if (status === 'enable') {
+        serviceFn = centresService.enable;
+      } else if (status === 'disable') {
+        serviceFn = centresService.disable;
+      } else {
+        throw new Error('invalid status: ' + status);
       }
-      throw new Error('centre does not have an ID');
+
+      modalOptions.headerHtml += status;
+      modalOptions.bodyHtml += status + ' centre ' + vm.centre.name + '?';
+
+      modalService.showModal({}, modalOptions).then(function () {
+        serviceFn(vm.centre).then(function () {
+          centresService.get(vm.centre.id).then(function (centre) {
+            vm.centre = centre;
+          });
+        });
+      });
     }
 
   }

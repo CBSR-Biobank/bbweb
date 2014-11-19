@@ -78,7 +78,7 @@ libraryDependencies ++= Seq(
   "org.webjars"               %  "angularjs"                      % "1.3.2" exclude(
     "org.webjars", "jquery"),
   "org.webjars"               %  "angular-ui-bootstrap"           % "0.11.2",
-  "org.webjars"               %  "angular-ui-router"              % "0.2.11-1" exclude(
+  "org.webjars"               %  "angular-ui-router"              % "0.2.12" exclude(
     "org.webjars", "angularjs"),
   "org.webjars"               %  "ng-table"                       % "0.3.3",
   "org.webjars"               % "toastr"                          % "2.0.3"exclude(

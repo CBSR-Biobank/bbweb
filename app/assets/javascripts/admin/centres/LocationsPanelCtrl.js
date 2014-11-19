@@ -27,17 +27,17 @@ define(['../module'], function(module) {
       'centre.panel.locations',
       'admin.centres.centre.locationAdd');
 
-    vm.centre      = $scope.centre;
-    vm.locations   = $scope.locations;
-    vm.update      = update;
-    vm.remove      = remove;
-    vm.add         = helper.add;
-    vm.information = information;
-    vm.panelOpen   = helper.panelOpen;
-    vm.panelToggle = helper.panelToggle;
+    vm.centre           = $scope.centre;
+    vm.locations        = $scope.locations;
+    vm.update           = update;
+    vm.remove           = remove;
+    vm.add              = helper.add;
+    vm.addButtonEnabled = vm.centre.status === 'Disabled';
+    vm.information      = information;
+    vm.panelOpen        = helper.panelOpen;
+    vm.panelToggle      = helper.panelToggle;
 
-    vm.tableParams = helper.getTableParams(vm.locations);
-    vm.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
+    vm.tableParams      = helper.getTableParams(vm.locations);
 
     function information(location) {
       var title = 'Location';
