@@ -40,7 +40,6 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.update              = update;
     vm.remove              = spcLinkTypeRemoveService.remove;
     vm.add                 = add;
-    vm.addButtonEnabled    = vm.study.status === 'Disabled';
     vm.information         = information;
     vm.panelOpen           = helper.panelOpen;
     vm.panelToggle         = helper.panelToggle;
@@ -52,6 +51,8 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.showProcessingType  = showProcessingType;
     vm.showSpecimenGroup   = showSpecimenGroup;
     vm.showAnnotationType  = showAnnotationType;
+
+    vm.modificationsAllowed = vm.study.status === 'Disabled';
 
     init();
 

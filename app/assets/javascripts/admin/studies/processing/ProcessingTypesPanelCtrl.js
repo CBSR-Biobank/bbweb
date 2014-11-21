@@ -34,11 +34,11 @@ define(['../../module'], function(module) {
     vm.update           = update;
     vm.remove           = processingTypeRemoveService.remove;
     vm.add              = helper.add;
-    vm.addButtonEnabled = vm.study.status === 'Disabled';
     vm.information      = information;
     vm.panelOpen        = helper.panelOpen;
     vm.panelToggle      = helper.panelToggle;
 
+    vm.modificationsAllowed = vm.study.status === 'Disabled';
     vm.tableParams = helper.getTableParams(vm.processingTypes);
 
     //--

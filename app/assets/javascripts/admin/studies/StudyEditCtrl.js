@@ -10,12 +10,14 @@ define(['../module'], function(module) {
   StudyEditCtrl.$inject = [
     'stateHelper',
     'studiesService',
+    'notificationsService',
     'domainEntityUpdateError',
     'study'
   ];
 
   function StudyEditCtrl(stateHelper,
                          studiesService,
+                         notificationsService,
                          domainEntityUpdateError,
                          study) {
     var vm = this;
@@ -42,9 +44,14 @@ define(['../module'], function(module) {
       stateHelper.reloadStateAndReinit(vm.returnState, vm.stateParams, {reload: true});
     }
 
+    function submitSuccess() {
+      notificationsService.submitSuccess();
+      gotoReturnState();
+    }
+
     function submit(study) {
       studiesService.addOrUpdate(study)
-        .then(gotoReturnState)
+        .then(submitSuccess)
         .catch(function(error) {
           domainEntityUpdateError.handleError(
             error,

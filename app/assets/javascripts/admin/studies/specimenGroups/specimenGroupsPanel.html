@@ -3,7 +3,7 @@
     Specimen Groups
     <panel-buttons on-add="vm.add(study)"
                    add-button-title="add specimen group"
-                   add-button-enabled="vm.addButtonEnabled"
+                   add-button-enabled="vm.modificationsAllowed"
                    panel-open="vm.panelOpen"
                    panel-toggle="vm.panelToggle()">
     </panel-buttons>
@@ -39,10 +39,12 @@
       <td data-title="'Description'" sortable="'description'">
         {{specimenGroup.description === null ? "" : specimenGroup.description | truncate:40}}
       </td>
-      <td ng-if="vm.study.status === 'Disabled'">
+      <td ng-if="vm.modificationsAllowed">
         <update-remove-buttons
-            on-update="vm.update(specimenGroup)"
-            on-remove="vm.remove(specimenGroup)">
+           on-update="vm.update(specimenGroup)"
+           on-remove="vm.remove(specimenGroup)"
+           update-button-enabled="vm.modificationsAllowed"
+           remove-button-enabled="vm.modificationsAllowed">
         </update-remove-buttons>
       </td>
     </tr>

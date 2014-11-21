@@ -37,22 +37,22 @@ define(['../../module', 'underscore'], function(module, _) {
       'study.panel.collectionEventTypes',
       'admin.studies.study.collection.ceventTypeAdd');
 
-    vm.study               = $scope.study;
-    vm.ceventTypes         = $scope.ceventTypes;
-    vm.annotTypes          = $scope.annotTypes;
-    vm.specimenGroups      = $scope.specimenGroups;
-    vm.annotationTypesById = [];
-    vm.specimenGroupsById  = [];
+    vm.study                = $scope.study;
+    vm.ceventTypes          = $scope.ceventTypes;
+    vm.annotTypes           = $scope.annotTypes;
+    vm.specimenGroups       = $scope.specimenGroups;
+    vm.annotationTypesById  = [];
+    vm.specimenGroupsById   = [];
 
-    vm.update             = update;
-    vm.remove             = ceventTypeRemoveService.remove;
-    vm.add                = helper.add;
-    vm.addButtonEnabled   = vm.study.status === 'Disabled';
-    vm.information        = information;
-    vm.showAnnotationType = showAnnotationType;
-    vm.showSpecimenGroup  = showSpecimenGroup;
-    vm.panelOpen          = helper.panelOpen;
-    vm.panelToggle        = helper.panelToggle;
+    vm.update               = update;
+    vm.remove               = ceventTypeRemoveService.remove;
+    vm.add                  = helper.add;
+    vm.information          = information;
+    vm.showAnnotationType   = showAnnotationType;
+    vm.showSpecimenGroup    = showSpecimenGroup;
+    vm.panelOpen            = helper.panelOpen;
+    vm.panelToggle          = helper.panelToggle;
+    vm.modificationsAllowed = vm.study.status === 'Disabled';
 
     init();
 

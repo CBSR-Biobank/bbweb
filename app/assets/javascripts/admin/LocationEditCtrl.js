@@ -7,6 +7,7 @@ define(['./module'], function(module) {
     '$state',
     'domainEntityUpdateError',
     'centreLocationService',
+    'notificationsService',
     'centre',
     'location'
   ];
@@ -17,6 +18,7 @@ define(['./module'], function(module) {
   function LocationEditCtrl($state,
                             domainEntityUpdateError,
                             centreLocationService,
+                            notificationsService,
                             centre,
                             location) {
 
@@ -36,6 +38,11 @@ define(['./module'], function(module) {
       return $state.go('admin.centres.centre.locations', {}, {reload: true});
     }
 
+    function submitSuccess() {
+      notificationsService.submitSuccess();
+      gotoReturnState();
+    }
+
     function submit(location) {
       if (location.id) {
         // remove the previous location before adding the new one
@@ -46,7 +53,7 @@ define(['./module'], function(module) {
 
       function addLocation() {
         centreLocationService.add(vm.centre, location)
-          .then(gotoReturnState)
+          .then(submitSuccess)
           .catch(function(error) {
             domainEntityUpdateError.handleError(
               error,

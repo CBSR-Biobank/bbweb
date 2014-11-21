@@ -4,7 +4,7 @@
     Locations
     <panel-buttons on-add="vm.add()"
                    add-button-title="add location"
-                   add-button-enabled="vm.addButtonEnabled"
+                   add-button-enabled="vm.modificationsAllowed"
                    panel-open="vm.panelOpen"
                    panel-toggle="vm.panelToggle()">
     </panel-buttons>
@@ -32,10 +32,12 @@
       <td data-title="'City'" sortable="'city'">
         {{location.city}}
       </td>
-      <td>
+      <td ng-if="vm.modificationsAllowed">
         <update-remove-buttons
-            on-update="vm.update(location)"
-            on-remove="vm.remove(location)">
+           on-update="vm.update(location)"
+           on-remove="vm.remove(location)"
+           update-button-enabled="vm.modificationsAllowed"
+           remove-button-enabled="vm.modificationsAllowed">
         </update-remove-buttons>
       </td>
     </tr>

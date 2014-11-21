@@ -37,10 +37,11 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.update                = update;
     vm.remove                = remove;
     vm.add                   = helper.add;
-    vm.addButtonEnabled      = vm.study.status === 'Disabled';
     vm.information           = information;
     vm.panelOpen             = helper.panelOpen;
     vm.panelToggle           = helper.panelToggle;
+
+    vm.modificationsAllowed = vm.study.status === 'Disabled';
 
     vm.tableParams = helper.getTableParams(vm.specimenGroups);
 

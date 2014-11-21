@@ -9,6 +9,7 @@ define(['../../module'], function(module) {
     'stateHelper',
     'domainEntityUpdateError',
     'processingTypesService',
+    'notificationsService',
     'study',
     'processingType'
   ];
@@ -21,6 +22,7 @@ define(['../../module'], function(module) {
                                   stateHelper,
                                   domainEntityUpdateError,
                                   processingTypesService,
+                                  notificationsService,
                                   study,
                                   processingType) {
 
@@ -38,9 +40,14 @@ define(['../../module'], function(module) {
       return $state.go('admin.studies.study.processing', {}, {reload: true});
     }
 
+    function submitSuccess() {
+      notificationsService.submitSuccess();
+      gotoReturnState();
+    }
+
     function submit(processingType) {
       processingTypesService.addOrUpdate(processingType)
-        .then(gotoReturnState)
+        .then(submitSuccess)
         .catch(function(error) {
           domainEntityUpdateError.handleError(
             error,

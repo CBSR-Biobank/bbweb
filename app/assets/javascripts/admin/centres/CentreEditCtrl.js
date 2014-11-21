@@ -10,6 +10,7 @@ define(['../module'], function(module) {
     'stateHelper',
     'centresService',
     'domainEntityUpdateError',
+    'notificationsService',
     'user',
     'centre',
   ];
@@ -23,6 +24,7 @@ define(['../module'], function(module) {
                           stateHelper,
                           centresService,
                           domainEntityUpdateError,
+                          notificationsService,
                           user,
                           centre) {
     var vm = this;
@@ -40,10 +42,15 @@ define(['../module'], function(module) {
       stateHelper.reloadStateAndReinit(returnState, $stateParams, {reload: true});
     }
 
+    function submitSuccess() {
+      notificationsService.submitSuccess();
+      gotoReturnState();
+    }
+
     function submit(centre) {
-      centresService.addOrUpdate(centre).then(
-        gotoReturnState,
-        function(error) {
+      centresService.addOrUpdate(centre)
+        .then(submitSuccess)
+        .catch(function(error) {
           domainEntityUpdateError(error, 'centre', returnState);
         });
     }

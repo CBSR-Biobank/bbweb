@@ -13,6 +13,7 @@ define(['../../module', 'underscore'], function(module, _) {
     '$state',
     'spcLinkTypesService',
     'domainEntityUpdateError',
+    'notificationsService',
     'study',
     'spcLinkType',
     'dtoProcessing'
@@ -21,6 +22,7 @@ define(['../../module', 'underscore'], function(module, _) {
   function SpcLinkTypeEditCtrl($state,
                                spcLinkTypesService,
                                domainEntityUpdateError,
+                               notificationsService,
                                study,
                                spcLinkType,
                                dtoProcessing) {
@@ -48,6 +50,11 @@ define(['../../module', 'underscore'], function(module, _) {
       return $state.go('admin.studies.study.processing', {}, {reload: true});
     }
 
+    function submitSuccess() {
+      notificationsService.submitSuccess();
+      gotoReturnState();
+    }
+
     function submit(spcLinkType) {
       var checkFields = ['inputContainerTypeId', 'outputContainerTypeId'];
       checkFields.forEach(function(fieldName) {
@@ -61,7 +68,7 @@ define(['../../module', 'underscore'], function(module, _) {
       }
 
       spcLinkTypesService.addOrUpdate(spcLinkType)
-        .then(gotoReturnState)
+        .then(submitSuccess)
         .catch(function(error) {
           domainEntityUpdateError.handleError(
             error,

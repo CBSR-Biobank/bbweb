@@ -49,10 +49,12 @@
           </span>
 
         </td>
-        <td ng-if="vm.study.status === 'Disabled'">
+        <td ng-if="vm.modificationsAllowed">
           <update-remove-buttons
              on-update="vm.update(annotType)"
-             on-remove="vm.remove(annotType)">
+             on-remove="vm.remove(annotType)"
+             update-button-enabled="vm.modificationsAllowed"
+             remove-button-enabled="vm.modificationsAllowed">
           </update-remove-buttons>
         </td>
       </tr>

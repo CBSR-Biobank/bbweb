@@ -7,6 +7,7 @@ define(['../../module'], function(module) {
     '$state',
     'domainEntityUpdateError',
     'specimenGroupsService',
+    'notificationsService',
     'valueTypes',
     'study',
     'specimenGroup'
@@ -18,6 +19,7 @@ define(['../../module'], function(module) {
   function SpecimenGroupEditCtrl($state,
                                  domainEntityUpdateError,
                                  specimenGroupsService,
+                                 notificationsService,
                                  valueTypes,
                                  study,
                                  specimenGroup) {
@@ -42,9 +44,14 @@ define(['../../module'], function(module) {
       return $state.go('admin.studies.study.specimens', {}, {reload: true});
     }
 
+    function submitSuccess() {
+      notificationsService.submitSuccess();
+      gotoReturnState();
+    }
+
     function submit(specimenGroup) {
       specimenGroupsService.addOrUpdate(specimenGroup)
-        .then(gotoReturnState)
+        .then(submitSuccess)
         .catch(function(error) {
           domainEntityUpdateError.handleError(
             error,

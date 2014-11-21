@@ -7,6 +7,7 @@ define(['../../module'], function(module) {
     '$state',
     'stateHelper',
     'domainEntityUpdateError',
+    'notificationsService',
     'study',
     'annotType',
     'addOrUpdateFn',
@@ -23,6 +24,7 @@ define(['../../module'], function(module) {
   function AnnotationTypeEditCtrl($state,
                                   stateHelper,
                                   domainEntityUpdateError,
+                                  notificationsService,
                                   study,
                                   annotType,
                                   addOrUpdateFn,
@@ -129,6 +131,11 @@ define(['../../module'], function(module) {
       return (vm.annotType.options.length <= 1);
     }
 
+    function submitSuccess() {
+      notificationsService.submitSuccess();
+      gotoReturnState();
+    }
+
     /**
      * Called when the user presses the submit button on the form.
      *
@@ -138,7 +145,7 @@ define(['../../module'], function(module) {
      */
     function submit(annotType) {
       addOrUpdateFn(annotType)
-        .then(gotoReturnState)
+        .then(submitSuccess)
         .catch(function(error) {
           domainEntityUpdateError.handleError(error, 'study', returnState);
         });

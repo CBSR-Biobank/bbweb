@@ -38,9 +38,10 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.remove           = remove;
     vm.information      = helper.information;
     vm.add              = helper.add;
-    vm.addButtonEnabled = vm.study.status === 'Disabled';
     vm.panelOpen        = helper.panelOpen;
     vm.panelToggle      = helper.panelToggle;
+
+    vm.modificationsAllowed = vm.study.status === 'Disabled';
 
     vm.columns = [
       { title: 'Name', field: 'name', filter: { 'name': 'text' } },

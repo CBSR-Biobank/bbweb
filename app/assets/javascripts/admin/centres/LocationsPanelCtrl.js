@@ -32,12 +32,13 @@ define(['../module'], function(module) {
     vm.update           = update;
     vm.remove           = remove;
     vm.add              = helper.add;
-    vm.addButtonEnabled = vm.centre.status === 'Disabled';
     vm.information      = information;
     vm.panelOpen        = helper.panelOpen;
     vm.panelToggle      = helper.panelToggle;
 
     vm.tableParams      = helper.getTableParams(vm.locations);
+
+    vm.modificationsAllowed = vm.centre.status === 'Disabled';
 
     function information(location) {
       var title = 'Location';
