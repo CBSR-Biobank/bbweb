@@ -54,6 +54,8 @@ class UsersController(implicit inj: Injector)
           err => {
             Logger.info(s"login: error: $err")
             val errStr = err.list.mkString(", ")
+            // FIXME: what if user attempts multiple failed logins? lock the account after 3 attempts?
+            // how long to lock the account?
             if (errStr.contains("not found") || errStr.contains("invalid password")) {
               Forbidden("invalid email or password")
             } else if (errStr.contains("not active") || errStr.contains("is locked")) {

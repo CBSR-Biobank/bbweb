@@ -4,7 +4,7 @@
 <div class="clearfix">
   <form class="form-horizontal"
         name="studyForm"
-        data-ng-submit="studyForm.$valid && vm.submit(vm.study)"
+        ng-submit="studyForm.$valid && vm.submit(vm.study)"
         novalidate>
 
     <!-- NAME -->
@@ -12,16 +12,16 @@
       <label for="name" class="col-md-2 control-label">Name</label>
       <div class="col-md-10">
         <input
-            name="name"
-            type="text"
-            class="form-control"
-            data-ng-model="vm.study.name"
-            data-ng-minlength="2"
-            placeholder="A short name for the study"
-            required />
+           name="name"
+           type="text"
+           class="form-control"
+           ng-model="vm.study.name"
+           ng-minlength="2"
+           placeholder="A short name for the study"
+           required />
       </div>
       <div class="col-md-offset-2 col-md-10">
-        <p class="help-block" data-ng-show="studyForm.name.$error.minlength">Name is too short.</p>
+        <p class="help-block" ng-show="studyForm.name.$error.minlength">Name is too short.</p>
       </div>
     </div>
 
@@ -32,7 +32,7 @@
         <textarea name="description"
                   class="form-control"
                   rows="10"
-                  data-ng-model="vm.study.description"
+                  ng-model="vm.study.description"
                   placeholder="A description of the study (optional)" />
       </div>
     </div>
@@ -40,8 +40,8 @@
     <!-- BUTTONS  -->
     <div class="form-group">
       <div class="col-md-offset-2 col-md-10">
-        <button class="btn btn-primary" data-ng-disabled="studyForm.$invalid">Submit</button>
-        <button type="button" class="btn" data-ng-click="vm.cancel()">Cancel</button>
+        <button class="btn btn-primary" ng-disabled="studyForm.$invalid">Submit</button>
+        <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
       </div>
     </div>
   </form>
