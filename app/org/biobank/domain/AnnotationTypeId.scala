@@ -12,8 +12,11 @@ case class AnnotationTypeId(val id: String) extends IdentifiedValueObject[String
 
 object AnnotationTypeId {
 
-  implicit val studyIdReader = (__ \ "id").read[String](minLength[String](2)).map( new AnnotationTypeId(_) )
-  implicit val studyIdWriter = Writes{ (id: AnnotationTypeId) => JsString(id.id) }
+  implicit val annotationTypeIdReader =
+    (__).read[String](minLength[String](2)).map( new AnnotationTypeId(_) )
+
+  implicit val annotationTypeIdWriter =
+    Writes{ (id: AnnotationTypeId) => JsString(id.id) }
 
 }
 

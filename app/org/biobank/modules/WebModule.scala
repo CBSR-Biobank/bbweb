@@ -22,6 +22,8 @@ class WebModule extends Module {
   binding to new StudiesController
   binding to new CentresController
 
+  binding to new ParticipantsController
+
   binding to play.api.libs.concurrent.Akka.system(inject[play.api.Application])
 
   binding identifiedBy 'akkaTimeout to Timeout(5 seconds)

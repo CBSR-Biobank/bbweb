@@ -135,7 +135,7 @@ object JsonHelper extends MustMatchers {
 
   def compareObj(json: JsValue, participant: Participant) = {
     compareEntity(json, participant)
-      (json \ "studyId").as[String]  mustBe (participant.studyId)
+      (json \ "studyId").as[String]  mustBe (participant.studyId.id)
       (json \ "uniqueId").as[String] mustBe (participant.uniqueId)
   }
 

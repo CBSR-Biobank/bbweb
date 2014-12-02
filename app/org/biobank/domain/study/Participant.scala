@@ -33,35 +33,41 @@ case class Participant(
   version: Long,
   timeAdded: DateTime,
   timeModified: Option[DateTime],
-  uniqueId: String)
+  uniqueId: String,
+  annotations: Set[ParticipantAnnotation])
     extends ConcurrencySafeEntity[ParticipantId]
     with HasStudyId {
 
   override def toString: String =
-    s"""|CollectionEventType:{
+    s"""|Participant:{
         |  studyId: $studyId,
         |  id: $id,
         |  version: $version,
         |  timeAdded: $timeAdded,
         |  timeModified: $timeModified,
         |  uniqueId: $uniqueId,
+        |  annotations: $annotations,
         |}""".stripMargin
 }
 
 object Participant extends ParticipantValidations {
   import org.biobank.domain.CommonValidations._
+  import ParticipantAnnotation._
+
+  case object UniqueIdRequired extends ValidationKey
 
   def create(
     studyId: StudyId,
     id: ParticipantId,
     version: Long,
     dateTime: DateTime,
-    uniqueId: String): DomainValidation[Participant] = {
+    uniqueId: String,
+    annotations: Set[ParticipantAnnotation]): DomainValidation[Participant] = {
     (validateId(studyId) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
-      validateString(uniqueId, NameRequired)) {
-      Participant(_, _, _, dateTime, None, _)
+      validateString(uniqueId, UniqueIdRequired)) {
+      Participant(_, _, _, dateTime, None, _, annotations)
     }
   }
 
@@ -71,7 +77,8 @@ object Participant extends ParticipantValidations {
       (__ \ "version").write[Long] and
       (__ \ "timeAdded").write[DateTime] and
       (__ \ "timeModified").write[Option[DateTime]] and
-      (__ \ "uniqueId").write[String]
+      (__ \ "uniqueId").write[String] and
+      (__ \ "annotations").write[Set[ParticipantAnnotation]]
   )(unlift(Participant.unapply))
 
 

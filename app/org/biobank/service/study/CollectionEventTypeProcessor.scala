@@ -115,8 +115,8 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     } yield event
   }
 
-  private def validateCmd(
-    cmd: UpdateCollectionEventTypeCmd): DomainValidation[CollectionEventTypeUpdatedEvent] = {
+  private def validateCmd(cmd: UpdateCollectionEventTypeCmd)
+      : DomainValidation[CollectionEventTypeUpdatedEvent] = {
     val timeNow = DateTime.now
     val studyId = StudyId(cmd.studyId)
     val v = update(cmd) { cet =>
@@ -200,8 +200,8 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     */
   private def validateSpecimenGroupData(
     studyId: StudyId,
-    specimenGroupData: List[CollectionEventTypeSpecimenGroupData]): DomainValidation[Boolean] = {
-
+    specimenGroupData: List[CollectionEventTypeSpecimenGroupData])
+      : DomainValidation[Boolean] = {
     val invalidSet = specimenGroupData.map(v => SpecimenGroupId(v.specimenGroupId)).map { id =>
       (id -> specimenGroupRepository.withId(studyId, id).isSuccess)
     }.filter(x => !x._2).map(_._1)

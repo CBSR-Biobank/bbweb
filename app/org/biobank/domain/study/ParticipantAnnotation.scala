@@ -24,16 +24,16 @@ object ParticipantAnnotation {
     (__ \ "participantId").read[ParticipantId] and
     (__ \ "annotationTypeId").read[AnnotationTypeId] and
     (__ \ "stringValue").readNullable[String](minLength[String](2)) and
-    (__ \ "numberValue").readNullable[String] and
-    (__ \ "selectedValue").readNullable[List[AnnotationOption]]
-  ){ ParticipantAnnotation(_, _, _, _, _) }
+    (__ \ "numberValue").readNullable[String](minLength[String](2)) and
+    (__ \ "selectedValues").readNullable[List[AnnotationOption]]
+  )(ParticipantAnnotation.apply _)
 
   implicit val participantAnnotationWrites: Writes[ParticipantAnnotation] = (
     (__ \ "participantId").write[ParticipantId] and
     (__ \ "annotationTypeId").write[AnnotationTypeId] and
     (__ \ "stringValue").write[Option[String]] and
     (__ \ "numberValue").write[Option[String]] and
-    (__ \ "selectedValue").write[Option[List[AnnotationOption]]]
+    (__ \ "selectedValues").write[Option[List[AnnotationOption]]]
   )(unlift(ParticipantAnnotation.unapply))
 
 }

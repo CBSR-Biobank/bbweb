@@ -263,13 +263,17 @@ object StudyEvents {
   case class ParticipantAddedEvent(
     studyId: String,
     participantId: String,
-    uniqueId: String)
+    uniqueId: String,
+    annotations: List[ParticipantAnnotation])
+      extends StudyEvent
 
   case class ParticipantUpdatedEvent(
     studyId: String,
     participantId: String,
     version: Long,
-    uniqueId: String)
+    uniqueId: String,
+    annotations: List[ParticipantAnnotation])
+      extends StudyEvent
 
   implicit val annotationValueTypeFormat: Format[AnnotationValueType] =
     enumFormat(org.biobank.domain.AnnotationValueType)
@@ -489,14 +493,16 @@ object StudyEvents {
   implicit val participantAddedEventWriter: Writes[ParticipantAddedEvent] = (
     (__ \ "studyId").write[String] and
       (__ \ "participantId").write[String] and
-      (__ \ "uniqueId").write[String]
+      (__ \ "uniqueId").write[String] and
+      (__ \ "annotations").write[List[ParticipantAnnotation]]
   )(unlift(ParticipantAddedEvent.unapply))
 
   implicit val participantUpdatedEventWriter: Writes[ParticipantUpdatedEvent] = (
     (__ \ "studyId").write[String] and
       (__ \ "participantId").write[String] and
       (__ \ "version").write[Long] and
-      (__ \ "uniqueId").write[String]
+      (__ \ "uniqueId").write[String] and
+      (__ \ "annotations").write[List[ParticipantAnnotation]]
   )(unlift(ParticipantUpdatedEvent.unapply))
 
 }

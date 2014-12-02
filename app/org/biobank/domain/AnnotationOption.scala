@@ -13,7 +13,7 @@ object AnnotationOption {
 
   implicit val annotationOptionRead: Reads[AnnotationOption] = (
     (__ \ "annotationTypeId").read[AnnotationTypeId] and
-      (__ \ "value").read[String]
+      (__ \ "value").read[String](minLength[String](2))
   )(AnnotationOption(_, _))
 
   implicit val annotationOptionWrites: Writes[AnnotationOption] = (

@@ -43,6 +43,8 @@ class TestModule extends Module {
 
   bind [StudiesService] to new StudiesServiceImpl
 
+  bind [ParticipantsService] to new ParticipantsServiceImpl
+
   bind [UsersService] to new UsersService
 
   bind [CentresService] to new CentresServiceImpl
@@ -55,6 +57,8 @@ class TestModule extends Module {
   binding toProvider new SpecimenLinkAnnotationTypeProcessor
   binding toProvider new SpecimenLinkTypeProcessor
   binding toProvider new StudiesProcessor
+
+  binding toProvider new ParticipantsProcessor
 
   binding toProvider new UsersProcessor
 

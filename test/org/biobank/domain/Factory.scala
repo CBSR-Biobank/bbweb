@@ -69,6 +69,7 @@ class Factory {
     domainObjects = domainObjects + (classOf[LockedUser] -> user)
     user
   }
+
   def createDisabledStudy: DisabledStudy = {
     val study = DisabledStudy(
       version        = 0L,
@@ -191,8 +192,10 @@ class Factory {
       description    = Some(nameGenerator.next[ParticipantAnnotationType]),
       valueType      = AnnotationValueType.Select,
       maxValueCount  = Some(1),
-      options        = Some(Seq(nameGenerator.next[String], nameGenerator.next[String])),
-      required       = true)
+      options        = Some(Seq(
+        nameGenerator.next[ParticipantAnnotationType],
+        nameGenerator.next[ParticipantAnnotationType])),
+      required       = false)
     domainObjects = domainObjects + (classOf[ParticipantAnnotationType] -> annotationType)
     annotationType
   }
@@ -268,7 +271,49 @@ class Factory {
   }
 
   def createParticipant: Participant = {
-    ???
+    val study = defaultEnabledStudy
+    val participant = Participant(
+      studyId      = study.id,
+      id           = ParticipantId(nameGenerator.next[Participant]),
+      version      = 0L,
+      timeAdded    = DateTime.now,
+      timeModified = None,
+      uniqueId     = nameGenerator.next[Participant],
+      annotations  = Set.empty
+    )
+    domainObjects = domainObjects + (classOf[Participant] -> participant)
+    participant
+  }
+
+  def createParticipantAnnotation: ParticipantAnnotation = {
+    val participant = defaultParticipant
+    val annotationType = defaultParticipantAnnotationType
+
+    val ptcpAnnot = ParticipantAnnotation(
+      participantId    = participant.id,
+      annotationTypeId = annotationType.id,
+      stringValue      =
+        if (annotationType.valueType == AnnotationValueType.Text)
+          Some(nameGenerator.next[ParticipantAnnotation])
+        else if (annotationType.valueType == AnnotationValueType.DateTime)
+          Some("2000-01-01 00:00")
+        else
+          None,
+      numberValue      =
+        if (annotationType.valueType == AnnotationValueType.Number)
+          Some("1.00")
+        else
+          None,
+      selectedValues   =
+        if (annotationType.valueType == AnnotationValueType.Select) {
+          // returns first option
+          Some(List(AnnotationOption(annotationType.id, annotationType.options.get(0))))
+        } else {
+          None
+        }
+    )
+    domainObjects = domainObjects + (classOf[ParticipantAnnotation] -> ptcpAnnot)
+    ptcpAnnot
   }
 
   def createDisabledCentre: DisabledCentre = {
@@ -358,6 +403,10 @@ class Factory {
       createParticipantAnnotationType)
   }
 
+  def defaultParticipantAnnotationType(annotationType: ParticipantAnnotationType) = {
+    defaultObject(classOf[ParticipantAnnotationType], annotationType)
+  }
+
   def defaultSpecimenLinkAnnotationType: SpecimenLinkAnnotationType = {
     defaultObject(
       classOf[SpecimenLinkAnnotationType],
@@ -380,6 +429,10 @@ class Factory {
 
   def defaultParticipant: Participant = {
     defaultObject(classOf[Participant], createParticipant)
+  }
+
+  def defaultParticipantAnnotation: ParticipantAnnotation = {
+    defaultObject(classOf[ParticipantAnnotation], createParticipantAnnotation)
   }
 
   def defaultDisabledCentre: DisabledCentre = {

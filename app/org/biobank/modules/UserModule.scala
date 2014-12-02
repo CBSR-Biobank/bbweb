@@ -47,6 +47,8 @@ class UserModule extends Module {
   binding toProvider new SpecimenLinkTypeProcessor
   binding toProvider new StudiesProcessor
 
+  binding toProvider new ParticipantsProcessor
+
   binding toProvider new UsersProcessor
 
   binding toProvider new CentresProcessor

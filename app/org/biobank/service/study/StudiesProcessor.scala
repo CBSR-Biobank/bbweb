@@ -168,9 +168,6 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     }
   }
 
-  private def validateAndForward(childActor: ActorRef, cmd: SpecimenLinkTypeCommand) = {
-  }
-
   def updateStudy[T <: Study](cmd: StudyModifyCommand)(fn: Study => DomainValidation[T])
       : DomainValidation[T] = {
     studyRepository.getByKey(StudyId(cmd.id)).fold(
