@@ -30,7 +30,7 @@ class ParticipantRepositoryImpl
         s"participant does not exist: { studyId: $studyId, participantId: $participantId }")
         .failNel,
       ptcp =>
-      if (ptcp.studyId.equals(studyId)) {
+      if (ptcp.studyId == studyId) {
         ptcp.success
       } else {
         DomainError(
@@ -41,7 +41,7 @@ class ParticipantRepositoryImpl
   }
 
   def allForStudy(studyId: StudyId): Set[Participant] = {
-    getValues.filter(x => x.studyId.equals(studyId)).toSet
+    getValues.filter(x => x.studyId == studyId).toSet
   }
 
 }

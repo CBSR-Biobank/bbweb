@@ -173,7 +173,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
 
   private def nameAvailable(name: String, excludeId: ProcessingTypeId): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, processingTypeRepository, ErrMsgNameExists){ item =>
-      item.name.equals(name) && (item.id != excludeId)
+      (item.name == name) && (item.id != excludeId)
     }
   }
 

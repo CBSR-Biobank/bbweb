@@ -9,7 +9,7 @@ trait IdentifiedDomainObject[T] {
   val id: T
 
   override def equals(that: Any) = that match {
-    case that: IdentifiedDomainObject[_] => this.id.equals(that.id)
+    case that: IdentifiedDomainObject[_] => this.id == that.id
     case _ => false
   }
 

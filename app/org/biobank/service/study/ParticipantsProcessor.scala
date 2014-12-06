@@ -106,14 +106,14 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
 
   private def uniqueIdAvailable(uniqueId: String): DomainValidation[Boolean] = {
     uniqueIdAvailableMatcher(uniqueId){ item =>
-      item.uniqueId.equals(uniqueId)
+      item.uniqueId == uniqueId
     }
   }
 
   private def uniqueIdAvailable(uniqueId: String, excludeParticipantId: ParticipantId)
       : DomainValidation[Boolean] = {
     uniqueIdAvailableMatcher(uniqueId){ item =>
-      item.uniqueId.equals(uniqueId) && (item.id != excludeParticipantId)
+      (item.uniqueId == uniqueId) && (item.id != excludeParticipantId)
     }
   }
 

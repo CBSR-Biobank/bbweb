@@ -183,13 +183,13 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
 
   private def nameAvailable(name: String): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, collectionEventTypeRepository, ErrMsgNameExists) { item =>
-      item.name.equals(name)
+      item.name == name
     }
   }
 
   private def nameAvailable(name: String, excludeId: CollectionEventTypeId): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, collectionEventTypeRepository, ErrMsgNameExists){ item =>
-      item.name.equals(name) && (item.id != excludeId)
+      (item.name == name) && (item.id != excludeId)
     }
   }
 

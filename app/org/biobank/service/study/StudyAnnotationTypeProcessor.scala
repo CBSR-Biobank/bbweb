@@ -20,13 +20,13 @@ trait StudyAnnotationTypeProcessor[A <: StudyAnnotationType] extends Processor {
 
   protected def nameAvailable(name: String): DomainValidation[Boolean] = {
     nameAvailableMatcher(name,annotationTypeRepository, errMsgNameExists){ item =>
-      item.name.equals(name)
+      item.name == name
     }
   }
 
   protected def nameAvailable(name: String, excludeId: AnnotationTypeId): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, annotationTypeRepository, errMsgNameExists){ item =>
-      item.name.equals(name) && (item.id != excludeId)
+      (item.name == name) && (item.id != excludeId)
     }
   }
 

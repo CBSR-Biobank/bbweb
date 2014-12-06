@@ -28,7 +28,7 @@ trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
       DomainError(
         s"annotation type does not exist: { studyId: $studyId, annotationTypeId: $annotationTypeId }").failNel,
       annotType =>
-      if (annotType.studyId.equals(studyId)) annotType.success
+      if (annotType.studyId == studyId) annotType.success
       else DomainError(
         "study does not have annotation type: { studyId: %s, annotationTypeId: %s }".format(
           studyId, annotationTypeId)).failNel
@@ -42,7 +42,7 @@ trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
   }
 
   def allForStudy(studyId: StudyId): Set[A] = {
-    getValues.filter(x => x.studyId.equals(studyId)).toSet
+    getValues.filter(x => x.studyId == studyId).toSet
   }
 
 }

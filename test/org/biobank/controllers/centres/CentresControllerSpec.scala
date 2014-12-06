@@ -106,7 +106,7 @@ class CentresControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("error")
       }
 
-      "not add a centre with a duplicate name" in new App(fakeApp) {
+      "fail when adding a centre with a duplicate name" in new App(fakeApp) {
         doLogin
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)

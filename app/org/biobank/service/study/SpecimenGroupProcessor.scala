@@ -195,7 +195,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
 
   private def nameAvailable(specimenGroupName: String): DomainValidation[Boolean] = {
     nameAvailableMatcher(specimenGroupName, specimenGroupRepository, ErrMsgNameExists) { item =>
-      item.name.equals(specimenGroupName)
+      item.name == specimenGroupName
     }
   }
 
@@ -203,7 +203,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     specimenGroupName: String,
     id: SpecimenGroupId): DomainValidation[Boolean] = {
     nameAvailableMatcher(specimenGroupName, specimenGroupRepository, ErrMsgNameExists) { item =>
-      item.name.equals(specimenGroupName) && (item.id != id)
+      (item.name == specimenGroupName) && (item.id != id)
     }
   }
 

@@ -45,7 +45,7 @@ trait Security { self: Controller =>
        request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey)).fold {
          DomainError("No token").failNel[AuthenticationInfo]
        } { token =>
-         if (!xsrfTokenCookie.value.equals(token)) {
+         if (xsrfTokenCookie.value != token) {
            DomainError("Token mismatch").failNel[AuthenticationInfo]
          } else {
            Cache.getAs[UserId](token).fold {

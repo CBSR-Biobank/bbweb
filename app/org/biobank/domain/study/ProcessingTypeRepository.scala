@@ -34,7 +34,7 @@ class ProcessingTypeRepositoryImpl
         s"processing type does not exist: { studyId: $studyId, processingTypeId: $processingTypeId }")
         .failNel,
       cet =>
-      if (cet.studyId.equals(studyId)) {
+      if (cet.studyId == studyId) {
         cet.success
       } else {
         DomainError(
@@ -45,6 +45,6 @@ class ProcessingTypeRepositoryImpl
   }
 
   def allForStudy(studyId: StudyId): Set[ProcessingType] = {
-    getValues.filter(x => x.studyId.equals(studyId)).toSet
+    getValues.filter(x => x.studyId == studyId).toSet
   }
 }

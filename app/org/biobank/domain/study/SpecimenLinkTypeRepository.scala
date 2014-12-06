@@ -34,7 +34,8 @@ class SpecimenLinkTypeRepositoryImpl
       DomainError(
         s"specimen link type does not exist: { processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
         .failNel,
-      slType => if (slType.processingTypeId.equals(processingTypeId))
+      slType =>
+      if (slType.processingTypeId == processingTypeId)
         slType.success
       else DomainError(
         s"processing type does not have specimen link type:{ processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
@@ -43,7 +44,7 @@ class SpecimenLinkTypeRepositoryImpl
   }
 
   def allForProcessingType(processingTypeId: ProcessingTypeId): Set[SpecimenLinkType] = {
-    getValues.filter(x => x.processingTypeId.equals(processingTypeId)).toSet
+    getValues.filter(x => x.processingTypeId == processingTypeId).toSet
   }
 
   def specimenGroupInUse(specimenGroupId: SpecimenGroupId): Boolean = {
@@ -53,6 +54,6 @@ class SpecimenLinkTypeRepositoryImpl
 
   def annotationTypeInUse(annotationType: SpecimenLinkAnnotationType): Boolean = {
     getValues.exists(slType =>
-      slType.annotationTypeData.exists(atd => atd.annotationTypeId.equals(annotationType.id.id)))
+      slType.annotationTypeData.exists(atd => atd.annotationTypeId == annotationType.id.id))
   }
 }

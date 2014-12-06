@@ -274,13 +274,13 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
   private def nameAvailable(name: String): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, centreRepository, errMsgNameExists){ item =>
-      item.name.equals(name)
+      item.name == name
     }
   }
 
   private def nameAvailable(name: String, excludeId: CentreId): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, centreRepository, errMsgNameExists){ item =>
-      item.name.equals(name) && (item.id != excludeId)
+      (item.name == name) && (item.id != excludeId)
     }
   }
 

@@ -25,7 +25,7 @@ class SpecimenGroupRepositoryImpl
   def nextIdentity: SpecimenGroupId = new SpecimenGroupId(nextIdentityAsString)
 
   def allForStudy(studyId: StudyId): Set[SpecimenGroup] = {
-    getValues.filter(x => x.studyId.equals(studyId)).toSet
+    getValues.filter(x => x.studyId == studyId).toSet
   }
 
   def withId(
@@ -35,7 +35,7 @@ class SpecimenGroupRepositoryImpl
       err => DomainError(
         s"specimen group does not exist: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
         .failNel,
-      sg => if (sg.studyId.equals(studyId)) {
+      sg => if (sg.studyId == studyId) {
         sg.success
       } else {
         DomainError(

@@ -39,7 +39,7 @@ class CollectionEventTypeRepositoryImpl
         s"collection event type does not exist: { studyId: $studyId, ceventTypeId: $ceventTypeId }")
         .failNel,
       cet =>
-      if (cet.studyId.equals(studyId))
+      if (cet.studyId == studyId)
         cet.success
       else DomainError(
         s"study does not have collection event type:{ studyId: $studyId, ceventTypeId: $ceventTypeId }")
@@ -48,18 +48,18 @@ class CollectionEventTypeRepositoryImpl
   }
 
   def allForStudy(studyId: StudyId): Set[CollectionEventType] = {
-    getValues.filter(x => x.studyId.equals(studyId)).toSet
+    getValues.filter(x => x.studyId == studyId).toSet
   }
 
   def specimenGroupInUse(studyId: StudyId, specimenGroupId: SpecimenGroupId): Boolean = {
     val sgId = specimenGroupId.toString
-    val studyCeventTypes = getValues.filter(cet => cet.studyId.equals(studyId))
+    val studyCeventTypes = getValues.filter(cet => cet.studyId == studyId)
     studyCeventTypes.exists(cet =>
-      cet.specimenGroupData.exists(sgd => sgd.specimenGroupId.equals(sgId)))
+      cet.specimenGroupData.exists(sgd => sgd.specimenGroupId == sgId))
   }
 
   def annotationTypeInUse(annotationType: CollectionEventAnnotationType): Boolean = {
     getValues.exists(cet =>
-      cet.annotationTypeData.exists(atd => atd.annotationTypeId.equals(annotationType.id.id)))
+      cet.annotationTypeData.exists(atd => atd.annotationTypeId == annotationType.id.id))
   }
 }

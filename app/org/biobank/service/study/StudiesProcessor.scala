@@ -342,13 +342,13 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
   private def nameAvailable(name: String): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, studyRepository, errMsgNameExists){ item =>
-      item.name.equals(name)
+      item.name == name
     }
   }
 
   private def nameAvailable(name: String, excludeStudyId: StudyId): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, studyRepository, errMsgNameExists){ item =>
-      item.name.equals(name) && (item.id != excludeStudyId)
+      (item.name == name) && (item.id != excludeStudyId)
     }
   }
 }

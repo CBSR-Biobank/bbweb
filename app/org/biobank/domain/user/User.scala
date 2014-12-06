@@ -42,7 +42,7 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
    * Authenticate a user.
    */
   def authenticate(email: String, password: String): DomainValidation[User] = {
-    if (this.password.equals(password)) this.success
+    if (this.password == password) this.success
     else DomainError("authentication failure").failNel
   }
 

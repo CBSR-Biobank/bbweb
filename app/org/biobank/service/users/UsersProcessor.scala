@@ -340,13 +340,13 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
 
   private def emailAvailable(email: String): DomainValidation[Boolean] = {
     emailAvailableMatcher(email){ item =>
-      item.email.equals(email)
+      item.email == email
     }
   }
 
   private def emailAvailable(email: String, excludeUserId: UserId): DomainValidation[Boolean] = {
     emailAvailableMatcher(email){ item =>
-      item.email.equals(email) && (item.id != excludeUserId)
+      (item.email == email) && (item.id != excludeUserId)
     }
   }
 

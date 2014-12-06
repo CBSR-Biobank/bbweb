@@ -35,7 +35,7 @@ trait AnnotationType
   val options: Option[Seq[String]]
 
   private def validateValueType: DomainValidation[Boolean] = {
-    if (valueType.equals(AnnotationValueType.Select)) {
+    if (valueType == AnnotationValueType.Select) {
       if (options.isEmpty) ("select annotation type with no values to select").failNel
     } else {
       if (!options.isEmpty) ("non select annotation type with values to select").failNel

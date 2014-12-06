@@ -175,7 +175,7 @@ object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotation
   private def validateSpecimenGroups(
     inputGroupId: SpecimenGroupId,
     outputGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
-    if (inputGroupId.equals(outputGroupId)) {
+    if (inputGroupId == outputGroupId) {
       DomainError("input and output specimen groups are the same").failNel
     } else {
       true.success
