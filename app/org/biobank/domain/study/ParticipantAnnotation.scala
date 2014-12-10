@@ -6,11 +6,10 @@ import play.api.libs.functional.syntax._
 
 import org.biobank.domain.{ Annotation, AnnotationTypeId, AnnotationOption }
 
-/** Value type.
+/** This is a value type.
   *
   */
 case class ParticipantAnnotation(
-  participantId: ParticipantId,
   annotationTypeId: AnnotationTypeId,
   stringValue: Option[String],
   numberValue: Option[String], // FIXME: should we use java.lang.Number
@@ -21,7 +20,6 @@ case class ParticipantAnnotation(
 object ParticipantAnnotation {
 
   implicit val participantAnnotationRead: Reads[ParticipantAnnotation] = (
-    (__ \ "participantId").read[ParticipantId] and
     (__ \ "annotationTypeId").read[AnnotationTypeId] and
     (__ \ "stringValue").readNullable[String](minLength[String](2)) and
     (__ \ "numberValue").readNullable[String](minLength[String](2)) and
@@ -29,7 +27,6 @@ object ParticipantAnnotation {
   )(ParticipantAnnotation.apply _)
 
   implicit val participantAnnotationWrites: Writes[ParticipantAnnotation] = (
-    (__ \ "participantId").write[ParticipantId] and
     (__ \ "annotationTypeId").write[AnnotationTypeId] and
     (__ \ "stringValue").write[Option[String]] and
     (__ \ "numberValue").write[Option[String]] and

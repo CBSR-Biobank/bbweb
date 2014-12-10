@@ -290,7 +290,6 @@ class Factory {
     val annotationType = defaultParticipantAnnotationType
 
     val ptcpAnnot = ParticipantAnnotation(
-      participantId    = participant.id,
       annotationTypeId = annotationType.id,
       stringValue      =
         if (annotationType.valueType == AnnotationValueType.Text)

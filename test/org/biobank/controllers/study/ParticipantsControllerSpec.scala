@@ -23,7 +23,7 @@ import org.scalatestplus.play._
 import org.joda.time.DateTime
 
 /**
-  * Tests the REST API for [[Study]].
+  * Tests the REST API for [[Participants]].
   */
 class ParticipantsControllerSpec extends ControllerFixture {
   import TestGlobal._
@@ -48,7 +48,6 @@ class ParticipantsControllerSpec extends ControllerFixture {
     */
   def annotationToJson(annotation: ParticipantAnnotation) = {
     val json = Json.obj(
-      "participantId"    -> annotation.participantId,
       "annotationTypeId" -> annotation.annotationTypeId,
       "stringValue"      -> annotation.stringValue,
       "numberValue"      -> annotation.numberValue
