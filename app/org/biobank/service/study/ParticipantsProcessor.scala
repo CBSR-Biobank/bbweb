@@ -118,30 +118,37 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
   }
 
   /**
-    * Checks that each required annotation is present and that all annotations belong to the same study as the
-    * annotation type. If one or more annotations are found that belong to a different study, they are
-    * returned in the DomainError.
+    * Checks the following:
+    *
+    *   - no more than one annotation per annotation type
+    *   - that each required annotation is present
+    *   - that all annotations belong to the same study as the annotation type.
+    *
+    * A DomainError is the result if these conditions fail.
     */
   private def validateAnnotationTypes(studyId: StudyId, annotations: Set[ParticipantAnnotation])
       : DomainValidation[Boolean]= {
-    val annotAnnotTypeIds = annotations.map(v => v.annotationTypeId).toSet
-    val requiredAnnotTypeIds = annotationTypeRepository.getValues.filter(at =>
-      (at.studyId.id == studyId.id) && at.required).map(at => at.id).toSet
+    val annotAnnotTypeIdsAsSet = annotations.map(v => v.annotationTypeId).toSet
+    val annotAnnotTypeIdsAsList = annotations.toList.map(v => v.annotationTypeId).toList
 
-    log.info(s"********** annotAnnotTypeIds: $annotAnnotTypeIds")
-    log.info(s"********** requiredAnnotTypeIds: $requiredAnnotTypeIds")
-
-    if (requiredAnnotTypeIds.intersect(annotAnnotTypeIds).size != requiredAnnotTypeIds.size) {
-      DomainError("missing required annotation type(s)").failNel
+    if (annotAnnotTypeIdsAsSet.size != annotAnnotTypeIdsAsList.size) {
+      DomainError("duplicate annotation types in annotations").failNel
     } else {
-      val invalidSet = annotAnnotTypeIds.map { id =>
-        (id -> annotationTypeRepository.withId(studyId, id).isSuccess)
-      }.filter(x => !x._2).map(_._1)
+      val requiredAnnotTypeIds = annotationTypeRepository.getValues.filter(at =>
+        at.studyId.equals(studyId) && at.required).map(at => at.id).toSet
 
-      if (! invalidSet.isEmpty) {
-        DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).failNel
+      if (requiredAnnotTypeIds.intersect(annotAnnotTypeIdsAsSet).size != requiredAnnotTypeIds.size) {
+        DomainError("missing required annotation type(s)").failNel
       } else {
-        true.success
+        val invalidSet = annotAnnotTypeIdsAsSet.map { id =>
+          (id -> annotationTypeRepository.withId(studyId, id).isSuccess)
+        }.filter(x => !x._2).map(_._1)
+
+        if (! invalidSet.isEmpty) {
+          DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).failNel
+        } else {
+          true.success
+        }
       }
     }
   }
