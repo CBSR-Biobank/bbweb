@@ -71,10 +71,10 @@ PUT     /studies/:procTypeId/sltypes/:id        @org.biobank.controllers.study.S
 DELETE  /studies/:procTypeId/sltypes/:id/:ver   @org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(procTypeId, id, ver: Long)
 
 # processing types
-GET     /studies/:studyId/participants/:id      @org.biobank.controllers.study.ParticipantsController.get(studyId, id: String)
-POST    /studies/:studyId/participants          @org.biobank.controllers.study.ParticipantsController.addParticipant(studyId)
-PUT     /studies/:studyId/participants/:id      @org.biobank.controllers.study.ParticipantsController.updateParticipant(studyId, id)
-GET     /studies/participants/checkUnique/:id   @org.biobank.controllers.study.ParticipantsController.checkUnique(id)
+GET     /studies/:studyId/participants/:id          @org.biobank.controllers.study.ParticipantsController.get(studyId, id: String)
+POST    /studies/:studyId/participants              @org.biobank.controllers.study.ParticipantsController.addParticipant(studyId)
+PUT     /studies/:studyId/participants/:id          @org.biobank.controllers.study.ParticipantsController.updateParticipant(studyId, id)
+GET     /studies/participants/checkUnique/:uniqueId @org.biobank.controllers.study.ParticipantsController.checkUnique(uniqueId)
 
 # centres
 GET     /centres                                @org.biobank.controllers.centres.CentresController.list

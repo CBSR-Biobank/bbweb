@@ -59,10 +59,10 @@ class ParticipantsController(implicit inj: Injector)
       }
     }
 
-  def checkUnique(id: String) =
+  def checkUnique(uniqueId: String) =
     AuthAction(parse.empty) { token => userId => implicit request =>
-      Logger.debug(s"ParticipantsController.checkUnique: id: $id")
-      domainValidationReply(participantsService.checkUnique(id))
+      Logger.debug(s"ParticipantsController.checkUnique: uniqueId: $uniqueId")
+      domainValidationReply(participantsService.checkUnique(uniqueId))
     }
 
 }

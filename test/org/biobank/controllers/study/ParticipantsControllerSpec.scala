@@ -346,9 +346,9 @@ class ParticipantsControllerSpec extends ControllerFixture {
       "must return true for a participant ID that does not exist" in new App(fakeApp) {
         doLogin
 
-        var participantId = nameGenerator.next[Participant]
+        var participantUniqueId = nameGenerator.next[Participant]
 
-        val json = makeRequest(GET, s"/studies/participants/checkUnique/$participantId")
+        val json = makeRequest(GET, s"/studies/participants/checkUnique/$participantUniqueId")
           (json \ "status").as[String] must include ("success")
           (json \ "data").as[Boolean] must equal (true)
       }
@@ -359,7 +359,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
         var participant = factory.createParticipant
         participantRepository.put(participant)
 
-        val json = makeRequest(GET, s"/studies/participants/checkUnique/${participant.id}")
+        val json = makeRequest(GET, s"/studies/participants/checkUnique/${participant.uniqueId}")
           (json \ "status").as[String] must include ("success")
           (json \ "data").as[Boolean] must equal (false)
       }
