@@ -4,6 +4,7 @@
 define([
   './ceventAnnotTypesService',
   './ceventTypesService',
+  './participantsService',
   './participantAnnotTypesService',
   './processingTypesService',
   './spcLinkAnnotTypesService',
