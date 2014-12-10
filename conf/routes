@@ -74,6 +74,7 @@ DELETE  /studies/:procTypeId/sltypes/:id/:ver   @org.biobank.controllers.study.S
 GET     /studies/:studyId/participants/:id      @org.biobank.controllers.study.ParticipantsController.get(studyId, id: String)
 POST    /studies/:studyId/participants          @org.biobank.controllers.study.ParticipantsController.addParticipant(studyId)
 PUT     /studies/:studyId/participants/:id      @org.biobank.controllers.study.ParticipantsController.updateParticipant(studyId, id)
+GET     /studies/participants/checkUnique/:id   @org.biobank.controllers.study.ParticipantsController.checkUnique(id)
 
 # centres
 GET     /centres                                @org.biobank.controllers.centres.CentresController.list

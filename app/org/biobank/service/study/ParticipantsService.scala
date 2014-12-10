@@ -31,6 +31,10 @@ trait ParticipantsService {
   def update(cmd: UpdateParticipantCmd)(implicit userId: UserId)
       : Future[DomainValidation[ParticipantUpdatedEvent]]
 
+  /** Returns true if a participant with the ID does not exist in the system, false otherwise.
+    */
+  def checkUnique(id: String): DomainValidation[Boolean]
+
 }
 
 class ParticipantsServiceImpl(implicit inj: Injector)
@@ -66,4 +70,10 @@ class ParticipantsServiceImpl(implicit inj: Injector)
       _.asInstanceOf[DomainValidation[ParticipantUpdatedEvent]])
   }
 
+  def checkUnique(id: String): DomainValidation[Boolean] = {
+    participantRepository.getByKey(ParticipantId(id)).fold(
+      err => true.success,
+      participant => false.success
+    )
+  }
 }

@@ -317,7 +317,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("annotation type(s) do not belong to study")
       }
 
-      "fail for more than one annotation with the same annotation type" taggedAs(Tag("1")) in new App(fakeApp) {
+      "fail for more than one annotation with the same annotation type" in new App(fakeApp) {
         doLogin
 
         val study = factory.createEnabledStudy
@@ -339,6 +339,31 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("duplicate annotation types in annotations")
       }
+    }
+
+    "GET /studies/participants/checkUnique/{id}" must {
+
+      "must return true for a participant ID that does not exist" in new App(fakeApp) {
+        doLogin
+
+        var participantId = nameGenerator.next[Participant]
+
+        val json = makeRequest(GET, s"/studies/participants/checkUnique/$participantId")
+          (json \ "status").as[String] must include ("success")
+          (json \ "data").as[Boolean] must equal (true)
+      }
+
+      "must return false for a participant ID that exists" taggedAs(Tag("1")) in new App(fakeApp) {
+        doLogin
+
+        var participant = factory.createParticipant
+        participantRepository.put(participant)
+
+        val json = makeRequest(GET, s"/studies/participants/checkUnique/${participant.id}")
+          (json \ "status").as[String] must include ("success")
+          (json \ "data").as[Boolean] must equal (false)
+      }
+
     }
 
   }
