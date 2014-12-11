@@ -70,18 +70,18 @@ libraryDependencies ++= Seq(
   "org.webjars"               %  "webjars-locator"                % "0.19" ,
   "org.webjars"               %% "webjars-play"                   % "2.3.0-2",
   // WebJars dependencies
-  "org.webjars"               %  "requirejs"                      % "2.1.14-3",
+  "org.webjars"               %  "requirejs"                      % "2.1.15",
   "org.webjars"               %  "underscorejs"                   % "1.7.0",
   "org.webjars"               %  "jquery"                         % "2.1.1",
-  "org.webjars"               %  "bootstrap"                      % "3.3.0" exclude(
+  "org.webjars"               %  "bootstrap"                      % "3.3.1" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angularjs"                      % "1.3.2" exclude(
+  "org.webjars"               %  "angularjs"                      % "1.3.6" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angular-ui-bootstrap"           % "0.11.2",
-  "org.webjars"               %  "angular-ui-router"              % "0.2.12" exclude(
+  "org.webjars"               %  "angular-ui-bootstrap"           % "0.12.0",
+  "org.webjars"               %  "angular-ui-router"              % "0.2.13" exclude(
     "org.webjars", "angularjs"),
   "org.webjars"               %  "ng-table"                       % "0.3.3",
-  "org.webjars"               % "toastr"                          % "2.0.3"exclude(
+  "org.webjars"               % "toastr"                          % "2.1.0"exclude(
     "org.webjars", "jquery"),
   "org.webjars"               % "angular-sanitize"                % "1.3.0-beta.18" exclude(
     "org.webjars", "angularjs"),
