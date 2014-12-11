@@ -3,6 +3,7 @@ logLevel := Level.Warn
 
 // The Typesafe repository
 resolvers ++= Seq(
+  Classpaths.sbtPluginReleases,
   "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 )
 
@@ -26,4 +27,4 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.0")
 // when changes are made to the web app
 addSbtPlugin("com.jamesward" %% "play-auto-refresh" % "0.0.11")
 
-addSbtPlugin("org.scoverage" %% "sbt-scoverage" % "0.99.7.1")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.0.1")

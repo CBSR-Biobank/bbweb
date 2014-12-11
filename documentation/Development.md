@@ -106,6 +106,18 @@ object MyTag extends Tag("MyTag")
 ...
 ```
 
+## Scala code coverage
+
+**sbt-scoverage** is used to determine code coverage. See the
+[GitHub page](https://github.com/scoverage/sbt-scoverage)
+for instructions on how to use it.
+
+To generate the HTML report use the command:
+
+```sh
+sbt coverageReport
+```
+
 ### Gtags
 
 Using helm-gtags in Emacs. To generate a tags file the following is required:

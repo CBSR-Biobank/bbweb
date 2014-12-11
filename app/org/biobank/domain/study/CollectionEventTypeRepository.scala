@@ -16,7 +16,7 @@ trait CollectionEventTypeRepository
 
   def allForStudy(studyId: StudyId): Set[CollectionEventType]
 
-  def specimenGroupInUse(studyId: StudyId, specimenGroupId: SpecimenGroupId): Boolean
+  def specimenGroupCanBeUpdated(studyId: StudyId, specimenGroupId: SpecimenGroupId): Boolean
 
   def annotationTypeInUse(annotationType: CollectionEventAnnotationType): Boolean
 
@@ -51,7 +51,7 @@ class CollectionEventTypeRepositoryImpl
     getValues.filter(x => x.studyId == studyId).toSet
   }
 
-  def specimenGroupInUse(studyId: StudyId, specimenGroupId: SpecimenGroupId): Boolean = {
+  def specimenGroupCanBeUpdated(studyId: StudyId, specimenGroupId: SpecimenGroupId): Boolean = {
     val sgId = specimenGroupId.toString
     val studyCeventTypes = getValues.filter(cet => cet.studyId == studyId)
     studyCeventTypes.exists(cet =>

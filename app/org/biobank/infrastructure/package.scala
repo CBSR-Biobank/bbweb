@@ -21,6 +21,13 @@ package infrastructure {
 
   }
 
+  trait HasCentreIdentity {
+
+    /** An command or event that includes the study ID that it is related to. */
+    val centreId: String
+
+  }
+
   trait HasProcessingTypeIdentity {
 
     /** An command or event that includes the processing type ID that it is related to. */

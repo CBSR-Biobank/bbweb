@@ -311,7 +311,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
   }
 
   private def updateCentre[T <: Centre]
-    (cmd: CentreCommand)
+    (cmd: CentreModifyCommand)
     (fn: Centre => DomainValidation[T])
       : DomainValidation[T] = {
     centreRepository.getByKey(CentreId(cmd.id)).fold(
@@ -324,7 +324,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
   }
 
   private def updateDisabled[T <: Centre]
-    (cmd: CentreCommand)
+    (cmd: CentreModifyCommand)
     (fn: DisabledCentre => DomainValidation[T])
       : DomainValidation[T] = {
     updateCentre(cmd) {
@@ -334,7 +334,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
   }
 
   private def updateEnabled[T <: Centre]
-    (cmd: CentreCommand)
+    (cmd: CentreModifyCommand)
     (fn: EnabledCentre => DomainValidation[T])
       : DomainValidation[T] = {
     updateCentre(cmd) {

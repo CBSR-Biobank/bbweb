@@ -87,7 +87,7 @@ trait StudiesService {
       : Future[DomainValidation[StudyUnretiredEvent]]
 
   // specimen groups
-  def specimenGroupInUse(studyId: String, specimenGroupId: String)
+  def specimenGroupCanBeUpdated(studyId: String, specimenGroupId: String)
       : DomainValidation[Boolean]
 
   def addSpecimenGroup(cmd: AddSpecimenGroupCmd)(implicit userId: UserId)
@@ -116,7 +116,7 @@ trait StudiesService {
       : Future[DomainValidation[CollectionEventTypeRemovedEvent]]
 
   // collection event annotation types
-  def isCollectionEventAnnotationTypeInUse
+  def collectionEventAnnotationTypeCanBeUpdated
     (studyId: String, annotationTypeId: String)
       : DomainValidation[Boolean]
 
@@ -136,7 +136,7 @@ trait StudiesService {
       : Future[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
 
   // participant annotation types
-  def isParticipantAnnotationTypeInUse
+  def participantAnnotationTypeCanBeUpdated
     (studyId: String, annotationTypeId: String)
       : DomainValidation[Boolean]
 
@@ -167,7 +167,7 @@ trait StudiesService {
     (studyId: String, annotationTypeId: String)
       : DomainValidation[SpecimenLinkAnnotationType]
 
-  def isSpecimenLinkAnnotationTypeInUse
+  def specimenLinkAnnotationTypeCanBeUpdated
     (studyId: String, annotationTypeId: String)
       : DomainValidation[Boolean]
 
@@ -464,13 +464,11 @@ class StudiesServiceImpl(implicit inj: Injector)
       _.asInstanceOf[DomainValidation[StudyUnretiredEvent]])
 
   // specimen groups
-  //
-  // FIXME: rename this to specimenGroupCanBeUpdated
-  def specimenGroupInUse(studyId: String, specimenGroupId: String)
+  def specimenGroupCanBeUpdated(studyId: String, specimenGroupId: String)
       : DomainValidation[Boolean] = {
     for {
       sg <- specimenGroupWithId(studyId, specimenGroupId)
-      inUse <- collectionEventTypeRepository.specimenGroupInUse(sg.studyId, sg.id).success
+      inUse <- collectionEventTypeRepository.specimenGroupCanBeUpdated(sg.studyId, sg.id).success
     } yield inUse
   }
 
@@ -508,9 +506,7 @@ class StudiesServiceImpl(implicit inj: Injector)
       _.asInstanceOf[DomainValidation[CollectionEventTypeRemovedEvent]])
 
   // collection event annotation types
-  //
-  // FIXME: rename this to collectionEventAnnotationTypeCanBeUpdated
-  def isCollectionEventAnnotationTypeInUse(
+  def collectionEventAnnotationTypeCanBeUpdated(
     studyId: String, annotationTypeId: String)
       : DomainValidation[Boolean] = {
     for {
@@ -542,9 +538,7 @@ class StudiesServiceImpl(implicit inj: Injector)
       _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]])
 
   // participant annotation types
-  //
-  // FIXME: rename this to participantAnnotationTypeCanBeUpdated
-  def isParticipantAnnotationTypeInUse(studyId: String, annotationTypeId: String)
+  def participantAnnotationTypeCanBeUpdated(studyId: String, annotationTypeId: String)
       : DomainValidation[Boolean] = {
     // TODO: needs implementation
     //
@@ -574,7 +568,7 @@ class StudiesServiceImpl(implicit inj: Injector)
       _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeRemovedEvent]])
 
   // specimen link annotation types
-  def isSpecimenLinkAnnotationTypeInUse(
+  def specimenLinkAnnotationTypeCanBeUpdated(
     studyId: String, annotationTypeId: String)
       : DomainValidation[Boolean] = {
     for {

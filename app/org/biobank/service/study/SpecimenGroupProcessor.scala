@@ -212,7 +212,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     specimenGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
 
     def checkNotInUseByCollectionEventType: DomainValidation[Boolean] = {
-      if (collectionEventTypeRepository.specimenGroupInUse(studyId, specimenGroupId)) {
+      if (collectionEventTypeRepository.specimenGroupCanBeUpdated(studyId, specimenGroupId)) {
         DomainError(s"specimen group is in use by collection event type: $specimenGroupId").failNel
       } else {
         true.success
@@ -220,7 +220,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     }
 
     def checkNotInUseBySpecimenLinkType: DomainValidation[Boolean] = {
-      if (specimenLinkTypeRepository.specimenGroupInUse(specimenGroupId)) {
+      if (specimenLinkTypeRepository.specimenGroupCanBeUpdated(specimenGroupId)) {
         DomainError(s"specimen group is in use by specimen link type: $specimenGroupId").failNel
       } else {
         true.success

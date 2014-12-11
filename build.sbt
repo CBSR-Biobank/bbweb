@@ -106,6 +106,6 @@ pipelineStages := Seq(rjs, digest, gzip)
 // To completely override the optimization process, use this config option:
 //requireNativePath := Some("node r.js -o name=main out=javascript-min/main.min.js")
 
+// not sure if emojiLogs actually works with play
 emojiLogs
 
-instrumentSettings // for sbt-scoverage

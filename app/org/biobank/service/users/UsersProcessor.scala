@@ -200,7 +200,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
   }
 
   def updateUser[T <: User]
-    (cmd: UserCommand)
+    (cmd: UserModifyCommand)
     (fn: User => DomainValidation[T])
       : DomainValidation[T] = {
     for {
@@ -211,7 +211,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
   }
 
   def updateRegistered[T <: User]
-    (cmd: UserCommand)
+    (cmd: UserModifyCommand)
     (fn: RegisteredUser => DomainValidation[T])
       : DomainValidation[T] = {
     updateUser(cmd) {
@@ -221,7 +221,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
   }
 
   def updateActive[T <: User]
-    (cmd: UserCommand)
+    (cmd: UserModifyCommand)
     (fn: ActiveUser => DomainValidation[T])
       : DomainValidation[T] = {
     updateUser(cmd) {
@@ -231,7 +231,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
   }
 
   def updateLocked[T <: User]
-    (cmd: UserCommand)
+    (cmd: UserModifyCommand)
     (fn: LockedUser => DomainValidation[T])
       : DomainValidation[T] = {
     updateUser(cmd) {
