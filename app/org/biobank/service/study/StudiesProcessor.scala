@@ -16,6 +16,7 @@ import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /**
   * The StudiesProcessor is responsible for maintaining state changes for all
@@ -122,7 +123,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     procCmd.command match {
       case cmd: StudyCommandWithStudyId =>
         studyRepository.getByKey(StudyId(cmd.studyId)).fold(
-          err => context.sender ! DomainError(s"invalid study id: ${cmd.studyId}").failNel,
+          err => context.sender ! DomainError(s"invalid study id: ${cmd.studyId}").failureNel,
           study => study match {
             case study: DisabledStudy => {
               val childActor = cmd match {
@@ -146,7 +147,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
               }
               childActor forward procCmd
             }
-            case study => context.sender ! DomainError(s"$study for $cmd is not disabled").failNel
+            case study => context.sender ! DomainError(s"$study for $cmd is not disabled").failureNel
           }
         )
 
@@ -160,7 +161,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
           err => context.sender ! err.failure,
           study => study match {
             case study: DisabledStudy => specimenLinkTypeProcessor forward procCmd
-            case study => context.sender ! s"$study for $cmd is not disabled".failNel
+            case study => context.sender ! s"$study for $cmd is not disabled".failureNel
           }
         )
 
@@ -171,7 +172,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   def updateStudy[T <: Study](cmd: StudyModifyCommand)(fn: Study => DomainValidation[T])
       : DomainValidation[T] = {
     studyRepository.getByKey(StudyId(cmd.id)).fold(
-      err => DomainError(s"invalid study id: ${cmd.id}").failNel,
+      err => DomainError(s"invalid study id: ${cmd.id}").failureNel,
       study => for {
         validVersion <-  study.requireVersion(cmd.expectedVersion)
         updatedStudy <- fn(study)
@@ -185,7 +186,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
       : DomainValidation[T] = {
     updateStudy(cmd) {
       case study: DisabledStudy => fn(study)
-      case study => s"$study for $cmd is not disabled".failNel
+      case study => s"$study for $cmd is not disabled".failureNel
     }
   }
 
@@ -195,7 +196,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
       : DomainValidation[T] = {
     updateStudy(cmd) {
       case study: EnabledStudy => fn(study)
-      case study => s"$study for $cmd is not enabled".failNel
+      case study => s"$study for $cmd is not enabled".failureNel
     }
   }
 
@@ -205,7 +206,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
       : DomainValidation[T] = {
     updateStudy(cmd) {
       case study: RetiredStudy => fn(study)
-      case study => s"$study for $cmd is not retired".failNel
+      case study => s"$study for $cmd is not retired".failureNel
     }
   }
 
@@ -233,7 +234,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
       } yield updatedStudy
     }
     v.fold(
-      err => err.fail,
+      err => err.failure,
       study => StudyUpdatedEvent(cmd.id, study.version, study.name, study.description).success
     )
   }
@@ -244,7 +245,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     val collectionEventtypeCount = collectionEventTypeRepository.allForStudy(studyId).size
     val v = updateDisabled(cmd) { s => s.enable(specimenGroupCount, collectionEventtypeCount) }
     v.fold(
-      err => err.fail,
+      err => err.failure,
       study => StudyEnabledEvent(cmd.id, study.version).success
     )
   }
@@ -252,7 +253,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   private def validateCmd(cmd: DisableStudyCmd): DomainValidation[StudyDisabledEvent] = {
     val v = updateEnabled(cmd) { s => s.disable }
     v.fold(
-      err => err.fail,
+      err => err.failure,
       study => StudyDisabledEvent(cmd.id, study.version).success
     )
   }
@@ -260,7 +261,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   private def validateCmd(cmd: RetireStudyCmd): DomainValidation[StudyRetiredEvent] = {
     val v = updateDisabled(cmd) { s => s.retire }
     v.fold(
-      err => err.fail,
+      err => err.failure,
       study => StudyRetiredEvent(cmd.id, study.version).success
     )
   }
@@ -268,7 +269,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   private def validateCmd(cmd: UnretireStudyCmd): DomainValidation[StudyUnretiredEvent] = {
     val v = updateRetired(cmd) { s => s.unretire }
     v.fold(
-      err => err.fail,
+      err => err.failure,
       study => StudyUnretiredEvent(cmd.id, study.version).success
     )
   }

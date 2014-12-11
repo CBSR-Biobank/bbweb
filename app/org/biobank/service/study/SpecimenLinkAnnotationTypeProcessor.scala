@@ -15,6 +15,7 @@ import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /**
   * The SpecimenLinkAnnotationTypeProcessor is responsible for maintaining state changes for all
@@ -117,7 +118,7 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
     }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       at => SpecimenLinkAnnotationTypeUpdatedEvent(
         at.studyId.id, at.id.id, at.version, at.name, at.description, at.valueType,
         at.maxValueCount, at.options).success
@@ -129,7 +130,7 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
     val v = update(cmd) { at => at.success }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       at =>  SpecimenLinkAnnotationTypeRemovedEvent(at.studyId.id, at.id.id).success
     )
   }
@@ -164,7 +165,7 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
   def checkNotInUse(annotationType: SpecimenLinkAnnotationType)
       : DomainValidation[SpecimenLinkAnnotationType] = {
     if (specimenLinkTypeRepository.annotationTypeInUse(annotationType)) {
-      DomainError(s"annotation type is in use by specimen link type: ${annotationType.id}").failNel
+      DomainError(s"annotation type is in use by specimen link type: ${annotationType.id}").failureNel
     } else {
       annotationType.success
     }

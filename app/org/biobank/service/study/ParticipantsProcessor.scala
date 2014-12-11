@@ -16,6 +16,7 @@ import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /**
   * The ParticipantsProcessor is responsible for maintaining state changes for all
@@ -80,10 +81,10 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
 
   private def enabledStudy(studyId: StudyId): DomainValidation[EnabledStudy] = {
     studyRepository.getByKey(studyId).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => study match {
         case st: EnabledStudy => st.success
-        case _ => DomainError(s"study is not enabled: $studyId").failNel
+        case _ => DomainError(s"study is not enabled: $studyId").failureNel
       }
     )
   }
@@ -98,7 +99,7 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
       matcher(item)
     }
     if (exists) {
-      DomainError(s"$errMsgUniqueIdExists: $uniqueId").failNel
+      DomainError(s"$errMsgUniqueIdExists: $uniqueId").failureNel
     } else {
       true.success
     }
@@ -132,20 +133,20 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
     val annotAnnotTypeIdsAsList = annotations.toList.map(v => v.annotationTypeId).toList
 
     if (annotAnnotTypeIdsAsSet.size != annotAnnotTypeIdsAsList.size) {
-      DomainError("duplicate annotation types in annotations").failNel
+      DomainError("duplicate annotation types in annotations").failureNel
     } else {
       val requiredAnnotTypeIds = annotationTypeRepository.getValues.filter(at =>
         at.studyId.equals(studyId) && at.required).map(at => at.id).toSet
 
       if (requiredAnnotTypeIds.intersect(annotAnnotTypeIdsAsSet).size != requiredAnnotTypeIds.size) {
-        DomainError("missing required annotation type(s)").failNel
+        DomainError("missing required annotation type(s)").failureNel
       } else {
         val invalidSet = annotAnnotTypeIdsAsSet.map { id =>
           (id -> annotationTypeRepository.withId(studyId, id).isSuccess)
         }.filter(x => !x._2).map(_._1)
 
         if (! invalidSet.isEmpty) {
-          DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).failNel
+          DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).failureNel
         } else {
           true.success
         }

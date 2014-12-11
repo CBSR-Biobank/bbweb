@@ -33,14 +33,115 @@ trait AnnotationType
     * @todo describe why this is a map.
     */
   val options: Option[Seq[String]]
+}
 
-  private def validateValueType: DomainValidation[Boolean] = {
-    if (valueType == AnnotationValueType.Select) {
-      if (options.isEmpty) ("select annotation type with no values to select").failNel
-    } else {
-      if (!options.isEmpty) ("non select annotation type with values to select").failNel
+trait AnnotationTypeValidations {
+  import org.biobank.domain.CommonValidations._
+
+  case object MaxValueCountError extends ValidationKey
+
+  case object OptionRequired extends ValidationKey
+
+  case object DuplicateOptionsError extends ValidationKey
+
+  def validateMaxValueCount(option: Option[Int]): DomainValidation[Option[Int]] = {
+    option.fold {
+      none[Int].successNel[String]
+    } { n  =>
+      if (n > -1) {
+        option.successNel
+      } else {
+        MaxValueCountError.toString.failureNel[Option[Int]]
+      }
     }
-    true.success
+  }
+
+  /**
+    *  Validates each item in the map and returns all failures.
+    */
+  def validateOptions(options: Option[Seq[String]]): DomainValidation[Option[Seq[String]]] = {
+    options.fold {
+      none[Seq[String]].successNel[String]
+    } { optionsSeq =>
+      if (optionsSeq.distinct.size == optionsSeq.size) {
+        optionsSeq.toList.map(validateString(_, OptionRequired)).sequenceU.fold(
+          err => err.toList.mkString(",").failureNel[Option[Seq[String]]],
+          list => Some(list.toSeq).successNel
+        )
+      } else {
+        DuplicateOptionsError.toString.failureNel[Option[Seq[String]]]
+      }
+    }
+  }
+
+  /**
+    *  Validates each item in the list and returns all failures if they exist.
+    */
+  protected def validateAnnotationTypeData[T <: AnnotationTypeData](
+    annotationTypeData: List[T]): DomainValidation[List[T]] = {
+
+    def validateAnnotationTypeItem(annotationTypeItem: T): DomainValidation[T] = {
+      validateString(annotationTypeItem.annotationTypeId, IdRequired).fold(
+        err => err.failure,
+        id => annotationTypeItem.success
+      )
+    }
+
+    annotationTypeData.map(validateAnnotationTypeItem).sequenceU
+  }
+
+  /** If an annotation type is for a select, the following is required:
+    *
+    * - max value count must be 1 or 2
+    * - options must be a non-empty sequence
+    *
+    * If an annotation type is not for a select, the following is required
+    *
+    * - max value count must be 0
+    * - options must be None
+    */
+  def validateSelectParams(
+    valueType: AnnotationValueType,
+    maxValueCount: Option[Int],
+    options: Option[Seq[String]])
+      : DomainValidation[Boolean] = {
+    if (valueType == AnnotationValueType.Select) {
+      maxValueCount.fold {
+        DomainError(s"max value count is invalid for select").failureNel[Boolean]
+      } { count =>
+        val countValidation = if ((count < 1) || (count > 2)) {
+          DomainError(s"select annotation type with invalid maxValueCount: $count").failureNel[Boolean]
+        } else {
+          true.successNel[String]
+        }
+
+        val optionsValidation = options.fold {
+          DomainError("select annotation type with no options").failureNel[Boolean]
+        } { optionsSeq =>
+          if (optionsSeq.isEmpty) {
+            DomainError("select annotation type with no optionsSeq to select").failureNel[Boolean]
+          } else {
+            true.successNel[String]
+          }
+        }
+
+        (countValidation |@| optionsValidation)(_ && _)
+      }
+    } else {
+      val countValidation = maxValueCount.fold {
+        true.successNel[String]
+      } { count =>
+        DomainError(s"max value count is invalid for non-select").failureNel[Boolean]
+      }
+
+      val optionsValidation = options.fold {
+        true.successNel[String]
+      } { optionsSeq =>
+        DomainError("non select annotation type with options to select").failureNel[Boolean]
+      }
+
+      (countValidation |@| optionsValidation)(_ && _)
+    }
   }
 
 }

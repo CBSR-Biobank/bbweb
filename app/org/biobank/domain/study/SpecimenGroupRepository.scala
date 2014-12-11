@@ -34,13 +34,13 @@ class SpecimenGroupRepositoryImpl
     getByKey(specimenGroupId).fold(
       err => DomainError(
         s"specimen group does not exist: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
-        .failNel,
+        .failureNel,
       sg => if (sg.studyId == studyId) {
         sg.success
       } else {
         DomainError(
           s"study does not have specimen group: { studyId: $studyId, specimenGroupId: $specimenGroupId }")
-          .failNel
+          .failureNel
       }
     )
   }

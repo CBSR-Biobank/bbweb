@@ -15,6 +15,7 @@ import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /**
   * The ParticipantAnnotationTypeProcessor is responsible for maintaining state changes for all
@@ -32,6 +33,8 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
   override def persistenceId = "participant-annotation-type-processor-id"
 
   override val annotationTypeRepository = inject [ParticipantAnnotationTypeRepository]
+
+  val participantRepository = inject [ParticipantRepository]
 
   case class SnapshotState(annotationTypes: Set[ParticipantAnnotationType])
 
@@ -104,11 +107,15 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
   }
 
 
+  /** Updates are only allowed if the study has no participants.
+    */
   private def validateCmd(cmd: UpdateParticipantAnnotationTypeCmd):
       DomainValidation[ParticipantAnnotationTypeUpdatedEvent] = {
     val timeNow = DateTime.now
     val v = update(cmd) { at =>
       for {
+        noParticipants <- participantRepository.getValues.filter(p =>
+          p.studyId.equals(at.studyId)).isEmpty.success
         nameAvailable <- nameAvailable(cmd.name, AnnotationTypeId(cmd.id))
         newItem <- at.update(
           cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options, cmd.required)
@@ -116,7 +123,7 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
     }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       at => ParticipantAnnotationTypeUpdatedEvent(
         at.studyId.id, at.id.id, at.version, at.name, at.description, at.valueType,
         at.maxValueCount, at.options, at.required).success
@@ -128,7 +135,7 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
     val v = update(cmd) { at => at.success }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       at =>  ParticipantAnnotationTypeRemovedEvent(at.studyId.id, at.id.id).success
     )
   }

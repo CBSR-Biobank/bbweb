@@ -87,9 +87,6 @@ trait StudiesService {
       : Future[DomainValidation[StudyUnretiredEvent]]
 
   // specimen groups
-  def specimenGroupCanBeUpdated(studyId: String, specimenGroupId: String)
-      : DomainValidation[Boolean]
-
   def addSpecimenGroup(cmd: AddSpecimenGroupCmd)(implicit userId: UserId)
       : Future[DomainValidation[SpecimenGroupAddedEvent]]
 
@@ -116,10 +113,6 @@ trait StudiesService {
       : Future[DomainValidation[CollectionEventTypeRemovedEvent]]
 
   // collection event annotation types
-  def collectionEventAnnotationTypeCanBeUpdated
-    (studyId: String, annotationTypeId: String)
-      : DomainValidation[Boolean]
-
   def addCollectionEventAnnotationType
     (cmd: AddCollectionEventAnnotationTypeCmd)
     (implicit userId: UserId)
@@ -136,10 +129,6 @@ trait StudiesService {
       : Future[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
 
   // participant annotation types
-  def participantAnnotationTypeCanBeUpdated
-    (studyId: String, annotationTypeId: String)
-      : DomainValidation[Boolean]
-
   def participantAnnotationTypesForStudy
     (studyId: String)
       : DomainValidation[Set[ParticipantAnnotationType]]
@@ -166,10 +155,6 @@ trait StudiesService {
   def specimenLinkAnnotationTypeWithId
     (studyId: String, annotationTypeId: String)
       : DomainValidation[SpecimenLinkAnnotationType]
-
-  def specimenLinkAnnotationTypeCanBeUpdated
-    (studyId: String, annotationTypeId: String)
-      : DomainValidation[Boolean]
 
   def specimenLinkAnnotationTypesForStudy(id: String)
       : DomainValidation[Set[SpecimenLinkAnnotationType]]
@@ -269,14 +254,14 @@ class StudiesServiceImpl(implicit inj: Injector)
   def specimenGroupWithId(studyId: String, specimenGroupId: String)
       : DomainValidation[SpecimenGroup] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => specimenGroupRepository.withId(study.id, SpecimenGroupId(specimenGroupId))
     )
   }
 
   def specimenGroupsForStudy(studyId: String) : DomainValidation[Set[SpecimenGroup]] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => specimenGroupRepository.allForStudy(study.id).successNel
     )
   }
@@ -284,7 +269,7 @@ class StudiesServiceImpl(implicit inj: Injector)
   def specimenGroupsInUse(studyId: String)
       : DomainValidation[Set[SpecimenGroupId]] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => {
         val cetSpecimenGroupIds = for {
           ceventType <- collectionEventTypeRepository.allForStudy(study.id)
@@ -305,7 +290,7 @@ class StudiesServiceImpl(implicit inj: Injector)
   def collectionEventAnnotationTypeWithId(studyId: String, annotationTypeId: String)
       : DomainValidation[CollectionEventAnnotationType] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => collectionEventAnnotationTypeRepository.withId(
         study.id, AnnotationTypeId(annotationTypeId))
     )
@@ -314,7 +299,7 @@ class StudiesServiceImpl(implicit inj: Injector)
   def collectionEventAnnotationTypesForStudy(studyId: String)
       : DomainValidation[Set[CollectionEventAnnotationType]] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => collectionEventAnnotationTypeRepository.allForStudy(study.id).successNel
     )
   }
@@ -322,7 +307,7 @@ class StudiesServiceImpl(implicit inj: Injector)
   def collectionEventTypeWithId(studyId: String, collectionEventTypeId: String)
       : DomainValidation[CollectionEventType] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => collectionEventTypeRepository.withId(study.id, CollectionEventTypeId(collectionEventTypeId))
     )
   }
@@ -330,7 +315,7 @@ class StudiesServiceImpl(implicit inj: Injector)
   def collectionEventTypesForStudy(studyId: String)
       : DomainValidation[Set[CollectionEventType]] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => collectionEventTypeRepository.allForStudy(study.id).success
     )
   }
@@ -338,7 +323,7 @@ class StudiesServiceImpl(implicit inj: Injector)
   def participantAnnotationTypesForStudy(studyId: String)
       : DomainValidation[Set[ParticipantAnnotationType]] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => participantAnnotationTypeRepository.allForStudy(study.id).success
     )
   }
@@ -346,7 +331,7 @@ class StudiesServiceImpl(implicit inj: Injector)
   def participantAnnotationTypeWithId(studyId: String, annotationTypeId: String)
       : DomainValidation[ParticipantAnnotationType] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => participantAnnotationTypeRepository.withId(study.id, AnnotationTypeId(annotationTypeId))
     )
   }
@@ -354,7 +339,7 @@ class StudiesServiceImpl(implicit inj: Injector)
   def specimenLinkAnnotationTypeWithId(studyId: String, annotationTypeId: String)
       : DomainValidation[SpecimenLinkAnnotationType] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => specimenLinkAnnotationTypeRepository.withId(study.id, AnnotationTypeId(annotationTypeId))
     )
   }
@@ -362,7 +347,7 @@ class StudiesServiceImpl(implicit inj: Injector)
   def processingTypeWithId(studyId: String, processingTypeId: String)
       : DomainValidation[ProcessingType] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => processingTypeRepository.withId(study.id, ProcessingTypeId(processingTypeId))
     )
   }
@@ -370,7 +355,7 @@ class StudiesServiceImpl(implicit inj: Injector)
   def processingTypesForStudy(studyId: String)
       : DomainValidation[Set[ProcessingType]] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => processingTypeRepository.allForStudy(study.id).success
     )
   }
@@ -378,7 +363,7 @@ class StudiesServiceImpl(implicit inj: Injector)
   def specimenLinkTypeWithId(processingTypeId: String, specimenLinkTypeId: String)
       : DomainValidation[SpecimenLinkType] = {
     processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId)).fold(
-      err => DomainError(s"invalid processing type id: $processingTypeId").failNel,
+      err => DomainError(s"invalid processing type id: $processingTypeId").failureNel,
       pt => specimenLinkTypeRepository.withId(pt.id, SpecimenLinkTypeId(specimenLinkTypeId))
     )
   }
@@ -386,14 +371,14 @@ class StudiesServiceImpl(implicit inj: Injector)
   def specimenLinkTypesForProcessingType(processingTypeId: String)
       : DomainValidation[Set[SpecimenLinkType]] = {
     processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId)).fold(
-      err => DomainError(s"invalid processing type id: $processingTypeId").failNel,
+      err => DomainError(s"invalid processing type id: $processingTypeId").failureNel,
       pt => specimenLinkTypeRepository.allForProcessingType(pt.id).success
     )
   }
 
   def getCollectionDto(studyId: String): DomainValidation[CollectionDto] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => {
         val collectionEventTypes = collectionEventTypeRepository.allForStudy(study.id)
         val annotationTypes = collectionEventAnnotationTypeRepository.allForStudy(study.id)
@@ -413,7 +398,7 @@ class StudiesServiceImpl(implicit inj: Injector)
 
   def getProcessingDto(studyId: String): DomainValidation[ProcessingDto] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => {
         val specimenGroups  = specimenGroupRepository.allForStudy(study.id)
         val processingTypes = processingTypeRepository.allForStudy(study.id)
@@ -464,14 +449,6 @@ class StudiesServiceImpl(implicit inj: Injector)
       _.asInstanceOf[DomainValidation[StudyUnretiredEvent]])
 
   // specimen groups
-  def specimenGroupCanBeUpdated(studyId: String, specimenGroupId: String)
-      : DomainValidation[Boolean] = {
-    for {
-      sg <- specimenGroupWithId(studyId, specimenGroupId)
-      inUse <- collectionEventTypeRepository.specimenGroupCanBeUpdated(sg.studyId, sg.id).success
-    } yield inUse
-  }
-
   def addSpecimenGroup(cmd: AddSpecimenGroupCmd)(implicit userId: UserId)
       : Future[DomainValidation[SpecimenGroupAddedEvent]] = {
     ask(processor, cmd, userId).map (
@@ -506,15 +483,6 @@ class StudiesServiceImpl(implicit inj: Injector)
       _.asInstanceOf[DomainValidation[CollectionEventTypeRemovedEvent]])
 
   // collection event annotation types
-  def collectionEventAnnotationTypeCanBeUpdated(
-    studyId: String, annotationTypeId: String)
-      : DomainValidation[Boolean] = {
-    for {
-      at <- collectionEventAnnotationTypeWithId(studyId, annotationTypeId)
-      inUse <- collectionEventTypeRepository.annotationTypeInUse(at).success
-    } yield inUse
-  }
-
   def addCollectionEventAnnotationType
     (cmd: AddCollectionEventAnnotationTypeCmd)
     (implicit userId: UserId)
@@ -538,14 +506,6 @@ class StudiesServiceImpl(implicit inj: Injector)
       _.asInstanceOf[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]])
 
   // participant annotation types
-  def participantAnnotationTypeCanBeUpdated(studyId: String, annotationTypeId: String)
-      : DomainValidation[Boolean] = {
-    // TODO: needs implementation
-    //
-    // return true if used by any participants
-    false.success
-  }
-
   def addParticipantAnnotationType
     (cmd: AddParticipantAnnotationTypeCmd)
     (implicit userId: UserId)
@@ -568,20 +528,10 @@ class StudiesServiceImpl(implicit inj: Injector)
       _.asInstanceOf[DomainValidation[ParticipantAnnotationTypeRemovedEvent]])
 
   // specimen link annotation types
-  def specimenLinkAnnotationTypeCanBeUpdated(
-    studyId: String, annotationTypeId: String)
-      : DomainValidation[Boolean] = {
-    for {
-      at <- specimenLinkAnnotationTypeRepository.withId(
-        StudyId(studyId), AnnotationTypeId(annotationTypeId))
-      inUse <- specimenLinkTypeRepository.annotationTypeInUse(at).success
-    } yield inUse
-  }
-
   def specimenLinkAnnotationTypesForStudy(studyId: String)
       : DomainValidation[Set[SpecimenLinkAnnotationType]] = {
     studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failNel,
+      err => DomainError(s"invalid study id: $studyId").failureNel,
       study => specimenLinkAnnotationTypeRepository.allForStudy(StudyId(studyId)).success
     )
   }

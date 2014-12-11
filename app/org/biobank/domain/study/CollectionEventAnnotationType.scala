@@ -73,8 +73,11 @@ object CollectionEventAnnotationType extends StudyAnnotationTypeValidations {
       validateString(name, NameRequired) |@|
       validateNonEmptyOption(description, NonEmptyDescription) |@|
       validateMaxValueCount(maxValueCount) |@|
-      validateOptions(options)) {
-        CollectionEventAnnotationType(_, _, _, dateTime, None, _, _, valueType, _, _)
+      validateOptions(options) |@|
+      validateSelectParams(valueType, maxValueCount, options)) {
+      case (p1, p2, p3, p4, p5, p6, p7, p8) =>
+        // p8 not used to create a ParticipantAnnotationType
+        CollectionEventAnnotationType(p1, p2, p3, dateTime, None, p4, p5, valueType, p6, p7)
       }
   }
 

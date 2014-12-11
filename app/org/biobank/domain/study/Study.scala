@@ -23,6 +23,7 @@ import play.api.libs.functional.syntax._
 import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /** A Study represents a collection of participants and specimens collected for a particular research
   * study. This is an aggregate root.
@@ -99,10 +100,10 @@ case class DisabledStudy(
     collectionEventTypeCount: Int): DomainValidation[EnabledStudy] = {
 
     def checkSpecimenGroupCount =
-      if (specimenGroupCount > 0) true.success else DomainError("no specimen groups").failNel
+      if (specimenGroupCount > 0) true.success else DomainError("no specimen groups").failureNel
 
     def checkCollectionEventTypeCount =
-      if (collectionEventTypeCount > 0) true.success else DomainError("no collection event types").failNel
+      if (collectionEventTypeCount > 0) true.success else DomainError("no collection event types").failureNel
 
     for {
       sgCount <- checkSpecimenGroupCount

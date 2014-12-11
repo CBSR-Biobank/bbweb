@@ -95,14 +95,14 @@ class CentresServiceImpl(implicit inj: Injector)
 
   def getCentre(id: String): DomainValidation[Centre] = {
     centreRepository.getByKey(CentreId(id)).fold(
-      err => DomainError(s"invalid centre id: $id").failNel,
+      err => DomainError(s"invalid centre id: $id").failureNel,
       centre => centre.success
     )
   }
 
   def getCentreLocations(centreId: String, locationIdOpt: Option[String]): DomainValidation[Set[Location]] = {
     centreRepository.getByKey(CentreId(centreId)).fold(
-      err => DomainError(s"invalid centre id: $centreId").failNel[Set[Location]],
+      err => DomainError(s"invalid centre id: $centreId").failureNel[Set[Location]],
       centre => {
         val locationIds = centreLocationsRepository.withCentreId(centre.id).map { x => x.locationId }
         val locations = locationRepository.getValues.filter(x => locationIds.contains(x.id)).toSet
@@ -110,11 +110,11 @@ class CentresServiceImpl(implicit inj: Injector)
           locations.successNel[String]
         } { locationId =>
           locationRepository.getByKey(LocationId(locationId)).fold(
-            err => DomainError(s"invalid location id: $locationId").failNel[Set[Location]],
+            err => DomainError(s"invalid location id: $locationId").failureNel[Set[Location]],
             location => {
               val locsFound = locations.filter(_.id.id == locationId)
               if (locsFound.isEmpty) {
-                DomainError(s"centre does not have location with id: $locationId").failNel[Set[Location]]
+                DomainError(s"centre does not have location with id: $locationId").failureNel[Set[Location]]
               } else {
                 Set(location).successNel[String]
               }
@@ -127,7 +127,7 @@ class CentresServiceImpl(implicit inj: Injector)
 
   def getCentreStudies(centreId: String): DomainValidation[Set[StudyId]] = {
     centreRepository.getByKey(CentreId(centreId)).fold(
-      err => DomainError(s"invalid centre id: $centreId").failNel,
+      err => DomainError(s"invalid centre id: $centreId").failureNel,
       centre => centreStudiesRepository.withCentreId(CentreId(centreId)).map(x => x.studyId).toSet.success
     )
   }

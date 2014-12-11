@@ -17,6 +17,7 @@ import scaldi.{Injectable, Injector}
 
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /**
   * Handles the commands to configure users.
@@ -107,7 +108,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     val timeNow = DateTime.now
     val v = updateRegistered(cmd) { u => u.activate }
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       user => UserActivatedEvent(user.id.id, user.version).success
     )
   }
@@ -116,7 +117,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     val timeNow = DateTime.now
     val v = updateActive(cmd) { _.updateName(cmd.name) }
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       user => UserNameUpdatedEvent(user.id.id, user.version, user.name).success
     )
   }
@@ -132,7 +133,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       user => UserEmailUpdatedEvent(user.id.id, user.version, user.email).success
     )
   }
@@ -145,12 +146,12 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
         val passwordInfo = encryptPassword(user, cmd.newPassword)
         user.updatePassword(passwordInfo.password, passwordInfo.salt)
       } else {
-        DomainError("invalid password").failNel
+        DomainError("invalid password").failureNel
       }
     }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       user => UserPasswordUpdatedEvent(user.id.id, user.version, user.password, user.salt).success
     )
   }
@@ -175,7 +176,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
                   updatedUser.salt).success
               }
             )
-          case user => s"$user for $cmd is not active".failNel
+          case user => s"$user for $cmd is not active".failureNel
         }
       }
     )
@@ -185,7 +186,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     val timeNow = DateTime.now
     val v = updateActive(cmd) { u => u.lock }
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       user => UserLockedEvent(user.id.id, user.version).success
     )
   }
@@ -194,7 +195,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     val timeNow = DateTime.now
     val v = updateLocked(cmd) { u => u.unlock }
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       user => UserUnlockedEvent(user.id.id, user.version).success
     )
   }
@@ -216,7 +217,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       : DomainValidation[T] = {
     updateUser(cmd) {
       case user: RegisteredUser => fn(user)
-      case user => s"$user for $cmd is not registered".failNel
+      case user => s"$user for $cmd is not registered".failureNel
     }
   }
 
@@ -226,7 +227,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       : DomainValidation[T] = {
     updateUser(cmd) {
       case user: ActiveUser => fn(user)
-      case user => s"$user for $cmd is not active".failNel
+      case user => s"$user for $cmd is not active".failureNel
     }
   }
 
@@ -236,7 +237,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       : DomainValidation[T] = {
     updateUser(cmd) {
       case user: LockedUser => fn(user)
-      case user => s"$user for $cmd is not locked".failNel
+      case user => s"$user for $cmd is not locked".failureNel
     }
   }
 
@@ -330,7 +331,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       matcher(item)
     }
     if (exists) {
-      DomainError(s"user with email already exists: $email").failNel
+      DomainError(s"user with email already exists: $email").failureNel
     } else {
       true.success
     }

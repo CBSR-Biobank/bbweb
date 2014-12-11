@@ -24,6 +24,7 @@ import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /**
   * The CollectionEventTypeProcessor is responsible for maintaining state changes for all
@@ -130,7 +131,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       cet => CollectionEventTypeUpdatedEvent(
         cmd.studyId, cet.id.id, cet.version, cet.name, cet.description,
         cet.recurring, cet.specimenGroupData, cet.annotationTypeData).success
@@ -142,7 +143,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     val v = update(cmd) { at => at.success }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       cet =>  CollectionEventTypeRemovedEvent(cet.studyId.id, cet.id.id).success
     )
   }
@@ -207,7 +208,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     }.filter(x => !x._2).map(_._1)
 
     if (invalidSet.isEmpty) true.success
-    else DomainError("specimen group(s) do not belong to study: " + invalidSet.mkString(", ")).failNel
+    else DomainError("specimen group(s) do not belong to study: " + invalidSet.mkString(", ")).failureNel
   }
 
   /**
@@ -224,7 +225,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     }.filter(x => !x._2).map(_._1)
 
     if (invalidSet.isEmpty) true.success
-    else DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).failNel
+    else DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).failureNel
   }
 
 }

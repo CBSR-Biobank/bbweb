@@ -115,7 +115,7 @@ for instructions on how to use it.
 To generate the HTML report use the command:
 
 ```sh
-sbt coverageReport
+sbt clean coverage test coverageReport
 ```
 
 ### Gtags

@@ -13,6 +13,7 @@ import akka.persistence.SnapshotOffer
 import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /**
   * The CeventAnnotationTypeProcessor is responsible for maintaining state changes for all
@@ -118,7 +119,7 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
     }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       at => CollectionEventAnnotationTypeUpdatedEvent(
         at.studyId.id, at.id.id, at.version, at.name, at.description, at.valueType,
         at.maxValueCount, at.options).success
@@ -131,7 +132,7 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
     val v = update(cmd) { at => at.success }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       at =>  CollectionEventAnnotationTypeRemovedEvent(at.studyId.id, at.id.id).success
     )
   }
@@ -167,7 +168,7 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
     (annotationType: CollectionEventAnnotationType)
       : DomainValidation[CollectionEventAnnotationType] = {
     if (collectionEventTypeRepository.annotationTypeInUse(annotationType)) {
-      DomainError(s"annotation type is in use by collection event type: ${annotationType.id}").failNel
+      DomainError(s"annotation type is in use by collection event type: ${annotationType.id}").failureNel
     } else {
       annotationType.success
     }

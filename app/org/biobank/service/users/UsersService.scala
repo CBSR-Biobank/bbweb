@@ -18,6 +18,7 @@ import scaldi.{Injectable, Injector}
 
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 class UsersService(implicit inj: Injector)
     extends ApplicationService
@@ -54,7 +55,7 @@ class UsersService(implicit inj: Injector)
         if (passwordHasher.valid(user.password, user.salt, enteredPwd)) {
           user.success
         } else {
-          DomainError("invalid password").failNel
+          DomainError("invalid password").failureNel
         }
       }
       notLocked <- UserHelper.isUserNotLocked(user)

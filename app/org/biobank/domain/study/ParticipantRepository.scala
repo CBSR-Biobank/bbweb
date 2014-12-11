@@ -28,14 +28,14 @@ class ParticipantRepositoryImpl
     getByKey(participantId).fold(
       err => DomainError(
         s"participant does not exist: { studyId: $studyId, participantId: $participantId }")
-        .failNel,
+        .failureNel,
       ptcp =>
       if (ptcp.studyId == studyId) {
         ptcp.success
       } else {
         DomainError(
           s"study does not have participant: { studyId: $studyId, participantId: $participantId }")
-          .failNel
+          .failureNel
       }
     )
   }

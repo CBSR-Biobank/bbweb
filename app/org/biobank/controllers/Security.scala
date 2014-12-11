@@ -13,7 +13,7 @@ import scaldi.{Injectable, Injector}
 
 import scalaz._
 import scalaz.Scalaz._
-
+import scalaz.Validation.FlatMap._
 /**
  * Security actions that should be used by all controllers that need to protect their actions.
  * Can be composed to fine-tune access control.
@@ -40,16 +40,16 @@ trait Security { self: Controller =>
     (implicit usersService: UsersService)
       : DomainValidation[AuthenticationInfo] = {
      request.cookies.get(AuthTokenCookieKey).fold {
-       DomainError("Invalid XSRF Token cookie").failNel[AuthenticationInfo]
+       DomainError("Invalid XSRF Token cookie").failureNel[AuthenticationInfo]
      } { xsrfTokenCookie =>
        request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey)).fold {
-         DomainError("No token").failNel[AuthenticationInfo]
+         DomainError("No token").failureNel[AuthenticationInfo]
        } { token =>
          if (xsrfTokenCookie.value != token) {
-           DomainError("Token mismatch").failNel[AuthenticationInfo]
+           DomainError("Token mismatch").failureNel[AuthenticationInfo]
          } else {
            Cache.getAs[UserId](token).fold {
-             DomainError("invalid token").failNel[AuthenticationInfo]
+             DomainError("invalid token").failureNel[AuthenticationInfo]
            } { userId =>
              for {
                user       <- usersService.getUser(userId.id)

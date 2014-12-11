@@ -17,7 +17,6 @@ import play.api.libs.functional.syntax._
 import com.github.nscala_time.time.Imports._
 import scalaz._
 import Scalaz._
-import typelevel._
 
 trait SpecimenLinkTypeValidations {
 
@@ -134,8 +133,12 @@ object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotation
     annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData] = List.empty): DomainValidation[SpecimenLinkType] = {
 
     /** The validation code below validates 13 items and to create a SpecimenLinkType only
-      *  12 parameters are requried. This function ignores the value returned by the last validation
-      *  to create the SpecimenLinkType.
+      * 12 parameters are requried. This function ignores the value returned by the last validation
+      * to create the SpecimenLinkType.
+      *
+      * Scalza applicative builders can only be used with up to 12 parameters. The <*> operator is used instead.
+      *
+      * See http://stackoverflow.com/questions/16930347/scalaz-how-can-i-accumulate-failures-or-apply-a-function-to-validations-with-di.
       */
     def applyFunc(
       processingTypeId: ProcessingTypeId,
@@ -156,27 +159,28 @@ object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotation
         inputContainerTypeId, outputContainerTypeId, annotationTypeData)
     }
 
-    (validateId(processingTypeId, ProcessingTypeIdRequired) :^:
-      validateId(id, IdRequired) :^:
-      validateAndIncrementVersion(version) :^:
-      validatePositiveNumber(expectedInputChange, InvalidPositiveNumber) :^:
-      validatePositiveNumber(expectedOutputChange, InvalidPositiveNumber) :^:
-      validatePositiveNumber(inputCount, InvalidPositiveNumber) :^:
-      validatePositiveNumber(outputCount, InvalidPositiveNumber) :^:
-      validateId(inputGroupId, SpecimenGroupIdRequired) :^:
-      validateId(outputGroupId, SpecimenGroupIdRequired) :^:
-      validateId(inputContainerTypeId, ContainerTypeIdRequired) :^:
-      validateId(outputContainerTypeId, ContainerTypeIdRequired) :^:
-      validateAnnotationTypeData(annotationTypeData) :^:
-      validateSpecimenGroups(inputGroupId, outputGroupId) :^:
-      KNil).applyP(applyFunc _ curried)
+    // these have to be in reverse order
+    validateSpecimenGroups(inputGroupId, outputGroupId) <*>
+    (validateAnnotationTypeData(annotationTypeData) <*>
+      (validateId(outputContainerTypeId, ContainerTypeIdRequired) <*>
+        (validateId(inputContainerTypeId, ContainerTypeIdRequired) <*>
+          (validateId(outputGroupId, SpecimenGroupIdRequired) <*>
+            (validateId(inputGroupId, SpecimenGroupIdRequired) <*>
+              (validatePositiveNumber(outputCount, InvalidPositiveNumber) <*>
+                (validatePositiveNumber(inputCount, InvalidPositiveNumber) <*>
+                  (validatePositiveNumber(expectedOutputChange, InvalidPositiveNumber) <*>
+                    (validatePositiveNumber(expectedInputChange, InvalidPositiveNumber) <*>
+                      (validateAndIncrementVersion(version) <*>
+                        (validateId(id, IdRequired) <*>
+                          (validateId(processingTypeId, ProcessingTypeIdRequired) map (applyFunc _).curried)
+                        )))))))))))
   }
 
   private def validateSpecimenGroups(
     inputGroupId: SpecimenGroupId,
     outputGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
     if (inputGroupId == outputGroupId) {
-      DomainError("input and output specimen groups are the same").failNel
+      DomainError("input and output specimen groups are the same").failureNel
     } else {
       true.success
     }

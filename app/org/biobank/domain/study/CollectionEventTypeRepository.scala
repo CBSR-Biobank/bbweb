@@ -37,13 +37,13 @@ class CollectionEventTypeRepositoryImpl
       err =>
       DomainError(
         s"collection event type does not exist: { studyId: $studyId, ceventTypeId: $ceventTypeId }")
-        .failNel,
+        .failureNel,
       cet =>
       if (cet.studyId == studyId)
         cet.success
       else DomainError(
         s"study does not have collection event type:{ studyId: $studyId, ceventTypeId: $ceventTypeId }")
-        .failNel
+        .failureNel
     )
   }
 

@@ -11,6 +11,7 @@ import scalaz._
 import scalaz.Scalaz._
 
 class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
+  import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -24,30 +25,32 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       val version = -1L
       val name = nameGenerator.next[SpecimenLinkAnnotationType]
       val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
-      val valueType = AnnotationValueType.Number
+      val valueType = AnnotationValueType.Select
       val maxValueCount = Some(1)
       val options = Some(Seq(
         nameGenerator.next[String],
         nameGenerator.next[String]))
 
-      val annotType = SpecimenLinkAnnotationType.create(
+      val v = SpecimenLinkAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
-        maxValueCount, options) | fail
-      annotType mustBe a[SpecimenLinkAnnotationType]
+        maxValueCount, options)
+      v mustSucceed { annotType =>
+        annotType mustBe a[SpecimenLinkAnnotationType]
 
-      annotType must have (
-        'studyId (studyId),
-        'id (id),
-        'version (0L),
-        'name (name),
-        'description (description),
-        'valueType  (valueType),
-        'maxValueCount  (maxValueCount),
-        'options (options)
-      )
+        annotType must have (
+          'studyId (studyId),
+          'id (id),
+          'version (0L),
+          'name (name),
+          'description (description),
+          'valueType  (valueType),
+          'maxValueCount  (maxValueCount),
+          'options (options)
+        )
 
-      (annotType.timeAdded to DateTime.now).millis must be < 100L
-      annotType.timeModified mustBe (None)
+        (annotType.timeAdded to DateTime.now).millis must be < 500L
+        annotType.timeModified mustBe (None)
+      }
     }
 
     "be updated" in {
@@ -63,22 +66,24 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
 
       //      log.info(s"$annotType")
 
-      val annotType2 = annotType.update(name, description, valueType, maxValueCount, options) | fail
-      annotType2 mustBe a[SpecimenLinkAnnotationType]
+      val v = annotType.update(name, description, valueType, maxValueCount, options)
+      v mustSucceed { annotType2 =>
+        annotType2 mustBe a[SpecimenLinkAnnotationType]
 
-      annotType2 must have (
-        'studyId (annotType.studyId),
-        'id (annotType.id),
-        'version (annotType.version + 1),
-        'name (name),
-        'description (description),
-        'valueType  (valueType),
-        'maxValueCount  (maxValueCount),
-        'options (options)
-      )
+        annotType2 must have (
+          'studyId (annotType.studyId),
+          'id (annotType.id),
+          'version (annotType.version + 1),
+          'name (name),
+          'description (description),
+          'valueType  (valueType),
+          'maxValueCount  (maxValueCount),
+          'options (options)
+        )
 
-      annotType2.timeAdded mustBe (annotType.timeAdded)
-      annotType2.timeModified mustBe (None)
+        annotType2.timeAdded mustBe (annotType.timeAdded)
+        annotType2.timeModified mustBe (None)
+      }
     }
   }
 

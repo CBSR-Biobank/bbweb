@@ -23,6 +23,7 @@ import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /**
   * The ProcessingTypeProcessor is responsible for maintaining state changes for all
@@ -119,7 +120,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       pt => ProcessingTypeUpdatedEvent(
         cmd.studyId, pt.id.id, pt.version, pt.name, pt.description, pt.enabled).success
     )
@@ -130,7 +131,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     val v = update(cmd) { pt => pt.success }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       pt =>  ProcessingTypeRemovedEvent(cmd.studyId, cmd.id).success
     )
   }

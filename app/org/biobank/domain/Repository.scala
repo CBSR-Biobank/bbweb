@@ -49,7 +49,7 @@ abstract class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepo
 
   def getByKey(key: K): DomainValidation[A] = {
     getMap.get(key).fold {
-      DomainError(s"${this.getClass.getSimpleName}: value with key $key not found").failNel[A]
+      DomainError(s"${this.getClass.getSimpleName}: value with key $key not found").failureNel[A]
     } { value =>
       value.successNel
     }

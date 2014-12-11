@@ -32,14 +32,14 @@ class ProcessingTypeRepositoryImpl
       err =>
       DomainError(
         s"processing type does not exist: { studyId: $studyId, processingTypeId: $processingTypeId }")
-        .failNel,
+        .failureNel,
       cet =>
       if (cet.studyId == studyId) {
         cet.success
       } else {
         DomainError(
           s"study does not have processing type:{ studyId: $studyId, processingTypeId: $processingTypeId }")
-          .failNel
+          .failureNel
       }
     )
   }

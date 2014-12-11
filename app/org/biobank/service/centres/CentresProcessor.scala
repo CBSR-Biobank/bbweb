@@ -23,6 +23,7 @@ import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
 
@@ -106,7 +107,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       centre => CentreUpdatedEvent(cmd.id, centre.version, centre.name, centre.description).success
     )
   }
@@ -116,7 +117,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     val v = updateDisabled(cmd) { c => c.enable }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       centre => CentreEnabledEvent(cmd.id, centre.version).success
     )
   }
@@ -125,7 +126,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     val timeNow = DateTime.now
     val v = updateEnabled(cmd) { c => c.disable }
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       centre => CentreDisabledEvent(cmd.id, centre.version).success
     )
   }
@@ -145,7 +146,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
   private def validateCmd(cmd: RemoveCentreLocationCmd): DomainValidation[CentreLocationRemovedEvent] = {
 
     locationRepository.getByKey(LocationId(cmd.locationId)).fold(
-      err => DomainError(s"no location with id: $id").failNel,
+      err => DomainError(s"no location with id: $id").failureNel,
       location => for {
         centre <- getDisabled(cmd.centreId)
         event <- CentreLocationRemovedEvent(cmd.centreId, cmd.locationId).success
@@ -266,7 +267,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
       (x.centreId == centreId) && (x.studyId == studyId)
     }
     if (exists) {
-      DomainError(s"centre and study already linked: { centreId: $centreId, studyId: $studyId }").failNel
+      DomainError(s"centre and study already linked: { centreId: $centreId, studyId: $studyId }").failureNel
     } else {
       true.success
     }
@@ -289,10 +290,10 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     */
   private def getDisabled(id: String): DomainValidation[DisabledCentre] = {
     centreRepository.getByKey(CentreId(id)).fold(
-      err => DomainError(s"no centre with id: $id").failNel,
+      err => DomainError(s"no centre with id: $id").failureNel,
       centre => centre match {
         case centre: DisabledCentre => centre.success
-        case centre => DomainError(s"centre is not disabled: $centre").failNel
+        case centre => DomainError(s"centre is not disabled: $centre").failureNel
       }
     )
   }
@@ -302,10 +303,10 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     */
   private def getEnabled(id: String): DomainValidation[EnabledCentre] = {
     centreRepository.getByKey(CentreId(id)).fold(
-      err => DomainError(s"no centre with id: $id").failNel,
+      err => DomainError(s"no centre with id: $id").failureNel,
       centre => centre match {
         case centre: EnabledCentre => centre.success
-        case centre => DomainError(s"centre is not enabled: $centre").failNel
+        case centre => DomainError(s"centre is not enabled: $centre").failureNel
       }
     )
   }
@@ -315,7 +316,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     (fn: Centre => DomainValidation[T])
       : DomainValidation[T] = {
     centreRepository.getByKey(CentreId(cmd.id)).fold(
-      err => DomainError(s"no centre with id: $id").failNel,
+      err => DomainError(s"no centre with id: $id").failureNel,
       centre => for {
         validVersion  <-  centre.requireVersion(cmd.expectedVersion)
         updatedCentre <- fn(centre)
@@ -329,7 +330,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
       : DomainValidation[T] = {
     updateCentre(cmd) {
       case centre: DisabledCentre => fn(centre)
-      case centre => s"$centre for $cmd is not disabled".failNel
+      case centre => s"$centre for $cmd is not disabled".failureNel
     }
   }
 
@@ -339,7 +340,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
       : DomainValidation[T] = {
     updateCentre(cmd) {
       case centre: EnabledCentre => fn(centre)
-      case centre => s"$centre for $cmd is not enabled".failNel
+      case centre => s"$centre for $cmd is not enabled".failureNel
     }
   }
 

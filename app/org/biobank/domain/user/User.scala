@@ -43,7 +43,7 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
    */
   def authenticate(email: String, password: String): DomainValidation[User] = {
     if (this.password == password) this.success
-    else DomainError("authentication failure").failNel
+    else DomainError("authentication failure").failureNel
   }
 
   override def toString =
@@ -92,7 +92,7 @@ trait UserValidations {
   val urlRegex = "^((https?|ftp)://|(www|ftp)\\.)[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$".r
 
   def validateEmail(email: String): DomainValidation[String] = {
-    emailRegex.findFirstIn(email).fold { InvalidEmail.toString.failNel[String] } { e => email.successNel }
+    emailRegex.findFirstIn(email).fold { InvalidEmail.toString.failureNel[String] } { e => email.successNel }
   }
 
   def validateAvatarUrl(urlOption: Option[String]): DomainValidation[Option[String]] = {
@@ -100,7 +100,7 @@ trait UserValidations {
       none[String].successNel[String]
     } { url  =>
       urlRegex.findFirstIn(url).fold {
-        InvalidUrl.toString.failNel[Option[String]]
+        InvalidUrl.toString.failureNel[Option[String]]
       } { e =>
         some(url).successNel
       }
@@ -268,27 +268,27 @@ object UserHelper {
   def isUserRegistered(user: User): DomainValidation[RegisteredUser] = {
     user match {
       case registeredUser: RegisteredUser => registeredUser.success
-      case _ => DomainError(s"the user is not registered").failNel
+      case _ => DomainError(s"the user is not registered").failureNel
     }
   }
 
   def isUserActive(user: User): DomainValidation[ActiveUser] = {
     user match {
       case activeUser: ActiveUser => activeUser.success
-      case _ => DomainError(s"the user is not active").failNel
+      case _ => DomainError(s"the user is not active").failureNel
     }
   }
 
   def isUserLocked(user: User): DomainValidation[LockedUser] = {
     user match {
       case lockedUser: LockedUser => lockedUser.success
-      case _ => DomainError(s"the user is not active").failNel
+      case _ => DomainError(s"the user is not active").failureNel
     }
   }
 
   def isUserNotLocked(user: User): DomainValidation[User] = {
     user match {
-      case lockedUser: LockedUser => DomainError(s"the user is locked").failNel
+      case lockedUser: LockedUser => DomainError(s"the user is locked").failureNel
       case _ => user.success
     }
   }

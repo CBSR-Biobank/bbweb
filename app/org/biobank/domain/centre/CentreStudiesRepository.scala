@@ -29,7 +29,7 @@ class CentreStudiesRepositoryImpl
     }
     option.fold {
       DomainError(s"centre and study not linked: { centreId: $centreId, studyId: $studyId }")
-        .failNel[StudyCentre]
+        .failureNel[StudyCentre]
     } { value  =>
       value.successNel
     }

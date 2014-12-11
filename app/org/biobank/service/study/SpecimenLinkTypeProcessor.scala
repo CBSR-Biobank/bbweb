@@ -26,6 +26,7 @@ import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /**
   * The SpecimenLinkTypeProcessor is responsible for maintaining state changes for all
@@ -174,7 +175,7 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
     }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       slt => SpecimenLinkTypeUpdatedEvent(
         cmd.processingTypeId,
         slt.id.id,
@@ -196,7 +197,7 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
     val v = update(cmd) { slt => slt.success }
 
     v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failNel,
+      err => DomainError(s"error $err occurred on $cmd").failureNel,
       pt =>  SpecimenLinkTypeRemovedEvent(cmd.processingTypeId, cmd.id).success
     )
   }
@@ -255,7 +256,7 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
       if (specimenGroup.studyId == processingType.studyId) {
         true.success
       } else {
-        DomainError("specimen group in wrong study").failNel
+        DomainError("specimen group in wrong study").failureNel
       }
     }
 
@@ -273,7 +274,7 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
     val exists = specimenLinkTypeRepository.getValues.exists { slType => matcher(slType) }
 
     if (exists) {
-      DomainError("specimen link type with specimen groups already exists").failNel
+      DomainError("specimen link type with specimen groups already exists").failureNel
     } else {
       true.success
     }
@@ -313,7 +314,7 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
       }.filter(x => !x._2).map(_._1)
 
       if (invalidSet.isEmpty) true.success
-      else DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).failNel
+      else DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).failureNel
     }
 
     for {

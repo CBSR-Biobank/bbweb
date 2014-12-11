@@ -33,13 +33,13 @@ class SpecimenLinkTypeRepositoryImpl
       err =>
       DomainError(
         s"specimen link type does not exist: { processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
-        .failNel,
+        .failureNel,
       slType =>
       if (slType.processingTypeId == processingTypeId)
         slType.success
       else DomainError(
         s"processing type does not have specimen link type:{ processingTypeId: $processingTypeId, specimenLinkTypeId: $specimenLinkTypeId }")
-        .failNel
+        .failureNel
     )
   }
 

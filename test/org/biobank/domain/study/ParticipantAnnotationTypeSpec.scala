@@ -11,6 +11,7 @@ import scalaz.Scalaz._
 
 
 class ParticipantAnnotationTypeSpec extends DomainSpec {
+  import org.biobank.TestUtils._
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -22,31 +23,33 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val version = -1L
       val name = nameGenerator.next[ParticipantAnnotationType]
       val description = some(nameGenerator.next[ParticipantAnnotationType])
-      val valueType = AnnotationValueType.Number
+      val valueType = AnnotationValueType.Select
       val maxValueCount = Some(1)
       val options = Some(Seq(
         nameGenerator.next[String],
         nameGenerator.next[String]))
       val required = true
 
-      val annotType = ParticipantAnnotationType.create(
+      val v = ParticipantAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
-        maxValueCount, options, required) | fail
-      annotType mustBe a[ParticipantAnnotationType]
-      annotType must have (
-        'studyId (studyId),
-        'id (id),
-        'version (0L),
-        'name (name),
-        'description (description),
-        'valueType  (valueType),
-        'maxValueCount  (maxValueCount),
-        'options (options),
-        'required  (required)
-      )
+        maxValueCount, options, required)
+      v mustSucceed { annotType =>
+        annotType mustBe a[ParticipantAnnotationType]
+        annotType must have (
+          'studyId (studyId),
+          'id (id),
+          'version (0L),
+          'name (name),
+          'description (description),
+          'valueType  (valueType),
+          'maxValueCount  (maxValueCount),
+          'options (options),
+          'required  (required)
+        )
 
-      (annotType.timeAdded to DateTime.now).millis must be < 200L
-      annotType.timeModified mustBe (None)
+        (annotType.timeAdded to DateTime.now).millis must be < 200L
+        annotType.timeModified mustBe (None)
+      }
     }
 
     "be updated" in {
@@ -54,30 +57,32 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
 
       val name = nameGenerator.next[ParticipantAnnotationType]
       val description = some(nameGenerator.next[ParticipantAnnotationType])
-      val valueType = AnnotationValueType.Number
-      val maxValueCount = Some(annotType.maxValueCount.getOrElse(0) + 100)
+      val valueType = AnnotationValueType.Select
+      val maxValueCount = Some(annotType.maxValueCount.getOrElse(0) + 1)
       val options = Some(Seq(
         nameGenerator.next[String],
         nameGenerator.next[String]))
       val required = !annotType.required
 
-      val annotType2 = annotType.update(name, description, valueType, maxValueCount, options, required) | fail
-      annotType2 mustBe a[ParticipantAnnotationType]
-      annotType2 must have (
-        'studyId (annotType.studyId),
-        'id (annotType.id),
-        'version (annotType.version + 1),
-        'name (name),
-        'description (description),
-        'valueType  (valueType),
-        'maxValueCount  (maxValueCount),
-        'options (options),
-        'required  (required)
-      )
+      val v = annotType.update(name, description, valueType, maxValueCount, options, required)
+      v mustSucceed { at =>
+        at mustBe a[ParticipantAnnotationType]
+        at must have (
+          'studyId (annotType.studyId),
+          'id (annotType.id),
+          'version (annotType.version + 1),
+          'name (name),
+          'description (description),
+          'valueType  (valueType),
+          'maxValueCount  (maxValueCount),
+          'options (options),
+          'required  (required)
+        )
 
-      annotType2.timeAdded mustBe (annotType.timeAdded)
-      // last update date is assigned by the processor
-      annotType2.timeModified mustBe (None)
+        at.timeAdded mustBe (annotType.timeAdded)
+        // last update date is assigned by the processor
+        at.timeModified mustBe (None)
+      }
     }
 
   }
@@ -90,7 +95,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val version = -1L
       val name = nameGenerator.next[ParticipantAnnotationType]
       val description = some(nameGenerator.next[ParticipantAnnotationType])
-      val valueType = AnnotationValueType.Number
+      val valueType = AnnotationValueType.Select
       val maxValueCount = Some(1)
       val options = Some(Seq(
         nameGenerator.next[String],
@@ -111,7 +116,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val version = -1L
       val name = nameGenerator.next[ParticipantAnnotationType]
       val description = some(nameGenerator.next[ParticipantAnnotationType])
-      val valueType = AnnotationValueType.Number
+      val valueType = AnnotationValueType.Select
       val maxValueCount = Some(1)
       val options = Some(Seq(
         nameGenerator.next[String],
@@ -131,7 +136,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val version = -2L
       val name = nameGenerator.next[ParticipantAnnotationType]
       val description = some(nameGenerator.next[ParticipantAnnotationType])
-      val valueType = AnnotationValueType.Number
+      val valueType = AnnotationValueType.Select
       val maxValueCount = Some(1)
       val options = Some(Seq(
         nameGenerator.next[String],
@@ -151,7 +156,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val version = -1L
       var name: String = null
       val description = some(nameGenerator.next[ParticipantAnnotationType])
-      val valueType = AnnotationValueType.Number
+      val valueType = AnnotationValueType.Select
       val maxValueCount = Some(1)
       val options = Some(Seq(
         nameGenerator.next[String],
@@ -179,7 +184,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val version = -1L
       val name = nameGenerator.next[ParticipantAnnotationType]
       var description: Option[String] = Some(null)
-      val valueType = AnnotationValueType.Number
+      val valueType = AnnotationValueType.Select
       val maxValueCount = Some(1)
       val options = Some(Seq(
         nameGenerator.next[String],
@@ -208,7 +213,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val version = -1L
       val name = nameGenerator.next[ParticipantAnnotationType]
       val description = some(nameGenerator.next[ParticipantAnnotationType])
-      val valueType = AnnotationValueType.Number
+      val valueType = AnnotationValueType.Select
       val maxValueCount = Some(-1)
       val options = Some(Seq(
         nameGenerator.next[String],
@@ -218,8 +223,11 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       ParticipantAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, options, required).fold(
-        err => err.list must (have length 1 and contain("MaxValueCountError")),
-        user => fail
+        err => {
+          err.list must not be ('empty)
+          err.list must contain ("MaxValueCountError")
+        },
+          pat => fail
       )
     }
 
@@ -229,7 +237,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val version = -1L
       val name = nameGenerator.next[ParticipantAnnotationType]
       val description = some(nameGenerator.next[ParticipantAnnotationType])
-      val valueType = AnnotationValueType.Number
+      val valueType = AnnotationValueType.Select
       val maxValueCount = Some(1)
       var options = Some(Seq(""))
       val required = true
@@ -256,7 +264,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val version = -2L
       val name = ""
       val description = some(nameGenerator.next[ParticipantAnnotationType])
-      val valueType = AnnotationValueType.Number
+      val valueType = AnnotationValueType.Select
       val maxValueCount = Some(1)
       val options = Some(Seq(
         nameGenerator.next[String],

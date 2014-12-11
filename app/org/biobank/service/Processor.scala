@@ -50,7 +50,7 @@ trait Processor extends PersistentActor with ActorLogging {
       matcher(item)
     }
     if (exists) {
-      DomainError(s"$errMsgPrefix: $name").failNel
+      DomainError(s"$errMsgPrefix: $name").failureNel
     } else {
       true.success
     }
@@ -62,7 +62,7 @@ trait Processor extends PersistentActor with ActorLogging {
     item: T,
     expectedVersion: Option[Long]): DomainValidation[Boolean] = {
     if (item.versionOption == expectedVersion) true.success
-    else DomainError(s"version mismatch").failNel
+    else DomainError(s"version mismatch").failureNel
   }
 
 }

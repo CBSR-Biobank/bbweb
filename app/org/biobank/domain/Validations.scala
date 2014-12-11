@@ -7,7 +7,7 @@ import scalaz.Scalaz._
   * Trait for validation errors
   */
 trait ValidationKey {
-  def failNel = this.toString.failureNel
+  def failureNel = this.toString.failureNel
   def nel = NonEmptyList(this.toString)
   def failure = this.toString.failure
 }
@@ -23,15 +23,15 @@ object CommonValidations {
   case object NonEmptyDescription extends ValidationKey
 
   def validateString(s: String, err: ValidationKey): DomainValidation[String] = {
-    if ((s == null) || s.isEmpty()) err.failNel else s.success
+    if ((s == null) || s.isEmpty()) err.failureNel else s.success
   }
 
   def validatePositiveNumber(number: Int, err: ValidationKey): DomainValidation[Int] = {
-    if (number < 0) err.failNel else number.success
+    if (number < 0) err.failureNel else number.success
   }
 
   def validatePositiveNumber(number: BigDecimal, err: ValidationKey): DomainValidation[BigDecimal] = {
-    if (number < 0) err.failNel else number.success
+    if (number < 0) err.failureNel else number.success
   }
 
   def validatePositiveNumberOption
@@ -41,7 +41,7 @@ object CommonValidations {
       none[BigDecimal].successNel[String]
     } { number =>
       if (number < 0) {
-        err.toString.failNel[Option[BigDecimal]]
+        err.toString.failureNel[Option[BigDecimal]]
       } else {
         option.successNel
       }
@@ -55,7 +55,7 @@ object CommonValidations {
       none[String].successNel[String]
     } { value =>
       if ((value == null) || value.isEmpty()) {
-        err.toString.failNel[Option[String]]
+        err.toString.failureNel[Option[String]]
       } else {
         option.successNel
       }
@@ -63,12 +63,12 @@ object CommonValidations {
   }
 
   def validateAndIncrementVersion(v: Long): DomainValidation[Long] =
-    if (v < -1) InvalidVersion.failNel else (v + 1).success
+    if (v < -1) InvalidVersion.failureNel else (v + 1).success
 
   def validateId[T <: IdentifiedValueObject[String]](
     id: T, err: ValidationKey): DomainValidation[T] = {
     validateString(id.id, err).fold(
-      err => err.fail,
+      err => err.failure,
       idString => id.success)
   }
 
@@ -83,7 +83,7 @@ object CommonValidations {
       none[T].successNel[String]
     } { id =>
       validateId(id, err).fold(
-        err => err.toString.failNel[Option[T]],
+        err => err.toString.failureNel[Option[T]],
         id => some(id).success
       )
     }

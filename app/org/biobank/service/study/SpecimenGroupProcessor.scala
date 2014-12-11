@@ -27,6 +27,7 @@ import scaldi.{Injectable, Injector}
 import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /** The SpecimenGroupProcessor is responsible for maintaining state changes for all
   * [[org.biobank.domain.study.SpecimenGroup]] aggregates. This particular processor uses Akka-Persistence's
@@ -139,7 +140,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
       } yield updatedSg
     }
     v.fold(
-      err => err.fail[SpecimenGroupUpdatedEvent],
+      err => err.failure[SpecimenGroupUpdatedEvent],
       sg => SpecimenGroupUpdatedEvent(
         cmd.studyId, sg.id.id, sg.version, cmd.name, cmd.description,
         cmd.units, cmd.anatomicalSourceType, cmd.preservationType, cmd.preservationTemperatureType,
@@ -152,7 +153,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     val v = update(cmd) { sg => sg.success }
 
     v.fold(
-      err => err.fail[SpecimenGroupRemovedEvent],
+      err => err.failure[SpecimenGroupRemovedEvent],
       sg =>  SpecimenGroupRemovedEvent(sg.studyId.id, sg.id.id).success
     )
   }
@@ -213,7 +214,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
 
     def checkNotInUseByCollectionEventType: DomainValidation[Boolean] = {
       if (collectionEventTypeRepository.specimenGroupCanBeUpdated(studyId, specimenGroupId)) {
-        DomainError(s"specimen group is in use by collection event type: $specimenGroupId").failNel
+        DomainError(s"specimen group is in use by collection event type: $specimenGroupId").failureNel
       } else {
         true.success
       }
@@ -221,7 +222,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
 
     def checkNotInUseBySpecimenLinkType: DomainValidation[Boolean] = {
       if (specimenLinkTypeRepository.specimenGroupCanBeUpdated(specimenGroupId)) {
-        DomainError(s"specimen group is in use by specimen link type: $specimenGroupId").failNel
+        DomainError(s"specimen group is in use by specimen link type: $specimenGroupId").failureNel
       } else {
         true.success
       }

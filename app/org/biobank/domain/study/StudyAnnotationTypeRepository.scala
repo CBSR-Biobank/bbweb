@@ -26,12 +26,12 @@ trait StudyAnnotationTypeRepositoryImpl[A <: StudyAnnotationType]
     getByKey(annotationTypeId).fold(
       err =>
       DomainError(
-        s"annotation type does not exist: { studyId: $studyId, annotationTypeId: $annotationTypeId }").failNel,
+        s"annotation type does not exist: { studyId: $studyId, annotationTypeId: $annotationTypeId }").failureNel,
       annotType =>
       if (annotType.studyId == studyId) annotType.success
       else DomainError(
         "study does not have annotation type: { studyId: %s, annotationTypeId: %s }".format(
-          studyId, annotationTypeId)).failNel
+          studyId, annotationTypeId)).failureNel
     )
   }
 
