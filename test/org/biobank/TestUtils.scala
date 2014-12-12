@@ -35,10 +35,10 @@ object TestUtils extends MustMatchers with OptionValues {
 
   case class ListContainsRegexMatcher(regex: String) extends Matcher[List[String]] {
     def apply(list: List[String]): MatchResult = {
-      val result = ! list.filter(x => x.matches(regex)).isEmpty
+      val result = list.filter(x => regex.r.findAllIn(x).length > 0).nonEmpty
       MatchResult(result,
-        s"list did not contain $regex",
-        s"list contained $regex but it shouldn't have")
+        s"""list did not contain "$regex": $list""",
+        s"""list contained "$regex" but it shouldn't have: $list""")
     }
   }
 
