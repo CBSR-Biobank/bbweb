@@ -67,7 +67,7 @@ object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidations {
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
     options: Option[Seq[String]]): DomainValidation[SpecimenLinkAnnotationType] = {
-    (validateId(studyId) |@|
+    (validateId(studyId, StudyIdRequired) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
       validateString(name, NameRequired) |@|

@@ -17,19 +17,26 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
+  def selectAnnotationTypeTuple = {
+    val studyId = StudyId(nameGenerator.next[SpecimenLinkAnnotationType])
+    val id = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType])
+    val version = -1L
+    val name = nameGenerator.next[SpecimenLinkAnnotationType]
+    val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
+    val valueType = AnnotationValueType.Select
+    val maxValueCount = Some(1)
+    val options = Some(Seq(
+      nameGenerator.next[String],
+      nameGenerator.next[String]))
+
+    (studyId, id, version, name, description, valueType, maxValueCount, options)
+  }
+
   "A specimen link annotation type" can {
 
     "be created" in {
-      val studyId = StudyId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val id = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val version = -1L
-      val name = nameGenerator.next[SpecimenLinkAnnotationType]
-      val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
-      val valueType = AnnotationValueType.Select
-      val maxValueCount = Some(1)
-      val options = Some(Seq(
-        nameGenerator.next[String],
-        nameGenerator.next[String]))
+      val (studyId, id, version, name, description, valueType, maxValueCount, options) =
+        selectAnnotationTypeTuple
 
       val v = SpecimenLinkAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -54,17 +61,9 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
     }
 
     "be updated" in {
+      val (studyId, id, version, name, description, valueType, maxValueCount, options) =
+        selectAnnotationTypeTuple
       val annotType = factory.createSpecimenLinkAnnotationType
-
-      val name = nameGenerator.next[SpecimenLinkAnnotationType]
-      val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
-      val valueType = AnnotationValueType.Number
-      val maxValueCount = Some(annotType.maxValueCount.getOrElse(0) + 100)
-      val options = Some(Seq(
-        nameGenerator.next[String],
-        nameGenerator.next[String]))
-
-      //      log.info(s"$annotType")
 
       val v = annotType.update(name, description, valueType, maxValueCount, options)
       v mustSucceed { annotType2 =>
@@ -90,182 +89,103 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
   "A specimen link annotation type" can {
 
     "not be created with an empty study id" in {
-      val studyId = StudyId("")
-      val id = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val version = -1L
-      val name = nameGenerator.next[SpecimenLinkAnnotationType]
-      val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
-      val valueType = AnnotationValueType.Number
-      val maxValueCount = Some(1)
-      val options = Some(Seq(
-        nameGenerator.next[String],
-        nameGenerator.next[String]))
+      val (studyId, id, version, name, description, valueType, maxValueCount, options) =
+        selectAnnotationTypeTuple
+      val badStudyId = StudyId("")
 
-      SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
-        description, valueType, maxValueCount, options).fold(
-        err => err.list must (have length 1 and contain("IdRequired")),
-          user => fail
-      )
+      SpecimenLinkAnnotationType.create(badStudyId, id, version, org.joda.time.DateTime.now, name,
+        description, valueType, maxValueCount, options)
+        .mustFail(1, "StudyIdRequired")
     }
 
     "not be created with an empty id" in {
-      val studyId = StudyId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val id = AnnotationTypeId("")
-      val version = -1L
-      val name = nameGenerator.next[SpecimenLinkAnnotationType]
-      val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
-      val valueType = AnnotationValueType.Number
-      val maxValueCount = Some(1)
-      val options = Some(Seq(
-        nameGenerator.next[String],
-        nameGenerator.next[String]))
+      val (studyId, id, version, name, description, valueType, maxValueCount, options) =
+        selectAnnotationTypeTuple
+      val badAnnotationTypeId = AnnotationTypeId("")
 
-      SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
-        description, valueType, maxValueCount, options).fold(
-        err => err.list must (have length 1 and contain("IdRequired")),
-          user => fail
-      )
+      SpecimenLinkAnnotationType.create(studyId, badAnnotationTypeId, version, org.joda.time.DateTime.now,
+        name, description, valueType, maxValueCount, options)
+        .mustFail(1, "IdRequired")
     }
 
     "not be created with an invalid version" in {
-      val studyId = StudyId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val id = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val version = -2L
-      val name = nameGenerator.next[SpecimenLinkAnnotationType]
-      val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
-      val valueType = AnnotationValueType.Number
-      val maxValueCount = Some(1)
-      val options = Some(Seq(
-        nameGenerator.next[String],
-        nameGenerator.next[String]))
+      val (studyId, id, version, name, description, valueType, maxValueCount, options) =
+        selectAnnotationTypeTuple
+      val invalidVersion = -2L
 
-      SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
-        description, valueType, maxValueCount, options).fold(
-        err => err.list must (have length 1 and contain("InvalidVersion")),
-          user => fail
-      )
-    }
+      SpecimenLinkAnnotationType.create(studyId, id, invalidVersion, org.joda.time.DateTime.now, name,
+        description, valueType, maxValueCount, options)
+        .mustFail(1, "InvalidVersion")
+  }
 
     "not be created with an null or empty name" in {
-      val studyId = StudyId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val id = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val version = -1L
-      var name: String = null
-      val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
-      val valueType = AnnotationValueType.Number
-      val maxValueCount = Some(1)
-      val options = Some(Seq(
-        nameGenerator.next[String],
-        nameGenerator.next[String]))
+      val (studyId, id, version, name, description, valueType, maxValueCount, options) =
+        selectAnnotationTypeTuple
+      var invalidName: String = null
 
-      SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
-        description, valueType, maxValueCount, options).fold(
-        err => err.list must (have length 1 and contain("NameRequired")),
-          user => fail
-      )
+      SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, invalidName,
+        description, valueType, maxValueCount, options)
+        .mustFail(1, "NameRequired")
 
-      name = ""
-      SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
-        description, valueType, maxValueCount, options).fold(
-        err => err.list must (have length 1 and contain("NameRequired")),
-          user => fail
-      )
+      invalidName = ""
+      SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, invalidName,
+        description, valueType, maxValueCount, options)
+        .mustFail(1, "NameRequired")
     }
 
     "not be created with an empty description option" in {
-      val studyId = StudyId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val id = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val version = -1L
-      val name = nameGenerator.next[SpecimenLinkAnnotationType]
-      var description: Option[String] = Some(null)
-      val valueType = AnnotationValueType.Number
-      val maxValueCount = Some(1)
-      val options = Some(Seq(
-        nameGenerator.next[String],
-        nameGenerator.next[String]))
+      val (studyId, id, version, name, description, valueType, maxValueCount, options) =
+        selectAnnotationTypeTuple
+      var invalidDescription: Option[String] = Some(null)
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
-        description, valueType, maxValueCount, options).fold(
-        err => err.list must (have length 1 and contain("NonEmptyDescription")),
-          user => fail
-      )
+        invalidDescription, valueType, maxValueCount, options)
+        .mustFail(1, "NonEmptyDescription")
 
-      description = Some("")
+      invalidDescription = Some("")
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
-        description, valueType, maxValueCount, options).fold(
-        err => err.list must (have length 1 and contain("NonEmptyDescription")),
-          user => fail
-      )
+        invalidDescription, valueType, maxValueCount, options)
+        .mustFail(1, "NonEmptyDescription")
     }
 
     "not be created with an negative max value count" in {
-      val studyId = StudyId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val id = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val version = -1L
-      val name = nameGenerator.next[SpecimenLinkAnnotationType]
-      val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
-      val valueType = AnnotationValueType.Number
-      val maxValueCount = Some(-1)
-      val options = Some(Seq(
-        nameGenerator.next[String],
-        nameGenerator.next[String]))
+      val (studyId, id, version, name, description, valueType, maxValueCount, options) =
+        selectAnnotationTypeTuple
+      val invalidMaxValueCount = Some(-1)
 
       SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
-        description, valueType, maxValueCount, options).fold(
-        err => err.list must (have length 1 and contain("MaxValueCountError")),
-          user => fail
-      )
+        description, valueType, invalidMaxValueCount, options)
+        .mustFail(1, "MaxValueCountError")
     }
 
 
     "not be created with an invalid options" in {
-      val studyId = StudyId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val id = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val version = -1L
-      val name = nameGenerator.next[SpecimenLinkAnnotationType]
-      val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
-      val valueType = AnnotationValueType.Number
-      val maxValueCount = Some(1)
-      var options = Some(Seq(""))
+      val (studyId, id, version, name, description, valueType, maxValueCount, options) =
+        selectAnnotationTypeTuple
+      var invalidOptions = Some(Seq(""))
 
       SpecimenLinkAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount,
-        options).fold(
-        err => err.list must (have length 1 and contain("OptionRequired")),
-          user => fail
-      )
+        invalidOptions)
+        .mustFail(1, "OptionRequired")
 
-      options = Some(Seq("duplicate", "duplicate"))
+      invalidOptions = Some(Seq("duplicate", "duplicate"))
       SpecimenLinkAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount,
-        options).fold(
-        err => err.list must (have length 1 and contain("DuplicateOptionsError")),
-          user => fail
-      )
+        invalidOptions)
+        .mustFail(1, "DuplicateOptionsError")
     }
 
     "have more than one validation fail" in {
-      val studyId = StudyId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val id = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType])
-      val version = -2L
-      val name = ""
-      val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
-      val valueType = AnnotationValueType.Number
-      val maxValueCount = Some(1)
-      val options = Some(Seq(
-        nameGenerator.next[String],
-        nameGenerator.next[String]))
+      val (studyId, id, version, name, description, valueType, maxValueCount, options) =
+        selectAnnotationTypeTuple
+      val invalidVersion = -2L
+      val invalidName = ""
 
       SpecimenLinkAnnotationType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount,
-        options).fold(
-        err => {
-          err.list must have length 2
-          err.list.head mustBe ("InvalidVersion")
-          err.list.tail.head mustBe ("NameRequired")
-        },
-          user => fail
-      )
+        studyId, id, invalidVersion, org.joda.time.DateTime.now, invalidName, description, valueType,
+        maxValueCount, options)
+        .mustFail(2, "InvalidVersion", "NameRequired")
     }
   }
 
