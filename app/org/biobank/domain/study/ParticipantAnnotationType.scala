@@ -72,7 +72,7 @@ object ParticipantAnnotationType extends StudyAnnotationTypeValidations {
     maxValueCount: Option[Int],
     options: Option[Seq[String]],
     required: Boolean): DomainValidation[ParticipantAnnotationType] = {
-    (validateId(studyId) |@|
+    (validateId(studyId, StudyIdRequired) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
       validateString(name, NameRequired) |@|

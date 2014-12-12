@@ -12,76 +12,66 @@ import scalaz.Scalaz._
 
 class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
   import org.biobank.TestUtils._
+  import StudyAnnotationTypeSpecUtil._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  def selectAnnotationTypeTuple = {
-    val studyId = StudyId(nameGenerator.next[SpecimenLinkAnnotationType])
-    val id = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType])
-    val version = -1L
-    val name = nameGenerator.next[SpecimenLinkAnnotationType]
-    val description = some(nameGenerator.next[SpecimenLinkAnnotationType])
-    val valueType = AnnotationValueType.Select
-    val maxValueCount = Some(1)
-    val options = Some(Seq(
-      nameGenerator.next[String],
-      nameGenerator.next[String]))
-
-    (studyId, id, version, name, description, valueType, maxValueCount, options)
-  }
-
   "A specimen link annotation type" can {
 
-    "be created" in {
-      val (studyId, id, version, name, description, valueType, maxValueCount, options) =
-        selectAnnotationTypeTuple
+    "be created for each value type" in {
+      AnnotationValueType.values.foreach { vt =>
+        val (studyId, id, version, name, description, valueType, maxValueCount, options) =
+          AnnotationValueTypeToTuple(vt)
 
-      val v = SpecimenLinkAnnotationType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
-        maxValueCount, options)
-      v mustSucceed { annotType =>
-        annotType mustBe a[SpecimenLinkAnnotationType]
+        val v = SpecimenLinkAnnotationType.create(
+          studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+          maxValueCount, options)
+        v mustSucceed { annotType =>
+          annotType mustBe a[SpecimenLinkAnnotationType]
 
-        annotType must have (
-          'studyId (studyId),
-          'id (id),
-          'version (0L),
-          'name (name),
-          'description (description),
-          'valueType  (valueType),
-          'maxValueCount  (maxValueCount),
-          'options (options)
-        )
+          annotType must have (
+            'studyId (studyId),
+            'id (id),
+            'version (0L),
+            'name (name),
+            'description (description),
+            'valueType  (valueType),
+            'maxValueCount  (maxValueCount),
+            'options (options)
+          )
 
-        (annotType.timeAdded to DateTime.now).millis must be < 500L
-        annotType.timeModified mustBe (None)
+          (annotType.timeAdded to DateTime.now).millis must be < 500L
+          annotType.timeModified mustBe (None)
+        }
       }
     }
 
-    "be updated" in {
-      val (studyId, id, version, name, description, valueType, maxValueCount, options) =
-        selectAnnotationTypeTuple
+    "be updated for each value type" in {
       val annotType = factory.createSpecimenLinkAnnotationType
+      AnnotationValueType.values.foreach { vt =>
+        val (studyId, id, version, name, description, valueType, maxValueCount, options) =
+          AnnotationValueTypeToTuple(vt)
 
-      val v = annotType.update(name, description, valueType, maxValueCount, options)
-      v mustSucceed { annotType2 =>
-        annotType2 mustBe a[SpecimenLinkAnnotationType]
+        val v = annotType.update(name, description, valueType, maxValueCount, options)
+        v mustSucceed { annotType2 =>
+          annotType2 mustBe a[SpecimenLinkAnnotationType]
 
-        annotType2 must have (
-          'studyId (annotType.studyId),
-          'id (annotType.id),
-          'version (annotType.version + 1),
-          'name (name),
-          'description (description),
-          'valueType  (valueType),
-          'maxValueCount  (maxValueCount),
-          'options (options)
-        )
+          annotType2 must have (
+            'studyId (annotType.studyId),
+            'id (annotType.id),
+            'version (annotType.version + 1),
+            'name (name),
+            'description (description),
+            'valueType  (valueType),
+            'maxValueCount  (maxValueCount),
+            'options (options)
+          )
 
-        annotType2.timeAdded mustBe (annotType.timeAdded)
-        annotType2.timeModified mustBe (None)
+          annotType2.timeAdded mustBe (annotType.timeAdded)
+          annotType2.timeModified mustBe (None)
+        }
       }
     }
   }
@@ -121,31 +111,25 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
     "not be created with an null or empty name" in {
       val (studyId, id, version, name, description, valueType, maxValueCount, options) =
         selectAnnotationTypeTuple
-      var invalidName: String = null
+      val invalidNames: List[String] = List(null, "")
 
-      SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, invalidName,
-        description, valueType, maxValueCount, options)
-        .mustFail(1, "NameRequired")
-
-      invalidName = ""
-      SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, invalidName,
-        description, valueType, maxValueCount, options)
-        .mustFail(1, "NameRequired")
+      invalidNames.foreach(invalidName =>
+        SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now,
+          invalidName, description, valueType, maxValueCount, options)
+          .mustFail(1, "NameRequired")
+      )
     }
 
     "not be created with an empty description option" in {
       val (studyId, id, version, name, description, valueType, maxValueCount, options) =
         selectAnnotationTypeTuple
-      var invalidDescription: Option[String] = Some(null)
+      var invalidDescriptions: List[Option[String]] = List(Some(null), Some(""))
 
-      SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
-        invalidDescription, valueType, maxValueCount, options)
-        .mustFail(1, "NonEmptyDescription")
-
-      invalidDescription = Some("")
-      SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
-        invalidDescription, valueType, maxValueCount, options)
-        .mustFail(1, "NonEmptyDescription")
+      invalidDescriptions.foreach(invalidDescription =>
+        SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now,
+          name, invalidDescription, valueType, maxValueCount, options)
+          .mustFail(1, "NonEmptyDescription")
+      )
     }
 
     "not be created with an negative max value count" in {
