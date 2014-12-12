@@ -14,7 +14,7 @@ case class SpecimenLinkTypeId(val id: String) extends IdentifiedValueObject[Stri
 
 object SpecimenLinkTypeId {
 
-  implicit val specimenLinkTypeIdReader = (__ \ "id").read[String](minLength[String](2)).map( new SpecimenLinkTypeId(_) )
+  implicit val specimenLinkTypeIdReader = (__).read[String](minLength[String](2)).map( new SpecimenLinkTypeId(_) )
   implicit val specimenLinkTypeIdWriter = Writes{ (id: SpecimenLinkTypeId) => JsString(id.id) }
 
 }

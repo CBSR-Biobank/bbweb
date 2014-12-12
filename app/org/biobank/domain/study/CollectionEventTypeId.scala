@@ -15,7 +15,7 @@ case class CollectionEventTypeId(val id: String) extends IdentifiedValueObject[S
 object CollectionEventTypeId {
 
   implicit val CollectionEventTypeIdReader =
-    (__ \ "id").read[String](minLength[String](2)).map( new CollectionEventTypeId(_) )
+    (__).read[String](minLength[String](2)).map( new CollectionEventTypeId(_) )
 
   implicit val CollectionEventTypeIdWriter =
     Writes{ (id: CollectionEventTypeId) => JsString(id.id) }

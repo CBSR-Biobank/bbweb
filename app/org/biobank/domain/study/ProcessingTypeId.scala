@@ -14,7 +14,7 @@ case class ProcessingTypeId(val id: String) extends IdentifiedValueObject[String
 
 object ProcessingTypeId {
 
-  implicit val processingTypeIdRead = (__ \ "id").read[String](minLength[String](2)).map( new ProcessingTypeId(_) )
+  implicit val processingTypeIdRead = (__).read[String](minLength[String](2)).map( new ProcessingTypeId(_) )
   implicit val processingTypeIdWrite = Writes{ (id: ProcessingTypeId) => JsString(id.id) }
 
 }

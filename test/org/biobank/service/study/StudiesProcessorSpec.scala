@@ -17,6 +17,7 @@ import org.biobank.domain.study._
 import org.joda.time.DateTime
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
+import akka.actor.Props
 
 import scalaz._
 import scalaz.Scalaz._
@@ -282,38 +283,23 @@ class StudiesProcessorSpec extends TestFixture {
     }
 
     "be recovered from journal" ignore {
-      /*
-       * Not sure if this is a good test, or how to do it correctly - ignoring it for now
-       */
-      // val study = factory.createDisabledStudy
+      val study = factory.createDisabledStudy
 
-      // var cmd: StudyCommand = AddStudyCmd(study.name, study.description)
-      // val validation = ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]]
-      //   .futureValue
+      askAddCommand(study) mustSucceed { event =>
+        event mustBe a [StudyAddedEvent]
 
-      // validation mustBe ('success)
-      // val event = validation.getOrElse(fail)
+        val study2 = study.copy(
+          id          = StudyId(event.id),
+          name        = nameGenerator.next[Study],
+          description = some(nameGenerator.next[Study]))
 
-      // Thread.sleep(10)
+        askUpdateCommand(study2) mustSucceed { event =>
+          event mustBe a[StudyUpdatedEvent]
+        }
+      }
 
-      // Await.result(gracefulStop(studiesProcessor, 5 seconds, PoisonPill), 6 seconds)
-
-      // // restart
-      // val newStudiesProcessor = system.actorOf(Props(new StudiesProcessor), "studyproc")
-
-      // Thread.sleep(10)
-
-      // val newName = nameGenerator.next[Study]
-      // val newDescription = some(nameGenerator.next[Study])
-
-      // cmd = UpdateStudyCmd(event.id, 0, newName, newDescription)
-      // val validation2 = ask(newStudiesProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]]
-      //   .futureValue
-
-      // validation2 mustSucceed { event =>
-      //   event mustBe a[StudyUpdatedEvent]
-      // }
-      ???
+      // restart the processor
+      val newStudiesProcessor = system.actorOf(Props(new StudiesProcessor), "study-processor-id")
     }
   }
 }

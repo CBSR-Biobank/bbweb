@@ -14,7 +14,7 @@ case class StudyId(id: String) extends IdentifiedValueObject[String]
 
 object StudyId {
 
-  implicit val studyIdReader = (__ \ "id").read[String](minLength[String](2)).map( new StudyId(_) )
+  implicit val studyIdReader = (__).read[String](minLength[String](2)).map( new StudyId(_) )
   implicit val studyIdWriter = Writes{ (id: StudyId) => JsString(id.id) }
 
 }
