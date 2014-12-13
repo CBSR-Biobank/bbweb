@@ -69,7 +69,7 @@ trait ControllerFixture
 
   }
 
-  var token: String = ""
+  var adminToken: String = ""
 
   val factory = new Factory
 
@@ -98,8 +98,8 @@ trait ControllerFixture
         status(result) mustBe OK
         contentType(result) mustBe Some("application/json")
         val json = Json.parse(contentAsString(result))
-        token = (json \ "data").as[String]
-        token
+        adminToken = (json \ "data").as[String]
+        adminToken
       case _ =>
         cancel("login failed")
     }
@@ -109,7 +109,9 @@ trait ControllerFixture
     method: String,
     path: String,
     expectedStatus: Int = OK,
-    json: JsValue = JsNull): JsValue = {
+    json: JsValue = JsNull,
+    token: String = adminToken)
+      : JsValue = {
     var fakeRequest = FakeRequest(method, path)
       .withJsonBody(json)
       .withHeaders("X-XSRF-TOKEN" -> token)
@@ -124,6 +126,7 @@ trait ControllerFixture
       Json.parse(contentAsString(result))
     }
   }
+
 
 }
 

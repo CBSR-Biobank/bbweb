@@ -58,6 +58,7 @@ class StudiesProcessorSpec extends TestFixture {
 
       askAddCommand(study) mustSucceed { event =>
         event mustBe a [StudyAddedEvent]
+
         event must have (
           'name (study.name),
           'description (study.description)

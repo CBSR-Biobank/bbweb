@@ -17,6 +17,8 @@ import Scalaz._
 /**
   * Tests for actor ParticipantAnnotationTypeProcessorSpec. These are written using ScalaTest.
   *
+  * To run tagged tests, use this command:
+  *   ParticipantAnnotationTypeProcessorSpec -- -n 1
   */
 class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
   import org.biobank.TestUtils._
