@@ -1,16 +1,17 @@
 define(['./module'], function(module) {
   'use strict';
 
-  /** Code originally borrowed from:
-    *
-    * https://github.com/forbode/forbode-angularjs-pwCheck
-    *
-    * http://codepen.io/brunoscopelliti/pen/ECyka
-    *
-    * http://rogeralsing.com/2013/08/26/angularjs-directive-to-check-that-passwords-match-followup/
-    *
-    * https://egghead.io/lessons/angularjs-using-ngmodel-in-custom-directives
-    */
+  /**
+   * Code originally borrowed from:
+   *
+   * https://github.com/forbode/forbode-angularjs-pwCheck
+   *
+   * http://codepen.io/brunoscopelliti/pen/ECyka
+   *
+   * http://rogeralsing.com/2013/08/26/angularjs-directive-to-check-that-passwords-match-followup/
+   *
+   * https://egghead.io/lessons/angularjs-using-ngmodel-in-custom-directives
+   */
   module.directive('passwordCheck', passwordCheck);
 
   function passwordCheck() {
