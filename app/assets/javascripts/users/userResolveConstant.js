@@ -23,15 +23,15 @@ define(['./module'], function(module) {
       token = $cookies['XSRF-TOKEN'];
 
       if (token) {
-        biobankXhrReqService.call('GET', '/authenticate').then(
-          function(user) {
+        biobankXhrReqService.call('GET', '/authenticate')
+          .then(function(user) {
             deferred.resolve(user);
-          },
-          function(error) {
+          })
+          .catch(function(error) {
             deferred.reject(error);
           });
       } else {
-        deferred.reject();
+        deferred.reject('no token present');
       }
     }
     return deferred.promise;

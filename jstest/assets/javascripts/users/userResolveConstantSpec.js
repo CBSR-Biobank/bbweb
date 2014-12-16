@@ -3,7 +3,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  ddescribe('Constant: userResolve', function() {
+  describe('Constant: userResolve', function() {
 
     var cookies, q, userResolve, httpBackend, usersService, biobankXhrReqService;
     var fakeToken = 'fake-token';
@@ -19,42 +19,96 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     beforeEach(mocks.module('biobankApp'));
 
-    beforeEach(inject(function ($cookies, $q, $httpBackend, _usersService_, _biobankXhrReqService_) {
-      cookies = $cookies;
+    beforeEach(inject(function ($q, $httpBackend, _usersService_, _biobankXhrReqService_) {
       q = $q;
-      $cookies['XSRF-TOKEN'] = fakeToken;
       httpBackend = $httpBackend;
       usersService = _usersService_;
       biobankXhrReqService = _biobankXhrReqService_;
     }));
 
-    it('should return a valid user on authentication success', inject(function(userResolve) {
-      httpBackend.whenGET('/authenticate').respond({
-        status: 'success',
-        data: user
-      });
+    describe('when token is present', function () {
 
-      userResolve.user(cookies, q, usersService, biobankXhrReqService)
-        .then(function (actualUser) {
-          expect(actualUser).toEqual(user);
-           });
-      httpBackend.flush();
-    }));
+      beforeEach(inject(function ($cookies) {
+        cookies = $cookies;
+        $cookies['XSRF-TOKEN'] = fakeToken;
+      }));
 
-    it('should return a invalid user on authentication failure', inject(function(userResolve) {
-      httpBackend.whenGET('/authenticate').respond({
-        status: 'error',
-        message: 'auth failure'
-      });
-
-      userResolve.user(cookies, q, usersService, biobankXhrReqService)
-        .then(function (actualUser) {
-          fail();
-        })
-        .catch(function () {
+      it('should return a valid user on authentication success', inject(function(userResolve) {
+        httpBackend.whenGET('/authenticate').respond({
+          status: 'success',
+          data: user
         });
-      httpBackend.flush();
-    }));
+
+        userResolve.user(cookies, q, usersService, biobankXhrReqService)
+          .then(function (actualUser) {
+            expect(actualUser).toEqual(user);
+          });
+        httpBackend.flush();
+      }));
+
+      it('should return a invalid user on authentication failure', inject(function(userResolve) {
+        httpBackend.whenGET('/authenticate').respond(401, {
+          status: 'error',
+          message: 'auth failure'
+        });
+
+        userResolve.user(cookies, q, usersService, biobankXhrReqService)
+          .then(function (user) {
+            // if this code runs, the test has failed
+            expect(true).toEqual(false);
+          })
+          .catch(function (resp) {
+            expect(resp.data.message).toBe('auth failure');
+          });
+        httpBackend.flush();
+      }));
+
+    });
+
+    describe('when no token is present', function () {
+
+      beforeEach(inject(function ($cookies, $q, $httpBackend, _usersService_, _biobankXhrReqService_) {
+        cookies = $cookies;
+        delete $cookies['XSRF-TOKEN'];
+      }));
+
+      it('should return a invalid user', inject(function($rootScope, userResolve) {
+        userResolve.user(cookies, q, usersService, biobankXhrReqService)
+          .then(function (user) {
+            // if this code runs, the test has failed
+            expect(true).toEqual(false);
+          })
+          .catch(function (err) {
+            expect(err).toBe('no token present');
+          });
+        $rootScope.$digest();
+      }));
+
+    });
+
+    describe('when user is defined in usersService', function () {
+
+      beforeEach(inject(function ($cookies, $q, $httpBackend, _biobankXhrReqService_, _usersService_) {
+        cookies = $cookies;
+        delete $cookies['XSRF-TOKEN'];
+
+        spyOn(usersService, 'getUser').and.callFake(function () {
+          return user;
+        });
+      }));
+
+      it('should return a invalid user on authentication failure', inject(function(userResolve) {
+        userResolve.user(cookies, q, usersService, biobankXhrReqService)
+          .then(function (actualUser) {
+            expect(actualUser).toEqual(user);
+          })
+          .catch(function (resp) {
+            // if this code runs, the test has failed
+            expect(true).toEqual(false);
+          });
+      }));
+
+    });
 
   });
 
