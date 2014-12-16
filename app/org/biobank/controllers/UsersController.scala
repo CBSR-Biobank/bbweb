@@ -205,11 +205,4 @@ class UsersController(implicit inj: Injector)
       }
   }
 
-  def removeUser(id: String, ver: Long) = AuthActionAsync(parse.empty) {
-    token => implicit userId => implicit request =>
-    val cmd = RemoveUserCmd(id, ver)
-    val future = usersService.remove(cmd)
-    domainValidationReply(future)
-  }
-
 }

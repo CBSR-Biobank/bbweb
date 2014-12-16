@@ -118,6 +118,12 @@ To generate the HTML report use the command:
 sbt clean coverage test coverageReport
 ```
 
+Or, within the SBT cli:
+
+```sh
+; clean; coverage; test; coverageReport
+```
+
 ### Gtags
 
 Using helm-gtags in Emacs. To generate a tags file the following is required:

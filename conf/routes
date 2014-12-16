@@ -97,7 +97,6 @@ DELETE  /centres/:centreId/studies/:studyId     @org.biobank.controllers.centres
 # Users
 GET     /users                                  @org.biobank.controllers.UsersController.list(query: Option[String], sort: Option[String], order: Option[String])
 POST    /users                                  @org.biobank.controllers.UsersController.registerUser()
-DELETE  /users/:id/:ver                         @org.biobank.controllers.UsersController.removeUser(id, ver: Long)
 GET     /users/:id                              @org.biobank.controllers.UsersController.user(id)
 PUT     /users/:id/name                         @org.biobank.controllers.UsersController.updateName(id)
 PUT     /users/:id/email                        @org.biobank.controllers.UsersController.updateEmail(id)

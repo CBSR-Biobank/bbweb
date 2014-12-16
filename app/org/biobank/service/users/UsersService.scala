@@ -103,10 +103,5 @@ class UsersService(implicit inj: Injector)
     ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserUnlockedEvent]])
   }
 
-  def remove(cmd: RemoveUserCmd)(implicit userId: UserId)
-      : Future[DomainValidation[UserRemovedEvent]] = {
-    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserRemovedEvent]])
-  }
-
 }
 

@@ -155,6 +155,19 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       httpBackend.flush();
     });
 
+    it('shoud get all value types', function() {
+      httpBackend.whenGET(uri() + '/valuetypes').respond({
+        status: 'success',
+        data: 'success'
+      });
+
+      studiesService.valueTypes().then(function(data) {
+        expect(data).toBe('success');
+      });
+
+      httpBackend.flush();
+    });
+
   });
 
 });

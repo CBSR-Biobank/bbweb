@@ -55,11 +55,6 @@ object UserCommands {
     expectedVersion: Long)
       extends UserModifyCommand
 
-  case class RemoveUserCmd(
-    id: String,
-    expectedVersion: Long)
-      extends UserModifyCommand
-
   case class ResetUserPasswordCmd(
     id: String,
     expectedVersion: Long,

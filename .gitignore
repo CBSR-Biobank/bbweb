@@ -24,6 +24,10 @@ evolutions
 # IntelliJ
 .idea*
 
+# AngularJS
+coverage/
+node_modules/
+
 # Others
 email.conf
 .tern-port
@@ -34,4 +38,3 @@ email.conf
 .project
 .settings/
 .worksheet/
-node_modules/

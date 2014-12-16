@@ -18,7 +18,8 @@ define(['./module', 'angular'], function(module, angular) {
       retire        : retire,
       unretire      : unretire,
       collectionDto : collectionDto,
-      processingDto : processingDto
+      processingDto : processingDto,
+      valueTypes    : valueTypes
     };
     return service;
 
@@ -85,6 +86,10 @@ define(['./module', 'angular'], function(module, angular) {
 
     function processingDto(studyId) {
       return biobankXhrReqService.call('GET', uri(studyId) + '/dto/processing');
+    }
+
+    function valueTypes() {
+      return biobankXhrReqService.call('GET', '/studies/valuetypes');
     }
   }
 

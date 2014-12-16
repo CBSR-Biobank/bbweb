@@ -13,8 +13,7 @@ define(['./module', 'angular'], function(module, angular) {
       getAll      : getAll,
       get         : get,
       addOrUpdate : addOrUpdate,
-      remove      : remove,
-      valueTypes  : valueTypes
+      remove      : remove
     };
     return services;
 
@@ -75,11 +74,6 @@ define(['./module', 'angular'], function(module, angular) {
         'DELETE',
         uri(annotTypeUri, annotType.studyId, annotType.id, annotType.version));
     }
-
-    function valueTypes() {
-      return biobankXhrReqService.call('GET', '/studies/valuetypes');
-    }
-
 
   }
 
