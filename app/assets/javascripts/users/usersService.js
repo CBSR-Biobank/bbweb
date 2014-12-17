@@ -103,6 +103,17 @@ define(['./module'], function(module) {
     }
 
     function getUsers(query, sort, order) {
+      var queryStr = [];
+      if (arguments.length > 0) {
+        queryStr.push(query);
+      }
+      if (arguments.length > 1) {
+        queryStr.push('sort=' + sort);
+      }
+      if (arguments.length > 2) {
+        queryStr.push('order=' + order);
+      }
+
       var q = query || '';
       var s = sort || 'name';
       var o = order || 'asc';

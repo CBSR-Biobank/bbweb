@@ -2,7 +2,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  describe('Service: userService', function() {
+  ddescribe('Service: userService', function() {
 
     var usersService;
     var fakeToken = 'fake-token';
@@ -139,6 +139,19 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         });
         usersService.query(user.id).then(function(data) {
           expect(_.isEqual(data, user));
+        });
+        httpBackend.flush();
+      });
+
+      it('should query for multiple users - no arguments', function() {
+        httpBackend.whenGET(uri()).respond({
+          status: 'success',
+          data: [user]
+        });
+
+        usersService.getUsers().then(function(data) {
+          expect(data.length).toBe(1);
+          expect(_.isEqual(data[0], user));
         });
         httpBackend.flush();
       });

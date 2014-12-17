@@ -3,7 +3,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  ddescribe('Directive: passwordCheck', function() {
+  describe('Directive: passwordCheck', function() {
 
     var scope, form;
 
