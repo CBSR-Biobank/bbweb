@@ -2,7 +2,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  ddescribe('Service: userService', function() {
+  describe('Service: userService', function() {
 
     var usersService;
     var fakeToken = 'fake-token';
@@ -143,7 +143,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         httpBackend.flush();
       });
 
-      it('should query for multiple users - no arguments', function() {
+      it('should query for multiple users - no parameters', function() {
         httpBackend.whenGET(uri()).respond({
           status: 'success',
           data: [user]
@@ -156,15 +156,45 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         httpBackend.flush();
       });
 
+      it('should query for multiple users - query parameter only', function() {
+        var query = 'test';
+
+        httpBackend.whenGET(uri() + '?query=' + query).respond({
+          status: 'success',
+          data: [user]
+        });
+
+        usersService.getUsers(query).then(function(data) {
+          expect(data.length).toBe(1);
+          expect(_.isEqual(data[0], user));
+        });
+        httpBackend.flush();
+      });
+
+      it('should query for multiple users - sort parameter only', function() {
+        var sort = 'asc';
+
+        httpBackend.whenGET(uri() + '?sort=' + sort).respond({
+          status: 'success',
+          data: [user]
+        });
+
+        usersService.getUsers(null, sort).then(function(data) {
+          expect(data.length).toBe(1);
+          expect(_.isEqual(data[0], user));
+        });
+        httpBackend.flush();
+      });
+
       it('should query for multiple users', function() {
         var query = 'test';
         var sort = 'email';
         var order = 'desc';
 
-        httpBackend.whenGET(uri() + '?' + query + '&sort=' + sort + '&order=' + order).respond({
-          status: 'success',
-          data: [user]
-        });
+        httpBackend.whenGET(uri() + '?query=' + query + '&sort=' + sort + '&order=' + order).respond({
+            status: 'success',
+            data: [user]
+          });
 
         usersService.getUsers(query, sort, order).then(function(data) {
           expect(data.length).toBe(1);
@@ -182,6 +212,21 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           avatarUrl: user.avatarUrl
         };
         httpBackend.expectPOST(uri(), cmd).respond(201, postResult);
+        usersService.add(userNoId).then(function(reply) {
+          expect(reply).toEqual('success');
+        });
+        httpBackend.flush();
+      });
+
+      it('should allow adding a user - no avatar url', function() {
+        var cmd = {
+          name:      user.name,
+          email:     user.email,
+          password:  user.password
+        };
+        httpBackend.expectPOST(uri(), cmd).respond(201, {status: 'success', data: 'success'});
+
+        userNoId.avatarUrl = undefined;
         usersService.add(userNoId).then(function(reply) {
           expect(reply).toEqual('success');
         });

@@ -1,4 +1,4 @@
-define(['./module'], function(module) {
+define(['./module', 'jquery'], function(module, jquery) {
   'use strict';
 
   module.service('usersService', UsersService);
@@ -103,24 +103,25 @@ define(['./module'], function(module) {
     }
 
     function getUsers(query, sort, order) {
-      var queryStr = [];
       if (arguments.length > 0) {
-        queryStr.push(query);
-      }
-      if (arguments.length > 1) {
-        queryStr.push('sort=' + sort);
-      }
-      if (arguments.length > 2) {
-        queryStr.push('order=' + order);
-      }
+        var params = {};
 
-      var q = query || '';
-      var s = sort || 'name';
-      var o = order || 'asc';
+        if (query) {
+          params['query'] = query;
+        }
 
-      return biobankXhrReqService.call(
-        'GET',
-        uri() + '?' + q + '&sort=' + s + '&order=' + o);
+        if ((arguments.length > 1) && sort) {
+          params['sort'] = sort;
+        }
+
+        if ((arguments.length > 2) && order) {
+          params['order'] = order;
+        }
+
+        return biobankXhrReqService.call('GET', uri() + '?' + jquery.param(params));
+      } else {
+        return biobankXhrReqService.call('GET', uri());
+      }
     }
 
     function add(newUser) {
