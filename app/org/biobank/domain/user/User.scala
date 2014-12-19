@@ -198,6 +198,13 @@ case class ActiveUser (
     )
   }
 
+  def updateAvatarUrl(avatarUrl: Option[String]): DomainValidation[ActiveUser] = {
+    validateAvatarUrl(avatarUrl).fold(
+      err => err.failure,
+      x => copy(version = version + 1, avatarUrl = x).success
+    )
+  }
+
   /** Locks an active user. */
   def lock: DomainValidation[LockedUser] = {
     LockedUser.create(this)

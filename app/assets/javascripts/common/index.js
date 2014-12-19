@@ -2,6 +2,7 @@
  * Common functionality.
  */
 define([
+  './directives/focusMeDirective',
   './directives/infoUpdateRemoveButtonsDirective',
   './directives/integerDirective',
   './directives/panelButtonsDirective',

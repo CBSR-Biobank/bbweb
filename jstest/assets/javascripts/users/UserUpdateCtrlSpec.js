@@ -3,7 +3,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  ddescribe('Controller: UserUpdateCtrl', function() {
+  describe('Controller: UserUpdateCtrl', function() {
     var scope, stateHelper, usersService, domainEntityUpdateError;
     var state = {current: {data: {returnState: 'admin.users'}}};
     var user  = {name: 'User1', email: 'admin@admin.com'};
@@ -52,19 +52,6 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       expect(stateHelper.reloadStateAndReinit).toHaveBeenCalledWith(
         state.current.data.returnState);
     });
-
-    it('should return to valid state on submit', inject(function($q) {
-      spyOn(usersService, 'addOrUpdate').and.callFake(function () {
-        var deferred = $q.defer();
-        deferred.resolve('xxx');
-        return deferred.promise;
-      });
-
-      scope.vm.submit(study);
-      scope.$digest();
-      expect(stateHelper.reloadStateAndReinit).toHaveBeenCalledWith(
-        'admin.studies', {}, {reload: true});
-    }));
 
   });
 

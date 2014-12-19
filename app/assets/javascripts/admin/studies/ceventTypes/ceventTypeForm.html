@@ -16,7 +16,8 @@
                data-ng-model="vm.ceventType.name"
                data-ng-minlength="2"
                placeholder="A short name for the collection event type"
-               required />
+               focus-me="true"
+               required/>
       </div>
       <div class="col-md-offset-2 col-md-10">
         <p class="help-block" data-ng-show="cetForm.name.$error.minlength">Name is too short.</p>

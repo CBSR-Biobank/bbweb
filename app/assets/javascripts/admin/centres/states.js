@@ -11,6 +11,7 @@ define(['../module', 'underscore'], function(module, _) {
   function config($urlRouterProvider, $stateProvider, userResolve ) {
 
     resolveCentre.$inject = ['$stateParams', 'centresService'];
+
     function resolveCentre($stateParams, centresService) {
       if ($stateParams.centreId) {
         return centresService.get($stateParams.centreId);
@@ -116,7 +117,8 @@ define(['../module', 'underscore'], function(module, _) {
     $stateProvider.state('admin.centres.centre.update', {
       url: '/add',
       resolve: {
-        user: userResolve.user
+        user: userResolve.user,
+        centre: resolveCentre
       },
       views: {
         'main@': {

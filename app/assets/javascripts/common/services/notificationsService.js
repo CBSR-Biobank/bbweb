@@ -10,7 +10,9 @@ define(['../module', 'toastr'], function(module, toastr) {
    */
   function notificationsService() {
     var service = {
-      submitSuccess: submitSuccess
+      submitSuccess: submitSuccess,
+      success: success,
+      error: error
     };
     return service;
 
@@ -19,6 +21,29 @@ define(['../module', 'toastr'], function(module, toastr) {
     function submitSuccess() {
       toastr.options.positionClass = 'toast-bottom-right';
       toastr.success('Your changes were saved.');
+    }
+
+    function success(message, title, _timeout) {
+      var options = {
+        closeButton: true,
+        timeOut:  _timeout || 0,
+        extendedTimeOut: 0,
+        positionClass: 'toast-bottom-right'
+      };
+
+      toastr.success(message, title, options);
+    }
+
+    function error(message, title, _timeout) {
+      var timeout = _timeout || 0;
+      var options = {
+        closeButton: true,
+        timeOut:  timeout,
+        extendedTimeOut: (timeout > 0) ? timeout * 2 : 0,
+        positionClass: 'toast-bottom-right'
+      };
+
+      toastr.error(message, title, options);
     }
 
   }

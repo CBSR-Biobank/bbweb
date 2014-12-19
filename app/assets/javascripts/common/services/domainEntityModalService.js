@@ -1,4 +1,4 @@
-define(['../module', 'angular'], function(module, angular) {
+define(['../module'], function(module) {
   'use strict';
 
   module.service('domainEntityModalService', domainEntityModalService);
@@ -6,13 +6,6 @@ define(['../module', 'angular'], function(module, angular) {
   domainEntityModalService.$inject = ['$modal', 'tableService'];
 
   function domainEntityModalService($modal, tableService) {
-    var modalDefaults = {
-      backdrop: true,
-      keyboard: true,
-      modalFade: true,
-      templateUrl: '/assets/javascripts/common/services/domainEntityModal.html'
-    };
-
     var service = {
       show: show
     };
@@ -22,28 +15,35 @@ define(['../module', 'angular'], function(module, angular) {
     //---
 
     function show (title, data) {
-      var tempModalDefaults = {};
-      angular.extend(tempModalDefaults, modalDefaults);
+      var modalOptions = {
+        backdrop: true,
+        keyboard: true,
+        modalFade: true,
+        templateUrl: '/assets/javascripts/common/services/domainEntityModal.html',
+        controller: controller
+      };
 
-      tempModalDefaults.controller = ['$scope', '$modalInstance', function ($scope, $modalInstance) {
+      controller.$inject = ['$scope', '$modalInstance'];
+
+      function controller($scope, $modalInstance) {
         var tableParameters = { count: 20 };
         var tableSettings = { counts: [] };
 
-        $scope.modalOptions = {};
-        $scope.modalOptions.title = title;
-        $scope.modalOptions.data = data;
-        $scope.modalOptions.tableParams =
-          tableService.getTableParams($scope.modalOptions.data, tableParameters, tableSettings);
-        $scope.modalOptions.ok = ok;
+        $scope.modalOptions = {
+          title: title,
+          data: data,
+          tableParams: tableService.getTableParams(data, tableParameters, tableSettings),
+          ok: ok
+        };
 
         //--
 
         function ok() {
           $modalInstance.close();
         }
-      }];
+      }
 
-      return $modal.open(tempModalDefaults).result;
+      return $modal.open(modalOptions).result;
     }
   }
 

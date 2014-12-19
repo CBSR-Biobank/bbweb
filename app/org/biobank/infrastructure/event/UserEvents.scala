@@ -40,6 +40,11 @@ object UserEvents {
       with HasIdentity
       with HasVersion
 
+  case class UserAvatarUrlUpdatedEvent(id: String, version: Long, avatarUrl: Option[String])
+      extends UserEvent
+      with HasIdentity
+      with HasVersion
+
   case class UserPasswordResetEvent(
     id: String,
     version: Long,
@@ -97,6 +102,12 @@ object UserEvents {
       (__ \ "password").write[String] and
       (__ \ "salt").write[String]
   )(unlift(UserPasswordUpdatedEvent.unapply))
+
+  implicit val userAvatarUrlUpdatedEventWrites: Writes[UserAvatarUrlUpdatedEvent] = (
+    (__ \ "id").write[String] and
+      (__ \ "version").write[Long] and
+      (__ \ "avatarUrl").writeNullable[String]
+  )(unlift(UserAvatarUrlUpdatedEvent.unapply))
 
   implicit val userPasswordResetEventWrites: Writes[UserPasswordResetEvent] = (
     (__ \ "id").write[String] and

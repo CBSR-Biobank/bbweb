@@ -11,5 +11,5 @@ define([
   './states',
   './userResolveConstant',
   './usersService',
-  './UserUpdateCtrl',
+  './UserProfileCtrl',
 ], function() {});

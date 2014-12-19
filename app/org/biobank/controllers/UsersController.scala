@@ -178,6 +178,11 @@ class UsersController(implicit inj: Injector)
     domainValidationReply(future)
   }
 
+  def updateAvatarUrl(id: String) =  commandAction { cmd: UpdateUserAvatarUrlCmd => implicit userId =>
+    val future = usersService.updateAvatarUrl(cmd)
+    domainValidationReply(future)
+  }
+
   def activateUser(id: String) =  commandAction { cmd: ActivateUserCmd => implicit userId =>
       if (cmd.id != id) {
         Future.successful(BadRequest("user id mismatch"))

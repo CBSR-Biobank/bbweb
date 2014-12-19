@@ -14,6 +14,7 @@
                 name="procTypeId"
                 data-ng-model="vm.spcLinkType.processingTypeId"
                 data-ng-options="pt.id as pt.name for pt in vm.processingTypes | orderBy: 'name'"
+                focus-me="true"
                 required>
           <option value="">-- choose processing type --</option>
         </select>

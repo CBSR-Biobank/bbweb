@@ -17,6 +17,8 @@ define(['../module'], function(module) {
       },
       templateUrl : '/assets/javascripts/common/directives/truncateToggle.html',
       controller: controller
+      //,
+      //link: link
     };
 
     controller.$inject = ['$scope', '$filter'];
@@ -30,8 +32,9 @@ define(['../module'], function(module) {
       $scope.buttonLabel      = 'Collapse';
       $scope.toggleText       = toggleText;
 
-      //---
+      console.log('***', $scope.text);
 
+      //---
       function toggleText() {
         if ($scope.toggleState) {
           $scope.displayText = $filter('truncate')($scope.text, $scope.toggleLength);
@@ -43,6 +46,13 @@ define(['../module'], function(module) {
         $scope.toggleState = !$scope.toggleState;
       }
     }
+
+    // function link(scope, element, attrs) {
+    //   var paragraphElement = angular.element(element.children().eq(0));
+    //   var buttonElement = angular.element(element.children().eq(2));
+
+    //   buttonElement.bind('click', toggleText);
+    // }
 
     return directive;
   }

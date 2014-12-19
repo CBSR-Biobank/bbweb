@@ -36,8 +36,14 @@ object UserCommands {
   case class UpdateUserPasswordCmd(
     id: String,
     expectedVersion: Long,
-    oldPassword: String,
+    currentPassword: String,
     newPassword: String)
+      extends UserModifyCommand
+
+  case class UpdateUserAvatarUrlCmd(
+    id: String,
+    expectedVersion: Long,
+    avatarUrl: Option[String])
       extends UserModifyCommand
 
   case class ActivateUserCmd(
@@ -89,9 +95,15 @@ object UserCommands {
   implicit val updateUserPasswordCmdReads = (
     (__ \ "id").read[String](minLength[String](2)) and
       (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "oldPassword").read[String](minLength[String](2)) and
+      (__ \ "currentPassword").read[String](minLength[String](2)) and
       (__ \ "newPassword").read[String](minLength[String](2))
   )(UpdateUserPasswordCmd.apply _)
+
+  implicit val updateUserAvatarUrlCmdReads = (
+    (__ \ "id").read[String](minLength[String](2)) and
+      (__ \ "expectedVersion").read[Long](min[Long](0)) and
+      (__ \ "avatarUrl").readNullable[String](minLength[String](5))
+  )(UpdateUserAvatarUrlCmd.apply _)
 
   implicit val activateUserCmdReads = (
     (__ \ "id").read[String](minLength[String](2)) and

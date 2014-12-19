@@ -2,7 +2,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  describe('Service: userService', function() {
+  ddescribe('Service: userService', function() {
 
     var usersService;
     var fakeToken = 'fake-token';
@@ -98,6 +98,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         expect(angular.isFunction(usersService.updateName)).toBe(true);
         expect(angular.isFunction(usersService.updateEmail)).toBe(true);
         expect(angular.isFunction(usersService.updatePassword)).toBe(true);
+        expect(angular.isFunction(usersService.updateAvatarUrl)).toBe(true);
         expect(angular.isFunction(usersService.passwordReset)).toBe(true);
         expect(angular.isFunction(usersService.activate)).toBe(true);
         expect(angular.isFunction(usersService.lock)).toBe(true);
@@ -192,9 +193,9 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         var order = 'desc';
 
         httpBackend.whenGET(uri() + '?query=' + query + '&sort=' + sort + '&order=' + order).respond({
-            status: 'success',
-            data: [user]
-          });
+          status: 'success',
+          data: [user]
+        });
 
         usersService.getUsers(query, sort, order).then(function(data) {
           expect(data.length).toBe(1);
@@ -279,6 +280,34 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         var postResult = {status: 'success', data: 'success'};
         httpBackend.expectPUT(uri(user.id) + '/password', expectedCmd).respond(201, postResult);
         usersService.updatePassword(user, user.password).then(function(data) {
+          expect(data).toBe('success');
+        });
+        httpBackend.flush();
+      });
+
+      it('should allow a users avatar URL to be changed', function() {
+        var expectedCmd = {
+          id:              user.id,
+          expectedVersion: user.version,
+          avatarUrl:       user.avatarUrl
+        };
+        var postResult = {status: 'success', data: 'success'};
+        httpBackend.expectPUT(uri(user.id) + '/avatarurl', expectedCmd).respond(201, postResult);
+        usersService.updateAvatarUrl(user, user.avatarUrl).then(function(data) {
+          expect(data).toBe('success');
+        });
+        httpBackend.flush();
+      });
+
+      it('should allow a users avatar URL to be removed', function() {
+        var expectedCmd = {
+          id:              user.id,
+          expectedVersion: user.version,
+          avatarUrl:       null
+        };
+        var postResult = {status: 'success', data: 'success'};
+        httpBackend.expectPUT(uri(user.id) + '/avatarurl', expectedCmd).respond(201, postResult);
+        usersService.updateAvatarUrl(user, null).then(function(data) {
           expect(data).toBe('success');
         });
         httpBackend.flush();

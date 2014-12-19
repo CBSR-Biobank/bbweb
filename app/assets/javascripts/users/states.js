@@ -83,19 +83,19 @@ define(['./module'], function(module) {
     /**
      * Allows changes to be made to a user
      */
-    $stateProvider.state('users.settings', {
-      url: '^/settings',
+    $stateProvider.state('users.profile', {
+      url: '^/profile',
       resolve: {
         user: userResolve.user
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/users/userSettingsForm.html',
-          controller: 'UserUpdateCtrl as vm'
+          templateUrl: '/assets/javascripts/users/userProfile.html',
+          controller: 'UserProfileCtrl as vm'
         }
       },
       data: {
-        displayName: 'User Settings'
+        displayName: 'User profile'
       }
     });
 

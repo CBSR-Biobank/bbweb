@@ -42,7 +42,7 @@ class UserRepositoryImpl
 
   def getByEmail(email: String): DomainValidation[User] = {
     getValues.find(_.email == email).fold {
-      DomainError(s"user with email not found: $email").failureNel[User]
+      DomainError(s"user with email not found: $email: ${getValues.size}").failureNel[User]
     } { user =>
       user.success
     }

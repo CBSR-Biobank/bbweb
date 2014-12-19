@@ -18,6 +18,7 @@
       'bootstrap':         ['jquery'],
       'angular-ui-router': ['angular'],
       'ui-bootstrap':      ['angular', 'bootstrap'],
+      'angular-strap':     ['angular', 'bootstrap'],
       'ngTable':           ['angular'],
       'toastr':            ['angular', 'jquery'],
       'angular-sanitize':  ['angular']
@@ -32,6 +33,7 @@
       'angular-ui-router': '../lib/angular-ui-router/angular-ui-router',
       'bootstrap':         '../lib/bootstrap/js/bootstrap',
       'ui-bootstrap':      '../lib/angular-ui-bootstrap/ui-bootstrap-tpls',
+      'angular-strap':     '../lib/angular-strap/angular-strap',
       'ngTable':           '../lib/ng-table/ng-table',
       'toastr':            '../lib/toastr/toastr',
       'angular-sanitize':  '../lib/angular-sanitize/angular-sanitize'

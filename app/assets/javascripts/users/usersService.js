@@ -14,20 +14,21 @@ define(['./module', 'jquery'], function(module, jquery) {
     self.token = $cookies['XSRF-TOKEN'];
 
     var service = {
-      login:          login,
-      logout:         logout,
-      getUser:        getUser,
-      query:          query,
-      getAllUsers:    getAllUsers,
-      getUsers:       getUsers,
-      add:            add,
-      updateName:     updateName,
-      updateEmail:    updateEmail,
-      updatePassword: updatePassword,
-      passwordReset:  passwordReset,
-      activate:       activate,
-      lock:           lock,
-      unlock:         unlock
+      login:           login,
+      logout:          logout,
+      getUser:         getUser,
+      query:           query,
+      getAllUsers:     getAllUsers,
+      getUsers:        getUsers,
+      add:             add,
+      updateName:      updateName,
+      updateEmail:     updateEmail,
+      updatePassword:  updatePassword,
+      updateAvatarUrl: updateAvatarUrl,
+      passwordReset:   passwordReset,
+      activate:        activate,
+      lock:            lock,
+      unlock:          unlock
     };
 
     init();
@@ -107,15 +108,15 @@ define(['./module', 'jquery'], function(module, jquery) {
         var params = {};
 
         if (query) {
-          params['query'] = query;
+          params.query = query;
         }
 
         if ((arguments.length > 1) && sort) {
-          params['sort'] = sort;
+          params.sort = sort;
         }
 
         if ((arguments.length > 2) && order) {
-          params['order'] = order;
+          params.order = order;
         }
 
         return biobankXhrReqService.call('GET', uri() + '?' + jquery.param(params));
@@ -154,13 +155,23 @@ define(['./module', 'jquery'], function(module, jquery) {
       return biobankXhrReqService.call('PUT', uri(user.id) + '/email', cmd);
     }
 
-    function updatePassword(user, newPassword) {
+    function updatePassword(user, currentPassword, newPassword) {
       var cmd = {
         id:              user.id,
         expectedVersion: user.version,
-        password:        newPassword
+        currentPassword: currentPassword,
+        newPassword:     newPassword
       };
       return biobankXhrReqService.call('PUT', uri(user.id) + '/password', cmd);
+    }
+
+    function updateAvatarUrl(user, avatarUrl) {
+      var cmd = {
+        id:              user.id,
+        expectedVersion: user.version,
+        avatarUrl:       avatarUrl
+      };
+      return biobankXhrReqService.call('PUT', uri(user.id) + '/avatarurl', cmd);
     }
 
     function passwordReset(email) {

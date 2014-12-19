@@ -102,6 +102,7 @@ class UsersControllerSpec extends ControllerFixture {
     }
 
     "PUT /users/:id/name" must {
+
       "update a user's name" in new App(fakeApp) {
         doLogin
         val user = factory.createRegisteredUser.activate | fail
@@ -114,10 +115,27 @@ class UsersControllerSpec extends ControllerFixture {
         val json = makeRequest(PUT, uri(user) + "/name", json = cmdJson)
 
         (json \ "status").as[String] must include("success")
+          (json \ "data" \ "version").as[Int] must be(user.version + 1)
+        (json \ "data" \ "name").as[String] must be(user.name)
+      }
+
+      "not update a user's name with an invalid name" in new App(fakeApp) {
+        doLogin
+        val user = factory.createRegisteredUser.activate | fail
+        userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "id" -> user.id.id,
+          "expectedVersion" -> Some(user.version),
+          "name" -> "a")
+        val json = makeRequest(PUT, uri(user) + "/name", BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include("error")
       }
     }
 
     "PUT /users/:id/email" must {
+
       "update a user's email" in new App(fakeApp) {
         doLogin
         val user = factory.createRegisteredUser.activate | fail
@@ -130,11 +148,30 @@ class UsersControllerSpec extends ControllerFixture {
         val json = makeRequest(PUT, uri(user) + "/email", json = cmdJson)
 
         (json \ "status").as[String] must include("success")
+          (json \ "data" \ "version").as[Int] must be(user.version + 1)
+        (json \ "data" \ "email").as[String] must be(user.email)
       }
+
+      "not update a user's email with an invalid email address" taggedAs(Tag("1")) in new App(fakeApp) {
+        doLogin
+        val user = factory.createRegisteredUser.activate | fail
+        userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "id" -> user.id.id,
+          "expectedVersion" -> Some(user.version),
+          "email" -> "abcdef")
+        val json = makeRequest(PUT, uri(user) + "/email", BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include("error")
+        (json \ "message").as[String] must include("InvalidEmail")
+      }
+
     }
 
     "PUT /users/:id/password" must {
-      "update a user's email" in new App(fakeApp) {
+
+      "update a user's password" in new App(fakeApp) {
         doLogin
         val plainPassword = nameGenerator.next[User]
         val newPassword = nameGenerator.next[User]
@@ -146,12 +183,105 @@ class UsersControllerSpec extends ControllerFixture {
         val cmdJson = Json.obj(
           "id" -> user.id.id,
           "expectedVersion" -> Some(user.version),
-          "oldPassword" -> plainPassword,
+          "currentPassword" -> plainPassword,
           "newPassword" -> newPassword)
         val json = makeRequest(PUT, uri(user) + "/password", json = cmdJson)
 
         (json \ "status").as[String] must include("success")
         (json \ "data" \ "password").as[String] must not be (newPassword)
+      }
+
+      "not update a user's password with an empty current password" in new App(fakeApp) {
+        doLogin
+        val user = factory.createActiveUser
+        userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "id" -> user.id.id,
+          "expectedVersion" -> Some(user.version),
+          "currentPassword" -> "",
+          "newPassword" -> "abcdef")
+        val json = makeRequest(PUT, uri(user) + "/password", BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include("error")
+      }
+
+      "not update a user's password with an empty new password" in new App(fakeApp) {
+        doLogin
+        val user = factory.createActiveUser
+        userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "id" -> user.id.id,
+          "expectedVersion" -> Some(user.version),
+          "currentPassword" -> "abcdef",
+          "newPassword" -> "")
+        val json = makeRequest(PUT, uri(user) + "/password", BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include("error")
+      }
+    }
+
+    "PUT /users/:id/avatarurl" must {
+
+      "update a user's avatar URL" in new App(fakeApp) {
+        doLogin
+        val user = factory.createRegisteredUser.activate | fail
+        userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "id" -> user.id.id,
+          "expectedVersion" -> Some(user.version),
+          "avatarUrl" -> user.avatarUrl)
+        val json = makeRequest(PUT, uri(user) + "/avatarurl", json = cmdJson)
+
+        (json \ "status").as[String] must include("success")
+          (json \ "data" \ "version").as[Int] must be(user.version + 1)
+        (json \ "data" \ "avatarUrl").as[Option[String]] must be(user.avatarUrl)
+      }
+
+      "remove a user's avatar URL" in new App(fakeApp) {
+        doLogin
+        val user = factory.createRegisteredUser.activate | fail
+        userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "id" -> user.id.id,
+          "expectedVersion" -> Some(user.version))
+        val json = makeRequest(PUT, uri(user) + "/avatarurl", json = cmdJson)
+
+        (json \ "status").as[String] must include("success")
+          (json \ "data" \ "version").as[Int] must be(user.version + 1)
+        (json \ "data" \ "avatarUrl") mustBe a[JsUndefined]
+      }
+
+      "not update a user's avatar URL if URL is invalid" in new App(fakeApp) {
+        doLogin
+        val user = factory.createRegisteredUser.activate | fail
+        userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "id" -> user.id.id,
+          "expectedVersion" -> Some(user.version),
+          "avatarUrl" -> "abcdef")
+        val json = makeRequest(PUT, uri(user) + "/avatarurl", BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include("error")
+        (json \ "message").as[String] must include("InvalidUrl")
+      }
+
+      "not update a user's avatar URL if URL is empty" in new App(fakeApp) {
+        doLogin
+        val user = factory.createRegisteredUser.activate | fail
+        userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "id" -> user.id.id,
+          "expectedVersion" -> Some(user.version),
+          "avatarUrl" -> "")
+        val json = makeRequest(PUT, uri(user) + "/avatarurl", BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include("error")
       }
     }
 
@@ -411,7 +541,7 @@ class UsersControllerSpec extends ControllerFixture {
           (authReplyJson \ "data" \ "email").as[String] must be (user.email)
       }
 
-      "not allow a registered user to authenticate" taggedAs(Tag("1")) in new App(fakeApp) {
+      "not allow a registered user to authenticate" in new App(fakeApp) {
         val plainPassword = nameGenerator.next[String]
         val user = createUserInRepository(plainPassword)
 

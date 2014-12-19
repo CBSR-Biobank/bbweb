@@ -101,6 +101,7 @@ GET     /users/:id                              @org.biobank.controllers.UsersCo
 PUT     /users/:id/name                         @org.biobank.controllers.UsersController.updateName(id)
 PUT     /users/:id/email                        @org.biobank.controllers.UsersController.updateEmail(id)
 PUT     /users/:id/password                     @org.biobank.controllers.UsersController.updatePassword(id)
+PUT     /users/:id/avatarurl                    @org.biobank.controllers.UsersController.updateAvatarUrl(id)
 POST    /users/:id/activate                     @org.biobank.controllers.UsersController.activateUser(id)
 POST    /users/:id/lock                         @org.biobank.controllers.UsersController.lockUser(id)
 POST    /users/:id/unlock                       @org.biobank.controllers.UsersController.unlockUser(id)

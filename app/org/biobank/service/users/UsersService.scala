@@ -88,6 +88,11 @@ class UsersService(implicit inj: Injector)
     ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserPasswordUpdatedEvent]])
   }
 
+  def updateAvatarUrl(cmd: UpdateUserAvatarUrlCmd)(implicit userId: UserId)
+      : Future[DomainValidation[UserAvatarUrlUpdatedEvent]] = {
+    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserAvatarUrlUpdatedEvent]])
+  }
+
   def activate(cmd: ActivateUserCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserActivatedEvent]] = {
     ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserActivatedEvent]])
