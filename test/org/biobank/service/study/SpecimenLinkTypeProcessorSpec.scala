@@ -3,6 +3,7 @@ package org.biobank.service.study
 import org.biobank.fixture._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
   ContainerTypeId,
   DomainError,
@@ -100,16 +101,17 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
         event mustBe a[SpecimenLinkTypeAddedEvent]
         event must have(
           'processingTypeId      (pt.id.id),
-          'expectedInputChange   (slType.expectedInputChange),
-          'expectedOutputChange  (slType.expectedOutputChange),
-          'inputCount            (slType.inputCount),
-          'outputCount           (slType.outputCount),
-          'inputGroupId          (slType.inputGroupId),
-          'outputGroupId         (slType.outputGroupId),
+          'expectedInputChange   (Some(slType.expectedInputChange)),
+          'expectedOutputChange  (Some(slType.expectedOutputChange)),
+          'inputCount            (Some(slType.inputCount)),
+          'outputCount           (Some(slType.outputCount)),
+          'inputGroupId          (Some(slType.inputGroupId.id)),
+          'outputGroupId         (Some(slType.outputGroupId.id)),
           'inputContainerTypeId  (slType.inputContainerTypeId),
-          'outputContainerTypeId (slType.outputContainerTypeId),
-          'annotationTypeData    (slType.annotationTypeData)
+          'outputContainerTypeId (slType.outputContainerTypeId)
         )
+
+        event.annotationTypeData must have length (0)
 
         specimenLinkTypeRepository.allForProcessingType(pt.id) must have size 1
         specimenLinkTypeRepository.withId(
@@ -176,17 +178,18 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
         event mustBe a[SpecimenLinkTypeUpdatedEvent]
         event must have(
           'processingTypeId      (pt.id.id),
-          'version               (slType.version + 1),
-          'expectedInputChange   (slType2.expectedInputChange),
-          'expectedOutputChange  (slType2.expectedOutputChange),
-          'inputCount            (slType2.inputCount),
-          'outputCount           (slType2.outputCount),
-          'inputGroupId          (slType2.inputGroupId),
-          'outputGroupId         (slType2.outputGroupId),
+          'version               (Some(slType.version + 1)),
+          'expectedInputChange   (Some(slType2.expectedInputChange)),
+          'expectedOutputChange  (Some(slType2.expectedOutputChange)),
+          'inputCount            (Some(slType2.inputCount)),
+          'outputCount           (Some(slType2.outputCount)),
+          'inputGroupId          (Some(slType2.inputGroupId.id)),
+          'outputGroupId         (Some(slType2.outputGroupId.id)),
           'inputContainerTypeId  (slType2.inputContainerTypeId),
-          'outputContainerTypeId (slType2.outputContainerTypeId),
-          'annotationTypeData    (slType2.annotationTypeData)
+          'outputContainerTypeId (slType2.outputContainerTypeId)
         )
+
+        event.annotationTypeData must have length (0)
 
         specimenLinkTypeRepository.allForProcessingType(pt.id) must have size 1
 
@@ -391,11 +394,11 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
 
         event.annotationTypeData(0) must have(
           'annotationTypeId (slTypeAnnotationTypeData(0).annotationTypeId),
-          'required (slTypeAnnotationTypeData(0).required))
+          'required         (Some(slTypeAnnotationTypeData(0).required)))
 
         event.annotationTypeData(1) must have(
           'annotationTypeId (slTypeAnnotationTypeData(1).annotationTypeId),
-          'required (slTypeAnnotationTypeData(1).required))
+          'required         (Some(slTypeAnnotationTypeData(1).required)))
       }
     }
 
@@ -416,8 +419,14 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       specimenLinkTypeRepository.put(slType)
 
       val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
-        annotationType.studyId.id, annotationType.id.id, annotationType.version,
-        annotationType.name, annotationType.description, annotationType.valueType)
+        studyId         = annotationType.studyId.id,
+        id              = annotationType.id.id,
+        expectedVersion = annotationType.version,
+        name            = annotationType.name,
+        description     = annotationType.description,
+        valueType       = annotationType.valueType,
+        maxValueCount   = annotationType.maxValueCount,
+        options         = annotationType.options)
 
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]

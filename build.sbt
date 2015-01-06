@@ -1,3 +1,5 @@
+import com.trueaccord.scalapb.{ScalaPbPlugin => PB}
+
 name := "bbweb"
 
 organization in ThisBuild := "org.biobank"
@@ -57,6 +59,7 @@ libraryDependencies ++= Seq(
   cache,
   filters,
   "com.typesafe.akka"         %% "akka-persistence-experimental"  % "2.3.4"              % "compile",
+  "com.typesafe.akka"         %% "akka-remote"                    % "2.3.4"              % "compile",
   "com.typesafe.akka"         %% "akka-slf4j"                     % "2.3.2"              % "compile",
   "org.scala-stm"             %% "scala-stm"                      % "0.7"                % "compile",
   "org.scalaz"                %% "scalaz-core"                    % "7.1.0"              % "compile",
@@ -110,3 +113,4 @@ pipelineStages := Seq(rjs, digest, gzip)
 // not sure if emojiLogs actually works with play
 emojiLogs
 
+PB.protobufSettings

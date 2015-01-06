@@ -152,7 +152,7 @@ object StudyCommands {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Seq[String]] = None)
+    options: Seq[String])
       extends StudyAnnotationTypeCommand
 
   case class UpdateCollectionEventAnnotationTypeCmd(
@@ -162,8 +162,8 @@ object StudyCommands {
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
-    maxValueCount: Option[Int] = None,
-    options: Option[Seq[String]] = None)
+    maxValueCount: Option[Int],
+    options: Seq[String])
       extends StudyAnnotationTypeModifyCommand
 
   case class RemoveCollectionEventAnnotationTypeCmd(
@@ -178,8 +178,8 @@ object StudyCommands {
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
-    maxValueCount: Option[Int] = None,
-    options: Option[Seq[String]] = None,
+    maxValueCount: Option[Int],
+    options: Seq[String],
     required: Boolean = false)
       extends StudyAnnotationTypeCommand
 
@@ -191,7 +191,7 @@ object StudyCommands {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Seq[String]] = None,
+    options: Seq[String],
     required: Boolean = false)
       extends StudyAnnotationTypeModifyCommand
 
@@ -208,7 +208,7 @@ object StudyCommands {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Seq[String]] = None)
+    options: Seq[String])
       extends StudyAnnotationTypeCommand
 
   case class UpdateSpecimenLinkAnnotationTypeCmd(
@@ -218,8 +218,8 @@ object StudyCommands {
     name: String,
     description: Option[String],
     valueType: AnnotationValueType,
-    maxValueCount: Option[Int] = None,
-    options: Option[Seq[String]] = None)
+    maxValueCount: Option[Int],
+    options: Seq[String])
       extends StudyAnnotationTypeModifyCommand
 
   case class RemoveSpecimenLinkAnnotationTypeCmd(
@@ -382,7 +382,7 @@ object StudyCommands {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Seq[String]] and
+      (__ \ "options").read[Seq[String]] and
       (__ \ "required").read[Boolean]
   ){ AddParticipantAnnotationTypeCmd.apply _}
 
@@ -394,7 +394,7 @@ object StudyCommands {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Seq[String]] and
+      (__ \ "options").read[Seq[String]] and
       (__ \ "required").read[Boolean]
   )(UpdateParticipantAnnotationTypeCmd.apply _)
 
@@ -434,7 +434,7 @@ object StudyCommands {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Seq[String]]
+      (__ \ "options").read[Seq[String]]
   ){ AddCollectionEventAnnotationTypeCmd.apply _ }
 
   implicit val updateCollectionEventAnnotationTypeCmdReads: Reads[UpdateCollectionEventAnnotationTypeCmd] = (
@@ -445,7 +445,7 @@ object StudyCommands {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Seq[String]]
+      (__ \ "options").read[Seq[String]]
   )(UpdateCollectionEventAnnotationTypeCmd.apply _)
 
   implicit val removeCollectionEventAnnotationTypeCmdReads: Reads[RemoveCollectionEventAnnotationTypeCmd] = (
@@ -508,7 +508,7 @@ object StudyCommands {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Seq[String]]
+      (__ \ "options").read[Seq[String]]
   ){ AddSpecimenLinkAnnotationTypeCmd.apply _ }
 
   implicit val updateSpecimenLinkAnnotationTypeCmdReads: Reads[UpdateSpecimenLinkAnnotationTypeCmd] = (
@@ -519,7 +519,7 @@ object StudyCommands {
       (__ \ "description").readNullable[String] and
       (__ \ "valueType").read[AnnotationValueType] and
       (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").readNullable[Seq[String]]
+      (__ \ "options").read[Seq[String]]
   )(UpdateSpecimenLinkAnnotationTypeCmd.apply _)
 
   implicit val removeSpecimenLinkAnnotationTypeCmdReads: Reads[RemoveSpecimenLinkAnnotationTypeCmd] = (

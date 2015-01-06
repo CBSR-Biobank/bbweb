@@ -39,7 +39,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        log.info(s"repo: ${}")
+        log.debug(s"repo: ${}")
 
         val json = makeRequest(GET, uri)
         (json \ "status").as[String] must include ("success")

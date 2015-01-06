@@ -3,7 +3,7 @@ package org.biobank.domain.study
 import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
 import org.biobank.domain.AnnotationValueType._
 import org.biobank.infrastructure.JsonUtils._
-import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.event.StudyEventsJson._
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
@@ -24,7 +24,7 @@ case class ParticipantAnnotationType (
   description: Option[String],
   valueType: AnnotationValueType,
   maxValueCount: Option[Int],
-  options: Option[Seq[String]],
+  options: Seq[String],
   required: Boolean)
     extends StudyAnnotationType
     with StudyAnnotationTypeValidations {
@@ -49,7 +49,7 @@ case class ParticipantAnnotationType (
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Seq[String]] = None,
+    options: Seq[String] = Seq.empty,
     required: Boolean = false): DomainValidation[ParticipantAnnotationType] = {
     ParticipantAnnotationType.create(
       this.studyId, this.id, this.version, this.timeAdded, name, description, valueType, maxValueCount,
@@ -70,7 +70,7 @@ object ParticipantAnnotationType extends StudyAnnotationTypeValidations {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Seq[String]],
+    options: Seq[String],
     required: Boolean): DomainValidation[ParticipantAnnotationType] = {
     (validateId(studyId, StudyIdRequired) |@|
       validateId(id) |@|
@@ -96,7 +96,7 @@ object ParticipantAnnotationType extends StudyAnnotationTypeValidations {
       (__ \ "description").write[Option[String]] and
       (__ \ "valueType").write[AnnotationValueType] and
       (__ \ "maxValueCount").write[Option[Int]] and
-      (__ \ "options").write[Option[Seq[String]]] and
+      (__ \ "options").write[Seq[String]] and
       (__ \ "required").write[Boolean]
   )(unlift(org.biobank.domain.study.ParticipantAnnotationType.unapply))
 

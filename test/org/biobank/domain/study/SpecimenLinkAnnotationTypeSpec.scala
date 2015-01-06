@@ -146,14 +146,14 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
     "not be created with an invalid options" in {
       val (studyId, id, version, name, description, valueType, maxValueCount, options) =
         selectAnnotationTypeTuple
-      var invalidOptions = Some(Seq(""))
+      var invalidOptions = Seq("")
 
       SpecimenLinkAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount,
         invalidOptions)
         .mustFail(1, "OptionRequired")
 
-      invalidOptions = Some(Seq("duplicate", "duplicate"))
+      invalidOptions = Seq("duplicate", "duplicate")
       SpecimenLinkAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount,
         invalidOptions)

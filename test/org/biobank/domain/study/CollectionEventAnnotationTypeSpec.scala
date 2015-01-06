@@ -148,7 +148,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
     "not be created with an invalid options" in {
       val (studyId, id, version, name, description, valueType, maxValueCount, options) =
         numberAnnotationTypeTuple
-      val invalidOptions = Some(Seq(""))
+      val invalidOptions = Seq("")
 
       CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
@@ -157,7 +157,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
 
       CollectionEventAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
-        maxValueCount, Some(Seq("duplicate", "duplicate")))
+        maxValueCount, Seq("duplicate", "duplicate"))
         .mustFail(1, "DuplicateOptionsError")
     }
 

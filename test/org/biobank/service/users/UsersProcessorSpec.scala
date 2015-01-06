@@ -41,13 +41,13 @@ class UsersProcessorSpec extends TestFixture {
       v mustSucceed { event =>
         event mustBe a [UserRegisteredEvent]
         event must have (
-          'name (user.name),
-          'email (user.email),
+          'name (Some(user.name)),
+          'email (Some(user.email)),
           'avatarUrl (user.avatarUrl)
         )
 
-        event.password must not be(user.password)    // password mustBe encrypted
-        event.salt.size must be > 0                  // salt must not be empty
+        event.password.value must not be(user.password)    // password mustBe encrypted
+        event.salt.value.size must be > 0                  // salt must not be empty
 
         userRepository.getRegistered(UserId(event.id)) mustSucceed { repoUser =>
           checkTimeStamps(repoUser, DateTime.now, None)
@@ -103,8 +103,8 @@ class UsersProcessorSpec extends TestFixture {
         event mustBe a [UserNameUpdatedEvent]
         event must have (
           'id        (user.id.id),
-          'version   (user.version + 1),
-          'name      (newName)
+          'version   (Some(user.version + 1)),
+          'name      (Some(newName))
         )
 
         userRepository.getActive(UserId(event.id)) mustSucceed { repoUser =>
@@ -138,8 +138,8 @@ class UsersProcessorSpec extends TestFixture {
         event mustBe a [UserEmailUpdatedEvent]
         event must have (
           'id        (user.id.id),
-          'version   (user.version + 1),
-          'email     (newEmail)
+          'version   (Some(user.version + 1)),
+          'email     (Some(newEmail))
         )
 
         userRepository.getActive(UserId(event.id)) mustSucceed { repoUser =>
@@ -175,12 +175,12 @@ class UsersProcessorSpec extends TestFixture {
         event mustBe a [UserPasswordUpdatedEvent]
         event must have (
           'id        (user.id.id),
-          'version   (user.version + 1)
+          'version   (Some(user.version + 1))
         )
 
         // password mustBe encrypted
-        event.password must not be(newPassword)
-        event.salt.length must be > 0
+        event.password.value must not be(newPassword)
+        event.salt.value.length must be > 0
 
         userRepository.getActive(UserId(event.id)) mustSucceed { repoUser =>
           checkTimeStamps(repoUser, user.timeAdded, DateTime.now)
@@ -215,12 +215,12 @@ class UsersProcessorSpec extends TestFixture {
         event mustBe a [UserPasswordResetEvent]
         event must have (
           'id        (user.id.id),
-          'version   (user.version + 1)
+          'version   (Some(user.version + 1))
         )
 
         // password mustBe encrypted
-        event.password.length must be > 0
-        event.salt.length must be > 0
+        event.password.value.length must be > 0
+        event.salt.value.length must be > 0
 
         userRepository.getActive(UserId(event.id)) mustSucceed { repoUser =>
           checkTimeStamps(repoUser, user.timeAdded, DateTime.now)

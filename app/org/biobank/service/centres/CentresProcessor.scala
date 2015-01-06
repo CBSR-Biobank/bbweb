@@ -44,16 +44,16 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
   val receiveRecover: Receive = {
     case wevent: WrappedEvent[_] =>
       wevent.event match {
-        case event: CentreAddedEvent =>            recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreUpdatedEvent =>          recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreEnabledEvent =>          recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreDisabledEvent =>         recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreLocationAddedEvent =>    recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreLocationRemovedEvent =>  recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreAddedToStudyEvent =>     recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreRemovedFromStudyEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+        case event: CentreAddedEvent            => recoverCentreAddedEvent(event, wevent.userId, wevent.dateTime)
+        case event: CentreUpdatedEvent          => recoverCentreUpdatedEvent(event, wevent.userId, wevent.dateTime)
+        case event: CentreEnabledEvent          => recoverCentreEnabledEvent(event, wevent.userId, wevent.dateTime)
+        case event: CentreDisabledEvent         => recoverCentreDisabledEvent(event, wevent.userId, wevent.dateTime)
+        case event: CentreLocationAddedEvent    => recoverCentreLocationAddedEvent(event, wevent.userId, wevent.dateTime)
+        case event: CentreLocationRemovedEvent  => recoverCentreLocationRemovedEvent(event, wevent.userId, wevent.dateTime)
+        case event: CentreAddedToStudyEvent     => recoverCentreAddedToStudyEvent(event, wevent.userId, wevent.dateTime)
+        case event: CentreRemovedFromStudyEvent => recoverCentreRemovedFromStudyEvent(event, wevent.userId, wevent.dateTime)
 
-        case event => throw new IllegalStateException(s"event not handled: $event")
+        case event => log.error(s"event not handled: $event")
       }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -64,14 +64,14 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     case procCmd: WrappedCommand =>
       implicit val userId = procCmd.userId
       procCmd.command match {
-        case cmd: AddCentreCmd =>             process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: UpdateCentreCmd =>          process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: EnableCentreCmd =>          process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: DisableCentreCmd =>         process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: AddCentreLocationCmd =>     process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: RemoveCentreLocationCmd =>  process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: AddStudyToCentreCmd =>      process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: RemoveStudyFromCentreCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        case cmd: AddCentreCmd             => processAddCentreCmd(cmd)
+        case cmd: UpdateCentreCmd          => processUpdateCentreCmd(cmd)
+        case cmd: EnableCentreCmd          => processEnableCentreCmd(cmd)
+        case cmd: DisableCentreCmd         => processDisableCentreCmd(cmd)
+        case cmd: AddCentreLocationCmd     => processAddCentreLocationCmd(cmd)
+        case cmd: RemoveCentreLocationCmd  => processRemoveCentreLocationCmd(cmd)
+        case cmd: AddStudyToCentreCmd      => processAddStudyToCentreCmd(cmd)
+        case cmd: RemoveStudyFromCentreCmd => processRemoveStudyFromCentreCmd(cmd)
       }
 
     case "snap" =>
@@ -82,23 +82,29 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
   }
 
-  private def validateCmd(cmd: AddCentreCmd): DomainValidation[CentreAddedEvent] = {
+  private def processAddCentreCmd(cmd: AddCentreCmd)(implicit userId: Option[UserId]): Unit = {
     val timeNow = DateTime.now
     val centreId = centreRepository.nextIdentity
 
     if (centreRepository.getByKey(centreId).isSuccess) {
-      throw new IllegalStateException(s"centre with id already exsits: $centreId")
+      log.error(s"centre with id already exsits: $centreId")
     }
 
-    for {
+    val event = for {
       nameAvailable <- nameAvailable(cmd.name)
       newCentre <- DisabledCentre.create(centreId, -1L, timeNow, cmd.name, cmd.description)
-      event <- CentreAddedEvent(newCentre.id.id, newCentre.name, newCentre.description).success
+      event <- CentreAddedEvent(
+        id = newCentre.id.id,
+        name = Some(newCentre.name),
+        description = newCentre.description).success
     } yield event
+
+    process(event){ wevent =>
+      recoverCentreAddedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def validateCmd(cmd: UpdateCentreCmd): DomainValidation[CentreUpdatedEvent] = {
-    val timeNow = DateTime.now
+  private def processUpdateCentreCmd(cmd: UpdateCentreCmd)(implicit userId: Option[UserId]): Unit = {
     val v = updateDisabled(cmd) { centre =>
       for {
         nameAvailable <- nameAvailable(cmd.name, centre.id)
@@ -106,120 +112,181 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
       } yield updatedCentre
     }
 
-    v.fold(
+    val event = v.fold(
       err => DomainError(s"error $err occurred on $cmd").failureNel,
-      centre => CentreUpdatedEvent(cmd.id, centre.version, centre.name, centre.description).success
+      centre => CentreUpdatedEvent(
+        id = cmd.id,
+        version = Some(centre.version),
+        name = Some(centre.name),
+        description = centre.description).success
     )
+
+    process(event){ wevent =>
+      recoverCentreUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def validateCmd(cmd: EnableCentreCmd): DomainValidation[CentreEnabledEvent] = {
+  private def processEnableCentreCmd(cmd: EnableCentreCmd)(implicit userId: Option[UserId]): Unit = {
     val timeNow = DateTime.now
     val v = updateDisabled(cmd) { c => c.enable }
 
-    v.fold(
+    val  event = v.fold(
       err => DomainError(s"error $err occurred on $cmd").failureNel,
-      centre => CentreEnabledEvent(cmd.id, centre.version).success
+      centre => CentreEnabledEvent(id = cmd.id, version = Some(centre.version)).success
     )
+
+    process(event){ wevent =>
+      recoverCentreEnabledEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def validateCmd(cmd: DisableCentreCmd): DomainValidation[CentreDisabledEvent] = {
-    val timeNow = DateTime.now
+  private def processDisableCentreCmd(cmd: DisableCentreCmd)(implicit userId: Option[UserId]): Unit = {
     val v = updateEnabled(cmd) { c => c.disable }
-    v.fold(
+    val event = v.fold(
       err => DomainError(s"error $err occurred on $cmd").failureNel,
-      centre => CentreDisabledEvent(cmd.id, centre.version).success
+      centre => CentreDisabledEvent(id = cmd.id, version = Some(centre.version)).success
     )
+
+    process(event){ wevent =>
+      recoverCentreDisabledEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def validateCmd(cmd: AddCentreLocationCmd): DomainValidation[CentreLocationAddedEvent] = {
+  private def processAddCentreLocationCmd(cmd: AddCentreLocationCmd)(implicit userId: Option[UserId]): Unit = {
     val locationId = locationRepository.nextIdentity
-    for {
+    val event = for {
       centre <- getDisabled(cmd.centreId)
       location <- Location(locationId, cmd.name, cmd.street, cmd.city, cmd.province,
         cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode).success
       event <- CentreLocationAddedEvent(
-        cmd.centreId, locationId.id, cmd.name, cmd.street, cmd.city, cmd.province,
-        cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode).success
+        centreId       = cmd.centreId,
+        locationId     = locationId.id,
+        name           = Some(cmd.name),
+        street         = Some(cmd.street),
+        city           = Some(cmd.city),
+        province       = Some(cmd.province),
+        postalCode     = Some(cmd.postalCode),
+        poBoxNumber    = cmd.poBoxNumber,
+        countryIsoCode = Some(cmd.countryIsoCode)).success
     } yield event
+
+    process(event){ wevent =>
+      recoverCentreLocationAddedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def validateCmd(cmd: RemoveCentreLocationCmd): DomainValidation[CentreLocationRemovedEvent] = {
-
-    locationRepository.getByKey(LocationId(cmd.locationId)).fold(
+  private def processRemoveCentreLocationCmd(cmd: RemoveCentreLocationCmd)(implicit userId: Option[UserId]): Unit = {
+    val event = locationRepository.getByKey(LocationId(cmd.locationId)).fold(
       err => DomainError(s"no location with id: $id").failureNel,
       location => for {
         centre <- getDisabled(cmd.centreId)
         event <- CentreLocationRemovedEvent(cmd.centreId, cmd.locationId).success
       } yield event
     )
+
+    process(event){ wevent =>
+      recoverCentreLocationRemovedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def validateCmd(cmd: AddStudyToCentreCmd): DomainValidation[CentreAddedToStudyEvent] = {
-    for {
+  private def processAddStudyToCentreCmd(cmd: AddStudyToCentreCmd)(implicit userId: Option[UserId]): Unit = {
+    val event = for {
       centre <- getDisabled(cmd.centreId)
       notLinked <- centreStudyNotLinked(centre.id, StudyId(cmd.studyId))
       event <- CentreAddedToStudyEvent(cmd.centreId, cmd.studyId).success
     } yield event
+
+    process(event){ wevent =>
+      recoverCentreAddedToStudyEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def validateCmd(cmd: RemoveStudyFromCentreCmd)
-      : DomainValidation[CentreRemovedFromStudyEvent] = {
-    for {
+  private def processRemoveStudyFromCentreCmd(cmd: RemoveStudyFromCentreCmd)(implicit userId: Option[UserId]): Unit = {
+    val event = for {
       centre <- getDisabled(cmd.centreId)
       item <- centreStudiesRepository.withIds(StudyId(cmd.studyId), centre.id)
       event <- CentreRemovedFromStudyEvent(cmd.centreId, cmd.studyId).success
     } yield event
+
+    process(event){ wevent =>
+      recoverCentreRemovedFromStudyEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def recoverEvent(event: CentreAddedEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverCentreAddedEvent
+    (event: CentreAddedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     centreRepository.put(DisabledCentre(
-      CentreId(event.id), 0L, dateTime, None, event.name, event.description))
+      CentreId(event.id), 0L, dateTime, None, event.getName, event.description))
     ()
   }
 
-  private def recoverEvent(event: CentreUpdatedEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverCentreUpdatedEvent
+    (event: CentreUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     getDisabled(event.id).fold(
-      err => throw new IllegalStateException(s"updating centre from event failed: $err"),
-      centre => centreRepository.put(centre.copy(
-        version = event.version,
-        timeModified = Some(dateTime),
-        name = event.name,
-        description = event.description))
+      err => log.error(s"updating centre from event failed: $err"),
+      centre => {
+        centreRepository.put(centre.copy(
+          version      = event.getVersion,
+          timeModified = Some(dateTime),
+          name         = event.getName,
+          description  = event.description))
+        ()
+      }
     )
-    ()
   }
 
-  private def recoverEvent(event: CentreEnabledEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverCentreEnabledEvent
+    (event: CentreEnabledEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     getDisabled(event.id).fold(
-      err => throw new IllegalStateException(s"enabling centre from event failed: $err"),
-      centre => centreRepository.put(EnabledCentre(
-        CentreId(event.id), event.version, centre.timeAdded, Some(dateTime),
-        centre.name, centre.description))
+      err => log.error(s"enabling centre from event failed: $err"),
+      centre => {
+        centreRepository.put(EnabledCentre(
+          CentreId(event.id), event.getVersion, centre.timeAdded, Some(dateTime),
+          centre.name, centre.description))
+        ()
+      }
     )
-    ()
   }
 
-  private def recoverEvent(event: CentreDisabledEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverCentreDisabledEvent
+    (event: CentreDisabledEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     getEnabled(event.id).fold(
-      err => throw new IllegalStateException(s"disabling centre from event failed: $err"),
-      centre => centreRepository.put(DisabledCentre(
-        CentreId(event.id), event.version, centre.timeAdded, Some(dateTime),
-        centre.name, centre.description))
+      err => log.error(s"disabling centre from event failed: $err"),
+      centre => {
+        centreRepository.put(DisabledCentre(
+          CentreId(event.id), event.getVersion, centre.timeAdded, Some(dateTime),
+          centre.name, centre.description))
+        ()
+      }
     )
-    ()
   }
 
-  private def recoverEvent(event: CentreLocationAddedEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverCentreLocationAddedEvent
+    (event: CentreLocationAddedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     val centreId = CentreId(event.centreId)
     val locationId = LocationId(event.locationId)
-    locationRepository.put(
-      Location(locationId, event.name, event.street, event.city, event.province,
-        event.postalCode, event.poBoxNumber, event.countryIsoCode))
+
+    locationRepository.put(Location(
+     id             = locationId,
+     name           = event.getName,
+     street         = event.getStreet,
+     city           = event.getCity,
+     province       = event.getProvince,
+     postalCode     = event.getPostalCode,
+     poBoxNumber    = event.poBoxNumber,
+     countryIsoCode = event.getCountryIsoCode))
     centreLocationsRepository.put(CentreLocation(centreId, locationId))
     ()
   }
 
-  private def recoverEvent(event: CentreLocationRemovedEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverCentreLocationRemovedEvent
+    (event: CentreLocationRemovedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     val centreId = CentreId(event.centreId)
     val locationId = LocationId(event.locationId)
     val validation = for {
@@ -231,11 +298,13 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     if (validation.isFailure) {
       // this should never happen because the only way to get here is when the
       // command passed validation
-      throw new IllegalStateException("removing centre location with event failed")
+      log.error("removing centre location with event failed")
     }
   }
 
-  private def recoverEvent(event: CentreAddedToStudyEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverCentreAddedToStudyEvent
+    (event: CentreAddedToStudyEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     val centreId = CentreId(event.centreId)
     val studyId = StudyId(event.studyId)
     val studyCentreId = centreStudiesRepository.nextIdentity
@@ -243,7 +312,9 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     ()
   }
 
-  private def recoverEvent(event: CentreRemovedFromStudyEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverCentreRemovedFromStudyEvent
+    (event: CentreRemovedFromStudyEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     val centreId = CentreId(event.centreId)
     val studyId = StudyId(event.studyId)
     val studyCentreId = centreStudiesRepository.nextIdentity
@@ -255,7 +326,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     if (validation.isFailure) {
       // this should never happen because the only way to get here is when the
       // command passed validation
-      throw new IllegalStateException(s"removing study centre link with event failed: $validation")
+      log.error(s"removing study centre link with event failed: $validation")
     }
   }
 

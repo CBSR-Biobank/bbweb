@@ -14,6 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
+import com.trueaccord.scalapb.GeneratedMessage
 
 import scalaz._
 import scalaz.Scalaz._
@@ -41,42 +42,44 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
   }
 
   val receiveRecover: Receive = {
-    case wevent: WrappedEvent[_] =>
+    case wevent: WrappedEvent[_] => {
       wevent.event match {
-        case event: UserRegisteredEvent       => recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: UserActivatedEvent        => recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: UserNameUpdatedEvent      => recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: UserEmailUpdatedEvent     => recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: UserPasswordUpdatedEvent  => recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: UserAvatarUrlUpdatedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: UserLockedEvent           => recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: UserUnlockedEvent         => recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: UserPasswordResetEvent    => recoverEvent(event, wevent.userId, wevent.dateTime)
+        case event: UserRegisteredEvent       => recoverUserRegisteredEvent(event, wevent.userId, wevent.dateTime)
+        case event: UserActivatedEvent        => recoverUserActivatedEvent(event, wevent.userId, wevent.dateTime)
+        case event: UserNameUpdatedEvent      => recoverUserNameUpdatedEvent(event, wevent.userId, wevent.dateTime)
+        case event: UserEmailUpdatedEvent     => recoverUserEmailUpdatedEvent(event, wevent.userId, wevent.dateTime)
+        case event: UserPasswordUpdatedEvent  => recoverUserPasswordUpdatedEvent(event, wevent.userId, wevent.dateTime)
+        case event: UserAvatarUrlUpdatedEvent => recoverUserAvatarUrlUpdatedEvent(event, wevent.userId, wevent.dateTime)
+        case event: UserLockedEvent           => recoverUserLockedEvent(event, wevent.userId, wevent.dateTime)
+        case event: UserUnlockedEvent         => recoverUserUnlockedEvent(event, wevent.userId, wevent.dateTime)
+        case event: UserPasswordResetEvent    => recoverUserPasswordResetEvent(event, wevent.userId, wevent.dateTime)
 
-        case event => throw new IllegalStateException(s"event not handled: $event")
+        case event => log.error(s"wrapped event not handled: $event")
       }
+    }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
       snapshot.users.foreach(i => userRepository.put(i))
 
     case event: RecoveryCompleted =>
 
-    case event => throw new IllegalStateException(s"event not handled: $event")
+    case event => log.error(s"event not handled: $event")
   }
 
   val receiveCommand: Receive = {
     case procCmd: WrappedCommand =>
       implicit val userId = procCmd.userId
+
       procCmd.command match {
-        case cmd: RegisterUserCmd        => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: ActivateUserCmd        => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: UpdateUserNameCmd      => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: UpdateUserEmailCmd     => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: UpdateUserPasswordCmd  => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: UpdateUserAvatarUrlCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: ResetUserPasswordCmd   => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: LockUserCmd            => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: UnlockUserCmd          => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        case cmd: RegisterUserCmd        => processRegisterUserCmd(cmd)
+        case cmd: ActivateUserCmd        => processActivateUserCmd(cmd)
+        case cmd: UpdateUserNameCmd      => processUpdateUserNameCmd(cmd)
+        case cmd: UpdateUserEmailCmd     => processUpdateUserEmailCmd(cmd)
+        case cmd: UpdateUserPasswordCmd  => processUpdateUserPasswordCmd(cmd)
+        case cmd: UpdateUserAvatarUrlCmd => processUpdateUserAvatarUrlCmd(cmd)
+        case cmd: ResetUserPasswordCmd   => processResetUserPasswordCmd(cmd)
+        case cmd: LockUserCmd            => processLockUserCmd(cmd)
+        case cmd: UnlockUserCmd          => processUnlockUserCmd(cmd)
 
         case cmd => log.error(s"wrapped command not handled: $cmd")
       }
@@ -88,43 +91,64 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     case cmd => log.error(s"UsersProcessor: message not handled: $cmd")
   }
 
-  def validateCmd(cmd: RegisterUserCmd): DomainValidation[UserRegisteredEvent] = {
-    val userId = userRepository.nextIdentity
+  def processRegisterUserCmd(cmd: RegisterUserCmd)(implicit userId: Option[UserId]): Unit = {
+    val newUserId = userRepository.nextIdentity
 
-    if (userRepository.getByKey(userId).isSuccess) {
-      throw new IllegalStateException(s"user with id already exsits: $userId")
+    if (userRepository.getByKey(newUserId).isSuccess) {
+      log.error(s"user with id already exsits: $userId")
     }
 
     val salt = passwordHasher.generateSalt
     val encryptedPwd = passwordHasher.encrypt(cmd.password, salt)
-    for {
+
+    val event = for {
       emailAvailable <- emailAvailable(cmd.email)
       user <- RegisteredUser.create(
-        userId, -1L, DateTime.now, cmd.name, cmd.email, encryptedPwd, salt, cmd.avatarUrl)
+        newUserId, -1L, DateTime.now, cmd.name, cmd.email, encryptedPwd, salt, cmd.avatarUrl)
       event <- UserRegisteredEvent(
-        user.id.id, user.name, user.email, encryptedPwd, salt, user.avatarUrl).success
+        id = user.id.id,
+        name = Some(user.name),
+        email = Some(user.email),
+        password = Some(encryptedPwd),
+        salt =  Some(salt),
+        avatarUrl = user.avatarUrl).success
     } yield event
+
+    process(event){ wevent =>
+      recoverUserRegisteredEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  def validateCmd(cmd: ActivateUserCmd): DomainValidation[UserActivatedEvent] = {
+  def processActivateUserCmd(cmd: ActivateUserCmd)(implicit userId: Option[UserId]): Unit = {
     val timeNow = DateTime.now
     val v = updateRegistered(cmd) { u => u.activate }
-    v.fold(
+    val event = v.fold(
       err => err.failure,
-      user => UserActivatedEvent(user.id.id, user.version).success
+      user => UserActivatedEvent(id = user.id.id, version = Some(user.version)).success
     )
+
+    process(event){ wevent =>
+      recoverUserActivatedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  def validateCmd(cmd: UpdateUserNameCmd): DomainValidation[UserNameUpdatedEvent] = {
+  def processUpdateUserNameCmd(cmd: UpdateUserNameCmd)(implicit userId: Option[UserId]): Unit = {
     val timeNow = DateTime.now
     val v = updateActive(cmd) { _.updateName(cmd.name) }
-    v.fold(
+    val event = v.fold(
       err => err.failure,
-      user => UserNameUpdatedEvent(user.id.id, user.version, user.name).success
+      user => UserNameUpdatedEvent(
+        id = user.id.id,
+        version = Some(user.version),
+        name = Some(user.name)).success
     )
+
+    process(event){ wevent =>
+      recoverUserNameUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  def validateCmd(cmd: UpdateUserEmailCmd): DomainValidation[UserEmailUpdatedEvent] = {
+  def processUpdateUserEmailCmd(cmd: UpdateUserEmailCmd)(implicit userId: Option[UserId]): Unit = {
     val timeNow = DateTime.now
 
     val v = updateActive(cmd) { user =>
@@ -134,13 +158,20 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       } yield updatedUser
     }
 
-    v.fold(
+    val event = v.fold(
       err => err.failure,
-      user => UserEmailUpdatedEvent(user.id.id, user.version, user.email).success
+      user => UserEmailUpdatedEvent(
+        id = user.id.id,
+        version = Some(user.version),
+        email = Some(user.email)).success
     )
+
+    process(event){ wevent =>
+      recoverUserEmailUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  def validateCmd(cmd: UpdateUserPasswordCmd): DomainValidation[UserPasswordUpdatedEvent] = {
+  def processUpdateUserPasswordCmd(cmd: UpdateUserPasswordCmd)(implicit userId: Option[UserId]): Unit = {
     val timeNow = DateTime.now
 
     val v = updateActive(cmd) { user =>
@@ -152,67 +183,99 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       }
     }
 
-    v.fold(
+    val event = v.fold(
       err => err.failure[UserPasswordUpdatedEvent],
-      user => UserPasswordUpdatedEvent(user.id.id, user.version, user.password, user.salt).success
+      user => UserPasswordUpdatedEvent(
+        id = user.id.id,
+        version = Some(user.version),
+        password = Some(user.password),
+        salt = Some(user.salt)).success
     )
+
+    process(event){ wevent =>
+      recoverUserPasswordUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  def validateCmd(cmd: UpdateUserAvatarUrlCmd): DomainValidation[UserAvatarUrlUpdatedEvent] = {
+  def processUpdateUserAvatarUrlCmd(cmd: UpdateUserAvatarUrlCmd)(implicit userId: Option[UserId]): Unit = {
     val timeNow = DateTime.now
 
     val v = updateActive(cmd) { user =>
       user.updateAvatarUrl(cmd.avatarUrl)
     }
 
-    v.fold(
+    val event = v.fold(
       err => err.failure,
-      user => UserAvatarUrlUpdatedEvent(user.id.id, user.version, user.avatarUrl).success
+      user => UserAvatarUrlUpdatedEvent(
+        id = user.id.id,
+        version = Some(user.version),
+        avatarUrl = user.avatarUrl).success
     )
+
+    process(event){ wevent =>
+      recoverUserAvatarUrlUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
   // only active users can request a password reset
-  def validateCmd(cmd: ResetUserPasswordCmd): DomainValidation[UserPasswordResetEvent] = {
-    val timeNow = DateTime.now
-
-    userRepository.getByEmail(cmd.email).fold(
-      err => err.failure,
+  def processResetUserPasswordCmd(cmd: ResetUserPasswordCmd)(implicit userId: Option[UserId]): Unit = {
+    val event = userRepository.getByEmail(cmd.email).fold(
+      err => err.failure[UserPasswordResetEvent],
       user => {
         user match {
-          case activeUser: ActiveUser =>
+          case activeUser: ActiveUser => {
             val plainPassword = Utils.randomString(8)
             val passwordInfo = encryptPassword(activeUser, plainPassword)
+
             activeUser.updatePassword(passwordInfo.password, passwordInfo.salt).fold(
-              err => err.failure,
+              err => err.failure[UserPasswordResetEvent],
               updatedUser => {
                 EmailService.passwordResetEmail(user.email, plainPassword)
                 UserPasswordResetEvent(
-                  updatedUser.id.id, updatedUser.version, updatedUser.password,
-                  updatedUser.salt).success
+                  id = updatedUser.id.id,
+                  version = Some(updatedUser.version),
+                  password = Some(updatedUser.password),
+                  salt = Some(updatedUser.salt)
+                ).success
               }
             )
-          case user => s"$user for $cmd is not active".failureNel
+          }
+
+          case user =>
+            DomainError(s"user is not active: $cmd").failureNel[UserPasswordResetEvent]
         }
       }
     )
+
+    process(event){ wevent =>
+      recoverUserPasswordResetEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  def validateCmd(cmd: LockUserCmd): DomainValidation[UserLockedEvent] = {
+  def processLockUserCmd(cmd: LockUserCmd)(implicit userId: Option[UserId]): Unit = {
     val timeNow = DateTime.now
     val v = updateActive(cmd) { u => u.lock }
-    v.fold(
+    val event = v.fold(
       err => err.failure,
-      user => UserLockedEvent(user.id.id, user.version).success
+      user => UserLockedEvent(id = user.id.id, version = Some(user.version)).success
     )
+
+    process(event){ wevent =>
+      recoverUserLockedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  def validateCmd(cmd: UnlockUserCmd): DomainValidation[UserUnlockedEvent] = {
+  def processUnlockUserCmd(cmd: UnlockUserCmd)(implicit userId: Option[UserId]): Unit = {
     val timeNow = DateTime.now
     val v = updateLocked(cmd) { u => u.unlock }
-    v.fold(
+    val event = v.fold(
       err => err.failure,
-      user => UserUnlockedEvent(user.id.id, user.version).success
+      user => UserUnlockedEvent(id = user.id.id, version = Some(user.version)).success
     )
+
+    process(event){ wevent =>
+      recoverUserUnlockedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
   def updateUser[T <: User]
@@ -256,96 +319,182 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     }
   }
 
-  def recoverEvent(event: UserRegisteredEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  def recoverUserRegisteredEvent
+    (event: UserRegisteredEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     log.debug(s"recoverEvent: $event")
-    userRepository.put(RegisteredUser(UserId(event.id), 0L, dateTime, None, event.name,
-      event.email, event.password, event.salt, event.avatarUrl))
+
+    userRepository.put(RegisteredUser(
+      id           = UserId(event.id),
+      version      = 0L,
+      timeAdded    = dateTime,
+      timeModified = None,
+      name         = event.getName,
+      email        = event.getEmail,
+      password     = event.getPassword,
+      salt         = event.getSalt,
+      avatarUrl    = event.avatarUrl))
     ()
   }
 
-  def recoverEvent(event: UserActivatedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  def recoverUserActivatedEvent
+    (event: UserActivatedEvent, userId: Option[UserId], dateTime: DateTime) = {
     log.debug(s"recoverEvent: $event")
+
     userRepository.getRegistered(UserId(event.id)).fold(
-      err => throw new IllegalStateException(s"activating user from event failed: $err"),
-      u =>
-      userRepository.put(ActiveUser(u.id, event.version, u.timeAdded, Some(dateTime),
-        u.name, u.email, u.password, u.salt, u.avatarUrl))
+      err => log.error(s"activating user from event failed: $err"),
+      u => {
+        userRepository.put(ActiveUser(
+          id           = u.id,
+          version      = event.getVersion,
+          timeAdded    = u.timeAdded,
+          timeModified = Some(dateTime),
+          name         = u.name,
+          email        = u.email,
+          password     = u.password,
+          salt         = u.salt,
+          avatarUrl    = u.avatarUrl))
+        ()
+      }
     )
-    ()
   }
 
-  def recoverEvent(event: UserNameUpdatedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  def recoverUserNameUpdatedEvent
+    (event: UserNameUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     log.debug(s"recoverEvent: $event")
+
     userRepository.getActive(UserId(event.id)).fold(
-      err => throw new IllegalStateException(s"updating name on user from event failed: $err"),
-      u => userRepository.put(u.copy(
-        version = event.version, name = event.name, timeModified = Some(dateTime)))
+      err => log.error(s"updating name on user from event failed: $err"),
+      u => {
+        userRepository.put(u.copy(
+          version      = event.getVersion,
+          name         = event.getName,
+          timeModified = Some(dateTime)))
+        ()
+      }
     )
-    ()
   }
 
-  def recoverEvent(event: UserEmailUpdatedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  def recoverUserEmailUpdatedEvent
+    (event: UserEmailUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     log.debug(s"recoverEvent: $event")
+
     userRepository.getActive(UserId(event.id)).fold(
-      err => throw new IllegalStateException(s"updating email on user from event failed: $err"),
-      u => userRepository.put(u.copy(
-        version = event.version, email = event.email, timeModified = Some(dateTime)))
+      err => log.error(s"updating email on user from event failed: $err"),
+      u => {
+        userRepository.put(u.copy(
+          version      = event.getVersion,
+          email        = event.getEmail,
+          timeModified = Some(dateTime)))
+        ()
+      }
     )
-    ()
   }
 
-  def recoverEvent(event: UserPasswordUpdatedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  def recoverUserPasswordUpdatedEvent
+    (event: UserPasswordUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     log.debug(s"recoverEvent: $event")
+    updatePassword(UserId(event.id), event.getVersion, event.getPassword, event.getSalt, dateTime).fold(
+      err => log.error(s"updating password on user from event failed: $err"),
+      user => ()
+    )
+  }
+
+  def recoverUserAvatarUrlUpdatedEvent
+    (event: UserAvatarUrlUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
+    log.debug(s"recoverEvent: $event")
+
     userRepository.getActive(UserId(event.id)).fold(
-      err => throw new IllegalStateException(s"updating password on user from event failed: $err"),
-      u => userRepository.put(u.copy(
-        version = event.version, password = event.password, salt = event.salt,
-        timeModified = Some(dateTime)))
+      err => log.error(s"updating avatar URL on user from event failed: $err"),
+      u => {
+        userRepository.put(u.copy(
+          version      = event.getVersion,
+          avatarUrl    = event.avatarUrl,
+          timeModified = Some(dateTime)))
+        ()
+      }
     )
-    ()
   }
 
-  def recoverEvent(event: UserAvatarUrlUpdatedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  def recoverUserPasswordResetEvent
+    (event: UserPasswordResetEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     log.debug(s"recoverEvent: $event")
+    updatePassword(UserId(event.id), event.getVersion, event.getPassword, event.getSalt, dateTime).fold(
+      err => log.error(s"resetting password on user from event failed: $err"),
+      user => ()
+    )
+  }
+
+  def recoverUserLockedEvent
+    (event: UserLockedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
+    log.debug(s"recoverEvent: $event")
+
     userRepository.getActive(UserId(event.id)).fold(
-      err => throw new IllegalStateException(s"updating avatar URL on user from event failed: $err"),
-      u => userRepository.put(u.copy(
-        version = event.version, avatarUrl = event.avatarUrl, timeModified = Some(dateTime)))
+      err => log.error(s"locking user from event failed: $err"),
+      u => {
+        userRepository.put(LockedUser(
+          id           = u.id,
+          version      = event.getVersion,
+          timeAdded    = u.timeAdded,
+          timeModified = Some(dateTime),
+          name         = u.name,
+          email        = u.email,
+          password     = u.password,
+          salt         = u.salt,
+          avatarUrl    = u.avatarUrl))
+        ()
+      }
     )
-    ()
   }
 
-  def recoverEvent(event: UserPasswordResetEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  def recoverUserUnlockedEvent
+    (event: UserUnlockedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     log.debug(s"recoverEvent: $event")
-    userRepository.getActive(UserId(event.id)).fold(
-      err => throw new IllegalStateException(s"resetting password on user from event failed: $err"),
-      u => userRepository.put(u.copy(
-        version = event.version, password = event.password, salt = event.salt,
-        timeModified = Some(dateTime)))
-    )
-    ()
-  }
 
-  def recoverEvent(event: UserLockedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
-    log.debug(s"recoverEvent: $event")
-    userRepository.getActive(UserId(event.id)).fold(
-      err => throw new IllegalStateException(s"locking user from event failed: $err"),
-      u => userRepository.put(LockedUser(
-        u.id, event.version, u.timeAdded, Some(dateTime), u.name, u.email, u.password, u.salt,
-        u.avatarUrl))
-    )
-    ()
-  }
-
-  def recoverEvent(event: UserUnlockedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
-    log.debug(s"recoverEvent: $event")
     userRepository.getLocked(UserId(event.id)).fold(
-      err => throw new IllegalStateException(s"unlocking user from event failed: $err"),
-      u => userRepository.put(ActiveUser(
-        u.id, event.version, u.timeAdded, Some(dateTime), u.name, u.email, u.password, u.salt,
-        u.avatarUrl))
+      err => log.error(s"unlocking user from event failed: $err"),
+      u => {
+        userRepository.put(ActiveUser(
+          id           = u.id,
+          version      = event.getVersion,
+          timeAdded    = u.timeAdded,
+          timeModified = Some(dateTime),
+          name         = u.name,
+          email        = u.email,
+          password     = u.password,
+          salt         = u.salt,
+          avatarUrl    = u.avatarUrl))
+        ()
+      }
     )
-    ()
+  }
+
+  /** Common code for events  UserPasswordUpdatedEvent and UserPasswordResetEvent */
+  private def updatePassword(
+    id: UserId,
+    version: Long,
+    password: String,
+    salt: String,
+    dateTime: DateTime): DomainValidation[User] = {
+
+    userRepository.getActive(id).fold(
+      err => DomainError(s"user with id not found: $id").failureNel,
+      u => {
+        userRepository.put(u.copy(
+          version      = version,
+          password     = password,
+          salt         = salt,
+          timeModified = Some(dateTime)))
+        u.successNel
+      }
+    )
   }
 
   /** Searches the repository for a matching item.

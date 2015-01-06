@@ -5,6 +5,7 @@ import org.biobank.service._
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.domain.study._
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._

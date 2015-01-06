@@ -155,7 +155,7 @@ class Factory {
       description    = Some(nameGenerator.next[CollectionEventAnnotationType]),
       valueType      = AnnotationValueType.Select,
       maxValueCount  = Some(1),
-      options        = Some(Seq(nameGenerator.next[String], nameGenerator.next[String])))
+      options        = Seq(nameGenerator.next[String], nameGenerator.next[String]))
 
     domainObjects = domainObjects + (classOf[CollectionEventAnnotationType] -> annotationType)
     annotationType
@@ -192,9 +192,9 @@ class Factory {
       description    = Some(nameGenerator.next[ParticipantAnnotationType]),
       valueType      = AnnotationValueType.Select,
       maxValueCount  = Some(1),
-      options        = Some(Seq(
+      options        = Seq(
         nameGenerator.next[ParticipantAnnotationType],
-        nameGenerator.next[ParticipantAnnotationType])),
+        nameGenerator.next[ParticipantAnnotationType]),
       required       = false)
     domainObjects = domainObjects + (classOf[ParticipantAnnotationType] -> annotationType)
     annotationType
@@ -212,7 +212,7 @@ class Factory {
       description    = Some(nameGenerator.next[SpecimenLinkAnnotationType]),
       valueType      = AnnotationValueType.Select,
       maxValueCount  = Some(1),
-      options        = Some(Seq(nameGenerator.next[String], nameGenerator.next[String])))
+      options        = Seq(nameGenerator.next[String], nameGenerator.next[String]))
     domainObjects = domainObjects + (classOf[SpecimenLinkAnnotationType] -> annotationType)
     annotationType
   }
@@ -306,9 +306,9 @@ class Factory {
       selectedValues   =
         if (annotationType.valueType == AnnotationValueType.Select) {
           // returns first option
-          Some(List(AnnotationOption(annotationType.id, annotationType.options.get(0))))
+          List(AnnotationOption(annotationType.id, annotationType.options(0)))
         } else {
-          None
+          List.empty
         }
     )
     domainObjects = domainObjects + (classOf[ParticipantAnnotation] -> ptcpAnnot)

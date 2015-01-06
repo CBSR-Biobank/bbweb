@@ -48,7 +48,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
 
   type AnnotTypeTuple = Tuple9[
     StudyId, AnnotationTypeId, Long, String, Some[String], AnnotationValueType.Value,
-    Option[Int], Option[Seq[String]], Boolean]
+    Option[Int], Seq[String], Boolean]
 
   val AnnotationValueTypeToTuple
       : Map[AnnotationValueType.AnnotationValueType, AnnotTypeTuple] = Map(
@@ -190,14 +190,14 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
     "not be created with an invalid options" in {
       val (studyId, id, version, name, description, valueType, maxValueCount, options, required) =
         textAnnotationTypeTuple
-      var invalidOptions = Some(Seq(""))
+      var invalidOptions = Seq("")
 
       ParticipantAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, invalidOptions, required)
         .mustFail(1, "OptionRequired")
 
-      invalidOptions = Some(Seq("duplicate", "duplicate"))
+      invalidOptions = Seq("duplicate", "duplicate")
       ParticipantAnnotationType.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
         maxValueCount, invalidOptions, required)

@@ -48,12 +48,12 @@ trait Global
 
     createSqlDdlScripts
 
-    Logger.info(s"Play started")
+    Logger.debug(s"Play started")
   }
 
   override def onStop(app: play.api.Application) {
     super.onStop(app)
-    Logger.info(s"Play stopped")
+    Logger.debug(s"Play stopped")
   }
 
   def checkEmailConfig(app: play.api.Application) = {
@@ -95,7 +95,7 @@ trait Global
   def createDefaultUser: User = {
     val userRepository = inject [UserRepository]
 
-    Logger.info("createDefaultUser")
+    Logger.debug("createDefaultUser")
     //if ((app.mode == Mode.Dev) || (app.mode == Mode.Test)) {
 
     //
@@ -115,7 +115,7 @@ trait Global
         user.activate.fold(
           err => throw new RuntimeException("could not activate default user in development mode: " + err),
           activeUser => {
-            Logger.info("default user created")
+            Logger.debug("default user created")
             userRepository.put(activeUser)
           }
         )

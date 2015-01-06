@@ -90,7 +90,7 @@ object JsonHelper extends MustMatchers {
     (json \ "valueType").as[String]           mustBe (annotType.valueType.toString)
     (json \ "maxValueCount").as[Option[Int]]  mustBe (annotType.maxValueCount)
 
-    (json \ "options").as[Option[Seq[String]]] mustBe (annotType.options)
+    (json \ "options").as[Seq[String]] mustBe (annotType.options)
   }
 
   def compareObj(json: JsValue, annotType: ParticipantAnnotationType)  = {
@@ -102,7 +102,7 @@ object JsonHelper extends MustMatchers {
     (json \ "maxValueCount").as[Option[Int]]  mustBe (annotType.maxValueCount)
     (json \ "required").as[Boolean]           mustBe (annotType.required)
 
-    (json \ "options").as[Option[Seq[String]]] mustBe (annotType.options)
+    (json \ "options").as[Seq[String]]        mustBe (annotType.options)
   }
 
   def compareObj(json: JsValue, processingType: ProcessingType)  = {

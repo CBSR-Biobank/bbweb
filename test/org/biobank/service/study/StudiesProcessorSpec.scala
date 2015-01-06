@@ -3,6 +3,7 @@ package org.biobank.service.study
 import org.biobank.fixture._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
   AnatomicalSourceType,
   AnnotationValueType,
@@ -60,7 +61,7 @@ class StudiesProcessorSpec extends TestFixture {
         event mustBe a [StudyAddedEvent]
 
         event must have (
-          'name (study.name),
+          'name        (Some(study.name)),
           'description (study.description)
         )
 
@@ -85,7 +86,7 @@ class StudiesProcessorSpec extends TestFixture {
       askUpdateCommand(study2) mustSucceed { event =>
         event mustBe a[StudyUpdatedEvent]
         event must have (
-          'name (study2.name),
+          'name        (Some(study2.name)),
           'description (study2.description)
         )
         studyRepository.getDisabled(StudyId(event.id)) mustSucceed { repoStudy =>
@@ -103,7 +104,7 @@ class StudiesProcessorSpec extends TestFixture {
       askUpdateCommand(study2) mustSucceed { event =>
         event mustBe a[StudyUpdatedEvent]
         event must have (
-          'name (study2.name),
+          'name        (Some(study2.name)),
           'description (study2.description)
         )
 
@@ -120,7 +121,7 @@ class StudiesProcessorSpec extends TestFixture {
 
       askUpdateCommand(study3) mustSucceed { event =>
         event must have (
-          'name (study3.name),
+          'name        (Some(study3.name)),
           'description (study3.description)
         )
         studyRepository.getDisabled(StudyId(event.id)) mustSucceed { repoStudy =>

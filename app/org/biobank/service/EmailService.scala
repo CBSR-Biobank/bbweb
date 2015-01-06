@@ -29,7 +29,7 @@ object EmailService {
                     |$password
                     |</pre>
                     |<p>Email address for account is: $recipient</p>
-                    |<p>If you did not make this request it is safe to disregard this message.</p>
+                    |<p>If you did not make this request, it is safe to disregard this message.</p>
                     |<p>Regards,<br/>Biobank</p>
                     |</html>""".stripMargin
       mail.sendHtml(msg)

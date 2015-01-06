@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory
 import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEventsUtil._
 import org.biobank.infrastructure.event.StudyEvents._
 
 import akka.persistence.SnapshotOffer
@@ -58,9 +59,9 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
   val receiveRecover: Receive = {
     case wevent: WrappedEvent[_] =>
       wevent.event match {
-        case event: SpecimenLinkTypeAddedEvent =>   recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: SpecimenLinkTypeUpdatedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: SpecimenLinkTypeRemovedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+        case event: SpecimenLinkTypeAddedEvent   => recoverSpecimenLinkTypeAddedEvent  (event, wevent.userId, wevent.dateTime)
+        case event: SpecimenLinkTypeUpdatedEvent => recoverSpecimenLinkTypeUpdatedEvent(event, wevent.userId, wevent.dateTime)
+        case event: SpecimenLinkTypeRemovedEvent => recoverSpecimenLinkTypeRemovedEvent(event, wevent.userId, wevent.dateTime)
 
         case event => throw new IllegalStateException(s"event not handled: $event")
       }
@@ -78,9 +79,9 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
     case procCmd: WrappedCommand =>
       implicit val userId = procCmd.userId
       procCmd.command match {
-        case cmd: AddSpecimenLinkTypeCmd =>    process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: UpdateSpecimenLinkTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: RemoveSpecimenLinkTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        case cmd: AddSpecimenLinkTypeCmd    => processAddSpecimenLinkTypeCmd(cmd)
+        case cmd: UpdateSpecimenLinkTypeCmd => processUpdateSpecimenLinkTypeCmd(cmd)
+        case cmd: RemoveSpecimenLinkTypeCmd => processRemoveSpecimenLinkTypeCmd(cmd)
       }
 
     case "snap" =>
@@ -105,13 +106,14 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
     } yield updatedSlt
   }
 
-  private def validateCmd(
-    cmd: AddSpecimenLinkTypeCmd): DomainValidation[SpecimenLinkTypeAddedEvent] = {
+  private def processAddSpecimenLinkTypeCmd
+    (cmd: AddSpecimenLinkTypeCmd)(implicit userId: Option[UserId])
+      : Unit = {
     val timeNow = DateTime.now
     val processingTypeId = ProcessingTypeId(cmd.processingTypeId)
     val id = specimenLinkTypeRepository.nextIdentity
 
-    for {
+    val event = for {
       processingType <- processingTypeRepository.getByKey(processingTypeId)
       newItem <- SpecimenLinkType.create(
         processingTypeId,
@@ -133,22 +135,27 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
       validSpecimenGroups <- validateSpecimenGroups(newItem.inputGroupId, newItem.outputGroupId)
       validAnnotData <- validateAnnotationTypeData(processingTypeId, cmd.annotationTypeData)
       event <- SpecimenLinkTypeAddedEvent(
-        cmd.processingTypeId,
-        id.id,
-        newItem.expectedInputChange,
-        newItem.expectedOutputChange,
-        newItem.inputCount,
-        newItem.outputCount,
-        newItem.inputGroupId,
-        newItem.outputGroupId,
-        newItem.inputContainerTypeId,
-        newItem.outputContainerTypeId,
-        newItem.annotationTypeData).success
+        processingTypeId      = cmd.processingTypeId,
+        specimenLinkTypeId    = id.id,
+        expectedInputChange   = Some(newItem.expectedInputChange.toDouble),
+        expectedOutputChange  = Some(newItem.expectedOutputChange.toDouble),
+        inputCount            = Some(newItem.inputCount),
+        outputCount           = Some(newItem.outputCount),
+        inputGroupId          = Some(newItem.inputGroupId.id),
+        outputGroupId         = Some(newItem.outputGroupId.id),
+        inputContainerTypeId  = newItem.inputContainerTypeId.map(_.id),
+        outputContainerTypeId = newItem.outputContainerTypeId.map(_.id),
+        annotationTypeData    = convertAnnotationTypeDataToEvent(newItem.annotationTypeData)).success
     } yield event
+
+    process(event){ wevent =>
+      recoverSpecimenLinkTypeAddedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def validateCmd(cmd: UpdateSpecimenLinkTypeCmd)
-      : DomainValidation[SpecimenLinkTypeUpdatedEvent] = {
+  private def processUpdateSpecimenLinkTypeCmd
+    (cmd: UpdateSpecimenLinkTypeCmd)(implicit userId: Option[UserId])
+      : Unit = {
     val timeNow = DateTime.now
 
     val v = update(cmd) { slt =>
@@ -174,73 +181,88 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
       } yield updatedSlt
     }
 
-    v.fold(
+    val event = v.fold(
       err => DomainError(s"error $err occurred on $cmd").failureNel,
       slt => SpecimenLinkTypeUpdatedEvent(
-        cmd.processingTypeId,
-        slt.id.id,
-        slt.version,
-        slt.expectedInputChange,
-        slt.expectedOutputChange,
-        slt.inputCount,
-        slt.outputCount,
-        slt.inputGroupId,
-        slt.outputGroupId,
-        slt.inputContainerTypeId,
-        slt.outputContainerTypeId,
-        slt.annotationTypeData).success
+        processingTypeId      = cmd.processingTypeId,
+        specimenLinkTypeId    = slt.id.id,
+        version               = Some(slt.version),
+        expectedInputChange   = Some(slt.expectedInputChange.toDouble),
+        expectedOutputChange  = Some(slt.expectedOutputChange.toDouble),
+        inputCount            = Some(slt.inputCount),
+        outputCount           = Some(slt.outputCount),
+        inputGroupId          = Some(slt.inputGroupId.id),
+        outputGroupId         = Some(slt.outputGroupId.id),
+        inputContainerTypeId  = slt.inputContainerTypeId.map(_.id),
+        outputContainerTypeId = slt.outputContainerTypeId.map(_.id),
+        annotationTypeData    = convertAnnotationTypeDataToEvent(slt.annotationTypeData)).success
     )
+
+    process(event){ wevent =>
+      recoverSpecimenLinkTypeUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def validateCmd(
-    cmd: RemoveSpecimenLinkTypeCmd): DomainValidation[SpecimenLinkTypeRemovedEvent] = {
+  private def processRemoveSpecimenLinkTypeCmd
+    (cmd: RemoveSpecimenLinkTypeCmd)(implicit userId: Option[UserId])
+      : Unit = {
     val v = update(cmd) { slt => slt.success }
 
-    v.fold(
+    val event = v.fold(
       err => DomainError(s"error $err occurred on $cmd").failureNel,
       pt =>  SpecimenLinkTypeRemovedEvent(cmd.processingTypeId, cmd.id).success
     )
+
+    process(event){ wevent =>
+      recoverSpecimenLinkTypeRemovedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def recoverEvent(event: SpecimenLinkTypeAddedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  private def recoverSpecimenLinkTypeAddedEvent
+    (event: SpecimenLinkTypeAddedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     specimenLinkTypeRepository.put(SpecimenLinkType(
-      ProcessingTypeId(event.processingTypeId),
-      SpecimenLinkTypeId(event.specimenLinkTypeId),
-      0L,
-      dateTime,
-      None,
-      event.expectedInputChange,
-      event.expectedOutputChange,
-      event.inputCount,
-      event.outputCount,
-      event.inputGroupId,
-      event.outputGroupId,
-      event.inputContainerTypeId,
-      event.outputContainerTypeId,
-      event.annotationTypeData))
+      processingTypeId      = ProcessingTypeId(event.processingTypeId),
+      id                    = SpecimenLinkTypeId(event.specimenLinkTypeId),
+      version               = 0L,
+      timeAdded             = dateTime,
+      timeModified          = None,
+      expectedInputChange   = event.getExpectedInputChange,
+      expectedOutputChange  = event.getExpectedOutputChange,
+      inputCount            = event.getInputCount,
+      outputCount           = event.getOutputCount,
+      inputGroupId          = SpecimenGroupId(event.getInputGroupId),
+      outputGroupId         = SpecimenGroupId(event.getOutputGroupId),
+      inputContainerTypeId  = event.inputContainerTypeId.map(ContainerTypeId(_)),
+      outputContainerTypeId = event.outputContainerTypeId.map(ContainerTypeId(_)),
+      annotationTypeData    = convertSpecimenLinkTypeAnnotationTypeDataFromEvent(event.annotationTypeData)))
     ()
   }
 
-  private def recoverEvent(event: SpecimenLinkTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  private def recoverSpecimenLinkTypeUpdatedEvent
+    (event: SpecimenLinkTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId)).fold(
       err => throw new IllegalStateException(s"updating specimen link type from event failed: $err"),
       slt => specimenLinkTypeRepository.put(slt.copy(
-        version               = event.version,
-        timeModified        = Some(dateTime),
-        expectedInputChange   = event.expectedInputChange,
-        expectedOutputChange  = event.expectedOutputChange,
-        inputCount            = event.inputCount,
-        outputCount           = event.outputCount,
-        inputGroupId          = event.inputGroupId,
-        outputGroupId         = event.outputGroupId,
-        inputContainerTypeId  = event.inputContainerTypeId,
-        outputContainerTypeId = event.outputContainerTypeId,
-        annotationTypeData    = event.annotationTypeData))
+        version               = event.getVersion,
+        timeModified          = Some(dateTime),
+        expectedInputChange   = event.getExpectedInputChange,
+        expectedOutputChange  = event.getExpectedOutputChange,
+        inputCount            = event.getInputCount,
+        outputCount           = event.getOutputCount,
+        inputGroupId          = SpecimenGroupId(event.getInputGroupId),
+        outputGroupId         = SpecimenGroupId(event.getOutputGroupId),
+        inputContainerTypeId  = event.inputContainerTypeId.map(ContainerTypeId(_)),
+        outputContainerTypeId = event.outputContainerTypeId.map(ContainerTypeId(_)),
+        annotationTypeData    = convertSpecimenLinkTypeAnnotationTypeDataFromEvent(event.annotationTypeData)))
     )
     ()
   }
 
-  private def recoverEvent(event: SpecimenLinkTypeRemovedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  private def recoverSpecimenLinkTypeRemovedEvent
+    (event: SpecimenLinkTypeRemovedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId)).fold(
       err => throw new IllegalStateException(s"updating specimen link type from event failed: $err"),
       slt => specimenLinkTypeRepository.remove(slt)

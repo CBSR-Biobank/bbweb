@@ -50,9 +50,9 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
   val receiveRecover: Receive = {
     case wevent: WrappedEvent[_] =>
       wevent.event match {
-        case event: ProcessingTypeAddedEvent =>   recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: ProcessingTypeUpdatedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: ProcessingTypeRemovedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+        case event: ProcessingTypeAddedEvent   => recoverProcessingTypeAddedEvent  (event, wevent.userId, wevent.dateTime)
+        case event: ProcessingTypeUpdatedEvent => recoverProcessingTypeUpdatedEvent(event, wevent.userId, wevent.dateTime)
+        case event: ProcessingTypeRemovedEvent => recoverProcessingTypeRemovedEvent(event, wevent.userId, wevent.dateTime)
 
         case event => throw new IllegalStateException(s"event not handled: $event")
       }
@@ -71,9 +71,9 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     case procCmd: WrappedCommand =>
       implicit val userId = procCmd.userId
       procCmd.command match {
-        case cmd: AddProcessingTypeCmd =>    process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: UpdateProcessingTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: RemoveProcessingTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        case cmd: AddProcessingTypeCmd    => processAddProcessingTypeCmd(cmd)
+        case cmd: UpdateProcessingTypeCmd => processUpdateProcessingTypeCmd(cmd)
+        case cmd: RemoveProcessingTypeCmd => processRemoveProcessingTypeCmd(cmd)
       }
 
     case "snap" =>
@@ -95,21 +95,34 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     } yield updatedPt
   }
 
-  private def validateCmd(cmd: AddProcessingTypeCmd): DomainValidation[ProcessingTypeAddedEvent] = {
+  private def processAddProcessingTypeCmd
+    (cmd: AddProcessingTypeCmd)
+    (implicit userId: Option[UserId])
+      : Unit = {
     val timeNow = DateTime.now
     val studyId = StudyId(cmd.studyId)
     val id = processingTypeRepository.nextIdentity
 
-    for {
+    val event = for {
       nameValid <- nameAvailable(cmd.name)
       newItem <- ProcessingType.create(studyId, id, -1L, timeNow, cmd.name, cmd.description, cmd.enabled)
       event <- ProcessingTypeAddedEvent(
-        cmd.studyId, id.id, newItem.name, newItem.description, newItem.enabled).success
+        studyId          = cmd.studyId,
+        processingTypeId = id.id,
+        name             = Some(newItem.name),
+        description      = newItem.description,
+        enabled          = Some(newItem.enabled)).success
     } yield event
+
+    process(event){ wevent =>
+      recoverProcessingTypeAddedEvent  (wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def validateCmd(cmd: UpdateProcessingTypeCmd)
-      : DomainValidation[ProcessingTypeUpdatedEvent] = {
+  private def processUpdateProcessingTypeCmd
+    (cmd: UpdateProcessingTypeCmd)
+    (implicit userId: Option[UserId])
+      : Unit = {
     val timeNow = DateTime.now
 
     val v = update(cmd) { pt =>
@@ -119,44 +132,71 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
       } yield updatedPt
     }
 
-    v.fold(
+    val event = v.fold(
       err => DomainError(s"error $err occurred on $cmd").failureNel,
       pt => ProcessingTypeUpdatedEvent(
-        cmd.studyId, pt.id.id, pt.version, pt.name, pt.description, pt.enabled).success
+        studyId          = cmd.studyId,
+        processingTypeId = pt.id.id,
+        version          = Some(pt.version),
+        name             = Some(pt.name),
+        description      = pt.description,
+        enabled          = Some(pt.enabled)).success
     )
+
+    process(event){ wevent =>
+      recoverProcessingTypeUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def validateCmd(
-    cmd: RemoveProcessingTypeCmd): DomainValidation[ProcessingTypeRemovedEvent] = {
+  private def processRemoveProcessingTypeCmd
+    (cmd: RemoveProcessingTypeCmd)
+    (implicit userId: Option[UserId])
+      : Unit = {
     val v = update(cmd) { pt => pt.success }
 
-    v.fold(
+    val event = v.fold(
       err => DomainError(s"error $err occurred on $cmd").failureNel,
       pt =>  ProcessingTypeRemovedEvent(cmd.studyId, cmd.id).success
     )
+
+    process(event){ wevent =>
+      recoverProcessingTypeRemovedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def recoverEvent(event: ProcessingTypeAddedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  private def recoverProcessingTypeAddedEvent
+    (event: ProcessingTypeAddedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     processingTypeRepository.put(ProcessingType(
-      StudyId(event.studyId), ProcessingTypeId(event.processingTypeId), 0L, dateTime, None,
-      event.name, event.description, event.enabled))
+     studyId      = StudyId(event.studyId),
+     id           = ProcessingTypeId(event.processingTypeId),
+     version      = 0L,
+     timeAdded    = dateTime,
+     timeModified = None,
+     name         = event.getName,
+     description  = event.description,
+     enabled      = event.getEnabled))
     ()
   }
 
-  private def recoverEvent(event: ProcessingTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  private def recoverProcessingTypeUpdatedEvent
+    (event: ProcessingTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     processingTypeRepository.getByKey(ProcessingTypeId(event.processingTypeId)).fold(
       err => throw new IllegalStateException(s"updating processing type from event failed: $err"),
       pt => processingTypeRepository.put(pt.copy(
-        version        = event.version,
+        version      = event.getVersion,
         timeModified = Some(dateTime),
-        name           = event.name,
-        description    = event.description,
-        enabled        = event.enabled))
+        name         = event.getName,
+        description  = event.description,
+        enabled      = event.getEnabled))
     )
     ()
   }
 
-  private def recoverEvent(event: ProcessingTypeRemovedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  private def recoverProcessingTypeRemovedEvent
+    (event: ProcessingTypeRemovedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     processingTypeRepository.getByKey(ProcessingTypeId(event.processingTypeId)).fold(
       err => throw new IllegalStateException(s"updating processing type from event failed: $err"),
       sg => processingTypeRepository.remove(sg)

@@ -116,11 +116,11 @@ trait ControllerFixture
       .withJsonBody(json)
       .withHeaders("X-XSRF-TOKEN" -> token)
       .withCookies(Cookie("XSRF-TOKEN", token))
-    Logger.info(s"makeRequest: request: $fakeRequest, $json")
+    Logger.debug(s"makeRequest: request: $fakeRequest, $json")
     route(fakeRequest).fold {
       fail("HTTP request returned NONE")
     } { result =>
-      Logger.info(s"makeRequest: status: ${status(result)}, result: ${contentAsString(result)}")
+      Logger.debug(s"makeRequest: status: ${status(result)}, result: ${contentAsString(result)}")
       status(result) mustBe(expectedStatus)
       contentType(result) mustBe(Some("application/json"))
       Json.parse(contentAsString(result))

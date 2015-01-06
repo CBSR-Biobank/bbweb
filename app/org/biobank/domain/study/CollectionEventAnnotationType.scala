@@ -3,7 +3,7 @@ package org.biobank.domain.study
 import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
 import org.biobank.domain.AnnotationValueType._
 import org.biobank.infrastructure.JsonUtils._
-import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.event.StudyEventsJson._
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
@@ -24,7 +24,7 @@ case class CollectionEventAnnotationType (
   description: Option[String],
   valueType: AnnotationValueType,
   maxValueCount: Option[Int],
-  options: Option[Seq[String]])
+  options: Seq[String])
     extends StudyAnnotationType
     with StudyAnnotationTypeValidations {
 
@@ -47,7 +47,7 @@ case class CollectionEventAnnotationType (
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Seq[String]] = None): DomainValidation[CollectionEventAnnotationType] = {
+    options: Seq[String] = Seq.empty): DomainValidation[CollectionEventAnnotationType] = {
     CollectionEventAnnotationType.create(
       this.studyId, this.id, this.version, this.timeAdded, name, description, valueType, maxValueCount, options)
   }
@@ -66,7 +66,7 @@ object CollectionEventAnnotationType extends StudyAnnotationTypeValidations {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Seq[String]] = None): DomainValidation[CollectionEventAnnotationType] = {
+    options: Seq[String] = Seq.empty): DomainValidation[CollectionEventAnnotationType] = {
     (validateId(studyId, StudyIdRequired) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
@@ -91,7 +91,7 @@ object CollectionEventAnnotationType extends StudyAnnotationTypeValidations {
       (__ \ "description").write[Option[String]] and
       (__ \ "valueType").write[AnnotationValueType] and
       (__ \ "maxValueCount").write[Option[Int]] and
-      (__ \ "options").write[Option[Seq[String]]]
+      (__ \ "options").write[Seq[String]]
   )(unlift(org.biobank.domain.study.CollectionEventAnnotationType.unapply))
 
 }

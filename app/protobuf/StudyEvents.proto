@@ -1,0 +1,263 @@
+package org.biobank.infrastructure.event;
+
+message StudyAddedEvent {
+   required string id          = 1;
+   optional string name        = 2;
+   optional string description = 3;
+}
+
+message StudyUpdatedEvent {
+   required string id          = 1;
+   optional int64  version     = 2;
+   optional string name        = 3;
+   optional string description = 4;
+}
+
+message StudyEnabledEvent {
+   required string id      = 1;
+   optional int64  version = 2;
+}
+
+message StudyDisabledEvent {
+   required string id      = 1;
+   optional int64  version = 2;
+}
+
+message StudyRetiredEvent {
+   required string id      = 1;
+   optional int64  version = 2;
+}
+
+message StudyUnretiredEvent {
+   required string id      = 1;
+   optional int64  version = 2;
+}
+
+message CollectionEventAnnotationTypeAddedEvent {
+   required string studyId          = 1;
+   required string annotationTypeId = 2;
+   optional string name             = 3;
+   optional string description      = 4;
+   optional string valueType        = 5; // a scala enum is used here
+   optional int32  maxValueCount    = 6;
+   repeated string options          = 7;
+}
+
+message CollectionEventAnnotationTypeUpdatedEvent {
+   required string studyId          = 1;
+   required string annotationTypeId = 2;
+   optional int64  version          = 3;
+   optional string name             = 4;
+   optional string description      = 5;
+   optional string valueType        = 6; // a scala enum is used here
+   optional int32  maxValueCount    = 7;
+   repeated string options          = 8;
+}
+
+message CollectionEventAnnotationTypeRemovedEvent {
+   required string studyId          = 1;
+   required string annotationTypeId = 2;
+}
+
+message ParticipantAnnotationTypeAddedEvent {
+   required string studyId          = 1;
+   required string annotationTypeId = 2;
+   optional string name             = 3;
+   optional string description      = 4;
+   optional string valueType        = 5; // a scala enum is used here
+   optional int32  maxValueCount    = 6;
+   repeated string options          = 7;
+   optional bool   required         = 8;
+}
+
+message ParticipantAnnotationTypeUpdatedEvent {
+   required string studyId          = 1;
+   required string annotationTypeId = 2;
+   optional int64  version          = 3;
+   optional string name             = 4;
+   optional string description      = 5;
+   optional string valueType        = 6; // a scala enum is used here
+   optional int32  maxValueCount    = 7;
+   repeated string options          = 8;
+   optional bool   required         = 9;
+}
+
+message ParticipantAnnotationTypeRemovedEvent {
+   required string studyId          = 1;
+   required string annotationTypeId = 2;
+}
+
+message SpecimenLinkAnnotationTypeAddedEvent {
+   required string studyId          = 1;
+   required string annotationTypeId = 2;
+   optional string name             = 3;
+   optional string description      = 4;
+   optional string valueType        = 5; // a scala enum is used here
+   optional int32  maxValueCount    = 6;
+   repeated string options          = 7;
+}
+
+message SpecimenLinkAnnotationTypeUpdatedEvent {
+   required string studyId          = 1;
+   required string annotationTypeId = 2;
+   optional int64  version          = 3;
+   optional string name             = 4;
+   optional string description      = 5;
+   optional string valueType        = 6; // a scala enum is used here
+   optional int32  maxValueCount    = 7;
+   repeated string options          = 8;
+}
+
+message SpecimenLinkAnnotationTypeRemovedEvent {
+   required string studyId          = 1;
+   required string annotationTypeId = 2;
+}
+
+message CollectionEventTypeAddedEvent {
+   message SpecimenGroupData {
+      required string specimenGroupId = 1;
+      optional int32  maxCount           = 2;
+      optional double amount          = 3;
+   }
+
+   message AnnotationTypeData {
+      required string annotationTypeId = 1;
+      optional bool   required         = 2;
+   }
+
+   required string             studyId               = 1;
+   required string             collectionEventTypeId = 2;
+   optional string             name                  = 3;
+   optional string             description           = 4;
+   optional bool               recurring             = 5;
+   repeated SpecimenGroupData  specimenGroupData     = 6;
+   repeated AnnotationTypeData annotationTypeData    = 7;
+}
+
+message CollectionEventTypeUpdatedEvent {
+   required string                                           studyId               = 1;
+   required string                                           collectionEventTypeId = 2;
+   optional int64                                            version               = 3;
+   optional string                                           name                  = 4;
+   optional string                                           description           = 5;
+   optional bool                                             recurring             = 6;
+   repeated CollectionEventTypeAddedEvent.SpecimenGroupData  specimenGroupData     = 7;
+   repeated CollectionEventTypeAddedEvent.AnnotationTypeData annotationTypeData    = 8;
+}
+
+message CollectionEventTypeRemovedEvent {
+   required string studyId               = 1;
+   required string collectionEventTypeId = 2;
+}
+
+message SpecimenGroupAddedEvent {
+   required string studyId                     = 1;
+   required string specimenGroupId             = 2;
+   optional string name                        = 3;
+   optional string description                 = 4;
+   optional string units                       = 5;
+   optional string anatomicalSourceType        = 6;
+   optional string preservationType            = 7;
+   optional string preservationTemperatureType = 8;
+   optional string specimenType                = 9;
+}
+
+message SpecimenGroupUpdatedEvent {
+   required string studyId                     = 1;
+   required string specimenGroupId             = 2;
+   optional int64  version                     = 3;
+   optional string name                        = 4;
+   optional string description                 = 5;
+   optional string units                       = 6;
+   optional string anatomicalSourceType        = 7;
+   optional string preservationType            = 8;
+   optional string preservationTemperatureType = 9;
+   optional string specimenType                = 10;
+}
+
+message SpecimenGroupRemovedEvent {
+   required string studyId         = 1;
+   required string specimenGroupId = 2;
+}
+
+  // procesing type events
+message ProcessingTypeAddedEvent {
+   required string studyId          = 1;
+   required string processingTypeId = 2;
+   optional string name             = 3;
+   optional string description      = 4;
+   optional bool   enabled          = 5;
+}
+
+message ProcessingTypeUpdatedEvent {
+   required string studyId          = 1;
+   required string processingTypeId = 2;
+   optional int64  version          = 3;
+   optional string name             = 4;
+   optional string description      = 5;
+   optional bool   enabled          = 6;
+}
+
+message ProcessingTypeRemovedEvent {
+   required string studyId          = 1;
+   required string processingTypeId = 2;
+}
+
+message SpecimenLinkTypeAddedEvent {
+   required string processingTypeId                                             = 1;
+   required string specimenLinkTypeId                                           = 2;
+   optional double expectedInputChange                                          = 3;
+   optional double expectedOutputChange                                         = 4;
+   optional int32  inputCount                                                   = 5;
+   optional int32  outputCount                                                  = 6;
+   optional string inputGroupId                                                 = 7;
+   optional string outputGroupId                                                = 8;
+   optional string inputContainerTypeId                                         = 9;
+   optional string outputContainerTypeId                                        = 10;
+   repeated CollectionEventTypeAddedEvent.AnnotationTypeData annotationTypeData = 11;
+}
+
+message SpecimenLinkTypeUpdatedEvent {
+   required string processingTypeId                                             = 1;
+   required string specimenLinkTypeId                                           = 2;
+   optional int64  version                                                      = 3;
+   optional double expectedInputChange                                          = 4;
+   optional double expectedOutputChange                                         = 5;
+   optional int32  inputCount                                                   = 6;
+   optional int32  outputCount                                                  = 7;
+   optional string inputGroupId                                                 = 8;
+   optional string outputGroupId                                                = 9;
+   optional string inputContainerTypeId                                         = 10;
+   optional string outputContainerTypeId                                        = 11;
+   repeated CollectionEventTypeAddedEvent.AnnotationTypeData annotationTypeData = 12;
+}
+
+message SpecimenLinkTypeRemovedEvent {
+   required string processingTypeId   = 1;
+   required string specimenLinkTypeId = 2;
+}
+
+message ParticipantAddedEvent {
+
+   message ParticipantAnnotation {
+      required string annotationTypeId = 1;
+      optional string stringValue      = 2;
+      optional string numberValue      = 3;
+      repeated string selectedValues   = 4;
+   }
+
+   required string studyId                    = 1;
+   required string participantId              = 2;
+   optional string uniqueId                   = 3;
+   repeated ParticipantAnnotation annotations = 4;
+}
+
+message ParticipantUpdatedEvent {
+   required string studyId                                          = 1;
+   required string participantId                                    = 2;
+   optional int64 version                                           = 3;
+   optional string uniqueId                                         = 4;
+   repeated ParticipantAddedEvent.ParticipantAnnotation annotations = 5;
+
+}
+

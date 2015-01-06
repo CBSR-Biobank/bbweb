@@ -8,7 +8,7 @@ object StudyAnnotationTypeSpecUtil {
 
   type AnnotTypeTuple = Tuple8[
     StudyId, AnnotationTypeId, Long, String, Some[String], AnnotationValueType.Value,
-    Option[Int], Option[Seq[String]]]
+    Option[Int], Seq[String]]
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -25,7 +25,7 @@ object StudyAnnotationTypeSpecUtil {
   def nonSelectAnnotationTypeTuple = {
     val (studyId, id, version, name, description) = annotationTypeNoValueTypeTuple
     val maxValueCount = None
-    val options = None
+    val options = Seq.empty
 
     (studyId, id, version, name, description, maxValueCount, options)
   }
@@ -53,9 +53,7 @@ object StudyAnnotationTypeSpecUtil {
 
     val valueType = AnnotationValueType.Select
     val maxValueCount = Some(1)
-    val options = Some(Seq(
-      nameGenerator.next[String],
-      nameGenerator.next[String]))
+    val options = Seq(nameGenerator.next[String], nameGenerator.next[String])
 
     (studyId, id, version, name, description, valueType, maxValueCount, options)
   }

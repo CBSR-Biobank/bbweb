@@ -11,6 +11,6 @@ trait Annotation[T <: AnnotationType] {
 
   val numberValue: Option[String] //Fixme: change to Option[java.lang.Number]
 
-  val selectedValues: Option[List[AnnotationOption]]
+  val selectedValues: List[AnnotationOption]
 
 }

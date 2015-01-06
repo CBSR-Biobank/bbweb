@@ -4,7 +4,6 @@ import org.biobank.domain._
 import org.biobank.domain.user.UserId
 import org.biobank.service.WrappedCommand
 import org.biobank.infrastructure.command.Commands._
-import org.biobank.infrastructure.event.Events._
 
 import akka.actor.ActorSystem
 import akka.util.Timeout

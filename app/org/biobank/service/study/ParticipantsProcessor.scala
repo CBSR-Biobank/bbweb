@@ -3,7 +3,8 @@ package org.biobank.service.study
 import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.domain.{ AnnotationTypeId, DomainValidation, DomainError }
+import org.biobank.infrastructure.event.StudyEventsJson._
+import org.biobank.domain.{ AnnotationTypeId, AnnotationOption, DomainValidation, DomainError }
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 
@@ -45,10 +46,12 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
   val receiveRecover: Receive = {
     case wevent: WrappedEvent[_] =>
       wevent.event match {
-        case event: ParticipantAddedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: ParticipantUpdatedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+        case event: ParticipantAddedEvent   =>
+          recoverParticipantAddedEvent(event, wevent.userId, wevent.dateTime)
+        case event: ParticipantUpdatedEvent =>
+          recoverParticipantUpdatedEvent(event, wevent.userId, wevent.dateTime)
 
-        case event => throw new IllegalStateException(s"event not handled: $event")
+        case event => log.error(s"event not handled: $event")
       }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -65,8 +68,8 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
 
       // order is important in the pattern match used below
       procCmd.command match {
-        case cmd: AddParticipantCmd =>    process(validateCmd(cmd)){ w => recoverEvent(w.event, w.userId, w.dateTime) }
-        case cmd: UpdateParticipantCmd => process(validateCmd(cmd)){ w => recoverEvent(w.event, w.userId, w.dateTime) }
+        case cmd: AddParticipantCmd    => processAddParticipantCmd(cmd)
+        case cmd: UpdateParticipantCmd => processUpdateParticipantCmd(cmd)
 
         case cmd => log.error(s"invalid wrapped command: $cmd")
       }
@@ -154,7 +157,8 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
     }
   }
 
-  private def validateCmd(cmd: AddParticipantCmd): DomainValidation[ParticipantAddedEvent] = {
+  private def processAddParticipantCmd(cmd: AddParticipantCmd)(implicit userId: Option[UserId])
+      : Unit = {
     val studyId = StudyId(cmd.studyId)
     val participantId = participantRepository.nextIdentity
 
@@ -162,21 +166,30 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
       throw new IllegalStateException(s"participant with id already exsits: $participantId")
     }
 
-    for {
+    val event = for {
       study <- enabledStudy(studyId)
       uniqueIdAvailable <- uniqueIdAvailable(cmd.uniqueId)
       annotTypes <- validateAnnotationTypes(studyId, cmd.annotations.toSet)
       newParticip <- Participant.create(
         studyId, participantId, -1L, DateTime.now, cmd.uniqueId, cmd.annotations.toSet)
-      event <- ParticipantAddedEvent(studyId.id, participantId.id, cmd.uniqueId, cmd.annotations).success
+      event <- ParticipantAddedEvent(
+        studyId       = studyId.id,
+        participantId = participantId.id,
+        uniqueId      = Some(cmd.uniqueId),
+        annotations   = convertAnnotationToEvent(cmd.annotations)).success
     } yield event
+
+    process(event){ w =>
+      recoverParticipantAddedEvent(w.event, w.userId, w.dateTime)
+    }
   }
 
-  private def validateCmd(cmd: UpdateParticipantCmd): DomainValidation[ParticipantUpdatedEvent] = {
+  private def processUpdateParticipantCmd(cmd: UpdateParticipantCmd)(implicit userId: Option[UserId])
+      : Unit = {
     val studyId = StudyId(cmd.studyId)
     val participantId = ParticipantId(cmd.id)
 
-    for {
+    val event = for {
       study <- enabledStudy(studyId)
       uniqueIdAvailable <- uniqueIdAvailable(cmd.uniqueId, participantId)
       annotTypes <- validateAnnotationTypes(studyId, cmd.annotations.toSet)
@@ -184,30 +197,75 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
       newParticip <- Participant.create(
         studyId, participantId, particip.version, DateTime.now, cmd.uniqueId, cmd.annotations.toSet)
       event <- ParticipantUpdatedEvent(
-        studyId.id, participantId.id, particip.version, cmd.uniqueId, cmd.annotations).success
+        studyId       = studyId.id,
+        participantId = participantId.id,
+        version       = Some(particip.version),
+        uniqueId      = Some(cmd.uniqueId),
+        annotations   = convertAnnotationToEvent(cmd.annotations)).success
     } yield event
+
+    process(event){ w =>
+      recoverParticipantUpdatedEvent(w.event, w.userId, w.dateTime)
+    }
   }
 
-  private def recoverEvent(event: ParticipantAddedEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverParticipantAddedEvent
+    (event: ParticipantAddedEvent, userId: Option[UserId], dateTime: DateTime) {
     participantRepository.put(Participant(
-      StudyId(event.studyId), ParticipantId(event.participantId), 0L, dateTime, None, event.uniqueId,
-      event.annotations.toSet))
+      studyId      = StudyId(event.studyId),
+      id           = ParticipantId(event.participantId),
+      version      = 0L,
+      timeAdded    = dateTime,
+      timeModified = None,
+      uniqueId     = event.getUniqueId,
+      annotations  = convertAnnotationsFromEvent(event.annotations)))
     ()
   }
 
-  private def recoverEvent(event: ParticipantUpdatedEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverParticipantUpdatedEvent
+    (event: ParticipantUpdatedEvent, userId: Option[UserId], dateTime: DateTime) {
     val studyId = StudyId(event.studyId)
     val participantId = ParticipantId(event.participantId)
 
     participantRepository.withId(studyId, participantId).fold(
       err => throw new IllegalStateException(s"updating participant from event failed: $err"),
       p => participantRepository.put(p.copy(
-        version      = event.version,
-        uniqueId     = event.uniqueId,
+        version      = event.getVersion,
+        uniqueId     = event.getUniqueId,
         timeModified = Some(dateTime),
-        annotations  = event.annotations.toSet))
+        annotations  = convertAnnotationsFromEvent(event.annotations)))
     )
     ()
   }
 
+  private def convertAnnotationToEvent
+    (annotations: List[ParticipantAnnotation])
+      : Seq[ParticipantAddedEvent.ParticipantAnnotation] = {
+    annotations.map { annot =>
+      ParticipantAddedEvent.ParticipantAnnotation(
+        annotationTypeId = annot.annotationTypeId.id,
+        stringValue      = annot.stringValue,
+        numberValue      = annot.numberValue,
+        selectedValues   = annot.selectedValues.map(_.value)
+      )
+    }
+  }
+
+  private def convertAnnotationsFromEvent
+    (annotations: Seq[ParticipantAddedEvent.ParticipantAnnotation])
+      : Set[ParticipantAnnotation] = {
+    annotations.map { eventAnnot =>
+      ParticipantAnnotation(
+        annotationTypeId = AnnotationTypeId(eventAnnot.annotationTypeId),
+        stringValue      = eventAnnot.stringValue,
+        numberValue      = eventAnnot.numberValue,
+        selectedValues   = eventAnnot.selectedValues.map { selectedValue =>
+          AnnotationOption(
+            annotationTypeId = AnnotationTypeId(eventAnnot.annotationTypeId),
+            value            = selectedValue
+          )
+        } toList
+      )
+    } toSet
+  }
 }

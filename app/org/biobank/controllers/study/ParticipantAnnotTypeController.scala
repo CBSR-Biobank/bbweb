@@ -5,6 +5,7 @@ import org.biobank.service._
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.domain.study._
 import org.biobank.domain.AnnotationValueType._
 
@@ -41,7 +42,7 @@ class ParticipantAnnotTypeController(implicit inj: Injector)
     */
   def get(studyId: String, annotTypeId: Option[String]) =
     AuthAction(parse.empty) { token => userId => implicit request =>
-      Logger.info(s"ParticipantAnnotTypeController.get: studyId: $studyId, annotTypeId: $annotTypeId")
+      Logger.debug(s"ParticipantAnnotTypeController.get: studyId: $studyId, annotTypeId: $annotTypeId")
 
       annotTypeId.fold {
         domainValidationReply(studiesService.participantAnnotationTypesForStudy(studyId).map(_.toList))

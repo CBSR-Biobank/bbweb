@@ -30,7 +30,7 @@ trait StudyAnnotationTypeProcessor[A <: StudyAnnotationType] extends Processor {
     }
   }
 
-  protected def recoverEvent(annotationTypeId: AnnotationTypeId): Unit = {
+  protected def recoverStudyAnnotationTypeRemovedEvent(annotationTypeId: AnnotationTypeId): Unit = {
     annotationTypeRepository.getByKey(annotationTypeId).fold(
       err => throw new IllegalStateException(s"updating annotation type from event failed: $err"),
       at => annotationTypeRepository.remove(at)

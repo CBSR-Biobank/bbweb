@@ -4,6 +4,7 @@ import org.biobank.domain.study.ParticipantAnnotationType
 
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.service._
 import org.biobank.domain._
 import org.biobank.domain.user.UserId

@@ -32,7 +32,7 @@ trait AnnotationType
     *
     * @todo describe why this is a map.
     */
-  val options: Option[Seq[String]]
+  val options: Seq[String]
 }
 
 trait AnnotationTypeValidations {
@@ -59,19 +59,15 @@ trait AnnotationTypeValidations {
   /**
     *  Validates each item in the map and returns all failures.
     */
-  def validateOptions(options: Option[Seq[String]]): DomainValidation[Option[Seq[String]]] = {
-    options.fold {
-      none[Seq[String]].successNel[String]
-    } { optionsSeq =>
-      if (optionsSeq.distinct.size == optionsSeq.size) {
-        optionsSeq.toList.map(validateString(_, OptionRequired)).sequenceU.fold(
-          err => err.toList.mkString(",").failureNel[Option[Seq[String]]],
-          list => Some(list.toSeq).successNel
+  def validateOptions(options: Seq[String]): DomainValidation[Seq[String]] = {
+      if (options.distinct.size == options.size) {
+        options.toList.map(validateString(_, OptionRequired)).sequenceU.fold(
+          err => err.toList.mkString(",").failureNel[Seq[String]],
+          list => list.toSeq.successNel
         )
       } else {
-        DuplicateOptionsError.toString.failureNel[Option[Seq[String]]]
+        DuplicateOptionsError.toString.failureNel[Seq[String]]
       }
-    }
   }
 
   /**
@@ -101,9 +97,7 @@ trait AnnotationTypeValidations {
     * - options must be None
     */
   def validateSelectParams(
-    valueType: AnnotationValueType,
-    maxValueCount: Option[Int],
-    options: Option[Seq[String]])
+    valueType: AnnotationValueType, maxValueCount: Option[Int], options: Seq[String])
       : DomainValidation[Boolean] = {
     if (valueType == AnnotationValueType.Select) {
       maxValueCount.fold {
@@ -115,14 +109,10 @@ trait AnnotationTypeValidations {
           true.successNel[String]
         }
 
-        val optionsValidation = options.fold {
-          DomainError("select annotation type with no options").failureNel[Boolean]
-        } { optionsSeq =>
-          if (optionsSeq.isEmpty) {
-            DomainError("select annotation type with no optionsSeq to select").failureNel[Boolean]
-          } else {
-            true.successNel[String]
-          }
+        val optionsValidation = if (options.isEmpty) {
+          DomainError("select annotation type with no options to select").failureNel[Boolean]
+        } else {
+          true.successNel[String]
         }
 
         (countValidation |@| optionsValidation)(_ && _)
@@ -134,9 +124,9 @@ trait AnnotationTypeValidations {
         DomainError(s"max value count is invalid for non-select").failureNel[Boolean]
       }
 
-      val optionsValidation = options.fold {
+      val optionsValidation = if (options.isEmpty) {
         true.successNel[String]
-      } { optionsSeq =>
+      } else {
         DomainError("non select annotation type with options to select").failureNel[Boolean]
       }
 

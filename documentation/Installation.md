@@ -20,6 +20,12 @@ sudo apt-get update
 sudo apt-get install sbt
 ```
 
+### Protocol Buffers
+
+```bash
+sudo apt-get install protobuf-compiler libprotoc-dev
+```
+
 ### MongoDB
 
 Install on Ubuntu:

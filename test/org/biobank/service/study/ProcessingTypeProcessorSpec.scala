@@ -83,9 +83,9 @@ class ProcessingTypeProcessorSpec extends TestFixture {
       askAddCommand(procType) mustSucceed { event =>
         event mustBe a[ProcessingTypeAddedEvent]
         event must have(
-          'name (procType.name),
+          'name        (Some(procType.name)),
           'description (procType.description),
-          'enabled (procType.enabled))
+          'enabled     (Some(procType.enabled)))
 
         processingTypeRepository.allForStudy(disabledStudy.id) must have size 1
         processingTypeRepository.withId(
@@ -108,7 +108,7 @@ class ProcessingTypeProcessorSpec extends TestFixture {
       askAddCommand(procType) mustFail "name already exists"
     }
 
-    "update a processing type" taggedAs(Tag("1")) in {
+    "update a processing type" in {
       val procType = factory.createProcessingType
       processingTypeRepository.put(procType)
 
@@ -117,9 +117,9 @@ class ProcessingTypeProcessorSpec extends TestFixture {
       askUpdateCommand(procType2) mustSucceed { event =>
         event mustBe a[ProcessingTypeUpdatedEvent]
         event must have(
-          'name (procType2.name),
+          'name        (Some(procType2.name)),
           'description (procType2.description),
-          'enabled (procType2.enabled))
+          'enabled     (Some(procType2.enabled)))
 
         processingTypeRepository.allForStudy(disabledStudy.id) must have size 1
         processingTypeRepository.withId(

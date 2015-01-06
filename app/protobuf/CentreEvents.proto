@@ -1,0 +1,51 @@
+package org.biobank.infrastructure.event;
+
+message CentreAddedEvent {
+   required string id = 1;
+   optional string name = 2;
+   optional string description = 3;
+}
+
+message CentreUpdatedEvent {
+   required string id = 1;
+   optional int64  version = 2;
+   optional string name = 3;
+   optional string description = 4;
+}
+
+message CentreEnabledEvent {
+   required string id = 1;
+   optional int64  version = 2;
+}
+
+message CentreDisabledEvent {
+   required string id = 1;
+   optional int64  version = 2;
+}
+
+message CentreLocationAddedEvent {
+   required string centreId       = 1;
+   required string locationId     = 2;
+   optional string name           = 3;
+   optional string street         = 4;
+   optional string city           = 5;
+   optional string province       = 6;
+   optional string postalCode     = 7;
+   optional string poBoxNumber    = 8;
+   optional string countryIsoCode = 9;
+}
+
+message CentreLocationRemovedEvent {
+   required string centreId   = 1;
+   required string locationId = 2;
+}
+
+message CentreAddedToStudyEvent {
+   required string centreId = 1;
+   required string studyId  = 2;
+}
+
+message CentreRemovedFromStudyEvent {
+   required string centreId = 1;
+   required string studyId  = 2;
+}

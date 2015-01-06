@@ -13,7 +13,7 @@ case class ParticipantAnnotation(
   annotationTypeId: AnnotationTypeId,
   stringValue: Option[String],
   numberValue: Option[String], // FIXME: should we use java.lang.Number
-  selectedValues: Option[List[AnnotationOption]])
+  selectedValues: List[AnnotationOption])
     extends Annotation[ParticipantAnnotationType]
 
 
@@ -23,14 +23,14 @@ object ParticipantAnnotation {
     (__ \ "annotationTypeId").read[AnnotationTypeId] and
     (__ \ "stringValue").readNullable[String](minLength[String](2)) and
     (__ \ "numberValue").readNullable[String](minLength[String](2)) and
-    (__ \ "selectedValues").readNullable[List[AnnotationOption]]
+    (__ \ "selectedValues").read[List[AnnotationOption]]
   )(ParticipantAnnotation.apply _)
 
   implicit val participantAnnotationWrites: Writes[ParticipantAnnotation] = (
     (__ \ "annotationTypeId").write[AnnotationTypeId] and
     (__ \ "stringValue").write[Option[String]] and
     (__ \ "numberValue").write[Option[String]] and
-    (__ \ "selectedValues").write[Option[List[AnnotationOption]]]
+    (__ \ "selectedValues").write[List[AnnotationOption]]
   )(unlift(ParticipantAnnotation.unapply))
 
 }

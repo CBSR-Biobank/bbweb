@@ -28,7 +28,7 @@ object TestUtils extends MustMatchers with OptionValues {
     entity: T,
     expectedAddedTime: DateTime,
     expectedLastUpdateTime: DateTime) = {
-    //log.info(s"entity: $entity, expectedAddedTime: $expectedAddedTime, expectedLastUpdateTime: $expectedLastUpdateTime")
+    //log.debug(s"entity: $entity, expectedAddedTime: $expectedAddedTime, expectedLastUpdateTime: $expectedLastUpdateTime")
     (entity.timeAdded to expectedAddedTime).millis must be < TimeCoparisonMillis
     (entity.timeModified.value to expectedLastUpdateTime).millis must be < TimeCoparisonMillis
   }

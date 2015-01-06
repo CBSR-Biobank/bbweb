@@ -2,6 +2,7 @@ package org.biobank.service.study
 
 import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.user.UserId
@@ -67,11 +68,15 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   val receiveRecover: Receive = {
     case wevent: WrappedEvent[_] =>
       wevent.event match {
-        case event: StudyEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+        case event: StudyAddedEvent     => recoverStudyAddedEvent(event, wevent.userId, wevent.dateTime)
+        case event: StudyUpdatedEvent   => recoverStudyUpdatedEvent(event, wevent.userId, wevent.dateTime)
+        case event: StudyEnabledEvent   => recoverStudyEnabledEvent(event, wevent.userId, wevent.dateTime)
+        case event: StudyDisabledEvent  => recoverStudyDisabledEvent(event, wevent.userId, wevent.dateTime)
+        case event: StudyRetiredEvent   => recoverStudyRetiredEvent(event, wevent.userId, wevent.dateTime)
+        case event: StudyUnretiredEvent => recoverStudyUnretiredEvent(event, wevent.userId, wevent.dateTime)
 
         case event => throw new IllegalStateException(s"event not handled: $event")
       }
-
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
       snapshot.studies.foreach{ study => studyRepository.put(study) }
@@ -99,14 +104,15 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
       // order is important in the pattern match used below
       procCmd.command match {
-        case _: StudyCommandWithStudyId | _: SpecimenLinkTypeCommand => validateAndForward(procCmd)
+        case _: StudyCommandWithStudyId
+           | _: SpecimenLinkTypeCommand => validateAndForward(procCmd)
 
-        case cmd: AddStudyCmd =>      process(validateCmd(cmd)){ w => recoverEvent(w.event, w.userId, w.dateTime) }
-        case cmd: UpdateStudyCmd =>   process(validateCmd(cmd)){ w => recoverEvent(w.event, w.userId, w.dateTime) }
-        case cmd: EnableStudyCmd =>   process(validateCmd(cmd)){ w => recoverEvent(w.event, w.userId, w.dateTime) }
-        case cmd: DisableStudyCmd =>  process(validateCmd(cmd)){ w => recoverEvent(w.event, w.userId, w.dateTime) }
-        case cmd: RetireStudyCmd =>   process(validateCmd(cmd)){ w => recoverEvent(w.event, w.userId, w.dateTime) }
-        case cmd: UnretireStudyCmd => process(validateCmd(cmd)){ w => recoverEvent(w.event, w.userId, w.dateTime) }
+        case cmd: AddStudyCmd      => processAddStudyCmd(cmd)
+        case cmd: UpdateStudyCmd   => processUpdateStudyCmd(cmd)
+        case cmd: EnableStudyCmd   => processEnableStudyCmd(cmd)
+        case cmd: DisableStudyCmd  => processDisableStudyCmd(cmd)
+        case cmd: RetireStudyCmd   => processRetireStudyCmd(cmd)
+        case cmd: UnretireStudyCmd => processUnretireStudyCmd(cmd)
 
         case cmd => log.error(s"invalid wrapped command: $cmd")
       }
@@ -210,131 +216,171 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     }
   }
 
-  private def validateCmd(cmd: AddStudyCmd): DomainValidation[StudyAddedEvent] = {
+  private def processAddStudyCmd(cmd: AddStudyCmd)(implicit userId: Option[UserId]): Unit = {
     val studyId = studyRepository.nextIdentity
 
     if (studyRepository.getByKey(studyId).isSuccess) {
       throw new IllegalStateException(s"study with id already exsits: $studyId")
     }
 
-    for {
+    val event = for {
       nameAvailable <- nameAvailable(cmd.name)
       newStudy <- DisabledStudy.create(
         studyId, -1L, org.joda.time.DateTime.now, cmd.name, cmd.description)
       event <- StudyAddedEvent(
-        newStudy.id.id, newStudy.name, newStudy.description).success
+        id          = newStudy.id.id,
+        name        = Some(newStudy.name),
+        description = newStudy.description).success
     } yield event
+
+    process(event){ w =>
+      recoverStudyAddedEvent(w.event, w.userId, w.dateTime)
+    }
   }
 
-  private def validateCmd(cmd: UpdateStudyCmd): DomainValidation[StudyUpdatedEvent] = {
+  private def processUpdateStudyCmd(cmd: UpdateStudyCmd)(implicit userId: Option[UserId]): Unit = {
     val v = updateDisabled(cmd) { s =>
       for {
         nameAvailable <- nameAvailable(cmd.name, StudyId(cmd.id))
         updatedStudy <- s.update(cmd.name, cmd.description)
       } yield updatedStudy
     }
-    v.fold(
+    val event = v.fold(
       err => err.failure,
-      study => StudyUpdatedEvent(cmd.id, study.version, study.name, study.description).success
+      study => StudyUpdatedEvent(
+        id          = cmd.id,
+        version     = Some(study.version),
+        name        = Some(study.name),
+        description = study.description).success
     )
+
+    process(event){ w =>
+      recoverStudyUpdatedEvent(w.event, w.userId, w.dateTime)
+    }
   }
 
-  private def validateCmd(cmd: EnableStudyCmd): DomainValidation[StudyEnabledEvent] = {
+  private def processEnableStudyCmd(cmd: EnableStudyCmd)(implicit userId: Option[UserId]): Unit = {
     val studyId = StudyId(cmd.id)
     val specimenGroupCount = specimenGroupRepository.allForStudy(studyId).size
     val collectionEventtypeCount = collectionEventTypeRepository.allForStudy(studyId).size
     val v = updateDisabled(cmd) { s => s.enable(specimenGroupCount, collectionEventtypeCount) }
-    v.fold(
+    val event = v.fold(
       err => err.failure,
-      study => StudyEnabledEvent(cmd.id, study.version).success
+      study => StudyEnabledEvent(id = cmd.id, version = Some(study.version)).success
     )
-  }
-
-  private def validateCmd(cmd: DisableStudyCmd): DomainValidation[StudyDisabledEvent] = {
-    val v = updateEnabled(cmd) { s => s.disable }
-    v.fold(
-      err => err.failure,
-      study => StudyDisabledEvent(cmd.id, study.version).success
-    )
-  }
-
-  private def validateCmd(cmd: RetireStudyCmd): DomainValidation[StudyRetiredEvent] = {
-    val v = updateDisabled(cmd) { s => s.retire }
-    v.fold(
-      err => err.failure,
-      study => StudyRetiredEvent(cmd.id, study.version).success
-    )
-  }
-
-  private def validateCmd(cmd: UnretireStudyCmd): DomainValidation[StudyUnretiredEvent] = {
-    val v = updateRetired(cmd) { s => s.unretire }
-    v.fold(
-      err => err.failure,
-      study => StudyUnretiredEvent(cmd.id, study.version).success
-    )
-  }
-
-  private def recoverEvent(event: StudyEvent, userId: Option[UserId], dateTime: DateTime) {
-    event match {
-      case event: StudyAddedEvent =>     recoverEvent(event, userId, dateTime)
-      case event: StudyUpdatedEvent =>   recoverEvent(event, userId, dateTime)
-      case event: StudyEnabledEvent =>   recoverEvent(event, userId, dateTime)
-      case event: StudyDisabledEvent =>  recoverEvent(event, userId, dateTime)
-      case event: StudyRetiredEvent =>   recoverEvent(event, userId, dateTime)
-      case event: StudyUnretiredEvent => recoverEvent(event, userId, dateTime)
-
-      case event => log.error(s"invalid event: $event")
+    process(event){ w =>
+      recoverStudyEnabledEvent(w.event, w.userId, w.dateTime)
     }
   }
 
-  private def recoverEvent(event: StudyAddedEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def processDisableStudyCmd(cmd: DisableStudyCmd)(implicit userId: Option[UserId]): Unit = {
+    val v = updateEnabled(cmd) { s => s.disable }
+    val event = v.fold(
+      err => err.failure,
+      study => StudyDisabledEvent(id = cmd.id, version = Some(study.version)).success
+    )
+    process(event){ w =>
+      recoverStudyDisabledEvent(w.event, w.userId, w.dateTime)
+    }
+  }
+
+  private def processRetireStudyCmd(cmd: RetireStudyCmd)(implicit userId: Option[UserId]): Unit = {
+    val v = updateDisabled(cmd) { s => s.retire }
+    val event = v.fold(
+      err => err.failure,
+      study => StudyRetiredEvent(id = cmd.id, version = Some(study.version)).success
+    )
+    process(event){ w =>
+      recoverStudyRetiredEvent(w.event, w.userId, w.dateTime)
+    }
+  }
+
+  private def processUnretireStudyCmd(cmd: UnretireStudyCmd)(implicit userId: Option[UserId]): Unit = {
+    val v = updateRetired(cmd) { s => s.unretire }
+    val event = v.fold(
+      err => err.failure,
+      study => StudyUnretiredEvent(id = cmd.id, version = Some(study.version)).success
+    )
+    process(event){ w =>
+      recoverStudyUnretiredEvent(w.event, w.userId, w.dateTime)
+    }
+  }
+
+  private def recoverStudyAddedEvent(event: StudyAddedEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.put(DisabledStudy(
-      StudyId(event.id), 0L, dateTime, None, event.name, event.description))
+      id           = StudyId(event.id),
+      version      = 0L,
+      timeAdded    = dateTime,
+      timeModified = None,
+      name         = event.getName,
+      description  = event.description))
     ()
   }
 
-  private def recoverEvent(event: StudyUpdatedEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverStudyUpdatedEvent(event: StudyUpdatedEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getDisabled(StudyId(event.id)).fold(
       err => throw new IllegalStateException(s"updating study from event failed: $err"),
       s => studyRepository.put(s.copy(
-        version = event.version, name = event.name, description = event.description,
+        version      = event.getVersion,
+        name         = event.getName,
+        description  = event.description,
         timeModified = Some(dateTime)))
     )
     ()
   }
 
-  private def recoverEvent(event: StudyEnabledEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverStudyEnabledEvent(event: StudyEnabledEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getDisabled(StudyId(event.id)).fold(
       err => throw new IllegalStateException(s"enabling study from event failed: $err"),
-      s => studyRepository.put(EnabledStudy(s.id, event.version, s.timeAdded, Some(dateTime),
-        s.name, s.description))
+      s => studyRepository.put(EnabledStudy(
+        id           = s.id,
+        version      = event.getVersion,
+        timeAdded    = s.timeAdded,
+        timeModified = Some(dateTime),
+        name         = s.name,
+        description  = s.description))
     )
     ()
   }
 
-  private def recoverEvent(event: StudyDisabledEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverStudyDisabledEvent(event: StudyDisabledEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getEnabled(StudyId(event.id)).fold(
       err => throw new IllegalStateException(s"disabling study from event failed: $err"),
-      s => studyRepository.put(DisabledStudy(s.id, event.version, s.timeAdded, Some(dateTime),
-        s.name, s.description))
+      s => studyRepository.put(DisabledStudy(
+        id           = s.id,
+        version      = event.getVersion,
+        timeAdded    = s.timeAdded,
+        timeModified = Some(dateTime),
+        name         = s.name,
+        description  = s.description))
     )
     ()
   }
 
-  private def recoverEvent(event: StudyRetiredEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverStudyRetiredEvent(event: StudyRetiredEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getDisabled(StudyId(event.id)).fold(
       err => throw new IllegalStateException(s"retiring study from event failed: $err"),
-      s => studyRepository.put(RetiredStudy(s.id, event.version, s.timeAdded, Some(dateTime),
-        s.name, s.description))
+      s => studyRepository.put(RetiredStudy(
+        id           = s.id,
+        version      = event.getVersion,
+        timeAdded    = s.timeAdded,
+        timeModified = Some(dateTime),
+        name         = s.name,
+        description  = s.description))
     )
     ()
   }
 
-  private def recoverEvent(event: StudyUnretiredEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverStudyUnretiredEvent(event: StudyUnretiredEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getRetired(StudyId(event.id)).fold(
       err => throw new IllegalStateException(s"disabling study from event failed: $err"),
-      s => studyRepository.put(DisabledStudy(s.id, event.version, s.timeAdded, Some(dateTime),
-        s.name, s.description))
+      s => studyRepository.put(DisabledStudy(
+        id           = s.id,
+        version      = event.getVersion,
+        timeAdded    = s.timeAdded,
+        timeModified = Some(dateTime),
+        name         = s.name,
+        description  = s.description))
     )
     ()
   }

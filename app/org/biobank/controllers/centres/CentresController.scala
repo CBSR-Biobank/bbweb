@@ -6,7 +6,7 @@ import org.biobank.service._
 import org.biobank.service.users.UsersService
 import org.biobank.service.centre.CentresService
 import org.biobank.infrastructure.command.CentreCommands._
-import org.biobank.infrastructure.event.CentreEvents._
+import org.biobank.infrastructure.event.CentreEventsJson._
 import org.biobank.domain.centre.Centre
 
 import play.api.Play.current

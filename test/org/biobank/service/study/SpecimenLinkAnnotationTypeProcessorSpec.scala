@@ -5,6 +5,7 @@ import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.event.StudyEvents._
 
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
@@ -54,17 +55,16 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends TestFixture {
       v mustSucceed { event =>
         event mustBe a[SpecimenLinkAnnotationTypeAddedEvent]
         event must have(
-          'studyId (annotType.studyId.id),
-          'name (annotType.name),
-          'description (annotType.description),
-          'valueType (annotType.valueType),
+          'studyId       (annotType.studyId.id),
+          'name          (Some(annotType.name)),
+          'description   (annotType.description),
+          'valueType     (Some(annotType.valueType.toString)),
           'maxValueCount (annotType.maxValueCount)
         )
 
-        event.options must not be (None)
-        event.options.value must have size annotType.options.value.size
-        annotType.options.value.map { item =>
-          event.options.value must contain (item)
+        event.options must have size annotType.options.size
+        annotType.options.map { item =>
+          event.options must contain (item)
         }
 
         specimenLinkAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
@@ -118,19 +118,18 @@ class SpecimenLinkAnnotationTypeProcessorSpec extends TestFixture {
       v mustSucceed { event =>
         event mustBe a[SpecimenLinkAnnotationTypeUpdatedEvent]
         event must have(
-          'studyId (annotType.studyId.id),
-          'version (annotType.version + 1),
-          'name (annotType2.name),
-          'description (annotType2.description),
-          'valueType (annotType2.valueType),
+          'studyId       (annotType.studyId.id),
+          'version       (Some(annotType.version + 1)),
+          'name          (Some(annotType2.name)),
+          'description   (annotType2.description),
+          'valueType     (Some(annotType2.valueType.toString)),
           'maxValueCount (annotType2.maxValueCount)
         )
 
-        event.options must not be (None)
-        event.options.value must have size annotType2.options.value.size
+        event.options must have size annotType2.options.size
         // verify each option
-        annotType2.options.value.map { item =>
-          event.options.value must contain (item)
+        annotType2.options.map { item =>
+          event.options must contain (item)
         }
 
         specimenLinkAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1

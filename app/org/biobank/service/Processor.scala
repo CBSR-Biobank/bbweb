@@ -1,6 +1,5 @@
 package org.biobank.service
 
-import org.biobank.infrastructure.event.Events._
 import org.biobank.domain._
 import org.biobank.domain.user.UserId
 
@@ -8,6 +7,8 @@ import akka.actor.ActorLogging
 import org.slf4j.Logger
 import akka.persistence.PersistentActor
 import org.joda.time.DateTime
+
+import com.trueaccord.scalapb.GeneratedMessage
 
 import scalaz._
 import scalaz.Scalaz._
@@ -19,25 +20,26 @@ trait Processor extends PersistentActor with ActorLogging {
     *
     * @see http://helenaedelson.com/?p=879
     */
-  protected def process[T <: Event]
+  protected def process[T <: GeneratedMessage]
     (validation: DomainValidation[T])
     (successFn: WrappedEvent[T] => Unit)
     (implicit userId: Option[UserId]) {
     val originalSender = context.sender
-    validation map { event =>
-      val wrappedEvent = WrappedEvent(event, userId, DateTime.now)
-      // FIXME: change this call to a peristAsync()?
-      persist(wrappedEvent) { we =>
-        successFn(we)
-        // inform the sender of the successful event resulting from a valid command
-        originalSender ! we.event.success
+    validation.fold(
+      err => {
+        // inform the sender of the failure
+        originalSender ! validation
+      },
+      event => {
+        val wrappedEvent = WrappedEvent(event, userId, DateTime.now)
+        // FIXME: change this call to a peristAsync()?
+        persist(wrappedEvent) { we =>
+          successFn(we)
+          // inform the sender of the successful event resulting from a valid command
+          originalSender ! we.event.success
+        }
       }
-    }
-
-    if (validation.isFailure) {
-      // inform the sender of the failure
-      originalSender ! validation
-    }
+    )
   }
 
   /** Searches the repository for a matching item.

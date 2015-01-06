@@ -63,13 +63,13 @@ class SpecimenGroupProcessorSpec extends TestFixture {
       v mustSucceed { event =>
         event mustBe a[SpecimenGroupAddedEvent]
         event must have (
-          'name                        (sg.name),
+          'name                        (Some(sg.name)),
           'description                 (sg.description),
-          'units                       (sg.units),
-          'anatomicalSourceType        (sg.anatomicalSourceType),
-          'preservationType            (sg.preservationType),
-          'preservationTemperatureType (sg.preservationTemperatureType),
-          'specimenType                (sg.specimenType)
+          'units                       (Some(sg.units)),
+          'anatomicalSourceType        (Some(sg.anatomicalSourceType.toString)),
+          'preservationType            (Some(sg.preservationType.toString)),
+          'preservationTemperatureType (Some(sg.preservationTemperatureType.toString)),
+          'specimenType                (Some(sg.specimenType.toString))
         )
 
         specimenGroupRepository.allForStudy(disabledStudy.id) must have size 1
@@ -90,13 +90,13 @@ class SpecimenGroupProcessorSpec extends TestFixture {
       v mustSucceed { event =>
         event mustBe a[SpecimenGroupAddedEvent]
         event must have (
-          'name                        (name2),
+          'name                        (Some(name2)),
           'description                 (None),
-          'units                       (sg.units),
-          'anatomicalSourceType        (sg.anatomicalSourceType),
-          'preservationType            (sg.preservationType),
-          'preservationTemperatureType (sg.preservationTemperatureType),
-          'specimenType                (sg.specimenType)
+          'units                       (Some(sg.units)),
+          'anatomicalSourceType        (Some(sg.anatomicalSourceType.toString)),
+          'preservationType            (Some(sg.preservationType.toString)),
+          'preservationTemperatureType (Some(sg.preservationTemperatureType.toString)),
+          'specimenType                (Some(sg.specimenType.toString))
         )
 
         specimenGroupRepository.allForStudy(disabledStudy.id) must have size 2
@@ -138,14 +138,14 @@ class SpecimenGroupProcessorSpec extends TestFixture {
         event must have (
           'studyId                     (disabledStudy.id.id),
           'specimenGroupId             (sg.id.id),
-          'version                     (sg.version + 1),
-          'name                        (sg2.name),
+          'version                     (Some(sg.version + 1)),
+          'name                        (Some(sg2.name)),
           'description                 (sg2.description),
-          'units                       (sg2.units),
-          'anatomicalSourceType        (sg2.anatomicalSourceType),
-          'preservationType            (sg2.preservationType),
-          'preservationTemperatureType (sg2.preservationTemperatureType),
-          'specimenType                (sg2.specimenType)
+          'units                       (Some(sg2.units)),
+          'anatomicalSourceType        (Some(sg2.anatomicalSourceType.toString)),
+          'preservationType            (Some(sg2.preservationType.toString)),
+          'preservationTemperatureType (Some(sg2.preservationTemperatureType.toString)),
+          'specimenType                (Some(sg2.specimenType.toString))
         )
 
         specimenGroupRepository.allForStudy(disabledStudy.id) must have size 1

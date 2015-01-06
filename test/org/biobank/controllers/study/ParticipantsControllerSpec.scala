@@ -53,11 +53,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
       "numberValue"      -> annotation.numberValue
     )
 
-    annotation.selectedValues.fold {
-      json
-    } { values =>
-      json ++ Json.obj("selectedValues" -> values.map(value => annotationOptionToJson(value)))
-    }
+    json ++ Json.obj("selectedValues" -> annotation.selectedValues.map(value => annotationOptionToJson(value)))
   }
 
   /** Converts a participant into an Add command.
@@ -83,7 +79,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
     ParticipantAnnotationType(
       study.id, AnnotationTypeId(nameGenerator.next[ParticipantAnnotationType]),
       0L, DateTime.now, None, nameGenerator.next[ParticipantAnnotationType], None,
-      AnnotationValueType.Text, None, None, false)
+      AnnotationValueType.Text, None, Seq.empty, false)
   }
 
 

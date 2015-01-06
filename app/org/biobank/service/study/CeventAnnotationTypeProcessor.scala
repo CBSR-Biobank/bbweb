@@ -2,6 +2,7 @@ package org.biobank.service.study
 
 import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain._
 import org.biobank.domain.user.UserId
@@ -43,9 +44,12 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
   val receiveRecover: Receive = {
     case wevent: WrappedEvent[_] =>
       wevent.event match {
-        case event: CollectionEventAnnotationTypeAddedEvent =>   recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: CollectionEventAnnotationTypeUpdatedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
-        case event: CollectionEventAnnotationTypeRemovedEvent => recoverEvent(event, wevent.userId, wevent.dateTime)
+        case event: CollectionEventAnnotationTypeAddedEvent =>
+          recoverCollectionEventAnnotationTypeAddedEvent(event, wevent.userId, wevent.dateTime)
+        case event: CollectionEventAnnotationTypeUpdatedEvent =>
+          recoverCollectionEventAnnotationTypeUpdatedEvent(event, wevent.userId, wevent.dateTime)
+        case event: CollectionEventAnnotationTypeRemovedEvent =>
+          recoverCollectionEventAnnotationTypeRemovedEvent(event, wevent.userId, wevent.dateTime)
 
         case event => throw new IllegalStateException(s"event not handled: $event")
       }
@@ -55,7 +59,6 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
         annotationTypeRepository.put(annotType) }
   }
 
-
   /**
     * These are the commands that are requested. A command can fail, and will send the failure as a response
     * back to the user. Each valid command generates one or more events and is journaled.
@@ -64,9 +67,9 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
     case procCmd: WrappedCommand =>
       implicit val userId = procCmd.userId
       procCmd.command match {
-        case cmd: AddCollectionEventAnnotationTypeCmd =>    process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: UpdateCollectionEventAnnotationTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
-        case cmd: RemoveCollectionEventAnnotationTypeCmd => process(validateCmd(cmd)){ wevent => recoverEvent(wevent.event, wevent.userId, wevent.dateTime) }
+        case cmd: AddCollectionEventAnnotationTypeCmd =>    processAddCollectionEventAnnotationTypeCmd(cmd)
+        case cmd: UpdateCollectionEventAnnotationTypeCmd => processUpdateCollectionEventAnnotationTypeCmd(cmd)
+        case cmd: RemoveCollectionEventAnnotationTypeCmd => processRemoveCollectionEventAnnotationTypeCmd(cmd)
       }
 
     case "snap" =>
@@ -90,26 +93,36 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
     } yield updatedAnnotType
   }
 
-  private def validateCmd
+  private def processAddCollectionEventAnnotationTypeCmd
     (cmd: AddCollectionEventAnnotationTypeCmd)
-      : DomainValidation[CollectionEventAnnotationTypeAddedEvent] = {
+    (implicit userId: Option[UserId])
+      : Unit = {
     val timeNow = DateTime.now
     val id = annotationTypeRepository.nextIdentity
-    for {
+    val event = for {
       nameValid <- nameAvailable(cmd.name)
       newItem <- CollectionEventAnnotationType.create(
         StudyId(cmd.studyId), id, -1L, timeNow, cmd.name, cmd.description,
         cmd.valueType, cmd.maxValueCount, cmd.options)
       event <- CollectionEventAnnotationTypeAddedEvent(
-        newItem.studyId.id, newItem.id.id, newItem.name,
-        newItem.description, newItem.valueType, newItem.maxValueCount, newItem.options).success
+        studyId          = newItem.studyId.id,
+        annotationTypeId = newItem.id.id,
+        name             = Some(newItem.name),
+        description      = newItem.description,
+        valueType        = Some(newItem.valueType.toString),
+        maxValueCount    = newItem.maxValueCount,
+        options          = newItem.options).success
     } yield event
+
+    process(event){ wevent =>
+      recoverCollectionEventAnnotationTypeAddedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-
-  private def validateCmd
+  private def processUpdateCollectionEventAnnotationTypeCmd
     (cmd: UpdateCollectionEventAnnotationTypeCmd)
-      : DomainValidation[CollectionEventAnnotationTypeUpdatedEvent] = {
+    (implicit userId: Option[UserId])
+      : Unit = {
     val timeNow = DateTime.now
     val v = update(cmd) { at =>
       for {
@@ -118,50 +131,79 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
       } yield newItem
     }
 
-    v.fold(
+    val event = v.fold(
       err => DomainError(s"error $err occurred on $cmd").failureNel,
       at => CollectionEventAnnotationTypeUpdatedEvent(
-        at.studyId.id, at.id.id, at.version, at.name, at.description, at.valueType,
-        at.maxValueCount, at.options).success
+        studyId          = at.studyId.id,
+        annotationTypeId = at.id.id,
+        version          = Some(at.version),
+        name             = Some(at.name),
+        description      = at.description,
+        valueType        = Some(at.valueType.toString),
+        maxValueCount    = at.maxValueCount,
+        options          = at.options).success
     )
+
+    process(event){ wevent =>
+      recoverCollectionEventAnnotationTypeUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def validateCmd
+  private def processRemoveCollectionEventAnnotationTypeCmd
     (cmd: RemoveCollectionEventAnnotationTypeCmd)
-      : DomainValidation[CollectionEventAnnotationTypeRemovedEvent] = {
+    (implicit userId: Option[UserId])
+      : Unit = {
     val v = update(cmd) { at => at.success }
 
-    v.fold(
+    val event = v.fold(
       err => DomainError(s"error $err occurred on $cmd").failureNel,
       at =>  CollectionEventAnnotationTypeRemovedEvent(at.studyId.id, at.id.id).success
     )
+
+    process(event){ wevent =>
+      recoverCollectionEventAnnotationTypeRemovedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    }
   }
 
-  private def recoverEvent(event: CollectionEventAnnotationTypeAddedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
-    log.info(s"recoverEvent: $event")
+  private def recoverCollectionEventAnnotationTypeAddedEvent
+    (event: CollectionEventAnnotationTypeAddedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
+    log.debug(s"recoverEvent: $event")
     annotationTypeRepository.put(CollectionEventAnnotationType(
-      StudyId(event.studyId), AnnotationTypeId(event.annotationTypeId), 0L, dateTime, None,
-      event.name, event.description, event.valueType, event.maxValueCount, event.options))
+      studyId       = StudyId(event.studyId),
+      id            = AnnotationTypeId(event.annotationTypeId),
+      version       = 0L,
+      timeAdded     = dateTime,
+      timeModified  = None,
+      name          = event.getName,
+      description   = event.description,
+      valueType     = AnnotationValueType.withName(event.getValueType),
+      maxValueCount = event.maxValueCount,
+      options       = event.options))
     ()
   }
 
-  private def recoverEvent(event: CollectionEventAnnotationTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
+  private def recoverCollectionEventAnnotationTypeUpdatedEvent
+    (event: CollectionEventAnnotationTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
     annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId)).fold(
       err => throw new IllegalStateException(s"updating annotation type from event failed: $err"),
       at => annotationTypeRepository.put(at.copy(
-        version       = event.version,
-        name          = event.name,
+        version       = event.getVersion,
+        name          = event.getName,
         description   = event.description,
-        valueType     = event.valueType,
+        valueType     = AnnotationValueType.withName(event.getValueType),
         maxValueCount = event.maxValueCount,
         options       = event.options,
-        timeModified = Some(dateTime)))
+        timeModified  = Some(dateTime)))
     )
     ()
   }
 
-  protected def recoverEvent(event: CollectionEventAnnotationTypeRemovedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
-    recoverEvent(AnnotationTypeId(event.annotationTypeId))
+  protected def recoverCollectionEventAnnotationTypeRemovedEvent
+    (event: CollectionEventAnnotationTypeRemovedEvent, userId: Option[UserId], dateTime: DateTime)
+      : Unit = {
+    recoverStudyAnnotationTypeRemovedEvent(AnnotationTypeId(event.annotationTypeId))
   }
 
   def checkNotInUse

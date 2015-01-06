@@ -25,7 +25,7 @@ case class SpecimenLinkAnnotationType (
   description: Option[String],
   valueType: AnnotationValueType,
   maxValueCount: Option[Int],
-  options: Option[Seq[String]])
+  options: Seq[String])
   extends StudyAnnotationType {
 
   override def toString: String =
@@ -47,7 +47,7 @@ case class SpecimenLinkAnnotationType (
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int] = None,
-    options: Option[Seq[String]] = None): DomainValidation[SpecimenLinkAnnotationType] = {
+    options: Seq[String] = Seq.empty): DomainValidation[SpecimenLinkAnnotationType] = {
     SpecimenLinkAnnotationType.create(
       this.studyId, this.id, this.version, this.timeAdded, name, description, valueType, maxValueCount, options)
   }
@@ -66,7 +66,7 @@ object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidations {
     description: Option[String],
     valueType: AnnotationValueType,
     maxValueCount: Option[Int],
-    options: Option[Seq[String]]): DomainValidation[SpecimenLinkAnnotationType] = {
+    options: Seq[String]): DomainValidation[SpecimenLinkAnnotationType] = {
     (validateId(studyId, StudyIdRequired) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
@@ -93,7 +93,7 @@ object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidations {
       (__ \ "description").write[Option[String]] and
       (__ \ "valueType").write[AnnotationValueType] and
       (__ \ "maxValueCount").write[Option[Int]] and
-      (__ \ "options").write[Option[Seq[String]]]
+      (__ \ "options").write[Seq[String]]
   )(unlift(org.biobank.domain.study.SpecimenLinkAnnotationType.unapply))
 
 }

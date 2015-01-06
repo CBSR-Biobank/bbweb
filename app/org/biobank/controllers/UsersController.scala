@@ -1,6 +1,7 @@
 package org.biobank.controllers
 
 import org.biobank.infrastructure.command.UserCommands._
+import org.biobank.infrastructure.event.UserEventsJson._
 import org.biobank.service.users.UsersService
 
 import play.api.Logger
@@ -52,7 +53,7 @@ class UsersController(implicit inj: Injector)
         // TODO: token should be derived from salt
         usersService.validatePassword(loginCredentials.email, loginCredentials.password).fold(
           err => {
-            Logger.info(s"login: error: $err")
+            Logger.debug(s"login: error: $err")
             val errStr = err.list.mkString(", ")
             // FIXME: what if user attempts multiple failed logins? lock the account after 3 attempts?
             // how long to lock the account?
@@ -65,7 +66,7 @@ class UsersController(implicit inj: Injector)
             }
           },
           user => {
-            Logger.info(s"user logged in: ${user.email}")
+            Logger.debug(s"user logged in: ${user.email}")
             val token = java.util.UUID.randomUUID.toString.replaceAll("-","")
             Cache.set(token, user.id)
             Ok(token).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
@@ -131,7 +132,7 @@ class UsersController(implicit inj: Injector)
 
   /** Retrieves the user for the given id as JSON */
   def user(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    Logger.info(s"user: id: $id")
+    Logger.debug(s"user: id: $id")
     usersService.getUser(id).fold(
       err => BadRequest(err.list.mkString(", ")),
       user => Ok(user)
@@ -144,7 +145,7 @@ class UsersController(implicit inj: Injector)
         Future.successful(BadRequest(JsError.toFlatJson(errors)))
       },
       cmd => {
-        Logger.info(s"addUser: cmd: $cmd")
+        Logger.debug(s"addUser: cmd: $cmd")
         val future = usersService.register(cmd)
         future.map { validation =>
           validation.fold(

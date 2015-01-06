@@ -5,6 +5,7 @@ import org.biobank.infrastructure.CollectionEventTypeAnnotationTypeData
 import org.biobank.infrastructure.CollectionEventTypeSpecimenGroupData
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
   AnatomicalSourceType,
   AnnotationTypeId,
@@ -99,9 +100,10 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
         event mustBe a[CollectionEventTypeAddedEvent]
         event must have(
           'studyId     (cet.studyId.id),
-          'name        (cet.name),
+          'name        (Some(cet.name)),
           'description (cet.description),
-          'recurring   (cet.recurring))
+          'recurring   (Some(cet.recurring))
+        )
 
         collectionEventTypeRepository.allForStudy(disabledStudy.id) must have size 1
         collectionEventTypeRepository.withId(
@@ -137,10 +139,11 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       askUpdateCommand(cet2) mustSucceed { event =>
         event mustBe a[CollectionEventTypeUpdatedEvent]
         event must have(
-          'version (cet.version + 1),
-          'name (cet2.name),
+          'version     (Some(cet.version + 1)),
+          'name        (Some(cet2.name)),
           'description (cet2.description),
-          'recurring (cet2.recurring))
+          'recurring   (Some(cet2.recurring))
+        )
 
         collectionEventTypeRepository.allForStudy(disabledStudy.id) must have size 1
         collectionEventTypeRepository.withId(
@@ -214,13 +217,15 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
 
         event.specimenGroupData(0) must have(
           'specimenGroupId (sg.id.id),
-          'maxCount (sgData(0).maxCount),
-          'amount (sgData(0).amount))
+          'maxCount        (Some(sgData(0).maxCount)),
+          'amount          (sgData(0).amount.map(_.toDouble))
+        )
 
         event.specimenGroupData(1) must have(
-          'specimenGroupId(sg.id.id),
-          'maxCount(sgData(1).maxCount),
-          'amount(sgData(1).amount))
+          'specimenGroupId (sg.id.id),
+          'maxCount        (Some(sgData(1).maxCount)),
+          'amount          (sgData(1).amount.map(_.toDouble))
+        )
 
         collectionEventTypeRepository.withId(
           disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
@@ -246,8 +251,9 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
 
         event.specimenGroupData(0) must have(
           'specimenGroupId (sg.id.id),
-          'maxCount (sgData(0).maxCount),
-          'amount (sgData(0).amount))
+          'maxCount        (Some(sgData(0).maxCount)),
+          'amount          (sgData(0).amount.map(_.toDouble))
+        )
 
         collectionEventTypeRepository.withId(
           disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
@@ -350,7 +356,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
 
         event.annotationTypeData(0) must have(
           'annotationTypeId (annotTypeData(0).annotationTypeId),
-          'required (annotTypeData(0).required))
+          'required         (Some(annotTypeData(0).required)))
 
         collectionEventTypeRepository.withId(
           disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
@@ -368,8 +374,14 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       collectionEventTypeRepository.put(cet)
 
       val cmd = UpdateCollectionEventAnnotationTypeCmd(
-        annotationType.studyId.id, annotationType.id.id, annotationType.version,
-        annotationType.name, annotationType.description, annotationType.valueType)
+        studyId          = annotationType.studyId.id,
+        id               = annotationType.id.id,
+        expectedVersion = annotationType.version,
+        name             = annotationType.name,
+        description      = annotationType.description,
+        valueType        = annotationType.valueType,
+        maxValueCount    = annotationType.maxValueCount,
+        options          = annotationType.options)
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
         .futureValue
