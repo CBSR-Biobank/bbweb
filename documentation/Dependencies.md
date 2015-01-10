@@ -36,6 +36,10 @@ This version of Biobank uses the following open source tools / software packages
     Bootstrap is a sleek, intuitive, and powerful front-end framework for faster and easier web
     user interface development
 
+* [ScalaPB](http://trueaccord.github.io/ScalaPB/generated-code.html)
+
+    Used to generate the scala files from [protobuf](https://github.com/google/protobuf/) `proto` files.
+
 ---
 
 [Back to top](../README.md)

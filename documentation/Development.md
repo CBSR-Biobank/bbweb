@@ -1,5 +1,22 @@
 # Development
 
+## Libraries and Frameworks
+
+### Protocol Buffers
+
+Google [protobuf](https://github.com/google/protobuf/) is used to save events to the Akka Persistence
+journal. By using protobuf it is easier to modify the events as the system grows. If an event is changed an
+old database can still be used with the application.
+
+#### ScalaPB
+
+[ScalaPB](http://trueaccord.github.io/ScalaPB/generated-code.html) is used to generate the scala files from
+the `proto` files.
+
+### Bootstrap
+
+* [Bootstrap 3.0.0 themes](http://bootswatch.com/)
+
 ## MongoDB
                                       | shell command
 --------------------------------------|----------------------------------------------
@@ -7,7 +24,35 @@ Drop the Evensourced Journal databse: | `mongo bbweb --eval "db.dropDatabase()"`
 Dump the Biobank database:            | `mongodump --db bbweb --out ~/tmp`
 Restore the Biobank database:         | `mongorestore ~/tmp/bbweb/bbweb.bson`
 
-## Eclipse
+## NPM
+
+Add dependencies to `package.json` in the root directory. Use command `web-assets:jseNpmNodeModules`
+to download the modules.
+
+OR: `web-assets:web-node-modules`
+
+### ng-annotate
+
+ng-annotate adds and removes AngularJS dependency injection annotations.
+
+```sh
+cd app/assets/javascripts
+find . -name \*.js -exec echo "/usr/local/bin/ng-annotate --add {} -o {}.new && mv {}.new {}" \; | sed 's/\.\///g'  > tmp.sh
+sh tmp.sh
+```
+
+### Client Tests
+
+Using Karma and Jasmine for client unit tests. Also using Grunt to run the tests.
+
+Client tests are found in the `jstest` directory since they don't pass Jshint inspection. Originally, they
+were placed in `tests/assets/javascripts`, but when running SBT, errors were generated. Currently sbt-jshint
+does not provide a way to use a `.jshintignore` file, so they had to be moved to the `jstest` directory.
+
+
+## Development Environment
+
+### Eclipse
 
 IDE:
 
@@ -22,17 +67,7 @@ SBT command to create Eclipse IDE project files:
 
     sbt 'eclipse with-source=true'
 
-## Bootstrap
-
-* [Bootstrap 3.0.0 themes](http://bootswatch.com/)
-
-## Debug
-
-To prevent users being logged out when the application is restarted, EHCACHE is configured to cache
-to disk. This must be disabled for the production server (see [conf/ehcache.xml]
-(../conf/ehcache.xml), tags: `defaultCache -> diskPersistent`).
-
-## Git
+### Git
 
 Delete remote branch:
 
@@ -40,7 +75,7 @@ Delete remote branch:
 git branch -d -r origin/__branch_name__
 ```
 
-## Squash Commits
+#### Squash Commits
 
 Using your own forked GitHub repository for the BBweb project. In this example the forked remote is
 named `nelson`, and the topic branch is named `nelson-dev`.
@@ -50,12 +85,48 @@ git rebase -i HEAD~6
 git push nelson +nelson-dev
 ```
 
-## GitHub Markdown
+### Gtags
+
+Using helm-gtags in Emacs. To generate a tags file the following is required:
+
+1. Install [GNU Global](http://www.gnu.org/software/global/download.html) from source (in `/usr/local/src`).
+1. Install exuberant-ctags:
+
+    ```bash
+    sudo apt-get install exuberant-ctags
+    ```
+
+1. Add the following line to `/usr/local/share/gtags/gtags.conf` in the `exuberant-ctags` section.
+
+    ```
+    :langmap=Scala\:.scala:\
+    ```
+
+1. Create the tags files (at the project root):
+
+    ```bash
+    find app -type f -print > /tmp/bbwebfiles \
+    && find test -type f -print >> /tmp/bbwebfiles \
+    && find jstest -type f -print >> /tmp/bbwebfiles
+    gtags -v -f /tmp/bbwebfiles --gtagslabel ctags
+    ```
+
+See: https://gist.github.com/tsdeng/8451067
+
+### GitHub Markdown
 
 *  [Grip]  (https://github.com/joeyespo/grip) - Preview GitHub Markdown files like Readme.md locally
    before committing them
 
-## Logging
+##Application
+
+### Debug
+
+To prevent users being logged out when the application is restarted, EHCACHE is configured to cache
+to disk. This must be disabled for the production server (see [conf/ehcache.xml]
+(../conf/ehcache.xml), tags: `defaultCache -> diskPersistent`).
+
+### Logging
 
 * To enable logging at the Domain or Service layers, edit the file [conf/logger.xml]
   (../conf/logger.xml).
@@ -123,60 +194,6 @@ Or, within the SBT cli:
 ```sh
 ; clean; coverage; test; coverageReport
 ```
-
-### Gtags
-
-Using helm-gtags in Emacs. To generate a tags file the following is required:
-
-1. Install [GNU Global](http://www.gnu.org/software/global/download.html) from source (in `/usr/local/src`).
-1. Install exuberant-ctags:
-
-    ```bash
-    sudo apt-get install exuberant-ctags
-    ```
-
-1. Add the following line to `/usr/local/share/gtags/gtags.conf` in the `exuberant-ctags` section.
-
-    ```
-    :langmap=Scala\:.scala:\
-    ```
-
-1. Create the tags files (at the project root):
-
-    ```bash
-    find app -type f -print > /tmp/bbwebfiles \
-    && find test -type f -print >> /tmp/bbwebfiles \
-    && find jstest -type f -print >> /tmp/bbwebfiles
-    gtags -v -f /tmp/bbwebfiles --gtagslabel ctags
-    ```
-
-See: https://gist.github.com/tsdeng/8451067
-
-## NPM
-
-Add dependencies to `package.json` in the root directory. Use command `web-assets:jseNpmNodeModules`
-to download the modules.
-
-OR: `web-assets:web-node-modules`
-
-### ng-annotate
-
-ng-annotate adds and removes AngularJS dependency injection annotations.
-
-```sh
-cd app/assets/javascripts
-find . -name \*.js -exec echo "/usr/local/bin/ng-annotate --add {} -o {}.new && mv {}.new {}" \; | sed 's/\.\///g'  > tmp.sh
-sh tmp.sh
-```
-
-### Client Tests
-
-Using Krama and Jasmine for client unit tests. Also using Grunt to run the tests.
-
-Client tests are found in the `jstest` directory since they don't pass Jshint inspection. Originally, they
-were placed in `tests/assets/javascripts`, but when running SBT, errors were generated. Currently sbt-jshint
-does not provide a way to use a `.jshintignore` file, so they had to be moved to the `jstest` directory.
-
 
 ---
 
