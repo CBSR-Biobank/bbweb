@@ -32,6 +32,7 @@ define(['./module'], function(module) {
     vm.updateEmail     = updateEmail;
     vm.updatePassword  = updatePassword;
     vm.updateAvatarUrl = updateAvatarUrl;
+    vm.removeAvatarUrl = removeAvatarUrl;
 
     //--
 
@@ -79,7 +80,6 @@ define(['./module'], function(module) {
         keyboard: true,
         modalFade: true
       });
-
     }
 
     function updateName() {
@@ -132,6 +132,30 @@ define(['./module'], function(module) {
                 1500);
             })
             .catch(updateError);
+        });
+    }
+
+    function removeAvatarUrl() {
+      var modalDefaults = {};
+      var modalOptions = {
+        headerHtml       : 'Remove Avatar URL',
+        bodyHtml         : 'Are you sure you want to remove your Avatar URL?',
+        closeButtonText  : 'Cancel',
+        actionButtonText : 'OK'
+      };
+
+      modalService.showModal(modalDefaults, modalOptions)
+        .then(function() {
+          usersService.updateAvatarUrl(user, null)
+            .then(function (event) {
+              vm.user.avatarUrl = event.avatarUrl;
+              vm.user.version = event.version;
+
+              notificationsService.success(
+                'Avatar URL remove successfully.',
+                'Remove successful',
+                1500);
+            });
         });
     }
 

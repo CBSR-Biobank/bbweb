@@ -5,8 +5,8 @@
     </div>
     <div class="panel-body">
       <div class="row">
-        <div class="col-md-3 panel-label">Name</div>
-        <div class="col-md-7 panel-value">
+        <div class="col-md-2 panel-label">Name</div>
+        <div class="col-md-8 panel-value">
           {{vm.user.name}}
         </div>
         <div class="col-md-2 panel-value">
@@ -19,8 +19,8 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-md-3 panel-label">Email</div>
-        <div class="col-md-7 panel-value">
+        <div class="col-md-2 panel-label">Email</div>
+        <div class="col-md-8 panel-value">
           {{vm.user.email}}
         </div>
         <div class="col-md-2 panel-value">
@@ -33,8 +33,8 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-md-3 panel-label">Password</div>
-        <div class="col-md-7 panel-value">
+        <div class="col-md-2 panel-label">Password</div>
+        <div class="col-md-8 panel-value">
           <button class="btn btn-xs btn-default" data-ng-click="vm.updatePassword()">
             <i class="glyphicon glyphicon-cog"></i>
             Update password
@@ -42,17 +42,28 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-md-3 panel-label">Avatar URL</div>
-        <div class="col-md-7 panel-value">
-          {{vm.user.avatarUrl ? vm.user.avatarUrl : "None"}}
+        <div class="col-md-2 panel-label">Avatar URL</div>
+        <div class="col-md-7 panel-value" ng-if="vm.user.avatarUrl">
+          <a target="_blank" ng-href="{{vm.user.avatarUrl}}">{{vm.user.avatarUrl}}</a>
         </div>
-        <div class="col-md-2 panel-value">
-          <button class="btn btn-xs btn-default pull-right"
-                  title="Update avatar URL"
-                  data-ng-click="vm.updateAvatarUrl()">
-            <i class="glyphicon glyphicon-cog"></i>
-            Update
-          </button>
+        <div class="col-md-7 panel-value" ng-if="! vm.user.avatarUrl">
+          None
+        </div>
+        <div class="col-md-3 panel-value">
+          <div class="btn-group pull-right">
+            <button class="btn btn-xs btn-default"
+                    title="Update avatar URL"
+                    data-ng-click="vm.updateAvatarUrl()">
+              <i class="glyphicon glyphicon-cog"></i>
+              Update
+            </button>
+            <button class="btn btn-xs btn-default"
+                    title="Remove avatar URL"
+                    data-ng-click="vm.removeAvatarUrl()">
+              <i class="glyphicon glyphicon-remove"></i>
+              Remove
+            </button>
+          </div>
         </div>
       </div>
     </div>
