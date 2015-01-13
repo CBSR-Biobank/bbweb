@@ -60,7 +60,6 @@ define(['./module'], function(module) {
         };
 
         $scope.modal.ok = function () {
-          console.log('$scope.modal.ok', $scope.modal.value);
           $modalInstance.close($scope.modal.value);
         };
         $scope.modal.close = function () {
@@ -85,7 +84,6 @@ define(['./module'], function(module) {
     function updateName() {
       modalStringInput(modalInputTypes.text, 'Update user name', 'Name', user.name).result
         .then(function (name) {
-          console.log(name);
           usersService.updateName(user, name)
             .then(function (event) {
               vm.user.name = event.name;
@@ -103,7 +101,6 @@ define(['./module'], function(module) {
     function updateEmail() {
       modalStringInput(modalInputTypes.email, 'Update user email', 'Email', user.email).result
         .then(function (email) {
-          console.log(email);
           usersService.updateEmail(user, email)
             .then(function (event) {
               vm.user.email = event.email;

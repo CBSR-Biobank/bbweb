@@ -88,8 +88,8 @@ define(['../../module'], function(module) {
         addOrUpdateFn: ['spcLinkAnnotTypesService', function(spcLinkAnnotTypesService) {
           return spcLinkAnnotTypesService.addOrUpdate;
         }],
-        valueTypes: ['studyAnnotTypesService', function(studyAnnotTypesService) {
-          return studyAnnotTypesService.valueTypes();
+        valueTypes: ['studiesService', function(studiesService) {
+          return studiesService.valueTypes();
         }]
       },
       views: {
@@ -122,8 +122,8 @@ define(['../../module'], function(module) {
         addOrUpdateFn: ['spcLinkAnnotTypesService', function(spcLinkAnnotTypesService) {
           return spcLinkAnnotTypesService.addOrUpdate;
         }],
-        valueTypes: ['studyAnnotTypesService', function(studyAnnotTypesService) {
-          return studyAnnotTypesService.valueTypes();
+        valueTypes: ['studiesService', function(studiesService) {
+          return studiesService.valueTypes();
         }]
       },
       views: {

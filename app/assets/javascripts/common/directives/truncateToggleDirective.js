@@ -29,8 +29,6 @@ define(['../module'], function(module) {
       $scope.buttonLabel = 'Collapse';
       $scope.toggleText  = toggleText;
 
-      console.log('***', $scope.text);
-
       //---
       function toggleText() {
         if ($scope.toggleState) {

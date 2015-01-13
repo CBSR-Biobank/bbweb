@@ -70,8 +70,8 @@ define(['../../module'], function(module) {
         addOrUpdateFn: ['participantAnnotTypesService', function(participantAnnotTypesService) {
           return participantAnnotTypesService.addOrUpdate;
         }],
-        valueTypes: ['studyAnnotTypesService', function(studyAnnotTypesService) {
-          return studyAnnotTypesService.valueTypes();
+        valueTypes: ['studiesService', function(studiesService) {
+          return studiesService.valueTypes();
         }]
       },
       views: {
