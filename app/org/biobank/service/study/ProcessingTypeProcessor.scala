@@ -54,7 +54,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
         case event: ProcessingTypeUpdatedEvent => recoverProcessingTypeUpdatedEvent(event, wevent.userId, wevent.dateTime)
         case event: ProcessingTypeRemovedEvent => recoverProcessingTypeRemovedEvent(event, wevent.userId, wevent.dateTime)
 
-        case event => throw new IllegalStateException(s"event not handled: $event")
+        case event => log.error(s"event not handled: $event")
       }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -183,25 +183,29 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     (event: ProcessingTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
       : Unit = {
     processingTypeRepository.getByKey(ProcessingTypeId(event.processingTypeId)).fold(
-      err => throw new IllegalStateException(s"updating processing type from event failed: $err"),
-      pt => processingTypeRepository.put(pt.copy(
-        version      = event.getVersion,
-        timeModified = Some(dateTime),
-        name         = event.getName,
-        description  = event.description,
-        enabled      = event.getEnabled))
+      err => log.error(s"updating processing type from event failed: $err"),
+      pt => {
+        processingTypeRepository.put(pt.copy(
+          version      = event.getVersion,
+          timeModified = Some(dateTime),
+          name         = event.getName,
+          description  = event.description,
+          enabled      = event.getEnabled))
+        ()
+      }
     )
-    ()
   }
 
   private def recoverProcessingTypeRemovedEvent
     (event: ProcessingTypeRemovedEvent, userId: Option[UserId], dateTime: DateTime)
       : Unit = {
     processingTypeRepository.getByKey(ProcessingTypeId(event.processingTypeId)).fold(
-      err => throw new IllegalStateException(s"updating processing type from event failed: $err"),
-      sg => processingTypeRepository.remove(sg)
+      err => log.error(s"updating processing type from event failed: $err"),
+      sg => {
+        processingTypeRepository.remove(sg)
+        ()
+      }
     )
-    ()
   }
 
   val ErrMsgNameExists = "processing type with name already exists"

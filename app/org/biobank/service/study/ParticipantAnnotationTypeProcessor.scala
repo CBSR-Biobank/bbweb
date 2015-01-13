@@ -53,7 +53,7 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
         case event: ParticipantAnnotationTypeRemovedEvent =>
           recoverParticipantAnnotationTypeRemovedEvent(event, wevent.userId, wevent.dateTime)
 
-        case event => throw new IllegalStateException(s"event not handled: $event")
+        case event => log.error(s"event not handled: $event")
       }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -194,18 +194,20 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
   private def recoverParticipantAnnotationTypeUpdatedEvent
     (event: ParticipantAnnotationTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime) = {
     annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId)).fold(
-      err => throw new IllegalStateException(s"updating annotation type from event failed: $err"),
-      at => annotationTypeRepository.put(at.copy(
-        version       = event.getVersion,
-        name          = event.getName,
-        description   = event.description,
-        valueType     = AnnotationValueType.withName(event.getValueType),
-        maxValueCount = event.maxValueCount,
-        options       = event.options,
-        required      = event.getRequired,
-        timeModified  = Some(dateTime)))
+      err => log.error(s"updating annotation type from event failed: $err"),
+      at => {
+        annotationTypeRepository.put(at.copy(
+          version       = event.getVersion,
+          name          = event.getName,
+          description   = event.description,
+          valueType     = AnnotationValueType.withName(event.getValueType),
+          maxValueCount = event.maxValueCount,
+          options       = event.options,
+          required      = event.getRequired,
+          timeModified  = Some(dateTime)))
+        ()
+      }
     )
-    ()
   }
 
   protected def recoverParticipantAnnotationTypeRemovedEvent

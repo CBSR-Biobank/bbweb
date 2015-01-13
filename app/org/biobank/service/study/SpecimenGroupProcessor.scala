@@ -66,7 +66,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
         case event: SpecimenGroupUpdatedEvent => recoverSpecimenGroupUpdatedEvent(event, wevent.userId, wevent.dateTime)
         case event: SpecimenGroupRemovedEvent => recoverSpecimenGroupRemovedEvent(event, wevent.userId, wevent.dateTime)
 
-        case event => throw new IllegalStateException(s"event not handled: $event")
+        case event => log.error(s"event not handled: $event")
       }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -115,7 +115,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     val sgId = specimenGroupRepository.nextIdentity
 
     if (specimenGroupRepository.getByKey(sgId).isSuccess) {
-      throw new IllegalStateException(s"specimen group with id already exsits: $id")
+      log.error(s"specimen group with id already exsits: $id")
     }
 
     val event = for {
@@ -218,30 +218,34 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     (event: SpecimenGroupUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
       : Unit = {
     specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId)).fold(
-      err => throw new IllegalStateException(s"updating annotation type from event failed: $err"),
-      sg => specimenGroupRepository.put(sg.copy(
-        version                     = event.getVersion,
-        timeModified                = Some(dateTime),
-        name                        = event.getName,
-        description                 = event.description,
-        units                       = event.getUnits,
-        anatomicalSourceType        = AnatomicalSourceType.withName(event.getAnatomicalSourceType),
-        preservationType            = PreservationType.withName(event.getPreservationType),
-        preservationTemperatureType = PreservationTemperatureType.withName(event.getPreservationTemperatureType),
-        specimenType                = SpecimenType.withName(event.getSpecimenType)
-      ))
+      err => log.error(s"updating annotation type from event failed: $err"),
+      sg => {
+        specimenGroupRepository.put(sg.copy(
+          version                     = event.getVersion,
+          timeModified                = Some(dateTime),
+          name                        = event.getName,
+          description                 = event.description,
+          units                       = event.getUnits,
+          anatomicalSourceType        = AnatomicalSourceType.withName(event.getAnatomicalSourceType),
+          preservationType            = PreservationType.withName(event.getPreservationType),
+          preservationTemperatureType = PreservationTemperatureType.withName(event.getPreservationTemperatureType),
+          specimenType                = SpecimenType.withName(event.getSpecimenType)
+        ))
+        ()
+      }
     )
-    ()
   }
 
   private def recoverSpecimenGroupRemovedEvent
     (event: SpecimenGroupRemovedEvent, userId: Option[UserId], dateTime: DateTime)
       : Unit = {
     specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId)).fold(
-      err => throw new IllegalStateException(s"updating annotation type from event failed: $err"),
-      sg => specimenGroupRepository.remove(sg)
+      err => log.error(s"updating annotation type from event failed: $err"),
+      sg => {
+        specimenGroupRepository.remove(sg)
+        ()
+      }
     )
-    ()
   }
 
   val ErrMsgNameExists = "specimen group with name already exists"

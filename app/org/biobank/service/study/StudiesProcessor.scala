@@ -75,7 +75,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
         case event: StudyRetiredEvent   => recoverStudyRetiredEvent(event, wevent.userId, wevent.dateTime)
         case event: StudyUnretiredEvent => recoverStudyUnretiredEvent(event, wevent.userId, wevent.dateTime)
 
-        case event => throw new IllegalStateException(s"event not handled: $event")
+        case event => log.error(s"event not handled: $event")
       }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -220,7 +220,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     val studyId = studyRepository.nextIdentity
 
     if (studyRepository.getByKey(studyId).isSuccess) {
-      throw new IllegalStateException(s"study with id already exsits: $studyId")
+      log.error(s"study with id already exsits: $studyId")
     }
 
     val event = for {
@@ -319,70 +319,80 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
   private def recoverStudyUpdatedEvent(event: StudyUpdatedEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getDisabled(StudyId(event.id)).fold(
-      err => throw new IllegalStateException(s"updating study from event failed: $err"),
-      s => studyRepository.put(s.copy(
-        version      = event.getVersion,
-        name         = event.getName,
-        description  = event.description,
-        timeModified = Some(dateTime)))
+      err => log.error(s"updating study from event failed: $err"),
+      s => {
+        studyRepository.put(s.copy(
+          version      = event.getVersion,
+          name         = event.getName,
+          description  = event.description,
+          timeModified = Some(dateTime)))
+        ()
+      }
     )
-    ()
   }
 
   private def recoverStudyEnabledEvent(event: StudyEnabledEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getDisabled(StudyId(event.id)).fold(
-      err => throw new IllegalStateException(s"enabling study from event failed: $err"),
-      s => studyRepository.put(EnabledStudy(
-        id           = s.id,
-        version      = event.getVersion,
-        timeAdded    = s.timeAdded,
-        timeModified = Some(dateTime),
-        name         = s.name,
-        description  = s.description))
+      err => log.error(s"enabling study from event failed: $err"),
+      s => {
+        studyRepository.put(EnabledStudy(
+          id           = s.id,
+          version      = event.getVersion,
+          timeAdded    = s.timeAdded,
+          timeModified = Some(dateTime),
+          name         = s.name,
+          description  = s.description))
+        ()
+      }
     )
-    ()
   }
 
   private def recoverStudyDisabledEvent(event: StudyDisabledEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getEnabled(StudyId(event.id)).fold(
-      err => throw new IllegalStateException(s"disabling study from event failed: $err"),
-      s => studyRepository.put(DisabledStudy(
-        id           = s.id,
-        version      = event.getVersion,
-        timeAdded    = s.timeAdded,
-        timeModified = Some(dateTime),
-        name         = s.name,
-        description  = s.description))
+      err => log.error(s"disabling study from event failed: $err"),
+      s => {
+        studyRepository.put(DisabledStudy(
+          id           = s.id,
+          version      = event.getVersion,
+          timeAdded    = s.timeAdded,
+          timeModified = Some(dateTime),
+          name         = s.name,
+          description  = s.description))
+        ()
+      }
     )
-    ()
   }
 
   private def recoverStudyRetiredEvent(event: StudyRetiredEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getDisabled(StudyId(event.id)).fold(
-      err => throw new IllegalStateException(s"retiring study from event failed: $err"),
-      s => studyRepository.put(RetiredStudy(
-        id           = s.id,
-        version      = event.getVersion,
-        timeAdded    = s.timeAdded,
-        timeModified = Some(dateTime),
-        name         = s.name,
-        description  = s.description))
+      err => log.error(s"retiring study from event failed: $err"),
+      s => {
+        studyRepository.put(RetiredStudy(
+          id           = s.id,
+          version      = event.getVersion,
+          timeAdded    = s.timeAdded,
+          timeModified = Some(dateTime),
+          name         = s.name,
+          description  = s.description))
+        ()
+      }
     )
-    ()
   }
 
   private def recoverStudyUnretiredEvent(event: StudyUnretiredEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.getRetired(StudyId(event.id)).fold(
-      err => throw new IllegalStateException(s"disabling study from event failed: $err"),
-      s => studyRepository.put(DisabledStudy(
-        id           = s.id,
-        version      = event.getVersion,
-        timeAdded    = s.timeAdded,
-        timeModified = Some(dateTime),
-        name         = s.name,
-        description  = s.description))
+      err => log.error(s"disabling study from event failed: $err"),
+      s => {
+        studyRepository.put(DisabledStudy(
+          id           = s.id,
+          version      = event.getVersion,
+          timeAdded    = s.timeAdded,
+          timeModified = Some(dateTime),
+          name         = s.name,
+          description  = s.description))
+        ()
+      }
     )
-    ()
   }
 
   val errMsgNameExists = "study with name already exists"

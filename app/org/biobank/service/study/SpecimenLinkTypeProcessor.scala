@@ -63,7 +63,7 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
         case event: SpecimenLinkTypeUpdatedEvent => recoverSpecimenLinkTypeUpdatedEvent(event, wevent.userId, wevent.dateTime)
         case event: SpecimenLinkTypeRemovedEvent => recoverSpecimenLinkTypeRemovedEvent(event, wevent.userId, wevent.dateTime)
 
-        case event => throw new IllegalStateException(s"event not handled: $event")
+        case event => log.error(s"event not handled: $event")
       }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -243,31 +243,35 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
     (event: SpecimenLinkTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
       : Unit = {
     specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId)).fold(
-      err => throw new IllegalStateException(s"updating specimen link type from event failed: $err"),
-      slt => specimenLinkTypeRepository.put(slt.copy(
-        version               = event.getVersion,
-        timeModified          = Some(dateTime),
-        expectedInputChange   = event.getExpectedInputChange,
-        expectedOutputChange  = event.getExpectedOutputChange,
-        inputCount            = event.getInputCount,
-        outputCount           = event.getOutputCount,
-        inputGroupId          = SpecimenGroupId(event.getInputGroupId),
-        outputGroupId         = SpecimenGroupId(event.getOutputGroupId),
-        inputContainerTypeId  = event.inputContainerTypeId.map(ContainerTypeId(_)),
-        outputContainerTypeId = event.outputContainerTypeId.map(ContainerTypeId(_)),
-        annotationTypeData    = convertSpecimenLinkTypeAnnotationTypeDataFromEvent(event.annotationTypeData)))
+      err => log.error(s"updating specimen link type from event failed: $err"),
+      slt => {
+        specimenLinkTypeRepository.put(slt.copy(
+          version               = event.getVersion,
+          timeModified          = Some(dateTime),
+          expectedInputChange   = event.getExpectedInputChange,
+          expectedOutputChange  = event.getExpectedOutputChange,
+          inputCount            = event.getInputCount,
+          outputCount           = event.getOutputCount,
+          inputGroupId          = SpecimenGroupId(event.getInputGroupId),
+          outputGroupId         = SpecimenGroupId(event.getOutputGroupId),
+          inputContainerTypeId  = event.inputContainerTypeId.map(ContainerTypeId(_)),
+          outputContainerTypeId = event.outputContainerTypeId.map(ContainerTypeId(_)),
+          annotationTypeData    = convertSpecimenLinkTypeAnnotationTypeDataFromEvent(event.annotationTypeData)))
+        ()
+      }
     )
-    ()
   }
 
   private def recoverSpecimenLinkTypeRemovedEvent
     (event: SpecimenLinkTypeRemovedEvent, userId: Option[UserId], dateTime: DateTime)
       : Unit = {
     specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(event.specimenLinkTypeId)).fold(
-      err => throw new IllegalStateException(s"updating specimen link type from event failed: $err"),
-      slt => specimenLinkTypeRepository.remove(slt)
+      err => log.error(s"updating specimen link type from event failed: $err"),
+      slt => {
+        specimenLinkTypeRepository.remove(slt)
+        ()
+      }
     )
-    ()
   }
 
   private def validSpecimenGroup(

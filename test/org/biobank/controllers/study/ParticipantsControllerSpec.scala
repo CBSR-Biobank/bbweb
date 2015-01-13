@@ -103,7 +103,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
         compareObj(jsObj, participant)
       }
 
-      "get participant, no annotations" in new App(fakeApp) {
+      "get participant with no annotations" in new App(fakeApp) {
         doLogin
 
         val study = factory.createEnabledStudy

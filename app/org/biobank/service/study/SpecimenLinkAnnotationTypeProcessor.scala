@@ -52,7 +52,7 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
         case event: SpecimenLinkAnnotationTypeRemovedEvent =>
           recoverSpecimenLinkAnnotationTypeRemovedEvent(event, wevent.userId, wevent.dateTime)
 
-        case event => throw new IllegalStateException(s"event not handled: $event")
+        case event => log.error(s"event not handled: $event")
       }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -186,17 +186,19 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
     (event: SpecimenLinkAnnotationTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
       : Unit = {
     annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId)).fold(
-      err => throw new IllegalStateException(s"updating annotatiotn type from event failed: $err"),
-      at => annotationTypeRepository.put(at.copy(
-        version       = event.getVersion,
-        name          = event.getName,
-        description   = event.description,
-        valueType     = AnnotationValueType.withName(event.getValueType),
-        maxValueCount = event.maxValueCount,
-        options       = event.options,
-        timeModified  = Some(dateTime)))
+      err => log.error(s"updating annotatiotn type from event failed: $err"),
+      at => {
+        annotationTypeRepository.put(at.copy(
+          version       = event.getVersion,
+          name          = event.getName,
+          description   = event.description,
+          valueType     = AnnotationValueType.withName(event.getValueType),
+          maxValueCount = event.maxValueCount,
+          options       = event.options,
+          timeModified  = Some(dateTime)))
+        ()
+      }
     )
-    ()
   }
 
   private def recoverSpecimenLinkAnnotationTypeRemovedEvent

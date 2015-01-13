@@ -60,7 +60,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
         case event: CollectionEventTypeUpdatedEvent => recoverCollectionEventTypeUpdatedEvent(event, wevent.userId, wevent.dateTime)
         case event: CollectionEventTypeRemovedEvent => recoverCollectionEventTypeRemovedEvent(event, wevent.userId, wevent.dateTime)
 
-        case event => throw new IllegalStateException(s"event not handled: $event")
+        case event => log.error(s"event not handled: $event")
       }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
@@ -201,28 +201,32 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     (event: CollectionEventTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
       : Unit = {
     collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.collectionEventTypeId)).fold(
-      err => throw new IllegalStateException(s"updating collection event type from event failed: $err"),
-      cet => collectionEventTypeRepository.put(cet.copy(
-        version            = event.getVersion,
-        timeModified       = Some(dateTime),
-        name               = event.getName,
-        description        = event.description,
-        recurring          = event.getRecurring,
-        specimenGroupData  = convertSpecimenGroupDataFromEvent(event.specimenGroupData),
-        annotationTypeData = convertCollectionEventTypeAnnotationTypeDataFromEvent(event.annotationTypeData)
-      ))
+      err => log.error(s"updating collection event type from event failed: $err"),
+      cet => {
+        collectionEventTypeRepository.put(cet.copy(
+          version            = event.getVersion,
+          timeModified       = Some(dateTime),
+          name               = event.getName,
+          description        = event.description,
+          recurring          = event.getRecurring,
+          specimenGroupData  = convertSpecimenGroupDataFromEvent(event.specimenGroupData),
+          annotationTypeData = convertCollectionEventTypeAnnotationTypeDataFromEvent(event.annotationTypeData)
+        ))
+        ()
+      }
     )
-    ()
   }
 
   private def recoverCollectionEventTypeRemovedEvent
     (event: CollectionEventTypeRemovedEvent, userId: Option[UserId], dateTime: DateTime)
       : Unit = {
     collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.collectionEventTypeId)).fold(
-      err => throw new IllegalStateException(s"updating collection event type from event failed: $err"),
-      cet => collectionEventTypeRepository.remove(cet)
+      err => log.error(s"updating collection event type from event failed: $err"),
+      cet => {
+        collectionEventTypeRepository.remove(cet)
+        ()
+      }
     )
-    ()
   }
 
   val ErrMsgNameExists = "collection event type with name already exists"

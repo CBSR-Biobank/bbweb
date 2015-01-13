@@ -163,7 +163,7 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
     val participantId = participantRepository.nextIdentity
 
     if (participantRepository.getByKey(participantId).isSuccess) {
-      throw new IllegalStateException(s"participant with id already exsits: $participantId")
+      log.error(s"participant with id already exsits: $participantId")
     }
 
     val event = for {
@@ -228,14 +228,16 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
     val participantId = ParticipantId(event.participantId)
 
     participantRepository.withId(studyId, participantId).fold(
-      err => throw new IllegalStateException(s"updating participant from event failed: $err"),
-      p => participantRepository.put(p.copy(
+      err => log.error(s"updating participant from event failed: $err"),
+      p => {
+        participantRepository.put(p.copy(
         version      = event.getVersion,
         uniqueId     = event.getUniqueId,
         timeModified = Some(dateTime),
         annotations  = convertAnnotationsFromEvent(event.annotations)))
+        ()
+      }
     )
-    ()
   }
 
   private def convertAnnotationToEvent

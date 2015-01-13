@@ -70,7 +70,7 @@ POST    /studies/:procTypeId/sltypes            @org.biobank.controllers.study.S
 PUT     /studies/:procTypeId/sltypes/:id        @org.biobank.controllers.study.SpecimenLinkTypeController.updateSpecimenLinkType(procTypeId, id)
 DELETE  /studies/:procTypeId/sltypes/:id/:ver   @org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(procTypeId, id, ver: Long)
 
-# processing types
+# participants
 GET     /studies/:studyId/participants/:id          @org.biobank.controllers.study.ParticipantsController.get(studyId, id: String)
 POST    /studies/:studyId/participants              @org.biobank.controllers.study.ParticipantsController.addParticipant(studyId)
 PUT     /studies/:studyId/participants/:id          @org.biobank.controllers.study.ParticipantsController.updateParticipant(studyId, id)
