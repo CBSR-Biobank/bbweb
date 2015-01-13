@@ -3,7 +3,7 @@
   <button  ng-if="text.length > toggleLength" class="btn btn-xs btn-primary" ng-click="toggleText()">
     {{buttonLabel}}
   </button>
-  <div ng-if="text.length <= 0" class="alert alert-warning" role="alert">
+  <div ng-if="(text == null) || text.length <= 0" class="alert alert-warning" role="alert">
     <p><span class="glyphicon glyphicon-warning-sign"></span> {{textEmptyWarning}}</p>
   </div>
 </div>

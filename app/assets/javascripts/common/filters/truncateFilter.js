@@ -13,6 +13,10 @@ define(['../module'], function(module) {
     return trunctate;
 
     function trunctate(text, length, end) {
+      if (! text) {
+        return '';
+      }
+
       if (isNaN(length)) {
         length = 10;
       }
