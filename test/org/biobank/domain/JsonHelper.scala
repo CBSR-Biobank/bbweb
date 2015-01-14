@@ -38,6 +38,11 @@ object JsonHelper extends MustMatchers {
     (json \ "status").as[String]                 mustBe (study.status)
   }
 
+  def compareObj(json: JsValue, study: StudyNameDto)  = {
+    (json \ "id").as[String]                     mustBe (study.id)
+    (json \ "name").as[String]                   mustBe (study.name)
+  }
+
   def compareObj(json: JsValue, specimenGroup: SpecimenGroup) = {
     compareEntity(json, specimenGroup)
     (json \ "studyId").as[String]                     mustBe (specimenGroup.studyId.id)

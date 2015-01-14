@@ -7,6 +7,10 @@ import org.joda.time.DateTime
 
 package infrastructure {
 
+  sealed trait Order
+  case object AscendingOrder extends Order
+  case object DescendingOrder extends Order
+
   trait HasIdentity {
 
     /** A command or event that includes the ID of the object it references. */
@@ -124,6 +128,17 @@ package infrastructure {
         (__ \ "required").write[Boolean]
     )(unlift(SpecimenLinkTypeAnnotationTypeData.unapply))
 
+  }
+
+  case class StudyNameDto(id:String, name: String)
+
+  object StudyNameDto {
+    def compareByName(a: StudyNameDto, b: StudyNameDto) = (a.name compareToIgnoreCase b.name) < 0
+
+    implicit val studyNameDtoWriter: Writes[StudyNameDto] = (
+      (__ \ "id").write[String] and
+      (__ \ "name").write[String]
+    )(unlift(StudyNameDto.unapply))
   }
 
   case class CollectionDto(

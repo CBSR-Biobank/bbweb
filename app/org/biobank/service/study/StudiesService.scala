@@ -1,6 +1,7 @@
-package org.biobank.service.study
+ package org.biobank.service.study
 
 import org.biobank.service.ApplicationService
+import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.infrastructure.event.StudyEvents._
@@ -28,7 +29,12 @@ import scalaz.Scalaz._
 
 trait StudiesService {
 
-  def getAll: Set[Study]
+  def getAll: Seq[StudyNameDto]
+
+  /** Studies are sorted by name, it does not make sense to sort them by description.
+    */
+  def getStudies(query: Option[String], order: org.biobank.infrastructure.Order)
+      : DomainValidation[Seq[StudyNameDto]]
 
   def getStudy(id: String): DomainValidation[Study]
 
@@ -244,8 +250,29 @@ class StudiesServiceImpl(implicit inj: Injector)
   /**
     * FIXME: use paging and sorting
     */
-  def getAll: Set[Study] = {
-    studyRepository.allStudies
+  def getAll: Seq[StudyNameDto] = {
+    val result = studyRepository.getValues.map { s => StudyNameDto(s.id.id, s.name) }
+    result.toSeq.sortWith(StudyNameDto.compareByName)
+  }
+
+  def getStudies(query: Option[String], order: org.biobank.infrastructure.Order)
+      : DomainValidation[Seq[StudyNameDto]] = {
+    val studies = studyRepository.getValues
+
+    val filteredStudies = query map { q =>
+      studies.filter { s => s.name.contains(q) }
+    } getOrElse {
+      studies
+    }
+
+    val orderedStudies = filteredStudies.toSeq
+    val result = orderedStudies.map { s => StudyNameDto(s.id.id, s.name) } sortWith(StudyNameDto.compareByName)
+
+    if (order == AscendingOrder) {
+      result.success
+    } else {
+      result.reverse.success
+    }
   }
 
   def getStudy(id: String) : DomainValidation[Study] = {

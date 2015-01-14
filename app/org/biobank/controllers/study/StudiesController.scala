@@ -4,6 +4,7 @@ import org.biobank.controllers._
 import org.biobank.domain._
 import org.biobank.service.users.UsersService
 import org.biobank.domain.study.Study
+import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.infrastructure.event.StudyEventsJson._
@@ -36,9 +37,31 @@ class StudiesController(implicit inj: Injector)
 
   private def studiesService = inject[StudiesService]
 
-  def list = AuthAction(parse.empty) { token => implicit userId => implicit request =>
-    Ok(studiesService.getAll.toList)
+  def getOrdering(order: Option[String]): DomainValidation[org.biobank.infrastructure.Order] = {
+    order map { o =>
+      o match {
+        case "ascending" => AscendingOrder.success
+        case "descending" => DescendingOrder.success
+        case _ => DomainError(s"invalid order requested: $o").failureNel
+      }
+    } getOrElse {
+      AscendingOrder.success
+    }
   }
+
+  def list(query: Option[String], order: Option[String]) =
+    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+
+      val ordering = getOrdering(order)
+
+      ordering.fold(
+        err => BadRequest(err.list.mkString),
+        o   => studiesService.getStudies(query, o).fold(
+          err => BadRequest(err.list.mkString),
+          studies => Ok(studies.toList)
+        )
+      )
+    }
 
   def query(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     studiesService.getStudy(id).fold(

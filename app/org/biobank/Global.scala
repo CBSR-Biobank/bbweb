@@ -46,6 +46,8 @@ trait Global
     createDefaultUser
     //createTestUser
 
+    addTestData
+
     createSqlDdlScripts
 
     Logger.debug(s"Play started")
@@ -121,6 +123,16 @@ trait Global
         )
       }
     )
+  }
+
+  def addTestData(): Unit = {
+    Logger.debug("addTestData")
+
+    addMultipleStudies
+  }
+
+  def addMultipleStudies(): Unit = {
+    Logger.debug("addMultipleStudies")
   }
 
   /**

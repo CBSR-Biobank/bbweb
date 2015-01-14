@@ -3,6 +3,7 @@ package org.biobank.controllers
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEventsJson._
 import org.biobank.service.users.UsersService
+import org.biobank.service.study.StudiesService
 
 import play.api.Logger
 import play.api.Play.current
@@ -26,6 +27,8 @@ class UsersController(implicit inj: Injector)
     with Injectable {
 
   implicit val usersService = inject [UsersService]
+
+  implicit val studiesService = inject [StudiesService]
 
   /** Used for obtaining the email and password from the HTTP login request */
   case class LoginCredentials(email: String, password: String)
@@ -211,4 +214,12 @@ class UsersController(implicit inj: Injector)
       }
   }
 
+  def userStudies(id: String, query: Option[String], sort: Option[String], order: Option[String]) =
+    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+      // FIXME this should return the only the studies this user has access to
+      //
+      // This this for now, but fix once user groups have been implemented
+      val studies = studiesService.getAll.toList
+      Ok(studies)
+    }
 }

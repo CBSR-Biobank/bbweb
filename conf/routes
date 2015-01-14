@@ -9,7 +9,7 @@
 GET     /                                      @org.biobank.controllers.Application.index
 
 # studies
-GET     /studies                               @org.biobank.controllers.study.StudiesController.list
+GET     /studies                               @org.biobank.controllers.study.StudiesController.list(query: Option[String], order: Option[String])
 POST    /studies                               @org.biobank.controllers.study.StudiesController.add
 
 # value objects
@@ -105,6 +105,8 @@ PUT     /users/:id/avatarurl                    @org.biobank.controllers.UsersCo
 POST    /users/:id/activate                     @org.biobank.controllers.UsersController.activateUser(id)
 POST    /users/:id/lock                         @org.biobank.controllers.UsersController.lockUser(id)
 POST    /users/:id/unlock                       @org.biobank.controllers.UsersController.unlockUser(id)
+
+GET     /users/:id/studies                      @org.biobank.controllers.UsersController.userStudies(id, query: Option[String], sort: Option[String], order: Option[String])
 
 # Authentication
 GET     /authenticate                           @org.biobank.controllers.UsersController.authenticateUser
