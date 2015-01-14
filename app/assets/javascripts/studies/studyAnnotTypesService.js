@@ -50,8 +50,12 @@ define(['./module', 'angular'], function(module, angular) {
         studyId:       annotType.studyId,
         name:          annotType.name,
         valueType:     annotType.valueType,
-        maxValueCount: annotType.maxValueCount
+        options:       []
       };
+
+      if (annotType.valueType === 'Select') {
+        cmd.maxValueCount = annotType.maxValueCount;
+      }
 
       angular.extend(cmd, domainEntityService.getOptionalAttribute(annotType, 'description'));
       angular.extend(cmd, domainEntityService.getOptionalAttribute(annotType, 'options'));
