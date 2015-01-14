@@ -6,6 +6,8 @@ import org.biobank.domain.user.{
   UserId,
   UserRepository
 }
+import org.biobank.domain.study.StudyRepository
+import org.biobank.domain.study._
 import org.biobank.service.PasswordHasher
 import play.api.GlobalSettings
 import play.api.mvc.WithFilters
@@ -69,7 +71,6 @@ trait Global
     */
   def createTestUser = {
     val userRepository = inject [UserRepository]
-
     val email = "test@biosample.ca"
     val validation = RegisteredUser.create(
       UserId(email),
@@ -132,7 +133,70 @@ trait Global
   }
 
   def addMultipleStudies(): Unit = {
+    val studyRepository = inject [StudyRepository]
+
     Logger.debug("addMultipleStudies")
+
+    val studyData = List(
+      ("SPARK", "A phase II randomized blinded controlled trial of the effect of furoSemide in cricially ill Patients with eARly acute Kidney injury"),
+      ("AHFEM", "Acute Heart Failure-Emergency Management"),
+      ("BBPSP", "Blood Borne Pathogens Surveillance Project"),
+      ("CHILD", "Canadian Health Infant Longitudinal Development Study"),
+      ("CEGIIR", "Centre of Excellence for Gastrointestinal Inflammation and Immunity Research"),
+      ("CCCS", "Critical Care Cohort Study"),
+      ("ERCIN", "Exploring the Renoprotective effects of fluid prophylaxis strategies for Contrast Induced Nephropathy (Study)"),
+      ("FIDS", "Fedorak Iron Deficiency Study"),
+      ("HEART", "Heart failure Etiology and Analysis Research Team"),
+      ("KDCS", "Kidney Disease Cohort Study"),
+      ("KMS", "Kingston Merger Study"),
+      ("LCS", "Laboratory Controls Study"),
+      ("MPS", "Man-Chui Poon Study"),
+      ("NHS", "Novartis Hepatitis C Study"),
+      ("RVS", "Retroviral Study"),
+      ("TCKS", "Tonelli Chronic Kidney Study"),
+      ("VAS", "Vascular Access Study"),
+      ("FABRY", "Enzyme replacement therapy in patients with Fabry disease: differential impact on Heart Remodeling and Vascular Function"),
+      ("CDGI", "Crohn's Disease Genetic Inflizimab"),
+      ("CRM", "Diagnostic Marker for a Colorectal Cancer Blood Test"),
+      ("PSS", "(Dr.) Parent Scoliosis Study"),
+      ("REFINE", "REFINE ICD"),
+      ("CaRE", "CaRE"),
+      ("Novel - ESRD", "Novel - ESRD"),
+      ("KIDNI", "KIDNI"),
+      ("PG1", "Phenomic Gap"),
+      ("Spinal Stiffness", "Spinal Stiffness"),
+      ("QPCS", "Quebec Pancreas Cancer Study"),
+      ("FALLOT", "FALLOT"),
+      ("HAART", "Randomized Controlled Pilot Study of Highly Active Anti-Retroviral Therapy"),
+      ("AKI", "Acute Kidney Injury"),
+      ("DG Study", "Delta Genomics Study"),
+      ("DBStudy", "DBTestStudy"),
+      ("CCSC Demo", "CCSC Demo"),
+      ("ZEST", "ZEST"),
+      ("Asthma", "Asthma"),
+      ("CSF", "CSF"),
+      ("REIM", "Resilience Enhancement in Military Populations Through Multiple Health Status Assessments"),
+      ("DDPS", "Double Dialysate Phosphate Study"),
+      ("PROBE", "PROBE"),
+      ("CITP", "Clinical Islet Transplant Program"),
+      ("Caspase", "CITP Caspase"),
+      ("iGenoMed", "iGenoMed"),
+      ("JB", "Bradwein"),
+      ("NEC", "Necrotizing Enterocolitis Study"),
+      ("TMIC", "TMIC")
+    )
+
+    val studies = studyData.map { case (name, description) =>
+      val study: Study = DisabledStudy(
+        id           = studyRepository.nextIdentity,
+        version      = 0L,
+        timeAdded    = DateTime.now,
+        timeModified = None,
+        name         = name,
+        description  = Some(description)
+      )
+      studyRepository.put(study)
+    }
   }
 
   /**
