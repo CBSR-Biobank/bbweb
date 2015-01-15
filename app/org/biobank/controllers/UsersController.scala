@@ -96,7 +96,9 @@ class UsersController(implicit inj: Injector)
     */
   def logout() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
     Cache.remove(token)
-    Ok("user has been logged out").discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
+    Ok("user has been logged out")
+      .discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
+      .withNewSession
   }
 
   /** Resets the user's password.

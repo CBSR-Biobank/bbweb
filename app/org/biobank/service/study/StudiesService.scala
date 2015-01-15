@@ -33,7 +33,11 @@ trait StudiesService {
 
   /** Studies are sorted by name, it does not make sense to sort them by description.
     */
-  def getStudies(query: Option[String], order: SortOrder)
+  def getStudies[T <: Study]
+    (filter: String, sortFunc: (Study, Study) => Boolean, order: SortOrder)
+      : DomainValidation[Seq[Study]]
+
+  def getStudyNames(filter: String, order: SortOrder)
       : DomainValidation[Seq[StudyNameDto]]
 
   def getStudy(id: String): DomainValidation[Study]
@@ -255,14 +259,35 @@ class StudiesServiceImpl(implicit inj: Injector)
     result.toSeq.sortWith(StudyNameDto.compareByName)
   }
 
-  def getStudies(query: Option[String], order: SortOrder)
+  def getStudies[T <: Study]
+    (filter: String, sortFunc: (Study, Study) => Boolean, order: SortOrder)
+      : DomainValidation[Seq[Study]] = {
+    val studies = studyRepository.getValues
+
+    val filteredStudies = if (filter.isEmpty) {
+      studies
+    } else {
+      studies.filter { s => s.name.contains(filter) }
+    }
+
+    val orderedStudies = filteredStudies.toSeq
+    val result = orderedStudies.sortWith(sortFunc)
+
+    if (order == AscendingOrder) {
+      result.success
+    } else {
+      result.reverse.success
+    }
+  }
+
+  def getStudyNames(filter: String, order: SortOrder)
       : DomainValidation[Seq[StudyNameDto]] = {
     val studies = studyRepository.getValues
 
-    val filteredStudies = query map { q =>
-      studies.filter { s => s.name.contains(q) }
-    } getOrElse {
+    val filteredStudies = if (filter.isEmpty) {
       studies
+    } else {
+      studies.filter { s => s.name.contains(filter) }
     }
 
     val orderedStudies = filteredStudies.toSeq

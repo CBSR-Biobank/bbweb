@@ -24,6 +24,7 @@ import scaldi.{Injectable, Injector}
 
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /**
   *
@@ -37,14 +38,44 @@ class StudiesController(implicit inj: Injector)
 
   private def studiesService = inject[StudiesService]
 
-  def list(query: Option[String], order: Option[String]) =
+  private val PageSizeDefault = 10
+
+  case class PaginationResult(studies: Seq[Study], page: Int, pageSize: Int)
+
+  def list(filter : String, sort : String, page : Int, pageSize : Int, order : String) =
     AuthAction(parse.empty) { token => implicit userId => implicit request =>
 
-      val sortOrder = order map SortOrder.fromString getOrElse AscendingOrder.successNel
+      Logger.debug(s"StudiesController: list: filter/$filter, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
 
-      sortOrder.fold(
+      val pagedQuery = PagedQuery(sort, page, pageSize, order)
+      val validation = for {
+        sortField <- pagedQuery.getSortField(Seq("name", "status"))
+        sortWith  <- (if (sortField == "status") (Study.compareByStatus _) else (Study.compareByName _)).success
+        sortOrder <- pagedQuery.getSortOrder
+        studies   <- studiesService.getStudies(filter, sortWith, sortOrder)
+        page      <- pagedQuery.getPage(studies.size)
+        pageSize  <- pagedQuery.getPageSize
+      } yield { PaginationResult(studies, page, pageSize) }
+
+      validation.fold(
         err => BadRequest(err.list.mkString),
-        so  => studiesService.getStudies(query, so).fold(
+        pq => {
+          val offset = pq.pageSize * (pq.page - 1)
+          if (offset > pq.studies.size) {
+            BadRequest(s"invalid page requested: ${pq.page}")
+          } else {
+            Ok(pq.studies.drop(offset).take(pq.pageSize))
+          }
+        }
+      )
+    }
+
+  def listNames(filter: String, order: String) =
+    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+
+      SortOrder.fromString(order).fold(
+        err => BadRequest(err.list.mkString),
+        so  => studiesService.getStudyNames(filter, so).fold(
           err => BadRequest(err.list.mkString),
           studies => Ok(studies.toList)
         )
@@ -116,23 +147,23 @@ class StudiesController(implicit inj: Injector)
   }
 
   def valueTypes = Action(parse.empty) { request =>
-     Ok(AnnotationValueType.values.map(x => x.toString))
+    Ok(AnnotationValueType.values.map(x => x.toString))
   }
 
   def anatomicalSourceTypes = Action(parse.empty) { request =>
-     Ok(AnatomicalSourceType.values.map(x => x.toString))
+    Ok(AnatomicalSourceType.values.map(x => x.toString))
   }
 
   def specimenTypes = Action(parse.empty) { request =>
-     Ok(SpecimenType.values.map(x => x.toString))
+    Ok(SpecimenType.values.map(x => x.toString))
   }
 
   def preservTypes = Action(parse.empty) { request =>
-     Ok(PreservationType.values.map(x => x.toString))
+    Ok(PreservationType.values.map(x => x.toString))
   }
 
   def preservTempTypes = Action(parse.empty) { request =>
-     Ok(PreservationTemperatureType.values.map(x => x.toString))
+    Ok(PreservationTemperatureType.values.map(x => x.toString))
   }
 
   /** Value types used by Specimen groups.

@@ -9,7 +9,7 @@
 GET     /                                      @org.biobank.controllers.Application.index
 
 # studies
-GET     /studies                               @org.biobank.controllers.study.StudiesController.list(query: Option[String], order: Option[String])
+GET     /studies                               @org.biobank.controllers.study.StudiesController.list(filter: String ?= "", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "ascending")
 POST    /studies                               @org.biobank.controllers.study.StudiesController.add
 
 # value objects
@@ -69,6 +69,9 @@ GET     /studies/:procTypeId/sltypes            @org.biobank.controllers.study.S
 POST    /studies/:procTypeId/sltypes            @org.biobank.controllers.study.SpecimenLinkTypeController.addSpecimenLinkType(procTypeId)
 PUT     /studies/:procTypeId/sltypes/:id        @org.biobank.controllers.study.SpecimenLinkTypeController.updateSpecimenLinkType(procTypeId, id)
 DELETE  /studies/:procTypeId/sltypes/:id/:ver   @org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(procTypeId, id, ver: Long)
+
+# Study DTOs
+GET     /studies/names                          @org.biobank.controllers.study.StudiesController.listNames(filter: String ?= "", order: String ?= "ascending")
 
 # participants
 GET     /studies/:studyId/participants/:id          @org.biobank.controllers.study.ParticipantsController.get(studyId, id: String)

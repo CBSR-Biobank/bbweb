@@ -65,6 +65,10 @@ object Study {
       "status"       -> study.status
     )
   }
+
+  def compareByName(a: Study, b: Study) = (a.name compareToIgnoreCase b.name) < 0
+
+  def compareByStatus(a: Study, b: Study) = (a.status compare b.status) < 0
 }
 
 /**

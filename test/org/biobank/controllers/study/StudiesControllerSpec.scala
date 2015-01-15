@@ -67,7 +67,7 @@ class StudiesControllerSpec extends ControllerFixture {
         (jsonList zip studies).map { item => compareStudyNameDto(item._1, item._2) }
       }
 
-      "list a single study with a name query string" in new App(fakeApp) {
+      "list a single study with a name query string" taggedAs(Tag("1")) in new App(fakeApp) {
         doLogin
 
         val study1 = factory.createDisabledStudy.copy(name = "ABC")
@@ -77,7 +77,7 @@ class StudiesControllerSpec extends ControllerFixture {
         studyRepository.removeAll
         studies.map(study => studyRepository.put(study))
 
-        val json = makeRequest(GET, uri + "?query=" + study1.name)
+        val json = makeRequest(GET, uri + "?filter=" + study1.name)
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
