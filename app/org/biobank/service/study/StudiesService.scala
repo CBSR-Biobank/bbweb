@@ -33,7 +33,7 @@ trait StudiesService {
 
   /** Studies are sorted by name, it does not make sense to sort them by description.
     */
-  def getStudies(query: Option[String], order: org.biobank.infrastructure.Order)
+  def getStudies(query: Option[String], order: SortOrder)
       : DomainValidation[Seq[StudyNameDto]]
 
   def getStudy(id: String): DomainValidation[Study]
@@ -255,7 +255,7 @@ class StudiesServiceImpl(implicit inj: Injector)
     result.toSeq.sortWith(StudyNameDto.compareByName)
   }
 
-  def getStudies(query: Option[String], order: org.biobank.infrastructure.Order)
+  def getStudies(query: Option[String], order: SortOrder)
       : DomainValidation[Seq[StudyNameDto]] = {
     val studies = studyRepository.getValues
 

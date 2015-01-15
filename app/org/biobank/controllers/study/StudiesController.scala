@@ -37,26 +37,14 @@ class StudiesController(implicit inj: Injector)
 
   private def studiesService = inject[StudiesService]
 
-  def getOrdering(order: Option[String]): DomainValidation[org.biobank.infrastructure.Order] = {
-    order map { o =>
-      o match {
-        case "ascending" => AscendingOrder.success
-        case "descending" => DescendingOrder.success
-        case _ => DomainError(s"invalid order requested: $o").failureNel
-      }
-    } getOrElse {
-      AscendingOrder.success
-    }
-  }
-
   def list(query: Option[String], order: Option[String]) =
     AuthAction(parse.empty) { token => implicit userId => implicit request =>
 
-      val ordering = getOrdering(order)
+      val sortOrder = order map SortOrder.fromString getOrElse AscendingOrder.successNel
 
-      ordering.fold(
+      sortOrder.fold(
         err => BadRequest(err.list.mkString),
-        o   => studiesService.getStudies(query, o).fold(
+        so  => studiesService.getStudies(query, so).fold(
           err => BadRequest(err.list.mkString),
           studies => Ok(studies.toList)
         )

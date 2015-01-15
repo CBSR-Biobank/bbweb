@@ -5,11 +5,27 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import org.joda.time.DateTime
 
+import scalaz._
+import scalaz.Scalaz._
+
 package infrastructure {
 
-  sealed trait Order
-  case object AscendingOrder extends Order
-  case object DescendingOrder extends Order
+  sealed trait SortOrder
+  case object AscendingOrder extends SortOrder
+  case object DescendingOrder extends SortOrder
+
+  object SortOrder {
+
+    def fromString(order: String): ValidationNel[String, SortOrder] = {
+      order match {
+        case "ascending" => AscendingOrder.successNel
+        case "descending" => DescendingOrder.successNel
+        case _ => s"invalid order requested: $order".failureNel
+      }
+
+    }
+  }
+
 
   trait HasIdentity {
 
