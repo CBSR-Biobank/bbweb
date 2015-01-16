@@ -14,7 +14,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       name: 'CEAT1',
       description: 'test',
       valueType: 'Text',
-      maxValueCount: null
+      options: []
     };
     var annotType = angular.extend({id: 'dummy-id'}, annotTypeNoId);
 
@@ -82,9 +82,13 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         name:          annotType.name,
         description:   annotType.description,
         valueType:     annotType.valueType,
-        maxValueCount: annotType.maxValueCount,
         options:       annotType.options
       };
+
+      if (annotType.valueType === 'Select') {
+        cmd.maxValueCount = annotType.maxValueCount;
+      }
+
       httpBackend.expectPOST(uri(), cmd).respond(201, expectedResult);
       ceventAnnotTypesService.addOrUpdate(annotTypeNoId).then(function(reply) {
         expect(reply).toEqual('success');

@@ -14,7 +14,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       name: 'CEAT1',
       description: 'test',
       valueType: 'Text',
-      maxValueCount: null
+      options: []
     };
     var annotType = angular.extend({id: 'dummy-id'}, annotTypeNoId);
 

@@ -2,7 +2,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  ddescribe('Service: userService', function() {
+  describe('Service: userService', function() {
 
     var usersService;
     var fakeToken = 'fake-token';
