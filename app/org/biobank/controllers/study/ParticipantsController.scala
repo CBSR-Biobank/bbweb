@@ -33,7 +33,7 @@ class ParticipantsController(implicit inj: Injector)
   private def participantsService = inject[ParticipantsService]
 
   def get(studyId: String, participantId: String) =
-    AuthAction(parse.empty) { token => userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
       Logger.debug(s"ParticipantsController.get: studyId: $studyId, participantId: $participantId")
       domainValidationReply(participantsService.get(studyId, participantId))
     }
@@ -61,7 +61,7 @@ class ParticipantsController(implicit inj: Injector)
     }
 
   def checkUnique(uniqueId: String) =
-    AuthAction(parse.empty) { token => userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
       Logger.debug(s"ParticipantsController.checkUnique: uniqueId: $uniqueId")
       domainValidationReply(participantsService.checkUnique(uniqueId))
     }

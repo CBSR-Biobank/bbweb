@@ -36,11 +36,11 @@ class CentresController(implicit inj: Injector)
 
   private def centresService = inject [CentresService]
 
-  def list = AuthAction(parse.empty) { token => implicit userId => implicit request =>
+  def list = AuthAction(parse.empty) { (token, userId, request) =>
     Ok(centresService.getAll.toList)
   }
 
-  def query(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
+  def query(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
     centresService.getCentre(id).fold(
       err => BadRequest(err.list.mkString(", ")),
       centres => Ok(centres)
@@ -76,7 +76,7 @@ class CentresController(implicit inj: Injector)
   }
 
   def getLocations(centreId: String, locationId: Option[String]) =
-    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
       val validation = centresService.getCentreLocations(centreId, locationId)
       locationId.fold {
         domainValidationReply(validation)
@@ -92,13 +92,13 @@ class CentresController(implicit inj: Injector)
   }
 
   def removeLocation(centreId: String, id: String) =
-    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-      val future = centresService.removeCentreLocation(RemoveCentreLocationCmd(centreId, id))
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
+      val future = centresService.removeCentreLocation(RemoveCentreLocationCmd(centreId, id))(userId)
       domainValidationReply(future)
     }
 
   def getStudies(centreId: String) =
-    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
       domainValidationReply(centresService.getCentreStudies(centreId))
     }
 
@@ -115,9 +115,9 @@ class CentresController(implicit inj: Injector)
     }
 
   def removeStudy(centreId: String, studyId: String) =
-    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
       Logger.debug(s"removeStudy: $centreId, $studyId")
-      val future = centresService.removeStudyFromCentre(RemoveStudyFromCentreCmd(centreId, studyId))
+      val future = centresService.removeStudyFromCentre(RemoveStudyFromCentreCmd(centreId, studyId))(userId)
       domainValidationReply(future)
     }
 

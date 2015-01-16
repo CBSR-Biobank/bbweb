@@ -45,7 +45,7 @@ class Application(implicit inj: Injector)
       (__ \ "users").write[Int]
   )(unlift(AggregateCountsDto.unapply))
 
-  def aggregateCounts = AuthAction(parse.empty) { token => implicit userId => implicit request =>
+  def aggregateCounts = AuthAction(parse.empty) { (token, userId, request) =>
     Ok(AggregateCountsDto(
       studiesService.getAll.size,
       centresService.getAll.size,

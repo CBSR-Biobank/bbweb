@@ -43,9 +43,9 @@ class StudiesController(implicit inj: Injector)
   case class PaginationResult(studies: Seq[Study], page: Int, pageSize: Int)
 
   def list(filter : String, sort : String, page : Int, pageSize : Int, order : String) =
-    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
 
-      Logger.debug(s"StudiesController: list: filter/$filter, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
+      Logger.debug(s"StudiesController:list: filter/$filter, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
 
       val pagedQuery = PagedQuery(sort, page, pageSize, order)
       val validation = for {
@@ -75,7 +75,7 @@ class StudiesController(implicit inj: Injector)
     }
 
   def listNames(filter: String, order: String) =
-    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
 
       SortOrder.fromString(order).fold(
         err => BadRequest(err.list.mkString),
@@ -86,7 +86,7 @@ class StudiesController(implicit inj: Injector)
       )
     }
 
-  def query(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
+  def query(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
     studiesService.getStudy(id).fold(
       err => {
         val errStr = err.list.mkString(", ")
@@ -183,12 +183,12 @@ class StudiesController(implicit inj: Injector)
     ))
   }
 
-  def getCollectionDto(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
+  def getCollectionDto(studyId: String) = AuthAction(parse.empty) { (token, userId, request) =>
     Logger.debug(s"StudiesController.getCollectionDto: studyId: $studyId")
     domainValidationReply(studiesService.getCollectionDto(studyId))
   }
 
-  def getProcessingDto(studyId: String) = AuthAction(parse.empty) { token => userId => implicit request =>
+  def getProcessingDto(studyId: String) = AuthAction(parse.empty) { (token, userId, request) =>
     Logger.debug(s"StudiesController.getProcessingDto: studyId: $studyId")
     domainValidationReply(studiesService.getProcessingDto(studyId))
   }

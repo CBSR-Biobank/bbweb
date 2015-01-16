@@ -34,7 +34,7 @@ class SpecimenLinkAnnotTypeController(implicit inj: Injector)
   private def studiesService = inject[StudiesService]
 
   def get(studyId: String, annotTypeId: Option[String]) =
-    AuthAction(parse.empty) { token => userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
       Logger.debug(s"SpecimenLinkAnnotTypeController.list: studyId: $studyId, annotTypeId: $annotTypeId")
 
       annotTypeId.fold {
@@ -67,9 +67,9 @@ class SpecimenLinkAnnotTypeController(implicit inj: Injector)
     }
 
   def removeAnnotationType(studyId: String, id: String, ver: Long) =
-    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveSpecimenLinkAnnotationTypeCmd(studyId, id, ver)
-      val future = studiesService.removeSpecimenLinkAnnotationType(cmd)
+      val future = studiesService.removeSpecimenLinkAnnotationType(cmd)(userId)
       domainValidationReply(future)
   }
 

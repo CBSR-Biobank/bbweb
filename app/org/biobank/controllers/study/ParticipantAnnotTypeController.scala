@@ -41,7 +41,7 @@ class ParticipantAnnotTypeController(implicit inj: Injector)
     * If no matching annotation type is found then an error result is returned.
     */
   def get(studyId: String, annotTypeId: Option[String]) =
-    AuthAction(parse.empty) { token => userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
       Logger.debug(s"ParticipantAnnotTypeController.get: studyId: $studyId, annotTypeId: $annotTypeId")
 
       annotTypeId.fold {
@@ -73,9 +73,9 @@ class ParticipantAnnotTypeController(implicit inj: Injector)
   }
 
   def removeAnnotationType(studyId: String, id: String, ver: Long) =
-    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveParticipantAnnotationTypeCmd(studyId, id, ver)
-      val future = studiesService.removeParticipantAnnotationType(cmd)
+      val future = studiesService.removeParticipantAnnotationType(cmd)(userId)
       domainValidationReply(future)
   }
 

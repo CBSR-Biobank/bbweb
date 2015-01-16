@@ -33,7 +33,7 @@ class ProcessingTypeController(implicit inj: Injector)
   private def studiesService = inject[StudiesService]
 
   def get(studyId: String, procTypeId: Option[String]) =
-    AuthAction(parse.empty) { token => userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
       Logger.debug(s"ProcessingTypeController.get: studyId: $studyId, procTypeId: $procTypeId")
 
       procTypeId.fold {
@@ -66,9 +66,9 @@ class ProcessingTypeController(implicit inj: Injector)
   }
 
   def removeProcessingType(studyId: String, id: String, ver: Long) =
-    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveProcessingTypeCmd(studyId, id, ver)
-      val future = studiesService.removeProcessingType(cmd)
+      val future = studiesService.removeProcessingType(cmd)(userId)
       domainValidationReply(future)
     }
 

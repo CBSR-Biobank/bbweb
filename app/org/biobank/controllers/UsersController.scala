@@ -81,7 +81,7 @@ class UsersController(implicit inj: Injector)
 
   /** Retrieves the user associated with the token, if it is valid.
     */
-  def authenticateUser() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
+  def authenticateUser() = AuthAction(parse.empty) { (token, userId, request) =>
     usersService.getUser(userId.id).fold(
       err  => BadRequest(err.list.mkString(", ")),
       user => Ok(user)
@@ -94,7 +94,7 @@ class UsersController(implicit inj: Injector)
     * Discard the cookie [[AuthTokenCookieKey]] to have AngularJS no longer set the
     * X-XSRF-TOKEN in HTTP header.
     */
-  def logout() = AuthAction(parse.empty) { token => implicit userId => implicit request =>
+  def logout() = AuthAction(parse.empty) { (token, userId, request) =>
     Cache.remove(token)
     Ok("user has been logged out")
       .discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
@@ -130,13 +130,13 @@ class UsersController(implicit inj: Injector)
   }
 
   def list(query: Option[String], sort: Option[String], order: Option[String]) =
-    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
       val users = usersService.getAll.toList
       Ok(users)
     }
 
   /** Retrieves the user for the given id as JSON */
-  def user(id: String) = AuthAction(parse.empty) { token => implicit userId => implicit request =>
+  def user(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
     Logger.debug(s"user: id: $id")
     usersService.getUser(id).fold(
       err => BadRequest(err.list.mkString(", ")),
@@ -217,7 +217,7 @@ class UsersController(implicit inj: Injector)
   }
 
   def userStudies(id: String, query: Option[String], sort: Option[String], order: Option[String]) =
-    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
       // FIXME this should return the only the studies this user has access to
       //
       // This this for now, but fix once user groups have been implemented

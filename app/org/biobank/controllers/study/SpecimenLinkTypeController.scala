@@ -33,7 +33,7 @@ class SpecimenLinkTypeController(implicit inj: Injector)
   private def studiesService = inject[StudiesService]
 
   def get(processingTypeId: String, slTypeId: Option[String]) =
-    AuthAction(parse.empty) { token => userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
       Logger.debug(s"SpecimenLinkTypeController.get: processingTypeId: $processingTypeId, slTypeId: $slTypeId")
 
       slTypeId.fold {
@@ -67,9 +67,9 @@ class SpecimenLinkTypeController(implicit inj: Injector)
     }
 
   def removeSpecimenLinkType(processingTypeId: String, id: String, ver: Long) =
-    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveSpecimenLinkTypeCmd(processingTypeId, id, ver)
-      val future = studiesService.removeSpecimenLinkType(cmd)
+      val future = studiesService.removeSpecimenLinkType(cmd)(userId)
       domainValidationReply(future)
     }
 

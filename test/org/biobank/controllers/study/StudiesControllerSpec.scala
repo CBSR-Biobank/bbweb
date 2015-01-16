@@ -582,6 +582,22 @@ class StudiesControllerSpec extends ControllerFixture {
         compareStudyNameDto(jsonList(0), study1)
       }
 
+      "list nothing when using an invalid filter" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ABC")
+        val study2 = factory.createDisabledStudy.copy(name = "DEF")
+
+        val studies = List(study2, study1)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, "/studies/names?filter=xxx")
+        (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
+        jsonList must have size 0
+      }
+
       "fail for invalid order parameter" in new App(fakeApp) {
         doLogin
 

@@ -38,7 +38,7 @@ class SpecimenGroupController(implicit inj: Injector)
   private def studiesService = inject[StudiesService]
 
   def get(studyId: String, sgId: Option[String]) =
-    AuthAction(parse.empty) { token => userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
       Logger.debug(s"SpecimenGroupController.get: studyId: $studyId, sgId: $sgId")
 
       sgId.fold {
@@ -48,7 +48,7 @@ class SpecimenGroupController(implicit inj: Injector)
       }
     }
 
-  def getInUse(studyId: String, sgId: Option[String]) = AuthAction(parse.empty) { token => userId => implicit request =>
+  def getInUse(studyId: String, sgId: Option[String]) = AuthAction(parse.empty) { (token, userId, request) =>
     Logger.debug(s"SpecimenGroupController.getInUse: studyId: $studyId, sgId: $sgId")
     domainValidationReply(studiesService.specimenGroupsInUse(studyId))
   }
@@ -77,9 +77,9 @@ class SpecimenGroupController(implicit inj: Injector)
     }
 
   def removeSpecimenGroup(studyId: String, id: String, ver: Long) =
-    AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveSpecimenGroupCmd(studyId, id, ver)
-      val future = studiesService.removeSpecimenGroup(cmd)
+      val future = studiesService.removeSpecimenGroup(cmd)(userId)
       domainValidationReply(future)
     }
 

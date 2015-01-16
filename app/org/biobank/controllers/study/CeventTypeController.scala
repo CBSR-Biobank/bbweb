@@ -33,7 +33,7 @@ class CeventTypeController(implicit inj: Injector)
   private def studiesService = inject[StudiesService]
 
   def get(studyId: String, ceventTypeId: Option[String]) =
-    AuthAction(parse.empty) { token => implicit userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
       Logger.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
 
       ceventTypeId.fold {
@@ -65,12 +65,11 @@ class CeventTypeController(implicit inj: Injector)
       }
     }
 
-  def removeCollectionEventType(
-    studyId: String,
-    id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-    val cmd = RemoveCollectionEventTypeCmd(studyId, id, ver)
-    val future = studiesService.removeCollectionEventType(cmd)
-    domainValidationReply(future)
+  def removeCollectionEventType(studyId: String, id: String, ver: Long) =
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
+      val cmd = RemoveCollectionEventTypeCmd(studyId, id, ver)
+      val future = studiesService.removeCollectionEventType(cmd)(userId)
+      domainValidationReply(future)
   }
 
 }

@@ -19,7 +19,7 @@ trait CommandController extends Controller with Security {
   def commandAction[A, T <: Command]
     (func: T => UserId => Future[Result])
     (implicit userService: UsersService, reads: Reads[T]) = {
-    AuthActionAsync(parse.json) { token => implicit userId => implicit request =>
+    AuthActionAsync(parse.json) { (token, userId, request) =>
         val cmdResult = request.body.validate[T]
         cmdResult.fold(
           errors => {
@@ -37,7 +37,7 @@ trait CommandController extends Controller with Security {
   def commandAction[A, T <: Command](numFields: Integer)
     (func: T => UserId => Future[Result])
     (implicit userService: UsersService, reads: Reads[T]) = {
-    AuthActionAsync(parse.json) { token => implicit userId => implicit request =>
+    AuthActionAsync(parse.json) { (token, userId, request) =>
       var jsonObj = request.body.as[JsObject]
       Logger.debug(s"commandAction: $jsonObj")
       if (jsonObj.keys.size == numFields) {

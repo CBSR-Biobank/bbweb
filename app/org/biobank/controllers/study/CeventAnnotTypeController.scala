@@ -32,7 +32,7 @@ class CeventAnnotTypeController(implicit inj: Injector)
   private def studiesService = inject[StudiesService]
 
   def get(studyId: String, annotTypeId : Option[String]) =
-    AuthAction(parse.empty) { token => userId => implicit request =>
+    AuthAction(parse.empty) { (token, userId, request) =>
       Logger.debug(s"CeventAnnotTypeController.list: studyId: $studyId, annotTypeId: $annotTypeId")
 
       annotTypeId.fold {
@@ -64,10 +64,11 @@ class CeventAnnotTypeController(implicit inj: Injector)
       }
   }
 
-  def removeAnnotationType(studyId: String, id: String, ver: Long) = AuthActionAsync(parse.empty) { token => implicit userId => implicit request =>
-    val cmd =  RemoveCollectionEventAnnotationTypeCmd(studyId, id, ver)
-    val future = studiesService.removeCollectionEventAnnotationType(cmd)
-    domainValidationReply(future)
-  }
+  def removeAnnotationType(studyId: String, id: String, ver: Long) =
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
+      val cmd =  RemoveCollectionEventAnnotationTypeCmd(studyId, id, ver)
+      val future = studiesService.removeCollectionEventAnnotationType(cmd)(userId)
+      domainValidationReply(future)
+    }
 
 }

@@ -14,10 +14,11 @@ import scaldi.{Injectable, Injector}
 import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+
 /**
- * Security actions that should be used by all controllers that need to protect their actions.
- * Can be composed to fine-tune access control.
- */
+  * Security actions that should be used by all controllers that need to protect their actions.
+  * Can be composed to fine-tune access control.
+  */
 trait Security { self: Controller =>
 
   val AuthTokenCookieKey = "XSRF-TOKEN"
@@ -39,58 +40,65 @@ trait Security { self: Controller =>
     (request: Request[A])
     (implicit usersService: UsersService)
       : DomainValidation[AuthenticationInfo] = {
-     request.cookies.get(AuthTokenCookieKey).fold {
-       DomainError("Invalid XSRF Token cookie").failureNel[AuthenticationInfo]
-     } { xsrfTokenCookie =>
-       request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey)).fold {
-         DomainError("No token").failureNel[AuthenticationInfo]
-       } { token =>
-         if (xsrfTokenCookie.value != token) {
-           DomainError("Token mismatch").failureNel[AuthenticationInfo]
-         } else {
-           Cache.getAs[UserId](token).fold {
-             DomainError("invalid token").failureNel[AuthenticationInfo]
-           } { userId =>
-             for {
-               user       <- usersService.getUser(userId.id)
-               activeUser <- UserHelper.isUserActive(user)
-               auth       <- AuthenticationInfo(token, userId).successNel
-             } yield auth
-           }
-         }
-       }
-     }
+    for {
+      cookieXsrfToken <- {
+        request.cookies.get(AuthTokenCookieKey)
+          .map(_.value.successNel)
+          .getOrElse(DomainError("Invalid XSRF Token cookie").failureNel)
+      }
+      headerXsrfToken <- {
+        request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey))
+          .map(_.successNel)
+          .getOrElse(DomainError("No token").failureNel)
+
+      }
+      validToken <-  {
+        if (cookieXsrfToken == headerXsrfToken) {
+          true.successNel
+        } else {
+          DomainError("Token mismatch").failureNel
+        }
+      }
+      userId <- {
+        Cache.getAs[UserId](headerXsrfToken)
+          .map(_.success)
+          .getOrElse(DomainError("invalid token").failureNel)
+      }
+      user       <- usersService.getUser(userId.id)
+      activeUser <- UserHelper.isUserActive(user)
+      auth       <- AuthenticationInfo(headerXsrfToken, userId).successNel
+    } yield auth
   }
 
   /**
-   * Ensures that the request has the proper authorization.
-   *
-   */
+    * Ensures that the request has the proper authorization.
+    *
+    */
   def AuthAction[A]
     (p: BodyParser[A] = parse.anyContent)
-    (f: String => UserId => Request[A] => Result)
+    (f: (String, UserId,  Request[A]) => Result)
     (implicit usersService: UsersService)
       : Action[A] =
     Action(p) { implicit request =>
       validateToken(request).fold(
         err => Unauthorized(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
-        authInfo => f(authInfo.token)(authInfo.userId)(request))
+        authInfo => f(authInfo.token, authInfo.userId, request))
     }
 
   /**
-   * Ensures that the request has the proper authorization.
-   *
-   */
+    * Ensures that the request has the proper authorization.
+    *
+    */
   def AuthActionAsync[A]
     (p: BodyParser[A] = parse.anyContent)
-    (f: String => UserId => Request[A] => Future[Result])
+    (f: (String, UserId, Request[A]) => Future[Result])
     (implicit usersService: UsersService) =
     Action.async(p) { implicit request =>
       validateToken(request).fold(
-        err => Future.successful(Unauthorized(Json.obj(
-          "status" ->"error",
-          "message" -> err.list.mkString(", ")))),
-        authInfo => f(authInfo.token)(authInfo.userId)(request))
+        err => Future.successful(
+          Unauthorized(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))),
+        authInfo => f(authInfo.token, authInfo.userId, request)
+      )
     }
 
 }
