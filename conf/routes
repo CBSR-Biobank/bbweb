@@ -20,6 +20,9 @@ GET     /studies/preservtypes                  @org.biobank.controllers.study.St
 GET     /studies/preservtemptypes              @org.biobank.controllers.study.StudiesController.preservTempTypes
 GET     /studies/sgvaluetypes                  @org.biobank.controllers.study.StudiesController.specimenGroupValueTypes
 
+# Study DTOs
+GET     /studies/names                          @org.biobank.controllers.study.StudiesController.listNames(filter: String ?= "", order: String ?= "ascending")
+
 GET     /studies/:id                           @org.biobank.controllers.study.StudiesController.query(id)
 PUT     /studies/:id                           @org.biobank.controllers.study.StudiesController.update(id)
 POST    /studies/:id/enable                    @org.biobank.controllers.study.StudiesController.enable(id)
@@ -69,9 +72,6 @@ GET     /studies/:procTypeId/sltypes            @org.biobank.controllers.study.S
 POST    /studies/:procTypeId/sltypes            @org.biobank.controllers.study.SpecimenLinkTypeController.addSpecimenLinkType(procTypeId)
 PUT     /studies/:procTypeId/sltypes/:id        @org.biobank.controllers.study.SpecimenLinkTypeController.updateSpecimenLinkType(procTypeId, id)
 DELETE  /studies/:procTypeId/sltypes/:id/:ver   @org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(procTypeId, id, ver: Long)
-
-# Study DTOs
-GET     /studies/names                          @org.biobank.controllers.study.StudiesController.listNames(filter: String ?= "", order: String ?= "ascending")
 
 # participants
 GET     /studies/:studyId/participants/:id          @org.biobank.controllers.study.ParticipantsController.get(studyId, id: String)

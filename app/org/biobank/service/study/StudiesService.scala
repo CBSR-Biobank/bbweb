@@ -291,7 +291,9 @@ class StudiesServiceImpl(implicit inj: Injector)
     }
 
     val orderedStudies = filteredStudies.toSeq
-    val result = orderedStudies.map { s => StudyNameDto(s.id.id, s.name) } sortWith(StudyNameDto.compareByName)
+    val result = orderedStudies.map { s =>
+      StudyNameDto(s.id.id, s.name)
+    } sortWith(StudyNameDto.compareByName)
 
     if (order == AscendingOrder) {
       result.success

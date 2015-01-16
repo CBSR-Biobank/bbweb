@@ -60,11 +60,15 @@ class StudiesController(implicit inj: Injector)
       validation.fold(
         err => BadRequest(err.list.mkString),
         pq => {
-          val offset = pq.pageSize * (pq.page - 1)
-          if (offset > pq.studies.size) {
-            BadRequest(s"invalid page requested: ${pq.page}")
+          if (pq.studies.isEmpty) {
+              Ok(Seq.empty[Study])
           } else {
-            Ok(pq.studies.drop(offset).take(pq.pageSize))
+            val offset = pq.pageSize * (pq.page - 1)
+            if (offset > pq.studies.size - 1) {
+              BadRequest(s"invalid page requested: ${pq.page}")
+            } else {
+              Ok(pq.studies.drop(offset).take(pq.pageSize))
+            }
           }
         }
       )

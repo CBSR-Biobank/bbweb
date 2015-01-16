@@ -31,7 +31,8 @@ class StudiesControllerSpec extends ControllerFixture {
   "Study REST API" when {
 
     "GET /studies" must {
-      "list none" in new App(fakeApp) {
+
+      "list none" taggedAs(Tag("1")) in new App(fakeApp) {
         doLogin
         val json = makeRequest(GET, uri)
         (json \ "status").as[String] must include ("success")
@@ -67,7 +68,7 @@ class StudiesControllerSpec extends ControllerFixture {
         (jsonList zip studies).map { item => compareStudyNameDto(item._1, item._2) }
       }
 
-      "list a single study with a name query string" taggedAs(Tag("1")) in new App(fakeApp) {
+      "list a single study with a name query string" in new App(fakeApp) {
         doLogin
 
         val study1 = factory.createDisabledStudy.copy(name = "ABC")
@@ -136,6 +137,121 @@ class StudiesControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("invalid order requested")
+      }
+
+      "list studies sorted by name" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ST1").enable(1, 1) | fail
+        val study2 = factory.createDisabledStudy.copy(name = "ST2")
+
+        val studies = List(study1, study2)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, uri + "?sort=name")
+        (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
+        jsonList must have size 2
+
+        compareStudyNameDto(jsonList(0), study1)
+        compareStudyNameDto(jsonList(1), study2)
+      }
+
+      "list studies sorted by status" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ST1").enable(1, 1) | fail
+        val study2 = factory.createDisabledStudy.copy(name = "ST2")
+
+        val studies = List(study1, study2)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, uri + "?sort=status")
+        (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
+        jsonList must have size 2
+
+        compareStudyNameDto(jsonList(0), study2)
+        compareStudyNameDto(jsonList(1), study1)
+      }
+
+      "fail for an invalid sort column" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ST1")
+        val study2 = factory.createDisabledStudy.copy(name = "ST2").enable(1, 1) | fail
+
+        val studies = List(study2, study1)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, uri + "?sort=description", BAD_REQUEST)
+
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("invalid sort field")
+      }
+
+      "list single study when using paged query" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ST1")
+        val study2 = factory.createDisabledStudy.copy(name = "ST2")
+
+        val studies = List(study2, study1)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, uri + "?pageSize=1")
+        (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
+        jsonList must have size 1
+      }
+
+      "fail when using page that exeeds limits" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ST1")
+        val study2 = factory.createDisabledStudy.copy(name = "ST2")
+
+        val studies = List(study2, study1)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, uri + "?page=3&pageSize=1", BAD_REQUEST)
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("invalid page requested")
+      }
+
+      "fail when using a negative page number" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ST1")
+        val study2 = factory.createDisabledStudy.copy(name = "ST2")
+
+        val studies = List(study2, study1)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, uri + "?page=-1&pageSize=1", BAD_REQUEST)
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("page is invalid")
+      }
+
+      "fail when using a negative pageSzie" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ST1")
+        val study2 = factory.createDisabledStudy.copy(name = "ST2")
+
+        val studies = List(study2, study1)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, uri + "?page=1&pageSize=-1", BAD_REQUEST)
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("page size is invalid")
       }
     }
 
@@ -426,6 +542,63 @@ class StudiesControllerSpec extends ControllerFixture {
         (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (1)
       }
     }
+
+    "GET /studies/names" must {
+
+      "list multiple study names in ascending order" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ST1")
+        val study2 = factory.createDisabledStudy.copy(name = "ST2")
+
+        val studies = List(study2, study1)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, "/studies/names?order=ascending")
+        (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
+        jsonList must have size studies.size
+
+        compareStudyNameDto(jsonList(0), study1)
+        compareStudyNameDto(jsonList(1), study2)
+      }
+
+      "list single study when using a filter" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ABC")
+        val study2 = factory.createDisabledStudy.copy(name = "DEF")
+
+        val studies = List(study2, study1)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, "/studies/names?filter=ABC")
+        (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
+        jsonList must have size 1
+
+        compareStudyNameDto(jsonList(0), study1)
+      }
+
+      "fail for invalid order parameter" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ST1")
+        val study2 = factory.createDisabledStudy.copy(name = "ST2")
+
+        val studies = List(study2, study1)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, "/studies/names?order=xxxx", BAD_REQUEST)
+
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("invalid order requested")
+      }
+    }
+
 
   }
 
