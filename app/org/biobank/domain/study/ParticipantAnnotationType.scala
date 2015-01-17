@@ -86,18 +86,6 @@ object ParticipantAnnotationType extends StudyAnnotationTypeValidations {
     }
   }
 
-  implicit val participantAnnotationTypeWrites: Writes[ParticipantAnnotationType] = (
-      (__ \ "studyId").write[StudyId] and
-      (__ \ "id").write[AnnotationTypeId] and
-      (__ \ "version").write[Long] and
-      (__ \ "timeAdded").write[DateTime] and
-      (__ \ "timeModified").write[Option[DateTime]] and
-      (__ \ "name").write[String] and
-      (__ \ "description").write[Option[String]] and
-      (__ \ "valueType").write[AnnotationValueType] and
-      (__ \ "maxValueCount").write[Option[Int]] and
-      (__ \ "options").write[Seq[String]] and
-      (__ \ "required").write[Boolean]
-  )(unlift(org.biobank.domain.study.ParticipantAnnotationType.unapply))
+  implicit val participantAnnotationTypeWrites = Json.writes[ParticipantAnnotationType]
 
 }

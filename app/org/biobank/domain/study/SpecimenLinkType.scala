@@ -186,21 +186,6 @@ object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotation
     }
   }
 
-  implicit val specimenLinkTypeWrites: Writes[SpecimenLinkType] = (
-    (__ \ "processingTypeId").write[ProcessingTypeId] and
-      (__ \ "id").write[SpecimenLinkTypeId] and
-      (__ \ "version").write[Long] and
-      (__ \ "timeAdded").write[DateTime] and
-      (__ \ "timeModified").write[Option[DateTime]] and
-      (__ \ "expectedInputChange").write[BigDecimal] and
-      (__ \ "expectedOutputChange").write[BigDecimal] and
-      (__ \ "inputCount").write[Int] and
-      (__ \ "outputCount").write[Int] and
-      (__ \ "inputGroupId").write[SpecimenGroupId] and
-      (__ \ "outputGroupId").write[SpecimenGroupId] and
-      (__ \ "inputContainerTypeId").write[Option[ContainerTypeId]] and
-      (__ \ "outputContainerTypeId").write[Option[ContainerTypeId]] and
-      (__ \ "annotationTypeData").write[List[SpecimenLinkTypeAnnotationTypeData]]
-  )(unlift(org.biobank.domain.study.SpecimenLinkType.unapply))
+  implicit val specimenLinkTypeWrites = Json.writes[SpecimenLinkType]
 
 }

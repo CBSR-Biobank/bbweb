@@ -132,20 +132,6 @@ object SpecimenGroup extends SpecimenGroupValidations with StudyAnnotationTypeVa
     }
   }
 
-  implicit val specimenGroupWrites: Writes[SpecimenGroup] = (
-    (__ \ "studyId").write[StudyId] and
-      (__ \ "id").write[SpecimenGroupId] and
-      (__ \ "version").write[Long] and
-      (__ \ "timeAdded").write[DateTime] and
-      (__ \ "timeModified").write[Option[DateTime]] and
-      (__ \ "name").write[String] and
-      (__ \ "description").write[Option[String]] and
-      (__ \ "units").write[String] and
-      (__ \ "anatomicalSourceType").write[AnatomicalSourceType] and
-      (__ \ "preservationType").write[PreservationType] and
-      (__ \ "preservationTemperatureType").write[PreservationTemperatureType] and
-      (__ \ "specimenType").write[SpecimenType]
-  )(unlift(SpecimenGroup.unapply))
-
+  implicit val specimenGroupWrites = Json.writes[SpecimenGroup]
 
 }

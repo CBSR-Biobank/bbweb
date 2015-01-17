@@ -105,44 +105,19 @@ package infrastructure {
 
   object CollectionEventTypeAnnotationTypeData {
 
-    implicit val annotationTypeDataReads: Reads[CollectionEventTypeAnnotationTypeData] = (
-      (__ \ "annotationTypeId").read[String](minLength[String](2)) and
-        (__ \ "required").read[Boolean]
-    )(CollectionEventTypeAnnotationTypeData.apply _)
-
-    implicit val annotationTypeDataWrites: Writes[CollectionEventTypeAnnotationTypeData] = (
-      (__ \ "annotationTypeId").write[String] and
-        (__ \ "required").write[Boolean]
-    )(unlift(CollectionEventTypeAnnotationTypeData.unapply))
+    implicit val annotationTypeDataFormat = Json.format[CollectionEventTypeAnnotationTypeData]
 
   }
 
   object CollectionEventTypeSpecimenGroupData {
 
-    implicit val specimenGroupDataReads: Reads[CollectionEventTypeSpecimenGroupData]= (
-      (__ \ "specimenGroupId").read[String](minLength[String](2)) and
-        (__ \ "maxCount").read[Int] and
-        (__ \ "amount").readNullable[BigDecimal]
-    )(CollectionEventTypeSpecimenGroupData.apply _)
+    implicit val specimenGroupDataFormat = Json.format[CollectionEventTypeSpecimenGroupData]
 
-    implicit val specimenGroupDataWrites: Writes[CollectionEventTypeSpecimenGroupData] = (
-      (__ \ "specimenGroupId").write[String] and
-        (__ \ "maxCount").write[Int] and
-        (__ \ "amount").write[Option[BigDecimal]]
-    )(unlift(CollectionEventTypeSpecimenGroupData.unapply))
   }
 
   object SpecimenLinkTypeAnnotationTypeData {
 
-    implicit val annotationTypeDataReads: Reads[SpecimenLinkTypeAnnotationTypeData] = (
-      (__ \ "annotationTypeId").read[String](minLength[String](2)) and
-        (__ \ "required").read[Boolean]
-    )(SpecimenLinkTypeAnnotationTypeData.apply _)
-
-    implicit val annotationTypeDataWrites: Writes[SpecimenLinkTypeAnnotationTypeData] = (
-      (__ \ "annotationTypeId").write[String] and
-        (__ \ "required").write[Boolean]
-    )(unlift(SpecimenLinkTypeAnnotationTypeData.unapply))
+    implicit val annotationTypeDataFormat = Json.format[SpecimenLinkTypeAnnotationTypeData]
 
   }
 
@@ -151,10 +126,7 @@ package infrastructure {
   object StudyNameDto {
     def compareByName(a: StudyNameDto, b: StudyNameDto) = (a.name compareToIgnoreCase b.name) < 0
 
-    implicit val studyNameDtoWriter: Writes[StudyNameDto] = (
-      (__ \ "id").write[String] and
-      (__ \ "name").write[String]
-    )(unlift(StudyNameDto.unapply))
+    implicit val studyNameDtoWriter = Json.writes[StudyNameDto]
   }
 
   case class CollectionDto(
@@ -164,12 +136,7 @@ package infrastructure {
     specimenGroups: List[org.biobank.domain.study.SpecimenGroup])
 
   object CollectionDto {
-    implicit val collectionDtoWriter: Writes[CollectionDto] = (
-      (__ \ "collectionEventTypes").write[List[org.biobank.domain.study.CollectionEventType]] and
-        (__ \ "collectionEventAnnotationTypes").write[List[org.biobank.domain.study.CollectionEventAnnotationType]] and
-        (__ \ "collectionEventAnnotationTypesInUse").write[List[String]] and
-        (__ \ "specimenGroups").write[List[org.biobank.domain.study.SpecimenGroup]]
-    )(unlift(CollectionDto.unapply))
+    implicit val collectionDtoWriter = Json.writes[CollectionDto]
   }
 
   case class ProcessingDto(
@@ -179,12 +146,9 @@ package infrastructure {
     specimenGroups: List[org.biobank.domain.study.SpecimenGroup])
 
   object ProcessingDto {
-    implicit val processingDtoWriter: Writes[ProcessingDto] = (
-      (__ \ "processingTypes").write[List[org.biobank.domain.study.ProcessingType]] and
-        (__ \ "specimenLinkTypes").write[List[org.biobank.domain.study.SpecimenLinkType]] and
-        (__ \ "specimenLinkAnnotationTypes").write[List[org.biobank.domain.study.SpecimenLinkAnnotationType]] and
-        (__ \ "specimenGroups").write[List[org.biobank.domain.study.SpecimenGroup]]
-    )(unlift(ProcessingDto.unapply))
+
+    implicit val processingDtoWriter = Json.writes[ProcessingDto]
+
   }
 
 }

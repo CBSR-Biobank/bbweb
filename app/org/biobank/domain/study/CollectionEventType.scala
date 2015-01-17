@@ -132,18 +132,7 @@ object CollectionEventType extends CollectionEventTypeValidations with StudyAnno
     specimenGroupData.map(validateSpecimenGroupItem).sequenceU
   }
 
-  implicit val collectionEventTypeWrites: Writes[CollectionEventType] = (
-    (__ \ "studyId").write[StudyId] and
-      (__ \ "id").write[CollectionEventTypeId] and
-      (__ \ "version").write[Long] and
-      (__ \ "timeAdded").write[DateTime] and
-      (__ \ "timeModified").write[Option[DateTime]] and
-      (__ \ "name").write[String] and
-      (__ \ "description").write[Option[String]] and
-      (__ \ "recurring").write[Boolean] and
-      (__ \ "specimenGroupData").write[List[CollectionEventTypeSpecimenGroupData]] and
-      (__ \ "annotationTypeData").write[List[CollectionEventTypeAnnotationTypeData]]
-  )(unlift(org.biobank.domain.study.CollectionEventType.unapply))
+  implicit val collectionEventTypeWrites = Json.writes[CollectionEventType]
 
 }
 

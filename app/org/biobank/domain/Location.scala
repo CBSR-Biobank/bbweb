@@ -32,15 +32,6 @@ case class Location(
 
 object Location {
 
-  implicit val locationWriter: Writes[Location] = (
-    (__ \ "id").write[LocationId] and
-      (__ \ "name").write[String] and
-      (__ \ "street").write[String] and
-      (__ \ "city").write[String] and
-      (__ \ "province").write[String] and
-      (__ \ "postalCode").write[String] and
-      (__ \ "poBoxNumber").writeNullable[String] and
-      (__ \ "countryIsoCode").write[String]
-  )(unlift(Location.unapply))
+  implicit val locationWriter = Json.writes[Location]
 
 }

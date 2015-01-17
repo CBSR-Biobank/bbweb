@@ -82,14 +82,5 @@ object ProcessingType {
     }
   }
 
-  implicit val processingTypeWrites: Writes[ProcessingType] = (
-    (__ \ "studyId").write[StudyId] and
-      (__ \ "id").write[ProcessingTypeId] and
-      (__ \ "version").write[Long] and
-      (__ \ "timeAdded").write[DateTime] and
-      (__ \ "timeModified").write[Option[DateTime]] and
-      (__ \ "name").write[String] and
-      (__ \ "description").write[Option[String]] and
-      (__ \ "enabled").write[Boolean]
-  )(unlift(org.biobank.domain.study.ProcessingType.unapply))
+  implicit val processingTypeWrites = Json.writes[ProcessingType]
 }

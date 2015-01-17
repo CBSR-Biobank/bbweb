@@ -344,236 +344,33 @@ object StudyCommands {
   implicit val preservatioTempTypeReads: Format[PreservationTemperatureType] =
     enumFormat(org.biobank.domain.PreservationTemperatureType)
 
-  implicit val addStudyCmdReads = (
-    (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String]
-  ){ AddStudyCmd(_, _) }
-
-  implicit val updateStudyCmdReads: Reads[UpdateStudyCmd] = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String]
-  )(UpdateStudyCmd.apply _)
-
-  implicit val enableStudyCmdReads: Reads[EnableStudyCmd] = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(EnableStudyCmd.apply _ )
-
-  implicit val disableStudyCmdReads: Reads[DisableStudyCmd] = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(DisableStudyCmd.apply _)
-
-  implicit val retireStudyCmdReads: Reads[RetireStudyCmd] = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(RetireStudyCmd.apply _)
-
-  implicit val unretireStudyCmdReads: Reads[UnretireStudyCmd] = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(UnretireStudyCmd.apply _)
-
-  implicit val addParticipantAnnotationTypeCmdReads: Reads[AddParticipantAnnotationTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String] and
-      (__ \ "valueType").read[AnnotationValueType] and
-      (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").read[Seq[String]] and
-      (__ \ "required").read[Boolean]
-  ){ AddParticipantAnnotationTypeCmd.apply _}
-
-  implicit val updateParticipantAnnotationTypeCmdReads: Reads[UpdateParticipantAnnotationTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String] and
-      (__ \ "valueType").read[AnnotationValueType] and
-      (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").read[Seq[String]] and
-      (__ \ "required").read[Boolean]
-  )(UpdateParticipantAnnotationTypeCmd.apply _)
-
-  implicit val addSpecimenGroupCmdReads: Reads[AddSpecimenGroupCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String] and
-      (__ \ "units").read[String](minLength[String](1)) and
-      (__ \ "anatomicalSourceType").read[AnatomicalSourceType] and
-      (__ \ "preservationType").read[PreservationType] and
-      (__ \ "preservationTemperatureType").read[PreservationTemperatureType] and
-      (__ \ "specimenType").read[SpecimenType]
-  ){ AddSpecimenGroupCmd.apply _ }
-
-  implicit val updateSpecimenGroupCmdReads: Reads[UpdateSpecimenGroupCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String] and
-      (__ \ "units").read[String](minLength[String](1)) and
-      (__ \ "anatomicalSourceType").read[AnatomicalSourceType] and
-      (__ \ "preservationType").read[PreservationType] and
-      (__ \ "preservationTemperatureType").read[PreservationTemperatureType] and
-      (__ \ "specimenType").read[SpecimenType]
-  )(UpdateSpecimenGroupCmd.apply _)
-
-  implicit val removeSpecimenGroupCmdReads: Reads[RemoveSpecimenGroupCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(RemoveSpecimenGroupCmd.apply _)
-
-  implicit val addCollectionEventAnnotationTypeCmdReads: Reads[AddCollectionEventAnnotationTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String] and
-      (__ \ "valueType").read[AnnotationValueType] and
-      (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").read[Seq[String]]
-  ){ AddCollectionEventAnnotationTypeCmd.apply _ }
-
-  implicit val updateCollectionEventAnnotationTypeCmdReads: Reads[UpdateCollectionEventAnnotationTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String] and
-      (__ \ "valueType").read[AnnotationValueType] and
-      (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").read[Seq[String]]
-  )(UpdateCollectionEventAnnotationTypeCmd.apply _)
-
-  implicit val removeCollectionEventAnnotationTypeCmdReads: Reads[RemoveCollectionEventAnnotationTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(RemoveCollectionEventAnnotationTypeCmd.apply _)
-
-  implicit val addCollectionEventTypeCmdReads: Reads[AddCollectionEventTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String] and
-      (__ \ "recurring").read[Boolean] and
-      (__ \ "specimenGroupData").read[List[CollectionEventTypeSpecimenGroupData]] and
-      (__ \ "annotationTypeData").read[List[CollectionEventTypeAnnotationTypeData]]
-  ){ AddCollectionEventTypeCmd.apply _ }
-
-  implicit val updateCollectionEventTypeCmdReads: Reads[UpdateCollectionEventTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String] and
-      (__ \ "recurring").read[Boolean] and
-      (__ \ "specimenGroupData").read[List[CollectionEventTypeSpecimenGroupData]] and
-      (__ \ "annotationTypeData").read[List[CollectionEventTypeAnnotationTypeData]]
-  )(UpdateCollectionEventTypeCmd.apply _)
-
-  implicit val removeCollectionEventTypeCmdReads: Reads[RemoveCollectionEventTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(RemoveCollectionEventTypeCmd.apply _)
-
-  implicit val addProcessingTypeCmdReads: Reads[AddProcessingTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String] and
-      (__ \ "enabled").read[Boolean]
-  ){ AddProcessingTypeCmd.apply _ }
-
-  implicit val updateProcessingTypeCmdReads: Reads[UpdateProcessingTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String] and
-      (__ \ "enabled").read[Boolean]
-  )(UpdateProcessingTypeCmd.apply _)
-
-  implicit val removeProcessingTypeCmdReads: Reads[RemoveProcessingTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(RemoveProcessingTypeCmd.apply _)
-
-  implicit val addSpecimenLinkAnnotationTypeCmdReads: Reads[AddSpecimenLinkAnnotationTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String] and
-      (__ \ "valueType").read[AnnotationValueType] and
-      (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").read[Seq[String]]
-  ){ AddSpecimenLinkAnnotationTypeCmd.apply _ }
-
-  implicit val updateSpecimenLinkAnnotationTypeCmdReads: Reads[UpdateSpecimenLinkAnnotationTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String] and
-      (__ \ "valueType").read[AnnotationValueType] and
-      (__ \ "maxValueCount").readNullable[Int] and
-      (__ \ "options").read[Seq[String]]
-  )(UpdateSpecimenLinkAnnotationTypeCmd.apply _)
-
-  implicit val removeSpecimenLinkAnnotationTypeCmdReads: Reads[RemoveSpecimenLinkAnnotationTypeCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(RemoveSpecimenLinkAnnotationTypeCmd.apply _)
-
-  implicit val addSpecimenLinkTypeCmdReads: Reads[AddSpecimenLinkTypeCmd] = (
-    (__ \ "processingTypeId").read[String](minLength[String](2)) and
-      (__ \ "expectedInputChange").read[BigDecimal] and
-      (__ \ "expectedOutputChange").read[BigDecimal] and
-      (__ \ "inputCount").read[Int] and
-      (__ \ "outputCount").read[Int] and
-      (__ \ "inputGroupId").read[String] and
-      (__ \ "outputGroupId").read[String] and
-      (__ \ "inputContainerTypeId").read[Option[String]] and
-      (__ \ "outputContainerTypeId").read[Option[String]] and
-      (__ \ "annotationTypeData").read[List[SpecimenLinkTypeAnnotationTypeData]]
-  ){ AddSpecimenLinkTypeCmd.apply _ }
-
-  implicit val updateSpecimenLinkTypeCmdReads: Reads[UpdateSpecimenLinkTypeCmd] = (
-    (__ \ "processingTypeId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "expectedInputChange").read[BigDecimal] and
-      (__ \ "expectedOutputChange").read[BigDecimal] and
-      (__ \ "inputCount").read[Int] and
-      (__ \ "outputCount").read[Int] and
-      (__ \ "inputGroupId").read[String] and
-      (__ \ "outputGroupId").read[String] and
-      (__ \ "inputContainerTypeId").read[Option[String]] and
-      (__ \ "outputContainerTypeId").read[Option[String]] and
-      (__ \ "annotationTypeData").read[List[SpecimenLinkTypeAnnotationTypeData]]
-  )(UpdateSpecimenLinkTypeCmd.apply _)
-
-  implicit val removeSpecimenLinkTypeCmdReads: Reads[RemoveSpecimenLinkTypeCmd] = (
-    (__ \ "processingTypeId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(RemoveSpecimenLinkTypeCmd.apply _)
-
-  implicit val addParticipantCmdReads: Reads[AddParticipantCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "uniqueId").read[String](minLength[String](2)) and
-      (__ \ "annotations").read[List[ParticipantAnnotation]]
-  ){ AddParticipantCmd.apply _ }
-
-  implicit val updateParticipantCmdReads: Reads[UpdateParticipantCmd] = (
-    (__ \ "studyId").read[String](minLength[String](2)) and
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "uniqueId").read[String](minLength[String](2)) and
-      (__ \ "annotations").read[List[ParticipantAnnotation]]
-  ){ UpdateParticipantCmd.apply _ }
+  implicit val addStudyCmdReads = Json.reads[AddStudyCmd]
+  implicit val updateStudyCmdReads = Json.reads[UpdateStudyCmd]
+  implicit val enableStudyCmdReads = Json.reads[EnableStudyCmd]
+  implicit val disableStudyCmdReads = Json.reads[DisableStudyCmd]
+  implicit val retireStudyCmdReads = Json.reads[RetireStudyCmd]
+  implicit val unretireStudyCmdReads = Json.reads[UnretireStudyCmd]
+  implicit val addParticipantAnnotationTypeCmdReads = Json.reads[AddParticipantAnnotationTypeCmd]
+  implicit val updateParticipantAnnotationTypeCmdReads = Json.reads[UpdateParticipantAnnotationTypeCmd]
+  implicit val addSpecimenGroupCmdReads = Json.reads[AddSpecimenGroupCmd]
+  implicit val updateSpecimenGroupCmdReads = Json.reads[UpdateSpecimenGroupCmd]
+  implicit val removeSpecimenGroupCmdReads = Json.reads[RemoveSpecimenGroupCmd]
+  implicit val addCollectionEventAnnotationTypeCmdReads = Json.reads[AddCollectionEventAnnotationTypeCmd]
+  implicit val updateCollectionEventAnnotationTypeCmdReads = Json.reads[UpdateCollectionEventAnnotationTypeCmd]
+  implicit val removeCollectionEventAnnotationTypeCmdReads = Json.reads[RemoveCollectionEventAnnotationTypeCmd]
+  implicit val addCollectionEventTypeCmdReads = Json.reads[AddCollectionEventTypeCmd]
+  implicit val updateCollectionEventTypeCmdReads = Json.reads[UpdateCollectionEventTypeCmd]
+  implicit val removeCollectionEventTypeCmdReads = Json.reads[RemoveCollectionEventTypeCmd]
+  implicit val addProcessingTypeCmdReads = Json.reads[AddProcessingTypeCmd]
+  implicit val updateProcessingTypeCmdReads = Json.reads[UpdateProcessingTypeCmd]
+  implicit val removeProcessingTypeCmdReads = Json.reads[RemoveProcessingTypeCmd]
+  implicit val addSpecimenLinkAnnotationTypeCmdReads = Json.reads[AddSpecimenLinkAnnotationTypeCmd]
+  implicit val updateSpecimenLinkAnnotationTypeCmdReads = Json.reads[UpdateSpecimenLinkAnnotationTypeCmd]
+  implicit val removeSpecimenLinkAnnotationTypeCmdReads = Json.reads[RemoveSpecimenLinkAnnotationTypeCmd]
+  implicit val addSpecimenLinkTypeCmdReads = Json.reads[AddSpecimenLinkTypeCmd]
+  implicit val updateSpecimenLinkTypeCmdReads = Json.reads[UpdateSpecimenLinkTypeCmd]
+  implicit val removeSpecimenLinkTypeCmdReads = Json.reads[RemoveSpecimenLinkTypeCmd]
+  implicit val addParticipantCmdReads = Json.reads[AddParticipantCmd]
+  implicit val updateParticipantCmdReads = Json.reads[UpdateParticipantCmd]
 
 }

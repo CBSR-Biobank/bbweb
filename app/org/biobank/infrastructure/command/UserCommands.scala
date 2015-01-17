@@ -73,52 +73,14 @@ object UserCommands {
     def apply(email: String): ResetUserPasswordCmd = ResetUserPasswordCmd("", -1, email)
   }
 
-  implicit val registerUserCmdReads = (
-    (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "email").read[String](minLength[String](5)) and
-      (__ \ "password").read[String](minLength[String](2)) and
-      (__ \ "avatarUrl").readNullable[String](minLength[String](2))
-  )(RegisterUserCmd.apply _)
-
-  implicit val updateUserNameCmdReads = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "name").read[String](minLength[String](2))
-  )(UpdateUserNameCmd.apply _)
-
-  implicit val updateUserEmailCmdReads = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "email").read[String](minLength[String](5))
-  )(UpdateUserEmailCmd.apply _)
-
-  implicit val updateUserPasswordCmdReads = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "currentPassword").read[String](minLength[String](2)) and
-      (__ \ "newPassword").read[String](minLength[String](2))
-  )(UpdateUserPasswordCmd.apply _)
-
-  implicit val updateUserAvatarUrlCmdReads = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "avatarUrl").readNullable[String](minLength[String](5))
-  )(UpdateUserAvatarUrlCmd.apply _)
-
-  implicit val activateUserCmdReads = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(ActivateUserCmd.apply _)
-
-  implicit val lockUserCmdReads = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(LockUserCmd.apply _)
-
-  implicit val unlockUserCmdReads = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(UnlockUserCmd.apply _)
+  implicit val registerUserCmdReads        = Json.reads[RegisterUserCmd]
+  implicit val updateUserNameCmdReads      = Json.reads[UpdateUserNameCmd]
+  implicit val updateUserEmailCmdReads     = Json.reads[UpdateUserEmailCmd]
+  implicit val updateUserPasswordCmdReads  = Json.reads[UpdateUserPasswordCmd]
+  implicit val updateUserAvatarUrlCmdReads = Json.reads[UpdateUserAvatarUrlCmd]
+  implicit val activateUserCmdReads        = Json.reads[ActivateUserCmd]
+  implicit val lockUserCmdReads            = Json.reads[LockUserCmd]
+  implicit val unlockUserCmdReads          = Json.reads[UnlockUserCmd]
 
   implicit val resetUserPasswordCmdReads: Reads[ResetUserPasswordCmd] = (
     (__ \ "email").read[String](minLength[String](5))

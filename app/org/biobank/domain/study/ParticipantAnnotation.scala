@@ -19,18 +19,6 @@ case class ParticipantAnnotation(
 
 object ParticipantAnnotation {
 
-  implicit val participantAnnotationRead: Reads[ParticipantAnnotation] = (
-    (__ \ "annotationTypeId").read[AnnotationTypeId] and
-    (__ \ "stringValue").readNullable[String](minLength[String](2)) and
-    (__ \ "numberValue").readNullable[String](minLength[String](2)) and
-    (__ \ "selectedValues").read[List[AnnotationOption]]
-  )(ParticipantAnnotation.apply _)
-
-  implicit val participantAnnotationWrites: Writes[ParticipantAnnotation] = (
-    (__ \ "annotationTypeId").write[AnnotationTypeId] and
-    (__ \ "stringValue").write[Option[String]] and
-    (__ \ "numberValue").write[Option[String]] and
-    (__ \ "selectedValues").write[List[AnnotationOption]]
-  )(unlift(ParticipantAnnotation.unapply))
+  implicit val participantAnnotationFormat = Json.format[ParticipantAnnotation]
 
 }

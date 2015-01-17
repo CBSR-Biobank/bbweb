@@ -71,15 +71,6 @@ object Participant extends ParticipantValidations {
     }
   }
 
-  implicit val participantWrites: Writes[Participant] = (
-    (__ \ "studyId").write[StudyId] and
-      (__ \ "id").write[ParticipantId] and
-      (__ \ "version").write[Long] and
-      (__ \ "timeAdded").write[DateTime] and
-      (__ \ "timeModified").write[Option[DateTime]] and
-      (__ \ "uniqueId").write[String] and
-      (__ \ "annotations").write[Set[ParticipantAnnotation]]
-  )(unlift(Participant.unapply))
-
+  implicit val participantWrites = Json.writes[Participant]
 
 }

@@ -64,52 +64,13 @@ object CentreCommands {
 
   case class RemoveStudyFromCentreCmd(centreId: String, studyId: String) extends CentreStudyCmd
 
-  implicit val addCentreCmdReads: Reads[AddCentreCmd] = (
-    (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String]
-  )(AddCentreCmd.apply _)
-
-  implicit val updateCentreCmdReads: Reads[UpdateCentreCmd] = (
-      (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "description").readNullable[String]
-  )(UpdateCentreCmd.apply _)
-
-  implicit val enableCentreCmdReads: Reads[EnableCentreCmd] = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(EnableCentreCmd.apply _ )
-
-  implicit val disableCentreCmdReads: Reads[DisableCentreCmd] = (
-    (__ \ "id").read[String](minLength[String](2)) and
-      (__ \ "expectedVersion").read[Long](min[Long](0))
-  )(DisableCentreCmd.apply _)
-
-  implicit val addCentreLocationCmdReads: Reads[AddCentreLocationCmd] = (
-    (__ \ "centreId").read[String](minLength[String](2)) and
-      (__ \ "name").read[String](minLength[String](2)) and
-      (__ \ "street").read[String] and
-      (__ \ "city").read[String] and
-      (__ \ "province").read[String] and
-      (__ \ "postalCode").read[String] and
-      (__ \ "poBoxNumber").readNullable[String] and
-      (__ \ "countryIsoCode").read[String]
-  )(AddCentreLocationCmd.apply _)
-
-  implicit val removeCentreLocationCmdReads: Reads[RemoveCentreLocationCmd] = (
-    (__ \ "centreId").read[String](minLength[String](2)) and
-      (__ \ "locationId").read[String](minLength[String](2))
-  )(RemoveCentreLocationCmd.apply _ )
-
-  implicit val addStudyToCentreCmdReads: Reads[AddStudyToCentreCmd] = (
-    (__ \ "centreId").read[String](minLength[String](2)) and
-      (__ \ "studyId").read[String](minLength[String](2))
-  )(AddStudyToCentreCmd.apply _ )
-
-  implicit val removeStudyFromCentreCmdReads: Reads[RemoveStudyFromCentreCmd] = (
-    (__ \ "centreId").read[String](minLength[String](2)) and
-      (__ \ "studyId").read[String](minLength[String](2))
-  )(RemoveStudyFromCentreCmd.apply _ )
+  implicit val addCentreCmdReads             = Json.reads[AddCentreCmd]
+  implicit val updateCentreCmdReads          = Json.reads[UpdateCentreCmd]
+  implicit val enableCentreCmdReads          = Json.reads[EnableCentreCmd]
+  implicit val disableCentreCmdReads         = Json.reads[DisableCentreCmd]
+  implicit val addCentreLocationCmdReads     = Json.reads[AddCentreLocationCmd]
+  implicit val removeCentreLocationCmdReads  = Json.reads[RemoveCentreLocationCmd]
+  implicit val addStudyToCentreCmdReads      = Json.reads[AddStudyToCentreCmd]
+  implicit val removeStudyFromCentreCmdReads = Json.reads[RemoveStudyFromCentreCmd]
 
 }

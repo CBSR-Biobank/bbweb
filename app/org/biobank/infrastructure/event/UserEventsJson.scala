@@ -22,51 +22,13 @@ object UserEventsJson {
     )
   }
 
-  implicit val userNameUpdatedEventWrites: Writes[UserNameUpdatedEvent] = (
-    (__ \ "id").write[String] and
-      (__ \ "version").writeNullable[Long] and
-      (__ \ "name").writeNullable[String]
-  )(unlift(UserNameUpdatedEvent.unapply))
-
-  implicit val userEmailUpdatedEventWrites: Writes[UserEmailUpdatedEvent] = (
-    (__ \ "id").write[String] and
-      (__ \ "version").writeNullable[Long] and
-      (__ \ "email").writeNullable[String]
-  )(unlift(UserEmailUpdatedEvent.unapply))
-
-  implicit val userPasswordUpdatedEventWrites: Writes[UserPasswordUpdatedEvent] = (
-    (__ \ "id").write[String] and
-      (__ \ "version").writeNullable[Long] and
-      (__ \ "password").writeNullable[String] and
-      (__ \ "salt").writeNullable[String]
-  )(unlift(UserPasswordUpdatedEvent.unapply))
-
-  implicit val userAvatarUrlUpdatedEventWrites: Writes[UserAvatarUrlUpdatedEvent] = (
-    (__ \ "id").write[String] and
-      (__ \ "version").writeNullable[Long] and
-      (__ \ "avatarUrl").writeNullable[String]
-  )(unlift(UserAvatarUrlUpdatedEvent.unapply))
-
-  implicit val userPasswordResetEventWrites: Writes[UserPasswordResetEvent] = (
-    (__ \ "id").write[String] and
-      (__ \ "version").writeNullable[Long] and
-      (__ \ "salt").writeNullable[String] and
-      (__ \ "password").writeNullable[String]
-  )(unlift(UserPasswordResetEvent.unapply))
-
-  implicit val userActivatedEventWrites: Writes[UserActivatedEvent] = (
-    (__ \ "id").write[String] and
-      (__ \ "version").writeNullable[Long]
-  )(unlift(UserActivatedEvent.unapply))
-
-  implicit val userLockedEventWrites: Writes[UserLockedEvent] = (
-    (__ \ "id").write[String] and
-      (__ \ "version").writeNullable[Long]
-  )(unlift(UserLockedEvent.unapply))
-
-  implicit val userUnlockedEventWrites: Writes[UserUnlockedEvent] = (
-    (__ \ "id").write[String] and
-      (__ \ "version").writeNullable[Long]
-  )(unlift(UserUnlockedEvent.unapply))
+  implicit val userNameUpdatedEventWrites      = Json.writes[UserNameUpdatedEvent]
+  implicit val userEmailUpdatedEventWrites     = Json.writes[UserEmailUpdatedEvent]
+  implicit val userPasswordUpdatedEventWrites  = Json.writes[UserPasswordUpdatedEvent]
+  implicit val userAvatarUrlUpdatedEventWrites = Json.writes[UserAvatarUrlUpdatedEvent]
+  implicit val userPasswordResetEventWrites    = Json.writes[UserPasswordResetEvent]
+  implicit val userActivatedEventWrites        = Json.writes[UserActivatedEvent]
+  implicit val userLockedEventWrites           = Json.writes[UserLockedEvent]
+  implicit val userUnlockedEventWrites         = Json.writes[UserUnlockedEvent]
 
 }
