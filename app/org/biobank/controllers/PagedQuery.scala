@@ -3,6 +3,10 @@ package org.biobank.controllers
 import org.biobank.infrastructure._
 import org.biobank.domain.{ DomainError, DomainValidation }
 
+import play.api.libs.json._
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
+
 import scalaz._
 import scalaz.Scalaz._
 
@@ -58,7 +62,7 @@ case class PagedQuery(sortField: String, page: Int, pageSize: Int, order: String
   *
   * https://github.com/pvillega/Play-Modules/blob/master/app/models/Pagination.scala
   */
-case class PagedReults[+T](items: Seq[T], page: Int, offset: Long, total: Long, pageSize: Int) {
+case class PagedResults[+T](items: Seq[T], page: Int, offset: Long, total: Long, pageSize: Int) {
   lazy val prev = Option(page - 1).filter(_ >= 0)
   lazy val next = Option(page + 1).filter(_ => (offset + items.size) < total)
   lazy val maxPages = (total.toDouble/pageSize).ceil.toInt
@@ -66,3 +70,23 @@ case class PagedReults[+T](items: Seq[T], page: Int, offset: Long, total: Long, 
   lazy val paginationEnd = (page + 3).min(maxPages)
 }
 
+
+object PagedResults {
+
+  implicit def pagedResultsWrites[T](implicit fmt: Writes[T]) : Writes[PagedResults[T]] =
+    new Writes[PagedResults[T]] {
+      def writes(pr: PagedResults[T]) = Json.obj(
+        "items"           -> pr.items,
+        "page"            -> pr.page,
+        "offset"          -> pr.offset,
+        "total"           -> pr.total,
+        "pageSize"        -> pr.pageSize,
+        "prev"            -> pr.prev,
+        "next"            -> pr.next,
+        "maxPages"        -> pr.maxPages,
+        "paginationStart" -> pr.paginationStart,
+        "paginationend"   -> pr.paginationEnd
+      )
+    }
+
+}
