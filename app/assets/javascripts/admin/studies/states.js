@@ -30,8 +30,8 @@ define(['../module'], function(module) {
       url: '/studies',
       resolve: {
         user: userResolve.user,
-        studies: ['studiesService', function(studiesService) {
-          return studiesService.getAll();
+        paginatedStudies: ['studiesService', function(studiesService) {
+          return studiesService.getStudies();
         }]
       },
       views: {

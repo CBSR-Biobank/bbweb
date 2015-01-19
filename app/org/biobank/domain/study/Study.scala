@@ -54,6 +54,8 @@ sealed trait Study
 
 object Study {
 
+  val status: String = "Study"
+
   implicit val studyWrites = new Writes[Study] {
     def writes(study: Study) = Json.obj(
       "id"           -> study.id,
@@ -68,7 +70,14 @@ object Study {
 
   def compareByName(a: Study, b: Study) = (a.name compareToIgnoreCase b.name) < 0
 
-  def compareByStatus(a: Study, b: Study) = (a.status compare b.status) < 0
+  def compareByStatus(a: Study, b: Study) = {
+    val statusCompare = a.status compare b.status
+    if (statusCompare == 0) {
+      compareByName(a, b)
+    } else {
+      statusCompare < 0
+    }
+  }
 }
 
 /**
@@ -88,7 +97,7 @@ case class DisabledStudy(
     extends Study {
   import CommonValidations._
 
-  override val status: String = "Disabled"
+  override val status: String = DisabledStudy.status
 
   /** Used to change the name or the description. */
   def update(name: String, description: Option[String]): DomainValidation[DisabledStudy] = {
@@ -129,6 +138,8 @@ case class DisabledStudy(
 object DisabledStudy {
   import CommonValidations._
 
+  val status: String = "Disabled"
+
   /**
     * The factory method to create a study.
     *
@@ -164,7 +175,7 @@ case class EnabledStudy(
   description: Option[String])
   extends Study {
 
-  override val status: String = "Enabled"
+  override val status: String = EnabledStudy.status
 
   def disable: DomainValidation[DisabledStudy] = {
     DisabledStudy.create(id, version, timeAdded, name, description)
@@ -176,6 +187,8 @@ case class EnabledStudy(
   */
 object EnabledStudy {
   import CommonValidations._
+
+  val status: String = "Enabled"
 
   /** A study must be in a disabled state before it can be enabled. */
   def create(study: DisabledStudy): DomainValidation[EnabledStudy] = {
@@ -203,7 +216,7 @@ case class RetiredStudy(
   description: Option[String])
   extends Study {
 
-  override val status: String = "Retired"
+  override val status: String = RetiredStudy.status
 
   def unretire: DomainValidation[DisabledStudy] = {
     DisabledStudy.create(id, version, timeAdded, name, description)
@@ -215,6 +228,8 @@ case class RetiredStudy(
   */
 object RetiredStudy {
   import CommonValidations._
+
+  val status: String = "Retired"
 
   /** A study must be in a disabled state before it can be retired. */
   def create(study: DisabledStudy): DomainValidation[RetiredStudy] = {

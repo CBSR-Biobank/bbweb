@@ -34,7 +34,7 @@ trait StudiesService {
   /** Studies are sorted by name, it does not make sense to sort them by description.
     */
   def getStudies[T <: Study]
-    (filter: String, sortFunc: (Study, Study) => Boolean, order: SortOrder)
+    (filter: String, status: String, sortFunc: (Study, Study) => Boolean, order: SortOrder)
       : DomainValidation[Seq[Study]]
 
   def getStudyNames(filter: String, order: SortOrder)
@@ -259,24 +259,44 @@ class StudiesServiceImpl(implicit inj: Injector)
     result.toSeq.sortWith(StudyNameDto.compareByName)
   }
 
-  def getStudies[T <: Study]
-    (filter: String, sortFunc: (Study, Study) => Boolean, order: SortOrder)
-      : DomainValidation[Seq[Study]] = {
-    val studies = studyRepository.getValues
-
-    val filteredStudies = if (filter.isEmpty) {
-      studies
-    } else {
-      studies.filter { s => s.name.contains(filter) }
+  private def getStatus(status: String): DomainValidation[String] = {
+    status match {
+      case "all"      => Study.status.successNel
+      case "disabled" => DisabledStudy.status.successNel
+      case "enabled"  => EnabledStudy.status.successNel
+      case "retired"  => RetiredStudy.status.successNel
+      case _          => DomainError(s"invalid study status: $status").failureNel
     }
+  }
 
-    val orderedStudies = filteredStudies.toSeq
-    val result = orderedStudies.sortWith(sortFunc)
+  private def filterByStatus(studies: Seq[Study], status: String): DomainValidation[Seq[Study]] = {
+    getStatus(status).map { status =>
+      if (status == Study.status) {
+        studies
+      } else {
+        studies.filter { study => study.status == status }
+      }
+    }
+  }
 
-    if (order == AscendingOrder) {
-      result.success
-    } else {
-      result.reverse.success
+  def getStudies[T <: Study]
+    (filter: String, status: String, sortFunc: (Study, Study) => Boolean, order: SortOrder)
+      : DomainValidation[Seq[Study]] = {
+    filterByStatus(studyRepository.getValues.toSeq, status).map { studies =>
+      val filteredStudies = if (filter.isEmpty) {
+        studies
+      } else {
+        val filterLowerCase = filter.toLowerCase
+        studies.filter { s => s.name.toLowerCase.contains(filterLowerCase) }
+      }
+
+      val result = filteredStudies.sortWith(sortFunc)
+
+      if (order == AscendingOrder) {
+        result
+      } else {
+        result.reverse
+      }
     }
   }
 

@@ -3,7 +3,7 @@ package org.biobank.controllers.study
 import org.biobank.controllers._
 import org.biobank.domain._
 import org.biobank.service.users.UsersService
-import org.biobank.domain.study.Study
+import org.biobank.domain.study._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEventsJson._
@@ -43,26 +43,32 @@ class StudiesController(implicit inj: Injector)
 
   case class PaginationResult(studies: Seq[Study], page: Int, pageSize: Int)
 
-  def list(filter : String, sort : String, page : Int, pageSize : Int, order : String) =
+  def list(filter: String, status: String, sort: String, page: Int, pageSize: Int, order: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
 
-      Logger.debug(s"StudiesController:list: filter/$filter, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
+      Logger.debug(s"StudiesController:list: filter/$filter, status/$status, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
 
       val pagedQuery = PagedQuery(sort, page, pageSize, order)
       val validation = for {
-        sortField <- pagedQuery.getSortField(Seq("name", "status"))
-        sortWith  <- (if (sortField == "status") (Study.compareByStatus _) else (Study.compareByName _)).success
-        sortOrder <- pagedQuery.getSortOrder
-        studies   <- studiesService.getStudies(filter, sortWith, sortOrder)
-        page      <- pagedQuery.getPage(studies.size)
-        pageSize  <- pagedQuery.getPageSize
+        sortField   <- pagedQuery.getSortField(Seq("name", "status"))
+        sortWith    <- (if (sortField == "status") (Study.compareByStatus _) else (Study.compareByName _)).success
+        sortOrder   <- pagedQuery.getSortOrder
+        studies     <- studiesService.getStudies(filter, status, sortWith, sortOrder)
+        page        <- pagedQuery.getPage(studies.size)
+        pageSize    <- pagedQuery.getPageSize
       } yield { PaginationResult(studies, page, pageSize) }
 
       validation.fold(
         err => BadRequest(err.list.mkString),
         pq => {
           if (pq.studies.isEmpty) {
-              Ok(Seq.empty[Study])
+            Ok(PagedResults(
+              items    = Seq.empty[Study],
+              page     = pq.page,
+              pageSize = pq.pageSize,
+              offset   = 0,
+              total    = 0
+            ))
           } else {
             val offset = pq.pageSize * (pq.page - 1)
             if (offset > pq.studies.size - 1) {

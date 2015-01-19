@@ -9,7 +9,7 @@
 GET     /                                      @org.biobank.controllers.Application.index
 
 # studies
-GET     /studies                               @org.biobank.controllers.study.StudiesController.list(filter: String ?= "", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "ascending")
+GET     /studies                               @org.biobank.controllers.study.StudiesController.list(filter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "ascending")
 POST    /studies                               @org.biobank.controllers.study.StudiesController.add
 
 # value objects

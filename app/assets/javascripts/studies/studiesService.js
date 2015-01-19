@@ -1,4 +1,4 @@
-define(['./module', 'angular'], function(module, angular) {
+define(['./module', 'angular', 'jquery'], function(module, angular, $) {
   'use strict';
 
   module.service('studiesService', StudiesService);
@@ -10,7 +10,7 @@ define(['./module', 'angular'], function(module, angular) {
    */
   function StudiesService(biobankXhrReqService, domainEntityService) {
     var service = {
-      getAll        : getAll,
+      getStudies    : getStudies,
       get           : get,
       addOrUpdate   : addOrUpdate,
       enable        : enable,
@@ -41,8 +41,37 @@ define(['./module', 'angular'], function(module, angular) {
       return biobankXhrReqService.call('POST', uri(study.id) + '/' + status, cmd);
     }
 
-    function getAll() {
-      return biobankXhrReqService.call('GET', uri());
+    function getStudies(nameFilter, status, page, pageSize, sortField, order) {
+      var params = {};
+
+      if (nameFilter) {
+        params.filter = nameFilter;
+      }
+
+      if (status) {
+        params.status = status;
+      }
+      if (page) {
+        params.page = page;
+      }
+      if (pageSize) {
+        params.pageSize = pageSize;
+      }
+      if (sortField) {
+        params.sort = sortField;
+      }
+      if (order) {
+        params.order = (order === 'asc') ? 'ascending' : 'descending';
+      }
+
+      var paramsStr = $.param(params);
+      var url = uri();
+
+      if (paramsStr !== '') {
+        url += '?' + paramsStr;
+      }
+
+      return biobankXhrReqService.call('GET', url);
     }
 
     function get(id) {

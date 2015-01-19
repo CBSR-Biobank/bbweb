@@ -3,15 +3,16 @@ define(['../module'], function(module) {
 
   module.controller('StudiesCtrl', StudiesCtrl);
 
-  StudiesCtrl.$inject = ['$state', 'studies'];
+  StudiesCtrl.$inject = ['$state', 'paginatedStudies'];
 
   /**
    * Displays a list of studies with each in its own mini-panel.
    *
    */
-  function StudiesCtrl($state, studies) {
+  function StudiesCtrl($state, paginatedStudies) {
     var vm = this;
-    vm.studies = studies;
+    vm.studies = paginatedStudies.items;
+    vm.paginatedStudies = paginatedStudies;
   }
 
 });
