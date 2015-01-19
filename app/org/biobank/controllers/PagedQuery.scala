@@ -21,7 +21,7 @@ case class PagedQuery(sortField: String, page: Int, pageSize: Int, order: String
   }
 
   def getPageSize(): DomainValidation[Int] = {
-    if (pageSize < 0) {
+    if (pageSize <= 0) {
       DomainError(s"page size is invalid: $pageSize").failureNel
     } else {
       pageSize.successNel
@@ -34,7 +34,7 @@ case class PagedQuery(sortField: String, page: Int, pageSize: Int, order: String
       pageSize => {
         if (page < 1) {
           DomainError(s"page is invalid: $page").failureNel
-        } else if ((page - 1) * pageSize > totalItems) {
+        } else if ((page - 1)* pageSize > totalItems) {
           DomainError(s"page exeeds limits: $page").failureNel
         } else {
           page.successNel[DomainError]
@@ -53,8 +53,8 @@ case class PagedQuery(sortField: String, page: Int, pageSize: Int, order: String
   * Defines a Page of elements.
   *
   * @param items items in the page
-  * @param page page number
-  * @param offset page offset
+  * @param page page number. Starts at page 1.
+  * @param offset page offset. Starts at 0.
   * @param total total elements
   * @param pageSize max elements in a page
   *
@@ -62,12 +62,10 @@ case class PagedQuery(sortField: String, page: Int, pageSize: Int, order: String
   *
   * https://github.com/pvillega/Play-Modules/blob/master/app/models/Pagination.scala
   */
-case class PagedResults[+T](items: Seq[T], page: Int, offset: Long, total: Long, pageSize: Int) {
-  lazy val prev = Option(page - 1).filter(_ >= 0)
+case class PagedResults[+T](items: Seq[T], page: Int, pageSize: Int, offset: Long, total: Long) {
+  lazy val prev = Option(page - 1).filter(_ > 0)
   lazy val next = Option(page + 1).filter(_ => (offset + items.size) < total)
   lazy val maxPages = (total.toDouble/pageSize).ceil.toInt
-  lazy val paginationStart = (page - 2).max(1)
-  lazy val paginationEnd = (page + 3).min(maxPages)
 }
 
 
@@ -83,9 +81,7 @@ object PagedResults {
         "pageSize"        -> pr.pageSize,
         "prev"            -> pr.prev,
         "next"            -> pr.next,
-        "maxPages"        -> pr.maxPages,
-        "paginationStart" -> pr.paginationStart,
-        "paginationend"   -> pr.paginationEnd
+        "maxPages"        -> pr.maxPages
       )
     }
 

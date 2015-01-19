@@ -10,6 +10,7 @@ import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.service._
 import org.biobank.service.study.StudiesService
+import org.biobank.controllers.PagedResults._
 
 import play.api.Logger
 import play.api.Play.current
@@ -67,7 +68,13 @@ class StudiesController(implicit inj: Injector)
             if (offset > pq.studies.size - 1) {
               BadRequest(s"invalid page requested: ${pq.page}")
             } else {
-              Ok(pq.studies.drop(offset).take(pq.pageSize))
+              Ok(PagedResults(
+                items    = pq.studies.drop(offset).take(pq.pageSize),
+                page     = pq.page,
+                pageSize = pq.pageSize,
+                offset   = offset,
+                total    = pq.studies.size
+              ))
             }
           }
         }
