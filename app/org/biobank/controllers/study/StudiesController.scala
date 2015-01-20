@@ -39,7 +39,9 @@ class StudiesController(implicit inj: Injector)
 
   private def studiesService = inject[StudiesService]
 
-  private val PageSizeDefault = 10
+  private val PageSizeDefault = 5
+
+  private val PageSizeMax = 10
 
   case class PaginationResult(studies: Seq[Study], page: Int, pageSize: Int)
 
@@ -55,8 +57,9 @@ class StudiesController(implicit inj: Injector)
         sortOrder   <- pagedQuery.getSortOrder
         studies     <- studiesService.getStudies(filter, status, sortWith, sortOrder)
         page        <- pagedQuery.getPage(studies.size)
-        pageSize    <- pagedQuery.getPageSize
+        pageSize    <- pagedQuery.getPageSize(PageSizeMax)
       } yield { PaginationResult(studies, page, pageSize) }
+
 
       validation.fold(
         err => BadRequest(err.list.mkString),

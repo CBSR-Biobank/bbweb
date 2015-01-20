@@ -5,7 +5,6 @@ define(['../module', 'underscore'], function(module, _) {
 
   StudiesTableCtrl.$inject = [
     '$q',
-    '$state',
     'studiesService',
     'tableService',
     'paginatedStudies'
@@ -18,7 +17,6 @@ define(['../module', 'underscore'], function(module, _) {
    * was very slow since the data is re-loaded using the REST API.
    */
   function StudiesTableCtrl($q,
-                            $state,
                             studiesService,
                             tableService,
                             paginatedStudies) {

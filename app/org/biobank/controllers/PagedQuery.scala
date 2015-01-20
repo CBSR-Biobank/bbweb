@@ -20,9 +20,11 @@ case class PagedQuery(sortField: String, page: Int, pageSize: Int, order: String
     }
   }
 
-  def getPageSize(): DomainValidation[Int] = {
+  def getPageSize(maxPageSize: Int): DomainValidation[Int] = {
     if (pageSize <= 0) {
       DomainError(s"page size is invalid: $pageSize").failureNel
+    } else if (pageSize > maxPageSize) {
+      DomainError(s"page size exceeds maximum: pageSize/$pageSize, max/$maxPageSize").failureNel
     } else {
       pageSize.successNel
     }

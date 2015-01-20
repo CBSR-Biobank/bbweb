@@ -33,6 +33,15 @@ define(['./module', 'angular', 'jquery'], function(module, angular, $) {
       return result;
     }
 
+    /**
+     * @param {Study} study the study to change the status on.
+     *
+     * @param {string} status One of 'disable', 'enable', 'retire', or 'unretire'. If an invalid
+     * value is used then the response is an error.
+     *
+     * @return A promise.
+     *
+     */
     function changeStatus(study, status) {
       var cmd = {
         id: study.id,
@@ -41,6 +50,26 @@ define(['./module', 'angular', 'jquery'], function(module, angular, $) {
       return biobankXhrReqService.call('POST', uri(study.id) + '/' + status, cmd);
     }
 
+    /**
+     * @param {string} nameFilter Returns the studies that have a name that match this filter.
+     *
+     * @param {string} status Returns studies that have a matching status. For all studies use
+     * 'all'. If a value larger than 10 is used then the response is an error.
+     *
+     * @param {int} page If the total results are longer than pageSize, then page selects which
+     * studies should be returned. If an invalid value is used then the response is an error.
+     *
+     * @param {int} pageSize The total number of studies to return per page. If a value larger than
+     * 10 is used then the response is an error.
+     *
+     * @param {string} sortField Studies can be sorted by 'name' or by 'status'. If an invalid value
+     * is used then the response is an error.
+     *
+     * @param {string} order One of 'asc' or 'desc'. If an invalid value is used then
+     * the response is an error.
+     *
+     * @return A promise.
+     */
     function getStudies(nameFilter, status, page, pageSize, sortField, order) {
       var params = {};
 
@@ -61,7 +90,12 @@ define(['./module', 'angular', 'jquery'], function(module, angular, $) {
         params.sort = sortField;
       }
       if (order) {
-        params.order = (order === 'asc') ? 'ascending' : 'descending';
+        if (order === 'asc') {
+          order = 'ascending';
+        } else if (order === 'desc') {
+          order = 'descending';
+        }
+        params.order = order;
       }
 
       var paramsStr = $.param(params);

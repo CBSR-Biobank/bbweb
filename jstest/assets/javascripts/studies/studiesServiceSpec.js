@@ -1,9 +1,9 @@
 // Jasmine test suite
 //
-define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
+define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], function(angular, mocks, _, $) {
   'use strict';
 
-  ddescribe('Service: studiesService', function() {
+  describe('Service: studiesService', function() {
 
     var studiesService, httpBackend;
     var studyId = 'dummy-study-id';
@@ -46,13 +46,89 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       expect(angular.isFunction(studiesService.processingDto)).toBe(true);
     });
 
-    it('list should return a list containing one study', function() {
+    it('calling getStudies with no parameters has no query string', function() {
       httpBackend.whenGET(uri()).respond({
         status: 'success',
         data: [study]
       });
 
       studiesService.getStudies().then(function(data) {
+        expect(data.length).toEqual(1);
+        expect(_.isEqual(study, data[0]));
+      });
+
+      httpBackend.flush();
+    });
+
+    it('calling getStudies with filter parameter has valid query string', function() {
+      var sortField = 'sortField';
+      var url = uri() + '?' + $.param({filter: sortField});
+      httpBackend.whenGET(url).respond({
+        status: 'success',
+        data: [study]
+      });
+
+      studiesService.getStudies(sortField).then(function(data) {
+        expect(data.length).toEqual(1);
+        expect(_.isEqual(study, data[0]));
+      });
+
+      httpBackend.flush();
+    });
+
+    it('calling getStudies with filter and status parameters has valid query string', function() {
+      var sortField = 'sortField';
+      var order = 'disabled';
+      var url = uri() + '?' + $.param({
+        filter: sortField,
+        status: order
+      });
+      httpBackend.whenGET(url).respond({
+        status: 'success',
+        data: [study]
+      });
+
+      studiesService.getStudies(sortField, order).then(function(data) {
+        expect(data.length).toEqual(1);
+        expect(_.isEqual(study, data[0]));
+      });
+
+      httpBackend.flush();
+    });
+
+    it('calling getStudies with page and pageSize parameters has valid query string', function() {
+      var page = 1;
+      var pageSize = 5;
+      var url = uri() + '?' + $.param({
+        page: page,
+        pageSize: pageSize
+      });
+      httpBackend.whenGET(url).respond({
+        status: 'success',
+        data: [study]
+      });
+
+      studiesService.getStudies(null, null, page, pageSize).then(function(data) {
+        expect(data.length).toEqual(1);
+        expect(_.isEqual(study, data[0]));
+      });
+
+      httpBackend.flush();
+    });
+
+    it('calling getStudies with sortField and order parameters has valid query string', function() {
+      var sortField = 'name';
+      var order = 'ascending';
+      var url = uri() + '?' + $.param({
+        sort: sortField,
+        order: order
+      });
+      httpBackend.whenGET(url).respond({
+        status: 'success',
+        data: [study]
+      });
+
+      studiesService.getStudies(null, null, null, null, sortField, order).then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });
