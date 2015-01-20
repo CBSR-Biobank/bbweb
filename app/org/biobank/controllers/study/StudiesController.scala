@@ -56,7 +56,7 @@ class StudiesController(implicit inj: Injector)
         sortWith    <- (if (sortField == "status") (Study.compareByStatus _) else (Study.compareByName _)).success
         sortOrder   <- pagedQuery.getSortOrder
         studies     <- studiesService.getStudies(filter, status, sortWith, sortOrder)
-        page        <- pagedQuery.getPage(studies.size)
+        page        <- pagedQuery.getPage(PageSizeMax, studies.size)
         pageSize    <- pagedQuery.getPageSize(PageSizeMax)
       } yield { PaginationResult(studies, page, pageSize) }
 

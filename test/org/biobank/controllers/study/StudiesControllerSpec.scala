@@ -32,11 +32,11 @@ class StudiesControllerSpec extends ControllerFixture {
 
     "GET /studies" must {
 
-      "list none" taggedAs(Tag("1")) in new App(fakeApp) {
+      "list none" in new App(fakeApp) {
         doLogin
         val json = makeRequest(GET, uri)
         (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 0
       }
 
@@ -49,7 +49,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val json = makeRequest(GET, uri)
         (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have length 1
         compareStudyNameDto(jsonList(0), study)
       }
@@ -62,13 +62,13 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val json = makeRequest(GET, uri)
         (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size studies.size
 
         (jsonList zip studies).map { item => compareStudyNameDto(item._1, item._2) }
       }
 
-      "list a single study with a name query string" in new App(fakeApp) {
+      "list a single study with a name" in new App(fakeApp) {
         doLogin
 
         val study1 = factory.createDisabledStudy.copy(name = "ABC")
@@ -80,9 +80,66 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val json = makeRequest(GET, uri + "?filter=" + study1.name)
         (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 1
         compareStudyNameDto(jsonList(0), study1)
+      }
+
+      "list studies filtered by disabled status" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ST1")
+        val study2 = factory.createEnabledStudy.copy(name = "ST2")
+        val study3 = factory.createRetiredStudy.copy(name = "ST3")
+
+        val studies = List(study1, study2, study3)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, uri + "?status=disabled")
+        (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
+        jsonList must have size 1
+
+        compareStudyNameDto(jsonList(0), study1)
+      }
+
+      "list studies filtered by enabled status" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ST1")
+        val study2 = factory.createEnabledStudy.copy(name = "ST2")
+        val study3 = factory.createRetiredStudy.copy(name = "ST3")
+
+        val studies = List(study1, study2, study3)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, uri + "?status=enabled")
+        (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
+        jsonList must have size 1
+
+        compareStudyNameDto(jsonList(0), study2)
+      }
+
+      "list studies filtered by retired status" in new App(fakeApp) {
+        doLogin
+
+        val study1 = factory.createDisabledStudy.copy(name = "ST1")
+        val study2 = factory.createEnabledStudy.copy(name = "ST2")
+        val study3 = factory.createRetiredStudy.copy(name = "ST3")
+
+        val studies = List(study1, study2, study3)
+        studyRepository.removeAll
+        studies.map(study => studyRepository.put(study))
+
+        val json = makeRequest(GET, uri + "?status=retired")
+        (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
+        jsonList must have size 1
+
+        compareStudyNameDto(jsonList(0), study3)
       }
 
       "list multiple studies in ascending order" in new App(fakeApp) {
@@ -97,7 +154,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val json = makeRequest(GET, uri + "?order=ascending")
         (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size studies.size
 
         compareStudyNameDto(jsonList(0), study1)
@@ -116,7 +173,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val json = makeRequest(GET, uri + "?order=descending")
         (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size studies.size
 
         compareStudyNameDto(jsonList(0), study2)
@@ -151,7 +208,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val json = makeRequest(GET, uri + "?sort=name")
         (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 2
 
         compareStudyNameDto(jsonList(0), study1)
@@ -170,7 +227,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val json = makeRequest(GET, uri + "?sort=status")
         (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 2
 
         compareStudyNameDto(jsonList(0), study2)
@@ -193,7 +250,7 @@ class StudiesControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("invalid sort field")
       }
 
-      "list single study when using paged query" in new App(fakeApp) {
+      "list single study when using paged query" taggedAs(Tag("1")) in new App(fakeApp) {
         doLogin
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
@@ -205,8 +262,13 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val json = makeRequest(GET, uri + "?pageSize=1")
         (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 1
+
+        (json \ "data" \ "offset").as[Long] must be (0)
+        (json \ "data" \ "total").as[Long] must be (2)
+        (json \ "data" \ "prev").as[Option[Int]] must be (None)
+        (json \ "data" \ "next").as[Option[Int]] must be (Some(2))
       }
 
       "fail when using page that exeeds limits" in new App(fakeApp) {

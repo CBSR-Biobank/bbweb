@@ -30,8 +30,8 @@ case class PagedQuery(sortField: String, page: Int, pageSize: Int, order: String
     }
   }
 
-  def getPage(totalItems: Int): DomainValidation[Int] = {
-    getPageSize.fold(
+  def getPage(maxPageSize: Int, totalItems: Int): DomainValidation[Int] = {
+    getPageSize(maxPageSize).fold(
       err => err.failure[Int],
       pageSize => {
         if (page < 1) {
