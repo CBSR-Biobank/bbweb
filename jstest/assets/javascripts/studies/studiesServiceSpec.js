@@ -3,7 +3,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  describe('Service: studiesService', function() {
+  ddescribe('Service: studiesService', function() {
 
     var studiesService, httpBackend;
     var studyId = 'dummy-study-id';
@@ -36,7 +36,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('should have the following functions', function () {
-      expect(angular.isFunction(studiesService.getAll)).toBe(true);
+      expect(angular.isFunction(studiesService.getStudies)).toBe(true);
       expect(angular.isFunction(studiesService.get)).toBe(true);
       expect(angular.isFunction(studiesService.addOrUpdate)).toBe(true);
       expect(angular.isFunction(studiesService.enable)).toBe(true);
@@ -52,7 +52,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         data: [study]
       });
 
-      studiesService.getAll().then(function(data) {
+      studiesService.getStudies().then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });
