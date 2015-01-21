@@ -3,14 +3,7 @@ package org.biobank.domain.study
 import org.biobank.infrastructure.{
   CollectionEventTypeSpecimenGroupData,
   CollectionEventTypeAnnotationTypeData}
-import org.biobank.domain.{
-  AnnotationTypeId,
-  CommonValidations,
-  ConcurrencySafeEntity,
-  DomainError,
-  DomainValidation,
-  HasUniqueName,
-  HasDescriptionOption }
+import org.biobank.domain._
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.AnnotationValueType._
 import org.biobank.domain.PreservationType._
@@ -80,6 +73,13 @@ object Study {
   }
 }
 
+trait StudyValidations {
+
+  val NameMinLength = 2
+
+  case object InvalidName extends ValidationKey
+}
+
 /**
   * This is the initial state for a study.  In this state, only configuration changes are allowed.
   * Collection and processing of specimens cannot be recorded.
@@ -94,14 +94,15 @@ case class DisabledStudy(
   timeModified: Option[DateTime],
   name: String,
   description: Option[String])
-    extends Study {
+    extends Study
+    with StudyValidations {
   import CommonValidations._
 
   override val status: String = DisabledStudy.status
 
   /** Used to change the name or the description. */
   def update(name: String, description: Option[String]): DomainValidation[DisabledStudy] = {
-    (validateString(name, NameRequired) |@|
+    (validateString(name, NameMinLength, InvalidName) |@|
       validateNonEmptyOption(description, NonEmptyDescription)) {
       case(n, d) => copy(version = version + 1, name = n, description = d)
     }
@@ -135,7 +136,7 @@ case class DisabledStudy(
 /**
   * Factory object used to create a study.
   */
-object DisabledStudy {
+object DisabledStudy extends StudyValidations {
   import CommonValidations._
 
   val status: String = "Disabled"
@@ -153,7 +154,7 @@ object DisabledStudy {
     description: Option[String]): DomainValidation[DisabledStudy] = {
     (validateId(id) |@|
       validateAndIncrementVersion(version) |@|
-      validateString(name, NameRequired) |@|
+      validateString(name, NameMinLength, InvalidName) |@|
       validateNonEmptyOption(description, NonEmptyDescription)) {
         DisabledStudy(_, _, dateTime, None, _, _)
       }
@@ -185,7 +186,7 @@ case class EnabledStudy(
 /**
   * Factory object used to enable a study.
   */
-object EnabledStudy {
+object EnabledStudy extends StudyValidations {
   import CommonValidations._
 
   val status: String = "Enabled"
@@ -194,7 +195,7 @@ object EnabledStudy {
   def create(study: DisabledStudy): DomainValidation[EnabledStudy] = {
     (validateId(study.id) |@|
       validateAndIncrementVersion(study.version) |@|
-      validateString(study.name, NameRequired) |@|
+      validateString(study.name, NameMinLength, InvalidName) |@|
       validateNonEmptyOption(study.description, NonEmptyDescription)) {
         EnabledStudy(_, _, study.timeAdded, None, _, _)
       }
@@ -226,7 +227,7 @@ case class RetiredStudy(
 /**
   * Factory object used to retire a study.
   */
-object RetiredStudy {
+object RetiredStudy extends StudyValidations {
   import CommonValidations._
 
   val status: String = "Retired"
@@ -235,7 +236,7 @@ object RetiredStudy {
   def create(study: DisabledStudy): DomainValidation[RetiredStudy] = {
     (validateId(study.id) |@|
       validateAndIncrementVersion(study.version) |@|
-      validateString(study.name, NameRequired) |@|
+      validateString(study.name, NameMinLength, InvalidName) |@|
       validateNonEmptyOption(study.description, NonEmptyDescription)) {
         RetiredStudy(_, _, study.timeAdded, None, _, _)
       }

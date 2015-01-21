@@ -13,13 +13,19 @@ define(['../module'], function(module) {
   function config($urlRouterProvider, $stateProvider, userResolve ) {
     $urlRouterProvider.otherwise('/');
 
+    resolveUserCount.$inject = ['usersService'];
+    function resolveUserCount(usersService) {
+      return usersService.getUserCount();
+    }
+
     /**
      * Displays all users in a table
      */
     $stateProvider.state('admin.users', {
       url: '/users',
       resolve: {
-        user: userResolve.user
+        user: userResolve.user,
+        userCount : resolveUserCount
       },
       views: {
         'main@': {

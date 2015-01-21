@@ -12,7 +12,8 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     'modalService',
     'tableService',
     'usersService',
-    'UserModalService'
+    'UserModalService',
+    'userCount'
   ];
 
   /**
@@ -26,57 +27,106 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
                           modalService,
                           tableService,
                           usersService,
-                          UserModalService) {
+                          UserModalService,
+                          userCount) {
     var vm = this;
 
     vm.users = [];
+    vm.haveUsers = (userCount > 0);
+    vm.paginatedUsers = {};
 
-    vm.userInformation = userInformation;
-    vm.activate        = activate;
-    vm.lock            = lock;
-    vm.unlock          = unlock;
+    vm.nameFilter       = '';
+    vm.emailFilter       = '';
+    vm.possibleStatuses = [
+      { id: 'all',        title: 'All' },
+      { id: 'active',     title: 'Active' },
+      { id: 'registered', title: 'Registered' },
+      { id: 'locked',     title: 'Locked' }
+    ];
+    vm.status              = vm.possibleStatuses[0];
+    vm.userInformation     = userInformation;
+    vm.activate            = activate;
+    vm.lock                = lock;
+    vm.unlock              = unlock;
+    vm.nameFilterUpdated   = nameFilterUpdated;
+    vm.emailFilterUpdated  = emailFilterUpdated;
+    vm.statusFilterUpdated = statusFilterUpdated;
 
     var tableParameters = {
-      page: 1,            // show first page
-      count: 15,           // count per page
+      page: 1,
+      count: 10,
       sorting: {
-        name: 'asc'       // initial sorting
+        name: 'asc'
       }
     };
 
     var tableSettings = {
-      total: function () { return getTableData().length; },
-      getData: function($defer, params) {
-        var filteredData = getTableData();
-        var orderedData = params.sorting() ?
-            $filter('orderBy')(filteredData, params.orderBy()) : filteredData;
-        params.total(filteredData.length);
-        $defer.resolve(
-          orderedData.slice(
-            (params.page() - 1) * params.count(),
-            params.page() * params.count()));
-      }
+      total: 0,
+      getData: getData
     };
 
-    vm.tableParams = tableService.getTableParams(getTableData, tableParameters, tableSettings);
-    vm.tableParams.settings().$scope = $scope;  // kludge: see https://github.com/esvit/ng-table/issues/297#issuecomment-55756473
-    updateData();
+    vm.tableParams = tableService.getTableParams(vm.users, tableParameters, tableSettings);
+    updateMessage();
 
     // --
 
-    function getTableData() {
-      return vm.users;
+    function updateMessage() {
+      if ((vm.nameFilter === '') && (vm.status.id === 'all')) {
+        vm.message = 'The following users have been configured.';
+      } else {
+        vm.message = 'The following users match the criteria:';
+      }
     }
 
-    function updateData() {
-      usersService.getAllUsers().then(function(data) {
-        vm.users = [];
-        _.each(data, function(user) {
-          vm.users.push(angular.extend(
-            user, {timeAddedLocal: (new Date(user.timeAdded)).toLocaleString()}));
+    function getData($defer, params) {
+      var sortObj = params.sorting();
+      var sortKeys = _.keys(sortObj);
+
+      usersService.getUsers(vm.nameFilter,
+                            vm.emailFilter,
+                            vm.status.id,
+                            sortKeys[0],
+                            params.page(),
+                            params.count(),
+                            sortObj[sortKeys[0]])
+        .then(function (paginatedUsers) {
+          vm.paginatedUsers = paginatedUsers;
+          vm.users = [];
+          _.each(paginatedUsers.items, function(user) {
+            vm.users.push(angular.extend(
+              user, {timeAddedLocal: (new Date(user.timeAdded)).toLocaleString()}));
+          });
+          vm.paginatedUsers = paginatedUsers;
+          params.total(paginatedUsers.total);
+          $defer.resolve(vm.users);
+          updateMessage();
         });
-        vm.tableParams.reload();
-      });
+    }
+
+    function tableReloadCommon() {
+      vm.tableParams.page(1);
+      vm.tableParams.reload();
+    }
+
+    /**
+     * Called when user enters text into the 'name filter'.
+     */
+    function nameFilterUpdated() {
+      tableReloadCommon();
+    }
+
+    /**
+     * Called when user enters text into the 'email filter'.
+     */
+    function emailFilterUpdated() {
+      tableReloadCommon();
+    }
+
+    /**
+     * Called when user selects a status from the 'status filter' select.
+     */
+    function statusFilterUpdated() {
+      tableReloadCommon();
     }
 
     function changeStatus(user, statusChangeFn, status) {
@@ -92,7 +142,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       modalService.showModal({}, modalOptions).then(
         function() {
           statusChangeFn(user).then(function() {
-            updateData();
+            vm.tableParams.reload();
           });
         }
       );

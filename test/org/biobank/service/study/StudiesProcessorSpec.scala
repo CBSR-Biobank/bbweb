@@ -77,6 +77,11 @@ class StudiesProcessorSpec extends TestFixture {
       askAddCommand(study) mustFail "study with name already exists"
     }
 
+    "not add add a new study with a name less than 2 characters" in {
+      val study = factory.createDisabledStudy.copy(name = "a")
+      askAddCommand(study) mustFail "InvalidName"
+    }
+
     "update a study leaving name unchanged" in {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
@@ -141,12 +146,19 @@ class StudiesProcessorSpec extends TestFixture {
       askUpdateCommand(study3) mustFail "name already exists"
     }
 
+    "not update a study's name to something less than 2 characters" taggedAs(Tag("1")) in {
+      val study = factory.createDisabledStudy
+      studyRepository.put(study)
+
+      val study2 = study.copy(name = "a")
+      askUpdateCommand(study2) mustFail "InvalidName"
+    }
+
     "not be updated with invalid version" in {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
 
       val study2 = study.copy(version = study.version + 1)
-
       askUpdateCommand(study2) mustFail "doesn't match current version"
     }
 

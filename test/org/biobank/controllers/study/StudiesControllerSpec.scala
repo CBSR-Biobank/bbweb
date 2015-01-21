@@ -68,7 +68,7 @@ class StudiesControllerSpec extends ControllerFixture {
         (jsonList zip studies).map { item => compareStudyNameDto(item._1, item._2) }
       }
 
-      "list a single study with a name" in new App(fakeApp) {
+      "list a single study when filtered by name" in new App(fakeApp) {
         doLogin
 
         val study1 = factory.createDisabledStudy.copy(name = "ABC")
@@ -199,7 +199,7 @@ class StudiesControllerSpec extends ControllerFixture {
       "list studies sorted by name" in new App(fakeApp) {
         doLogin
 
-        val study1 = factory.createDisabledStudy.copy(name = "ST1").enable(1, 1) | fail
+        val study1 = factory.createEnabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")
 
         val studies = List(study1, study2)
@@ -218,7 +218,7 @@ class StudiesControllerSpec extends ControllerFixture {
       "list studies sorted by status" in new App(fakeApp) {
         doLogin
 
-        val study1 = factory.createDisabledStudy.copy(name = "ST1").enable(1, 1) | fail
+        val study1 = factory.createEnabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")
 
         val studies = List(study1, study2)
@@ -238,7 +238,7 @@ class StudiesControllerSpec extends ControllerFixture {
         doLogin
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createDisabledStudy.copy(name = "ST2").enable(1, 1) | fail
+        val study2 = factory.createEnabledStudy.copy(name = "ST2")
 
         val studies = List(study2, study1)
         studyRepository.removeAll
@@ -250,7 +250,7 @@ class StudiesControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("invalid sort field")
       }
 
-      "list single study when using paged query" taggedAs(Tag("1")) in new App(fakeApp) {
+      "list single study when using paged query" in new App(fakeApp) {
         doLogin
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
@@ -271,7 +271,7 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "data" \ "next").as[Option[Int]] must be (Some(2))
       }
 
-      "fail when using page that exeeds limits" in new App(fakeApp) {
+      "fail when using page that exceeds limit" in new App(fakeApp) {
         doLogin
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
@@ -283,7 +283,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val json = makeRequest(GET, uri + "?page=3&pageSize=1", BAD_REQUEST)
           (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("invalid page requested")
+          (json \ "message").as[String] must include ("page exceeds limit")
       }
 
       "fail when using a negative page number" in new App(fakeApp) {
@@ -365,7 +365,7 @@ class StudiesControllerSpec extends ControllerFixture {
     "GET /studies/:id" must {
       "read a study" in new App(fakeApp) {
         doLogin
-        val study = factory.createDisabledStudy.enable(1, 1) | fail
+        val study = factory.createEnabledStudy
         studyRepository.put(study)
         val json = makeRequest(GET, uri(study))
         compareObj((json \ "data"), study)
@@ -414,7 +414,7 @@ class StudiesControllerSpec extends ControllerFixture {
     "POST /studies/disable" must {
       "disable a study" in new App(fakeApp) {
         doLogin
-        val study = factory.createDisabledStudy.enable(1, 1) | fail
+        val study = factory.createEnabledStudy
         studyRepository.put(study)
 
         val cmdJson = Json.obj(

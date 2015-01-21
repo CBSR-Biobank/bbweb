@@ -1,14 +1,6 @@
 package org.biobank.domain.centre
 
-import org.biobank.domain.{
-  Comment,
-  ConcurrencySafeEntity,
-  DomainError,
-  DomainValidation,
-  HasUniqueName,
-  HasDescriptionOption,
-  Location
-}
+import org.biobank.domain._
 import org.biobank.domain.study.StudyId
 import org.biobank.infrastructure.JsonUtils._
 
@@ -70,6 +62,15 @@ object Centre {
 
 }
 
+trait CentreValidations {
+  import CommonValidations._
+
+  val NameMinLength = 2
+
+  case object InvalidName extends ValidationKey
+}
+
+
 /**
   * This is the initial state for a centre.  In this state, only configuration changes are allowed. Collection
   * and processing of specimens cannot be recorded.
@@ -104,7 +105,7 @@ case class DisabledCentre(
 /**
   * Factory object used to create a centre.
   */
-object DisabledCentre {
+object DisabledCentre extends CentreValidations {
   import org.biobank.domain.CommonValidations._
 
   /**
@@ -120,7 +121,7 @@ object DisabledCentre {
     description: Option[String]): DomainValidation[DisabledCentre] = {
     (validateId(id) |@|
       validateAndIncrementVersion(version) |@|
-      validateString(name, NameRequired) |@|
+      validateString(name, NameMinLength, InvalidName) |@|
       validateNonEmptyOption(description, NonEmptyDescription)) {
         DisabledCentre(_, _, dateTime, None, _, _)
       }
@@ -153,14 +154,14 @@ case class EnabledCentre(
 /**
   * Factory object used to enable a centre.
   */
-object EnabledCentre {
-  import org.biobank.domain.CommonValidations._
+object EnabledCentre extends CentreValidations {
+  import CommonValidations._
 
   /** A centre must be in a disabled state before it can be enabled. */
   def create(centre: DisabledCentre): DomainValidation[EnabledCentre] = {
     (validateId(centre.id) |@|
       validateAndIncrementVersion(centre.version) |@|
-      validateString(centre.name, NameRequired) |@|
+      validateString(centre.name, NameMinLength, InvalidName) |@|
       validateNonEmptyOption(centre.description, NonEmptyDescription)) {
         EnabledCentre(_, _, centre.timeAdded, None, _, _)
       }

@@ -7,7 +7,7 @@ define(['../module', 'underscore'], function(module, _) {
     '$q',
     'studiesService',
     'tableService',
-    'paginatedStudies'
+    'studyCount'
   ];
 
   /**
@@ -19,11 +19,11 @@ define(['../module', 'underscore'], function(module, _) {
   function StudiesTableCtrl($q,
                             studiesService,
                             tableService,
-                            paginatedStudies) {
+                            studyCount) {
     var vm = this;
-    vm.studies          = paginatedStudies.items;
-    vm.paginatedStudies = paginatedStudies;
-    vm.haveConfiguredStudies = (paginatedStudies.total > 0);
+    vm.studies          = [];
+    vm.paginatedStudies = {};
+    vm.haveConfiguredStudies = (studyCount > 0);
     vm.nameFilter       = '';
     vm.possibleStatuses = [
       { id: 'all',      title: 'All' },
@@ -33,25 +33,24 @@ define(['../module', 'underscore'], function(module, _) {
     ];
     vm.status           = vm.possibleStatuses[0];
 
-    var customParameters = {
+    var tableParams = {
       page: 1,
-      count: paginatedStudies.pageSize,
+      count: 5,
       sorting: {
         name: 'asc'
       }
     };
 
-    var customSettings = {
+    var tableSettings = {
       total: 0,
       getData: getData
     };
 
-    vm.tableParams = tableService.getTableParams(vm.studies, customParameters, customSettings);
+    vm.tableParams = tableService.getTableParams(vm.studies, tableParams, tableSettings);
     vm.nameFilterUpdated = nameFilterUpdated;
     vm.statusFilterUpdated = statusFilterUpdated;
 
     function updateMessage() {
-      vm.message = '';
       if ((vm.nameFilter === '') && (vm.status.id === 'all')) {
         vm.message = 'The following studies have been configured.';
       } else {

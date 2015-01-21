@@ -1,4 +1,4 @@
-define(['./module', 'jquery'], function(module, jquery) {
+define(['./module', 'jquery'], function(module, $) {
   'use strict';
 
   module.service('usersService', UsersService);
@@ -19,6 +19,7 @@ define(['./module', 'jquery'], function(module, jquery) {
       getUser:         getUser,
       query:           query,
       getAllUsers:     getAllUsers,
+      getUserCount:    getUserCount,
       getUsers:        getUsers,
       add:             add,
       updateName:      updateName,
@@ -103,26 +104,44 @@ define(['./module', 'jquery'], function(module, jquery) {
       return biobankXhrReqService.call('GET', uri());
     }
 
-    function getUsers(query, sort, order) {
-      if (arguments.length > 0) {
-        var params = {};
+    function getUserCount() {
+      return biobankXhrReqService.call('GET', uri() + '/count');
+    }
 
-        if (query) {
-          params.query = query;
+    function getUsers(nameFilter,
+                      emailFilter,
+                      status,
+                      sortField,
+                      page,
+                      pageSize,
+                      order) {
+      var params = {};
+
+      if (nameFilter)  { params.nameFilter = nameFilter; }
+      if (emailFilter) { params.emailFilter = emailFilter; }
+      if (status)      { params.status = status; }
+      if (sortField)   { params.sort = sortField; }
+      if (page)        { params.page = page; }
+      if (pageSize)    { params.pageSize = pageSize; }
+      if (order)       { params.order = order; }
+
+      if (order) {
+        if (order === 'asc') {
+          order = 'ascending';
+        } else if (order === 'desc') {
+          order = 'descending';
         }
-
-        if ((arguments.length > 1) && sort) {
-          params.sort = sort;
-        }
-
-        if ((arguments.length > 2) && order) {
-          params.order = order;
-        }
-
-        return biobankXhrReqService.call('GET', uri() + '?' + jquery.param(params));
-      } else {
-        return biobankXhrReqService.call('GET', uri());
+        params.order = order;
       }
+
+      var paramsStr = $.param(params);
+      var url = uri();
+
+      if (!paramsStr.isEmpty) {
+        url += '?' + paramsStr;
+      }
+
+      return biobankXhrReqService.call('GET', url);
     }
 
     function add(newUser) {

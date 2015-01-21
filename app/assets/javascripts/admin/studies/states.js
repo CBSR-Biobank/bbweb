@@ -20,6 +20,11 @@ define(['../module'], function(module) {
       throw new Error('state parameter studyId is invalid');
     }
 
+    resolveStudyCount.$inject = ['studiesService'];
+    function resolveStudyCount(studiesService) {
+      return studiesService.getStudyCount();
+    }
+
     $urlRouterProvider.otherwise('/');
 
     /**
@@ -51,7 +56,8 @@ define(['../module'], function(module) {
     $stateProvider.state('admin.studies.table', {
       url: '',
       resolve: {
-        user: userResolve.user
+        user: userResolve.user,
+        studyCount: resolveStudyCount
       },
       views: {
         'main@': {

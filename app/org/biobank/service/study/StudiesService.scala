@@ -31,8 +31,6 @@ trait StudiesService {
 
   def getAll: Seq[StudyNameDto]
 
-  /** Studies are sorted by name, it does not make sense to sort them by description.
-    */
   def getStudies[T <: Study]
     (filter: String, status: String, sortFunc: (Study, Study) => Boolean, order: SortOrder)
       : DomainValidation[Seq[Study]]
@@ -269,28 +267,28 @@ class StudiesServiceImpl(implicit inj: Injector)
     }
   }
 
-  private def filterByStatus(studies: Seq[Study], status: String): DomainValidation[Seq[Study]] = {
-    getStatus(status).map { status =>
-      if (status == Study.status) {
-        studies
-      } else {
-        studies.filter { study => study.status == status }
-      }
-    }
-  }
-
   def getStudies[T <: Study]
     (filter: String, status: String, sortFunc: (Study, Study) => Boolean, order: SortOrder)
       : DomainValidation[Seq[Study]] = {
-    filterByStatus(studyRepository.getValues.toSeq, status).map { studies =>
-      val filteredStudies = if (filter.isEmpty) {
-        studies
-      } else {
-        val filterLowerCase = filter.toLowerCase
-        studies.filter { s => s.name.toLowerCase.contains(filterLowerCase) }
-      }
+    val allStudies = studyRepository.getValues
 
-      val result = filteredStudies.sortWith(sortFunc)
+    val studiesFilteredByName = if (!filter.isEmpty) {
+      val filterLowerCase = filter.toLowerCase
+      allStudies.filter { study => study.name.toLowerCase.contains(filterLowerCase) }
+    } else {
+      allStudies
+    }
+
+    val studiesFilteredByStatus = getStatus(status).map { status =>
+      if (status == Study.status) {
+        studiesFilteredByName
+      } else {
+        studiesFilteredByName.filter { study => study.status == status }
+      }
+    }
+
+    studiesFilteredByStatus.map { studies =>
+      val result = studies.toSeq.sortWith(sortFunc)
 
       if (order == AscendingOrder) {
         result

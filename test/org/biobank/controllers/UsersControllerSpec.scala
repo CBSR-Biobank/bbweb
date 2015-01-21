@@ -35,10 +35,20 @@ class UsersControllerSpec extends ControllerFixture {
 
   def uri(user: User): String = uri + s"/${user.id.id}"
 
-  def createUserInRepository(plainPassword: String): RegisteredUser = {
+  def createRegisteredUserInRepository(plainPassword: String): RegisteredUser = {
     val salt = passwordHasher.generateSalt
 
     val user = factory.createRegisteredUser.copy(
+      salt = salt,
+      password = passwordHasher.encrypt(plainPassword, salt))
+    userRepository.put(user)
+    user
+  }
+
+  def createActiveUserInRepository(plainPassword: String): ActiveUser = {
+    val salt = passwordHasher.generateSalt
+
+    val user = factory.createActiveUser.copy(
       salt = salt,
       password = passwordHasher.encrypt(plainPassword, salt))
     userRepository.put(user)
@@ -51,10 +61,15 @@ class UsersControllerSpec extends ControllerFixture {
       "list the default user in the test environment" in new App(fakeApp) {
         doLogin
         val json = makeRequest(GET, uri)
-        val jsonList = (json \ "data").as[List[JsObject]]
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 1
         val jsonDefaultUser = jsonList(0)
         (jsonDefaultUser \ "email").as[String] mustBe ("admin@admin.com")
+
+        (json \ "data" \ "offset").as[Long] must be (0)
+        (json \ "data" \ "total").as[Long] must be (1)
+        (json \ "data" \ "prev").as[Option[Int]] must be (None)
+        (json \ "data" \ "next").as[Option[Int]] must be (None)
       }
 
       "list a new user" in new App(fakeApp) {
@@ -63,26 +78,255 @@ class UsersControllerSpec extends ControllerFixture {
         userRepository.put(user)
 
         val json = makeRequest(GET, uri)
-        val jsonList = (json \ "data").as[List[JsObject]]
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have length 2
         compareObj(jsonList(1), user)
-      }
-    }
 
-    "GET /users" must {
+        (json \ "data" \ "offset").as[Long] must be (0)
+        (json \ "data" \ "total").as[Long] must be (2)
+        (json \ "data" \ "prev").as[Option[Int]] must be (None)
+        (json \ "data" \ "next").as[Option[Int]] must be (None)
+      }
+
       "list multiple users" in new App(fakeApp) {
         doLogin
-        val users = List(factory.createRegisteredUser, factory.createRegisteredUser)
+        val user1 = factory.createRegisteredUser.copy(name = "user1")
+        val user2 = factory.createRegisteredUser.copy(name = "user2")
+        val users = List(user1, user2)
         users.map(user => userRepository.put(user))
 
         val json = makeRequest(GET, uri)
-        val jsonList = (json \ "data").as[List[JsObject]].filterNot { u =>
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
           (u \ "id").as[String].equals("admin@admin.com")
         }
 
         jsonList must have size users.size
 
         (jsonList zip users).map { item => compareObj(item._1, item._2) }
+      }
+
+      "list a single user when filtered by name" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createRegisteredUser.copy(name = "user1")
+        val user2 = factory.createRegisteredUser.copy(name = "user2")
+        val users = List(user1, user2)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?nameFilter=${user1.name}")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
+
+        jsonList must have size 1
+        compareObj(jsonList(0), user1)
+      }
+
+      "list a single user when filtered by email" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createRegisteredUser.copy(email = "user1@test.com")
+        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
+        val users = List(user1, user2)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?emailFilter=${user1.email}")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
+
+        jsonList must have size 1
+        compareObj(jsonList(0), user1)
+      }
+
+      "list a single registered user when filtered by status" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createRegisteredUser
+        val user2 = factory.createActiveUser
+        val users = List(user1, user2)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?status=registered")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
+
+        jsonList must have size 1
+        compareObj(jsonList(0), user1)
+      }
+
+      "list active users when filtered by status" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createRegisteredUser
+        val user2 = factory.createActiveUser
+        val users = List(user1, user2)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?status=active")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
+
+        jsonList must have size 2
+        compareObj(jsonList(1), user2)
+      }
+
+      "list locked users when filtered by status" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createLockedUser
+        val user2 = factory.createActiveUser
+        val users = List(user1, user2)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?status=locked")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
+
+        jsonList must have size 1
+        compareObj(jsonList(0), user1)
+      }
+
+      "list users sorted by name" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createLockedUser.copy(name = "user2")
+        val user2 = factory.createRegisteredUser.copy(name = "user1")
+        val users = List(user1, user2)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?sort=name")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
+          (u \ "id").as[String].equals("admin@admin.com")
+        }
+
+        jsonList must have size 2
+        compareObj(jsonList(0), user2)
+        compareObj(jsonList(1), user1)
+      }
+
+      "list users sorted by email" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createLockedUser.copy(email = "user2@test.com")
+        val user2 = factory.createRegisteredUser.copy(email = "user1@test.com")
+        val users = List(user1, user2)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?sort=email")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
+          (u \ "id").as[String].equals("admin@admin.com")
+        }
+
+        jsonList must have size 2
+        compareObj(jsonList(0), user2)
+        compareObj(jsonList(1), user1)
+      }
+
+      "list users sorted by status" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
+        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
+        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
+        val users = List(user1, user2, user3)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?sort=status")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
+          (u \ "id").as[String].equals("admin@admin.com")
+        }
+
+        jsonList must have size 3
+        compareObj(jsonList(0), user3)
+        compareObj(jsonList(1), user1)
+        compareObj(jsonList(2), user2)
+      }
+
+      "list a single user when using paged query" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
+        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
+        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
+        val users = List(user1, user2, user3)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?sort=email&page=1&pageSize=1&order=descending")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
+          (u \ "id").as[String].equals("admin@admin.com")
+        }
+
+        jsonList must have size 1
+        compareObj(jsonList(0), user1)
+      }
+
+      "list users sorted by status in descending order" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
+        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
+        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
+        val users = List(user1, user2, user3)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?sort=status&order=descending")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
+          (u \ "id").as[String].equals("admin@admin.com")
+        }
+
+        jsonList must have size 3
+        compareObj(jsonList(0), user2)
+        compareObj(jsonList(1), user1)
+        compareObj(jsonList(2), user3)
+      }
+
+      "fail when using an invalid status" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
+        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
+        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
+        val users = List(user1, user2, user3)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?status=xxxx", BAD_REQUEST)
+        (json \ "status").as[String] must include("error")
+        (json \ "message").as[String] must include("invalid user status")
+      }
+
+      "fail when using an invalid page number" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
+        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
+        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
+        val users = List(user1, user2, user3)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?page=-1", BAD_REQUEST)
+        (json \ "status").as[String] must include("error")
+        (json \ "message").as[String] must include("page is invalid")
+      }
+
+      "fail when using an invalid page number that exeeds limits" taggedAs(Tag("1")) in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
+        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
+        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
+        val users = List(user1, user2, user3)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?page=5&pageSize=1", BAD_REQUEST)
+        (json \ "status").as[String] must include("error")
+        (json \ "message").as[String] must include("page exceeds limit")
+      }
+
+      "fail when using an invalid page size" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
+        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
+        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
+        val users = List(user1, user2, user3)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?pageSize=-1", BAD_REQUEST)
+        (json \ "status").as[String] must include("error")
+        (json \ "message").as[String] must include("page size is invalid")
+      }
+
+      "fail when using an invalid sort order" in new App(fakeApp) {
+        doLogin
+        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
+        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
+        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
+        val users = List(user1, user2, user3)
+        users.map(user => userRepository.put(user))
+
+        val json = makeRequest(GET, uri + s"?order=xxx", BAD_REQUEST)
+        (json \ "status").as[String] must include("error")
+        (json \ "message").as[String] must include("invalid order requested")
       }
     }
 
@@ -105,7 +349,7 @@ class UsersControllerSpec extends ControllerFixture {
 
       "update a user's name" in new App(fakeApp) {
         doLogin
-        val user = factory.createRegisteredUser.activate | fail
+        val user = factory.createActiveUser
         userRepository.put(user)
 
         val cmdJson = Json.obj(
@@ -121,16 +365,17 @@ class UsersControllerSpec extends ControllerFixture {
 
       "not update a user's name with an invalid name" in new App(fakeApp) {
         doLogin
-        val user = factory.createRegisteredUser.activate | fail
+        val user = factory.createActiveUser
         userRepository.put(user)
 
         val cmdJson = Json.obj(
-          "id" -> user.id.id,
+          "id"              -> user.id.id,
           "expectedVersion" -> Some(user.version),
-          "name" -> "a")
+          "name"            -> "a")
         val json = makeRequest(PUT, uri(user) + "/name", BAD_REQUEST, json = cmdJson)
 
         (json \ "status").as[String] must include("error")
+        (json \ "message").as[String] must include("InvalidName")
       }
     }
 
@@ -138,7 +383,7 @@ class UsersControllerSpec extends ControllerFixture {
 
       "update a user's email" in new App(fakeApp) {
         doLogin
-        val user = factory.createRegisteredUser.activate | fail
+        val user = factory.createActiveUser
         userRepository.put(user)
 
         val cmdJson = Json.obj(
@@ -152,9 +397,9 @@ class UsersControllerSpec extends ControllerFixture {
         (json \ "data" \ "email").as[String] must be(user.email)
       }
 
-      "not update a user's email with an invalid email address" taggedAs(Tag("1")) in new App(fakeApp) {
+      "not update a user's email with an invalid email address" in new App(fakeApp) {
         doLogin
-        val user = factory.createRegisteredUser.activate | fail
+        val user = factory.createActiveUser
         userRepository.put(user)
 
         val cmdJson = Json.obj(
@@ -193,8 +438,8 @@ class UsersControllerSpec extends ControllerFixture {
 
       "not update a user's password with an empty current password" in new App(fakeApp) {
         doLogin
-        val user = factory.createActiveUser
-        userRepository.put(user)
+        val plainPassword = nameGenerator.next[String]
+        val user = createActiveUserInRepository(plainPassword)
 
         val cmdJson = Json.obj(
           "id" -> user.id.id,
@@ -208,8 +453,8 @@ class UsersControllerSpec extends ControllerFixture {
 
       "not update a user's password with an empty new password" in new App(fakeApp) {
         doLogin
-        val user = factory.createActiveUser
-        userRepository.put(user)
+        val plainPassword = nameGenerator.next[String]
+        val user = createActiveUserInRepository(plainPassword)
 
         val cmdJson = Json.obj(
           "id" -> user.id.id,
@@ -226,7 +471,7 @@ class UsersControllerSpec extends ControllerFixture {
 
       "update a user's avatar URL" in new App(fakeApp) {
         doLogin
-        val user = factory.createRegisteredUser.activate | fail
+        val user = factory.createActiveUser
         userRepository.put(user)
 
         val cmdJson = Json.obj(
@@ -242,7 +487,7 @@ class UsersControllerSpec extends ControllerFixture {
 
       "remove a user's avatar URL" in new App(fakeApp) {
         doLogin
-        val user = factory.createRegisteredUser.activate | fail
+        val user = factory.createActiveUser
         userRepository.put(user)
 
         val cmdJson = Json.obj(
@@ -257,7 +502,7 @@ class UsersControllerSpec extends ControllerFixture {
 
       "not update a user's avatar URL if URL is invalid" in new App(fakeApp) {
         doLogin
-        val user = factory.createRegisteredUser.activate | fail
+        val user = factory.createActiveUser
         userRepository.put(user)
 
         val cmdJson = Json.obj(
@@ -272,7 +517,7 @@ class UsersControllerSpec extends ControllerFixture {
 
       "not update a user's avatar URL if URL is empty" in new App(fakeApp) {
         doLogin
-        val user = factory.createRegisteredUser.activate | fail
+        val user = factory.createActiveUser
         userRepository.put(user)
 
         val cmdJson = Json.obj(
@@ -288,7 +533,7 @@ class UsersControllerSpec extends ControllerFixture {
     "GET /users/:id" must {
       "return a user" in new App(fakeApp) {
         doLogin
-        val user = factory.createRegisteredUser.activate | fail
+        val user = factory.createActiveUser
         userRepository.put(user)
         val json = makeRequest(GET, uri(user))
         val jsonObj = (json \ "data").as[JsObject]
@@ -316,7 +561,7 @@ class UsersControllerSpec extends ControllerFixture {
       "lock a user" in new App(fakeApp) {
         doLogin
 
-        val user = factory.createRegisteredUser.activate | fail
+        val user = factory.createActiveUser
         userRepository.put(user)
 
         val cmdJson = Json.obj(
@@ -331,7 +576,7 @@ class UsersControllerSpec extends ControllerFixture {
     "PUT /users/unlock" must {
       "must unlock a user" in new App(fakeApp) {
         doLogin
-        val user = factory.createRegisteredUser.activate | fail
+        val user = factory.createActiveUser
         val lockedUser = user.lock | fail
         userRepository.put(lockedUser)
 
@@ -347,7 +592,7 @@ class UsersControllerSpec extends ControllerFixture {
     "POST /login" must {
       "allow a user to log in" in new App(fakeApp) {
         val plainPassword = nameGenerator.next[String]
-        val user = createUserInRepository(plainPassword)
+        val user = createRegisteredUserInRepository(plainPassword)
 
         val cmdJson = Json.obj(
           "email" -> user.email,
@@ -369,7 +614,7 @@ class UsersControllerSpec extends ControllerFixture {
       }
 
       "prevent a user logging in with bad password" in new App(fakeApp) {
-        val user = createUserInRepository(nameGenerator.next[String])
+        val user = createRegisteredUserInRepository(nameGenerator.next[String])
         val invalidPassword = nameGenerator.next[String]
         val cmdJson = Json.obj(
           "email" -> user.email,
@@ -382,7 +627,7 @@ class UsersControllerSpec extends ControllerFixture {
 
       "not allow a locked user to log in" in new App(fakeApp) {
         val plainPassword = nameGenerator.next[String]
-        val activeUser = createUserInRepository(plainPassword).activate | fail
+        val activeUser = createActiveUserInRepository(plainPassword)
         val lockedUser = activeUser.lock | fail
         userRepository.put(lockedUser)
 
@@ -468,7 +713,7 @@ class UsersControllerSpec extends ControllerFixture {
 
         // this request is valid since user is logged in
         var json = makeRequest(GET, uri)
-        val jsonList = (json \ "data").as[List[JsObject]]
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 1
 
         // the user is now logged out
@@ -486,17 +731,14 @@ class UsersControllerSpec extends ControllerFixture {
     "POST /passreset" must {
 
       "allow an active user to reset his/her password" in new App(fakeApp) {
-        val user = createUserInRepository(nameGenerator.next[String])
-        val activeUser = user.activate | fail
-        userRepository.put(activeUser)
-
-        val cmdJson = Json.obj("email" -> activeUser.email)
+        val user = createActiveUserInRepository(nameGenerator.next[String])
+        val cmdJson = Json.obj("email" -> user.email)
         val json = makeRequest(POST, "/passreset", json = cmdJson)
         (json \ "status").as[String] must include("success")
       }
 
       "not allow a registered user to reset his/her password" in new App(fakeApp) {
-        val user = createUserInRepository(nameGenerator.next[String])
+        val user = createRegisteredUserInRepository(nameGenerator.next[String])
         val cmdJson = Json.obj("email" -> user.email)
         val json = makeRequest(POST, "/passreset", FORBIDDEN, json = cmdJson)
         (json \ "status").as[String] must include("error")
@@ -526,8 +768,7 @@ class UsersControllerSpec extends ControllerFixture {
 
       "allow a user to authenticate" in new App(fakeApp) {
         val plainPassword = nameGenerator.next[String]
-        val user = createUserInRepository(plainPassword).activate | fail
-        userRepository.put(user)
+        val user = createActiveUserInRepository(plainPassword)
 
         val cmdJson = Json.obj(
           "email" -> user.email,
@@ -543,7 +784,7 @@ class UsersControllerSpec extends ControllerFixture {
 
       "not allow a registered user to authenticate" in new App(fakeApp) {
         val plainPassword = nameGenerator.next[String]
-        val user = createUserInRepository(plainPassword)
+        val user = createRegisteredUserInRepository(plainPassword)
 
         val cmdJson = Json.obj(
           "email" -> user.email,
@@ -559,8 +800,7 @@ class UsersControllerSpec extends ControllerFixture {
 
       "not allow a locked user to authenticate" in new App(fakeApp) {
         val plainPassword = nameGenerator.next[String]
-        val activeUser = createUserInRepository(plainPassword).activate | fail
-        userRepository.put(activeUser)
+        val activeUser = createActiveUserInRepository(plainPassword)
 
         val cmdJson = Json.obj(
           "email" -> activeUser.email,

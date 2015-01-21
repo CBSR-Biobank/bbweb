@@ -43,7 +43,10 @@ class StudiesController(implicit inj: Injector)
 
   private val PageSizeMax = 10
 
-  case class PaginationResult(studies: Seq[Study], page: Int, pageSize: Int)
+  def studyCount() =
+    AuthAction(parse.empty) { (token, userId, request) =>
+      Ok(studiesService.getAll.size)
+    }
 
   def list(filter: String, status: String, sort: String, page: Int, pageSize: Int, order: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
@@ -58,35 +61,12 @@ class StudiesController(implicit inj: Injector)
         studies     <- studiesService.getStudies(filter, status, sortWith, sortOrder)
         page        <- pagedQuery.getPage(PageSizeMax, studies.size)
         pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-      } yield { PaginationResult(studies, page, pageSize) }
-
+        results     <- PagedResults.create(studies, page, pageSize)
+      } yield results
 
       validation.fold(
         err => BadRequest(err.list.mkString),
-        pq => {
-          if (pq.studies.isEmpty) {
-            Ok(PagedResults(
-              items    = Seq.empty[Study],
-              page     = pq.page,
-              pageSize = pq.pageSize,
-              offset   = 0,
-              total    = 0
-            ))
-          } else {
-            val offset = pq.pageSize * (pq.page - 1)
-            if (offset > pq.studies.size - 1) {
-              BadRequest(s"invalid page requested: ${pq.page}")
-            } else {
-              Ok(PagedResults(
-                items    = pq.studies.drop(offset).take(pq.pageSize),
-                page     = pq.page,
-                pageSize = pq.pageSize,
-                offset   = offset,
-                total    = pq.studies.size
-              ))
-            }
-          }
-        }
+        results =>  Ok(results)
       )
     }
 

@@ -26,6 +26,20 @@ object CommonValidations {
     if ((s == null) || s.isEmpty()) err.failureNel else s.success
   }
 
+  def validateString(s: String, minLength: Long, err: ValidationKey): DomainValidation[String] = {
+    validateString(s, err).fold(
+      err => err.failure,
+      str => {
+        if (str.length < minLength) {
+          err.failureNel
+        } else {
+          str.successNel
+        }
+      }
+    )
+
+  }
+
   def validatePositiveNumber(number: Int, err: ValidationKey): DomainValidation[Int] = {
     if (number < 0) err.failureNel else number.success
   }

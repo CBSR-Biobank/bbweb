@@ -12,10 +12,10 @@
   </h1>
 </div>
 <div class="clearfix">
-  <div ng-if="(vm.paginatedStudies.total <= 0) && (vm.nameFilter == '') && (vm.status.id == 'all')">
+  <div ng-if="! vm.haveConfiguredStudies">
     <p>No studies have been added yet.</p>
   </div>
-  <div ng-if="(vm.paginatedStudies.total > 0) || (vm.nameFilter != '') || (vm.status.id != 'all')">
+  <div ng-if="vm.haveConfiguredStudies">
     <div class="panel panel-default">
       <div class="panel-body">
         {{vm.message}}
@@ -46,7 +46,7 @@
     </form>
 
     <div class="alert alert-warning" role="alert"
-         ng-if="(vm.paginatedStudies.total <= 0) && (vm.status.id != 'all')">
+         ng-if="(vm.paginatedUsers.total <= 0) && (vm.status.id != 'all')">
       <p><span class="glyphicon glyphicon-warning-sign"></span>
         No studies match the criteria.
     </div>

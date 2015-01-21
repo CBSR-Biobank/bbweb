@@ -63,6 +63,8 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
 
 object User {
 
+  val status: String = "User"
+
   implicit val userWrites = new Writes[User] {
     def writes(user: User) = Json.obj(
       "id"           -> user.id,
@@ -76,13 +78,38 @@ object User {
     )
   }
 
+  // users with duplicate emails are not allowed
+  def compareByEmail(a: User, b: User) = (a.email compareToIgnoreCase b.email) < 0
+
+  def compareByName(a: User, b: User) = {
+    val nameCompare = a.name compareToIgnoreCase b.name
+    if (nameCompare == 0) {
+      compareByEmail(a, b)
+    } else {
+      nameCompare < 0
+    }
+  }
+
+  def compareByStatus(a: User, b: User) = {
+    val statusCompare = a.status compare b.status
+    if (statusCompare == 0) {
+      compareByName(a, b)
+    } else {
+      statusCompare < 0
+    }
+  }
 }
 
 trait UserValidations {
+  import CommonValidations._
+
+  val NameMinLength = 2
 
   case object PasswordRequired extends ValidationKey
 
   case object SaltRequired extends ValidationKey
+
+  case object InvalidName extends ValidationKey
 
   case object InvalidEmail extends ValidationKey
 
@@ -124,7 +151,7 @@ case class RegisteredUser (
   avatarUrl: Option[String]) extends User with UserValidations {
   import CommonValidations._
 
-  override val status: String = "Registered"
+  override val status: String = RegisteredUser.status
 
   /* Activates a registered user. */
   def activate: DomainValidation[ActiveUser] = {
@@ -135,6 +162,8 @@ case class RegisteredUser (
 /** Factory object. */
 object RegisteredUser extends UserValidations {
   import CommonValidations._
+
+  val status: String = "Registered"
 
   /** Creates a registered user. */
   def create(
@@ -149,7 +178,7 @@ object RegisteredUser extends UserValidations {
 
     (validateId(id) |@|
       validateAndIncrementVersion(version) |@|
-      validateString(name, NameRequired) |@|
+      validateString(name, NameMinLength, InvalidName) |@|
       validateEmail(email) |@|
       validateString(password, PasswordRequired) |@|
       validateString(salt, SaltRequired) |@|
@@ -175,10 +204,10 @@ case class ActiveUser (
     with UserValidations {
   import CommonValidations._
 
-  override val status: String = "Active"
+  override val status: String = ActiveUser.status
 
   def updateName(name: String): DomainValidation[ActiveUser] = {
-    validateString(name, NameRequired).fold(
+    validateString(name, NameMinLength, InvalidName).fold(
       err => err.failure,
       x => copy(version = version + 1, name = x).success
     )
@@ -215,11 +244,13 @@ case class ActiveUser (
 object ActiveUser extends UserValidations {
   import CommonValidations._
 
+  val status: String = "Active"
+
   /** Creates an active user from a registered user. */
   def create[T <: User](user: T): DomainValidation[ActiveUser] = {
     (validateId(user.id) |@|
       validateAndIncrementVersion(user.version) |@|
-      validateString(user.name, NameRequired) |@|
+      validateString(user.name, NameMinLength, InvalidName) |@|
       validateEmail(user.email) |@|
       validateString(user.password, PasswordRequired) |@|
       validateString(user.salt, SaltRequired) |@|
@@ -242,7 +273,7 @@ case class LockedUser (
   salt: String,
   avatarUrl: Option[String]) extends User {
 
-  override val status: String = "Locked"
+  override val status: String = LockedUser.status
 
   /** Unlocks a locked user. */
   def unlock: DomainValidation[ActiveUser] = {
@@ -255,11 +286,13 @@ case class LockedUser (
 object LockedUser extends UserValidations {
   import CommonValidations._
 
+  val status: String = "Locked"
+
   /** Creates an active user from a locked user. */
   def create(user: ActiveUser): DomainValidation[LockedUser] = {
     (validateId(user.id) |@|
       validateAndIncrementVersion(user.version) |@|
-      validateString(user.name, NameRequired) |@|
+      validateString(user.name, NameMinLength, InvalidName) |@|
       validateEmail(user.email) |@|
       validateString(user.password, PasswordRequired) |@|
       validateString(user.salt, SaltRequired) |@|

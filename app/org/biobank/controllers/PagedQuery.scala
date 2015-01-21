@@ -36,10 +36,12 @@ case class PagedQuery(sortField: String, page: Int, pageSize: Int, order: String
       pageSize => {
         if (page < 1) {
           DomainError(s"page is invalid: $page").failureNel
-        } else if ((page - 1)* pageSize > totalItems) {
-          DomainError(s"page exeeds limits: $page").failureNel
+        } else if (((totalItems > 0) && ((page - 1) * pageSize >= totalItems)) ||
+          ((totalItems == 0) && (page > 1))) {
+          DomainError(s"page exceeds limit: $page").failureNel
         } else {
-          page.successNel[DomainError]
+          // if totalItems is zero, but page is 1 then it is valid
+          page.successNel
         }
       }
     )
@@ -72,6 +74,33 @@ case class PagedResults[+T](items: Seq[T], page: Int, pageSize: Int, offset: Lon
 
 
 object PagedResults {
+
+  def create[T](items: Seq[T], page: Int, pageSize: Int): DomainValidation[PagedResults[T]]= {
+    if (items.isEmpty) {
+      PagedResults.createEmpty(page, pageSize).successNel
+    } else {
+      val offset = pageSize * (page - 1)
+      if ((offset > 0) && (offset >= items.size)) {
+        DomainError(s"invalid page requested: ${page}").failureNel
+      } else {
+        PagedResults(
+          items    = items.drop(offset).take(pageSize),
+          page     = page,
+          pageSize = pageSize,
+          offset   = offset,
+          total    = items.size
+        ).successNel
+      }
+    }
+  }
+
+  def createEmpty[T](page: Int, pageSize: Int) = PagedResults(
+    items    = Seq.empty[T],
+    page     = page,
+    pageSize = pageSize,
+    offset   = 0,
+    total    = 0
+  )
 
   implicit def pagedResultsWrites[T](implicit fmt: Writes[T]) : Writes[PagedResults[T]] =
     new Writes[PagedResults[T]] {

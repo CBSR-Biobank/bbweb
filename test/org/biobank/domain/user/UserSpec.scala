@@ -122,7 +122,7 @@ class UserSpec extends DomainSpec {
 
       RegisteredUser.create(
         id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list must (have length 1 and contain("NameRequired")),
+        err => err.list must (have length 1 and contain("InvalidName")),
         user => fail("name validation failed")
       )
     }
@@ -271,7 +271,7 @@ class UserSpec extends DomainSpec {
         err => {
           err.list must have length 2
           err.list.head mustBe ("InvalidVersion")
-          err.list.tail.head mustBe ("NameRequired")
+          err.list.tail.head mustBe ("InvalidName")
         },
         user => fail
       )

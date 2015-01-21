@@ -35,7 +35,7 @@ class StudySpec extends DomainSpec {
           'description (description)
         )
 
-        (study.timeAdded to DateTime.now).millis must be < 100L
+        (study.timeAdded to DateTime.now).millis must be < 500L
         study.timeModified mustBe (None)
       }
     }
@@ -168,11 +168,11 @@ class StudySpec extends DomainSpec {
       val description = some(nameGenerator.next[Study])
 
       val v = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
-      v mustFail "NameRequired"
+      v mustFail "InvalidName"
 
       name = ""
       val v2 = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
-      v2 mustFail "NameRequired"
+      v2 mustFail "InvalidName"
     }
 
     "not be created with an empty description option" in {
@@ -196,7 +196,7 @@ class StudySpec extends DomainSpec {
       val description = Some(nameGenerator.next[Study])
 
       val validation = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
-      validation.mustFail("InvalidVersion",  "NameRequired")
+      validation.mustFail("InvalidVersion",  "InvalidName")
     }
 
     "not be enabled without prior configuration" in {

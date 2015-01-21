@@ -13,6 +13,7 @@ GET     /studies                               @org.biobank.controllers.study.St
 POST    /studies                               @org.biobank.controllers.study.StudiesController.add
 
 # value objects
+GET     /studies/count                         @org.biobank.controllers.study.StudiesController.studyCount()
 GET     /studies/valuetypes                    @org.biobank.controllers.study.StudiesController.valueTypes
 GET     /studies/anatomicalsrctypes            @org.biobank.controllers.study.StudiesController.anatomicalSourceTypes
 GET     /studies/specimentypes                 @org.biobank.controllers.study.StudiesController.specimenTypes
@@ -98,7 +99,8 @@ POST    /centres/:centreId/studies/:studyId     @org.biobank.controllers.centres
 DELETE  /centres/:centreId/studies/:studyId     @org.biobank.controllers.centres.CentresController.removeStudy(centreId, studyId)
 
 # Users
-GET     /users                                  @org.biobank.controllers.UsersController.list(query: Option[String], sort: Option[String], order: Option[String])
+GET     /users/count                            @org.biobank.controllers.UsersController.userCount()
+GET     /users                                  @org.biobank.controllers.UsersController.list(nameFilter: String ?= "", emailFilter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "ascending")
 POST    /users                                  @org.biobank.controllers.UsersController.registerUser()
 GET     /users/:id                              @org.biobank.controllers.UsersController.user(id)
 PUT     /users/:id/name                         @org.biobank.controllers.UsersController.updateName(id)

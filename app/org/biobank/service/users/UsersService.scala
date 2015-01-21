@@ -3,6 +3,7 @@ package org.biobank.service.users
 import org.biobank.service._
 import org.biobank.domain._
 import org.biobank.domain.user._
+import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 
@@ -38,6 +39,58 @@ class UsersService(implicit inj: Injector)
 
   def getAll: Set[User] = {
     userRepository.allUsers
+  }
+
+  private def getStatus(status: String): DomainValidation[String] = {
+    status match {
+      case "all"        => User.status.successNel
+      case "registered" => RegisteredUser.status.successNel
+      case "active"     => ActiveUser.status.successNel
+      case "locked"     => LockedUser.status.successNel
+      case _            => DomainError(s"invalid user status: $status").failureNel
+    }
+  }
+
+  def getUsers[T <: User]
+    (nameFilter: String,
+      emailFilter: String,
+      status: String,
+      sortFunc: (User, User) => Boolean,
+      order: SortOrder)
+      : DomainValidation[Seq[User]] = {
+    val allUsers = userRepository.getValues
+
+    val usersFilteredByName = if (!nameFilter.isEmpty) {
+      val nameFilterLowerCase = nameFilter.toLowerCase
+      allUsers.filter { _.name.toLowerCase.contains(nameFilterLowerCase) }
+    } else {
+      allUsers
+    }
+
+    val usersFilteredByEmail = if (!emailFilter.isEmpty) {
+      val emailFilterLowerCase = emailFilter.toLowerCase
+      usersFilteredByName.filter { _.email.toLowerCase.contains(emailFilterLowerCase) }
+    } else {
+      usersFilteredByName
+    }
+
+    val usersFilteredByStatus = getStatus(status).map { status =>
+      if (status == User.status) {
+        usersFilteredByEmail
+      } else {
+        usersFilteredByEmail.filter { user => user.status == status }
+      }
+    }
+
+    usersFilteredByStatus.map { users =>
+      val result = users.toSeq.sortWith(sortFunc)
+
+      if (order == AscendingOrder) {
+        result
+      } else {
+        result.reverse
+      }
+    }
   }
 
   def getUser(id: String): DomainValidation[User] = {

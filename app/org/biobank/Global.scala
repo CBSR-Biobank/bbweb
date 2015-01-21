@@ -1,11 +1,7 @@
 package org.biobank
 
-import org.biobank.domain.user.{
-  RegisteredUser,
-  User,
-  UserId,
-  UserRepository
-}
+import org.biobank.domain.user._
+import org.biobank.service.PasswordHasher
 import org.biobank.domain.study.StudyRepository
 import org.biobank.domain.study._
 import org.biobank.service.PasswordHasher
@@ -133,6 +129,7 @@ trait Global
     Logger.debug("addTestData")
 
     addMultipleStudies
+    addMultipleUsers
   }
 
   def addMultipleStudies(): Unit = {
@@ -200,6 +197,71 @@ trait Global
       )
       studyRepository.put(study)
     }
+  }
+
+  def addMultipleUsers() {
+    Logger.debug("addMultipleUsers")
+
+    val userData = List(
+      ("7f423654cc8f4037b0cee77dfebd5319", "Jessica Miniaci", "jessica.miniaci@ualberta.ca"),
+      ("a092a89fb12247b28d97ab1c3e117831", "Elizabeth Taylor", "elizabeth.taylor@deltagenomics.com"),
+      ("98cd257929e74a03bbef4a66067614cc", "Aaron Peck", "aaron.peck@ualberta.ca"),
+      ("4e2c3c51a9a94f54b08e3cb9e1c78016", "Meagen LaFave", "cbsr.financial@me.com"),
+      ("6e2385f6466d408697bc4c0d1c2b4e66", "Nelson Loyola", "loyola@ualberta.ca"),
+      ("5a9a8d9f697948a0aceba73da0b5b370", "Aaron Young", "aaron.young@ualberta.ca"),
+      ("f417948d108c468eaa7ef0c2531de0ef", "Luisa Franco", "lfrancor@ucalgary.ca"),
+      ("b94257c9c6274a5597ca32e9f5fb0875", "Corazon Oballo", "coballo@ucalgary.ca"),
+      ("31220b17be584b7fb73f31acf91e9d68", "Amie Lee", "amie1@ualberta.ca"),
+      ("7fff64b01bc24977a421f6c3654bdf47", "Lisa Tanguay", "lisa.tanguay@ualberta.ca"),
+      ("81ec2e59d0244e7abf52774c0efef969", "Darlene Ramadan", "ramadan@ucalgary.ca"),
+      ("40f875bda98547438b7babc8070f1cba", "Juline Skripitsky", "Jskrip@biosample.ca"),
+      ("c56bea77bd7a4fb1a38429754521dffc", "Leslie Jackson Carter", "jacksola@ucalgary.ca"),
+      ("1ccd4ca5f3034fb8a44362918a5e6c57", "Thiago Oliveira", "toliveir@ucalgary.ca"),
+      ("ffc3482d537e446dbc6ca12cc6b99b92", "Rozsa Sass", "rsas@ucalgary.ca"),
+      ("a2866a9ae6fa41ec8ab992ede6247f10", "Margaret Morck", "mmorck@ucalgary.ca"),
+      ("3b4928f6d0b14fff89a87b884a1ca5b9", "Kristan Nagy", "nagy1@ualberta.ca"),
+      ("0aa1e54d803c405399dc8acc1403565e", "Bruce Ritchie", "bruce.ritchie@ualberta.ca"),
+      ("7f5bff95c40846a39b9f45b7745a29c2", "Matthew Klassen", "mwklasse@ualberta.ca"),
+      ("74ce097f11b34fe8aa2b46d9d10da05f", "Marleen Irwin", "mirwin@ualberta.ca"),
+      ("a785a42f21514d97833cca4c20085457", "Millie Silverstone", "millie.silverstone@me.com"),
+      ("f3b7575623d84b5b8dd22ff7769d25f5", "Trevor Soll", "tsoll@ualberta.ca"),
+      ("60953dfe532842a0bcebeb9c786b6803", "Stephanie Wichuk", "stephaniewichuk@med.ualberta.ca"),
+      ("0b8f58b3542748fcb26cf5594391ddce", "Deborah Parfett", "dparfett@catrials.org"),
+      ("e41f6d17d67c404e997cc77ce62f4175", "Samantha Taylor", "samantha.taylor@albertahealthservices.ca"),
+      ("b9bd92bd6879493384976147de1325bf", "Martine Bergeron", "martine.bergeron@crchum.qc.ca"),
+      ("6107efa2aece48ef8d3b6bca9f13af85", "Isabelle Deneufbourg", "isabelle.deneufbourg@criucpq.ulaval.ca"),
+      ("3fa89a208baf42709588337bdeb35a32", "Colin Coros", "coros@ualberta.ca"),
+      ("f431d76d79d743329a55859b95a1a3f4", "Ray Vis", "rvis@ualberta.ca"),
+      ("72469d992e0544ed868348a4a7ddbffb", "Suzanne Morissette", "suzanne.morissette.chum@ssss.gouv.qc.ca"),
+      ("f6dd6947b4e24397b2a2a49c7eafd8cd", "Francine Marsan", "francine.marsan.chum@ssss.gouv.qc.ca"),
+      ("2fe94da331ca4e65bf582c8b5563f601", "Jeanne Bjergo", "jeannebjergo@hcnw.com"),
+      ("33dea4db597843b996730ba6c19ba721", "Larissa Weeks", "larissaweeks@hcnw.com"),
+      ("2602abaa2d6b4de39df2d2d6aa9c227b", "Sharon Fulton", "sharonfulton@hcnw.com"),
+      ("28c39db836634627948fac3bbb88726f", "Mirjana Maric Viskovic", "maric@ucalgary.ca"),
+      ("2295eef3d29d4de79997ebff9a962209", "Paivi Kastell", "paivi.kastell@ppshp.fi"),
+      ("88346afcb2884e53853a25da6930fb64", "Paivi Koski", "paivi.koski@ppshp.fi")
+    )
+
+    val userRepository = inject [UserRepository]
+    def passwordHasher = inject [PasswordHasher]
+    val plainPassword = "testuser"
+    val salt = passwordHasher.generateSalt
+
+    val users = userData.map { case(id, name, email) =>
+      val user: User = ActiveUser(
+        id = UserId(id),
+        version = 0L,
+        timeAdded = DateTime.now,
+        timeModified = None,
+        name = name,
+        email = email,
+        password = passwordHasher.encrypt(plainPassword, salt),
+        salt = salt,
+        avatarUrl = None
+      )
+      userRepository.put(user)
+    }
+
   }
 
   /**

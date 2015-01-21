@@ -11,6 +11,7 @@ define(['./module', 'angular', 'jquery'], function(module, angular, $) {
   function StudiesService(biobankXhrReqService, domainEntityService) {
     var service = {
       getStudies    : getStudies,
+      getStudyCount : getStudyCount,
       get           : get,
       addOrUpdate   : addOrUpdate,
       enable        : enable,
@@ -50,6 +51,10 @@ define(['./module', 'angular', 'jquery'], function(module, angular, $) {
       return biobankXhrReqService.call('POST', uri(study.id) + '/' + status, cmd);
     }
 
+    function getStudyCount() {
+      return biobankXhrReqService.call('GET', uri() + '/count');
+    }
+
     /**
      * @param {string} nameFilter Returns the studies that have a name that match this filter.
      *
@@ -73,22 +78,12 @@ define(['./module', 'angular', 'jquery'], function(module, angular, $) {
     function getStudies(nameFilter, status, page, pageSize, sortField, order) {
       var params = {};
 
-      if (nameFilter) {
-        params.filter = nameFilter;
-      }
+      if (nameFilter) { params.filter = nameFilter; }
+      if (status)     { params.status = status; }
+      if (page)       { params.page = page; }
+      if (pageSize)   { params.pageSize = pageSize; }
+      if (sortField)  { params.sort = sortField; }
 
-      if (status) {
-        params.status = status;
-      }
-      if (page) {
-        params.page = page;
-      }
-      if (pageSize) {
-        params.pageSize = pageSize;
-      }
-      if (sortField) {
-        params.sort = sortField;
-      }
       if (order) {
         if (order === 'asc') {
           order = 'ascending';

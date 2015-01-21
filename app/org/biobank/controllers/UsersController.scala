@@ -1,5 +1,6 @@
 package org.biobank.controllers
 
+import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEventsJson._
 import org.biobank.service.users.UsersService
@@ -20,6 +21,7 @@ import scaldi.{Injectable, Injector}
 
 import scalaz._
 import Scalaz._
+import scalaz.Validation.FlatMap._
 
 class UsersController(implicit inj: Injector)
     extends CommandController
@@ -30,14 +32,15 @@ class UsersController(implicit inj: Injector)
 
   implicit val studiesService = inject [StudiesService]
 
+  private val PageSizeDefault = 5
+
+  private val PageSizeMax = 20
+
   /** Used for obtaining the email and password from the HTTP login request */
   case class LoginCredentials(email: String, password: String)
 
   /** JSON reader for [[LoginCredentials]]. */
-  implicit val loginCredentialsReads = (
-    (__ \ "email").read[String](minLength[String](5)) and
-      (__ \ "password").read[String](minLength[String](2))
-  )(LoginCredentials.apply _)
+  implicit val loginCredentialsReads = Json.reads[LoginCredentials]
 
   /**
     * Log-in a user. Expects the credentials in the body in JSON format.
@@ -129,10 +132,45 @@ class UsersController(implicit inj: Injector)
     )
   }
 
-  def list(query: Option[String], sort: Option[String], order: Option[String]) =
+  def userCount() =
     AuthAction(parse.empty) { (token, userId, request) =>
-      val users = usersService.getAll.toList
-      Ok(users)
+      Ok(usersService.getAll.size)
+    }
+
+  def list(
+    nameFilter: String,
+    emailFilter: String ,
+    status: String,
+    sort: String,
+    page: Int,
+    pageSize: Int,
+    order: String) =
+    AuthAction(parse.empty) { (token, userId, request) =>
+      Logger.debug(s"UsersController:list: nameFilter/$nameFilter, emailFilter/$emailFilter, status/$status, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
+
+      def sortWith(sortField: String): (User, User) => Boolean = {
+        sortField match {
+          case "name"  => (User.compareByName _)
+          case "email" => (User.compareByEmail _)
+          case _       => (User.compareByStatus _)
+        }
+      }
+
+      val pagedQuery = PagedQuery(sort, page, pageSize, order)
+      val validation = for {
+        sortField   <- pagedQuery.getSortField(Seq("name", "email", "status"))
+        sortWith    <- sortWith(sortField).success
+        sortOrder   <- pagedQuery.getSortOrder
+        users       <- usersService.getUsers(nameFilter, emailFilter, status, sortWith, sortOrder)
+        page        <- pagedQuery.getPage(PageSizeMax, users.size)
+        pageSize    <- pagedQuery.getPageSize(PageSizeMax)
+        results     <- PagedResults.create(users, page, pageSize)
+      } yield results
+
+      validation.fold(
+        err => BadRequest(err.list.mkString),
+        results =>  Ok(results)
+      )
     }
 
   /** Retrieves the user for the given id as JSON */
