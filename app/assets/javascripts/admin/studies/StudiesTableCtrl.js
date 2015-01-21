@@ -22,8 +22,9 @@ define(['../module', 'underscore'], function(module, _) {
                             paginatedStudies) {
     var vm = this;
     vm.studies          = paginatedStudies.items;
-    vm.nameFilter       = '';
     vm.paginatedStudies = paginatedStudies;
+    vm.haveConfiguredStudies = (paginatedStudies.total > 0);
+    vm.nameFilter       = '';
     vm.possibleStatuses = [
       { id: 'all',      title: 'All' },
       { id: 'disabled', title: 'Disabled' },
@@ -49,6 +50,15 @@ define(['../module', 'underscore'], function(module, _) {
     vm.nameFilterUpdated = nameFilterUpdated;
     vm.statusFilterUpdated = statusFilterUpdated;
 
+    function updateMessage() {
+      vm.message = '';
+      if ((vm.nameFilter === '') && (vm.status.id === 'all')) {
+        vm.message = 'The following studies have been configured.';
+      } else {
+        vm.message = 'The following studies match the criteria:';
+      }
+    }
+
     function getData($defer, params) {
       var sortObj = params.sorting();
       var sortKeys = _.keys(sortObj);
@@ -64,6 +74,7 @@ define(['../module', 'underscore'], function(module, _) {
           vm.paginatedStudies = paginatedStudies;
           params.total(paginatedStudies.total);
           $defer.resolve(vm.studies);
+          updateMessage();
         });
     }
 

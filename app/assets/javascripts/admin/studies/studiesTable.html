@@ -16,17 +16,23 @@
     <p>No studies have been added yet.</p>
   </div>
   <div ng-if="(vm.paginatedStudies.total > 0) || (vm.nameFilter != '') || (vm.status.id != 'all')">
-    <p ng-if="(vm.nameFilter == '') && (vm.status.id == 'all')">
-      The following studies have been configured. Narrow your search by using the filters.</p>
-
-    <p ng-if="(vm.nameFilter != '') || (vm.status.id != 'all')">
-      The following studies match the criteria:</p>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        {{vm.message}}
+      </div>
+      <div class="panel-footer">
+        <span class="label label-info">
+          Narrow your search by using the filters.
+        </span>
+      </div>
+    </div>
 
     <form class="form-inline" style="margin-bottom: 20px;">
       <div class="form-group">
         <label for="status" class="small">Name filter</label>
-        <input type="text" class="form-control input-sm" ng-change="vm.nameFilterUpdated()"
-                ng-model="vm.nameFilter">
+        <input type="text" class="form-control input-sm"
+               ng-model="vm.nameFilter"
+               ng-change="vm.nameFilterUpdated()">
       </div>
       <div class="form-group">
         <label for="status" class="small">Status filter</label>
@@ -63,13 +69,16 @@
 
     <script type="text/ng-template" id="custom/pager">
 
-      <div ng-if="params.settings().counts.length" class="btn-group btn-group-xs pull-right">
-        <button type="button" ng-class="{'active':params.count() == 5}"
-                ng-click="params.count(5)"
-                class="btn btn-default">5</button>
-        <button type="button" ng-class="{'active':params.count() == 10}"
-                ng-click="params.count(10)"
-                class="btn btn-default">10</button>
+      <div class="pull-right">
+        <span class="small">Records per page:</span>
+        <div ng-if="params.settings().counts.length" class="btn-group btn-group-xs">
+          <button type="button" ng-class="{'active':params.count() == 5}"
+                  ng-click="params.count(5)"
+                  class="btn btn-default">5</button>
+          <button type="button" ng-class="{'active':params.count() == 10}"
+                  ng-click="params.count(10)"
+                  class="btn btn-default">10</button>
+        </div>
       </div>
 
       <ul class="pagination ng-table-pagination">

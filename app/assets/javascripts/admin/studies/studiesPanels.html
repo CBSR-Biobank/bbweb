@@ -12,11 +12,39 @@
   </h1>
 </div>
 <div class="clearfix">
-  <div data-ng-if="vm.studies.length <= 0">
+  <div ng-if="!vm.haveConfiguredStudies">
     <p>No studies have been added.</p>
   </div>
-  <div data-ng-if="vm.studies.length > 0">
-    <p>The following studies have been configured:</p>
+  <div ng-if="vm.haveConfiguredStudies">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        {{vm.message}}
+      </div>
+      <div class="panel-footer">
+        <span class="label label-info">
+          Narrow your search by using the filters.
+        </span>
+      </div>
+    </div>
+
+    <form class="form-inline" style="margin-bottom: 20px;">
+      <div class="form-group">
+        <label for="status" class="small">Name filter</label>
+        <input type="text" class="form-control input-sm"
+               ng-model="vm.nameFilter"
+               ng-change="vm.nameFilterUpdated()">
+      </div>
+      <div class="form-group">
+        <label for="status" class="small">Status filter</label>
+        <select class="form-control input-sm"
+                name="status"
+                ng-model="vm.status"
+                ng-options="status.title for status in vm.possibleStatuses"
+                ng-change="vm.statusFilterUpdated()">
+        </select>
+      </div>
+    </form>
+
     <div class="row" data-ng-repeat="rows in vm.studies | partition:3">
       <div class="col-md-4" data-ng-repeat="study in rows">
         <div class="panel panel-default" style="margin-top: 10px;">
