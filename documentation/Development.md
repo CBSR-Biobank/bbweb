@@ -17,21 +17,25 @@ the `proto` files.
 
 * [Bootstrap 3.0.0 themes](http://bootswatch.com/)
 
-## MongoDB
+### MongoDB
                                       | shell command
 --------------------------------------|----------------------------------------------
 Drop the Evensourced Journal databse: | `mongo bbweb --eval "db.dropDatabase()"`
 Dump the Biobank database:            | `mongodump --db bbweb --out ~/tmp`
 Restore the Biobank database:         | `mongorestore ~/tmp/bbweb/bbweb.bson`
 
-## NPM
+### AngularJS
+
+The code uses the style guide proposed by John Papa: [AngularJS Style Guide](https://github.com/johnpapa/angularjs-styleguide).
+
+#### NPM
 
 Add dependencies to `package.json` in the root directory. Use command `web-assets:jseNpmNodeModules`
 to download the modules.
 
 OR: `web-assets:web-node-modules`
 
-### ng-annotate
+##### ng-annotate
 
 ng-annotate adds and removes AngularJS dependency injection annotations.
 
