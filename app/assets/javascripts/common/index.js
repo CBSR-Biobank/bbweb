@@ -11,7 +11,6 @@ define([
   './directives/truncateToggleDirective',
   './directives/uiBreadcrumbsDirective',
   './directives/updateRemoveButtonsDirective',
-  './filters/partitionFilter',
   './filters/timeagoFilter',
   './filters/truncateFilter',
   './services/addTimeStampsService',

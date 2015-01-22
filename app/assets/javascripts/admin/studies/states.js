@@ -35,9 +35,7 @@ define(['../module'], function(module) {
       url: '/studies',
       resolve: {
         user: userResolve.user,
-        paginatedStudies: ['studiesService', function(studiesService) {
-          return studiesService.getStudies();
-        }]
+        studyCount: resolveStudyCount
       },
       views: {
         'main@': {

@@ -92,6 +92,8 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
         .then(function (paginatedUsers) {
           vm.paginatedUsers = paginatedUsers;
           vm.users = [];
+
+          // FIXME: use a filter to do this
           _.each(paginatedUsers.items, function(user) {
             vm.users.push(angular.extend(
               user, {timeAddedLocal: (new Date(user.timeAdded)).toLocaleString()}));

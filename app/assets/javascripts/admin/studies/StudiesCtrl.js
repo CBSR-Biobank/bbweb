@@ -1,20 +1,22 @@
-define(['../module'], function(module) {
+define(['../module', 'underscore'], function(module, _) {
   'use strict';
 
   module.controller('StudiesCtrl', StudiesCtrl);
 
-  StudiesCtrl.$inject = ['studiesService', 'paginatedStudies'];
+  StudiesCtrl.$inject = ['studiesService', 'studyCount'];
 
   /**
    * Displays a list of studies with each in its own mini-panel.
    *
    */
-  function StudiesCtrl(studiesService, paginatedStudies) {
+  function StudiesCtrl(studiesService, studyCount) {
     var vm = this;
-    vm.studies = [];
-    vm.paginatedStudies = paginatedStudies;
+    vm.studyRows = [];
+    vm.paginatedStudies = {};
+    vm.rowSize = 3;
+    vm.pageSize = 6;
 
-    vm.haveConfiguredStudies = (paginatedStudies.total > 0);
+    vm.haveConfiguredStudies = (studyCount > 0);
     vm.nameFilter       = '';
     vm.possibleStatuses = [
       { id: 'all',      title: 'All' },
@@ -46,12 +48,17 @@ define(['../module'], function(module) {
       studiesService.getStudies(vm.nameFilter,
                                 vm.status.id,
                                 1,
-                                6,
+                                vm.pageSize,
                                 'name',
                                 'ascending')
         .then(function (paginatedStudies) {
-          vm.studies = paginatedStudies.items;
           vm.paginatedStudies = paginatedStudies;
+
+          // split studies into array of rows of vm.rowSize items
+          vm.studyRows = _.groupBy(paginatedStudies.items, function (item, index) {
+            return Math.floor(index / vm.rowSize);
+          });
+
           updateMessage();
         });
     }

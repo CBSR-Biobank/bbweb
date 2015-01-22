@@ -23,12 +23,14 @@
         <label for="status" class="small">Email filter</label>
         <input type="text" class="form-control input-sm"
                ng-model="vm.emailFilter"
+               ng-model-options="{ debounce: 1000 }"
                ng-change="vm.emailFilterUpdated()">
       </div>
       <div class="form-group">
         <label for="status" class="small">Name filter</label>
         <input type="text" class="form-control input-sm"
                ng-model="vm.nameFilter"
+               ng-model-options="{ debounce: 1000 }"
                ng-change="vm.nameFilterUpdated()">
       </div>
       <div class="form-group">

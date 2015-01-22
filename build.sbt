@@ -14,7 +14,7 @@ lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .settings(libraryDependencies ~= (_.map(excludeSpecs2)))
 
-scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.4")
+scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.5")
 
 scalacOptions in ThisBuild ++= Seq(
   "-target:jvm-1.7",
