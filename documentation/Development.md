@@ -23,6 +23,7 @@ the `proto` files.
 Drop the Evensourced Journal databse: | `mongo bbweb --eval "db.dropDatabase()"`
 Dump the Biobank database:            | `mongodump --db bbweb --out ~/tmp`
 Restore the Biobank database:         | `mongorestore ~/tmp/bbweb/bbweb.bson`
+Shutdown the mongo server             | `mongo admin --eval "db.shutdownServer({timeoutSecs: 10});"`
 
 ### AngularJS
 
@@ -45,7 +46,7 @@ find . -name \*.js -exec echo "/usr/local/bin/ng-annotate --add {} -o {}.new && 
 sh tmp.sh
 ```
 
-### Client Tests
+##### Client Tests
 
 Using Karma and Jasmine for client unit tests. Also using Grunt to run the tests.
 
@@ -53,6 +54,35 @@ Client tests are found in the `jstest` directory since they don't pass Jshint in
 were placed in `tests/assets/javascripts`, but when running SBT, errors were generated. Currently sbt-jshint
 does not provide a way to use a `.jshintignore` file, so they had to be moved to the `jstest` directory.
 
+### Docker
+
+In the `tools\docker` folder of the project is a **Docker** file. This file can be used to create a docker
+image to run the web application in. You also need:
+
+* the ZIP file that is created when the web application is created with the `sbt dist` command,
+* a valid email.conf file
+* and the `bbweb_start.sh` script.
+
+Run the command `sbt build -t bbweb .` as **root** in this folder to create the docker image.
+
+To keep data between appliction versions, the image uses a data volume to store the mongo database. The
+directory the database files are kept in is `/opt/bbweb_docker/mongodb_data`. To make backups of this database
+a mongo server must be started with the configuration pointing at the `mongod.conf` file. Use the command:
+
+```bash
+/usr/bin/mongod --config /opt/bbweb_docker/mongod.conf &
+```
+
+The Dockerfile was built by using the following as an example:
+
+* https://github.com/mingfang/docker-play/blob/master/Dockerfile
+*
+)http://stackoverflow.com/questions/25364940/how-to-create-docker-image-for-local-application-taking-file-and-value-parameter
+
+Some docker commands:
+* remove docker image by id: `docker rmi __image_id__`
+* remove all existing containers: `docker rm $(docker ps -a -q)`
+* stop a docker image: `docker stop __container_id__`
 
 ## Development Environment
 

@@ -45,9 +45,9 @@ trait Global
     createDefaultUser
     //createTestUser
 
-    if (app.mode == Mode.Dev) {
-      addTestData
-    }
+    // if (app.mode == Mode.Dev) {
+       addTestData
+    // }
 
     createSqlDdlScripts
 
