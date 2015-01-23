@@ -81,7 +81,8 @@ PUT     /studies/:studyId/participants/:id          @org.biobank.controllers.stu
 GET     /studies/participants/checkUnique/:uniqueId @org.biobank.controllers.study.ParticipantsController.checkUnique(uniqueId)
 
 # centres
-GET     /centres                                @org.biobank.controllers.centres.CentresController.list
+GET     /centres                                @org.biobank.controllers.centres.CentresController.list(filter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
+GET     /centres/count                          @org.biobank.controllers.centres.CentresController.centreCount()
 POST    /centres                                @org.biobank.controllers.centres.CentresController.add
 GET     /centres/:id                            @org.biobank.controllers.centres.CentresController.query(id)
 PUT     /centres/:id                            @org.biobank.controllers.centres.CentresController.update(id)

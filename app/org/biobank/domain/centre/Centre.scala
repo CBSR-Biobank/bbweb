@@ -48,6 +48,8 @@ sealed trait Centre
 
 object Centre {
 
+  val status: String = "Study"
+
   implicit val centreWrites = new Writes[Centre] {
     def writes(centre: Centre) = Json.obj(
       "id"             -> centre.id,
@@ -60,6 +62,16 @@ object Centre {
     )
   }
 
+  def compareByName(a: Centre, b: Centre) = (a.name compareToIgnoreCase b.name) < 0
+
+  def compareByStatus(a: Centre, b: Centre) = {
+    val statusCompare = a.status compare b.status
+    if (statusCompare == 0) {
+      compareByName(a, b)
+    } else {
+      statusCompare < 0
+    }
+  }
 }
 
 trait CentreValidations {
@@ -87,7 +99,7 @@ case class DisabledCentre(
   description: Option[String])
     extends Centre {
 
-  override val status: String = "Disabled"
+  override val status: String = DisabledCentre.status
 
   /** Used to change the name or the description. */
   def update(
@@ -107,6 +119,8 @@ case class DisabledCentre(
   */
 object DisabledCentre extends CentreValidations {
   import org.biobank.domain.CommonValidations._
+
+  val status: String = "Disabled"
 
   /**
     * The factory method to create a centre.
@@ -143,7 +157,7 @@ case class EnabledCentre(
   description: Option[String])
   extends Centre {
 
-  override val status: String = "Enabled"
+  override val status: String = EnabledCentre.status
 
   def disable: DomainValidation[DisabledCentre] = {
     DisabledCentre.create(this.id, this.version, this.timeAdded, name, description)
@@ -156,6 +170,8 @@ case class EnabledCentre(
   */
 object EnabledCentre extends CentreValidations {
   import CommonValidations._
+
+  val status: String = "Disabled"
 
   /** A centre must be in a disabled state before it can be enabled. */
   def create(centre: DisabledCentre): DomainValidation[EnabledCentre] = {

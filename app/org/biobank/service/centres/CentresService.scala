@@ -1,6 +1,7 @@
 package org.biobank.service.centre
 
 import org.biobank.service.ApplicationService
+import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 import org.biobank.domain.{ DomainValidation, DomainError, Location, LocationId, LocationRepository }
@@ -24,6 +25,10 @@ import scalaz.Scalaz._
 trait CentresService {
 
   def getAll: Set[Centre]
+
+  def getCentres[T <: Centre]
+    (filter: String, status: String, sortFunc: (Centre, Centre) => Boolean, order: SortOrder)
+      : DomainValidation[Seq[Centre]]
 
   def getCentre(id: String): DomainValidation[Centre]
 
@@ -91,6 +96,46 @@ class CentresServiceImpl(implicit inj: Injector)
     */
   def getAll: Set[Centre] = {
     centreRepository.getValues.toSet
+  }
+
+  private def getStatus(status: String): DomainValidation[String] = {
+    status match {
+      case "all"      => Centre.status.successNel
+      case "disabled" => DisabledCentre.status.successNel
+      case "enabled"  => EnabledCentre.status.successNel
+      case _          => DomainError(s"invalid centre status: $status").failureNel
+    }
+  }
+
+  def getCentres[T <: Centre]
+    (filter: String, status: String, sortFunc: (Centre, Centre) => Boolean, order: SortOrder)
+      : DomainValidation[Seq[Centre]] =  {
+    val allCentres = centreRepository.getValues
+
+    val centresFilteredByName = if (!filter.isEmpty) {
+      val filterLowerCase = filter.toLowerCase
+      allCentres.filter { centre => centre.name.toLowerCase.contains(filterLowerCase) }
+    } else {
+      allCentres
+    }
+
+    val centresFilteredByStatus = getStatus(status).map { status =>
+      if (status == Centre.status) {
+        centresFilteredByName
+      } else {
+        centresFilteredByName.filter { centre => centre.status == status }
+      }
+    }
+
+    centresFilteredByStatus.map { centres =>
+      val result = centres.toSeq.sortWith(sortFunc)
+
+      if (order == AscendingOrder) {
+        result
+      } else {
+        result.reverse
+      }
+    }
   }
 
   def getCentre(id: String): DomainValidation[Centre] = {

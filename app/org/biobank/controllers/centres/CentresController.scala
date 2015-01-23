@@ -23,6 +23,7 @@ import scaldi.{Injectable, Injector}
 
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /**
   *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
@@ -36,9 +37,34 @@ class CentresController(implicit inj: Injector)
 
   private def centresService = inject [CentresService]
 
-  def list = AuthAction(parse.empty) { (token, userId, request) =>
-    Ok(centresService.getAll.toList)
-  }
+  private val PageSizeMax = 10
+
+  def centreCount() =
+    AuthAction(parse.empty) { (token, userId, request) =>
+      Ok(centresService.getAll.size)
+    }
+
+  def list(filter: String, status: String, sort: String, page: Int, pageSize: Int, order: String) =
+    AuthAction(parse.empty) { (token, userId, request) =>
+
+      Logger.debug(s"CentresController:list: filter/$filter, status/$status, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
+
+      val pagedQuery = PagedQuery(sort, page, pageSize, order)
+      val validation = for {
+        sortField   <- pagedQuery.getSortField(Seq("name", "status"))
+        sortWith    <- (if (sortField == "status") (Centre.compareByStatus _) else (Centre.compareByName _)).success
+        sortOrder   <- pagedQuery.getSortOrder
+        centres     <- centresService.getCentres(filter, status, sortWith, sortOrder)
+        page        <- pagedQuery.getPage(PageSizeMax, centres.size)
+        pageSize    <- pagedQuery.getPageSize(PageSizeMax)
+        results     <- PagedResults.create(centres, page, pageSize)
+      } yield results
+
+      validation.fold(
+        err => BadRequest(err.list.mkString),
+        results =>  Ok(results)
+      )
+    }
 
   def query(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
     centresService.getCentre(id).fold(
