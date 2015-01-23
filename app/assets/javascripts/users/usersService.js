@@ -1,14 +1,18 @@
-define(['./module', 'jquery'], function(module, $) {
+define(['./module', 'jquery', 'underscore'], function(module, $, _) {
   'use strict';
 
   module.service('usersService', UsersService);
 
-  UsersService.$inject = ['$q', '$cookies', '$log', 'biobankXhrReqService'];
+  UsersService.$inject = ['$q', '$cookies', '$log', 'biobankXhrReqService', 'queryStringService'];
 
   /**
    * Communicates with the server to get user related information and perform user related commands.
    */
-  function UsersService($q, $cookies, $log, biobankXhrReqService) {
+  function UsersService($q,
+                        $cookies,
+                        $log,
+                        biobankXhrReqService,
+                        queryStringService) {
     var self = this;
     self.user = undefined;
     self.token = $cookies['XSRF-TOKEN'];
@@ -108,37 +112,50 @@ define(['./module', 'jquery'], function(module, $) {
       return biobankXhrReqService.call('GET', uri() + '/count');
     }
 
-    function getUsers(nameFilter,
-                      emailFilter,
-                      status,
-                      sortField,
-                      page,
-                      pageSize,
-                      order) {
-      var params = {};
+    /**
+     * @param {string} options.nameFilter The filter to use on user names. Default is empty string.
+     *
+     * @param {string} options.emailFilter The filter to use on user emails. Default is empty string.
+     *
+     * @param {string} options.status Returns users filtered by status. The following are valid: 'all' to
+     * return all users, 'retired' to return only retired users, 'active' to reutrn only active
+     * users, and 'locked' to return only locked users. For any other values the response is an error.
+     *
+     * @param {string} options.sortField Users can be sorted by 'name', 'email' or by 'status'. Values other
+     * than these yield an error.
+     *
+     * @param {int} options.page If the total results are longer than pageSize, then page selects which
+     * users should be returned. If an invalid value is used then the response is an error.
+     *
+     * @param {int} options.pageSize The total number of users to return per page. The maximum page size is
+     * 10. If a value larger than 10 is used then the response is an error.
+     *
+     * @param {string} options.order One of 'asc' or 'desc'. If an invalid value is used then
+     * the response is an error.
+     *
+     * @return A promise. If the promise succeeds then a paged result is returned.
+     */
+    function getUsers(options) {
+      var validKeys = [
+        'nameFilter',
+        'emailFilter',
+        'status',
+        'sort',
+        'page',
+        'pageSize',
+        'order'
+      ];
+      var paramsStr = '';
 
-      if (nameFilter)  { params.nameFilter = nameFilter; }
-      if (emailFilter) { params.emailFilter = emailFilter; }
-      if (status)      { params.status = status; }
-      if (sortField)   { params.sort = sortField; }
-      if (page)        { params.page = page; }
-      if (pageSize)    { params.pageSize = pageSize; }
-      if (order)       { params.order = order; }
-
-      if (order) {
-        if (order === 'asc') {
-          order = 'ascending';
-        } else if (order === 'desc') {
-          order = 'descending';
-        }
-        params.order = order;
+      if (arguments.length) {
+        paramsStr = queryStringService.param(options, function (value, key) {
+          return _.contains(validKeys, key);
+        });
       }
 
-      var paramsStr = $.param(params);
       var url = uri();
-
-      if (!paramsStr.isEmpty) {
-        url += '?' + paramsStr;
+      if (paramsStr) {
+        url += paramsStr;
       }
 
       return biobankXhrReqService.call('GET', url);

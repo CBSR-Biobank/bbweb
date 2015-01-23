@@ -1,14 +1,14 @@
-define(['./module', 'angular', 'jquery'], function(module, angular, $) {
+define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular, $, _) {
   'use strict';
 
   module.service('studiesService', StudiesService);
 
-  StudiesService.$inject = ['biobankXhrReqService', 'domainEntityService'];
+  StudiesService.$inject = ['biobankXhrReqService', 'domainEntityService', 'queryStringService'];
 
   /**
    * Service to acccess studies.
    */
-  function StudiesService(biobankXhrReqService, domainEntityService) {
+  function StudiesService(biobankXhrReqService, domainEntityService, queryStringService) {
     var service = {
       getStudies    : getStudies,
       getStudyCount : getStudyCount,
@@ -56,48 +56,46 @@ define(['./module', 'angular', 'jquery'], function(module, angular, $) {
     }
 
     /**
-     * @param {string} nameFilter Returns the studies that have a name that match this filter.
+     * @param {string} options.filter The filter to use on study names. Default is empty string.
      *
-     * @param {string} status Returns studies that have a matching status. For all studies use
-     * 'all'. If a value larger than 10 is used then the response is an error.
+     * @param {string} options.status Returns studies filtered by status. The following are valid: 'all' to
+     * return all studies, 'disabled' to return only disabled studies, 'enabled' to reutrn only enable
+     * studies, and 'retired' to return only retired studies. For any other values the response is an error.
      *
-     * @param {int} page If the total results are longer than pageSize, then page selects which
+     * @param {string} options.sortField Studies can be sorted by 'name' or by 'status'. Values other than
+     * these two yield an error.
+     *
+     * @param {int} options.page If the total results are longer than pageSize, then page selects which
      * studies should be returned. If an invalid value is used then the response is an error.
      *
-     * @param {int} pageSize The total number of studies to return per page. If a value larger than
-     * 10 is used then the response is an error.
+     * @param {int} options.pageSize The total number of studies to return per page. The maximum page size is
+     * 10. If a value larger than 10 is used then the response is an error.
      *
-     * @param {string} sortField Studies can be sorted by 'name' or by 'status'. If an invalid value
-     * is used then the response is an error.
-     *
-     * @param {string} order One of 'asc' or 'desc'. If an invalid value is used then
+     * @param {string} options.order One of 'asc' or 'desc'. If an invalid value is used then
      * the response is an error.
      *
-     * @return A promise.
+     * @return A promise. If the promise succeeds then a paged result is returned.
      */
-    function getStudies(nameFilter, status, page, pageSize, sortField, order) {
-      var params = {};
+    function getStudies(options) {
+      var url = uri();
+      var paramsStr = '';
+      var validKeys = [
+        'filter',
+        'status',
+        'sort',
+        'page',
+        'pageSize',
+        'order'
+      ];
 
-      if (nameFilter) { params.filter = nameFilter; }
-      if (status)     { params.status = status; }
-      if (page)       { params.page = page; }
-      if (pageSize)   { params.pageSize = pageSize; }
-      if (sortField)  { params.sort = sortField; }
-
-      if (order) {
-        if (order === 'asc') {
-          order = 'ascending';
-        } else if (order === 'desc') {
-          order = 'descending';
-        }
-        params.order = order;
+      if (arguments.length) {
+        paramsStr = queryStringService.param(options, function (value, key) {
+          return _.contains(validKeys, key);
+        });
       }
 
-      var paramsStr = $.param(params);
-      var url = uri();
-
-      if (paramsStr !== '') {
-        url += '?' + paramsStr;
+      if (paramsStr) {
+        url += paramsStr;
       }
 
       return biobankXhrReqService.call('GET', url);

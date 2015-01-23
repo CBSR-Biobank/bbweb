@@ -236,7 +236,7 @@ class UsersControllerSpec extends ControllerFixture {
         val users = List(user1, user2, user3)
         users.map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, uri + s"?sort=email&page=1&pageSize=1&order=descending")
+        val json = makeRequest(GET, uri + s"?sort=email&page=1&pageSize=1&order=desc")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
           (u \ "id").as[String].equals("admin@admin.com")
         }
@@ -253,7 +253,7 @@ class UsersControllerSpec extends ControllerFixture {
         val users = List(user1, user2, user3)
         users.map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, uri + s"?sort=status&order=descending")
+        val json = makeRequest(GET, uri + s"?sort=status&order=desc")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
           (u \ "id").as[String].equals("admin@admin.com")
         }

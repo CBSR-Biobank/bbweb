@@ -152,7 +152,7 @@ class StudiesControllerSpec extends ControllerFixture {
         studyRepository.removeAll
         studies.map(study => studyRepository.put(study))
 
-        val json = makeRequest(GET, uri + "?order=ascending")
+        val json = makeRequest(GET, uri + "?order=asc")
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size studies.size
@@ -171,7 +171,7 @@ class StudiesControllerSpec extends ControllerFixture {
         studyRepository.removeAll
         studies.map(study => studyRepository.put(study))
 
-        val json = makeRequest(GET, uri + "?order=descending")
+        val json = makeRequest(GET, uri + "?order=desc")
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size studies.size
@@ -617,7 +617,7 @@ class StudiesControllerSpec extends ControllerFixture {
         studyRepository.removeAll
         studies.map(study => studyRepository.put(study))
 
-        val json = makeRequest(GET, "/studies/names?order=ascending")
+        val json = makeRequest(GET, "/studies/names?order=asc")
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size studies.size

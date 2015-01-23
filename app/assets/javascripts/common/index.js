@@ -23,6 +23,7 @@ define([
   './services/notificationsService',
   './services/panelService',
   './services/panelTableService',
+  './services/queryStringService',
   './services/stateHelperService',
   './services/tableService'
 ], function() {});

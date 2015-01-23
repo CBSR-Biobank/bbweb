@@ -1,5 +1,5 @@
 // Jasmine test suite
-define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
+define(['angular', 'angularMocks', 'jquery', 'underscore', 'biobankApp'], function(angular, mocks, $, _) {
   'use strict';
 
   describe('Service: userService', function() {
@@ -56,7 +56,6 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       }));
     });
 
-
     describe('service functions', function () {
 
       var httpBackend;
@@ -90,6 +89,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       });
 
       it('should have the following functions', function () {
+        expect(angular.isFunction(usersService.getUserCount)).toBe(true);
         expect(angular.isFunction(usersService.getAllUsers)).toBe(true);
         expect(angular.isFunction(usersService.getUser)).toBe(true);
         expect(angular.isFunction(usersService.query)).toBe(true);
@@ -118,6 +118,20 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       it('should return the user that is logged in', function() {
         doLogin();
         expect(_.isEqual(usersService.getUser(), user));
+      });
+
+      it('calling getUserCount has valid URL', function() {
+        httpBackend.whenGET(uri() + '/count').respond({
+          status: 'success',
+          data: [user]
+        });
+
+        usersService.getUserCount().then(function(data) {
+          expect(data.length).toEqual(1);
+          expect(_.isEqual(user, data[0]));
+        });
+
+        httpBackend.flush();
       });
 
       it('should get a list of all users', function() {
@@ -157,15 +171,30 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         httpBackend.flush();
       });
 
-      it('should query for multiple users - query parameter only', function() {
-        var query = 'test';
+      it('should query for multiple users - name filter parameter only', function() {
+        var nameFilter = 'test';
 
-        httpBackend.whenGET(uri() + '?query=' + query).respond({
+        httpBackend.whenGET(uri() + '?' + $.param({nameFilter: nameFilter})).respond({
           status: 'success',
           data: [user]
         });
 
-        usersService.getUsers(query).then(function(data) {
+        usersService.getUsers({nameFilter: nameFilter}).then(function(data) {
+          expect(data.length).toBe(1);
+          expect(_.isEqual(data[0], user));
+        });
+        httpBackend.flush();
+      });
+
+      it('should query for multiple users - email filter parameter only', function() {
+        var emailFilter = 'test';
+
+        httpBackend.whenGET(uri() + '?' + $.param({emailFilter: emailFilter})).respond({
+          status: 'success',
+          data: [user]
+        });
+
+        usersService.getUsers({emailFilter: emailFilter}).then(function(data) {
           expect(data.length).toBe(1);
           expect(_.isEqual(data[0], user));
         });
@@ -175,12 +204,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       it('should query for multiple users - sort parameter only', function() {
         var sort = 'asc';
 
-        httpBackend.whenGET(uri() + '?sort=' + sort).respond({
+        httpBackend.whenGET(uri() + '?' + $.param({sort: sort})).respond({
           status: 'success',
           data: [user]
         });
 
-        usersService.getUsers(null, sort).then(function(data) {
+        usersService.getUsers({sort: sort}).then(function(data) {
           expect(data.length).toBe(1);
           expect(_.isEqual(data[0], user));
         });
@@ -188,16 +217,16 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       });
 
       it('should query for multiple users', function() {
-        var query = 'test';
+        var emailFilter = 'test';
         var sort = 'email';
         var order = 'desc';
 
-        httpBackend.whenGET(uri() + '?query=' + query + '&sort=' + sort + '&order=' + order).respond({
+        httpBackend.whenGET(uri() + '?' + $.param({emailFilter: emailFilter, sort: sort, order: 'desc'})).respond({
           status: 'success',
           data: [user]
         });
 
-        usersService.getUsers(query, sort, order).then(function(data) {
+        usersService.getUsers({emailFilter: emailFilter, sort: sort, order: order}).then(function(data) {
           expect(data.length).toBe(1);
           expect(_.isEqual(data[0], user));
         });

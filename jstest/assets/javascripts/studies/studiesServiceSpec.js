@@ -36,6 +36,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
     });
 
     it('should have the following functions', function () {
+      expect(angular.isFunction(studiesService.getStudyCount)).toBe(true);
       expect(angular.isFunction(studiesService.getStudies)).toBe(true);
       expect(angular.isFunction(studiesService.get)).toBe(true);
       expect(angular.isFunction(studiesService.addOrUpdate)).toBe(true);
@@ -44,6 +45,20 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
       expect(angular.isFunction(studiesService.retire)).toBe(true);
       expect(angular.isFunction(studiesService.unretire)).toBe(true);
       expect(angular.isFunction(studiesService.processingDto)).toBe(true);
+    });
+
+    it('calling getStudyCount has valid URL', function() {
+      httpBackend.whenGET(uri() + '/count').respond({
+        status: 'success',
+        data: [study]
+      });
+
+      studiesService.getStudyCount().then(function(data) {
+        expect(data.length).toEqual(1);
+        expect(_.isEqual(study, data[0]));
+      });
+
+      httpBackend.flush();
     });
 
     it('calling getStudies with no parameters has no query string', function() {
@@ -62,13 +77,13 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
 
     it('calling getStudies with filter parameter has valid query string', function() {
       var sortField = 'sortField';
-      var url = uri() + '?' + $.param({filter: sortField});
+      var url = uri() + '?' + $.param({sort: sortField});
       httpBackend.whenGET(url).respond({
         status: 'success',
         data: [study]
       });
 
-      studiesService.getStudies(sortField).then(function(data) {
+      studiesService.getStudies({sort: sortField}).then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });
@@ -77,18 +92,18 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
     });
 
     it('calling getStudies with filter and status parameters has valid query string', function() {
-      var sortField = 'sortField';
+      var nameFilter = 'nameFilter';
       var order = 'disabled';
       var url = uri() + '?' + $.param({
-        filter: sortField,
-        status: order
+        filter: nameFilter,
+        order: order
       });
       httpBackend.whenGET(url).respond({
         status: 'success',
         data: [study]
       });
 
-      studiesService.getStudies(sortField, order).then(function(data) {
+      studiesService.getStudies({filter: nameFilter, order: order}).then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });
@@ -108,7 +123,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
         data: [study]
       });
 
-      studiesService.getStudies(null, null, page, pageSize).then(function(data) {
+      studiesService.getStudies({page: page, pageSize: pageSize}).then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });
@@ -128,7 +143,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
         data: [study]
       });
 
-      studiesService.getStudies(null, null, null, null, sortField, order).then(function(data) {
+      studiesService.getStudies({sort: sortField, order: order}).then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });

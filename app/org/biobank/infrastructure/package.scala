@@ -18,8 +18,8 @@ package infrastructure {
 
     def fromString(order: String): ValidationNel[String, SortOrder] = {
       order match {
-        case "ascending" => AscendingOrder.successNel
-        case "descending" => DescendingOrder.successNel
+        case "asc" => AscendingOrder.successNel
+        case "desc" => DescendingOrder.successNel
         case _ => s"invalid order requested: $order".failureNel
       }
 

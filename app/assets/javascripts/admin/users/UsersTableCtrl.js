@@ -92,10 +92,8 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
         .then(function (paginatedUsers) {
           vm.paginatedUsers = paginatedUsers;
           vm.users = [];
-
-          // FIXME: use a filter to do this
           _.each(paginatedUsers.items, function(user) {
-            vm.users.push(angular.extend(
+            vm.users.push(_.extend(
               user, {timeAddedLocal: (new Date(user.timeAdded)).toLocaleString()}));
           });
           vm.paginatedUsers = paginatedUsers;
@@ -141,8 +139,8 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       modalOptions.bodyHtml = 'Please confirm that you want to ' + status + ' user "' +
         user.name + '"?';
 
-      modalService.showModal({}, modalOptions).then(
-        function() {
+      modalService.showModal({}, modalOptions)
+        .then(function () {
           statusChangeFn(user).then(function() {
             vm.tableParams.reload();
           });

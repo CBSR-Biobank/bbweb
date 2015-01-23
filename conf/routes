@@ -9,7 +9,7 @@
 GET     /                                      @org.biobank.controllers.Application.index
 
 # studies
-GET     /studies                               @org.biobank.controllers.study.StudiesController.list(filter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "ascending")
+GET     /studies                               @org.biobank.controllers.study.StudiesController.list(filter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
 POST    /studies                               @org.biobank.controllers.study.StudiesController.add
 
 # value objects
@@ -22,7 +22,7 @@ GET     /studies/preservtemptypes              @org.biobank.controllers.study.St
 GET     /studies/sgvaluetypes                  @org.biobank.controllers.study.StudiesController.specimenGroupValueTypes
 
 # Study DTOs
-GET     /studies/names                          @org.biobank.controllers.study.StudiesController.listNames(filter: String ?= "", order: String ?= "ascending")
+GET     /studies/names                          @org.biobank.controllers.study.StudiesController.listNames(filter: String ?= "", order: String ?= "asc")
 
 GET     /studies/:id                           @org.biobank.controllers.study.StudiesController.query(id)
 PUT     /studies/:id                           @org.biobank.controllers.study.StudiesController.update(id)
@@ -100,7 +100,7 @@ DELETE  /centres/:centreId/studies/:studyId     @org.biobank.controllers.centres
 
 # Users
 GET     /users/count                            @org.biobank.controllers.UsersController.userCount()
-GET     /users                                  @org.biobank.controllers.UsersController.list(nameFilter: String ?= "", emailFilter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "ascending")
+GET     /users                                  @org.biobank.controllers.UsersController.list(nameFilter: String ?= "", emailFilter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
 POST    /users                                  @org.biobank.controllers.UsersController.registerUser()
 GET     /users/:id                              @org.biobank.controllers.UsersController.user(id)
 PUT     /users/:id/name                         @org.biobank.controllers.UsersController.updateName(id)
