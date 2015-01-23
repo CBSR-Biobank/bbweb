@@ -11,6 +11,7 @@ define(['../module', 'underscore'], function(module, _) {
    */
   function StudiesCtrl(studiesService, studyCount) {
     var vm = this;
+    vm.studyCount = studyCount;
     vm.studyRows = [];
     vm.paginatedStudies = {};
     vm.rowSize = 3;
@@ -38,8 +39,8 @@ define(['../module', 'underscore'], function(module, _) {
         vm.message = 'There is 1 study that matches the criteria. ';
       } else {
         vm.message = 'There are ' + vm.paginatedStudies.total + ' studies that match the criteria. ';
-        if (vm.paginatedStudies.total > vm.studies.length) {
-          vm.message += 'Displaying the first ' + vm.studies.length + '.';
+        if (vm.paginatedStudies.total > vm.studyCount) {
+          vm.message += 'Displaying the first ' + vm.studyCount + '.';
         }
       }
     }

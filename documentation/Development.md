@@ -65,6 +65,8 @@ image to run the web application in. You also need:
 
 Run the command `sbt build -t bbweb .` as **root** in this folder to create the docker image.
 
+Run the command `docker build -t bbweb .` to build the docker image in the directory containing the Dockerfile.
+
 To keep data between appliction versions, the image uses a data volume to store the mongo database. The
 directory the database files are kept in is `/opt/bbweb_docker/mongodb_data`. To make backups of this database
 a mongo server must be started with the configuration pointing at the `mongod.conf` file. Use the command:

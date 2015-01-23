@@ -42,6 +42,7 @@ EXPOSE 9000
 USER root
 WORKDIR /home/bbweb
 
-# ORIGINAL: docker run -d -p 9000:9000 -v /opt/bbweb_docker/mongodb_data:/data/db ubuntu:bbweb /bin/bash -c "(/usr/bin/mongod &) && su bbweb -c '/home/bbweb/bbweb_start.sh'"
-# UPDATED: docker run -d -p 9000:9000 -v /opt/bbweb_docker/mongodb_data:/data/db bbweb /bin/bash -c "(/usr/bin/mongod &) && su bbweb -c '/home/bbweb/bbweb_start.sh'"
+# to run the image:
+#
+# docker run -d -p 9000:9000 -v /opt/bbweb_docker/mongodb_data:/data/db bbweb /bin/bash -c "(/usr/bin/mongod &) && su bbweb -c '/home/bbweb/bbweb_start.sh'"
 
