@@ -21,32 +21,29 @@ class ApplicationSpec extends ControllerFixture {
 
   "Application" must {
 
-    "send 404 on a bad request" in new App(fakeApp) {
+    "send 404 on a bad request" in {
       route(FakeRequest(GET, "/xyz")) mustBe (None)
     }
 
-    "return results for index" in new App(fakeApp) {
+    "return results for index" in {
       val home = route(FakeRequest(GET, "/")).get
 
       status(home) mustBe (OK)
       contentType(home) mustBe (Some("text/html"))
     }
 
-    "return initial aggregate counts" in new App(fakeApp) {
-      doLogin
+    "return initial aggregate counts" in {
       val json = makeRequest(GET, "/counts")
       val jsonObj = (json \ "data").as[JsObject]
 
       (jsonObj \ "studies").as[Int] mustBe (0)
-      (jsonObj \ "centres").as[Int] mustBe (0)
+        (jsonObj \ "centres").as[Int] mustBe (0)
 
       // mustBe 1 because of default user
       (jsonObj \ "users").as[Int] mustBe (1)
     }
 
-    "return correct aggregate counts" in new App(fakeApp) {
-      doLogin
-
+    "return correct aggregate counts" in {
       studyRepository.put(factory.createDisabledStudy)
       centreRepository.put(factory.createDisabledCentre)
       userRepository.put(factory.createRegisteredUser)
@@ -55,7 +52,7 @@ class ApplicationSpec extends ControllerFixture {
       val jsonObj = (json \ "data").as[JsObject]
 
       (jsonObj \ "studies").as[Int] mustBe (1)
-      (jsonObj \ "centres").as[Int] mustBe (1)
+        (jsonObj \ "centres").as[Int] mustBe (1)
 
       // mustBe 1 because of default user
       (jsonObj \ "users").as[Int] mustBe (2)

@@ -52,7 +52,7 @@ resolvers ++= Seq(
   Classpaths.sbtPluginReleases,
   "Typesafe repository"          at "https://repo.typesafe.com/typesafe/releases/",
   //"Akka Snapshots"               at "https://repo.akka.io/snapshots/",
-  "Sonatype OSS Snapshots"       at "https://oss.sonatype.org/content/repositories/snapshots"
+  "Sonatype OSS"                 at "https://oss.sonatype.org/content/repositories/releases"
 )
 
 libraryDependencies ++= Seq(
@@ -63,8 +63,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"         %% "akka-slf4j"                     % "2.3.2"              % "compile",
   "org.scala-stm"             %% "scala-stm"                      % "0.7"                % "compile",
   "org.scalaz"                %% "scalaz-core"                    % "7.1.0"              % "compile",
-  //"org.scalaz"                %% "scalaz-typelevel"               % "7.1.0"              % "compile",
-  "com.github.ddevore"        %% "akka-persistence-mongo-casbah"  % "0.7.3-SNAPSHOT"     % "compile",
+  "com.github.ironfish"       %% "akka-persistence-mongo-casbah"  % "0.7.5"              % "compile",
   "com.github.t3hnar"         %% "scala-bcrypt"                   % "2.4",
   "com.typesafe.play.plugins" %% "play-plugins-mailer"            % "2.3.0",
   "org.scaldi"                %% "scaldi-play"                    % "0.4.1",

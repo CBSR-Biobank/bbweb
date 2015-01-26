@@ -25,16 +25,15 @@ import scaldi.Module
 /**
   * This trait allows a test suite to run tests on a Play Framework fake application.
   *
-  * It include a [[FactoryComponent]] to make the creation of domain model objects easier. It uses
-  * the [[https://github.com/ddevore/akka-persistence-mongo/ Mongo Journal for Akka Persistence]]
-  * to make it easier to drop all items in the database prior to running a test suite.
+  * It includse an application module to allow injection of system components (repositories for example). It
+  * uses the [[https://github.com/ddevore/akka-persistence-mongo/ Mongo Journal for Akka Persistence]] to make
+  * it easier to drop all items in the database prior to running a test in a test suite.
   */
-trait ControllerFixture
-    extends fixture.WordSpec
+abstract class ControllerFixture
+    extends PlaySpec
+    with OneServerPerTest
     with MustMatchers
-    with OptionValues
-    with BeforeAndAfterEach
-    with MixedFixtures {
+    with OptionValues {
 
   private val dbName = "bbweb-test"
 
@@ -71,20 +70,25 @@ trait ControllerFixture
 
   var adminToken: String = ""
 
+  // allow tests to access the test [[Factory]].
   val factory = new Factory
 
   /**
-   * tests will not work with EhCache, need alternate implementation
+   * tests will not work with EhCache, need alternate implementation for EhCachePlugin
    *
    * See FixedEhCachePlugin.
     */
-  def fakeApp: FakeApplication =
-    FakeApplication(
+  override def newAppForTest(testData: TestData): FakeApplication = {
+    val fakeApp = FakeApplication(
       withGlobal = Some(TestGlobal),
       additionalPlugins = List("org.biobank.controllers.FixedEhCachePlugin"),
       additionalConfiguration = Map("ehcacheplugin" -> "disabled"))
+    initializeAkkaPersitence
 
-  override def beforeEach: Unit = {
+    fakeApp
+  }
+
+  private def initializeAkkaPersitence(): Unit = {
     // ensure the database is empty
     MongoConnection()(dbName)("messages").drop
     MongoConnection()(dbName)("snapshots").drop
@@ -93,24 +97,18 @@ trait ControllerFixture
   def doLogin() = {
     // Log in with test user
     val request = Json.obj("email" -> "admin@admin.com", "password" -> "testuser")
-    route(FakeRequest(POST, "/login").withJsonBody(request)) match {
-      case Some(result) =>
-        status(result) mustBe OK
+    route(FakeRequest(POST, "/login").withJsonBody(request)).fold {
+        cancel("login failed")
+    } { result =>
+        status(result) mustBe (OK)
         contentType(result) mustBe Some("application/json")
         val json = Json.parse(contentAsString(result))
         adminToken = (json \ "data").as[String]
         adminToken
-      case _ =>
-        cancel("login failed")
     }
   }
 
-  def makeRequest(
-    method: String,
-    path: String,
-    expectedStatus: Int = OK,
-    json: JsValue = JsNull,
-    token: String = adminToken)
+  def makeRequest(method: String, path: String, expectedStatus: Int, json: JsValue, token: String)
       : JsValue = {
     var fakeRequest = FakeRequest(method, path)
       .withJsonBody(json)
@@ -126,6 +124,10 @@ trait ControllerFixture
       Json.parse(contentAsString(result))
     }
   }
+
+  def makeRequest(method: String, path: String, expectedStatus: Int = OK, json: JsValue = JsNull)
+      : JsValue =
+    makeRequest(method, path, expectedStatus, json, "bbweb-test-token")
 
 
 }

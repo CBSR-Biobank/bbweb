@@ -5,6 +5,8 @@ import org.biobank.domain.user.{ UserId, UserHelper }
 import org.biobank.service.users.UsersService
 
 import scala.concurrent.Future
+import play.api.Play
+import play.api.Mode
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.cache._
@@ -34,12 +36,9 @@ trait Security { self: Controller =>
    *
    *  - either in the header or in the query string,
    *
-   *  - matches a token already stored in the play cache
+   *  - that the cookie token matches the other one
    */
-  private def validateToken[A]
-    (request: Request[A])
-    (implicit usersService: UsersService)
-      : DomainValidation[AuthenticationInfo] = {
+  private def validRequestToken[T](request: Request[T]): DomainValidation[String] = {
     for {
       cookieXsrfToken <- {
         request.cookies.get(AuthTokenCookieKey)
@@ -50,23 +49,44 @@ trait Security { self: Controller =>
         request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey))
           .map(_.successNel)
           .getOrElse(DomainError("No token").failureNel)
-
       }
-      validToken <-  {
+      matchingTokens <- {
         if (cookieXsrfToken == headerXsrfToken) {
-          true.successNel
+          headerXsrfToken.successNel
         } else {
-          DomainError("Token mismatch").failureNel
+          DomainError(s"tokens did not match: cookie/$cookieXsrfToken, header/$headerXsrfToken").failureNel
         }
       }
+    } yield (headerXsrfToken)
+  }
+
+  /*
+   * Checks that the token is:
+   *
+   *  - present in the cookie header of the request,
+   *
+   *  - either in the header or in the query string,
+   *
+   *  - matches a token already stored in the play cache
+   */
+  private def validateToken[A]
+    (request: Request[A])
+    (implicit usersService: UsersService)
+      : DomainValidation[AuthenticationInfo] = {
+    for {
+      token <- validRequestToken(request)
       userId <- {
-        Cache.getAs[UserId](headerXsrfToken)
-          .map(_.success)
-          .getOrElse(DomainError("invalid token").failureNel)
+        if ((Play.current.mode == Mode.Test) && (token == "bbweb-test-token")) {
+          org.biobank.Global.DefaultUserId.success
+        } else {
+          Cache.getAs[UserId](token)
+            .map(_.success)
+            .getOrElse(DomainError("invalid token").failureNel)
+        }
       }
       user       <- usersService.getUser(userId.id)
       activeUser <- UserHelper.isUserActive(user)
-      auth       <- AuthenticationInfo(headerXsrfToken, userId).successNel
+      auth       <- AuthenticationInfo(token, userId).successNel
     } yield auth
   }
 

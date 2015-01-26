@@ -14,6 +14,7 @@ import play.api.libs.json._
 import org.slf4j.LoggerFactory
 import com.typesafe.plugin._
 import play.api.Play.current
+import play.api.test.FakeApplication
 import org.scalatest.Tag
 import org.scalatestplus.play._
 
@@ -34,28 +35,25 @@ class CentresControllerSpec extends ControllerFixture {
   "Centre REST API" when {
 
     "GET /centres" must {
-      "list none" in new App(fakeApp) {
-        doLogin
+      "list none" taggedAs(Tag("1")) in {
         val json = makeRequest(GET, uri)
-        (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
+          (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 0
       }
 
-      "list a centre" in new App(fakeApp) {
-        doLogin
+      "list a centre" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
         val json = makeRequest(GET, uri)
-        (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
+          (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have length 1
         compareObj(jsonList(0), centre)
       }
 
-      "list multiple centres" in new App(fakeApp) {
-        doLogin
+      "list multiple centres" in {
         val centres = List(factory.createDisabledCentre, factory.createDisabledCentre)
           .map{ centre => (centre.id, centre) }.toMap
 
@@ -63,8 +61,8 @@ class CentresControllerSpec extends ControllerFixture {
         centres.values.foreach(centre => centreRepository.put(centre))
 
         val json = makeRequest(GET, uri)
-        (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
+          (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size centres.size
         jsonList.foreach{ jsonObj =>
           val jsonId = CentreId((jsonObj \ "id").as[String])
@@ -74,8 +72,7 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "POST /centres" must {
-      "add a centre" in new App(fakeApp) {
-        doLogin
+      "add a centre" in {
         val centre = factory.createDisabledCentre
         val cmdJson = Json.obj("name" -> centre.name, "description" -> centre.description)
         val json = makeRequest(POST, uri, json = cmdJson)
@@ -88,26 +85,24 @@ class CentresControllerSpec extends ControllerFixture {
         validation map { repoCentre =>
           repoCentre.name mustBe ((json \ "data" \ "name").as[String])
         }
+        ()
       }
 
-      "add a centre with no description" in new App(fakeApp) {
-        doLogin
+      "add a centre with no description" in {
         val cmdJson = Json.obj("name" -> nameGenerator.next[String])
         val json = makeRequest(POST, uri, json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
       }
 
-      "not add a centre with a name that is too short" in new App(fakeApp) {
-        doLogin
+      "not add a centre with a name that is too short" in {
         val cmdJson = Json.obj("name" -> "A")
         val json = makeRequest(POST, uri, BAD_REQUEST, json = cmdJson)
 
         (json \ "status").as[String] must include ("error")
       }
 
-      "fail when adding a centre with a duplicate name" in new App(fakeApp) {
-        doLogin
+      "fail when adding a centre with a duplicate name" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
@@ -120,8 +115,7 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "PUT /centres/:id" must {
-      "update a centre" in new App(fakeApp) {
-        doLogin
+      "update a centre" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
@@ -141,10 +135,10 @@ class CentresControllerSpec extends ControllerFixture {
           repoCentre.name mustBe ((json \ "data" \ "name").as[String])
           repoCentre.version mustBe ((json \ "data" \ "version").as[Long])
         }
+        ()
       }
 
-      "update a centre with no description" in new App(fakeApp) {
-        doLogin
+      "update a centre with no description" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
@@ -157,8 +151,7 @@ class CentresControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("success")
       }
 
-      "not update an invalid centre" in new App(fakeApp) {
-        doLogin
+      "not update an invalid centre" in {
 
         val centre = factory.createDisabledCentre
         val cmdJson = Json.obj(
@@ -171,8 +164,7 @@ class CentresControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("no centre with id")
       }
 
-      "not update a centre with an invalid version" in new App(fakeApp) {
-        doLogin
+      "not update a centre with an invalid version" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
@@ -187,8 +179,7 @@ class CentresControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("expected version doesn't match current version")
       }
 
-      "not update a centre with a duplicate name" in new App(fakeApp) {
-        doLogin
+      "not update a centre with a duplicate name" in {
         val centres = List(factory.createDisabledCentre, factory.createDisabledCentre)
         centres.foreach { centre =>
           centreRepository.put(centre)
@@ -210,18 +201,16 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "GET /centres/:id" must {
-      "read a centre" in new App(fakeApp) {
-        doLogin
+      "read a centre" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
         val json = makeRequest(GET, uri(centre))
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, centre)
       }
 
-      "not read an invalid centre" in new App(fakeApp) {
-        doLogin
+      "not read an invalid centre" in {
         val centre = factory.createDisabledCentre
 
         val json = makeRequest(GET, uri(centre), BAD_REQUEST)
@@ -232,8 +221,7 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "POST /centres/enable" must {
-      "enable a centre" in new App(fakeApp) {
-        doLogin
+      "enable a centre" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
@@ -250,10 +238,10 @@ class CentresControllerSpec extends ControllerFixture {
         validation map { repoCentre =>
           repoCentre.version mustBe ((json \ "data" \ "version").as[Long])
         }
+        ()
       }
 
-      "not enable an invalid centre" in new App(fakeApp) {
-        doLogin
+      "not enable an invalid centre" in {
         val centre = factory.createDisabledCentre
 
         val cmdJson = Json.obj(
@@ -267,8 +255,7 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "POST /centres/disable" must {
-      "disable a centre" in new App(fakeApp) {
-        doLogin
+      "disable a centre" in {
         val centre = factory.createDisabledCentre.enable | fail
         centreRepository.put(centre)
 
@@ -285,10 +272,10 @@ class CentresControllerSpec extends ControllerFixture {
         validation map { repoCentre =>
           repoCentre.version mustBe ((json \ "data" \ "version").as[Long])
         }
+        ()
       }
 
-      "not disable an invalid centre" in new App(fakeApp) {
-        doLogin
+      "not disable an invalid centre" in {
         val centre = factory.createDisabledCentre
 
         val cmdJson = Json.obj(
@@ -302,20 +289,18 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "GET /centres/location" must {
-      "list none" in new App(fakeApp) {
-        doLogin
+      "list none" in {
 
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
         val json = makeRequest(GET, uri(centre) + s"/locations")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
       }
 
-      "list a centre location" in new App(fakeApp) {
-        doLogin
+      "list a centre location" in {
 
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
@@ -325,14 +310,13 @@ class CentresControllerSpec extends ControllerFixture {
         centreLocationsRepository.put(CentreLocation(centre.id, location.id))
 
         val json = makeRequest(GET, uri(centre) + s"/locations")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
         compareObj(jsonList(0), location)
       }
 
-      "list multiple centre locations" in new App(fakeApp) {
-        doLogin
+      "list multiple centre locations" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
@@ -345,7 +329,7 @@ class CentresControllerSpec extends ControllerFixture {
         }
 
         val json = makeRequest(GET, uri(centre) + "/locations")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size locations.size
         jsonList.foreach{ jsonObj =>
@@ -354,8 +338,7 @@ class CentresControllerSpec extends ControllerFixture {
         }
       }
 
-      "list a specific centre location" in new App(fakeApp) {
-        doLogin
+      "list a specific centre location" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
@@ -368,14 +351,13 @@ class CentresControllerSpec extends ControllerFixture {
         }
 
         val json = makeRequest(GET, uri(centre) + s"/locations?locationId=${locations(0).id}")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         val jsonId = LocationId((jsonObj \ "id").as[String])
         compareObj(jsonObj, locationsMap(jsonId))
       }
 
-      "does not list an invalid location" in new App(fakeApp) {
-        doLogin
+      "does not list an invalid location" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
@@ -402,8 +384,7 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "POST /centres/location" must {
-      "add a location" in new App(fakeApp) {
-        doLogin
+      "add a location" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
@@ -437,10 +418,10 @@ class CentresControllerSpec extends ControllerFixture {
             'centreId   (centre.id)
           )
         }
+        ()
       }
 
-      "fail on attempt to add a location to an invalid centre" in new App(fakeApp) {
-        doLogin
+      "fail on attempt to add a location to an invalid centre" in {
 
         val centre = factory.createDisabledCentre
         val location = factory.createLocation
@@ -453,8 +434,7 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "DELETE /centres/location" must {
-      "delete a location from a centre" in new App(fakeApp) {
-        doLogin
+      "delete a location from a centre" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
@@ -470,8 +450,7 @@ class CentresControllerSpec extends ControllerFixture {
         }
       }
 
-      "delete a location from an invalid centre" in new App(fakeApp) {
-        doLogin
+      "delete a location from an invalid centre" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
@@ -485,8 +464,7 @@ class CentresControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("no centre with id")
       }
 
-      "delete an invalid location from a centre" in new App(fakeApp) {
-        doLogin
+      "delete an invalid location from a centre" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
@@ -499,20 +477,18 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "GET /centres/studies" must {
-      "list none" in new App(fakeApp) {
-        doLogin
+      "list none" in {
 
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
         val json = makeRequest(GET, uri(centre) + s"/studies")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
       }
 
-      "list a centre study" in new App(fakeApp) {
-        doLogin
+      "list a centre study" in {
 
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
@@ -523,14 +499,13 @@ class CentresControllerSpec extends ControllerFixture {
         centreStudiesRepository.put(StudyCentre(id, study.id, centre.id))
 
         val json = makeRequest(GET, uri(centre) + "/studies")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val studyIdList = (json \ "data").as[List[String]]
         studyIdList must have size 1
         studyIdList(0) mustBe (study.id.id)
       }
 
-      "list multiple centre studies" in new App(fakeApp) {
-        doLogin
+      "list multiple centre studies" in {
 
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
@@ -543,7 +518,7 @@ class CentresControllerSpec extends ControllerFixture {
         }
 
         val json = makeRequest(GET, uri(centre) + "/studies")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val studyIdList = (json \ "data").as[List[String]]
         studyIdList must have size studies.size
         studies.foreach{ study => studyIdList must contain (study.id.id) }
@@ -551,8 +526,7 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "POST /centres/studies" must {
-      "add a study to a centre" in new App(fakeApp) {
-        doLogin
+      "add a study to a centre" in {
 
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
@@ -578,8 +552,7 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "DELETE /centres/studies" must {
-      "remove a study from a centre" in new App(fakeApp) {
-        doLogin
+      "remove a study from a centre" in {
 
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
@@ -593,8 +566,7 @@ class CentresControllerSpec extends ControllerFixture {
           (json \ "status").as[String] must include ("success")
       }
 
-      "fail on attempt remove an invalid study from a centre" in new App(fakeApp) {
-        doLogin
+      "fail on attempt remove an invalid study from a centre" in {
 
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)

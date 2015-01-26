@@ -30,10 +30,6 @@ trait Global
 
   def applicationModule = new WebModule :: new UserModule
 
-  val defaultUserEmail = "admin@admin.com"
-
-  val defaultUserId = UserId(defaultUserEmail)
-
   /**
     *
     */
@@ -102,11 +98,11 @@ trait Global
 
     //
     val validation = RegisteredUser.create(
-      UserId(defaultUserEmail),
+      Global.DefaultUserId,
       -1L,
       DateTime.now,
       "admin",
-      defaultUserEmail,
+      Global.DefaultUserEmail,
       "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
       "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
       None)
@@ -308,5 +304,12 @@ object Global
       val contentType = response.headers.get("Content-Type")
       contentType.exists(_.startsWith("text/html")) || request.path.endsWith("jsroutes.js")
     }))
-    with Global
+    with Global {
+
+  val DefaultUserEmail = "admin@admin.com"
+
+  val DefaultUserId = UserId(DefaultUserEmail)
+
+
+}
 

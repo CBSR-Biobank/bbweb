@@ -64,7 +64,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       procTypeToAddCmdJson(procType))
 
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("is not disabled")
+      (json \ "message").as[String] must include ("is not disabled")
   }
 
   def updateOnNonDisabledStudy(study: Study) {
@@ -82,7 +82,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       procTypeToUpdateCmdJson(procType2))
 
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("is not disabled")
+      (json \ "message").as[String] must include ("is not disabled")
   }
 
   def removeOnNonDisabledStudy(study: Study) {
@@ -97,25 +97,23 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       BAD_REQUEST)
 
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("is not disabled")
+      (json \ "message").as[String] must include ("is not disabled")
   }
 
   "Processing Type REST API" when {
 
     "GET /studies/proctypes" must {
-      "list none" in new App(fakeApp) {
-        doLogin
+      "list none" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
         val json = makeRequest(GET, uri(study))
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
       }
 
-      "list a single processing type" in new App(fakeApp) {
-        doLogin
+      "list a single processing type" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -123,14 +121,13 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         processingTypeRepository.put(procType)
 
         val json = makeRequest(GET, uri(study))
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
         compareObj(jsonList(0), procType)
       }
 
-      "get a single processing type" in new App(fakeApp) {
-        doLogin
+      "get a single processing type" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -138,13 +135,12 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         processingTypeRepository.put(procType)
 
         val json = makeRequest(GET, uriWithQuery(study, procType)).as[JsObject]
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, procType)
       }
 
-      "list multiple processing types" in new App(fakeApp) {
-        doLogin
+      "list multiple processing types" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -153,7 +149,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         proctypes map { procType => processingTypeRepository.put(procType) }
 
         val json = makeRequest(GET, uri(study))
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
 
         jsonList must have size proctypes.size
@@ -161,41 +157,37 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         ()
       }
 
-      "fail for an invalid study ID" in new App(fakeApp) {
-        doLogin
+      "fail for an invalid study ID" in {
         val study = factory.createDisabledStudy
 
         val json = makeRequest(GET, uri(study), BAD_REQUEST)
-        (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("invalid study id")
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("invalid study id")
       }
 
-      "fail for an invalid study ID when using an processing type id" in new App(fakeApp) {
-        doLogin
+      "fail for an invalid study ID when using an processing type id" in {
         val study = factory.createDisabledStudy
         val procType = factory.createProcessingType
 
         val json = makeRequest(GET, uriWithQuery(study, procType), BAD_REQUEST)
-        (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("invalid study id")
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("invalid study id")
       }
 
-      "fail for an invalid processing type id" in new App(fakeApp) {
-        doLogin
+      "fail for an invalid processing type id" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
         val procType = factory.createProcessingType
 
         val json = makeRequest(GET, uriWithQuery(study, procType), BAD_REQUEST)
-        (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("processing type does not exist")
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("processing type does not exist")
       }
     }
 
     "POST /studies/proctypes" must {
-      "add a processing type" in new App(fakeApp) {
-        doLogin
+      "add a processing type" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -210,24 +202,21 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     }
 
     "POST /studies/proctypes" must {
-      "not add a processing type to an enabled study" in new App(fakeApp) {
-        doLogin
+      "not add a processing type to an enabled study" in {
         addOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail)
       }
     }
 
     "POST /studies/proctypes" must {
-      "not add a processing type to an retired study" in new App(fakeApp) {
-        doLogin
+      "not add a processing type to an retired study" in {
         addOnNonDisabledStudy(
           factory.createDisabledStudy.retire | fail)
       }
     }
 
     "PUT /studies/proctypes" must {
-      "update a processing type" in new App(fakeApp) {
-        doLogin
+      "update a processing type" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -249,24 +238,21 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     }
 
     "PUT /studies/proctypes" must {
-      "not update a processing type on an enabled study" in new App(fakeApp) {
-        doLogin
+      "not update a processing type on an enabled study" in {
         updateOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail)
       }
     }
 
     "PUT /studies/proctypes" must {
-      "not update a processing type on an retired study" in new App(fakeApp) {
-        doLogin
+      "not update a processing type on an retired study" in {
         updateOnNonDisabledStudy(
           factory.createDisabledStudy.retire | fail)
       }
     }
 
     "DELETE /studies/proctypes" must {
-      "remove a processing type" in new App(fakeApp) {
-        doLogin
+      "remove a processing type" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -280,16 +266,14 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
     }
 
     "DELETE /studies/proctypes" must {
-      "not remove a processing type on an enabled study" in new App(fakeApp) {
-        doLogin
+      "not remove a processing type on an enabled study" in {
         removeOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail)
       }
     }
 
     "DELETE /studies/proctypes" must {
-      "not remove a processing type on an retired study" in new App(fakeApp) {
-        doLogin
+      "not remove a processing type on an retired study" in {
         removeOnNonDisabledStudy(
           factory.createDisabledStudy.retire | fail)
       }

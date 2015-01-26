@@ -32,44 +32,41 @@ class StudiesControllerSpec extends ControllerFixture {
 
     "GET /studies" must {
 
-      "list none" in new App(fakeApp) {
-        doLogin
+      "list none" in {
         val json = makeRequest(GET, uri)
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 0
       }
 
-      "list a study" in new App(fakeApp) {
-        doLogin
+      "list a study" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
         log.debug(s"repo: ${}")
 
         val json = makeRequest(GET, uri)
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have length 1
         compareStudyNameDto(jsonList(0), study)
       }
 
-      "list multiple studies" in new App(fakeApp) {
-        doLogin
+      "list multiple studies" in {
         val studies = List(factory.createDisabledStudy, factory.createDisabledStudy)
         studyRepository.removeAll
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, uri)
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size studies.size
 
         (jsonList zip studies).map { item => compareStudyNameDto(item._1, item._2) }
+        ()
       }
 
-      "list a single study when filtered by name" in new App(fakeApp) {
-        doLogin
+      "list a single study when filtered by name" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ABC")
         val study2 = factory.createDisabledStudy.copy(name = "XYZ")
@@ -79,14 +76,13 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, uri + "?filter=" + study1.name)
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 1
         compareStudyNameDto(jsonList(0), study1)
       }
 
-      "list studies filtered by disabled status" in new App(fakeApp) {
-        doLogin
+      "list studies filtered by disabled status" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createEnabledStudy.copy(name = "ST2")
@@ -97,15 +93,14 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, uri + "?status=disabled")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 1
 
         compareStudyNameDto(jsonList(0), study1)
       }
 
-      "list studies filtered by enabled status" in new App(fakeApp) {
-        doLogin
+      "list studies filtered by enabled status" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createEnabledStudy.copy(name = "ST2")
@@ -116,15 +111,14 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, uri + "?status=enabled")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 1
 
         compareStudyNameDto(jsonList(0), study2)
       }
 
-      "list studies filtered by retired status" in new App(fakeApp) {
-        doLogin
+      "list studies filtered by retired status" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createEnabledStudy.copy(name = "ST2")
@@ -135,15 +129,14 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, uri + "?status=retired")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 1
 
         compareStudyNameDto(jsonList(0), study3)
       }
 
-      "list multiple studies in ascending order" in new App(fakeApp) {
-        doLogin
+      "list multiple studies in ascending order" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")
@@ -153,7 +146,7 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, uri + "?order=asc")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size studies.size
 
@@ -161,8 +154,7 @@ class StudiesControllerSpec extends ControllerFixture {
         compareStudyNameDto(jsonList(1), study2)
       }
 
-      "list multiple studies in descending order" in new App(fakeApp) {
-        doLogin
+      "list multiple studies in descending order" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")
@@ -172,7 +164,7 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, uri + "?order=desc")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size studies.size
 
@@ -180,8 +172,7 @@ class StudiesControllerSpec extends ControllerFixture {
         compareStudyNameDto(jsonList(1), study1)
       }
 
-      "fail for invalid order parameter" in new App(fakeApp) {
-        doLogin
+      "fail for invalid order parameter" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")
@@ -196,8 +187,7 @@ class StudiesControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("invalid order requested")
       }
 
-      "list studies sorted by name" in new App(fakeApp) {
-        doLogin
+      "list studies sorted by name" in {
 
         val study1 = factory.createEnabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")
@@ -207,7 +197,7 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, uri + "?sort=name")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 2
 
@@ -215,8 +205,7 @@ class StudiesControllerSpec extends ControllerFixture {
         compareStudyNameDto(jsonList(1), study2)
       }
 
-      "list studies sorted by status" in new App(fakeApp) {
-        doLogin
+      "list studies sorted by status" in {
 
         val study1 = factory.createEnabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")
@@ -226,7 +215,7 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, uri + "?sort=status")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 2
 
@@ -234,8 +223,7 @@ class StudiesControllerSpec extends ControllerFixture {
         compareStudyNameDto(jsonList(1), study1)
       }
 
-      "fail for an invalid sort column" in new App(fakeApp) {
-        doLogin
+      "fail for an invalid sort column" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createEnabledStudy.copy(name = "ST2")
@@ -250,8 +238,7 @@ class StudiesControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("invalid sort field")
       }
 
-      "list single study when using paged query" in new App(fakeApp) {
-        doLogin
+      "list single study when using paged query" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")
@@ -261,18 +248,17 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, uri + "?pageSize=1")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 1
 
         (json \ "data" \ "offset").as[Long] must be (0)
-        (json \ "data" \ "total").as[Long] must be (2)
-        (json \ "data" \ "prev").as[Option[Int]] must be (None)
-        (json \ "data" \ "next").as[Option[Int]] must be (Some(2))
+          (json \ "data" \ "total").as[Long] must be (2)
+          (json \ "data" \ "prev").as[Option[Int]] must be (None)
+          (json \ "data" \ "next").as[Option[Int]] must be (Some(2))
       }
 
-      "fail when using page that exceeds limit" in new App(fakeApp) {
-        doLogin
+      "fail when using page that exceeds limit" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")
@@ -286,8 +272,7 @@ class StudiesControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("page exceeds limit")
       }
 
-      "fail when using a negative page number" in new App(fakeApp) {
-        doLogin
+      "fail when using a negative page number" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")
@@ -301,8 +286,7 @@ class StudiesControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("page is invalid")
       }
 
-      "fail when using a negative pageSzie" in new App(fakeApp) {
-        doLogin
+      "fail when using a negative pageSzie" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")
@@ -318,8 +302,7 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "POST /studies" must {
-      "add a study" in new App(fakeApp) {
-        doLogin
+      "add a study" in {
         val study = factory.createDisabledStudy
         val cmdJson = Json.obj(
           "name" -> study.name,
@@ -337,8 +320,7 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "PUT /studies/:id" must {
-      "update a study" in new App(fakeApp) {
-        doLogin
+      "update a study" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -363,8 +345,7 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "GET /studies/:id" must {
-      "read a study" in new App(fakeApp) {
-        doLogin
+      "read a study" in {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
         val json = makeRequest(GET, uri(study))
@@ -373,8 +354,7 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "POST /studies/enable" must {
-      "enable a study" in new App(fakeApp) {
-        doLogin
+      "enable a study" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
         specimenGroupRepository.put(factory.createSpecimenGroup)
@@ -388,16 +368,15 @@ class StudiesControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("success")
 
         val eventStudyId = (json \ "data" \ "id").as[String]
-         studyRepository.getByKey(StudyId(eventStudyId)).fold(
+        studyRepository.getByKey(StudyId(eventStudyId)).fold(
           err => fail(err.list.mkString),
-           repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
-         )
+          repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
+        )
       }
     }
 
     "POST /studies/enable" must {
-      "not enable a study" in new App(fakeApp) {
-        doLogin
+      "not enable a study" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -412,8 +391,7 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "POST /studies/disable" must {
-      "disable a study" in new App(fakeApp) {
-        doLogin
+      "disable a study" in {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -433,8 +411,7 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "POST /studies/retire" must {
-      "retire a study" in new App(fakeApp) {
-        doLogin
+      "retire a study" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -454,8 +431,7 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "POST /studies/unretire" must {
-      "unretire a study" in new App(fakeApp) {
-        doLogin
+      "unretire a study" in {
         val study = factory.createDisabledStudy.retire | fail
         studyRepository.put(study)
 
@@ -475,8 +451,7 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "GET /studies/valuetypes" must {
-      "list all" in new App(fakeApp) {
-        doLogin
+      "list all" in {
         val json = makeRequest(GET, uri + "/valuetypes")
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
@@ -484,8 +459,7 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "GET /studies/anatomicalsrctypes" must {
-      "list all" in new App(fakeApp) {
-        doLogin
+      "list all" in {
         val json = makeRequest(GET, uri + "/anatomicalsrctypes")
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
@@ -493,8 +467,7 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "GET /studies/specimentypes" must {
-      "list all" in new App(fakeApp) {
-        doLogin
+      "list all" in {
         val json = makeRequest(GET, uri + "/specimentypes")
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
@@ -502,8 +475,7 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "GET /studies/preservtypes" must {
-      "list all" in new App(fakeApp) {
-        doLogin
+      "list all" in {
         val json = makeRequest(GET, uri + "/preservtypes")
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
@@ -511,8 +483,7 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "GET /studies/preservtemptypes " must {
-      "list all" in new App(fakeApp) {
-        doLogin
+      "list all" in {
         val json = makeRequest(GET, uri + "/preservtemptypes")
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
@@ -520,20 +491,18 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "GET /studies/sgvaluetypes " must {
-      "list all" in new App(fakeApp) {
-        doLogin
+      "list all" in {
         val json = makeRequest(GET, uri + "/sgvaluetypes")
         val jsonObj = (json \ "data").as[JsObject]
-        (jsonObj \ "anatomicalSourceType").as[List[String]].size        must be > 0
-        (jsonObj \ "preservationType").as[List[String]].size            must be > 0
-        (jsonObj \ "preservationTemperatureType").as[List[String]].size must be > 0
-        (jsonObj \ "specimenType").as[List[String]].size                must be > 0
+          (jsonObj \ "anatomicalSourceType").as[List[String]].size        must be > 0
+          (jsonObj \ "preservationType").as[List[String]].size            must be > 0
+          (jsonObj \ "preservationTemperatureType").as[List[String]].size must be > 0
+          (jsonObj \ "specimenType").as[List[String]].size                must be > 0
       }
     }
 
     "GET /studies/dto/collection " must {
-      "return empty results for new study" in new App(fakeApp) {
-        doLogin
+      "return empty results for new study" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -541,13 +510,12 @@ class StudiesControllerSpec extends ControllerFixture {
         val jsonObj = (json \ "data").as[JsObject]
 
         (jsonObj \ "collectionEventTypes").as[List[JsObject]].size mustBe (0)
-        (jsonObj \ "collectionEventAnnotationTypes").as[List[JsObject]].size mustBe (0)
-        (jsonObj \ "collectionEventAnnotationTypesInUse").as[List[String]].size mustBe (0)
-        (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (0)
+          (jsonObj \ "collectionEventAnnotationTypes").as[List[JsObject]].size mustBe (0)
+          (jsonObj \ "collectionEventAnnotationTypesInUse").as[List[String]].size mustBe (0)
+          (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (0)
       }
 
-      "return valid results for study" in new App(fakeApp) {
-        doLogin
+      "return valid results for study" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -564,15 +532,14 @@ class StudiesControllerSpec extends ControllerFixture {
         val jsonObj = (json \ "data").as[JsObject]
 
         (jsonObj \ "collectionEventTypes").as[List[JsObject]].size mustBe (1)
-        (jsonObj \ "collectionEventAnnotationTypes").as[List[JsObject]].size mustBe (1)
-        (jsonObj \ "collectionEventAnnotationTypesInUse").as[List[String]].size mustBe (1)
-        (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (1)
+          (jsonObj \ "collectionEventAnnotationTypes").as[List[JsObject]].size mustBe (1)
+          (jsonObj \ "collectionEventAnnotationTypesInUse").as[List[String]].size mustBe (1)
+          (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (1)
       }
     }
 
     "GET /studies/dto/processing " must {
-      "return empty results for new study" in new App(fakeApp) {
-        doLogin
+      "return empty results for new study" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -580,13 +547,12 @@ class StudiesControllerSpec extends ControllerFixture {
         val jsonObj = (json \ "data").as[JsObject]
 
         (jsonObj \ "processingTypes").as[List[JsObject]].size mustBe (0)
-        (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size mustBe (0)
-        (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size mustBe (0)
-        (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (0)
+          (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size mustBe (0)
+          (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size mustBe (0)
+          (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (0)
       }
 
-      "return valid results for study" in new App(fakeApp) {
-        doLogin
+      "return valid results for study" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -599,16 +565,15 @@ class StudiesControllerSpec extends ControllerFixture {
         val jsonObj = (json \ "data").as[JsObject]
 
         (jsonObj \ "processingTypes").as[List[JsObject]].size mustBe (1)
-        (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size mustBe (1)
-        (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size mustBe (1)
-        (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (1)
+          (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size mustBe (1)
+          (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size mustBe (1)
+          (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (1)
       }
     }
 
     "GET /studies/names" must {
 
-      "list multiple study names in ascending order" in new App(fakeApp) {
-        doLogin
+      "list multiple study names in ascending order" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")
@@ -618,7 +583,7 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, "/studies/names?order=asc")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size studies.size
 
@@ -626,8 +591,7 @@ class StudiesControllerSpec extends ControllerFixture {
         compareStudyNameDto(jsonList(1), study2)
       }
 
-      "list single study when using a filter" in new App(fakeApp) {
-        doLogin
+      "list single study when using a filter" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ABC")
         val study2 = factory.createDisabledStudy.copy(name = "DEF")
@@ -637,15 +601,14 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, "/studies/names?filter=ABC")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
 
         compareStudyNameDto(jsonList(0), study1)
       }
 
-      "list nothing when using an invalid filter" in new App(fakeApp) {
-        doLogin
+      "list nothing when using an invalid filter" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ABC")
         val study2 = factory.createDisabledStudy.copy(name = "DEF")
@@ -655,13 +618,12 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, "/studies/names?filter=xxx")
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
       }
 
-      "fail for invalid order parameter" in new App(fakeApp) {
-        doLogin
+      "fail for invalid order parameter" in {
 
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")

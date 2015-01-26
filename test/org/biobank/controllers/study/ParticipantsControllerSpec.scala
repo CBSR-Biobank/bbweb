@@ -87,8 +87,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
 
     "GET /studies/{studyId}/participants/{id}" must {
 
-      "get participant" in new App(fakeApp) {
-        doLogin
+      "get participant" in {
 
         val study = factory.createEnabledStudy
         studyRepository.put(study)
@@ -98,13 +97,12 @@ class ParticipantsControllerSpec extends ControllerFixture {
         participantRepository.put(participant)
 
         val json = makeRequest(GET, uri(factory.defaultEnabledStudy, participant))
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsObj = (json \ "data").as[JsObject]
         compareObj(jsObj, participant)
       }
 
-      "get participant with no annotations" in new App(fakeApp) {
-        doLogin
+      "get participant with no annotations" in {
 
         val study = factory.createEnabledStudy
         studyRepository.put(study)
@@ -113,7 +111,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
         participantRepository.put(participant)
 
         val json = makeRequest(GET, uri(factory.defaultEnabledStudy, participant))
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsObj = (json \ "data").as[JsObject]
         compareObj(jsObj, participant)
       }
@@ -122,8 +120,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
 
     "POST /studies/{studyId}/participants" must {
 
-      "add a participant with no annotation types" in new App(fakeApp) {
-        doLogin
+      "add a participant with no annotation types" in {
 
         val study = factory.createEnabledStudy
         studyRepository.put(study)
@@ -133,8 +130,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "status").as[String] must include ("success")
       }
 
-      "add a participant with annotation types" in new App(fakeApp) {
-        doLogin
+      "add a participant with annotation types" in {
 
         val study = factory.createEnabledStudy
         studyRepository.put(study)
@@ -151,8 +147,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "status").as[String] must include ("success")
       }
 
-      "fail when adding participant with duplicate uniqueId" in new App(fakeApp) {
-        doLogin
+      "fail when adding participant with duplicate uniqueId" in {
 
         val study = factory.createEnabledStudy
         studyRepository.put(study)
@@ -166,8 +161,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("participant with unique ID already exists")
       }
 
-      "fail when missing a required annotation type" in new App(fakeApp) {
-        doLogin
+      "fail when missing a required annotation type" in {
 
         val study = factory.createEnabledStudy
         studyRepository.put(study)
@@ -183,8 +177,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("missing required annotation type")
       }
 
-      "fail for an invalid annotation type" in new App(fakeApp) {
-        doLogin
+      "fail for an invalid annotation type" in {
 
         // annotation type belongs to a different study
         val annotType = factory.createParticipantAnnotationType
@@ -200,8 +193,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("annotation type(s) do not belong to study")
       }
 
-      "fail for more than one annotation with the same annotation type" in new App(fakeApp) {
-        doLogin
+      "fail for more than one annotation with the same annotation type" in {
 
         val study = factory.createEnabledStudy
         studyRepository.put(study)
@@ -225,8 +217,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
 
     "PUT /studies/{studyId}/participants" must {
 
-      "update a participant with no annotation types" in new App(fakeApp) {
-        doLogin
+      "update a participant with no annotation types" in {
 
         val study = factory.createEnabledStudy
         studyRepository.put(study)
@@ -238,8 +229,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "status").as[String] must include ("success")
       }
 
-      "update a participant with annotation types" in new App(fakeApp) {
-        doLogin
+      "update a participant with annotation types" in {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -256,8 +246,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "status").as[String] must include ("success")
       }
 
-      "update a participant to remove an annotation type" in new App(fakeApp) {
-        doLogin
+      "update a participant to remove an annotation type" in {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -274,8 +263,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "status").as[String] must include ("success")
       }
 
-      "fail when missing a required annotation type" in new App(fakeApp) {
-        doLogin
+      "fail when missing a required annotation type" in {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -293,8 +281,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("missing required annotation type")
       }
 
-      "fail for an invalid annotation type" in new App(fakeApp) {
-        doLogin
+      "fail for an invalid annotation type" in {
 
         // annotation type belongs to a different study
         val annotType = factory.createParticipantAnnotationType
@@ -313,8 +300,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("annotation type(s) do not belong to study")
       }
 
-      "fail for more than one annotation with the same annotation type" in new App(fakeApp) {
-        doLogin
+      "fail for more than one annotation with the same annotation type" in {
 
         val study = factory.createEnabledStudy
         studyRepository.put(study)
@@ -339,8 +325,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
 
     "GET /studies/participants/checkUnique/{id}" must {
 
-      "must return true for a participant ID that does not exist" in new App(fakeApp) {
-        doLogin
+      "must return true for a participant ID that does not exist" in {
 
         var participantUniqueId = nameGenerator.next[Participant]
 
@@ -349,8 +334,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "data").as[Boolean] must equal (true)
       }
 
-      "must return false for a participant ID that exists" taggedAs(Tag("1")) in new App(fakeApp) {
-        doLogin
+      "must return false for a participant ID that exists" taggedAs(Tag("1")) in {
 
         var participant = factory.createParticipant
         participantRepository.put(participant)

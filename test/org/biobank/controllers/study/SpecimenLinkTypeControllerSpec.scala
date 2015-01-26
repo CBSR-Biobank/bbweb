@@ -86,7 +86,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       slTypeToAddCmdJson(slType))
 
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("is not disabled")
+      (json \ "message").as[String] must include ("is not disabled")
   }
 
   def updateOnNonDisabledStudy(
@@ -109,7 +109,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       slTypeToUpdateCmdJson(slType2))
 
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("is not disabled")
+      (json \ "message").as[String] must include ("is not disabled")
   }
 
   def removeOnNonDisabledStudy(
@@ -126,25 +126,23 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     val json = makeRequest(DELETE, uri(procType, slType, slType.version), BAD_REQUEST)
 
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("is not disabled")
+      (json \ "message").as[String] must include ("is not disabled")
   }
 
   "SpecimenLink Type REST API" when {
 
     "GET /studies/sltypes" must {
-      "list none" in new App(fakeApp) {
-        doLogin
+      "list none" in {
         val procType = factory.createProcessingType
         processingTypeRepository.put(procType)
 
         val json = makeRequest(GET, uri(procType))
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
       }
 
-      "list a single specimen link type" in new App(fakeApp) {
-        doLogin
+      "list a single specimen link type" in {
         val procType = factory.createProcessingType
         processingTypeRepository.put(procType)
 
@@ -154,14 +152,13 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         specimenLinkTypeRepository.put(slType)
 
         val json = makeRequest(GET, uri(procType))
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
         compareObj(jsonList(0), slType)
       }
 
-      "get a single specimen link type" in new App(fakeApp) {
-        doLogin
+      "get a single specimen link type" in {
         val procType = factory.createProcessingType
         processingTypeRepository.put(procType)
 
@@ -171,13 +168,12 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         specimenLinkTypeRepository.put(slType)
 
         val json = makeRequest(GET, uriWithQuery(procType, slType))
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, slType)
       }
 
-      "list multiple specimen link types" in new App(fakeApp) {
-        doLogin
+      "list multiple specimen link types" in {
         val procType = factory.createProcessingType
         processingTypeRepository.put(procType)
 
@@ -186,7 +182,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         sltypes map { slType => specimenLinkTypeRepository.put(slType) }
 
         val json = makeRequest(GET, uri(procType))
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
 
         jsonList must have size sltypes.size
@@ -194,42 +190,38 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         ()
       }
 
-      "fail for invalid processing type id" in new App(fakeApp) {
-        doLogin
+      "fail for invalid processing type id" in {
         val procType = factory.createProcessingType
 
         val json = makeRequest(GET, uri(procType), BAD_REQUEST)
-        (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("invalid processing type id")
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("invalid processing type id")
       }
 
-      "fail for an invalid study ID when using an specimen link type id" in new App(fakeApp) {
-        doLogin
+      "fail for an invalid study ID when using an specimen link type id" in {
         val procType = factory.createProcessingType
         val slType = factory.createSpecimenLinkType
 
         val json = makeRequest(GET, uriWithQuery(procType, slType), BAD_REQUEST)
-        (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("invalid processing type id")
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("invalid processing type id")
       }
 
-      "fail for an invalid specimen link type id" in new App(fakeApp) {
-        doLogin
+      "fail for an invalid specimen link type id" in {
         val procType = factory.createProcessingType
         processingTypeRepository.put(procType)
 
         val slType = factory.createSpecimenLinkType
 
         val json = makeRequest(GET, uriWithQuery(procType, slType), BAD_REQUEST)
-        (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("specimen link type does not exist")
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("specimen link type does not exist")
       }
 
     }
 
     "POST /studies/sltypes" must {
-      "add a specimen link type" in new App(fakeApp) {
-        doLogin
+      "add a specimen link type" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -245,15 +237,13 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("success")
       }
 
-      "not add a specimen link type to an enabled study" in new App(fakeApp) {
-        doLogin
+      "not add a specimen link type to an enabled study" in {
         val study = studyRepository.put(
           factory.createDisabledStudy.enable(1, 1) | fail)
         addOnNonDisabledStudy(study, factory.createProcessingType)
       }
 
-      "not add a specimen link type to an retired study" in new App(fakeApp) {
-        doLogin
+      "not add a specimen link type to an retired study" in {
         val study = studyRepository.put(
           factory.createDisabledStudy.retire | fail)
         addOnNonDisabledStudy(study, factory.createProcessingType)
@@ -261,8 +251,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     }
 
     "PUT /studies/sltypes" must {
-      "must update a specimen link type" in new App(fakeApp) {
-        doLogin
+      "must update a specimen link type" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -282,18 +271,16 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         )
 
         val json = makeRequest(PUT, uri(procType, slType2), json = slTypeToUpdateCmdJson(slType2))
-        (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("success")
       }
 
-      "not update a specimen link type on an enabled study" in new App(fakeApp) {
-        doLogin
+      "not update a specimen link type on an enabled study" in {
         val study = studyRepository.put(
           factory.createDisabledStudy.enable(1, 1) | fail)
         updateOnNonDisabledStudy(study, factory.createProcessingType)
       }
 
-      "not update a specimen link type on an retired study" in new App(fakeApp) {
-        doLogin
+      "not update a specimen link type on an retired study" in {
         val study = studyRepository.put(
           factory.createDisabledStudy.retire | fail)
         updateOnNonDisabledStudy(study, factory.createProcessingType)
@@ -301,8 +288,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     }
 
     "DELETE /studies/sltypes" must {
-      "remove a specimen link type" in new App(fakeApp) {
-        doLogin
+      "remove a specimen link type" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -319,15 +305,13 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("success")
       }
 
-      "not remove a specimen link type on an enabled study" in new App(fakeApp) {
-        doLogin
+      "not remove a specimen link type on an enabled study" in {
         val study = studyRepository.put(
           factory.createDisabledStudy.enable(1, 1) | fail)
         removeOnNonDisabledStudy(study, factory.createProcessingType)
       }
 
-      "not remove a specimen link type on an retired study" in new App(fakeApp) {
-        doLogin
+      "not remove a specimen link type on an retired study" in {
         val study = studyRepository.put(
           factory.createDisabledStudy.retire | fail)
         removeOnNonDisabledStudy(study, factory.createProcessingType)
