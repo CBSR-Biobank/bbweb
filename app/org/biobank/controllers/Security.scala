@@ -68,6 +68,8 @@ trait Security { self: Controller =>
    *  - either in the header or in the query string,
    *
    *  - matches a token already stored in the play cache
+   *
+   * Note: there is special behaviour if the code is running in TEST mode.
    */
   private def validateToken[A]
     (request: Request[A])
@@ -77,6 +79,7 @@ trait Security { self: Controller =>
       token <- validRequestToken(request)
       userId <- {
         if ((Play.current.mode == Mode.Test) && (token == "bbweb-test-token")) {
+          // when running in TEST mode, always allow the action if the token is the test token
           org.biobank.Global.DefaultUserId.success
         } else {
           Cache.getAs[UserId](token)
