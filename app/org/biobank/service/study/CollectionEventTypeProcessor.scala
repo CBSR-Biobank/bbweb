@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory
 import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.infrastructure.event.StudyEventsUtil._
 import org.biobank.infrastructure.event.StudyEvents._
 

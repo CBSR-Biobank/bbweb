@@ -2,7 +2,6 @@ package org.biobank.service.study
 
 import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain._
 import org.biobank.domain.user.UserId

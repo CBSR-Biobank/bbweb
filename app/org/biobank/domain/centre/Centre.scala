@@ -48,7 +48,7 @@ sealed trait Centre
 
 object Centre {
 
-  val status: String = "Study"
+  val status: String = "Centre"
 
   implicit val centreWrites = new Writes[Centre] {
     def writes(centre: Centre) = Json.obj(
@@ -171,7 +171,7 @@ case class EnabledCentre(
 object EnabledCentre extends CentreValidations {
   import CommonValidations._
 
-  val status: String = "Disabled"
+  val status: String = "Enabled"
 
   /** A centre must be in a disabled state before it can be enabled. */
   def create(centre: DisabledCentre): DomainValidation[EnabledCentre] = {

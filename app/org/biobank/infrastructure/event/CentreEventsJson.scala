@@ -9,7 +9,7 @@ import play.api.libs.functional.syntax._
 /**
   * Events used by the Centre Aggregate.
   */
-object CentreEventsJson {
+trait CentreEventsJson {
   import org.biobank.infrastructure.event.CentreEvents._
 
   implicit val centreAddedEventWriter            = Json.writes[CentreAddedEvent]

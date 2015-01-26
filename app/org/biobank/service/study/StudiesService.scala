@@ -3,7 +3,6 @@
 import org.biobank.service.ApplicationService
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.infrastructure.{ CollectionDto, ProcessingDto }
 import org.biobank.domain.{

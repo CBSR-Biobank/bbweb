@@ -1,5 +1,6 @@
 package org.biobank.infrastructure.event
 
+import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.JsonUtils._
 
@@ -8,9 +9,7 @@ import play.api.libs.functional.syntax._
 
 /** User events are defined in app/protobuf/UserEvents.proto
   */
-object UserEventsJson {
-  import org.biobank.infrastructure.event.UserEvents._
-
+trait UserEventsJson {
   /** Does not convert password or salt to JSON.
     */
   implicit val userRegisteredEventWrites = new Writes[UserRegisteredEvent] {

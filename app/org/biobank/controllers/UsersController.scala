@@ -2,7 +2,7 @@ package org.biobank.controllers
 
 import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
-import org.biobank.infrastructure.event.UserEventsJson._
+import org.biobank.infrastructure.event.UserEventsJson
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 
@@ -26,7 +26,8 @@ import scalaz.Validation.FlatMap._
 class UsersController(implicit inj: Injector)
     extends CommandController
     with JsonController
-    with Injectable {
+    with Injectable
+    with UserEventsJson {
 
   implicit val usersService = inject [UsersService]
 

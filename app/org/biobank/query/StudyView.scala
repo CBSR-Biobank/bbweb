@@ -6,7 +6,6 @@ package org.biobank.query
 //import play.api.db.slick._
 
 //import org.biobank.query.model._
-import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service.WrappedEvent
 

@@ -6,7 +6,7 @@ import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEventsJson._
+import org.biobank.infrastructure.event.StudyEventsJson
 import org.biobank.domain._
 import AnnotationValueType._
 import org.biobank.domain.study._
@@ -27,7 +27,8 @@ import Scalaz._
 class SpecimenLinkAnnotTypeController(implicit inj: Injector)
     extends CommandController
     with JsonController
-    with Injectable {
+    with Injectable
+    with StudyEventsJson {
 
   implicit val usersService = inject [UsersService]
 

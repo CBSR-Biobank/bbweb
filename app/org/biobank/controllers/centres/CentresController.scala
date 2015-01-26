@@ -6,7 +6,7 @@ import org.biobank.service._
 import org.biobank.service.users.UsersService
 import org.biobank.service.centre.CentresService
 import org.biobank.infrastructure.command.CentreCommands._
-import org.biobank.infrastructure.event.CentreEventsJson._
+import org.biobank.infrastructure.event.CentreEventsJson
 import org.biobank.domain.centre.Centre
 
 import play.api.Play.current
@@ -31,7 +31,8 @@ import scalaz.Validation.FlatMap._
 class CentresController(implicit inj: Injector)
     extends CommandController
     with JsonController
-    with Injectable {
+    with Injectable
+    with CentreEventsJson {
 
   implicit val usersService = inject [UsersService]
 

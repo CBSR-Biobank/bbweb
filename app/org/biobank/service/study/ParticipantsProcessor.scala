@@ -3,7 +3,6 @@ package org.biobank.service.study
 import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.infrastructure.event.StudyEventsJson._
 import org.biobank.domain.{ AnnotationTypeId, AnnotationOption, DomainValidation, DomainError }
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._

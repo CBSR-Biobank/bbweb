@@ -32,14 +32,40 @@ class CentresControllerSpec extends ControllerFixture {
 
   def uri(centre: Centre): String = uri + s"/${centre.id.id}"
 
+  def jsonAddCentreLocationCmd(location: Location, centreId: CentreId): JsValue = {
+    Json.obj(
+      "centreId"       -> centreId.id,
+      "name"           -> location.name,
+      "street"         -> location.street,
+      "city"           -> location.city,
+      "province"       -> location.province,
+      "postalCode"     -> location.postalCode,
+      "poBoxNumber"    -> location.poBoxNumber,
+      "countryIsoCode" -> location.countryIsoCode)
+  }
+
+  def compareObjs(jsonList: List[JsObject], centres: List[Centre]) = {
+    val centresMap = centres.map { centre => (centre.id, centre) }.toMap
+    jsonList.foreach { jsonObj =>
+      val jsonId = CentreId((jsonObj \ "id").as[String])
+      compareObj(jsonObj, centresMap(jsonId))
+    }
+  }
+
   "Centre REST API" when {
 
     "GET /centres" must {
-      "list none" taggedAs(Tag("1")) in {
+
+      "list none" in {
         val json = makeRequest(GET, uri)
           (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size 0
+
+        (json \ "data" \ "offset").as[Long] must be (0)
+          (json \ "data" \ "total").as[Long] must be (0)
+          (json \ "data" \ "prev").as[Option[Int]] must be (None)
+          (json \ "data" \ "next").as[Option[Int]] must be (None)
       }
 
       "list a centre" in {
@@ -55,19 +81,100 @@ class CentresControllerSpec extends ControllerFixture {
 
       "list multiple centres" in {
         val centres = List(factory.createDisabledCentre, factory.createDisabledCentre)
-          .map{ centre => (centre.id, centre) }.toMap
-
-        centreRepository.removeAll
-        centres.values.foreach(centre => centreRepository.put(centre))
+          .map{ centre => centreRepository.put(centre) }
 
         val json = makeRequest(GET, uri)
           (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data" \ "items").as[List[JsObject]]
         jsonList must have size centres.size
-        jsonList.foreach{ jsonObj =>
-          val jsonId = CentreId((jsonObj \ "id").as[String])
-          compareObj(jsonObj, centres(jsonId))
-        }
+        compareObjs(jsonList, centres)
+      }
+
+      "list a single centre when filtered by name" in {
+        val centres = List(factory.createDisabledCentre, factory.createEnabledCentre)
+          .map { centre => centreRepository.put(centre) }
+
+        val json = makeRequest(GET, uri + "?filter=" + centres(0).name)
+          (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
+        jsonList must have size 1
+        compareObj(jsonList(0), centres(0))
+
+        (json \ "data" \ "offset").as[Long] must be (0)
+          (json \ "data" \ "total").as[Long] must be (1)
+          (json \ "data" \ "prev").as[Option[Int]] must be (None)
+          (json \ "data" \ "next").as[Option[Int]] must be (None)
+      }
+
+      "list a single disabled centre when filtered by status" taggedAs(Tag("1")) in {
+        val centres = List(
+          factory.createDisabledCentre,
+          factory.createEnabledCentre,
+          factory.createEnabledCentre)
+          .map { centre => centreRepository.put(centre) }
+
+        val json = makeRequest(GET, uri + "?status=disabled")
+          (json \ "status").as[String] must include ("success")
+
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
+        jsonList must have size 1
+        compareObj(jsonList(0), centres(0))
+
+        (json \ "data" \ "offset").as[Long] must be (0)
+          (json \ "data" \ "total").as[Long] must be (1)
+          (json \ "data" \ "prev").as[Option[Int]] must be (None)
+          (json \ "data" \ "next").as[Option[Int]] must be (None)
+      }
+
+      "list disabled centres when filtered by status" in {
+        val centres = List(
+          factory.createDisabledCentre,
+          factory.createDisabledCentre,
+          factory.createEnabledCentre,
+          factory.createEnabledCentre)
+          .map { centre => centreRepository.put(centre) }
+
+        val json = makeRequest(GET, uri + "?status=disabled")
+          (json \ "status").as[String] must include ("success")
+
+        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
+        jsonList must have size 2
+        compareObj(jsonList(0), centres(0))
+
+        (json \ "data" \ "offset").as[Long] must be (0)
+          (json \ "data" \ "total").as[Long] must be (1)
+          (json \ "data" \ "prev").as[Option[Int]] must be (None)
+          (json \ "data" \ "next").as[Option[Int]] must be (None)
+      }
+
+      "list enabled centres when filtered by status" in {
+      }
+
+      "list centres sorted by name" in {
+      }
+
+      "list centres sorted by status" in {
+      }
+
+      "list a single centre when using paged query" in {
+      }
+
+      "list centres sorted by status in descending order" in {
+      }
+
+      "fail when using an invalid status" in {
+      }
+
+      "fail when using an invalid page number" in {
+      }
+
+      "fail when using an invalid page number that exeeds limits" in {
+      }
+
+      "fail when using an invalid page size" in {
+      }
+
+      "fail when using an invalid sort order" in {
       }
     }
 
@@ -369,18 +476,6 @@ class CentresControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include ("invalid location id")
 
       }
-    }
-
-    def jsonAddCentreLocationCmd(location: Location, centreId: CentreId): JsValue = {
-      Json.obj(
-        "centreId"       -> centreId.id,
-        "name"           -> location.name,
-        "street"         -> location.street,
-        "city"           -> location.city,
-        "province"       -> location.province,
-        "postalCode"     -> location.postalCode,
-        "poBoxNumber"    -> location.poBoxNumber,
-        "countryIsoCode" -> location.countryIsoCode)
     }
 
     "POST /centres/location" must {

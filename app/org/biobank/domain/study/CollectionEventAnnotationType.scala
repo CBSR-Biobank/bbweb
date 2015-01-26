@@ -3,7 +3,7 @@ package org.biobank.domain.study
 import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
 import org.biobank.domain.AnnotationValueType._
 import org.biobank.infrastructure.JsonUtils._
-import org.biobank.infrastructure.event.StudyEventsJson._
+import org.biobank.infrastructure.event.StudyEventsJson
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._

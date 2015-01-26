@@ -276,7 +276,7 @@ class UsersControllerSpec extends ControllerFixture {
           (json \ "message").as[String] must include("page is invalid")
       }
 
-      "fail when using an invalid page number that exeeds limits" taggedAs(Tag("1")) in {
+      "fail when using an invalid page number that exeeds limits" in {
         val user1 = factory.createLockedUser.copy(email = "user3@test.com")
         val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
         val user3 = factory.createActiveUser.copy(email = "user1@test.com")

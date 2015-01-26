@@ -334,7 +334,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           (json \ "data").as[Boolean] must equal (true)
       }
 
-      "must return false for a participant ID that exists" taggedAs(Tag("1")) in {
+      "must return false for a participant ID that exists" in {
 
         var participant = factory.createParticipant
         participantRepository.put(participant)
