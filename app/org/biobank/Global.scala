@@ -41,7 +41,7 @@ trait Global
     createDefaultUser
     //createTestUser
 
-    if (app.mode == Mode.Dev) {
+    if (app.mode != Mode.Test) {
       addTestData
     }
 
