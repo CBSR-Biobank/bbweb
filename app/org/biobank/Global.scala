@@ -38,10 +38,9 @@ trait Global
 
     checkEmailConfig(app)
 
-    createDefaultUser
-    //createTestUser
-
     if (app.mode != Mode.Test) {
+      createDefaultUser
+
       addTestData
     }
 
@@ -60,35 +59,8 @@ trait Global
       throw new RuntimeException("smtp server information needs to be set in email.conf"))
   }
 
-  /** Used for debugging only.
-    *
-    * password is "testuser"
-    */
-  def createTestUser = {
-    val userRepository = inject [UserRepository]
-    val email = "test@biosample.ca"
-    val validation = RegisteredUser.create(
-      UserId(email),
-      -1L,
-      DateTime.now,
-      "testuser",
-      email,
-      "$2a$10$bkENUsLcxClf9gce/Mnv3OQcLcG6S5jP730MxGWSKNSKUmaJ/gdGq",
-      "$2a$10$bkENUsLcxClf9gce/Mnv3O",
-      None)
-
-    if (validation.isFailure) {
-      validation.swap.map { err =>
-        throw new RuntimeException("could not add default user in development mode: " + err)
-      }
-    }
-    validation map { user =>
-      userRepository.put(user)
-    }
-  }
-
   /**
-    * for debug only - password is "testuser"
+    * For debug only in development mode - password is "testuser"
     */
   def createDefaultUser: User = {
     val userRepository = inject [UserRepository]

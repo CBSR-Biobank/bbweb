@@ -1,5 +1,6 @@
 package org.biobank.fixture
 
+import org.biobank.Global
 import org.biobank.domain._
 import org.biobank.domain.user.{ UserRepository, UserRepositoryImpl }
 import org.biobank.domain.centre._
@@ -16,11 +17,23 @@ import org.scalatestplus.play._
 import play.api.Logger
 import play.api.Play
 import play.api.libs.json._
-import play.api.mvc.Cookie
+import play.api.mvc._
 import play.api.test.FakeApplication
 import play.api.test.FakeRequest
+import play.api.test.FakeHeaders
 import play.api.test.Helpers._
 import scaldi.Module
+
+trait BbwebFakeApplication {
+
+  def makeRequest(method: String, path: String, expectedStatus: Int, json: JsValue, token: String)
+      : JsValue
+
+  def makeRequest(method: String, path: String, expectedStatus: Int = OK, json: JsValue = JsNull)
+      : JsValue
+
+}
+
 
 /**
   * This trait allows a test suite to run tests on a Play Framework fake application.
@@ -33,7 +46,8 @@ abstract class ControllerFixture
     extends PlaySpec
     with OneServerPerTest
     with MustMatchers
-    with OptionValues {
+    with OptionValues
+    with BbwebFakeApplication {
 
   private val dbName = "bbweb-test"
 
@@ -94,9 +108,9 @@ abstract class ControllerFixture
     MongoConnection()(dbName)("snapshots").drop
   }
 
-  def doLogin() = {
+  def doLogin(email: String = Global.DefaultUserEmail, password: String = "testuser") = {
     // Log in with test user
-    val request = Json.obj("email" -> "admin@admin.com", "password" -> "testuser")
+    val request = Json.obj("email" -> email, "password" -> password)
     route(FakeRequest(POST, "/login").withJsonBody(request)).fold {
         cancel("login failed")
     } { result =>
@@ -128,7 +142,6 @@ abstract class ControllerFixture
   def makeRequest(method: String, path: String, expectedStatus: Int = OK, json: JsValue = JsNull)
       : JsValue =
     makeRequest(method, path, expectedStatus, json, "bbweb-test-token")
-
 
 }
 

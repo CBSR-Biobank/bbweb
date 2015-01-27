@@ -57,53 +57,37 @@ class CentresControllerSpec extends ControllerFixture {
     "GET /centres" must {
 
       "list none" in {
-        val json = makeRequest(GET, uri)
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 0
-
-        (json \ "data" \ "offset").as[Long] must be (0)
-          (json \ "data" \ "total").as[Long] must be (0)
-          (json \ "data" \ "prev").as[Option[Int]] must be (None)
-          (json \ "data" \ "next").as[Option[Int]] must be (None)
+        PagedResultsSpec(this).emptyResults(uri)
       }
 
       "list a centre" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
-
-        val json = makeRequest(GET, uri)
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have length 1
-        compareObj(jsonList(0), centre)
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri)
+        compareObj(jsonItem, centre)
       }
 
       "list multiple centres" in {
         val centres = List(factory.createDisabledCentre, factory.createDisabledCentre)
           .map{ centre => centreRepository.put(centre) }
 
-        val json = makeRequest(GET, uri)
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size centres.size
-        compareObjs(jsonList, centres)
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          offset = 0,
+          total = centres.size,
+          maybeNext = None,
+          maybePrev = None)
+        jsonItems must have size centres.size
+        compareObjs(jsonItems, centres)
       }
 
       "list a single centre when filtered by name" in {
         val centres = List(factory.createDisabledCentre, factory.createEnabledCentre)
           .map { centre => centreRepository.put(centre) }
 
-        val json = makeRequest(GET, uri + "?filter=" + centres(0).name)
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 1
-        compareObj(jsonList(0), centres(0))
-
-        (json \ "data" \ "offset").as[Long] must be (0)
-          (json \ "data" \ "total").as[Long] must be (1)
-          (json \ "data" \ "prev").as[Option[Int]] must be (None)
-          (json \ "data" \ "next").as[Option[Int]] must be (None)
+        val jsonItem = PagedResultsSpec(this)
+          .singleItemResult(uri, Map("filter" -> centres(0).name))
+        compareObj(jsonItem, centres(0))
       }
 
       "list a single disabled centre when filtered by status" in {
@@ -113,17 +97,9 @@ class CentresControllerSpec extends ControllerFixture {
           factory.createEnabledCentre)
           .map { centre => centreRepository.put(centre) }
 
-        val json = makeRequest(GET, uri + "?status=disabled")
-          (json \ "status").as[String] must include ("success")
-
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 1
-        compareObj(jsonList(0), centres(0))
-
-        (json \ "data" \ "offset").as[Long] must be (0)
-          (json \ "data" \ "total").as[Long] must be (1)
-          (json \ "data" \ "prev").as[Option[Int]] must be (None)
-          (json \ "data" \ "next").as[Option[Int]] must be (None)
+        val jsonItem = PagedResultsSpec(this)
+          .singleItemResult(uri, Map("status" -> "disabled"))
+        compareObj(jsonItem, centres(0))
       }
 
       "list disabled centres when filtered by status" in {
@@ -134,18 +110,17 @@ class CentresControllerSpec extends ControllerFixture {
           factory.createEnabledCentre)
           .map { centre => centreRepository.put(centre) }
 
-        val json = makeRequest(GET, uri + "?status=disabled")
-          (json \ "status").as[String] must include ("success")
+        val expectedCentres = List(centres(0), centres(1))
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("status" -> "disabled"),
+          offset = 0,
+          total = expectedCentres.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 2
-
-        compareObjs(jsonList, List(centres(0), centres(1)))
-
-        (json \ "data" \ "offset").as[Long] must be (0)
-          (json \ "data" \ "total").as[Long] must be (2)
-          (json \ "data" \ "prev").as[Option[Int]] must be (None)
-          (json \ "data" \ "next").as[Option[Int]] must be (None)
+        jsonItems must have size expectedCentres.size
+        compareObjs(jsonItems, expectedCentres)
       }
 
       "list enabled centres when filtered by status" in {
@@ -156,18 +131,17 @@ class CentresControllerSpec extends ControllerFixture {
           factory.createEnabledCentre)
           .map { centre => centreRepository.put(centre) }
 
-        val json = makeRequest(GET, uri + "?status=enabled")
-          (json \ "status").as[String] must include ("success")
+        val expectedCentres = List(centres(2), centres(3))
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("status" -> "enabled"),
+          offset = 0,
+          total = expectedCentres.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 2
-
-        compareObjs(jsonList, List(centres(2), centres(3)))
-
-        (json \ "data" \ "offset").as[Long] must be (0)
-          (json \ "data" \ "total").as[Long] must be (2)
-          (json \ "data" \ "prev").as[Option[Int]] must be (None)
-          (json \ "data" \ "next").as[Option[Int]] must be (None)
+        jsonItems must have size expectedCentres.size
+        compareObjs(jsonItems, expectedCentres)
       }
 
       "list centres sorted by name" in {
@@ -178,18 +152,19 @@ class CentresControllerSpec extends ControllerFixture {
           factory.createEnabledCentre.copy(name = "CTR0"))
           .map { centre => centreRepository.put(centre) }
 
-        val json = makeRequest(GET, uri + "?sort=name")
-          (json \ "status").as[String] must include ("success")
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("sort" -> "name"),
+          offset = 0,
+          total = centres.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size centres.size
-
-        compareObjs(jsonList, List(centres(3), centres(2), centres(1), centres(0)))
-
-        (json \ "data" \ "offset").as[Long] must be (0)
-          (json \ "data" \ "total").as[Long] must be (centres.size)
-          (json \ "data" \ "prev").as[Option[Int]] must be (None)
-          (json \ "data" \ "next").as[Option[Int]] must be (None)
+        jsonItems must have size centres.size
+        compareObj(jsonItems(0), centres(3))
+        compareObj(jsonItems(1), centres(2))
+        compareObj(jsonItems(2), centres(1))
+        compareObj(jsonItems(3), centres(0))
       }
 
       "list centres sorted by status" in {
@@ -198,18 +173,17 @@ class CentresControllerSpec extends ControllerFixture {
           factory.createDisabledCentre)
           .map { centre => centreRepository.put(centre) }
 
-        val json = makeRequest(GET, uri + "?sort=status")
-          (json \ "status").as[String] must include ("success")
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("sort" -> "status"),
+          offset = 0,
+          total = centres.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size centres.size
-
-        compareObjs(jsonList, List(centres(1), centres(0)))
-
-        (json \ "data" \ "offset").as[Long] must be (0)
-          (json \ "data" \ "total").as[Long] must be (centres.size)
-          (json \ "data" \ "prev").as[Option[Int]] must be (None)
-          (json \ "data" \ "next").as[Option[Int]] must be (None)
+        jsonItems must have size centres.size
+        compareObj(jsonItems(0), centres(1))
+        compareObj(jsonItems(1), centres(0))
       }
 
       "list centres sorted by status in descending order" in {
@@ -218,18 +192,17 @@ class CentresControllerSpec extends ControllerFixture {
           factory.createDisabledCentre)
           .map { centre => centreRepository.put(centre) }
 
-        val json = makeRequest(GET, uri + "?sort=status&order=desc")
-          (json \ "status").as[String] must include ("success")
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("sort" -> "status", "order" -> "desc"),
+          offset = 0,
+          total = centres.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size centres.size
-
-        compareObjs(jsonList, List(centres(0), centres(1)))
-
-        (json \ "data" \ "offset").as[Long] must be (0)
-          (json \ "data" \ "total").as[Long] must be (centres.size)
-          (json \ "data" \ "prev").as[Option[Int]] must be (None)
-          (json \ "data" \ "next").as[Option[Int]] must be (None)
+        jsonItems must have size centres.size
+        compareObj(jsonItems(0), centres(0))
+        compareObj(jsonItems(1), centres(1))
       }
 
       "list a single centre when using paged query" in {
@@ -240,21 +213,16 @@ class CentresControllerSpec extends ControllerFixture {
           factory.createEnabledCentre.copy(name = "CTR0"))
           .map { centre => centreRepository.put(centre) }
 
-        val json = makeRequest(GET, uri + "?sort=name&pageSize=1")
-          (json \ "status").as[String] must include ("success")
+        val jsonItem = PagedResultsSpec(this).singleItemResult(
+          uri = uri,
+          queryParams = Map("sort" -> "name", "pageSize" -> "1"),
+          total = centres.size,
+          maybeNext = Some(2))
 
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 1
-
-        compareObj(jsonList(0), centres(3))
-
-        (json \ "data" \ "offset").as[Long] must be (0)
-          (json \ "data" \ "total").as[Long] must be (4)
-          (json \ "data" \ "prev").as[Option[Int]] must be (None)
-          (json \ "data" \ "next").as[Option[Int]] must be (Some(2))
+        compareObj(jsonItem, centres(3))
       }
 
-      "list a the last centre when using paged query" in {
+      "list the last centre when using paged query" in {
         val centres = List(
           factory.createDisabledCentre.copy(name = "CTR3"),
           factory.createDisabledCentre.copy(name = "CTR2"),
@@ -262,74 +230,21 @@ class CentresControllerSpec extends ControllerFixture {
           factory.createEnabledCentre.copy(name = "CTR0"))
           .map { centre => centreRepository.put(centre) }
 
-        val json = makeRequest(GET, uri + "?sort=name&page=4&pageSize=1")
-          (json \ "status").as[String] must include ("success")
+        val jsonItem = PagedResultsSpec(this).singleItemResult(
+          uri = uri,
+          queryParams = Map("sort" -> "name", "page" -> "4", "pageSize" -> "1"),
+          total = 4,
+          offset = 3,
+          maybeNext = None,
+          maybePrev = Some(3))
 
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 1
-
-        compareObj(jsonList(0), centres(0))
-
-        (json \ "data" \ "offset").as[Long] must be (3)
-          (json \ "data" \ "total").as[Long] must be (4)
-          (json \ "data" \ "prev").as[Option[Int]] must be (Some(3))
-          (json \ "data" \ "next").as[Option[Int]] must be (None)
+        compareObj(jsonItem, centres(0))
       }
 
-      "fail when using an invalid status" in {
-        val centres = List(
-          factory.createEnabledCentre,
-          factory.createDisabledCentre)
-          .map { centre => centreRepository.put(centre) }
-
-        val json = makeRequest(GET, uri + "?sort=xxx", BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("invalid sort field")
+      "fail when using an invalid query parameters" in {
+        PagedResultsSpec(this).failWithInvalidParams(uri)
       }
 
-      "fail when using an invalid page number" in {
-        val centres = List(
-          factory.createEnabledCentre,
-          factory.createDisabledCentre)
-          .map { centre => centreRepository.put(centre) }
-
-        val json = makeRequest(GET, uri + "?page=-1&pageSize=1", BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("page is invalid")
-      }
-
-      "fail when using an invalid page number that exeeds limits" in {
-        val centres = List(
-          factory.createEnabledCentre,
-          factory.createDisabledCentre)
-          .map { centre => centreRepository.put(centre) }
-
-        val json = makeRequest(GET, uri + "?page=3&pageSize=1", BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("page exceeds limit")
-      }
-
-      "fail when using an invalid page size" in {
-        val centres = List(
-          factory.createEnabledCentre,
-          factory.createDisabledCentre)
-          .map { centre => centreRepository.put(centre) }
-
-        val json = makeRequest(GET, uri + "?pageSize=-1", BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("page size is invalid")
-      }
-
-      "fail when using an invalid sort order" in {
-        val centres = List(
-          factory.createEnabledCentre,
-          factory.createDisabledCentre)
-          .map { centre => centreRepository.put(centre) }
-
-        val json = makeRequest(GET, uri + "?sort=xyz", BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("invalid sort field")
-      }
     }
 
     "POST /centres" must {

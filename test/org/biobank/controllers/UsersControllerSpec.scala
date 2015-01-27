@@ -55,261 +55,219 @@ class UsersControllerSpec extends ControllerFixture {
     user
   }
 
+  def compareObjs(jsonList: List[JsObject], users: List[User]) = {
+    val usersMap = users.map { user => (user.id, user) }.toMap
+    jsonList.foreach { jsonObj =>
+      val jsonId = UserId((jsonObj \ "id").as[String])
+      compareObj(jsonObj, usersMap(jsonId))
+    }
+  }
+
   "User REST API" must {
 
     "GET /users" must {
-      "list the default user in the test environment" in {
-        val json = makeRequest(GET, uri)
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 1
-        val jsonDefaultUser = jsonList(0)
-          (jsonDefaultUser \ "email").as[String] mustBe ("admin@admin.com")
 
-        (json \ "data" \ "offset").as[Long] must be (0)
-          (json \ "data" \ "total").as[Long] must be (1)
-          (json \ "data" \ "prev").as[Option[Int]] must be (None)
-          (json \ "data" \ "next").as[Option[Int]] must be (None)
+      "list none" in {
+        PagedResultsSpec(this).emptyResults(uri)
       }
 
       "list a new user" in {
         val user = factory.createRegisteredUser
         userRepository.put(user)
-
-        val json = makeRequest(GET, uri)
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have length 2
-        compareObj(jsonList(1), user)
-
-        (json \ "data" \ "offset").as[Long] must be (0)
-          (json \ "data" \ "total").as[Long] must be (2)
-          (json \ "data" \ "prev").as[Option[Int]] must be (None)
-          (json \ "data" \ "next").as[Option[Int]] must be (None)
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri)
+        compareObj(jsonItem, user)
       }
 
       "list multiple users" in {
-        val user1 = factory.createRegisteredUser.copy(name = "user1")
-        val user2 = factory.createRegisteredUser.copy(name = "user2")
-        val users = List(user1, user2)
-        users.map(user => userRepository.put(user))
+        val users = List(factory.createRegisteredUser, factory.createRegisteredUser)
+          .map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, uri)
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
-          (u \ "id").as[String].equals("admin@admin.com")
-        }
-
-        jsonList must have size users.size
-
-        (jsonList zip users).map { item => compareObj(item._1, item._2) }
-        ()
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          offset = 0,
+          total = users.size,
+          maybeNext = None,
+          maybePrev = None)
+        jsonItems must have size users.size
+        compareObjs(jsonItems, users)
       }
 
       "list a single user when filtered by name" in {
-        val user1 = factory.createRegisteredUser.copy(name = "user1")
-        val user2 = factory.createRegisteredUser.copy(name = "user2")
-        val users = List(user1, user2)
-        users.map(user => userRepository.put(user))
+        val users = List(
+          factory.createRegisteredUser.copy(name = "user1"),
+          factory.createRegisteredUser.copy(name = "user2"))
+          .map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, uri + s"?nameFilter=${user1.name}")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-
-        jsonList must have size 1
-        compareObj(jsonList(0), user1)
+        val jsonItem = PagedResultsSpec(this)
+          .singleItemResult(uri, Map("nameFilter" -> users(0).name))
+        compareObj(jsonItem, users(0))
       }
 
       "list a single user when filtered by email" in {
-        val user1 = factory.createRegisteredUser.copy(email = "user1@test.com")
-        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
-        val users = List(user1, user2)
-        users.map(user => userRepository.put(user))
+        val users = List(
+          factory.createRegisteredUser.copy(email = "user1@test.com"),
+          factory.createRegisteredUser.copy(email = "user2@test.com"))
+          .map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, uri + s"?emailFilter=${user1.email}")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-
-        jsonList must have size 1
-        compareObj(jsonList(0), user1)
+        val jsonItem = PagedResultsSpec(this)
+          .singleItemResult(uri, Map("emailFilter" -> users(0).email))
+        compareObj(jsonItem, users(0))
       }
 
       "list a single registered user when filtered by status" in {
-        val user1 = factory.createRegisteredUser
-        val user2 = factory.createActiveUser
-        val users = List(user1, user2)
-        users.map(user => userRepository.put(user))
+        val users = List(
+          factory.createRegisteredUser.copy(email = "user1@test.com"),
+          factory.createActiveUser.copy(email = "user2@test.com"),
+          factory.createActiveUser.copy(email = "user3@test.com"))
+          .map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, uri + s"?status=registered")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-
-        jsonList must have size 1
-        compareObj(jsonList(0), user1)
+        val jsonItem = PagedResultsSpec(this)
+          .singleItemResult(uri, Map("status" -> "registered"))
+        compareObj(jsonItem, users(0))
       }
 
       "list active users when filtered by status" in {
-        val user1 = factory.createRegisteredUser
-        val user2 = factory.createActiveUser
-        val users = List(user1, user2)
-        users.map(user => userRepository.put(user))
+        val users = List(
+          factory.createRegisteredUser.copy(email = "user1@test.com"),
+          factory.createActiveUser.copy(email = "user2@test.com"),
+          factory.createActiveUser.copy(email = "user3@test.com"))
+          .map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, uri + s"?status=active")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
+        val expectedUsers = List(users(1), users(2))
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("status" -> "active"),
+          offset = 0,
+          total = expectedUsers.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        jsonList must have size 2
-        compareObj(jsonList(1), user2)
+        jsonItems must have size expectedUsers.size
+        compareObjs(jsonItems, expectedUsers)
       }
 
       "list locked users when filtered by status" in {
-        val user1 = factory.createLockedUser
-        val user2 = factory.createActiveUser
-        val users = List(user1, user2)
-        users.map(user => userRepository.put(user))
+        val users = List(
+          factory.createActiveUser.copy(email = "user1@test.com"),
+          factory.createLockedUser.copy(email = "user2@test.com"),
+          factory.createLockedUser.copy(email = "user3@test.com"))
+          .map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, uri + s"?status=locked")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
+        val expectedUsers = List(users(1), users(2))
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("status" -> "locked"),
+          offset = 0,
+          total = expectedUsers.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        jsonList must have size 1
-        compareObj(jsonList(0), user1)
+        jsonItems must have size expectedUsers.size
+        compareObjs(jsonItems, expectedUsers)
       }
 
       "list users sorted by name" in {
-        val user1 = factory.createLockedUser.copy(name = "user2")
-        val user2 = factory.createRegisteredUser.copy(name = "user1")
-        val users = List(user1, user2)
-        users.map(user => userRepository.put(user))
+        val users = List(
+          factory.createRegisteredUser.copy(name = "user3"),
+          factory.createRegisteredUser.copy(name = "user2"),
+          factory.createRegisteredUser.copy(name = "user1"))
+          .map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, uri + s"?sort=name")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
-          (u \ "id").as[String].equals("admin@admin.com")
-        }
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("sort" -> "name"),
+          offset = 0,
+          total = users.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        jsonList must have size 2
-        compareObj(jsonList(0), user2)
-        compareObj(jsonList(1), user1)
+        jsonItems must have size users.size
+        compareObj(jsonItems(0), users(2))
+        compareObj(jsonItems(1), users(1))
+        compareObj(jsonItems(2), users(0))
       }
 
       "list users sorted by email" in {
-        val user1 = factory.createLockedUser.copy(email = "user2@test.com")
-        val user2 = factory.createRegisteredUser.copy(email = "user1@test.com")
-        val users = List(user1, user2)
-        users.map(user => userRepository.put(user))
+        val users = List(
+          factory.createRegisteredUser.copy(email = "user3@test.com"),
+          factory.createActiveUser.copy(email = "user2@test.com"),
+          factory.createActiveUser.copy(email = "user1@test.com"))
+          .map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, uri + s"?sort=email")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
-          (u \ "id").as[String].equals("admin@admin.com")
-        }
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("sort" -> "email"),
+          offset = 0,
+          total = users.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        jsonList must have size 2
-        compareObj(jsonList(0), user2)
-        compareObj(jsonList(1), user1)
+        jsonItems must have size users.size
+        compareObj(jsonItems(0), users(2))
+        compareObj(jsonItems(1), users(1))
+        compareObj(jsonItems(2), users(0))
       }
 
       "list users sorted by status" in {
-        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
-        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
-        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
-        val users = List(user1, user2, user3)
-        users.map(user => userRepository.put(user))
+        val users = List(
+          factory.createRegisteredUser.copy(email = "user3@test.com"),
+          factory.createLockedUser.copy(email = "user2@test.com"),
+          factory.createActiveUser.copy(email = "user1@test.com"))
+          .map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, uri + s"?sort=status")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
-          (u \ "id").as[String].equals("admin@admin.com")
-        }
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("sort" -> "status"),
+          offset = 0,
+          total = users.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        jsonList must have size 3
-        compareObj(jsonList(0), user3)
-        compareObj(jsonList(1), user1)
-        compareObj(jsonList(2), user2)
-      }
-
-      "list a single user when using paged query" in {
-        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
-        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
-        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
-        val users = List(user1, user2, user3)
-        users.map(user => userRepository.put(user))
-
-        val json = makeRequest(GET, uri + s"?sort=email&page=1&pageSize=1&order=desc")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
-          (u \ "id").as[String].equals("admin@admin.com")
-        }
-
-        jsonList must have size 1
-        compareObj(jsonList(0), user1)
+        jsonItems must have size users.size
+        compareObj(jsonItems(0), users(2))
+        compareObj(jsonItems(1), users(1))
+        compareObj(jsonItems(2), users(0))
       }
 
       "list users sorted by status in descending order" in {
-        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
-        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
-        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
-        val users = List(user1, user2, user3)
-        users.map(user => userRepository.put(user))
+        val users = List(
+          factory.createRegisteredUser.copy(email = "user3@test.com"),
+          factory.createLockedUser.copy(email = "user2@test.com"),
+          factory.createActiveUser.copy(email = "user1@test.com"))
+          .map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, uri + s"?sort=status&order=desc")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]].filterNot { u =>
-          (u \ "id").as[String].equals("admin@admin.com")
-        }
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("sort" -> "status", "order" -> "desc"),
+          offset = 0,
+          total = users.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        jsonList must have size 3
-        compareObj(jsonList(0), user2)
-        compareObj(jsonList(1), user1)
-        compareObj(jsonList(2), user3)
+        jsonItems must have size users.size
+        compareObj(jsonItems(0), users(0))
+        compareObj(jsonItems(1), users(1))
+        compareObj(jsonItems(2), users(2))
       }
 
-      "fail when using an invalid status" in {
-        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
-        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
-        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
-        val users = List(user1, user2, user3)
-        users.map(user => userRepository.put(user))
+      "list a single user when using paged query" in {
+        val users = List(
+          factory.createRegisteredUser.copy(email = "user3@test.com"),
+          factory.createLockedUser.copy(email = "user2@test.com"),
+          factory.createActiveUser.copy(email = "user1@test.com"))
+          .map(user => userRepository.put(user))
 
-        val json = makeRequest(GET, uri + s"?status=xxxx", BAD_REQUEST)
-          (json \ "status").as[String] must include("error")
-          (json \ "message").as[String] must include("invalid user status")
+        val jsonItem = PagedResultsSpec(this).singleItemResult(
+          uri = uri,
+          queryParams = Map("sort" -> "email", "pageSize" -> "1"),
+          total = users.size,
+          maybeNext = Some(2))
+
+        compareObj(jsonItem, users(2))
       }
 
-      "fail when using an invalid page number" in {
-        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
-        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
-        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
-        val users = List(user1, user2, user3)
-        users.map(user => userRepository.put(user))
-
-        val json = makeRequest(GET, uri + s"?page=-1", BAD_REQUEST)
-          (json \ "status").as[String] must include("error")
-          (json \ "message").as[String] must include("page is invalid")
-      }
-
-      "fail when using an invalid page number that exeeds limits" in {
-        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
-        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
-        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
-        val users = List(user1, user2, user3)
-        users.map(user => userRepository.put(user))
-
-        val json = makeRequest(GET, uri + s"?page=5&pageSize=1", BAD_REQUEST)
-          (json \ "status").as[String] must include("error")
-          (json \ "message").as[String] must include("page exceeds limit")
-      }
-
-      "fail when using an invalid page size" in {
-        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
-        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
-        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
-        val users = List(user1, user2, user3)
-        users.map(user => userRepository.put(user))
-
-        val json = makeRequest(GET, uri + s"?pageSize=-1", BAD_REQUEST)
-          (json \ "status").as[String] must include("error")
-          (json \ "message").as[String] must include("page size is invalid")
-      }
-
-      "fail when using an invalid sort order" in {
-        val user1 = factory.createLockedUser.copy(email = "user3@test.com")
-        val user2 = factory.createRegisteredUser.copy(email = "user2@test.com")
-        val user3 = factory.createActiveUser.copy(email = "user1@test.com")
-        val users = List(user1, user2, user3)
-        users.map(user => userRepository.put(user))
-
-        val json = makeRequest(GET, uri + s"?order=xxx", BAD_REQUEST)
-          (json \ "status").as[String] must include("error")
-          (json \ "message").as[String] must include("invalid order requested")
+      "fail when using an invalid query parameters" in {
+        PagedResultsSpec(this).failWithInvalidParams(uri)
       }
     }
 
@@ -626,7 +584,10 @@ class UsersControllerSpec extends ControllerFixture {
       }
 
       "not allow mismatched tokens in request" in {
-        val validToken = doLogin
+        val plainPassword = nameGenerator.next[String]
+        val user = createActiveUserInRepository(plainPassword)
+
+        val validToken = doLogin(user.email, plainPassword)
         val badToken = nameGenerator.next[String]
 
         // this request is valid since user is logged in
@@ -658,8 +619,11 @@ class UsersControllerSpec extends ControllerFixture {
         ()
       }
 
-      "not allow requests missing X-XSRF-TOKEN in header" in {
-        val token = doLogin
+      "not allow requests missing X-XSRF-TOKEN in header" taggedAs(Tag("1")) in {
+        val plainPassword = nameGenerator.next[String]
+        val user = createActiveUserInRepository(plainPassword)
+        val token = doLogin(user.email, plainPassword)
+
         val resp = route(FakeRequest(GET, uri).withCookies(Cookie("XSRF-TOKEN", token)))
         resp must not be (None)
         resp.map { result =>
@@ -675,8 +639,10 @@ class UsersControllerSpec extends ControllerFixture {
 
     "POST /logout" must {
 
-      "disallow access to logged out users" in {
-        val token = doLogin
+      "disallow access to logged out users" taggedAs(Tag("1")) in {
+        val plainPassword = nameGenerator.next[String]
+        val user = createActiveUserInRepository(plainPassword)
+        val token = doLogin(user.email, plainPassword)
 
         // this request is valid since user is logged in
         var json = makeRequest(GET, uri, OK, JsNull, token)

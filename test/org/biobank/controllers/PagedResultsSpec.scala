@@ -1,80 +1,119 @@
 package org.biobank.controllers
 
-import org.biobank.Global
-import org.biobank.domain._
-import org.biobank.domain.user._
-import org.biobank.fixture.{ ControllerFixture, NameGenerator }
-import org.biobank.infrastructure.command.UserCommands._
-import org.biobank.domain.JsonHelper._
-import org.biobank.service.PasswordHasher
+import org.biobank.fixture.{ BbwebFakeApplication, ControllerFixture }
 
-import com.typesafe.plugin._
-import org.joda.time.DateTime
-import org.scalatest.Tag
-import org.scalatestplus.play._
-import org.slf4j.LoggerFactory
-import play.api.Play.current
 import play.api.libs.json._
-import play.api.mvc.Cookie
 import play.api.test.Helpers._
-import play.api.test._
-import scaldi.Injectable
+import play.api.test.FakeApplication
+import org.scalatest._
 
 /**
-  * Tests the REST API for [[User]].
+  * Common code for REST APIs that uses paged results.
   */
-trait PagedResultsSpec {
+case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers {
 
   def emptyResults(uri: String): Unit = {
-    val json = makeRequest(GET, uri)
+    val json = fakeApp.makeRequest(GET, uri)
       (json \ "status").as[String] must include ("success")
       (json \ "data" \ "offset").as[Long] must be (0)
       (json \ "data" \ "total").as[Long] must be (0)
-      (json \ "data" \ "prev").as[Option[Int]] must be (None)
       (json \ "data" \ "next").as[Option[Int]] must be (None)
+      (json \ "data" \ "prev").as[Option[Int]] must be (None)
 
     val jsonList = (json \ "data" \ "items").as[List[JsObject]]
     jsonList must have length 0
   }
 
-  def singleItemResult(uri: String): JsObject = {
-    val json = makeRequest(GET, uri)
+  def singleItemResult(
+    uri: String,
+    queryParams: Map[String, String] =  Map.empty,
+    total: Long = 1,
+    offset: Long = 0,
+    maybeNext: Option[Int] = None,
+    maybePrev: Option[Int] = None)
+      : JsObject = {
+    val json = fakeApp.makeRequest(GET, uriWithParams(uri, queryParams))
       (json \ "status").as[String] must include ("success")
-      (json \ "data" \ "offset").as[Long] must be (0)
-      (json \ "data" \ "total").as[Long] must be (1)
-      (json \ "data" \ "prev").as[Option[Int]] must be (None)
-      (json \ "data" \ "next").as[Option[Int]] must be (None)
+      (json \ "data" \ "offset").as[Long] must be (offset)
+      (json \ "data" \ "total").as[Long] must be (total)
+      (json \ "data" \ "next").as[Option[Int]] must be (maybeNext)
+      (json \ "data" \ "prev").as[Option[Int]] must be (maybePrev)
 
     val jsonList = (json \ "data" \ "items").as[List[JsObject]]
     jsonList must have length 1
     jsonList(0)
   }
 
-  def singleItemResultWithFilter[T <: ConcurrencySafeEntity[_]]
-    (filterName: String, filterValue: String, uri: String, resultSize: Int)
-      : JsObject = {
-    val json = makeRequest(GET, uri + s"?$filterName=$filterValue")
-      (json \ "status").as[String] must include ("success")
-      (json \ "data" \ "offset").as[Long] must be (0)
-      (json \ "data" \ "total").as[Long] must be (1)
-      (json \ "data" \ "prev").as[Option[Int]] must be (None)
-      (json \ "data" \ "next").as[Option[Int]] must be (None)
+  def multipleItemsResult(
+    uri: String,
+    queryParams: Map[String, String] =  Map.empty,
+    offset: Long,
+    total: Long,
+    maybeNext: Option[Int],
+    maybePrev: Option[Int])
+      : List[JsObject] = {
 
-    jsonList must have length 1
-    jsonList(0)
+    val json = fakeApp.makeRequest(GET, uriWithParams(uri, queryParams))
+      (json \ "status").as[String] must include ("success")
+      (json \ "data" \ "offset").as[Long] must be (offset)
+      (json \ "data" \ "total").as[Long] must be (total)
+      (json \ "data" \ "next").as[Option[Int]] must be (maybeNext)
+      (json \ "data" \ "prev").as[Option[Int]] must be (maybePrev)
+
+    (json \ "data" \ "items").as[List[JsObject]]
   }
 
-  def singleItemResultWithStatus[T <: ConcurrencySafeEntity[_]]
-    (nameFilter: String, uri: String, resultSize: Int)
-      : JsObject = {
-    val json = makeRequest(GET, uri + "?filter=" + nameFilter)
-      (json \ "status").as[String] must include ("success")
-      (json \ "data" \ "offset").as[Long] must be (0)
-      (json \ "data" \ "total").as[Long] must be (1)
-      (json \ "data" \ "prev").as[Option[Int]] must be (None)
-      (json \ "data" \ "next").as[Option[Int]] must be (None)
+  def failWithInvalidStatus(uri: String) = {
+    val json = fakeApp.makeRequest(GET, uri + "?sort=xxx", BAD_REQUEST)
+      (json \ "status").as[String] must include ("error")
+      (json \ "message").as[String] must include ("invalid sort field")
+  }
 
-    jsonList must have length 1
-    jsonList(0)
+  def failWithNegativePageNumber(uri: String) = {
+    val json = fakeApp.makeRequest(GET, uri + "?page=-1&pageSize=1", BAD_REQUEST)
+      (json \ "status").as[String] must include ("error")
+      (json \ "message").as[String] must include ("page is invalid")
+  }
+
+  def failWithInvalidPageNumber(uri: String) = {
+    // assumes the result will be empty
+    val json = fakeApp.makeRequest(GET, uri + "?page=2", BAD_REQUEST)
+      (json \ "status").as[String] must include ("error")
+      (json \ "message").as[String] must include ("page exceeds limit")
+  }
+
+  def failWithNegativePageSize(uri: String) = {
+    val json = fakeApp.makeRequest(GET, uri + "?pageSize=-1", BAD_REQUEST)
+      (json \ "status").as[String] must include ("error")
+      (json \ "message").as[String] must include ("page size is invalid")
+  }
+
+  def failWithInvalidPageSize(uri: String, pageSize: Int) = {
+    val json = fakeApp.makeRequest(GET, uri + "?pageSize=-1", BAD_REQUEST)
+      (json \ "status").as[String] must include ("error")
+      (json \ "message").as[String] must include ("page size is invalid")
+  }
+
+  def failWithInvalidSortfail(uri: String) = {
+    val json = fakeApp.makeRequest(GET, uri + "?sort=xyz", BAD_REQUEST)
+      (json \ "status").as[String] must include ("error")
+      (json \ "message").as[String] must include ("invalid sort field")
+  }
+
+  def failWithInvalidParams(uri: String, invalidPageSize: Int = 100) =  {
+    failWithInvalidStatus(uri)
+    failWithNegativePageNumber(uri)
+    failWithInvalidPageNumber(uri)
+    failWithNegativePageSize(uri)
+    failWithInvalidPageSize(uri, invalidPageSize);
+    failWithInvalidSortfail(uri)
+  }
+
+  private def uriWithParams(baseUri: String, queryParams: Map[String, String]) = {
+    if (queryParams.nonEmpty) {
+      baseUri + "?" + queryParams.map { case (k,v) => s"$k=$v" }.mkString("&")
+    } else {
+      baseUri
+    }
   }
 }

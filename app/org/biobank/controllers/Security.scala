@@ -26,6 +26,7 @@ trait Security { self: Controller =>
   val AuthTokenCookieKey = "XSRF-TOKEN"
   val AuthTokenHeader = "X-XSRF-TOKEN"
   val AuthTokenUrlKey = "auth"
+  val TestAuthToken = "bbweb-test-token"
 
   sealed case class AuthenticationInfo(token: String, userId: UserId)
 
@@ -60,6 +61,23 @@ trait Security { self: Controller =>
     } yield (headerXsrfToken)
   }
 
+  def getAuthInfo(token: String)(implicit usersService: UsersService)
+      : DomainValidation[AuthenticationInfo] = {
+    if ((Play.current.mode == Mode.Test) && (token == TestAuthToken)) {
+      // when running in TEST mode, always allow the action if the token is the test token
+      AuthenticationInfo(token, org.biobank.Global.DefaultUserId).successNel
+    } else {
+      for {
+        userId <- Cache.getAs[UserId](token)
+        .map(_.success)
+        .getOrElse(DomainError("invalid token").failureNel)
+        user       <- usersService.getUser(userId.id)
+        activeUser <- UserHelper.isUserActive(user)
+        auth       <- AuthenticationInfo(token, userId).successNel
+      } yield auth
+    }
+  }
+
   /*
    * Checks that the token is:
    *
@@ -77,19 +95,7 @@ trait Security { self: Controller =>
       : DomainValidation[AuthenticationInfo] = {
     for {
       token <- validRequestToken(request)
-      userId <- {
-        if ((Play.current.mode == Mode.Test) && (token == "bbweb-test-token")) {
-          // when running in TEST mode, always allow the action if the token is the test token
-          org.biobank.Global.DefaultUserId.success
-        } else {
-          Cache.getAs[UserId](token)
-            .map(_.success)
-            .getOrElse(DomainError("invalid token").failureNel)
-        }
-      }
-      user       <- usersService.getUser(userId.id)
-      activeUser <- UserHelper.isUserActive(user)
-      auth       <- AuthenticationInfo(token, userId).successNel
+      auth <- getAuthInfo(token)
     } yield auth
   }
 

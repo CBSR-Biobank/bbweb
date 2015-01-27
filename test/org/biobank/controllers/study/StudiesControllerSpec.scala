@@ -1,5 +1,6 @@
 package org.biobank.controllers.study
 
+import org.biobank.controllers._
 import org.biobank.domain.study.{ Study, StudyId }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
@@ -28,277 +29,206 @@ class StudiesControllerSpec extends ControllerFixture {
     compareObj(json, StudyNameDto(study.id.id, study.name))
   }
 
+  def compareObjs(jsonList: List[JsObject], studies: List[Study]) = {
+    val studiesMap = studies.map { study => (study.id, study) }.toMap
+    jsonList.foreach { jsonObj =>
+      val jsonId = StudyId((jsonObj \ "id").as[String])
+      compareObj(jsonObj, studiesMap(jsonId))
+    }
+  }
+
   "Study REST API" when {
 
     "GET /studies" must {
-
       "list none" in {
-        val json = makeRequest(GET, uri)
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 0
+        PagedResultsSpec(this).emptyResults(uri)
       }
 
       "list a study" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
-
-        log.debug(s"repo: ${}")
-
-        val json = makeRequest(GET, uri)
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have length 1
-        compareStudyNameDto(jsonList(0), study)
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri)
+        compareObj(jsonItem, study)
       }
 
       "list multiple studies" in {
         val studies = List(factory.createDisabledStudy, factory.createDisabledStudy)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
+          .map{ study => studyRepository.put(study) }
 
-        val json = makeRequest(GET, uri)
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size studies.size
-
-        (jsonList zip studies).map { item => compareStudyNameDto(item._1, item._2) }
-        ()
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          offset = 0,
+          total = studies.size,
+          maybeNext = None,
+          maybePrev = None)
+        jsonItems must have size studies.size
+        compareObjs(jsonItems, studies)
       }
 
       "list a single study when filtered by name" in {
+        val studies = List(factory.createDisabledStudy, factory.createEnabledStudy)
+          .map { study => studyRepository.put(study) }
 
-        val study1 = factory.createDisabledStudy.copy(name = "ABC")
-        val study2 = factory.createDisabledStudy.copy(name = "XYZ")
-
-        val studies = List(study2, study1)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?filter=" + study1.name)
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 1
-        compareStudyNameDto(jsonList(0), study1)
+        val jsonItem = PagedResultsSpec(this)
+          .singleItemResult(uri, Map("filter" -> studies(0).name))
+        compareObj(jsonItem, studies(0))
       }
 
-      "list studies filtered by disabled status" in {
+      "list a single disabled study when filtered by status" in {
+        val studies = List(
+          factory.createDisabledStudy,
+          factory.createEnabledStudy,
+          factory.createEnabledStudy)
+          .map { study => studyRepository.put(study) }
 
-        val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createEnabledStudy.copy(name = "ST2")
-        val study3 = factory.createRetiredStudy.copy(name = "ST3")
-
-        val studies = List(study1, study2, study3)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?status=disabled")
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 1
-
-        compareStudyNameDto(jsonList(0), study1)
+        val jsonItem = PagedResultsSpec(this)
+          .singleItemResult(uri, Map("status" -> "disabled"))
+        compareObj(jsonItem, studies(0))
       }
 
-      "list studies filtered by enabled status" in {
+      "list disabled studies when filtered by status" in {
+        val studies = List(
+          factory.createDisabledStudy,
+          factory.createDisabledStudy,
+          factory.createEnabledStudy,
+          factory.createEnabledStudy)
+          .map { study => studyRepository.put(study) }
 
-        val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createEnabledStudy.copy(name = "ST2")
-        val study3 = factory.createRetiredStudy.copy(name = "ST3")
+        val expectedStudies = List(studies(0), studies(1))
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("status" -> "disabled"),
+          offset = 0,
+          total = expectedStudies.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        val studies = List(study1, study2, study3)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?status=enabled")
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 1
-
-        compareStudyNameDto(jsonList(0), study2)
+        jsonItems must have size expectedStudies.size
+        compareObjs(jsonItems, expectedStudies)
       }
 
-      "list studies filtered by retired status" in {
+      "list enabled studies when filtered by status" in {
+        val studies = List(
+          factory.createDisabledStudy,
+          factory.createDisabledStudy,
+          factory.createEnabledStudy,
+          factory.createEnabledStudy)
+          .map { study => studyRepository.put(study) }
 
-        val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createEnabledStudy.copy(name = "ST2")
-        val study3 = factory.createRetiredStudy.copy(name = "ST3")
+        val expectedStudies = List(studies(2), studies(3))
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("status" -> "enabled"),
+          offset = 0,
+          total = expectedStudies.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        val studies = List(study1, study2, study3)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?status=retired")
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 1
-
-        compareStudyNameDto(jsonList(0), study3)
-      }
-
-      "list multiple studies in ascending order" in {
-
-        val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createDisabledStudy.copy(name = "ST2")
-
-        val studies = List(study2, study1)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?order=asc")
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size studies.size
-
-        compareStudyNameDto(jsonList(0), study1)
-        compareStudyNameDto(jsonList(1), study2)
-      }
-
-      "list multiple studies in descending order" in {
-
-        val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createDisabledStudy.copy(name = "ST2")
-
-        val studies = List(study2, study1)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?order=desc")
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size studies.size
-
-        compareStudyNameDto(jsonList(0), study2)
-        compareStudyNameDto(jsonList(1), study1)
-      }
-
-      "fail for invalid order parameter" in {
-
-        val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createDisabledStudy.copy(name = "ST2")
-
-        val studies = List(study2, study1)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?order=xxxx", BAD_REQUEST)
-
-        (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("invalid order requested")
+        jsonItems must have size expectedStudies.size
+        compareObjs(jsonItems, expectedStudies)
       }
 
       "list studies sorted by name" in {
+        val studies = List(
+          factory.createDisabledStudy.copy(name = "CTR3"),
+          factory.createDisabledStudy.copy(name = "CTR2"),
+          factory.createEnabledStudy.copy(name = "CTR1"),
+          factory.createEnabledStudy.copy(name = "CTR0"))
+          .map { study => studyRepository.put(study) }
 
-        val study1 = factory.createEnabledStudy.copy(name = "ST1")
-        val study2 = factory.createDisabledStudy.copy(name = "ST2")
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("sort" -> "name"),
+          offset = 0,
+          total = studies.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        val studies = List(study1, study2)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?sort=name")
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 2
-
-        compareStudyNameDto(jsonList(0), study1)
-        compareStudyNameDto(jsonList(1), study2)
+        jsonItems must have size studies.size
+        compareObj(jsonItems(0), studies(3))
+        compareObj(jsonItems(1), studies(2))
+        compareObj(jsonItems(2), studies(1))
+        compareObj(jsonItems(3), studies(0))
       }
 
       "list studies sorted by status" in {
+        val studies = List(
+          factory.createEnabledStudy,
+          factory.createDisabledStudy)
+          .map { study => studyRepository.put(study) }
 
-        val study1 = factory.createEnabledStudy.copy(name = "ST1")
-        val study2 = factory.createDisabledStudy.copy(name = "ST2")
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("sort" -> "status"),
+          offset = 0,
+          total = studies.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        val studies = List(study1, study2)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?sort=status")
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 2
-
-        compareStudyNameDto(jsonList(0), study2)
-        compareStudyNameDto(jsonList(1), study1)
+        jsonItems must have size studies.size
+        compareObj(jsonItems(0), studies(1))
+        compareObj(jsonItems(1), studies(0))
       }
 
-      "fail for an invalid sort column" in {
+      "list studies sorted by status in descending order" in {
+        val studies = List(
+          factory.createEnabledStudy,
+          factory.createDisabledStudy)
+          .map { study => studyRepository.put(study) }
 
-        val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createEnabledStudy.copy(name = "ST2")
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+          uri = uri,
+          queryParams = Map("sort" -> "status", "order" -> "desc"),
+          offset = 0,
+          total = studies.size,
+          maybeNext = None,
+          maybePrev = None)
 
-        val studies = List(study2, study1)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?sort=description", BAD_REQUEST)
-
-        (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("invalid sort field")
+        jsonItems must have size studies.size
+        compareObj(jsonItems(0), studies(0))
+        compareObj(jsonItems(1), studies(1))
       }
 
-      "list single study when using paged query" in {
+      "list a single study when using paged query" in {
+        val studies = List(
+          factory.createDisabledStudy.copy(name = "CTR3"),
+          factory.createDisabledStudy.copy(name = "CTR2"),
+          factory.createEnabledStudy.copy(name = "CTR1"),
+          factory.createEnabledStudy.copy(name = "CTR0"))
+          .map { study => studyRepository.put(study) }
 
-        val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createDisabledStudy.copy(name = "ST2")
+        val jsonItem = PagedResultsSpec(this).singleItemResult(
+          uri = uri,
+          queryParams = Map("sort" -> "name", "pageSize" -> "1"),
+          total = studies.size,
+          maybeNext = Some(2))
 
-        val studies = List(study2, study1)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?pageSize=1")
-          (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 1
-
-        (json \ "data" \ "offset").as[Long] must be (0)
-          (json \ "data" \ "total").as[Long] must be (2)
-          (json \ "data" \ "prev").as[Option[Int]] must be (None)
-          (json \ "data" \ "next").as[Option[Int]] must be (Some(2))
+        compareObj(jsonItem, studies(3))
       }
 
-      "fail when using page that exceeds limit" in {
+      "list the last study when using paged query" in {
+        val studies = List(
+          factory.createDisabledStudy.copy(name = "CTR3"),
+          factory.createDisabledStudy.copy(name = "CTR2"),
+          factory.createEnabledStudy.copy(name = "CTR1"),
+          factory.createEnabledStudy.copy(name = "CTR0"))
+          .map { study => studyRepository.put(study) }
 
-        val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createDisabledStudy.copy(name = "ST2")
+        val jsonItem = PagedResultsSpec(this).singleItemResult(
+          uri = uri,
+          queryParams = Map("sort" -> "name", "page" -> "4", "pageSize" -> "1"),
+          total = 4,
+          offset = 3,
+          maybeNext = None,
+          maybePrev = Some(3))
 
-        val studies = List(study2, study1)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?page=3&pageSize=1", BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("page exceeds limit")
+        compareObj(jsonItem, studies(0))
       }
 
-      "fail when using a negative page number" in {
-
-        val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createDisabledStudy.copy(name = "ST2")
-
-        val studies = List(study2, study1)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?page=-1&pageSize=1", BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("page is invalid")
+      "fail when using an invalid query parameters" in {
+        PagedResultsSpec(this).failWithInvalidParams(uri)
       }
 
-      "fail when using a negative pageSzie" in {
-
-        val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createDisabledStudy.copy(name = "ST2")
-
-        val studies = List(study2, study1)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri + "?page=1&pageSize=-1", BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("page size is invalid")
-      }
     }
 
     "POST /studies" must {
