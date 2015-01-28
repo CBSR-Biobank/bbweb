@@ -2,7 +2,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  describe('Service: centresService', function() {
+  fdescribe('Service: centresService', function() {
 
     var centresService, httpBackend;
     var centreNoId = {
@@ -34,7 +34,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('should have the following functions', function () {
-      expect(angular.isFunction(centresService.list)).toBe(true);
+      expect(angular.isFunction(centresService.getCentreCount)).toBe(true);
+      expect(angular.isFunction(centresService.getCentres)).toBe(true);
       expect(angular.isFunction(centresService.get)).toBe(true);
       expect(angular.isFunction(centresService.addOrUpdate)).toBe(true);
       expect(angular.isFunction(centresService.enable)).toBe(true);
@@ -44,15 +45,119 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       expect(angular.isFunction(centresService.removeStudy)).toBe(true);
     });
 
-    it('list should return a list of centres containing one element', function() {
+    it('calling getCentreCount has valid URL', function() {
+      httpBackend.whenGET(uri() + '/count').respond({
+        status: 'success',
+        data: [centre]
+      });
+
+      centresService.getCentreCount().then(function(data) {
+        expect(data.length).toEqual(1);
+        expect(_.isEqual(centre, data[0]));
+      });
+
+      httpBackend.flush();
+    });
+
+    it('calling getCentres with no parameters has no query string', function() {
       httpBackend.whenGET(uri()).respond({
         status: 'success',
         data: [centre]
       });
 
-      centresService.list().then(function(data) {
-        //console.log(JSON.stringify(data));
+      centresService.getCentres().then(function(data) {
+        expect(data.length).toEqual(1);
+        expect(_.isEqual(centre, data[0]));
+      });
 
+      httpBackend.flush();
+    });
+
+    it('calling getCentres with filter parameter has valid query string', function() {
+      var nameFilter = 'nameFilter';
+      var url = uri() + '?' + $.param({filter: nameFilter});
+      httpBackend.whenGET(url).respond({
+        status: 'success',
+        data: [centre]
+      });
+
+      centresService.getCentres({filter: nameFilter}).then(function(data) {
+        expect(data.length).toEqual(1);
+        expect(_.isEqual(centre, data[0]));
+      });
+
+      httpBackend.flush();
+    });
+
+    it('calling getCentres with sort parameter has valid query string', function() {
+      var sortField = 'sortField';
+      var url = uri() + '?' + $.param({sort: sortField});
+      httpBackend.whenGET(url).respond({
+        status: 'success',
+        data: [centre]
+      });
+
+      centresService.getCentres({sort: sortField}).then(function(data) {
+        expect(data.length).toEqual(1);
+        expect(_.isEqual(centre, data[0]));
+      });
+
+      httpBackend.flush();
+    });
+
+    it('calling getCentres with filter and status parameters has valid query string', function() {
+      var nameFilter = 'nameFilter';
+      var order = 'disabled';
+      var url = uri() + '?' + $.param({
+        filter: nameFilter,
+        order: order
+      });
+      httpBackend.whenGET(url).respond({
+        status: 'success',
+        data: [centre]
+      });
+
+      centresService.getCentres({filter: nameFilter, order: order}).then(function(data) {
+        expect(data.length).toEqual(1);
+        expect(_.isEqual(centre, data[0]));
+      });
+
+      httpBackend.flush();
+    });
+
+    it('calling getCentres with page and pageSize parameters has valid query string', function() {
+      var page = 1;
+      var pageSize = 5;
+      var url = uri() + '?' + $.param({
+        page: page,
+        pageSize: pageSize
+      });
+      httpBackend.whenGET(url).respond({
+        status: 'success',
+        data: [centre]
+      });
+
+      centresService.getCentres({page: page, pageSize: pageSize}).then(function(data) {
+        expect(data.length).toEqual(1);
+        expect(_.isEqual(centre, data[0]));
+      });
+
+      httpBackend.flush();
+    });
+
+    it('calling getCentres with sortField and order parameters has valid query string', function() {
+      var sortField = 'name';
+      var order = 'ascending';
+      var url = uri() + '?' + $.param({
+        sort: sortField,
+        order: order
+      });
+      httpBackend.whenGET(url).respond({
+        status: 'success',
+        data: [centre]
+      });
+
+      centresService.getCentres({sort: sortField, order: order}).then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(centre, data[0]));
       });

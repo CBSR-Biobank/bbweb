@@ -77,8 +77,6 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
      * @return A promise. If the promise succeeds then a paged result is returned.
      */
     function getStudies(options) {
-      var url = uri();
-      var paramsStr = '';
       var validKeys = [
         'filter',
         'status',
@@ -87,6 +85,8 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
         'pageSize',
         'order'
       ];
+      var url = uri();
+      var paramsStr = '';
 
       if (arguments.length) {
         paramsStr = queryStringService.param(options, function (value, key) {

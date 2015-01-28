@@ -1,7 +1,7 @@
 /**
  * Configure routes of centres module.
  */
-define(['../module', 'underscore'], function(module, _) {
+define(['../module'], function(module) {
   'use strict';
 
   module.config(config);
@@ -11,12 +11,16 @@ define(['../module', 'underscore'], function(module, _) {
   function config($urlRouterProvider, $stateProvider, userResolve ) {
 
     resolveCentre.$inject = ['$stateParams', 'centresService'];
-
     function resolveCentre($stateParams, centresService) {
       if ($stateParams.centreId) {
         return centresService.get($stateParams.centreId);
       }
       throw new Error('state parameter centreId is invalid');
+    }
+
+    resolveCentreCount.$inject = ['centresService'];
+    function resolveCentreCount(centresService) {
+      return centresService.getCentreCount();
     }
 
     $urlRouterProvider.otherwise('/');
@@ -28,11 +32,7 @@ define(['../module', 'underscore'], function(module, _) {
       url: '/centres',
       resolve: {
         user: userResolve.user,
-        centres: ['centresService', function(centresService) {
-          return centresService.list().then(function(centres) {
-            return _.sortBy(centres, function(centre) { return centre.name; });
-          });
-        }]
+        centreCount: resolveCentreCount
       },
       views: {
         'main@': {
@@ -52,11 +52,7 @@ define(['../module', 'underscore'], function(module, _) {
       url: '',
       resolve: {
         user: userResolve.user,
-        centres: ['centresService', function(centresService) {
-          return centresService.list().then(function(centres) {
-            return _.sortBy(centres, function(centre) { return centre.name; });
-          });
-        }]
+        centreCount: resolveCentreCount
       },
       views: {
         'main@': {

@@ -1,10 +1,10 @@
 package org.biobank
 
+import org.biobank.domain.centre._
+import org.biobank.domain.study._
 import org.biobank.domain.user._
 import org.biobank.service.PasswordHasher
-import org.biobank.domain.study.StudyRepository
-import org.biobank.domain.study._
-import org.biobank.service.PasswordHasher
+
 import play.api.GlobalSettings
 import play.api.mvc.WithFilters
 import play.filters.gzip.GzipFilter
@@ -97,7 +97,71 @@ trait Global
     Logger.debug("addTestData")
 
     addMultipleStudies
+    addMultipleCentres
     addMultipleUsers
+  }
+
+  def addMultipleCentres(): Unit = {
+    val centreRepository = inject [CentreRepository]
+
+    Logger.debug("addMultipleStudies")
+
+    val centreData = List(
+      ("fd0c47dfecce46549be0220066f88aea", "CL1-Foothills", "CL1-Foothills"),
+      ("a176700d8bcd413787b09336146bd484", "CL1-Heritage", "CL1-Heritage"),
+      ("213d322c2ea74738a4fc716e56e99c5a", "CL1-Sunridge", "CL1-Sunridge"),
+      ("5f96dac71fdf482096ca6647d839947f", "CL2-Children Hosp", "CL2-Alberta's Children's Hospital"),
+      ("5430762309d34371bec10619fd2a0b25", "ED1-UofA", "ED1-UofA"),
+      ("9a1cf03368364345b100066d3e9ce2b7", "OT2-Children Hosp", "OT2-Children's Hospital of Eastern Ontario"),
+      ("84906909311147c18b085473b4259fbc", "QB1-Enfant-Jesus", "QB1-Hopital Enfant-Jesus"),
+      ("1a0a5060cc5b4982a0c4697a1956e75a", "RD1-Red Deer Hosp", "RD1-Red Deer Regional Hospital"),
+      ("a0722517d8ff454ba2b0c9a5fd0476bd", "SB1-St John NB Hosp", "SB1-Saint Johns NB Regional Hospital"),
+      ("59a485ab525644e0babea2c5dcb7ca2b", "SD1-Sudbury Hosp", "SD1-Sudbury Regional Hospital"),
+      ("db034b3a7b1b47a1a5991d8e8f3426a5", "SF1-Health NFLD", "SF1-Health Science Center"),
+      ("8e4e2bd96e4a4a638182d7d27b10e374", "SP1-St Therese Hosp", "SP1-St Therese Hospital"),
+      ("41a114187e3d43c59871f8b777681f7c", "SS1-Royal Hosp", "SS1-Royal University Hospital"),
+      ("6a84942115d2465caf63b994004adefc", "TH1-Regional Hosp", "TH1-Thunder Bay Regional Hospital"),
+      ("b25d04e7c66641daa2bf25fa4392ea11", "TR1-St Mikes", "TR1-St Michael's Hospital"),
+      ("7cca56f87a1c4a52a11d83b3c37a6745", "VN1-St Paul", "VN1-St Paul's Hospital"),
+      ("436ebfffb39d4274960ca860bf7f0d70", "VN2-Childrens Hosp", "VN2-BC Women and Children's Hospital"),
+      ("7e92a3b606e9454ea0c723017d2d8b31", "WL1-Westlock Hosp", "WL1-Westlock Health Care Center"),
+      ("96efbb19a8f04719a8fd0718eb71d3c6", "WN1-Cancer Care", "WN1-Cancer Care Manitoba"),
+      ("31d72b83e44b4d659c85b33e34ebf892", "CL1-Foothills TRW", "CL1-Foothills TRW"),
+      ("5cff3b52ee614955b3b2678c1bd8db6b", "CBSR", "Canadian BioSample Repository"),
+      ("03cfe59222ab41368dc7a53304a0c1eb", "Calgary-F", "Calgary Foothills"),
+      ("526b806e611f4e42887f7b73b52f1a00", "100-Calgary AB", "100-Calgary Alberta Refine"),
+      ("6ed7fdc7eed34e6f953c28a4039c4303", "College Plaza UofA", "College Plaza UofA"),
+      ("5f485e9b9e084a8d89c91ca0381cda93", "101-London ON", "101-London Ontario Refine"),
+      ("e00765c96c994788a822e5028b5c338b", "102-Newmarket ON", "102-Newmarket Ontario Refine"),
+      ("0e667d31c7244722a952a00333ee1847", "103-Montreal QC", "103-Montreal Quebec Refine"),
+      ("126760ec653f49f79692419dee1027d2", "104-Montreal QC", "104-Montreal Quebec Refine"),
+      ("374771ef392a4df6a60d20777bcf9630", "105-Victoria BC", "105-Victoria British Columbia refine"),
+      ("c0b93f4229a94d84820b17b46085d0c6", "106-Quebec City QC", "106-Quebec City Quebec Refine"),
+      ("70e5ff857c81434096d6d19db83abfc1", "CaRE ED1", "CaRE ED1"),
+      ("fb949aa553a6488bae344f55378110d3", "200-Spokane WA", "200-Spokane Washington REFINE"),
+      ("544b1d2f33f84835b852c4772e1090a2", "201-Erie PA", "201-Erie Pennsylvania REFINE"),
+      ("a3e3c42cdce949dc8e76eba9dd130c92", "202-Cherry Hill NJ", "202-Cherry Hill New Jersey REFINE"),
+      ("b554f8bce4f647689521dce66437c278", "203-West Des Moines IA", "203-West Des Moines Iowa REFINE"),
+      ("c2961133850c4501bd91661be2adbcc4", "204-Evansville IN", "204-Evansville Indiana REFINE"),
+      ("3177b52571144ff0a91c38619a4b4af2", "205-Southfield MI", "205-Southfield Michigan REFINE"),
+      ("2bbce120784345889608b10b0684d763", "206 A -Nashville TN", "206 A -Nashville Tennessee REFINE"),
+      ("66a0ad4939d842ab9d315c37441f8f43", "207-Amarillo TX", "207-Amarillo Texas REFINE"),
+      ("1d218c3d731a4a78bafeedc100c184c7", "300-Oulu FI", "300-Oulu Finland REFINE"),
+      ("4abb6fa792ea47fcbc0db343aec3141c", "ED1-GNH", "ED1-GNH"),
+      ("67d0fa657720475a8d0e5527de6d93b5", "KIDNI CL1", "KIDNI Calgary")
+    )
+
+    val centres = centreData.map { case (id, name, description) =>
+      val centre: Centre = DisabledCentre(
+        id           = CentreId(id),
+        version      = 0L,
+        timeAdded    = DateTime.now,
+        timeModified = None,
+        name         = name,
+        description  = Some(description)
+      )
+      centreRepository.put(centre)
+    }
   }
 
   def addMultipleStudies(): Unit = {

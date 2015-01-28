@@ -81,14 +81,17 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     function getData($defer, params) {
       var sortObj = params.sorting();
       var sortKeys = _.keys(sortObj);
+      var options = {
+        nameFilter:  vm.nameFilter,
+        emailFilter: vm.emailFilter,
+        status:      vm.status.id,
+        sort:        sortKeys[0],
+        page:        params.page(),
+        pageSize:    params.count(),
+        order:       sortObj[sortKeys[0]]
+      };
 
-      usersService.getUsers(vm.nameFilter,
-                            vm.emailFilter,
-                            vm.status.id,
-                            sortKeys[0],
-                            params.page(),
-                            params.count(),
-                            sortObj[sortKeys[0]])
+      usersService.getUsers(options)
         .then(function (paginatedUsers) {
           vm.paginatedUsers = paginatedUsers;
           vm.users = [];

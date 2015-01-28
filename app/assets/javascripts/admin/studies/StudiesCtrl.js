@@ -46,12 +46,15 @@ define(['../module', 'underscore'], function(module, _) {
     }
 
     function updateStudies() {
-      studiesService.getStudies(vm.nameFilter,
-                                vm.status.id,
-                                1,
-                                vm.pageSize,
-                                'name',
-                                'ascending')
+      var options = {
+        filter: vm.nameFilter,
+        status: vm.status.id,
+        page: 1,
+        pageSize: vm.pageSize,
+        sort: 'name',
+        order: 'asc'
+      };
+      studiesService.getStudies(options)
         .then(function (paginatedStudies) {
           vm.paginatedStudies = paginatedStudies;
 

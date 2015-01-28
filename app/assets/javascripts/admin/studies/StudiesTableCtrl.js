@@ -4,7 +4,6 @@ define(['../module', 'underscore'], function(module, _) {
   module.controller('StudiesTableCtrl', StudiesTableCtrl);
 
   StudiesTableCtrl.$inject = [
-    '$q',
     'studiesService',
     'tableService',
     'studyCount'
@@ -16,8 +15,7 @@ define(['../module', 'underscore'], function(module, _) {
    * This page uses a form to perform filtering on the table. This was done because filter using ng-table
    * was very slow since the data is re-loaded using the REST API.
    */
-  function StudiesTableCtrl($q,
-                            studiesService,
+  function StudiesTableCtrl(studiesService,
                             tableService,
                             studyCount) {
     var vm = this;
@@ -61,13 +59,16 @@ define(['../module', 'underscore'], function(module, _) {
     function getData($defer, params) {
       var sortObj = params.sorting();
       var sortKeys = _.keys(sortObj);
+      var options = {
+        filter:   vm.nameFilter,
+        status:   vm.status.id,
+        page:     params.page(),
+        pageSize: params.count(),
+        sort:     sortKeys[0],
+        order:    sortObj[sortKeys[0]]
+      };
 
-      studiesService.getStudies(vm.nameFilter,
-                                vm.status.id,
-                                params.page(),
-                                params.count(),
-                                sortKeys[0],
-                                sortObj[sortKeys[0]])
+      studiesService.getStudies(options)
         .then(function (paginatedStudies) {
           vm.studies = paginatedStudies.items;
           vm.paginatedStudies = paginatedStudies;

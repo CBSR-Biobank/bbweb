@@ -145,6 +145,7 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
         'pageSize',
         'order'
       ];
+      var url = uri();
       var paramsStr = '';
 
       if (arguments.length) {
@@ -153,7 +154,6 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
         });
       }
 
-      var url = uri();
       if (paramsStr) {
         url += paramsStr;
       }

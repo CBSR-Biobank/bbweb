@@ -3,7 +3,7 @@
 define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], function(angular, mocks, _, $) {
   'use strict';
 
-  describe('Service: studiesService', function() {
+  fdescribe('Service: studiesService', function() {
 
     var studiesService, httpBackend;
     var studyId = 'dummy-study-id';
@@ -76,6 +76,22 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
     });
 
     it('calling getStudies with filter parameter has valid query string', function() {
+      var nameFilter = 'nameFilter';
+      var url = uri() + '?' + $.param({filter: nameFilter});
+      httpBackend.whenGET(url).respond({
+        status: 'success',
+        data: [study]
+      });
+
+      studiesService.getStudies({filter: nameFilter}).then(function(data) {
+        expect(data.length).toEqual(1);
+        expect(_.isEqual(study, data[0]));
+      });
+
+      httpBackend.flush();
+    });
+
+    it('calling getStudies with sort parameter has valid query string', function() {
       var sortField = 'sortField';
       var url = uri() + '?' + $.param({sort: sortField});
       httpBackend.whenGET(url).respond({
