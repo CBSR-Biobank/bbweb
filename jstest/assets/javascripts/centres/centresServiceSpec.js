@@ -34,7 +34,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('should have the following functions', function () {
-      expect(angular.isFunction(centresService.getCentreCount)).toBe(true);
+      expect(angular.isFunction(centresService.getCentreCounts)).toBe(true);
       expect(angular.isFunction(centresService.getCentres)).toBe(true);
       expect(angular.isFunction(centresService.get)).toBe(true);
       expect(angular.isFunction(centresService.addOrUpdate)).toBe(true);
@@ -45,13 +45,13 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       expect(angular.isFunction(centresService.removeStudy)).toBe(true);
     });
 
-    it('calling getCentreCount has valid URL', function() {
-      httpBackend.whenGET(uri() + '/count').respond({
+    it('calling getCentreCounts has valid URL', function() {
+      httpBackend.whenGET(uri() + '/counts').respond({
         status: 'success',
         data: [centre]
       });
 
-      centresService.getCentreCount().then(function(data) {
+      centresService.getCentreCounts().then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(centre, data[0]));
       });

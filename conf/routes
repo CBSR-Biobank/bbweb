@@ -13,7 +13,7 @@ GET     /studies                               @org.biobank.controllers.study.St
 POST    /studies                               @org.biobank.controllers.study.StudiesController.add
 
 # value objects
-GET     /studies/count                         @org.biobank.controllers.study.StudiesController.studyCount()
+GET     /studies/counts                        @org.biobank.controllers.study.StudiesController.studyCounts()
 GET     /studies/valuetypes                    @org.biobank.controllers.study.StudiesController.valueTypes
 GET     /studies/anatomicalsrctypes            @org.biobank.controllers.study.StudiesController.anatomicalSourceTypes
 GET     /studies/specimentypes                 @org.biobank.controllers.study.StudiesController.specimenTypes
@@ -82,7 +82,7 @@ GET     /studies/participants/checkUnique/:uniqueId @org.biobank.controllers.stu
 
 # centres
 GET     /centres                                @org.biobank.controllers.centres.CentresController.list(filter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
-GET     /centres/count                          @org.biobank.controllers.centres.CentresController.centreCount()
+GET     /centres/counts                         @org.biobank.controllers.centres.CentresController.centreCounts()
 POST    /centres                                @org.biobank.controllers.centres.CentresController.add
 GET     /centres/:id                            @org.biobank.controllers.centres.CentresController.query(id)
 PUT     /centres/:id                            @org.biobank.controllers.centres.CentresController.update(id)

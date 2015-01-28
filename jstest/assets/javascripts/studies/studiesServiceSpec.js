@@ -36,7 +36,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
     });
 
     it('should have the following functions', function () {
-      expect(angular.isFunction(studiesService.getStudyCount)).toBe(true);
+      expect(angular.isFunction(studiesService.getStudyCounts)).toBe(true);
       expect(angular.isFunction(studiesService.getStudies)).toBe(true);
       expect(angular.isFunction(studiesService.get)).toBe(true);
       expect(angular.isFunction(studiesService.addOrUpdate)).toBe(true);
@@ -48,12 +48,12 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
     });
 
     it('calling getStudyCount has valid URL', function() {
-      httpBackend.whenGET(uri() + '/count').respond({
+      httpBackend.whenGET(uri() + '/counts').respond({
         status: 'success',
         data: [study]
       });
 
-      studiesService.getStudyCount().then(function(data) {
+      studiesService.getStudyCounts().then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });

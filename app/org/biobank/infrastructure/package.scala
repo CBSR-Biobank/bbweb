@@ -129,26 +129,4 @@ package infrastructure {
     implicit val studyNameDtoWriter = Json.writes[StudyNameDto]
   }
 
-  case class CollectionDto(
-    collectionEventTypes: List[org.biobank.domain.study.CollectionEventType],
-    collectionEventAnnotationTypes: List[org.biobank.domain.study.CollectionEventAnnotationType],
-    collectionEventAnnotationTypesInUse: List[String],
-    specimenGroups: List[org.biobank.domain.study.SpecimenGroup])
-
-  object CollectionDto {
-    implicit val collectionDtoWriter = Json.writes[CollectionDto]
-  }
-
-  case class ProcessingDto(
-    processingTypes: List[org.biobank.domain.study.ProcessingType],
-    specimenLinkTypes: List[org.biobank.domain.study.SpecimenLinkType],
-    specimenLinkAnnotationTypes: List[org.biobank.domain.study.SpecimenLinkAnnotationType],
-    specimenGroups: List[org.biobank.domain.study.SpecimenGroup])
-
-  object ProcessingDto {
-
-    implicit val processingDtoWriter = Json.writes[ProcessingDto]
-
-  }
-
 }

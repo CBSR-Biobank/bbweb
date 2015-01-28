@@ -84,10 +84,11 @@ libraryDependencies ++= Seq(
   "org.webjars"               %  "angular-ui-router"              % "0.2.13" exclude(
     "org.webjars", "angularjs"),
   "org.webjars"               %  "ng-table"                       % "0.3.3",
-  "org.webjars"               % "toastr"                          % "2.1.0"exclude(
+  "org.webjars"               %  "toastr"                         % "2.1.0"exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               % "angular-sanitize"                % "1.3.0-beta.18" exclude(
+  "org.webjars"               %  "angular-sanitize"               % "1.3.0-beta.18" exclude(
     "org.webjars", "angularjs"),
+  "org.webjars"               %  "angular-paginate-anything"      % "3.1.1",
   // Testing
   "com.typesafe.akka"         %% "akka-testkit"                   % "2.3.2"              % "test",
   "org.scalatestplus"         %% "play"                           % "1.2.0"              % "test",
@@ -109,7 +110,9 @@ pipelineStages := Seq(rjs, digest, gzip)
 // To completely override the optimization process, use this config option:
 //requireNativePath := Some("node r.js -o name=main out=javascript-min/main.min.js")
 
-// not sure if emojiLogs actually works with play
-emojiLogs
-
 PB.protobufSettings
+
+// setting for play-auto-refresh plugin so that it does not open a new browser window when
+// the application is run
+com.jamesward.play.BrowserNotifierKeys.shouldOpenBrowser := false
+

@@ -1,10 +1,11 @@
  package org.biobank.service.study
 
+import org.biobank.dto._
 import org.biobank.service.ApplicationService
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.infrastructure.{ CollectionDto, ProcessingDto }
+import org.biobank.dto.{ CollectionDto, ProcessingDto }
 import org.biobank.domain.{
   AnnotationTypeId,
   DomainValidation,
@@ -29,6 +30,8 @@ import scalaz.Scalaz._
 trait StudiesService {
 
   def getAll: Seq[StudyNameDto]
+
+  def getCountsByStatus(): StudyCountsByStatus
 
   def getStudies[T <: Study]
     (filter: String, status: String, sortFunc: (Study, Study) => Boolean, order: SortOrder)
@@ -254,6 +257,17 @@ class StudiesServiceImpl(implicit inj: Injector)
   def getAll: Seq[StudyNameDto] = {
     val result = studyRepository.getValues.map { s => StudyNameDto(s.id.id, s.name) }
     result.toSeq.sortWith(StudyNameDto.compareByName)
+  }
+
+  def getCountsByStatus(): StudyCountsByStatus = {
+    // FIXME should be replaced by DTO query to the database
+    val studies = studyRepository.getValues
+    StudyCountsByStatus(
+      total         = studies.size,
+      disabledCount = studies.collect { case s: DisabledStudy => s }.size,
+      enabledCount  = studies.collect { case s: EnabledStudy => s }.size,
+      retiredCount  = studies.collect { case s: RetiredStudy => s }.size
+    )
   }
 
   private def getStatus(status: String): DomainValidation[String] = {

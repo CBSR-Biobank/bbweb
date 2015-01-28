@@ -104,7 +104,7 @@ trait Global
   def addMultipleCentres(): Unit = {
     val centreRepository = inject [CentreRepository]
 
-    Logger.debug("addMultipleStudies")
+    Logger.debug("addMultipleCentres")
 
     val centreData = List(
       ("fd0c47dfecce46549be0220066f88aea", "CL1-Foothills", "CL1-Foothills"),

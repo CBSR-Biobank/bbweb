@@ -1,5 +1,6 @@
 package org.biobank.controllers
 
+import org.biobank.dto._
 import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
@@ -34,16 +35,6 @@ class Application(implicit inj: Injector)
     // does not return a JSON object, but HTML content
     Results.Ok(views.html.index())
   }
-
-  // FIXME move to DTO file
-  case class AggregateCountsDto(studies: Int, centres: Int, users: Int)
-
-  // FIXME move to DTO file
-  implicit val aggregateCountsDtoWriter: Writes[AggregateCountsDto] = (
-    (__ \ "studies").write[Int] and
-      (__ \ "centres").write[Int] and
-      (__ \ "users").write[Int]
-  )(unlift(AggregateCountsDto.unapply))
 
   def aggregateCounts = AuthAction(parse.empty) { (token, userId, request) =>
     Ok(AggregateCountsDto(

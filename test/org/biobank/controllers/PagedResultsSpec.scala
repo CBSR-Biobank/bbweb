@@ -17,8 +17,8 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
       (json \ "status").as[String] must include ("success")
       (json \ "data" \ "offset").as[Long] must be (0)
       (json \ "data" \ "total").as[Long] must be (0)
-      (json \ "data" \ "next").as[Option[Int]] must be (None)
-      (json \ "data" \ "prev").as[Option[Int]] must be (None)
+      (json \ "data" \ "next").asOpt[Int] must be (None)
+      (json \ "data" \ "prev").asOpt[Int] must be (None)
 
     val jsonList = (json \ "data" \ "items").as[List[JsObject]]
     jsonList must have length 0
@@ -36,8 +36,8 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
       (json \ "status").as[String] must include ("success")
       (json \ "data" \ "offset").as[Long] must be (offset)
       (json \ "data" \ "total").as[Long] must be (total)
-      (json \ "data" \ "next").as[Option[Int]] must be (maybeNext)
-      (json \ "data" \ "prev").as[Option[Int]] must be (maybePrev)
+      (json \ "data" \ "next").asOpt[Int] must be (maybeNext)
+      (json \ "data" \ "prev").asOpt[Int] must be (maybePrev)
 
     val jsonList = (json \ "data" \ "items").as[List[JsObject]]
     jsonList must have length 1
@@ -57,8 +57,8 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
       (json \ "status").as[String] must include ("success")
       (json \ "data" \ "offset").as[Long] must be (offset)
       (json \ "data" \ "total").as[Long] must be (total)
-      (json \ "data" \ "next").as[Option[Int]] must be (maybeNext)
-      (json \ "data" \ "prev").as[Option[Int]] must be (maybePrev)
+      (json \ "data" \ "next").asOpt[Int] must be (maybeNext)
+      (json \ "data" \ "prev").asOpt[Int] must be (maybePrev)
 
     (json \ "data" \ "items").as[List[JsObject]]
   }

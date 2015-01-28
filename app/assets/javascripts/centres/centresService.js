@@ -10,15 +10,15 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
    */
   function centresService(biobankXhrReqService, domainEntityService, queryStringService) {
     var service = {
-      getCentres:     getCentres,
-      getCentreCount: getCentreCount,
-      get:            get,
-      addOrUpdate:    addOrUpdate,
-      enable:         enable,
-      disable:        disable,
-      studies:        studies,
-      addStudy:       addStudy,
-      removeStudy:    removeStudy
+      getCentres:      getCentres,
+      getCentreCounts: getCentreCounts,
+      get:             get,
+      addOrUpdate:     addOrUpdate,
+      enable:          enable,
+      disable:         disable,
+      studies:         studies,
+      addStudy:        addStudy,
+      removeStudy:     removeStudy
     };
     return service;
 
@@ -37,8 +37,8 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
       return biobankXhrReqService.call('POST', uri(centre.id) + '/' + status, cmd);
     }
 
-    function getCentreCount() {
-      return biobankXhrReqService.call('GET', uri() + '/count');
+    function getCentreCounts() {
+      return biobankXhrReqService.call('GET', uri() + '/counts');
     }
 
     /**

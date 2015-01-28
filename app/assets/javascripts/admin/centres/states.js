@@ -18,50 +18,30 @@ define(['../module'], function(module) {
       throw new Error('state parameter centreId is invalid');
     }
 
-    resolveCentreCount.$inject = ['centresService'];
-    function resolveCentreCount(centresService) {
-      return centresService.getCentreCount();
+    resolveCentreCounts.$inject = ['centresService'];
+    function resolveCentreCounts(centresService) {
+      return centresService.getCentreCounts();
     }
 
     $urlRouterProvider.otherwise('/');
 
     /**
-     * Centres - view all centres in panels
+     * Centres - view all centres
      */
     $stateProvider.state('admin.centres', {
       url: '/centres',
       resolve: {
         user: userResolve.user,
-        centreCount: resolveCentreCount
+        centreCounts: resolveCentreCounts
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/centres/centresPanels.html',
+          templateUrl: '/assets/javascripts/admin/centres/centres.html',
           controller: 'CentresCtrl as vm'
         }
       },
       data: {
         displayName: 'Centres'
-      }
-    });
-
-    /**
-     * Centres - view all centres in a table
-     */
-    $stateProvider.state('admin.centres.table', {
-      url: '',
-      resolve: {
-        user: userResolve.user,
-        centreCount: resolveCentreCount
-      },
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/admin/centres/centresTable.html',
-          controller: 'CentresTableCtrl as vm'
-        }
-      },
-      data: {
-        displayName: false
       }
     });
 

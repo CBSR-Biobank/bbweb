@@ -20,51 +20,31 @@ define(['../module'], function(module) {
       throw new Error('state parameter studyId is invalid');
     }
 
-    resolveStudyCount.$inject = ['studiesService'];
-    function resolveStudyCount(studiesService) {
-      return studiesService.getStudyCount();
+    resolveStudyCounts.$inject = ['studiesService'];
+    function resolveStudyCounts(studiesService) {
+      return studiesService.getStudyCounts();
     }
 
     $urlRouterProvider.otherwise('/');
 
     /**
-     * Studies - view all studies in panels
+     * Studies - view all studies
      *
      */
     $stateProvider.state('admin.studies', {
       url: '/studies',
       resolve: {
         user: userResolve.user,
-        studyCount: resolveStudyCount
+        studyCounts: resolveStudyCounts
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/studiesPanels.html',
+          templateUrl: '/assets/javascripts/admin/studies/studies.html',
           controller: 'StudiesCtrl as vm'
         }
       },
       data: {
         displayName: 'Studies'
-      }
-    });
-
-    /**
-     * Studies - view all studies in a table
-     */
-    $stateProvider.state('admin.studies.table', {
-      url: '',
-      resolve: {
-        user: userResolve.user,
-        studyCount: resolveStudyCount
-      },
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/studiesTable.html',
-          controller: 'StudiesTableCtrl as vm'
-        }
-      },
-      data: {
-        displayName: false
       }
     });
 

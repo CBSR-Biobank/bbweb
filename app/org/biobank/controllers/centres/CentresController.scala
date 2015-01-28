@@ -40,9 +40,9 @@ class CentresController(implicit inj: Injector)
 
   private val PageSizeMax = 10
 
-  def centreCount() =
+  def centreCounts() =
     AuthAction(parse.empty) { (token, userId, request) =>
-      Ok(centresService.getAll.size)
+      Ok(centresService.getCountsByStatus)
     }
 
   def list(filter: String, status: String, sort: String, page: Int, pageSize: Int, order: String) =

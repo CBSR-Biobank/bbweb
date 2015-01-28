@@ -1,0 +1,21 @@
+<div class="page-header">
+  <h1>
+    Centre administration
+    <div class="btn-group pull-right">
+
+      <a ui-sref="admin.centres.table" class="btn btn-xs btn-primary" type="button">Table view</a>
+      <a ui-sref="admin.centres.add" class="btn btn-xs btn-primary" type="button">
+        Add centre <i class="glyphicon glyphicon-plus"></i>
+      </a>
+
+    </div>
+  </h1>
+</div>
+<div class="clearfix">
+  <paged-items-list counts="vm.centreCounts"
+                    page-size="vm.pageSize"
+                    possible-statuses="vm.possibleStatuses"
+                    message-no-items="No centres have been added yet."
+                    message-no-results="No centres match the criteria."
+                    get-items="vm.updateCentres">
+</div>

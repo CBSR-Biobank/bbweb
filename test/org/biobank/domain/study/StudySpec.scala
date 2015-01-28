@@ -207,6 +207,7 @@ class StudySpec extends DomainSpec {
         study.enable(0, 0) mustFail "no specimen groups"
       }
     }
+
   }
 
 }

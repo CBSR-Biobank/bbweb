@@ -414,7 +414,7 @@ class UsersControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] must include("success")
           (json \ "data" \ "version").as[Int] must be(user.version + 1)
-          (json \ "data" \ "avatarUrl").as[Option[String]] must be(user.avatarUrl)
+          (json \ "data" \ "avatarUrl").asOpt[String] must be(user.avatarUrl)
       }
 
       "remove a user's avatar URL" in {

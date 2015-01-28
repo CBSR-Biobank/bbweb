@@ -1,6 +1,7 @@
 package org.biobank.service.centre
 
 import org.biobank.service.ApplicationService
+import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
@@ -29,6 +30,8 @@ trait CentresService {
   def getCentres[T <: Centre]
     (filter: String, status: String, sortFunc: (Centre, Centre) => Boolean, order: SortOrder)
       : DomainValidation[Seq[Centre]]
+
+  def getCountsByStatus(): CentreCountsByStatus
 
   def getCentre(id: String): DomainValidation[Centre]
 
@@ -96,6 +99,16 @@ class CentresServiceImpl(implicit inj: Injector)
     */
   def getAll: Set[Centre] = {
     centreRepository.getValues.toSet
+  }
+
+  def getCountsByStatus(): CentreCountsByStatus = {
+    // FIXME should be replaced by DTO query to the database
+    val studies = centreRepository.getValues
+    CentreCountsByStatus(
+      total         = studies.size,
+      disabledCount = studies.collect { case s: DisabledCentre => s }.size,
+      enabledCount  = studies.collect { case s: EnabledCentre => s }.size
+    )
   }
 
   private def getStatus(status: String): DomainValidation[String] = {

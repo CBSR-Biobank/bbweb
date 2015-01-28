@@ -43,9 +43,9 @@ class StudiesController(implicit inj: Injector)
 
   private val PageSizeMax = 10
 
-  def studyCount() =
+  def studyCounts() =
     AuthAction(parse.empty) { (token, userId, request) =>
-      Ok(studiesService.getAll.size)
+      Ok(studiesService.getCountsByStatus)
     }
 
   def list(filter: String, status: String, sort: String, page: Int, pageSize: Int, order: String) =
@@ -179,15 +179,17 @@ class StudiesController(implicit inj: Injector)
     ))
   }
 
-  def getCollectionDto(studyId: String) = AuthAction(parse.empty) { (token, userId, request) =>
-    Logger.debug(s"StudiesController.getCollectionDto: studyId: $studyId")
-    domainValidationReply(studiesService.getCollectionDto(studyId))
-  }
+  def getCollectionDto(studyId: String) =
+    AuthAction(parse.empty) { (token, userId, request) =>
+      Logger.debug(s"StudiesController.getCollectionDto: studyId: $studyId")
+      domainValidationReply(studiesService.getCollectionDto(studyId))
+    }
 
-  def getProcessingDto(studyId: String) = AuthAction(parse.empty) { (token, userId, request) =>
-    Logger.debug(s"StudiesController.getProcessingDto: studyId: $studyId")
-    domainValidationReply(studiesService.getProcessingDto(studyId))
-  }
+  def getProcessingDto(studyId: String) =
+    AuthAction(parse.empty) { (token, userId, request) =>
+      Logger.debug(s"StudiesController.getProcessingDto: studyId: $studyId")
+      domainValidationReply(studiesService.getProcessingDto(studyId))
+    }
 
 }
 

@@ -10,17 +10,17 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
    */
   function StudiesService(biobankXhrReqService, domainEntityService, queryStringService) {
     var service = {
-      getStudies    : getStudies,
-      getStudyCount : getStudyCount,
-      get           : get,
-      addOrUpdate   : addOrUpdate,
-      enable        : enable,
-      disable       : disable,
-      retire        : retire,
-      unretire      : unretire,
-      collectionDto : collectionDto,
-      processingDto : processingDto,
-      valueTypes    : valueTypes
+      getStudies     : getStudies,
+      getStudyCounts : getStudyCounts,
+      get            : get,
+      addOrUpdate    : addOrUpdate,
+      enable         : enable,
+      disable        : disable,
+      retire         : retire,
+      unretire       : unretire,
+      collectionDto  : collectionDto,
+      processingDto  : processingDto,
+      valueTypes     : valueTypes
     };
     return service;
 
@@ -51,8 +51,8 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
       return biobankXhrReqService.call('POST', uri(study.id) + '/' + status, cmd);
     }
 
-    function getStudyCount() {
-      return biobankXhrReqService.call('GET', uri() + '/count');
+    function getStudyCounts() {
+      return biobankXhrReqService.call('GET', uri() + '/counts');
     }
 
     /**
