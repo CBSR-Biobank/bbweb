@@ -2,6 +2,6 @@
  * Files that make up this module.
  */
 define([
-  './DashboardCtrl',
+  './CollectionCtrl',
   './states',
 ], function () {});

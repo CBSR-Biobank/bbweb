@@ -95,7 +95,6 @@ define(['./module', 'underscore'], function(module, _) {
     }
 
     function updateItems() {
-      console.log('updateItems', vm.pagerOptions);
       vm.getItems()(vm.pagerOptions).then(function (pagedResult) {
         vm.pagedResult = pagedResult;
         vm.displayState = displayState();

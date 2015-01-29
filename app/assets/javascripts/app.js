@@ -11,6 +11,7 @@ define([
   'common/index',
   'home/index',
   'centres/index',
+  'collection/index',
   'studies/index',
   'users/index',
   'admin/index',
@@ -23,6 +24,7 @@ define([
   var app = angular.module('biobankApp', [
     'biobank.admin',
     'biobank.centres',
+    'biobank.collection',
     'biobank.dashboard',
     'biobank.home',
     'biobank.studies',
