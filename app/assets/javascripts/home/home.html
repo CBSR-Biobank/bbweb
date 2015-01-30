@@ -1,18 +1,47 @@
 <div class="page-header">
-  <h1>Welcome to Biobank</h1>
+  <h1>Welcome to Biobank<br/><small>Select a task</small></h1>
 </div>
 <div class="clearfix">
   <div class="row">
+    <div class="col-md-12">
+    </div>
+  </div>
+
+  <div class="row">
+
+    <!-- COLLECTION -->
     <div class="col-md-4">
-      <div class="panel panel-default" style="margin-top: 10px;">
+      <div class="panel panel-default">
         <div class="panel-heading">
-          <h3 class="panel-title">Dashboard</h3>
+          <h3 class="panel-title">
+            Collection
+            <span class="btn-group pull-right">
+              <a ui-sref="home.collection" class="btn btn-xs btn-primary" type="button">Select</a>
+            </span>
+          </h3>
         </div>
         <div class="panel-body">
-          <p>Go to dashboard.</p>
-          <a ui-sref="dashboard.admin" class="btn btn-sm btn-primary" type="button">Select</a>
+          <p>Record specimen collection.</p>
         </div>
       </div>
     </div>
+
+    <!-- ADMINISTRATION -->
+    <div class="col-md-4">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            Administration
+            <span class="btn-group pull-right">
+              <a ui-sref="home.admin" class="btn btn-xs btn-primary" type="button">Select</a>
+            </span>
+          </h3>
+        </div>
+        <div class="panel-body">
+          <p>Perform administrative tasks.</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>

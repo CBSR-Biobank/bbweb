@@ -47,7 +47,7 @@ define(['../../module', 'underscore'], function(module, _) {
 
     var helper = panelService.panel(
       'study.panel.participantAnnottionTypes',
-      'admin.studies.study.collection.ceventAnnotTypeAdd',
+      'home.admin.studies.study.collection.ceventAnnotTypeAdd',
       annotTypeModalService,
       'Collection Event Annotation Type');
 
@@ -89,7 +89,7 @@ define(['../../module', 'underscore'], function(module, _) {
         annotTypeInUseModal();
       } else {
         $state.go(
-          'admin.studies.study.collection.ceventAnnotTypeUpdate',
+          'home.admin.studies.study.collection.ceventAnnotTypeUpdate',
           { annotTypeId: annotType.id });
       }
     }
@@ -105,7 +105,7 @@ define(['../../module', 'underscore'], function(module, _) {
         annotationTypeRemoveService.remove(
           ceventAnnotTypesService.remove,
           annotType,
-          'admin.studies.study.collection',
+          'home.admin.studies.study.collection',
           {studyId: annotType.studyId});
       }
     }

@@ -49,7 +49,7 @@ define(['../../module', 'underscore'], function(module, _) {
 
     var helper = panelService.panel(
       'study.panel.specimenGroups',
-      'admin.studies.study.specimens.groupAdd');
+      'home.admin.studies.study.specimens.groupAdd');
 
     vm.study                 = $scope.study;
     vm.specimenGroups        = $scope.specimenGroups;
@@ -85,7 +85,7 @@ define(['../../module', 'underscore'], function(module, _) {
             'a collection event type or a specimen link type');
       } else {
         $state.go(
-          'admin.studies.study.specimens.groupUpdate',
+          'home.admin.studies.study.specimens.groupUpdate',
           { specimenGroupId: specimenGroup.id });
       }
     }

@@ -53,11 +53,11 @@ define(['../module'], function(module) {
       $timeout(activeTabUpdate, 0);
 
       function activeTabUpdate() {
-        vm.tabSummaryActive      = ($state.current.name === 'admin.studies.study.summary');
-        vm.tabParticipantsActive = ($state.current.name === 'admin.studies.study.participants');
-        vm.tabSpecimensActive    = ($state.current.name === 'admin.studies.study.specimens');
-        vm.tabCollectionActive   = ($state.current.name === 'admin.studies.study.collection');
-        vm.tabProcessingActive   = ($state.current.name === 'admin.studies.study.processing');
+        vm.tabSummaryActive      = ($state.current.name === 'home.admin.studies.study.summary');
+        vm.tabParticipantsActive = ($state.current.name === 'home.admin.studies.study.participants');
+        vm.tabSpecimensActive    = ($state.current.name === 'home.admin.studies.study.specimens');
+        vm.tabCollectionActive   = ($state.current.name === 'home.admin.studies.study.collection');
+        vm.tabProcessingActive   = ($state.current.name === 'home.admin.studies.study.processing');
       }
     }
 

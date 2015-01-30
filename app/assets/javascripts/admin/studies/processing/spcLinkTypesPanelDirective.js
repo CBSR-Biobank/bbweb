@@ -115,7 +115,7 @@ define(['../../module', 'underscore'], function(module, _) {
             'Please add specimen groups first.';
         return modalService.modalOk(headerHtml, bodyHtml);
       } else {
-        return $state.go('admin.studies.study.processing.spcLinkTypeAdd');
+        return $state.go('home.admin.studies.study.processing.spcLinkTypeAdd');
       }
     }
 
@@ -124,7 +124,7 @@ define(['../../module', 'underscore'], function(module, _) {
      */
     function update(spcLinkType) {
       $state.go(
-        'admin.studies.study.processing.spcLinkTypeUpdate',
+        'home.admin.studies.study.processing.spcLinkTypeUpdate',
         { procTypeId:spcLinkType.processingTypeId, spcLinkTypeId: spcLinkType.id });
     }
 

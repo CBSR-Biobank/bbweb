@@ -31,7 +31,7 @@ define(['../module'], function(module) {
      * Studies - view all studies
      *
      */
-    $stateProvider.state('admin.studies', {
+    $stateProvider.state('home.admin.studies', {
       url: '/studies',
       resolve: {
         user: userResolve.user,
@@ -51,7 +51,7 @@ define(['../module'], function(module) {
     /**
      * Study add
      */
-    $stateProvider.state('admin.studies.add', {
+    $stateProvider.state('home.admin.studies.add', {
       url: '/add',
       resolve: {
         user: userResolve.user,
@@ -73,7 +73,7 @@ define(['../module'], function(module) {
     /**
      * Study view
      */
-    $stateProvider.state('admin.studies.study', {
+    $stateProvider.state('home.admin.studies.study', {
       abstract: true,
       url: '/{studyId}',
       resolve: {
@@ -86,14 +86,14 @@ define(['../module'], function(module) {
         }
       },
       data: {
-        breadcrumProxy: 'admin.studies.study.summary'
+        breadcrumProxy: 'home.admin.studies.study.summary'
       }
     });
 
     /**
      * Study view summary information
      */
-    $stateProvider.state('admin.studies.study.summary', {
+    $stateProvider.state('home.admin.studies.study.summary', {
       url: '/summary',
       resolve: {
         user: userResolve.user,
@@ -113,7 +113,7 @@ define(['../module'], function(module) {
     /**
      * Study summary information update
      */
-    $stateProvider.state('admin.studies.study.summary.update', {
+    $stateProvider.state('home.admin.studies.study.summary.update', {
       url: '/update',
       resolve: {
         user: userResolve.user,
@@ -133,7 +133,7 @@ define(['../module'], function(module) {
     /**
      * Study view participatns information
      */
-    $stateProvider.state('admin.studies.study.participants', {
+    $stateProvider.state('home.admin.studies.study.participants', {
       url: '/participants',
       resolve: {
         user: userResolve.user,
@@ -162,7 +162,7 @@ define(['../module'], function(module) {
     /**
      * Study view specimen information
      */
-    $stateProvider.state('admin.studies.study.specimens', {
+    $stateProvider.state('home.admin.studies.study.specimens', {
       url: '/specimens',
       resolve: {
         user: userResolve.user,
@@ -201,7 +201,7 @@ define(['../module'], function(module) {
     /**
      * Study view collection information
      */
-    $stateProvider.state('admin.studies.study.collection', {
+    $stateProvider.state('home.admin.studies.study.collection', {
       url: '/collection',
       resolve: {
         user: userResolve.user,
@@ -236,7 +236,7 @@ define(['../module'], function(module) {
     /**
      * Study view processing tab
      */
-    $stateProvider.state('admin.studies.study.processing', {
+    $stateProvider.state('home.admin.studies.study.processing', {
       url: '/processing',
       resolve: {
         user: userResolve.user,

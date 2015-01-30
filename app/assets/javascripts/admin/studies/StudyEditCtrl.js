@@ -29,11 +29,11 @@ define(['../module'], function(module) {
     vm.stateParams = {};
     if (study.id) {
       action = 'Update';
-      vm.returnState = 'admin.studies.study.summary';
+      vm.returnState = 'home.admin.studies.study.summary';
       vm.stateParams.studyId = study.id;
     } else {
       action = 'Add';
-      vm.returnState = 'admin.studies';
+      vm.returnState = 'home.admin.studies';
     }
 
     vm.title =  action + ' study';

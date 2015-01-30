@@ -29,7 +29,7 @@ define(['../module'], function(module) {
                           centre) {
     var vm = this;
     var action = centre.id ? 'Update' : 'Add';
-    var returnState = centre.id ? 'admin.centres.centre.summary' : 'admin.centres';
+    var returnState = centre.id ? 'home.admin.centres.centre.summary' : 'home.admin';
 
     vm.title = action + ' centre';
     vm.centre = centre;

@@ -44,7 +44,7 @@ define(['../module'], function(module) {
 
     var helper = panelService.panel(
       'centre.panel.locations',
-      'admin.centres.centre.locationAdd');
+      'home.admin.centres.centre.locationAdd');
 
     vm.centre           = $scope.centre;
     vm.locations        = $scope.locations;
@@ -74,7 +74,7 @@ define(['../module'], function(module) {
     }
 
     function update(location) {
-      $state.go('admin.centres.centre.locationUpdate', { locationId: location.id });
+      $state.go('home.admin.centres.centre.locationUpdate', { locationId: location.id });
     }
 
     function remove(location) {
@@ -84,7 +84,7 @@ define(['../module'], function(module) {
         'Location ' + location.name + ' cannot be removed: ',
         removeCallback,
         location,
-        'admin.centres.centre.locations');
+        'home.admin.centres.centre.locations');
 
       function removeCallback(location) {
         return centreLocationService.remove(vm.centre.id, location.id);

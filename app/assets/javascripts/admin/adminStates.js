@@ -10,8 +10,8 @@ define(['./module'], function(module) {
 
       $urlRouterProvider.otherwise('/');
 
-      $stateProvider.state('admin', {
-        url: '/admin',
+      $stateProvider.state('home.admin', {
+        url: '^/admin',
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/admin/adminDetails.html',

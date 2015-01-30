@@ -17,7 +17,7 @@ define(['../../module'], function(module) {
     /**
      * Used to add a specimen group.
      */
-    $stateProvider.state('admin.studies.study.specimens.groupAdd', {
+    $stateProvider.state('home.admin.studies.study.specimens.groupAdd', {
       url: '/spcgroup/add',
       resolve: {
         user: userResolve.user,
@@ -51,7 +51,7 @@ define(['../../module'], function(module) {
     /**
      * Used to update a specimen group.
      */
-    $stateProvider.state('admin.studies.study.specimens.groupUpdate', {
+    $stateProvider.state('home.admin.studies.study.specimens.groupUpdate', {
       url: '/spcgroup/update/{specimenGroupId}',
       resolve: {
         user: userResolve.user,

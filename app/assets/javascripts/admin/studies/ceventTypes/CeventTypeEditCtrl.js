@@ -47,7 +47,7 @@ define(['../../module', 'underscore'], function(module, _) {
     //---
 
     function gotoReturnState() {
-      return $state.go('admin.studies.study.collection', {}, {reload: true});
+      return $state.go('home.admin.studies.study.collection', {}, {reload: true});
     }
 
     function submitSuccess() {
@@ -62,7 +62,7 @@ define(['../../module', 'underscore'], function(module, _) {
           domainEntityUpdateError.handleError(
             error,
             'collection event type',
-            'admin.studies.study.collection',
+            'home.admin.studies.study.collection',
             {studyId: study.id},
             {reload: true});
         });

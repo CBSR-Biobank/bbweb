@@ -10,11 +10,11 @@ define(['./module'], function(module) {
 
   function config($urlRouterProvider, $stateProvider) {
 
-    $urlRouterProvider.otherwise('/');
+    $urlRouterProvider.otherwise('/index');
 
     $stateProvider
       .state('home', {
-        url: '/',
+        url: '/index',
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/home/home.html',
@@ -22,29 +22,29 @@ define(['./module'], function(module) {
           }
         },
         data: {
-          displayName: false
+          displayName: 'Home'
         }
       })
-      .state('about', {
-        url: '/about',
+      .state('home.about', {
+        url: '^/about',
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/home/about.html'
           }
         },
         data: {
-          displayName: false
+          displayName: 'About'
         }
       })
-      .state('contact', {
-        url: '/contact',
+      .state('home.contact', {
+        url: '^/contact',
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/home/contact.html'
           }
         },
         data: {
-          displayName: false
+          displayName: 'Contact Us'
         }
       });
   }

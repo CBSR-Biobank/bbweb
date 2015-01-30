@@ -23,7 +23,7 @@ define(['../../module'], function(module) {
         'Processing type ' + processingType.name + ' cannot be removed: ',
         processingTypesService.remove,
         processingType,
-        'admin.studies.study.processing');
+        'home.admin.studies.study.processing');
     }
   }
 

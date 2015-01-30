@@ -54,12 +54,12 @@ define(['../../module'], function(module) {
      * Determines the state to transition to when the user submits the form or cancels it.
      */
     function determineReturnState() {
-      if ($state.current.name.indexOf('admin.studies.study.collection') >= 0) {
-        return 'admin.studies.study.collection';
-      } else if ($state.current.name.indexOf('admin.studies.study.participants') >= 0) {
-        return 'admin.studies.study.participants';
-      } else if ($state.current.name.indexOf('admin.studies.study.processing') >= 0) {
-        return 'admin.studies.study.processing';
+      if ($state.current.name.indexOf('home.admin.studies.study.collection') >= 0) {
+        return 'home.admin.studies.study.collection';
+      } else if ($state.current.name.indexOf('home.admin.studies.study.participants') >= 0) {
+        return 'home.admin.studies.study.participants';
+      } else if ($state.current.name.indexOf('home.admin.studies.study.processing') >= 0) {
+        return 'home.admin.studies.study.processing';
       }
       throw new Error('invalid state: ' + $state.current.name);
     }

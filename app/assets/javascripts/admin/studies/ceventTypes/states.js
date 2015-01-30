@@ -23,7 +23,7 @@ define(['../../module'], function(module) {
     /**
      * Collection Event Type Add
      */
-    $stateProvider.state('admin.studies.study.collection.ceventTypeAdd', {
+    $stateProvider.state('home.admin.studies.study.collection.ceventTypeAdd', {
       url: '/cetypes/add',
       resolve: {
         user: userResolve.user,
@@ -64,7 +64,7 @@ define(['../../module'], function(module) {
     /**
      * Collection Event Type Update
      */
-    $stateProvider.state('admin.studies.study.collection.ceventTypeUpdate', {
+    $stateProvider.state('home.admin.studies.study.collection.ceventTypeUpdate', {
       url: '/cetypes/update/{ceventTypeId}',
       resolve: {
         user: userResolve.user,
@@ -104,7 +104,7 @@ define(['../../module'], function(module) {
     /**
      * Collection Event Annotation Type Add
      */
-    $stateProvider.state('admin.studies.study.collection.ceventAnnotTypeAdd', {
+    $stateProvider.state('home.admin.studies.study.collection.ceventAnnotTypeAdd', {
       url: '/cevent/annottype/add',
       resolve: {
         user: userResolve.user,
@@ -138,7 +138,7 @@ define(['../../module'], function(module) {
     /**
      * Collection Event Annotation Type Update
      */
-    $stateProvider.state('admin.studies.study.collection.ceventAnnotTypeUpdate', {
+    $stateProvider.state('home.admin.studies.study.collection.ceventAnnotTypeUpdate', {
       url: '/cevent/annottype/update/{annotTypeId}',
       resolve: {
         user: userResolve.user,

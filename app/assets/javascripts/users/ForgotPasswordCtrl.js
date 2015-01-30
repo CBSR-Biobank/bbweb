@@ -23,13 +23,13 @@ define(['./module'], function(module) {
     }
 
     function pwdResetSuccess() {
-      $state.go('users.forgot.passwordSent', { email: vm.email });
+      $state.go('home.users.forgot.passwordSent', { email: vm.email });
     }
 
     function pwdResetFailure(response) {
       // user not found
       if (response.message === 'email address not registered') {
-        $state.go('users.forgot.emailNotFound');
+        $state.go('home.users.forgot.emailNotFound');
       } else {
         var headerHtml = 'Cannot reset your password';
         var bodyHtml = 'The account associated with that email is not active in the system. ' +

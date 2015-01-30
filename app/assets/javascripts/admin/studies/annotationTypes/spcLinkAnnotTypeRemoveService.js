@@ -33,7 +33,7 @@ define(['../../module', 'underscore'], function(module, _) {
         annotationTypeRemoveService.remove(
           spcLinkAnnotTypesService.remove,
           annotType,
-          'admin.studies.study.processing',
+          'home.admin.studies.study.processing',
           {studyId: annotType.studyId});
       }
     }

@@ -16,7 +16,7 @@ define(['../../module'], function(module) {
     /**
      * Prticipant Annotation Type Add
      */
-    $stateProvider.state('admin.studies.study.participants.annotTypeAdd', {
+    $stateProvider.state('home.admin.studies.study.participants.annotTypeAdd', {
       url: '/annottype/add',
       resolve: {
         user: userResolve.user,
@@ -51,7 +51,7 @@ define(['../../module'], function(module) {
     /**
      * Prticipant Annotation Type Update
      */
-    $stateProvider.state('admin.studies.study.participants.annotTypeUpdate', {
+    $stateProvider.state('home.admin.studies.study.participants.annotTypeUpdate', {
       url: '/annottype/update/{annotTypeId}',
       resolve: {
         user: userResolve.user,
@@ -65,7 +65,7 @@ define(['../../module'], function(module) {
           }
         ],
         childReturnState: function() {
-          return 'admin.studies.study.participants';
+          return 'home.admin.studies.study.participants';
         },
         addOrUpdateFn: ['participantAnnotTypesService', function(participantAnnotTypesService) {
           return participantAnnotTypesService.addOrUpdate;

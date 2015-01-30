@@ -56,7 +56,7 @@ define(['../../module', 'underscore'], function(module, _) {
 
     var helper = panelService.panel(
       'study.panel.collectionEventTypes',
-      'admin.studies.study.collection.ceventTypeAdd');
+      'home.admin.studies.study.collection.ceventTypeAdd');
 
     vm.study                = $scope.study;
     vm.ceventTypes          = $scope.ceventTypes;
@@ -129,7 +129,7 @@ define(['../../module', 'underscore'], function(module, _) {
      */
     function update(ceventType) {
       $state.go(
-        'admin.studies.study.collection.ceventTypeUpdate',
+        'home.admin.studies.study.collection.ceventTypeUpdate',
         { ceventTypeId: ceventType.id });
     }
   }

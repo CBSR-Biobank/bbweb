@@ -28,7 +28,7 @@ define(['../module'], function(module) {
     /**
      * Centres - view all centres
      */
-    $stateProvider.state('admin.centres', {
+    $stateProvider.state('home.admin.centres', {
       url: '/centres',
       resolve: {
         user: userResolve.user,
@@ -48,7 +48,7 @@ define(['../module'], function(module) {
     /**
      * Centre add
      */
-    $stateProvider.state('admin.centres.add', {
+    $stateProvider.state('home.admin.centres.add', {
       url: '/add',
       resolve: {
         user: userResolve.user,
@@ -70,7 +70,7 @@ define(['../module'], function(module) {
     /**
      * Centre view
      */
-    $stateProvider.state('admin.centres.centre', {
+    $stateProvider.state('home.admin.centres.centre', {
       abstract: true,
       url: '/{centreId}',
       resolve: {
@@ -83,14 +83,14 @@ define(['../module'], function(module) {
         }
       },
       data: {
-        breadcrumProxy: 'admin.studies.centre.summary'
+        breadcrumProxy: 'home.admin.centres.centre.summary'
       }
     });
 
     /**
      * Centre add
      */
-    $stateProvider.state('admin.centres.centre.update', {
+    $stateProvider.state('home.admin.centres.centre.update', {
       url: '/add',
       resolve: {
         user: userResolve.user,
@@ -110,7 +110,7 @@ define(['../module'], function(module) {
     /**
      * Centre view summary information
      */
-    $stateProvider.state('admin.centres.centre.summary', {
+    $stateProvider.state('home.admin.centres.centre.summary', {
       url: '/summary',
       resolve: {
         user: userResolve.user,
@@ -130,7 +130,7 @@ define(['../module'], function(module) {
     /**
      * Centre view location information
      */
-    $stateProvider.state('admin.centres.centre.locations', {
+    $stateProvider.state('home.admin.centres.centre.locations', {
       url: '/locations',
       resolve: {
         user: userResolve.user,
@@ -164,7 +164,7 @@ define(['../module'], function(module) {
     /**
      * Used to add a centre location.
      */
-    $stateProvider.state('admin.centres.centre.locationAdd', {
+    $stateProvider.state('home.admin.centres.centre.locationAdd', {
       url: '/location/add',
       resolve: {
         user: userResolve.user,
@@ -195,7 +195,7 @@ define(['../module'], function(module) {
     /**
      * Used to update a centre location.
      */
-    $stateProvider.state('admin.centres.centre.locationUpdate', {
+    $stateProvider.state('home.admin.centres.centre.locationUpdate', {
       url: '/location/update/:locationId',
       resolve: {
         user: userResolve.user,
@@ -221,7 +221,7 @@ define(['../module'], function(module) {
     /**
      * Centre view studies information
      */
-    $stateProvider.state('admin.centres.centre.studies', {
+    $stateProvider.state('home.admin.centres.centre.studies', {
       url: '/studies',
       resolve: {
         user: userResolve.user,
@@ -231,12 +231,6 @@ define(['../module'], function(module) {
           function(centresService, centre) {
             return centresService.studies(centre.id);
           }
-        ],
-        allStudies: [
-          'studiesService',
-          function(studiesService) {
-            return studiesService.getAll();
-          }
         ]
       },
       views: {
@@ -244,15 +238,14 @@ define(['../module'], function(module) {
           template: '<accordion close-others="false">' +
             '<centre-studies-panel  ' +
             '  centre="centre" ' +
-            '  centre-studies="centreStudies" ' +
-            '  all-studies="allStudies"></centre-studies-panel>' +
+            '  centre-studies="centreStudies"> ' +
+            '  </centre-studies-panel>' +
             '</accordion>',
           controller: [
-            '$scope', 'centre', 'centreStudies', 'allStudies',
-            function($scope, centre, centreStudies, allStudies) {
+            '$scope', 'centre', 'centreStudies',
+            function($scope, centre, centreStudies) {
               $scope.centre = centre;
               $scope.centreStudies = centreStudies;
-              $scope.allStudies = allStudies;
             }
           ]
         }

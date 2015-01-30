@@ -26,7 +26,7 @@ define(['../../module'], function(module) {
         'specimen link type ' + spcLinkType.name + ' cannot be removed: ',
         spcLinkTypesService.remove,
         spcLinkType,
-        'admin.studies.study.processing');
+        'home.admin.studies.study.processing');
     }
   }
 

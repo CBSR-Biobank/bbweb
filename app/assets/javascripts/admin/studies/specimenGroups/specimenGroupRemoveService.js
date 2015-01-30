@@ -33,7 +33,7 @@ define(['../../module', 'underscore'], function(module, _) {
           'Specimen group ' + specimenGroup.name + ' cannot be removed: ',
           specimenGroupsService.remove,
           specimenGroup,
-          'admin.studies.study.specimens');
+          'home.admin.studies.study.specimens');
       }
     }
   }

@@ -12,9 +12,9 @@ define(['./module'], function(module) {
 
     $urlRouterProvider.otherwise('/');
 
-    $stateProvider.state('users', {
+    $stateProvider.state('home.users', {
       abstract: true,
-      url: '/users',
+      url: '^/users',
       views: {
         'main@': {
           template: '<ui-view/>'
@@ -22,7 +22,7 @@ define(['./module'], function(module) {
       }
     });
 
-    $stateProvider.state('users.login', {
+    $stateProvider.state('home.users.login', {
       url: '^/login',
       views: {
         'main@': {
@@ -32,7 +32,7 @@ define(['./module'], function(module) {
       }
     });
 
-    $stateProvider.state('users.forgot', {
+    $stateProvider.state('home.users.forgot', {
       url: '^/forgot',
       resolve: {
       },
@@ -47,7 +47,7 @@ define(['./module'], function(module) {
       }
     });
 
-    $stateProvider.state('users.forgot.emailNotFound', {
+    $stateProvider.state('home.users.forgot.emailNotFound', {
       url: '^/forgot',
       views: {
         'main@': {
@@ -60,7 +60,7 @@ define(['./module'], function(module) {
       }
     });
 
-    $stateProvider.state('users.forgot.passwordSent', {
+    $stateProvider.state('home.users.forgot.passwordSent', {
       url: '^/passwordSent/{email}',
       views: {
         'main@': {
@@ -70,7 +70,7 @@ define(['./module'], function(module) {
       }
     });
 
-    $stateProvider.state('users.register', {
+    $stateProvider.state('home.users.register', {
       url: '^/register',
       views: {
         'main@': {
@@ -83,7 +83,7 @@ define(['./module'], function(module) {
     /**
      * Allows changes to be made to a user
      */
-    $stateProvider.state('users.profile', {
+    $stateProvider.state('home.users.profile', {
       url: '^/profile',
       resolve: {
         user: userResolve.user

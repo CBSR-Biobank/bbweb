@@ -37,7 +37,7 @@ define(['../../module'], function(module) {
     //---
 
     function gotoReturnState() {
-      return $state.go('admin.studies.study.processing', {}, {reload: true});
+      return $state.go('home.admin.studies.study.processing', {}, {reload: true});
     }
 
     function submitSuccess() {
@@ -52,7 +52,7 @@ define(['../../module'], function(module) {
           domainEntityUpdateError.handleError(
             error,
             'processing type',
-            'admin.studies.study.processing',
+            'home.admin.studies.study.processing',
             {studyId: study.id},
             {reload: true});
         });

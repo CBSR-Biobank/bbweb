@@ -17,7 +17,7 @@ define(['../../module'], function(module) {
     /**
      * Processing Type Add
      */
-    $stateProvider.state('admin.studies.study.processing.processingTypeAdd', {
+    $stateProvider.state('home.admin.studies.study.processing.processingTypeAdd', {
       url: '/proctypes/add',
       resolve: {
         user: userResolve.user,
@@ -44,7 +44,7 @@ define(['../../module'], function(module) {
     /**
      * Processing Type Update
      */
-    $stateProvider.state('admin.studies.study.processing.processingTypeUpdate', {
+    $stateProvider.state('home.admin.studies.study.processing.processingTypeUpdate', {
       url: '/proctypes/update/{processingTypeId}',
       resolve: {
         user: userResolve.user,
@@ -72,7 +72,7 @@ define(['../../module'], function(module) {
     /**
      * Specimen Link Annotation Type Add
      */
-    $stateProvider.state('admin.studies.study.processing.spcLinkAnnotTypeAdd', {
+    $stateProvider.state('home.admin.studies.study.processing.spcLinkAnnotTypeAdd', {
       url: '/annottype/add',
       resolve: {
         user: userResolve.user,
@@ -106,7 +106,7 @@ define(['../../module'], function(module) {
     /**
      * Prticipant Annotation Type Update
      */
-    $stateProvider.state('admin.studies.study.processing.spcLinkAnnotTypeUpdate', {
+    $stateProvider.state('home.admin.studies.study.processing.spcLinkAnnotTypeUpdate', {
       url: '/annottype/update/{annotTypeId}',
       resolve: {
         user: userResolve.user,
@@ -140,7 +140,7 @@ define(['../../module'], function(module) {
     /**
      * Specimen Link Type Add
      */
-    $stateProvider.state('admin.studies.study.processing.spcLinkTypeAdd', {
+    $stateProvider.state('home.admin.studies.study.processing.spcLinkTypeAdd', {
       url: '/sltype/add',
       resolve: {
         user: userResolve.user,
@@ -175,7 +175,7 @@ define(['../../module'], function(module) {
     /**
      * Specimen Link Type Update
      */
-    $stateProvider.state('admin.studies.study.processing.spcLinkTypeUpdate', {
+    $stateProvider.state('home.admin.studies.study.processing.spcLinkTypeUpdate', {
       url: '/sltype/update/{procTypeId}/{spcLinkTypeId}',
       resolve: {
         user: userResolve.user,

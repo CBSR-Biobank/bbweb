@@ -39,7 +39,7 @@ define(['./module', 'toastr'], function(module, toastr) {
               extendedTimeOut: 0,
               positionClass: 'toast-bottom-right'
             });
-          $state.go('users.login', {}, {reload: true});
+          $state.go('home.users.login', {}, {reload: true});
         },
         function() {
           // registration failed
@@ -53,7 +53,7 @@ define(['./module', 'toastr'], function(module, toastr) {
               positionClass: 'toast-bottom-right'
             });
 
-          $state.go('users.register', {}, {reload: true});
+          $state.go('home.users.register', {}, {reload: true});
         }
       );
     }

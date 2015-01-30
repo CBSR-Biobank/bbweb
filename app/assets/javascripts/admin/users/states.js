@@ -21,7 +21,7 @@ define(['../module'], function(module) {
     /**
      * Displays all users in a table
      */
-    $stateProvider.state('admin.users', {
+    $stateProvider.state('home.admin.users', {
       url: '/users',
       resolve: {
         user: userResolve.user,

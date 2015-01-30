@@ -23,7 +23,7 @@ define(['../../module'], function(module) {
         'Collection event type ' + ceventType.name + ' cannot be removed: ',
         ceventTypesService.remove,
         ceventType,
-        'admin.studies.study.collection');
+        'home.admin.studies.study.collection');
     }
   }
 

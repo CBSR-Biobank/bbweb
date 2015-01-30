@@ -35,7 +35,7 @@ define(['./module'], function(module) {
     //--
 
     function gotoReturnState() {
-      return $state.go('admin.centres.centre.locations', {}, {reload: true});
+      return $state.go('home.admin.centres.centre.locations', {}, {reload: true});
     }
 
     function submitSuccess() {
@@ -58,7 +58,7 @@ define(['./module'], function(module) {
             domainEntityUpdateError.handleError(
               error,
               'location',
-              'admin.centres.centre.locations',
+              'home.admin.centres.centre.locations',
               {},
               {reload: true});
           });

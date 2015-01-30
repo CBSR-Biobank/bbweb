@@ -12,8 +12,7 @@ define(['../module', 'underscore'], function(module, _) {
       restrict: 'EA',
       scope: {
         centre: '=',
-        centreStudies: '=',
-        allStudies: '='
+        centreStudies: '='
       },
       templateUrl: '/assets/javascripts/admin/centres/studiesPanel.html',
       controller: 'CentreStudiesPanelCtrl as vm'
@@ -51,7 +50,7 @@ define(['../module', 'underscore'], function(module, _) {
     var helper = panelService.panel('centre.panel.studies');
 
     vm.centre         = $scope.centre;
-    vm.allStudies     = $scope.allStudies;
+    vm.allStudies     = [];
     vm.studiesById    = _.indexBy($scope.allStudies, 'id');
     vm.centreStudies  = undefined;
 

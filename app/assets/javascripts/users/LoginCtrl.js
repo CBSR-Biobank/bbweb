@@ -29,7 +29,7 @@ define(['./module'], function(module) {
     //--
 
     function loginSuccess() {
-      $state.go('dashboard');
+      $state.go('home');
     }
 
     function loginFailure(error) {

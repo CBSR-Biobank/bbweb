@@ -48,7 +48,7 @@ define(['../../module', 'underscore'], function(module, _) {
 
     var helper = panelService.panel(
       'study.panel.participantAnnotationTypes',
-      'admin.studies.study.participants.annotTypeAdd',
+      'home.admin.studies.study.participants.annotTypeAdd',
       annotTypeModalService,
       'Participant Annotation Type');
 
@@ -98,7 +98,7 @@ define(['../../module', 'underscore'], function(module, _) {
         annotTypeInUseModal();
       } else {
         $state.go(
-          'admin.studies.study.participants.annotTypeUpdate',
+          'home.admin.studies.study.participants.annotTypeUpdate',
           { annotTypeId: annotType.id });
       }
     }

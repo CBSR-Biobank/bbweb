@@ -33,7 +33,7 @@ define(['../../module', 'underscore'], function(module, _) {
         annotationTypeRemoveService.remove(
           participantAnnotTypesService.remove,
           annotType,
-          'admin.studies.study.participants');
+          'home.admin.studies.study.participants');
       }
     }
   }

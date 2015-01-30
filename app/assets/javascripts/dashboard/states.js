@@ -12,8 +12,8 @@ define(['./module'], function(module) {
 
     $urlRouterProvider.otherwise('/');
 
-    $stateProvider.state('dashboard', {
-      url: '/dashboard',
+    $stateProvider.state('home.dashboard', {
+      url: '^/dashboard',
       resolve: {
         user: userResolve.user
       },
@@ -28,8 +28,8 @@ define(['./module'], function(module) {
       }
     });
 
-    $stateProvider.state('dashboard.admin', {
-      url: '/admin',
+    $stateProvider.state('home.dashboard.admin', {
+      url: '^/admin',
       resolve: {
         user: userResolve.user
       },

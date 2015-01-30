@@ -41,7 +41,7 @@ define(['../../module'], function(module) {
     //--
 
     function gotoReturnState() {
-      return $state.go('admin.studies.study.specimens', {}, {reload: true});
+      return $state.go('home.admin.studies.study.specimens', {}, {reload: true});
     }
 
     function submitSuccess() {
@@ -56,7 +56,7 @@ define(['../../module'], function(module) {
           domainEntityUpdateError.handleError(
             error,
             'specimen link type',
-            'admin.studies.study.specimens',
+            'home.admin.studies.study.specimens',
             {},
             {reload: true});
         });

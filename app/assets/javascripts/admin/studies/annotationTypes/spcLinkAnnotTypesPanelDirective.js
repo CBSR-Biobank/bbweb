@@ -49,7 +49,7 @@ define(['../../module', 'underscore'], function(module, _) {
 
     var helper = panelService.panel(
       'study.panel.specimenLinkAnnotationTypes',
-      'admin.studies.study.processing.spcLinkAnnotTypeAdd',
+      'home.admin.studies.study.processing.spcLinkAnnotTypeAdd',
       annotTypeModalService,
       'Specimen Link Annotation Type');
 
@@ -106,7 +106,7 @@ define(['../../module', 'underscore'], function(module, _) {
         annotTypeInUseModal();
       } else {
         $state.go(
-          'admin.studies.study.processing.spcLinkAnnotTypeUpdate',
+          'home.admin.studies.study.processing.spcLinkAnnotTypeUpdate',
           { annotTypeId: annotType.id });
       }
     }

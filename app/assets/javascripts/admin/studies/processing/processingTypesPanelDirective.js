@@ -46,7 +46,7 @@ define(['../../module'], function(module) {
 
     var helper = panelService.panel(
       'study.panel.processingTypes',
-      'admin.studies.study.processing.processingTypeAdd');
+      'home.admin.studies.study.processing.processingTypeAdd');
 
     vm.study            = $scope.study;
     vm.processingTypes  = $scope.processingDto.processingTypes;
@@ -74,7 +74,7 @@ define(['../../module'], function(module) {
      */
     function update(processingType) {
       $state.go(
-        'admin.studies.study.processing.processingTypeUpdate',
+        'home.admin.studies.study.processing.processingTypeUpdate',
         { processingTypeId: processingType.id });
     }
 

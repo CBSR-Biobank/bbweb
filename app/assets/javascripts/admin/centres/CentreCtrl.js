@@ -40,9 +40,9 @@ define(['../module'], function(module) {
       $timeout(activeTabUpdate, 0);
 
       function activeTabUpdate() {
-        vm.tabSummaryActive   = ($state.current.name === 'admin.centres.centre.summary');
-        vm.tabLocationsActive = ($state.current.name === 'admin.centres.centre.locations');
-        vm.tabStudiesActive   = ($state.current.name === 'admin.centres.centre.studies');
+        vm.tabSummaryActive   = ($state.current.name === 'home.admin.centres.centre.summary');
+        vm.tabLocationsActive = ($state.current.name === 'home.admin.centres.centre.locations');
+        vm.tabStudiesActive   = ($state.current.name === 'home.admin.centres.centre.studies');
       }
     }
 
