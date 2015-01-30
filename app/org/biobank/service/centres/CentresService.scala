@@ -65,14 +65,14 @@ trait CentresService {
 }
 
 /**
-  * This is the Centre Aggregate Application Service.
-  *
-  * Handles the commands to configure centres. the commands are forwarded to the Centre Aggregate
-  * Processor.
-  *
-  * @param centreProcessor
-  *
-  */
+ * This is the Centre Aggregate Application Service.
+ *
+ * Handles the commands to configure centres. the commands are forwarded to the Centre Aggregate
+ * Processor.
+ *
+ * @param centreProcessor
+ *
+ */
 class CentresServiceImpl(implicit inj: Injector)
     extends CentresService
     with ApplicationService
@@ -95,8 +95,8 @@ class CentresServiceImpl(implicit inj: Injector)
   val log = LoggerFactory.getLogger(this.getClass)
 
   /**
-    * FIXME: use paging and sorting
-    */
+   * FIXME: use paging and sorting
+   */
   def getAll: Set[Centre] = {
     centreRepository.getValues.toSet
   }
@@ -104,11 +104,11 @@ class CentresServiceImpl(implicit inj: Injector)
   def getCountsByStatus(): CentreCountsByStatus = {
     // FIXME should be replaced by DTO query to the database
     val studies = centreRepository.getValues
-    CentreCountsByStatus(
-      total         = studies.size,
-      disabledCount = studies.collect { case s: DisabledCentre => s }.size,
-      enabledCount  = studies.collect { case s: EnabledCentre => s }.size
-    )
+      CentreCountsByStatus(
+        total         = studies.size,
+        disabledCount = studies.collect { case s: DisabledCentre => s }.size,
+        enabledCount  = studies.collect { case s: EnabledCentre => s }.size
+      )
   }
 
   private def getStatus(status: String): DomainValidation[String] = {
@@ -120,25 +120,27 @@ class CentresServiceImpl(implicit inj: Injector)
     }
   }
 
-  def getCentres[T <: Centre]
-    (filter: String, status: String, sortFunc: (Centre, Centre) => Boolean, order: SortOrder)
+  def getCentres[T <: Centre](filter: String,
+                              status: String,
+                              sortFunc: (Centre, Centre) => Boolean,
+                              order: SortOrder)
       : DomainValidation[Seq[Centre]] =  {
     val allCentres = centreRepository.getValues
 
     val centresFilteredByName = if (!filter.isEmpty) {
-      val filterLowerCase = filter.toLowerCase
-      allCentres.filter { centre => centre.name.toLowerCase.contains(filterLowerCase) }
-    } else {
-      allCentres
-    }
+        val filterLowerCase = filter.toLowerCase
+          allCentres.filter { centre => centre.name.toLowerCase.contains(filterLowerCase) }
+      } else {
+        allCentres
+      }
 
     val centresFilteredByStatus = getStatus(status).map { status =>
-      if (status == Centre.status) {
-        centresFilteredByName
-      } else {
-        centresFilteredByName.filter { centre => centre.status == status }
+        if (status == Centre.status) {
+          centresFilteredByName
+        } else {
+          centresFilteredByName.filter { centre => centre.status == status }
+        }
       }
-    }
 
     centresFilteredByStatus.map { centres =>
       val result = centres.toSeq.sortWith(sortFunc)
@@ -158,27 +160,29 @@ class CentresServiceImpl(implicit inj: Injector)
     )
   }
 
-  def getCentreLocations(centreId: String, locationIdOpt: Option[String]): DomainValidation[Set[Location]] = {
+  def getCentreLocations(centreId: String,
+                         locationIdOpt: Option[String])
+      : DomainValidation[Set[Location]] = {
     centreRepository.getByKey(CentreId(centreId)).fold(
       err => DomainError(s"invalid centre id: $centreId").failureNel[Set[Location]],
       centre => {
         val locationIds = centreLocationsRepository.withCentreId(centre.id).map { x => x.locationId }
         val locations = locationRepository.getValues.filter(x => locationIds.contains(x.id)).toSet
-        locationIdOpt.fold {
-          locations.successNel[String]
-        } { locationId =>
-          locationRepository.getByKey(LocationId(locationId)).fold(
-            err => DomainError(s"invalid location id: $locationId").failureNel[Set[Location]],
-            location => {
-              val locsFound = locations.filter(_.id.id == locationId)
-              if (locsFound.isEmpty) {
-                DomainError(s"centre does not have location with id: $locationId").failureNel[Set[Location]]
-              } else {
-                Set(location).successNel[String]
+          locationIdOpt.fold {
+            locations.successNel[String]
+          } { locationId =>
+            locationRepository.getByKey(LocationId(locationId)).fold(
+              err => DomainError(s"invalid location id: $locationId").failureNel[Set[Location]],
+              location => {
+                val locsFound = locations.filter(_.id.id == locationId)
+                if (locsFound.isEmpty) {
+                  DomainError(s"centre does not have location with id: $locationId").failureNel[Set[Location]]
+                } else {
+                  Set(location).successNel[String]
+                }
               }
-            }
-          )
-        }
+            )
+          }
       }
     )
   }

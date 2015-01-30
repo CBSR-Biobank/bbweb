@@ -6,9 +6,9 @@ define(['./module'], function(module) {
 
   module.config(config);
 
-  config.$inject = ['$urlRouterProvider', '$stateProvider', 'userResolve'];
+  config.$inject = ['$urlRouterProvider', '$stateProvider', 'authorizationProvider'];
 
-  function config($urlRouterProvider, $stateProvider, userResolve ) {
+  function config($urlRouterProvider, $stateProvider, authorizationProvider ) {
 
     $urlRouterProvider.otherwise('/');
 
@@ -86,7 +86,7 @@ define(['./module'], function(module) {
     $stateProvider.state('home.users.profile', {
       url: '^/profile',
       resolve: {
-        user: userResolve.user
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {

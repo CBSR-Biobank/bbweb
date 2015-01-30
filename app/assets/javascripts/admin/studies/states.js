@@ -7,10 +7,10 @@ define(['../module'], function(module) {
   module.config(config);
 
   config.$inject = [
-    '$urlRouterProvider', '$stateProvider', 'userResolve'
+    '$urlRouterProvider', '$stateProvider', 'authorizationProvider'
   ];
 
-  function config($urlRouterProvider, $stateProvider, userResolve ) {
+  function config($urlRouterProvider, $stateProvider, authorizationProvider ) {
 
     resolveStudy.$inject = ['$stateParams', 'studiesService'];
     function resolveStudy($stateParams, studiesService) {
@@ -34,7 +34,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.studies', {
       url: '/studies',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         studyCounts: resolveStudyCounts
       },
       views: {
@@ -54,7 +54,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.studies.add', {
       url: '/add',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         study: function() {
           return { name: '', description: null };
         }
@@ -77,7 +77,7 @@ define(['../module'], function(module) {
       abstract: true,
       url: '/{studyId}',
       resolve: {
-        user: userResolve.user
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {
@@ -96,7 +96,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.summary', {
       url: '/summary',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         study: resolveStudy
       },
       views: {
@@ -116,7 +116,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.summary.update', {
       url: '/update',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         study: resolveStudy
       },
       views: {
@@ -136,7 +136,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.participants', {
       url: '/participants',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         study: resolveStudy,
         annotTypes: [
           'participantAnnotTypesService', 'study',
@@ -165,7 +165,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.specimens', {
       url: '/specimens',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         study: resolveStudy,
         specimenGroups: [
           'specimenGroupsService', 'study',
@@ -204,7 +204,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.collection', {
       url: '/collection',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         study: resolveStudy,
         collectionDto: [
           'studiesService', 'study',
@@ -239,7 +239,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.processing', {
       url: '/processing',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         study: resolveStudy,
         processingDto: [
           'studiesService', 'study',

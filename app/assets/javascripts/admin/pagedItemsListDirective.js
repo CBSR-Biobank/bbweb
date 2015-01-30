@@ -65,6 +65,7 @@ define(['./module', 'underscore'], function(module, _) {
 
     //---
 
+    // FIXME change this to a directive?
     function panelHeading(counts) {
       var panelHeadingItems = [
         { label: 'Disabled', value: counts.disabledCount, icon:  'glyphicon-cog' },

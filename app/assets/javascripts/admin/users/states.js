@@ -7,10 +7,10 @@ define(['../module'], function(module) {
   module.config(config);
 
   config.$inject = [
-    '$urlRouterProvider', '$stateProvider', 'userResolve'
+    '$urlRouterProvider', '$stateProvider', 'authorizationProvider'
   ];
 
-  function config($urlRouterProvider, $stateProvider, userResolve ) {
+  function config($urlRouterProvider, $stateProvider, authorizationProvider) {
     $urlRouterProvider.otherwise('/');
 
     resolveUserCount.$inject = ['usersService'];
@@ -24,7 +24,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.users', {
       url: '/users',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         userCount : resolveUserCount
       },
       views: {

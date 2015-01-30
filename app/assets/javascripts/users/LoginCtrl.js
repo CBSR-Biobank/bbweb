@@ -16,17 +16,23 @@ define(['./module'], function(module) {
    */
   function LoginCtrl($state, stateHelper, usersService, modalService) {
     var vm = this;
-    if (usersService.getUser()) {
-      // user already logged in, send him to home page
-      $state.go('home');
-    }
+
     vm.credentials = {
       email: '',
       password: ''
     };
     vm.login = login;
 
+    init();
+
     //--
+
+    function init() {
+      if (usersService.isAuthenticated()) {
+        // user already logged in, send him to home page
+        $state.go('home');
+      }
+    }
 
     function loginSuccess() {
       $state.go('home');

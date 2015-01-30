@@ -5,8 +5,8 @@ define(['./module'], function(module) {
   'use strict';
 
   module.config([
-    '$urlRouterProvider', '$stateProvider', 'userResolve',
-    function($urlRouterProvider, $stateProvider, userResolve ) {
+    '$urlRouterProvider', '$stateProvider', 'authorizationProvider',
+    function($urlRouterProvider, $stateProvider, authorizationProvider ) {
 
       $urlRouterProvider.otherwise('/');
 
@@ -19,7 +19,7 @@ define(['./module'], function(module) {
           }
         },
         resolve: {
-          user: userResolve.user,
+          user: authorizationProvider.requireAuthenticatedUser,
           aggregateCounts: ['adminService', function(adminService) {
             return adminService.aggregateCounts();
           }]

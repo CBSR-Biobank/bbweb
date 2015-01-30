@@ -8,9 +8,6 @@ define(['./module'], function(module) {
 
   DashboardCtrl.$inject = ['user'];
 
-  /**
-   * user is not a service, but stems from userResolve (Check ../users/services.js) object used by dashboard.routes.
-   */
   function DashboardCtrl($scope, user) {
     var vm = this;
     vm.user = user;

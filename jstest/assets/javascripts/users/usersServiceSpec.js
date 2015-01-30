@@ -46,13 +46,13 @@ define(['angular', 'angularMocks', 'jquery', 'underscore', 'biobankApp'], functi
       it('should allow a user to re-connect', inject(function($rootScope, usersService) {
         authenticateDeferred.resolve(user);
         $rootScope.$digest();
-        expect(usersService.getUser()).toEqual(user);
+        expect(usersService.getCurrentUser()).toEqual(user);
       }));
 
       it('should not allow a user to re-connect', inject(function($rootScope, usersService) {
         authenticateDeferred.reject();
         $rootScope.$digest();
-        expect(usersService.getUser()).not.toBeDefined();
+        expect(usersService.getCurrentUser()).toBeNull();
       }));
     });
 
@@ -91,7 +91,7 @@ define(['angular', 'angularMocks', 'jquery', 'underscore', 'biobankApp'], functi
       it('should have the following functions', function () {
         expect(angular.isFunction(usersService.getUserCount)).toBe(true);
         expect(angular.isFunction(usersService.getAllUsers)).toBe(true);
-        expect(angular.isFunction(usersService.getUser)).toBe(true);
+        expect(angular.isFunction(usersService.requestCurrentUser)).toBe(true);
         expect(angular.isFunction(usersService.query)).toBe(true);
         expect(angular.isFunction(usersService.getUsers)).toBe(true);
         expect(angular.isFunction(usersService.add)).toBe(true);
@@ -117,7 +117,7 @@ define(['angular', 'angularMocks', 'jquery', 'underscore', 'biobankApp'], functi
 
       it('should return the user that is logged in', function() {
         doLogin();
-        expect(_.isEqual(usersService.getUser(), user));
+        expect(_.isEqual(usersService.requestCurrentUser(), user));
       });
 
       it('calling getUserCount has valid URL', function() {

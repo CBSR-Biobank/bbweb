@@ -9,12 +9,12 @@ define(['../../module'], function(module) {
   config.$inject = [
     '$urlRouterProvider',
     '$stateProvider',
-    'userResolve'
+    'authorizationProvider'
   ];
 
   function config($urlRouterProvider,
                   $stateProvider,
-                  userResolve
+                  authorizationProvider
                   //ceventAnnotTypesService
                  ) {
 
@@ -26,7 +26,7 @@ define(['../../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.collection.ceventTypeAdd', {
       url: '/cetypes/add',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         ceventType: ['study', function(study) {
           return {
             studyId: study.id,
@@ -67,7 +67,7 @@ define(['../../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.collection.ceventTypeUpdate', {
       url: '/cetypes/update/{ceventTypeId}',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         ceventType: [
           '$stateParams', 'ceventTypesService', 'study',
           function($stateParams, ceventTypesService, study) {
@@ -107,7 +107,7 @@ define(['../../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.collection.ceventAnnotTypeAdd', {
       url: '/cevent/annottype/add',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         annotType: ['study', function(study) {
           return {
             studyId: study.id,
@@ -141,7 +141,7 @@ define(['../../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.collection.ceventAnnotTypeUpdate', {
       url: '/cevent/annottype/update/{annotTypeId}',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         annotType: [
           '$stateParams', 'ceventAnnotTypesService', 'study',
           function($stateParams, ceventAnnotTypesService, study) {

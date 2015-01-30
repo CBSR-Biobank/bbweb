@@ -7,10 +7,10 @@ define(['../../module'], function(module) {
   module.config(config);
 
   config.$inject = [
-    '$urlRouterProvider', '$stateProvider', 'userResolve'
+    '$urlRouterProvider', '$stateProvider', 'authorizationProvider'
   ];
 
-  function config($urlRouterProvider, $stateProvider, userResolve ) {
+  function config($urlRouterProvider, $stateProvider, authorizationProvider ) {
 
     $urlRouterProvider.otherwise('/');
 
@@ -20,7 +20,7 @@ define(['../../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.processing.processingTypeAdd', {
       url: '/proctypes/add',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         processingType: ['study', function(study) {
           return {
             studyId: study.id,
@@ -47,7 +47,7 @@ define(['../../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.processing.processingTypeUpdate', {
       url: '/proctypes/update/{processingTypeId}',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         processingType: [
           '$stateParams', 'processingTypesService', 'study',
           function($stateParams, processingTypesService, study) {
@@ -75,7 +75,7 @@ define(['../../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.processing.spcLinkAnnotTypeAdd', {
       url: '/annottype/add',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         annotType: ['study', function(study) {
           return {
             studyId: study.id,
@@ -109,7 +109,7 @@ define(['../../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.processing.spcLinkAnnotTypeUpdate', {
       url: '/annottype/update/{annotTypeId}',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         annotType: [
           '$stateParams', 'spcLinkAnnotTypesService', 'study',
           function($stateParams, spcLinkAnnotTypesService, study) {
@@ -143,7 +143,7 @@ define(['../../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.processing.spcLinkTypeAdd', {
       url: '/sltype/add',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         spcLinkType: function() {
           return {
             processingTypeId:      null,
@@ -178,7 +178,7 @@ define(['../../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.processing.spcLinkTypeUpdate', {
       url: '/sltype/update/{procTypeId}/{spcLinkTypeId}',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         spcLinkType: [
           '$stateParams', 'spcLinkTypesService', 'study',
           function($stateParams, spcLinkTypesService) {

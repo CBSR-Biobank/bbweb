@@ -16,7 +16,7 @@ define(['./module'], function(module) {
     // Wrap the current user from the service in a watch expression to display the user's name in
     // the navigation bar
     $scope.$watch(function() {
-      var user = usersService.getUser();
+      var user = usersService.getCurrentUser();
       return user;
     }, function(user) {
       vm.user = user;

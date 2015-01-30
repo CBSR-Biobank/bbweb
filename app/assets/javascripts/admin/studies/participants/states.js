@@ -7,10 +7,10 @@ define(['../../module'], function(module) {
   module.config(config);
 
   config.$inject = [
-    '$urlRouterProvider', '$stateProvider', 'userResolve'
+    '$urlRouterProvider', '$stateProvider', 'authorizationProvider'
   ];
 
-  function config($urlRouterProvider, $stateProvider, userResolve) {
+  function config($urlRouterProvider, $stateProvider, authorizationProvider) {
     $urlRouterProvider.otherwise('/');
 
     /**
@@ -19,7 +19,7 @@ define(['../../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.participants.annotTypeAdd', {
       url: '/annottype/add',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         annotType: ['study', function(study) {
           return {
             studyId: study.id,
@@ -54,7 +54,7 @@ define(['../../module'], function(module) {
     $stateProvider.state('home.admin.studies.study.participants.annotTypeUpdate', {
       url: '/annottype/update/{annotTypeId}',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         annotType: [
           '$stateParams', 'participantAnnotTypesService', 'study',
           function($stateParams, participantAnnotTypesService, study) {

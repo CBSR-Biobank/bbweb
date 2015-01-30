@@ -14,26 +14,29 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
                         biobankXhrReqService,
                         queryStringService) {
     var self = this;
-    self.user = undefined;
+    self.currentUser = null;
     self.token = $cookies['XSRF-TOKEN'];
 
     var service = {
-      login:           login,
-      logout:          logout,
-      getUser:         getUser,
-      query:           query,
-      getAllUsers:     getAllUsers,
-      getUserCount:    getUserCount,
-      getUsers:        getUsers,
-      add:             add,
-      updateName:      updateName,
-      updateEmail:     updateEmail,
-      updatePassword:  updatePassword,
-      updateAvatarUrl: updateAvatarUrl,
-      passwordReset:   passwordReset,
-      activate:        activate,
-      lock:            lock,
-      unlock:          unlock
+      getCurrentUser:     getCurrentUser,
+      requestCurrentUser: requestCurrentUser,
+      login:              login,
+      logout:             logout,
+      isAuthenticated:    isAuthenticated,
+      isAdmin:            isAdmin,
+      query:              query,
+      getAllUsers:        getAllUsers,
+      getUserCount:       getUserCount,
+      getUsers:           getUsers,
+      add:                add,
+      updateName:         updateName,
+      updateEmail:        updateEmail,
+      updatePassword:     updatePassword,
+      updateAvatarUrl:    updateAvatarUrl,
+      passwordReset:      passwordReset,
+      activate:           activate,
+      lock:               lock,
+      unlock:             unlock
     };
 
     init();
@@ -44,12 +47,12 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
     /* If the token is assigned, check that the token is still valid on the server */
     function init() {
       if (self.token) {
-        biobankXhrReqService.call('GET', '/authenticate').then(
-          function(user) {
-            self.user = user;
-            $log.info('Welcome back, ' + self.user.name);
-          },
-          function() {
+        biobankXhrReqService.call('GET', '/authenticate')
+          .then(function(currentUser) {
+            self.currentUser = currentUser;
+            $log.info('Welcome back, ' + self.currentUser.name);
+          })
+          .catch(function() {
             /* the token is no longer valid */
             $log.info('Token no longer valid, please log in.');
             self.token = undefined;
@@ -67,6 +70,30 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
       return result;
     }
 
+    function requestCurrentUser() {
+      if (isAuthenticated()) {
+        return $q.when(self.currentUser);
+      } else {
+        return biobankXhrReqService.call('GET', '/authenticate').then(function(currentUser) {
+          self.currentUser = currentUser;
+          return self.currentUser;
+        });
+      }
+    }
+
+    function getCurrentUser() {
+      return self.currentUser;
+    }
+
+    function isAuthenticated() {
+      return !!self.currentUser;
+    }
+
+    function isAdmin() {
+      // FIXME this needs to be implemented once completed on the server, for now just return true if logged in
+      return !!self.currentUser;
+    }
+
     function changeStatus(user, status) {
       var cmd = {
         id: user.id,
@@ -80,10 +107,11 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
         .then(function(token) {
           self.token = token;
           return biobankXhrReqService.call('GET', '/authenticate');
-        }).then(function(user) {
-          self.user = user;
-          $log.info('Welcome ' + self.user.name);
-          return self.user;
+        })
+        .then(function(user) {
+          self.currentUser = user;
+          $log.info('Welcome ' + self.currentUser.name);
+          return self.currentUser;
         });
     }
 
@@ -92,12 +120,8 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
         $log.info('Good bye');
         delete $cookies['XSRF-TOKEN'];
         self.token = undefined;
-        self.user = undefined;
+        self.currentUser = undefined;
       });
-    }
-
-    function getUser() {
-      return self.user;
     }
 
     function query(userId) {

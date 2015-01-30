@@ -6,9 +6,9 @@ define(['../module'], function(module) {
 
   module.config(config);
 
-  config.$inject = ['$urlRouterProvider', '$stateProvider', 'userResolve'];
+  config.$inject = ['$urlRouterProvider', '$stateProvider', 'authorizationProvider'];
 
-  function config($urlRouterProvider, $stateProvider, userResolve ) {
+  function config($urlRouterProvider, $stateProvider, authorizationProvider ) {
 
     resolveCentre.$inject = ['$stateParams', 'centresService'];
     function resolveCentre($stateParams, centresService) {
@@ -31,7 +31,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.centres', {
       url: '/centres',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         centreCounts: resolveCentreCounts
       },
       views: {
@@ -51,7 +51,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.centres.add', {
       url: '/add',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         centre: function() {
           return { name: '', description: null };
         }
@@ -74,7 +74,7 @@ define(['../module'], function(module) {
       abstract: true,
       url: '/{centreId}',
       resolve: {
-        user: userResolve.user
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {
@@ -93,7 +93,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.centres.centre.update', {
       url: '/add',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         centre: resolveCentre
       },
       views: {
@@ -113,7 +113,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.centres.centre.summary', {
       url: '/summary',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         centre: resolveCentre
       },
       views: {
@@ -133,7 +133,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.centres.centre.locations', {
       url: '/locations',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         centre: resolveCentre,
         locations: [
           'centreLocationService', 'centre',
@@ -167,7 +167,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.centres.centre.locationAdd', {
       url: '/location/add',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         centre: resolveCentre,
         location: [function() {
           return {
@@ -198,7 +198,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.centres.centre.locationUpdate', {
       url: '/location/update/:locationId',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         centre: resolveCentre,
         location: [
           '$stateParams', 'centreLocationService', 'centre',
@@ -224,7 +224,7 @@ define(['../module'], function(module) {
     $stateProvider.state('home.admin.centres.centre.studies', {
       url: '/studies',
       resolve: {
-        user: userResolve.user,
+        user: authorizationProvider.requireAuthenticatedUser,
         centre: resolveCentre,
         centreStudies: [
           'centresService', 'centre',

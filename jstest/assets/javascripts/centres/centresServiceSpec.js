@@ -2,7 +2,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  fdescribe('Service: centresService', function() {
+  describe('Service: centresService', function() {
 
     var centresService, httpBackend;
     var centreNoId = {
