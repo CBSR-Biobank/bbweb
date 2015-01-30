@@ -36,14 +36,14 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       it('should contain valid settings to add a study', function() {
         expect(scope.vm.study).toBe(study);
         expect(scope.vm.title).toContain('Add');
-        expect(scope.vm.returnState).toBe('admin.studies');
+        expect(scope.vm.returnState).toBe('home.admin.studies');
         expect(scope.vm.stateParams).toEqual({});
       });
 
       it('should return to valid state on cancel', function() {
         scope.vm.cancel();
         expect(stateHelper.reloadStateAndReinit).toHaveBeenCalledWith(
-          'admin.studies', {}, {reload: true});
+          'home.admin.studies', {}, {reload: true});
       });
 
       it('should return to valid state on submit', inject(function($q) {
@@ -56,7 +56,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         scope.vm.submit(study);
         scope.$digest();
         expect(stateHelper.reloadStateAndReinit).toHaveBeenCalledWith(
-          'admin.studies', {}, {reload: true});
+          'home.admin.studies', {}, {reload: true});
       }));
 
       it('should return to valid state on invalid submit', inject(function($q) {
@@ -69,7 +69,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         scope.vm.submit(study);
         scope.$digest();
         expect(domainEntityUpdateError.handleError).toHaveBeenCalledWith(
-          'xxx', 'study', 'admin.studies', {}, {reload: true});
+          'xxx', 'study', 'home.admin.studies', {}, {reload: true});
       }));
 
     });
@@ -94,14 +94,14 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       it('should contain valid settings to update a study', function() {
         expect(scope.vm.study).toBe(study);
         expect(scope.vm.title).toContain('Update');
-        expect(scope.vm.returnState).toBe('admin.studies.study.summary');
+        expect(scope.vm.returnState).toBe('home.admin.studies.study.summary');
         expect(scope.vm.stateParams).toEqual({studyId: study.id});
       });
 
       it('should return to valid state on cancel', function() {
         scope.vm.cancel();
         expect(stateHelper.reloadStateAndReinit).toHaveBeenCalledWith(
-          'admin.studies.study.summary', {studyId: study.id}, {reload: true});
+          'home.admin.studies.study.summary', {studyId: study.id}, {reload: true});
       });
 
       it('should return to valid state on submit', inject(function($q) {
@@ -114,7 +114,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         scope.vm.submit(study);
         scope.$digest();
         expect(stateHelper.reloadStateAndReinit).toHaveBeenCalledWith(
-          'admin.studies.study.summary', {studyId: study.id}, {reload: true});
+          'home.admin.studies.study.summary', {studyId: study.id}, {reload: true});
       }));
 
       it('should return to valid state on invalid submit', inject(function($q) {
@@ -127,7 +127,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         scope.vm.submit(study);
         scope.$digest();
         expect(domainEntityUpdateError.handleError).toHaveBeenCalledWith(
-          'xxx', 'study', 'admin.studies.study.summary', {studyId: study.id}, {reload: true});
+          'xxx', 'study', 'home.admin.studies.study.summary', {studyId: study.id}, {reload: true});
       }));
 
     });

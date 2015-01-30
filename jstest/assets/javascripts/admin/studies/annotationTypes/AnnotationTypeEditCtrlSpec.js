@@ -60,7 +60,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     describe('scope', function() {
       var state = {
         current: {
-          name: 'admin.studies.study.collection'
+          name: 'home.admin.studies.study.collection'
         }
       };
 
@@ -97,7 +97,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     describe('form callbacks:', function() {
       var state = {
         current: {
-          name: 'admin.studies.study.collection'
+          name: 'home.admin.studies.study.collection'
         }
       };
       var annotType = {name: 'AT1'};
@@ -197,10 +197,10 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     describe('for participant annotation types', function() {
       var state = {
         current: {
-          name: 'admin.studies.study.participants'
+          name: 'home.admin.studies.study.participants'
         }
       };
-      var returnState = 'admin.studies.study.participants';
+      var returnState = 'home.admin.studies.study.participants';
 
       describe('when adding', function() {
         var annotType = {name: 'AT1'};
@@ -233,10 +233,10 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     describe('for collection event annotation types', function() {
       var state = {
         current: {
-          name: 'admin.studies.study.collection'
+          name: 'home.admin.studies.study.collection'
         }
       };
-      var returnState = 'admin.studies.study.collection';
+      var returnState = 'home.admin.studies.study.collection';
 
       describe('when adding', function() {
         var annotType = {name: 'AT1'};
@@ -269,10 +269,10 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     describe('for specimen link annotation types', function() {
       var state = {
         current: {
-          name: 'admin.studies.study.processing'
+          name: 'home.admin.studies.study.processing'
         }
       };
-      var returnState = 'admin.studies.study.processing';
+      var returnState = 'home.admin.studies.study.processing';
 
       describe('when adding', function() {
         var annotType = {name: 'AT1'};

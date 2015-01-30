@@ -91,7 +91,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       spyOn(modalService, 'modalOk');
       scope.vm.update(annotTypes[1]);
       expect(state.go).toHaveBeenCalledWith(
-        'admin.studies.study.participants.annotTypeUpdate',
+        'home.admin.studies.study.participants.annotTypeUpdate',
         { annotTypeId: annotTypes[1].id });
     });
 

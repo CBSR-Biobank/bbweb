@@ -5,7 +5,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
   describe('Service: authorizationService', function() {
 
-    var $rootScope, $q, authorization, usersService, resolved;
+    var $rootScope, $q, biobankXhrReqService, authorization, usersService, resolved;
     var fakeToken = 'fake-token';
     var user = {
       id:           'dummy-id',
@@ -17,56 +17,112 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       status:       'Active'
     };
 
+    var failTest = function(error) {
+      expect(error).toBeUndefined();
+    };
+
     beforeEach(mocks.module('biobankApp'));
 
-    beforeEach(inject(function (_$rootScope_, _$q_, _usersService_, _authorization_) {
+    beforeEach(inject(function (_$rootScope_,
+                                _$q_,
+                                _biobankXhrReqService_,
+                                _usersService_,
+                                _authorization_) {
       $rootScope = _$rootScope_;
       $q = _$q_;
+      biobankXhrReqService = _biobankXhrReqService_;
       usersService = _usersService_;
       authorization = _authorization_;
       resolved = false;
 
-      spyOn(usersService, 'requestCurrentUser').and.callFake(function () {
-        usersService.currentUser = usersService.currentUser || user;
-        var promise = $q.when(usersService.currentUser);
-        // Trigger a digest to resolve the promise;
-        return promise;
-      });
     }));
 
-    fdescribe('requireAuthenticatedUser', function () {
+    describe('requireAuthenticatedUser', function () {
 
       it('requests the user from the server', function (done) {
-        var failTest = function(error) {
-          expect(error).toBeUndefined();
-        };
+        spyOn(biobankXhrReqService, 'call').and.callFake(function () {
+          var deferred = $q.defer();
+          deferred.resolve(user);
+          return deferred.promise;
+        });
 
         expect(usersService.isAuthenticated()).toBe(false);
         authorization.requireAuthenticatedUser()
           .then(function (data) {
-            console.log('*************', data);
             resolved = true;
-            expect(authorization.isAuthenticated()).toBe(true);
-            expect(authorization.getCurrentUser()).toBe(user);
+            expect(usersService.isAuthenticated()).toBe(true);
+            expect(usersService.getCurrentUser()).toBe(user);
           })
           .catch(failTest)
-          .finally(done);
+            .finally(done);
+
         $rootScope.$digest();
         expect(resolved).toBe(true);
-        done();
+      });
+
+      it('user is not authorized', function (done) {
+        spyOn(biobankXhrReqService, 'call').and.callFake(function () {
+          var deferred = $q.defer();
+          deferred.reject();
+          return deferred.promise;
+        });
+
+        expect(usersService.isAuthenticated()).toBe(false);
+        authorization.requireAuthenticatedUser()
+          .then(function (data) {
+            resolved = true;
+            expect(usersService.isAuthenticated()).toBe(false);
+            expect(usersService.getCurrentUser()).toBe(null);
+          })
+          .catch(failTest)
+            .finally(done);
+
+        $rootScope.$digest();
+        expect(resolved).toBe(true);
       });
 
     });
 
     describe('requireAdminUser', function () {
 
-      it('requests the user from the server', function () {
-        expect(usersService.isAuthenticated()).toBe(false);
-        authorization.requireAdminUser().then(function(data) {
-          resolved = true;
-          expect(authorization.isAdmin()).toBe(true);
-          expect(authorization.getCurrentUser()).toBe(user);
+      it('requests the user from the server', function (done) {
+        spyOn(biobankXhrReqService, 'call').and.callFake(function () {
+          var deferred = $q.defer();
+          deferred.resolve(user);
+          return deferred.promise;
         });
+
+        expect(usersService.isAuthenticated()).toBe(false);
+        authorization.requireAdminUser()
+          .then(function (data) {
+            resolved = true;
+            expect(usersService.isAdmin()).toBe(true);
+            expect(usersService.getCurrentUser()).toBe(user);
+          })
+          .catch(failTest)
+            .finally(done);
+
+        $rootScope.$digest();
+        expect(resolved).toBe(true);
+      });
+
+      it('user is not authorized', function (done) {
+        spyOn(biobankXhrReqService, 'call').and.callFake(function () {
+          var deferred = $q.defer();
+          deferred.reject();
+          return deferred.promise;
+        });
+
+        expect(usersService.isAuthenticated()).toBe(false);
+        authorization.requireAdminUser()
+          .then(function (data) {
+            resolved = true;
+            expect(usersService.isAuthenticated()).toBe(false);
+            expect(usersService.getCurrentUser()).toBe(null);
+          })
+          .catch(failTest)
+            .finally(done);
+
         $rootScope.$digest();
         expect(resolved).toBe(true);
       });

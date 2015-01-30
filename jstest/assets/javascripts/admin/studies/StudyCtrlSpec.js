@@ -20,7 +20,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
       stateService = {
         current: {
-          name: 'admin.studies.study.processing'
+          name: 'home.admin.studies.study.processing'
         }
       };
 
@@ -30,7 +30,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     beforeEach(inject(function($controller, $rootScope, $q, $window, $timeout, _studiesService_) {
       state = {
         params: {studyId: study.id},
-        current: {name: 'admin.studies.study.processing'}
+        current: {name: 'home.admin.studies.study.processing'}
       };
       timeout = $timeout;
       scope = $rootScope.$new();
