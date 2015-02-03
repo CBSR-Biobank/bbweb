@@ -226,26 +226,28 @@ define(['../module'], function(module) {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         centre: resolveCentre,
-        centreStudies: [
-          'centresService', 'centre',
-          function(centresService, centre) {
-            return centresService.studies(centre.id);
-          }
-        ]
+        centreStudies: ['centresService', 'centre', function(centresService, centre) {
+          return centresService.studies(centre.id);
+        }],
+        studyNames: ['studiesService', function(studiesService) {
+          return studiesService.getStudyNames();
+        }]
       },
       views: {
         'centreDetails': {
           template: '<accordion close-others="false">' +
             '<centre-studies-panel  ' +
             '  centre="centre" ' +
-            '  centre-studies="centreStudies"> ' +
+            '  centre-studies="centreStudies" ' +
+            '  study-names="studyNames"> ' +
             '  </centre-studies-panel>' +
             '</accordion>',
           controller: [
-            '$scope', 'centre', 'centreStudies',
-            function($scope, centre, centreStudies) {
-              $scope.centre = centre;
+            '$scope', 'centre', 'centreStudies', 'studyNames',
+            function($scope, centre, centreStudies, studyNames) {
+              $scope.centre        = centre;
               $scope.centreStudies = centreStudies;
+              $scope.studyNames    = studyNames;
             }
           ]
         }

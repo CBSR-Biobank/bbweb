@@ -1,12 +1,12 @@
 define(['../../module', 'underscore'], function(module, _) {
   'use strict';
 
-  module.directive('ceventTypesPanel', ceventTypesPanel);
+  module.directive('ceventTypesPanel', ceventTypesPanelDirective);
 
   /**
    *
    */
-  function ceventTypesPanel() {
+  function ceventTypesPanelDirective() {
     var directive = {
       require: '^tab',
       restrict: 'E',

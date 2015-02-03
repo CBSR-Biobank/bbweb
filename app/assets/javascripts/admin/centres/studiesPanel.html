@@ -1,7 +1,7 @@
 <ng-include src="'/assets/javascripts/admin/centres/centreNotDisabledWarning.html'"></ng-include>
 <accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
   <accordion-heading>
-    Studies
+    This centre is linked to these studies
     <div class="btn-group pull-right">
       <button class="btn btn-xs btn-default"
               data-ng-click="vm.panelToggle()"
@@ -11,20 +11,17 @@
       </button>
     </div>
   </accordion-heading>
-  <p>
-    This centre is involved with these studies.
-  </p>
-  <div class="panel panel-warning" data-ng-if="vm.centreStudies.length <= 0">
+  <div class="panel panel-warning" data-ng-if="vm.centreStudyIds.length <= 0">
     <div class="panel-heading">
       No studies have been added yet.
     </div>
   </div>
-  <table data-ng-show="vm.centreStudies.length != 0"
+  <table data-ng-show="vm.centreStudyIds.length > 0"
          class="table table-hover table-condensed"
          data-ng-table="vm.tableParams">
     <tr data-ng-repeat="study in $data">
       <td data-title="'Name'" sortable="'name'">
-        <span data-ng-click="vm.information(study)">
+        <span data-ng-click="vm.information(study.id)">
           <a href>{{study.name}}</a>
         </span>
       </td>
@@ -34,7 +31,7 @@
       <td>
         <div class="btn-group pull-right" ng-if="vm.centre.status === 'Disabled'">
           <button class="btn btn-xs btn-warning"
-                  data-ng-click="vm.remove(study)"
+                  data-ng-click="vm.remove(study.id)"
                   data-toggle="tooltip"
                   title="Remove">
             <i class="glyphicon glyphicon-remove"></i>
@@ -47,7 +44,7 @@
     <span class="input-group-addon">Add Study</span>
     <input type="text"
            ng-model="vm.selected"
-           typeahead="study.name for study in vm.allStudies | filter:$viewValue | limitTo:8"
+           typeahead="study.name for study in vm.studyNames | filter:$viewValue | limitTo:8"
            typeahead-on-select="vm.onSelect($item)"
            placeholder="enter a study's name or partial name"
            class="form-control">

@@ -255,7 +255,7 @@ class StudiesServiceImpl(implicit inj: Injector)
     * FIXME: use paging and sorting
     */
   def getAll: Seq[StudyNameDto] = {
-    val result = studyRepository.getValues.map { s => StudyNameDto(s.id.id, s.name) }
+    val result = studyRepository.getValues.map { s => StudyNameDto(s.id.id, s.name, s.status) }
     result.toSeq.sortWith(StudyNameDto.compareByName)
   }
 
@@ -323,7 +323,7 @@ class StudiesServiceImpl(implicit inj: Injector)
 
     val orderedStudies = filteredStudies.toSeq
     val result = orderedStudies.map { s =>
-      StudyNameDto(s.id.id, s.name)
+      StudyNameDto(s.id.id, s.name, s.status)
     } sortWith(StudyNameDto.compareByName)
 
     if (order == AscendingOrder) {

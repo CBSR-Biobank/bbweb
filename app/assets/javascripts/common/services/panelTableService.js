@@ -35,11 +35,14 @@ define(['../module', 'angular'], function(module, angular) {
           var filteredData = tableDataFn();
           var orderedData = params.sorting() ?
               $filter('orderBy')(filteredData, params.orderBy()) : filteredData;
+          var page = params.page();
+          var slice = orderedData.slice((page - 1) * params.count(), page * params.count());
+
+          if ((page > 1) && (slice.length <= 0)) {
+            params.page(page - 1);
+          }
           params.total(filteredData.length);
-          $defer.resolve(
-            orderedData.slice(
-              (params.page() - 1) * params.count(),
-              params.page() * params.count()));
+          $defer.resolve(slice);
         }
       };
 

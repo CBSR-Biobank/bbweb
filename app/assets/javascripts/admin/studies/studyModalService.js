@@ -21,7 +21,7 @@ define(['../module'], function(module) {
     //--
 
     function show(study) {
-      var title = 'Specimen Group';
+      var title = 'Study';
       var description = study.description || '';
       var data = [
         {name: 'Name:',        value: study.name},

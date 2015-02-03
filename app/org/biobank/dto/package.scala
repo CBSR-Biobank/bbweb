@@ -12,6 +12,14 @@ package dto {
 
   }
 
+  case class StudyNameDto(id: String, name: String, status: String)
+
+  object StudyNameDto {
+    def compareByName(a: StudyNameDto, b: StudyNameDto) = (a.name compareToIgnoreCase b.name) < 0
+
+    implicit val studyNameDtoWriter = Json.writes[StudyNameDto]
+  }
+
   case class StudyCountsByStatus(total: Long, disabledCount: Long, enabledCount: Long, retiredCount: Long)
 
   object StudyCountsByStatus {
