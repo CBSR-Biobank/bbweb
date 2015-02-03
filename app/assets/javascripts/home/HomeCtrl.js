@@ -3,12 +3,16 @@ define(['./module'], function(module) {
 
   module.controller('HomeCtrl', HomeCtrl);
 
-  HomeCtrl.$inject = ['$rootScope'];
+  HomeCtrl.$inject = ['$rootScope', 'usersService'];
 
   /**
    * Controller for the index page.
    */
-  function HomeCtrl($rootScope) {
+  function HomeCtrl($rootScope, usersService) {
+    var vm = this;
+
+    vm.userIsAuthenticated = usersService.isAuthenticated();
+
     $rootScope.pageTitle = 'Biobank';
   }
 

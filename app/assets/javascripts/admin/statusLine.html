@@ -1,0 +1,17 @@
+<table class="table table-bordered">
+  <tr>
+    <td>
+      <small class="text-muted">Status: <strong>{{item.status}}</strong></small>
+    </td>
+    <td>
+      <small class="text-muted">Added: <strong>{{item.timeAdded | timeago}}</strong></small>
+    </td>
+    <td>
+      <small class="text-muted">
+        Modified:
+        <strong ng-if="!!item.timeModified">{{item.timeModified | timeago}}</strong>
+        <strong ng-if="! item.timeModified">Never</strong>
+      </small>
+    </td>
+  </tr>
+</table>

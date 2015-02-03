@@ -48,25 +48,25 @@
            class="table table-hover"
            template-pagination="custom/pager">
       <tr data-ng-repeat="user in $data">
-        <td data-title="'Email'" sortable="'email'">
+        <td class="col-md-3" data-title="'Email'" sortable="'email'">
           <span data-ng-click="vm.userInformation(user)">
             <a href>{{user.email}}</a>
           </span>
         </td>
-        <td data-title="'Name'" sortable="'name'">
+        <td class="col-md-3" data-title="'Name'" sortable="'name'">
           {{user.name}}
         </td>
-        <td data-title="'Added'" sortable="'timeAdded'">
+        <td class="col-md-3" data-title="'Added'" sortable="'timeAdded'">
           <a href tooltip="{{user.timeAddedLocal}}">
             {{user.timeAdded | timeago}}
           </a>
         </td>
-        <td data-title="'Status'" sortable="'status'">
+        <td class="col-md-1" data-title="'Status'" sortable="'status'">
           <span class="badge">{{user.status}}</span>
         </td>
 
         <!-- BUTTONS -->
-        <td data-title="'Action'">
+        <td class="col-md-1" data-title="'Action'">
           <div class="btn-group pull-right">
             <button class="btn btn-xs btn-success"
                     data-ng-click="vm.activate(user)"

@@ -16,6 +16,7 @@ define([
   './centres/locationsPanelDirective',
   './centres/centreStudiesPanelDirective',
   './centres/states',
+  './statusLineDirective',
   './studies/StudyCtrl',
   './studies/StudyEditCtrl',
   './studies/studyModalService',

@@ -45,27 +45,5 @@
        toggle-length="vm.descriptionToggleLength"
        text-empty-warning="'Description not entered yet.'"></truncate-toggle>
   </div>
-  <table class="table table-bordered">
-    <tr>
-      <td>
-        <span class="center-block text-center text-muted"><small>Status</small></span>
-        <span class="center-block text-center"><strong>{{vm.study.status}}</strong></span>
-      </td>
-      <td>
-        <span class="center-block text-center text-muted"><small>Added</small></span>
-        <span class="center-block text-center"><strong>{{vm.study.timeAdded | timeago}}</strong></span>
-      </td>
-      <td>
-        <span class="center-block text-center text-muted"><small>Modified</small></span>
-        <span class="center-block text-center"
-              data-ng-if="centre.timeModified !== null">
-          <strong>{{vm.study.timeModified | timeago}}</strong>
-        </span>
-        <span class="center-block text-center"
-              data-ng-if="centre.timeModified === null">
-          <strong>Never</strong>
-        </span>
-      </td>
-    </tr>
-  </table>
+  <status-line item="vm.study">
 </div>
