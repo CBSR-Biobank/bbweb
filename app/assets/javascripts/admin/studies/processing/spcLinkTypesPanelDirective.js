@@ -105,12 +105,9 @@ define(['../../module', 'underscore'], function(module, _) {
         spcLinkType, vm.processingTypesById, vm.specimenGroupsById, vm.annotTypesById);
     }
 
-    /**
-     * Switches state to add a specimen link type.
-     */
     function add() {
       if ($scope.processingDto.specimenGroups.length <= 0) {
-        var headerHtml = 'Cannot add specimen link type';
+        var headerHtml = 'Cannot add a specimen link type';
         var bodyHtml = 'No <em>specimen groups</em> have been added to this study yet. ' +
             'Please add specimen groups first.';
         return modalService.modalOk(headerHtml, bodyHtml);

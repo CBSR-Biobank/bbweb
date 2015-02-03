@@ -28,9 +28,9 @@ define(['../../module', 'underscore'], function(module, _) {
     '$scope',
     '$state',
     '$stateParams',
+    'modalService',
     'panelService',
     'ceventTypesService',
-    'specimenGroupsService',
     'ceventAnnotTypesService',
     'ceventTypeModalService',
     'annotTypeModalService',
@@ -44,9 +44,9 @@ define(['../../module', 'underscore'], function(module, _) {
   function CeventTypesPanelCtrl($scope,
                                 $state,
                                 $stateParams,
+                                modalService,
                                 panelService,
                                 ceventTypesService,
-                                specimenGroupsService,
                                 ceventAnnotTypesService,
                                 ceventTypeModalService,
                                 annotTypeModalService,
@@ -67,7 +67,7 @@ define(['../../module', 'underscore'], function(module, _) {
 
     vm.update               = update;
     vm.remove               = ceventTypeRemoveService.remove;
-    vm.add                  = helper.add;
+    vm.add                  = add;
     vm.information          = information;
     vm.showAnnotationType   = showAnnotationType;
     vm.showSpecimenGroup    = showSpecimenGroup;
@@ -101,6 +101,17 @@ define(['../../module', 'underscore'], function(module, _) {
           cet.annotationTypes.push({ id: atItem.annotationTypeId, name: at.name });
         });
       });
+    }
+
+    function add() {
+      if (vm.specimenGroups.length <= 0) {
+        var headerHtml = 'Cannot add a collection event type';
+        var bodyHtml = 'No <em>specimen groups</em> have been added to this study yet. ' +
+            'Please add specimen groups first.';
+        return modalService.modalOk(headerHtml, bodyHtml);
+      } else {
+        return $state.go('home.admin.studies.study.collection.ceventTypeAdd');
+      }
     }
 
     /**
