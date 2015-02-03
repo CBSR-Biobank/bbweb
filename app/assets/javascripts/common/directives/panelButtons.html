@@ -2,14 +2,14 @@
   <button
      class="btn btn-xs btn-default"
      title="{{addButtonTitle}}"
-     data-ng-if="addButtonEnabled()"
-     data-ng-click="add()">
+     ng-if="addButtonEnabled()"
+     ng-click="vm.addButtonPressed($event)">
     <i class="glyphicon glyphicon-plus"></i>
   </button>
   <button class="btn btn-xs btn-default"
-          data-ng-click="panelToggle()"
+          ng-click="panelToggle()"
           title="expand / collapse">
     <i class="glyphicon"
-       data-ng-class="panelOpen() ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
+       ng-class="panelOpen() ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
   </button>
 </div>
