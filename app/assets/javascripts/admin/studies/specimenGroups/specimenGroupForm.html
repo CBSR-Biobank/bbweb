@@ -1,143 +1,141 @@
 <div class="page-header">
   <h1>{{vm.study.name}} <small>{{vm.title}}</small></h1>
 </div>
-<div class="clearfix">
-  <form class="form-horizontal"
-        name="sgForm"
-        novalidate>
+<form class="form-horizontal"
+      name="sgForm"
+      novalidate>
 
-    <!-- NAME -->
-    <div class="form-group" data-ng-class="{ 'has-error' : sgForm.name.$invalid && !sgForm.name.$pristine }">
-      <label for="name" class="col-md-2 control-label">Name</label>
-      <div class="col-md-10">
-        <input name="name"
-               type="text"
-               class="form-control"
-               data-ng-model="vm.specimenGroup.name"
-               data-ng-minlength="2"
-               placeholder="A short name for the specimen group"
-               focus-me="true"
-               required />
-      </div>
-      <div class="col-md-offset-2 col-md-10">
-        <p class="help-block" data-ng-show="sgForm.name.$error.minlength">Name is too short.</p>
-      </div>
+  <!-- NAME -->
+  <div class="form-group" data-ng-class="{ 'has-error' : sgForm.name.$invalid && !sgForm.name.$pristine }">
+    <label for="name" class="col-md-2 control-label">Name</label>
+    <div class="col-md-10">
+      <input name="name"
+             type="text"
+             class="form-control"
+             data-ng-model="vm.specimenGroup.name"
+             data-ng-minlength="2"
+             placeholder="A short name for the specimen group"
+             focus-me="true"
+             required />
     </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p class="help-block" data-ng-show="sgForm.name.$error.minlength">Name is too short.</p>
+    </div>
+  </div>
 
-    <!-- DESCRIPTION -->
-    <div class="form-group">
-      <label for="description" class="col-md-2 control-label">Description</label>
-      <div class="col-md-10">
-        <textarea name="description"
-                  class="form-control"
-                  rows="10"
-                  data-ng-model="vm.specimenGroup.description"
-                  placeholder="A description of the specimen group (optional)" />
-      </div>
+  <!-- DESCRIPTION -->
+  <div class="form-group">
+    <label for="description" class="col-md-2 control-label">Description</label>
+    <div class="col-md-10">
+      <textarea name="description"
+                class="form-control"
+                rows="10"
+                data-ng-model="vm.specimenGroup.description"
+                placeholder="A description of the specimen group (optional)" />
     </div>
+  </div>
 
-    <!-- UNITS -->
-    <div class="form-group">
-      <label for="units" class="col-md-2 control-label">Units</label>
-      <div class="col-md-10">
-        <input name="units"
-               type="text"
-               class="form-control"
-               data-ng-model="vm.specimenGroup.units"
-               placeholder="the units the specimens are measured in (eg. mL, cm, etc.)"
-               required/>
-      </div>
-      <div class="col-md-offset-2 col-md-10">
-        <p data-ng-show="sgForm.units.$invalid && !sgForm.units.$pristine"
-           class="help-block">
-          Units are required.</p>
-      </div>
+  <!-- UNITS -->
+  <div class="form-group">
+    <label for="units" class="col-md-2 control-label">Units</label>
+    <div class="col-md-10">
+      <input name="units"
+             type="text"
+             class="form-control"
+             data-ng-model="vm.specimenGroup.units"
+             placeholder="the units the specimens are measured in (eg. mL, cm, etc.)"
+             required/>
     </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p data-ng-show="sgForm.units.$invalid && !sgForm.units.$pristine"
+         class="help-block">
+        Units are required.</p>
+    </div>
+  </div>
 
-    <!-- ANATOMICAL SOURCE -->
-    <div class="form-group">
-      <label for="anatomicalSourceType" class="col-md-2 control-label">Anatomical Source</label>
-      <div class="col-md-10">
-        <select class="form-control"
-                name="anatomicalSourceType"
-                data-ng-model="vm.specimenGroup.anatomicalSourceType"
-                data-ng-options="source for source in vm.anatomicalSourceTypes"
-                required>
-          <option value="">-- make a selection --</option>
-        </select>
-      </div>
-      <div class="col-md-offset-2 col-md-10">
-        <p data-ng-show="sgForm.anatomicalSourceType.$invalid && !sgForm.anatomicalSourceType.$pristine"
-           class="help-block">
-          Anatomical source is required.</p>
-      </div>
+  <!-- ANATOMICAL SOURCE -->
+  <div class="form-group">
+    <label for="anatomicalSourceType" class="col-md-2 control-label">Anatomical Source</label>
+    <div class="col-md-10">
+      <select class="form-control"
+              name="anatomicalSourceType"
+              data-ng-model="vm.specimenGroup.anatomicalSourceType"
+              data-ng-options="source for source in vm.anatomicalSourceTypes"
+              required>
+        <option value="">-- make a selection --</option>
+      </select>
     </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p data-ng-show="sgForm.anatomicalSourceType.$invalid && !sgForm.anatomicalSourceType.$pristine"
+         class="help-block">
+        Anatomical source is required.</p>
+    </div>
+  </div>
 
-    <!-- PRESERVATION TYPE -->
-    <div class="form-group">
-      <label for="perservationType" class="col-md-2 control-label">Preservation Type</label>
-      <div class="col-md-10">
-        <select class="form-control"
-                name="perservationType"
-                data-ng-model="vm.specimenGroup.preservationType"
-                data-ng-options="preserv for preserv in vm.preservTypes"
-                required>
-          <option value="">-- make a selection --</option>
-        </select>
-      </div>
-      <div class="col-md-offset-2 col-md-10">
-        <p data-ng-show="sgForm.perservationType.$invalid && !sgForm.perservationType.$pristine"
-           class="help-block">
-          Preservation type is required.</p>
-      </div>
+  <!-- PRESERVATION TYPE -->
+  <div class="form-group">
+    <label for="perservationType" class="col-md-2 control-label">Preservation Type</label>
+    <div class="col-md-10">
+      <select class="form-control"
+              name="perservationType"
+              data-ng-model="vm.specimenGroup.preservationType"
+              data-ng-options="preserv for preserv in vm.preservTypes"
+              required>
+        <option value="">-- make a selection --</option>
+      </select>
     </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p data-ng-show="sgForm.perservationType.$invalid && !sgForm.perservationType.$pristine"
+         class="help-block">
+        Preservation type is required.</p>
+    </div>
+  </div>
 
-    <!-- PRESERVATION TEMPERATURE -->
-    <div class="form-group">
-      <label for="perservationTempType" class="col-md-2 control-label">Preservation Temperature</label>
-      <div class="col-md-10">
-        <select class="form-control"
-                name="perservationTempType"
-                data-ng-model="vm.specimenGroup.preservationTemperatureType"
-                data-ng-options="temp for temp in vm.preservTempTypes"
-                required>
-          <option value="">-- make a selection --</option>
-        </select>
-      </div>
-      <div class="col-md-offset-2 col-md-10">
-        <p data-ng-show="sgForm.perservationTempType.$invalid && !sgForm.perservationTempType.$pristine"
-           class="help-block">
-          Preservation temperature is required.</p>
-      </div>
+  <!-- PRESERVATION TEMPERATURE -->
+  <div class="form-group">
+    <label for="perservationTempType" class="col-md-2 control-label">Preservation Temperature</label>
+    <div class="col-md-10">
+      <select class="form-control"
+              name="perservationTempType"
+              data-ng-model="vm.specimenGroup.preservationTemperatureType"
+              data-ng-options="temp for temp in vm.preservTempTypes"
+              required>
+        <option value="">-- make a selection --</option>
+      </select>
     </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p data-ng-show="sgForm.perservationTempType.$invalid && !sgForm.perservationTempType.$pristine"
+         class="help-block">
+        Preservation temperature is required.</p>
+    </div>
+  </div>
 
-    <!-- SPECIMEN TYPE -->
-    <div class="form-group">
-      <label for="specimenType" class="col-md-2 control-label">Specimen Type</label>
-      <div class="col-md-10">
-        <select class="form-control"
-                name="specimenType"
-                data-ng-model="vm.specimenGroup.specimenType"
-                data-ng-options="type for type in vm.specimenTypes"
-                required>
-          <option value="">-- make a selection --</option>
-        </select>
-      </div>
-      <div class="col-md-offset-2 col-md-10">
-        <p data-ng-show="sgForm.specimenType.$invalid && !sgForm.specimenType.$pristine"
-           class="help-block">
-          Specimen type is required.</p>
-      </div>
+  <!-- SPECIMEN TYPE -->
+  <div class="form-group">
+    <label for="specimenType" class="col-md-2 control-label">Specimen Type</label>
+    <div class="col-md-10">
+      <select class="form-control"
+              name="specimenType"
+              data-ng-model="vm.specimenGroup.specimenType"
+              data-ng-options="type for type in vm.specimenTypes"
+              required>
+        <option value="">-- make a selection --</option>
+      </select>
     </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p data-ng-show="sgForm.specimenType.$invalid && !sgForm.specimenType.$pristine"
+         class="help-block">
+        Specimen type is required.</p>
+    </div>
+  </div>
 
-    <!-- BUTTONS  -->
-    <div class="form-group">
-      <div class="col-md-offset-2 col-md-10">
-        <button class="btn btn-primary"
-                data-ng-disabled="sgForm.$invalid"
-                data-ng-click="vm.submit(vm.specimenGroup)">Submit</button>
-        <button type="button" class="btn" data-ng-click="vm.cancel()">Cancel</button>
-      </div>
+  <!-- BUTTONS  -->
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-10">
+      <button class="btn btn-primary"
+              data-ng-disabled="sgForm.$invalid"
+              data-ng-click="vm.submit(vm.specimenGroup)">Submit</button>
+      <button type="button" class="btn" data-ng-click="vm.cancel()">Cancel</button>
     </div>
-  </form>
-</div>
+  </div>
+</form>

@@ -1,34 +1,36 @@
 <div class="page-header">
   <h1>{{vm.study.name}} <small>Study administration </small></h1>
 </div>
-<div class="clearfix">
-  <!--
-      The 'ui-sref' attribute has to go on the 'tab' tag to have the state change when any part
-      of the tab is clicked on, not just the link.
+<!--
+    The 'ui-sref' attribute has to go on the 'tab' tag to have the state change when any part
+    of the tab is clicked on, not just the link.
   -->
-  <tabset>
-    <tab heading="Summary"
-         ui-sref="home.admin.studies.study.summary"
-         ui-sref-opts="{reload: true}"
-         active="vm.tabSummaryActive"></tab>
-    <tab heading="Participants"
-         ui-sref="home.admin.studies.study.participants"
-         ui-sref-opts="{reload: true}"
-         active="vm.tabParticipantsActive"></tab>
-    <tab heading="Specimens"
-         ui-sref="home.admin.studies.study.specimens"
-         ui-sref-opts="{reload: true}"
-         active="vm.tabSpecimensActive"></tab>
-    <tab heading="Collection"
-         ui-sref="home.admin.studies.study.collection"
-         ui-sref-opts="{reload: true}"
-         active="vm.tabCollectionActive"></tab>
-    <tab heading="Processing"
-         ui-sref="home.admin.studies.study.processing"
-         ui-sref-opts="{reload: true}"
-         active="vm.tabProcessingActive"></tab>
-  </tabset>
-  <div class="row">
-    <div ui-view="studyDetails" style="margin-top: 10px;"></div>
+<div class="row">
+  <div class="col-md-12">
+    <tabset>
+      <tab heading="Summary"
+           ui-sref="home.admin.studies.study.summary"
+           ui-sref-opts="{reload: true}"
+           active="vm.tabSummaryActive"></tab>
+      <tab heading="Participants"
+           ui-sref="home.admin.studies.study.participants"
+           ui-sref-opts="{reload: true}"
+           active="vm.tabParticipantsActive"></tab>
+      <tab heading="Specimens"
+           ui-sref="home.admin.studies.study.specimens"
+           ui-sref-opts="{reload: true}"
+           active="vm.tabSpecimensActive"></tab>
+      <tab heading="Collection"
+           ui-sref="home.admin.studies.study.collection"
+           ui-sref-opts="{reload: true}"
+           active="vm.tabCollectionActive"></tab>
+      <tab heading="Processing"
+           ui-sref="home.admin.studies.study.processing"
+           ui-sref-opts="{reload: true}"
+           active="vm.tabProcessingActive"></tab>
+    </tabset>
   </div>
+</div>
+<div class="row">
+  <div ui-view="studyDetails" style="margin-top: 10px;"></div>
 </div>

@@ -1,240 +1,238 @@
 <div class="page-header">
   <h1>{{vm.study.name}} <small>{{vm.title}}</small></h1>
 </div>
-<div class="clearfix">
-  <form class="form-horizontal"
-        name="spcLinkTypeForm"
-        novalidate>
+<form class="form-horizontal"
+      name="spcLinkTypeForm"
+      novalidate>
 
-    <!-- PROCESSING TYPE -->
-    <div class="form-group">
-      <label for="procTypeId" class="col-md-3 control-label">Processing Type</label>
-      <div class="col-md-9">
+  <!-- PROCESSING TYPE -->
+  <div class="form-group">
+    <label for="procTypeId" class="col-md-3 control-label">Processing Type</label>
+    <div class="col-md-9">
+      <select class="form-control"
+              name="procTypeId"
+              data-ng-model="vm.spcLinkType.processingTypeId"
+              data-ng-options="pt.id as pt.name for pt in vm.processingTypes | orderBy: 'name'"
+              focus-me="true"
+              required>
+        <option value="">-- choose processing type --</option>
+      </select>
+    </div>
+  </div>
+  <div class="col-md-offset-3 col-md-9">
+    <p class="help-block"
+       data-ng-show="spcLinkTypeForm.procTypeName.$error.required && !spcLinkTypeForm.procTypeName.$pristine">
+      Please select a processing type
+    </p>
+  </div>
+
+  <!-- INPUT SPECIMEN GROUP -->
+  <div class="form-group">
+    <label for="inputGroupId" class="col-md-3 control-label">Input Specimen Group</label>
+    <div class="col-md-9">
+      <select class="form-control"
+              name="inputGroupId"
+              data-ng-model="vm.spcLinkType.inputGroupId"
+              data-ng-options="sg.id as sg.name for sg in vm.specimenGroups | orderBy: 'name'"
+              required>
+        <option value="">-- choose specimen group --</option>
+      </select>
+    </div>
+  </div>
+  <div class="col-md-offset-3 col-md-9">
+    <p class="help-block"
+       data-ng-show="spcLinkTypeForm.inputGroupName.$error.required && !spcLinkTypeForm.inputGroupName.$pristine">
+      Please select a specimen group
+    </p>
+  </div>
+
+  <!-- INPUT COUNT -->
+  <div class="form-group">
+    <label for="inputCount" class="col-md-3 control-label">Input count</label>
+    <div class="col-md-2">
+      <input type="number"
+             min="1"
+             name="inputCount"
+             class="form-control input-sm"
+             data-ng-model="vm.spcLinkType.inputCount"
+             placeholder="count"
+             valid-count
+             required />
+    </div>
+  </div>
+  <div class="col-md-offset-3 col-md-9">
+    <p class="help-block"
+       data-ng-show="spcLinkTypeForm.inputCount.$error.validCount">
+      Input count should be a positive integer number greater than 1
+    </p>
+  </div>
+
+  <!-- EXPECTED INPUT CHANGE -->
+  <div class="form-group">
+    <label for="expectedInputChange" class="col-md-3 control-label">Expected Input change</label>
+    <div class="col-md-2">
+      <input type="number"
+             min="0"
+             name="expectedInputChange"
+             class="form-control input-sm"
+             data-ng-model="vm.spcLinkType.expectedInputChange"
+             placeholder="amount"
+             valid-amount
+             required />
+    </div>
+    <div class="col-md-2">
+      {{vm.specimenGroupsById[vm.spcLinkType.inputGroupId]
+      ? vm.specimenGroupsById[vm.spcLinkType.inputGroupId].units : 'amount'}}
+    </div>
+  </div>
+  <div class="col-md-offset-3 col-md-9">
+    <p class="help-block"
+       data-ng-show="spcLinkTypeForm.expectedInputChange.$error.validAmount">
+      Input change should be a positive floating point number greater than zero
+    </p>
+  </div>
+
+  <!-- INPUT CONTAINER TYPE -->
+  <div class="form-group">
+    <label for="inputContainertypeId" class="col-md-3 control-label">Input Container Type</label>
+    <div class="col-md-9">
+      <select class="form-control"
+              name="inputContainertypeId"
+              data-ng-model="vm.spcLinkType.inputContainertypeName"
+              data-ng-options="ct.id as ct.name for ct in vm.containerTypes | orderBy: 'name'">
+        <option value="">None</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- OUTPUT SPECIMEN GROUP -->
+  <div class="form-group">
+    <label for="outputGroupId" class="col-md-3 control-label">Output Specimen Group</label>
+    <div class="col-md-9">
+      <select class="form-control"
+              name="outputGroupId"
+              data-ng-model="vm.spcLinkType.outputGroupId"
+              data-ng-options="sg.id as sg.name for sg in vm.specimenGroups | orderBy: 'name'"
+              required>
+        <option value="">-- choose specimen group --</option>
+      </select>
+    </div>
+  </div>
+  <div class="col-md-offset-3 col-md-9">
+    <p class="help-block"
+       data-ng-show="spcLinkTypeForm.outputGroupName.$error.required && !spcLinkTypeForm.outputGroupName.$pristine">
+      Please select a specimen group
+    </p>
+  </div>
+
+  <!-- OUTPUT COUNT -->
+  <div class="form-group">
+    <label for="outputCount" class="col-md-3 control-label">Output count</label>
+    <div class="col-md-2">
+      <input type="number"
+             min="1"
+             name="outputCount"
+             class="form-control input-sm"
+             data-ng-model="vm.spcLinkType.outputCount"
+             placeholder="count"
+             valid-count
+             required />
+    </div>
+  </div>
+  <div class="col-md-offset-3 col-md-9">
+    <p class="help-block" data-ng-show="spcLinkTypeForm.outputCount.$error.validCount">
+      Output count should be a positive an integer number greater than 1
+    </p>
+  </div>
+
+  <!-- EXPECTED OUTPUT CHANGE -->
+  <div class="form-group">
+    <label for="expectedOutputChange" class="col-md-3 control-label">Expected Output change</label>
+    <div class="col-md-2">
+      <input type="number"
+             min="0"
+             name="expectedOutputChange"
+             class="form-control input-sm"
+             data-ng-model="vm.spcLinkType.expectedOutputChange"
+             placeholder="amount"
+             valid-amount
+             required />
+    </div>
+    <div class="col-md-2">
+      {{vm.specimenGroupsById[vm.spcLinkType.outputGroupId]
+      ? vm.specimenGroupsById[vm.spcLinkType.outputGroupId].units : 'amount'}}
+    </div>
+  </div>
+  <div class="col-md-offset-3 col-md-9">
+    <p class="help-block"
+       data-ng-show="spcLinkTypeForm.expectedOutputChange.$error.validAmount">
+      Input change should be a positive floating point number greater than zero
+    </p>
+  </div>
+
+  <!-- OUTPUT CONTAINER TYPE -->
+  <div class="form-group">
+    <label for="outputContainertypeId" class="col-md-3 control-label">Output Container Type</label>
+    <div class="col-md-9">
+      <select class="form-control"
+              name="outputContainertypeId"
+              data-ng-model="vm.spcLinkType.outputContainertypeId"
+              data-ng-options="ct.id as ct.name for ct in vm.containerTypes | orderBy: 'name'">
+        <option value="">None</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ANNOTATION TYPE DATA -->
+  <div class="form-group" data-ng-repeat="atData in vm.spcLinkType.annotationTypeData track by $index">
+    <data-ng-form name="atSubForm">
+      <div class="col-md-3 control-label">
+        <label>Annotation Type {{$index + 1}}</label>
+      </div>
+      <div class="col-md-4">
         <select class="form-control"
-                name="procTypeId"
-                data-ng-model="vm.spcLinkType.processingTypeId"
-                data-ng-options="pt.id as pt.name for pt in vm.processingTypes | orderBy: 'name'"
-                focus-me="true"
+                name="annotTypeName"
+                data-ng-model="vm.spcLinkType.annotationTypeData[$index].annotationTypeId"
+                data-ng-options="annotType.id as annotType.name for annotType in vm.annotTypes | orderBy: 'name'"
                 required>
-          <option value="">-- choose processing type --</option>
+          <option value="">-- choose annotation type --</option>
         </select>
       </div>
-    </div>
-    <div class="col-md-offset-3 col-md-9">
-      <p class="help-block"
-         data-ng-show="spcLinkTypeForm.procTypeName.$error.required && !spcLinkTypeForm.procTypeName.$pristine">
-        Please select a processing type
-      </p>
-    </div>
-
-    <!-- INPUT SPECIMEN GROUP -->
-    <div class="form-group">
-      <label for="inputGroupId" class="col-md-3 control-label">Input Specimen Group</label>
-      <div class="col-md-9">
-        <select class="form-control"
-                name="inputGroupId"
-                data-ng-model="vm.spcLinkType.inputGroupId"
-                data-ng-options="sg.id as sg.name for sg in vm.specimenGroups | orderBy: 'name'"
-                required>
-          <option value="">-- choose specimen group --</option>
-        </select>
-      </div>
-    </div>
-    <div class="col-md-offset-3 col-md-9">
-      <p class="help-block"
-         data-ng-show="spcLinkTypeForm.inputGroupName.$error.required && !spcLinkTypeForm.inputGroupName.$pristine">
-        Please select a specimen group
-      </p>
-    </div>
-
-    <!-- INPUT COUNT -->
-    <div class="form-group">
-      <label for="inputCount" class="col-md-3 control-label">Input count</label>
       <div class="col-md-2">
-        <input type="number"
-               min="1"
-               name="inputCount"
-               class="form-control input-sm"
-               data-ng-model="vm.spcLinkType.inputCount"
-               placeholder="count"
-               valid-count
-               required />
-        </div>
-    </div>
-    <div class="col-md-offset-3 col-md-9">
-      <p class="help-block"
-         data-ng-show="spcLinkTypeForm.inputCount.$error.validCount">
-        Input count should be a positive integer number greater than 1
-      </p>
-    </div>
-
-    <!-- EXPECTED INPUT CHANGE -->
-    <div class="form-group">
-      <label for="expectedInputChange" class="col-md-3 control-label">Expected Input change</label>
-      <div class="col-md-2">
-        <input type="number"
-               min="0"
-               name="expectedInputChange"
-               class="form-control input-sm"
-               data-ng-model="vm.spcLinkType.expectedInputChange"
-               placeholder="amount"
-               valid-amount
-               required />
-        </div>
-      <div class="col-md-2">
-        {{vm.specimenGroupsById[vm.spcLinkType.inputGroupId]
-        ? vm.specimenGroupsById[vm.spcLinkType.inputGroupId].units : 'amount'}}
-        </div>
-    </div>
-    <div class="col-md-offset-3 col-md-9">
-      <p class="help-block"
-         data-ng-show="spcLinkTypeForm.expectedInputChange.$error.validAmount">
-        Input change should be a positive floating point number greater than zero
-      </p>
-    </div>
-
-    <!-- INPUT CONTAINER TYPE -->
-    <div class="form-group">
-      <label for="inputContainertypeId" class="col-md-3 control-label">Input Container Type</label>
-      <div class="col-md-9">
-        <select class="form-control"
-                name="inputContainertypeId"
-                data-ng-model="vm.spcLinkType.inputContainertypeName"
-                data-ng-options="ct.id as ct.name for ct in vm.containerTypes | orderBy: 'name'">
-          <option value="">None</option>
-        </select>
+        <input name="required" type="checkbox" data-ng-model="vm.spcLinkType.annotationTypeData[$index].required"/> Required
       </div>
-    </div>
-
-    <!-- OUTPUT SPECIMEN GROUP -->
-    <div class="form-group">
-      <label for="outputGroupId" class="col-md-3 control-label">Output Specimen Group</label>
-      <div class="col-md-9">
-        <select class="form-control"
-                name="outputGroupId"
-                data-ng-model="vm.spcLinkType.outputGroupId"
-                data-ng-options="sg.id as sg.name for sg in vm.specimenGroups | orderBy: 'name'"
-                required>
-          <option value="">-- choose specimen group --</option>
-        </select>
-      </div>
-    </div>
-    <div class="col-md-offset-3 col-md-9">
-      <p class="help-block"
-         data-ng-show="spcLinkTypeForm.outputGroupName.$error.required && !spcLinkTypeForm.outputGroupName.$pristine">
-        Please select a specimen group
-      </p>
-    </div>
-
-    <!-- OUTPUT COUNT -->
-    <div class="form-group">
-      <label for="outputCount" class="col-md-3 control-label">Output count</label>
-        <div class="col-md-2">
-          <input type="number"
-                 min="1"
-                 name="outputCount"
-                 class="form-control input-sm"
-                 data-ng-model="vm.spcLinkType.outputCount"
-                 placeholder="count"
-                 valid-count
-                 required />
-        </div>
-    </div>
-    <div class="col-md-offset-3 col-md-9">
-      <p class="help-block" data-ng-show="spcLinkTypeForm.outputCount.$error.validCount">
-        Output count should be a positive an integer number greater than 1
-      </p>
-    </div>
-
-    <!-- EXPECTED OUTPUT CHANGE -->
-    <div class="form-group">
-      <label for="expectedOutputChange" class="col-md-3 control-label">Expected Output change</label>
-      <div class="col-md-2">
-        <input type="number"
-               min="0"
-               name="expectedOutputChange"
-               class="form-control input-sm"
-               data-ng-model="vm.spcLinkType.expectedOutputChange"
-               placeholder="amount"
-               valid-amount
-               required />
-        </div>
-        <div class="col-md-2">
-          {{vm.specimenGroupsById[vm.spcLinkType.outputGroupId]
-          ? vm.specimenGroupsById[vm.spcLinkType.outputGroupId].units : 'amount'}}
-        </div>
-    </div>
-    <div class="col-md-offset-3 col-md-9">
-      <p class="help-block"
-         data-ng-show="spcLinkTypeForm.expectedOutputChange.$error.validAmount">
-        Input change should be a positive floating point number greater than zero
-      </p>
-    </div>
-
-    <!-- OUTPUT CONTAINER TYPE -->
-    <div class="form-group">
-      <label for="outputContainertypeId" class="col-md-3 control-label">Output Container Type</label>
-      <div class="col-md-9">
-        <select class="form-control"
-                name="outputContainertypeId"
-                data-ng-model="vm.spcLinkType.outputContainertypeId"
-                data-ng-options="ct.id as ct.name for ct in vm.containerTypes | orderBy: 'name'">
-          <option value="">None</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- ANNOTATION TYPE DATA -->
-    <div class="form-group" data-ng-repeat="atData in vm.spcLinkType.annotationTypeData track by $index">
-      <data-ng-form name="atSubForm">
-        <div class="col-md-3 control-label">
-          <label>Annotation Type {{$index + 1}}</label>
-        </div>
-        <div class="col-md-4">
-          <select class="form-control"
-                  name="annotTypeName"
-                  data-ng-model="vm.spcLinkType.annotationTypeData[$index].annotationTypeId"
-                  data-ng-options="annotType.id as annotType.name for annotType in vm.annotTypes | orderBy: 'name'"
-                  required>
-            <option value="">-- choose annotation type --</option>
-          </select>
-        </div>
-        <div class="col-md-2">
-          <input name="required" type="checkbox" data-ng-model="vm.spcLinkType.annotationTypeData[$index].required"/> Required
-        </div>
-        <div class="col-md-1">
-          <button class="btn btn-xs btn-warning"
-                  data-ng-click="vm.removeAnnotType(atData)">
-            <i class="glyphicon glyphicon-minus"></i> Remove
-          </button>
-        </div>
-        <div class="col-md-offset-3 col-md-9">
-          <p class="help-block" data-ng-show="atSubForm.name.$error.required && !atSubForm.name.$pristine">
-            Please select an annotation type
-          </p>
-        </div>
-      </data-ng-form>
-    </div>
-
-    <!-- ANNOTATION TYPE DATA ADD -->
-    <div class="form-group">
-      <div class="col-md-3">
-        <button class="btn btn-sm btn-primary pull-right"
-                data-ng-disabled="annotTypeNames == 0"
-                data-ng-click="vm.addAnnotType()">
-           Add annotation type <i class="glyphicon glyphicon-plus"></i>
+      <div class="col-md-1">
+        <button class="btn btn-xs btn-warning"
+                data-ng-click="vm.removeAnnotType(atData)">
+          <i class="glyphicon glyphicon-minus"></i> Remove
         </button>
       </div>
-    </div>
-
-    <!-- BUTTONS  -->
-    <div class="form-group">
       <div class="col-md-offset-3 col-md-9">
-        <button class="btn btn-primary"
-                data-ng-disabled="spcLinkTypeForm.$invalid"
-                data-ng-click="vm.submit(vm.spcLinkType)">Submit</button>
-        <button type="button" class="btn" data-ng-click="vm.cancel()">Cancel</button>
+        <p class="help-block" data-ng-show="atSubForm.name.$error.required && !atSubForm.name.$pristine">
+          Please select an annotation type
+        </p>
       </div>
+    </data-ng-form>
+  </div>
+
+  <!-- ANNOTATION TYPE DATA ADD -->
+  <div class="form-group">
+    <div class="col-md-3">
+      <button class="btn btn-sm btn-primary pull-right"
+              data-ng-disabled="annotTypeNames == 0"
+              data-ng-click="vm.addAnnotType()">
+        Add annotation type <i class="glyphicon glyphicon-plus"></i>
+      </button>
     </div>
-  </form>
-</div>
+  </div>
+
+  <!-- BUTTONS  -->
+  <div class="form-group">
+    <div class="col-md-offset-3 col-md-9">
+      <button class="btn btn-primary"
+              data-ng-disabled="spcLinkTypeForm.$invalid"
+              data-ng-click="vm.submit(vm.spcLinkType)">Submit</button>
+      <button type="button" class="btn" data-ng-click="vm.cancel()">Cancel</button>
+    </div>
+  </div>
+</form>

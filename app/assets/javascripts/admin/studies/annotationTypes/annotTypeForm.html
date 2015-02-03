@@ -1,141 +1,139 @@
 <div class="page-header">
   <h1>{{vm.study.name}} <small>{{vm.title}}</small></h1>
 </div>
-<div class="clearfix">
-  <form class="form-horizontal"
-        name="annotTypeForm"
-        novalidate>
+<form class="form-horizontal"
+      name="annotTypeForm"
+      novalidate>
 
-    <!-- NAME -->
-    <div class="form-group">
-      <label for="name" class="col-md-2 control-label">Name</label>
-      <div class="col-md-10">
-        <input name="name"
-               type="text"
-               class="form-control"
-               data-ng-model="vm.annotType.name"
-               data-ng-minlength="2"
-               placeholder="A short name for the annotation type"
-               focus-me="true"
-               required/>
-      </div>
-      <div class="col-md-offset-2 col-md-10">
-        <p class="help-block" data-ng-show="annotTypeForm.name.$error.minlength">Name is too short.</p>
-      </div>
+  <!-- NAME -->
+  <div class="form-group">
+    <label for="name" class="col-md-2 control-label">Name</label>
+    <div class="col-md-10">
+      <input name="name"
+             type="text"
+             class="form-control"
+             data-ng-model="vm.annotType.name"
+             data-ng-minlength="2"
+             placeholder="A short name for the annotation type"
+             focus-me="true"
+             required/>
     </div>
-
-    <!-- DESCRIPTION -->
-    <div class="form-group">
-      <label for="description" class="col-md-2 control-label">Description</label>
-      <div class="col-md-10">
-        <textarea name="description"
-                  class="form-control"
-                  rows="10"
-                  data-ng-model="vm.annotType.description"
-                  placeholder="A description of the annotation type (optional)" />
-      </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p class="help-block" data-ng-show="annotTypeForm.name.$error.minlength">Name is too short.</p>
     </div>
+  </div>
 
-    <!-- REQUIRED -->
-    <div class="form-group" data-ng-if="vm.hasRequiredField">
-      <label for="required" class="col-md-2 control-label">Required</label>
-      <div class="col-md-10">
-        <input name="required"
-               type="checkbox"
-               data-ng-model="vm.annotType.required"/>
-      </div>
+  <!-- DESCRIPTION -->
+  <div class="form-group">
+    <label for="description" class="col-md-2 control-label">Description</label>
+    <div class="col-md-10">
+      <textarea name="description"
+                class="form-control"
+                rows="10"
+                data-ng-model="vm.annotType.description"
+                placeholder="A description of the annotation type (optional)" />
     </div>
+  </div>
 
-    <!--VALUE TYPE  -->
-    <div class="form-group">
-      <label for="valueType" class="col-md-2 control-label">Value Type</label>
-      <div class="col-md-10">
-        <select class="form-control"
-                name="valueType"
-                data-ng-model="vm.annotType.valueType"
-                data-ng-options="valueType for valueType in vm.valueTypes"
-                data-ng-change="vm.valueTypeChange()"
-                required>
-          <option value="">-- make a selection --</option>
-        </select>
-      </div>
-      <div class="col-md-offset-2 col-md-10">
-        <p data-ng-show="annotTypeForm.valueType.$invalid && !annotTypeForm.valueType.$pristine"
-           class="help-block">
+  <!-- REQUIRED -->
+  <div class="form-group" data-ng-if="vm.hasRequiredField">
+    <label for="required" class="col-md-2 control-label">Required</label>
+    <div class="col-md-10">
+      <input name="required"
+             type="checkbox"
+             data-ng-model="vm.annotType.required"/>
+    </div>
+  </div>
+
+  <!--VALUE TYPE  -->
+  <div class="form-group">
+    <label for="valueType" class="col-md-2 control-label">Value Type</label>
+    <div class="col-md-10">
+      <select class="form-control"
+              name="valueType"
+              data-ng-model="vm.annotType.valueType"
+              data-ng-options="valueType for valueType in vm.valueTypes"
+              data-ng-change="vm.valueTypeChange()"
+              required>
+        <option value="">-- make a selection --</option>
+      </select>
+    </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p data-ng-show="annotTypeForm.valueType.$invalid && !annotTypeForm.valueType.$pristine"
+         class="help-block">
         Value type is required.</p>
-      </div>
     </div>
+  </div>
 
-    <!-- SELECTIONS -->
-    <div class="form-group" data-ng-if="vm.annotType.valueType === 'Select'">
-      <label for="maxValueCount" class="col-md-2 control-label">Selections</label>
-      <div class="col-md-5">
-        <input name="maxValueCount"
-               type="radio"
-               data-ng-model="vm.annotType.maxValueCount"
-               value="1"
-               ng-required="vm.maxValueCountRequired()"
-               str2integer /> Single selection only
-      </div>
-      <div class="col-md-5">
-        <input type="radio"
-               data-ng-model="vm.annotType.maxValueCount"
-               value="2"
-               ng-required="vm.maxValueCountRequired()"
-               str2integer /> Multiple selections allowed
-      </div>
+  <!-- SELECTIONS -->
+  <div class="form-group" data-ng-if="vm.annotType.valueType === 'Select'">
+    <label for="maxValueCount" class="col-md-2 control-label">Selections</label>
+    <div class="col-md-5">
+      <input name="maxValueCount"
+             type="radio"
+             data-ng-model="vm.annotType.maxValueCount"
+             value="1"
+             ng-required="vm.maxValueCountRequired()"
+             str2integer /> Single selection only
     </div>
-
-    <!-- SELECTION OPTIONS -->
-    <div class="form-group"
-         data-ng-if="vm.annotType.valueType === 'Select'"
-         data-ng-repeat="opt in vm.annotType.options track by $index">
-      <data-ng-form name="subForm">
-        <div class="col-md-2 control-label">
-          <label>Selection Option {{$index + 1}}</label>
-        </div>
-        <div class="col-md-8">
-          <input type="text"
-                 name="option"
-                 class="form-control"
-                 data-ng-model="vm.annotType.options[$index]"
-                 placeholder="Enter an option"
-                 required />
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-sm btn-warning"
-                  data-ng-click="vm.optionRemove(opt)"
-                  data-ng-disabled="vm.removeButtonDisabled()">
-            <i class="glyphicon glyphicon-minus"></i> Remove
-          </button>
-        </div>
-        <div class="col-md-offset-2 col-md-10">
-          <p class="help-block" data-ng-show="subForm.option.$invalid && !subForm.option.$pristine">
-            A value is required
-          </p>
-        </div>
-      </data-ng-form>
+    <div class="col-md-5">
+      <input type="radio"
+             data-ng-model="vm.annotType.maxValueCount"
+             value="2"
+             ng-required="vm.maxValueCountRequired()"
+             str2integer /> Multiple selections allowed
     </div>
+  </div>
 
-    <!-- ADD SELECTION OPTION -->
-    <div class="form-group"
-         data-ng-if="vm.annotType.valueType === 'Select'">
+  <!-- SELECTION OPTIONS -->
+  <div class="form-group"
+       data-ng-if="vm.annotType.valueType === 'Select'"
+       data-ng-repeat="opt in vm.annotType.options track by $index">
+    <data-ng-form name="subForm">
+      <div class="col-md-2 control-label">
+        <label>Selection Option {{$index + 1}}</label>
+      </div>
+      <div class="col-md-8">
+        <input type="text"
+               name="option"
+               class="form-control"
+               data-ng-model="vm.annotType.options[$index]"
+               placeholder="Enter an option"
+               required />
+      </div>
       <div class="col-md-2">
-        <button class="btn btn-sm btn-primary pull-right"
-                data-ng-click="vm.optionAdd()">
-          Add option <i class="glyphicon glyphicon-plus"></i>
+        <button class="btn btn-sm btn-warning"
+                data-ng-click="vm.optionRemove(opt)"
+                data-ng-disabled="vm.removeButtonDisabled()">
+          <i class="glyphicon glyphicon-minus"></i> Remove
         </button>
       </div>
-    </div>
-
-    <!-- BUTTONS -->
-    <div class="form-group">
       <div class="col-md-offset-2 col-md-10">
-        <button class="btn btn-primary"
-                data-ng-disabled="annotTypeForm.$invalid"
-                data-ng-click="vm.submit(vm.annotType)">Submit</button>
-        <button type="button" class="btn" data-ng-click="vm.cancel()">Cancel</button>
+        <p class="help-block" data-ng-show="subForm.option.$invalid && !subForm.option.$pristine">
+          A value is required
+        </p>
       </div>
+    </data-ng-form>
+  </div>
+
+  <!-- ADD SELECTION OPTION -->
+  <div class="form-group"
+       data-ng-if="vm.annotType.valueType === 'Select'">
+    <div class="col-md-2">
+      <button class="btn btn-sm btn-primary pull-right"
+              data-ng-click="vm.optionAdd()">
+        Add option <i class="glyphicon glyphicon-plus"></i>
+      </button>
     </div>
-  </form>
-</div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-10">
+      <button class="btn btn-primary"
+              data-ng-disabled="annotTypeForm.$invalid"
+              data-ng-click="vm.submit(vm.annotType)">Submit</button>
+      <button type="button" class="btn" data-ng-click="vm.cancel()">Cancel</button>
+    </div>
+  </div>
+</form>

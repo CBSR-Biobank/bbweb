@@ -41,22 +41,6 @@ define(['./module'], function(module) {
           templateUrl: '/assets/javascripts/users/forgot.html',
           controller: 'ForgotPasswordCtrl as vm'
         }
-      },
-      data: {
-        emailNotFound: false
-      }
-    });
-
-    $stateProvider.state('home.users.forgot.emailNotFound', {
-      url: '^/forgot',
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/users/forgot.html',
-          controller: 'ForgotPasswordCtrl as vm'
-        }
-      },
-      data: {
-        emailNotFound: true
       }
     });
 

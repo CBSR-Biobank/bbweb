@@ -1,18 +1,18 @@
 <div class="page-header">
   <h1>Welcome to Biobank</h1>
 </div>
-<div class="clearfix">
+<div class="container" ng-if="! vm.userIsAuthenticated">
   <div class="row">
     <div class="col-md-12">
+      Please log in.
     </div>
   </div>
-
-  <div class="row" ng-if="! vm.userIsAuthenticated">
-    Please log in.
-  </div>
-
-  <div class="row" ng-if="vm.userIsAuthenticated">
-    <h2>Select a task</h2>
+</div>
+<div class="container" ng-if="vm.userIsAuthenticated">
+  <div class="row">
+    <div class="col-md-12" ng-if="vm.userIsAuthenticated">
+      <h2>Select a task</h2>
+    </div>
 
     <!-- COLLECTION -->
     <div class="col-md-4">

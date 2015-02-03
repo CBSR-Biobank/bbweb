@@ -1,84 +1,81 @@
 <div class="page-header">
   <h1>Select a task</h1>
 </div>
-<div class="clearfix">
-  <div class="row">
+<div class="row">
 
-    <!-- STUDY ADMIN -->
-    <div class="col-md-4">
-      <div class="panel panel-default" style="margin-top: 10px;">
-        <div class="panel-heading">
-          <h3 class="panel-title">
-            Study Administration
-            <span class="btn-group pull-right">
-              <a ui-sref="home.admin.studies" class="btn btn-xs btn-primary" type="button">Select</a>
-            </span>
-          </h3>
-        </div>
-        <div class="panel-body">
-          <p>Add a new study or make changes to existing studies.</p>
-        </div>
-        <ul class="list-group">
-          <li class="list-group-item">
-            <span class="badge">{{vm.counts.studies}}</span>
-            Configured studies
-            <!-- FIXME: add count of enabled studies here -->
-          </li>
-        </ul>
+  <!-- STUDY ADMIN -->
+  <div class="col-md-4">
+    <div class="panel panel-default" style="margin-top: 10px;">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          Study Administration
+          <span class="btn-group pull-right">
+            <a ui-sref="home.admin.studies" class="btn btn-xs btn-primary" type="button">Select</a>
+          </span>
+        </h3>
       </div>
-    </div>
-
-    <!-- CENTRE ADMIN -->
-    <div class="col-md-4">
-      <div class="panel panel-default" style="margin-top: 10px;">
-        <div class="panel-heading">
-          <h3 class="panel-title">
-            Center Administration
-
-            <span class="btn-group pull-right">
-              <a ui-sref="home.admin.centres" class="btn btn-xs btn-primary" type="button">Select</a>
-            </span>
-
-          </h3>
-        </div>
-        <div class="panel-body">
-          <p>Add a new centre or make changes to existing centres.</p>
-        </div>
-        <ul class="list-group">
-          <li class="list-group-item">
-            <span class="badge">{{vm.counts.centres}}</span>
-            Configured centres
-            <!-- FIXME: add count of enabled centres here -->
-          </li>
-        </ul>
+      <div class="panel-body">
+        <p>Add a new study or make changes to existing studies.</p>
       </div>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <span class="badge">{{vm.counts.studies}}</span>
+          Configured studies
+          <!-- FIXME: add count of enabled studies here -->
+        </li>
+      </ul>
     </div>
-
-    <!-- USER ADMIN -->
-    <div class="col-md-4">
-      <div class="panel panel-default" style="margin-top: 10px;">
-        <div class="panel-heading">
-          <h3 class="panel-title">
-            User Administration
-
-            <span class="btn-group pull-right">
-              <a ui-sref="home.admin.users" class="btn btn-xs btn-primary" type="button">Select</a>
-            </span>
-
-          </h3>
-        </div>
-        <div class="panel-body">
-          <p>Activate users, lock out existing users, or manage user permissions.</p>
-        </div>
-        <ul class="list-group">
-          <li class="list-group-item">
-            <span class="badge">{{vm.counts.users}}</span>
-            Active users
-          </li>
-        </ul>
-      </div>
-    </div>
-
   </div>
-  <div ui-view></div>
+
+  <!-- CENTRE ADMIN -->
+  <div class="col-md-4">
+    <div class="panel panel-default" style="margin-top: 10px;">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          Center Administration
+
+          <span class="btn-group pull-right">
+            <a ui-sref="home.admin.centres" class="btn btn-xs btn-primary" type="button">Select</a>
+          </span>
+
+        </h3>
+      </div>
+      <div class="panel-body">
+        <p>Add a new centre or make changes to existing centres.</p>
+      </div>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <span class="badge">{{vm.counts.centres}}</span>
+          Configured centres
+          <!-- FIXME: add count of enabled centres here -->
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- USER ADMIN -->
+  <div class="col-md-4">
+    <div class="panel panel-default" style="margin-top: 10px;">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          User Administration
+
+          <span class="btn-group pull-right">
+            <a ui-sref="home.admin.users" class="btn btn-xs btn-primary" type="button">Select</a>
+          </span>
+
+        </h3>
+      </div>
+      <div class="panel-body">
+        <p>Activate users, lock out existing users, or manage user permissions.</p>
+      </div>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <span class="badge">{{vm.counts.users}}</span>
+          Active users
+        </li>
+      </ul>
+    </div>
+  </div>
+
 </div>
