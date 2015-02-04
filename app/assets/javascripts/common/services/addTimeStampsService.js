@@ -20,7 +20,7 @@ define(['../module'], function(module) {
     function get(domainEntity) {
       var data = [];
       data.push({name: 'Added:', value: $filter('timeago')(domainEntity.timeAdded)});
-      if (domainEntity.timeModified !== null) {
+      if (!!domainEntity.timeModified) {
         data.push({name: 'Last updated:', value: $filter('timeago')(domainEntity.timeModified)});
       }
       return data;

@@ -1,5 +1,6 @@
 package org.biobank.domain
 
+import org.biobank.dto._
 import org.biobank.domain._
 import org.biobank.domain.user._
 import org.biobank.domain.study._
@@ -39,8 +40,11 @@ object JsonHelper extends MustMatchers {
   }
 
   def compareObj(json: JsValue, study: StudyNameDto)  = {
-    (json \ "id").as[String]                     mustBe (study.id)
-    (json \ "name").as[String]                   mustBe (study.name)
+    (json \ "id").as[String] mustBe (study.id)
+
+    (json \ "name").as[String] mustBe (study.name)
+
+    (json \ "status").as[String] mustBe (study.status)
   }
 
   def compareObj(json: JsValue, specimenGroup: SpecimenGroup) = {

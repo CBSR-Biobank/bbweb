@@ -1,6 +1,7 @@
 package org.biobank.controllers.study
 
 import org.biobank.controllers._
+import org.biobank.dto._
 import org.biobank.domain.study.{ Study, StudyId }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
@@ -26,7 +27,7 @@ class StudiesControllerSpec extends ControllerFixture {
   def uri(study: Study): String = uri + s"/${study.id.id}"
 
   def compareStudyNameDto(json: JsValue, study: Study) {
-    compareObj(json, StudyNameDto(study.id.id, study.name))
+    compareObj(json, StudyNameDto(study.id.id, study.name, study.status))
   }
 
   def compareObjs(jsonList: List[JsObject], studies: List[Study]) = {

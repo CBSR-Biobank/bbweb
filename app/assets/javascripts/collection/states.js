@@ -10,17 +10,23 @@ define(['./module'], function(module) {
 
   function config($urlRouterProvider, $stateProvider, authorizationProvider) {
 
+    resolveStudyCounts.$inject = ['studiesService'];
+    function resolveStudyCounts(studiesService) {
+      return studiesService.getStudyCounts();
+    }
+
     $urlRouterProvider.otherwise('/');
 
     $stateProvider.state('home.collection', {
       url: '^/collection',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
+        user: authorizationProvider.requireAuthenticatedUser,
+        studyCounts: resolveStudyCounts
       },
       views: {
         'main@': {
           templateUrl: '/assets/javascripts/collection/collection.html',
-          controller: 'CollectionCtrl'
+          controller: 'CollectionCtrl as vm'
         }
       },
       data: {

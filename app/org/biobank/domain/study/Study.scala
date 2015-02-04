@@ -113,15 +113,15 @@ case class DisabledStudy(
     specimenGroupCount: Int,
     collectionEventTypeCount: Int): DomainValidation[EnabledStudy] = {
 
-    def checkSpecimenGroupCount =
-      if (specimenGroupCount > 0) true.success else DomainError("no specimen groups").failureNel
-
-    def checkCollectionEventTypeCount =
-      if (collectionEventTypeCount > 0) true.success else DomainError("no collection event types").failureNel
-
     for {
-      sgCount <- checkSpecimenGroupCount
-      cetCount <- checkCollectionEventTypeCount
+      sgCount <- {
+        if (specimenGroupCount > 0) true.success
+        else DomainError("no specimen groups").failureNel
+      }
+      cetCount <- {
+        if (collectionEventTypeCount > 0) true.success
+        else DomainError("no collection event types").failureNel
+      }
       enabledStudy <- EnabledStudy.create(this)
     } yield enabledStudy
   }
@@ -197,7 +197,7 @@ object EnabledStudy extends StudyValidations {
       validateAndIncrementVersion(study.version) |@|
       validateString(study.name, NameMinLength, InvalidName) |@|
       validateNonEmptyOption(study.description, NonEmptyDescription)) {
-        EnabledStudy(_, _, study.timeAdded, None, _, _)
+        EnabledStudy(_, _, study.timeAdded, Some(DateTime.now), _, _)
       }
   }
 }

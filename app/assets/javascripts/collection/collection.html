@@ -1,3 +1,43 @@
 <div class="page-header">
   <h1>Specimen collection</h1>
 </div>
+<div class="row" ng-if="!vm.haveEnabledStudies">
+  <div class="col-md-12">
+    <div class="alert alert-warning" role="alert">
+      <p><span class="glyphicon glyphicon-warning-sign"></span>
+        No studies are enabled. Cannot process any specimens yet.</p>
+    </div>
+  </div>
+</div>
+<div class="row" ng-if="vm.haveEnabledStudies">
+  <div class="col-md-12">
+    <h4>Select the study you wish to work with:</h4>
+  </div>
+</div>
+<div class="row" ng-if="vm.haveEnabledStudies">
+  <div class="col-md-6">
+    <select-study get-header="vm.getEnabledStudiesPanelHeader"
+                  get-studies="vm.updateEnabledStudies"
+                  icon="glyphicon-ok-circle"
+                  page-size="10"
+                  messageNoResults="No results match the criteria."
+                  navigate-state-name="home.collection.study"
+                  navigate-state-param-name="studyId">
+
+  </div>
+  <div class="col-md-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <strong>Contributed to</strong>
+      </div>
+
+      <ul class="list-group">
+        <li class="list-group-item">
+          <p class="alert alert-warning" role="alert">
+            <span class="glyphicon glyphicon-warning-sign"></span> You have not contributed to any studies.
+          </p>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
