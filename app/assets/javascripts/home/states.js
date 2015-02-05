@@ -14,7 +14,7 @@ define(['./module'], function(module) {
 
     $stateProvider
       .state('home', {
-        url: '/index',
+        url: '/',
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/home/home.html',

@@ -3,12 +3,12 @@ define(['./module'], function(module) {
 
   module.service('centreLocationService', centreLocationService);
 
-  centreLocationService.$inject = ['biobankXhrReqService'];
+  centreLocationService.$inject = ['biobankApi'];
 
   /**
    *
    */
-  function centreLocationService(biobankXhrReqService) {
+  function centreLocationService(biobankApi) {
     var service = {
       list:   list,
       query:  query,
@@ -34,11 +34,11 @@ define(['./module'], function(module) {
     }
 
     function list(centreId) {
-      return biobankXhrReqService.call('GET', uri(centreId));
+      return biobankApi.call('GET', uri(centreId));
     }
 
     function query(centreId, locationId) {
-      return biobankXhrReqService.call(
+      return biobankApi.call(
         'GET',
         uri(centreId) + '?locationId=' + locationId);
     }
@@ -55,11 +55,11 @@ define(['./module'], function(module) {
         countryIsoCode: location.countryIsoCode
       };
 
-      return biobankXhrReqService.call('POST', uri(centre.id), cmd);
+      return biobankApi.call('POST', uri(centre.id), cmd);
     }
 
     function remove(centreId, locationId) {
-      return biobankXhrReqService.call('DELETE', uri(centreId, locationId));
+      return biobankApi.call('DELETE', uri(centreId, locationId));
     }
 
   }

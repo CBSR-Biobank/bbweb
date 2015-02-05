@@ -58,41 +58,40 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  "com.typesafe.akka"         %% "akka-persistence-experimental"  % "2.3.4"              % "compile",
-  "com.typesafe.akka"         %% "akka-remote"                    % "2.3.4"              % "compile",
-  "com.typesafe.akka"         %% "akka-slf4j"                     % "2.3.2"              % "compile",
-  "org.scala-stm"             %% "scala-stm"                      % "0.7"                % "compile",
-  "org.scalaz"                %% "scalaz-core"                    % "7.1.0"              % "compile",
-  "com.github.ironfish"       %% "akka-persistence-mongo-casbah"  % "0.7.5"              % "compile",
-  "com.github.t3hnar"         %% "scala-bcrypt"                   % "2.4",
-  "com.typesafe.play.plugins" %% "play-plugins-mailer"            % "2.3.0",
-  "org.scaldi"                %% "scaldi-play"                    % "0.4.1",
-  "org.scaldi"                %% "scaldi-akka"                    % "0.4",
+  "com.typesafe.akka"         %% "akka-persistence-experimental"     % "2.3.9"              % "compile",
+  "com.typesafe.akka"         %% "akka-remote"                       % "2.3.9"              % "compile",
+  "com.typesafe.akka"         %% "akka-slf4j"                        % "2.3.9"              % "compile",
+  "org.scala-stm"             %% "scala-stm"                         % "0.7"                % "compile",
+  "org.scalaz"                %% "scalaz-core"                       % "7.1.1"              % "compile",
+  "com.github.ironfish"       %% "akka-persistence-mongo-casbah"     % "0.7.5"              % "compile",
+  "com.github.t3hnar"         %% "scala-bcrypt"                      % "2.4",
+  "com.typesafe.play.plugins" %% "play-plugins-mailer"               % "2.3.1",
+  "org.scaldi"                %% "scaldi-play"                       % "0.5.3",
+  "org.scaldi"                %% "scaldi-akka"                       % "0.5.3",
   // WebJars infrastructure
-  "org.webjars"               %  "webjars-locator"                % "0.19" ,
-  "org.webjars"               %% "webjars-play"                   % "2.3.0-2",
+  "org.webjars"               %  "webjars-locator"                   % "0.19" ,
+  "org.webjars"               %% "webjars-play"                      % "2.3.0-2",
   // WebJars dependencies
-  "org.webjars"               %  "requirejs"                      % "2.1.15",
-  "org.webjars"               %  "underscorejs"                   % "1.7.0-1",
-  "org.webjars"               %  "jquery"                         % "2.1.3",
-  "org.webjars"               %  "bootstrap"                      % "3.3.2" exclude(
+  "org.webjars"               %  "requirejs"                         % "2.1.15",
+  "org.webjars"               %  "underscorejs"                      % "1.7.0-1",
+  "org.webjars"               %  "jquery"                            % "2.1.3",
+  "org.webjars"               %  "bootstrap"                         % "3.3.2" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angularjs"                      % "1.3.10" exclude(
+  "org.webjars"               %  "angularjs"                         % "1.3.11" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angular-ui-bootstrap"           % "0.12.0",
-  "org.webjars"               %  "angular-strap"                  % "2.1.4",
-  "org.webjars"               %  "angular-ui-router"              % "0.2.13" exclude(
+  "org.webjars"               %  "angular-ui-bootstrap"              % "0.12.0",
+  "org.webjars"               %  "angular-ui-router"                 % "0.2.13" exclude(
     "org.webjars", "angularjs"),
-  "org.webjars"               %  "ng-table"                       % "0.3.3",
-  "org.webjars"               %  "toastr"                         % "2.1.0"exclude(
+  "org.webjars"               %  "ng-table"                          % "0.3.3",
+  "org.webjars"               %  "toastr"                            % "2.1.0" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angular-sanitize"               % "1.3.0-beta.18" exclude(
+  "org.webjars"               %  "angular-sanitize"                  % "1.3.11" exclude(
     "org.webjars", "angularjs"),
-  "org.webjars"               %  "angular-paginate-anything"      % "3.1.1",
+  "org.webjars"               %  "momentjs"                          % "2.9.0",
   // Testing
-  "com.typesafe.akka"         %% "akka-testkit"                   % "2.3.2"              % "test",
-  "org.scalatestplus"         %% "play"                           % "1.2.0"              % "test",
-  "org.pegdown"               % "pegdown"                         % "1.0.2"              % "test"
+  "com.typesafe.akka"         %% "akka-testkit"                      % "2.3.9"              % "test",
+  "org.scalatestplus"         %% "play"                              % "1.2.0"              % "test",
+  "org.pegdown"               % "pegdown"                            % "1.4.2"              % "test"
 )
 
 JsEngineKeys.engineType := JsEngineKeys.EngineType.Node

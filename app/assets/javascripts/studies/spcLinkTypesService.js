@@ -3,12 +3,12 @@ define(['./module'], function(module) {
 
   module.service('spcLinkTypesService', SpcLinkTypesService);
 
-  SpcLinkTypesService.$inject = ['biobankXhrReqService'];
+  SpcLinkTypesService.$inject = ['biobankApi'];
 
   /**
    * Service to access Spcecimen Link Types.
    */
-  function SpcLinkTypesService(biobankXhrReqService) {
+  function SpcLinkTypesService(biobankApi) {
     var service = {
       getAll      : getAll,
       get         : get,
@@ -38,11 +38,11 @@ define(['./module'], function(module) {
     }
 
     function getAll(processingTypeId) {
-      return biobankXhrReqService.call('GET', uri(processingTypeId));
+      return biobankApi.call('GET', uri(processingTypeId));
     }
 
     function get(processingTypeId, spcLinkTypeId) {
-      return biobankXhrReqService.call('GET', uri(processingTypeId) + '?slTypeId=' + spcLinkTypeId);
+      return biobankApi.call('GET', uri(processingTypeId) + '?slTypeId=' + spcLinkTypeId);
     }
 
     function addOrUpdate(spcLinkType) {
@@ -62,14 +62,14 @@ define(['./module'], function(module) {
       if (spcLinkType.id) {
         cmd.id = spcLinkType.id;
         cmd.expectedVersion = spcLinkType.version;
-        return biobankXhrReqService.call('PUT', uri(spcLinkType.processingTypeId, spcLinkType.id), cmd);
+        return biobankApi.call('PUT', uri(spcLinkType.processingTypeId, spcLinkType.id), cmd);
       } else {
-        return biobankXhrReqService.call('POST', uri(spcLinkType.processingTypeId), cmd);
+        return biobankApi.call('POST', uri(spcLinkType.processingTypeId), cmd);
       }
     }
 
     function remove(spcLinkType) {
-      return biobankXhrReqService.call(
+      return biobankApi.call(
         'DELETE',
         uri(spcLinkType.processingTypeId, spcLinkType.id, spcLinkType.version));
     }

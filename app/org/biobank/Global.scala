@@ -21,8 +21,9 @@ import scaldi.play.ScaldiSupport
 import scaldi.Module
 import scaldi.akka.AkkaInjectable
 
-/** This is a trait so that it can be used by tests also.
-  */
+/**
+ * This is a trait so that it can be used by tests also.
+ */
 trait Global
     extends GlobalSettings
     with ScaldiSupport {
@@ -30,8 +31,8 @@ trait Global
   def applicationModule = new WebModule :: new UserModule
 
   /**
-    *
-    */
+   *
+   */
   override def onStart(app: play.api.Application) {
     super.onStart(app)
 
@@ -58,8 +59,8 @@ trait Global
   }
 
   /**
-    * For debug only in development mode - password is "testuser"
-    */
+   * For debug only in development mode - password is "testuser"
+   */
   def createDefaultUser: User = {
     val userRepository = inject [UserRepository]
 
@@ -92,8 +93,8 @@ trait Global
   }
 
   /**
-    * Creates SQL DDL scripts on application start-up.
-    */
+   * Creates SQL DDL scripts on application start-up.
+   */
   private def createSqlDdlScripts(): Unit = {
     // if (app.mode != Mode.Prod) {
     //   app.configuration.getConfig(configKey).foreach { configuration =>
@@ -116,8 +117,8 @@ trait Global
   }
 
   /**
-    * Writes the given DDL statements to a file.
-    */
+   * Writes the given DDL statements to a file.
+   */
   private def writeScript(
     ddlStatements: Seq[Iterator[String]],
     directory: File,
@@ -131,10 +132,11 @@ trait Global
 
 
 object Global
-    extends WithFilters(new GzipFilter(shouldGzip = (request, response) => {
-      val contentType = response.headers.get("Content-Type")
-      contentType.exists(_.startsWith("text/html")) || request.path.endsWith("jsroutes.js")
-    }))
+    extends WithFilters(
+  new GzipFilter(shouldGzip = (request, response) => {
+                   val contentType = response.headers.get("Content-Type")
+                   contentType.exists(_.startsWith("text/html")) || request.path.endsWith("jsroutes.js")
+                 }))
     with Global {
 
   val DefaultUserEmail = "admin@admin.com"

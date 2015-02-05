@@ -18,25 +18,24 @@
       'bootstrap':         ['jquery'],
       'angular-ui-router': ['angular'],
       'ui-bootstrap':      ['angular', 'bootstrap'],
-      'angular-strap':     ['angular', 'bootstrap'],
       'ngTable':           ['angular'],
       'toastr':            ['angular', 'jquery'],
       'angular-sanitize':  ['angular']
     },
     paths: {
-      'requirejs':         '../lib/requirejs/require',
-      'jquery':            '../lib/jquery/jquery',
-      'angular':           '../lib/angularjs/angular',
-      'underscore':        '../lib/underscorejs/underscore',
-      'angular-route':     '../lib/angularjs/angular-route',
-      'angular-cookies':   '../lib/angularjs/angular-cookies',
-      'angular-ui-router': '../lib/angular-ui-router/angular-ui-router',
-      'bootstrap':         '../lib/bootstrap/js/bootstrap',
-      'ui-bootstrap':      '../lib/angular-ui-bootstrap/ui-bootstrap-tpls',
-      'angular-strap':     '../lib/angular-strap/angular-strap',
-      'ngTable':           '../lib/ng-table/ng-table',
-      'toastr':            '../lib/toastr/toastr',
-      'angular-sanitize':  '../lib/angular-sanitize/angular-sanitize'
+      'requirejs':              '../lib/requirejs/require',
+      'jquery':                 '../lib/jquery/jquery',
+      'angular':                '../lib/angularjs/angular',
+      'underscore':             '../lib/underscorejs/underscore',
+      'angular-route':          '../lib/angularjs/angular-route',
+      'angular-cookies':        '../lib/angularjs/angular-cookies',
+      'angular-ui-router':      '../lib/angular-ui-router/angular-ui-router',
+      'bootstrap':              '../lib/bootstrap/js/bootstrap',
+      'ui-bootstrap':           '../lib/angular-ui-bootstrap/ui-bootstrap-tpls',
+      'ngTable':                '../lib/ng-table/ng-table',
+      'toastr':                 '../lib/toastr/toastr',
+      'angular-sanitize':       '../lib/angular-sanitize/angular-sanitize',
+      'moment':                 '../lib/momentjs/moment'
     }
   });
 
@@ -47,13 +46,13 @@
   // Load the app. This is kept minimal so it doesn't need much updating.
   require([
     'angular',
+    'jquery',
+    'bootstrap',
     'angular-cookies',
     'angular-route',
     'angular-ui-router',
     'ui-bootstrap',
     'ngTable',
-    'jquery',
-    'bootstrap',
     'angular-sanitize',
     './app'
   ], function(angular) {

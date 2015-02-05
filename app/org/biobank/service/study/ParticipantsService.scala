@@ -25,6 +25,8 @@ trait ParticipantsService {
 
   def get(studyId: String, participantId: String): DomainValidation[Participant]
 
+  def getByUniqueId(studyId: String, uniqueId: String): DomainValidation[Participant]
+
   def add(cmd: AddParticipantCmd)(implicit userId: UserId)
       : Future[DomainValidation[ParticipantAddedEvent]]
 
@@ -56,6 +58,10 @@ class ParticipantsServiceImpl(implicit inj: Injector)
 
   def get(studyId: String, participantId: String): DomainValidation[Participant] = {
     participantRepository.withId(StudyId(studyId), ParticipantId(participantId))
+  }
+
+  def getByUniqueId(studyId: String, uniqueId: String): DomainValidation[Participant] = {
+    participantRepository.withUniqueId(StudyId(studyId), uniqueId)
   }
 
   def add(cmd: AddParticipantCmd)(implicit userId: UserId)

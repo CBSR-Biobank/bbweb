@@ -42,6 +42,12 @@ class ParticipantsController(implicit inj: Injector)
       domainValidationReply(participantsService.get(studyId, participantId))
     }
 
+  def getByUniqueId(studyId: String, uniqueId: String) =
+    AuthAction(parse.empty) { (token, userId, request) =>
+      Logger.debug(s"ParticipantsController.getByUniqueId: studyId: $studyId, uniqueId: uniqueId")
+      domainValidationReply(participantsService.getByUniqueId(studyId, uniqueId))
+    }
+
   def addParticipant(studyId: String) =
     commandAction { cmd: AddParticipantCmd => implicit userId =>
       if (cmd.studyId != studyId) {

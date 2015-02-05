@@ -1,15 +1,15 @@
 define(['../module'], function(module) {
   'use strict';
 
-  module.service('biobankXhrReqService', biobankXhrReqService);
+  module.service('biobankApi', biobankApi);
 
-  biobankXhrReqService.$inject = ['$http', '$q', '$log'];
+  biobankApi.$inject = ['$http', '$q', '$log'];
 
   /**
    * Makes a request to the Biobank server REST API. All REST responses from the server have a similar
    * response JSON object. This service returns the 'data' field if the call was successful.
    */
-  function biobankXhrReqService($http, $q, $log) {
+  function biobankApi($http, $q, $log) {
     var service = {
       call: call
     };

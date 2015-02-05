@@ -3,5 +3,9 @@
  */
 define([
   './CollectionCtrl',
+  './CollectionStudyCtrl',
+  './ParticipantCtrl',
+  './ParticipantEditCtrl',
+  './selectStudyDirective',
   './states',
 ], function () {});

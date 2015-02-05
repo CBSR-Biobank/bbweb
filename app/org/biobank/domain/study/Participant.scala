@@ -28,13 +28,13 @@ trait ParticipantValidations {
   *        used by the domain model.
   */
 case class Participant(
-  studyId: StudyId,
-  id: ParticipantId,
-  version: Long,
-  timeAdded: DateTime,
+  studyId:      StudyId,
+  id:           ParticipantId,
+  version:      Long,
+  timeAdded:    DateTime,
   timeModified: Option[DateTime],
-  uniqueId: String,
-  annotations: Set[ParticipantAnnotation])
+  uniqueId:     String,
+  annotations:  Set[ParticipantAnnotation])
     extends ConcurrencySafeEntity[ParticipantId]
     with HasStudyId {
 

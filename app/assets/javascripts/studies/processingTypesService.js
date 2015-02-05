@@ -3,12 +3,12 @@ define(['./module', 'angular'], function(module, angular) {
 
   module.service('processingTypesService', ProcessingTypesService);
 
-  ProcessingTypesService.$inject = ['biobankXhrReqService', 'domainEntityService',];
+  ProcessingTypesService.$inject = ['biobankApi', 'domainEntityService',];
 
   /**
    * Service to access Processing Types.
    */
-  function ProcessingTypesService(biobankXhrReqService, domainEntityService) {
+  function ProcessingTypesService(biobankApi, domainEntityService) {
     var service = {
       getAll      : getAll,
       get         : get,
@@ -38,11 +38,11 @@ define(['./module', 'angular'], function(module, angular) {
     }
 
     function getAll(studyId) {
-      return biobankXhrReqService.call('GET', uri(studyId));
+      return biobankApi.call('GET', uri(studyId));
     }
 
     function get(studyId, processingTypeId) {
-      return biobankXhrReqService.call('GET', uri(studyId) + '?procTypeId=' + processingTypeId);
+      return biobankApi.call('GET', uri(studyId) + '?procTypeId=' + processingTypeId);
     }
 
     function addOrUpdate(processingType) {
@@ -57,14 +57,14 @@ define(['./module', 'angular'], function(module, angular) {
       if (processingType.id) {
         cmd.id = processingType.id;
         cmd.expectedVersion = processingType.version;
-        return biobankXhrReqService.call('PUT', uri(processingType.studyId, processingType.id), cmd);
+        return biobankApi.call('PUT', uri(processingType.studyId, processingType.id), cmd);
       } else {
-        return biobankXhrReqService.call('POST', uri(processingType.studyId), cmd);
+        return biobankApi.call('POST', uri(processingType.studyId), cmd);
       }
     }
 
     function remove(processingType) {
-      return biobankXhrReqService.call(
+      return biobankApi.call(
         'DELETE',
         uri(processingType.studyId, processingType.id, processingType.version));
     }

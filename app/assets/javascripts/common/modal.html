@@ -4,10 +4,9 @@
           data-dismiss="modal"
           aria-hidden="true"
           data-ng-click="modalOptions.close()">&times;</button>
-  <h3 class="modal-title">{{modalOptions.headerHtml}}</h3>
+  <h3 class="modal-title" ng-bind-html="modalOptions.headerHtml"></h3>
 </div>
-<div class="modal-body">
-  {{modalOptions.bodyHtml}}
+<div class="modal-body" ng-bind-html="modalOptions.bodyHtml">
 </div>
 <div class="modal-footer">
   <button class="btn" data-ng-click="modalOptions.close()">{{modalOptions.closeButtonText}}</button>

@@ -45,9 +45,7 @@
   <!-- SPECIMEN GROUP DATA -->
   <div class="form-group" data-ng-repeat="sgData in vm.ceventType.specimenGroupData track by $index">
     <data-ng-form name="sgSubForm">
-      <div class="col-md-2 control-label">
-        <label>Specimen Group {{$index + 1}}</label>
-      </div>
+      <label class="col-md-2 control-label">Specimen Group {{$index + 1}}</label>
       <div class="col-md-3">
         <select class="form-control"
                 name="sgId"
@@ -57,9 +55,7 @@
           <option value="">-- make a selection --</option>
         </select>
       </div>
-      <div class="col-md-1 control-label">
-        <label class="small">#:</label>
-      </div>
+      <label  class="col-md-1 control-label small">#:</label>
       <div class="col-md-2">
         <input type="number"
                min="1"
@@ -70,12 +66,10 @@
                valid-count
                required/>
       </div>
-      <div class="col-md-1 control-label">
-        <label class="small">
-          {{(vm.specimenGroupsById[sgData.specimenGroupId]
-          ? vm.specimenGroupsById[sgData.specimenGroupId].units : 'Amount') + ':'}}
-        </label>
-      </div>
+      <label class="col-md-1 control-label small">
+        {{(vm.specimenGroupsById[sgData.specimenGroupId]
+        ? vm.specimenGroupsById[sgData.specimenGroupId].units : 'Amount') + ':'}}
+      </label>
       <div class="col-md-2">
         <input type="number"
                min="0"
@@ -120,9 +114,7 @@
   <!-- ANNOTATION TYPE DATA -->
   <div class="form-group" data-ng-repeat="atData in vm.ceventType.annotationTypeData track by $index">
     <data-ng-form name="atSubForm">
-      <div class="col-md-2 control-label">
-        <label>Annotation Type {{$index + 1}}</label>
-      </div>
+      <label class="col-md-2 control-label">Annotation Type {{$index + 1}}</label>
       <div class="col-md-3">
         <select class="form-control"
                 name="name"

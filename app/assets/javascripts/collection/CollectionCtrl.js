@@ -23,7 +23,7 @@ define(['./module'], function(module) {
     }
 
     function getEnabledStudiesPanelHeader() {
-      return '<strong>Enabled studies</strong>';
+      return 'Studies you participate in';
     }
 
   }

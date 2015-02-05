@@ -186,9 +186,7 @@
   <!-- ANNOTATION TYPE DATA -->
   <div class="form-group" data-ng-repeat="atData in vm.spcLinkType.annotationTypeData track by $index">
     <data-ng-form name="atSubForm">
-      <div class="col-md-3 control-label">
-        <label>Annotation Type {{$index + 1}}</label>
-      </div>
+      <label class="col-md-3 control-label">Annotation Type {{$index + 1}}</label>
       <div class="col-md-4">
         <select class="form-control"
                 name="annotTypeName"

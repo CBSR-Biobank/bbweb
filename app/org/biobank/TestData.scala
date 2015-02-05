@@ -159,8 +159,8 @@ object TestData extends Injectable {
     Logger.debug("addTestData")
 
     addMultipleStudies
-      addMultipleCentres
-      addMultipleUsers
+    addMultipleCentres
+    addMultipleUsers
   }
 
   def addMultipleCentres(implicit injector: Injector): Unit = {
@@ -177,7 +177,7 @@ object TestData extends Injectable {
         name         = name,
         description  = Some(description)
       )
-        centreRepository.put(centre)
+      centreRepository.put(centre)
     }
   }
 
@@ -194,11 +194,12 @@ object TestData extends Injectable {
                                        name         = name,
                                        description  = Some(description)
       )
-        studyRepository.put(study)
+      studyRepository.put(study)
     }
 
     addSpecimenGroups
-      addCollectionEvents
+    addCollectionEvents
+    addParticipantAnnotationTypes
 
     val specimenGroupRepository = inject [SpecimenGroupRepository]
     val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
@@ -210,13 +211,13 @@ object TestData extends Injectable {
           val valid = study.enable(
             specimenGroupRepository.allForStudy(study.id).size,
             collectionEventTypeRepository.allForStudy(study.id).size)
-            valid.fold(
-              err => Logger.error(err.list.mkString(",")),
-              study => {
-                studyRepository.put(study)
-                  Logger.info(s"study ${study.name} enabled")
-              }
-            )
+          valid.fold(
+            err => Logger.error(err.list.mkString(",")),
+            study => {
+              studyRepository.put(study)
+              Logger.info(s"study ${study.name} enabled")
+            }
+          )
         }
       )
     }
@@ -244,7 +245,6 @@ object TestData extends Injectable {
 
       specimenGroupRepository.put(sg)
     }
-
   }
 
   def addCollectionEvents(implicit injector: Injector) = {
@@ -278,6 +278,86 @@ object TestData extends Injectable {
     }
   }
 
+  def addParticipantAnnotationTypes(implicit injector: Injector) = {
+    Logger.debug("addParticipantAnnotationTypes")
+
+    val studyRepository = inject [StudyRepository]
+    val patRepository = inject [ParticipantAnnotationTypeRepository]
+    val studyNames = List("BBPSP")
+
+    studyNames.foreach { studyName =>
+      studyRepository.getValues.find(s => s.name == studyName) match {
+        case None =>
+          Logger.error(s"addParticipantAnnotationTypes: study with name not found: $studyName")
+        case Some(study)  =>
+          val patList = List(
+            ParticipantAnnotationType(
+              studyId       = study.id,
+              id            = AnnotationTypeId("31674c709c364b2e8ad0d52d1f44e5f8"),
+              version       = 0L,
+              timeAdded     = DateTime.now,
+              timeModified  = None,
+              name          = "BBPSP PAT Text",
+              description   = None,
+              valueType     = AnnotationValueType.Text,
+              maxValueCount = None,
+              options       = Seq.empty,
+              required      = true),
+            ParticipantAnnotationType(
+              studyId       = study.id,
+              id            = AnnotationTypeId("1badaa5943694cdf8a2b4b19922efbd1"),
+              version       = 0L,
+              timeAdded     = DateTime.now,
+              timeModified  = None,
+              name          = "BBPSP PAT Number",
+              description   = None,
+              valueType     = AnnotationValueType.Number,
+              maxValueCount = None,
+              options       = Seq.empty,
+              required      = true),
+            ParticipantAnnotationType(
+              studyId       = study.id,
+              id            = AnnotationTypeId("e6d4576cf8f1400f9779354629ec8a72"),
+              version       = 0L,
+              timeAdded     = DateTime.now,
+              timeModified  = None,
+              name          = "BBPSP PAT DateTime",
+              description   = None,
+              valueType     = AnnotationValueType.DateTime,
+              maxValueCount = None,
+              options       = Seq.empty,
+              required      = true),
+            ParticipantAnnotationType(
+              studyId       = study.id,
+              id            = AnnotationTypeId("390e28e0741b4f7fa1cf02d58d3a3033"),
+              version       = 0L,
+              timeAdded     = DateTime.now,
+              timeModified  = None,
+              name          = "Select single",
+              description   = None,
+              valueType     = AnnotationValueType.Select,
+              maxValueCount = Some(1),
+              options       = Seq("option1", "option2"),
+              required      = true),
+            ParticipantAnnotationType(
+              studyId       = study.id,
+              id            = AnnotationTypeId("a422a68aca2848ceb0bc6d9eeeab47e6"),
+              version       = 0L,
+              timeAdded     = DateTime.now,
+              timeModified  = None,
+              name          = "Select multiple",
+              description   = None,
+              valueType     = AnnotationValueType.Select,
+              maxValueCount = Some(2),
+              options       = Seq("option1", "option2", "option3"),
+              required      = true)
+          )
+          patList.foreach { pat => patRepository.put(pat) }
+      }
+    }
+
+  }
+
   def addMultipleUsers(implicit injector: Injector) = {
     Logger.debug("addMultipleUsers")
 
@@ -298,7 +378,7 @@ object TestData extends Injectable {
         salt = salt,
         avatarUrl = None
       )
-        userRepository.put(user)
+      userRepository.put(user)
     }
 
   }

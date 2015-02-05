@@ -14,17 +14,17 @@ import scalaz.Scalaz._
   * annotation types on participants to store different types of data.
   */
 case class ParticipantAnnotationType (
-  studyId: StudyId,
-  id: AnnotationTypeId,
-  version: Long,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  name: String,
-  description: Option[String],
-  valueType: AnnotationValueType,
+  studyId:       StudyId,
+  id:            AnnotationTypeId,
+  version:       Long,
+  timeAdded:     DateTime,
+  timeModified:  Option[DateTime],
+  name:          String,
+  description:   Option[String],
+  valueType:     AnnotationValueType,
   maxValueCount: Option[Int],
-  options: Seq[String],
-  required: Boolean)
+  options:       Seq[String],
+  required:      Boolean)
     extends StudyAnnotationType
     with StudyAnnotationTypeValidations {
 

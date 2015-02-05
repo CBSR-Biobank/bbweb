@@ -2,6 +2,7 @@
  * Common functionality.
  */
 define([
+  './directives/annotationsInputDirective',
   './directives/focusMeDirective',
   './directives/infoUpdateRemoveButtonsDirective',
   './directives/integerDirective',
@@ -14,7 +15,7 @@ define([
   './filters/timeagoFilter',
   './filters/truncateFilter',
   './services/addTimeStampsService',
-  './services/biobankXhrReqService',
+  './services/biobankApiService',
   './services/modalService',
   './services/domainEntityModalService',
   './services/domainEntityService',

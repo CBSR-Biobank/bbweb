@@ -3,12 +3,12 @@ define(['./module', 'angular'], function(module, angular) {
 
   module.service('ceventTypesService', CeventTypesService);
 
-  CeventTypesService.$inject = ['biobankXhrReqService', 'domainEntityService'];
+  CeventTypesService.$inject = ['biobankApi', 'domainEntityService'];
 
   /**
    * Service to access Collection Event Types.
    */
-  function CeventTypesService(biobankXhrReqService, domainEntityService) {
+  function CeventTypesService(biobankApi, domainEntityService) {
     var service = {
       getAll      : getAll,
       get         : get,
@@ -38,11 +38,11 @@ define(['./module', 'angular'], function(module, angular) {
     }
 
     function getAll(studyId) {
-      return biobankXhrReqService.call('GET', uri(studyId));
+      return biobankApi.call('GET', uri(studyId));
     }
 
     function get(studyId, collectionEventTypeId) {
-      return biobankXhrReqService.call('GET', uri(studyId) + '?cetId=' + collectionEventTypeId);
+      return biobankApi.call('GET', uri(studyId) + '?cetId=' + collectionEventTypeId);
     }
 
     function addOrUpdate(ceventType) {
@@ -59,14 +59,14 @@ define(['./module', 'angular'], function(module, angular) {
       if (ceventType.id) {
         cmd.id = ceventType.id;
         cmd.expectedVersion = ceventType.version;
-        return biobankXhrReqService.call('PUT', uri(ceventType.studyId, ceventType.id), cmd);
+        return biobankApi.call('PUT', uri(ceventType.studyId, ceventType.id), cmd);
       } else {
-        return biobankXhrReqService.call('POST', uri(ceventType.studyId), cmd);
+        return biobankApi.call('POST', uri(ceventType.studyId), cmd);
       }
     }
 
     function remove(ceventType) {
-      return biobankXhrReqService.call(
+      return biobankApi.call(
         'DELETE', uri(ceventType.studyId, ceventType.id, ceventType.version));
     }
 

@@ -3,12 +3,12 @@ define(['./module', 'angular'], function(module, angular) {
 
   module.service('studyAnnotTypesService', StudyAnnotTypesService);
 
-  StudyAnnotTypesService.$inject = ['biobankXhrReqService', 'domainEntityService'];
+  StudyAnnotTypesService.$inject = ['biobankApi', 'domainEntityService'];
 
   /**
    * Service to access study annotation types.
    */
-  function StudyAnnotTypesService(biobankXhrReqService, domainEntityService) {
+  function StudyAnnotTypesService(biobankApi, domainEntityService) {
     var services = {
       getAll      : getAll,
       get         : get,
@@ -38,11 +38,11 @@ define(['./module', 'angular'], function(module, angular) {
     }
 
     function getAll(annotTypeUri, studyId) {
-      return biobankXhrReqService.call('GET', uri(annotTypeUri, studyId));
+      return biobankApi.call('GET', uri(annotTypeUri, studyId));
     }
 
     function get(annotTypeUri, studyId, annotTypeId) {
-      return biobankXhrReqService.call('GET', uri(annotTypeUri, studyId) + '?annotTypeId=' + annotTypeId);
+      return biobankApi.call('GET', uri(annotTypeUri, studyId) + '?annotTypeId=' + annotTypeId);
     }
 
     function addOrUpdate(annotTypeUri, annotType) {
@@ -67,14 +67,14 @@ define(['./module', 'angular'], function(module, angular) {
       if (annotType.id) {
         cmd.id = annotType.id;
         cmd.expectedVersion = annotType.version;
-        return biobankXhrReqService.call('PUT', uri(annotTypeUri, annotType.studyId, annotType.id), cmd);
+        return biobankApi.call('PUT', uri(annotTypeUri, annotType.studyId, annotType.id), cmd);
       } else {
-        return biobankXhrReqService.call('POST', uri(annotTypeUri, annotType.studyId), cmd);
+        return biobankApi.call('POST', uri(annotTypeUri, annotType.studyId), cmd);
       }
     }
 
     function remove(annotTypeUri, annotType) {
-      return biobankXhrReqService.call(
+      return biobankApi.call(
         'DELETE',
         uri(annotTypeUri, annotType.studyId, annotType.id, annotType.version));
     }

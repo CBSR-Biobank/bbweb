@@ -24,7 +24,12 @@ trait AuthToken {
 
 class AuthTokenImpl extends AuthToken {
 
-  val TokenExpirationSeconds = 60 * 15;
+  val TokenExpirationSeconds =
+    if (play.api.Play.current.mode == play.api.Mode.Prod) {
+      60 * 15
+    } else {
+      60 * 60
+    }
 
   /**
    *  Generates a new token for userId with an expiration of TokenExpirationSeconds.

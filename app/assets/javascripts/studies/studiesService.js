@@ -3,12 +3,12 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
 
   module.service('studiesService', StudiesService);
 
-  StudiesService.$inject = ['biobankXhrReqService', 'domainEntityService', 'queryStringService'];
+  StudiesService.$inject = ['biobankApi', 'domainEntityService', 'queryStringService'];
 
   /**
    * Service to acccess studies.
    */
-  function StudiesService(biobankXhrReqService, domainEntityService, queryStringService) {
+  function StudiesService(biobankApi, domainEntityService, queryStringService) {
     var service = {
       getStudies:     getStudies,
       getStudyCounts: getStudyCounts,
@@ -49,11 +49,11 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
         id: study.id,
         expectedVersion: study.version
       };
-      return biobankXhrReqService.call('POST', uri(study.id) + '/' + status, cmd);
+      return biobankApi.call('POST', uri(study.id) + '/' + status, cmd);
     }
 
     function getStudyCounts() {
-      return biobankXhrReqService.call('GET', uri() + '/counts');
+      return biobankApi.call('GET', uri() + '/counts');
     }
 
     /**
@@ -99,7 +99,7 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
         url += paramsStr;
       }
 
-      return biobankXhrReqService.call('GET', url);
+      return biobankApi.call('GET', url);
     }
 
     function getStudyNames(options) {
@@ -117,11 +117,11 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
         url += paramsStr;
       }
 
-      return biobankXhrReqService.call('GET', url + '/names');
+      return biobankApi.call('GET', url + '/names');
     }
 
     function get(id) {
-      return biobankXhrReqService.call('GET', uri(id));
+      return biobankApi.call('GET', uri(id));
     }
 
     function addOrUpdate(study) {
@@ -133,9 +133,9 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
         cmd.id = study.id;
         cmd.expectedVersion = study.version;
 
-        return biobankXhrReqService.call('PUT', uri(study.id), cmd);
+        return biobankApi.call('PUT', uri(study.id), cmd);
       } else {
-        return biobankXhrReqService.call('POST', uri(), cmd);
+        return biobankApi.call('POST', uri(), cmd);
       }
     }
 
@@ -156,15 +156,15 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
     }
 
     function collectionDto(studyId) {
-      return biobankXhrReqService.call('GET', uri(studyId) + '/dto/collection');
+      return biobankApi.call('GET', uri(studyId) + '/dto/collection');
     }
 
     function processingDto(studyId) {
-      return biobankXhrReqService.call('GET', uri(studyId) + '/dto/processing');
+      return biobankApi.call('GET', uri(studyId) + '/dto/processing');
     }
 
     function valueTypes() {
-      return biobankXhrReqService.call('GET', '/studies/valuetypes');
+      return biobankApi.call('GET', '/studies/valuetypes');
     }
   }
 

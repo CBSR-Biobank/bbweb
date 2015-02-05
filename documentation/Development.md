@@ -98,6 +98,11 @@ sudo docker run -d -p 9000:9000 -v /opt/bbweb_docker/mongodb_data:/data/db bbweb
 
 ## Development Environment
 
+### SBT
+
+Project [sbt-updated](https://github.com/rtimush/sbt-updates) is used to determine if any
+dependencies can be updated. Use command `dependencyUpdates` to display what can be updated.
+
 ### Eclipse
 
 IDE:

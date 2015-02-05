@@ -30,10 +30,10 @@ define(['angular', 'angularMocks', 'jquery', 'underscore', 'biobankApp'], functi
 
       var cookies, authenticateDeferred;
 
-      beforeEach(inject(function ($cookies, $q, biobankXhrReqService) {
+      beforeEach(inject(function ($cookies, $q, biobankApi) {
         $cookies['XSRF-TOKEN'] = fakeToken;
 
-        spyOn(biobankXhrReqService, 'call').and.callFake(function () {
+        spyOn(biobankApi, 'call').and.callFake(function () {
           authenticateDeferred = $q.defer();
           return authenticateDeferred.promise;
         });

@@ -6,16 +6,16 @@ define(['./module'], function(module) {
 
   module.factory('adminService', AdminService);
 
-  AdminService.$inject = ['biobankXhrReqService'];
+  AdminService.$inject = ['biobankApi'];
 
-  function AdminService(biobankXhrReqService) {
+  function AdminService(biobankApi) {
     var service = {
       aggregateCounts: aggregateCounts
     };
     return service;
 
     function aggregateCounts() {
-      return biobankXhrReqService.call('GET', '/counts');
+      return biobankApi.call('GET', '/counts');
     }
   }
 

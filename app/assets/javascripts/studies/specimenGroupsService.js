@@ -3,12 +3,12 @@ define(['./module', 'angular'], function(module, angular) {
 
   module.service('specimenGroupsService', SpecimenGroupsService);
 
-  SpecimenGroupsService.$inject = ['biobankXhrReqService', 'domainEntityService'];
+  SpecimenGroupsService.$inject = ['biobankApi', 'domainEntityService'];
 
   /**
    * Service to access specimen groups.
    */
-  function SpecimenGroupsService(biobankXhrReqService, domainEntityService) {
+  function SpecimenGroupsService(biobankApi, domainEntityService) {
     var service = {
       getAll                  : getAll,
       get                     : get,
@@ -44,11 +44,11 @@ define(['./module', 'angular'], function(module, angular) {
     }
 
     function getAll(studyId) {
-      return biobankXhrReqService.call('GET', uri(studyId));
+      return biobankApi.call('GET', uri(studyId));
     }
 
     function get(studyId, specimenGroupId) {
-      return biobankXhrReqService.call('GET', uri(studyId) + '?sgId=' + specimenGroupId);
+      return biobankApi.call('GET', uri(studyId) + '?sgId=' + specimenGroupId);
     }
 
     function addOrUpdate(specimenGroup) {
@@ -67,40 +67,40 @@ define(['./module', 'angular'], function(module, angular) {
       if (specimenGroup.id) {
         cmd.id = specimenGroup.id;
         cmd.expectedVersion = specimenGroup.version;
-        return biobankXhrReqService.call('PUT', uri(specimenGroup.studyId, specimenGroup.id), cmd);
+        return biobankApi.call('PUT', uri(specimenGroup.studyId, specimenGroup.id), cmd);
       } else {
-        return biobankXhrReqService.call('POST', uri(specimenGroup.studyId), cmd);
+        return biobankApi.call('POST', uri(specimenGroup.studyId), cmd);
       }
     }
 
     function remove(specimenGroup) {
-      return biobankXhrReqService.call(
+      return biobankApi.call(
         'DELETE',
         uri(specimenGroup.studyId, specimenGroup.id, specimenGroup.version));
     }
 
     function  specimenGroupIdsInUse(studyId) {
-      return biobankXhrReqService.call('GET', uri(studyId) + '/inuse');
+      return biobankApi.call('GET', uri(studyId) + '/inuse');
     }
 
     function  anatomicalSourceTypes() {
-      return biobankXhrReqService.call('GET', '/studies/anatomicalsrctypes');
+      return biobankApi.call('GET', '/studies/anatomicalsrctypes');
     }
 
     function  specimenTypes() {
-      return biobankXhrReqService.call('GET', '/studies/specimentypes');
+      return biobankApi.call('GET', '/studies/specimentypes');
     }
 
     function  preservTypes() {
-      return biobankXhrReqService.call('GET', '/studies/preservtypes');
+      return biobankApi.call('GET', '/studies/preservtypes');
     }
 
     function  preservTempTypes() {
-      return biobankXhrReqService.call('GET', '/studies/preservtemptypes');
+      return biobankApi.call('GET', '/studies/preservtemptypes');
     }
 
     function  specimenGroupValueTypes() {
-      return biobankXhrReqService.call('GET', '/studies/sgvaluetypes');
+      return biobankApi.call('GET', '/studies/sgvaluetypes');
     }
   }
 

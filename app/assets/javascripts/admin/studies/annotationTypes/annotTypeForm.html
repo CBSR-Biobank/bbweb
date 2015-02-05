@@ -90,9 +90,7 @@
        data-ng-if="vm.annotType.valueType === 'Select'"
        data-ng-repeat="opt in vm.annotType.options track by $index">
     <data-ng-form name="subForm">
-      <div class="col-md-2 control-label">
-        <label>Selection Option {{$index + 1}}</label>
-      </div>
+      <label class="col-md-2 control-label">Selection Option {{$index + 1}}</label>
       <div class="col-md-8">
         <input type="text"
                name="option"

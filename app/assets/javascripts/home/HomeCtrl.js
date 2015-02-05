@@ -10,10 +10,7 @@ define(['./module'], function(module) {
    */
   function HomeCtrl($rootScope, usersService) {
     var vm = this;
-
     vm.userIsAuthenticated = usersService.isAuthenticated();
-    console.log(vm.userIsAuthenticated);
-
     $rootScope.pageTitle = 'Biobank';
   }
 

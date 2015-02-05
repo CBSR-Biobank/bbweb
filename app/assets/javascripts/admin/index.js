@@ -43,7 +43,6 @@ define([
   './studies/processing/spcLinkTypeRemoveService',
   './studies/processing/spcLinkTypesPanelDirective',
   './studies/processing/states',
-  './studies/selectStudyDirective',
   './studies/specimenGroups/SpecimenGroupEditCtrl',
   './studies/specimenGroups/specimenGroupModalService',
   './studies/specimenGroups/specimenGroupRemoveService',

@@ -3,7 +3,7 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
 
   module.service('usersService', UsersService);
 
-  UsersService.$inject = ['$q', '$cookies', '$log', 'biobankXhrReqService', 'queryStringService'];
+  UsersService.$inject = ['$q', '$cookies', '$log', 'biobankApi', 'queryStringService'];
 
   /**
    * Communicates with the server to get user related information and perform user related commands.
@@ -11,7 +11,7 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
   function UsersService($q,
                         $cookies,
                         $log,
-                        biobankXhrReqService,
+                        biobankApi,
                         queryStringService) {
     var self = this;
     self.currentUser = null;
@@ -47,7 +47,7 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
     /* If the token is assigned, check that the token is still valid on the server */
     function init() {
       if (self.token) {
-        biobankXhrReqService.call('GET', '/authenticate')
+        biobankApi.call('GET', '/authenticate')
           .then(function(currentUser) {
             self.currentUser = currentUser;
             $log.info('Welcome back, ' + self.currentUser.name);
@@ -74,7 +74,7 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
       if (isAuthenticated()) {
         return $q.when(self.currentUser);
       } else {
-        return biobankXhrReqService.call('GET', '/authenticate').then(function(currentUser) {
+        return biobankApi.call('GET', '/authenticate').then(function(currentUser) {
           self.currentUser = currentUser;
           return self.currentUser;
         });
@@ -99,14 +99,14 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
         id: user.id,
         expectedVersion: user.version
       };
-      return biobankXhrReqService.call('POST', uri(user.id) + '/' + status, cmd);
+      return biobankApi.call('POST', uri(user.id) + '/' + status, cmd);
     }
 
     function login(credentials) {
-      return biobankXhrReqService.call('POST', '/login', credentials)
+      return biobankApi.call('POST', '/login', credentials)
         .then(function(token) {
           self.token = token;
-          return biobankXhrReqService.call('GET', '/authenticate');
+          return biobankApi.call('GET', '/authenticate');
         })
         .then(function(user) {
           self.currentUser = user;
@@ -116,7 +116,7 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
     }
 
     function logout() {
-      return biobankXhrReqService.call('POST', '/logout').then(function() {
+      return biobankApi.call('POST', '/logout').then(function() {
         $log.info('Good bye');
         delete $cookies['XSRF-TOKEN'];
         self.token = undefined;
@@ -125,15 +125,15 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
     }
 
     function query(userId) {
-      return biobankXhrReqService.call('GET', uri(userId));
+      return biobankApi.call('GET', uri(userId));
     }
 
     function getAllUsers() {
-      return biobankXhrReqService.call('GET', uri());
+      return biobankApi.call('GET', uri());
     }
 
     function getUserCount() {
-      return biobankXhrReqService.call('GET', uri() + '/count');
+      return biobankApi.call('GET', uri() + '/count');
     }
 
     /**
@@ -182,7 +182,7 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
         url += paramsStr;
       }
 
-      return biobankXhrReqService.call('GET', url);
+      return biobankApi.call('GET', url);
     }
 
     function add(newUser) {
@@ -194,7 +194,7 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
       if (newUser.avatarUrl) {
         cmd.avatarUrl = newUser.avatarUrl;
       }
-      return biobankXhrReqService.call('POST', uri(), cmd);
+      return biobankApi.call('POST', uri(), cmd);
     }
 
     function updateName(user, newName) {
@@ -203,7 +203,7 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
         expectedVersion: user.version,
         name:            newName
       };
-      return biobankXhrReqService.call('PUT', uri(user.id) + '/name', cmd);
+      return biobankApi.call('PUT', uri(user.id) + '/name', cmd);
     }
 
     function updateEmail(user, newEmail) {
@@ -212,7 +212,7 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
         expectedVersion: user.version,
         email:           newEmail
       };
-      return biobankXhrReqService.call('PUT', uri(user.id) + '/email', cmd);
+      return biobankApi.call('PUT', uri(user.id) + '/email', cmd);
     }
 
     function updatePassword(user, currentPassword, newPassword) {
@@ -222,7 +222,7 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
         currentPassword: currentPassword,
         newPassword:     newPassword
       };
-      return biobankXhrReqService.call('PUT', uri(user.id) + '/password', cmd);
+      return biobankApi.call('PUT', uri(user.id) + '/password', cmd);
     }
 
     function updateAvatarUrl(user, avatarUrl) {
@@ -231,11 +231,11 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
         expectedVersion: user.version,
         avatarUrl:       avatarUrl
       };
-      return biobankXhrReqService.call('PUT', uri(user.id) + '/avatarurl', cmd);
+      return biobankApi.call('PUT', uri(user.id) + '/avatarurl', cmd);
     }
 
     function passwordReset(email) {
-      return biobankXhrReqService.call('POST', '/passreset', { email: email });
+      return biobankApi.call('POST', '/passreset', { email: email });
     }
 
     function activate(user) {

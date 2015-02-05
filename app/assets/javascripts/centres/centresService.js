@@ -3,12 +3,12 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
 
   module.service('centresService', centresService);
 
-  centresService.$inject = ['biobankXhrReqService', 'domainEntityService', 'queryStringService'];
+  centresService.$inject = ['biobankApi', 'domainEntityService', 'queryStringService'];
 
   /**
    *
    */
-  function centresService(biobankXhrReqService, domainEntityService, queryStringService) {
+  function centresService(biobankApi, domainEntityService, queryStringService) {
     var service = {
       getCentres:      getCentres,
       getCentreCounts: getCentreCounts,
@@ -34,11 +34,11 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
 
     function changeStatus(status, centre) {
       var cmd = { id: centre.id, expectedVersion: centre.version };
-      return biobankXhrReqService.call('POST', uri(centre.id) + '/' + status, cmd);
+      return biobankApi.call('POST', uri(centre.id) + '/' + status, cmd);
     }
 
     function getCentreCounts() {
-      return biobankXhrReqService.call('GET', uri() + '/counts');
+      return biobankApi.call('GET', uri() + '/counts');
     }
 
     /**
@@ -84,11 +84,11 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
         url += paramsStr;
       }
 
-      return biobankXhrReqService.call('GET', url);
+      return biobankApi.call('GET', url);
     }
 
     function get(id) {
-      return biobankXhrReqService.call('GET', uri(id));
+      return biobankApi.call('GET', uri(id));
     }
 
     function addOrUpdate(centre) {
@@ -100,9 +100,9 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
         cmd.id = centre.id;
         cmd.expectedVersion = centre.version;
 
-        return biobankXhrReqService.call('PUT', uri(centre.id), cmd);
+        return biobankApi.call('PUT', uri(centre.id), cmd);
       } else {
-        return biobankXhrReqService.call('POST', uri(), cmd);
+        return biobankApi.call('POST', uri(), cmd);
       }
     }
 
@@ -115,16 +115,16 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
     }
 
     function studies(centreId) {
-      return biobankXhrReqService.call('GET', uri(centreId) + '/studies');
+      return biobankApi.call('GET', uri(centreId) + '/studies');
     }
 
     function addStudy(centreId, studyId) {
       var cmd = {centreId: centreId, studyId: studyId};
-      return biobankXhrReqService.call('POST', uri(centreId) + '/studies/' + studyId, cmd);
+      return biobankApi.call('POST', uri(centreId) + '/studies/' + studyId, cmd);
     }
 
     function removeStudy(centreId, studyId) {
-      return biobankXhrReqService.call('DELETE', uri(centreId) + '/studies/' + studyId);
+      return biobankApi.call('DELETE', uri(centreId) + '/studies/' + studyId);
     }
   }
 

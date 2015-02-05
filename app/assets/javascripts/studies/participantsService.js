@@ -3,16 +3,16 @@ define(['./module'], function(module) {
 
   module.service('participantsService', participantsService);
 
-  participantsService.$inject = ['biobankXhrReqService'];
+  participantsService.$inject = ['biobankApi'];
 
   /**
    *
    */
-  function participantsService(biobankXhrReqService) {
+  function participantsService(biobankApi) {
     var service = {
-      get:         get,
-      addOrUpdate: addOrUpdate,
-      checkUnique: checkUnique
+      get:           get,
+      getByUniqueId: getByUniqueId,
+      addOrUpdate:   addOrUpdate
     };
     return service;
 
@@ -33,7 +33,11 @@ define(['./module'], function(module) {
     }
 
     function get(studyId, participantId) {
-      return biobankXhrReqService.call('GET', uri(studyId, participantId));
+      return biobankApi.call('GET', uri(studyId, participantId));
+    }
+
+    function getByUniqueId(studyId, uniqueId) {
+      return biobankApi.call('GET', uri(studyId) + '/uniqueId/' + uniqueId);
     }
 
     function addOrUpdate(participant) {
@@ -46,14 +50,10 @@ define(['./module'], function(module) {
       if (participant.id) {
         cmd.id = participant.id;
         cmd.expectedVersion = participant.version;
-        return biobankXhrReqService.call('PUT', uri(participant.studyId, participant.id), cmd);
+        return biobankApi.call('PUT', uri(participant.studyId, participant.id), cmd);
       } else {
-        return biobankXhrReqService.call('POST', uri(participant.studyId), cmd);
+        return biobankApi.call('POST', uri(participant.studyId), cmd);
       }
-    }
-
-    function checkUnique(uniqueId) {
-      return biobankXhrReqService.call('GET', '/studies/participants/checkUnique/' + uniqueId);
     }
   }
 

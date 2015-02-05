@@ -26,18 +26,16 @@ class UserModule extends Module {
   bind [StudyRepository]                          to new StudyRepositoryImpl
   bind [ParticipantRepository]                    to new ParticipantRepositoryImpl
 
-  bind [UserRepository] to new UserRepositoryImpl
-
-  bind [CentreRepository] to new CentreRepositoryImpl
+  bind [UserRepository]            to new UserRepositoryImpl
+  bind [CentreRepository]          to new CentreRepositoryImpl
   bind [CentreLocationsRepository] to new CentreLocationsRepositoryImpl
-  bind [CentreStudiesRepository] to new CentreStudiesRepositoryImpl
-  bind [LocationRepository] to new LocationRepositoryImpl
+  bind [CentreStudiesRepository]   to new CentreStudiesRepositoryImpl
+  bind [LocationRepository]        to new LocationRepositoryImpl
 
-  bind [StudiesService] to new StudiesServiceImpl
-
-  bind [UsersService] to new UsersService
-
-  bind [CentresService] to new CentresServiceImpl
+  bind [StudiesService]      to new StudiesServiceImpl
+  bind [ParticipantsService] to new ParticipantsServiceImpl
+  bind [UsersService]        to new UsersService
+  bind [CentresService]      to new CentresServiceImpl
 
   binding toProvider new CeventAnnotationTypeProcessor
   binding toProvider new CollectionEventTypeProcessor

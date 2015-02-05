@@ -5,7 +5,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
   describe('Service: authorizationService', function() {
 
-    var $rootScope, $q, biobankXhrReqService, authorization, usersService, resolved;
+    var $rootScope, $q, biobankApi, authorization, usersService, resolved;
     var fakeToken = 'fake-token';
     var user = {
       id:           'dummy-id',
@@ -25,12 +25,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     beforeEach(inject(function (_$rootScope_,
                                 _$q_,
-                                _biobankXhrReqService_,
+                                _biobankApi_,
                                 _usersService_,
                                 _authorization_) {
       $rootScope = _$rootScope_;
       $q = _$q_;
-      biobankXhrReqService = _biobankXhrReqService_;
+      biobankApi = _biobankApi_;
       usersService = _usersService_;
       authorization = _authorization_;
       resolved = false;
@@ -40,7 +40,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     describe('requireAuthenticatedUser', function () {
 
       it('requests the user from the server', function (done) {
-        spyOn(biobankXhrReqService, 'call').and.callFake(function () {
+        spyOn(biobankApi, 'call').and.callFake(function () {
           var deferred = $q.defer();
           deferred.resolve(user);
           return deferred.promise;
@@ -61,7 +61,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       });
 
       it('user is not authorized', function (done) {
-        spyOn(biobankXhrReqService, 'call').and.callFake(function () {
+        spyOn(biobankApi, 'call').and.callFake(function () {
           var deferred = $q.defer();
           deferred.reject();
           return deferred.promise;
@@ -86,7 +86,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     describe('requireAdminUser', function () {
 
       it('requests the user from the server', function (done) {
-        spyOn(biobankXhrReqService, 'call').and.callFake(function () {
+        spyOn(biobankApi, 'call').and.callFake(function () {
           var deferred = $q.defer();
           deferred.resolve(user);
           return deferred.promise;
@@ -107,7 +107,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       });
 
       it('user is not authorized', function (done) {
-        spyOn(biobankXhrReqService, 'call').and.callFake(function () {
+        spyOn(biobankApi, 'call').and.callFake(function () {
           var deferred = $q.defer();
           deferred.reject();
           return deferred.promise;

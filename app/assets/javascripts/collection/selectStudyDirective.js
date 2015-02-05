@@ -1,5 +1,5 @@
 /* global define */
-define(['../module'], function(module) {
+define(['./module'], function(module) {
   'use strict';
 
   module.directive('selectStudy', selectStudyDirective);
@@ -19,7 +19,7 @@ define(['../module'], function(module) {
         navigateStateName:      '@',
         navigateStateParamName: '@'
       },
-      templateUrl : '/assets/javascripts/admin/studies/selectStudy.html',
+      templateUrl : '/assets/javascripts/collection/selectStudy.html',
       controller: 'SelectStudyCtr as vm'
     };
     return directive;

@@ -12,6 +12,8 @@ trait ParticipantRepository
 
   def withId(studyId: StudyId, participantId: ParticipantId): DomainValidation[Participant]
 
+  def withUniqueId(studyId: StudyId, uniqueId: String): DomainValidation[Participant]
+
   def allForStudy(studyId: StudyId): Set[Participant]
 
 }
@@ -27,17 +29,35 @@ class ParticipantRepositoryImpl
   def withId(studyId: StudyId, participantId: ParticipantId): DomainValidation[Participant] = {
     getByKey(participantId).fold(
       err => DomainError(
-        s"participant does not exist: { studyId: $studyId, participantId: $participantId }")
-        .failureNel,
+        s"participant does not exist: { studyId: $studyId, participantId: $participantId }"
+      ).failureNel,
       ptcp =>
-      if (ptcp.studyId == studyId) {
-        ptcp.success
-      } else {
+      if (ptcp.studyId != studyId) {
         DomainError(
-          s"study does not have participant: { studyId: $studyId, participantId: $participantId }")
-          .failureNel
+          s"study does not have participant: { studyId: $studyId, participantId: $participantId }"
+        ).failureNel
+      } else {
+        ptcp.success
       }
     )
+  }
+
+  def withUniqueId(studyId: StudyId, uniqueId: String): DomainValidation[Participant] = {
+    getValues.find(p => p.uniqueId == uniqueId) match {
+      case None =>
+        DomainError(
+          s"participant does not exist: { studyId: $studyId, uniqueId: $uniqueId }"
+        ).failureNel
+      case Some(ptcp) => {
+        if (ptcp.studyId != studyId) {
+          DomainError(
+            s"study does not have participant: { studyId: $studyId, uniqueId: $uniqueId }"
+          ).failureNel
+        } else {
+          ptcp.success
+        }
+      }
+    }
   }
 
   def allForStudy(studyId: StudyId): Set[Participant] = {

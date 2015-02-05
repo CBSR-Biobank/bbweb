@@ -1,0 +1,23 @@
+<div class="page-header">
+  <h1>{{vm.study.name}} <small>collection</small></h1>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <form class="form-inline" name="UniqueId">
+      <div class="form-group">
+        <label for="nameFilter">Enter the participant's unique ID:</label>
+        <div class="input-group">
+          <input type="text"
+                 class="form-control"
+                 name="uniqueId"
+                 ng-model="vm.uniqueId">
+          <span class="input-group-btn">
+            <button class="btn btn-default"
+                    ng-click="vm.uniqueIdChanged()">
+              Submit <i class="glyphicon glyphicon-ok"></i>
+            </button>
+          </span>
+        </div>
+    </form>
+  </div>
+</div>
