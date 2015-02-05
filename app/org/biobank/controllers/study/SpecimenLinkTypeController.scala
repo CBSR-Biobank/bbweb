@@ -6,6 +6,7 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEventsJson
 import org.biobank.domain._
 import org.biobank.domain.study._
+import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 
@@ -29,9 +30,11 @@ class SpecimenLinkTypeController(implicit inj: Injector)
     with Injectable
     with StudyEventsJson {
 
-  implicit val usersService = inject [UsersService]
+  implicit override val authToken = inject [AuthToken]
 
-  private def studiesService = inject[StudiesService]
+  implicit override val usersService = inject [UsersService]
+
+  private val studiesService  = inject[StudiesService]
 
   def get(processingTypeId: String, slTypeId: Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>

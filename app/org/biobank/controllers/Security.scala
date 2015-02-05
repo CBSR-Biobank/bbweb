@@ -2,6 +2,7 @@ package org.biobank.controllers
 
 import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.user.{ UserId, UserHelper }
+import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 
 import scala.concurrent.Future
@@ -27,6 +28,10 @@ trait Security { self: Controller =>
   val AuthTokenHeader = "X-XSRF-TOKEN"
   val AuthTokenUrlKey = "auth"
   val TestAuthToken = "bbweb-test-token"
+
+  implicit val authToken: AuthToken
+
+  implicit val usersService: UsersService
 
   sealed case class AuthenticationInfo(token: String, userId: UserId)
 
@@ -58,19 +63,17 @@ trait Security { self: Controller =>
           DomainError(s"tokens did not match: cookie/$cookieXsrfToken, header/$headerXsrfToken").failureNel
         }
       }
-    } yield (headerXsrfToken)
+    } yield headerXsrfToken
   }
 
-  def getAuthInfo(token: String)(implicit usersService: UsersService)
+  private def getAuthInfo(token: String)
       : DomainValidation[AuthenticationInfo] = {
     if ((Play.current.mode == Mode.Test) && (token == TestAuthToken)) {
       // when running in TEST mode, always allow the action if the token is the test token
       AuthenticationInfo(token, org.biobank.Global.DefaultUserId).successNel
     } else {
       for {
-        userId <- Cache.getAs[UserId](token)
-        .map(_.success)
-        .getOrElse(DomainError("invalid token").failureNel)
+        userId     <- authToken.getUserId(token)
         user       <- usersService.getUser(userId.id)
         activeUser <- UserHelper.isUserActive(user)
         auth       <- AuthenticationInfo(token, userId).successNel
@@ -89,9 +92,7 @@ trait Security { self: Controller =>
    *
    * Note: there is special behaviour if the code is running in TEST mode.
    */
-  private def validateToken[A]
-    (request: Request[A])
-    (implicit usersService: UsersService)
+  private def validateToken[A](request: Request[A])
       : DomainValidation[AuthenticationInfo] = {
     for {
       token <- validRequestToken(request)
@@ -106,7 +107,6 @@ trait Security { self: Controller =>
   def AuthAction[A]
     (p: BodyParser[A] = parse.anyContent)
     (f: (String, UserId,  Request[A]) => Result)
-    (implicit usersService: UsersService)
       : Action[A] =
     Action(p) { implicit request =>
       validateToken(request).fold(
@@ -120,8 +120,7 @@ trait Security { self: Controller =>
     */
   def AuthActionAsync[A]
     (p: BodyParser[A] = parse.anyContent)
-    (f: (String, UserId, Request[A]) => Future[Result])
-    (implicit usersService: UsersService) =
+    (f: (String, UserId, Request[A]) => Future[Result]) =
     Action.async(p) { implicit request =>
       validateToken(request).fold(
         err => Future.successful(

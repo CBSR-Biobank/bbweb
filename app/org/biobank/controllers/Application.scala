@@ -4,6 +4,7 @@ import org.biobank.dto._
 import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
+import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 import org.biobank.service.centre.CentresService
@@ -24,6 +25,8 @@ class Application(implicit inj: Injector)
     with Security
     with JsonController
     with Injectable {
+
+  implicit val authToken = inject [AuthToken]
 
   implicit val usersService = inject [UsersService]
 

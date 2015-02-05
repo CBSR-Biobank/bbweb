@@ -28,9 +28,11 @@ class ParticipantAnnotTypeController(implicit inj: Injector)
     with Injectable
     with StudyEventsJson {
 
-  implicit val usersService = inject [UsersService]
+  implicit override val authToken = inject [AuthToken]
 
-  private def studiesService = inject[StudiesService]
+  implicit override val usersService = inject [UsersService]
+
+  private val studiesService = inject[StudiesService]
 
   /**
     * If [[annotTypeId]] is an empty string, then all the participant annotation types for the

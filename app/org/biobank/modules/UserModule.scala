@@ -14,6 +14,7 @@ import scaldi.Module
 class UserModule extends Module {
 
   bind [PasswordHasher] to new PasswordHasherImpl
+  bind [AuthToken] to new AuthTokenImpl
 
   bind [CollectionEventAnnotationTypeRepository]  to new CollectionEventAnnotationTypeRepositoryImpl
   bind [CollectionEventTypeRepository]            to new CollectionEventTypeRepositoryImpl

@@ -34,7 +34,9 @@ class CentresController(implicit inj: Injector)
     with Injectable
     with CentreEventsJson {
 
-  implicit val usersService = inject [UsersService]
+  implicit override val authToken = inject [AuthToken]
+
+  implicit override val usersService = inject [UsersService]
 
   private def centresService = inject [CentresService]
 

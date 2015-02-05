@@ -25,9 +25,10 @@ define(['./module'], function(module) {
     //---
 
     function logout() {
-      usersService.logout();
-      $scope.user = undefined;
-      $state.go('home');
+      usersService.logout().then(function () {
+        $scope.user = undefined;
+        $state.go('home');
+      });
     }
   }
 

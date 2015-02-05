@@ -12,6 +12,7 @@ define(['./module'], function(module) {
     var vm = this;
 
     vm.userIsAuthenticated = usersService.isAuthenticated();
+    console.log(vm.userIsAuthenticated);
 
     $rootScope.pageTitle = 'Biobank';
   }

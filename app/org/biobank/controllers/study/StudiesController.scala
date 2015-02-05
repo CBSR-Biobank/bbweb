@@ -35,9 +35,11 @@ class StudiesController(implicit inj: Injector)
     with Injectable
     with StudyEventsJson {
 
-  implicit val usersService = inject [UsersService]
+  implicit override val authToken = inject [AuthToken]
 
-  private def studiesService = inject[StudiesService]
+  implicit override val usersService = inject [UsersService]
+
+  private val studiesService = inject[StudiesService]
 
   private val PageSizeDefault = 5
 

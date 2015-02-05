@@ -3,6 +3,7 @@ package org.biobank.controllers
 import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEventsJson
+import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 
@@ -29,7 +30,9 @@ class UsersController(implicit inj: Injector)
     with Injectable
     with UserEventsJson {
 
-  implicit val usersService = inject [UsersService]
+  implicit override val authToken = inject [AuthToken]
+
+  implicit override val usersService = inject [UsersService]
 
   implicit val studiesService = inject [StudiesService]
 
@@ -57,7 +60,6 @@ class UsersController(implicit inj: Injector)
         BadRequest(JsError.toFlatJson(errors))
       },
       loginCredentials => {
-        // TODO: token should be derived from salt
         usersService.validatePassword(loginCredentials.email, loginCredentials.password).fold(
           err => {
             Logger.debug(s"login: error: $err")
@@ -74,8 +76,7 @@ class UsersController(implicit inj: Injector)
           },
           user => {
             Logger.debug(s"user logged in: ${user.email}")
-            val token = java.util.UUID.randomUUID.toString.replaceAll("-","")
-            Cache.set(token, user.id)
+            val token = authToken.newToken(user.id)
             Ok(token).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
           }
         )

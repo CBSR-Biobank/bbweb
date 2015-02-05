@@ -3,7 +3,6 @@ package org.biobank.service
 import com.github.t3hnar.bcrypt._
 import org.slf4j.LoggerFactory
 
-
 trait PasswordHasher {
   def encrypt(password: String, salt: String): String
 

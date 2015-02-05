@@ -3,6 +3,7 @@ package org.biobank.controllers
 import org.biobank.service.users.UsersService
 import org.biobank.domain.{ DomainValidation }
 import org.biobank.domain.user.UserId
+import org.biobank.service.AuthToken
 import org.biobank.infrastructure.command.Commands._
 
 import scala.concurrent.Future
@@ -16,9 +17,13 @@ import play.api.libs.concurrent.Execution.Implicits._
 
 trait CommandController extends Controller with Security {
 
+  implicit val authToken: AuthToken
+
+  implicit val usersService: UsersService
+
   def commandAction[A, T <: Command]
     (func: T => UserId => Future[Result])
-    (implicit userService: UsersService, reads: Reads[T]) = {
+    (implicit reads: Reads[T]) = {
     AuthActionAsync(parse.json) { (token, userId, request) =>
         val cmdResult = request.body.validate[T]
         cmdResult.fold(
@@ -36,7 +41,7 @@ trait CommandController extends Controller with Security {
 
   def commandAction[A, T <: Command](numFields: Integer)
     (func: T => UserId => Future[Result])
-    (implicit userService: UsersService, reads: Reads[T]) = {
+    (implicit reads: Reads[T]) = {
     AuthActionAsync(parse.json) { (token, userId, request) =>
       var jsonObj = request.body.as[JsObject]
       Logger.debug(s"commandAction: $jsonObj")
