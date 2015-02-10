@@ -31,7 +31,14 @@ package dto {
 
   object CentreCountsByStatus {
 
-    implicit val studyCountsByStatusWriter = Json.writes[CentreCountsByStatus]
+    implicit val centreCountsByStatusWriter = Json.writes[CentreCountsByStatus]
+  }
+
+  case class UserCountsByStatus(total: Long, registeredCount: Long, activeCount: Long, lockedCount: Long)
+
+  object UserCountsByStatus {
+
+    implicit val userCountsByStatusWriter = Json.writes[UserCountsByStatus]
   }
 
   case class CollectionDto(

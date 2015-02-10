@@ -12,11 +12,10 @@ case class AnnotationTypeId(val id: String) extends IdentifiedValueObject[String
 
 object AnnotationTypeId {
 
-  implicit val annotationTypeIdReader =
-    (__).read[String](minLength[String](2)).map( new AnnotationTypeId(_) )
-
-  implicit val annotationTypeIdWriter =
-    Writes{ (id: AnnotationTypeId) => JsString(id.id) }
+  // Do not want JSON to create a sub object, we just want it to be converted
+  // to a single string
+  implicit val annotationTypeIdReader = (__).read[String].map( new AnnotationTypeId(_) )
+  implicit val annotationTypeIdWriter = Writes{ (id: AnnotationTypeId) => JsString(id.id) }
 
 }
 

@@ -1,6 +1,7 @@
 package org.biobank.service.users
 
 import org.biobank.service._
+import org.biobank.dto._
 import org.biobank.domain._
 import org.biobank.domain.user._
 import org.biobank.infrastructure._
@@ -39,6 +40,17 @@ class UsersService(implicit inj: Injector)
 
   def getAll: Set[User] = {
     userRepository.allUsers
+  }
+
+  def getCountsByStatus(): UserCountsByStatus = {
+    // FIXME should be replaced by DTO query to the database
+    val users = userRepository.getValues
+      UserCountsByStatus(
+        total           = users.size,
+        registeredCount = users.collect { case u: RegisteredUser => u }.size,
+        activeCount     = users.collect { case u: ActiveUser     => u }.size,
+        lockedCount     = users.collect { case u: LockedUser     => u }.size
+      )
   }
 
   private def getStatus(status: String): DomainValidation[String] = {
@@ -94,7 +106,10 @@ class UsersService(implicit inj: Injector)
   }
 
   def getUser(id: String): DomainValidation[User] = {
-    userRepository.getByKey(UserId(id))
+    userRepository.getByKey(UserId(id)).fold(
+      err => DomainError(s"user with id does not exist: $id").failureNel,
+      user => user.success
+    )
   }
 
   def getByEmail(email: String): DomainValidation[User] = {

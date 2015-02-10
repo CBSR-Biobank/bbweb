@@ -14,10 +14,9 @@ case class CollectionEventTypeId(val id: String) extends IdentifiedValueObject[S
 
 object CollectionEventTypeId {
 
-  implicit val CollectionEventTypeIdReader =
-    (__).read[String](minLength[String](2)).map( new CollectionEventTypeId(_) )
-
-  implicit val CollectionEventTypeIdWriter =
-    Writes{ (id: CollectionEventTypeId) => JsString(id.id) }
+  // Do not want JSON to create a sub object, we just want it to be converted
+  // to a single string
+  implicit val collectionEventTypeIdReader = (__).read[String].map( new CollectionEventTypeId(_) )
+  implicit val collectionEventTypeIdWriter = Writes{ (id: CollectionEventTypeId) => JsString(id.id) }
 
 }

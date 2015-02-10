@@ -8,6 +8,8 @@ Google [protobuf](https://github.com/google/protobuf/) is used to save events to
 journal. By using protobuf it is easier to modify the events as the system grows. If an event is changed an
 old database can still be used with the application.
 
+On Ubuntu you must install package `libprotoc-dev`.
+
 #### ScalaPB
 
 [ScalaPB](http://trueaccord.github.io/ScalaPB/generated-code.html) is used to generate the scala files from
@@ -237,7 +239,8 @@ for instructions on how to use it.
 To generate the HTML report use the command:
 
 ```sh
-sbt clean coverage test coverageReport
+sbt clean coverage test
+sbt coverageReport
 ```
 
 Or, within the SBT cli:

@@ -85,17 +85,7 @@ class StudiesController(implicit inj: Injector)
     }
 
   def query(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
-    studiesService.getStudy(id).fold(
-      err => {
-        val errStr = err.list.mkString(", ")
-        if (errStr.contains("not found")) {
-          BadRequest(s"study with id not found: $id")
-        } else {
-          BadRequest(errStr)
-        }
-      },
-      study => Ok(study)
-    )
+    domainValidationReply(studiesService.getStudy(id))
   }
 
   def add = commandAction { cmd: AddStudyCmd => implicit userId =>

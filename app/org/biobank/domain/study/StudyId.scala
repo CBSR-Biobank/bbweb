@@ -14,7 +14,9 @@ case class StudyId(id: String) extends IdentifiedValueObject[String]
 
 object StudyId {
 
-  implicit val studyIdReader = (__).read[String](minLength[String](2)).map( new StudyId(_) )
+  // Do not want JSON to create a sub object, we just want it to be converted
+  // to a single string
+  implicit val studyIdReader = (__).read[String].map( new StudyId(_) )
   implicit val studyIdWriter = Writes{ (id: StudyId) => JsString(id.id) }
 
 }

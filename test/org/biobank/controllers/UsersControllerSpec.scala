@@ -271,6 +271,49 @@ class UsersControllerSpec extends ControllerFixture {
       }
     }
 
+    "GET /users/counts" must {
+
+      def checkCounts(json:            JsValue,
+                      registeredCount: Long,
+                      activeCount:     Long,
+                      lockedCount:     Long) = {
+        log.info(s"$json")
+        (json \ "total").as[Long] must be (registeredCount + activeCount + lockedCount)
+        (json \ "registeredCount").as[Long] must be (registeredCount)
+        (json \ "activeCount").as[Long] must be (activeCount)
+        (json \ "lockedCount").as[Long] must be (lockedCount)
+      }
+
+      "return empty counts" in {
+        val json = makeRequest(GET, uri + "/counts")
+        (json \ "status").as[String] must include ("success")
+        checkCounts(json            = (json \ "data"),
+                    registeredCount = 0,
+                    activeCount     = 0,
+                    lockedCount     = 0)
+      }
+
+      "return valid counts" in {
+        val users = List(
+          factory.createRegisteredUser,
+          factory.createRegisteredUser,
+          factory.createRegisteredUser,
+          factory.createActiveUser,
+          factory.createActiveUser,
+          factory.createLockedUser
+        )
+        users.foreach { c => userRepository.put(c) }
+
+        val json = makeRequest(GET, uri + "/counts")
+        (json \ "status").as[String] must include ("success")
+        checkCounts(json            = (json \ "data"),
+                    registeredCount = 3,
+                    activeCount     = 2,
+                    lockedCount     = 1)
+      }
+
+    }
+
     "POST /users" must {
       "add a user" in {
         val user = factory.createRegisteredUser
@@ -282,6 +325,21 @@ class UsersControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, uri, json = cmdJson)
 
         (json \ "status").as[String] must include("success")
+      }
+
+      "fail on registering an existing user" in {
+        val user = factory.createRegisteredUser
+        userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "name" -> user.name,
+          "email" -> user.email,
+          "password" -> "testpassword",
+          "avatarUrl" -> user.avatarUrl)
+        val json = makeRequest(POST, uri, FORBIDDEN, json = cmdJson)
+
+        (json \ "status").as[String] must include("error")
+        (json \ "message").as[String] must include("already registered")
       }
     }
 
@@ -464,14 +522,21 @@ class UsersControllerSpec extends ControllerFixture {
         val user = factory.createActiveUser
         userRepository.put(user)
         val json = makeRequest(GET, uri(user))
+        (json \ "status").as[String] must include("success")
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, user)
+      }
+
+      "return not found for an invalid user" in {
+        val userId = nameGenerator.next[User]
+        val json = makeRequest(GET, uri + s"/$userId", NOT_FOUND)
+        (json \ "status").as[String] must include("error")
+        (json \ "message").as[String] must include("user with id does not exist")
       }
     }
 
     "PUT /users/activate" must {
       "activate a user" in {
-
         val user = factory.createRegisteredUser
         userRepository.put(user)
 
@@ -482,11 +547,23 @@ class UsersControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] must include("success")
       }
+
+      "fail when attempting to activate a user and the user ids differ" in {
+        val user = factory.createRegisteredUser
+        userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "expectedVersion" -> Some(user.version),
+          "id" -> nameGenerator.next[User])
+        val json = makeRequest(POST, uri(user) + "/activate", BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include("error")
+        (json \ "message").as[String] must include("user id mismatch")
+      }
     }
 
     "PUT /users/lock" must {
       "lock a user" in {
-
         val user = factory.createActiveUser
         userRepository.put(user)
 
@@ -496,6 +573,19 @@ class UsersControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, uri(user) + "/lock", json = cmdJson)
 
         (json \ "status").as[String] must include("success")
+      }
+
+      "fail when attempting to lock a user and the user ids differ" in {
+        val user = factory.createActiveUser
+        userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "expectedVersion" -> Some(user.version),
+          "id" -> nameGenerator.next[User])
+        val json = makeRequest(POST, uri(user) + "/lock", BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include("error")
+        (json \ "message").as[String] must include("user id mismatch")
       }
     }
 
@@ -511,6 +601,19 @@ class UsersControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, uri(user) + "/unlock", json = cmdJson)
 
         (json \ "status").as[String] must include("success")
+      }
+
+      "fail when attempting to unlock a user and the user ids differ" in {
+        val user = factory.createLockedUser
+        userRepository.put(user)
+
+        val cmdJson = Json.obj(
+          "expectedVersion" -> Some(user.version),
+          "id" -> nameGenerator.next[User])
+        val json = makeRequest(POST, uri(user) + "/unlock", BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include("error")
+        (json \ "message").as[String] must include("user id mismatch")
       }
     }
 
@@ -577,13 +680,13 @@ class UsersControllerSpec extends ControllerFixture {
           status(result) mustBe (UNAUTHORIZED)
           contentType(result) mustBe (Some("application/json"))
           val json = Json.parse(contentAsString(result))
-            (json \ "status").as[String] must include("error")
-            (json \ "message").as[String] must include("invalid token")
+          (json \ "status").as[String] must include("error")
+          (json \ "message").as[String] must include("invalid token")
         }
         ()
       }
 
-      "not allow mismatched tokens in request" in {
+      "not allow mismatched tokens in request for an non asyncaction" in {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
 
@@ -599,14 +702,45 @@ class UsersControllerSpec extends ControllerFixture {
           status(result) mustBe (UNAUTHORIZED)
           contentType(result) mustBe (Some("application/json"))
           val json = Json.parse(contentAsString(result))
-            (json \ "status").as[String] must include("error")
-            (json \ "message").as[String] must include("tokens did not match")
+          (json \ "status").as[String] must include("error")
+          (json \ "message").as[String] must include("tokens did not match")
+        }
+        ()
+      }
+
+      "not allow mismatched tokens in request for an async action" in {
+        val plainPassword = nameGenerator.next[String]
+        val user = createActiveUserInRepository(plainPassword)
+
+        val validToken = doLogin(user.email, plainPassword)
+        val badToken = nameGenerator.next[String]
+
+        val cmdJson = Json.obj(
+          "expectedVersion" -> Some(user.version),
+          "id" -> user.id.id)
+
+        // this request is valid since user is logged in
+        var fakeRequest = FakeRequest(POST, uri(user) + "/lock")
+        .withJsonBody(cmdJson)
+        .withHeaders("X-XSRF-TOKEN" -> validToken)
+        .withCookies(Cookie("XSRF-TOKEN", badToken))
+
+        //log.info(s"makeRequest: request: $fakeRequest")
+
+        val resp = route(fakeRequest)
+        resp must not be (None)
+        resp.map { result =>
+          // log.info(s"makeRequest: status: ${status(result)}, result: ${contentAsString(result)}")
+          status(result) mustBe (UNAUTHORIZED)
+          contentType(result) mustBe (Some("application/json"))
+          val json = Json.parse(contentAsString(result))
+          (json \ "status").as[String] must include("error")
+          (json \ "message").as[String] must include("tokens did not match")
         }
         ()
       }
 
       "not allow requests missing XSRF-TOKEN cookie" in {
-
         val resp = route(FakeRequest(GET, uri))
         resp must not be (None)
         resp.map { result =>
@@ -619,7 +753,7 @@ class UsersControllerSpec extends ControllerFixture {
         ()
       }
 
-      "not allow requests missing X-XSRF-TOKEN in header" taggedAs(Tag("1")) in {
+      "not allow requests missing X-XSRF-TOKEN in header" in {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
         val token = doLogin(user.email, plainPassword)
@@ -639,7 +773,7 @@ class UsersControllerSpec extends ControllerFixture {
 
     "POST /logout" must {
 
-      "disallow access to logged out users" taggedAs(Tag("1")) in {
+      "disallow access to logged out users" in {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
         val token = doLogin(user.email, plainPassword)

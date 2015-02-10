@@ -18,23 +18,24 @@ trait ParticipantValidations {
 
   case object UniqueIdInvalid extends ValidationKey
 
+  case object UniqueIdRequired extends ValidationKey
+
 }
 
 /** The subject for which a set of specimens were collected from. The subject can be human or non human.
-  * A participant belongs to a single study.
-  *
-  * @param uniqueId A participant has a unique identifier that is used to identify the participant in
-  *        the system. This identifier is not the same as the ParticipantId value object
-  *        used by the domain model.
-  */
-case class Participant(
-  studyId:      StudyId,
-  id:           ParticipantId,
-  version:      Long,
-  timeAdded:    DateTime,
-  timeModified: Option[DateTime],
-  uniqueId:     String,
-  annotations:  Set[ParticipantAnnotation])
+ * A participant belongs to a single study.
+ *
+ * @param uniqueId A participant has a unique identifier that is used to identify the participant in
+ *        the system. This identifier is not the same as the ParticipantId value object
+ *        used by the domain model.
+ */
+case class Participant(studyId:      StudyId,
+                       id:           ParticipantId,
+                       version:      Long,
+                       timeAdded:    DateTime,
+                       timeModified: Option[DateTime],
+                       uniqueId:     String,
+                       annotations:  Set[ParticipantAnnotation])
     extends ConcurrencySafeEntity[ParticipantId]
     with HasStudyId {
 
@@ -54,15 +55,13 @@ object Participant extends ParticipantValidations {
   import org.biobank.domain.CommonValidations._
   import ParticipantAnnotation._
 
-  case object UniqueIdRequired extends ValidationKey
-
-  def create(
-    studyId: StudyId,
-    id: ParticipantId,
-    version: Long,
-    dateTime: DateTime,
-    uniqueId: String,
-    annotations: Set[ParticipantAnnotation]): DomainValidation[Participant] = {
+  def create(studyId: StudyId,
+             id: ParticipantId,
+             version: Long,
+             dateTime: DateTime,
+             uniqueId: String,
+             annotations: Set[ParticipantAnnotation])
+      : DomainValidation[Participant] = {
     (validateId(studyId) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|

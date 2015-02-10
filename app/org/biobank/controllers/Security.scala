@@ -8,6 +8,7 @@ import org.biobank.service.users.UsersService
 import scala.concurrent.Future
 import play.api.Play
 import play.api.Mode
+import play.api.Logger
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.cache._
@@ -123,8 +124,11 @@ trait Security { self: Controller =>
     (f: (String, UserId, Request[A]) => Future[Result]) =
     Action.async(p) { implicit request =>
       validateToken(request).fold(
-        err => Future.successful(
-          Unauthorized(Json.obj("status" ->"error", "message" -> err.list.mkString(", ")))),
+        err => {
+          Logger.info(s"AuthActionAsync: $err")
+          Future.successful(
+            Unauthorized(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))))
+        },
         authInfo => f(authInfo.token, authInfo.userId, request)
       )
     }

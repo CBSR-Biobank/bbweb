@@ -72,7 +72,7 @@ class SpecimenGroupController(implicit inj: Injector)
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else if (cmd.id != id) {
-        Future.successful(BadRequest("annotation type id mismatch"))
+        Future.successful(BadRequest("specimen group id mismatch"))
       } else {
         val future = studiesService.updateSpecimenGroup(cmd)
         domainValidationReply(future)

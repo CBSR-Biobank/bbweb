@@ -41,6 +41,13 @@ package infrastructure {
 
   }
 
+  trait HasParticipantIdentity {
+
+    /** An command or event that includes the study ID that it is related to. */
+    val participantId: String
+
+  }
+
   trait HasCentreIdentity {
 
     /** An command or event that includes the study ID that it is related to. */

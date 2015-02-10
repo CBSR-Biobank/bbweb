@@ -9,4 +9,18 @@ package study {
 
   }
 
+  trait HasSpecimenGroupId {
+
+    /** The ID of the study this object belongs to. */
+    val specimenGroupId: SpecimenGroupId
+
+  }
+
+  trait HasParticipantId {
+
+    /** The ID of the study this object belongs to. */
+    val participantId: ParticipantId
+
+  }
+
 }

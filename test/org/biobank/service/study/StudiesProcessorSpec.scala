@@ -146,7 +146,7 @@ class StudiesProcessorSpec extends TestFixture {
       askUpdateCommand(study3) mustFail "name already exists"
     }
 
-    "not update a study's name to something less than 2 characters" taggedAs(Tag("1")) in {
+    "not update a study's name to something less than 2 characters" in {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
 

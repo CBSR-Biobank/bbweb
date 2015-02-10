@@ -63,7 +63,7 @@ class SpecimenLinkTypeController(implicit inj: Injector)
       if (cmd.processingTypeId != procTypeId) {
         Future.successful(BadRequest("processing type id mismatch"))
       } else if (cmd.id != id) {
-        Future.successful(BadRequest("annotation type id mismatch"))
+        Future.successful(BadRequest("specimen link type id mismatch"))
       } else {
         val future = studiesService.updateSpecimenLinkType(cmd)
         domainValidationReply(future)

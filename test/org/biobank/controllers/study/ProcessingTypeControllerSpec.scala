@@ -51,11 +51,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
   def addOnNonDisabledStudy(study: Study) {
     studyRepository.put(study)
-
-    val sg = factory.createSpecimenGroup
-    specimenGroupRepository.put(sg)
-
-    val procType = factory.createProcessingType
+    val procType = factory.createProcessingType.copy(studyId = study.id)
 
     val json = makeRequest(
       POST,
@@ -70,10 +66,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
   def updateOnNonDisabledStudy(study: Study) {
     studyRepository.put(study)
 
-    val procType = factory.createProcessingType
+    val procType = factory.createProcessingType.copy(studyId = study.id)
     processingTypeRepository.put(procType)
 
-    val procType2 = factory.createProcessingType
+    val procType2 = factory.createProcessingType.copy(studyId = study.id)
 
     val json = makeRequest(
       PUT,
@@ -180,7 +176,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
         val procType = factory.createProcessingType
 
-        val json = makeRequest(GET, uriWithQuery(study, procType), BAD_REQUEST)
+        val json = makeRequest(GET, uriWithQuery(study, procType), NOT_FOUND)
           (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("processing type does not exist")
       }
@@ -199,19 +195,31 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "POST /studies/proctypes" must {
       "not add a processing type to an enabled study" in {
-        addOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(1, 1) | fail)
+        addOnNonDisabledStudy(factory.createEnabledStudy)
       }
-    }
 
-    "POST /studies/proctypes" must {
       "not add a processing type to an retired study" in {
-        addOnNonDisabledStudy(
-          factory.createDisabledStudy.retire | fail)
+        addOnNonDisabledStudy(factory.createRetiredStudy)
+      }
+
+      "fail when adding and study IDs do not match" in {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val procType = factory.createProcessingType
+
+        val study2 = factory.createDisabledStudy
+
+        val json = makeRequest(
+          POST,
+          uri(study2),
+          BAD_REQUEST,
+          json = procTypeToAddCmdJson(procType))
+
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study id mismatch")
       }
     }
 
@@ -235,19 +243,49 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "PUT /studies/proctypes" must {
       "not update a processing type on an enabled study" in {
-        updateOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(1, 1) | fail)
+        updateOnNonDisabledStudy(factory.createEnabledStudy)
       }
-    }
 
-    "PUT /studies/proctypes" must {
       "not update a processing type on an retired study" in {
-        updateOnNonDisabledStudy(
-          factory.createDisabledStudy.retire | fail)
+        updateOnNonDisabledStudy(factory.createRetiredStudy)
+      }
+
+      "fail when updating and study IDs do not match" in {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val procType = factory.createProcessingType
+        processingTypeRepository.put(procType)
+
+        val study2 = factory.createDisabledStudy
+
+        val json = makeRequest(PUT,
+                               uri(study2, procType),
+                               BAD_REQUEST,
+                               json = procTypeToUpdateCmdJson(procType))
+
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study id mismatch")
+      }
+
+      "fail when updating and processing type IDs do not match" in {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val procType = factory.createProcessingType
+        processingTypeRepository.put(procType)
+
+        val procType2 = factory.createProcessingType
+
+        val json = makeRequest(PUT,
+                               uri(study, procType2),
+                               BAD_REQUEST,
+                               json = procTypeToUpdateCmdJson(procType))
+
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("processing type id mismatch")
       }
     }
 

@@ -58,7 +58,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     val json = makeRequest(POST, uri(study), BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] must include ("error")
-      (json \ "message").as[String] must include ("is not disabled")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   def updateOnNonDisabledStudy(study: Study, sg: SpecimenGroup) = {
@@ -70,7 +70,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     val json = makeRequest(PUT, uri(study, sg2), BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] must include ("error")
-      (json \ "message").as[String] must include ("is not disabled")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   def removeOnNonDisabledStudy(
@@ -82,7 +82,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     val json = makeRequest(DELETE, uri(study, sg, sg.version), BAD_REQUEST)
 
     (json \ "status").as[String] must include ("error")
-      (json \ "message").as[String] must include ("is not disabled")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   "Specimen Group REST API" when {
@@ -93,7 +93,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         studyRepository.put(study)
 
         val json = makeRequest(GET, uri(study))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
       }
@@ -106,7 +106,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         specimenGroupRepository.put(sg)
 
         val json = makeRequest(GET, uri(study))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
         compareObj(jsonList(0), sg)
@@ -120,7 +120,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         specimenGroupRepository.put(sg)
 
         val json = makeRequest(GET, uriWithQuery(study, sg)).as[JsObject]
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data")
         compareObj(jsonObj, sg)
       }
@@ -133,10 +133,10 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         sgroups map { sg => specimenGroupRepository.put(sg) }
 
         val json = makeRequest(GET, uri(study))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size sgroups.size
-          (jsonList zip sgroups).map { item => compareObj(item._1, item._2) }
+        (jsonList zip sgroups).map { item => compareObj(item._1, item._2) }
         ()
       }
 
@@ -144,8 +144,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
 
         val json = makeRequest(GET, uri(study), BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("invalid study id")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("invalid study id")
       }
 
       "fail for an invalid study ID when using an specimen group id" in {
@@ -153,8 +153,8 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val sg = factory.createSpecimenGroup
 
         val json = makeRequest(GET, uriWithQuery(study, sg), BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("invalid study id")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("invalid study id")
       }
 
       "fail for an invalid specimen group id" in {
@@ -163,9 +163,9 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
         val sg = factory.createSpecimenGroup
 
-        val json = makeRequest(GET, uriWithQuery(study, sg), BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("specimen group does not exist")
+        val json = makeRequest(GET, uriWithQuery(study, sg), NOT_FOUND)
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("specimen group does not exist")
       }
 
     }
@@ -182,16 +182,26 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       }
 
       "not add a specimen group to enabled study" in {
-        addToNonDisabledStudy(
-          factory.createDisabledStudy.enable(1, 1) | fail,
-          factory.createSpecimenGroup)
+        addToNonDisabledStudy(factory.createEnabledStudy, factory.createSpecimenGroup)
       }
 
       "not add a specimen group to retired study" in {
-        addToNonDisabledStudy(
-          factory.createDisabledStudy.retire | fail,
-          factory.createSpecimenGroup)
+        addToNonDisabledStudy(factory.createRetiredStudy, factory.createSpecimenGroup)
       }
+
+      "fail when adding and study IDs do not match" in {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val cmdJson = specimenGroupToAddCmd(factory.createSpecimenGroup)
+        val study2 = factory.createDisabledStudy
+
+        val json = makeRequest(POST, uri(study2), BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study id mismatch")
+      }
+
     }
 
     "PUT /studies/sgroups" must {
@@ -210,15 +220,11 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       }
 
       "not update a specimen group on an enabled study" in {
-        updateOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(1, 1) | fail,
-          factory.createSpecimenGroup)
+        updateOnNonDisabledStudy(factory.createEnabledStudy, factory.createSpecimenGroup)
       }
 
       "not update a specimen group on an retired study" in {
-        updateOnNonDisabledStudy(
-          factory.createDisabledStudy.retire | fail,
-          factory.createSpecimenGroup)
+        updateOnNonDisabledStudy(factory.createRetiredStudy, factory.createSpecimenGroup)
       }
 
       "not update a specimen group in use by a collection event type" in {
@@ -239,7 +245,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           PUT, uri(study, sg), BAD_REQUEST, json = specimenGroupToUpdateCmd(sg))
 
         (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("specimen group is in use by collection event type")
+        (json \ "message").as[String] must include ("specimen group is in use by collection event type")
       }
 
       "not update a specimen group in use by a specimen link type" in {
@@ -259,14 +265,14 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           PUT, uri(study, inputSg), BAD_REQUEST, json = specimenGroupToUpdateCmd(inputSg))
 
         (jsonReply \ "status").as[String] must include ("error")
-          (jsonReply \ "message").as[String] must include ("specimen group is in use by specimen link type")
+        (jsonReply \ "message").as[String] must include ("specimen group is in use by specimen link type")
 
         // attempt to update outputSg
         jsonReply = makeRequest(
           PUT, uri(study, outputSg), BAD_REQUEST, json = specimenGroupToUpdateCmd(outputSg))
 
         (jsonReply \ "status").as[String] must include ("error")
-          (jsonReply \ "message").as[String] must include ("specimen group is in use by specimen link type")
+        (jsonReply \ "message").as[String] must include ("specimen group is in use by specimen link type")
       }
 
       "not update a specimen group in use by a collection event type and a specimen link type" in {
@@ -294,9 +300,44 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
           PUT, uri(study, outputSg), BAD_REQUEST, json = specimenGroupToUpdateCmd(outputSg))
 
         (jsonReply \ "status").as[String] must include ("error")
-          (jsonReply \ "message").as[String] must include ("specimen group is in use by collection event type")
-          (jsonReply \ "message").as[String] must include ("specimen group is in use by specimen link type")
+        (jsonReply \ "message").as[String] must include ("specimen group is in use by collection event type")
+        (jsonReply \ "message").as[String] must include ("specimen group is in use by specimen link type")
       }
+
+      "fail when updating and study IDs do not match" in {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val sg = factory.createSpecimenGroup
+        specimenGroupRepository.put(sg)
+
+        val sg2 = factory.createSpecimenGroup.copy(id = sg.id)
+        val cmdJson = specimenGroupToUpdateCmd(sg2)
+
+        val study2 = factory.createDisabledStudy
+
+        val json = makeRequest(PUT, uri(study2, sg2), BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study id mismatch")
+      }
+
+      "fail when updating and specimen group IDs do not match" in {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val sg = factory.createSpecimenGroup
+        specimenGroupRepository.put(sg)
+        val cmdJson = specimenGroupToUpdateCmd(sg)
+
+        val sg2 = factory.createSpecimenGroup
+
+        val json = makeRequest(PUT, uri(study, sg2), BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("specimen group id mismatch")
+      }
+
     }
 
     "DELETE /studies/sgroups" must {

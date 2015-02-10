@@ -103,12 +103,12 @@ class CentresServiceImpl(implicit inj: Injector)
 
   def getCountsByStatus(): CentreCountsByStatus = {
     // FIXME should be replaced by DTO query to the database
-    val studies = centreRepository.getValues
-      CentreCountsByStatus(
-        total         = studies.size,
-        disabledCount = studies.collect { case s: DisabledCentre => s }.size,
-        enabledCount  = studies.collect { case s: EnabledCentre => s }.size
-      )
+    val centres = centreRepository.getValues
+    CentreCountsByStatus(
+      total         = centres.size,
+      disabledCount = centres.collect { case s: DisabledCentre => s }.size,
+      enabledCount  = centres.collect { case s: EnabledCentre => s }.size
+    )
   }
 
   private def getStatus(status: String): DomainValidation[String] = {

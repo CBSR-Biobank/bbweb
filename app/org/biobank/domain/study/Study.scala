@@ -78,6 +78,10 @@ trait StudyValidations {
   val NameMinLength = 2
 
   case object InvalidName extends ValidationKey
+
+  case object InvalidStudyId extends ValidationKey
+
+  case object InvalidSpecimenGroupId extends ValidationKey
 }
 
 /**

@@ -134,9 +134,9 @@ class UsersController(implicit inj: Injector)
     )
   }
 
-  def userCount() =
+  def userCounts() =
     AuthAction(parse.empty) { (token, userId, request) =>
-      Ok(usersService.getAll.size)
+      Ok(usersService.getCountsByStatus)
     }
 
   def list(
@@ -177,11 +177,7 @@ class UsersController(implicit inj: Injector)
 
   /** Retrieves the user for the given id as JSON */
   def user(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
-    Logger.debug(s"user: id: $id")
-    usersService.getUser(id).fold(
-      err => BadRequest(err.list.mkString(", ")),
-      user => Ok(user)
-    )
+    domainValidationReply(usersService.getUser(id))
   }
 
   def registerUser() = Action.async(parse.json) { implicit request =>

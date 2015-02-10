@@ -115,3 +115,4 @@ PB.protobufSettings
 // the application is run
 com.jamesward.play.BrowserNotifierKeys.shouldOpenBrowser := false
 
+ScoverageSbtPlugin.ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*"

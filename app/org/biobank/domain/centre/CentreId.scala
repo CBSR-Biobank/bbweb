@@ -14,7 +14,9 @@ case class CentreId(id: String) extends IdentifiedValueObject[String]
 
 object CentreId {
 
-  implicit val centreIdReader = (__ \ "id").read[String](minLength[String](2)).map( new CentreId(_) )
+  // Do not want JSON to create a sub object, we just want it to be converted
+  // to a single string
+  implicit val centreIdReader = (__ \ "id").read[String].map( new CentreId(_) )
   implicit val centreIdWriter = Writes{ (centreId: CentreId) => JsString(centreId.id) }
 
 }

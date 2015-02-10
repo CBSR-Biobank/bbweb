@@ -1,5 +1,6 @@
 package org.biobank.controllers.study
 
+import org.biobank.fixture.NameGenerator
 import org.biobank.controllers._
 import org.biobank.dto._
 import org.biobank.domain.study.{ Study, StudyId }
@@ -21,6 +22,8 @@ class StudiesControllerSpec extends ControllerFixture {
   import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  val nameGenerator = new NameGenerator(this.getClass)
 
   def uri: String = "/studies"
 
@@ -232,6 +235,38 @@ class StudiesControllerSpec extends ControllerFixture {
 
     }
 
+    "GET /studies/counts" must {
+
+      "return empty counts" in {
+        val json = makeRequest(GET, uri + "/counts")
+        (json \ "status").as[String] must include ("success")
+        (json \ "data" \ "total").as[Long] must be (0)
+        (json \ "data" \ "disabledCount").as[Long] must be (0)
+        (json \ "data" \ "enabledCount").as[Long] must be (0)
+        (json \ "data" \ "retiredCount").as[Long] must be (0)
+      }
+
+      "return valid counts"  in {
+        val studies = List(
+          factory.createDisabledStudy,
+          factory.createDisabledStudy,
+          factory.createDisabledStudy,
+          factory.createEnabledStudy,
+          factory.createEnabledStudy,
+          factory.createRetiredStudy
+        )
+        studies.foreach { c => studyRepository.put(c) }
+
+        val json = makeRequest(GET, uri + "/counts")
+        (json \ "status").as[String] must include ("success")
+        (json \ "data" \ "total").as[Long] must be (6)
+        (json \ "data" \ "disabledCount").as[Long] must be (3)
+        (json \ "data" \ "enabledCount").as[Long] must be (2)
+        (json \ "data" \ "retiredCount").as[Long] must be (1)
+      }
+
+    }
+
     "POST /studies" must {
       "add a study" in {
         val study = factory.createDisabledStudy
@@ -251,6 +286,7 @@ class StudiesControllerSpec extends ControllerFixture {
     }
 
     "PUT /studies/:id" must {
+
       "update a study" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
@@ -272,6 +308,21 @@ class StudiesControllerSpec extends ControllerFixture {
             repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
           }
         )
+      }
+
+      "fail when updating and study IDs do not match" in {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val cmdJson = Json.obj(
+          "id"              -> nameGenerator.next[Study],
+          "expectedVersion" -> Some(study.version),
+          "name"            -> study.name,
+          "description"     -> study.description)
+        val json = makeRequest(PUT, uri(study), BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study id mismatch")
       }
     }
 
@@ -304,12 +355,13 @@ class StudiesControllerSpec extends ControllerFixture {
           repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
         )
       }
-    }
 
-    "POST /studies/enable" must {
-      "not enable a study" in {
+      "not enable a study when it has no specimen groups" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
+
+        val cet = factory.createCollectionEventType
+        collectionEventTypeRepository.put(cet)
 
         val cmdJson = Json.obj(
           "id" -> study.id.id,
@@ -318,6 +370,37 @@ class StudiesControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("no specimen groups")
+      }
+
+      "not enable a study  when it has no collection event types" in {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val sg = factory.createSpecimenGroup
+        specimenGroupRepository.put(sg)
+
+        val cmdJson = Json.obj(
+          "id" -> study.id.id,
+          "expectedVersion" -> Some(study.version))
+        val json = makeRequest(POST, uri(study) + "/enable", BAD_REQUEST, cmdJson)
+
+        (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("no collection event types")
+      }
+
+      "fail when enabling a study and the study IDs do not match" in {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+        specimenGroupRepository.put(factory.createSpecimenGroup)
+        collectionEventTypeRepository.put(factory.createCollectionEventType)
+
+        val cmdJson = Json.obj(
+          "id" -> nameGenerator.next[Study],
+          "expectedVersion" -> Some(study.version))
+        val json = makeRequest(POST, uri(study) + "/enable", BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study id mismatch")
       }
     }
 
@@ -339,6 +422,19 @@ class StudiesControllerSpec extends ControllerFixture {
           repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
         )
       }
+
+      "fail when disabling a study and the study IDs do not match" in {
+        val study = factory.createEnabledStudy
+        studyRepository.put(study)
+
+        val cmdJson = Json.obj(
+          "id" -> nameGenerator.next[Study],
+          "expectedVersion" -> Some(study.version))
+        val json = makeRequest(POST, uri(study) + "/disable", BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study id mismatch")
+      }
     }
 
     "POST /studies/retire" must {
@@ -359,6 +455,19 @@ class StudiesControllerSpec extends ControllerFixture {
           repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
         )
       }
+
+      "fail when retiring a study and the study IDs do not match" in {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val cmdJson = Json.obj(
+          "id" -> nameGenerator.next[Study],
+          "expectedVersion" -> Some(study.version))
+        val json = makeRequest(POST, uri(study) + "/retire", BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study id mismatch")
+      }
     }
 
     "POST /studies/unretire" must {
@@ -378,6 +487,19 @@ class StudiesControllerSpec extends ControllerFixture {
           err => fail(err.list.mkString),
           repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
         )
+      }
+
+      "fail when retiring a study and the study IDs do not match" in {
+        val study = factory.createRetiredStudy
+        studyRepository.put(study)
+
+        val cmdJson = Json.obj(
+          "id" -> nameGenerator.next[Study],
+          "expectedVersion" -> Some(study.version))
+        val json = makeRequest(POST, uri(study) + "/unretire", BAD_REQUEST, json = cmdJson)
+
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study id mismatch")
       }
     }
 

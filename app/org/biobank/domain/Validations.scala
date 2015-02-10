@@ -49,29 +49,29 @@ object CommonValidations {
   }
 
   def validatePositiveNumberOption
-    (option: Option[BigDecimal], err: ValidationKey)
+    (maybeNumber: Option[BigDecimal], err: ValidationKey)
       : DomainValidation[Option[BigDecimal]] = {
-    option.fold {
+    maybeNumber.fold {
       none[BigDecimal].successNel[String]
     } { number =>
       if (number < 0) {
         err.toString.failureNel[Option[BigDecimal]]
       } else {
-        option.successNel
+        maybeNumber.successNel
       }
     }
   }
 
   def validateNonEmptyOption
-    (option: Option[String], err: ValidationKey)
+    (maybeString: Option[String], err: ValidationKey)
       : DomainValidation[Option[String]] = {
-    option.fold {
+    maybeString.fold {
       none[String].successNel[String]
     } { value =>
       if ((value == null) || value.isEmpty()) {
         err.toString.failureNel[Option[String]]
       } else {
-        option.successNel
+        maybeString.successNel
       }
     }
   }
@@ -91,9 +91,9 @@ object CommonValidations {
   }
 
   def validateId[T <: IdentifiedValueObject[String]]
-    (idOption: Option[T], err: ValidationKey)
+    (maybeId: Option[T], err: ValidationKey)
       : DomainValidation[Option[T]] = {
-    idOption.fold {
+    maybeId.fold {
       none[T].successNel[String]
     } { id =>
       validateId(id, err).fold(

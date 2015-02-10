@@ -23,8 +23,8 @@ import org.scalatestplus.play._
 import org.joda.time.DateTime
 
 /**
-  * Tests the REST API for [[Participants]].
-  */
+ * Tests the REST API for [[Participants]].
+ */
 class ParticipantsControllerSpec extends ControllerFixture {
   import TestGlobal._
 
@@ -45,7 +45,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
   }
 
   /** Converts a participant annotation into a Json object.
-    */
+   */
   def annotationToJson(annotation: ParticipantAnnotation) = {
     val json = Json.obj(
       "annotationTypeId" -> annotation.annotationTypeId,
@@ -57,7 +57,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
   }
 
   /** Converts a participant into an Add command.
-    */
+   */
   def participantToAddCmd(participant: Participant) = {
     Json.obj(
       "studyId"     -> participant.studyId.id,
@@ -67,7 +67,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
   }
 
   /** Converts a participant into an Update command.
-    */
+   */
   def participantToUpdateCmd(participant: Participant) = {
     participantToAddCmd(participant) ++ Json.obj(
       "id"              -> participant.id.id,
@@ -97,13 +97,12 @@ class ParticipantsControllerSpec extends ControllerFixture {
         participantRepository.put(participant)
 
         val json = makeRequest(GET, uri(factory.defaultEnabledStudy, participant))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsObj = (json \ "data").as[JsObject]
         compareObj(jsObj, participant)
       }
 
       "get participant with no annotations" in {
-
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -111,9 +110,49 @@ class ParticipantsControllerSpec extends ControllerFixture {
         participantRepository.put(participant)
 
         val json = makeRequest(GET, uri(factory.defaultEnabledStudy, participant))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsObj = (json \ "data").as[JsObject]
         compareObj(jsObj, participant)
+      }
+
+    }
+
+    "GET /studies/:studyId/participants/uniqueId/:id" must {
+
+      "must return false for a participant ID that exists" in {
+        val study = factory.createEnabledStudy
+        studyRepository.put(study)
+
+        var participant = factory.createParticipant
+        participantRepository.put(participant)
+
+        val json = makeRequest(GET, uri(study) + "/uniqueId/" + participant.uniqueId)
+        (json \ "status").as[String] must include ("success")
+        val jsObj = (json \ "data").as[JsObject]
+        compareObj(jsObj, participant)
+      }
+
+      "must return BAD_REQUEST for a participant ID that exists but in a different study" in {
+        var participant = factory.createParticipant
+        participantRepository.put(participant)
+
+        val study = factory.createEnabledStudy
+        studyRepository.put(study)
+
+        val json = makeRequest(GET, uri(study) + "/uniqueId/" + participant.uniqueId, BAD_REQUEST)
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study does not have participant")
+      }
+
+      "must return NOT_FOUND for a participant ID that does not exist" in {
+        val study = factory.createEnabledStudy
+        studyRepository.put(study)
+
+        var participantUniqueId = nameGenerator.next[Participant]
+
+        val json = makeRequest(GET, uri(study) + "/uniqueId/" + participantUniqueId, NOT_FOUND)
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("participant does not exist")
       }
 
     }
@@ -127,7 +166,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
 
         val participant = factory.createParticipant
         val json = makeRequest(POST, uri(study), json = participantToAddCmd(participant))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
       }
 
       "add a participant with annotation types" in {
@@ -144,7 +183,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
           annotations = Set(factory.createParticipantAnnotation))
 
         val json = makeRequest(POST, uri(study), json = participantToAddCmd(participant))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
       }
 
       "fail when adding participant with duplicate uniqueId" in {
@@ -157,8 +196,8 @@ class ParticipantsControllerSpec extends ControllerFixture {
 
         // participant already in repository, request to add another with same uniqueId should fail
         val json = makeRequest(POST, uri(study), FORBIDDEN, json = participantToAddCmd(participant))
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("participant with unique ID already exists")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("participant with unique ID already exists")
       }
 
       "fail when missing a required annotation type" in {
@@ -173,8 +212,8 @@ class ParticipantsControllerSpec extends ControllerFixture {
 
         val participant = factory.createParticipant
         val json = makeRequest(POST, uri(study), BAD_REQUEST, json = participantToAddCmd(participant))
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("missing required annotation type")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("missing required annotation type")
       }
 
       "fail for an invalid annotation type" in {
@@ -189,8 +228,8 @@ class ParticipantsControllerSpec extends ControllerFixture {
         val participant = factory.createParticipant.copy(annotations = Set(annotation))
 
         val json = makeRequest(POST, uri(study), BAD_REQUEST, json = participantToAddCmd(participant))
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("annotation type(s) do not belong to study")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("annotation type(s) do not belong to study")
       }
 
       "fail for more than one annotation with the same annotation type" in {
@@ -209,10 +248,23 @@ class ParticipantsControllerSpec extends ControllerFixture {
           annotations = Set(annotation, annotation2))
 
         val json = makeRequest(POST, uri(study), BAD_REQUEST, json = participantToAddCmd(participant))
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("duplicate annotation types in annotations")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("duplicate annotation types in annotations")
       }
 
+      "fail when adding and study IDs do not match" in {
+        val study = factory.createEnabledStudy
+        studyRepository.put(study)
+
+        val participant = factory.createParticipant
+        participantRepository.put(participant)
+
+        val study2 = factory.createEnabledStudy
+
+        val json = makeRequest(POST, uri(study2), BAD_REQUEST, json = participantToAddCmd(participant))
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study id mismatch")
+      }
     }
 
     "PUT /studies/{studyId}/participants" must {
@@ -226,7 +278,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
         participantRepository.put(participant)
 
         val json = makeRequest(PUT, uri(study, participant), json = participantToUpdateCmd(participant))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
       }
 
       "update a participant with annotation types" in {
@@ -243,7 +295,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
         val p2 = participant.copy(annotations = Set(annotation))
 
         val json = makeRequest(PUT, uri(study, p2), json = participantToUpdateCmd(p2))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
       }
 
       "update a participant to remove an annotation type" in {
@@ -260,7 +312,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
         val p2 = participant.copy(annotations = Set.empty)
 
         val json = makeRequest(PUT, uri(study, p2), json = participantToUpdateCmd(p2))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
       }
 
       "fail when missing a required annotation type" in {
@@ -277,12 +329,11 @@ class ParticipantsControllerSpec extends ControllerFixture {
         val p2 = participant.copy(annotations = Set.empty)
 
         val json = makeRequest(PUT, uri(study, p2), BAD_REQUEST, json = participantToUpdateCmd(p2))
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("missing required annotation type")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("missing required annotation type")
       }
 
       "fail for an invalid annotation type" in {
-
         // annotation type belongs to a different study
         val annotType = factory.createParticipantAnnotationType
         participantAnnotationTypeRepository.put(annotType)
@@ -296,12 +347,11 @@ class ParticipantsControllerSpec extends ControllerFixture {
         val p2 = participant.copy(annotations = Set(annotation))
 
         val json = makeRequest(PUT, uri(study, p2), BAD_REQUEST, json = participantToUpdateCmd(p2))
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("annotation type(s) do not belong to study")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("annotation type(s) do not belong to study")
       }
 
       "fail for more than one annotation with the same annotation type" in {
-
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -318,32 +368,43 @@ class ParticipantsControllerSpec extends ControllerFixture {
         val p2 = participant.copy(annotations = Set(annotation, annotation2))
 
         val json = makeRequest(PUT, uri(study, p2), BAD_REQUEST, json = participantToUpdateCmd(p2))
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("duplicate annotation types in annotations")
-      }
-    }
-
-    "GET /studies/participants/checkUnique/{id}" must {
-
-      "must return true for a participant ID that does not exist" in {
-
-        var participantUniqueId = nameGenerator.next[Participant]
-
-        val json = makeRequest(GET, s"/studies/participants/checkUnique/$participantUniqueId")
-          (json \ "status").as[String] must include ("success")
-          (json \ "data").as[Boolean] must equal (true)
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("duplicate annotation types in annotations")
       }
 
-      "must return false for a participant ID that exists" in {
+      "fail when updating and study IDs do not match" in {
+        val study = factory.createEnabledStudy
+        studyRepository.put(study)
 
-        var participant = factory.createParticipant
+        val participant = factory.createParticipant
         participantRepository.put(participant)
 
-        val json = makeRequest(GET, s"/studies/participants/checkUnique/${participant.uniqueId}")
-          (json \ "status").as[String] must include ("success")
-          (json \ "data").as[Boolean] must equal (false)
+        val study2 = factory.createEnabledStudy
+
+        val json = makeRequest(PUT,
+                               uri(study2, participant),
+                               BAD_REQUEST,
+                               json = participantToUpdateCmd(participant))
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study id mismatch")
       }
 
+      "fail when updating and participant IDs do not match" in {
+        val study = factory.createEnabledStudy
+        studyRepository.put(study)
+
+        val participant = factory.createParticipant
+        participantRepository.put(participant)
+
+        val participant2 = factory.createParticipant
+
+        val json = makeRequest(PUT,
+                               uri(study, participant2),
+                               BAD_REQUEST,
+                               json = participantToUpdateCmd(participant))
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("participant id mismatch")
+      }
     }
 
   }

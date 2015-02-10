@@ -295,7 +295,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       : DomainValidation[T] = {
     updateUser(cmd) {
       case user: RegisteredUser => fn(user)
-      case user => s"$user for $cmd is not registered".failureNel
+      case user => s"user is not registered: ${cmd.id}".failureNel
     }
   }
 
@@ -305,7 +305,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       : DomainValidation[T] = {
     updateUser(cmd) {
       case user: ActiveUser => fn(user)
-      case user => s"$user for $cmd is not active".failureNel
+      case user => s"user is not active: ${cmd.id}".failureNel
     }
   }
 
@@ -315,7 +315,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       : DomainValidation[T] = {
     updateUser(cmd) {
       case user: LockedUser => fn(user)
-      case user => s"$user for $cmd is not locked".failureNel
+      case user => s"user is not locked: ${cmd.id}".failureNel
     }
   }
 

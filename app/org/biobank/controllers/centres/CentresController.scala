@@ -70,10 +70,7 @@ class CentresController(implicit inj: Injector)
     }
 
   def query(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
-    centresService.getCentre(id).fold(
-      err => BadRequest(err.list.mkString(", ")),
-      centres => Ok(centres)
-    )
+    domainValidationReply(centresService.getCentre(id))
   }
 
   def add = commandAction { cmd: AddCentreCmd => implicit userId =>

@@ -33,23 +33,27 @@ class CeventTypeControllerSpec extends ControllerFixture {
   def uri(study: Study, ceventType: CollectionEventType, version: Long): String =
     uri(study, ceventType) + s"/${version}"
 
-  def cetToAddCmd(cet: CollectionEventType) = Json.obj(
-    "studyId"              -> cet.studyId.id,
-    "name"                 -> cet.name,
-    "description"          -> cet.description,
-    "recurring"            -> cet.recurring,
-    "specimenGroupData"    -> Json.arr(
-      Json.obj(
-        "specimenGroupId"  -> cet.specimenGroupData(0).specimenGroupId,
-        "maxCount"         -> cet.specimenGroupData(0).maxCount,
-        "amount"           -> Some(cet.specimenGroupData(0).amount)
-      )),
-    "annotationTypeData"   -> Json.arr(
-      Json.obj(
-        "annotationTypeId" -> cet.annotationTypeData(0).annotationTypeId,
-        "required"         -> cet.annotationTypeData(0).required
-      ))
-  )
+  def cetToAddCmd(cet: CollectionEventType) = {
+    Json.obj(
+      "studyId"              -> cet.studyId.id,
+      "name"                 -> cet.name,
+      "description"          -> cet.description,
+      "recurring"            -> cet.recurring,
+      "specimenGroupData"    -> cet.specimenGroupData.map { sg =>
+        Json.obj(
+          "specimenGroupId"  -> sg.specimenGroupId,
+          "maxCount"         -> sg.maxCount,
+          "amount"           -> Some(sg.amount)
+        )
+      },
+      "annotationTypeData"   -> cet.annotationTypeData.map { at =>
+        Json.obj(
+          "annotationTypeId" -> at.annotationTypeId,
+          "required"         -> at.required
+        )
+      }
+    )
+  }
 
   def cetToUpdateCmd(cet: CollectionEventType) =
     cetToAddCmd(cet) ++ Json.obj(
@@ -60,7 +64,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
   def addOnNonDisabledStudy(study: Study) {
     studyRepository.put(study)
 
-    val sg = factory.createSpecimenGroup
+    val sg = factory.createSpecimenGroup.copy(studyId = study.id)
     specimenGroupRepository.put(sg)
 
     val annotType = factory.createCollectionEventAnnotationType
@@ -73,39 +77,40 @@ class CeventTypeControllerSpec extends ControllerFixture {
     val json = makeRequest(POST, uri(study), BAD_REQUEST, cetToAddCmd(cet))
 
     (json \ "status").as[String] must include ("error")
-      (json \ "message").as[String] must include ("is not disabled")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   def updateOnNonDisabledStudy(study: Study) {
     studyRepository.put(study)
 
-    val sg = factory.createSpecimenGroup
+    val sg = factory.createSpecimenGroup.copy(studyId = study.id)
     specimenGroupRepository.put(sg)
 
-    val annotType = factory.createCollectionEventAnnotationType
+    val annotType = factory.createCollectionEventAnnotationType.copy(studyId = study.id)
     collectionEventAnnotationTypeRepository.put(annotType)
 
-    val cet = factory.createCollectionEventType
+    val cet = factory.createCollectionEventType.copy(studyId = study.id)
     collectionEventTypeRepository.put(cet)
 
     val cet2 = factory.createCollectionEventType.copy(
-      id = cet.id,
-      specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
+      studyId            = study.id,
+      id                 = cet.id,
+      specimenGroupData  = List(factory.createCollectionEventTypeSpecimenGroupData),
       annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
     val json = makeRequest(PUT, uri(study, cet2), BAD_REQUEST, cetToUpdateCmd(cet2))
 
     (json \ "status").as[String] must include ("error")
-      (json \ "message").as[String] must include ("is not disabled")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   def removeOnNonDisabledStudy(study: Study) {
     studyRepository.put(study)
 
-    val sg = factory.createSpecimenGroup
+    val sg = factory.createSpecimenGroup.copy(studyId = study.id)
     specimenGroupRepository.put(sg)
 
-    val annotType = factory.createCollectionEventAnnotationType
+    val annotType = factory.createCollectionEventAnnotationType.copy(studyId = study.id)
     collectionEventAnnotationTypeRepository.put(annotType)
 
     val cet = factory.createCollectionEventType.copy(
@@ -116,7 +121,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
     val json = makeRequest(DELETE, uri(study, cet, cet.version), BAD_REQUEST)
 
     (json \ "status").as[String] must include ("error")
-      (json \ "message").as[String] must include ("is not disabled")
+    (json \ "message").as[String] must include ("is not disabled")
   }
 
   "Collection Event Type REST API" when {
@@ -127,7 +132,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         studyRepository.put(study)
 
         val json = makeRequest(GET, uri(study))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
       }
@@ -140,7 +145,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         collectionEventTypeRepository.put(cet)
 
         val json = makeRequest(GET, uri(study))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
         compareObj(jsonList(0), cet)
@@ -154,7 +159,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         collectionEventTypeRepository.put(cet)
 
         val json = makeRequest(GET, uriWithQuery(study, cet))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, cet)
       }
@@ -175,11 +180,11 @@ class CeventTypeControllerSpec extends ControllerFixture {
         cetypes map { cet => collectionEventTypeRepository.put(cet) }
 
         val json = makeRequest(GET, uri(study))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
 
         jsonList must have size cetypes.size
-          (jsonList zip cetypes).map { item => compareObj(item._1, item._2) }
+        (jsonList zip cetypes).map { item => compareObj(item._1, item._2) }
         ()
       }
 
@@ -187,8 +192,8 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
 
         val json = makeRequest(GET, uri(study), BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("invalid study id")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("invalid study id")
       }
 
       "fail for an invalid study ID when using a collection event type id" in {
@@ -196,8 +201,8 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val cet = factory.createCollectionEventType
 
         val json = makeRequest(GET, uriWithQuery(study, cet), BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("invalid study id")
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("invalid study id")
       }
 
       "fail for an invalid collection event type id" in {
@@ -206,14 +211,15 @@ class CeventTypeControllerSpec extends ControllerFixture {
 
         val cet = factory.createCollectionEventType
 
-        val json = makeRequest(GET, uriWithQuery(study, cet), BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("collection event type does not exist")
+        val json = makeRequest(GET, uriWithQuery(study, cet), NOT_FOUND)
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("collection event type does not exist")
       }
 
     }
 
     "POST /studies/cetypes" must {
+
       "add a collection event type" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
@@ -229,11 +235,9 @@ class CeventTypeControllerSpec extends ControllerFixture {
           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
         val json = makeRequest(POST, uri(study), json = cetToAddCmd(cet))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
       }
-    }
 
-    "POST /studies/cetypes" must {
       "not add a collection event type to an enabled study" in {
         addOnNonDisabledStudy(
           factory.createDisabledStudy.enable(1, 1) | fail)
@@ -243,9 +247,23 @@ class CeventTypeControllerSpec extends ControllerFixture {
         addOnNonDisabledStudy(
           factory.createDisabledStudy.retire | fail)
       }
+
+      "fail when adding and study IDs do not match" in {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val cet = factory.createCollectionEventType
+
+        val study2 = factory.createDisabledStudy
+
+        val json = makeRequest(POST, uri(study2), BAD_REQUEST, json = cetToAddCmd(cet))
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study id mismatch")
+      }
     }
 
     "PUT /studies/cetypes" must {
+
       "update a collection event type" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
@@ -265,17 +283,43 @@ class CeventTypeControllerSpec extends ControllerFixture {
           annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
         val json = makeRequest(PUT, uri(study, cet2), json = cetToUpdateCmd(cet2))
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
       }
 
       "not update a collection event type on an enabled study" in {
-        updateOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(1, 1) | fail)
+        updateOnNonDisabledStudy(factory.createEnabledStudy)
       }
 
       "not update a collection event type on an retired study" in {
-        updateOnNonDisabledStudy(
-          factory.createDisabledStudy.retire | fail)
+        updateOnNonDisabledStudy(factory.createRetiredStudy)
+      }
+
+      "fail when updating and study IDs do not match" in {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val cet = factory.createCollectionEventType
+        collectionEventTypeRepository.put(cet)
+
+        val study2 = factory.createDisabledStudy
+
+        val json = makeRequest(PUT, uri(study2, cet), BAD_REQUEST, json = cetToUpdateCmd(cet))
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("study id mismatch")
+      }
+
+      "fail when updating and annotation type IDs do not match" in {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val cet = factory.createCollectionEventType
+        collectionEventTypeRepository.put(cet)
+
+        val cet2 = factory.createCollectionEventType
+
+        val json = makeRequest(PUT, uri(study, cet2), BAD_REQUEST, json = cetToUpdateCmd(cet))
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("annotation type id mismatch")
       }
     }
 
