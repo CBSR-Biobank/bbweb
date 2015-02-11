@@ -44,6 +44,7 @@ require.config({
     'angular-ui-router': '../../../target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router',
     'ui-bootstrap':      '../../../target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls',
     'angular-sanitize':  '../../../target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize',
+    'moment':            '../../../target/web/web-modules/main/webjars/lib/momentjs/moment',
     'biobankApp':        'app'
   },
 

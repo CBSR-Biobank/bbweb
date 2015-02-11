@@ -27,6 +27,7 @@ module.exports = function(config) {
       {pattern: 'target/web/web-modules/main/webjars/lib/ng-table/ng-table.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/jquery/jquery.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/toastr/toastr.js', included: false},
+      {pattern: 'target/web/web-modules/main/webjars/lib/momentjs/moment.js', included: false},
       {pattern: 'app/assets/javascripts/**/*.js', included: false},
       {pattern: 'jstest/assets/javascripts/**/*Spec.js', included: false},
       'jstest/assets/javascripts/test-main.js'
