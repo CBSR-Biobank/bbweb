@@ -67,11 +67,12 @@ class CeventTypeControllerSpec extends ControllerFixture {
     val sg = factory.createSpecimenGroup.copy(studyId = study.id)
     specimenGroupRepository.put(sg)
 
-    val annotType = factory.createCollectionEventAnnotationType
+    val annotType = factory.createCollectionEventAnnotationType.copy(studyId = study.id)
     collectionEventAnnotationTypeRepository.put(annotType)
 
     val cet = factory.createCollectionEventType.copy(
-      specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData),
+      studyId            = study.id,
+      specimenGroupData  = List(factory.createCollectionEventTypeSpecimenGroupData),
       annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
     val json = makeRequest(POST, uri(study), BAD_REQUEST, cetToAddCmd(cet))
@@ -239,13 +240,11 @@ class CeventTypeControllerSpec extends ControllerFixture {
       }
 
       "not add a collection event type to an enabled study" in {
-        addOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(1, 1) | fail)
+        addOnNonDisabledStudy(factory.createEnabledStudy)
       }
 
       "not add a collection event type to an retired study" in {
-        addOnNonDisabledStudy(
-          factory.createDisabledStudy.retire | fail)
+        addOnNonDisabledStudy(factory.createRetiredStudy)
       }
 
       "fail when adding and study IDs do not match" in {
@@ -260,6 +259,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("study id mismatch")
       }
+
     }
 
     "PUT /studies/cetypes" must {
@@ -345,13 +345,11 @@ class CeventTypeControllerSpec extends ControllerFixture {
       }
 
       "not remove a collection event type on an enabled study" in {
-        removeOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(1, 1) | fail)
+        removeOnNonDisabledStudy(factory.createEnabledStudy)
       }
 
       "not remove a collection event type on an retired study" in {
-        removeOnNonDisabledStudy(
-          factory.createDisabledStudy.retire | fail)
+        removeOnNonDisabledStudy(factory.createRetiredStudy)
       }
     }
   }

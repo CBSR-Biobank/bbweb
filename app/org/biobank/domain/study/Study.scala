@@ -35,12 +35,12 @@ sealed trait Study
 
   override def toString =
     s"""|${this.getClass.getSimpleName}: {
-        |  id: $id,
-        |  version: $version,
-        |  timeAdded: $timeAdded,
+        |  id:           $id,
+        |  version:      $version,
+        |  timeAdded:    $timeAdded,
         |  timeModified: $timeModified,
-        |  name: $name,
-        |  description: $description
+        |  name:         $name,
+        |  description:  $description
         |}""".stripMargin
 
 }
@@ -91,13 +91,12 @@ trait StudyValidations {
   * This class has a private constructor and instances of this class can only be created using
   * the [[DisabledStudy.create]] method on the factory object.
   */
-case class DisabledStudy(
-  id: StudyId,
-  version: Long,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  name: String,
-  description: Option[String])
+case class DisabledStudy(id:           StudyId,
+                         version:      Long,
+                         timeAdded:    DateTime,
+                         timeModified: Option[DateTime],
+                         name:         String,
+                         description:  Option[String])
     extends Study
     with StudyValidations {
   import CommonValidations._
@@ -113,10 +112,8 @@ case class DisabledStudy(
   }
 
   /** Used to enable a study after it has been configured, or had configuration changes made on it. */
-  def enable(
-    specimenGroupCount: Int,
-    collectionEventTypeCount: Int): DomainValidation[EnabledStudy] = {
-
+  def enable(specimenGroupCount: Int, collectionEventTypeCount: Int)
+      : DomainValidation[EnabledStudy] = {
     for {
       sgCount <- {
         if (specimenGroupCount > 0) true.success
@@ -150,12 +147,12 @@ object DisabledStudy extends StudyValidations {
     *
     * Performs validation on fields.
     */
-  def create(
-    id: StudyId,
-    version: Long,
-    dateTime: DateTime,
-    name: String,
-    description: Option[String]): DomainValidation[DisabledStudy] = {
+  def create(id:          StudyId,
+             version:     Long,
+             dateTime:    DateTime,
+             name:        String,
+             description: Option[String])
+      : DomainValidation[DisabledStudy] = {
     (validateId(id) |@|
       validateAndIncrementVersion(version) |@|
       validateString(name, NameMinLength, InvalidName) |@|
@@ -171,14 +168,13 @@ object DisabledStudy extends StudyValidations {
   * This class has a private constructor and instances of this class can only be created using
   * the [[EnabledStudy.create]] method on the factory object.
   */
-case class EnabledStudy(
-  id: StudyId,
-  version: Long,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  name: String,
-  description: Option[String])
-  extends Study {
+case class EnabledStudy(id:           StudyId,
+                        version:      Long,
+                        timeAdded:    DateTime,
+                        timeModified: Option[DateTime],
+                        name:         String,
+                        description:  Option[String])
+    extends Study {
 
   override val status: String = EnabledStudy.status
 
@@ -212,14 +208,13 @@ object EnabledStudy extends StudyValidations {
   * This class has a private constructor and instances of this class can only be created using
   * the [[RetiredStudy.create]] method on the factory object.
  */
-case class RetiredStudy(
-  id: StudyId,
-  version: Long,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  name: String,
-  description: Option[String])
-  extends Study {
+case class RetiredStudy(id:           StudyId,
+                        version:      Long,
+                        timeAdded:    DateTime,
+                        timeModified: Option[DateTime],
+                        name:         String,
+                        description:  Option[String])
+    extends Study {
 
   override val status: String = RetiredStudy.status
 

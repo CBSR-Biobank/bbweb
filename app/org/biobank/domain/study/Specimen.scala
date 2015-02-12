@@ -48,6 +48,29 @@ case class Specimen(specimenGroupId:  SpecimenGroupId,
     extends ConcurrencySafeEntity[SpecimenId]
     with HasSpecimenGroupId {
 
+  def update(timeCreated:      DateTime,
+             amount:           BigDecimal,
+             originLocationId: LocationId,
+             locationId:       LocationId,
+             containerId:      Option[ContainerId],
+             position:         Option[String],
+             usable:           Boolean)
+      : DomainValidation[Specimen] = {
+    val v = Specimen.create(this.specimenGroupId,
+                            this.id,
+                            this.version,
+                            this.timeAdded,
+                            timeCreated,
+                            amount,
+                            originLocationId,
+                            locationId,
+                            containerId,
+                            position,
+                            usable)
+
+    v.map(_.copy(timeModified = Some(DateTime.now)))
+  }
+
   override def toString: String =
     s"""|Specimen:{
         |  specimenGroupId:  $specimenGroupId

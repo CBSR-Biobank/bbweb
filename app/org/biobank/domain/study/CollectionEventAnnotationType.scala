@@ -14,42 +14,49 @@ import scalaz.Scalaz._
 /** Used to add custom annotations to collection events. The study can define multiple
   * annotation types on collection events to store different types of data.
   */
-case class CollectionEventAnnotationType (
-  studyId: StudyId,
-  id: AnnotationTypeId,
-  version: Long,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  name: String,
-  description: Option[String],
-  valueType: AnnotationValueType,
-  maxValueCount: Option[Int],
-  options: Seq[String])
+case class CollectionEventAnnotationType(studyId:       StudyId,
+                                         id:            AnnotationTypeId,
+                                         version:       Long,
+                                         timeAdded:     DateTime,
+                                         timeModified:  Option[DateTime],
+                                         name:          String,
+                                         description:   Option[String],
+                                         valueType:     AnnotationValueType,
+                                         maxValueCount: Option[Int],
+                                         options:       Seq[String])
     extends StudyAnnotationType
     with StudyAnnotationTypeValidations {
 
   override def toString: String =
     s"""|CollectionEventAnnotationType:{
-        |  studyId: $studyId,
-        |  id: $id,
-        |  version: $version,
-        |  timeAdded: $timeAdded,
-        |  timeModified: $timeModified,
-        |  name: $name,
-        |  description: $description,
-        |  valueType: $valueType,
+        |  studyId:       $studyId,
+        |  id:            $id,
+        |  version:       $version,
+        |  timeAdded:     $timeAdded,
+        |  timeModified:  $timeModified,
+        |  name:          $name,
+        |  description:   $description,
+        |  valueType:     $valueType,
         |  maxValueCount: $maxValueCount,
-        |  options: { $options }
+        |  options:       { $options }
         }""".stripMargin
 
-  def update(
-    name: String,
-    description: Option[String],
-    valueType: AnnotationValueType,
-    maxValueCount: Option[Int] = None,
-    options: Seq[String] = Seq.empty): DomainValidation[CollectionEventAnnotationType] = {
-    CollectionEventAnnotationType.create(
-      this.studyId, this.id, this.version, this.timeAdded, name, description, valueType, maxValueCount, options)
+  def update(name:          String,
+             description:   Option[String],
+             valueType:     AnnotationValueType,
+             maxValueCount: Option[Int] = None,
+             options:       Seq[String] = Seq.empty)
+      : DomainValidation[CollectionEventAnnotationType] = {
+    val v = CollectionEventAnnotationType.create(this.studyId,
+                                                 this.id,
+                                                 this.version,
+                                                 this.timeAdded,
+                                                 name,
+                                                 description,
+                                                 valueType,
+                                                 maxValueCount,
+                                                 options)
+    v.map(_.copy(timeModified =  Some(DateTime.now)))
   }
 }
 
@@ -57,16 +64,16 @@ case class CollectionEventAnnotationType (
 object CollectionEventAnnotationType extends StudyAnnotationTypeValidations {
   import org.biobank.domain.CommonValidations._
 
-  def create(
-    studyId: StudyId,
-    id: AnnotationTypeId,
-    version: Long,
-    dateTime: DateTime,
-    name: String,
-    description: Option[String],
-    valueType: AnnotationValueType,
-    maxValueCount: Option[Int] = None,
-    options: Seq[String] = Seq.empty): DomainValidation[CollectionEventAnnotationType] = {
+  def create(studyId:       StudyId,
+             id:            AnnotationTypeId,
+             version:       Long,
+             dateTime:      DateTime,
+             name:          String,
+             description:   Option[String],
+             valueType:     AnnotationValueType,
+             maxValueCount: Option[Int] = None,
+             options:       Seq[String] = Seq.empty)
+      : DomainValidation[CollectionEventAnnotationType] = {
     (validateId(studyId, StudyIdRequired) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|

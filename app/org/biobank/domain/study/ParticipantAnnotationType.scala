@@ -4,6 +4,7 @@ import org.biobank.domain.{ AnnotationTypeId, DomainValidation }
 import org.biobank.domain.AnnotationValueType._
 import org.biobank.infrastructure.JsonUtils._
 
+import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import com.github.nscala_time.time.Imports._
@@ -13,64 +14,71 @@ import scalaz.Scalaz._
 /** Used to add custom annotations to participants. The study can define multiple
   * annotation types on participants to store different types of data.
   */
-case class ParticipantAnnotationType (
-  studyId:       StudyId,
-  id:            AnnotationTypeId,
-  version:       Long,
-  timeAdded:     DateTime,
-  timeModified:  Option[DateTime],
-  name:          String,
-  description:   Option[String],
-  valueType:     AnnotationValueType,
-  maxValueCount: Option[Int],
-  options:       Seq[String],
-  required:      Boolean)
+case class ParticipantAnnotationType(studyId:       StudyId,
+                                     id:            AnnotationTypeId,
+                                     version:       Long,
+                                     timeAdded:     DateTime,
+                                     timeModified:  Option[DateTime],
+                                     name:          String,
+                                     description:   Option[String],
+                                     valueType:     AnnotationValueType,
+                                     maxValueCount: Option[Int],
+                                     options:       Seq[String],
+                                     required:      Boolean)
     extends StudyAnnotationType
     with StudyAnnotationTypeValidations {
 
+  def update(name:          String,
+             description:   Option[String],
+             valueType:     AnnotationValueType,
+             maxValueCount: Option[Int] = None,
+             options:       Seq[String] = Seq.empty,
+             required:      Boolean = false)
+      : DomainValidation[ParticipantAnnotationType] = {
+    val v = ParticipantAnnotationType.create(this.studyId,
+                                             this.id,
+                                             this.version,
+                                             this.timeAdded,
+                                             name,
+                                             description,
+                                             valueType,
+                                             maxValueCount,
+                                             options,
+                                             required)
+    v.map(_.copy(timeModified = Some(DateTime.now)))
+  }
+
   override def toString: String =
     s"""|ParticipantAnnotationTypex: {
-        |  studyId: $studyId,
-        |  id: $id,
-        |  version: $version,
-        |  timeAdded: $timeAdded,
-        |  timeModified: $timeModified,
-        |  name: $name,
-        |  description: $description,
-        |  valueType: $valueType,
+        |  studyId:       $studyId,
+        |  id:            $id,
+        |  version:       $version,
+        |  timeAdded:     $timeAdded,
+        |  timeModified:  $timeModified,
+        |  name:          $name,
+        |  description:   $description,
+        |  valueType:     $valueType,
         |  maxValueCount: $maxValueCount,
-        |  options: { $options }
-        |  required: $required
+        |  options:       { $options }
+        |  required:      $required
         |}""".stripMargin
-
-  def update(
-    name: String,
-    description: Option[String],
-    valueType: AnnotationValueType,
-    maxValueCount: Option[Int] = None,
-    options: Seq[String] = Seq.empty,
-    required: Boolean = false): DomainValidation[ParticipantAnnotationType] = {
-    ParticipantAnnotationType.create(
-      this.studyId, this.id, this.version, this.timeAdded, name, description, valueType, maxValueCount,
-      options, required)
-  }
 
 }
 
 object ParticipantAnnotationType extends StudyAnnotationTypeValidations {
   import org.biobank.domain.CommonValidations._
 
-  def create(
-    studyId: StudyId,
-    id: AnnotationTypeId,
-    version: Long,
-    dateTime: DateTime,
-    name: String,
-    description: Option[String],
-    valueType: AnnotationValueType,
-    maxValueCount: Option[Int],
-    options: Seq[String],
-    required: Boolean): DomainValidation[ParticipantAnnotationType] = {
+  def create(studyId:       StudyId,
+             id:            AnnotationTypeId,
+             version:       Long,
+             dateTime:      DateTime,
+             name:          String,
+             description:   Option[String],
+             valueType:     AnnotationValueType,
+             maxValueCount: Option[Int],
+             options:       Seq[String],
+             required:      Boolean)
+      : DomainValidation[ParticipantAnnotationType] = {
     (validateId(studyId, StudyIdRequired) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|

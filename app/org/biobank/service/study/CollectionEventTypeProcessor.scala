@@ -132,15 +132,17 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     (cmd: UpdateCollectionEventTypeCmd)
     (implicit userId: Option[UserId])
       : Unit = {
-    val timeNow = DateTime.now
     val studyId = StudyId(cmd.studyId)
     val v = update(cmd) { cet =>
       for {
         nameAvailable <- nameAvailable(cmd.name, CollectionEventTypeId(cmd.id))
-        validSgData <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
-        validAtData <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
-        newItem <- cet.update(
-          cmd.name, cmd.description, cmd.recurring, cmd.specimenGroupData, cmd.annotationTypeData)
+        validSgData   <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
+        validAtData   <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
+        newItem       <- cet.update(cmd.name,
+                                    cmd.description,
+                                    cmd.recurring,
+                                    cmd.specimenGroupData,
+                                    cmd.annotationTypeData)
       } yield newItem
     }
 

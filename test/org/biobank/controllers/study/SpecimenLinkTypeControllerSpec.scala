@@ -60,7 +60,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     )
   }
 
-  def addOnNonDisabledStudy(study: Study, procType: ProcessingType) {
+  def addOnNonDisabledStudy(study: Study, procType: ProcessingType) = {
     studyRepository.put(study)
     processingTypeRepository.put(procType.copy(studyId = study.id))
 
@@ -79,7 +79,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     (json \ "message").as[String] must include ("is not disabled")
   }
 
-  def updateOnNonDisabledStudy(study: Study, procType: ProcessingType) {
+  def updateOnNonDisabledStudy(study: Study, procType: ProcessingType) = {
     studyRepository.put(study)
     processingTypeRepository.put(procType.copy(studyId = study.id))
 
@@ -100,11 +100,9 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     (json \ "message").as[String] must include ("is not disabled")
   }
 
-  def removeOnNonDisabledStudy(
-    study: Study,
-    procType: ProcessingType) {
+  def removeOnNonDisabledStudy(study: Study, procType: ProcessingType) = {
     studyRepository.put(study)
-    processingTypeRepository.put(procType)
+    processingTypeRepository.put(procType.copy(studyId = study.id))
 
     val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
     specimenGroupRepository.put(inputSg)
@@ -351,15 +349,11 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
       }
 
       "not remove a specimen link type on an enabled study" in {
-        val study = studyRepository.put(
-          factory.createDisabledStudy.enable(1, 1) | fail)
-        removeOnNonDisabledStudy(study, factory.createProcessingType)
+        removeOnNonDisabledStudy(factory.createEnabledStudy, factory.createProcessingType)
       }
 
       "not remove a specimen link type on an retired study" in {
-        val study = studyRepository.put(
-          factory.createDisabledStudy.retire | fail)
-        removeOnNonDisabledStudy(study, factory.createProcessingType)
+        removeOnNonDisabledStudy(factory.createRetiredStudy, factory.createProcessingType)
       }
     }
   }

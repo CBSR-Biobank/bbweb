@@ -66,7 +66,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
           )
 
           annotType2.timeAdded mustBe (annotType.timeAdded)
-          annotType2.timeModified mustBe (None)
+          annotType2.timeModified must not be (None)
         }
       }
     }

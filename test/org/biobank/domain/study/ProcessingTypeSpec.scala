@@ -64,7 +64,7 @@ class ProcessingTypeSpec extends DomainSpec {
         )
 
         pt2.timeAdded mustBe (processingType.timeAdded)
-        pt2.timeModified mustBe (None)
+        pt2.timeModified must not be (None)
       }
     }
   }

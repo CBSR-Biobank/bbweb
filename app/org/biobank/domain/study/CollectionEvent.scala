@@ -36,6 +36,17 @@ case class CollectionEvent(participantId: ParticipantId,
     extends ConcurrencySafeEntity[CollectionEventId]
     with HasParticipantId {
 
+  def update(timeDone:      DateTime,
+             visitNumber:   Int)
+      : DomainValidation[CollectionEvent] = {
+    val v = CollectionEvent.create(this.participantId,
+                                   this.id,
+                                   this.version,
+                                   this.timeAdded,
+                                   timeDone,
+                                   visitNumber)
+    v.map(_.copy(timeModified = Some(DateTime.now)))
+  }
   override def toString: String =
     s"""|CollectionEvent:{
         |  participantId: $participantId,
@@ -46,6 +57,7 @@ case class CollectionEvent(participantId: ParticipantId,
         |  timeDone:      $timeDone,
         |  visitNumber:   $visitNumber,
         |}""".stripMargin
+
 }
 
 object CollectionEvent extends CollectionEventValidations {
@@ -54,9 +66,10 @@ object CollectionEvent extends CollectionEventValidations {
   def create(participantId: ParticipantId,
              id:            CollectionEventId,
              version:       Long,
-             dateTime:       DateTime,
+             dateTime:      DateTime,
              timeDone:      DateTime,
-             visitNumber:   Int) = {
+             visitNumber:   Int)
+      : DomainValidation[CollectionEvent] = {
     (validateId(participantId) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|

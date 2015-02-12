@@ -63,24 +63,25 @@ class CollectionEventTypeSpec extends DomainSpec {
         CollectionEventTypeSpecimenGroupData("x", 1, Option(BigDecimal(1.0))))
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
-      val cet2 = cet.update(
-        name, description, recurring, specimenGroupData, annotationTypeData) | fail
-      cet2 mustBe a[CollectionEventType]
+      val v = cet.update(name, description, recurring, specimenGroupData, annotationTypeData)
+      v mustSucceed { updatedCet =>
+        updatedCet mustBe a[CollectionEventType]
 
-      cet2 must have (
-        'studyId (cet.studyId),
-        'id (cet.id),
-        'version (cet.version + 1),
-        'name (name),
-        'description (description),
-        'recurring (recurring)
-      )
+        updatedCet must have (
+          'studyId (cet.studyId),
+          'id (cet.id),
+          'version (cet.version + 1),
+          'name (name),
+          'description (description),
+          'recurring (recurring)
+        )
 
-      cet2.specimenGroupData must have length 1
-      cet2.annotationTypeData must have length 1
+        updatedCet.specimenGroupData must have length 1
+        updatedCet.annotationTypeData must have length 1
 
-      (cet.timeAdded to cet2.timeAdded).millis must be < 100L
-      cet2.timeModified mustBe (None)
+        (cet.timeAdded to updatedCet.timeAdded).millis must be < 100L
+        updatedCet.timeModified must not be (None)
+      }
     }
 
   }

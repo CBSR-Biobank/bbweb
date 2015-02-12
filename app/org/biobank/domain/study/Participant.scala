@@ -39,15 +39,26 @@ case class Participant(studyId:      StudyId,
     extends ConcurrencySafeEntity[ParticipantId]
     with HasStudyId {
 
+  def update(uniqueId: String, annotations: Set[ParticipantAnnotation])
+      : DomainValidation[Participant] = {
+    val v = Participant.create(this.studyId,
+                               this.id,
+                               this.version,
+                               this.timeAdded,
+                               uniqueId,
+                               annotations)
+    v.map(_.copy(timeModified = Some(DateTime.now)))
+  }
+
   override def toString: String =
     s"""|Participant:{
-        |  studyId: $studyId,
-        |  id: $id,
-        |  version: $version,
-        |  timeAdded: $timeAdded,
+        |  studyId:      $studyId,
+        |  id:           $id,
+        |  version:      $version,
+        |  timeAdded:    $timeAdded,
         |  timeModified: $timeModified,
-        |  uniqueId: $uniqueId,
-        |  annotations: $annotations,
+        |  uniqueId:     $uniqueId,
+        |  annotations:  $annotations,
         |}""".stripMargin
 }
 

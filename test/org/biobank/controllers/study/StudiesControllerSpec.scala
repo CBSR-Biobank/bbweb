@@ -472,7 +472,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
     "POST /studies/unretire" must {
       "unretire a study" in {
-        val study = factory.createDisabledStudy.retire | fail
+        val study = factory.createRetiredStudy
         studyRepository.put(study)
 
         val cmdJson = Json.obj(

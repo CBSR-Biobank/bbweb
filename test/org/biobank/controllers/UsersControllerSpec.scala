@@ -55,6 +55,16 @@ class UsersControllerSpec extends ControllerFixture {
     user
   }
 
+  def createLockedUserInRepository(plainPassword: String): LockedUser = {
+    val salt = passwordHasher.generateSalt
+
+    val user = factory.createLockedUser.copy(
+      salt = salt,
+      password = passwordHasher.encrypt(plainPassword, salt))
+    userRepository.put(user)
+    user
+  }
+
   def compareObjs(jsonList: List[JsObject], users: List[User]) = {
     val usersMap = users.map { user => (user.id, user) }.toMap
     jsonList.foreach { jsonObj =>
@@ -591,13 +601,12 @@ class UsersControllerSpec extends ControllerFixture {
 
     "PUT /users/unlock" must {
       "must unlock a user" in {
-        val user = factory.createActiveUser
-        val lockedUser = user.lock | fail
-        userRepository.put(lockedUser)
+        val user = factory.createLockedUser
+        userRepository.put(user)
 
         val cmdJson = Json.obj(
-          "expectedVersion" -> Some(lockedUser.version),
-          "id" -> lockedUser.id.id)
+          "expectedVersion" -> Some(user.version),
+          "id" -> user.id.id)
         val json = makeRequest(POST, uri(user) + "/unlock", json = cmdJson)
 
         (json \ "status").as[String] must include("success")
@@ -654,10 +663,8 @@ class UsersControllerSpec extends ControllerFixture {
       }
 
       "not allow a locked user to log in" in {
-        val plainPassword = nameGenerator.next[String]
-        val activeUser = createActiveUserInRepository(plainPassword)
-        val lockedUser = activeUser.lock | fail
-        userRepository.put(lockedUser)
+        val plainPassword = nameGenerator.next[User]
+        val lockedUser = createLockedUserInRepository(plainPassword)
 
         val cmdJson = Json.obj(
           "email" -> lockedUser.email,
@@ -665,7 +672,7 @@ class UsersControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, "/login", FORBIDDEN, json = cmdJson)
 
         (json \ "status").as[String] must include("error")
-          (json \ "message").as[String] must include("the user is locked")
+        (json \ "message").as[String] must include("the user is locked")
       }
 
       "not allow a request with an invalid token" in {

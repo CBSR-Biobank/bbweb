@@ -63,15 +63,22 @@ case class CollectionEventType(
     with HasDescriptionOption
     with HasStudyId {
 
-  def update(
-    name: String,
-    description: Option[String],
-    recurring: Boolean,
-    specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
-    annotationTypeData: List[CollectionEventTypeAnnotationTypeData]): DomainValidation[CollectionEventType] = {
-    CollectionEventType.create(
-      this.studyId, this.id, this.version, this.timeAdded, name, description, recurring, specimenGroupData,
-      annotationTypeData)
+  def update(name:               String,
+             description:        Option[String],
+             recurring:          Boolean,
+             specimenGroupData:  List[CollectionEventTypeSpecimenGroupData],
+             annotationTypeData: List[CollectionEventTypeAnnotationTypeData])
+      : DomainValidation[CollectionEventType] = {
+    val v = CollectionEventType.create(this.studyId,
+                                         this.id,
+                                         this.version,
+                                         this.timeAdded,
+                                         name,
+                                         description,
+                                         recurring,
+                                         specimenGroupData,
+                               annotationTypeData)
+    v.map(_.copy(timeModified = Some(DateTime.now)))
   }
 
   override def toString: String =

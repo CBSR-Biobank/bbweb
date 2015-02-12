@@ -282,13 +282,11 @@ class SpecimenLinkAnnotTypeControllerSpec extends StudyAnnotTypeControllerSpec[S
       }
 
       "not remove a specimen link annotation type on an enabled study" in {
-        removeOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(1, 1) | fail)
+        removeOnNonDisabledStudy(factory.createEnabledStudy)
       }
 
       "not remove a specimen link annotation type on an retired study" in {
-        removeOnNonDisabledStudy(
-          factory.createDisabledStudy.retire | fail)
+        removeOnNonDisabledStudy(factory.createRetiredStudy)
       }
     }
   }

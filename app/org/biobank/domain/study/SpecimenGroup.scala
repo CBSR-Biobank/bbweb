@@ -39,19 +39,18 @@ import Scalaz._
   * @param preservationTemperatureType see [[PreservationTemperatureType]].
   * @param specimenType see [[SpecimenType]].
   */
-case class SpecimenGroup(
-  studyId: StudyId,
-  id: SpecimenGroupId,
-  version: Long,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  name: String,
-  description: Option[String],
-  units: String,
-  anatomicalSourceType: AnatomicalSourceType,
-  preservationType: PreservationType,
-  preservationTemperatureType: PreservationTemperatureType,
-  specimenType: SpecimenType)
+case class SpecimenGroup(studyId:                     StudyId,
+                         id:                          SpecimenGroupId,
+                         version:                     Long,
+                         timeAdded:                   DateTime,
+                         timeModified:                Option[DateTime],
+                         name:                        String,
+                         description:                 Option[String],
+                         units:                       String,
+                         anatomicalSourceType:        AnatomicalSourceType,
+                         preservationType:            PreservationType,
+                         preservationTemperatureType: PreservationTemperatureType,
+                         specimenType:                SpecimenType)
     extends ConcurrencySafeEntity[SpecimenGroupId]
     with HasUniqueName
     with HasDescriptionOption
@@ -59,31 +58,40 @@ case class SpecimenGroup(
 
   override def toString: String =
     s"""|SpecimenGroup:{
-        |  studyId: $studyId,
-        |  id: $id,
-        |  version: $version,
-        |  name: $name,
-        |  timeAdded: $timeAdded,
-        |  timeModified: $timeModified,
-        |  description: $description,
-        |  units: $units,
-        |  anatomicalSourceType: $anatomicalSourceType,
-        |  preservationType: $preservationType,
+        |  studyId:                     $studyId,
+        |  id:                          $id,
+        |  version:                     $version,
+        |  name:                        $name,
+        |  timeAdded:                   $timeAdded,
+        |  timeModified:                $timeModified,
+        |  description:                 $description,
+        |  units:                       $units,
+        |  anatomicalSourceType:        $anatomicalSourceType,
+        |  preservationType:            $preservationType,
         |  preservationTemperatureType: $preservationTemperatureType,
-        |  specimenType: $specimenType
+        |  specimenType:                $specimenType
         |}""".stripMargin
 
-  def update(
-    name: String,
-    description: Option[String],
-    units: String,
-    anatomicalSourceType: AnatomicalSourceType,
-    preservationType: PreservationType,
-    preservationTemperatureType: PreservationTemperatureType,
-    specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
-    SpecimenGroup.create(
-      this.studyId, this.id, this.version, this.timeAdded, name, description, units, anatomicalSourceType,
-      preservationType, preservationTemperatureType, specimenType)
+  def update(name:                        String,
+             description:                 Option[String],
+             units:                       String,
+             anatomicalSourceType:        AnatomicalSourceType,
+             preservationType:            PreservationType,
+             preservationTemperatureType: PreservationTemperatureType,
+             specimenType:                SpecimenType)
+      : DomainValidation[SpecimenGroup] =  {
+    val v = SpecimenGroup.create(this.studyId,
+                                 this.id,
+                                 this.version,
+                                 this.timeAdded,
+                                 name,
+                                 description,
+                                 units,
+                                 anatomicalSourceType,
+                                 preservationType,
+                                 preservationTemperatureType,
+                                 specimenType)
+    v.map(_.copy(timeModified = Some(DateTime.now)))
   }
 }
 
@@ -109,18 +117,18 @@ object SpecimenGroup extends SpecimenGroupValidations with StudyAnnotationTypeVa
     * @param version the previous version number for the specimen group. If the specimen group is
     * new then this value should be -1L.
     */
-  def create(
-    studyId: StudyId,
-    id: SpecimenGroupId,
-    version: Long,
-    dateTime: DateTime,
-    name: String,
-    description: Option[String],
-    units: String,
-    anatomicalSourceType: AnatomicalSourceType,
-    preservationType: PreservationType,
-    preservationTemperatureType: PreservationTemperatureType,
-    specimenType: SpecimenType): DomainValidation[SpecimenGroup] =  {
+  def create(studyId:                     StudyId,
+             id:                          SpecimenGroupId,
+             version:                     Long,
+             dateTime:                    DateTime,
+             name:                        String,
+             description:                 Option[String],
+             units:                       String,
+             anatomicalSourceType:        AnatomicalSourceType,
+             preservationType:            PreservationType,
+             preservationTemperatureType: PreservationTemperatureType,
+             specimenType:                SpecimenType)
+      : DomainValidation[SpecimenGroup] =  {
     (validateId(studyId) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|

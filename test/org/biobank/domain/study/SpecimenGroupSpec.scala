@@ -31,26 +31,28 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-      val specimenGroup = SpecimenGroup.create(
+      val v = SpecimenGroup.create(
         studyId, id, version, org.joda.time.DateTime.now, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType) | fail
-      specimenGroup mustBe a[SpecimenGroup]
+        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
+      v mustSucceed { specimenGroup =>
+        specimenGroup mustBe a[SpecimenGroup]
 
-      specimenGroup must have (
-        'studyId                       (studyId),
-        'id                            (id),
-        'version                       (0L),
-        'name                          (name),
-        'description                   (description),
+        specimenGroup must have (
+          'studyId                       (studyId),
+          'id                            (id),
+          'version                       (0L),
+          'name                          (name),
+          'description                   (description),
         'units                         (units),
-        'anatomicalSourceType          (anatomicalSourceType),
-        'preservationType              (preservationType),
-        'preservationTemperatureType   (preservationTemperatureType),
-        'specimenType                  (specimenType)
-      )
+          'anatomicalSourceType          (anatomicalSourceType),
+          'preservationType              (preservationType),
+          'preservationTemperatureType   (preservationTemperatureType),
+          'specimenType                  (specimenType)
+        )
 
-      (specimenGroup.timeAdded to DateTime.now).millis must be < 100L
-      specimenGroup.timeModified mustBe (None)
+        (specimenGroup.timeAdded to DateTime.now).millis must be < 100L
+        specimenGroup.timeModified mustBe (None)
+      }
     }
 
     "be updated" in {
@@ -64,25 +66,26 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.RoomTemperature
       val specimenType = SpecimenType.Plasma
 
-      val updatedSg = specimenGroup.update(
+      val v = specimenGroup.update(
         name, description, units, anatomicalSourceType, preservationType, preservationTemperatureType,
-        specimenType) | fail
+        specimenType)
+      v mustSucceed { updatedSg =>
+        updatedSg must have (
+          'studyId                     (specimenGroup.studyId),
+          'id                          (specimenGroup.id),
+          'version                     (specimenGroup.version + 1),
+          'name                        (name),
+          'description                 (description),
+          'units                       (units),
+          'anatomicalSourceType        (anatomicalSourceType),
+          'preservationType            (preservationType),
+          'preservationTemperatureType (preservationTemperatureType),
+          'specimenType                (specimenType)
+        )
 
-      updatedSg must have (
-        'studyId                     (specimenGroup.studyId),
-        'id                          (specimenGroup.id),
-        'version                     (specimenGroup.version + 1),
-        'name                        (name),
-        'description                 (description),
-        'units                       (units),
-        'anatomicalSourceType        (anatomicalSourceType),
-        'preservationType            (preservationType),
-        'preservationTemperatureType (preservationTemperatureType),
-        'specimenType                (specimenType)
-      )
-
-      (specimenGroup.timeAdded to updatedSg.timeAdded).millis must be < 100L
-      updatedSg.timeModified mustBe (None)
+        (specimenGroup.timeAdded to updatedSg.timeAdded).millis must be < 100L
+        updatedSg.timeModified must not be (None)
+      }
     }
 
   }

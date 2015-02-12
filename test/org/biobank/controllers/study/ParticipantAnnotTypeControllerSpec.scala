@@ -57,10 +57,10 @@ class ParticipantAnnotTypeControllerSpec extends StudyAnnotTypeControllerSpec[Pa
   def removeOnNonDisabledStudy(study: Study) {
     studyRepository.put(study)
 
-    val sg = factory.createSpecimenGroup
+    val sg = factory.createSpecimenGroup.copy(studyId = study.id)
     specimenGroupRepository.put(sg)
 
-    val annotType = factory.createParticipantAnnotationType
+    val annotType = factory.createParticipantAnnotationType.copy(studyId = study.id)
     participantAnnotationTypeRepository.put(annotType)
 
     val json = makeRequest(
@@ -273,8 +273,11 @@ class ParticipantAnnotTypeControllerSpec extends StudyAnnotTypeControllerSpec[Pa
       }
 
       "not remove a participant annotation type on an enabled study" in {
-        removeOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(1, 1) | fail)
+        removeOnNonDisabledStudy(factory.createEnabledStudy)
+      }
+
+      "not remove a participant annotation type on a retired study" in {
+        removeOnNonDisabledStudy(factory.createRetiredStudy)
       }
     }
   }

@@ -60,77 +60,77 @@ trait SpecimenLinkTypeValidations {
   * @param outputContainerTypeId The specimen container type that the output specimens are stored
   *        into. This is an optional field.
   */
-case class SpecimenLinkType(
-  processingTypeId: ProcessingTypeId,
-  id: SpecimenLinkTypeId,
-  version: Long,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  expectedInputChange: BigDecimal,
-  expectedOutputChange: BigDecimal,
-  inputCount: Int,
-  outputCount: Int,
-  inputGroupId: SpecimenGroupId,
-  outputGroupId: SpecimenGroupId,
-  inputContainerTypeId: Option[ContainerTypeId],
-  outputContainerTypeId: Option[ContainerTypeId],
-  annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData])
+case class SpecimenLinkType(processingTypeId:      ProcessingTypeId,
+                            id:                    SpecimenLinkTypeId,
+                            version:               Long,
+                            timeAdded:             DateTime,
+                            timeModified:          Option[DateTime],
+                            expectedInputChange:   BigDecimal,
+                            expectedOutputChange:  BigDecimal,
+                            inputCount:            Int,
+                            outputCount:           Int,
+                            inputGroupId:          SpecimenGroupId,
+                            outputGroupId:         SpecimenGroupId,
+                            inputContainerTypeId:  Option[ContainerTypeId],
+                            outputContainerTypeId: Option[ContainerTypeId],
+                            annotationTypeData:    List[SpecimenLinkTypeAnnotationTypeData])
     extends ConcurrencySafeEntity[SpecimenLinkTypeId] {
 
   /** Updates a specimen link type with one or more new values.
     */
-  def update(
-    expectedInputChange: BigDecimal,
-    expectedOutputChange: BigDecimal,
-    inputCount: Int,
-    outputCount: Int,
-    inputGroupId: SpecimenGroupId,
-    outputGroupId: SpecimenGroupId,
-    inputContainerTypeId: Option[ContainerTypeId] = None,
-    outputContainerTypeId: Option[ContainerTypeId] = None,
-    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData]): DomainValidation[SpecimenLinkType] = {
-    SpecimenLinkType.create(
-      this.processingTypeId, this.id, this.version, this.timeAdded, expectedInputChange, expectedOutputChange,
-      inputCount, outputCount, inputGroupId, outputGroupId, inputContainerTypeId, outputContainerTypeId,
-      annotationTypeData)
+  def update(expectedInputChange:   BigDecimal,
+             expectedOutputChange:  BigDecimal,
+             inputCount:            Int,
+             outputCount:           Int,
+             inputGroupId:          SpecimenGroupId,
+             outputGroupId:         SpecimenGroupId,
+             inputContainerTypeId:  Option[ContainerTypeId] = None,
+             outputContainerTypeId: Option[ContainerTypeId] = None,
+             annotationTypeData:    List[SpecimenLinkTypeAnnotationTypeData])
+      : DomainValidation[SpecimenLinkType] = {
+    val v = SpecimenLinkType.create(this.processingTypeId, this.id, this.version, this.timeAdded,
+                                    expectedInputChange, expectedOutputChange, inputCount,
+                                    outputCount, inputGroupId, outputGroupId, inputContainerTypeId,
+                                    outputContainerTypeId, annotationTypeData)
+    v.map(_.copy(timeModified = Some(DateTime.now)))
   }
 
   override def toString: String =
     s"""|SpecimenLinkType:{
-        |  processingTypeId: $processingTypeId,
-        |  id: $id,
-        |  version: $version,
-        |  timeAdded: $timeAdded,
-        |  timeModified: $timeModified,
-        |  expectedInputChange: $expectedInputChange,
-        |  expectedOutputChange: $expectedOutputChange,
-        |  inputCount: $inputCount,
-        |  outputCount: $outputCount,
-        |  inputGroupId: $inputGroupId,
-        |  outputGroupId: $outputGroupId,
-        |  inputContainerTypeId: $inputContainerTypeId,
+        |  processingTypeId:      $processingTypeId,
+        |  id:                    $id,
+        |  version:               $version,
+        |  timeAdded:             $timeAdded,
+        |  timeModified:          $timeModified,
+        |  expectedInputChange:   $expectedInputChange,
+        |  expectedOutputChange:  $expectedOutputChange,
+        |  inputCount:            $inputCount,
+        |  outputCount:           $outputCount,
+        |  inputGroupId:          $inputGroupId,
+        |  outputGroupId:         $outputGroupId,
+        |  inputContainerTypeId:  $inputContainerTypeId,
         |  outputContainerTypeId: $outputContainerTypeId
-        |  annotationTypeData: $annotationTypeData
+        |  annotationTypeData:    $annotationTypeData
         |}""".stripMargin
 }
 
 object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotationTypeValidations {
   import org.biobank.domain.CommonValidations._
 
-  def create(
-    processingTypeId: ProcessingTypeId,
-    id: SpecimenLinkTypeId,
-    version: Long,
-    dateTime: DateTime,
-    expectedInputChange: BigDecimal,
-    expectedOutputChange: BigDecimal,
-    inputCount: Int,
-    outputCount: Int,
-    inputGroupId: SpecimenGroupId,
-    outputGroupId: SpecimenGroupId,
-    inputContainerTypeId: Option[ContainerTypeId] = None,
-    outputContainerTypeId: Option[ContainerTypeId] = None,
-    annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData] = List.empty): DomainValidation[SpecimenLinkType] = {
+  def create(processingTypeId: ProcessingTypeId,
+             id:                    SpecimenLinkTypeId,
+             version:               Long,
+             dateTime:              DateTime,
+             expectedInputChange:   BigDecimal,
+             expectedOutputChange:  BigDecimal,
+             inputCount:            Int,
+             outputCount:           Int,
+             inputGroupId:          SpecimenGroupId,
+             outputGroupId:         SpecimenGroupId,
+             inputContainerTypeId:  Option[ContainerTypeId] = None,
+             outputContainerTypeId: Option[ContainerTypeId] = None,
+             annotationTypeData:    List[SpecimenLinkTypeAnnotationTypeData])
+      : DomainValidation[SpecimenLinkType] = {
 
     /** The validation code below validates 13 items and to create a SpecimenLinkType only
       * 12 parameters are requried. This function ignores the value returned by the last validation
@@ -140,23 +140,23 @@ object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotation
       *
       * See http://stackoverflow.com/questions/16930347/scalaz-how-can-i-accumulate-failures-or-apply-a-function-to-validations-with-di.
       */
-    def applyFunc(
-      processingTypeId: ProcessingTypeId,
-      id: SpecimenLinkTypeId,
-      version: Long,
-      expectedInputChange: BigDecimal,
-      expectedOutputChange: BigDecimal,
-      inputCount: Int,
-      outputCount: Int,
-      inputGroupId: SpecimenGroupId,
-      outputGroupId: SpecimenGroupId,
-      inputContainerTypeId: Option[ContainerTypeId] = None,
-      outputContainerTypeId: Option[ContainerTypeId] = None,
-      annotationTypeData: List[SpecimenLinkTypeAnnotationTypeData],
-      ignore: Boolean): SpecimenLinkType = {
+    def applyFunc(processingTypeId:      ProcessingTypeId,
+                  id:                    SpecimenLinkTypeId,
+                  version:               Long,
+                  expectedInputChange:   BigDecimal,
+                  expectedOutputChange:  BigDecimal,
+                  inputCount:            Int,
+                  outputCount:           Int,
+                  inputGroupId:          SpecimenGroupId,
+                  outputGroupId:         SpecimenGroupId,
+                  inputContainerTypeId:  Option[ContainerTypeId] = None,
+                  outputContainerTypeId: Option[ContainerTypeId] = None,
+                  annotationTypeData:    List[SpecimenLinkTypeAnnotationTypeData],
+                  ignore:                Boolean)
+        : SpecimenLinkType = {
       SpecimenLinkType(processingTypeId, id, version, dateTime, None, expectedInputChange,
-        expectedOutputChange, inputCount, outputCount, inputGroupId, outputGroupId,
-        inputContainerTypeId, outputContainerTypeId, annotationTypeData)
+                       expectedOutputChange, inputCount, outputCount, inputGroupId, outputGroupId,
+                       inputContainerTypeId, outputContainerTypeId, annotationTypeData)
     }
 
     // these have to be in reverse order
@@ -176,9 +176,8 @@ object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotation
                         )))))))))))
   }
 
-  private def validateSpecimenGroups(
-    inputGroupId: SpecimenGroupId,
-    outputGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
+  private def validateSpecimenGroups(inputGroupId: SpecimenGroupId, outputGroupId: SpecimenGroupId)
+      : DomainValidation[Boolean] = {
     if (inputGroupId == outputGroupId) {
       DomainError("input and output specimen groups are the same").failureNel
     } else {

@@ -486,7 +486,7 @@ class CentresControllerSpec extends ControllerFixture {
 
     "POST /centres/disable" must {
       "disable a centre" in {
-        val centre = factory.createDisabledCentre.enable | fail
+        val centre = factory.createEnabledCentre
         centreRepository.put(centre)
 
         val cmdJson = Json.obj(

@@ -26,15 +26,14 @@ import scalaz.Scalaz._
   *         decided to stop a processing type in favour of another.  In this case enabled is set to false.
   *
   */
-case class ProcessingType(
-  studyId: StudyId,
-  id: ProcessingTypeId,
-  version: Long,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  name: String,
-  description: Option[String],
-  enabled: Boolean)
+case class ProcessingType(studyId:      StudyId,
+                          id:           ProcessingTypeId,
+                          version:      Long,
+                          timeAdded:    DateTime,
+                          timeModified: Option[DateTime],
+                          name:         String,
+                          description:  Option[String],
+                          enabled:      Boolean)
     extends ConcurrencySafeEntity[ProcessingTypeId]
     with HasUniqueName
     with HasDescriptionOption
@@ -42,37 +41,42 @@ case class ProcessingType(
 
   /** Updates a processing type with new values.
     */
-  def update(
-    name: String,
-    description: Option[String],
-    enabled: Boolean): DomainValidation[ProcessingType] = {
-    ProcessingType.create(this.studyId, this.id, this.version, this.timeAdded, name, description, enabled)
+  def update(name: String, description: Option[String], enabled: Boolean)
+      : DomainValidation[ProcessingType] = {
+    val v = ProcessingType.create(this.studyId,
+                                  this.id,
+                                  this.version,
+                                  this.timeAdded,
+                                  name,
+                                  description,
+                                  enabled)
+    v.map(_.copy(timeModified = Some(DateTime.now)))
   }
 
   override def toString: String =
     s"""|ProcessingType:{
-        |  studyId: $studyId,
-        |  id: $id,
-        |  timeAdded: $timeAdded,
+        |  studyId:      $studyId,
+        |  id:           $id,
+        |  timeAdded:    $timeAdded,
         |  timeModified: $timeModified,
-        |  version: $version,
-        |  name: $name,
-        |  description: $description,
-        |  enabled: $enabled
+        |  version:      $version,
+        |  name:         $name,
+        |  description:  $description,
+        |  enabled:      $enabled
         |}""".stripMargin
 }
 
 object ProcessingType {
   import org.biobank.domain.CommonValidations._
 
-  def create(
-    studyId: StudyId,
-    id: ProcessingTypeId,
-    version: Long,
-    dateTime: DateTime,
-    name: String,
-    description: Option[String],
-    enabled: Boolean): DomainValidation[ProcessingType] = {
+  def create(studyId:     StudyId,
+             id:          ProcessingTypeId,
+             version:     Long,
+             dateTime:    DateTime,
+             name:        String,
+             description: Option[String],
+             enabled:     Boolean)
+      : DomainValidation[ProcessingType] = {
     (validateId(studyId) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|

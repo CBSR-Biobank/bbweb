@@ -57,20 +57,23 @@ class UserSpec extends DomainSpec {
     "can be activated, locked, and unlocked" in {
       val user = factory.createRegisteredUser
 
-      val activeUser = user.activate  | fail
-      activeUser mustBe a[ActiveUser]
-      activeUser.version mustBe(user.version + 1)
-      activeUser.timeAdded mustBe (user.timeAdded)
+      user.activate.mustSucceed { activeUser =>
+        activeUser mustBe a[ActiveUser]
+        activeUser.version mustBe(user.version + 1)
+        activeUser.timeAdded mustBe (user.timeAdded)
 
-      val lockedUser = activeUser.lock | fail
-      lockedUser mustBe a[LockedUser]
-      lockedUser.version mustBe(activeUser.version + 1)
-      lockedUser.timeAdded mustBe (user.timeAdded)
+        activeUser.lock.mustSucceed { lockedUser =>
+          lockedUser mustBe a[LockedUser]
+          lockedUser.version mustBe(activeUser.version + 1)
+          lockedUser.timeAdded mustBe (user.timeAdded)
 
-      val unlockedUser = lockedUser.unlock | fail
-      unlockedUser mustBe a[ActiveUser]
-      unlockedUser.version mustBe(lockedUser.version + 1)
-      unlockedUser.timeAdded mustBe (user.timeAdded)
+          lockedUser.unlock.mustSucceed { unlockedUser =>
+            unlockedUser mustBe a[ActiveUser]
+            unlockedUser.version mustBe(lockedUser.version + 1)
+            unlockedUser.timeAdded mustBe (user.timeAdded)
+          }
+        }
+      }
     }
   }
 

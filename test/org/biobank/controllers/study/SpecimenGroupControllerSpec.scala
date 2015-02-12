@@ -354,15 +354,11 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       }
 
       "not remove a specimen group from an enabled study" in {
-        removeOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(1, 1) | fail,
-          factory.createSpecimenGroup)
+        removeOnNonDisabledStudy(factory.createEnabledStudy, factory.createSpecimenGroup)
       }
 
       "not remove a specimen group from an retired study" in {
-        removeOnNonDisabledStudy(
-          factory.createDisabledStudy.retire | fail,
-          factory.createSpecimenGroup)
+        removeOnNonDisabledStudy(factory.createRetiredStudy, factory.createSpecimenGroup)
       }
     }
 

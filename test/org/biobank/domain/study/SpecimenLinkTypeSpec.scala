@@ -94,7 +94,7 @@ class SpecimenLinkTypeSpec extends DomainSpec {
         slType.annotationTypeData must have length (0)
 
         slType2.timeAdded mustBe (slType.timeAdded)
-        slType2.timeModified mustBe (None)
+        slType2.timeModified must not be (None)
       }
     }
 

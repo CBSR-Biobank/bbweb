@@ -305,15 +305,11 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
     "DELETE /studies/proctypes" must {
       "not remove a processing type on an enabled study" in {
-        removeOnNonDisabledStudy(
-          factory.createDisabledStudy.enable(1, 1) | fail)
+        removeOnNonDisabledStudy(factory.createEnabledStudy)
       }
-    }
 
-    "DELETE /studies/proctypes" must {
       "not remove a processing type on an retired study" in {
-        removeOnNonDisabledStudy(
-          factory.createDisabledStudy.retire | fail)
+        removeOnNonDisabledStudy(factory.createRetiredStudy)
       }
     }
   }

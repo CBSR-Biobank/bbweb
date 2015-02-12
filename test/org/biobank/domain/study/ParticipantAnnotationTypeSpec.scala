@@ -110,7 +110,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
 
           at.timeAdded mustBe (annotType.timeAdded)
           // last update date is assigned by the processor
-          at.timeModified mustBe (None)
+          at.timeModified must not be (None)
         }
       }
     }

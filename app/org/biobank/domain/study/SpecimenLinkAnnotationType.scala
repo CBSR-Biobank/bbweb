@@ -5,6 +5,7 @@ import org.biobank.domain.AnnotationValueType._
 import org.biobank.infrastructure.JsonUtils._
 import org.biobank.infrastructure.EnumUtils._
 
+import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
@@ -15,41 +16,48 @@ import scalaz.Scalaz._
 /** Used to add custom annotations to processing specimens. The study can define multiple
   * annotation types on processed specimens to store different types of data.
   */
-case class SpecimenLinkAnnotationType (
-  studyId: StudyId,
-  id: AnnotationTypeId,
-  version: Long = -1,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  name: String,
-  description: Option[String],
-  valueType: AnnotationValueType,
-  maxValueCount: Option[Int],
-  options: Seq[String])
-  extends StudyAnnotationType {
+case class SpecimenLinkAnnotationType(studyId:       StudyId,
+                                      id:            AnnotationTypeId,
+                                      version:       Long = -1,
+                                      timeAdded:     DateTime,
+                                      timeModified:  Option[DateTime],
+                                      name:          String,
+                                      description:   Option[String],
+                                      valueType:     AnnotationValueType,
+                                      maxValueCount: Option[Int],
+                                      options:       Seq[String])
+    extends StudyAnnotationType {
 
   override def toString: String =
     s"""|SpecimenLinkAnnotationType:{
-        |  studyId: $studyId,
-        |  id: $id,
-        |  version: $version,
-        |  timeAdded: $timeAdded,
-        |  timeModified: $timeModified,
-        |  name: $name,
-        |  description: $description,
-        |  valueType: $valueType,
+        |  studyId:       $studyId,
+        |  id:            $id,
+        |  version:       $version,
+        |  timeAdded:     $timeAdded,
+        |  timeModified:  $timeModified,
+        |  name:          $name,
+        |  description:   $description,
+        |  valueType:     $valueType,
         |  maxValueCount: $maxValueCount,
-        |  options: { $options }
+        |  options:       { $options }
         }""".stripMargin
 
-  def update(
-    name: String,
-    description: Option[String],
-    valueType: AnnotationValueType,
-    maxValueCount: Option[Int] = None,
-    options: Seq[String] = Seq.empty): DomainValidation[SpecimenLinkAnnotationType] = {
-    SpecimenLinkAnnotationType.create(
-      this.studyId, this.id, this.version, this.timeAdded, name, description, valueType, maxValueCount, options)
+  def update(name:          String,
+             description:   Option[String],
+             valueType:     AnnotationValueType,
+             maxValueCount: Option[Int] = None,
+             options:       Seq[String] = Seq.empty)
+      : DomainValidation[SpecimenLinkAnnotationType] = {
+    val v = SpecimenLinkAnnotationType.create(this.studyId,
+                                              this.id,
+                                              this.version,
+                                              this.timeAdded,
+                                              name,
+                                              description,
+                                              valueType,
+                                              maxValueCount,
+                                              options)
+    v.map(_.copy(timeModified = Some(DateTime.now)))
   }
 
 }
@@ -57,16 +65,16 @@ case class SpecimenLinkAnnotationType (
 object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidations {
   import org.biobank.domain.CommonValidations._
 
-  def create(
-    studyId: StudyId,
-    id: AnnotationTypeId,
-    version: Long,
-    dateTime: DateTime,
-    name: String,
-    description: Option[String],
-    valueType: AnnotationValueType,
-    maxValueCount: Option[Int],
-    options: Seq[String]): DomainValidation[SpecimenLinkAnnotationType] = {
+  def create(studyId:       StudyId,
+             id:            AnnotationTypeId,
+             version:       Long,
+             dateTime:      DateTime,
+             name:          String,
+             description:   Option[String],
+             valueType:     AnnotationValueType,
+             maxValueCount: Option[Int],
+             options:       Seq[String])
+      : DomainValidation[SpecimenLinkAnnotationType] = {
     (validateId(studyId, StudyIdRequired) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
