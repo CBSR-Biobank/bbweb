@@ -3,7 +3,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  fdescribe('Service: participantsService', function() {
+  describe('Service: participantsService', function() {
 
     var participantsService, httpBackend;
     var studyId = 'dummy-study-id';

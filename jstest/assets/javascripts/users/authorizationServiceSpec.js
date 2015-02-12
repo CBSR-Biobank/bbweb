@@ -18,6 +18,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     };
 
     var failTest = function(error) {
+      console.log('test fails', error);
       expect(error).toBeUndefined();
     };
 
@@ -69,12 +70,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
         expect(usersService.isAuthenticated()).toBe(false);
         authorization.requireAuthenticatedUser()
-          .then(function (data) {
+          .then(failTest)
+          .catch(function (data) {
             resolved = true;
             expect(usersService.isAuthenticated()).toBe(false);
             expect(usersService.getCurrentUser()).toBe(null);
           })
-          .catch(failTest)
             .finally(done);
 
         $rootScope.$digest();
@@ -115,12 +116,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
         expect(usersService.isAuthenticated()).toBe(false);
         authorization.requireAdminUser()
-          .then(function (data) {
+          .then(failTest)
+          .catch(function (data) {
             resolved = true;
             expect(usersService.isAuthenticated()).toBe(false);
             expect(usersService.getCurrentUser()).toBe(null);
           })
-          .catch(failTest)
             .finally(done);
 
         $rootScope.$digest();

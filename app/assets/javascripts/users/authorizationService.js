@@ -35,20 +35,26 @@ define(['./module'], function(module) {
     function authorizationServiceFactory($q, usersService) {
       var factoryService = {
         requireAuthenticatedUser: function () {
-          var promise = usersService.requestCurrentUser().then(function () {
-            if (!usersService.isAuthenticated()) {
-              return $q.reject('user is not logged in');
+          return usersService.requestCurrentUser().then(function (currentUser) {
+            var defer = $q.defer();
+            if (usersService.isAuthenticated()) {
+              defer.resolve(currentUser);
+            } else {
+              defer.reject('user is not logged in');
             }
+            return defer;
           });
-          return promise;
         },
         requireAdminUser: function () {
-          var promise = usersService.requestCurrentUser().then(function () {
-            if (!usersService.isAdmin()) {
-              return $q.reject('user is not an administrator');
+          return usersService.requestCurrentUser().then(function (currentUser) {
+            var defer = $q.defer();
+            if (usersService.isAdmin()) {
+              defer.resolve(currentUser);
+            } else {
+              defer.reject('user is not an administrator');
             }
+            return defer;
           });
-          return promise;
         }
       };
       return factoryService;
