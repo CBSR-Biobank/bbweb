@@ -33,7 +33,7 @@ define(['./module', 'moment', 'underscore'], function(module, moment, _) {
       if (annotationType.valueType === 'DateTime') {
         self.value = {
           date: moment().format('YYYY-MM-DD'),
-          time: moment().format('YYYY-MM-DD h:mm:ss a')
+          time: moment()
         };
       } else if ((annotationType.valueType === 'Select') && (annotationType.maxValueCount > 1)) {
         self.values = [];
@@ -102,22 +102,35 @@ define(['./module', 'moment', 'underscore'], function(module, moment, _) {
         self.value = annotation.stringValue;
         self.displayValue = annotation.stringValue;
       } else if (self.annotationType.valueType === 'Number') {
-        self.value = annotation.numberValue;
-        self.displayValue = annotation.numberValue;
+        self.value = parseFloat(annotation.numberValue);
+        self.displayValue = self.value;
       } else if (self.annotationType.valueType === 'DateTime') {
         // date part is kept in self.value.date and time in self.value.time, they must be combined
-        date = moment(annotation.stringValue, 'YYYY-MM-DD h:mm:ss a');
-        self.value.date = date;
+        date = moment(annotation.stringValue);
+        self.value.date = date.format('YYYY-MM-DD');
         self.value.time = date;
-        self.displayValue = date.format('YYYY-MM-DD h:mm A');
+
+        self.displayValue = date.local().format('YYYY-MM-DD h:mm A') + ' (' + date.local().fromNow() + ')';
       } else if (self.annotationType.valueType === 'Select') {
         if (self.annotationType.maxValueCount === 1) {
           self.value = annotation.selectedValues[0].value;
           self.displayValue = self.value;
         } else if (self.annotationType.maxValueCount > 1) {
-          // copy the values
-          self.values = _.map(annotation.selectedValues, function(sv) { return sv.value; });
-          self.displayValue = self.values.join(', ');
+          // set the 'checked' property on all the selected values
+          _.each(annotation.selectedValues, function(selectedValue) {
+            var value = _.find(self.values, function (selfValue) {
+              return selectedValue.value === selfValue.name;
+            });
+            if (value) {
+              value.checked = true;
+            }
+          });
+
+          self.displayValue = _.chain(self.values)
+            .filter(function(value) { return value.checked; })
+            .map(function(value) { return value.name; })
+            .value()
+            .join(', ');
         } else {
           throw new Error('invalid max value count for annotation: ' + self.annotationType.maxValueCount);
         }
@@ -133,7 +146,6 @@ define(['./module', 'moment', 'underscore'], function(module, moment, _) {
     AnnotationHelper.prototype.getAnnotationValue = function () {
       var self = this;
       var datetime;
-      var time;
 
       if (self.annotationType.valueType === 'Text') {
         return { stringValue: self.value };
@@ -145,14 +157,16 @@ define(['./module', 'moment', 'underscore'], function(module, moment, _) {
 
       if (self.annotationType.valueType === 'DateTime') {
         // date part is kept in self.value.date and time in self.value.time, they must be combined
-        time = moment(self.value.time, 'YYYY-MM-DD h:mm:ss a');
-        datetime = moment(self.value.date, 'yyyy-MM-dd').set({
+        if (self.value.time instanceof Date) {
+          self.value.time = moment(self.value.time);
+        }
+        datetime = moment(self.value.date).set({
           'millisecond': 0,
           'second': 0,
-          'minute': time.minutes(),
-          'hour': time.hour()
+          'minute': self.value.time.minutes(),
+          'hour': self.value.time.hours()
         });
-        return { stringValue: datetime.utc().format() };
+        return { stringValue: datetime.local().format() };
       }
 
       return null;

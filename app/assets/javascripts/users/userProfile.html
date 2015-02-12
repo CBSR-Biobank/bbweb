@@ -1,69 +1,90 @@
+<div class="page-header">
+  <h1>{{vm.user.name}} <small>Profile</small></h1>
+</div>
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">Profile</h3>
   </div>
-  <div class="panel-body">
-    <div class="row">
-      <div class="col-md-2 panel-label">Name</div>
-      <div class="col-md-8 panel-value">
-        {{vm.user.name}}
-      </div>
-      <div class="col-md-2 panel-value">
-        <button class="btn btn-xs btn-default pull-right"
-                title="Update name"
-                data-ng-click="vm.updateName()">
-          <i class="glyphicon glyphicon-cog"></i>
-          Update
-        </button>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2 panel-label">Email</div>
-      <div class="col-md-8 panel-value">
-        {{vm.user.email}}
-      </div>
-      <div class="col-md-2 panel-value">
-        <button class="btn btn-xs btn-default pull-right"
-                title="Update email"
-                data-ng-click="vm.updateEmail()">
-          <i class="glyphicon glyphicon-cog"></i>
-          Update
-        </button>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2 panel-label">Password</div>
-      <div class="col-md-8 panel-value">
-        <button class="btn btn-xs btn-default" data-ng-click="vm.updatePassword()">
-          <i class="glyphicon glyphicon-cog"></i>
-          Update password
-        </button>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2 panel-label">Avatar URL</div>
-      <div class="col-md-7 panel-value" ng-if="vm.user.avatarUrl">
-        <a target="_blank" ng-href="{{vm.user.avatarUrl}}">{{vm.user.avatarUrl}}</a>
-      </div>
-      <div class="col-md-7 panel-value" ng-if="! vm.user.avatarUrl">
-        None
-      </div>
-      <div class="col-md-3 panel-value">
-        <div class="btn-group pull-right">
-          <button class="btn btn-xs btn-default"
-                  title="Update avatar URL"
-                  data-ng-click="vm.updateAvatarUrl()">
+
+  <ul class="list-group">
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-2"><strong>Name</strong></div>
+        <div class="col-md-8">{{vm.user.name}}</div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-default pull-right"
+                  title="Update name"
+                  ng-click="vm.updateName()">
             <i class="glyphicon glyphicon-cog"></i>
             Update
           </button>
-          <button class="btn btn-xs btn-default"
-                  title="Remove avatar URL"
-                  data-ng-click="vm.removeAvatarUrl()">
-            <i class="glyphicon glyphicon-remove"></i>
-            Remove
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-2"><strong>Email</strong></div>
+        <div class="col-md-8">{{vm.user.email}}</div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-default pull-right"
+                  title="Update email"
+                  ng-click="vm.updateEmail()">
+            <i class="glyphicon glyphicon-cog"></i>
+            Update
           </button>
         </div>
       </div>
-    </div>
-  </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-2"><strong>Password</strong></div>
+        <div class="col-md-8">
+          <button class="btn btn-xs btn-default" ng-click="vm.updatePassword()">
+            <i class="glyphicon glyphicon-cog"></i>
+            Update password
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-2"><strong>Avatar URL</strong></div>
+        <div class="col-md-7" ng-if="vm.user.avatarUrl">
+          <a target="_blank" ng-href="{{vm.user.avatarUrl}}">{{vm.user.avatarUrl}}</a>
+        </div>
+        <div class="col-md-7" ng-if="! vm.user.avatarUrl">
+          None
+        </div>
+        <div class="col-md-3">
+          <div class="btn-group pull-right">
+            <button class="btn btn-xs btn-default"
+                    title="Update avatar URL"
+                    ng-click="vm.updateAvatarUrl()">
+              <i class="glyphicon glyphicon-cog"></i>
+              Update
+            </button>
+            <button class="btn btn-xs btn-default"
+                    title="Remove avatar URL"
+                    ng-click="vm.removeAvatarUrl()">
+              <i class="glyphicon glyphicon-remove"></i>
+              Remove
+            </button>
+          </div>
+        </div>
+      </div>
+    </li>
+  </ul>
+  <table class="table table-bordered">
+    <tr>
+      <td>
+        <small class="text-muted">Added: <strong>{{vm.user.timeAdded | timeago}}</strong></small>
+      </td>
+      <td>
+        <small class="text-muted">
+          Modified:
+          <strong>{{vm.user.timeModified | timeago}}</strong>
+        </small>
+      </td>
+    </tr>
+  </table>
 </div>

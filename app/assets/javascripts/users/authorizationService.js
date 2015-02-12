@@ -42,7 +42,7 @@ define(['./module'], function(module) {
             } else {
               defer.reject('user is not logged in');
             }
-            return defer;
+            return defer.promise;
           });
         },
         requireAdminUser: function () {
@@ -53,7 +53,7 @@ define(['./module'], function(module) {
             } else {
               defer.reject('user is not an administrator');
             }
-            return defer;
+            return defer.promise;
           });
         }
       };

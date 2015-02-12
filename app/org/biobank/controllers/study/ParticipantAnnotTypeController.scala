@@ -45,11 +45,11 @@ class ParticipantAnnotTypeController(implicit inj: Injector)
     */
   def get(studyId: String, annotTypeId: Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      Logger.debug(s"ParticipantAnnotTypeController.get: studyId: $studyId, annotTypeId: $annotTypeId")
-
       annotTypeId.fold {
+        Logger.debug(s"ParticipantAnnotTypeController.get: studyId: $studyId")
         domainValidationReply(studiesService.participantAnnotationTypesForStudy(studyId).map(_.toList))
       } { id =>
+        Logger.debug(s"ParticipantAnnotTypeController.get: studyId: $studyId, annotTypeId: $id")
         domainValidationReply(studiesService.participantAnnotationTypeWithId(studyId, id))
       }
   }

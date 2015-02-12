@@ -208,8 +208,10 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
     }
   }
 
-  private def recoverParticipantAddedEvent
-    (event: ParticipantAddedEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverParticipantAddedEvent(event: ParticipantAddedEvent,
+                                           userId: Option[UserId],
+                                           dateTime: DateTime) = {
+    log.info(s"recoverParticipantAddedEvent: event/$event, userId/$userId, dateTime/$dateTime")
     participantRepository.put(Participant(
       studyId      = StudyId(event.studyId),
       id           = ParticipantId(event.participantId),
@@ -221,8 +223,10 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
     ()
   }
 
-  private def recoverParticipantUpdatedEvent
-    (event: ParticipantUpdatedEvent, userId: Option[UserId], dateTime: DateTime) {
+  private def recoverParticipantUpdatedEvent(event: ParticipantUpdatedEvent,
+                                             userId: Option[UserId],
+                                             dateTime: DateTime) = {
+    log.info(s"recoverParticipantUpdatedEvent: event/$event, userId/$userId, dateTime/$dateTime")
     val studyId = StudyId(event.studyId)
     val participantId = ParticipantId(event.participantId)
 

@@ -3,4 +3,5 @@
  */
 define([
   './AnnotationHelper',
+  './Participant',
 ], function() {});

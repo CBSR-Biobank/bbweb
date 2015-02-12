@@ -127,6 +127,22 @@ define(['./module'], function(module) {
       }
     });
 
+    $stateProvider.state('home.collection.study.participant.update', {
+      url: '/update',
+      resolve: {
+        user: authorizationProvider.requireAuthenticatedUser
+      },
+      views: {
+        'main@': {
+          templateUrl: '/assets/javascripts/collection/participantForm.html',
+          controller: 'ParticipantEditCtrl as vm'
+        }
+      },
+      data: {
+        displayName: 'Update participant'
+      }
+    });
+
   }
 
 });

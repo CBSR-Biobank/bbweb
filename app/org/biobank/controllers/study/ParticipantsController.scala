@@ -44,7 +44,7 @@ class ParticipantsController(implicit inj: Injector)
 
   def getByUniqueId(studyId: String, uniqueId: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      Logger.debug(s"ParticipantsController.getByUniqueId: studyId: $studyId, uniqueId: uniqueId")
+      Logger.debug(s"ParticipantsController.getByUniqueId: studyId: $studyId, uniqueId: $uniqueId")
       domainValidationReply(participantsService.getByUniqueId(studyId, uniqueId))
     }
 

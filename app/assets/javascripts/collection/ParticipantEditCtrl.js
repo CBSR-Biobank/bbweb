@@ -1,4 +1,4 @@
-define(['./module', 'underscore'], function(module, _) {
+define(['./module'], function(module) {
   'use strict';
 
   module.controller('ParticipantEditCtrl', ParticipantEditCtrl);
@@ -9,7 +9,7 @@ define(['./module', 'underscore'], function(module, _) {
     'participantsService',
     'domainEntityUpdateError',
     'notificationsService',
-    'AnnotationHelper',
+    'Participant',
     'study',
     'participant',
     'annotationTypes'
@@ -23,37 +23,37 @@ define(['./module', 'underscore'], function(module, _) {
                                participantsService,
                                domainEntityUpdateError,
                                notificationsService,
-                               AnnotationHelper,
+                               Participant,
                                study,
                                participant,
                                annotationTypes) {
     var vm = this;
 
     vm.study           = study;
-    vm.participant     = participant;
+    vm.participant     = new Participant(study, participant, annotationTypes);
     vm.submit          = submit;
     vm.cancel          = cancel;
-    vm.annotHelpers    = getAnnotationHelpers(annotationTypes);
 
-    if (!vm.participant.id) {
+    vm.onSubmitState = {
+      name: 'home.collection.study.participant',
+      params: {
+        studyId: study.id,
+        participantId: participant.id
+      }
+    };
+
+    if (vm.participant.isNew) {
       vm.title = 'Add participant';
-      vm.participant.uniqueId = $stateParams.uniqueId;
+      vm.participant.setUniqueId($stateParams.uniqueId);
+      vm.onCancelState = {name: 'home.collection.study', params: {studyId: study.id}};
     } else {
       vm.title = 'Update participant';
-    }
-
-    function getAnnotationHelpers(annotationTypes) {
-      return _.map(annotationTypes, function(annotType) {
-        return new AnnotationHelper(annotType);
-      });
+      vm.onCancelState = vm.onSubmitState;
     }
 
     function submit(participant) {
-      // convert the form date to data expected by REST API
-      participant.studyId = study.id;
-      participant.annotations = _.map(vm.annotHelpers, function (annotationHelper) {
-        return annotationHelper.getAnnotation();
-      });
+      // convert the data from the form to data expected by REST API
+      participant.updateAnnotations();
 
       participantsService.addOrUpdate(participant)
         .then(submitSuccess)
@@ -66,14 +66,22 @@ define(['./module', 'underscore'], function(module, _) {
         });
     }
 
-    function submitSuccess(participant) {
+    function gotoState(state, reload) {
+      $state.transitionTo(state.name, state.params, { reload: reload });
+    }
+
+    function submitSuccess(event) {
+      if (vm.participant.isNew) {
+        // the event contains the id assigned to this new participant, therefore, the state data can be
+        // updated
+        vm.onSubmitState.params.participantId = event.participantId;
+      }
       notificationsService.submitSuccess();
-      $state.go('home.collection.study.participant',
-                {studyId: study.id, participantId: participant.participantId});
+      gotoState(vm.onSubmitState, true);
     }
 
     function cancel() {
-      $state.go('home.collection.study', {studyId: study.id});
+      gotoState(vm.onCancelState, false);
     }
   }
 
