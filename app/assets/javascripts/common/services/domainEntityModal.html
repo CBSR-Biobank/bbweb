@@ -2,17 +2,23 @@
   <button type="button"
           class="close"
           data-ng-click="modalOptions.ok()">&times;</button>
-  <h3 class="modal-title">{{modalOptions.title}}</h3>
+  <h3 class="modal-title" ng-bind-html="modalOptions.entityViewer.title"></h3>
 </div>
 <div class="modal-body">
-  <table data-ng-table="modalOptions.tableParams" class="table table-hover">
-    <tr data-ng-repeat="rowData in $data">
-      <td>
-        <strong>{{rowData.name}}</strong>
-      </td>
-      <td>
-        {{rowData.value}}
-      </td>
-    </tr>
-  </table>
+  <div class="panel panel-default">
+    <ul class="list-group">
+      <li class="list-group-item"
+          ng-repeat="item in modalOptions.entityViewer.items">
+        <div class="row">
+          <div class="col-md-4">
+            <strong>{{item.label}}</strong>
+          </div>
+          <div class="col-md-8">
+            {{item.value}}
+          </div>
+        </div>
+      </li>
+    </ul>
+    <domain-entity-timestamps entity="modalOptions.entityViewer"></domain-entity-timestamps>
+  </div>
 </div>

@@ -3,6 +3,15 @@
  */
 define([
   './AnnotationHelper',
+  './AnnotationTypeViewer',
+  './CeventTypeViewer',
   './CollectionEventType',
+  './EntityViewer',
+  './LocationViewer',
   './Participant',
+  './ProcessingTypeViewer',
+  './SpcLinkTypeViewer',
+  './SpecimenGroupViewer',
+  './StudyViewer',
+  './UserViewer'
 ], function() {});

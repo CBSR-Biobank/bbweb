@@ -29,8 +29,8 @@ define(['../../module', 'underscore'], function(module, _) {
     'modalService',
     'ceventAnnotTypesService',
     'annotationTypeRemoveService',
-    'annotTypeModalService',
-    'panelService'
+    'Panel',
+    'AnnotationTypeViewer'
   ];
 
   /**
@@ -41,25 +41,22 @@ define(['../../module', 'underscore'], function(module, _) {
                                      modalService,
                                      ceventAnnotTypesService,
                                      annotationTypeRemoveService,
-                                     annotTypeModalService,
-                                     panelService) {
+                                     Panel,
+                                     AnnotationTypeViewer) {
     var vm = this;
 
-    var helper = panelService.panel(
-      'study.panel.participantAnnottionTypes',
-      'home.admin.studies.study.collection.ceventAnnotTypeAdd',
-      annotTypeModalService,
-      'Collection Event Annotation Type');
+    var helper = new Panel('study.panel.participantAnnottionTypes',
+                           'home.admin.studies.study.collection.ceventAnnotTypeAdd');
 
     vm.study            = $scope.study;
     vm.annotTypes       = $scope.annotTypes;
     vm.annotTypesInUse  = $scope.annotTypesInUse;
     vm.update           = update;
     vm.remove           = remove;
-    vm.information      = helper.information;
-    vm.add              = helper.add;
+    vm.information      = information;
+    vm.add              = add;
     vm.panelOpen        = helper.panelOpen;
-    vm.panelToggle      = helper.panelToggle;
+    vm.panelToggle      = panelToggle;
 
     vm.modificationsAllowed = vm.study.status === 'Disabled';
 
@@ -72,6 +69,18 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.tableParams = helper.getTableParams(vm.annotTypes);
 
     //--
+
+    function add() {
+      return helper.add();
+    }
+
+    function information(annotType) {
+      return new AnnotationTypeViewer(annotType, 'Collection Event Annotation Type');
+    }
+
+    function panelToggle() {
+      return helper.panelToggle();
+    }
 
     function annotTypeInUseModal() {
       var headerHtml = 'Cannot update this annotation type';

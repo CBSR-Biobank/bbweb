@@ -27,13 +27,13 @@ define(['../../module', 'underscore'], function(module, _) {
     '$state',
     '$stateParams',
     'modalService',
-    'panelService',
+    'Panel',
     'studiesService',
-    'spcLinkTypeModalService',
+    'SpcLinkTypeViewer',
     'spcLinkTypeRemoveService',
-    'processingTypeModalService',
-    'specimenGroupModalService',
-    'annotTypeModalService'
+    'ProcessingTypeViewer',
+    'SpecimenGroupViewer',
+    'AnnotationTypeViewer'
   ];
 
   /**
@@ -43,16 +43,16 @@ define(['../../module', 'underscore'], function(module, _) {
                                  $state,
                                  $stateParams,
                                  modalService,
-                                 panelService,
+                                 Panel,
                                  studiesService,
-                                 spcLinkTypeModalService,
+                                 SpcLinkTypeViewer,
                                  spcLinkTypeRemoveService,
-                                 processingTypeModalService,
-                                 specimenGroupModalService,
-                                 annotTypeModalService) {
+                                 ProcessingTypeViewer,
+                                 SpecimenGroupViewer,
+                                 AnnotationTypeViewer) {
     var vm = this;
 
-    var helper = panelService.panel('study.panel.specimenLinkTypes');
+    var helper = new Panel('study.panel.specimenLinkTypes');
 
     vm.study               = $scope.study;
     vm.tableData           = [];
@@ -61,7 +61,7 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.add                 = add;
     vm.information         = information;
     vm.panelOpen           = helper.panelOpen;
-    vm.panelToggle         = helper.panelToggle;
+    vm.panelToggle         = panelToggle;
 
     vm.processingTypesById = _.indexBy($scope.processingDto.processingTypes, 'id');
     vm.specimenGroupsById  = _.indexBy($scope.processingDto.specimenGroups, 'id');
@@ -97,11 +97,15 @@ define(['../../module', 'underscore'], function(module, _) {
       });
     }
 
+    function panelToggle() {
+      return helper.panelToggle();
+    }
+
     /**
      * Displays a specimen link type in a modal.
      */
     function information(spcLinkType) {
-      spcLinkTypeModalService.show(
+      return new SpcLinkTypeViewer(
         spcLinkType, vm.processingTypesById, vm.specimenGroupsById, vm.annotTypesById);
     }
 
@@ -129,21 +133,21 @@ define(['../../module', 'underscore'], function(module, _) {
      * Displays a processing type in a modal.
      */
     function showProcessingType(processingTypeId) {
-      processingTypeModalService.show(vm.processingTypesById[processingTypeId]);
+      return new ProcessingTypeViewer(vm.processingTypesById[processingTypeId]);
     }
 
     /**
      * Displays a specimen group in a modal.
      */
     function showSpecimenGroup(specimenGroupId) {
-      specimenGroupModalService.show(vm.specimenGroupsById[specimenGroupId]);
+      return new SpecimenGroupViewer(vm.specimenGroupsById[specimenGroupId]);
     }
 
     /**
      * Display a specimen link annotation type in a modal.
      */
     function showAnnotationType(annotTypeId) {
-      annotTypeModalService.show('Specimen Link Annotation Type', vm.annotTypesById[annotTypeId]);
+      return new AnnotationTypeViewer(vm.annotTypesById[annotTypeId], 'Specimen Link Annotation Type');
     }
 
   }

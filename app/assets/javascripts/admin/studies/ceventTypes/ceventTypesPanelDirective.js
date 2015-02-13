@@ -29,12 +29,12 @@ define(['../../module', 'underscore'], function(module, _) {
     '$state',
     '$stateParams',
     'modalService',
-    'panelService',
+    'Panel',
     'ceventTypesService',
     'ceventAnnotTypesService',
-    'ceventTypeModalService',
-    'annotTypeModalService',
-    'specimenGroupModalService',
+    'CeventTypeViewer',
+    'AnnotationTypeViewer',
+    'SpecimenGroupViewer',
     'ceventTypeRemoveService'
   ];
 
@@ -45,18 +45,17 @@ define(['../../module', 'underscore'], function(module, _) {
                                 $state,
                                 $stateParams,
                                 modalService,
-                                panelService,
+                                Panel,
                                 ceventTypesService,
                                 ceventAnnotTypesService,
-                                ceventTypeModalService,
-                                annotTypeModalService,
-                                specimenGroupModalService,
+                                CeventTypeViewer,
+                                AnnotationTypeViewer,
+                                SpecimenGroupViewer,
                                 ceventTypeRemoveService) {
     var vm = this;
 
-    var helper = panelService.panel(
-      'study.panel.collectionEventTypes',
-      'home.admin.studies.study.collection.ceventTypeAdd');
+    var helper = new Panel('study.panel.collectionEventTypes',
+                           'home.admin.studies.study.collection.ceventTypeAdd');
 
     vm.study                = $scope.study;
     vm.ceventTypes          = $scope.ceventTypes;
@@ -72,7 +71,7 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.showAnnotationType   = showAnnotationType;
     vm.showSpecimenGroup    = showSpecimenGroup;
     vm.panelOpen            = helper.panelOpen;
-    vm.panelToggle          = helper.panelToggle;
+    vm.panelToggle          = panelToggle;
     vm.modificationsAllowed = vm.study.status === 'Disabled';
 
     init();
@@ -103,6 +102,10 @@ define(['../../module', 'underscore'], function(module, _) {
       });
     }
 
+    function panelToggle() {
+      return helper.panelToggle();
+    }
+
     function add() {
       if (vm.specimenGroups.length <= 0) {
         var headerHtml = 'Cannot add a collection event type';
@@ -118,21 +121,25 @@ define(['../../module', 'underscore'], function(module, _) {
      * Display a collection event type in a modal.
      */
     function information(ceventType) {
-      ceventTypeModalService.show(ceventType, vm.specimenGroups, vm.annotTypes);
+      return new CeventTypeViewer(vm.study, ceventType, vm.specimenGroups, vm.annotTypes);
     }
 
     /**
      * Display a collection event annotation type in a modal.
+     *
+     * @param id the ID for the annotation type.
      */
-    function showAnnotationType(annotTypeId) {
-      annotTypeModalService.show('Specimen Link Annotation Type', vm.annotationTypesById[annotTypeId]);
+    function showAnnotationType(id) {
+      console.log(id, vm.annotationTypesById[id]);
+      return new AnnotationTypeViewer(vm.annotationTypesById[id],
+                                     'Collecrtion Event Annotation Type');
     }
 
     /**
      * Displays a specimen group in a modal.
      */
     function showSpecimenGroup(specimenGroupId) {
-      specimenGroupModalService.show(vm.specimenGroupsById[specimenGroupId]);
+      return new SpecimenGroupViewer(vm.specimenGroupsById[specimenGroupId]);
     }
 
     /**

@@ -26,18 +26,5 @@
       </div>
     </li>
   </ul>
-
-  <table class="table table-bordered">
-    <tr>
-      <td>
-        <small class="text-muted">Added: <strong>{{vm.participant.timeAdded | timeago}}</strong></small>
-      </td>
-      <td>
-        <small class="text-muted">
-          Modified:
-          <strong>{{vm.participant.timeModified | timeago}}</strong>
-        </small>
-      </td>
-    </tr>
-  </table>
+  <domain-entity-timestamps entity="vm.participant"></domain-entity-timestamps>
 </div>

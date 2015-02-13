@@ -2,7 +2,7 @@
 define(['./module', 'underscore'], function(module, _) {
   'use strict';
 
-  module.service('Participant', ParticipantFactory);
+  module.factory('Participant', ParticipantFactory);
 
   ParticipantFactory.$inject = ['AnnotationHelper'];
 

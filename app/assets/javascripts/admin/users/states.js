@@ -13,9 +13,9 @@ define(['../module'], function(module) {
   function config($urlRouterProvider, $stateProvider, authorizationProvider) {
     $urlRouterProvider.otherwise('/');
 
-    resolveUserCount.$inject = ['usersService'];
-    function resolveUserCount(usersService) {
-      return usersService.getUserCount();
+    resolveUserCounts.$inject = ['usersService'];
+    function resolveUserCounts(usersService) {
+      return usersService.getUserCounts();
     }
 
     /**
@@ -25,7 +25,7 @@ define(['../module'], function(module) {
       url: '/users',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        userCount : resolveUserCount
+        userCounts: resolveUserCounts
       },
       views: {
         'main@': {

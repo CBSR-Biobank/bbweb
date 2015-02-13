@@ -27,10 +27,10 @@ define(['../../module', 'underscore'], function(module, _) {
     '$scope',
     '$state',
     '$stateParams',
-    'panelService',
+    'Panel',
     'modalService',
     'specimenGroupsService',
-    'specimenGroupModalService',
+    'SpecimenGroupViewer',
     'specimenGroupRemoveService'
   ];
 
@@ -40,26 +40,25 @@ define(['../../module', 'underscore'], function(module, _) {
   function SpecimenGroupsPanelCtrl($scope,
                                    $state,
                                    $stateParams,
-                                   panelService,
+                                   Panel,
                                    modalService,
                                    specimenGroupsService,
-                                   specimenGroupModalService,
+                                   SpecimenGroupViewer,
                                    specimenGroupRemoveService) {
     var vm = this;
 
-    var helper = panelService.panel(
-      'study.panel.specimenGroups',
-      'home.admin.studies.study.specimens.groupAdd');
+    var helper = new Panel('study.panel.specimenGroups',
+                           'home.admin.studies.study.specimens.groupAdd');
 
     vm.study                 = $scope.study;
     vm.specimenGroups        = $scope.specimenGroups;
     vm.specimenGroupIdsInUse = $scope.specimenGroupIdsInUse;
     vm.update                = update;
     vm.remove                = remove;
-    vm.add                   = helper.add;
+    vm.add                   = add;
     vm.information           = information;
     vm.panelOpen             = helper.panelOpen;
-    vm.panelToggle           = helper.panelToggle;
+    vm.panelToggle           = panelToggle;
 
     vm.modificationsAllowed = vm.study.status === 'Disabled';
 
@@ -67,11 +66,19 @@ define(['../../module', 'underscore'], function(module, _) {
 
     //--
 
+    function add() {
+      return helper.add;
+    }
+
+    function panelToggle() {
+      return helper.panelToggle();
+    }
+
     /**
      * Displays a specimen group in a modal.
      */
     function information(specimenGroup) {
-      specimenGroupModalService.show(specimenGroup);
+      return new SpecimenGroupViewer(specimenGroup);
     }
 
     /**

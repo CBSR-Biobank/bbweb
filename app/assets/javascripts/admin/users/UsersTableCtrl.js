@@ -12,8 +12,8 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     'modalService',
     'tableService',
     'usersService',
-    'UserModalService',
-    'userCount'
+    'UserViewer',
+    'userCounts'
   ];
 
   /**
@@ -27,12 +27,12 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
                           modalService,
                           tableService,
                           usersService,
-                          UserModalService,
-                          userCount) {
+                          UserViewer,
+                          userCounts) {
     var vm = this;
 
     vm.users = [];
-    vm.haveUsers = (userCount > 0);
+    vm.haveUsers = (userCounts.total > 0);
     vm.paginatedUsers = {};
 
     vm.nameFilter       = '';
@@ -152,7 +152,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     }
 
     function userInformation(user) {
-      UserModalService.show(user);
+      return new UserViewer(user);
     }
 
     function activate(user) {

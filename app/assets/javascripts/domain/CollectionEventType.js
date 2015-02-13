@@ -2,7 +2,7 @@
 define(['./module', 'underscore'], function(module, _) {
   'use strict';
 
-  module.service('CollectionEventType', CollectionEventTypeFactory);
+  module.factory('CollectionEventType', CollectionEventTypeFactory);
 
   //CollectionEventTypeFactory.$inject = [''];
 
@@ -64,6 +64,30 @@ define(['./module', 'underscore'], function(module, _) {
         this.annotationTypeData.splice(index, 1);
       }
     };
+
+    CollectionEventType.prototype.getSpecimenGroupsAsString = function () {
+      var self = this;
+      return _.map(self.specimenGroupData, function (sgItem) {
+        var specimenGroup = self.specimenGroupsById[sgItem.specimenGroupId];
+        if (!specimenGroup) {
+          throw new Error('specimen group not found: ' + sgItem.specimenGroupId);
+        }
+        return specimenGroup.name + ' (' + sgItem.maxCount + ', ' + sgItem.amount +
+          ' ' + specimenGroup.units + ')';
+      }).join(', ');
+    };
+
+    CollectionEventType.prototype.getAnnotationTypesAsString = function () {
+      var self = this;
+      return _.map(self.annotationTypeData, function (atItem) {
+        var annotType = self.annotationTypesById[atItem.annotationTypeId];
+        if (!annotType) {
+          throw new Error('annotation type not found: ' + atItem.annotationTypeId);
+        }
+        return annotType.name + (atItem.required ? ' (Req)' : ' (N/R)');
+      }).join(', ');
+    };
+
 
     /** return constructor function */
     return CollectionEventType;

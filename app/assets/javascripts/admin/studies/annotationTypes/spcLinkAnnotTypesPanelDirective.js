@@ -30,8 +30,8 @@ define(['../../module', 'underscore'], function(module, _) {
     'modalService',
     'spcLinkAnnotTypesService',
     'spcLinkAnnotTypeRemoveService',
-    'annotTypeModalService',
-    'panelService'
+    'Panel',
+    'AnnotationTypeViewer'
   ];
 
   /**
@@ -43,25 +43,23 @@ define(['../../module', 'underscore'], function(module, _) {
                                       modalService,
                                       spcLinkAnnotTypesService,
                                       spcLinkAnnotTypeRemoveService,
-                                      annotTypeModalService,
-                                      panelService) {
+                                      Panel,
+                                      AnnotationTypeViewer) {
     var vm = this;
 
-    var helper = panelService.panel(
+    var helper = new Panel(
       'study.panel.specimenLinkAnnotationTypes',
-      'home.admin.studies.study.processing.spcLinkAnnotTypeAdd',
-      annotTypeModalService,
-      'Specimen Link Annotation Type');
+      'home.admin.studies.study.processing.spcLinkAnnotTypeAdd');
 
     vm.study            = $scope.study;
     vm.annotTypes       = $scope.annotTypes;
     vm.spcLinkTypes     = $scope.spcLinkTypes;
     vm.update           = update;
     vm.remove           = remove;
-    vm.information      = helper.information;
-    vm.add              = helper.add;
+    vm.information      = information;
+    vm.add              = add;
     vm.panelOpen        = helper.panelOpen;
-    vm.panelToggle      = helper.panelToggle;
+    vm.panelToggle      = panelToggle;
 
     vm.modificationsAllowed = vm.study.status === 'Disabled';
 
@@ -76,6 +74,18 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.annotTypesInUse = annotTypesInUse();
 
     //--
+
+    function add() {
+      return helper.add();
+    }
+
+    function information(annotType) {
+      return new AnnotationTypeViewer(annotType, 'Specimen Link Annotation Type');
+    }
+
+    function panelToggle() {
+      return helper.panelToggle();
+    }
 
     /**
      * Returns the annotation types that are in use.

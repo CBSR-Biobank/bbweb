@@ -25,8 +25,8 @@ define(['../module'], function(module) {
   LocationsPanelCtrl.$inject = [
     '$scope',
     '$state',
-    'panelService',
-    'domainEntityModalService',
+    'LocationViewer',
+    'Panel',
     'domainEntityRemoveService',
     'centreLocationService'
   ];
@@ -36,41 +36,37 @@ define(['../module'], function(module) {
    */
   function LocationsPanelCtrl($scope,
                               $state,
-                              panelService,
-                              domainEntityModalService,
+                              LocationViewer,
+                              Panel,
                               domainEntityRemoveService,
                               centreLocationService) {
     var vm = this;
 
-    var helper = panelService.panel(
-      'centre.panel.locations',
-      'home.admin.centres.centre.locationAdd');
+    var helper = new Panel('centre.panel.locations', 'home.admin.centres.centre.locationAdd');
 
     vm.centre           = $scope.centre;
     vm.locations        = $scope.locations;
     vm.update           = update;
     vm.remove           = remove;
-    vm.add              = helper.add;
+    vm.add              = add;
     vm.information      = information;
     vm.panelOpen        = helper.panelOpen;
-    vm.panelToggle      = helper.panelToggle;
+    vm.panelToggle      = panelToggle;
 
     vm.tableParams      = helper.getTableParams(vm.locations);
 
     vm.modificationsAllowed = vm.centre.status === 'Disabled';
 
+    function add() {
+      return helper.add();
+    }
+
+    function panelToggle() {
+      return helper.panelToggle();
+    }
+
     function information(location) {
-      var title = 'Location';
-      var data = [
-        {name: 'Name:',              value: location.name},
-        {name: 'Street:',            value: location.street},
-        {name: 'City:',              value: location.city},
-        {name: 'Province / State:',  value: location.province},
-        {name: 'Postal / Zip code:', value: location.postalCode},
-        {name: 'PO Box Number:',     value: location.poBoxNumber},
-        {name: 'Country ISO Code:',  value: location.countryIsoCode},
-      ];
-      domainEntityModalService.show(title, data);
+      return new LocationViewer(location);
     }
 
     function update(location) {

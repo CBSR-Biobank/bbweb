@@ -27,11 +27,11 @@ define(['../module', 'underscore'], function(module, _) {
     '$scope',
     '$state',
     '$filter',
-    'panelService',
+    'Panel',
+    'StudyViewer',
     'panelTableService',
     'centresService',
     'studiesService',
-    'studyModalService',
     'modalService'
   ];
 
@@ -41,16 +41,16 @@ define(['../module', 'underscore'], function(module, _) {
   function CentreStudiesPanelCtrl($scope,
                                   $state,
                                   $filter,
-                                  panelService,
+                                  Panel,
+                                  StudyViewer,
                                   panelTableService,
                                   centresService,
                                   studiesService,
-                                  studyModalService,
                                   modalService) {
 
     var vm = this;
 
-    var helper = panelService.panel('centre.panel.studies');
+    var helper = new Panel('centre.panel.studies');
 
     vm.centre         = $scope.centre;
     vm.centreStudyIds = $scope.centreStudies;
@@ -61,7 +61,7 @@ define(['../module', 'underscore'], function(module, _) {
     vm.remove         = remove;
     vm.information    = information;
     vm.panelOpen      = helper.panelOpen;
-    vm.panelToggle    = helper.panelToggle;
+    vm.panelToggle    = panelToggle;
 
     vm.selected = undefined;
     vm.onSelect = onSelect;
@@ -78,6 +78,10 @@ define(['../module', 'underscore'], function(module, _) {
       });
 
       vm.tableParams = panelTableService.getTableParamsWithCallback(getTableData, {count: 10}, {counts: []});
+    }
+
+    function panelToggle() {
+      return helper.panelToggle();
     }
 
     function getTableData() {
@@ -99,11 +103,11 @@ define(['../module', 'underscore'], function(module, _) {
     function information(studyId) {
       if (!!vm.studiesById[studyId].timeAdded) {
         // study already loaded, no need to reload it
-        studyModalService.show(vm.studiesById[studyId]);
+        return new StudyViewer(vm.studiesById[studyId]);
       } else {
-        studiesService.get(studyId).then(function (study) {
+        return studiesService.get(studyId).then(function (study) {
           vm.studiesById[study.id] = study;
-          studyModalService.show(study);
+          return new StudyViewer(study);
         });
       }
     }

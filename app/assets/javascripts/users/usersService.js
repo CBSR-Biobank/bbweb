@@ -26,7 +26,7 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
       isAdmin:            isAdmin,
       query:              query,
       getAllUsers:        getAllUsers,
-      getUserCount:       getUserCount,
+      getUserCounts:      getUserCounts,
       getUsers:           getUsers,
       add:                add,
       updateName:         updateName,
@@ -132,8 +132,8 @@ define(['./module', 'jquery', 'underscore'], function(module, $, _) {
       return biobankApi.call('GET', uri());
     }
 
-    function getUserCount() {
-      return biobankApi.call('GET', uri() + '/count');
+    function getUserCounts() {
+      return biobankApi.call('GET', uri() + '/counts');
     }
 
     /**

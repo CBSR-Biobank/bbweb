@@ -26,9 +26,9 @@ define(['../../module'], function(module) {
     '$scope',
     '$state',
     '$stateParams',
-    'panelService',
+    'Panel',
     'processingTypesService',
-    'processingTypeModalService',
+    'ProcessingTypeViewer',
     'processingTypeRemoveService'
   ];
 
@@ -38,35 +38,42 @@ define(['../../module'], function(module) {
   function ProcessingTypesPanelCtrl($scope,
                                     $state,
                                     $stateParams,
-                                    panelService,
+                                    Panel,
                                     processingTypesService,
-                                    processingTypeModalService,
+                                    ProcessingTypeViewer,
                                     processingTypeRemoveService) {
     var vm = this;
 
-    var helper = panelService.panel(
-      'study.panel.processingTypes',
-      'home.admin.studies.study.processing.processingTypeAdd');
+    var helper = new Panel('study.panel.processingTypes',
+                           'home.admin.studies.study.processing.processingTypeAdd');
 
     vm.study            = $scope.study;
     vm.processingTypes  = $scope.processingDto.processingTypes;
     vm.update           = update;
     vm.remove           = processingTypeRemoveService.remove;
-    vm.add              = helper.add;
+    vm.add              = add;
     vm.information      = information;
     vm.panelOpen        = helper.panelOpen;
-    vm.panelToggle      = helper.panelToggle;
+    vm.panelToggle      = panelToggle;
 
     vm.modificationsAllowed = vm.study.status === 'Disabled';
     vm.tableParams = helper.getTableParams(vm.processingTypes);
 
     //--
 
+    function add() {
+      return helper.add();
+    }
+
+    function panelToggle() {
+      return helper.panelToggle();
+    }
+
     /**
      * Displays a processing type in a modal.
      */
     function information(processingType) {
-      processingTypeModalService.show(processingType);
+      return new ProcessingTypeViewer(processingType);
     }
 
     /**
