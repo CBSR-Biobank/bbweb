@@ -1,10 +1,11 @@
-define(['../../module', 'underscore'], function(module, _) {
+define(['../../module'], function(module) {
   'use strict';
 
   module.controller('CeventTypeEditCtrl', CeventTypeEditCtrl);
 
   CeventTypeEditCtrl.$inject = [
     '$state',
+    'CollectionEventType',
     'domainEntityUpdateError',
     'ceventTypesService',
     'notificationsService',
@@ -18,6 +19,7 @@ define(['../../module', 'underscore'], function(module, _) {
    * Used to add or update a collection event type.
    */
   function CeventTypeEditCtrl($state,
+                              CollectionEventType,
                               domainEntityUpdateError,
                               ceventTypesService,
                               notificationsService,
@@ -25,24 +27,19 @@ define(['../../module', 'underscore'], function(module, _) {
                               ceventType,
                               annotTypes,
                               specimenGroups) {
-    var action = ceventType.id ? 'Update' : 'Add';
+    var vm = this, action;
 
-    var vm = this;
-    vm.title          =  action + ' Collection Event Type';
-    vm.study          = study;
-    vm.ceventType     = ceventType;
-    vm.annotTypes     = annotTypes;
-    vm.specimenGroups = specimenGroups;
+    vm.ceventType = new CollectionEventType(study, ceventType, specimenGroups, annotTypes);
+    action = vm.ceventType.isNew ? 'Add' : 'Update';
 
-    vm.submit              = submit;
-    vm.cancel              = cancel;
-    vm.addSpecimenGroup    = addSpecimenGroup;
-    vm.removeSpecimenGroup = removeSpecimenGroup;
-    vm.addAnnotType        = addAnnotType;
-    vm.removeAnnotType     = removeAnnotType;
-
-    // used to display the specimen group units label in the form
-    vm.specimenGroupsById = _.indexBy(vm.specimenGroups, 'id');
+    vm.title                   = action + ' Collection Event Type';
+    vm.study                   = study;
+    vm.submit                  = submit;
+    vm.cancel                  = cancel;
+    vm.addSpecimenGroupData    = addSpecimenGroupData;
+    vm.removeSpecimenGroupData = removeSpecimenGroupData;
+    vm.addAnnotTypeData        = addAnnotTypeData;
+    vm.removeAnnotTypeData     = removeAnnotTypeData;
 
     //---
 
@@ -72,30 +69,20 @@ define(['../../module', 'underscore'], function(module, _) {
       gotoReturnState();
     }
 
-    function addSpecimenGroup() {
-      vm.ceventType.specimenGroupData.push({name:'', specimenGroupId:'', maxCount: '', amount: ''});
+    function addSpecimenGroupData() {
+      vm.ceventType.addSpecimenGroupData({name:'', specimenGroupId:'', maxCount: '', amount: ''});
     }
 
-    function removeSpecimenGroup(sgData) {
-      var index = vm.ceventType.specimenGroupData.indexOf(sgData);
-      if (index > -1) {
-        vm.ceventType.specimenGroupData.splice(index, 1);
-      }
+    function removeSpecimenGroupData(sgData) {
+      vm.ceventType.removeSpecimenGroupData(sgData);
     }
 
-    function addAnnotType() {
-      vm.ceventType.annotationTypeData.push({name:'', annotationTypeId:'', required: false});
+    function addAnnotTypeData() {
+      vm.ceventType.addAnnotationTypeData({annotationTypeId:'', required: false});
     }
 
-    function removeAnnotType(atData) {
-      if (vm.ceventType.annotationTypeData.length < 1) {
-        throw new Error('invalid length for annotation type data');
-      }
-
-      var index = vm.ceventType.annotationTypeData.indexOf(atData);
-      if (index > -1) {
-        vm.ceventType.annotationTypeData.splice(index, 1);
-      }
+    function removeAnnotTypeData(atData) {
+      vm.ceventType.removeAnnotationTypeData(atData);
     }
   }
 

@@ -3,5 +3,6 @@
  */
 define([
   './AnnotationHelper',
+  './CollectionEventType',
   './Participant',
 ], function() {});

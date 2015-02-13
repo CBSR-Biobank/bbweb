@@ -1,9 +1,7 @@
 <div class="page-header">
   <h1>{{vm.study.name}} <small>{{vm.title}}</small></h1>
 </div>
-<form class="form-horizontal"
-      name="cetForm"
-      novalidate>
+<form class="form-horizontal" name="cetForm" novalidate>
 
   <!-- NAME -->
   <div class="form-group" data-ng-class="{ 'has-error' : cetForm.name.$invalid && !cetForm.name.$pristine }">
@@ -50,7 +48,7 @@
         <select class="form-control"
                 name="sgId"
                 data-ng-model="vm.ceventType.specimenGroupData[$index].specimenGroupId"
-                data-ng-options="sg.id as sg.name for sg in vm.specimenGroups | orderBy: 'name'"
+                data-ng-options="sg.id as sg.name for sg in vm.ceventType.specimenGroups | orderBy: 'name'"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -67,8 +65,8 @@
                required/>
       </div>
       <label class="col-md-1 control-label small">
-        {{(vm.specimenGroupsById[sgData.specimenGroupId]
-        ? vm.specimenGroupsById[sgData.specimenGroupId].units : 'Amount') + ':'}}
+        {{(vm.ceventType.getSpecimenGroupById(sgData.specimenGroupId)
+        ? vm.ceventType.getSpecimenGroupById(sgData.specimenGroupId).units : 'Amount') + ':'}}
       </label>
       <div class="col-md-2">
         <input type="number"
@@ -82,7 +80,7 @@
       </div>
       <div class="col-md-1">
         <button class="btn btn-xs btn-warning"
-                data-ng-click="vm.removeSpecimenGroup(sgData)">
+                data-ng-click="vm.removeSpecimenGroupData(sgData)">
           <i class="glyphicon glyphicon-minus"></i> Remove
         </button>
       </div>
@@ -92,10 +90,11 @@
           Please select a specimen group
         </p>
         <p class="help-block"
-           data-ng-show="sgSubForm.maxCount.$error.validCount">
+           data-ng-show="sgSubForm.maxCount.$error.validCount && !sgSubForm.maxCount.$pristine">
           Max count should be a positive number greater than 1
         </p>
-        <p class="help-block" data-ng-show="sgSubForm.amount.$error.validAmount">
+        <p class="help-block"
+           data-ng-show="sgSubForm.amount.$error.validAmount && !sgSubForm.amount.$pristine">
           Amount should be a positive floating point number
         </p>
       </div>
@@ -105,7 +104,8 @@
   <!-- SPECIMEN GROUP DATA ADD -->
   <div class="form-group">
     <div class="col-md-2">
-      <button class="btn btn-sm btn-primary pull-right" data-ng-click="vm.addSpecimenGroup()">
+      <button class="btn btn-sm btn-primary pull-right"
+              data-ng-click="vm.ceventType.addSpecimenGroupData()">
         Add specimen group <i class="glyphicon glyphicon-plus"></i>
       </button>
     </div>
@@ -119,7 +119,7 @@
         <select class="form-control"
                 name="name"
                 data-ng-model="vm.ceventType.annotationTypeData[$index].annotationTypeId"
-                data-ng-options="annotType.id as annotType.name for annotType in vm.annotTypes | orderBy: 'name'"
+                data-ng-options="annotType.id as annotType.name for annotType in vm.ceventType.annotationTypes | orderBy: 'name'"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -129,7 +129,7 @@
       </div>
       <div class="col-md-1">
         <button class="btn btn-xs btn-warning"
-                data-ng-click="vm.removeAnnotType(atData)">
+                data-ng-click="vm.removeAnnotTypeData(atData)">
           <i class="glyphicon glyphicon-minus"></i> Remove
         </button>
       </div>
@@ -146,7 +146,7 @@
     <div class="col-md-2">
       <button class="btn btn-sm btn-primary pull-right"
               data-ng-disabled="annotTypeNames == 0"
-              data-ng-click="vm.addAnnotType()">
+              data-ng-click="vm.addAnnotTypeData()">
         Add annotation type <i class="glyphicon glyphicon-plus"></i>
       </button>
     </div>
