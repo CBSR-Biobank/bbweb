@@ -13,20 +13,20 @@
     summary, storage, and classification information that applies to an entire group or collection of
     Specimens.
   </p>
-  <div class="panel panel-warning" data-ng-if="vm.specimenGroups.length == 0">
+  <div class="panel panel-warning" ng-if="vm.specimenGroups.length == 0">
     <div class="panel-heading">
       Specimen groups have not been defined for this study yet.
     </div>
   </div>
-  <p data-ng-if="vm.specimenGroups.length != 0">
+  <p ng-if="vm.specimenGroups.length != 0">
     The following specimen groups are defined:
   </p>
-  <table data-ng-show="vm.specimenGroups.length != 0"
+  <table ng-show="vm.specimenGroups.length != 0"
          class="table table-hover table-condensed"
-         data-ng-table="vm.tableParams">
-    <tr data-ng-repeat="specimenGroup in $data">
+         ng-table="vm.tableParams">
+    <tr ng-repeat="specimenGroup in $data">
       <td data-title="'Name'" sortable="'name'">
-        <span data-ng-click="vm.information(specimenGroup)">
+        <span ng-click="vm.information(specimenGroup)">
           <a href>{{specimenGroup.name}}</a>
         </span>
       </td>

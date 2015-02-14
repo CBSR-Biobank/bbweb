@@ -3,7 +3,7 @@
 </div>
 <form class="form-horizontal"
       name="locationForm"
-      data-ng-submit="locationForm.$valid && vm.submit(vm.location)"
+      ng-submit="locationForm.$valid && vm.submit(vm.location)"
       novalidate>
 
   <!-- NAME -->
@@ -14,14 +14,14 @@
          name="name"
          type="text"
          class="form-control"
-         data-ng-model="vm.location.name"
-         data-ng-minlength="2"
+         ng-model="vm.location.name"
+         ng-minlength="2"
          placeholder="A short name for the location"
          focus-me="true"
          required />
     </div>
     <div class="col-md-offset-2 col-md-10">
-      <p class="help-block" data-ng-show="locationForm.name.$error.minlength">Name is too short.</p>
+      <p class="help-block" ng-show="locationForm.name.$error.minlength">Name is too short.</p>
     </div>
   </div>
 
@@ -33,7 +33,7 @@
          name="street"
          type="text"
          class="form-control"
-         data-ng-model="vm.location.street"
+         ng-model="vm.location.street"
          placeholder="Street address for this location (including unit number)" />
     </div>
   </div>
@@ -46,7 +46,7 @@
          name="city"
          type="text"
          class="form-control"
-         data-ng-model="vm.location.city" />
+         ng-model="vm.location.city" />
     </div>
   </div>
 
@@ -58,7 +58,7 @@
          name="province"
          type="text"
          class="form-control"
-         data-ng-model="vm.location.province" />
+         ng-model="vm.location.province" />
     </div>
   </div>
 
@@ -70,7 +70,7 @@
          name="postalCode"
          type="text"
          class="form-control"
-         data-ng-model="vm.location.postalCode" />
+         ng-model="vm.location.postalCode" />
     </div>
   </div>
 
@@ -82,7 +82,7 @@
          name="poBoxNumber"
          type="text"
          class="form-control"
-         data-ng-model="vm.location.poBoxNumber"
+         ng-model="vm.location.poBoxNumber"
          placeholder="Optional" />
     </div>
   </div>
@@ -95,15 +95,15 @@
          name="countryIsoCode"
          type="text"
          class="form-control"
-         data-ng-model="vm.location.countryIsoCode" />
+         ng-model="vm.location.countryIsoCode" />
     </div>
   </div>
 
   <!-- BUTTONS  -->
   <div class="form-group">
     <div class="col-md-offset-2 col-md-10">
-      <button class="btn btn-primary" data-ng-disabled="locationForm.$invalid">Submit</button>
-      <button type="button" class="btn" data-ng-click="vm.cancel()">Cancel</button>
+      <button class="btn btn-primary" ng-disabled="locationForm.$invalid">Submit</button>
+      <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
     </div>
   </div>
 </form>

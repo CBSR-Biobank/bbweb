@@ -8,14 +8,14 @@
         </a>
 
         <button class="btn btn-xs btn-success"
-                data-ng-click="vm.changeStatus('enable')"
+                ng-click="vm.changeStatus('enable')"
                 title="Enable"
                 ng-if="vm.centre.status === 'Disabled'">
           <i class="glyphicon glyphicon-ok-circle"></i>
         </button>
 
         <button class="btn btn-xs btn-danger"
-                data-ng-click="vm.changeStatus('disable')"
+                ng-click="vm.changeStatus('disable')"
                 title="Disable"
                 ng-if="vm.centre.status === 'Enabled'">
           <i class="glyphicon glyphicon-remove-sign"></i>

@@ -3,7 +3,7 @@
           class="close"
           data-dismiss="modal"
           aria-hidden="true"
-          data-ng-click="modalOptions.close()">&times;</button>
+          ng-click="modalOptions.close()">&times;</button>
   <h3 class="modal-title">Modified by another user</h3>
 </div>
 <div class="modal-body">
@@ -13,6 +13,6 @@
   </p>
 </div>
 <div class="modal-footer">
-  <button class="btn" data-ng-click="modalOptions.close()">{{modalOptions.closeButtonText}}</button>
-  <button class="btn btn-primary" data-ng-click="modalOptions.ok()">{{modalOptions.actionButtonText}}</button>
+  <button class="btn" ng-click="modalOptions.close()">{{modalOptions.closeButtonText}}</button>
+  <button class="btn btn-primary" ng-click="modalOptions.ok()">{{modalOptions.actionButtonText}}</button>
 </div>

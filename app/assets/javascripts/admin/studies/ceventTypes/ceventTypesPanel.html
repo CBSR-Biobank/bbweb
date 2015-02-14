@@ -13,33 +13,33 @@
     participant visit. A participant visit is a record of when specimens were collected
     from a participant at a collection centre.
   </p>
-  <div class="panel panel-warning" data-ng-if="vm.ceventTypes.length <= 0">
+  <div class="panel panel-warning" ng-if="vm.ceventTypes.length <= 0">
     <div class="panel-heading">
       Collection event types have not been defined for this study yet.
     </div>
   </div>
-  <p data-ng-if="vm.ceventTypes.length > 0">
+  <p ng-if="vm.ceventTypes.length > 0">
     The following collection event types are defined:
   </p>
-  <table data-ng-show="vm.ceventTypes.length > 0"
+  <table ng-show="vm.ceventTypes.length > 0"
          class="table table-condensed table-hover"
-         data-ng-table="vm.tableParams">
-    <tr data-ng-repeat="ceventType in $data">
+         ng-table="vm.tableParams">
+    <tr ng-repeat="ceventType in $data">
       <td data-title="'Name'" sortable="'name'">
-        <span data-ng-click="vm.information(ceventType)">
+        <span ng-click="vm.information(ceventType)">
           <a href>{{ceventType.name}}</a>
         </span>
       </td>
       <td data-title="'Specimen Groups'">
-        <span data-ng-repeat="sg in ceventType.specimenGroups"
-              data-ng-click="vm.showSpecimenGroup(sg.id)">
-          <a href>{{sg.name}}</a><span data-ng-if="!$last">, </span>
+        <span ng-repeat="sg in ceventType.specimenGroups"
+              ng-click="vm.showSpecimenGroup(sg.id)">
+          <a href>{{sg.name}}</a><span ng-if="!$last">, </span>
         </span>
       </td>
       <td data-title="'Annotation Types'">
-        <span data-ng-repeat="at in ceventType.annotationTypes"
-              data-ng-click="vm.showAnnotationType(at.id)">
-          <a href>{{at.name}}</a><span data-ng-if="!$last">, </span>
+        <span ng-repeat="at in ceventType.annotationTypes"
+              ng-click="vm.showAnnotationType(at.id)">
+          <a href>{{at.name}}</a><span ng-if="!$last">, </span>
         </span>
 
       </td>

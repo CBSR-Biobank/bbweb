@@ -12,14 +12,14 @@
       <input name="name"
              type="text"
              class="form-control"
-             data-ng-model="vm.user.name"
-             data-ng-minlength="2"
+             ng-model="vm.user.name"
+             ng-minlength="2"
              placeholder="given name(s) followed by surname(s) separated by spaces"
              focus-me="true"
              required/>
     </div>
     <div class="col-md-offset-3 col-md-7">
-      <p class="help-block" data-ng-show="userRegForm.name.$error.minlength">Name is too short.</p>
+      <p class="help-block" ng-show="userRegForm.name.$error.minlength">Name is too short.</p>
     </div>
   </div>
 
@@ -31,12 +31,12 @@
          name="email"
          type="email"
          class="form-control"
-         data-ng-model="vm.user.email"
+         ng-model="vm.user.email"
          placeholder="Email"
          required/>
     </div>
     <div class="col-md-offset-3 col-md-7">
-      <p data-ng-show="userRegForm.email.$invalid && !userRegForm.email.$pristine"
+      <p ng-show="userRegForm.email.$invalid && !userRegForm.email.$pristine"
          class="help-block">
         Valid email address is required.</p>
     </div>
@@ -50,13 +50,13 @@
          name="password"
          type="password"
          class="form-control"
-         data-ng-model="vm.user.password"
+         ng-model="vm.user.password"
          placeholder="Password"
-         data-ng-minlength="8"
+         ng-minlength="8"
          required />
     </div>
     <div class="col-md-offset-3 col-md-7">
-      <p class="help-block" data-ng-show="userRegForm.password.$error.minlength">
+      <p class="help-block" ng-show="userRegForm.password.$error.minlength">
         Password too short. It should be minimum 8 characters.
       </p>
     </div>
@@ -70,13 +70,13 @@
          name="confirmPassword"
          type="password"
          class="form-control"
-         data-ng-model="vm.user.confirmPassword"
+         ng-model="vm.user.confirmPassword"
          placeholder="Password"
          password-check="vm.user.password"
-         data-ng-required />
+         ng-required />
     </div>
     <div class="col-md-offset-3 col-md-7">
-      <p data-ng-show="userRegForm.confirmPassword.$error.passwordmatch"
+      <p ng-show="userRegForm.confirmPassword.$error.passwordmatch"
          class="help-block">
         Passwords do not match</p>
     </div>
@@ -86,9 +86,9 @@
   <div class="form-group">
     <div class="col-md-offset-3 col-md-9">
       <button class="btn btn-primary"
-              data-ng-disabled="userRegForm.$invalid"
-              data-ng-click="vm.submit(vm.user)">Submit</button>
-      <button type="button" class="btn" data-ng-click="vm.cancel()">Cancel</button>
+              ng-disabled="userRegForm.$invalid"
+              ng-click="vm.submit(vm.user)">Submit</button>
+      <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
     </div>
   </div>
 </form>

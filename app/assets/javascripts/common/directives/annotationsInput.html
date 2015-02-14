@@ -1,4 +1,4 @@
-<div class="form-group" data-ng-repeat="annotationHelper in vm.annotationHelpers">
+<div class="form-group" ng-repeat="annotationHelper in vm.annotationHelpers">
   <ng-form name="annotationSubForm">
     <label class="col-md-2 control-label">{{annotationHelper.annotationType.name}}</label>
     <div class="col-md-8" ng-switch on="annotationHelper.annotationType.valueType">

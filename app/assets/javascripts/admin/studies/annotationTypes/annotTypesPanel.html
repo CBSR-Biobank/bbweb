@@ -3,15 +3,15 @@
     this file is included by a parent template
 
   -->
-<div class="panel panel-warning" data-ng-if="vm.annotTypes.length <= 0">
+<div class="panel panel-warning" ng-if="vm.annotTypes.length <= 0">
   <div class="panel-heading">
     Annotation types have not been defined for this study yet.
   </div>
 </div>
-<div data-ng-if="vm.annotTypes.length > 0">
+<div ng-if="vm.annotTypes.length > 0">
   <p>The following annotation types are defined:</p>
   <table class="table table-condensed table-hover"
-         data-ng-table="vm.tableParams"
+         ng-table="vm.tableParams"
          show-filter="true">
     <!-- tried to put the th tag in a thead but they would not display on the page -->
     <tbody>
@@ -28,23 +28,23 @@
         </th>
         <th ng-if="vm.study.status === 'Disabled'"><!-- heading for buttons: blank for now --></th>
       </tr>
-      <tr data-ng-repeat="annotType in $data">
+      <tr ng-repeat="annotType in $data">
         <td ng-repeat="column in vm.columns" sortable="column.field">
 
-          <span data-ng-if="column.field === 'name'"
-                data-ng-click="vm.information(annotType)">
+          <span ng-if="column.field === 'name'"
+                ng-click="vm.information(annotType)">
             <a href>{{annotType[column.field]}}</a>
           </span>
 
-          <span data-ng-if="(column.field === 'description')">
+          <span ng-if="(column.field === 'description')">
             {{annotType[column.field] ? (annotType[column.field] | truncate:50) : ''}}
           </span>
 
-          <span data-ng-if="(column.field !== 'name') && (column.field !== 'description') && (column.field !== 'required')">
+          <span ng-if="(column.field !== 'name') && (column.field !== 'description') && (column.field !== 'required')">
             {{annotType[column.field]}}
           </span>
 
-          <span data-ng-if="vm.hasRequired && (column.field === 'required')">
+          <span ng-if="vm.hasRequired && (column.field === 'required')">
             {{annotType[column.field] ? 'Yes' : 'No'}}
           </span>
 

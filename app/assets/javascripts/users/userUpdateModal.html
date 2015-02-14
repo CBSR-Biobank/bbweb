@@ -3,7 +3,7 @@
           class="close"
           data-dismiss="modal"
           aria-hidden="true"
-          data-ng-click="modal.close()">&times;</button>
+          ng-click="modal.close()">&times;</button>
   <h3 class="modal-title">{{modal.title}}</h3>
 </div>
 <div class="modal-body">
@@ -57,8 +57,8 @@
 
 </div>
 <div class="modal-footer">
-  <button class="btn" data-ng-click="modal.close()">Cancel</button>
+  <button class="btn" ng-click="modal.close()">Cancel</button>
   <button class="btn btn-primary"
-          data-ng-click="modal.ok()"
+          ng-click="modal.ok()"
           ng-disabled="form.$invalid">OK</button>
 </div>

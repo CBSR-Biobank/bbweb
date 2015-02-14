@@ -13,37 +13,37 @@
     processing procedure involving two Specimens: an input, which must be in a specific Specimen Group, and an
     output, which must be in a specific Specimen Group.
   </p>
-  <div class="panel panel-warning" data-ng-if="vm.tableData.length == 0">
+  <div class="panel panel-warning" ng-if="vm.tableData.length == 0">
     <div class="panel-heading">
       Specimen link types have not been defined for this study yet.
     </div>
   </div>
-  <p data-ng-if="vm.tableData.length > 0">
+  <p ng-if="vm.tableData.length > 0">
     The following specimen link types are defined:
   </p>
-  <table data-ng-show="vm.tableData.length > 0"
+  <table ng-show="vm.tableData.length > 0"
          class="table table-condensed table-hover"
-         data-ng-table="vm.tableParams">
-    <tr data-ng-repeat="tableData in $data">
+         ng-table="vm.tableParams">
+    <tr ng-repeat="tableData in $data">
       <td data-title="'Processing Type'"
           sortable="'processingTypeName'"
-          data-ng-click="vm.showProcessingType(tableData.specimenLinkType.processingTypeId)">
+          ng-click="vm.showProcessingType(tableData.specimenLinkType.processingTypeId)">
         <a href>{{tableData.processingTypeName}}</a>
       </td>
       <td data-title="'Input Specimen Group'"
           sortable="'inputGroupName'"
-          data-ng-click="vm.showSpecimenGroup(tableData.specimenLinkType.inputGroupId)">
+          ng-click="vm.showSpecimenGroup(tableData.specimenLinkType.inputGroupId)">
         <a href>{{tableData.inputGroupName}}</a>
       </td>
       <td data-title="'Output Specimen Group'"
           sortable="'outputGroupName'"
-          data-ng-click="vm.showSpecimenGroup(tableData.specimenLinkType.outputGroupId)">
+          ng-click="vm.showSpecimenGroup(tableData.specimenLinkType.outputGroupId)">
         <a href>{{tableData.outputGroupName}}</a>
       </td>
       <td data-title="'Annotation Types'">
-        <span data-ng-repeat="at in tableData.annotationTypes"
-             data-ng-click="vm.showAnnotationType(at.id)">
-          <a href>{{at.name}}</a><span data-ng-if="!$last">, </span>
+        <span ng-repeat="at in tableData.annotationTypes"
+             ng-click="vm.showAnnotationType(at.id)">
+          <a href>{{at.name}}</a><span ng-if="!$last">, </span>
         </span>
 
       </td>

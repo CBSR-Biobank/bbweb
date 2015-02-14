@@ -8,7 +8,7 @@
         <form role="form"
               name="forgotForm"
               autocomplete="on"
-              data-ng-submit="forgotForm.$valid && vm.submit(vm.email)"
+              ng-submit="forgotForm.$valid && vm.submit(vm.email)"
               novalidate>
 
           <!-- EMAIL -->
@@ -19,14 +19,14 @@
             <input name="email"
                    type="email"
                    class="form-control"
-                   data-ng-model="vm.email"
+                   ng-model="vm.email"
                    placeholder="Email"
                    required/>
           </div>
 
           <!-- BUTTONS  -->
           <div class="form-group">
-            <button class="btn btn-primary" data-ng-disabled="forgotForm.$invalid">Submit</button>
+            <button class="btn btn-primary" ng-disabled="forgotForm.$invalid">Submit</button>
           </div>
         </form>
       </div>

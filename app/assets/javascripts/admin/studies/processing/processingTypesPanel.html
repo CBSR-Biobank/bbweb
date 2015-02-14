@@ -13,21 +13,21 @@
     to this study). There should be one or more associated Specimen Link Types that (1) further define legal
     procedures and (2) allow recording of procedures performed on different types of Specimens.
   </p>
-  <div class="panel panel-warning" data-ng-if="vm.processingTypes.length == 0">
+  <div class="panel panel-warning" ng-if="vm.processingTypes.length == 0">
     <div class="panel-heading">
       Processing types have not been defined for this study yet.
     </div>
   </div>
-  <p data-ng-if="vm.processingTypes.length > 0">
+  <p ng-if="vm.processingTypes.length > 0">
     The following processing types are defined:
   </p>
-  <table data-ng-show="vm.processingTypes.length > 0"
+  <table ng-show="vm.processingTypes.length > 0"
          class="table table-condensed table-hover"
-         data-ng-table="vm.tableParams">
-    <tr data-ng-repeat="processingType in $data"
-        data-ng-class="{'active': user.$selected}" >
+         ng-table="vm.tableParams">
+    <tr ng-repeat="processingType in $data"
+        ng-class="{'active': user.$selected}" >
       <td data-title="'Name'" sortable="'name'">
-        <span data-ng-click="vm.information(processingType)">
+        <span ng-click="vm.information(processingType)">
           <a href>{{processingType.name}}</a>
         </span>
       </td>

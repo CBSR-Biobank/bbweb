@@ -12,17 +12,17 @@
   <p>
     The addresses for this centre.
   </p>
-  <div class="panel panel-warning" data-ng-if="vm.locations.length <= 0">
+  <div class="panel panel-warning" ng-if="vm.locations.length <= 0">
     <div class="panel-heading">
       No locations have been entered yet.
     </div>
   </div>
-  <table data-ng-show="vm.locations.length > 0"
+  <table ng-show="vm.locations.length > 0"
          class="table table-hover table-condensed"
-         data-ng-table="vm.tableParams">
-    <tr data-ng-repeat="location in $data">
+         ng-table="vm.tableParams">
+    <tr ng-repeat="location in $data">
       <td data-title="'Name'" sortable="'name'">
-        <span data-ng-click="vm.information(location)">
+        <span ng-click="vm.information(location)">
           <a href>{{location.name}}</a>
         </span>
       </td>

@@ -42,12 +42,12 @@
     </div>
   </form>
 
-  <table data-ng-table="vm.tableParams"
+  <table ng-table="vm.tableParams"
          class="table table-hover"
          template-pagination="custom/pager">
-    <tr data-ng-repeat="user in $data">
+    <tr ng-repeat="user in $data">
       <td class="col-md-3" data-title="'Email'" sortable="'email'">
-        <span data-ng-click="vm.userInformation(user)">
+        <span ng-click="vm.userInformation(user)">
           <a href>{{user.email}}</a>
         </span>
       </td>
@@ -67,24 +67,24 @@
       <td class="col-md-1" data-title="'Action'">
         <div class="btn-group pull-right">
           <button class="btn btn-xs btn-success"
-                  data-ng-click="vm.activate(user)"
+                  ng-click="vm.activate(user)"
                   data-toggle="tooltip"
                   title="Activate user"
-                  data-ng-if="user.status == 'Registered'">
+                  ng-if="user.status == 'Registered'">
             <i class="glyphicon glyphicon-check"></i>
           </button>
           <button class="btn btn-xs btn-warning"
-                  data-ng-click="vm.lock(user)"
+                  ng-click="vm.lock(user)"
                   data-toggle="tooltip"
                   title="Lock user"
-                  data-ng-if="user.status == 'Active'">
+                  ng-if="user.status == 'Active'">
             <i class="glyphicon glyphicon-lock"></i>
           </button>
           <button class="btn btn-xs btn-danger"
-                  data-ng-click="vm.unlock(user)"
+                  ng-click="vm.unlock(user)"
                   data-toggle="tooltip"
                   title="Unlock user"
-                  data-ng-if="user.status == 'Locked'">
+                  ng-if="user.status == 'Locked'">
             <i class="glyphicon glyphicon-plus"></i>
           </button>
         </div>

@@ -6,20 +6,20 @@
       novalidate>
 
   <!-- NAME -->
-  <div class="form-group" data-ng-class="{ 'has-error' : ptForm.name.$invalid && !ptForm.name.$pristine }">
+  <div class="form-group" ng-class="{ 'has-error' : ptForm.name.$invalid && !ptForm.name.$pristine }">
     <label for="name" class="col-md-2 control-label">Name</label>
     <div class="col-md-10">
       <input name="name"
              type="text"
              class="form-control"
-             data-ng-model="vm.processingType.name"
-             data-ng-minlength="2"
+             ng-model="vm.processingType.name"
+             ng-minlength="2"
              placeholder="A short name for the processing type"
              focus-me="true"
              required />
     </div>
     <div class="col-md-offset-2 col-md-10">
-      <p class="help-block" data-ng-show="ptForm.name.$error.minlength">Name is too short.</p>
+      <p class="help-block" ng-show="ptForm.name.$error.minlength">Name is too short.</p>
     </div>
   </div>
 
@@ -30,7 +30,7 @@
       <textarea name="description"
                 class="form-control"
                 rows="10"
-                data-ng-model="vm.processingType.description"
+                ng-model="vm.processingType.description"
                 placeholder="A description of the processing type (optional)" />
     </div>
   </div>
@@ -38,7 +38,7 @@
   <!-- ENABLED -->
   <div class="form-group">
     <div class="col-md-offset-2 col-md-10">
-      <input name="enabled" type="checkbox" data-ng-model="vm.processingType.enabled"/> Enabled
+      <input name="enabled" type="checkbox" ng-model="vm.processingType.enabled"/> Enabled
     </div>
   </div>
 
@@ -46,9 +46,9 @@
   <div class="form-group">
     <div class="col-md-offset-2 col-md-10">
       <button class="btn btn-primary"
-              data-ng-disabled="ptForm.$invalid"
-              data-ng-click="vm.submit(vm.processingType)">Submit</button>
-      <button type="button" class="btn" data-ng-click="vm.cancel()">Cancel</button>
+              ng-disabled="ptForm.$invalid"
+              ng-click="vm.submit(vm.processingType)">Submit</button>
+      <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
     </div>
   </div>
 </form>
