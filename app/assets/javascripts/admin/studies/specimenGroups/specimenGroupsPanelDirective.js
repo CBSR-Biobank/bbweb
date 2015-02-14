@@ -67,7 +67,7 @@ define(['../../module', 'underscore'], function(module, _) {
     //--
 
     function add() {
-      return helper.add;
+      return helper.add();
     }
 
     function panelToggle() {

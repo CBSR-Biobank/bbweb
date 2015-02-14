@@ -52,11 +52,7 @@ sh tmp.sh
 
 Using Karma and Jasmine for client unit tests. Also using Grunt to run the tests.
 
-Client tests are found in the `jstest` directory since they don't pass Jshint inspection. Originally, they
-were placed in `tests/assets/javascripts`, but when running SBT, errors were generated. Currently sbt-jshint
-does not provide a way to use a `.jshintignore` file, so they had to be moved to the `jstest` directory.
-
-### Docker
+## Docker ##
 
 In the `tools\docker` folder of the project is a **Docker** file. This file can be used to create a docker
 image to run the web application in. You also need:

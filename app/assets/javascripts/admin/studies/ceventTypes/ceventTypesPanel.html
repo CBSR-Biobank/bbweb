@@ -31,15 +31,15 @@
         </span>
       </td>
       <td data-title="'Specimen Groups'">
-        <span ng-repeat="sg in ceventType.specimenGroups"
-              ng-click="vm.showSpecimenGroup(sg.id)">
-          <a href>{{sg.name}}</a><span ng-if="!$last">, </span>
+        <span ng-repeat="sgItem in ceventType.specimenGroupData"
+              ng-click="vm.showSpecimenGroup(sgItem.specimenGroup.id)">
+          <a href>{{sgItem.specimenGroup.name}}</a><span ng-if="!$last">, </span>
         </span>
       </td>
       <td data-title="'Annotation Types'">
-        <span ng-repeat="at in ceventType.annotationTypes"
-              ng-click="vm.showAnnotationType(at.id)">
-          <a href>{{at.name}}</a><span ng-if="!$last">, </span>
+        <span ng-repeat="atItem in ceventType.annotationTypeData"
+              ng-click="vm.showAnnotationType(atItem.annotationType.id)">
+          <a href>{{atItem.annotationType.name}}</a><span ng-if="!$last">, </span>
         </span>
 
       </td>

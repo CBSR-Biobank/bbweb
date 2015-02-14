@@ -84,7 +84,8 @@ define(['../../module', 'underscore'], function(module, _) {
     }
 
     function panelToggle() {
-      return helper.panelToggle();
+      vm.panelOpen = helper.panelToggle();
+      return vm.panelOpen;
     }
 
     function annotTypeInUseModal() {

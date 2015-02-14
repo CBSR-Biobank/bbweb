@@ -13,7 +13,8 @@ module.exports = function(config) {
     frameworks: [
       'jasmine',
       'jasmine-matchers',
-      'requirejs'
+      'requirejs',
+      'faker'
     ],
 
     // list of files / patterns to load in the browser
@@ -29,8 +30,9 @@ module.exports = function(config) {
       {pattern: 'target/web/web-modules/main/webjars/lib/toastr/toastr.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/momentjs/moment.js', included: false},
       {pattern: 'app/assets/javascripts/**/*.js', included: false},
-      {pattern: 'jstest/assets/javascripts/**/*Spec.js', included: false},
-      'jstest/assets/javascripts/test-main.js'
+      {pattern: 'test/assets/javascripts/**/*Spec.js', included: false},
+      'test/assets/javascripts/test-main.js',
+      'test/assets/javascripts/fixtures/**/*.js'
     ],
 
 

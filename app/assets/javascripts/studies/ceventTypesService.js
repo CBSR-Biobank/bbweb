@@ -67,7 +67,8 @@ define(['./module', 'angular'], function(module, angular) {
 
     function remove(ceventType) {
       return biobankApi.call(
-        'DELETE', uri(ceventType.studyId, ceventType.id, ceventType.version));
+        'DELETE',
+        uri(ceventType.studyId, ceventType.id, ceventType.version));
     }
 
   }

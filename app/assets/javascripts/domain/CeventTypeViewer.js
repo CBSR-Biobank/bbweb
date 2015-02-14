@@ -3,15 +3,25 @@ define(['./module'], function(module) {
 
   module.factory('CeventTypeViewer', CeventTypeViewerFactory);
 
-  CeventTypeViewerFactory.$inject = ['EntityViewer', 'CollectionEventType'];
+  CeventTypeViewerFactory.$inject = [
+    'EntityViewer',
+    'CollectionEventType',
+    'SpecimenGroupSet',
+    'AnnotationTypeSet'
+  ];
 
   /**
-   * Displays a collection event type in a modal. The information is displayed in an ng-table.
+   * Displays a collection event type in a modal.
    */
-  function CeventTypeViewerFactory(EntityViewer, CollectionEventType) {
+  function CeventTypeViewerFactory(EntityViewer,
+                                   CollectionEventType,
+                                   SpecimenGroupSet,
+                                   AnnotationTypeSet) {
 
     function CeventTypeViewer(study, ceventType, specimenGroups, annotTypes) {
-      var cet = new CollectionEventType(study, ceventType, specimenGroups, annotTypes);
+      var specimenGroupSet  = new SpecimenGroupSet(specimenGroups);
+      var annotationTypeSet  = new AnnotationTypeSet(annotTypes);
+      var cet = new CollectionEventType(study, ceventType, specimenGroupSet, annotationTypeSet);
       var ev = new EntityViewer(cet, 'Collection Event Type');
 
       ev.addAttribute('Name:', ceventType.name);

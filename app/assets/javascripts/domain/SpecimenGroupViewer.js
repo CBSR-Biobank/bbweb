@@ -3,7 +3,7 @@ define(['./module'], function(module) {
   'use strict';
 
   /**
-   * Displays a study annotation type in a modal. The information is displayed in an ng-table.
+   * Displays a study annotation type in a modal.
    *
    */
   module.factory('SpecimenGroupViewer', SpecimenGroupViewerFactory);

@@ -26,7 +26,6 @@ define(['../../module', 'underscore'], function(module, _) {
   SpcLinkAnnotTypesPanelCtrl.$inject = [
     '$scope',
     '$state',
-    '$stateParams',
     'modalService',
     'spcLinkAnnotTypesService',
     'spcLinkAnnotTypeRemoveService',
@@ -39,7 +38,6 @@ define(['../../module', 'underscore'], function(module, _) {
    */
   function SpcLinkAnnotTypesPanelCtrl($scope,
                                       $state,
-                                      $stateParams,
                                       modalService,
                                       spcLinkAnnotTypesService,
                                       spcLinkAnnotTypeRemoveService,
@@ -84,20 +82,23 @@ define(['../../module', 'underscore'], function(module, _) {
     }
 
     function panelToggle() {
-      return helper.panelToggle();
+      vm.panelOpen = helper.panelToggle();
+      return vm.panelOpen;
     }
 
     /**
      * Returns the annotation types that are in use.
+     *
      */
     function annotTypesInUse() {
-      var result = [];
+      var result = {};
       _.each(vm.spcLinkTypes, function(slt) {
         _.each(slt.annotationTypeData, function (atItem) {
-          result.push(atItem.annotationTypeId);
+          // push the value as a key
+          result[atItem.annotationTypeId] = true;
         });
       });
-      return result;
+      return _.keys(result);
     }
 
     function annotTypeInUseModal() {

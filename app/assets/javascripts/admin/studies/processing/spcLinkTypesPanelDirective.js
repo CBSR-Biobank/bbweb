@@ -25,10 +25,11 @@ define(['../../module', 'underscore'], function(module, _) {
   SpcLinkTypesPanelCtrl.$inject = [
     '$scope',
     '$state',
-    '$stateParams',
     'modalService',
+    'SpecimenLinkType',
+    'SpecimenGroupSet',
+    'AnnotationTypeSet',
     'Panel',
-    'studiesService',
     'SpcLinkTypeViewer',
     'spcLinkTypeRemoveService',
     'ProcessingTypeViewer',
@@ -41,10 +42,11 @@ define(['../../module', 'underscore'], function(module, _) {
    */
   function SpcLinkTypesPanelCtrl($scope,
                                  $state,
-                                 $stateParams,
                                  modalService,
+                                 SpecimenLinkType,
+                                 SpecimenGroupSet,
+                                 AnnotationTypeSet,
                                  Panel,
-                                 studiesService,
                                  SpcLinkTypeViewer,
                                  spcLinkTypeRemoveService,
                                  ProcessingTypeViewer,
@@ -52,7 +54,9 @@ define(['../../module', 'underscore'], function(module, _) {
                                  AnnotationTypeViewer) {
     var vm = this;
 
-    var helper = new Panel('study.panel.specimenLinkTypes');
+    var specimenGroupSet  = new SpecimenGroupSet($scope.processingDto.specimenGroups);
+    var annotationTypeSet = new AnnotationTypeSet($scope.processingDto.specimenLinkAnnotationTypes);
+    var panel = new Panel('study.panel.specimenLinkTypes');
 
     vm.study               = $scope.study;
     vm.tableData           = [];
@@ -60,7 +64,7 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.remove              = spcLinkTypeRemoveService.remove;
     vm.add                 = add;
     vm.information         = information;
-    vm.panelOpen           = helper.panelOpen;
+    vm.panelOpen           = panel.panelOpen;
     vm.panelToggle         = panelToggle;
 
     vm.processingTypesById = _.indexBy($scope.processingDto.processingTypes, 'id');
@@ -73,47 +77,32 @@ define(['../../module', 'underscore'], function(module, _) {
 
     vm.modificationsAllowed = vm.study.status === 'Disabled';
 
-    init();
+    vm.specimenLinkTypes = _.map($scope.processingDto.specimenLinkTypes, function (slt) {
+      return new SpecimenLinkType(slt,
+                                  vm.processingTypesById[slt.processingTypeId],
+                                  specimenGroupSet,
+                                  annotationTypeSet);
+    });
 
-    vm.tableParams = helper.getTableParams(vm.tableData);
+    vm.tableParams = panel.getTableParams(vm.specimenLinkTypes);
 
-    //--
-
-    function init() {
-      _.each($scope.processingDto.specimenLinkTypes, function (slt) {
-        var annotationTypes = [];
-        _.each(slt.annotationTypeData, function (annotTypeItem) {
-          var at = vm.annotTypesById[annotTypeItem.annotationTypeId];
-          annotationTypes.push({id: annotTypeItem.annotationTypeId, name: at.name });
-        });
-
-        vm.tableData.push({
-          specimenLinkType:   slt,
-          processingTypeName: vm.processingTypesById[slt.processingTypeId].name,
-          inputGroupName:     vm.specimenGroupsById[slt.inputGroupId].name,
-          outputGroupName:    vm.specimenGroupsById[slt.outputGroupId].name,
-          annotationTypes:    annotationTypes
-        });
-      });
-    }
 
     function panelToggle() {
-      return helper.panelToggle();
+      return panel.panelToggle();
     }
 
     /**
      * Displays a specimen link type in a modal.
      */
     function information(spcLinkType) {
-      return new SpcLinkTypeViewer(
-        spcLinkType, vm.processingTypesById, vm.specimenGroupsById, vm.annotTypesById);
+      return new SpcLinkTypeViewer(spcLinkType);
     }
 
     function add() {
       if ($scope.processingDto.specimenGroups.length <= 0) {
         var headerHtml = 'Cannot add a specimen link type';
         var bodyHtml = 'No <em>specimen groups</em> have been added to this study yet. ' +
-            'Please add specimen groups first.';
+            'Please add specimen groups first and then add a specimen link type.';
         return modalService.modalOk(headerHtml, bodyHtml);
       } else {
         return $state.go('home.admin.studies.study.processing.spcLinkTypeAdd');
@@ -149,7 +138,6 @@ define(['../../module', 'underscore'], function(module, _) {
     function showAnnotationType(annotTypeId) {
       return new AnnotationTypeViewer(vm.annotTypesById[annotTypeId], 'Specimen Link Annotation Type');
     }
-
   }
 
 });

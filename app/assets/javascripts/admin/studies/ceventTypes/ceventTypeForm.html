@@ -48,7 +48,7 @@
         <select class="form-control"
                 name="sgId"
                 ng-model="vm.ceventType.specimenGroupData[$index].specimenGroupId"
-                ng-options="sg.id as sg.name for sg in vm.ceventType.specimenGroups | orderBy: 'name'"
+                ng-options="sg.id as sg.name for sg in vm.specimenGroups | orderBy: 'name'"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -65,8 +65,7 @@
                required/>
       </div>
       <label class="col-md-1 control-label small">
-        {{(vm.ceventType.getSpecimenGroupById(sgData.specimenGroupId)
-        ? vm.ceventType.getSpecimenGroupById(sgData.specimenGroupId).units : 'Amount') + ':'}}
+        {{vm.getSpecimenGroupUnits(sgData.specimenGroupId)}}:
       </label>
       <div class="col-md-2">
         <input type="number"
@@ -119,7 +118,7 @@
         <select class="form-control"
                 name="name"
                 ng-model="vm.ceventType.annotationTypeData[$index].annotationTypeId"
-                ng-options="annotType.id as annotType.name for annotType in vm.ceventType.annotationTypes | orderBy: 'name'"
+                ng-options="annotType.id as annotType.name for annotType in vm.annotationTypes | orderBy: 'name'"
                 required>
           <option value="">-- make a selection --</option>
         </select>

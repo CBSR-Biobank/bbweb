@@ -6,7 +6,7 @@ define(['./module'], function(module) {
   ProcessingTypeViewerFactory.$inject = ['EntityViewer'];
 
   /**
-   * Displays a processing type in a modal. The information is displayed in an ng-table.
+   * Displays a processing type in a modal.
    */
   function ProcessingTypeViewerFactory(EntityViewer) {
 

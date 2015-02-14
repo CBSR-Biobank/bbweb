@@ -21,6 +21,20 @@
     "predef": {
       "requirejs": true,
       "require": true,
-      "define": true
+      "define": true,
+      "jasmine": true,
+      "describe": true,
+      "fdescribe": true,
+      "before": true,
+      "beforeEach": true,
+      "after": true,
+      "afterEach": true,
+      "it": true,
+      "fit": true,
+      "it": true,
+      "xit": true,
+      "inject": true,
+      "expect": true,
+      "spyOn": true
     }
 }

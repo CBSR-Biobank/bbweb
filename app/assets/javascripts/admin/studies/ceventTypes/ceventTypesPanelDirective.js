@@ -30,6 +30,8 @@ define(['../../module', 'underscore'], function(module, _) {
     '$stateParams',
     'modalService',
     'CollectionEventType',
+    'SpecimenGroupSet',
+    'AnnotationTypeSet',
     'Panel',
     'ceventTypesService',
     'ceventAnnotTypesService',
@@ -47,6 +49,8 @@ define(['../../module', 'underscore'], function(module, _) {
                                 $stateParams,
                                 modalService,
                                 CollectionEventType,
+                                SpecimenGroupSet,
+                                AnnotationTypeSet,
                                 Panel,
                                 ceventTypesService,
                                 ceventAnnotTypesService,
@@ -60,15 +64,12 @@ define(['../../module', 'underscore'], function(module, _) {
                            'home.admin.studies.study.collection.ceventTypeAdd');
 
     vm.study = $scope.study;
+    vm.specimenGroupSet  = new SpecimenGroupSet($scope.specimenGroups);
+    vm.annotationTypeSet  = new AnnotationTypeSet($scope.annotTypes);
 
     vm.ceventTypes = _.map($scope.ceventTypes, function (ceventType) {
-      return new CollectionEventType(vm.study, ceventType, $scope.specimenGroups, $scope.annotTypes);
+      return new CollectionEventType(vm.study, ceventType, vm.specimenGroupSet, vm.annotationTypeSet);
     });
-
-    vm.annotTypes           = $scope.annotTypes;
-    vm.specimenGroups       = $scope.specimenGroups;
-    vm.annotationTypesById  = _.indexBy(vm.annotTypes, 'id');
-    vm.specimenGroupsById   = _.indexBy(vm.specimenGroups, 'id');
 
     vm.update               = update;
     vm.remove               = ceventTypeRemoveService.remove;
@@ -92,7 +93,7 @@ define(['../../module', 'underscore'], function(module, _) {
       if (vm.specimenGroups.length <= 0) {
         var headerHtml = 'Cannot add a collection event type';
         var bodyHtml = 'No <em>specimen groups</em> have been added to this study yet. ' +
-            'Please add specimen groups first.';
+            'Please add specimen groups first and then add a collection event type.';
         return modalService.modalOk(headerHtml, bodyHtml);
       } else {
         return $state.go('home.admin.studies.study.collection.ceventTypeAdd');
@@ -112,15 +113,14 @@ define(['../../module', 'underscore'], function(module, _) {
      * @param id the ID for the annotation type.
      */
     function showAnnotationType(id) {
-      console.log(id, vm.annotationTypesById[id]);
-      return new AnnotationTypeViewer(vm.annotationTypesById[id], 'Collection Event Annotation Type');
+      return new AnnotationTypeViewer(vm.annotationTypesSet(id), 'Collection Event Annotation Type');
     }
 
     /**
      * Displays a specimen group in a modal.
      */
     function showSpecimenGroup(specimenGroupId) {
-      return new SpecimenGroupViewer(vm.specimenGroupsById[specimenGroupId]);
+      return new SpecimenGroupViewer(vm.specimenGroupsSet(specimenGroupId));
     }
 
     /**

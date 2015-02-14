@@ -45,7 +45,7 @@ define(['../../module', 'underscore'], function(module, _) {
                                      AnnotationTypeViewer) {
     var vm = this;
 
-    var helper = new Panel('study.panel.participantAnnottionTypes',
+    var helper = new Panel('study.panel.collectionEventAnnottionTypes',
                            'home.admin.studies.study.collection.ceventAnnotTypeAdd');
 
     vm.study            = $scope.study;
@@ -79,7 +79,8 @@ define(['../../module', 'underscore'], function(module, _) {
     }
 
     function panelToggle() {
-      return helper.panelToggle();
+      vm.panelOpen = helper.panelToggle();
+      return vm.panelOpen;
     }
 
     function annotTypeInUseModal() {
