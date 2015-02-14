@@ -29,6 +29,7 @@ define(['../../module', 'underscore'], function(module, _) {
     '$state',
     '$stateParams',
     'modalService',
+    'CollectionEventType',
     'Panel',
     'ceventTypesService',
     'ceventAnnotTypesService',
@@ -45,6 +46,7 @@ define(['../../module', 'underscore'], function(module, _) {
                                 $state,
                                 $stateParams,
                                 modalService,
+                                CollectionEventType,
                                 Panel,
                                 ceventTypesService,
                                 ceventAnnotTypesService,
@@ -57,12 +59,16 @@ define(['../../module', 'underscore'], function(module, _) {
     var helper = new Panel('study.panel.collectionEventTypes',
                            'home.admin.studies.study.collection.ceventTypeAdd');
 
-    vm.study                = $scope.study;
-    vm.ceventTypes          = $scope.ceventTypes;
+    vm.study = $scope.study;
+
+    vm.ceventTypes = _.map($scope.ceventTypes, function (ceventType) {
+      return new CollectionEventType(vm.study, ceventType, $scope.specimenGroups, $scope.annotTypes);
+    });
+
     vm.annotTypes           = $scope.annotTypes;
     vm.specimenGroups       = $scope.specimenGroups;
-    vm.annotationTypesById  = [];
-    vm.specimenGroupsById   = [];
+    vm.annotationTypesById  = _.indexBy(vm.annotTypes, 'id');
+    vm.specimenGroupsById   = _.indexBy(vm.specimenGroups, 'id');
 
     vm.update               = update;
     vm.remove               = ceventTypeRemoveService.remove;
@@ -74,33 +80,9 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.panelToggle          = panelToggle;
     vm.modificationsAllowed = vm.study.status === 'Disabled';
 
-    init();
-
     vm.tableParams = helper.getTableParams(vm.ceventTypes);
 
     //--
-
-    /**
-     * Links the collection event with the specimen groups that they use.
-     */
-    function init() {
-      vm.annotationTypesById = _.indexBy(vm.annotTypes, 'id');
-      vm.specimenGroupsById = _.indexBy(vm.specimenGroups, 'id');
-
-      _.each(vm.ceventTypes, function (cet) {
-        cet.specimenGroups = [];
-        _.each(cet.specimenGroupData, function (sgItem) {
-          var sg = vm.specimenGroupsById[sgItem.specimenGroupId];
-          cet.specimenGroups.push({ id: sgItem.specimenGroupId, name: sg.name });
-        });
-
-        cet.annotationTypes = [];
-        _.each(cet.annotationTypeData, function (atItem) {
-          var at = vm.annotationTypesById[atItem.annotationTypeId];
-          cet.annotationTypes.push({ id: atItem.annotationTypeId, name: at.name });
-        });
-      });
-    }
 
     function panelToggle() {
       return helper.panelToggle();
@@ -131,8 +113,7 @@ define(['../../module', 'underscore'], function(module, _) {
      */
     function showAnnotationType(id) {
       console.log(id, vm.annotationTypesById[id]);
-      return new AnnotationTypeViewer(vm.annotationTypesById[id],
-                                     'Collecrtion Event Annotation Type');
+      return new AnnotationTypeViewer(vm.annotationTypesById[id], 'Collection Event Annotation Type');
     }
 
     /**
@@ -146,9 +127,7 @@ define(['../../module', 'underscore'], function(module, _) {
      * Switches to the state to update a collection event type.
      */
     function update(ceventType) {
-      $state.go(
-        'home.admin.studies.study.collection.ceventTypeUpdate',
-        { ceventTypeId: ceventType.id });
+      $state.go('home.admin.studies.study.collection.ceventTypeUpdate', { ceventTypeId: ceventType.id });
     }
   }
 
