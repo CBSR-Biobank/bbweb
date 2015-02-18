@@ -8,13 +8,13 @@ define(['./module', 'underscore'], function(module, _) {
   function AnnotationTypeDataSetFactory(AnnotationTypeSet) {
 
     /**
-     * Maintains a set of annotationTypeData items. Can hold two types on annotation types used by the
-     * study: collection event type and speclimen link type. Only one annotation data type with a non
-     * empty ID is allowed in the set. A blank annotation type ID is allowed for adding new ones that
-     * are being edited by the user.
+     * Maintains a set of annotationTypeData items. Can hold two types on annotation types used by the study:
+     * collection event type and speclimen link type. Only one annotation type data item with a non empty ID
+     * is allowed in the set. A blank annotation type ID is allowed for adding new ones that are being edited
+     * by the user.
      *
-     * @param {AnnotationTypeData} annotation type data as returned from server. Either from a collection
-     * event type or specimen link type.
+     * @param {AnnotationTypeData} dataItems annotation type data as returned from server. Either from a
+     * collection event type or specimen link type.
      *
      * @param {AnnotationType array} options.studyAnnotationTypes all the annotation types
      * for the study. Should be a list returned by the server.
@@ -22,7 +22,7 @@ define(['./module', 'underscore'], function(module, _) {
      * @param {AnnotationTypeSet} options.studyAnnotationTypeSet all the collection event annotation types for
      * the study.
      *
-     * Only one of options.studyAnnotationTypes or options.studyAnnotationTypeSet is required, but not both.
+     * Only one of options.studyAnnotationTypes or options.studyAnnotationTypeSet should be used, but not both.
      */
     function AnnotationTypeDataSet(dataItems, options) {
       var self = this;
@@ -40,15 +40,25 @@ define(['./module', 'underscore'], function(module, _) {
       }
 
       if (options.studyAnnotationTypeSet) {
+        self.annotationTypeSet = options.studyAnnotationTypeSet;
+      }
+
+      if (self.annotationTypeSet) {
         _.each(self.dataItems, function (item) {
           item.annotationType = self.annotationTypeSet.get(item.annotationTypeId);
         });
       }
-
     }
 
     AnnotationTypeDataSet.prototype.size = function () {
       return this.dataItems.length;
+    };
+
+    /**
+     * Returns the IDs of all data items.
+     */
+    AnnotationTypeDataSet.prototype.allIds = function () {
+      return _.pluck(this.dataItems, 'annotationTypeId');
     };
 
     /**
@@ -67,14 +77,18 @@ define(['./module', 'underscore'], function(module, _) {
      * Allows adding multiple items with a empty ID (i.e. ''). If id is not empty then duplicate items
      * are not allowed.
      */
-    AnnotationTypeDataSet.prototype.add = function (atDataItem) {
-      if (atDataItem.id && (atDataItem.id !== '')) {
-        var foundItem = _.findWhere(this.dataItems, {annotationTypeId: atDataItem.id});
+    AnnotationTypeDataSet.prototype.add = function (item) {
+      if (item.id && (item.id !== '')) {
+        var foundItem = _.findWhere(this.dataItems, {annotationTypeId: item.id});
         if (foundItem !== undefined) {
-          throw new Error('annotation type data already exists: ' + atDataItem.id);
+          throw new Error('annotation type data already exists: ' + item.id);
         }
       }
-      this.dataItems.push(atDataItem);
+      item = _.clone(item);
+      if (item.annotationTypeId) {
+        item.annotationType = this.annotationTypeSet.get(item.annotationTypeId);
+      }
+      this.dataItems.push(item);
     };
 
     /**

@@ -14,6 +14,9 @@ define(['./module', 'underscore'], function(module, _) {
      * @param specimenGroups a list of sepcimen groups returned by the server.
      */
     function SpecimenGroupSet(specimenGroups) {
+      if (_.isUndefined(specimenGroups)) {
+        throw new Error('annotationTypes is undefined');
+      }
       this.specimenGroups = _.indexBy(specimenGroups, 'id');
     }
 
@@ -22,10 +25,10 @@ define(['./module', 'underscore'], function(module, _) {
      *
      * @param id the ID of the required wspecimen group.
      */
-    SpecimenGroupSet.prototype.get = function (ig) {
-      var result = this.specimenGroups[ig];
+    SpecimenGroupSet.prototype.get = function (id) {
+      var result = this.specimenGroups[id];
       if (!result) {
-        throw new Error('specimen group not found: ' + ig);
+        throw new Error('specimen group not found: ' + id);
       }
       return result;
     };

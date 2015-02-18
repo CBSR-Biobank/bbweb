@@ -2,8 +2,8 @@
  * Module for files in the 'domain' directory.
  */
 define([
-  './AnnotationTypeDataSet',
   './AnnotationHelper',
+  './AnnotationTypeDataSet',
   './AnnotationTypeSet',
   './AnnotationTypeViewer',
   './CeventTypeViewer',
@@ -13,6 +13,7 @@ define([
   './Participant',
   './ProcessingTypeViewer',
   './SpcLinkTypeViewer',
+  './SpecimenGroupDataSet',
   './SpecimenGroupSet',
   './SpecimenGroupViewer',
   './SpecimenLinkType',

@@ -6,7 +6,7 @@ define(
     'angularMocks',
     'underscore',
     'biobank.fakeDomainEntities',
-    'biobank.commonTests',
+    'biobank.panelTests',
     'biobankApp'
   ],
   function(angular, mocks, _, fakeEntities, commonTests) {
@@ -108,11 +108,11 @@ define(
       describe('for the panel', function() {
 
         it('should invoke information function', function() {
-          commonTests.panelTests.information(scope, modal, annotTypes[0]);
+          commonTests.information(scope, modal, annotTypes[0]);
         });
 
         it('should invoke add function', function() {
-          commonTests.panelTests.addItem(scope, Panel);
+          commonTests.addItem(scope, Panel);
         });
 
         it('should invoke getTableParams function', function() {
@@ -120,11 +120,11 @@ define(
         });
 
         it('panel should be open when created', function() {
-          commonTests.panelTests.panelInitialState(scope);
+          commonTests.panelInitialState(scope);
         });
 
         it('should allow toggling of the panel', function() {
-          commonTests.panelTests.panelToggle(scope, Panel);
+          commonTests.panelToggle(scope, Panel);
         });
 
       });

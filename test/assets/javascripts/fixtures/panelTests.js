@@ -1,8 +1,8 @@
 /**
- * Generates fake domain entities as returned by the server.
+ * Common tests for the Panel object.
  */
 define(
-  'biobank.commonTests',
+  'biobank.panelTests',
   [
     'underscore',
     'faker',
@@ -11,17 +11,14 @@ define(
   ],
   function(_, faker, moment, utils) {
 
-    var commonTests = {
-      panelTests: {
-        information: information,
-        addItem: addItem,
-        panelInitialState: panelInitialState,
-        panelToggle: panelToggle
-      }
-
+    var panelTests = {
+      information: information,
+      addItem: addItem,
+      panelInitialState: panelInitialState,
+      panelToggle: panelToggle
     };
 
-    return commonTests;
+    return panelTests;
 
     function information(scope, modal, item) {
       spyOn(modal, 'open').and.callThrough();

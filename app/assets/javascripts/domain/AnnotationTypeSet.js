@@ -14,6 +14,9 @@ define(['./module', 'underscore'], function(module, _) {
      * @param annotationTypes a list of annotation types returned by the server.
      */
     function AnnotationTypeSet(annotationTypes) {
+      if (_.isUndefined(annotationTypes)) {
+        throw new Error('annotationTypes is undefined');
+      }
       this.annotationTypes = _.indexBy(annotationTypes, 'id');
     }
 

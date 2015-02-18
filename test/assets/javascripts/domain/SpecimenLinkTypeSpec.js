@@ -9,8 +9,9 @@ define([
   'underscore',
   'faker',
   'biobank.fakeDomainEntities',
+  'biobank.annotationTypeDataSetCommon',
   'biobankApp'
-], function(angular, mocks, _, faker, fakeEntities) {
+], function(angular, mocks, _, faker, fakeEntities, commonTests) {
   'use strict';
 
   describe('SpecimenLinkType', function() {
@@ -18,17 +19,15 @@ define([
     var SpecimenLinkType, SpecimenGroupSet, AnnotationTypeSet, sltFromServer;
 
     var study = fakeEntities.study();
+    var processingType = fakeEntities.processingType(study);
 
-    var studySpecimenGroups = _.map(_.range(2), function() {
+    study.specimenGroups = _.map(_.range(2), function() {
       return fakeEntities.specimenGroup(study);
     });
 
-    var studyAnnotationTypes = _.map(_.range(2), function() {
+    study.annotationTypes = _.map(_.range(2), function() {
       return fakeEntities.annotationType(study);
     });
-
-    var specimenGroupsById = _.indexBy(studySpecimenGroups, 'id');
-    var annotationTypesById = _.indexBy(studyAnnotationTypes, 'id');
 
     beforeEach(mocks.module('biobankApp'));
 
@@ -37,243 +36,124 @@ define([
       SpecimenGroupSet    = _SpecimenGroupSet_;
       AnnotationTypeSet   = _AnnotationTypeSet_;
 
-      sltFromServer = fakeEntities.specimenLinkType(
-        study,
-        {
-          specimenGroups: studySpecimenGroups,
-          annotationTypes: studyAnnotationTypes
-        });
+      sltFromServer = fakeEntities.specimenLinkType(processingType);
     }));
 
-    it('isNew should be true for a collection event with no ID', function() {
-      var cetNoId = _.omit(sltFromServer, 'id');
-      var cet = new SpecimenLinkType(study, cetNoId);
-      expect(cet.isNew).toBe(true);
+    it('isNew should be true for a specimen link type with no ID', function() {
+      var sltNoId = _.omit(sltFromServer, 'id', 'processingTypeId');
+      var slt = new SpecimenLinkType(processingType, sltNoId);
+      expect(slt.isNew).toBe(true);
     });
 
-    it('study ID matches the study', function() {
-      var cet = new SpecimenLinkType(study, sltFromServer);
-      expect(cet.studyId).toBe(study.id);
+    it('processing type ID matches', function() {
+      var slt = new SpecimenLinkType(processingType, sltFromServer);
+      expect(slt.processingTypeId).toBe(processingType.id);
     });
 
-    it('study matches the study', function() {
-      var cet = new SpecimenLinkType(study, sltFromServer);
-      expect(cet.studyId).toBe(study.id);
+    it('processing type matches', function() {
+      var slt = new SpecimenLinkType(processingType, sltFromServer);
+      expect(slt.processingType).toEqual(processingType);
     });
 
-    it('isNew should be false for a collection event that has an ID', function() {
-      var cet = new SpecimenLinkType(study, sltFromServer);
-      expect(cet.study).toEqual(study);
+    it('isNew should be false for a specimen link type that has an ID', function() {
+      var slt = new SpecimenLinkType(processingType, sltFromServer);
+      expect(slt.isNew).toBe(false);
     });
 
-    it('should be initialized with specimen group and annotation type objects', function() {
-      var specimenGroupSet = new SpecimenGroupSet(studySpecimenGroups);
-      var annotationTypeSet = new AnnotationTypeSet(studyAnnotationTypes);
-      var cet = new SpecimenLinkType(
+    it('should be initialized with annotation type objects', function() {
+      var sltFromServer = fakeEntities.specimenLinkType(
+        processingType,
+        {
+          inputGroup: study.specimenGroups[0],
+          outputGroup: study.specimenGroups[1],
+          annotationTypes: study.annotationTypes
+        }
+      );
+
+      var slt = new SpecimenLinkType(
         study,
         sltFromServer,
         {
-          specimenGroupSet: specimenGroupSet,
-          annotationTypeSet: annotationTypeSet
+          studySpecimenGroups: study.specimenGroups,
+          studyAnnotationTypes: study.annotationTypes
         });
 
-      _.each(cet.specimenGroupData, function(sgItem) {
-        expect(sgItem.specimenGroup).toEqual(specimenGroupsById[sgItem.specimenGroupId]);
-      });
+      expect(slt.inputGroup).toEqual(study.specimenGroups[0]);
+      expect(slt.outputGroup).toEqual(study.specimenGroups[1]);
 
-      _.each(cet.annotatinTypeData, function(atItem) {
-        expect(atItem.annotationType).toEqual(annotationTypesById[atItem.annotationTypeId]);
+      _.each(study.annotationTypes, function(at) {
+        expect(slt.getAnnotationTypeData(at.id).annotationType).toEqual(at);
       });
     });
 
-    it('should be initialized with specimen group and annotation type objects', function() {
-      var cet = new SpecimenLinkType(
+    it('should be initialized with AnnotationTypeSet', function() {
+      var sltFromServer = fakeEntities.specimenLinkType(
+        processingType,
+        {
+          inputGroup: study.specimenGroups[0],
+          outputGroup: study.specimenGroups[1],
+          annotationTypes: study.annotationTypes
+        }
+      );
+      var slt = new SpecimenLinkType(
         study,
         sltFromServer,
         {
-          specimenGroups: studySpecimenGroups,
-          annotationTypes: studyAnnotationTypes
+          studySpecimenGroupSet: new SpecimenGroupSet(study.specimenGroups),
+          studyAnnotationTypeSet: new AnnotationTypeSet(study.annotationTypes)
         });
 
-      _.each(cet.specimenGroupData, function(sgItem) {
-        expect(sgItem.specimenGroup).toEqual(specimenGroupsById[sgItem.specimenGroupId]);
-      });
+      expect(slt.inputGroup).toEqual(study.specimenGroups[0]);
+      expect(slt.outputGroup).toEqual(study.specimenGroups[1]);
 
-      _.each(cet.annotatinTypeData, function(atItem) {
-        expect(atItem.annotationType).toEqual(annotationTypesById[atItem.annotationTypeId]);
-      });
-    });
-
-    it('should be initialized with SpecimenGroupSet and AnnotationTypeSet', function() {
-      var cet = new SpecimenLinkType(
-        study,
-        sltFromServer,
-        {
-          specimenGroupSet: new SpecimenGroupSet(studySpecimenGroups),
-          annotationTypeSet: new AnnotationTypeSet(studyAnnotationTypes)
-        });
-
-      _.each(cet.specimenGroupData, function(sgItem) {
-        expect(sgItem.specimenGroup).toEqual(specimenGroupsById[sgItem.specimenGroupId]);
-      });
-
-      _.each(cet.annotatinTypeData, function(atItem) {
-        expect(atItem.annotationType).toEqual(annotationTypesById[atItem.annotationTypeId]);
-      });
-    });
-
-    it('calling addSpecimenGroupData adds a new specimen group data item', function() {
-      var newSgDataItem = fakeEntities.specimenGroupData(fakeEntities.specimenGroup(study));
-
-      var cet = new SpecimenLinkType(study, sltFromServer);
-      var originalSgDataItems = cet.specimenGroupData.length;
-      cet.addSpecimenGroupData(newSgDataItem);
-      expect(cet.specimenGroupData.length).toBe(originalSgDataItems + 1);
-
-      expect(_.find(cet.specimenGroupData, function(sgItem) {
-        return _.isEqual(sgItem, newSgDataItem);
-      })).toBeDefined();
-    });
-
-    it('allows adding multiple specimen group data items with empty id', function() {
-      var filteredItems;
-      var noIdSgDataItem = {specimenGroupId: '', maxCount: 0, amount: 0};
-
-      var cet = new specimenLinkType(study, sltFromServer);
-      var originalSgDataItems = cet.specimenGroupData.length;
-
-      var numNewItems = 5;
-      _.each(_.range(numNewItems), function() { cet.addSpecimenGroupData(noIdSgDataItem); });
-
-      expect(cet.specimenGroupData.length).toBe(originalSgDataItems + numNewItems);
-
-      filteredItems = _.filter(cet.specimenGroupData, function(sgItem) {
-        return _.isEqual(sgItem, noIdSgDataItem);
-      });
-
-      expect(filteredItems).toBeDefined(numNewItems);
-    });
-
-    it('allow removing specimen group data items', function() {
-      var cet = new CollectionEventType(study, sltFromServer, { specimenGroups: studySpecimenGroups });
-      var sgDataItemCount = cet.specimenGroupData.length;
-
-      _.each(_.pluck(cet.specimenGroupData, 'specimenGroupId'), function(id) {
-        cet.removeSpecimenGroupData(id);
-        sgDataItemCount = sgDataItemCount - 1;
-        expect(cet.specimenGroupData.length).toBe(sgDataItemCount);
+      _.each(study.annotationTypes, function(at) {
+        expect(slt.getAnnotationTypeData(at.id).annotationType).toEqual(at);
       });
     });
 
     it('calling addAnnotationTypeData adds a new annotation type data item', function() {
-      var newAtDataItem = fakeEntities.annotationTypeData(fakeEntities.annotationType(study));
-
-      var cet = new CollectionEventType(study, sltFromServer);
-      var originalAtDataItems = cet.annotationTypeData.length;
-      cet.addAnnotationTypeData(newAtDataItem);
-      expect(cet.annotationTypeData.length).toBe(originalAtDataItems + 1);
-
-      expect(_.find(cet.annotationTypeData, function(atItem) {
-        return _.isEqual(atItem, newAtDataItem);
-      })).toBeDefined();
+      var slt = new SpecimenLinkType(study,
+                                     sltFromServer,
+                                     { studyAnnotationTypes: study.annotationTypes });
+      var newAtDataItem = fakeEntities.annotationTypeData(study.annotationTypes[0]);
+      commonTests.addItem(slt, newAtDataItem, study.annotationTypes[0]);
     });
 
 
     it('allows adding multiple annotation type data items with empty id', function() {
-      var filteredItems;
+      var slt = new SpecimenLinkType(study,
+                                     sltFromServer,
+                                     { studyAnnotationTypes: study.annotationTypes });
       var noIdAtDataItem = {annotationTypeId: '', required: false};
-
-      var cet = new CollectionEventType(study, sltFromServer);
-      var originalAtDataItems = cet.annotationTypeData.length;
-
-      var numNewItems = 5;
-      _.each(_.range(numNewItems), function() { cet.addAnnotationTypeData(noIdAtDataItem); });
-
-      expect(cet.annotationTypeData.length).toBe(originalAtDataItems + numNewItems);
-
-      filteredItems = _.filter(cet.annotationTypeData, function(sgItem) {
-        return _.isEqual(sgItem, noIdAtDataItem);
-      });
-
-      expect(filteredItems).toBeDefined(numNewItems);
+      commonTests.addItem(slt, noIdAtDataItem);
     });
 
     it('allow removing annotation type data items', function() {
-      var cet = new CollectionEventType(study, sltFromServer, { annotationTypes: studyAnnotationTypes });
-      var atDataItemCount = cet.specimenGroupData.length;
-
-      _.each(_.pluck(cet.annotationTypeData, 'annotationTypeId'), function(id) {
-        cet.removeAnnotationTypeData(id);
-        atDataItemCount = atDataItemCount - 1;
-        expect(cet.annotationTypeData.length).toBe(atDataItemCount);
-      });
-    });
-
-    it('returns specimen group data as a string', function() {
-      var cet = new CollectionEventType(study,
-                                        sltFromServer,
-                                        { specimenGroups: studySpecimenGroups });
-      var str = cet.getSpecimenGroupsAsString();
-      var regex = /(\w+) \((\d+), (\d+) (\w+)\)/g;
-
-      var matches = regex.exec(str);
-      while (matches !== null) {
-        checkSpecimenGroupMatches(cet, matches);
-        matches = regex.exec(str);
-      }
-
-      function checkSpecimenGroupMatches(cet, matches) {
-        var found;
-
-        expect(matches).toBeArrayOfSize(5);
-
-        // find the specimen group data item with the matching name
-        found = _.find(cet.specimenGroupData, function (sgDataItem) {
-          return sgDataItem.specimenGroup.name === matches[1];
-        });
-
-        expect(found).toBeDefined();
-        expect(matches[2]).toBe(found.maxCount.toString());
-        expect(matches[3]).toBe(found.amount.toString());
-        expect(matches[4]).toBe(found.specimenGroup.units);
-      }
+      var sltFromServer = fakeEntities.specimenLinkType(
+        processingType,
+        { annotationTypes: study.annotationTypes }
+      );
+      var slt = new SpecimenLinkType(study,
+                                     sltFromServer,
+                                     { studyAnnotationTypes: study.annotationTypes });
+      commonTests.removeItems(slt);
     });
 
     it('returns annotation type data as a string', function() {
-      // need at least 2 annotation type data items for this test
-      expect(sltFromServer.annotationTypeData).toBeArrayOfSize(2);
+      var sltFromServer;
+
+      var annotationTypes = _.map(_.range(2), function() {
+        return fakeEntities.annotationType(study);
+      });
+
+      sltFromServer = fakeEntities.specimenLinkType(processingType, { annotationTypes: annotationTypes});
+      sltFromServer.annotationTypeData[0].required = true;
       sltFromServer.annotationTypeData[0].required = false;
-      sltFromServer.annotationTypeData[1].required = true;
 
-      var cet = new CollectionEventType(study,
-                                        sltFromServer,
-                                        { annotationTypes: studyAnnotationTypes });
-      var str = cet.getAnnotationTypesAsString();
-      var regex = /(\w+) \((\w+)\)/g;
-      var matches = regex.exec(str);
-
-      while (matches !== null) {
-        checkAnnotationTypeMatches(cet, matches);
-        matches = regex.exec(str);
-      }
-
-      function checkAnnotationTypeMatches(cet, matches) {
-        var found;
-
-        expect(matches).toBeArrayOfSize(3);
-
-        // find the annotation type data item with the matching name
-        found = _.find(cet.annotationTypeData, function (atDataItem) {
-          return atDataItem.annotationType.name === matches[1];
-        });
-
-        expect(found).toBeDefined();
-        if (found.required) {
-          expect(matches[2]).toBe('Req');
-        } else {
-          expect(matches[2]).toBe('N/R');
-        }
-      }
+      var slt = new SpecimenLinkType(study,
+                                     sltFromServer,
+                                     { studyAnnotationTypes: annotationTypes });
+      commonTests.getAsString(slt);
     });
 
 

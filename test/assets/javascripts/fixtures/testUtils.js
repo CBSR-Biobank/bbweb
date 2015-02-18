@@ -3,7 +3,7 @@ define('biobank.testUtils', ['faker', 'moment'], function(faker, moment) {
   var entityNames = [];
 
   var utils = {
-    uuid: uuid,
+    uuid:          uuid,
     randomBoolean: randomBoolean
   };
 
