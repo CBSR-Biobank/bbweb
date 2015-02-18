@@ -11,7 +11,7 @@
     <div class="col-md-9">
       <select class="form-control"
               name="procTypeId"
-              ng-model="vm.spcLinkType.processingTypeId"
+              ng-model="vm.specimenLinkType.processingTypeId"
               ng-options="pt.id as pt.name for pt in vm.processingTypes | orderBy: 'name'"
               focus-me="true"
               required>
@@ -32,7 +32,7 @@
     <div class="col-md-9">
       <select class="form-control"
               name="inputGroupId"
-              ng-model="vm.spcLinkType.inputGroupId"
+              ng-model="vm.specimenLinkType.inputGroupId"
               ng-options="sg.id as sg.name for sg in vm.specimenGroups | orderBy: 'name'"
               required>
         <option value="">-- choose specimen group --</option>
@@ -54,7 +54,7 @@
              min="1"
              name="inputCount"
              class="form-control input-sm"
-             ng-model="vm.spcLinkType.inputCount"
+             ng-model="vm.specimenLinkType.inputCount"
              placeholder="count"
              valid-count
              required />
@@ -75,14 +75,13 @@
              min="0"
              name="expectedInputChange"
              class="form-control input-sm"
-             ng-model="vm.spcLinkType.expectedInputChange"
+             ng-model="vm.specimenLinkType.expectedInputChange"
              placeholder="amount"
              valid-amount
              required />
     </div>
     <div class="col-md-2">
-      {{vm.specimenGroupsById[vm.spcLinkType.inputGroupId]
-      ? vm.specimenGroupsById[vm.spcLinkType.inputGroupId].units : 'amount'}}
+      {{vm.getSpecimenGroupUnits(vm.specimenLinkType.inputGroupId)}}
     </div>
   </div>
   <div class="col-md-offset-3 col-md-9">
@@ -98,7 +97,7 @@
     <div class="col-md-9">
       <select class="form-control"
               name="inputContainertypeId"
-              ng-model="vm.spcLinkType.inputContainertypeName"
+              ng-model="vm.specimenLinkType.inputContainertypeName"
               ng-options="ct.id as ct.name for ct in vm.containerTypes | orderBy: 'name'">
         <option value="">None</option>
       </select>
@@ -111,7 +110,7 @@
     <div class="col-md-9">
       <select class="form-control"
               name="outputGroupId"
-              ng-model="vm.spcLinkType.outputGroupId"
+              ng-model="vm.specimenLinkType.outputGroupId"
               ng-options="sg.id as sg.name for sg in vm.specimenGroups | orderBy: 'name'"
               required>
         <option value="">-- choose specimen group --</option>
@@ -133,7 +132,7 @@
              min="1"
              name="outputCount"
              class="form-control input-sm"
-             ng-model="vm.spcLinkType.outputCount"
+             ng-model="vm.specimenLinkType.outputCount"
              placeholder="count"
              valid-count
              required />
@@ -153,14 +152,13 @@
              min="0"
              name="expectedOutputChange"
              class="form-control input-sm"
-             ng-model="vm.spcLinkType.expectedOutputChange"
+             ng-model="vm.specimenLinkType.expectedOutputChange"
              placeholder="amount"
              valid-amount
              required />
     </div>
     <div class="col-md-2">
-      {{vm.specimenGroupsById[vm.spcLinkType.outputGroupId]
-      ? vm.specimenGroupsById[vm.spcLinkType.outputGroupId].units : 'amount'}}
+      {{vm.getSpecimenGroupUnits(vm.specimenLinkType.outputGroupId)}}
     </div>
   </div>
   <div class="col-md-offset-3 col-md-9">
@@ -176,7 +174,7 @@
     <div class="col-md-9">
       <select class="form-control"
               name="outputContainertypeId"
-              ng-model="vm.spcLinkType.outputContainertypeId"
+              ng-model="vm.specimenLinkType.outputContainertypeId"
               ng-options="ct.id as ct.name for ct in vm.containerTypes | orderBy: 'name'">
         <option value="">None</option>
       </select>
@@ -184,24 +182,26 @@
   </div>
 
   <!-- ANNOTATION TYPE DATA -->
-  <div class="form-group" ng-repeat="atData in vm.spcLinkType.annotationTypeData track by $index">
+  <div class="form-group" ng-repeat="atData in vm.annotationTypeData track by $index">
     <ng-form name="atSubForm">
       <label class="col-md-3 control-label">Annotation Type {{$index + 1}}</label>
       <div class="col-md-4">
         <select class="form-control"
                 name="annotTypeName"
-                ng-model="vm.spcLinkType.annotationTypeData[$index].annotationTypeId"
+                ng-model="vm.annotationTypeData[$index].annotationTypeId"
                 ng-options="annotType.id as annotType.name for annotType in vm.annotTypes | orderBy: 'name'"
                 required>
           <option value="">-- choose annotation type --</option>
         </select>
       </div>
       <div class="col-md-2">
-        <input name="required" type="checkbox" ng-model="vm.spcLinkType.annotationTypeData[$index].required"/> Required
+        <input name="required"
+               type="checkbox"
+               ng-model="vm.annotationTypeData[$index].required"/> Required
       </div>
       <div class="col-md-1">
         <button class="btn btn-xs btn-warning"
-                ng-click="vm.removeAnnotType(atData)">
+                ng-click="vm.removeAnnotType($index)">
           <i class="glyphicon glyphicon-minus"></i> Remove
         </button>
       </div>
@@ -229,7 +229,7 @@
     <div class="col-md-offset-3 col-md-9">
       <button class="btn btn-primary"
               ng-disabled="spcLinkTypeForm.$invalid"
-              ng-click="vm.submit(vm.spcLinkType)">Submit</button>
+              ng-click="vm.submit(vm.specimenLinkType)">Submit</button>
       <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
     </div>
   </div>

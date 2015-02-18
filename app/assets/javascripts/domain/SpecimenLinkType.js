@@ -69,16 +69,34 @@ define(['./module', 'underscore'], function(module, _) {
       return this.annotationTypeDataSet.get(annotationTypeId);
     };
 
-    SpecimenLinkType.prototype.addAnnotationTypeData = function (atDataItem) {
-      this.annotationTypeDataSet.add(atDataItem);
-    };
-
-    SpecimenLinkType.prototype.removeAnnotationTypeData = function (atDataItem) {
-      this.annotationTypeDataSet.remove(atDataItem);
-    };
-
     SpecimenLinkType.prototype.getAnnotationTypesAsString = function () {
-      this.annotationTypeDataSet.getAsString();
+      return this.annotationTypeDataSet.getAsString();
+    };
+
+    /**
+     * Returns a collection event type as expected by the server.
+     */
+    SpecimenLinkType.prototype.getServerSpecimenLinkType = function () {
+      var serverSpecimenLinkType = _.pick(this,
+                                          'processingTypeId',
+                                          'id',
+                                          'version',
+                                          'timeAdded',
+                                          'timeModified',
+                                          'expectedInputChange',
+                                          'expectedOutputChange',
+                                          'inputCount',
+                                          'outputCount',
+                                          'inputGroupId',
+                                          'outputGroupId');
+      if (this.inputContainerTypeId) {
+        serverSpecimenLinkType.inputContainerTypeId = this.inputContainerTypeId;
+      }
+      if (this.outputContainerTypeId) {
+        serverSpecimenLinkType.outputContainerTypeId = this.outputContainerTypeId;
+      }
+      serverSpecimenLinkType.annotationTypeData = this.annotationTypeDataSet.getAnnotationTypeData();
+      return serverSpecimenLinkType;
     };
 
 

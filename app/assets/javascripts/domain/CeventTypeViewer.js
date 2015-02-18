@@ -3,31 +3,25 @@ define(['./module'], function(module) {
 
   module.factory('CeventTypeViewer', CeventTypeViewerFactory);
 
-  CeventTypeViewerFactory.$inject = [
-    'EntityViewer',
-    'CollectionEventType',
-    'SpecimenGroupSet',
-    'AnnotationTypeSet'
-  ];
+  CeventTypeViewerFactory.$inject = ['EntityViewer'];
 
   /**
    * Displays a collection event type in a modal.
+   *
    */
-  function CeventTypeViewerFactory(EntityViewer,
-                                   CollectionEventType,
-                                   SpecimenGroupSet,
-                                   AnnotationTypeSet) {
+  function CeventTypeViewerFactory(EntityViewer) {
 
-    function CeventTypeViewer(study, ceventType, specimenGroups, annotTypes) {
-      var specimenGroupSet  = new SpecimenGroupSet(specimenGroups);
-      var annotationTypeSet  = new AnnotationTypeSet(annotTypes);
-      var cet = new CollectionEventType(study, ceventType, specimenGroupSet, annotationTypeSet);
-      var ev = new EntityViewer(cet, 'Collection Event Type');
+    /**
+     *
+     * @param {CollectionEventType} ceventType the JS object containing the information.
+     */
+    function CeventTypeViewer(study, ceventType) {
+      var ev = new EntityViewer(ceventType, 'Collection Event Type');
 
       ev.addAttribute('Name:', ceventType.name);
       ev.addAttribute('Recurring:', ceventType.recurring ? 'Yes' : 'No');
-      ev.addAttribute('Specimen Groups (Count, Amount):', cet.getSpecimenGroupsAsString());
-      ev.addAttribute('Annotation Types:', cet.getAnnotationTypesAsString());
+      ev.addAttribute('Specimen Groups (Count, Amount):', ceventType.getSpecimenGroupsAsString());
+      ev.addAttribute('Annotation Types:', ceventType.getAnnotationTypesAsString());
       ev.addAttribute('Description:', ceventType.description);
 
       ev.showModal();

@@ -71,6 +71,10 @@ define(['./module', 'underscore'], function(module, _) {
       return this.specimenGroupDataSet.get(specimenGroupId);
     };
 
+    CollectionEventType.prototype.getSpecimenGroupDataByIndex = function (index) {
+      return this.specimenGroupDataSet.getByIndex(index);
+    };
+
     /**
      * Allows adding multiple items with a empty ID (i.e. ''). If id is not empty then duplicate items
      * are not allowed.
@@ -82,10 +86,10 @@ define(['./module', 'underscore'], function(module, _) {
     /**
      * Removes a specimen group data item. Note that there can be multiple items with an empty ID.
      *
-     * @param {string} sgDataItemId the ID of the specimen group to remove.
+     * @param {Int} the index of the specimen group to remove.
      */
-    CollectionEventType.prototype.removeSpecimenGroupData = function (sgDataItemId) {
-      this.specimenGroupDataSet.remove(sgDataItemId);
+    CollectionEventType.prototype.removeSpecimenGroupData = function (index) {
+      this.specimenGroupDataSet.remove(index);
     };
 
     CollectionEventType.prototype.getSpecimenGroupsAsString = function () {
@@ -104,16 +108,37 @@ define(['./module', 'underscore'], function(module, _) {
       return this.annotationTypeDataSet.get(annotationTypeId);
     };
 
+    CollectionEventType.prototype.getAnnotationTypeDataByIndex = function (index) {
+      return this.annotationTypeDataSet.getByIndex(index);
+    };
+
     CollectionEventType.prototype.addAnnotationTypeData = function (atDataItem) {
       this.annotationTypeDataSet.add(atDataItem);
     };
 
-    CollectionEventType.prototype.removeAnnotationTypeData = function (atDataItem) {
-      this.annotationTypeDataSet.remove(atDataItem);
+    CollectionEventType.prototype.removeAnnotationTypeData = function (index) {
+      this.annotationTypeDataSet.remove(index);
     };
 
     CollectionEventType.prototype.getAnnotationTypesAsString = function () {
       return this.annotationTypeDataSet.getAsString();
+    };
+
+    /**
+     * Returns a collection event type as expected by the server.
+     */
+    CollectionEventType.prototype.getServerCeventType = function () {
+      var serverCeventType = _.pick(this,
+                                   'id',
+                                   'studyId',
+                                   'version',
+                                   'timeAdded',
+                                   'timeModified',
+                                   'name',
+                                   'recurring');
+      serverCeventType.specimenGroupData  = this.specimenGroupDataSet.getSpecimenGroupData();
+      serverCeventType.annotationTypeData = this.annotationTypeDataSet.getAnnotationTypeData();
+      return serverCeventType;
     };
 
     /** return constructor function */

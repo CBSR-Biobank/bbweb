@@ -68,7 +68,13 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.annotationTypeSet  = new AnnotationTypeSet($scope.annotTypes);
 
     vm.ceventTypes = _.map($scope.ceventTypes, function (ceventType) {
-      return new CollectionEventType(vm.study, ceventType, vm.specimenGroupSet, vm.annotationTypeSet);
+      return new CollectionEventType(
+        vm.study,
+        ceventType,
+        {
+          studySpecimenGroups:  $scope.specimenGroups,
+          studyAnnotationTypes: $scope.annotTypes
+        });
     });
 
     vm.update               = update;
@@ -113,14 +119,15 @@ define(['../../module', 'underscore'], function(module, _) {
      * @param id the ID for the annotation type.
      */
     function showAnnotationType(id) {
-      return new AnnotationTypeViewer(vm.annotationTypesSet(id), 'Collection Event Annotation Type');
+      return new AnnotationTypeViewer(vm.annotationTypeSet.get(id),
+                                      'Collection Event Annotation Type');
     }
 
     /**
      * Displays a specimen group in a modal.
      */
     function showSpecimenGroup(specimenGroupId) {
-      return new SpecimenGroupViewer(vm.specimenGroupsSet(specimenGroupId));
+      return new SpecimenGroupViewer(vm.specimenGroupSet.get(specimenGroupId));
     }
 
     /**

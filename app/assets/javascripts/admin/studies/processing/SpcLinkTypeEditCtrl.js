@@ -12,6 +12,8 @@ define(['../../module', 'underscore'], function(module, _) {
   SpcLinkTypeEditCtrl.$inject = [
     '$state',
     'spcLinkTypesService',
+    'SpecimenLinkType',
+    'SpecimenGroupSet',
     'domainEntityUpdateError',
     'notificationsService',
     'study',
@@ -21,28 +23,38 @@ define(['../../module', 'underscore'], function(module, _) {
 
   function SpcLinkTypeEditCtrl($state,
                                spcLinkTypesService,
+                               SpecimenLinkType,
+                               SpecimenGroupSet,
                                domainEntityUpdateError,
                                notificationsService,
                                study,
                                spcLinkType,
                                dtoProcessing) {
-    var action = spcLinkType.id ? 'Update' : 'Add';
-    var vm = this;
+    var vm = this, action;
 
-    vm.title           =  action + ' Spcecimen Link Type';
-    vm.study           = study;
-    vm.spcLinkType     = spcLinkType;
-    vm.processingTypes = dtoProcessing.processingTypes;
-    vm.annotTypes      = dtoProcessing.specimenLinkAnnotationTypes;
-    vm.specimenGroups  = dtoProcessing.specimenGroups;
+    vm.study               = study;
+    vm.processingTypes     = dtoProcessing.processingTypes;
+    vm.processingTypesById = _.indexBy(dtoProcessing.processingTypes, 'id');
+    vm.annotTypes          = dtoProcessing.specimenLinkAnnotationTypes;
+    vm.specimenGroupSet    = new SpecimenGroupSet(dtoProcessing.specimenGroups);
+    vm.annotationTypeData  = spcLinkType.annotationTypeData;
 
-    vm.submit = submit;
-    vm.cancel = cancel;
-    vm.addAnnotType = addAnnotType;
-    vm.removeAnnotType = removeAnnotType;
+    vm.submit                = submit;
+    vm.cancel                = cancel;
+    vm.addAnnotType          = addAnnotType;
+    vm.removeAnnotType       = removeAnnotType;
+    vm.getSpecimenGroupUnits = getSpecimenGroupUnits;
 
-    // used to display the specimen group units label in the form
-    vm.specimenGroupsById = _.indexBy(vm.specimenGroups, 'id');
+    vm.specimenLinkType = new SpecimenLinkType(
+      vm.processingTypesById[spcLinkType.processingTypeId],
+      spcLinkType,
+      {
+        studySpecimenGroupSet: vm.specimenGroupSet,
+        studyAnnotationTypes:  dtoProcessing.specimenLinkAnnotationTypes
+      });
+
+    action = vm.specimenLinkType.isNew ? 'Add' : 'Update';
+    vm.title =  action + ' Spcecimen Link Type';
 
     //---
 
@@ -55,19 +67,12 @@ define(['../../module', 'underscore'], function(module, _) {
       gotoReturnState();
     }
 
-    function submit(spcLinkType) {
-      var checkFields = ['inputContainerTypeId', 'outputContainerTypeId'];
-      checkFields.forEach(function(fieldName) {
-        if (typeof spcLinkType[fieldName] === 'undefined') {
-          spcLinkType[fieldName] = null;
-        }
-      });
+    function submit(specimenLinkType) {
+      var serverSpcLinkType = specimenLinkType.getServerSpecimenLinkType();
 
-      if (typeof spcLinkType.annotationTypeData === 'undefined') {
-        spcLinkType.annotationTypeData = [];
-      }
+      serverSpcLinkType.annotationTypeData = vm.annotationTypeData;
 
-      spcLinkTypesService.addOrUpdate(spcLinkType)
+      spcLinkTypesService.addOrUpdate(serverSpcLinkType)
         .then(submitSuccess)
         .catch(function(error) {
           domainEntityUpdateError.handleError(
@@ -84,18 +89,21 @@ define(['../../module', 'underscore'], function(module, _) {
     }
 
     function addAnnotType () {
-      vm.spcLinkType.annotationTypeData.push({name:'', annotationTypeId:'', required: false});
+      vm.annotationTypeData.push({annotationTypeId:'', required: false});
     }
 
-    function removeAnnotType (atData) {
-      if (vm.spcLinkType.annotationTypeData.length < 1) {
-        throw new Error('invalid length for annotation type data');
-      }
+    function removeAnnotType (index) {
+      vm.annotationTypeData.splice(index, 1);
+    }
 
-      var index = vm.spcLinkType.annotationTypeData.indexOf(atData);
-      if (index > -1) {
-        vm.spcLinkType.annotationTypeData.splice(index, 1);
+    function getSpecimenGroupUnits(sgId) {
+      if (!sgId) { return 'Amount'; }
+
+      var sg = vm.specimenGroupSet.get(sgId);
+      if (sg) {
+        return sg.units;
       }
+      throw new Error('specimen group not found: ' + sgId);
     }
   }
 

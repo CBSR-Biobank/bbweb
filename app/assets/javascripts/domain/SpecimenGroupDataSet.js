@@ -72,41 +72,6 @@ define(['./module', 'underscore'], function(module, _) {
       return foundItem;
     };
 
-    /**
-     * Allows adding multiple items with a empty ID (i.e. ''). If id is not empty then duplicate items
-     * are not allowed.
-     */
-    SpecimenGroupDataSet.prototype.add = function (item) {
-      if (!this.specimenGroupSet) {
-        throw new Error('study has no specimen groups');
-      }
-
-      if (item.id && (item.id !== '')) {
-        var foundItem = _.findWhere(this.dataItems, {specimenGroupId: item.id});
-        if (foundItem !== undefined) {
-          throw new Error('specimen group data already exists: ' + item.id);
-        }
-      }
-      item = _.clone(item);
-      if (item.specimenGroupId) {
-        item.specimenGroup = this.specimenGroupSet.get(item.specimenGroupId);
-      }
-      this.dataItems.push(item);
-    };
-
-    /**
-     * Removes a specimen group data item. Note that there can be multiple items with an empty ID.
-     *
-     * @param {string} atDataItemId the ID of the specimen group to remove.
-     */
-    SpecimenGroupDataSet.prototype.remove = function (atDataItemId) {
-      var foundItem = _.findWhere(this.dataItems, {specimenGroupId: atDataItemId});
-      if (foundItem === undefined) {
-        throw new Error('specimen group data with id not found: ' + atDataItemId);
-      }
-
-      this.dataItems = _.without(this.dataItems, foundItem);
-    };
 
     SpecimenGroupDataSet.prototype.getAsString = function () {
       if (this.dataItems.length === 0) {

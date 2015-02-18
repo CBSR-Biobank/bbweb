@@ -73,37 +73,15 @@ define(['./module', 'underscore'], function(module, _) {
       return foundItem;
     };
 
-    /**
-     * Allows adding multiple items with a empty ID (i.e. ''). If id is not empty then duplicate items
-     * are not allowed.
-     */
-    AnnotationTypeDataSet.prototype.add = function (item) {
-      if (item.id && (item.id !== '')) {
-        var foundItem = _.findWhere(this.dataItems, {annotationTypeId: item.id});
-        if (foundItem !== undefined) {
-          throw new Error('annotation type data already exists: ' + item.id);
-        }
-      }
-      item = _.clone(item);
-      if (item.annotationTypeId) {
-        item.annotationType = this.annotationTypeSet.get(item.annotationTypeId);
-      }
-      this.dataItems.push(item);
+    AnnotationTypeDataSet.prototype.getAnnotationTypeData = function () {
+      return _.map(this.dataItems, function (item) {
+        return {
+          annotationTypeId: item.annotationTypeId,
+          required:         item.required
+        };
+      });
     };
 
-    /**
-     * Removes a annotation type data item. Note that there can be multiple items with an empty ID.
-     *
-     * @param {string} atDataItemId the ID of the annotation type to remove.
-     */
-    AnnotationTypeDataSet.prototype.remove = function (atDataItemId) {
-      var foundItem = _.findWhere(this.dataItems, {annotationTypeId: atDataItemId});
-      if (foundItem === undefined) {
-        throw new Error('annotation type data with id not found: ' + atDataItemId);
-      }
-
-      this.dataItems = _.without(this.dataItems, foundItem);
-    };
 
     AnnotationTypeDataSet.prototype.getAsString = function () {
       if (this.dataItems.length === 0) {

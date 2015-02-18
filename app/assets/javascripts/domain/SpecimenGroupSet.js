@@ -33,6 +33,15 @@ define(['./module', 'underscore'], function(module, _) {
       return result;
     };
 
+    /**
+     * Returns the specimen group with the given id or undefined if it does not exist.
+     *
+     * @param id the ID of the required wspecimen group.
+     */
+    SpecimenGroupSet.prototype.find = function (id) {
+      return this.specimenGroups[id];
+    };
+
     return SpecimenGroupSet;
   }
 

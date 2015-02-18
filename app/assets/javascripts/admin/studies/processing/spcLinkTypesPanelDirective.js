@@ -78,10 +78,13 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.modificationsAllowed = vm.study.status === 'Disabled';
 
     vm.specimenLinkTypes = _.map($scope.processingDto.specimenLinkTypes, function (slt) {
-      return new SpecimenLinkType(slt,
-                                  vm.processingTypesById[slt.processingTypeId],
-                                  specimenGroupSet,
-                                  annotationTypeSet);
+      return new SpecimenLinkType(
+        vm.processingTypesById[slt.processingTypeId],
+        slt,
+        {
+          studySpecimenGroupSet: specimenGroupSet,
+          studyAnnotationTypeSet: annotationTypeSet
+        });
     });
 
     vm.tableParams = panel.getTableParams(vm.specimenLinkTypes);

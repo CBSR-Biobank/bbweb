@@ -34,11 +34,19 @@ define(['../../module', 'underscore'], function(module, _) {
                               specimenGroups) {
     var vm = this, action;
 
-    var specimenGroupSet  = new SpecimenGroupSet(specimenGroups);
-    var annotationTypeSet  = new AnnotationTypeSet(annotTypes);
+    vm.specimenGroupSet  = new SpecimenGroupSet(specimenGroups);
 
-    vm.ceventType = new CollectionEventType(study, ceventType, specimenGroupSet, annotationTypeSet);
+    vm.ceventType = new CollectionEventType(
+      study,
+      ceventType,
+      {
+        studySpecimenGroupSet: vm.specimenGroupSet,
+        studyAnnotationTypes:  annotTypes
+      });
     action = vm.ceventType.isNew ? 'Add' : 'Update';
+
+    vm.specimenGroupData  = ceventType.specimenGroupData;
+    vm.annotationTypeData = ceventType.annotationTypeData;
 
     vm.title                   = action + ' Collection Event Type';
     vm.study                   = study;
@@ -49,8 +57,8 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.annotationTypes         = annotTypes;
     vm.addSpecimenGroupData    = addSpecimenGroupData;
     vm.removeSpecimenGroupData = removeSpecimenGroupData;
-    vm.addAnnotTypeData        = addAnnotTypeData;
-    vm.removeAnnotTypeData     = removeAnnotTypeData;
+    vm.addAnnotationTypeData        = addAnnotationTypeData;
+    vm.removeAnnotationTypeData     = removeAnnotationTypeData;
     vm.getSpecimenGroupUnits   = getSpecimenGroupUnits;
 
     //---
@@ -65,7 +73,11 @@ define(['../../module', 'underscore'], function(module, _) {
     }
 
     function submit(ceventType) {
-      ceventTypesService.addOrUpdate(ceventType)
+      var serverCeventType = ceventType.getServerCeventType();
+      serverCeventType.specimenGroupData = vm.specimenGroupData;
+      serverCeventType.annotationTypeData = vm.annotationTypeData;
+
+      ceventTypesService.addOrUpdate(serverCeventType)
         .then(submitSuccess)
         .catch(function(error) {
           domainEntityUpdateError.handleError(
@@ -82,25 +94,25 @@ define(['../../module', 'underscore'], function(module, _) {
     }
 
     function addSpecimenGroupData() {
-      vm.ceventType.addSpecimenGroupData({name:'', specimenGroupId:'', maxCount: '', amount: ''});
+      vm.specimenGroupData.push({specimenGroupId: '', maxCount: null, amount: null});
     }
 
-    function removeSpecimenGroupData(sgData) {
-      vm.ceventType.removeSpecimenGroupData(sgData.id);
+    function removeSpecimenGroupData(index) {
+      vm.specimenGroupData.splice(index, 1);
     }
 
-    function addAnnotTypeData() {
-      vm.ceventType.addAnnotationTypeData({annotationTypeId:'', required: false});
+    function addAnnotationTypeData() {
+      vm.annotationTypeData.push({annotationTypeId:'', required: false});
     }
 
-    function removeAnnotTypeData(atData) {
-      vm.ceventType.removeAnnotationTypeData(atData.id);
+    function removeAnnotationTypeData(index) {
+      vm.annotationTypeData.splice(index, 1);
     }
 
     function getSpecimenGroupUnits(sgId) {
       if (!sgId) { return 'Amount'; }
 
-      var sg = vm.specimenGroupsById[sgId];
+      var sg = vm.specimenGroupSet.get(sgId);
       if (sg) {
         return sg.units;
       }

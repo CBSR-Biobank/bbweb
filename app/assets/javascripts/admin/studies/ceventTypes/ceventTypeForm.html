@@ -41,13 +41,13 @@
   </div>
 
   <!-- SPECIMEN GROUP DATA -->
-  <div class="form-group" ng-repeat="sgData in vm.ceventType.specimenGroupData track by $index">
+  <div class="form-group" ng-repeat="sgDataItem in vm.specimenGroupData track by $index">
     <ng-form name="sgSubForm">
       <label class="col-md-2 control-label">Specimen Group {{$index + 1}}</label>
       <div class="col-md-3">
         <select class="form-control"
                 name="sgId"
-                ng-model="vm.ceventType.specimenGroupData[$index].specimenGroupId"
+                ng-model="vm.specimenGroupData[$index].specimenGroupId"
                 ng-options="sg.id as sg.name for sg in vm.specimenGroups | orderBy: 'name'"
                 required>
           <option value="">-- make a selection --</option>
@@ -59,33 +59,33 @@
                min="1"
                name="maxCount"
                class="form-control input-sm"
-               ng-model="vm.ceventType.specimenGroupData[$index].maxCount"
+               ng-model="vm.specimenGroupData[$index].maxCount"
                placeholder="max count"
                valid-count
                required/>
       </div>
       <label class="col-md-1 control-label small">
-        {{vm.getSpecimenGroupUnits(sgData.specimenGroupId)}}:
+        {{vm.getSpecimenGroupUnits(vm.specimenGroupData[$index].specimenGroupId)}}:
       </label>
       <div class="col-md-2">
         <input type="number"
                min="0"
                name="amount"
                class="form-control input-sm"
-               ng-model="vm.ceventType.specimenGroupData[$index].amount"
+               ng-model="vm.specimenGroupData[$index].amount"
                placeholder="amount"
                valid-amount
                required />
       </div>
       <div class="col-md-1">
         <button class="btn btn-xs btn-warning"
-                ng-click="vm.removeSpecimenGroupData(sgData)">
+                ng-click="vm.removeSpecimenGroupData($index)">
           <i class="glyphicon glyphicon-minus"></i> Remove
         </button>
       </div>
       <div class="col-md-offset-2 col-md-10">
         <p class="help-block"
-           ng-show="sgSubForm.sgName.$error.required && !sgSubForm.sgName.$pristine">
+           ng-show="sgSubForm.sgId.$error.required && !sgSubForm.sgId.$pristine">
           Please select a specimen group
         </p>
         <p class="help-block"
@@ -104,31 +104,33 @@
   <div class="form-group">
     <div class="col-md-2">
       <button class="btn btn-sm btn-primary pull-right"
-              ng-click="vm.ceventType.addSpecimenGroupData()">
+              ng-click="vm.addSpecimenGroupData()">
         Add specimen group <i class="glyphicon glyphicon-plus"></i>
       </button>
     </div>
   </div>
 
   <!-- ANNOTATION TYPE DATA -->
-  <div class="form-group" ng-repeat="atData in vm.ceventType.annotationTypeData track by $index">
+  <div class="form-group" ng-repeat="atData in vm.annotationTypeData track by $index">
     <ng-form name="atSubForm">
       <label class="col-md-2 control-label">Annotation Type {{$index + 1}}</label>
       <div class="col-md-3">
         <select class="form-control"
                 name="name"
-                ng-model="vm.ceventType.annotationTypeData[$index].annotationTypeId"
-                ng-options="annotType.id as annotType.name for annotType in vm.annotationTypes | orderBy: 'name'"
+                ng-model="vm.annotationTypeData[$index].annotationTypeId"
+                ng-options="annotationType.id as annotationType.name for annotationType in vm.annotationTypes | orderBy: 'name'"
                 required>
           <option value="">-- make a selection --</option>
         </select>
       </div>
       <div class="col-md-2">
-        <input name="required" type="checkbox" ng-model="vm.ceventType.annotationTypeData[$index].required"/> Required
+        <input name="required"
+               type="checkbox"
+               ng-model="vm.annotationTypeData[$index].required"/> Required
       </div>
       <div class="col-md-1">
         <button class="btn btn-xs btn-warning"
-                ng-click="vm.removeAnnotTypeData(atData)">
+                ng-click="vm.removeAnnotationTypeData($index)">
           <i class="glyphicon glyphicon-minus"></i> Remove
         </button>
       </div>
@@ -144,8 +146,7 @@
   <div class="form-group">
     <div class="col-md-2">
       <button class="btn btn-sm btn-primary pull-right"
-              ng-disabled="annotTypeNames == 0"
-              ng-click="vm.addAnnotTypeData()">
+              ng-click="vm.addAnnotationTypeData()">
         Add annotation type <i class="glyphicon glyphicon-plus"></i>
       </button>
     </div>

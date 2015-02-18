@@ -41,9 +41,11 @@
         <a href>{{specimenLinkType.outputGroup.name}}</a>
       </td>
       <td data-title="'Annotation Types'">
-        <span ng-repeat="atItem in specimenLinkType.annotationTypeData"
-             ng-click="vm.showAnnotationType(atItem.annotationType.id)">
-          <a href>{{atItem.annotationType.name}}</a><span ng-if="!$last">, </span>
+        <span ng-repeat="atItemId in specimenLinkType.allAnnotationTypeDataIds()"
+             ng-click="vm.showAnnotationType(atItemId)">
+          <a href>
+            {{specimenLinkType.getAnnotationTypeData(atItemId).annotationType.name}}
+          </a><span ng-if="!$last">, </span>
         </span>
 
       </td>

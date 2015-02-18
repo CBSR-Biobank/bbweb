@@ -111,34 +111,6 @@ define([
       });
     });
 
-    it('calling addAnnotationTypeData adds a new annotation type data item', function() {
-      var slt = new SpecimenLinkType(study,
-                                     sltFromServer,
-                                     { studyAnnotationTypes: study.annotationTypes });
-      var newAtDataItem = fakeEntities.annotationTypeData(study.annotationTypes[0]);
-      commonTests.addItem(slt, newAtDataItem, study.annotationTypes[0]);
-    });
-
-
-    it('allows adding multiple annotation type data items with empty id', function() {
-      var slt = new SpecimenLinkType(study,
-                                     sltFromServer,
-                                     { studyAnnotationTypes: study.annotationTypes });
-      var noIdAtDataItem = {annotationTypeId: '', required: false};
-      commonTests.addItem(slt, noIdAtDataItem);
-    });
-
-    it('allow removing annotation type data items', function() {
-      var sltFromServer = fakeEntities.specimenLinkType(
-        processingType,
-        { annotationTypes: study.annotationTypes }
-      );
-      var slt = new SpecimenLinkType(study,
-                                     sltFromServer,
-                                     { studyAnnotationTypes: study.annotationTypes });
-      commonTests.removeItems(slt);
-    });
-
     it('returns annotation type data as a string', function() {
       var sltFromServer;
 
