@@ -2,6 +2,7 @@
  * Module for files in the 'domain' directory.
  */
 define([
+  './AnnotationTypeDataSet',
   './AnnotationHelper',
   './AnnotationTypeSet',
   './AnnotationTypeViewer',

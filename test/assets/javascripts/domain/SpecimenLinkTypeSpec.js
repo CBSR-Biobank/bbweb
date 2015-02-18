@@ -13,9 +13,9 @@ define([
 ], function(angular, mocks, _, faker, fakeEntities) {
   'use strict';
 
-  fdescribe('CollectionEventType', function() {
+  describe('SpecimenLinkType', function() {
 
-    var CollectionEventType, SpecimenGroupSet, AnnotationTypeSet, cetFromServer;
+    var SpecimenLinkType, SpecimenGroupSet, AnnotationTypeSet, sltFromServer;
 
     var study = fakeEntities.study();
 
@@ -32,12 +32,12 @@ define([
 
     beforeEach(mocks.module('biobankApp'));
 
-    beforeEach(inject(function(_CollectionEventType_, _SpecimenGroupSet_, _AnnotationTypeSet_) {
-      CollectionEventType = _CollectionEventType_;
+    beforeEach(inject(function(_SpecimenLinkType_, _SpecimenGroupSet_, _AnnotationTypeSet_) {
+      SpecimenLinkType = _SpecimenLinkType_;
       SpecimenGroupSet    = _SpecimenGroupSet_;
       AnnotationTypeSet   = _AnnotationTypeSet_;
 
-      cetFromServer = fakeEntities.collectionEventType(
+      sltFromServer = fakeEntities.specimenLinkType(
         study,
         {
           specimenGroups: studySpecimenGroups,
@@ -46,35 +46,35 @@ define([
     }));
 
     it('isNew should be true for a collection event with no ID', function() {
-      var cetNoId = _.omit(cetFromServer, 'id');
-      var cet = new CollectionEventType(study, cetNoId);
+      var cetNoId = _.omit(sltFromServer, 'id');
+      var cet = new SpecimenLinkType(study, cetNoId);
       expect(cet.isNew).toBe(true);
     });
 
     it('study ID matches the study', function() {
-      var cet = new CollectionEventType(study, cetFromServer);
+      var cet = new SpecimenLinkType(study, sltFromServer);
       expect(cet.studyId).toBe(study.id);
     });
 
     it('study matches the study', function() {
-      var cet = new CollectionEventType(study, cetFromServer);
+      var cet = new SpecimenLinkType(study, sltFromServer);
       expect(cet.studyId).toBe(study.id);
     });
 
     it('isNew should be false for a collection event that has an ID', function() {
-      var cet = new CollectionEventType(study, cetFromServer);
+      var cet = new SpecimenLinkType(study, sltFromServer);
       expect(cet.study).toEqual(study);
     });
 
     it('should be initialized with specimen group and annotation type objects', function() {
       var specimenGroupSet = new SpecimenGroupSet(studySpecimenGroups);
       var annotationTypeSet = new AnnotationTypeSet(studyAnnotationTypes);
-      var cet = new CollectionEventType(
+      var cet = new SpecimenLinkType(
         study,
-        cetFromServer,
+        sltFromServer,
         {
           specimenGroupSet: specimenGroupSet,
-          studyAnnotationTypeSet: annotationTypeSet
+          annotationTypeSet: annotationTypeSet
         });
 
       _.each(cet.specimenGroupData, function(sgItem) {
@@ -87,12 +87,12 @@ define([
     });
 
     it('should be initialized with specimen group and annotation type objects', function() {
-      var cet = new CollectionEventType(
+      var cet = new SpecimenLinkType(
         study,
-        cetFromServer,
+        sltFromServer,
         {
-          studySpecimenGroups: studySpecimenGroups,
-          studyAnnotationTypes: studyAnnotationTypes
+          specimenGroups: studySpecimenGroups,
+          annotationTypes: studyAnnotationTypes
         });
 
       _.each(cet.specimenGroupData, function(sgItem) {
@@ -105,9 +105,9 @@ define([
     });
 
     it('should be initialized with SpecimenGroupSet and AnnotationTypeSet', function() {
-      var cet = new CollectionEventType(
+      var cet = new SpecimenLinkType(
         study,
-        cetFromServer,
+        sltFromServer,
         {
           specimenGroupSet: new SpecimenGroupSet(studySpecimenGroups),
           annotationTypeSet: new AnnotationTypeSet(studyAnnotationTypes)
@@ -125,7 +125,7 @@ define([
     it('calling addSpecimenGroupData adds a new specimen group data item', function() {
       var newSgDataItem = fakeEntities.specimenGroupData(fakeEntities.specimenGroup(study));
 
-      var cet = new CollectionEventType(study, cetFromServer);
+      var cet = new SpecimenLinkType(study, sltFromServer);
       var originalSgDataItems = cet.specimenGroupData.length;
       cet.addSpecimenGroupData(newSgDataItem);
       expect(cet.specimenGroupData.length).toBe(originalSgDataItems + 1);
@@ -139,7 +139,7 @@ define([
       var filteredItems;
       var noIdSgDataItem = {specimenGroupId: '', maxCount: 0, amount: 0};
 
-      var cet = new CollectionEventType(study, cetFromServer);
+      var cet = new specimenLinkType(study, sltFromServer);
       var originalSgDataItems = cet.specimenGroupData.length;
 
       var numNewItems = 5;
@@ -155,7 +155,7 @@ define([
     });
 
     it('allow removing specimen group data items', function() {
-      var cet = new CollectionEventType(study, cetFromServer, { studySpecimenGroups: studySpecimenGroups });
+      var cet = new CollectionEventType(study, sltFromServer, { specimenGroups: studySpecimenGroups });
       var sgDataItemCount = cet.specimenGroupData.length;
 
       _.each(_.pluck(cet.specimenGroupData, 'specimenGroupId'), function(id) {
@@ -167,12 +167,15 @@ define([
 
     it('calling addAnnotationTypeData adds a new annotation type data item', function() {
       var newAtDataItem = fakeEntities.annotationTypeData(fakeEntities.annotationType(study));
-      var cet = new CollectionEventType(study, cetFromServer);
-      var originalAtDataItems = cet.annotationTypeDataSize();
 
+      var cet = new CollectionEventType(study, sltFromServer);
+      var originalAtDataItems = cet.annotationTypeData.length;
       cet.addAnnotationTypeData(newAtDataItem);
-      expect(cet.annotationTypeDataSize()).toBe(originalAtDataItems + 1);
-      expect(cet.getAnnotationTypeData(newAtDataItem.annotationTypeId)).toEqual(newAtDataItem);
+      expect(cet.annotationTypeData.length).toBe(originalAtDataItems + 1);
+
+      expect(_.find(cet.annotationTypeData, function(atItem) {
+        return _.isEqual(atItem, newAtDataItem);
+      })).toBeDefined();
     });
 
 
@@ -180,13 +183,13 @@ define([
       var filteredItems;
       var noIdAtDataItem = {annotationTypeId: '', required: false};
 
-      var cet = new CollectionEventType(study, cetFromServer);
-      var originalAtDataItems = cet.annotationTypeDataSize();
+      var cet = new CollectionEventType(study, sltFromServer);
+      var originalAtDataItems = cet.annotationTypeData.length;
 
       var numNewItems = 5;
       _.each(_.range(numNewItems), function() { cet.addAnnotationTypeData(noIdAtDataItem); });
 
-      expect(cet.annotationTypeDataSize()).toBe(originalAtDataItems + numNewItems);
+      expect(cet.annotationTypeData.length).toBe(originalAtDataItems + numNewItems);
 
       filteredItems = _.filter(cet.annotationTypeData, function(sgItem) {
         return _.isEqual(sgItem, noIdAtDataItem);
@@ -196,20 +199,20 @@ define([
     });
 
     it('allow removing annotation type data items', function() {
-      var cet = new CollectionEventType(study, cetFromServer, { studyAnnotationTypes: studyAnnotationTypes });
+      var cet = new CollectionEventType(study, sltFromServer, { annotationTypes: studyAnnotationTypes });
       var atDataItemCount = cet.specimenGroupData.length;
 
       _.each(_.pluck(cet.annotationTypeData, 'annotationTypeId'), function(id) {
         cet.removeAnnotationTypeData(id);
         atDataItemCount = atDataItemCount - 1;
-        expect(cet.annotationTypeDataSize()).toBe(atDataItemCount);
+        expect(cet.annotationTypeData.length).toBe(atDataItemCount);
       });
     });
 
     it('returns specimen group data as a string', function() {
       var cet = new CollectionEventType(study,
-                                        cetFromServer,
-                                        { studySpecimenGroups: studySpecimenGroups });
+                                        sltFromServer,
+                                        { specimenGroups: studySpecimenGroups });
       var str = cet.getSpecimenGroupsAsString();
       var regex = /(\w+) \((\d+), (\d+) (\w+)\)/g;
 
@@ -238,13 +241,13 @@ define([
 
     it('returns annotation type data as a string', function() {
       // need at least 2 annotation type data items for this test
-      expect(cetFromServer.annotationTypeData).toBeArrayOfSize(2);
-      cetFromServer.annotationTypeData[0].required = false;
-      cetFromServer.annotationTypeData[1].required = true;
+      expect(sltFromServer.annotationTypeData).toBeArrayOfSize(2);
+      sltFromServer.annotationTypeData[0].required = false;
+      sltFromServer.annotationTypeData[1].required = true;
 
       var cet = new CollectionEventType(study,
-                                        cetFromServer,
-                                        { studyAnnotationTypes: studyAnnotationTypes });
+                                        sltFromServer,
+                                        { annotationTypes: studyAnnotationTypes });
       var str = cet.getAnnotationTypesAsString();
       var regex = /(\w+) \((\w+)\)/g;
       var matches = regex.exec(str);
