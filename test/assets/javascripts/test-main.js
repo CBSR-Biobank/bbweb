@@ -46,7 +46,8 @@ require.config({
     'angular-sanitize':  '../../../target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize',
     'moment':            '../../../target/web/web-modules/main/webjars/lib/momentjs/moment',
     'faker':             '../../../node_modules/karma-faker/node_modules/faker/build/build/faker',
-    'biobankApp':        'app'
+    'biobankApp':        'app',
+    'test':              'fixtures/fakeDomainEntities'
   },
 
   // dynamically load all test files

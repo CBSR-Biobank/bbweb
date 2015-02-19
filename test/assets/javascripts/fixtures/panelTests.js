@@ -14,8 +14,7 @@ define(
     var panelTests = {
       information: information,
       addItem: addItem,
-      panelInitialState: panelInitialState,
-      panelToggle: panelToggle
+      panelInitialState: panelInitialState
     };
 
     return panelTests;
@@ -33,19 +32,6 @@ define(
     }
 
     function panelInitialState(scope) {
-      expect(scope.vm.panelOpen).toEqual(true);
-    }
-
-    /**
-     * Panel's state should be open prior to calling this test.
-     */
-    function panelToggle(scope, Panel) {
-      spyOn(Panel.prototype, 'panelToggle').and.callThrough();
-      scope.vm.panelToggle();
-      expect(scope.vm.panelOpen).toEqual(false);
-      expect(Panel.prototype.panelToggle).toHaveBeenCalled();
-
-      scope.vm.panelToggle();
       expect(scope.vm.panelOpen).toEqual(true);
     }
 

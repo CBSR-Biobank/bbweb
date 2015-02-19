@@ -25,8 +25,6 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
   CentreStudiesPanelCtrl.$inject = [
     '$scope',
-    '$state',
-    '$filter',
     'Panel',
     'StudyViewer',
     'panelTableService',
@@ -39,8 +37,6 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
    *
    */
   function CentreStudiesPanelCtrl($scope,
-                                  $state,
-                                  $filter,
                                   Panel,
                                   StudyViewer,
                                   panelTableService,

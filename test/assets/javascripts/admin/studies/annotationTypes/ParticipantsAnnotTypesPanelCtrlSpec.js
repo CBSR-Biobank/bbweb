@@ -123,10 +123,6 @@ define(
           commonTests.panelInitialState(scope);
         });
 
-        it('should allow toggling of the panel', function() {
-          commonTests.panelToggle(scope, Panel);
-        });
-
       });
 
     });

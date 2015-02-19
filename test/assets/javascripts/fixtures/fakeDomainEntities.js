@@ -1,30 +1,68 @@
 /**
  * Generates fake domain entities as returned by the server.
+ *
+ * This has to be an AngularJS service so that it's dependencies from the real application
+ * can be injected (i.e. AnnotationValueType).
  */
-define(
-  'biobank.fakeDomainEntities',
-  [
-    'underscore',
-    'faker',
-    'moment',
-    'biobank.testUtils'
-  ],
-  function(_, faker, moment, utils) {
+define('biobank.fakeDomainEntities', [
+  'angular',
+  'underscore',
+  'faker',
+  'moment',
+  'biobank.testUtils'
+], function(angular,
+            _,
+            faker,
+            moment,
+            utils) {
+  'use strict';
 
+  var module = angular.module('biobank.fakeDomainEntities', []);
+
+  module.service('fakeDomainEntities', fakeDomainEntities);
+
+  fakeDomainEntities.$inject = [
+    'AnnotationValueType',
+    'AnatomicalSourceType',
+    'PreservationTemperatureType',
+    'PreservationType',
+    'SpecimenType'
+  ];
+
+  function fakeDomainEntities(AnnotationValueType,
+                              AnatomicalSourceType,
+                              PreservationTemperatureType,
+                              PreservationType,
+                              SpecimenType) {
     var entityNames = [];
 
-    var domainEntities = {
-      domainEntityNameNext: domainEntityNameNext,
-      specimenGroupData:    specimenGroupData,
-      annotationTypeData:   annotationTypeData,
-      studyAnnotationType:  studyAnnotationType,
-      specimenLinkType:     specimenLinkType,
-      processingType:       processingType,
-      collectionEventType:  collectionEventType,
-      specimenGroup:        specimenGroup,
-      annotationType:       annotationType,
-      study:                study
+    var service = {
+      domainEntityNameNext:              domainEntityNameNext,
+      specimenGroupData:                 specimenGroupData,
+      annotationTypeData:                annotationTypeData,
+      studyAnnotationType:               studyAnnotationType,
+      specimenLinkType:                  specimenLinkType,
+      processingType:                    processingType,
+      collectionEventType:               collectionEventType,
+      specimenGroup:                     specimenGroup,
+      annotationType:                    annotationType,
+      study:                             study,
+
+      ENTITY_NAME_PROCESSING_TYPE:       ENTITY_NAME_PROCESSING_TYPE,
+      ENTITY_NAME_SPECIMEN_LINK_TYPE:    ENTITY_NAME_SPECIMEN_LINK_TYPE,
+      ENTITY_NAME_COLLECTION_EVENT_TYPE: ENTITY_NAME_COLLECTION_EVENT_TYPE,
+      ENTITY_NAME_SPECIMEN_GROUP:        ENTITY_NAME_SPECIMEN_GROUP,
+      ENTITY_NAME_ANNOTATION_TYPE:       ENTITY_NAME_ANNOTATION_TYPE,
+      ENTITY_NAME_STUDY:                 ENTITY_NAME_STUDY
     };
+    return service;
+
+    function ENTITY_NAME_PROCESSING_TYPE()       { return 'processingType'; }
+    function ENTITY_NAME_SPECIMEN_LINK_TYPE()    { return 'specimenLinkType'; }
+    function ENTITY_NAME_COLLECTION_EVENT_TYPE() { return 'collectionEventType'; }
+    function ENTITY_NAME_SPECIMEN_GROUP()        { return 'specimenGroup'; }
+    function ENTITY_NAME_ANNOTATION_TYPE()       { return 'annotationType'; }
+    function ENTITY_NAME_STUDY()                 { return 'study'; }
 
     function entityCommonFields() {
       return {
@@ -35,11 +73,14 @@ define(
     }
 
     /**
-     * Generates a unique name for a domain entity type.
+     * Generates a unique name for a domain entity type. If domain entity type is undefined, then a unique
+     * string is generated.
      *
      * @param domainEntityType the name of the domain entity type. Eg: 'study', 'centre', 'user', etc.
      */
     function domainEntityNameNext(domainEntityType) {
+      domainEntityType = domainEntityType || 'string';
+
       if (!entityNames[domainEntityType]) {
         entityNames[domainEntityType] = [];
       }
@@ -102,7 +143,7 @@ define(
       var pt =  {
         id:          utils.uuid(),
         studyId:     study.id,
-        name:        domainEntityNameNext('study'),
+        name:        domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE()),
         description: faker.lorem.words(1),
         enabled:     false
       };
@@ -117,7 +158,7 @@ define(
       var cet = {
         id:                 utils.uuid(),
         studyId:            study.id,
-        name:               domainEntityNameNext('collectionEventType'),
+        name:               domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE()),
         description:        faker.lorem.words(1),
         recurring:          utils.randomBoolean()
       };
@@ -138,17 +179,33 @@ define(
       return _.extend(cet, entityCommonFields());
     }
 
+    function randomAnatomicalSourceType() {
+      faker.random.array_element(AnatomicalSourceType.allValues());
+    }
+
+    function randomPreservationType() {
+      faker.random.array_element(PreservationType.allValues());
+    }
+
+    function randomPreservationTemperatureTypeType() {
+      faker.random.array_element(PreservationTemperatureType.allValues());
+    }
+
+    function randomSpecimenType() {
+      faker.random.array_element(SpecimenType.allValues());
+    }
+
     function specimenGroup(study) {
       var sg = {
         id:                          utils.uuid(),
         studyId:                     study.id,
-        name:                        domainEntityNameNext('specimenGroup'),
+        name:                        domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
         description:                 faker.lorem.words(1),
         units:                       'mL',
-        anatomicalSourceType:        'Blood',
-        preservationType:            'Fresh Specimen',
-        preservationTemperatureType: '-80 C',
-        specimenType:                'Plasma'
+        anatomicalSourceType:        randomAnatomicalSourceType(),
+        preservationType:            randomPreservationType(),
+        preservationTemperatureType: randomPreservationTemperatureTypeType(),
+        specimenType:                randomSpecimenType()
       };
       return _.extend(sg, entityCommonFields());
     }
@@ -170,23 +227,25 @@ define(
       options = options || {};
 
       if (!options.valueType) {
-        options.valueType = 'Text';
+        options.valueType = AnnotationValueType.TEXT();
       }
 
       var at = {
         id:        utils.uuid(),
         valueType: options.valueType,
-        name:      domainEntityNameNext('annotationType'),
+        name:      domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE()),
         options:   []
       };
 
-      if (options.valueType == 'Select') {
-        if (!options.maxValueCount) {
+      if (options.valueType === AnnotationValueType.SELECT()) {
+        if (_.isUndefined(options.maxValueCount)) {
           options.maxValueCount = 1;
         }
 
         at.maxValueCount = options.maxValueCount;
-        at.options = _.map(_.range(2), function() { return domainEntityNameNext('annotationType'); });
+        at.options = _.map(_.range(2), function() {
+          return domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE());
+        });
       }
 
       if (options.required) {
@@ -203,12 +262,14 @@ define(
     function study() {
       var study =  {
         id:          utils.uuid(),
-        name:        domainEntityNameNext('study'),
+        name:        domainEntityNameNext(ENTITY_NAME_STUDY()),
         description: faker.lorem.words(1),
         status:      'Disabled'
       };
       return _.extend(study, entityCommonFields());
     }
 
-    return domainEntities;
-  });
+  }
+
+});
+

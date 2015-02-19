@@ -45,9 +45,8 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
                                       AnnotationTypeViewer) {
     var vm = this;
 
-    var panel = new Panel(
-      'study.panel.specimenLinkAnnotationTypes',
-      'home.admin.studies.study.processing.spcLinkAnnotTypeAdd');
+    var panel = new Panel('study.panel.specimenLinkAnnotationTypes',
+                          'home.admin.studies.study.processing.spcLinkAnnotTypeAdd');
 
     vm.study            = $scope.study;
     vm.annotTypes       = $scope.annotTypes;

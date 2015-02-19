@@ -27,7 +27,6 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
   CeventTypesPanelCtrl.$inject = [
     '$scope',
     '$state',
-    '$stateParams',
     'modalService',
     'CollectionEventType',
     'SpecimenGroupSet',
@@ -46,7 +45,6 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
    */
   function CeventTypesPanelCtrl($scope,
                                 $state,
-                                $stateParams,
                                 modalService,
                                 CollectionEventType,
                                 SpecimenGroupSet,

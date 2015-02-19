@@ -4,13 +4,13 @@ define(['./module', 'moment', 'underscore'], function(module, moment, _) {
 
   module.factory('AnnotationHelper', AnnotationHelperFactory);
 
-  //AnnotationFactory.$inject = [];
+  AnnotationHelperFactory.$inject = ['AnnotationValueType'];
 
   /**
    * An annotation helper created from an annotation type. This object is used by HTML form code
    * to manage annotation information.
    */
-  function AnnotationHelperFactory() {
+  function AnnotationHelperFactory(AnnotationValueType) {
     /**
      * @param annotationType the annotationHelper type this annotationHelper is based from
      * @param required set only if annotationType does not have a 'required' attribute.
@@ -21,32 +21,47 @@ define(['./module', 'moment', 'underscore'], function(module, moment, _) {
       self.annotationType = annotationType;
       self.displayValue = undefined;
 
-      if (annotationType.required) {
-        self.required = annotationType.required;
-      } else {
-        if (!!required) {
-          self.required = required;
+      if (_.isUndefined(annotationType.required)) {
+        if (_.isUndefined(required)) {
+          throw new Error('required not assigned');
         }
-        throw new Error('required not assigned');
+        self.required = required;
+      } else {
+        self.required = annotationType.required;
       }
 
-      if (annotationType.valueType === 'DateTime') {
+      switch (annotationType.valueType) {
+
+      case AnnotationValueType.TEXT():
+        self.value = undefined;
+        break;
+
+      case AnnotationValueType.NUMBER():
+        self.value = undefined;
+        break;
+
+      case AnnotationValueType.DATE_TIME():
         self.value = {
           date: moment().format('YYYY-MM-DD'),
           time: moment()
         };
-      } else if ((annotationType.valueType === 'Select') && (annotationType.maxValueCount > 1)) {
-        self.values = [];
-        _.each(annotationType.options, function (option) {
-          self.values.push({name: option, checked: false});
-        });
-        self.someSelected = function () {
-          return _.find(self.values, function(value) {
-            return value.checked;
+        break;
+
+      case AnnotationValueType.SELECT():
+        if (annotationType.maxValueCount == 2) {
+          self.values = [];
+          _.each(annotationType.options, function (option) {
+            self.values.push({name: option, checked: false});
           });
-        };
-      } else {
-        self.value = undefined;
+        } else if (annotationType.maxValueCount == 1) {
+          self.value = undefined;
+        } else {
+          throw new Error('invalid value for max count');
+        }
+        break;
+
+      default:
+        throw new Error('value type is invalid: ' + annotationType.valueType);
       }
     }
 
@@ -58,69 +73,52 @@ define(['./module', 'moment', 'underscore'], function(module, moment, _) {
     };
 
     /**
-     *
-     */
-    AnnotationHelper.prototype.getSelectedValues = function () {
-      var self = this;
-      if (self.annotationType.valueType !== 'Select') {
-        return [];
-      }
-
-      if (self.annotationType.maxValueCount === 1) {
-        return [{
-          annotationTypeId: self.annotationType.id,
-          value:            self.value
-        }];
-      }
-
-      return _.chain(self.values)
-        .filter(function(value) { return value.checked; })
-        .map(function(value) {
-          return {
-            annotationTypeId: self.annotationType.id,
-            value:            value.name
-          };
-        })
-        .value();
-    };
-
-    /**
-     *
+     * Returns the label to display for the annotation.
      */
     AnnotationHelper.prototype.getLabel = function () {
       return this.annotationType.name;
     };
 
     /**
+     * Assigns the value to an annotation based on the annotation's type.
      *
+     * @param annotation.stringValue when setting date must be an ISO date format (i.e. 2015-02-20T09:00:00-0700).
+     *
+     * Note: for Number value types, the value must be formatted as a string.
      */
     AnnotationHelper.prototype.setValue = function (annotation) {
       var self = this;
       var date;
 
-      if (self.annotationType.valueType === 'Text') {
+      switch (self.annotationType.valueType) {
+
+      case AnnotationValueType.TEXT():
         self.value = annotation.stringValue;
         self.displayValue = annotation.stringValue;
-      } else if (self.annotationType.valueType === 'Number') {
+        break;
+
+      case AnnotationValueType.NUMBER():
         self.value = parseFloat(annotation.numberValue);
         self.displayValue = self.value;
-      } else if (self.annotationType.valueType === 'DateTime') {
+        break;
+
+      case AnnotationValueType.DATE_TIME():
         // date part is kept in self.value.date and time in self.value.time, they must be combined
         date = moment(annotation.stringValue);
         self.value.date = date.format('YYYY-MM-DD');
         self.value.time = date;
 
         self.displayValue = date.local().format('YYYY-MM-DD h:mm A') + ' (' + date.local().fromNow() + ')';
-      } else if (self.annotationType.valueType === 'Select') {
+        break;
+
+      case AnnotationValueType.SELECT():
         if (self.annotationType.maxValueCount === 1) {
           self.value = annotation.selectedValues[0].value;
           self.displayValue = self.value;
         } else if (self.annotationType.maxValueCount > 1) {
           // set the 'checked' property on all the selected values
           _.each(annotation.selectedValues, function(selectedValue) {
-            var value = _.find(self.values, function (selfValue) {
-              return selectedValue.value === selfValue.name;
-            });
+            var value = _.findWhere(self.values,  { name: selectedValue.value });
             if (value) {
               value.checked = true;
             }
@@ -134,42 +132,11 @@ define(['./module', 'moment', 'underscore'], function(module, moment, _) {
         } else {
           throw new Error('invalid max value count for annotation: ' + self.annotationType.maxValueCount);
         }
+        break;
 
-      } else {
+      default:
         throw new Error('invalid value type for annotation: ' + self.annotationType.valueType);
       }
-    };
-
-    /**
-     *
-     */
-    AnnotationHelper.prototype.getAnnotationValue = function () {
-      var self = this;
-      var datetime;
-
-      if (self.annotationType.valueType === 'Text') {
-        return { stringValue: self.value };
-      }
-
-      if (self.annotationType.valueType === 'Number') {
-        return { numberValue: self.value.toString() };
-      }
-
-      if (self.annotationType.valueType === 'DateTime') {
-        // date part is kept in self.value.date and time in self.value.time, they must be combined
-        if (self.value.time instanceof Date) {
-          self.value.time = moment(self.value.time);
-        }
-        datetime = moment(self.value.date).set({
-          'millisecond': 0,
-          'second': 0,
-          'minute': self.value.time.minutes(),
-          'hour': self.value.time.hours()
-        });
-        return { stringValue: datetime.local().format() };
-      }
-
-      return null;
     };
 
     /**
@@ -179,15 +146,72 @@ define(['./module', 'moment', 'underscore'], function(module, moment, _) {
       var self = this;
       var result = {
         annotationTypeId: self.annotationType.id,
-        selectedValues:   self.getSelectedValues()
+        selectedValues:   getSelectedValues()
       };
 
-      var value = self.getAnnotationValue();
+      var value = getAnnotationValue();
       if (value) {
         _.extend(result, value);
       }
 
       return result;
+
+      //---
+
+      function getSelectedValues() {
+        if (self.annotationType.valueType !== AnnotationValueType.SELECT()) {
+          return [];
+        }
+
+        if (self.annotationType.maxValueCount === 1) {
+          return [{
+            annotationTypeId: self.annotationType.id,
+            value:            self.value
+          }];
+        }
+
+        return _.chain(self.values)
+          .filter(function(value) { return value.checked; })
+          .map(function(value) {
+            return {
+              annotationTypeId: self.annotationType.id,
+              value:            value.name
+            };
+          })
+          .value();
+      }
+
+      /**
+       * Returns the annotaions current value as a string..
+       */
+       function getAnnotationValue() {
+        var datetime;
+
+        switch (self.annotationType.valueType) {
+
+        case AnnotationValueType.TEXT():
+          return { stringValue: self.value };
+
+        case AnnotationValueType.NUMBER():
+          return { numberValue: self.value.toString() };
+
+        case AnnotationValueType.DATE_TIME():
+          // date part is kept in self.value.date and time in self.value.time, they must be combined
+          if (self.value.time instanceof Date) {
+            self.value.time = moment(self.value.time);
+          }
+          datetime = moment(self.value.date).set({
+            'millisecond': 0,
+            'second': 0,
+            'minute': self.value.time.minutes(),
+            'hour': self.value.time.hours()
+          });
+          return { stringValue: datetime.local().format() };
+        }
+
+        return null;
+      }
+
     };
 
     /** return constructor function */

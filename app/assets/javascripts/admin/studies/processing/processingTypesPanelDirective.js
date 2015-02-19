@@ -25,7 +25,6 @@ define(['../../module', 'angular'], function(module, angular) {
   ProcessingTypesPanelCtrl.$inject = [
     '$scope',
     '$state',
-    '$stateParams',
     'Panel',
     'processingTypesService',
     'ProcessingTypeViewer',
@@ -37,7 +36,6 @@ define(['../../module', 'angular'], function(module, angular) {
    */
   function ProcessingTypesPanelCtrl($scope,
                                     $state,
-                                    $stateParams,
                                     Panel,
                                     processingTypesService,
                                     ProcessingTypeViewer,

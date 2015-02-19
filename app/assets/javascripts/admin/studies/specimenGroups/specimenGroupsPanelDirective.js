@@ -26,7 +26,6 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
   SpecimenGroupsPanelCtrl.$inject = [
     '$scope',
     '$state',
-    '$stateParams',
     'Panel',
     'modalService',
     'specimenGroupsService',
@@ -39,7 +38,6 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
    */
   function SpecimenGroupsPanelCtrl($scope,
                                    $state,
-                                   $stateParams,
                                    Panel,
                                    modalService,
                                    specimenGroupsService,

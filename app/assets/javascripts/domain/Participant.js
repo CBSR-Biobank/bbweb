@@ -25,9 +25,7 @@ define(['./module', 'underscore'], function(module, _) {
       function getAnnotationHelpers(annotationTypes) {
         return _.map(annotationTypes, function(annotType) {
           var helper =  new AnnotationHelper(annotType);
-          var annotation = _.find(self.annotations, function(annotation) {
-            return annotType.id === annotation.annotationTypeId;
-          });
+          var annotation = _.findWhere(self.annotations, {id: annotation.annotationTypeId});
           if (annotation) {
             helper.setValue(annotation);
           }

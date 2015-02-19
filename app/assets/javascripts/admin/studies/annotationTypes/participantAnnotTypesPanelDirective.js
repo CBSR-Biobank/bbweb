@@ -25,9 +25,7 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
   ParticipantAnnotTypesPanelCtrl.$inject = [
     '$scope',
     '$state',
-    '$stateParams',
     'modalService',
-    'participantAnnotTypesService',
     'participantAnnotTypeRemoveService',
     'Panel',
     'AnnotationTypeViewer'
@@ -38,9 +36,7 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
    */
   function ParticipantAnnotTypesPanelCtrl($scope,
                                           $state,
-                                          $stateParams,
                                           modalService,
-                                          participantAnnotTypesService,
                                           participantAnnotTypeRemoveService,
                                           Panel,
                                           AnnotationTypeViewer) {

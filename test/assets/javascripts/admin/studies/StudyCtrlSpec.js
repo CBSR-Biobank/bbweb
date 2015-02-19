@@ -70,7 +70,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       expect(windowService.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.participantAnnotationTypes', true);
       expect(windowService.localStorage.setItem)
-        .toHaveBeenCalledWith('study.panel.participantAnnottionTypes', true);
+        .toHaveBeenCalledWith('study.panel.participantAnnotationTypes', true);
       expect(windowService.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.processingTypes', true);
       expect(windowService.localStorage.setItem)
