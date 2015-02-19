@@ -1,4 +1,4 @@
-define(['../../module', 'underscore'], function(module, _) {
+define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
   'use strict';
 
   module.directive('ceventAnnotTypesPanel', ceventAnnotTypesPanel);
@@ -45,7 +45,7 @@ define(['../../module', 'underscore'], function(module, _) {
                                      AnnotationTypeViewer) {
     var vm = this;
 
-    var helper = new Panel('study.panel.collectionEventAnnottionTypes',
+    var panel = new Panel('study.panel.collectionEventAnnotationTypes',
                            'home.admin.studies.study.collection.ceventAnnotTypeAdd');
 
     vm.study            = $scope.study;
@@ -55,8 +55,10 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.remove           = remove;
     vm.information      = information;
     vm.add              = add;
-    vm.panelOpen        = helper.panelOpen;
-    vm.panelToggle      = panelToggle;
+    vm.panelOpen        = panel.getPanelOpenState();
+
+    $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
+                  angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
     vm.modificationsAllowed = vm.study.status === 'Disabled';
 
@@ -66,21 +68,16 @@ define(['../../module', 'underscore'], function(module, _) {
       { title: 'Description', field: 'description', filter: { 'description': 'text' } }
     ];
 
-    vm.tableParams = helper.getTableParams(vm.annotTypes);
+    vm.tableParams = panel.getTableParams(vm.annotTypes);
 
     //--
 
     function add() {
-      return helper.add();
+      return panel.add();
     }
 
     function information(annotType) {
       return new AnnotationTypeViewer(annotType, 'Collection Event Annotation Type');
-    }
-
-    function panelToggle() {
-      vm.panelOpen = helper.panelToggle();
-      return vm.panelOpen;
     }
 
     function annotTypeInUseModal() {

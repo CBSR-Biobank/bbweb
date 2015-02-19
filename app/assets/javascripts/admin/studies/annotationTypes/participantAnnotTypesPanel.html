@@ -1,11 +1,10 @@
 <accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
   <accordion-heading>
-    Participant Annotation Types
+    Participant Annotation Types - {{vm.panelOpen}}
     <panel-buttons on-add="vm.add()"
                    add-button-title="Add annotation type"
                    add-button-enabled="vm.modificationsAllowed"
-                   panel-open="vm.panelOpen"
-                   panel-toggle="vm.panelToggle()">
+                   panel-open="vm.panelOpen">
     </panel-buttons>
   </accordion-heading>
   <p>

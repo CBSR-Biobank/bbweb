@@ -16,7 +16,7 @@ define(['../module'], function(module) {
         addButtonTitle: '@',
         addButtonEnabled: '&',
         panelToggle: '&',
-        panelOpen: '&'
+        panelOpen: '='
       },
       templateUrl: '/assets/javascripts/common/directives/panelButtons.html',
       controller: 'PanelButtonsController as vm'

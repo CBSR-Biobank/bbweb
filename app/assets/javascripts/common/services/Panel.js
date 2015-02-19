@@ -13,27 +13,27 @@ define(['../module'], function(module) {
   function PanelFactory($window, $state, panelTableService) {
 
     function Panel(panelId, addStateName) {
-      var self = this, localStorage;
+      var self = this, panelStateLocalStorage;
 
       self.panelId = panelId;
       self.addStateName = addStateName;
-      localStorage = $window.localStorage.getItem(self.panelId);
-      if ((localStorage === null) || (localStorage === ''))  {
+
+      panelStateLocalStorage = $window.localStorage.getItem(self.panelId);
+      if ((panelStateLocalStorage === null) || (panelStateLocalStorage === ''))  {
         $window.localStorage.setItem(self.panelId, 'true');
       }
-
-      self.panelOpen = ($window.localStorage.getItem(self.panelId) === 'true');
     }
 
     Panel.prototype.add = function () {
       $state.go(this.addStateName);
     };
 
-    Panel.prototype.panelToggle = function () {
-      var currentState = ($window.localStorage.getItem(this.panelId) === 'true');
-      this.panelOpen = !currentState;
-      $window.localStorage.setItem(this.panelId, this.panelOpen);
-      return this.panelOpen;
+    Panel.prototype.getPanelOpenState = function () {
+      return ($window.localStorage.getItem(this.panelId) === 'true');
+    };
+
+    Panel.prototype.watchPanelOpenChangeFunc = function(newValue) {
+      $window.localStorage.setItem(this.panelId, newValue.toString());
     };
 
     /**

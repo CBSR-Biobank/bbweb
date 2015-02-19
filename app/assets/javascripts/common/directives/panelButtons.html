@@ -1,15 +1,13 @@
 <div class="btn-group pull-right">
-  <button
-     class="btn btn-xs btn-default"
-     title="{{addButtonTitle}}"
-     ng-if="addButtonEnabled()"
-     ng-click="vm.addButtonPressed($event)">
+  <button class="btn btn-xs btn-default"
+          title="{{addButtonTitle}}"
+          ng-if="addButtonEnabled()"
+          ng-click="vm.addButtonPressed($event)">
     <i class="glyphicon glyphicon-plus"></i>
   </button>
   <button class="btn btn-xs btn-default"
-          ng-click="panelToggle()"
           title="expand / collapse">
     <i class="glyphicon"
-       ng-class="panelOpen() ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
+       ng-class="panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
   </button>
 </div>

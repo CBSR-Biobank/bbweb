@@ -1,4 +1,4 @@
-define(['../../module', 'underscore'], function(module, _) {
+define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
   'use strict';
 
   module.directive('spcLinkAnnotTypesPanel', spcLinkAnnotTypesPanel);
@@ -45,7 +45,7 @@ define(['../../module', 'underscore'], function(module, _) {
                                       AnnotationTypeViewer) {
     var vm = this;
 
-    var helper = new Panel(
+    var panel = new Panel(
       'study.panel.specimenLinkAnnotationTypes',
       'home.admin.studies.study.processing.spcLinkAnnotTypeAdd');
 
@@ -56,8 +56,10 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.remove           = remove;
     vm.information      = information;
     vm.add              = add;
-    vm.panelOpen        = helper.panelOpen;
-    vm.panelToggle      = panelToggle;
+    vm.panelOpen   = panel.getPanelOpenState();
+
+    $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
+                  angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
     vm.modificationsAllowed = vm.study.status === 'Disabled';
 
@@ -67,23 +69,18 @@ define(['../../module', 'underscore'], function(module, _) {
       { title: 'Description', field: 'description', filter: { 'description': 'text' } }
     ];
 
-    vm.tableParams = helper.getTableParams(vm.annotTypes);
+    vm.tableParams = panel.getTableParams(vm.annotTypes);
 
     vm.annotTypesInUse = annotTypesInUse();
 
     //--
 
     function add() {
-      return helper.add();
+      return panel.add();
     }
 
     function information(annotType) {
       return new AnnotationTypeViewer(annotType, 'Specimen Link Annotation Type');
-    }
-
-    function panelToggle() {
-      vm.panelOpen = helper.panelToggle();
-      return vm.panelOpen;
     }
 
     /**

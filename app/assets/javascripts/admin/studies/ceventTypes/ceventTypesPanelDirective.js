@@ -1,4 +1,4 @@
-define(['../../module', 'underscore'], function(module, _) {
+define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
   'use strict';
 
   module.directive('ceventTypesPanel', ceventTypesPanelDirective);
@@ -60,7 +60,7 @@ define(['../../module', 'underscore'], function(module, _) {
                                 ceventTypeRemoveService) {
     var vm = this;
 
-    var helper = new Panel('study.panel.collectionEventTypes',
+    var panel = new Panel('study.panel.collectionEventTypes',
                            'home.admin.studies.study.collection.ceventTypeAdd');
 
     vm.study = $scope.study;
@@ -83,17 +83,16 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.information          = information;
     vm.showAnnotationType   = showAnnotationType;
     vm.showSpecimenGroup    = showSpecimenGroup;
-    vm.panelOpen            = helper.panelOpen;
-    vm.panelToggle          = panelToggle;
+    vm.panelOpen            = panel.getPanelOpenState();
+
+    $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
+                  angular.bind(panel, panel.watchPanelOpenChangeFunc));
+
     vm.modificationsAllowed = vm.study.status === 'Disabled';
 
-    vm.tableParams = helper.getTableParams(vm.ceventTypes);
+    vm.tableParams = panel.getTableParams(vm.ceventTypes);
 
     //--
-
-    function panelToggle() {
-      return helper.panelToggle();
-    }
 
     function add() {
       if (vm.specimenGroups.length <= 0) {

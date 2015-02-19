@@ -30,13 +30,13 @@ define(['../module'], function(module) {
         // initialize the panels to open state when viewing a new study
         if (vm.study.id !== $window.localStorage.getItem('study.panel.studyId')) {
           // this way when the user selects a new study, the panels always default to open
-          $window.localStorage.setItem('study.panel.collectionEventTypes',        true);
-          $window.localStorage.setItem('study.panel.participantAnnotationTypes',  true);
-          $window.localStorage.setItem('study.panel.participantAnnottionTypes',   true);
-          $window.localStorage.setItem('study.panel.processingTypes',             true);
-          $window.localStorage.setItem('study.panel.specimenGroups',              true);
-          $window.localStorage.setItem('study.panel.specimenLinkAnnotationTypes', true);
-          $window.localStorage.setItem('study.panel.specimenLinkTypes',           true);
+          $window.localStorage.setItem('study.panel.participantAnnotationTypes',     true);
+          $window.localStorage.setItem('study.panel.specimenGroups',                 true);
+          $window.localStorage.setItem('study.panel.collectionEventTypes',           true);
+          $window.localStorage.setItem('study.panel.collectionEventAnnotationTypes', true);
+          $window.localStorage.setItem('study.panel.processingTypes',                true);
+          $window.localStorage.setItem('study.panel.specimenLinkAnnotationTypes',    true);
+          $window.localStorage.setItem('study.panel.specimenLinkTypes',              true);
 
           // remember the last viewed study
           $window.localStorage.setItem('study.panel.studyId', vm.study.id);

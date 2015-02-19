@@ -1,4 +1,4 @@
-define(['../../module', 'underscore'], function(module, _) {
+define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
   'use strict';
 
   module.directive('participantsAnnotTypesPanel', participantsAnnotTypesPanel);
@@ -46,18 +46,20 @@ define(['../../module', 'underscore'], function(module, _) {
                                           AnnotationTypeViewer) {
     var vm = this;
 
-    var helper = new Panel('study.panel.participantAnnotationTypes',
+    var panel = new Panel('study.panel.participantAnnotationTypes',
                            'home.admin.studies.study.participants.annotTypeAdd');
 
-    vm.study            = $scope.study;
-    vm.annotTypes       = $scope.annotTypes;
-    vm.hasRequired      = true;
-    vm.update           = update;
-    vm.remove           = remove;
-    vm.information      = information;
-    vm.add              = add;
-    vm.panelOpen        = helper.panelOpen;
-    vm.panelToggle      = panelToggle;
+    vm.study       = $scope.study;
+    vm.annotTypes  = $scope.annotTypes;
+    vm.hasRequired = true;
+    vm.update      = update;
+    vm.remove      = remove;
+    vm.information = information;
+    vm.add         = add;
+    vm.panelOpen   = panel.getPanelOpenState();
+
+    $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
+                  angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
     vm.modificationsAllowed = vm.study.status === 'Disabled';
 
@@ -68,7 +70,7 @@ define(['../../module', 'underscore'], function(module, _) {
       { title: 'Description', field: 'description', filter: { 'description': 'text' } }
     ];
 
-    vm.tableParams = helper.getTableParams(vm.annotTypes);
+    vm.tableParams = panel.getTableParams(vm.annotTypes);
 
     // FIXME this is set to empty array for now, but will have to call the correct method in the future
     vm.annotTypesInUse = [];
@@ -76,16 +78,11 @@ define(['../../module', 'underscore'], function(module, _) {
     //--
 
     function add() {
-      return helper.add();
+      return panel.add();
     }
 
     function information(annotationType) {
       return new AnnotationTypeViewer(annotationType, 'Participant Annotation Type');
-    }
-
-    function panelToggle() {
-      vm.panelOpen = helper.panelToggle();
-      return vm.panelOpen;
     }
 
     function annotTypeInUseModal() {

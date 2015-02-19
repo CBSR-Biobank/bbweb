@@ -1,7 +1,7 @@
 define(['./module'], function(module) {
   'use strict';
 
-  module.factory('Location', LocationViewerFactory);
+  module.factory('LocationViewer', LocationViewerFactory);
 
   LocationViewerFactory.$inject = ['EntityViewer'];
 

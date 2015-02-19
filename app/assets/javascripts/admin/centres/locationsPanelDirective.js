@@ -1,4 +1,4 @@
-define(['../module'], function(module) {
+define(['../module', 'angular'], function(module, angular) {
   'use strict';
 
   module.directive('locationsPanel', locationsPanel);
@@ -42,7 +42,7 @@ define(['../module'], function(module) {
                               centreLocationService) {
     var vm = this;
 
-    var helper = new Panel('centre.panel.locations', 'home.admin.centres.centre.locationAdd');
+    var panel = new Panel('centre.panel.locations', 'home.admin.centres.centre.locationAdd');
 
     vm.centre           = $scope.centre;
     vm.locations        = $scope.locations;
@@ -50,19 +50,16 @@ define(['../module'], function(module) {
     vm.remove           = remove;
     vm.add              = add;
     vm.information      = information;
-    vm.panelOpen        = helper.panelOpen;
-    vm.panelToggle      = panelToggle;
-
-    vm.tableParams      = helper.getTableParams(vm.locations);
+    vm.panelOpen        = panel.getPanelOpenState();
+    vm.tableParams      = panel.getTableParams(vm.locations);
 
     vm.modificationsAllowed = vm.centre.status === 'Disabled';
 
-    function add() {
-      return helper.add();
-    }
+    $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
+                  angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
-    function panelToggle() {
-      return helper.panelToggle();
+    function add() {
+      return panel.add();
     }
 
     function information(location) {

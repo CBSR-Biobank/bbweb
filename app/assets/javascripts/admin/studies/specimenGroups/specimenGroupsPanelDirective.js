@@ -1,4 +1,4 @@
-define(['../../module', 'underscore'], function(module, _) {
+define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
   'use strict';
 
   module.directive('specimenGroupsPanel', specimenGroupsPanel);
@@ -47,7 +47,7 @@ define(['../../module', 'underscore'], function(module, _) {
                                    specimenGroupRemoveService) {
     var vm = this;
 
-    var helper = new Panel('study.panel.specimenGroups',
+    var panel = new Panel('study.panel.specimenGroups',
                            'home.admin.studies.study.specimens.groupAdd');
 
     vm.study                 = $scope.study;
@@ -57,21 +57,19 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.remove                = remove;
     vm.add                   = add;
     vm.information           = information;
-    vm.panelOpen             = helper.panelOpen;
-    vm.panelToggle           = panelToggle;
+    vm.panelOpen             = panel.getPanelOpenState();
+
+    $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
+                  angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
     vm.modificationsAllowed = vm.study.status === 'Disabled';
 
-    vm.tableParams = helper.getTableParams(vm.specimenGroups);
+    vm.tableParams = panel.getTableParams(vm.specimenGroups);
 
     //--
 
     function add() {
-      return helper.add();
-    }
-
-    function panelToggle() {
-      return helper.panelToggle();
+      return panel.add();
     }
 
     /**

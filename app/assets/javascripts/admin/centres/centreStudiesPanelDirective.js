@@ -1,4 +1,4 @@
-define(['../module', 'underscore'], function(module, _) {
+define(['../module', 'angular', 'underscore'], function(module, angular, _) {
   'use strict';
 
   module.directive('centreStudiesPanel', centreStudiesPanel);
@@ -50,7 +50,7 @@ define(['../module', 'underscore'], function(module, _) {
 
     var vm = this;
 
-    var helper = new Panel('centre.panel.studies');
+    var panel = new Panel('centre.panel.studies');
 
     vm.centre         = $scope.centre;
     vm.centreStudyIds = $scope.centreStudies;
@@ -60,8 +60,7 @@ define(['../module', 'underscore'], function(module, _) {
 
     vm.remove         = remove;
     vm.information    = information;
-    vm.panelOpen      = helper.panelOpen;
-    vm.panelToggle    = panelToggle;
+    vm.panelOpen      = panel.getPanelOpenState();
 
     vm.selected = undefined;
     vm.onSelect = onSelect;
@@ -71,6 +70,9 @@ define(['../module', 'underscore'], function(module, _) {
     //--
 
     function init() {
+      $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
+                    angular.bind(panel, panel.watchPanelOpenChangeFunc));
+
       vm.studiesById = _.indexBy(vm.studyNames, 'id');
 
       _.each($scope.centreStudies, function (studyId) {
@@ -78,10 +80,6 @@ define(['../module', 'underscore'], function(module, _) {
       });
 
       vm.tableParams = panelTableService.getTableParamsWithCallback(getTableData, {count: 10}, {counts: []});
-    }
-
-    function panelToggle() {
-      return helper.panelToggle();
     }
 
     function getTableData() {

@@ -1,4 +1,4 @@
-define(['../../module', 'underscore'], function(module, _) {
+define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
   'use strict';
 
   module.directive('spcLinkTypesPanel', spcLinkTypesPanel);
@@ -64,8 +64,7 @@ define(['../../module', 'underscore'], function(module, _) {
     vm.remove              = spcLinkTypeRemoveService.remove;
     vm.add                 = add;
     vm.information         = information;
-    vm.panelOpen           = panel.panelOpen;
-    vm.panelToggle         = panelToggle;
+    vm.panelOpen           = panel.getPanelOpenState();
 
     vm.processingTypesById = _.indexBy($scope.processingDto.processingTypes, 'id');
     vm.specimenGroupsById  = _.indexBy($scope.processingDto.specimenGroups, 'id');
@@ -89,10 +88,8 @@ define(['../../module', 'underscore'], function(module, _) {
 
     vm.tableParams = panel.getTableParams(vm.specimenLinkTypes);
 
-
-    function panelToggle() {
-      return panel.panelToggle();
-    }
+    $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
+                  angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
     /**
      * Displays a specimen link type in a modal.

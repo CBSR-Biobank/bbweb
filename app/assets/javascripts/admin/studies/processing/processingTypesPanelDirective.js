@@ -1,4 +1,4 @@
-define(['../../module'], function(module) {
+define(['../../module', 'angular'], function(module, angular) {
   'use strict';
 
   module.directive('processingTypesPanel', processingTypesPanel);
@@ -44,7 +44,7 @@ define(['../../module'], function(module) {
                                     processingTypeRemoveService) {
     var vm = this;
 
-    var helper = new Panel('study.panel.processingTypes',
+    var panel = new Panel('study.panel.processingTypes',
                            'home.admin.studies.study.processing.processingTypeAdd');
 
     vm.study            = $scope.study;
@@ -53,20 +53,18 @@ define(['../../module'], function(module) {
     vm.remove           = processingTypeRemoveService.remove;
     vm.add              = add;
     vm.information      = information;
-    vm.panelOpen        = helper.panelOpen;
-    vm.panelToggle      = panelToggle;
+    vm.panelOpen   = panel.getPanelOpenState();
 
     vm.modificationsAllowed = vm.study.status === 'Disabled';
-    vm.tableParams = helper.getTableParams(vm.processingTypes);
+    vm.tableParams = panel.getTableParams(vm.processingTypes);
+
+    $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
+                  angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
     //--
 
     function add() {
-      return helper.add();
-    }
-
-    function panelToggle() {
-      return helper.panelToggle();
+      return panel.add();
     }
 
     /**
