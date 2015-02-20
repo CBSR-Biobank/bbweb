@@ -4,13 +4,13 @@ define(['./module'], function(module) {
   module.controller('ForgotPasswordCtrl', ForgotPasswordCtrl);
 
   ForgotPasswordCtrl.$inject = [
-    '$state', '$stateParams', 'usersService', 'modalService',
+    '$state', 'usersService', 'modalService',
   ];
 
   /**
    *
    */
-  function ForgotPasswordCtrl($state, $stateParams, usersService, modalService) {
+  function ForgotPasswordCtrl($state, usersService, modalService) {
     var vm = this;
     vm.email = '';
     vm.submit = submit;

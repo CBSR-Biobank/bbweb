@@ -7,23 +7,17 @@ define(['./module'], function(module) {
   module.controller('UserProfileCtrl', UserProfileCtrl);
 
   UserProfileCtrl.$inject = [
-    '$filter',
     '$modal',
-    'domainEntityUpdateError',
     'notificationsService',
     'modalService',
     'usersService',
-    'stateHelper',
     'user'
   ];
 
-  function UserProfileCtrl($filter,
-                           $modal,
-                           domainEntityUpdateError,
+  function UserProfileCtrl($modal,
                            notificationsService,
                            modalService,
                            usersService,
-                           stateHelper,
                            user) {
     var vm = this;
 

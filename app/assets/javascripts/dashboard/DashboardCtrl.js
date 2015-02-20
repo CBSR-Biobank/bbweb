@@ -8,7 +8,7 @@ define(['./module'], function(module) {
 
   DashboardCtrl.$inject = ['user'];
 
-  function DashboardCtrl($scope, user) {
+  function DashboardCtrl(user) {
     var vm = this;
     vm.user = user;
   }

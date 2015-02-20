@@ -66,14 +66,6 @@ define([
       expect(cet.isNew).toBe(false);
     });
 
-    it('should return the correct size for specimen group data', function() {
-      // var cetFromServer = fakeEntities.collectionEventType(study,
-      //                                                      { specimenGroups: study.specimenGroups });
-      // var cet = new CollectionEventType(study,
-      //                                   cetFromServer,
-      //                                   { studySpecimenGroups: study.specimenGroups });
-    });
-
     it('should be initialized with specimen group and annotation type server objects', function() {
       var cetFromServer = fakeEntities.collectionEventType(
         study,
@@ -122,6 +114,95 @@ define([
       });
     });
 
+    it('should not be initialized with specimen group array and SpecimenGroupSet', function() {
+      var cetFromServer = fakeEntities.collectionEventType(
+        study,
+        { specimenGroups: study.specimenGroups });
+
+      expect(function () {
+        return new CollectionEventType(
+          study,
+          cetFromServer,
+          {
+            studySpecimenGroups: study.specimenGroups,
+            studySpecimenGroupSet: new SpecimenGroupSet(study.specimenGroups)
+          });
+      }).toThrow(new Error('cannot create with both specimenGroups and specimenGroupSet'));
+    });
+
+    it('should not be initialized with annotation type and AnnotationTypeSet', function() {
+      var cetFromServer = fakeEntities.collectionEventType(
+        study,
+        { annotationTypes: study.annotationTypes });
+
+      expect(function () {
+        return new CollectionEventType(
+          study,
+          cetFromServer,
+          {
+            studyAnnotationTypes: study.annotationTypes,
+            studyAnnotationTypeSet: new AnnotationTypeSet(study.annotationTypes)
+          });
+      }).toThrow(new Error('cannot create with both annotationTypes and annotationTypeSet'));
+    });
+
+    it('should return the correct size for specimen group data', function() {
+      var cetFromServer = fakeEntities.collectionEventType(
+        study,
+        { specimenGroups: study.specimenGroups });
+      var cet = new CollectionEventType(
+        study,
+        cetFromServer,
+        { studySpecimenGroups: study.specimenGroups });
+      expect(cet.specimenGroupDataSize()).toBe(cetFromServer.specimenGroupData.length);
+    });
+
+    it('should return the specimen group IDs', function() {
+      var specimenGroupIds = _.pluck(study.specimenGroups, 'id');
+
+      var cetFromServer = fakeEntities.collectionEventType(
+        study,
+        { specimenGroups: study.specimenGroups });
+      var cet = new CollectionEventType(
+        study,
+        cetFromServer,
+        { studySpecimenGroups: study.specimenGroups });
+      expect(cet.allSpecimenGroupDataIds()).toBeArrayOfSize(cetFromServer.specimenGroupData.length);
+
+      _.each(cet.allSpecimenGroupDataIds(), function(id) {
+        expect(specimenGroupIds).toContain(id);
+      });
+    });
+
+    it('should return the specimen group IDs', function() {
+      var cetFromServer = fakeEntities.collectionEventType(
+        study,
+        { specimenGroups: study.specimenGroups });
+      var cet = new CollectionEventType(
+        study,
+        cetFromServer,
+        { studySpecimenGroups: study.specimenGroups });
+
+      _.each(cetFromServer.specimenGroupData, function(serverSgDataItem) {
+        var sgDataItem = cet.getSpecimenGroupData(serverSgDataItem.specimenGroupId);
+        expect(serverSgDataItem.specimenGroupId).toBe(sgDataItem.specimenGroupId);
+        expect(serverSgDataItem.maxCount).toBe(sgDataItem.maxCount);
+        expect(serverSgDataItem.amount).toBe(sgDataItem.amount);
+      });
+    });
+
+    it('should throw an error if there are no specimen group data items', function() {
+      var cet = new CollectionEventType(study, cetFromServer);
+      expect(function () { cet.getSpecimenGroupData(study.specimenGroups[0].id); })
+        .toThrow(new Error('no data items'));
+    });
+
+    it('getSpecimenGroupData should throw an error if there are no specimen group data items', function() {
+      var cet = new CollectionEventType(study, cetFromServer);
+      expect(function () { cet.getSpecimenGroupData(study.specimenGroups[0].id); })
+        .toThrow(new Error('no data items'));
+    });
+
     it('returns specimen group data as a string', function() {
       var cetFromServer = fakeEntities.collectionEventType(study, { specimenGroups: study.specimenGroups});
       var cet = new CollectionEventType(study,
@@ -157,6 +238,63 @@ define([
       }
     });
 
+    it('getSpecimenGroupsAsString should throw an error if there are no specimen group data items', function() {
+      var cet = new CollectionEventType(study, cetFromServer);
+      expect(function () { cet.getSpecimenGroupsAsString(); })
+        .toThrow(new Error('no data items'));
+    });
+
+    it('should return the correct size for annotation type data', function() {
+      var cetFromServer = fakeEntities.collectionEventType(
+        study,
+        { annotationTypes: study.annotationTypes });
+      var cet = new CollectionEventType(
+        study,
+        cetFromServer,
+        { studyAnnotationTypes: study.annotationTypes });
+      expect(cet.annotationTypeDataSize()).toBe(cetFromServer.annotationTypeData.length);
+    });
+
+    it('should return the annotation type IDs', function() {
+      var annotationTypeIds = _.pluck(study.annotationTypes, 'id');
+
+      var cetFromServer = fakeEntities.collectionEventType(
+        study,
+        { annotationTypes: study.annotationTypes });
+      var cet = new CollectionEventType(
+        study,
+        cetFromServer,
+        { studyAnnotationTypes: study.annotationTypes });
+      expect(cet.allAnnotationTypeDataIds()).toBeArrayOfSize(cetFromServer.annotationTypeData.length);
+
+      _.each(cet.allAnnotationTypeDataIds(), function(id) {
+        expect(annotationTypeIds).toContain(id);
+      });
+    });
+
+    it('should return the annotation type IDs', function() {
+      var cetFromServer = fakeEntities.collectionEventType(
+        study,
+        { annotationTypes: study.annotationTypes });
+      var cet = new CollectionEventType(
+        study,
+        cetFromServer,
+        { studyAnnotationTypes: study.annotationTypes });
+
+      _.each(cetFromServer.annotationTypeData, function(serverAtDataItem) {
+        var atDataItem = cet.getAnnotationTypeData(serverAtDataItem.annotationTypeId);
+        expect(serverAtDataItem.annotationTypeId).toBe(atDataItem.annotationTypeId);
+        expect(serverAtDataItem.maxCount).toBe(atDataItem.maxCount);
+        expect(serverAtDataItem.amount).toBe(atDataItem.amount);
+      });
+    });
+
+    it('getAnnotationTypeData throws an error if there are no annotation type data items', function() {
+      var cet = new CollectionEventType(study, cetFromServer);
+      expect(function () { cet.getAnnotationTypeData(study.annotationTypes[0].id); })
+        .toThrow(new Error('no data items'));
+    });
+
     it('returns annotation type data as a string', function() {
       var cetFromServer;
 
@@ -172,6 +310,31 @@ define([
                                         cetFromServer,
                                         { studyAnnotationTypes: annotationTypes });
       commonTests.getAsString(cet);
+    });
+
+    it('getAnnotationTypesAsString should throw an error if there are no annotation type data items', function() {
+      var cet = new CollectionEventType(study, cetFromServer);
+      expect(function () { cet.getAnnotationTypesAsString(); })
+        .toThrow(new Error('no data items'));
+    });
+
+    it('returns the collection event type required by the server', function() {
+      var cetFromServer = fakeEntities.collectionEventType(
+        study,
+        {
+          specimenGroups: study.specimenGroups,
+          annotationTypes: study.annotationTypes
+        });
+      var cet = new CollectionEventType(
+        study,
+        cetFromServer,
+        {
+          studySpecimenGroups: study.specimenGroups,
+          studyAnnotationTypes: study.annotationTypes
+        });
+
+      var serverCeventType = cet.getServerCeventType();
+      expect(serverCeventType).toEqual(cetFromServer);
     });
 
 

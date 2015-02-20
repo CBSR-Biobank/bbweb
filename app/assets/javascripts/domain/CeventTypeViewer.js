@@ -18,11 +18,11 @@ define(['./module'], function(module) {
     function CeventTypeViewer(study, ceventType) {
       var ev = new EntityViewer(ceventType, 'Collection Event Type');
 
-      ev.addAttribute('Name:', ceventType.name);
-      ev.addAttribute('Recurring:', ceventType.recurring ? 'Yes' : 'No');
-      ev.addAttribute('Specimen Groups (Count, Amount):', ceventType.getSpecimenGroupsAsString());
-      ev.addAttribute('Annotation Types:', ceventType.getAnnotationTypesAsString());
-      ev.addAttribute('Description:', ceventType.description);
+      ev.addAttribute('Name', ceventType.name);
+      ev.addAttribute('Recurring', ceventType.recurring ? 'Yes' : 'No');
+      ev.addAttribute('Specimen Groups (Count, Amount)', ceventType.getSpecimenGroupsAsString());
+      ev.addAttribute('Annotation Types', ceventType.getAnnotationTypesAsString());
+      ev.addAttribute('Description', ceventType.description);
 
       ev.showModal();
     }

@@ -13,11 +13,11 @@ define(['./module'], function(module) {
     function AnnotationTypeViewer(annotationType, title) {
       var ev = new EntityViewer(annotationType, title);
 
-      ev.addAttribute('Name:', annotationType.name);
-      ev.addAttribute('Type:', annotationType.valueType);
+      ev.addAttribute('Name', annotationType.name);
+      ev.addAttribute('Type', annotationType.valueType);
 
       if (typeof annotationType.required !== 'undefined') {
-        ev.addAttribute('Required:', annotationType.required ? 'Yes' : 'No');
+        ev.addAttribute('Required', annotationType.required ? 'Yes' : 'No');
       }
 
       if (annotationType.valueType === 'Select') {
@@ -25,12 +25,12 @@ define(['./module'], function(module) {
           throw new Error('invalid annotation type options');
         }
 
-        ev.addAttribute('# Selections Allowed:',
+        ev.addAttribute('# Selections Allowed',
                         annotationType.maxValueCount === 1 ? 'Single' : 'Multiple');
-        ev.addAttribute('Selections:', annotationType.options.join(', '));
+        ev.addAttribute('Selections', annotationType.options.join(', '));
       }
 
-      ev.addAttribute('Description:', annotationType.description);
+      ev.addAttribute('Description', annotationType.description);
       ev.showModal();
     }
 

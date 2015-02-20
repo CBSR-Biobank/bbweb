@@ -27,7 +27,7 @@ define(['./module', 'underscore'], function(module, _) {
     function AnnotationTypeDataSet(dataItems, options) {
       var self = this;
 
-      self.dataItems = dataItems || [];
+      self.dataItems = _.map(dataItems, function (item) { return _.clone(item); });
 
       options = options || {};
 
@@ -65,7 +65,13 @@ define(['./module', 'underscore'], function(module, _) {
      * Returns the annotation type with the give ID.
      */
     AnnotationTypeDataSet.prototype.get = function (annotationTypeId) {
-      var foundItem = _.findWhere(this.dataItems, {annotationTypeId: annotationTypeId});
+      var foundItem;
+
+      if (this.dataItems.length === 0) {
+        throw new Error('no data items');
+      }
+
+      foundItem = _.findWhere(this.dataItems, {annotationTypeId: annotationTypeId});
       if (foundItem === undefined) {
         throw new Error('annotation type data with id not found: ' + annotationTypeId);
       }
@@ -85,7 +91,7 @@ define(['./module', 'underscore'], function(module, _) {
 
     AnnotationTypeDataSet.prototype.getAsString = function () {
       if (this.dataItems.length === 0) {
-        return '';
+        throw new Error('no data items');
       }
       return _.map(this.dataItems, function (atItem) {
         return atItem.annotationType.name + (atItem.required ? ' (Req)' : ' (N/R)');

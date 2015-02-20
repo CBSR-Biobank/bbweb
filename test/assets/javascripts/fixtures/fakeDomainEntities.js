@@ -159,8 +159,7 @@ define('biobank.fakeDomainEntities', [
         id:                 utils.uuid(),
         studyId:            study.id,
         name:               domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE()),
-        description:        faker.lorem.words(1),
-        recurring:          utils.randomBoolean()
+        description:        faker.lorem.words(1)
       };
 
       options = options || {};
@@ -175,6 +174,8 @@ define('biobank.fakeDomainEntities', [
           return annotationTypeData(at);
         });
       }
+
+      cet.recurring = _.isUndefined(options.recurring) ? false : options.recurring;
 
       return _.extend(cet, entityCommonFields());
     }
@@ -243,12 +244,17 @@ define('biobank.fakeDomainEntities', [
         }
 
         at.maxValueCount = options.maxValueCount;
-        at.options = _.map(_.range(2), function() {
-          return domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE());
-        });
+
+        if (_.isUndefined(options.options)) {
+          at.options = _.map(_.range(2), function() {
+            return domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE());
+          });
+        } else {
+          at.options = options.options;
+        }
       }
 
-      if (options.required) {
+      if (!_.isUndefined(options.required)) {
         at.required = options.required;
       }
 

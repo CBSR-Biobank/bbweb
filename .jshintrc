@@ -17,7 +17,7 @@
     "quotmark": "single",
     "strict": true,
     "undef": true,
-    "unused": true,
+    "unused": "vars",
     "predef": {
       "requirejs": true,
       "require": true,

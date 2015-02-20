@@ -1,4 +1,4 @@
-define(['./module', 'jquery', 'underscore'], function(module, $, _) {
+define(['./module', 'underscore'], function(module, _) {
   'use strict';
 
   module.service('usersService', UsersService);

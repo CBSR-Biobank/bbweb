@@ -71,27 +71,6 @@ define(['./module', 'underscore'], function(module, _) {
       return this.specimenGroupDataSet.get(specimenGroupId);
     };
 
-    CollectionEventType.prototype.getSpecimenGroupDataByIndex = function (index) {
-      return this.specimenGroupDataSet.getByIndex(index);
-    };
-
-    /**
-     * Allows adding multiple items with a empty ID (i.e. ''). If id is not empty then duplicate items
-     * are not allowed.
-     */
-    CollectionEventType.prototype.addSpecimenGroupData = function (sgDataItem) {
-      this.specimenGroupDataSet.add(sgDataItem);
-    };
-
-    /**
-     * Removes a specimen group data item. Note that there can be multiple items with an empty ID.
-     *
-     * @param {Int} the index of the specimen group to remove.
-     */
-    CollectionEventType.prototype.removeSpecimenGroupData = function (index) {
-      this.specimenGroupDataSet.remove(index);
-    };
-
     CollectionEventType.prototype.getSpecimenGroupsAsString = function () {
       return this.specimenGroupDataSet.getAsString();
     };
@@ -108,18 +87,6 @@ define(['./module', 'underscore'], function(module, _) {
       return this.annotationTypeDataSet.get(annotationTypeId);
     };
 
-    CollectionEventType.prototype.getAnnotationTypeDataByIndex = function (index) {
-      return this.annotationTypeDataSet.getByIndex(index);
-    };
-
-    CollectionEventType.prototype.addAnnotationTypeData = function (atDataItem) {
-      this.annotationTypeDataSet.add(atDataItem);
-    };
-
-    CollectionEventType.prototype.removeAnnotationTypeData = function (index) {
-      this.annotationTypeDataSet.remove(index);
-    };
-
     CollectionEventType.prototype.getAnnotationTypesAsString = function () {
       return this.annotationTypeDataSet.getAsString();
     };
@@ -129,13 +96,14 @@ define(['./module', 'underscore'], function(module, _) {
      */
     CollectionEventType.prototype.getServerCeventType = function () {
       var serverCeventType = _.pick(this,
-                                   'id',
-                                   'studyId',
-                                   'version',
-                                   'timeAdded',
-                                   'timeModified',
-                                   'name',
-                                   'recurring');
+                                    'id',
+                                    'studyId',
+                                    'version',
+                                    'timeAdded',
+                                    'timeModified',
+                                    'name',
+                                    'description',
+                                    'recurring');
       serverCeventType.specimenGroupData  = this.specimenGroupDataSet.getSpecimenGroupData();
       serverCeventType.annotationTypeData = this.annotationTypeDataSet.getAnnotationTypeData();
       return serverCeventType;

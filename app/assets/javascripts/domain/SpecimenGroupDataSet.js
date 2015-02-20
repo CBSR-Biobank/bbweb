@@ -26,7 +26,7 @@ define(['./module', 'underscore'], function(module, _) {
     function SpecimenGroupDataSet(dataItems, options) {
       var self = this;
 
-      self.dataItems = dataItems || [];
+      self.dataItems = _.map(dataItems, function (item) { return _.clone(item); });
 
       options = options || {};
 
@@ -64,7 +64,13 @@ define(['./module', 'underscore'], function(module, _) {
      * Returns the specimen group with the given ID.
      */
     SpecimenGroupDataSet.prototype.get = function (specimenGroupId) {
-      var foundItem = _.findWhere(this.dataItems, {specimenGroupId: specimenGroupId});
+      var foundItem;
+
+      if (this.dataItems.length === 0) {
+        throw new Error('no data items');
+      }
+
+      foundItem = _.findWhere(this.dataItems, {specimenGroupId: specimenGroupId});
       if (foundItem === undefined) {
         throw new Error('specimen group data with id not found: ' + specimenGroupId);
       }
@@ -72,10 +78,19 @@ define(['./module', 'underscore'], function(module, _) {
       return foundItem;
     };
 
+    SpecimenGroupDataSet.prototype.getSpecimenGroupData = function () {
+      return _.map(this.dataItems, function (item) {
+        return {
+          specimenGroupId: item.specimenGroupId,
+          maxCount:        item.maxCount,
+          amount:          item.amount
+        };
+      });
+    };
 
     SpecimenGroupDataSet.prototype.getAsString = function () {
       if (this.dataItems.length === 0) {
-        return '';
+        throw new Error('no data items');
       }
       return _.map(this.dataItems, function (item) {
         return item.specimenGroup.name + ' (' + item.maxCount + ', ' + item.amount +
