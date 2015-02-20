@@ -16,25 +16,30 @@ define([
 
   describe('SpecimenLinkType', function() {
 
-    var SpecimenLinkType, SpecimenGroupSet, AnnotationTypeSet, sltFromServer;
+    var SpecimenLinkType, SpecimenGroupSet, AnnotationTypeSet, sltFromServer, fakeEntities;
+    var study, processingType;
 
-    var study = fakeEntities.study();
-    var processingType = fakeEntities.processingType(study);
+    beforeEach(mocks.module('biobankApp', 'biobank.fakeDomainEntities'));
 
-    study.specimenGroups = _.map(_.range(2), function() {
-      return fakeEntities.specimenGroup(study);
-    });
-
-    study.annotationTypes = _.map(_.range(2), function() {
-      return fakeEntities.annotationType(study);
-    });
-
-    beforeEach(mocks.module('biobankApp'));
-
-    beforeEach(inject(function(_SpecimenLinkType_, _SpecimenGroupSet_, _AnnotationTypeSet_) {
+    beforeEach(inject(function(_SpecimenLinkType_,
+                               _SpecimenGroupSet_,
+                               _AnnotationTypeSet_,
+                               fakeDomainEntities) {
       SpecimenLinkType = _SpecimenLinkType_;
       SpecimenGroupSet    = _SpecimenGroupSet_;
       AnnotationTypeSet   = _AnnotationTypeSet_;
+      fakeEntities        = fakeDomainEntities;
+
+      study = fakeEntities.study();
+      processingType = fakeEntities.processingType(study);
+
+      study.specimenGroups = _.map(_.range(2), function() {
+        return fakeEntities.specimenGroup(study);
+      });
+
+      study.annotationTypes = _.map(_.range(2), function() {
+        return fakeEntities.annotationType(study);
+      });
 
       sltFromServer = fakeEntities.specimenLinkType(processingType);
     }));

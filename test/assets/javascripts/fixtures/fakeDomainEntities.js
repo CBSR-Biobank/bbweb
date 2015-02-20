@@ -180,26 +180,26 @@ define('biobank.fakeDomainEntities', [
     }
 
     function randomAnatomicalSourceType() {
-      faker.random.array_element(AnatomicalSourceType.allValues());
+      faker.random.array_element(AnatomicalSourceType.values());
     }
 
     function randomPreservationType() {
-      faker.random.array_element(PreservationType.allValues());
+      faker.random.array_element(PreservationType.values());
     }
 
     function randomPreservationTemperatureTypeType() {
-      faker.random.array_element(PreservationTemperatureType.allValues());
+      faker.random.array_element(PreservationTemperatureType.values());
     }
 
     function randomSpecimenType() {
-      faker.random.array_element(SpecimenType.allValues());
+      faker.random.array_element(SpecimenType.values());
     }
 
     function specimenGroup(study) {
       var sg = {
         id:                          utils.uuid(),
         studyId:                     study.id,
-        name:                        domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
+        name:                        domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP()),
         description:                 faker.lorem.words(1),
         units:                       'mL',
         anatomicalSourceType:        randomAnatomicalSourceType(),

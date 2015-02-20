@@ -8,35 +8,39 @@ define([
   'angularMocks',
   'underscore',
   'faker',
-  'biobank.fakeDomainEntities',
   'biobank.annotationTypeDataSetCommon',
   'biobankApp'
-], function(angular, mocks, _, faker, fakeEntities, commonTests) {
+], function(angular, mocks, _, faker, commonTests) {
   'use strict';
 
   describe('CollectionEventType', function() {
 
-    var CollectionEventType, SpecimenGroupSet, AnnotationTypeSet, cetFromServer;
+    var CollectionEventType, SpecimenGroupSet, AnnotationTypeSet, cetFromServer, fakeEntities;
+    var study;
 
-    var study = fakeEntities.study();
+    beforeEach(mocks.module('biobankApp', 'biobank.fakeDomainEntities'));
 
-    study.specimenGroups = _.map(_.range(2), function() {
-      return fakeEntities.specimenGroup(study);
-    });
-
-    study.annotationTypes = _.map(_.range(2), function() {
-      return fakeEntities.annotationType(study);
-    });
-
-    study.specimenGroupsById = _.indexBy(study.specimenGroups, 'id');
-    study.annotationTypesById = _.indexBy(study.annotationTypes, 'id');
-
-    beforeEach(mocks.module('biobankApp'));
-
-    beforeEach(inject(function(_CollectionEventType_, _SpecimenGroupSet_, _AnnotationTypeSet_) {
+    beforeEach(inject(function(_CollectionEventType_,
+                               _SpecimenGroupSet_,
+                               _AnnotationTypeSet_,
+                               fakeDomainEntities) {
       CollectionEventType = _CollectionEventType_;
       SpecimenGroupSet    = _SpecimenGroupSet_;
       AnnotationTypeSet   = _AnnotationTypeSet_;
+      fakeEntities        = fakeDomainEntities;
+
+      study = fakeEntities.study();
+
+      study.specimenGroups = _.map(_.range(2), function() {
+        return fakeEntities.specimenGroup(study);
+      });
+
+      study.annotationTypes = _.map(_.range(2), function() {
+        return fakeEntities.annotationType(study);
+      });
+
+      study.specimenGroupsById = _.indexBy(study.specimenGroups, 'id');
+      study.annotationTypesById = _.indexBy(study.annotationTypes, 'id');
 
       cetFromServer = fakeEntities.collectionEventType(study);
     }));
