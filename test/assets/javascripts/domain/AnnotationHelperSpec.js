@@ -5,9 +5,8 @@ define([
   'angularMocks',
   'underscore',
   'moment',
-  'faker',
   'biobankApp'
-], function(angular, mocks, _, moment, faker) {
+], function(angular, mocks, _, moment) {
   'use strict';
 
   describe('AnnotationHelper', function() {
@@ -29,7 +28,7 @@ define([
         valueType: AnnotationValueType.TEXT()
       });
 
-      expect(function () { new AnnotationHelper(annotationType); })
+      expect(function () { return new AnnotationHelper(annotationType); })
         .toThrow(new Error('required not assigned'));
     });
 
@@ -38,13 +37,13 @@ define([
         valueType: AnnotationValueType.TEXT()
       }));
 
-      expect(function () { new AnnotationHelper(annotationType); })
+      expect(function () { return new AnnotationHelper(annotationType); })
         .not.toThrow(new Error('required not assigned'));
     });
 
     it('constructor fails if value type is invalid', function() {
       var annotationType = fakeEntities.annotationType({valueType: 'ABCDEF'});
-      expect(function () { new AnnotationHelper(annotationType, true); })
+      expect(function () { return new AnnotationHelper(annotationType, true); })
         .toThrow(new Error('value type is invalid: ABCDEF'));
     });
 
@@ -53,14 +52,14 @@ define([
         valueType: AnnotationValueType.SELECT(),
         maxValueCount: 0
       });
-      expect(function () { new AnnotationHelper(annotationType, true); })
+      expect(function () { return new AnnotationHelper(annotationType, true); })
         .toThrow(new Error('invalid value for max count'));
 
       annotationType = fakeEntities.annotationType({
         valueType: AnnotationValueType.SELECT(),
         maxValueCount: 3
       });
-      expect(function () { new AnnotationHelper(annotationType, true); })
+      expect(function () { return new AnnotationHelper(annotationType, true); })
         .toThrow(new Error('invalid value for max count'));
     });
 

@@ -35,7 +35,7 @@ define(['./module'], function(module) {
     function MINUS_180_CELCIUS() { return '-180 C'; }
     function ROOM_TEMPERATURE()  { return 'Room Temperature'; }
 
-    function values()            { return ALL_VALUES; };
+    function values()            { return ALL_VALUES; }
 
   }
 

@@ -32,7 +32,7 @@ define(['./module'], function(module) {
     function DATE_TIME() { return 'DateTime'; }
     function SELECT()    { return 'Select'; }
 
-    function values()    { return ALL_VALUES; };
+    function values()    { return ALL_VALUES; }
 
   }
 

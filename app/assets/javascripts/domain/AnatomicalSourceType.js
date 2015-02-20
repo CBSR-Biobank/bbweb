@@ -68,7 +68,7 @@ define(['./module'], function(module) {
     function TOE_NAILS()        { return 'Toe Nails'; }
     function URINE()            { return 'Urine'; }
 
-    function values()           { return ALL_VALUES; };
+    function values()           { return ALL_VALUES; }
   }
 
 });

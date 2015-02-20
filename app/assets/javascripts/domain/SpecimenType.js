@@ -110,7 +110,7 @@ define(['./module'], function(module) {
     function TAP_WATER()                    { return 'Tap Water'; }
     function TRANSVERSE_COLON()             { return 'Transverse Colon'; }
 
-    function values()                       { return ALL_VALUES; };
+    function values()                       { return ALL_VALUES; }
 
   }
 

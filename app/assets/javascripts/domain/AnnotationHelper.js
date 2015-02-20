@@ -48,12 +48,12 @@ define(['./module', 'moment', 'underscore'], function(module, moment, _) {
         break;
 
       case AnnotationValueType.SELECT():
-        if (annotationType.maxValueCount == 2) {
+        if (annotationType.maxValueCount === 2) {
           self.values = [];
           _.each(annotationType.options, function (option) {
             self.values.push({name: option, checked: false});
           });
-        } else if (annotationType.maxValueCount == 1) {
+        } else if (annotationType.maxValueCount === 1) {
           self.value = undefined;
         } else {
           throw new Error('invalid value for max count');
@@ -184,7 +184,7 @@ define(['./module', 'moment', 'underscore'], function(module, moment, _) {
       /**
        * Returns the annotaions current value as a string..
        */
-       function getAnnotationValue() {
+      function getAnnotationValue() {
         var datetime;
 
         switch (self.annotationType.valueType) {

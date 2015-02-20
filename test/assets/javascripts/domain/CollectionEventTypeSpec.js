@@ -66,6 +66,14 @@ define([
       expect(cet.isNew).toBe(false);
     });
 
+    it('should return the correct size for specimen group data', function() {
+      // var cetFromServer = fakeEntities.collectionEventType(study,
+      //                                                      { specimenGroups: study.specimenGroups });
+      // var cet = new CollectionEventType(study,
+      //                                   cetFromServer,
+      //                                   { studySpecimenGroups: study.specimenGroups });
+    });
+
     it('should be initialized with specimen group and annotation type server objects', function() {
       var cetFromServer = fakeEntities.collectionEventType(
         study,

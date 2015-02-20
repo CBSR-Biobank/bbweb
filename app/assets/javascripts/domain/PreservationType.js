@@ -32,7 +32,7 @@ define(['./module'], function(module) {
     function FRESH_SPECIMEN()  { return 'Fresh Specimen'; }
     function SLIDE()           { return 'Slide'; }
 
-    function values()          { return ALL_VALUES; };
+    function values()          { return ALL_VALUES; }
 
   }
 
