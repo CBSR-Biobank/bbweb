@@ -50,11 +50,21 @@ module.exports = function(config) {
       'app/assets/javascripts/**/*.js': 'coverage'
     },
 
-
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress','coverage'],
+    reporters: ['spec', 'coverage'],
+
+    specReporter: {
+      maxLogLines: 10,
+      prefixes: {
+        // these are override here becasue the default values do not show up correctly when the tests are run
+        // inside Emacs
+        success: 'PASS ',
+        failure: 'FAIL ',
+        skipped: 'SKIPPED '
+      }
+    },
 
     coverageReporter: {
       type: 'html',
@@ -80,7 +90,10 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
+    browsers: [
+      'PhantomJS'
+      // 'ChromeExtra'
+    ],
 
 
     // Continuous Integration mode
