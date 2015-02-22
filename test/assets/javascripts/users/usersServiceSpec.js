@@ -89,20 +89,20 @@ define(['angular', 'angularMocks', 'jquery', 'underscore', 'biobankApp'], functi
       });
 
       it('should have the following functions', function () {
-        expect(angular.isFunction(usersService.getUserCounts)).toBe(true);
-        expect(angular.isFunction(usersService.getAllUsers)).toBe(true);
-        expect(angular.isFunction(usersService.requestCurrentUser)).toBe(true);
-        expect(angular.isFunction(usersService.query)).toBe(true);
-        expect(angular.isFunction(usersService.getUsers)).toBe(true);
-        expect(angular.isFunction(usersService.add)).toBe(true);
-        expect(angular.isFunction(usersService.updateName)).toBe(true);
-        expect(angular.isFunction(usersService.updateEmail)).toBe(true);
-        expect(angular.isFunction(usersService.updatePassword)).toBe(true);
-        expect(angular.isFunction(usersService.updateAvatarUrl)).toBe(true);
-        expect(angular.isFunction(usersService.passwordReset)).toBe(true);
-        expect(angular.isFunction(usersService.activate)).toBe(true);
-        expect(angular.isFunction(usersService.lock)).toBe(true);
-        expect(angular.isFunction(usersService.unlock)).toBe(true);
+        expect(usersService.getUserCounts).toBeFunction();
+        expect(usersService.getAllUsers).toBeFunction();
+        expect(usersService.requestCurrentUser).toBeFunction();
+        expect(usersService.query).toBeFunction();
+        expect(usersService.getUsers).toBeFunction();
+        expect(usersService.add).toBeFunction();
+        expect(usersService.updateName).toBeFunction();
+        expect(usersService.updateEmail).toBeFunction();
+        expect(usersService.updatePassword).toBeFunction();
+        expect(usersService.updateAvatarUrl).toBeFunction();
+        expect(usersService.passwordReset).toBeFunction();
+        expect(usersService.activate).toBeFunction();
+        expect(usersService.lock).toBeFunction();
+        expect(usersService.unlock).toBeFunction();
       });
 
       it('should allow a user to login', function () {

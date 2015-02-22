@@ -7,10 +7,9 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'faker',
-  'biobank.annotationTypeDataSetCommon',
+  './annotationTypeDataSetSharedSpec',
   'biobankApp'
-], function(angular, mocks, _, faker, commonTests) {
+], function(angular, mocks, _, annotationTypeDataSetSharedSpec) {
   'use strict';
 
   describe('CollectionEventType', function() {
@@ -18,7 +17,7 @@ define([
     var CollectionEventType, SpecimenGroupSet, AnnotationTypeSet, cetFromServer, fakeEntities;
     var study;
 
-    beforeEach(mocks.module('biobankApp', 'biobank.fakeDomainEntities'));
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_CollectionEventType_,
                                _SpecimenGroupSet_,
@@ -295,29 +294,6 @@ define([
         .toThrow(new Error('no data items'));
     });
 
-    it('returns annotation type data as a string', function() {
-      var cetFromServer;
-
-      var annotationTypes = _.map(_.range(2), function() {
-        return fakeEntities.annotationType(study);
-      });
-
-      cetFromServer = fakeEntities.collectionEventType(study, { annotationTypes: annotationTypes});
-      cetFromServer.annotationTypeData[0].required = true;
-      cetFromServer.annotationTypeData[0].required = false;
-
-      var cet = new CollectionEventType(study,
-                                        cetFromServer,
-                                        { studyAnnotationTypes: annotationTypes });
-      commonTests.getAsString(cet);
-    });
-
-    it('getAnnotationTypesAsString should throw an error if there are no annotation type data items', function() {
-      var cet = new CollectionEventType(study, cetFromServer);
-      expect(function () { cet.getAnnotationTypesAsString(); })
-        .toThrow(new Error('no data items'));
-    });
-
     it('returns the collection event type required by the server', function() {
       var cetFromServer = fakeEntities.collectionEventType(
         study,
@@ -337,6 +313,31 @@ define([
       expect(serverCeventType).toEqual(cetFromServer);
     });
 
+    describe('uses annotation type set correctly', function () {
+
+      var study, annotationTypes, cetFromServer, cet;
+      var context = {};
+
+      beforeEach(inject(function(CollectionEventType,
+                                 fakeDomainEntities) {
+
+        study = fakeDomainEntities.study();
+        annotationTypes = _.map(_.range(2), function() {
+          return fakeDomainEntities.annotationType(study);
+        });
+
+        cetFromServer = fakeEntities.collectionEventType(study, { annotationTypes: annotationTypes});
+        cetFromServer.annotationTypeData[0].required = true;
+        cetFromServer.annotationTypeData[0].required = false;
+
+        cet = new CollectionEventType(study,
+                                      cetFromServer,
+                                      { studyAnnotationTypes: annotationTypes });
+        context.parentObj = cet;
+      }));
+
+      annotationTypeDataSetSharedSpec(context);
+    });
 
   });
 

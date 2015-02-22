@@ -47,17 +47,16 @@ trait CollectionEventTypeValidations {
   * @param annotationTypeData The [[AnnotationType]]s for a collection event type.
   *
   */
-case class CollectionEventType(
-  studyId: StudyId,
-  id: CollectionEventTypeId,
-  version: Long,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  name: String,
-  description: Option[String],
-  recurring: Boolean,
-  specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
-  annotationTypeData: List[CollectionEventTypeAnnotationTypeData])
+case class CollectionEventType(studyId:            StudyId,
+                               id:                 CollectionEventTypeId,
+                               version:            Long,
+                               timeAdded:          DateTime,
+                               timeModified:       Option[DateTime],
+                               name:               String,
+                               description:        Option[String],
+                               recurring:          Boolean,
+                               specimenGroupData:  List[CollectionEventTypeSpecimenGroupData],
+                               annotationTypeData: List[CollectionEventTypeAnnotationTypeData])
     extends ConcurrencySafeEntity[CollectionEventTypeId]
     with HasName
     with HasDescriptionOption

@@ -2,14 +2,17 @@ var allTestFiles = [];
 var TEST_REGEXP = /(spec|test)\.js$/i;
 
 var pathToModule = function(path) {
-  return path.replace(/^\/base\//, '').replace(/\.js$/, '');
+  var module = '../../../' + path.replace(/^\/base\//, '').replace(/\.js$/, '');
+  //console.log(path, module);
+  return module;
 };
 
 Object.keys(window.__karma__.files).forEach(function(file) {
+  var path;
+
   if (TEST_REGEXP.test(file)) {
     // Normalize paths to RequireJS module names.
-    var path = '../../../' + pathToModule(file);
-    //console.log(file, path);
+    path = pathToModule(file);
     allTestFiles.push(path);
   }
 });
@@ -30,6 +33,10 @@ require.config({
     'biobankApp': {
       deps: ['angular'],
       exports: 'biobankApp'
+    },
+    'biobankTest': {
+      deps: ['angular'],
+      exports: 'biobankApp'
     }
   },
 
@@ -46,8 +53,8 @@ require.config({
     'angular-sanitize':  '../../../target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize',
     'moment':            '../../../target/web/web-modules/main/webjars/lib/momentjs/moment',
     'faker':             '../../../node_modules/karma-faker/node_modules/faker/build/build/faker',
-    'biobankApp':        'app',
-    'test':              'fixtures/fakeDomainEntities'
+    'biobankTest':       '../../../test/assets/javascripts/test/module',
+    'biobankApp':        'app'
   },
 
   // dynamically load all test files

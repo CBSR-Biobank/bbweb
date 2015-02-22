@@ -52,13 +52,13 @@ object Centre {
 
   implicit val centreWrites = new Writes[Centre] {
     def writes(centre: Centre) = Json.obj(
-      "id"             -> centre.id,
-      "version"        -> centre.version,
-      "timeAdded"      -> centre.timeAdded,
+      "id"           -> centre.id,
+      "version"      -> centre.version,
+      "timeAdded"    -> centre.timeAdded,
       "timeModified" -> centre.timeModified,
-      "name"           -> centre.name,
-      "description"    -> centre.description,
-      "status"         -> centre.status
+      "name"         -> centre.name,
+      "description"  -> centre.description,
+      "status"       -> centre.status
     )
   }
 

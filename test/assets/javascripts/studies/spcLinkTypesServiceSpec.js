@@ -47,10 +47,10 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('should have the following functions', function () {
-      expect(angular.isFunction(spcLinkTypesService.getAll)).toBe(true);
-      expect(angular.isFunction(spcLinkTypesService.get)).toBe(true);
-      expect(angular.isFunction(spcLinkTypesService.addOrUpdate)).toBe(true);
-      expect(angular.isFunction(spcLinkTypesService.remove)).toBe(true);
+      expect(spcLinkTypesService.getAll).toBeFunction();
+      expect(spcLinkTypesService.get).toBeFunction();
+      expect(spcLinkTypesService.addOrUpdate).toBeFunction();
+      expect(spcLinkTypesService.remove).toBeFunction();
     });
 
     it('list should return a list containing one spcLink type', function() {

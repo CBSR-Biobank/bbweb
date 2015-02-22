@@ -3,5 +3,5 @@
  */
 define([
   './centresService',
-  './centreLocationService',
+  './centreLocationsService',
 ], function () {});

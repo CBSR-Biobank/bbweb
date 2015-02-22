@@ -19,15 +19,14 @@ import play.api.libs.functional.syntax._
   *
   * @param countryIsoCode the ISO country code for the country the location is in.
   */
-case class Location(
-  id: LocationId,
-  name: String,
-  street: String,
-  city: String,
-  province: String,
-  postalCode: String,
-  poBoxNumber: Option[String],
-  countryIsoCode: String)
+case class Location(id:             LocationId,
+                    name:           String,
+                    street:         String,
+                    city:           String,
+                    province:       String,
+                    postalCode:     String,
+                    poBoxNumber:    Option[String],
+                    countryIsoCode: String)
     extends IdentifiedValueObject[LocationId]
 
 object Location {

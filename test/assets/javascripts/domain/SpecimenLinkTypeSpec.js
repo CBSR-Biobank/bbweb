@@ -7,11 +7,9 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'faker',
-  'biobank.fakeDomainEntities',
-  'biobank.annotationTypeDataSetCommon',
+  './annotationTypeDataSetSharedSpec',
   'biobankApp'
-], function(angular, mocks, _, faker, fakeEntities, commonTests) {
+], function(angular, mocks, _, annotationTypeDataSetSharedSpec) {
   'use strict';
 
   describe('SpecimenLinkType', function() {
@@ -19,7 +17,7 @@ define([
     var SpecimenLinkType, SpecimenGroupSet, AnnotationTypeSet, sltFromServer, fakeEntities;
     var study, processingType;
 
-    beforeEach(mocks.module('biobankApp', 'biobank.fakeDomainEntities'));
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_SpecimenLinkType_,
                                _SpecimenGroupSet_,
@@ -116,21 +114,40 @@ define([
       });
     });
 
-    it('returns annotation type data as a string', function() {
-      var sltFromServer;
+    it('getAnnotationTypeData throws an error if there are no annotation type data items', function() {
+      var slt = new SpecimenLinkType(study, sltFromServer);
+      expect(function () { slt.getAnnotationTypeData(study.annotationTypes[0].id); })
+        .toThrow(new Error('no data items'));
+    });
 
-      var annotationTypes = _.map(_.range(2), function() {
-        return fakeEntities.annotationType(study);
-      });
+    describe('uses annotation type set correctly', function () {
 
-      sltFromServer = fakeEntities.specimenLinkType(processingType, { annotationTypes: annotationTypes});
-      sltFromServer.annotationTypeData[0].required = true;
-      sltFromServer.annotationTypeData[0].required = false;
+      var study, processingType, annotationTypes, sltFromServer, slt;
+      var context = {};
 
-      var slt = new SpecimenLinkType(study,
-                                     sltFromServer,
-                                     { studyAnnotationTypes: annotationTypes });
-      commonTests.getAsString(slt);
+      beforeEach(inject(function(SpecimenLinkType,
+                                 fakeDomainEntities) {
+
+        study = fakeDomainEntities.study();
+        processingType = fakeDomainEntities.processingType(study);
+        annotationTypes = _.map(_.range(2), function() {
+          return fakeDomainEntities.annotationType(study);
+        });
+
+        sltFromServer = fakeDomainEntities.specimenLinkType(
+          processingType,
+          { annotationTypes: annotationTypes});
+
+        sltFromServer.annotationTypeData[0].required = true;
+        sltFromServer.annotationTypeData[0].required = false;
+
+        slt = new SpecimenLinkType(study,
+                                   sltFromServer,
+                                   { studyAnnotationTypes: annotationTypes });
+        context.parentObj = slt;
+      }));
+
+      annotationTypeDataSetSharedSpec(context);
     });
 
 

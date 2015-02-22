@@ -41,10 +41,10 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('should have the following functions', function () {
-      expect(angular.isFunction(processingTypesService.getAll)).toBe(true);
-      expect(angular.isFunction(processingTypesService.get)).toBe(true);
-      expect(angular.isFunction(processingTypesService.addOrUpdate)).toBe(true);
-      expect(angular.isFunction(processingTypesService.remove)).toBe(true);
+      expect(processingTypesService.getAll).toBeFunction();
+      expect(processingTypesService.get).toBeFunction();
+      expect(processingTypesService.addOrUpdate).toBeFunction();
+      expect(processingTypesService.remove).toBeFunction();
     });
 
     it('list should return a list containing one processing type', function() {

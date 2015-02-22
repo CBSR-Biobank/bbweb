@@ -4,13 +4,16 @@
 define([
   './AnatomicalSourceType',
   './AnnotationHelper',
+  './AnnotationType',
   './AnnotationTypeDataSet',
   './AnnotationTypeSet',
   './AnnotationTypeViewer',
   './AnnotationValueType',
   './CeventTypeViewer',
   './CollectionEventType',
+  './ConcurrencySafeEntity',
   './EntityViewer',
+  './Location',
   './LocationViewer',
   './Participant',
   './PreservationTemperatureType',
@@ -24,5 +27,9 @@ define([
   './SpecimenLinkType',
   './SpecimenType',
   './StudyViewer',
-  './UserViewer'
+  './UserViewer',
+  './study/CollectionEventAnnotationType',
+  './study/ParticipantAnnotationType',
+  './study/SpecimenLinkAnnotationType',
+  './study/StudyAnnotationType',
 ], function() {});

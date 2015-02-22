@@ -1,14 +1,14 @@
 define(['./module'], function(module) {
   'use strict';
 
-  module.service('centreLocationService', centreLocationService);
+  module.service('centreLocationsService', centreLocationsService);
 
-  centreLocationService.$inject = ['biobankApi'];
+  centreLocationsService.$inject = ['biobankApi', 'Location'];
 
   /**
    *
    */
-  function centreLocationService(biobankApi) {
+  function centreLocationsService(biobankApi, Location) {
     var service = {
       list:   list,
       query:  query,
@@ -34,28 +34,23 @@ define(['./module'], function(module) {
     }
 
     function list(centreId) {
-      return biobankApi.call('GET', uri(centreId));
+      return biobankApi.call('GET', uri(centreId)).then(function (locations){
+        return _.map(locations, function(location) {
+          return new Location(location);
+        });
+      });
+
     }
 
     function query(centreId, locationId) {
-      return biobankApi.call(
-        'GET',
-        uri(centreId) + '?locationId=' + locationId);
+      return biobankApi.call('GET', uri(centreId) + '?locationId=' + locationId)
+        .then(function (location){
+          return new Location(location);
+        });
     }
 
     function add(centre, location) {
-      var cmd = {
-        centreId:       centre.id,
-        name:           location.name,
-        street:         location.street,
-        city:           location.city,
-        province:       location.province,
-        postalCode:     location.postalCode,
-        poBoxNumber:    location.poBoxNumber,
-        countryIsoCode: location.countryIsoCode
-      };
-
-      return biobankApi.call('POST', uri(centre.id), cmd);
+      return biobankApi.call('POST', uri(centre.id), location.getAddCommand());
     }
 
     function remove(centreId, locationId) {

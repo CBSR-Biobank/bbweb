@@ -1,17 +1,17 @@
 // Jasmine test suite
-define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], function(angular, mocks, _, $) {
+define([
+  'angular',
+  'angularMocks',
+  'underscore',
+  'biobankApp',
+  'biobankTest'
+], function(angular, mocks, _, $) {
   'use strict';
 
   describe('Service: centresService', function() {
 
-    var centresService, httpBackend;
-    var centreNoId = {
-      name:         'CTR1',
-      status:       'Disabled',
-      version:      1,
-      timeAdded:    '2014-10-20T09:58:43-0600'
-    };
-    var centre = angular.extend({id: 'dummy-id'}, centreNoId);
+    var centresService, httpBackend, fakeEntities;
+    var centre, centreNoId;
 
     function uri(centreId) {
       var result = '/centres';
@@ -21,11 +21,17 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
       return result;
     }
 
-    beforeEach(mocks.module('biobankApp'));
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (_centresService_, $httpBackend) {
+    beforeEach(inject(function (_centresService_,
+                                $httpBackend,
+                                fakeDomainEntities) {
       centresService = _centresService_;
       httpBackend = $httpBackend;
+      fakeEntities = fakeDomainEntities;
+
+      centre = fakeEntities.centre();
+      centreNoId = _.omit(centre, 'id');
     }));
 
     afterEach(function() {
@@ -34,15 +40,15 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
     });
 
     it('should have the following functions', function () {
-      expect(angular.isFunction(centresService.getCentreCounts)).toBe(true);
-      expect(angular.isFunction(centresService.getCentres)).toBe(true);
-      expect(angular.isFunction(centresService.get)).toBe(true);
-      expect(angular.isFunction(centresService.addOrUpdate)).toBe(true);
-      expect(angular.isFunction(centresService.enable)).toBe(true);
-      expect(angular.isFunction(centresService.disable)).toBe(true);
-      expect(angular.isFunction(centresService.studies)).toBe(true);
-      expect(angular.isFunction(centresService.addStudy)).toBe(true);
-      expect(angular.isFunction(centresService.removeStudy)).toBe(true);
+      expect(centresService.getCentreCounts).toBeFunction();
+      expect(centresService.getCentres).toBeFunction();
+      expect(centresService.get).toBeFunction();
+      expect(centresService.addOrUpdate).toBeFunction();
+      expect(centresService.enable).toBeFunction();
+      expect(centresService.disable).toBeFunction();
+      expect(centresService.studies).toBeFunction();
+      expect(centresService.addStudy).toBeFunction();
+      expect(centresService.removeStudy).toBeFunction();
     });
 
     it('calling getCentreCounts has valid URL', function() {

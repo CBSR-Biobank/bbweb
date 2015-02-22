@@ -37,9 +37,9 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('should have the following functions', function () {
-      expect(angular.isFunction(participantsService.get)).toBe(true);
-      expect(angular.isFunction(participantsService.getByUniqueId)).toBe(true);
-      expect(angular.isFunction(participantsService.addOrUpdate)).toBe(true);
+      expect(participantsService.get).toBeFunction();
+      expect(participantsService.getByUniqueId).toBeFunction();
+      expect(participantsService.addOrUpdate).toBeFunction();
     });
 
     it('get should return valid object', function() {

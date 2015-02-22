@@ -1,31 +1,22 @@
 // Jasmine test suite
 //
-define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
+define([
+  'angular',
+  'angularMocks',
+  'underscore',
+  'biobank.testUtils',
+  'biobankApp'
+], function(angular,
+            mocks,
+            _,
+           testUtils) {
   'use strict';
 
   describe('CeventTypeViewer', function() {
 
     var CeventTypeViewer, CollectionEventType, fakeEntities, study;
 
-    var fakeModal = {
-      result: {
-        then: function(confirmCallback, cancelCallback) {
-          //Store the callbacks for later when the user clicks on the OK or Cancel button of the dialog
-          this.confirmCallBack = confirmCallback;
-          this.cancelCallback = cancelCallback;
-        }
-      },
-      close: function( item ) {
-        //The user clicked OK on the modal dialog, call the stored confirm callback with the selected item
-        this.result.confirmCallBack( item );
-      },
-      dismiss: function( type ) {
-        //The user clicked cancel on the modal dialog, call the stored cancel callback
-        this.result.cancelCallback( type );
-      }
-    };
-
-    beforeEach(mocks.module('biobankApp', 'biobank.fakeDomainEntities'));
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_CeventTypeViewer_,
                                _CollectionEventType_,
@@ -70,7 +61,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     it('should open a modal when created', function() {
       var count = 0;
       var modal = this.$injector.get('$modal');
-      spyOn(modal, 'open').and.callFake(function () { return fakeModal; });
+      spyOn(modal, 'open').and.callFake(function () { return testUtils.fakeModal(); });
 
       _.each([false, true], function(recurring) {
         // jshint unused:false

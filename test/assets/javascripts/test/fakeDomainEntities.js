@@ -4,7 +4,7 @@
  * This has to be an AngularJS service so that it's dependencies from the real application
  * can be injected (i.e. AnnotationValueType).
  */
-define('biobank.fakeDomainEntities', [
+define([
   'angular',
   'underscore',
   'faker',
@@ -17,7 +17,7 @@ define('biobank.fakeDomainEntities', [
             utils) {
   'use strict';
 
-  var module = angular.module('biobank.fakeDomainEntities', []);
+  var module = angular.module('biobank.test.fakeDomainEntities', []);
 
   module.service('fakeDomainEntities', fakeDomainEntities);
 
@@ -48,12 +48,18 @@ define('biobank.fakeDomainEntities', [
       annotationType:                    annotationType,
       study:                             study,
 
+      centre:                            centre,
+      location:                          location,
+
       ENTITY_NAME_PROCESSING_TYPE:       ENTITY_NAME_PROCESSING_TYPE,
       ENTITY_NAME_SPECIMEN_LINK_TYPE:    ENTITY_NAME_SPECIMEN_LINK_TYPE,
       ENTITY_NAME_COLLECTION_EVENT_TYPE: ENTITY_NAME_COLLECTION_EVENT_TYPE,
       ENTITY_NAME_SPECIMEN_GROUP:        ENTITY_NAME_SPECIMEN_GROUP,
       ENTITY_NAME_ANNOTATION_TYPE:       ENTITY_NAME_ANNOTATION_TYPE,
-      ENTITY_NAME_STUDY:                 ENTITY_NAME_STUDY
+      ENTITY_NAME_STUDY:                 ENTITY_NAME_STUDY,
+
+      ENTITY_NAME_CENTRE:                ENTITY_NAME_CENTRE,
+      ENTITY_NAME_LOCATION:              ENTITY_NAME_LOCATION
     };
     return service;
 
@@ -63,6 +69,9 @@ define('biobank.fakeDomainEntities', [
     function ENTITY_NAME_SPECIMEN_GROUP()        { return 'specimenGroup'; }
     function ENTITY_NAME_ANNOTATION_TYPE()       { return 'annotationType'; }
     function ENTITY_NAME_STUDY()                 { return 'study'; }
+
+    function ENTITY_NAME_CENTRE()                { return 'centre'; }
+    function ENTITY_NAME_LOCATION()              { return 'location'; }
 
     function entityCommonFields() {
       return {
@@ -233,6 +242,7 @@ define('biobank.fakeDomainEntities', [
 
       var at = {
         id:        utils.uuid(),
+        studyId:   options.studyId || null,
         valueType: options.valueType,
         name:      domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE()),
         options:   []
@@ -275,7 +285,32 @@ define('biobank.fakeDomainEntities', [
       return _.extend(study, entityCommonFields());
     }
 
+    function centre() {
+      var centre =  {
+        id:          utils.uuid(),
+        name:        domainEntityNameNext(ENTITY_NAME_CENTRE()),
+        description: faker.lorem.words(1),
+        status:      'Disabled'
+      };
+      return _.extend(centre, entityCommonFields());
+    }
+
+    /**
+     * This is a value object, so it does not have the common fields.
+     */
+    function location() {
+      return  {
+        id:             utils.uuid(),
+        name:           domainEntityNameNext(ENTITY_NAME_LOCATION()),
+        street:         faker.address.streetAddress(),
+        city:           faker.address.city(),
+        province:       faker.address.state(),
+        postalCode:     faker.address.zipCode(),
+        poBoxNumber:    faker.lorem.words(1)[0],
+        countryIsoCode: faker.lorem.words(1)[0]
+      };
+    }
+
   }
 
 });
-

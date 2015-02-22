@@ -14,7 +14,7 @@ define([
     var annotationTypeRemoveService, AnnotationTypeViewer, Panel, fakeEntities;
     var study, annotTypes, annotTypesInUse;
 
-    beforeEach(mocks.module('biobankApp', 'biobank.fakeDomainEntities'));
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function($modal,
                                _modalService_,

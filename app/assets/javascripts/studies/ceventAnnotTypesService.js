@@ -1,41 +1,39 @@
 define(['./module'], function(module) {
   'use strict';
 
-  module.service('ceventAnnotTypesService', CeventAnnotTypesService);
+  module.service('ceventAnnotTypesService', ceventAnnotTypesService);
 
-  CeventAnnotTypesService.$inject = ['studyAnnotTypesService'];
+  ceventAnnotTypesService.$inject = [
+    'StudyAnnotTypesService',
+    'CollectionEventAnnotationType'
+  ];
 
   /**
    * Service to access Collection Event Annotation Types.
    */
-  function CeventAnnotTypesService(studyAnnotTypesService) {
-    var annotTypeUri ='ceannottypes';
+  function ceventAnnotTypesService(StudyAnnotTypesService,
+                                   CollectionEventAnnotationType) {
 
-    var service = {
-      getAll      : getAll,
-      get         : get,
-      addOrUpdate : addOrUpdate,
-      remove      : remove
+    function CeventAnnotTypesService() {
+      StudyAnnotTypesService.call(this, 'ceannottypes');
+    }
+
+    CeventAnnotTypesService.prototype = Object.create(StudyAnnotTypesService.prototype);
+
+    CeventAnnotTypesService.prototype.getAll = function (studyId) {
+      return StudyAnnotTypesService.prototype.getAll.call(this,
+                                                          CollectionEventAnnotationType,
+                                                          studyId);
     };
-    return service;
 
-    //-------
+    CeventAnnotTypesService.prototype.get = function (studyId, annotTypeId) {
+      return StudyAnnotTypesService.prototype.get.call(this,
+                                                       CollectionEventAnnotationType,
+                                                       studyId,
+                                                       annotTypeId);
+    };
 
-    function getAll(studyId) {
-      return studyAnnotTypesService.getAll(annotTypeUri, studyId);
-    }
-
-    function get(studyId, annotTypeId) {
-      return studyAnnotTypesService.get(annotTypeUri, studyId, annotTypeId);
-    }
-
-    function addOrUpdate(annotType) {
-      return studyAnnotTypesService.addOrUpdate(annotTypeUri, annotType);
-    }
-
-    function remove(annotType) {
-      return studyAnnotTypesService.remove(annotTypeUri, annotType);
-    }
+    return new CeventAnnotTypesService();
 
   }
 

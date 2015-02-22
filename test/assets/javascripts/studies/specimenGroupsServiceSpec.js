@@ -45,16 +45,16 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('should have the following functions', function () {
-      expect(angular.isFunction(specimenGroupsService.getAll)).toBe(true);
-      expect(angular.isFunction(specimenGroupsService.get)).toBe(true);
-      expect(angular.isFunction(specimenGroupsService.addOrUpdate)).toBe(true);
-      expect(angular.isFunction(specimenGroupsService.remove)).toBe(true);
-      expect(angular.isFunction(specimenGroupsService.anatomicalSourceTypes)).toBe(true);
-      expect(angular.isFunction(specimenGroupsService.specimenTypes)).toBe(true);
-      expect(angular.isFunction(specimenGroupsService.preservTypes)).toBe(true);
-      expect(angular.isFunction(specimenGroupsService.preservTempTypes)).toBe(true);
-      expect(angular.isFunction(specimenGroupsService.specimenGroupValueTypes)).toBe(true);
-      expect(angular.isFunction(specimenGroupsService.specimenGroupIdsInUse)).toBe(true);
+      expect(specimenGroupsService.getAll).toBeFunction();
+      expect(specimenGroupsService.get).toBeFunction();
+      expect(specimenGroupsService.addOrUpdate).toBeFunction();
+      expect(specimenGroupsService.remove).toBeFunction();
+      expect(specimenGroupsService.anatomicalSourceTypes).toBeFunction();
+      expect(specimenGroupsService.specimenTypes).toBeFunction();
+      expect(specimenGroupsService.preservTypes).toBeFunction();
+      expect(specimenGroupsService.preservTempTypes).toBeFunction();
+      expect(specimenGroupsService.specimenGroupValueTypes).toBeFunction();
+      expect(specimenGroupsService.specimenGroupIdsInUse).toBeFunction();
 
     });
 

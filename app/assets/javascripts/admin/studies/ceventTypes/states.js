@@ -15,8 +15,17 @@ define(['../../module'], function(module) {
   function config($urlRouterProvider,
                   $stateProvider,
                   authorizationProvider
-                  //ceventAnnotTypesService
                  ) {
+
+    resolveSpecimenGroups.$inject = ['specimenGroupsService', 'study'];
+    function resolveSpecimenGroups(specimenGroupsService, study) {
+      return specimenGroupsService.getAll(study.id);
+    }
+
+    resolveAnnotTypes.$inject = ['ceventAnnotTypesService', 'study'];
+    function resolveAnnotTypes(ceventAnnotTypesService, study) {
+      return ceventAnnotTypesService.getAll(study.id);
+    }
 
     $urlRouterProvider.otherwise('/');
 
@@ -37,18 +46,8 @@ define(['../../module'], function(module) {
             annotationTypeData: []
           };
         }],
-        annotTypes: [
-          'ceventAnnotTypesService', 'study',
-          function(ceventAnnotTypesService, study) {
-            return ceventAnnotTypesService.getAll(study.id);
-          }
-        ],
-        specimenGroups: [
-          'specimenGroupsService', 'study',
-          function(specimenGroupsService, study) {
-            return specimenGroupsService.getAll(study.id);
-          }
-        ]
+        annotTypes: resolveAnnotTypes,
+        specimenGroups: resolveSpecimenGroups
       },
       views: {
         'main@': {
@@ -77,18 +76,8 @@ define(['../../module'], function(module) {
             throw new Error('state parameter ceventTypeId is invalid');
           }
         ],
-        annotTypes: [
-          'ceventAnnotTypesService', 'study',
-          function(ceventAnnotTypesService, study) {
-            return ceventAnnotTypesService.getAll(study.id);
-          }
-        ],
-        specimenGroups: [
-          'specimenGroupsService', 'study',
-          function(specimenGroupsService, study) {
-            return specimenGroupsService.getAll(study.id);
-          }
-        ]
+        annotTypes: resolveAnnotTypes,
+        specimenGroups: resolveSpecimenGroups
       },
       views: {
         'main@': {

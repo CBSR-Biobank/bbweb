@@ -18,28 +18,26 @@ define(['../module'], function(module) {
     //-------------
 
     function call(method, url, data) {
-      var deferred = $q.defer();
       var config = { method: method, url: url };
 
       if (data) {
         config.data = data;
       }
 
-      $http(config)
+      return $http(config)
         .then(function(response) {
           // TODO: check status here and log it if it not 'success'
           if (method === 'DELETE') {
-            deferred.resolve(response.data);
+            return response.data;
           } else {
-            deferred.resolve(response.data.data);
+            return response.data.data;
           }
         })
         .catch(function(response) {
           $log.error(response);
-          deferred.reject(response);
+          $q.reject(response);
         }
       );
-      return deferred.promise;
     }
   }
 

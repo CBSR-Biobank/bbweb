@@ -13,7 +13,7 @@ define([
 
     var AnnotationHelper, AnnotationValueType, fakeEntities;
 
-    beforeEach(mocks.module('biobankApp', 'biobank.fakeDomainEntities'));
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_AnnotationHelper_,
                                _AnnotationValueType_,

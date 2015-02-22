@@ -31,6 +31,7 @@ module.exports = function(config) {
       {pattern: 'target/web/web-modules/main/webjars/lib/momentjs/moment.js', included: false},
       {pattern: 'app/assets/javascripts/**/*.js', included: false},
       {pattern: 'test/assets/javascripts/**/*Spec.js', included: false},
+      {pattern: 'test/assets/javascripts/test/**/*.js', included: false},
       'test/assets/javascripts/test-main.js',
       'test/assets/javascripts/fixtures/**/*.js'
     ],

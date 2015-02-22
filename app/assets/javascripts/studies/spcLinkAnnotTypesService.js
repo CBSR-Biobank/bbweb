@@ -1,41 +1,39 @@
 define(['./module'], function(module) {
   'use strict';
 
-  module.service('spcLinkAnnotTypesService', SpcLinkAnnotTypesService);
+  module.service('spcLinkAnnotTypesService', spcLinkAnnotTypesService);
 
-  SpcLinkAnnotTypesService.$inject = ['studyAnnotTypesService'];
+  spcLinkAnnotTypesService.$inject = [
+    'StudyAnnotTypesService',
+    'SpecimenLinkAnnotationType'
+  ];
 
   /**
    * Service to access Specimen Link Annotation Types.
    */
-  function SpcLinkAnnotTypesService(studyAnnotTypesService) {
-    var annotTypeUri = 'slannottypes';
-    var service = {
-      getAll      : getAll,
-      get         : get,
-      addOrUpdate : addOrUpdate,
-      remove      : remove
+  function spcLinkAnnotTypesService(StudyAnnotTypesService,
+                                    SpecimenLinkAnnotationType) {
+
+    function SpcLinkAnnotTypesService() {
+      StudyAnnotTypesService.call(this, 'slannottypes');
+    }
+
+    SpcLinkAnnotTypesService.prototype = Object.create(StudyAnnotTypesService.prototype);
+
+    SpcLinkAnnotTypesService.prototype.getAll = function (studyId) {
+      return StudyAnnotTypesService.prototype.getAll.call(this,
+                                                          SpecimenLinkAnnotationType,
+                                                          studyId);
     };
-    return service;
 
-    //-------
+    SpcLinkAnnotTypesService.prototype.get = function (studyId, annotTypeId) {
+      return StudyAnnotTypesService.prototype.get.call(this,
+                                                       SpecimenLinkAnnotationType,
+                                                       studyId,
+                                                       annotTypeId);
+    };
 
-    function getAll(studyId) {
-      return studyAnnotTypesService.getAll(annotTypeUri, studyId);
-    }
-
-    function get(studyId, annotTypeId) {
-      return studyAnnotTypesService.get(annotTypeUri, studyId, annotTypeId);
-    }
-
-    function addOrUpdate(annotType) {
-      return studyAnnotTypesService.addOrUpdate(annotTypeUri, annotType);
-    }
-
-    function remove(annotType) {
-      return studyAnnotTypesService.remove(annotTypeUri, annotType);
-    }
-
+    return new SpcLinkAnnotTypesService();
   }
 
 });

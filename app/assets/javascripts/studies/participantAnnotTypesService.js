@@ -1,41 +1,39 @@
 define(['./module'], function(module) {
   'use strict';
 
-  module.service('participantAnnotTypesService', ParticipantAnnotTypesService);
+  module.service('participantAnnotTypesService', participantAnnotTypesService);
 
-  ParticipantAnnotTypesService.$inject = ['studyAnnotTypesService'];
+  participantAnnotTypesService.$inject = [
+    'StudyAnnotTypesService',
+    'ParticipantAnnotationType'
+  ];
 
   /**
    * Service to access participant annotation types.
    */
-  function ParticipantAnnotTypesService(studyAnnotTypesService) {
-    var annotTypeUri = 'pannottypes';
-    var service = {
-      getAll      : getAll,
-      get         : get,
-      addOrUpdate : addOrUpdate,
-      remove      : remove
+  function participantAnnotTypesService(StudyAnnotTypesService,
+                                        ParticipantAnnotationType) {
+
+    function ParticipantAnnotTypesService() {
+      StudyAnnotTypesService.call(this, 'pannottypes');
+    }
+
+    ParticipantAnnotTypesService.prototype = Object.create(StudyAnnotTypesService.prototype);
+
+    ParticipantAnnotTypesService.prototype.getAll = function (studyId) {
+      return StudyAnnotTypesService.prototype.getAll.call(this,
+                                                          ParticipantAnnotationType,
+                                                          studyId);
     };
-    return service;
 
-    //-------
+    ParticipantAnnotTypesService.prototype.get = function (studyId, annotTypeId) {
+      return StudyAnnotTypesService.prototype.get.call(this,
+                                                       ParticipantAnnotationType,
+                                                       studyId,
+                                                       annotTypeId);
+    };
 
-    function getAll(studyId) {
-      return studyAnnotTypesService.getAll(annotTypeUri, studyId);
-    }
-
-    function get(studyId, annotTypeId) {
-      return studyAnnotTypesService.get(annotTypeUri, studyId, annotTypeId);
-    }
-
-    function addOrUpdate(annotType) {
-      return studyAnnotTypesService.addOrUpdate(annotTypeUri, annotType);
-    }
-
-    function remove(annotType) {
-      return studyAnnotTypesService.remove(annotTypeUri, annotType);
-    }
-
+    return new ParticipantAnnotTypesService();
   }
 
 });

@@ -10,6 +10,6 @@ define([
   './spcLinkAnnotTypesService',
   './spcLinkTypesService',
   './specimenGroupsService',
-  './studyAnnotTypesService',
+  './StudyAnnotTypesService',
   './studiesService',
 ], function () {});

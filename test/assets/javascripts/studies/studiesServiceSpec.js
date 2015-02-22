@@ -36,15 +36,15 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
     });
 
     it('should have the following functions', function () {
-      expect(angular.isFunction(studiesService.getStudyCounts)).toBe(true);
-      expect(angular.isFunction(studiesService.getStudies)).toBe(true);
-      expect(angular.isFunction(studiesService.get)).toBe(true);
-      expect(angular.isFunction(studiesService.addOrUpdate)).toBe(true);
-      expect(angular.isFunction(studiesService.enable)).toBe(true);
-      expect(angular.isFunction(studiesService.disable)).toBe(true);
-      expect(angular.isFunction(studiesService.retire)).toBe(true);
-      expect(angular.isFunction(studiesService.unretire)).toBe(true);
-      expect(angular.isFunction(studiesService.processingDto)).toBe(true);
+      expect(studiesService.getStudyCounts).toBeFunction();
+      expect(studiesService.getStudies).toBeFunction();
+      expect(studiesService.get).toBeFunction();
+      expect(studiesService.addOrUpdate).toBeFunction();
+      expect(studiesService.enable).toBeFunction();
+      expect(studiesService.disable).toBeFunction();
+      expect(studiesService.retire).toBeFunction();
+      expect(studiesService.unretire).toBeFunction();
+      expect(studiesService.processingDto).toBeFunction();
     });
 
     it('calling getStudyCount has valid URL', function() {

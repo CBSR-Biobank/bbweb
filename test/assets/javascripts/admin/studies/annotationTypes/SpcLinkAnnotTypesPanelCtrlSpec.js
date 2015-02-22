@@ -14,7 +14,7 @@ define([
     var spcLinkAnnotTypeRemoveService, AnnotationTypeViewer, Panel;
     var study, annotTypes, processingType,  spcLinkTypes, fakeEntities;
 
-    beforeEach(mocks.module('biobankApp', 'biobank.fakeDomainEntities'));
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function($modal,
                                _modalService_,

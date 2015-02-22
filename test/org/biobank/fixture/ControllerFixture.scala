@@ -56,7 +56,7 @@ abstract class ControllerFixture
     */
   object TestGlobal extends org.biobank.Global {
 
-    override def applicationModule = new TestModule ++ new WebModule ++ new UserModule
+    override val applicationModule = new TestModule ++ new WebModule ++ new UserModule
 
     def passwordHasher = inject [PasswordHasher]
 

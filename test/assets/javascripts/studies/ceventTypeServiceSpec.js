@@ -43,10 +43,10 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('should have the following functions', function () {
-      expect(angular.isFunction(ceventTypesService.getAll)).toBe(true);
-      expect(angular.isFunction(ceventTypesService.get)).toBe(true);
-      expect(angular.isFunction(ceventTypesService.addOrUpdate)).toBe(true);
-      expect(angular.isFunction(ceventTypesService.remove)).toBe(true);
+      expect(ceventTypesService.getAll).toBeFunction();
+      expect(ceventTypesService.get).toBeFunction();
+      expect(ceventTypesService.addOrUpdate).toBeFunction();
+      expect(ceventTypesService.remove).toBeFunction();
     });
 
     it('list should return a list containing one cevent type', function() {
