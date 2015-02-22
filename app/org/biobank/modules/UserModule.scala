@@ -13,29 +13,29 @@ import scaldi.Module
 
 class UserModule extends Module {
 
-  bind [PasswordHasher] to new PasswordHasherImpl
-  bind [AuthToken] to new AuthTokenImpl
+  bind [PasswordHasher] toNonLazy new PasswordHasherImpl
+  bind [AuthToken] toNonLazy new AuthTokenImpl
 
-  bind [CollectionEventAnnotationTypeRepository]  to new CollectionEventAnnotationTypeRepositoryImpl
-  bind [CollectionEventTypeRepository]            to new CollectionEventTypeRepositoryImpl
-  bind [ParticipantAnnotationTypeRepository]      to new ParticipantAnnotationTypeRepositoryImpl
-  bind [ProcessingTypeRepository]                 to new ProcessingTypeRepositoryImpl
-  bind [SpecimenGroupRepository]                  to new SpecimenGroupRepositoryImpl
-  bind [SpecimenLinkAnnotationTypeRepository]     to new SpecimenLinkAnnotationTypeRepositoryImpl
-  bind [SpecimenLinkTypeRepository]               to new SpecimenLinkTypeRepositoryImpl
-  bind [StudyRepository]                          to new StudyRepositoryImpl
-  bind [ParticipantRepository]                    to new ParticipantRepositoryImpl
+  bind [CollectionEventAnnotationTypeRepository]  toNonLazy new CollectionEventAnnotationTypeRepositoryImpl
+  bind [CollectionEventTypeRepository]            toNonLazy new CollectionEventTypeRepositoryImpl
+  bind [ParticipantAnnotationTypeRepository]      toNonLazy new ParticipantAnnotationTypeRepositoryImpl
+  bind [ProcessingTypeRepository]                 toNonLazy new ProcessingTypeRepositoryImpl
+  bind [SpecimenGroupRepository]                  toNonLazy new SpecimenGroupRepositoryImpl
+  bind [SpecimenLinkAnnotationTypeRepository]     toNonLazy new SpecimenLinkAnnotationTypeRepositoryImpl
+  bind [SpecimenLinkTypeRepository]               toNonLazy new SpecimenLinkTypeRepositoryImpl
+  bind [StudyRepository]                          toNonLazy new StudyRepositoryImpl
+  bind [ParticipantRepository]                    toNonLazy new ParticipantRepositoryImpl
 
-  bind [UserRepository]            to new UserRepositoryImpl
-  bind [CentreRepository]          to new CentreRepositoryImpl
-  bind [CentreLocationsRepository] to new CentreLocationsRepositoryImpl
-  bind [CentreStudiesRepository]   to new CentreStudiesRepositoryImpl
-  bind [LocationRepository]        to new LocationRepositoryImpl
+  bind [UserRepository]            toNonLazy new UserRepositoryImpl
+  bind [CentreRepository]          toNonLazy new CentreRepositoryImpl
+  bind [CentreLocationsRepository] toNonLazy new CentreLocationsRepositoryImpl
+  bind [CentreStudiesRepository]   toNonLazy new CentreStudiesRepositoryImpl
+  bind [LocationRepository]        toNonLazy new LocationRepositoryImpl
 
-  bind [StudiesService]      to new StudiesServiceImpl
-  bind [ParticipantsService] to new ParticipantsServiceImpl
-  bind [UsersService]        to new UsersService
-  bind [CentresService]      to new CentresServiceImpl
+  bind [StudiesService]      toNonLazy new StudiesServiceImpl
+  bind [ParticipantsService] toNonLazy new ParticipantsServiceImpl
+  bind [UsersService]        toNonLazy new UsersService
+  bind [CentresService]      toNonLazy new CentresServiceImpl
 
   binding toProvider new CeventAnnotationTypeProcessor
   binding toProvider new CollectionEventTypeProcessor

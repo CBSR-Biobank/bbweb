@@ -28,7 +28,7 @@ trait Global
     extends GlobalSettings
     with ScaldiSupport {
 
-  def applicationModule = new WebModule :: new UserModule
+  val applicationModule = new WebModule :: new UserModule
 
   /**
    *
