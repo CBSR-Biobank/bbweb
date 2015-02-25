@@ -82,13 +82,13 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
       var url = uri();
       var paramsStr = '';
 
-      if (arguments.length) {
-        paramsStr = queryStringService.param(options, function (value, key) {
-          return _.contains(validKeys, key);
-        });
-      }
+      options = options || {};
 
-      if (paramsStr) {
+      paramsStr = queryStringService.param(options, function (value, key) {
+        return _.contains(validKeys, key);
+      });
+
+      if (paramsStr.length) {
         url += paramsStr;
       }
 

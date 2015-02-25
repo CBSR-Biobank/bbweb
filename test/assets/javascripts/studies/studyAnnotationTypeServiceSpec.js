@@ -18,7 +18,7 @@ define([
   /**
    * Suite for ceventAnnotTypesService
    */
-  fdescribe('service: ceventAnnotTypesService', function () {
+  describe('service: ceventAnnotTypesService', function () {
 
     var context = {};
 
@@ -47,7 +47,7 @@ define([
   /**
    * Suite for spcLinkAnnotTypesService
    */
-  fdescribe('service: spcLinkAnnotTypesService', function () {
+  describe('service: spcLinkAnnotTypesService', function () {
 
     var context = {};
 
@@ -76,7 +76,7 @@ define([
   /**
    * Suite for participantAnnotTypesService
    */
-  fdescribe('service: participantAnnotTypesService', function () {
+  describe('service: participantAnnotTypesService', function () {
 
     var context = {};
 

@@ -3,11 +3,19 @@ define(['../module', 'angular'], function(module, angular) {
 
   module.factory('Centre', CentreFactory);
 
-  CentreFactory.$inject = ['ConcurrencySafeEntity'];
+  CentreFactory.$inject = [
+    'ConcurrencySafeEntity',
+    'Location',
+    'centresService',
+    'centreLocationsSevice'
+  ];
 
   /**  *
    */
-  function CentreFactory(ConcurrencySafeEntity) {
+  function CentreFactory(ConcurrencySafeEntity,
+                         Location,
+                         centresService,
+                         centreLocationsSevice) {
 
     /**
      * Centre is a value object.
@@ -26,20 +34,79 @@ define(['../module', 'angular'], function(module, angular) {
 
     Centre.prototype = Object.create(ConcurrencySafeEntity.prototype);
 
-    Centre.prototype.addLocations = function (locations) {
-      this.locations = _.union(this.locations, locations);
+    Centre.prototype.getLocations = function () {
+      if (this.id === null) {
+        throw new Error('id is null');
+      }
+      return centreLocationsSevice.list(this.id).then(function(reply){
+        var locs = _.map(reply, function(loc) {
+          return new Location(loc);
+        });
+        this.locations = _.union(this.locations, locs);
+        return this;
+      });
     };
 
-    Centre.prototype.removeLocations = function (locations) {
-      this.locations = _.difference(this.locations, locations);
+    Centre.prototype.addLocation = function (location) {
+      if (this.id === null) {
+        throw new Error('id is null');
+      }
+      if (this.locations.contains(location)) {
+        throw new Error('location already present: ' + location);
+      }
+      return centreLocationsSevice.add(this, location).then(function(reply) {
+        this.locations.push(location);
+        return this;
+      });
     };
 
-    Centre.prototype.addStudyIds = function (studyIds) {
-      this.studyIds = _.union(this.studyIds, studyIds);
+    Centre.prototype.removeLocation = function (location) {
+      if (this.id === null) {
+        throw new Error('id is null');
+      }
+      if (! this.studyIds.contains(location)) {
+        throw new Error('location not present: ' + location);
+      }
+      return centreLocationsSevice.add(this, location).then(function(reply) {
+        this.locations = _.without(this.locations, location);
+        return this;
+      });
     };
 
-    Centre.prototype.removeStudyIds = function (studyIds) {
-      this.studyIds = _.difference(this.studyIds, studyIds);
+    Centre.prototype.getStudyIds = function() {
+      if (this.id === null) {
+        throw new Error('id is null');
+      }
+      return centresService.studies(this).then(function(reply) {
+        this.studyIds = _.union(this.studyIds, reply);
+        return this;
+      });
+    };
+
+    Centre.prototype.addStudyId = function (studyId) {
+      if (this.id === null) {
+        throw new Error('id is null');
+      }
+      if (this.studyIds.contains(studyId)) {
+        throw new Error('study ID already present: ' + studyId);
+      }
+      return centresService.addStudy(this, studyId).then(function(reply) {
+        this.studyIds.push(studyId);
+        return this;
+      });
+    };
+
+    Centre.prototype.removeStudyId = function (studyId) {
+      if (this.id === null) {
+        throw new Error('id is null');
+      }
+      if (! this.studyIds.contains(studyId)) {
+        throw new Error('study ID not present: ' + studyId);
+      }
+      return centresService.removeStudy(this, studyId).then(function(reply) {
+        this.studyIds = _.without(this.studyIds, studyId);
+        return this;
+      });
     };
 
     Centre.prototype.getAddCommand = function () {
