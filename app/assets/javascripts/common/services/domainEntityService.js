@@ -7,6 +7,9 @@ define(['../module', 'underscore'], function(module, _) {
 
   /**
    * Utilities for services that access domain objects.
+   *
+   * FIXME: deprecated, replaced with JS domain entities.
+   *
    */
   function domainEntityService() {
     var service = {

@@ -3,15 +3,16 @@ define([
   'angular',
   'angularMocks',
   'underscore',
+  'jquery',
   'biobankApp',
   'biobankTest'
 ], function(angular, mocks, _, $) {
   'use strict';
 
-  describe('Service: centresService', function() {
+  fdescribe('Service: centresService', function() {
 
-    var centresService, httpBackend, fakeEntities;
-    var centre, centreNoId;
+    var httpBackend, centresService, Centre, fakeEntities;
+    var serverCentre, serverCentreNoId;
 
     function uri(centreId) {
       var result = '/centres';
@@ -23,15 +24,17 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (_centresService_,
-                                $httpBackend,
-                                fakeDomainEntities) {
-      centresService = _centresService_;
-      httpBackend = $httpBackend;
-      fakeEntities = fakeDomainEntities;
-
-      centre = fakeEntities.centre();
-      centreNoId = _.omit(centre, 'id');
+    beforeEach(inject(function ($httpBackend,
+                                _centresService_,
+                                _Centre_,
+                                fakeDomainEntities,
+                                extendedDomainEntities) {
+      httpBackend      = $httpBackend;
+      centresService   = _centresService_;
+      Centre           = _Centre_;
+      fakeEntities     = fakeDomainEntities;
+      serverCentre     = fakeEntities.centre();
+      serverCentreNoId = _.omit(serverCentre, 'id');
     }));
 
     afterEach(function() {
@@ -52,157 +55,78 @@ define([
     });
 
     it('calling getCentreCounts has valid URL', function() {
+      var response = {count: 1};
       httpBackend.whenGET(uri() + '/counts').respond({
         status: 'success',
-        data: [centre]
+        data: response
       });
 
       centresService.getCentreCounts().then(function(data) {
-        expect(data.length).toEqual(1);
-        expect(_.isEqual(centre, data[0]));
+        expect(data).toEqual(response);
       });
 
       httpBackend.flush();
     });
 
     it('calling getCentres with no parameters has no query string', function() {
-      httpBackend.whenGET(uri()).respond({
-        status: 'success',
-        data: [centre]
-      });
-
-      centresService.getCentres().then(function(data) {
-        expect(data.length).toEqual(1);
-        expect(_.isEqual(centre, data[0]));
-      });
-
-      httpBackend.flush();
+      getCentresSharedBehaviour(serverCentre);
     });
 
     it('calling getCentres with filter parameter has valid query string', function() {
-      var nameFilter = 'nameFilter';
-      var url = uri() + '?' + $.param({filter: nameFilter});
-      httpBackend.whenGET(url).respond({
-        status: 'success',
-        data: [centre]
-      });
-
-      centresService.getCentres({filter: nameFilter}).then(function(data) {
-        expect(data.length).toEqual(1);
-        expect(_.isEqual(centre, data[0]));
-      });
-
-      httpBackend.flush();
+      getCentresSharedBehaviour(serverCentre,  { filter: 'nameFilter' });
     });
 
     it('calling getCentres with sort parameter has valid query string', function() {
-      var sortField = 'sortField';
-      var url = uri() + '?' + $.param({sort: sortField});
-      httpBackend.whenGET(url).respond({
-        status: 'success',
-        data: [centre]
-      });
-
-      centresService.getCentres({sort: sortField}).then(function(data) {
-        expect(data.length).toEqual(1);
-        expect(_.isEqual(centre, data[0]));
-      });
-
-      httpBackend.flush();
+      getCentresSharedBehaviour(serverCentre, { sort: 'status' });
     });
 
     it('calling getCentres with filter and status parameters has valid query string', function() {
-      var nameFilter = 'nameFilter';
-      var order = 'disabled';
-      var url = uri() + '?' + $.param({
-        filter: nameFilter,
-        order: order
-      });
-      httpBackend.whenGET(url).respond({
-        status: 'success',
-        data: [centre]
-      });
-
-      centresService.getCentres({filter: nameFilter, order: order}).then(function(data) {
-        expect(data.length).toEqual(1);
-        expect(_.isEqual(centre, data[0]));
-      });
-
-      httpBackend.flush();
+      getCentresSharedBehaviour(serverCentre, { filter: 'nameFilter', order: 'desc' });
     });
 
     it('calling getCentres with page and pageSize parameters has valid query string', function() {
-      var page = 1;
-      var pageSize = 5;
-      var url = uri() + '?' + $.param({
-        page: page,
-        pageSize: pageSize
-      });
-      httpBackend.whenGET(url).respond({
-        status: 'success',
-        data: [centre]
-      });
-
-      centresService.getCentres({page: page, pageSize: pageSize}).then(function(data) {
-        expect(data.length).toEqual(1);
-        expect(_.isEqual(centre, data[0]));
-      });
-
-      httpBackend.flush();
+      getCentresSharedBehaviour(serverCentre, { page: 1, pageSize: 5 });
     });
 
     it('calling getCentres with sortField and order parameters has valid query string', function() {
-      var sortField = 'name';
-      var order = 'ascending';
-      var url = uri() + '?' + $.param({
-        sort: sortField,
-        order: order
-      });
-      httpBackend.whenGET(url).respond({
-        status: 'success',
-        data: [centre]
-      });
-
-      centresService.getCentres({sort: sortField, order: order}).then(function(data) {
-        expect(data.length).toEqual(1);
-        expect(_.isEqual(centre, data[0]));
-      });
-
-      httpBackend.flush();
+      getCentresSharedBehaviour(serverCentre, { sort: 'name', order: 'asc' });
     });
 
     it('get should return valid object', function() {
-      httpBackend.whenGET(uri(centre.id)).respond({
+      httpBackend.whenGET(uri(serverCentre.id)).respond({
         status: 'success',
-        data: centre
+        data: serverCentre
       });
 
-      centresService.get(centre.id).then(function(data) {
-        expect(_.isEqual(centre, data));
+      centresService.get(serverCentre.id).then(function(centre) {
+        expect(centre).toEqual(jasmine.any(Centre));
+        centre.compareToServerEntity(serverCentre);
       });
 
       httpBackend.flush();
     });
 
     it('should allow adding a centre', function() {
-      var centre = {name: 'CTR1', description: 'test'};
-      var expectedResult = {status: 'success', data: 'success'};
-      httpBackend.expectPOST(uri(), centre).respond(201, expectedResult);
+      var centre = new Centre(_.omit(fakeEntities.centre(), 'id'));
+      var expectedResult = { status: 'success', data: 'success' };
+      httpBackend.expectPOST(uri(), centre.getAddCommand()).respond(201, expectedResult);
+
       centresService.addOrUpdate(centre).then(function(reply) {
         expect(reply).toEqual('success');
       });
       httpBackend.flush();
     });
 
-    function statusChangeShared(status, serviceFn) {
-      var expectedCmd = { id: centre.id, expectedVersion: centre.version};
-      var expectedResult = {status: 'success', data: 'success'};
-      httpBackend.expectPOST(uri(centre.id) + '/' + status, expectedCmd).respond(201, expectedResult);
-      serviceFn(centre).then(function(reply) {
+    it('should allow updating a centre', function() {
+      var centre = new Centre(fakeEntities.centre(), 'id');
+      var expectedResult = { status: 'success', data: 'success' };
+      httpBackend.expectPUT(uri(centre.id), centre.getUpdateCommand()).respond(201, expectedResult);
+
+      centresService.addOrUpdate(centre).then(function(reply) {
         expect(reply).toEqual('success');
       });
       httpBackend.flush();
-    }
+    });
 
     it('should enable a centre', function() {
       statusChangeShared('enable', centresService.enable);
@@ -213,37 +137,85 @@ define([
     });
 
     it('should get the studies linked to a centre', function() {
-      var studyId = 'a-study-id';
+      var study = fakeEntities.study();
+      var centre = new Centre(fakeEntities.centre());
       httpBackend.whenGET(uri(centre.id) + '/studies').respond({
         status: 'success',
-        data: [studyId]
+        data: [study.id]
       });
 
-      centresService.studies(centre.id).then(function(data) {
-        expect(data.length).toEqual(1);
-        expect(data[0]).toEqual(studyId);
+      centresService.studies(centre).then(function(replyCentre) {
+        expect(replyCentre.studyIds.length).toEqual(1);
+        expect(replyCentre.studyIds[0]).toEqual(study.id);
       });
 
       httpBackend.flush();
     });
 
     it('should add a study to a centre', function() {
-      var studyId = 'a-study-id';
-      var expectedCmd = {centreId: centre.id, studyId: studyId};
-      var expectedResult = {status: 'success', data: 'success'};
-      httpBackend.expectPOST(uri(centre.id) + '/studies/' + studyId, expectedCmd).respond(201, expectedResult);
-      centresService.addStudy(centre.id, studyId).then(function(reply) {
-        expect(reply).toEqual('success');
+      var study = fakeEntities.study();
+      var centre = new Centre(fakeEntities.centre());
+      var expectedCmd = {centreId: centre.id, studyId: study.id};
+      var expectedResult = {status: 'success', data: {centreId: centre.id, studyId: study.id}};
+      httpBackend.expectPOST(uri(centre.id) + '/studies/' + study.id, expectedCmd)
+        .respond(201, expectedResult);
+      centresService.addStudy(centre, study.id).then(function(replyCentre) {
+        expect(replyCentre.studyIds.length).toEqual(1);
+        expect(replyCentre.studyIds[0]).toEqual(study.id);
       });
       httpBackend.flush();
     });
 
-    it('should remove a study to a centre', function() {
-      var studyId = 'a-study-id';
-      httpBackend.expectDELETE(uri(centre.id) + '/studies/' + studyId).respond(201);
-      centresService.removeStudy(centre.id, studyId);
+    it('should remove a study from a centre', function() {
+      var numStudies;
+      var study = fakeEntities.study();
+      var centre = new Centre(fakeEntities.centre());
+
+      centre.addStudyIds([study.id]);
+      numStudies = centre.studyIds.length;
+
+      httpBackend.expectDELETE(uri(centre.id) + '/studies/' + study.id)
+        .respond(201, {centreId: centre.id, studyId: study.id});
+      centresService.removeStudy(centre, study.id).then(function(replyCentre) {
+        expect(replyCentre.studyIds.length).toEqual(numStudies - 1);
+        expect(replyCentre.studyIds).not.toContain(study.id);
+      });
       httpBackend.flush();
     });
+
+    function getCentresSharedBehaviour(serverCentre, options) {
+      options = options || {};
+
+      var url = uri();
+      if (options) {
+        url += '?' + $.param(options);
+      }
+      httpBackend.whenGET(url).respond({
+        status: 'success',
+        data: [serverCentre]
+      });
+
+      centresService.getCentres(options).then(function(centres) {
+        expect(centres.length).toEqual(1);
+        _.each(centres, function(centre) {
+          expect(centre).toEqual(jasmine.any(Centre));
+          centre.compareToServerEntity(serverCentre);
+        });
+      });
+
+      httpBackend.flush();
+    }
+
+    function statusChangeShared(status, serviceFn) {
+      var centre = new Centre(fakeEntities.centre());
+      var expectedCmd = { id: centre.id, expectedVersion: centre.version};
+      var expectedResult = {status: 'success', data: 'success'};
+      httpBackend.expectPOST(uri(centre.id) + '/' + status, expectedCmd).respond(201, expectedResult);
+      serviceFn(centre).then(function(replyCentre) {
+        expect(replyCentre).toEqual(centre);
+      });
+      httpBackend.flush();
+    }
 
   });
 

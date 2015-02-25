@@ -6,12 +6,12 @@
 define([
   'angular',
   '../../../test/assets/javascripts/test/fakeDomainEntities',
-  '../../../test/assets/javascripts/test/extendDomainEntities'
+  '../../../test/assets/javascripts/test/extendedDomainEntities'
 ], function(angular) {
   'use strict';
 
   return angular.module('biobank.test', [
     'biobank.test.fakeDomainEntities',
-    'biobank.test.extendDomainEntities'
+    'biobank.test.extendedDomainEntities'
   ]);
 });

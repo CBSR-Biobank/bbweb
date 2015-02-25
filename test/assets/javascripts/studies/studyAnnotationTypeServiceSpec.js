@@ -26,7 +26,7 @@ define([
 
     beforeEach(inject(function ($httpBackend,
                                 fakeDomainEntities,
-                                extendDomainEntities,
+                                extendedDomainEntities,
                                 CollectionEventAnnotationType,
                                 ceventAnnotTypesService) {
       var fakeEntities = fakeDomainEntities;
@@ -55,7 +55,7 @@ define([
 
     beforeEach(inject(function ($httpBackend,
                                 fakeDomainEntities,
-                                extendDomainEntities,
+                                extendedDomainEntities,
                                 SpecimenLinkAnnotationType,
                                 spcLinkAnnotTypesService) {
       var fakeEntities = fakeDomainEntities;
@@ -84,7 +84,7 @@ define([
 
     beforeEach(inject(function ($httpBackend,
                                 fakeDomainEntities,
-                                extendDomainEntities,
+                                extendedDomainEntities,
                                 ParticipantAnnotationType,
                                 participantAnnotTypesService) {
       var fakeEntities = fakeDomainEntities;

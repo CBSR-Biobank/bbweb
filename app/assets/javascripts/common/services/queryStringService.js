@@ -14,8 +14,8 @@ define(['../module', 'jquery', 'underscore'], function(module, $, _) {
     //-------
 
     /**
-     * Creates a query string to be appended to a URI. Function 'callback' is invoked to determine if the key in
-     * the options object is valid. Function callback signature is: function(value, key, object).
+     * Creates a query string to be appended to a URI. Function 'callback' is invoked to determine if the key
+     * in the options object is valid. Function callback signature is: function(value, key, object).
      */
     function param(options, callback) {
       var paramsStr = null;

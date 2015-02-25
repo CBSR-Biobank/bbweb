@@ -4,7 +4,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  fdescribe('Service: centresLocationService', function() {
+  describe('Service: centresLocationService', function() {
 
     var centreLocationsService, httpBackend, Location, fakeEntities;
     var centre, serverLocation, serverLocationNoId;
@@ -27,7 +27,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
                                 $httpBackend,
                                 _Location_,
                                 fakeDomainEntities,
-                                extendDomainEntities) {
+                                extendedDomainEntities) {
       centreLocationsService = _centreLocationsService_;
       httpBackend = $httpBackend;
       Location = _Location_;

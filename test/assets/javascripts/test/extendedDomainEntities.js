@@ -4,22 +4,24 @@
 define(['angular', 'underscore'], function(angular, _) {
   'use strict';
 
-  var module = angular.module('biobank.test.extendDomainEntities', []);
+  var module = angular.module('biobank.test.extendedDomainEntities', []);
 
-  module.service('extendDomainEntities', extendDomainEntities);
+  module.service('extendedDomainEntities', extendedDomainEntities);
 
-  extendDomainEntities.$inject = [
+  extendedDomainEntities.$inject = [
     'ConcurrencySafeEntity',
     'AnnotationType',
     'StudyAnnotationType',
     'ParticipantAnnotationType',
+    'Centre',
     'Location'
   ];
 
-  function extendDomainEntities(ConcurrencySafeEntity,
+  function extendedDomainEntities(ConcurrencySafeEntity,
                                 AnnotationType,
                                 StudyAnnotationType,
                                 ParticipantAnnotationType,
+                                Centre,
                                 Location) {
 
     /**
@@ -55,7 +57,6 @@ define(['angular', 'underscore'], function(angular, _) {
     };
 
     AnnotationType.prototype.compareToServerEntity = function (annotType) {
-      var self = this;
       ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, annotType);
       validateAttrs(this, annotType, 'name', 'valueType', 'options');
       validateOptional(this, annotType, 'description', 'maxValueCount');
@@ -69,6 +70,12 @@ define(['angular', 'underscore'], function(angular, _) {
     ParticipantAnnotationType.prototype.compareToServerEntity = function (annotType) {
       StudyAnnotationType.prototype.compareToServerEntity.call(this, annotType);
       validateAttrs(this, annotType, 'required');
+    };
+
+    Centre.prototype.compareToServerEntity = function (centre) {
+      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, centre);
+      validateAttrs(this, centre, 'name', 'Status');
+      validateOptional(this, centre, 'description');
     };
 
     Location.prototype.compareToServerEntity = function (location) {

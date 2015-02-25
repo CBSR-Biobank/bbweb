@@ -28,6 +28,7 @@ define([
   './SpecimenType',
   './StudyViewer',
   './UserViewer',
+  './centre/Centre',
   './study/CollectionEventAnnotationType',
   './study/ParticipantAnnotationType',
   './study/SpecimenLinkAnnotationType',
