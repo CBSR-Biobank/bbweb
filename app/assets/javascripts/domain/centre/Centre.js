@@ -1,4 +1,4 @@
-define(['../module', 'angular'], function(module, angular) {
+define(['../module', 'angular', 'underscore'], function(module, angular, _) {
   'use strict';
 
   module.factory('Centre', CentreFactory);
@@ -7,7 +7,7 @@ define(['../module', 'angular'], function(module, angular) {
     'ConcurrencySafeEntity',
     'Location',
     'centresService',
-    'centreLocationsSevice'
+    'centreLocationsService'
   ];
 
   /**  *
@@ -15,7 +15,7 @@ define(['../module', 'angular'], function(module, angular) {
   function CentreFactory(ConcurrencySafeEntity,
                          Location,
                          centresService,
-                         centreLocationsSevice) {
+                         centreLocationsService) {
 
     /**
      * Centre is a value object.
@@ -38,7 +38,7 @@ define(['../module', 'angular'], function(module, angular) {
       if (this.id === null) {
         throw new Error('id is null');
       }
-      return centreLocationsSevice.list(this.id).then(function(reply){
+      return centreLocationsService.list(this.id).then(function(reply){
         var locs = _.map(reply, function(loc) {
           return new Location(loc);
         });
@@ -54,7 +54,7 @@ define(['../module', 'angular'], function(module, angular) {
       if (this.locations.contains(location)) {
         throw new Error('location already present: ' + location);
       }
-      return centreLocationsSevice.add(this, location).then(function(reply) {
+      return centreLocationsService.add(this, location).then(function(reply) {
         this.locations.push(location);
         return this;
       });
@@ -67,7 +67,7 @@ define(['../module', 'angular'], function(module, angular) {
       if (! this.studyIds.contains(location)) {
         throw new Error('location not present: ' + location);
       }
-      return centreLocationsSevice.add(this, location).then(function(reply) {
+      return centreLocationsService.add(this, location).then(function(reply) {
         this.locations = _.without(this.locations, location);
         return this;
       });
@@ -121,6 +121,20 @@ define(['../module', 'angular'], function(module, angular) {
       return _.extend(this.getAddCommand(), {
         id:              this.id,
         expectedVersion: this.version
+      });
+    };
+
+    Centre.getCentres = function (options) {
+      return centresService.getCentres(options).then(function(reply) {
+        return _.map(reply, function(obj){
+          return new Centre(obj);
+        });
+      });
+    };
+
+    Centre.getCentre = function (id) {
+      return centresService.get(id).then(function(reply) {
+        return new Centre(reply);
       });
     };
 

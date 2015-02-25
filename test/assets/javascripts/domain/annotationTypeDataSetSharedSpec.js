@@ -2,6 +2,7 @@
  * Common tests for the Panel object.
  */
 define(['underscore'], function(_) {
+  'use strict';
 
   function annotationTypeDataSetSharedSpec(context) {
 

@@ -1,4 +1,4 @@
-define(['../module'], function(module) {
+define(['../module', 'underscore'], function(module, _) {
   'use strict';
 
   module.factory('ParticipantAnnotationType', ParticipantAnnotationTypeFactory);

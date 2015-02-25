@@ -3,12 +3,12 @@ define(['./module'], function(module) {
 
   module.service('centreLocationsService', centreLocationsService);
 
-  centreLocationsService.$inject = ['biobankApi', 'Location'];
+  centreLocationsService.$inject = ['biobankApi'];
 
   /**
    *
    */
-  function centreLocationsService(biobankApi, Location) {
+  function centreLocationsService(biobankApi) {
     var service = {
       list:   list,
       query:  query,

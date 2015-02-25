@@ -159,7 +159,7 @@ define([
       httpBackend.expectPOST(uri(centre.id) + '/studies/' + study.id, expectedCmd)
         .respond(201, expectedResult);
       centresService.addStudy(centre, study.id).then(function(reply) {
-         expect(reply).toEqual(expectedResult.data);
+        expect(reply).toEqual(expectedResult.data);
       });
       httpBackend.flush();
     });

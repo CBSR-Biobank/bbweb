@@ -7,7 +7,7 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  './annotationTypeDataSetSharedSpec',
+  '../annotationTypeDataSetSharedSpec',
   'biobankApp'
 ], function(angular, mocks, _, annotationTypeDataSetSharedSpec) {
   'use strict';

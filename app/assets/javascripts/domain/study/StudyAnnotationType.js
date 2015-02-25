@@ -1,4 +1,4 @@
-define(['../module', 'angular'], function(module, angular) {
+define(['../module', 'angular', 'underscore'], function(module, angular, _) {
   'use strict';
 
   module.factory('StudyAnnotationType', StudyAnnotationTypeFactory);

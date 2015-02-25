@@ -6,7 +6,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
   describe('Service: centreLocationsService', function() {
 
-    var centreLocationsService, httpBackend, Location, fakeEntities;
+    var centreLocationsService, httpBackend, fakeEntities;
     var centre, serverLocation, serverLocationNoId;
 
     function uri(centreId, locationId) {
@@ -25,12 +25,10 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     beforeEach(inject(function (_centreLocationsService_,
                                 $httpBackend,
-                                _Location_,
                                 fakeDomainEntities,
                                 extendedDomainEntities) {
       centreLocationsService = _centreLocationsService_;
       httpBackend = $httpBackend;
-      Location = _Location_;
       fakeEntities = fakeDomainEntities;
 
       centre = fakeEntities.centre();
@@ -68,33 +66,31 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('get should return a valid object', function() {
-        httpBackend.whenGET(uri(centre.id) + '?locationId=' + serverLocation.id).respond({
-          status: 'success',
-          data: serverLocation
-        });
+      httpBackend.whenGET(uri(centre.id) + '?locationId=' + serverLocation.id).respond({
+        status: 'success',
+        data: serverLocation
+      });
 
-        centreLocationsService.query(centre.id, serverLocation.id).then(function(loc) {
-          expect(loc).toEqual(serverLocation);
-        });
+      centreLocationsService.query(centre.id, serverLocation.id).then(function(loc) {
+        expect(loc).toEqual(serverLocation);
+      });
 
-        httpBackend.flush();
+      httpBackend.flush();
     });
 
     it('should allow adding an location to a centre', function() {
-      var location = new Location(serverLocation);
-      var cmd = location.getAddCommand();
+      var cmd = {centreId: centre.id, locationId: serverLocation.id};
       var expectedResult = {status: 'success', data: 'success'};
       httpBackend.expectPOST(uri(centre.id), cmd).respond(201, expectedResult);
-      centreLocationsService.add(centre, location).then(function(reply) {
+      centreLocationsService.add(centre, serverLocation).then(function(reply) {
         expect(reply).toEqual('success');
       });
       httpBackend.flush();
     });
 
     it('should remove a location from a centre', function() {
-      var location = new Location(serverLocation);
-      httpBackend.expectDELETE(uri(centre.id, location.id)).respond(201);
-      centreLocationsService.remove(centre.id, location.id);
+      httpBackend.expectDELETE(uri(centre.id, serverLocation.id)).respond(201);
+      centreLocationsService.remove(centre.id, serverLocation.id);
       httpBackend.flush();
     });
 

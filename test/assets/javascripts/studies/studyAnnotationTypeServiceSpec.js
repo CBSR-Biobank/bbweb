@@ -108,7 +108,7 @@ define([
 
     describe('(shared)', function() {
 
-      var httpBackend, studyAnnotTypesService, annotationTypeType;
+      var httpBackend, studyAnnotTypesService, AnnotationTypeType;
       var study, serverAnnotType, serverAnnotTypeNoId;
 
       function uri(annotTypeId, version) {
@@ -125,7 +125,7 @@ define([
       beforeEach(function () {
         httpBackend            = context.httpBackend;
         studyAnnotTypesService = context.studyAnnotTypesService;
-        annotationTypeType     = context.annotationTypeType;
+        AnnotationTypeType     = context.annotationTypeType;
         study                  = context.study;
         serverAnnotType        = context.serverAnnotType;
         serverAnnotTypeNoId    = _.omit(context.serverAnnotType, 'id', 'version');
@@ -174,7 +174,7 @@ define([
       });
 
       it('should allow adding an annotation type', function() {
-        var annotType = new annotationTypeType(serverAnnotTypeNoId);
+        var annotType = new AnnotationTypeType(serverAnnotTypeNoId);
         var cmd = annotType.getAddCommand();
 
         var expectedResult = {status: 'success', data: 'success'};
@@ -187,7 +187,7 @@ define([
       });
 
       it('should allow updating an annotation type', function() {
-        var annotType = new annotationTypeType(serverAnnotType);
+        var annotType = new AnnotationTypeType(serverAnnotType);
         var cmd = annotType.getUpdateCommand();
 
         var expectedResult = {status: 'success', data: 'success'};
@@ -201,7 +201,7 @@ define([
       });
 
       it('should remove an annotation type', function() {
-        var annotType = new annotationTypeType(serverAnnotType);
+        var annotType = new AnnotationTypeType(serverAnnotType);
         httpBackend.expectDELETE(uri(annotType.id, annotType.version)).respond(201);
         studyAnnotTypesService.remove(annotType);
         httpBackend.flush();
