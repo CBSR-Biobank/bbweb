@@ -27,19 +27,19 @@ define(['./module', 'angular'], function(module, angular) {
     }
 
     Location.prototype.getAddCommand = function() {
+      var self = this;
       var cmd = {
         name:           this.name,
         street:         this.street,
         city:           this.city,
         province:       this.province,
         postalCode:     this.postalCode,
-        poBoxNumber:    this.poBoxNumber,
         countryIsoCode: this.countryIsoCode
       };
 
       _.each(['id', 'poBoxNumber'], function(attr){
-        if (this[attr] !== null) {
-          cmd[attr] = this[attr];
+        if (self[attr] !== null) {
+          cmd[attr] = self[attr];
         }
       });
 
