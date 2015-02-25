@@ -9,7 +9,7 @@ define([
 ], function(angular, mocks, _, $) {
   'use strict';
 
-  fdescribe('Service: centresService', function() {
+  describe('Service: centresService', function() {
 
     var httpBackend, centresService, Centre, fakeEntities;
     var serverCentre, serverCentreNoId;
@@ -99,8 +99,7 @@ define([
       });
 
       centresService.get(serverCentre.id).then(function(centre) {
-        expect(centre).toEqual(jasmine.any(Centre));
-        centre.compareToServerEntity(serverCentre);
+        expect(centre).toEqual(serverCentre);
       });
 
       httpBackend.flush();
@@ -144,9 +143,9 @@ define([
         data: [study.id]
       });
 
-      centresService.studies(centre).then(function(replyCentre) {
-        expect(replyCentre.studyIds.length).toEqual(1);
-        expect(replyCentre.studyIds[0]).toEqual(study.id);
+      centresService.studies(centre).then(function(reply) {
+        expect(reply.length).toEqual(1);
+        expect(reply[0]).toEqual(study.id);
       });
 
       httpBackend.flush();
@@ -154,14 +153,13 @@ define([
 
     it('should add a study to a centre', function() {
       var study = fakeEntities.study();
-      var centre = new Centre(fakeEntities.centre());
+      var centre = fakeEntities.centre();
       var expectedCmd = {centreId: centre.id, studyId: study.id};
       var expectedResult = {status: 'success', data: {centreId: centre.id, studyId: study.id}};
       httpBackend.expectPOST(uri(centre.id) + '/studies/' + study.id, expectedCmd)
         .respond(201, expectedResult);
-      centresService.addStudy(centre, study.id).then(function(replyCentre) {
-        expect(replyCentre.studyIds.length).toEqual(1);
-        expect(replyCentre.studyIds[0]).toEqual(study.id);
+      centresService.addStudy(centre, study.id).then(function(reply) {
+         expect(reply).toEqual(expectedResult.data);
       });
       httpBackend.flush();
     });
@@ -170,15 +168,15 @@ define([
       var numStudies;
       var study = fakeEntities.study();
       var centre = new Centre(fakeEntities.centre());
+      var expectedResult = {status: 'success', data: {centreId: centre.id, studyId: study.id}};
 
       centre.addStudyIds([study.id]);
       numStudies = centre.studyIds.length;
 
       httpBackend.expectDELETE(uri(centre.id) + '/studies/' + study.id)
-        .respond(201, {centreId: centre.id, studyId: study.id});
-      centresService.removeStudy(centre, study.id).then(function(replyCentre) {
-        expect(replyCentre.studyIds.length).toEqual(numStudies - 1);
-        expect(replyCentre.studyIds).not.toContain(study.id);
+        .respond(201, expectedResult);
+      centresService.removeStudy(centre, study.id).then(function(reply) {
+        expect(reply).toEqual(expectedResult);
       });
       httpBackend.flush();
     });
@@ -198,8 +196,7 @@ define([
       centresService.getCentres(options).then(function(centres) {
         expect(centres.length).toEqual(1);
         _.each(centres, function(centre) {
-          expect(centre).toEqual(jasmine.any(Centre));
-          centre.compareToServerEntity(serverCentre);
+          expect(centre).toEqual(serverCentre);
         });
       });
 
@@ -207,12 +204,12 @@ define([
     }
 
     function statusChangeShared(status, serviceFn) {
-      var centre = new Centre(fakeEntities.centre());
+      var centre = fakeEntities.centre();
       var expectedCmd = { id: centre.id, expectedVersion: centre.version};
       var expectedResult = {status: 'success', data: 'success'};
       httpBackend.expectPOST(uri(centre.id) + '/' + status, expectedCmd).respond(201, expectedResult);
-      serviceFn(centre).then(function(replyCentre) {
-        expect(replyCentre).toEqual(centre);
+      serviceFn(centre).then(function(reply) {
+        expect(reply).toBe('success');
       });
       httpBackend.flush();
     }

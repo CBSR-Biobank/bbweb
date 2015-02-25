@@ -4,7 +4,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  describe('Service: centresLocationService', function() {
+  describe('Service: centreLocationsService', function() {
 
     var centreLocationsService, httpBackend, Location, fakeEntities;
     var centre, serverLocation, serverLocationNoId;
@@ -59,8 +59,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       centreLocationsService.list(centre.id).then(function(locations) {
         expect(locations.length).toEqual(1);
         _.each(locations, function(loc) {
-          expect(loc).toEqual(jasmine.any(Location));
-          loc.compareToServerEntity(serverLocation);
+          expect(loc).toEqual(serverLocation);
         });
 
       });
@@ -75,8 +74,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         });
 
         centreLocationsService.query(centre.id, serverLocation.id).then(function(loc) {
-          expect(loc).toEqual(jasmine.any(Location));
-          loc.compareToServerEntity(serverLocation);
+          expect(loc).toEqual(serverLocation);
         });
 
         httpBackend.flush();

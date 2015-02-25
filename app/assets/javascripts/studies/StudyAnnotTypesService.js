@@ -32,19 +32,12 @@ define(['./module', 'angular'], function(module, angular) {
       return result;
     }
 
-    StudyAnnotTypesService.prototype.getAll = function (annotationTypeType, studyId) {
-      return biobankApi.call('GET', uri(this.annotTypeUri, studyId)).then(function (annotationTypes) {
-          return _.map(annotationTypes, function (at) {
-            return new annotationTypeType(at);
-          });
-      });
+    StudyAnnotTypesService.prototype.getAll = function (studyId) {
+      return biobankApi.call('GET', uri(this.annotTypeUri, studyId));
     };
 
-    StudyAnnotTypesService.prototype.get = function (annotationTypeType, studyId, annotTypeId) {
-      return biobankApi.call('GET', uri(this.annotTypeUri, studyId) + '?annotTypeId=' + annotTypeId)
-        .then(function (annotationType) {
-          return new annotationTypeType(annotationType);
-        });
+    StudyAnnotTypesService.prototype.get = function (studyId, annotTypeId) {
+      return biobankApi.call('GET', uri(this.annotTypeUri, studyId) + '?annotTypeId=' + annotTypeId);
     };
 
     StudyAnnotTypesService.prototype.addOrUpdate = function (annotType) {

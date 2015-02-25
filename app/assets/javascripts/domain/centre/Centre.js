@@ -17,13 +17,22 @@ define(['../module', 'angular'], function(module, angular) {
 
       ConcurrencySafeEntity.call(this, obj);
 
-      this.name = obj.name || '';
+      this.name        = obj.name || '';
       this.description = obj.description || null;
-      this.status = obj.status || 'Disabled';
-      this.studyIds = obj.studyIds || [];
+      this.status      = obj.status || 'Disabled';
+      this.locations   = obj.locations || [];
+      this.studyIds    = obj.studyIds || [];
     }
 
     Centre.prototype = Object.create(ConcurrencySafeEntity.prototype);
+
+    Centre.prototype.addLocations = function (locations) {
+      this.locations = _.union(this.locations, locations);
+    };
+
+    Centre.prototype.removeLocations = function (locations) {
+      this.locations = _.difference(this.locations, locations);
+    };
 
     Centre.prototype.addStudyIds = function (studyIds) {
       this.studyIds = _.union(this.studyIds, studyIds);

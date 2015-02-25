@@ -20,21 +20,7 @@ define(['./module'], function(module) {
 
     CeventAnnotTypesService.prototype = Object.create(StudyAnnotTypesService.prototype);
 
-    CeventAnnotTypesService.prototype.getAll = function (studyId) {
-      return StudyAnnotTypesService.prototype.getAll.call(this,
-                                                          CollectionEventAnnotationType,
-                                                          studyId);
-    };
-
-    CeventAnnotTypesService.prototype.get = function (studyId, annotTypeId) {
-      return StudyAnnotTypesService.prototype.get.call(this,
-                                                       CollectionEventAnnotationType,
-                                                       studyId,
-                                                       annotTypeId);
-    };
-
     return new CeventAnnotTypesService();
-
   }
 
 });

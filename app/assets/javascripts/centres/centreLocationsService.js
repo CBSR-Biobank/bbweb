@@ -20,11 +20,13 @@ define(['./module'], function(module) {
     //-------
 
     function uri(centreId, locationId) {
-      var result = '/centres/' + centreId + '/locations';
+      var result;
 
       if (arguments.length <= 0) {
         throw new Error('invalid arguments');
       }
+
+      result = '/centres/' + centreId + '/locations';
 
       if (arguments.length > 1) {
         result += '/' + locationId;
@@ -34,19 +36,11 @@ define(['./module'], function(module) {
     }
 
     function list(centreId) {
-      return biobankApi.call('GET', uri(centreId)).then(function (locations){
-        return _.map(locations, function(location) {
-          return new Location(location);
-        });
-      });
-
+      return biobankApi.call('GET', uri(centreId));
     }
 
     function query(centreId, locationId) {
-      return biobankApi.call('GET', uri(centreId) + '?locationId=' + locationId)
-        .then(function (location){
-          return new Location(location);
-        });
+      return biobankApi.call('GET', uri(centreId) + '?locationId=' + locationId);
     }
 
     function add(centre, location) {

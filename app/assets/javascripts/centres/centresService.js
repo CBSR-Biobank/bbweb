@@ -42,12 +42,7 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
 
     function changeStatus(status, centre) {
       var cmd = { id: centre.id, expectedVersion: centre.version };
-      return biobankApi.call('POST', uri(centre.id) + '/' + status, cmd)
-        .then(function (response){
-          centre.version = response.version;
-          centre.status = status.charAt(0).toUpperCase() + status.slice(1);
-          return centre;
-        });
+      return biobankApi.call('POST', uri(centre.id) + '/' + status, cmd);
     }
 
     function getCentreCounts() {
@@ -97,17 +92,11 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
         url += paramsStr;
       }
 
-      return biobankApi.call('GET', url).then(function (serverList) {
-        return _.map(serverList, function(serverItem) {
-          return new Centre(serverItem);
-        });
-      });
+      return biobankApi.call('GET', url);
     }
 
     function get(id) {
-      return biobankApi.call('GET', uri(id)).then(function (serverItem) {
-        return new Centre(serverItem);
-      });
+      return biobankApi.call('GET', uri(id));
     }
 
     function addOrUpdate(centre) {
@@ -127,27 +116,16 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
     }
 
     function studies(centre) {
-      return biobankApi.call('GET', uri(centre.id) + '/studies').then(function (studyIds) {
-        centre.addStudyIds(studyIds);
-        return centre;
-      });
+      return biobankApi.call('GET', uri(centre.id) + '/studies');
     }
 
     function addStudy(centre, studyId) {
       var cmd = {centreId: centre.id, studyId: studyId};
-      return biobankApi.call('POST', uri(centre.id) + '/studies/' + studyId, cmd)
-        .then(function (response) {
-          centre.addStudyIds([response.studyId]);
-          return centre;
-        });
+      return biobankApi.call('POST', uri(centre.id) + '/studies/' + studyId, cmd);
     }
 
     function removeStudy(centre, studyId) {
-      return biobankApi.call('DELETE', uri(centre.id) + '/studies/' + studyId)
-        .then(function (response) {
-          centre.removeStudyIds([response.studyId]);
-          return centre;
-        });
+      return biobankApi.call('DELETE', uri(centre.id) + '/studies/' + studyId);
     }
   }
 

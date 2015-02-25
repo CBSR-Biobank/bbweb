@@ -20,19 +20,6 @@ define(['./module'], function(module) {
 
     SpcLinkAnnotTypesService.prototype = Object.create(StudyAnnotTypesService.prototype);
 
-    SpcLinkAnnotTypesService.prototype.getAll = function (studyId) {
-      return StudyAnnotTypesService.prototype.getAll.call(this,
-                                                          SpecimenLinkAnnotationType,
-                                                          studyId);
-    };
-
-    SpcLinkAnnotTypesService.prototype.get = function (studyId, annotTypeId) {
-      return StudyAnnotTypesService.prototype.get.call(this,
-                                                       SpecimenLinkAnnotationType,
-                                                       studyId,
-                                                       annotTypeId);
-    };
-
     return new SpcLinkAnnotTypesService();
   }
 

@@ -49,7 +49,6 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     var panel = new Panel('centre.panel.studies');
 
     vm.centre         = $scope.centre;
-    vm.centreStudyIds = $scope.centreStudies;
     vm.studyNames     = $scope.studyNames;
     vm.studiesById    = [];
     vm.tableStudies   = [];
@@ -61,6 +60,8 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     vm.selected = undefined;
     vm.onSelect = onSelect;
 
+    vm.centre.addStudyIds($scope.centreStudies);
+
     init();
 
     //--
@@ -71,7 +72,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
       vm.studiesById = _.indexBy(vm.studyNames, 'id');
 
-      _.each($scope.centreStudies, function (studyId) {
+      _.each(vm.centre.studyIds, function (studyId) {
         vm.tableStudies.push(vm.studiesById[studyId]);
       });
 
@@ -85,8 +86,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     function onSelect(item) {
       // add the study only if it's not there
       if(_.indexOf(vm.centreStudyIds, item.id) < 0) {
-        centresService.addStudy(vm.centre.id, item.id).then(function () {
-          vm.centreStudyIds.push(item.id);
+        centresService.addStudy(vm.centre, item.id).then(function () {
           vm.tableStudies.push(vm.studiesById[item.id]);
           vm.tableParams.reload();
         });

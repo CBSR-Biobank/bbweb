@@ -18,7 +18,7 @@ define([
   /**
    * Suite for ceventAnnotTypesService
    */
-  describe('service: ceventAnnotTypesService', function () {
+  fdescribe('service: ceventAnnotTypesService', function () {
 
     var context = {};
 
@@ -47,7 +47,7 @@ define([
   /**
    * Suite for spcLinkAnnotTypesService
    */
-  describe('service: spcLinkAnnotTypesService', function () {
+  fdescribe('service: spcLinkAnnotTypesService', function () {
 
     var context = {};
 
@@ -76,7 +76,7 @@ define([
   /**
    * Suite for participantAnnotTypesService
    */
-  describe('service: participantAnnotTypesService', function () {
+  fdescribe('service: participantAnnotTypesService', function () {
 
     var context = {};
 
@@ -152,8 +152,7 @@ define([
         studyAnnotTypesService.getAll(study.id).then(function(annotTypes) {
           expect(annotTypes.length).toEqual(1);
           _.each(annotTypes, function(at) {
-            expect(at).toEqual(jasmine.any(annotationTypeType));
-            at.compareToServerEntity(serverAnnotType);
+            expect(at).toEqual(serverAnnotType);
           });
 
         });
@@ -168,8 +167,7 @@ define([
         });
 
         studyAnnotTypesService.get(serverAnnotType.studyId, serverAnnotType.id).then(function(at) {
-          expect(at).toEqual(jasmine.any(annotationTypeType));
-          at.compareToServerEntity(serverAnnotType);
+          expect(at).toEqual(serverAnnotType);
         });
 
         httpBackend.flush();
