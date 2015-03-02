@@ -14,7 +14,7 @@ lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .settings(libraryDependencies ~= (_.map(excludeSpecs2)))
 
-scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.5")
+scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.6")
 
 scalacOptions in ThisBuild ++= Seq(
   "-target:jvm-1.7",
@@ -69,17 +69,16 @@ libraryDependencies ++= Seq(
   "org.scaldi"                %% "scaldi-play"                       % "0.5.3",
   "org.scaldi"                %% "scaldi-akka"                       % "0.5.3",
   // WebJars infrastructure
-  "org.webjars"               %  "webjars-locator"                   % "0.19" ,
-  "org.webjars"               %% "webjars-play"                      % "2.3.0-2",
+  "org.webjars"               %% "webjars-play"                      % "2.3.0-3",
   // WebJars dependencies
-  "org.webjars"               %  "requirejs"                         % "2.1.15",
-  "org.webjars"               %  "underscorejs"                      % "1.7.0-1",
+  "org.webjars"               %  "requirejs"                         % "2.1.16",
+  "org.webjars"               %  "underscorejs"                      % "1.8.2",
   "org.webjars"               %  "jquery"                            % "2.1.3",
   "org.webjars"               %  "bootstrap"                         % "3.3.2" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angularjs"                         % "1.3.11" exclude(
+  "org.webjars"               %  "angularjs"                         % "1.3.14" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angular-ui-bootstrap"              % "0.12.0",
+  "org.webjars"               %  "angular-ui-bootstrap"              % "0.12.1",
   "org.webjars"               %  "angular-ui-router"                 % "0.2.13" exclude(
     "org.webjars", "angularjs"),
   "org.webjars"               %  "ng-table"                          % "0.3.3",
@@ -91,7 +90,7 @@ libraryDependencies ++= Seq(
   // Testing
   "com.typesafe.akka"         %% "akka-testkit"                      % "2.3.9"              % "test",
   "org.scalatestplus"         %% "play"                              % "1.2.0"              % "test",
-  "org.pegdown"               % "pegdown"                            % "1.4.2"              % "test"
+  "org.pegdown"               % "pegdown"                            % "1.5.0"              % "test"
 )
 
 JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
