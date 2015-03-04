@@ -78,8 +78,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       httpBackend.flush();
     });
 
-    it('should allow adding an location to a centre', function() {
-      var cmd = {centreId: centre.id, locationId: serverLocation.id};
+    it('should allow adding a location to a centre', function() {
+      var cmd =_.pick(serverLocation,
+                      'name', 'street', 'city', 'province', 'postalCode', 'poBoxNumber', 'countryIsoCode');
+
+      _.extend(cmd, {centreId: centre.id});
+
       var expectedResult = {status: 'success', data: 'success'};
       httpBackend.expectPOST(uri(centre.id), cmd).respond(201, expectedResult);
       centreLocationsService.add(centre, serverLocation).then(function(reply) {
@@ -90,7 +94,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     it('should remove a location from a centre', function() {
       httpBackend.expectDELETE(uri(centre.id, serverLocation.id)).respond(201);
-      centreLocationsService.remove(centre.id, serverLocation.id);
+      centreLocationsService.remove(centre, serverLocation);
       httpBackend.flush();
     });
 

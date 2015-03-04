@@ -16,7 +16,7 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
                           domainEntityService,
                           queryStringService) {
     var service = {
-      getCentres:      getCentres,
+      list:            list,
       getCentreCounts: getCentreCounts,
       get:             get,
       addOrUpdate:     addOrUpdate,
@@ -29,6 +29,21 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
     return service;
 
     //----
+
+    function getAddCommand(centre) {
+      var cmd = _.pick(centre, ['name']);
+      if (centre.description) {
+        cmd.description = centre.description;
+      }
+      return cmd;
+    }
+
+    function getUpdateCommand (centre) {
+      return _.extend(getAddCommand(centre), {
+        id:              centre.id,
+        expectedVersion: centre.version
+      });
+    }
 
     function uri(centreId) {
       var result = '/centres';
@@ -68,7 +83,7 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
      *
      * @return A promise. If the promise succeeds then a paged result is returned.
      */
-    function getCentres(options) {
+    function list(options) {
       var validKeys = [
         'filter',
         'status',
@@ -99,9 +114,9 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
 
     function addOrUpdate(centre) {
       if (centre.isNew()) {
-        return biobankApi.call('POST', uri(), centre.getAddCommand());
+        return biobankApi.call('POST', uri(), getAddCommand(centre));
       } else {
-        return biobankApi.call('PUT', uri(centre.id), centre.getUpdateCommand());
+        return biobankApi.call('PUT', uri(centre.id), getUpdateCommand(centre));
       }
     }
 

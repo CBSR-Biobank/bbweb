@@ -1,4 +1,4 @@
-define(['./module'], function(module) {
+define(['./module', 'underscore'], function(module, _) {
   'use strict';
 
   module.service('centreLocationsService', centreLocationsService);
@@ -18,6 +18,21 @@ define(['./module'], function(module) {
     return service;
 
     //-------
+
+    function getAddCommand(centre, location) {
+      var cmd = _.pick(location,
+                      'name', 'street', 'city', 'province', 'postalCode', 'countryIsoCode');
+
+      _.extend(cmd, {centreId: centre.id});
+
+      _.each(['poBoxNumber'], function(attr){
+        if (location[attr] !== null) {
+          cmd[attr] = location[attr];
+        }
+      });
+
+      return cmd;
+    }
 
     function uri(centreId, locationId) {
       var result;
@@ -44,11 +59,11 @@ define(['./module'], function(module) {
     }
 
     function add(centre, location) {
-      return biobankApi.call('POST', uri(centre.id), location.getAddCommand());
+      return biobankApi.call('POST', uri(centre.id), getAddCommand(centre, location));
     }
 
-    function remove(centreId, locationId) {
-      return biobankApi.call('DELETE', uri(centreId, locationId));
+    function remove(centre, location) {
+      return biobankApi.call('DELETE', uri(centre.id, location.id));
     }
 
   }

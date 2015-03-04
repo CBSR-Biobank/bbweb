@@ -18,13 +18,17 @@ define(['../module', 'jquery', 'underscore'], function(module, $, _) {
      * in the options object is valid. Function callback signature is: function(value, key, object).
      */
     function param(options, callback) {
-      var paramsStr = null;
+      var paramsStr = '';
 
       if (options) {
-        paramsStr = '?' + $.param(_.pick(options, callback));
+        paramsStr = $.param(_.pick(options, callback));
       }
 
-      return paramsStr;
+      if (paramsStr === '') {
+        return '';
+      }
+
+      return '?' + paramsStr;
     }
 
   }

@@ -44,7 +44,7 @@ define([
 
     it('should have the following functions', function () {
       expect(centresService.getCentreCounts).toBeFunction();
-      expect(centresService.getCentres).toBeFunction();
+      expect(centresService.list).toBeFunction();
       expect(centresService.get).toBeFunction();
       expect(centresService.addOrUpdate).toBeFunction();
       expect(centresService.enable).toBeFunction();
@@ -68,28 +68,28 @@ define([
       httpBackend.flush();
     });
 
-    it('calling getCentres with no parameters has no query string', function() {
-      getCentresSharedBehaviour(serverCentre);
+    it('calling list with no parameters has no query string', function() {
+      listSharedBehaviour(serverCentre);
     });
 
-    it('calling getCentres with filter parameter has valid query string', function() {
-      getCentresSharedBehaviour(serverCentre,  { filter: 'nameFilter' });
+    it('calling list with filter parameter has valid query string', function() {
+      listSharedBehaviour(serverCentre,  { filter: 'nameFilter' });
     });
 
-    it('calling getCentres with sort parameter has valid query string', function() {
-      getCentresSharedBehaviour(serverCentre, { sort: 'status' });
+    it('calling list with sort parameter has valid query string', function() {
+      listSharedBehaviour(serverCentre, { sort: 'status' });
     });
 
-    it('calling getCentres with filter and status parameters has valid query string', function() {
-      getCentresSharedBehaviour(serverCentre, { filter: 'nameFilter', order: 'desc' });
+    it('calling list with filter and status parameters has valid query string', function() {
+      listSharedBehaviour(serverCentre, { filter: 'nameFilter', order: 'desc' });
     });
 
-    it('calling getCentres with page and pageSize parameters has valid query string', function() {
-      getCentresSharedBehaviour(serverCentre, { page: 1, pageSize: 5 });
+    it('calling list with page and pageSize parameters has valid query string', function() {
+      listSharedBehaviour(serverCentre, { page: 1, pageSize: 5 });
     });
 
-    it('calling getCentres with sortField and order parameters has valid query string', function() {
-      getCentresSharedBehaviour(serverCentre, { sort: 'name', order: 'asc' });
+    it('calling list with sortField and order parameters has valid query string', function() {
+      listSharedBehaviour(serverCentre, { sort: 'name', order: 'asc' });
     });
 
     it('get should return valid object', function() {
@@ -108,7 +108,8 @@ define([
     it('should allow adding a centre', function() {
       var centre = new Centre(_.omit(fakeEntities.centre(), 'id'));
       var expectedResult = { status: 'success', data: 'success' };
-      httpBackend.expectPOST(uri(), centre.getAddCommand()).respond(201, expectedResult);
+      httpBackend.expectPOST(uri(), {name: centre.name, description: centre.description})
+        .respond(201, expectedResult);
 
       centresService.addOrUpdate(centre).then(function(reply) {
         expect(reply).toEqual('success');
@@ -119,7 +120,15 @@ define([
     it('should allow updating a centre', function() {
       var centre = new Centre(fakeEntities.centre(), 'id');
       var expectedResult = { status: 'success', data: 'success' };
-      httpBackend.expectPUT(uri(centre.id), centre.getUpdateCommand()).respond(201, expectedResult);
+      httpBackend.expectPUT(
+        uri(centre.id),
+        {
+          id:              centre.id,
+          expectedVersion: centre.version,
+          name:            centre.name,
+          description:     centre.description
+        })
+        .respond(201, expectedResult);
 
       centresService.addOrUpdate(centre).then(function(reply) {
         expect(reply).toEqual('success');
@@ -170,7 +179,6 @@ define([
       var centre = new Centre(fakeEntities.centre());
       var expectedResult = {status: 'success', data: {centreId: centre.id, studyId: study.id}};
 
-      centre.addStudyIds([study.id]);
       numStudies = centre.studyIds.length;
 
       httpBackend.expectDELETE(uri(centre.id) + '/studies/' + study.id)
@@ -181,19 +189,24 @@ define([
       httpBackend.flush();
     });
 
-    function getCentresSharedBehaviour(serverCentre, options) {
+    function listSharedBehaviour(serverCentre, options) {
+      var url;
+      var params = '';
       options = options || {};
 
-      var url = uri();
       if (options) {
-        url += '?' + $.param(options);
+        params += $.param(options);
       }
+      if (params !== '') {
+        params = '?' + params;
+      }
+      url = uri() + params;
       httpBackend.whenGET(url).respond({
         status: 'success',
         data: [serverCentre]
       });
 
-      centresService.getCentres(options).then(function(centres) {
+      centresService.list(options).then(function(centres) {
         expect(centres.length).toEqual(1);
         _.each(centres, function(centre) {
           expect(centre).toEqual(serverCentre);

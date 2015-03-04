@@ -26,26 +26,6 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
       this.countryIsoCode = obj.countryIsoCode || '';
     }
 
-    Location.prototype.getAddCommand = function() {
-      var self = this;
-      var cmd = {
-        name:           this.name,
-        street:         this.street,
-        city:           this.city,
-        province:       this.province,
-        postalCode:     this.postalCode,
-        countryIsoCode: this.countryIsoCode
-      };
-
-      _.each(['id', 'poBoxNumber'], function(attr){
-        if (self[attr] !== null) {
-          cmd[attr] = self[attr];
-        }
-      });
-
-      return cmd;
-    };
-
     return Location;
   }
 

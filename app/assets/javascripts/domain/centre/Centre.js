@@ -34,107 +34,99 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
     Centre.prototype = Object.create(ConcurrencySafeEntity.prototype);
 
-    Centre.prototype.getLocations = function () {
-      if (this.id === null) {
-        throw new Error('id is null');
-      }
-      return centreLocationsService.list(this.id).then(function(reply){
-        var locs = _.map(reply, function(loc) {
-          return new Location(loc);
-        });
-        this.locations = _.union(this.locations, locs);
-        return this;
-      });
-    };
-
-    Centre.prototype.addLocation = function (location) {
-      if (this.id === null) {
-        throw new Error('id is null');
-      }
-      if (this.locations.contains(location)) {
-        throw new Error('location already present: ' + location);
-      }
-      return centreLocationsService.add(this, location).then(function(reply) {
-        this.locations.push(location);
-        return this;
-      });
-    };
-
-    Centre.prototype.removeLocation = function (location) {
-      if (this.id === null) {
-        throw new Error('id is null');
-      }
-      if (! this.studyIds.contains(location)) {
-        throw new Error('location not present: ' + location);
-      }
-      return centreLocationsService.add(this, location).then(function(reply) {
-        this.locations = _.without(this.locations, location);
-        return this;
-      });
-    };
-
-    Centre.prototype.getStudyIds = function() {
-      if (this.id === null) {
-        throw new Error('id is null');
-      }
-      return centresService.studies(this).then(function(reply) {
-        this.studyIds = _.union(this.studyIds, reply);
-        return this;
-      });
-    };
-
-    Centre.prototype.addStudyId = function (studyId) {
-      if (this.id === null) {
-        throw new Error('id is null');
-      }
-      if (this.studyIds.contains(studyId)) {
-        throw new Error('study ID already present: ' + studyId);
-      }
-      return centresService.addStudy(this, studyId).then(function(reply) {
-        this.studyIds.push(studyId);
-        return this;
-      });
-    };
-
-    Centre.prototype.removeStudyId = function (studyId) {
-      if (this.id === null) {
-        throw new Error('id is null');
-      }
-      if (! this.studyIds.contains(studyId)) {
-        throw new Error('study ID not present: ' + studyId);
-      }
-      return centresService.removeStudy(this, studyId).then(function(reply) {
-        this.studyIds = _.without(this.studyIds, studyId);
-        return this;
-      });
-    };
-
-    Centre.prototype.getAddCommand = function () {
-      var cmd = _.pick(this, ['name']);
-      if (this.description) {
-        cmd.description = this.description;
-      }
-      return cmd;
-    };
-
-    Centre.prototype.getUpdateCommand = function () {
-      return _.extend(this.getAddCommand(), {
-        id:              this.id,
-        expectedVersion: this.version
-      });
-    };
-
-    Centre.getCentres = function (options) {
-      return centresService.getCentres(options).then(function(reply) {
+    Centre.list = function (options) {
+      options = options || {};
+      return centresService.list(options).then(function(reply) {
         return _.map(reply, function(obj){
           return new Centre(obj);
         });
       });
     };
 
-    Centre.getCentre = function (id) {
+    Centre.get = function (id) {
       return centresService.get(id).then(function(reply) {
         return new Centre(reply);
+      });
+    };
+
+    Centre.prototype.getLocations = function () {
+      var self = this;
+      if (self.id === null) {
+        throw new Error('id is null');
+      }
+      return centreLocationsService.list(self.id).then(function(reply){
+        var locs = _.map(reply, function(loc) {
+          return new Location(loc);
+        });
+        self.locations = _.union(self.locations, locs);
+        return self;
+      });
+    };
+
+    Centre.prototype.addLocation = function (location) {
+      var self = this;
+      if (self.id === null) {
+        throw new Error('id is null');
+      }
+      if (_.contains(self.locations, location)) {
+        throw new Error('location already present: ' + location.id);
+      }
+      return centreLocationsService.add(this, location).then(function(reply) {
+        self.locations.push(new Location(location));
+        return this;
+      });
+    };
+
+    Centre.prototype.removeLocation = function (location) {
+      var self = this;
+      if (self.id === null) {
+        throw new Error('id is null');
+      }
+      if (!_.contains(self.locations, location)) {
+        throw new Error('location not present: ' + location.id);
+      }
+      return centreLocationsService.remove(this, location).then(function(reply) {
+        self.locations = _.without(self.locations, location);
+        return self;
+      });
+    };
+
+    Centre.prototype.getStudyIds = function() {
+      var self = this;
+      if (self.id === null) {
+        throw new Error('id is null');
+      }
+      return centresService.studies(this).then(function(reply) {
+        self.studyIds = _.union(self.studyIds, reply);
+        return self;
+      });
+    };
+
+    Centre.prototype.addStudy = function (study) {
+      var self = this;
+      if (self.id === null) {
+        throw new Error('id is null');
+      }
+      if (_.contains(self.studyIds, study.id)) {
+        throw new Error('study ID already present: ' + study.id);
+      }
+      return centresService.addStudy(this, study.id).then(function(reply) {
+        self.studyIds.push(study.id);
+        return self;
+      });
+    };
+
+    Centre.prototype.removeStudy = function (study) {
+      var self = this;
+      if (self.id === null) {
+        throw new Error('id is null');
+      }
+      if (! _.contains(self.studyIds, study.id)) {
+        throw new Error('study ID not present: ' + study.id);
+      }
+      return centresService.removeStudy(this, study.id).then(function(reply) {
+        self.studyIds = _.without(self.studyIds, study.id);
+        return self;
       });
     };
 
