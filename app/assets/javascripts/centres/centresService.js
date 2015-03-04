@@ -5,7 +5,6 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
 
   centresService.$inject = [
     'biobankApi',
-    'domainEntityService',
     'queryStringService'
   ];
 
@@ -13,7 +12,6 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
    *
    */
   function centresService(biobankApi,
-                          domainEntityService,
                           queryStringService) {
     var service = {
       list:            list,

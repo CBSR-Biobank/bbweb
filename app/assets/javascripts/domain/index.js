@@ -29,6 +29,8 @@ define([
   './StudyViewer',
   './UserViewer',
   './centre/Centre',
+  './centre/CentreCounts',
+  './centre/CentreStatus',
   './study/CollectionEventAnnotationType',
   './study/ParticipantAnnotationType',
   './study/SpecimenLinkAnnotationType',

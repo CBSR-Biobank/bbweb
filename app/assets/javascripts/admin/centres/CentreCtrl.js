@@ -3,12 +3,12 @@ define(['../module'], function(module) {
 
   module.controller('CentreCtrl', CentreCtrl);
 
-  CentreCtrl.$inject = ['$window', '$scope', '$state', '$timeout', 'centresService'];
+  CentreCtrl.$inject = ['$window', '$scope', '$state', '$timeout', 'Centre'];
 
   /**
    *
    */
-  function CentreCtrl($window, $scope, $state, $timeout, centresService) {
+  function CentreCtrl($window, $scope, $state, $timeout, Centre) {
     var vm = this;
     vm.centre = {};
 
@@ -23,7 +23,7 @@ define(['../module'], function(module) {
 
     // initialize the panels to open state when viewing a new centre
     function init() {
-      centresService.get($state.params.centreId).then(function (centre) {
+      Centre.get($state.params.centreId).then(function (centre) {
         vm.centre = centre;
 
         if (centre.id !== $window.localStorage.getItem('centre.panel.centreId')) {

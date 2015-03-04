@@ -51,6 +51,8 @@ define([
       centre:                            centre,
       location:                          location,
 
+      pagedResult:                       pagedResult,
+
       ENTITY_NAME_PROCESSING_TYPE:       ENTITY_NAME_PROCESSING_TYPE,
       ENTITY_NAME_SPECIMEN_LINK_TYPE:    ENTITY_NAME_SPECIMEN_LINK_TYPE,
       ENTITY_NAME_COLLECTION_EVENT_TYPE: ENTITY_NAME_COLLECTION_EVENT_TYPE,
@@ -308,6 +310,19 @@ define([
         postalCode:     faker.address.zipCode(),
         poBoxNumber:    faker.lorem.words(1)[0],
         countryIsoCode: faker.lorem.words(1)[0]
+      };
+    }
+
+    function pagedResult(entities) {
+      return {
+        items:    entities,
+        page:     1,
+        offset:   0,
+        total:    20,
+        pageSize: 5,
+        next:     2,
+        maxPages: 4
+
       };
     }
 

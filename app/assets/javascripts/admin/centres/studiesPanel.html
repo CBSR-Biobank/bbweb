@@ -11,12 +11,12 @@
       </button>
     </div>
   </accordion-heading>
-  <div class="panel panel-warning" ng-if="vm.centreStudyIds.length <= 0">
+  <div class="panel panel-warning" ng-if="vm.centre.studyIds.length <= 0">
     <div class="panel-heading">
       No studies have been added yet.
     </div>
   </div>
-  <table ng-show="vm.centreStudyIds.length > 0"
+  <table ng-show="vm.centre.studyIds.length > 0"
          class="table table-hover table-condensed"
          ng-table="vm.tableParams">
     <tr ng-repeat="study in $data">

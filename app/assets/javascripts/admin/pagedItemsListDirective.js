@@ -68,13 +68,13 @@ define(['./module', 'underscore'], function(module, _) {
     // FIXME change this to a directive?
     function panelHeading(counts) {
       var panelHeadingItems = [
-        { label: 'Disabled', value: counts.disabledCount, icon:  'glyphicon-cog' },
-        { label: 'Enabled', value: counts.enabledCount, icon:  'glyphicon-ok-circle' }
+        { label: 'Disabled', value: counts.disabled, icon:  'glyphicon-cog' },
+        { label: 'Enabled', value: counts.enabled, icon:  'glyphicon-ok-circle' }
       ];
 
-      if (counts.retiredCount !== undefined) {
+      if (!_.isUndefined(counts.retired)) {
         panelHeadingItems.push(
-          { label: 'Retired', value: vm.counts.retiredCount, icon:  'glyphicon-remove-sign' });
+          { label: 'Retired', value: vm.counts.retired, icon:  'glyphicon-remove-sign' });
       }
 
       return _.map(panelHeadingItems, function (item) {

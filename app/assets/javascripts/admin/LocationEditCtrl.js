@@ -1,33 +1,36 @@
-define(['./module'], function(module) {
+define(['./module', 'underscore'], function(module, _) {
   'use strict';
 
   module.controller('LocationEditCtrl', LocationEditCtrl);
 
   LocationEditCtrl.$inject = [
     '$state',
+    'Location',
     'domainEntityUpdateError',
-    'centreLocationService',
     'notificationsService',
-    'centre',
-    'location'
+    'centre'
   ];
 
   /**
-   *
+   * @param {Centre} centre - The centre the location belongs to.
    */
   function LocationEditCtrl($state,
+                            Location,
                             domainEntityUpdateError,
-                            centreLocationService,
                             notificationsService,
-                            centre,
-                            location) {
-
-    var action = location.id ? 'Update' : 'Add';
+                            centre) {
 
     var vm = this;
-    vm.title =  action + ' Location';
+
     vm.centre = centre;
-    vm.location = location;
+
+    if ($state.current.name === 'home.admin.centres.centre.locationAdd') {
+      vm.location = new Location();
+      vm.title =  'Add Location';
+    } else {
+      vm.location = _.findWhere(centre.locations, { id: $state.params.locationId });
+      vm.title = 'Update Location';
+    }
 
     vm.submit = submit;
     vm.cancel = cancel;
@@ -44,25 +47,16 @@ define(['./module'], function(module) {
     }
 
     function submit(location) {
-      if (location.id) {
-        // remove the previous location before adding the new one
-        centreLocationService.remove(vm.centre.id, location.id).then(addLocation);
-      } else {
-        addLocation();
-      }
-
-      function addLocation() {
-        centreLocationService.add(vm.centre, location)
-          .then(submitSuccess)
-          .catch(function(error) {
-            domainEntityUpdateError.handleError(
-              error,
-              'location',
-              'home.admin.centres.centre.locations',
-              {},
-              {reload: true});
-          });
-      }
+      vm.centre.addLocation(location)
+        .then(submitSuccess)
+        .catch(function(error) {
+          domainEntityUpdateError.handleError(
+            error,
+            'location',
+            'home.admin.centres.centre.locations',
+            {},
+            {reload: true});
+        });
     }
 
     function cancel() {

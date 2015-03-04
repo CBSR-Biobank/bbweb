@@ -5,10 +5,8 @@ define(['../module'], function(module) {
 
   CentreEditCtrl.$inject = [
     '$scope',
-    '$state',
     '$stateParams',
     'stateHelper',
-    'centresService',
     'domainEntityUpdateError',
     'notificationsService',
     'user',
@@ -19,10 +17,8 @@ define(['../module'], function(module) {
    *
    */
   function CentreEditCtrl($scope,
-                          $state,
                           $stateParams,
                           stateHelper,
-                          centresService,
                           domainEntityUpdateError,
                           notificationsService,
                           user,
@@ -48,7 +44,7 @@ define(['../module'], function(module) {
     }
 
     function submit(centre) {
-      centresService.addOrUpdate(centre)
+      centre.addOrUpdate()
         .then(submitSuccess)
         .catch(function(error) {
           domainEntityUpdateError(error, 'centre', returnState);

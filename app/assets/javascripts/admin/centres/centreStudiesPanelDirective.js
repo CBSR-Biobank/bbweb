@@ -28,7 +28,6 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     'Panel',
     'StudyViewer',
     'panelTableService',
-    'centresService',
     'studiesService',
     'modalService'
   ];
@@ -40,7 +39,6 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
                                   Panel,
                                   StudyViewer,
                                   panelTableService,
-                                  centresService,
                                   studiesService,
                                   modalService) {
 
@@ -60,7 +58,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     vm.selected = undefined;
     vm.onSelect = onSelect;
 
-    vm.centre.addStudyIds($scope.centreStudies);
+    vm.centre.studyIds = _.union(vm.centre.studyIds, $scope.centreStudies);
 
     init();
 
@@ -85,8 +83,8 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
     function onSelect(item) {
       // add the study only if it's not there
-      if(_.indexOf(vm.centreStudyIds, item.id) < 0) {
-        centresService.addStudy(vm.centre, item.id).then(function () {
+      if(_.indexOf(vm.centre.studyIds, item.id) < 0) {
+        vm.centre.addStudy(item).then(function () {
           vm.tableStudies.push(vm.studiesById[item.id]);
           vm.tableParams.reload();
         });
@@ -115,9 +113,8 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       };
 
       modalService.showModal({}, modalOptions).then(function () {
-        return centresService.removeStudy(vm.centre.id, studyId)
+        return vm.centre.removeStudy({id: studyId})
           .then(function () {
-            vm.centreStudyIds = _.without(vm.centreStudyIds, studyId);
             vm.tableStudies = _.without(vm.tableStudies, vm.studiesById[studyId]);
             vm.tableParams.reload();
           }).

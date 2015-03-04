@@ -27,8 +27,7 @@ define(['../module', 'angular'], function(module, angular) {
     '$state',
     'LocationViewer',
     'Panel',
-    'domainEntityRemoveService',
-    'centreLocationService'
+    'domainEntityRemoveService'
   ];
 
   /**
@@ -38,20 +37,18 @@ define(['../module', 'angular'], function(module, angular) {
                               $state,
                               LocationViewer,
                               Panel,
-                              domainEntityRemoveService,
-                              centreLocationService) {
+                              domainEntityRemoveService) {
     var vm = this;
 
     var panel = new Panel('centre.panel.locations', 'home.admin.centres.centre.locationAdd');
 
     vm.centre           = $scope.centre;
-    vm.locations        = $scope.locations;
     vm.update           = update;
     vm.remove           = remove;
     vm.add              = add;
     vm.information      = information;
     vm.panelOpen        = panel.getPanelOpenState();
-    vm.tableParams      = panel.getTableParams(vm.locations);
+    vm.tableParams      = panel.getTableParams(vm.centre.locations);
 
     vm.modificationsAllowed = vm.centre.status === 'Disabled';
 
@@ -80,7 +77,7 @@ define(['../module', 'angular'], function(module, angular) {
         'home.admin.centres.centre.locations');
 
       function removeCallback(location) {
-        return centreLocationService.remove(vm.centre.id, location.id);
+        return vm.centre.removeLocation(location);
       }
     }
   }

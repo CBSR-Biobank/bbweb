@@ -12,12 +12,12 @@
   <p>
     The addresses for this centre.
   </p>
-  <div class="panel panel-warning" ng-if="vm.locations.length <= 0">
+  <div class="panel panel-warning" ng-if="vm.centre.locations.length <= 0">
     <div class="panel-heading">
       No locations have been entered yet.
     </div>
   </div>
-  <table ng-show="vm.locations.length > 0"
+  <table ng-show="vm.centre.locations.length > 0"
          class="table table-hover table-condensed"
          ng-table="vm.tableParams">
     <tr ng-repeat="location in $data">

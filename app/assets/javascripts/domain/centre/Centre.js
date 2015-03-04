@@ -5,6 +5,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
   CentreFactory.$inject = [
     'ConcurrencySafeEntity',
+    'CentreStatus',
     'Location',
     'centresService',
     'centreLocationsService'
@@ -13,6 +14,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
   /**  *
    */
   function CentreFactory(ConcurrencySafeEntity,
+                         CentreStatus,
                          Location,
                          centresService,
                          centreLocationsService) {
@@ -27,7 +29,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
       this.name        = obj.name || '';
       this.description = obj.description || null;
-      this.status      = obj.status || 'Disabled';
+      this.status      = obj.status || CentreStatus.DISABLED();
       this.locations   = obj.locations || [];
       this.studyIds    = obj.studyIds || [];
     }
@@ -37,15 +39,54 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     Centre.list = function (options) {
       options = options || {};
       return centresService.list(options).then(function(reply) {
-        return _.map(reply, function(obj){
+        // reply is a paged result
+        reply.items = _.map(reply.items, function(obj){
           return new Centre(obj);
         });
+        return reply;
       });
     };
 
     Centre.get = function (id) {
       return centresService.get(id).then(function(reply) {
         return new Centre(reply);
+      });
+    };
+
+    Centre.prototype.addOrUpdate = function () {
+      var self = this;
+      return centresService.addOrUpdate(self).then(function(reply) {
+        self.id = reply.id;
+        self.name = reply.name;
+
+        if (_.isUndefined(reply.version)) {
+          self.version = 0;
+        } else {
+          self.version = reply.version;
+        }
+
+        if (! _.isUndefined(reply.description)) {
+          self.description = reply.description;
+        }
+        return self;
+      });
+    };
+
+    Centre.prototype.disable = function () {
+      var self = this;
+      return centresService.disable(self).then(function(reply) {
+        self.status = CentreStatus.DISABLED();
+        self.version = reply.version;
+        return self;
+      });
+    };
+
+    Centre.prototype.enable = function () {
+      var self = this;
+      return centresService.enable(self).then(function(reply) {
+        self.status = CentreStatus.ENABLED();
+        self.version = reply.version;
+        return self;
       });
     };
 
@@ -63,28 +104,52 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       });
     };
 
-    Centre.prototype.addLocation = function (location) {
+    Centre.prototype.getLocation = function (locationId) {
       var self = this;
       if (self.id === null) {
         throw new Error('id is null');
       }
-      if (_.contains(self.locations, location)) {
-        throw new Error('location already present: ' + location.id);
-      }
-      return centreLocationsService.add(this, location).then(function(reply) {
-        self.locations.push(new Location(location));
-        return this;
+      return centreLocationsService.query(self.id, locationId).then(function(reply){
+        self.locations = _.union(self.locations, [ new Location(reply) ]);
+        return self;
       });
     };
 
-    Centre.prototype.removeLocation = function (location) {
-      var self = this;
+    Centre.prototype.addLocation = function (location) {
+      var self = this, existingLoc;
+
       if (self.id === null) {
         throw new Error('id is null');
       }
-      if (!_.contains(self.locations, location)) {
+
+      existingLoc = _.findWhere(self.locations, { id: location.id });
+      if (existingLoc) {
+        // remove this location first
+        return self.removeLocation(location).then(addInternal);
+      } else {
+        return addInternal();
+      }
+
+      function addInternal() {
+        return centreLocationsService.add(self, location).then(function(reply) {
+          self.locations.push(new Location(location));
+          return self;
+        });
+      }
+    };
+
+    Centre.prototype.removeLocation = function (location) {
+      var self = this, existingLoc;
+
+      if (self.id === null) {
+        throw new Error('id is null');
+      }
+
+      existingLoc = _.findWhere(self.locations, { id: location.id });
+      if (_.isUndefined(existingLoc)) {
         throw new Error('location not present: ' + location.id);
       }
+
       return centreLocationsService.remove(this, location).then(function(reply) {
         self.locations = _.without(self.locations, location);
         return self;

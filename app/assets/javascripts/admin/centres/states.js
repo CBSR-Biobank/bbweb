@@ -10,17 +10,17 @@ define(['../module'], function(module) {
 
   function config($urlRouterProvider, $stateProvider, authorizationProvider ) {
 
-    resolveCentre.$inject = ['$stateParams', 'centresService'];
-    function resolveCentre($stateParams, centresService) {
+    resolveCentre.$inject = ['$stateParams', 'Centre'];
+    function resolveCentre($stateParams, Centre) {
       if ($stateParams.centreId) {
-        return centresService.get($stateParams.centreId);
+        return Centre.get($stateParams.centreId);
       }
       throw new Error('state parameter centreId is invalid');
     }
 
-    resolveCentreCounts.$inject = ['centresService'];
-    function resolveCentreCounts(centresService) {
-      return centresService.getCentreCounts();
+    resolveCentreCounts.$inject = ['CentreCounts'];
+    function resolveCentreCounts(CentreCounts) {
+      return CentreCounts.get();
     }
 
     $urlRouterProvider.otherwise('/');
@@ -74,7 +74,8 @@ define(['../module'], function(module) {
       abstract: true,
       url: '/{centreId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
+        user: authorizationProvider.requireAuthenticatedUser,
+        centre: resolveCentre
       },
       views: {
         'main@': {
@@ -134,18 +135,14 @@ define(['../module'], function(module) {
       url: '/locations',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        centre: resolveCentre,
-        locations: [
-          'centreLocationService', 'centre',
-          function(centreLocationService, centre) {
-            return centreLocationService.list(centre.id);
-          }
-        ]
+        locations: ['centre', function(centre) {
+          return centre.getLocations();
+        }]
       },
       views: {
         'centreDetails': {
           template: '<accordion close-others="false">' +
-            '<locations-panel centre="centre" locations="locations"></locations-panel>' +
+            '<locations-panel centre="centre"></locations-panel>' +
             '</accordion>',
           controller: [
             '$scope', 'centre', 'locations',
@@ -168,18 +165,7 @@ define(['../module'], function(module) {
       url: '/location/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        centre: resolveCentre,
-        location: [function() {
-          return {
-            name           : '',
-            street         : '',
-            city           : '',
-            province       : '',
-            postalCode     : '',
-            poBoxNumber    : '',
-            countryIsoCode : ''
-          };
-        }]
+        centre: resolveCentre
       },
       views: {
         'main@': {
@@ -199,11 +185,10 @@ define(['../module'], function(module) {
       url: '/location/update/:locationId',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        centre: resolveCentre,
-        location: [
-          '$stateParams', 'centreLocationService', 'centre',
-          function($stateParams, centreLocationService, centre) {
-            return centreLocationService.query(centre.id, $stateParams.locationId);
+        centre: [
+          '$stateParams', 'centre',
+          function($stateParams, centre) {
+            return centre.getLocation($stateParams.locationId);
           }
         ]
       },
@@ -226,8 +211,8 @@ define(['../module'], function(module) {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         centre: resolveCentre,
-        centreStudies: ['centresService', 'centre', function(centresService, centre) {
-          return centresService.studies(centre.id);
+        centreStudies: ['centre', function(centre) {
+          return centre.getStudyIds();
         }],
         studyNames: ['studiesService', function(studiesService) {
           return studiesService.getStudyNames();

@@ -1,7 +1,7 @@
 /**
  * Centre administration controllers.
  */
-define(['../module'], function(module) {
+define(['../module', 'underscore'], function(module, _) {
   'use strict';
 
   /**
@@ -10,9 +10,9 @@ define(['../module'], function(module) {
    */
   module.controller('CentreSummaryTabCtrl', CentreSummaryTabCtrl);
 
-  CentreSummaryTabCtrl.$inject = ['$filter', 'centresService', 'modalService', 'centre'];
+  CentreSummaryTabCtrl.$inject = ['$filter', 'modalService', 'centre'];
 
-  function CentreSummaryTabCtrl($filter, centresService, modalService, centre) {
+  function CentreSummaryTabCtrl($filter, modalService, centre) {
     var vm = this;
     vm.centre = centre;
     vm.descriptionToggleControl = {}; // for truncateToggle directive
@@ -24,7 +24,7 @@ define(['../module'], function(module) {
     //----
 
     function changeStatus(status) {
-      var serviceFn;
+      var changeStatusFn;
       var modalOptions = {
         closeButtonText: 'Cancel',
         headerHtml: 'Confirm centre ',
@@ -32,9 +32,9 @@ define(['../module'], function(module) {
       };
 
       if (status === 'enable') {
-        serviceFn = centresService.enable;
+        changeStatusFn = centre.enable;
       } else if (status === 'disable') {
-        serviceFn = centresService.disable;
+        changeStatusFn = centre.disable;
       } else {
         throw new Error('invalid status: ' + status);
       }
@@ -43,10 +43,8 @@ define(['../module'], function(module) {
       modalOptions.bodyHtml += status + ' centre ' + vm.centre.name + '?';
 
       modalService.showModal({}, modalOptions).then(function () {
-        serviceFn(vm.centre).then(function () {
-          centresService.get(vm.centre.id).then(function (centre) {
-            vm.centre = centre;
-          });
+        _.bind(changeStatusFn, centre)().then(function (centre) {
+          vm.centre = centre;
         });
       });
     }
