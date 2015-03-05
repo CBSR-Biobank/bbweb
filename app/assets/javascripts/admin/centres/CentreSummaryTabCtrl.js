@@ -32,9 +32,9 @@ define(['../module', 'underscore'], function(module, _) {
       };
 
       if (status === 'enable') {
-        changeStatusFn = centre.enable;
+        changeStatusFn = vm.centre.enable;
       } else if (status === 'disable') {
-        changeStatusFn = centre.disable;
+        changeStatusFn = vm.centre.disable;
       } else {
         throw new Error('invalid status: ' + status);
       }
@@ -43,7 +43,7 @@ define(['../module', 'underscore'], function(module, _) {
       modalOptions.bodyHtml += status + ' centre ' + vm.centre.name + '?';
 
       modalService.showModal({}, modalOptions).then(function () {
-        _.bind(changeStatusFn, centre)().then(function (centre) {
+        _.bind(changeStatusFn, vm.centre)().then(function (centre) {
           vm.centre = centre;
         });
       });

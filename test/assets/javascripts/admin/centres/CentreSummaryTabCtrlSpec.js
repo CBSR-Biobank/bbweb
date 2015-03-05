@@ -4,15 +4,26 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: CentreSummaryTabCtrl', function() {
-    var centresService, modalService, scope;
-    var centre = {name: 'CTR1', description: 'some description'};
+    var q, Centre, CentreStatus, modalService, scope, fakeEntities, centre;
 
-    beforeEach(mocks.module('biobankApp'));
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($q, $controller, $rootScope, $filter, _centresService_, _modalService_) {
+    beforeEach(inject(function($q,
+                               $controller,
+                               $rootScope,
+                               $filter,
+                               _Centre_,
+                               _CentreStatus_,
+                               _modalService_,
+                               fakeDomainEntities) {
+      q = $q;
       scope = $rootScope.$new();
-      centresService = _centresService_;
+      Centre = _Centre_;
+      CentreStatus = _CentreStatus_;
       modalService = _modalService_;
+      fakeEntities = fakeDomainEntities;
+
+      centre = new Centre(fakeEntities.centre());
 
       spyOn(modalService, 'showModal').and.callFake(function () {
         var deferred = $q.defer();
@@ -35,33 +46,29 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
     describe('change centre status', function() {
 
-      beforeEach(inject(function($q) {
-        spyOn(centresService, 'get').and.callFake(function () {
-          var deferred = $q.defer();
+      function checkStatusChange(status, newStatus) {
+        spyOn(Centre.prototype, status).and.callFake(function () {
+          var deferred = q.defer();
+          centre.status = (centre.status === CentreStatus.ENABLED()) ?
+            CentreStatus.DISABLED() : CentreStatus.ENABLED();
           deferred.resolve(centre);
-          return deferred.promise;
-        });
-      }));
-
-      function checkStatusChange($q, status) {
-        spyOn(centresService, status).and.callFake(function () {
-          var deferred = $q.defer();
-          deferred.resolve('status changed');
           return deferred.promise;
         });
 
         scope.vm.changeStatus(status);
         scope.$digest();
-        expect(centresService[status]).toHaveBeenCalledWith(centre);
+        expect(Centre.prototype[status]).toHaveBeenCalled();
+        expect(scope.vm.centre.status).toBe(newStatus);
       }
 
-      it('should enable a centre', inject(function($q) {
-        checkStatusChange($q, 'enable');
-      }));
+      it('should enable a centre', function() {
+        checkStatusChange('enable', CentreStatus.ENABLED());
+      });
 
-      it('should disable a centre', inject(function($q) {
-        checkStatusChange($q, 'disable');
-      }));
+      it('should disable a centre', function() {
+        centre.status = CentreStatus.ENABLED();
+        checkStatusChange('disable', CentreStatus.DISABLED());
+      });
 
     });
 

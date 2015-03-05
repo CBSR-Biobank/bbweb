@@ -253,15 +253,28 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         httpBackend.flush();
       });
 
-      it('fail adding a duplicate location', function() {
+      it('adding a location with existing ID removes previous one', function(done) {
         var centre = new Centre(fakeEntities.centre());
         var location = new Location(fakeEntities.location(centre));
+        var command = _.pick(location,
+                             'name', 'street', 'city', 'province', 'postalCode', 'poBoxNumber', 'countryIsoCode');
+        var serverReply = { locationId: location.id };
+
+        _.extend(command, { centreId: centre.id });
+        _.extend(serverReply, command);
 
         centre.locations.push(location);
 
-        expect(function () {
-          centre.addLocation(location);
-        }).toThrow(new Error('location already present: ' + location.id));
+        httpBackend.expectDELETE(uri(centre.id) + '/locations/' + location.id)
+          .respond(201, serverReply);
+
+        httpBackend.expectPOST(uri(centre.id) + '/locations', command)
+          .respond(201, location);
+
+        centre.addLocation(location).then(function () {
+          done();
+        });
+        httpBackend.flush();
       });
 
       it('can remove a location', function(done) {

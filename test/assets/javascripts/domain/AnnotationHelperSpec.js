@@ -244,6 +244,9 @@ define([
           { value: annotationType.options[1] }
         ]
       });
+
+      console.log(annotationType.options);
+
       var annotation = helper.getAnnotation();
       expect(annotation.annotationTypeId).toBe(annotationType.id);
       expect(annotation.selectedValues).toBeArrayOfSize(2);

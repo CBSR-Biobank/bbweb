@@ -34,7 +34,7 @@ define([
                               PreservationTemperatureType,
                               PreservationType,
                               SpecimenType) {
-    var entityNames = [];
+    var nameCountByEntity = {};
 
     var service = {
       domainEntityNameNext:              domainEntityNameNext,
@@ -92,13 +92,13 @@ define([
     function domainEntityNameNext(domainEntityType) {
       domainEntityType = domainEntityType || 'string';
 
-      if (!entityNames[domainEntityType]) {
-        entityNames[domainEntityType] = [];
+      if (_.isUndefined(nameCountByEntity[domainEntityType])) {
+        nameCountByEntity[domainEntityType] = 0;
+      } else {
+        nameCountByEntity[domainEntityType]++;
       }
 
-      var newName = domainEntityType + '_' + entityNames[domainEntityType].length;
-      entityNames[domainEntityType].push(newName);
-      return newName;
+      return domainEntityType + '_' + nameCountByEntity[domainEntityType];
     }
 
     function specimenGroupData(specimenGroup) {
