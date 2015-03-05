@@ -27,10 +27,13 @@ define(['angular', 'underscore'], function(angular, _) {
     /**
      * @param obj the JS domain entity.
      * @param entity the server side entity to compare against.
-     * @param attr* the attributes to compare agains. May be more than one.
+     * @param attrs* the attributes to compare agains. May be more than one.
      */
-    function validateAttrs(obj, entity, attr) {
-      var args = Array.prototype.slice.call(arguments, 2);
+    function validateAttrs(/* obj, entity, attrs */) {
+      var args = _.toArray(arguments);
+      var obj = args.shift();
+      var entity = args.shift();
+
       _.each(args, function(arg) {
         expect(obj[arg]).toEqual(entity[arg]);
       });
@@ -39,15 +42,18 @@ define(['angular', 'underscore'], function(angular, _) {
     /**
      * @param obj the JS domain entity.
      * @param entity the server side entity to compare against.
-     * @param attr* the attributes to compare agains. May be more than one.
+     * @param attrs* the attributes to compare agains. May be more than one.
      */
-    function validateOptional(obj, entity, attr) {
-      var args = Array.prototype.slice.call(arguments, 2);
-      _.each(args, function(arg) {
-        if (obj[arg] !== null) {
-          expect(obj[arg]).toEqual(entity[arg]);
+    function validateOptional(/* obj, entity, attrs */) {
+      var args = _.toArray(arguments);
+      var obj = args.shift();
+      var entity = args.shift();
+
+      _.each(args, function(attr) {
+        if (obj[attr] !== null) {
+          expect(obj[attr]).toEqual(entity[attr]);
         } else {
-          expect(entity[arg]).toBeUndefined();
+          expect(entity[attr]).toBeUndefined();
         }
       });
     };

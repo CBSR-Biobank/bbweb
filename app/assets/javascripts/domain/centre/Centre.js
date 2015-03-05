@@ -4,6 +4,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
   module.factory('Centre', CentreFactory);
 
   CentreFactory.$inject = [
+    'validationService',
     'ConcurrencySafeEntity',
     'CentreStatus',
     'Location',
@@ -13,11 +14,37 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
   /**  *
    */
-  function CentreFactory(ConcurrencySafeEntity,
+  function CentreFactory(validationService,
+                         ConcurrencySafeEntity,
                          CentreStatus,
                          Location,
                          centresService,
                          centreLocationsService) {
+
+    var addedEventKeys = ['id', 'name'];
+
+    var updatedEventKeys = addedEventKeys.concat('version');
+
+    var checkObject = validationService.checker(
+      validationService.aMapValidator,
+      validationService.hasKeys('id', 'version', 'timeAdded', 'name', 'status')
+    );
+
+    var checkAddedEvent = validationService.checker(
+      validationService.aMapValidator,
+      validationService.hasKeys.apply(null, addedEventKeys));
+
+    var checkUpdatedEvent = validationService.checker(
+      validationService.aMapValidator,
+      validationService.hasKeys.apply(null, updatedEventKeys));
+
+    function createCentre(obj) {
+      var checks = checkObject(obj);
+      if (checks.length) {
+        throw new Error('invalid object from server: ' + checks.join(', '));
+      }
+      return new Centre(obj);
+    }
 
     /**
      * Centre is a value object.
@@ -27,11 +54,13 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
       ConcurrencySafeEntity.call(this, obj);
 
-      this.name        = obj.name || '';
-      this.description = obj.description || null;
-      this.status      = obj.status || CentreStatus.DISABLED();
-      this.locations   = obj.locations || [];
-      this.studyIds    = obj.studyIds || [];
+      _.extend(this, _.defaults(obj, {
+        name:        '',
+        description: null,
+        status:      CentreStatus.DISABLED(),
+        locations :  [],
+        studyIds:    []
+      }));
     }
 
     Centre.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -41,7 +70,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       return centresService.list(options).then(function(reply) {
         // reply is a paged result
         reply.items = _.map(reply.items, function(obj){
-          return new Centre(obj);
+          return createCentre(obj);
         });
         return reply;
       });
@@ -49,25 +78,21 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
     Centre.get = function (id) {
       return centresService.get(id).then(function(reply) {
-        return new Centre(reply);
+        return createCentre(reply);
       });
     };
 
     Centre.prototype.addOrUpdate = function () {
       var self = this;
       return centresService.addOrUpdate(self).then(function(reply) {
-        self.id = reply.id;
-        self.name = reply.name;
+        var checker = this.isNew() ? checkAddedEvent : checkUpdatedEvent;
+        var checks = checker();
 
-        if (_.isUndefined(reply.version)) {
-          self.version = 0;
-        } else {
-          self.version = reply.version;
+        if (checks.length) {
+          throw new Error('invalid event from server: ' + checks.join(', '));
         }
 
-        if (! _.isUndefined(reply.description)) {
-          self.description = reply.description;
-        }
+        _.extend(self, _.defaults(reply, { version: 0, description: null }));
         return self;
       });
     };
@@ -97,7 +122,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       }
       return centreLocationsService.list(self.id).then(function(reply){
         var locs = _.map(reply, function(loc) {
-          return new Location(loc);
+          return Location.create(loc);
         });
         self.locations = _.union(self.locations, locs);
         return self;
@@ -110,7 +135,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
         throw new Error('id is null');
       }
       return centreLocationsService.query(self.id, locationId).then(function(reply){
-        self.locations = _.union(self.locations, [ new Location(reply) ]);
+        self.locations.push(Location.create(reply));
         return self;
       });
     };
@@ -131,8 +156,8 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       }
 
       function addInternal() {
-        return centreLocationsService.add(self, location).then(function(reply) {
-          self.locations.push(new Location(location));
+        return centreLocationsService.add(self, location).then(function(event) {
+          self.locations.push(Location.create(event));
           return self;
         });
       }

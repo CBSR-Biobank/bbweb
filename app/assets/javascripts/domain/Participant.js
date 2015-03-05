@@ -4,42 +4,136 @@ define(['./module', 'underscore'], function(module, _) {
 
   module.factory('Participant', ParticipantFactory);
 
-  ParticipantFactory.$inject = ['AnnotationHelper'];
+  ParticipantFactory.$inject = [
+    'validationService',
+    'ConcurrencySafeEntity',
+    'participantsService',
+    'AnnotationHelper'
+  ];
 
   /**
    * Factory for participants.
    */
-  function ParticipantFactory(AnnotationHelper) {
+  function ParticipantFactory(validationService,
+                              ConcurrencySafeEntity,
+                              participantsService,
+                              AnnotationHelper) {
 
-    function Participant(study, participant, annotationTypes) {
+    var checkObject = validationService.checker(
+      validationService.aMapValidator,
+      validationService.hasKeys('id', 'uniqueId', 'annotations'));
+
+    var addedEventKeys = ['studyId', 'participantId', 'uniqueId', 'annotations'];
+
+    var updatedEventKeys = addedEventKeys.concat('version');
+
+    var checkAddedEvent = validationService.checker(
+      validationService.aMapValidator,
+      validationService.hasKeys.apply(null, addedEventKeys));
+
+    var checkUpdatedEvent = validationService.checker(
+      validationService.aMapValidator,
+      validationService.hasKeys.apply(null, updatedEventKeys));
+
+    var checkAnnotations = validationService.checker(
+      validationService.aMapValidator,
+      validationService.hasKeys('annotationTypeId', 'selectedValues'));
+
+    function checkAddOrUpdateEvent(checker, event) {
+      var checks = checker();
+
+      if (checks.length) {
+        return checks;
+      }
+
+      // now check annotations
+      checks = _.reduce(event.annotations, function (annotation) {
+        return checkAnnotations(annotation);
+      });
+
+      return checks;
+    }
+
+    function createParticipant(obj) {
+      var checks = checkObject(obj);
+      if (checks.length) {
+        throw new Error('invalid object from server: ' + checks.join(', '));
+      }
+      return new Participant(obj);
+    }
+
+    function Participant(obj, study, annotationTypes) {
       var self = this;
 
-      _.extend(self, participant);
+      obj = obj || {};
 
-      self.isNew        = !self.id;
-      self.study        = study;
-      self.studyId      = study.id;
+      ConcurrencySafeEntity.call(this, obj);
 
-      self.annotationHelpers = getAnnotationHelpers(annotationTypes);
+      _.extend(this, _.defaults(obj, {
+        study:             null,
+        studyId:           null,
+        uniqueId:          '',
+        annotations:       [],
+        annotationHelpers: []
+      }));
 
-      function getAnnotationHelpers(annotationTypes) {
-        return _.map(annotationTypes, function(annotType) {
-          var helper =  new AnnotationHelper(annotType);
-          var annotation = _.findWhere(self.annotations, {id: annotation.annotationTypeId});
-          if (annotation) {
-            helper.setValue(annotation);
-          }
-          return helper;
-        });
+      if (study) {
+        self.study   = study;
+        self.studyId = study.id;
+      }
+
+      if (annotationTypes) {
+        self.annotationHelpers = this.createAnnotationHelpers(annotationTypes);
       }
     }
 
-    Participant.prototype.setUniqueId = function (uniqueId) {
-      this.uniqueId = uniqueId;
+    Participant.get = function (id) {
+      var self = this;
+
+      if (self.studyId === null) {
+        throw new Error('study ID is null');
+      }
+      return participantsService.get(self.studyId, id).then(function (reply) {
+        return createParticipant(reply);
+      });
     };
 
-    Participant.prototype.getAnnotationHelpers = function () {
-      return this.annotationHelpers;
+    Participant.getByUniqueId = function (uniqueId) {
+      var self = this;
+
+      if (self.studyId === null) {
+        throw new Error('study ID is null');
+      }
+      return participantsService.getByUniqueId(self.studyId, uniqueId).then(function (reply) {
+        return createParticipant(reply);
+      });
+    };
+
+    Participant.prototype.addOrUpdate = function () {
+      var self = this;
+      return participantsService.addOrUpdate(self).then(function(event) {
+        var checker = this.isNew() ? checkAddedEvent : checkUpdatedEvent;
+        var checks = checkAddOrUpdateEvent(checker, event);
+
+        if (checks.length) {
+          throw new Error('invalid event from server: ' + checks.join(', '));
+        }
+
+        _.extend(self, _.defaults(event, { version: 0 }));
+        return self;
+      });
+    };
+
+    Participant.prototype.createAnnotationHelpers = function (annotationTypes) {
+      var self = this;
+      self.annotationHelpers = _.map(annotationTypes, function(annotType) {
+        var helper =  new AnnotationHelper(annotType);
+        var annotation = _.findWhere(self.annotations, {id: annotation.annotationTypeId});
+        if (annotation) {
+          helper.setValue(annotation);
+        }
+        return helper;
+      });
     };
 
     /**

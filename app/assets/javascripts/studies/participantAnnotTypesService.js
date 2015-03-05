@@ -4,15 +4,13 @@ define(['./module'], function(module) {
   module.service('participantAnnotTypesService', participantAnnotTypesService);
 
   participantAnnotTypesService.$inject = [
-    'StudyAnnotTypesService',
-    'ParticipantAnnotationType'
+    'StudyAnnotTypesService'
   ];
 
   /**
    * Service to access participant annotation types.
    */
-  function participantAnnotTypesService(StudyAnnotTypesService,
-                                        ParticipantAnnotationType) {
+  function participantAnnotTypesService(StudyAnnotTypesService) {
 
     function ParticipantAnnotTypesService() {
       StudyAnnotTypesService.call(this, 'pannottypes');

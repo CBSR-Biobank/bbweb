@@ -3,26 +3,33 @@ define(['../module', 'underscore'], function(module, _) {
 
   module.factory('ParticipantAnnotationType', ParticipantAnnotationTypeFactory);
 
-  ParticipantAnnotationTypeFactory.$inject = ['StudyAnnotationType'];
+  ParticipantAnnotationTypeFactory.$inject = [
+    'validationService',
+    'StudyAnnotationType',
+    'participantAnnotTypesService'
+  ];
 
   /**
    *
    */
-  function ParticipantAnnotationTypeFactory(StudyAnnotationType) {
+  function ParticipantAnnotationTypeFactory(validationService,
+                                            StudyAnnotationType,
+                                            participantAnnotTypesService) {
 
     function ParticipantAnnotationType(obj) {
       obj = obj || {};
       StudyAnnotationType.call(this, obj);
+
       this.required = obj.required || false;
+
+      this._requiredKeys.unshift('required');
+      this._addedEventRequiredKeys.unshift('required');
+      this._updatedEventRequiredKeys.unshift('required');
+
+      this._service = participantAnnotTypesService;
     }
 
     ParticipantAnnotationType.prototype = Object.create(StudyAnnotationType.prototype);
-
-    ParticipantAnnotationType.prototype.getAddCommand = function () {
-      return _.extend(
-        StudyAnnotationType.prototype.getAddCommand.call(this),
-        { required: this.required });
-    };
 
     return ParticipantAnnotationType;
   }

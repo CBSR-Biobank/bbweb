@@ -1,11 +1,18 @@
-define(['./module', 'angular'], function(module, angular) {
+define(['./module', 'angular', 'underscore'], function(module, angular, _) {
   'use strict';
 
   module.factory('StudyAnnotTypesService', StudyAnnotTypesServiceFactory);
 
-  StudyAnnotTypesServiceFactory.$inject = ['biobankApi', 'domainEntityService'];
+  StudyAnnotTypesServiceFactory.$inject = [
+    'biobankApi',
+    'AnnotationValueType',
+    'domainEntityService'
+  ];
 
-  function StudyAnnotTypesServiceFactory(biobankApi, domainEntityService) {
+  function StudyAnnotTypesServiceFactory(biobankApi,
+                                         AnnotationValueType,
+                                         domainEntityService,
+                                         ParticipantAnnotationType) {
 
     /**
      * Service to access study annotation types.
@@ -14,20 +21,28 @@ define(['./module', 'angular'], function(module, angular) {
       this.annotTypeUri = annotTypeUri || '';
     }
 
-    function uri(annotTypeUri, studyId, annotTypeId, version) {
+    function uri(/* annotTypeUri, studyId, annotTypeId, version */) {
+      var args = _.toArray(arguments);
+      var annotTypeUri, studyId, annotTypeId, version;
       var result = '/studies';
+
       if (arguments.length < 2) {
         throw new Error('annotTypeUri or study id not specified');
-      } else {
-        result += '/' + studyId + '/' + annotTypeUri;
+      }
 
-        if (arguments.length > 2) {
-          result += '/' + annotTypeId;
-        }
+      annotTypeUri = args.shift();
+      studyId = args.shift();
 
-        if (arguments.length > 3) {
-          result += '/' + version;
-        }
+      result += '/' + studyId + '/' + annotTypeUri;
+
+      if (args.length > 0) {
+        annotTypeId = args.shift();
+        result += '/' + annotTypeId;
+      }
+
+      if (args.length > 0) {
+        version = args.shift();
+        result += '/' + version;
       }
       return result;
     }
@@ -41,15 +56,18 @@ define(['./module', 'angular'], function(module, angular) {
     };
 
     StudyAnnotTypesService.prototype.addOrUpdate = function (annotType) {
-      var cmd;
-
       if (annotType.isNew()) {
-        cmd = annotType.getAddCommand(annotType);
-        return biobankApi.call('POST', uri(this.annotTypeUri, annotType.studyId), cmd);
-      } else {
-        cmd = annotType.getUpdateCommand(annotType);
-        return biobankApi.call('PUT', uri(this.annotTypeUri, annotType.studyId, annotType.id), cmd);
+        return biobankApi.call(
+          'POST',
+          uri(this.annotTypeUri, annotType.studyId),
+          getAddCommand(annotType));
       }
+
+      return biobankApi.call(
+        'PUT',
+        uri(this.annotTypeUri, annotType.studyId, annotType.id),
+        getUpdateCommand(annotType));
+
     };
 
     StudyAnnotTypesService.prototype.remove = function (annotType) {
@@ -57,6 +75,27 @@ define(['./module', 'angular'], function(module, angular) {
         'DELETE',
         uri(this.annotTypeUri, annotType.studyId, annotType.id, annotType.version));
     };
+
+    function getAddCommand(annotationType) {
+      var cmd = _.pick(annotationType, ['studyId', 'name', 'valueType', 'options']);
+      if (annotationType.description) {
+        cmd.description = annotationType.description;
+      }
+      if (annotationType.valueType === AnnotationValueType.SELECT()) {
+        cmd.maxValueCount = annotationType.maxValueCount;
+      }
+      if (!_.isUndefined(annotationType.required)) {
+        cmd.required = annotationType.required;
+      }
+      return cmd;
+    }
+
+    function getUpdateCommand (annotationType) {
+      return _.extend(getAddCommand(annotationType), {
+        id:              annotationType.id,
+        expectedVersion: annotationType.version
+      });
+    }
 
     return StudyAnnotTypesService;
 

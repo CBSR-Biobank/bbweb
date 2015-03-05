@@ -3,8 +3,8 @@
  */
 define([
   './directives/annotationsInputDirective',
-  './directives/focusMeDirective',
   './directives/domainEntityTimestampsDirective',
+  './directives/focusMeDirective',
   './directives/infoUpdateRemoveButtonsDirective',
   './directives/integerDirective',
   './directives/panelButtonsDirective',
@@ -15,15 +15,16 @@ define([
   './directives/updateRemoveButtonsDirective',
   './filters/timeagoFilter',
   './filters/truncateFilter',
-  './services/biobankApiService',
-  './services/modalService',
-  './services/domainEntityService',
-  './services/domainEntityRemoveService',
-  './services/domainEntityUpdateErrorService',
-  './services/notificationsService',
   './services/Panel',
+  './services/biobankApiService',
+  './services/domainEntityRemoveService',
+  './services/domainEntityService',
+  './services/domainEntityUpdateErrorService',
+  './services/modalService',
+  './services/notificationsService',
   './services/panelTableService',
   './services/queryStringService',
   './services/stateHelperService',
-  './services/tableService'
+  './services/tableService',
+  './services/validationService'
 ], function() {});

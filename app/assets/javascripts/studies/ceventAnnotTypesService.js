@@ -4,15 +4,13 @@ define(['./module'], function(module) {
   module.service('ceventAnnotTypesService', ceventAnnotTypesService);
 
   ceventAnnotTypesService.$inject = [
-    'StudyAnnotTypesService',
-    'CollectionEventAnnotationType'
+    'StudyAnnotTypesService'
   ];
 
   /**
    * Service to access Collection Event Annotation Types.
    */
-  function ceventAnnotTypesService(StudyAnnotTypesService,
-                                   CollectionEventAnnotationType) {
+  function ceventAnnotTypesService(StudyAnnotTypesService) {
 
     function CeventAnnotTypesService() {
       StudyAnnotTypesService.call(this, 'ceannottypes');

@@ -1,4 +1,4 @@
-define(['./module', 'angular'], function(module, angular) {
+define(['./module', 'angular', 'underscore'], function(module, angular, _) {
   'use strict';
 
   module.factory('ConcurrencySafeEntity', ConcurrencySafeEntityFactory);
@@ -13,10 +13,12 @@ define(['./module', 'angular'], function(module, angular) {
     function ConcurrencySafeEntity(obj) {
       obj = obj || {};
 
-      this.id           = obj.id || null;
-      this.version      = obj.version || 0;
-      this.timeAdded    = obj.timeAdded || null;
-      this.timeModified = obj.timeModified || null;
+      _.extend(this, _.defaults(obj, {
+        id: null,
+        version: 0,
+        timeAdded: null,
+        timeModified: null
+      }));
     }
 
     ConcurrencySafeEntity.prototype.isNew = function () {

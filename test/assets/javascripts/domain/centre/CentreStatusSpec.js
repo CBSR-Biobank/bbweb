@@ -6,9 +6,9 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
   describe('CentreStatus', function() {
 
-   beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
     var CentreStatus;
+
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function (_CentreStatus_) {
       CentreStatus = _CentreStatus_;

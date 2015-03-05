@@ -157,8 +157,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         expect(replyCentre.status).toBe(status);
       });
       httpBackend.flush();
-    };
-
+    }
 
     describe('locations', function () {
 

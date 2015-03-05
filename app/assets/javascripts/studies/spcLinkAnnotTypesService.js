@@ -4,15 +4,13 @@ define(['./module'], function(module) {
   module.service('spcLinkAnnotTypesService', spcLinkAnnotTypesService);
 
   spcLinkAnnotTypesService.$inject = [
-    'StudyAnnotTypesService',
-    'SpecimenLinkAnnotationType'
+    'StudyAnnotTypesService'
   ];
 
   /**
    * Service to access Specimen Link Annotation Types.
    */
-  function spcLinkAnnotTypesService(StudyAnnotTypesService,
-                                    SpecimenLinkAnnotationType) {
+  function spcLinkAnnotTypesService(StudyAnnotTypesService) {
 
     function SpcLinkAnnotTypesService() {
       StudyAnnotTypesService.call(this, 'slannottypes');

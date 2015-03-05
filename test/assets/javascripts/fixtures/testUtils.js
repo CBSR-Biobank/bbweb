@@ -1,11 +1,13 @@
-define('biobank.testUtils', ['faker', 'moment'], function(faker, moment) {
+define('biobank.testUtils', ['faker', 'moment', 'underscore'], function(faker, moment, _) {
 
   var entityNames = [];
 
   var utils = {
     uuid:          uuid,
     randomBoolean: randomBoolean,
-    fakeModal:     fakeModal
+    fakeModal:     fakeModal,
+    construct:     construct,
+    renameKeys:    renameKeys
   };
 
   /**
@@ -44,6 +46,28 @@ define('biobank.testUtils', ['faker', 'moment'], function(faker, moment) {
         this.result.cancelCallback( type );
       }
     };
+  }
+
+  function cat() {
+    var head = _.first(arguments);
+    if (head !== null) {
+      return head.concat.apply(head, _.rest(arguments));
+    } else {
+      return [];
+    }
+  }
+
+  function construct(head, tail) {
+    return cat([head], _.toArray(tail));
+  }
+
+  function renameKeys(obj, newNames) {
+    return _.reduce(newNames,
+                    function(o, nu, old) {
+                      if (_.has(obj, old)) { o[nu] = obj[old]; }
+                      return o;
+                    },
+                    _.omit.apply(null, construct(obj, _.keys(newNames))));
   }
 
   return utils;
