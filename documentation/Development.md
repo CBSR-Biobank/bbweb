@@ -63,13 +63,15 @@ image to run the web application in. You also need:
 * a valid email.conf file
 * and the `bbweb_start.sh` script.
 
-Run the command `sbt build -t bbweb .` as **root** in this folder to create the docker image.
+This docker image contains instructions to also install Oracle Java 7.
 
-Run the command `docker build -t bbweb .` to build the docker image in the directory containing the Dockerfile.
+Run the command `docker build -t bbweb .` to build the docker image in the directory containing the
+Dockerfile.
 
-To keep data between appliction versions, the image uses a data volume to store the mongo database. The
-directory the database files are kept in is `/opt/bbweb_docker/mongodb_data`. To make backups of this database
-a mongo server must be started with the configuration pointing at the `mongod.conf` file. Use the command:
+To keep data between appliction versions, the image uses a data volume to store the mongo database. On
+`aicml-med.cs.ualberta.ca`, the database files are kept in directory `/opt/bbweb_docker/mongodb_data`. To make
+backups of this database a mongo server must be started with the configuration pointing at the `mongod.conf`
+file. Use the command:
 
 ```bash
 /usr/bin/mongod --config /opt/bbweb_docker/mongod.conf &
@@ -78,13 +80,21 @@ a mongo server must be started with the configuration pointing at the `mongod.co
 The Dockerfile was built by using the following as an example:
 
 * https://github.com/mingfang/docker-play/blob/master/Dockerfile
-*
-)http://stackoverflow.com/questions/25364940/how-to-create-docker-image-for-local-application-taking-file-and-value-parameter
+* http://stackoverflow.com/questions/25364940/how-to-create-docker-image-for-local-application-taking-file-and-value-parameter
 
 Some docker commands:
 * remove docker image by id: `docker rmi __image_id__`
 * remove all existing containers: `docker rm $(docker ps -a -q)`
 * stop a docker image: `docker stop __container_id__`
+
+#### Test server
+
+Once the docker image has been created on the test server, the docker container can be started using this
+command:
+
+```bash
+sudo docker run -d -p 9000:9000 -v /opt/bbweb_docker/mongodb_data:/data/db bbweb /bin/bash -c "(/usr/bin/mongod &) && su bbweb -c '/home/bbweb/bbweb_start.sh'"
+```
 
 ## Development Environment
 
