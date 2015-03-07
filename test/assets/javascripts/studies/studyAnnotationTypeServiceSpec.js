@@ -137,45 +137,13 @@ define([
       });
 
       it('should have the following functions', function () {
-        expect(studyAnnotTypesService.getAll).toBeFunction();
-        expect(studyAnnotTypesService.get).toBeFunction();
         expect(studyAnnotTypesService.addOrUpdate).toBeFunction();
         expect(studyAnnotTypesService.remove).toBeFunction();
       });
 
-      it('list should return a list containing one annotation type', function() {
-        httpBackend.whenGET(uri()).respond({
-          status: 'success',
-          data: [serverAnnotType]
-        });
-
-        studyAnnotTypesService.getAll(study.id).then(function(annotTypes) {
-          expect(annotTypes.length).toEqual(1);
-          _.each(annotTypes, function(at) {
-            expect(at).toEqual(serverAnnotType);
-          });
-
-        });
-
-        httpBackend.flush();
-      });
-
-      it('get should return a valid object', function() {
-        httpBackend.whenGET(uri() + '?annotTypeId=' + serverAnnotType.id).respond({
-          status: 'success',
-          data: serverAnnotType
-        });
-
-        studyAnnotTypesService.get(serverAnnotType.studyId, serverAnnotType.id).then(function(at) {
-          expect(at).toEqual(serverAnnotType);
-        });
-
-        httpBackend.flush();
-      });
-
       it('should allow adding an annotation type', function() {
         var annotType = new AnnotationTypeType(serverAnnotTypeNoId);
-        var cmd = annotType.getAddCommand();
+        var cmd = getAddCommand(annotType);
 
         var expectedResult = {status: 'success', data: 'success'};
         httpBackend.expectPOST(uri(), cmd).respond(201, expectedResult);
@@ -188,7 +156,7 @@ define([
 
       it('should allow updating an annotation type', function() {
         var annotType = new AnnotationTypeType(serverAnnotType);
-        var cmd = annotType.getUpdateCommand();
+        var cmd = getUpdateCommand(annotType);
 
         var expectedResult = {status: 'success', data: 'success'};
 
@@ -206,6 +174,19 @@ define([
         studyAnnotTypesService.remove(annotType);
         httpBackend.flush();
       });
+
+      function getAddCommand(annotType) {
+        var result = _.pick(annotType, 'studyId', 'name', 'valueType', 'options');
+        _.each(['description', 'maxValueCount', 'required'], function(optionalKey) {
+          if (!_.isUndefined(annotType[optionalKey])) {
+            result[optionalKey] = annotType[optionalKey];
+          }
+        });
+      }
+
+      function getUpdateCommand(annotType) {
+        return _.extend(getAddCommand(annotType), { expectedVersion: annotType.version });
+      }
 
     });
 

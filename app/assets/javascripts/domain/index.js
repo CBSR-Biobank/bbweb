@@ -28,6 +28,7 @@ define([
   './SpecimenType',
   './StudyViewer',
   './UserViewer',
+  './annotationTypeValidation',
   './centre/Centre',
   './centre/CentreCounts',
   './centre/CentreStatus',
@@ -35,4 +36,8 @@ define([
   './study/ParticipantAnnotationType',
   './study/SpecimenLinkAnnotationType',
   './study/StudyAnnotationType',
+  './study/studyAnnotationTypeValidation',
+  './study/participantAnnotationTypeValidation',
+  './user/User',
+  './user/UserStatus'
 ], function() {});

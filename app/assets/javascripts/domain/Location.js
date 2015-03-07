@@ -3,23 +3,25 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
 
   module.factory('Location', LocationFactory);
 
-  LocationFactory.$inject = ['validationService'];
+  LocationFactory.$inject = ['funutils', 'validationService'];
 
   /**
    *
    */
-  function LocationFactory(validationService) {
+  function LocationFactory(funutils, validationService) {
 
-    var checkObject = validationService.checker(
-      validationService.aMapValidator,
-      validationService.hasKeys('centreId',
-                                'locationId',
-                                'name',
-                                'street',
-                                'city',
-                                'province',
-                                'postalCode',
-                                'countryIsoCode'));
+    var validateObject = validationService.condition1(
+      validationService.validator('must be a map', _.isObject),
+      validationService.validator('has the correct keys',
+                                  validationService.hasKeys('id',
+                                                            'name',
+                                                            'street',
+                                                            'city',
+                                                            'province',
+                                                            'postalCode',
+                                                            'countryIsoCode')));
+
+    var createObject = funutils.partial(validateObject, _.identity);
 
     /**
      * Location is a value object.
@@ -46,10 +48,10 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
      * Should be used to create a location from the object returned by the server.
      */
     Location.create = function(obj) {
-      var checks = checkObject(obj);
+      var validatedObj = createObject(obj);
 
-      if (checks.length) {
-        throw new Error('invalid object from server: ' + checks.join(', '));
+      if (!_.isObject(validatedObj)) {
+        throw new Error('invalid object from server: ' + validatedObj);
       }
 
       return new Location(obj);

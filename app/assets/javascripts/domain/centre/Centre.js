@@ -4,6 +4,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
   module.factory('Centre', CentreFactory);
 
   CentreFactory.$inject = [
+    'funutils',
     'validationService',
     'ConcurrencySafeEntity',
     'CentreStatus',
@@ -14,37 +15,36 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
   /**  *
    */
-  function CentreFactory(validationService,
+  function CentreFactory(funutils,
+                         validationService,
                          ConcurrencySafeEntity,
                          CentreStatus,
                          Location,
                          centresService,
                          centreLocationsService) {
 
-    var addedEventKeys = ['id', 'name'];
+    var requiredKeys = ['id', 'name'];
 
-    var updatedEventKeys = addedEventKeys.concat('version');
+    var updatedEventRequiredKeys = requiredKeys.concat('version');
 
-    var checkObject = validationService.checker(
-      validationService.aMapValidator,
-      validationService.hasKeys('id', 'version', 'timeAdded', 'name', 'status')
-    );
+    var validateIsMap = validationService.condition1(
+      validationService.validator('must be a map', _.isObject));
 
-    var checkAddedEvent = validationService.checker(
-      validationService.aMapValidator,
-      validationService.hasKeys.apply(null, addedEventKeys));
+    var createObj = funutils.partial1(validateIsMap, _.identity);
 
-    var checkUpdatedEvent = validationService.checker(
-      validationService.aMapValidator,
-      validationService.hasKeys.apply(null, updatedEventKeys));
+    var validateObj = funutils.partial1(
+      validationService.condition1(
+        validationService.validator('has the correct keys',
+                                    validationService.hasKeys.apply(null, requiredKeys))),
+      createObj);
 
-    function createCentre(obj) {
-      var checks = checkObject(obj);
-      if (checks.length) {
-        throw new Error('invalid object from server: ' + checks.join(', '));
-      }
-      return new Centre(obj);
-    }
+    var validateAddedEvent = validateObj;
+
+    var validateUpdatedEvent = funutils.partial1(
+      validationService.condition1(
+        validationService.validator('has the correct keys',
+                                    validationService.hasKeys.apply(null, updatedEventRequiredKeys))),
+      createObj);
 
     /**
      * Centre is a value object.
@@ -65,12 +65,20 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
     Centre.prototype = Object.create(ConcurrencySafeEntity.prototype);
 
+    Centre.create = function (obj) {
+      var validation = validateObj(obj);
+      if (!_.isObject(validation)) {
+        throw new Error('invalid object from server: ' + validation);
+      }
+      return new Centre(obj);
+    };
+
     Centre.list = function (options) {
       options = options || {};
       return centresService.list(options).then(function(reply) {
         // reply is a paged result
         reply.items = _.map(reply.items, function(obj){
-          return createCentre(obj);
+          return Centre.create(obj);
         });
         return reply;
       });
@@ -78,22 +86,21 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
     Centre.get = function (id) {
       return centresService.get(id).then(function(reply) {
-        return createCentre(reply);
+        return Centre.create(reply);
       });
     };
 
     Centre.prototype.addOrUpdate = function () {
       var self = this;
       return centresService.addOrUpdate(self).then(function(reply) {
-        var checker = this.isNew() ? checkAddedEvent : checkUpdatedEvent;
-        var checks = checker();
+        var validator = self.isNew() ? validateAddedEvent : validateUpdatedEvent;
+        var validation = validator(reply);
 
-        if (checks.length) {
-          throw new Error('invalid event from server: ' + checks.join(', '));
+        if (!_.isObject(validation)) {
+          throw new Error('invalid event from server: ' + validation);
         }
 
-        _.extend(self, _.defaults(reply, { version: 0, description: null }));
-        return self;
+        return new Centre(_.extend({}, reply, { version: 0 }));
       });
     };
 
@@ -151,13 +158,13 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       if (existingLoc) {
         // remove this location first
         return self.removeLocation(location).then(addInternal);
-      } else {
-        return addInternal();
       }
+      return addInternal();
 
       function addInternal() {
         return centreLocationsService.add(self, location).then(function(event) {
-          self.locations.push(Location.create(event));
+          var newLoc = Location.create(_.extend(funutils.renameKeys(event, { locationId: 'id' }), location));
+          self.locations.push(newLoc);
           return self;
         });
       }

@@ -6,8 +6,7 @@ define('biobank.testUtils', ['faker', 'moment', 'underscore'], function(faker, m
     uuid:          uuid,
     randomBoolean: randomBoolean,
     fakeModal:     fakeModal,
-    construct:     construct,
-    renameKeys:    renameKeys
+    addCustomMatchers: addCustomMatchers
   };
 
   /**
@@ -48,26 +47,18 @@ define('biobank.testUtils', ['faker', 'moment', 'underscore'], function(faker, m
     };
   }
 
-  function cat() {
-    var head = _.first(arguments);
-    if (head !== null) {
-      return head.concat.apply(head, _.rest(arguments));
-    } else {
-      return [];
-    }
-  }
-
-  function construct(head, tail) {
-    return cat([head], _.toArray(tail));
-  }
-
-  function renameKeys(obj, newNames) {
-    return _.reduce(newNames,
-                    function(o, nu, old) {
-                      if (_.has(obj, old)) { o[nu] = obj[old]; }
-                      return o;
-                    },
-                    _.omit.apply(null, construct(obj, _.keys(newNames))));
+  function addCustomMatchers() {
+    jasmine.addMatchers({
+      toContainAll: function(util, customEqualityTesters) {
+        return {
+          compare: function(actual, expected) {
+            return { pass: _.each(expected, function (item) {
+              return util.contains(actual, item, customEqualityTesters); })
+              };
+          }
+        };
+      }
+    });
   }
 
   return utils;

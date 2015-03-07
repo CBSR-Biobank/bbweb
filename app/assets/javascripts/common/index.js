@@ -20,6 +20,7 @@ define([
   './services/domainEntityRemoveService',
   './services/domainEntityService',
   './services/domainEntityUpdateErrorService',
+  './services/funutils',
   './services/modalService',
   './services/notificationsService',
   './services/panelTableService',

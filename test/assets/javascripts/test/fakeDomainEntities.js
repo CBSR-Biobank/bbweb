@@ -51,6 +51,8 @@ define([
       centre:                            centre,
       location:                          location,
 
+      user:                              user,
+
       pagedResult:                       pagedResult,
 
       ENTITY_NAME_PROCESSING_TYPE:       ENTITY_NAME_PROCESSING_TYPE,
@@ -75,12 +77,14 @@ define([
     function ENTITY_NAME_CENTRE()                { return 'centre'; }
     function ENTITY_NAME_LOCATION()              { return 'location'; }
 
-    function entityCommonFields() {
-      return {
+    function ENTITY_NAME_USER()                  { return 'user'; }
+
+    function extendWithCommonFields(obj) {
+      return _.extend(obj, {
         version:      0,
         timeAdded:    moment(faker.date.recent(10)).format(),
         timeModified: moment(faker.date.recent(5)).format()
-      };
+      });
     }
 
     /**
@@ -147,7 +151,7 @@ define([
         });
       }
 
-      return _.extend(slt, entityCommonFields());
+      return extendWithCommonFields(slt);
     }
 
     function processingType(study) {
@@ -158,7 +162,7 @@ define([
         description: faker.lorem.words(1),
         enabled:     false
       };
-      return _.extend(pt, entityCommonFields());
+      return extendWithCommonFields(pt);
 
     }
 
@@ -188,7 +192,7 @@ define([
 
       cet.recurring = _.isUndefined(options.recurring) ? false : options.recurring;
 
-      return _.extend(cet, entityCommonFields());
+      return extendWithCommonFields(cet);
     }
 
     function randomAnatomicalSourceType() {
@@ -219,7 +223,7 @@ define([
         preservationTemperatureType: randomPreservationTemperatureTypeType(),
         specimenType:                randomSpecimenType()
       };
-      return _.extend(sg, entityCommonFields());
+      return extendWithCommonFields(sg);
     }
 
     /**
@@ -270,7 +274,7 @@ define([
         at.required = options.required;
       }
 
-      return _.extend(at, entityCommonFields());
+      return extendWithCommonFields(at);
     }
 
     function studyAnnotationType(study, options) {
@@ -284,7 +288,7 @@ define([
         description: faker.lorem.words(1),
         status:      'Disabled'
       };
-      return _.extend(study, entityCommonFields());
+      return extendWithCommonFields(study);
     }
 
     function centre() {
@@ -294,7 +298,7 @@ define([
         description: faker.lorem.words(1),
         status:      'Disabled'
       };
-      return _.extend(centre, entityCommonFields());
+      return extendWithCommonFields(centre);
     }
 
     /**
@@ -311,6 +315,17 @@ define([
         poBoxNumber:    faker.lorem.words(1)[0],
         countryIsoCode: faker.lorem.words(1)[0]
       };
+    }
+
+    function user() {
+      var user =  {
+        id:          utils.uuid(),
+        name:        domainEntityNameNext(ENTITY_NAME_USER()),
+        email:       faker.internet.email(),
+        avatarUrl:   faker.internet.avatar(),
+        status:      'Registered'
+      };
+      return extendWithCommonFields(user);
     }
 
     function pagedResult(entities) {

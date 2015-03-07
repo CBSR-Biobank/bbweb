@@ -1,0 +1,50 @@
+/**
+ * Jasmine test suite
+ */
+define([
+  'angular',
+  'angularMocks',
+  './studyAnnotationTypeSharedSpec',
+  'biobankApp'
+], function(angular, mocks, studyAnnotationTypeSharedSpec) {
+  'use strict';
+
+  describe('SpecimenLinkAnnotationType', function() {
+
+    var context = {}, SpecimenLinkAnnotationType, fakeEntities;
+    var commonKeys = ['studyId', 'name', 'valueType', 'options'];
+
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+
+    beforeEach(inject(function(_SpecimenLinkAnnotationType_,
+                               fakeDomainEntities) {
+      SpecimenLinkAnnotationType = _SpecimenLinkAnnotationType_;
+      fakeEntities = fakeDomainEntities;
+
+      context.annotTypeType            = SpecimenLinkAnnotationType;
+      context.createAnnotTypeFn        = createAnnotType;
+      context.annotTypeUriPart         = '/slannottypes';
+      context.objRequiredKeys          = commonKeys.concat('id');
+      context.addedEventRequiredKeys   = commonKeys.concat('annotationTypeId');
+      context.updatedEventRequiredKeys = context.addedEventRequiredKeys.concat('version');
+      context.createServerAnnotTypeFn  = createServerAnnotType;
+      context.annotTypeListFn          = SpecimenLinkAnnotationType.list;
+      context.annotTypeGetFn           = SpecimenLinkAnnotationType.get;
+    }));
+
+    function createServerAnnotType() {
+      var study = fakeEntities.study();
+      return fakeEntities.studyAnnotationType(study);
+    }
+
+    function createAnnotType(obj) {
+      obj = obj || {};
+      return new SpecimenLinkAnnotationType(obj);
+    }
+
+    studyAnnotationTypeSharedSpec(context);
+
+  });
+
+
+});

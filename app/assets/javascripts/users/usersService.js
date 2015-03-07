@@ -185,11 +185,11 @@ define(['./module', 'underscore'], function(module, _) {
       return biobankApi.call('GET', url);
     }
 
-    function add(newUser) {
+    function add(newUser, password) {
       var cmd = {
         name:     newUser.name,
         email:    newUser.email,
-        password: newUser.password
+        password: password
       };
       if (newUser.avatarUrl) {
         cmd.avatarUrl = newUser.avatarUrl;

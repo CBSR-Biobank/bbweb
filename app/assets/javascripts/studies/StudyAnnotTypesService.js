@@ -47,14 +47,6 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
       return result;
     }
 
-    StudyAnnotTypesService.prototype.getAll = function (studyId) {
-      return biobankApi.call('GET', uri(this.annotTypeUri, studyId));
-    };
-
-    StudyAnnotTypesService.prototype.get = function (studyId, annotTypeId) {
-      return biobankApi.call('GET', uri(this.annotTypeUri, studyId) + '?annotTypeId=' + annotTypeId);
-    };
-
     StudyAnnotTypesService.prototype.addOrUpdate = function (annotType) {
       if (annotType.isNew()) {
         return biobankApi.call(

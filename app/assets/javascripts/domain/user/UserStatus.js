@@ -1,14 +1,14 @@
 define(['../module'], function(module) {
   'use strict';
 
-  module.service('CentreStatus', CentreStatus);
+  module.service('UserStatus', UserStatus);
 
-  //CentreStatus.$inject = [];
+  //UserStatus.$inject = [];
 
   /**
    *
    */
-  function CentreStatus() {
+  function UserStatus() {
     var ALL_VALUES = [
       REGISTERED(),
       ACTIVE(),

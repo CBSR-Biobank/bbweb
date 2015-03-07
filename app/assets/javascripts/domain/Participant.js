@@ -5,6 +5,7 @@ define(['./module', 'underscore'], function(module, _) {
   module.factory('Participant', ParticipantFactory);
 
   ParticipantFactory.$inject = [
+    'funutils',
     'validationService',
     'ConcurrencySafeEntity',
     'participantsService',
@@ -14,7 +15,8 @@ define(['./module', 'underscore'], function(module, _) {
   /**
    * Factory for participants.
    */
-  function ParticipantFactory(validationService,
+  function ParticipantFactory(funutils,
+                              validationService,
                               ConcurrencySafeEntity,
                               participantsService,
                               AnnotationHelper) {
@@ -54,14 +56,6 @@ define(['./module', 'underscore'], function(module, _) {
       return checks;
     }
 
-    function createParticipant(obj) {
-      var checks = checkObject(obj);
-      if (checks.length) {
-        throw new Error('invalid object from server: ' + checks.join(', '));
-      }
-      return new Participant(obj);
-    }
-
     function Participant(obj, study, annotationTypes) {
       var self = this;
 
@@ -87,6 +81,14 @@ define(['./module', 'underscore'], function(module, _) {
       }
     }
 
+    Participant.create = function (obj) {
+      var checks = checkObject(obj);
+      if (checks.length) {
+        throw new Error('invalid object from server: ' + checks.join(', '));
+      }
+      return new Participant(obj);
+    };
+
     Participant.get = function (id) {
       var self = this;
 
@@ -94,7 +96,7 @@ define(['./module', 'underscore'], function(module, _) {
         throw new Error('study ID is null');
       }
       return participantsService.get(self.studyId, id).then(function (reply) {
-        return createParticipant(reply);
+        return Participant.create(reply);
       });
     };
 
@@ -105,7 +107,7 @@ define(['./module', 'underscore'], function(module, _) {
         throw new Error('study ID is null');
       }
       return participantsService.getByUniqueId(self.studyId, uniqueId).then(function (reply) {
-        return createParticipant(reply);
+        return Participant.create(reply);
       });
     };
 
@@ -119,8 +121,8 @@ define(['./module', 'underscore'], function(module, _) {
           throw new Error('invalid event from server: ' + checks.join(', '));
         }
 
-        _.extend(self, _.defaults(event, { version: 0 }));
-        return self;
+        return Participant.create(_.extend(funutils.renameKeys(event, { participantId: 'id' }),
+                                           { version: 0 }));
       });
     };
 

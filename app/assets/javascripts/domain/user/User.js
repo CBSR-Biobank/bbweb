@@ -1,9 +1,10 @@
-define(['./module', 'underscore'], function(module, _) {
+define(['../module', 'underscore'], function(module, _) {
   'use strict';
 
   module.factory('User', UserFactory);
 
   UserFactory.$inject = [
+    'funutils',
     'validationService',
     'ConcurrencySafeEntity',
     'UserStatus',
@@ -13,23 +14,32 @@ define(['./module', 'underscore'], function(module, _) {
   /**
    *
    */
-  function UserFactory(validationService,
+  function UserFactory(funutils,
+                       validationService,
                        ConcurrencySafeEntity,
                        UserStatus,
                        usersService) {
 
-    var checkObject = validationService.checker(
-      validationService.validator('must be a map', validationService.aMap),
-      validationService.hasKeys('id', 'name', 'email', 'status')
-    );
+    var requiredKeys = ['id', 'name', 'email'];
 
-    function createUser(obj) {
-      var checks = checkObject(obj);
-      if (checks.length) {
-        throw new Error('invalid object from server: ' + checks.join(', '));
-      }
-      return new User(obj);
-    }
+    var objRequiredKeys = requiredKeys.concat('status');
+
+    var validateIsMap = validationService.condition1(
+      validationService.validator('must be a map', _.isObject));
+
+    var createObj = funutils.partial1(validateIsMap, _.identity);
+
+    var validateObj = funutils.partial1(
+      validationService.condition1(
+        validationService.validator('has the correct keys',
+                                    validationService.hasKeys.apply(null, objRequiredKeys))),
+      createObj);
+
+    var validateRegisteredEvent = funutils.partial1(
+      validationService.condition1(
+        validationService.validator('has the correct keys',
+                                    validationService.hasKeys.apply(null, requiredKeys))),
+      createObj);
 
     function User(obj) {
       obj = obj || {};
@@ -46,35 +56,41 @@ define(['./module', 'underscore'], function(module, _) {
 
     User.prototype = Object.create(ConcurrencySafeEntity.prototype);
 
+    User.create = function (obj) {
+      var validation = validateObj(obj);
+      if (!_.isObject(validation)) {
+        throw new Error('invalid object from server: ' + validation);
+      }
+      return new User(obj);
+    };
+
     User.list = function(options) {
       options = options || {};
-      return usersService.list(options).then(function(reply) {
+      return usersService.getUsers(options).then(function(reply) {
         // reply is a paged result
         reply.items = _.map(reply.items, function(obj){
-          return createUser(obj);
+          return User.create(obj);
         });
         return reply;
       });
     };
 
     User.get = function(id) {
-      return usersService.get(id).then(function(reply) {
-        return createUser(reply);
+      return usersService.query(id).then(function(reply) {
+        return User.create(reply);
       });
     };
 
-    User.prototype.addOrUpdate = function () {
+    User.prototype.register = function (password) {
       var self = this;
-      return usersService.addOrUpdate(self).then(function(reply) {
-        self.id = reply.id;
-        self.name = reply.name;
+      return usersService.add(self, password).then(function(reply) {
+        var validation = validateRegisteredEvent(reply);
 
-        if (_.isUndefined(reply.version)) {
-          self.version = 0;
-        } else {
-          self.version = reply.version;
+        if (!_.isObject(validation)) {
+          throw new Error('invalid event from server: ' + validation);
         }
-        return self;
+
+        return new User(_.extend({}, reply, { version: 0 }));
       });
     };
 

@@ -1,38 +1,39 @@
 /**
  * Jasmine test suite
  */
-define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
+define([
+  'angular',
+  'angularMocks',
+  'underscore',
+  'biobank.testUtils',
+  'biobankApp'
+] , function(angular, mocks, _, testUtils) {
   'use strict';
-
-  function uri(centreId) {
-    var result = '/centres';
-    if (arguments.length > 0) {
-      result += '/' + centreId;
-    }
-    return result;
-  }
 
   /**
    * For now these tests test the interaction between the class and the server.
    *
-   * At the moment not sure if we need the service layer if it is decided that the domain model objects
-   * encapuslate all the behaviour. If the service layer is kept then these tests will have to be modified
-   * and only mock the service methods in 'centresService'.
+   * At the moment not sure if we need the service layer, or if the domain model objects call the rest API
+   * directly. If the service layer is kept then these tests will have to be modified and only mock the
+   * service methods in 'centresService'.
    */
   describe('Centre', function() {
 
-    var httpBackend, Centre, Location, fakeEntities;
+    var httpBackend, Centre, CentreStatus, Location, funutils, fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function($httpBackend,
                                _Centre_,
+                               _CentreStatus_,
                                _Location_,
+                               _funutils_,
                                fakeDomainEntities,
                                extendedDomainEntities) {
       httpBackend  = $httpBackend;
       Centre       = _Centre_;
       Location     = _Location_;
+      funutils     = _funutils_;
       fakeEntities = fakeDomainEntities;
     }));
 
@@ -46,15 +47,13 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       expect(centre.description).toBeNull();
       expect(centre.locations).toBeEmptyArray();
       expect(centre.studyIds).toBeEmptyArray();
+      expect(centre.status).toBe(CentreStatus.DISABLED());
     });
 
     it('can retrieve centres', function(done) {
       var centres = [fakeEntities.centre()];
       var serverReply = fakeEntities.pagedResult(centres);
-      httpBackend.whenGET(uri()).respond({
-        status: 'success',
-        data: serverReply
-      });
+      httpBackend.whenGET(uri()).respond(serverReply(centres));
 
       Centre.list().then(function (pagedResult) {
         expect(pagedResult.items).toBeArrayOfSize(centres.length);
@@ -66,16 +65,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('can retrieve a single centre', function(done) {
-      var serverReply = fakeEntities.centre();
-      var centreId = serverReply.id;
-      httpBackend.whenGET(uri(centreId)).respond({
-        status: 'success',
-        data: serverReply
-      });
+      var centre = fakeEntities.centre();
+      httpBackend.whenGET(uri(centreId)).respond(serverReply(centre));
 
-      Centre.get(centreId).then(function (centre) {
-        expect(centre).toEqual(jasmine.any(Centre));
-        centre.compareToServerEntity(serverReply);
+      Centre.get(centreId).then(function (reply) {
+        expect(reply).toEqual(jasmine.any(Centre));
+        reply.compareToServerEntity(centre);
         done();
       });
       httpBackend.flush();
@@ -83,19 +78,13 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     it('can add a centre', function(done) {
       var centre = new Centre(_.omit(fakeEntities.centre(), 'id'));
-      var serverReply = {
-        status: 'success',
-        data: {
-          id: 'abc',
-          name: centre.name,
-          description: centre.description
-        }
-      };
-      httpBackend.expectPOST(uri(), {name: centre.name, description: centre.description})
-        .respond(201, serverReply);
+      var cmd = addCommand(centre);
+      var event = addedEvent(centre);
 
-      centre.addOrUpdate(centre).then(function(replyCentre) {
-        expect(replyCentre.id).toEqual(serverReply.data.id);
+      httpBackend.expectPOST(uri(), cmd).respond(201, serverReply(event));
+
+      centre.addOrUpdate().then(function(replyCentre) {
+        expect(replyCentre.id).toEqual(event.id);
         expect(replyCentre.version).toEqual(0);
         expect(replyCentre.name).toEqual(centre.name);
         expect(replyCentre.description).toEqual(centre.description);
@@ -106,23 +95,13 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     it('can update a centre', function(done) {
       var centre = new Centre(fakeEntities.centre());
-      var command = {
-        id:              centre.id,
-        expectedVersion: centre.version,
-        name:            centre.name,
-        description:     centre.description
-      };
-      var expectedResult = {
-        status: 'success',
-        data: _.omit(command, 'expectedVersion')
-      };
-      expectedResult.data.version = centre.version;
+      var command = updateCommand(centre);
+      var event = updatedEvent(centre);
 
-      httpBackend.expectPUT(uri(centre.id), command)
-        .respond(201, expectedResult);
+      httpBackend.expectPUT(uri(centre.id), command).respond(201, serverReply(event));
 
-      centre.addOrUpdate(centre).then(function(replyCentre) {
-        expect(replyCentre.id).toEqual(expectedResult.data.id);
+      centre.addOrUpdate().then(function(replyCentre) {
+        expect(replyCentre.id).toEqual(event.id);
         expect(replyCentre.version).toEqual(centre.version);
         expect(replyCentre.name).toEqual(centre.name);
         expect(replyCentre.description).toEqual(centre.description);
@@ -141,18 +120,49 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       changeStatusShared('enable', CentreStatus.ENABLED());
     });
 
+    function expectedVersion(version) {
+      return { expectedVersion: version};
+    }
+
+    function addCommand(centre) {
+      return  _.pick(centre, 'name', 'description');
+    }
+
+    function updateCommand(centre) {
+      return _.extend(_.pick(centre, 'id', 'name', 'description'), expectedVersion(centre.version));
+    }
+
+    function changeStatusCommand(centre) {
+      return _.extend(_.pick(centre, 'id'), expectedVersion(centre.version));
+    }
+
+    function addedEvent(centre) {
+      if (_.isUndefined(centre.id)) {
+        return _.extend(addCommand(centre), { id: testUtils.uuid() });
+      }
+      return _.extend(addCommand(centre), _.pick(centre, 'id'));
+    }
+
+    function updatedEvent(centre) {
+      return _.pick(centre, 'id', 'name', 'description', 'version');
+    }
+
+    function changedSatusEvent(centre) {
+      return _.pick(centre, 'id', 'version');
+    }
+
+    function serverReply(event) {
+      return { status: 'success', data: event };
+    }
+
     function changeStatusShared(action, status) {
       var centre = new Centre(fakeEntities.centre());
       var changeStatusFn = action === 'disable' ? centre.disable : centre.enable;
-      var command = { id: centre.id, expectedVersion: centre.version};
-      var serverReply = {
-        status: 'success',
-        data: {
-          id: centre.id,
-          version: centre.version
-        }
-      };
-      httpBackend.expectPOST(uri(centre.id) + '/' + action, command).respond(201, serverReply);
+      var command = changeStatusCommand(centre);
+      var event = changedSatusEvent(centre);
+
+      httpBackend.expectPOST(uri(centre.id) + '/' + action, command).respond(201, serverReply(event));
+
       _.bind(changeStatusFn, centre)().then(function(replyCentre) {
         expect(replyCentre.status).toBe(status);
       });
@@ -180,7 +190,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         var centre = new Centre();
         expect(function () {
           centre.addLocation(new Location());
-        }).toThrow(new Error('id is null'));
+       }).toThrow(new Error('id is null'));
       });
 
       it('cannot remove a location from a new centre', function() {
@@ -193,17 +203,15 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       it('can retrieve centre locations', function(done) {
         var serverCentre = fakeEntities.centre();
         var centre = new Centre(serverCentre);
-        var serverReply = [fakeEntities.location(serverCentre)];
+        var location = fakeEntities.location(serverCentre);
+        var locations = [ location ];
 
-        httpBackend.whenGET(uri(centre.id) + '/locations').respond({
-          status: 'success',
-          data: serverReply
-        });
+        httpBackend.whenGET(uri(centre.id) + '/locations').respond(serverReply(locations));
 
         centre.getLocations().then(function () {
-          expect(centre.locations).toBeArrayOfSize(serverReply.length);
+          expect(centre.locations).toBeArrayOfSize(locations.length);
           expect(centre.locations[0]).toEqual(jasmine.any(Location));
-          centre.locations[0].compareToServerEntity(serverReply[0]);
+          centre.locations[0].compareToServerEntity(locations[0]);
           done();
         });
         httpBackend.flush();
@@ -228,19 +236,15 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       });
 
       it('can add a location', function(done) {
-        var serverCentre = fakeEntities.centre();
-        var centre = new Centre(serverCentre);
-        var locationCount = centre.locations.length;
+        var centre = new Centre(fakeEntities.centre());
         var location = fakeEntities.location(centre);
-        var command = _.pick(location,
-                             'name', 'street', 'city', 'province', 'postalCode', 'poBoxNumber', 'countryIsoCode');
-        var serverReply = { locationId: location.id };
+        var command = addLocationCommand(centre, location);
+        var event = locationAddedEvent(location);
 
-        _.extend(command, { centreId: centre.id });
-        _.extend(serverReply, command);
+        var locationCount = centre.locations.length;
 
         httpBackend.expectPOST(uri(centre.id) + '/locations', command)
-          .respond(201, serverReply);
+          .respond(201, serverReply(event));
 
         centre.addLocation(location).then(function () {
           var lastIndex = centre.locations.length - 1;
@@ -280,14 +284,15 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         var serverCentre = fakeEntities.centre();
         var centre = new Centre(serverCentre);
         var location = new Location(fakeEntities.location(centre));
-        var serverReply, locationCount;
+        var command = removeLocationCommand(centre, location);
+        var event = locationRemovedEvent(centre, location);
+        var locationCount;
 
         centre.locations.push(location);
-        serverReply = { centreId: centre.id, locationId: location.id };
         locationCount = centre.locations.length;
 
         httpBackend.expectDELETE(uri(centre.id) + '/locations/' + location.id)
-          .respond(201, serverReply);
+          .respond(201, serverReply(event));
 
         centre.removeLocation(location).then(function () {
           expect(centre.locations).toBeArrayOfSize(locationCount - 1);
@@ -305,6 +310,25 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           centre.removeLocation(location);
         }).toThrow(new Error('location not present: ' + location.id));
       });
+
+      function addLocationCommand(centre, location) {
+        return _.extend({ centreId: centre.id },
+                        _.pick(location,
+                               'name', 'street', 'city', 'province', 'postalCode',
+                               'poBoxNumber', 'countryIsoCode'));
+      }
+
+      function locationAddedEvent(location) {
+        return _.extend(addLocationCommand(location), { id: testUtils.uuid() });
+      }
+
+      function removeLocationCommand(centre, location) {
+        return { centreId: centre.id, locationId: location.id };
+      }
+
+      function locationRemovedEvent(centre, location) {
+        return removeLocationCommand(centre, location);
+      }
 
     });
 
@@ -352,12 +376,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       it('can add a study', function(done) {
         var study = fakeEntities.study();
         var centre = new Centre(fakeEntities.centre());
-        var command = { centreId: centre.id, studyId: study.id };
-        var serverReply = _.clone(command);
+        var command = addStudyCommand(centre, study);
+        var event =studyAddedToCentreEvent(centre, study);
         var studyCount = centre.studyIds.length;
 
         httpBackend.expectPOST(uri(centre.id) + '/studies/' + study.id, command)
-          .respond(201, serverReply);
+          .respond(201, serverReply(event));
 
         centre.addStudy(study).then(function () {
           var lastIndex = centre.studyIds.length - 1;
@@ -382,14 +406,15 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       it('can remove a study', function(done) {
         var study = fakeEntities.study();
         var centre = new Centre(fakeEntities.centre());
-        var serverReply = { centreId: centre.id, studyId: study.id };
+        var command = removeStudyCommand(centre, study);
+        var event = studyRemovedFromCentreEvent(centre, study);
         var studyCount;
 
         centre.studyIds.push(study.id);
         studyCount = centre.studyIds.length;
 
         httpBackend.expectDELETE(uri(centre.id) + '/studies/' + study.id)
-          .respond(201, serverReply);
+          .respond(201, serverReply(event));
 
         centre.removeStudy(study).then(function () {
           expect(centre.studyIds).toBeArrayOfSize(studyCount - 1);
@@ -407,6 +432,30 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           centre.removeStudy(study);
         }).toThrow(new Error('study ID not present: ' + study.id));
       });
+
+      function addStudyCommand(centre, study) {
+        return { centreId: centre.id, studyId: study.id };
+      }
+
+      function removeStudyCommand(centre, study) {
+        return addStudyCommand(centre, study);
+      }
+
+      function studyAddedToCentreEvent(centre, study) {
+        return { centreId: centre.id, studyId: study.id };
+      }
+
+      function studyRemovedFromCentreEvent(centre, study) {
+        return { centreId: centre.id, studyId: study.id };
+      }
+
+      function uri(centreId) {
+        var result = '/centres';
+        if (arguments.length > 0) {
+          result += '/' + centreId;
+        }
+        return result;
+      }
 
     });
   });

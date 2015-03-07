@@ -4,14 +4,20 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
   module.factory('StudyAnnotationType', StudyAnnotationTypeFactory);
 
   StudyAnnotationTypeFactory.$inject = [
+    'funutils',
+    'biobankApi',
     'validationService',
+    'studyAnnotationTypeValidation',
     'AnnotationType'
   ];
 
   /**
    *
    */
-  function StudyAnnotationTypeFactory(validationService,
+  function StudyAnnotationTypeFactory(funutils,
+                                      biobankApi,
+                                      validationService,
+                                      studyAnnotationTypeValidation,
                                       AnnotationType) {
 
     function StudyAnnotationType(obj) {
@@ -19,60 +25,85 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       AnnotationType.call(this, obj);
       _.extend(this, _.defaults(obj, { studyId: null }));
 
-      this._requiredKeys.unshift('studyId');
-      this._addedEventRequiredKeys = ['studyId', 'annotationTypeId', 'name', 'valueType', 'options'];
-      this._updatedEventRequiredKeys = this._addedEventRequiredKeys.concat('version');
-
       this._service = null;
+      this._validateAddedEvent = studyAnnotationTypeValidation.validateAddedEvent;
+      this._validateUpdatedEvent = studyAnnotationTypeValidation.validateUpdatedEvent;
     }
 
     StudyAnnotationType.prototype = Object.create(AnnotationType.prototype);
 
     /**
-     * Used to create a study annotation type from a response from the server.
+     * Factory function to get all study annotation types for studyId.
      *
-     * The object is validated to have the required fields.
+     * @param {String} studyId - the ID for the parent study.
      */
-    StudyAnnotationType.create = function (obj) {
-      var checker = validationService.checker(
-        validationService.aMapValidator,
-        validationService.hasKeys.apply(null, this._requiredKeys));
-      var checks = checker(obj);
-
-      if (checks.length > 0) {
-        return new Error('invalid object from server: ' + checks.join(', '));
-      }
-      return new StudyAnnotationType(obj);
+    StudyAnnotationType.list = function (validator, createFn, annotTypeUriPart, studyId) {
+      return biobankApi.call('GET', '/studies/' + studyId + '/' + annotTypeUriPart).then(function (reply) {
+        return _.map(reply, function(obj) {
+          return create(validator, createFn, obj);
+        });
+      });
     };
 
+    /**
+     * Factory function to get one study annotation type.
+     *
+     * @param {String} studyId - the ID for the parent study.
+     *
+     * @param {String} annotationTypeId - the ID of the annotaiton type.
+     */
+    StudyAnnotationType.get = function (validator,
+                                        createFn,
+                                        annotTypeUriPart,
+                                        studyId,
+                                        annotationTypeId) {
+      return biobankApi.call(
+        'GET',
+        '/studies/' + studyId + '/' + annotTypeUriPart + '/' + annotationTypeId
+      ).then(function (obj) {
+        return create(validator, createFn, obj);
+      });
+    };
+
+    /**
+     * Sends a command, to the server, to add or update to a study annotation type.
+     */
     StudyAnnotationType.prototype.addOrUpdate = function () {
       var self = this;
       if (self._service === null) {
         throw new Error('_service is null');
       }
-      return self._service.addOrUpdate(self).then(function(event) {
-        var checks = addOrUpdateChecker()(event);
 
-        if (checks.length > 0) {
-          //console.log(event);
-          return new Error('invalid event from server: ' + checks.join(', '));
+      if (self._validateAddedEvent === null) {
+        return new Error('self._validateAddedEvent is null');
+      }
+
+      if (self._validateUpdatedEvent === null) {
+        return new Error('self._validateUpdatedEvent is null');
+      }
+
+      return self._service.addOrUpdate(self).then(function(event) {
+        var validator = self.isNew() ? self._validateAddedEvent : self._validateUpdatedEvent;
+
+        var result = validator(event);
+
+        if (!_.isObject(result)) {
+          return new Error('invalid event from server: ' + result);
         }
 
-        // FIXME use renameKeys here
-        _.extend(self, _.defaults(
-          _.omit(event, 'participantId'),
-          { id: event.participantId, version: 0 }));
-        return self;
+        return _.extend(funutils.renameKeys(result, { annotationTypeId: 'id' }), { version: 0 });
       });
-
-      function addOrUpdateChecker() {
-        var requiredKeys = self.isNew() ? self._addedEventRequiredKeys : self._updatedEventRequiredKeys;
-
-        return validationService.checker(
-          validationService.aMapValidator,
-          validationService.hasKeys.apply(null, requiredKeys));
-      }
     };
+
+    function create(validator, createFn, obj) {
+      var validation = validator(obj);
+
+      if (!_.isObject(validation)) {
+        return new Error('annotation type from server fails validation: ' + validation);
+      }
+
+      return createFn(obj);
+    }
 
     return StudyAnnotationType;
   }
