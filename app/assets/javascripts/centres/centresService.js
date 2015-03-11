@@ -53,11 +53,11 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
 
     function changeStatus(status, centre) {
       var cmd = { id: centre.id, expectedVersion: centre.version };
-      return biobankApi.call('POST', uri(centre.id) + '/' + status, cmd);
+      return biobankApi.post(uri(centre.id) + '/' + status, cmd);
     }
 
     function getCentreCounts() {
-      return biobankApi.call('GET', uri() + '/counts');
+      return biobankApi.get(uri() + '/counts');
     }
 
     /**
@@ -103,18 +103,18 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
         url += paramsStr;
       }
 
-      return biobankApi.call('GET', url);
+      return biobankApi.get(url);
     }
 
     function get(id) {
-      return biobankApi.call('GET', uri(id));
+      return biobankApi.get(uri(id));
     }
 
     function addOrUpdate(centre) {
       if (centre.isNew()) {
-        return biobankApi.call('POST', uri(), getAddCommand(centre));
+        return biobankApi.post(uri(), getAddCommand(centre));
       } else {
-        return biobankApi.call('PUT', uri(centre.id), getUpdateCommand(centre));
+        return biobankApi.put(uri(centre.id), getUpdateCommand(centre));
       }
     }
 
@@ -127,16 +127,16 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
     }
 
     function studies(centre) {
-      return biobankApi.call('GET', uri(centre.id) + '/studies');
+      return biobankApi.get(uri(centre.id) + '/studies');
     }
 
     function addStudy(centre, studyId) {
       var cmd = {centreId: centre.id, studyId: studyId};
-      return biobankApi.call('POST', uri(centre.id) + '/studies/' + studyId, cmd);
+      return biobankApi.post(uri(centre.id) + '/studies/' + studyId, cmd);
     }
 
     function removeStudy(centre, studyId) {
-      return biobankApi.call('DELETE', uri(centre.id) + '/studies/' + studyId);
+      return biobankApi.del(uri(centre.id) + '/studies/' + studyId);
     }
   }
 

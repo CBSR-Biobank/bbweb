@@ -51,19 +51,19 @@ define(['./module', 'underscore'], function(module, _) {
     }
 
     function list(centreId) {
-      return biobankApi.call('GET', uri(centreId));
+      return biobankApi.get(uri(centreId));
     }
 
     function query(centreId, locationId) {
-      return biobankApi.call('GET', uri(centreId) + '?locationId=' + locationId);
+      return biobankApi.get(uri(centreId) + '?locationId=' + locationId);
     }
 
     function add(centre, location) {
-      return biobankApi.call('POST', uri(centre.id), getAddCommand(centre, location));
+      return biobankApi.post(uri(centre.id), getAddCommand(centre, location));
     }
 
     function remove(centre, location) {
-      return biobankApi.call('DELETE', uri(centre.id, location.id));
+      return biobankApi.del(uri(centre.id, location.id));
     }
 
   }

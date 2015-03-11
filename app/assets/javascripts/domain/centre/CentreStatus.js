@@ -16,7 +16,7 @@ define(['../module'], function(module) {
 
     var service = {
       DISABLED: DISABLED,
-      ENABLED:   ENABLED,
+      ENABLED:  ENABLED,
 
       values:    values
     };

@@ -1,4 +1,4 @@
-define(['../module', 'angular', 'underscore'], function(module, angular, _) {
+define(['../module', 'angular', 'underscore', 'moment'], function(module, angular, _, moment) {
   'use strict';
 
   module.controller('UsersTableCtrl', UsersTableCtrl);
@@ -11,7 +11,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     'stateHelper',
     'modalService',
     'tableService',
-    'usersService',
+    'User',
     'UserViewer',
     'userCounts'
   ];
@@ -26,7 +26,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
                           stateHelper,
                           modalService,
                           tableService,
-                          usersService,
+                          User,
                           UserViewer,
                           userCounts) {
     var vm = this;
@@ -51,6 +51,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     vm.nameFilterUpdated   = nameFilterUpdated;
     vm.emailFilterUpdated  = emailFilterUpdated;
     vm.statusFilterUpdated = statusFilterUpdated;
+    vm.getTimeAddedlocal   = getTimeAddedlocal;
 
     var tableParameters = {
       page: 1,
@@ -91,19 +92,14 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
         order:       sortObj[sortKeys[0]]
       };
 
-      usersService.getUsers(options)
-        .then(function (paginatedUsers) {
-          vm.paginatedUsers = paginatedUsers;
-          vm.users = [];
-          _.each(paginatedUsers.items, function(user) {
-            vm.users.push(_.extend(
-              user, {timeAddedLocal: (new Date(user.timeAdded)).toLocaleString()}));
-          });
-          vm.paginatedUsers = paginatedUsers;
-          params.total(paginatedUsers.total);
-          $defer.resolve(vm.users);
-          updateMessage();
-        });
+      User.list(options).then(function (paginatedUsers) {
+        vm.paginatedUsers = paginatedUsers;
+        vm.users = paginatedUsers.items;
+        vm.paginatedUsers = paginatedUsers;
+        params.total(paginatedUsers.total);
+        $defer.resolve(vm.users);
+        updateMessage();
+      });
     }
 
     function tableReloadCommon() {
@@ -132,7 +128,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       tableReloadCommon();
     }
 
-    function changeStatus(user, statusChangeFn, status) {
+    function changeStatus(user, method, status) {
       var modalOptions = {
         closeButtonText: 'Cancel',
         actionButtonText: 'OK'
@@ -142,13 +138,11 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       modalOptions.bodyHtml = 'Please confirm that you want to ' + status + ' user "' +
         user.name + '"?';
 
-      modalService.showModal({}, modalOptions)
-        .then(function () {
-          statusChangeFn(user).then(function() {
-            vm.tableParams.reload();
-          });
-        }
-      );
+      modalService.showModal({}, modalOptions).then(function () {
+        user[method]().then(function() {
+          vm.tableParams.reload();
+        });
+      });
     }
 
     function userInformation(user) {
@@ -156,15 +150,19 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     }
 
     function activate(user) {
-      changeStatus(user, usersService.activate, 'activate');
+      changeStatus(user, 'activate', 'activate');
     }
 
     function lock(user) {
-      changeStatus(user, usersService.lock, 'lock');
+      changeStatus(user, 'lock', 'lock');
     }
 
     function unlock(user) {
-      changeStatus(user, usersService.unlock, 'unlock');
+      changeStatus(user, 'unlock', 'unlock');
+    }
+
+    function getTimeAddedlocal(user) {
+      return moment(user.timeAdded).format('YYYY-MM-DD hh: ss A');
     }
   }
 

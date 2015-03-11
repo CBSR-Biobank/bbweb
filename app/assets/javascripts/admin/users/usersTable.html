@@ -55,7 +55,7 @@
         {{user.name}}
       </td>
       <td class="col-md-3" data-title="'Added'" sortable="'timeAdded'">
-        <a href tooltip="{{user.timeAddedLocal}}">
+        <a href tooltip="{{vm.getTimeAddedlocal(user)}}">
           {{user.timeAdded | timeago}}
         </a>
       </td>

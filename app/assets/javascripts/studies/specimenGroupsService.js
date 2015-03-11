@@ -44,11 +44,11 @@ define(['./module', 'angular'], function(module, angular) {
     }
 
     function getAll(studyId) {
-      return biobankApi.call('GET', uri(studyId));
+      return biobankApi.get(uri(studyId));
     }
 
     function get(studyId, specimenGroupId) {
-      return biobankApi.call('GET', uri(studyId) + '?sgId=' + specimenGroupId);
+      return biobankApi.get(uri(studyId) + '?sgId=' + specimenGroupId);
     }
 
     function addOrUpdate(specimenGroup) {
@@ -67,40 +67,39 @@ define(['./module', 'angular'], function(module, angular) {
       if (specimenGroup.id) {
         cmd.id = specimenGroup.id;
         cmd.expectedVersion = specimenGroup.version;
-        return biobankApi.call('PUT', uri(specimenGroup.studyId, specimenGroup.id), cmd);
+        return biobankApi.put(uri(specimenGroup.studyId, specimenGroup.id), cmd);
       } else {
-        return biobankApi.call('POST', uri(specimenGroup.studyId), cmd);
+        return biobankApi.post(uri(specimenGroup.studyId), cmd);
       }
     }
 
     function remove(specimenGroup) {
-      return biobankApi.call(
-        'DELETE',
+      return biobankApi.del(
         uri(specimenGroup.studyId, specimenGroup.id, specimenGroup.version));
     }
 
     function  specimenGroupIdsInUse(studyId) {
-      return biobankApi.call('GET', uri(studyId) + '/inuse');
+      return biobankApi.get(uri(studyId) + '/inuse');
     }
 
     function  anatomicalSourceTypes() {
-      return biobankApi.call('GET', '/studies/anatomicalsrctypes');
+      return biobankApi.get('/studies/anatomicalsrctypes');
     }
 
     function  specimenTypes() {
-      return biobankApi.call('GET', '/studies/specimentypes');
+      return biobankApi.get('/studies/specimentypes');
     }
 
     function  preservTypes() {
-      return biobankApi.call('GET', '/studies/preservtypes');
+      return biobankApi.get('/studies/preservtypes');
     }
 
     function  preservTempTypes() {
-      return biobankApi.call('GET', '/studies/preservtemptypes');
+      return biobankApi.get('/studies/preservtemptypes');
     }
 
     function  specimenGroupValueTypes() {
-      return biobankApi.call('GET', '/studies/sgvaluetypes');
+      return biobankApi.get('/studies/sgvaluetypes');
     }
   }
 

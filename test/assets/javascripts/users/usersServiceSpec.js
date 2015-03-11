@@ -33,7 +33,7 @@ define(['angular', 'angularMocks', 'jquery', 'underscore', 'biobankApp'], functi
       beforeEach(inject(function ($cookies, $q, biobankApi) {
         $cookies['XSRF-TOKEN'] = fakeToken;
 
-        spyOn(biobankApi, 'call').and.callFake(function () {
+        spyOn(biobankApi, 'get').and.callFake(function () {
           authenticateDeferred = $q.defer();
           return authenticateDeferred.promise;
         });
@@ -329,11 +329,7 @@ define(['angular', 'angularMocks', 'jquery', 'underscore', 'biobankApp'], functi
       });
 
       it('should allow a users avatar URL to be removed', function() {
-        var expectedCmd = {
-          id:              user.id,
-          expectedVersion: user.version,
-          avatarUrl:       null
-        };
+        var expectedCmd = { id: user.id, expectedVersion: user.version };
         var postResult = {status: 'success', data: 'success'};
         httpBackend.expectPUT(uri(user.id) + '/avatarurl', expectedCmd).respond(201, postResult);
         usersService.updateAvatarUrl(user, null).then(function(data) {

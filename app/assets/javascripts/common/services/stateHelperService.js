@@ -28,6 +28,9 @@ define(['../module'], function(module) {
         { reload: true, inherit: false, notify: true });
     }
 
+    /**
+     * FIXME: this should be removed, it just mirrors the transition to call
+     */
     function reloadStateAndReinit(stateName, stateParams, stateOptions) {
       var params = stateParams || {};
       var options = stateOptions || {};

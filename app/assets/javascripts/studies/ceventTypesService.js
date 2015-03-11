@@ -38,11 +38,11 @@ define(['./module', 'angular'], function(module, angular) {
     }
 
     function getAll(studyId) {
-      return biobankApi.call('GET', uri(studyId));
+      return biobankApi.get(uri(studyId));
     }
 
     function get(studyId, collectionEventTypeId) {
-      return biobankApi.call('GET', uri(studyId) + '?cetId=' + collectionEventTypeId);
+      return biobankApi.get(uri(studyId) + '?cetId=' + collectionEventTypeId);
     }
 
     function addOrUpdate(ceventType) {
@@ -59,16 +59,14 @@ define(['./module', 'angular'], function(module, angular) {
       if (ceventType.id) {
         cmd.id = ceventType.id;
         cmd.expectedVersion = ceventType.version;
-        return biobankApi.call('PUT', uri(ceventType.studyId, ceventType.id), cmd);
+        return biobankApi.put(uri(ceventType.studyId, ceventType.id), cmd);
       } else {
-        return biobankApi.call('POST', uri(ceventType.studyId), cmd);
+        return biobankApi.post(uri(ceventType.studyId), cmd);
       }
     }
 
     function remove(ceventType) {
-      return biobankApi.call(
-        'DELETE',
-        uri(ceventType.studyId, ceventType.id, ceventType.version));
+      return biobankApi.del(uri(ceventType.studyId, ceventType.id, ceventType.version));
     }
 
   }

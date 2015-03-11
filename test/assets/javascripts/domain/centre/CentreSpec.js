@@ -32,6 +32,7 @@ define([
                                extendedDomainEntities) {
       httpBackend  = $httpBackend;
       Centre       = _Centre_;
+      CentreStatus = _CentreStatus_;
       Location     = _Location_;
       funutils     = _funutils_;
       fakeEntities = fakeDomainEntities;
@@ -39,6 +40,7 @@ define([
 
     it('constructor with no parameters has default values', function() {
       var centre = new Centre();
+
       expect(centre.id).toBeNull();
       expect(centre.version).toBe(0);
       expect(centre.timeAdded).toBeNull();
@@ -52,8 +54,8 @@ define([
 
     it('can retrieve centres', function(done) {
       var centres = [fakeEntities.centre()];
-      var serverReply = fakeEntities.pagedResult(centres);
-      httpBackend.whenGET(uri()).respond(serverReply(centres));
+      var reply = fakeEntities.pagedResult(centres);
+      httpBackend.whenGET(uri()).respond(serverReply(reply));
 
       Centre.list().then(function (pagedResult) {
         expect(pagedResult.items).toBeArrayOfSize(centres.length);
@@ -66,9 +68,9 @@ define([
 
     it('can retrieve a single centre', function(done) {
       var centre = fakeEntities.centre();
-      httpBackend.whenGET(uri(centreId)).respond(serverReply(centre));
+      httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
-      Centre.get(centreId).then(function (reply) {
+      Centre.get(centre.id).then(function (reply) {
         expect(reply).toEqual(jasmine.any(Centre));
         reply.compareToServerEntity(centre);
         done();
@@ -164,9 +166,21 @@ define([
       httpBackend.expectPOST(uri(centre.id) + '/' + action, command).respond(201, serverReply(event));
 
       _.bind(changeStatusFn, centre)().then(function(replyCentre) {
+        expect(replyCentre.timeAdded).toBeNull();
+        expect(replyCentre.timeModified).toBeNull();
+        expect(replyCentre.id).toEqual(event.id);
+        expect(replyCentre.version).toEqual(event.version);
         expect(replyCentre.status).toBe(status);
       });
       httpBackend.flush();
+    }
+
+    function uri(centreId) {
+      var result = '/centres';
+      if (arguments.length > 0) {
+        result += '/' + centreId;
+      }
+      return result;
     }
 
     describe('locations', function () {
@@ -190,7 +204,7 @@ define([
         var centre = new Centre();
         expect(function () {
           centre.addLocation(new Location());
-       }).toThrow(new Error('id is null'));
+        }).toThrow(new Error('id is null'));
       });
 
       it('cannot remove a location from a new centre', function() {
@@ -284,7 +298,6 @@ define([
         var serverCentre = fakeEntities.centre();
         var centre = new Centre(serverCentre);
         var location = new Location(fakeEntities.location(centre));
-        var command = removeLocationCommand(centre, location);
         var event = locationRemovedEvent(centre, location);
         var locationCount;
 
@@ -322,12 +335,8 @@ define([
         return _.extend(addLocationCommand(location), { id: testUtils.uuid() });
       }
 
-      function removeLocationCommand(centre, location) {
-        return { centreId: centre.id, locationId: location.id };
-      }
-
       function locationRemovedEvent(centre, location) {
-        return removeLocationCommand(centre, location);
+        return { centreId: centre.id, locationId: location.id };
       }
 
     });
@@ -406,7 +415,6 @@ define([
       it('can remove a study', function(done) {
         var study = fakeEntities.study();
         var centre = new Centre(fakeEntities.centre());
-        var command = removeStudyCommand(centre, study);
         var event = studyRemovedFromCentreEvent(centre, study);
         var studyCount;
 
@@ -437,24 +445,12 @@ define([
         return { centreId: centre.id, studyId: study.id };
       }
 
-      function removeStudyCommand(centre, study) {
-        return addStudyCommand(centre, study);
-      }
-
       function studyAddedToCentreEvent(centre, study) {
         return { centreId: centre.id, studyId: study.id };
       }
 
       function studyRemovedFromCentreEvent(centre, study) {
         return { centreId: centre.id, studyId: study.id };
-      }
-
-      function uri(centreId) {
-        var result = '/centres';
-        if (arguments.length > 0) {
-          result += '/' + centreId;
-        }
-        return result;
       }
 
     });

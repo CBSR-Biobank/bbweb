@@ -49,22 +49,19 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
 
     StudyAnnotTypesService.prototype.addOrUpdate = function (annotType) {
       if (annotType.isNew()) {
-        return biobankApi.call(
-          'POST',
+        return biobankApi.post(
           uri(this.annotTypeUri, annotType.studyId),
           getAddCommand(annotType));
       }
 
-      return biobankApi.call(
-        'PUT',
+      return biobankApi.put(
         uri(this.annotTypeUri, annotType.studyId, annotType.id),
         getUpdateCommand(annotType));
 
     };
 
     StudyAnnotTypesService.prototype.remove = function (annotType) {
-      return biobankApi.call(
-        'DELETE',
+      return biobankApi.del(
         uri(this.annotTypeUri, annotType.studyId, annotType.id, annotType.version));
     };
 

@@ -11,33 +11,54 @@ define(['../module'], function(module) {
    */
   function biobankApi($http, $q, $log) {
     var service = {
-      call: call
+      get:  get,
+      post: post,
+      put:  put,
+      del:  del
     };
     return service;
 
     //-------------
 
     function call(method, url, data) {
+      var deferred = $q.defer();
       var config = { method: method, url: url };
 
-      if (data) {
+      if (data && ((method === 'POST') || (method === 'PUT'))) {
         config.data = data;
       }
 
-      return $http(config)
+      $http(config)
         .then(function(response) {
           // TODO: check status here and log it if it not 'success'
           if (method === 'DELETE') {
-            return response.data;
+            deferred.resolve(response.data);
           } else {
-            return response.data.data;
+            deferred.resolve(response.data.data);
           }
         })
         .catch(function(response) {
           $log.error(response);
-          $q.reject(response);
+          deferred.reject(response.data);
         }
       );
+      return deferred.promise;
+    }
+
+    function get(url) {
+      return call('GET', url);
+    }
+
+    function post(url, cmd) {
+      return call('POST', url, cmd);
+    }
+
+    function put(url, cmd) {
+      return call('PUT', url, cmd);
+    }
+
+    function del(url) {
+      return call('DELETE', url);
     }
   }
 

@@ -15,7 +15,7 @@ define(['./module'], function(module) {
     return service;
 
     function aggregateCounts() {
-      return biobankApi.call('GET', '/counts');
+      return biobankApi.get('/counts');
     }
   }
 

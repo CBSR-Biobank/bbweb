@@ -38,11 +38,11 @@ define(['./module'], function(module) {
     }
 
     function getAll(processingTypeId) {
-      return biobankApi.call('GET', uri(processingTypeId));
+      return biobankApi.get(uri(processingTypeId));
     }
 
     function get(processingTypeId, spcLinkTypeId) {
-      return biobankApi.call('GET', uri(processingTypeId) + '?slTypeId=' + spcLinkTypeId);
+      return biobankApi.get(uri(processingTypeId) + '?slTypeId=' + spcLinkTypeId);
     }
 
     function addOrUpdate(spcLinkType) {
@@ -62,15 +62,14 @@ define(['./module'], function(module) {
       if (spcLinkType.id) {
         cmd.id = spcLinkType.id;
         cmd.expectedVersion = spcLinkType.version;
-        return biobankApi.call('PUT', uri(spcLinkType.processingTypeId, spcLinkType.id), cmd);
+        return biobankApi.put(uri(spcLinkType.processingTypeId, spcLinkType.id), cmd);
       } else {
-        return biobankApi.call('POST', uri(spcLinkType.processingTypeId), cmd);
+        return biobankApi.post(uri(spcLinkType.processingTypeId), cmd);
       }
     }
 
     function remove(spcLinkType) {
-      return biobankApi.call(
-        'DELETE',
+      return biobankApi.del(
         uri(spcLinkType.processingTypeId, spcLinkType.id, spcLinkType.version));
     }
 

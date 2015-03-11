@@ -71,7 +71,7 @@ define(['../module', 'underscore'], function(module, _) {
       _.each(keys, function(key) {
         if ((obj[key] !== undefined) && (obj[key] !== null)) {
           result[key] = obj[key];
-        };
+        }
       });
       return result;
     }

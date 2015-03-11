@@ -49,11 +49,11 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
         id: study.id,
         expectedVersion: study.version
       };
-      return biobankApi.call('POST', uri(study.id) + '/' + status, cmd);
+      return biobankApi.post(uri(study.id) + '/' + status, cmd);
     }
 
     function getStudyCounts() {
-      return biobankApi.call('GET', uri() + '/counts');
+      return biobankApi.get(uri() + '/counts');
     }
 
     /**
@@ -99,7 +99,7 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
         url += paramsStr;
       }
 
-      return biobankApi.call('GET', url);
+      return biobankApi.get(url);
     }
 
     function getStudyNames(options) {
@@ -117,11 +117,11 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
         url += paramsStr;
       }
 
-      return biobankApi.call('GET', url + '/names');
+      return biobankApi.get(url + '/names');
     }
 
     function get(id) {
-      return biobankApi.call('GET', uri(id));
+      return biobankApi.get(uri(id));
     }
 
     function addOrUpdate(study) {
@@ -133,9 +133,9 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
         cmd.id = study.id;
         cmd.expectedVersion = study.version;
 
-        return biobankApi.call('PUT', uri(study.id), cmd);
+        return biobankApi.put(uri(study.id), cmd);
       } else {
-        return biobankApi.call('POST', uri(), cmd);
+        return biobankApi.post(uri(), cmd);
       }
     }
 
@@ -156,15 +156,15 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
     }
 
     function collectionDto(studyId) {
-      return biobankApi.call('GET', uri(studyId) + '/dto/collection');
+      return biobankApi.get(uri(studyId) + '/dto/collection');
     }
 
     function processingDto(studyId) {
-      return biobankApi.call('GET', uri(studyId) + '/dto/processing');
+      return biobankApi.get(uri(studyId) + '/dto/processing');
     }
 
     function valueTypes() {
-      return biobankApi.call('GET', '/studies/valuetypes');
+      return biobankApi.get('/studies/valuetypes');
     }
   }
 

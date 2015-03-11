@@ -47,7 +47,7 @@ define(['./module', 'underscore'], function(module, _) {
     /* If the token is assigned, check that the token is still valid on the server */
     function init() {
       if (self.token) {
-        biobankApi.call('GET', '/authenticate')
+        biobankApi.get('/authenticate')
           .then(function(currentUser) {
             self.currentUser = currentUser;
             $log.info('Welcome back, ' + self.currentUser.name);
@@ -74,7 +74,7 @@ define(['./module', 'underscore'], function(module, _) {
       if (isAuthenticated()) {
         return $q.when(self.currentUser);
       } else {
-        return biobankApi.call('GET', '/authenticate').then(function(currentUser) {
+        return biobankApi.get('/authenticate').then(function(currentUser) {
           self.currentUser = currentUser;
           return self.currentUser;
         });
@@ -99,14 +99,14 @@ define(['./module', 'underscore'], function(module, _) {
         id: user.id,
         expectedVersion: user.version
       };
-      return biobankApi.call('POST', uri(user.id) + '/' + status, cmd);
+      return biobankApi.post(uri(user.id) + '/' + status, cmd);
     }
 
     function login(credentials) {
-      return biobankApi.call('POST', '/login', credentials)
+      return biobankApi.post('/login', credentials)
         .then(function(token) {
           self.token = token;
-          return biobankApi.call('GET', '/authenticate');
+          return biobankApi.get('/authenticate');
         })
         .then(function(user) {
           self.currentUser = user;
@@ -116,7 +116,7 @@ define(['./module', 'underscore'], function(module, _) {
     }
 
     function logout() {
-      return biobankApi.call('POST', '/logout').then(function() {
+      return biobankApi.post('/logout').then(function() {
         $log.info('Good bye');
         delete $cookies['XSRF-TOKEN'];
         self.token = undefined;
@@ -125,15 +125,15 @@ define(['./module', 'underscore'], function(module, _) {
     }
 
     function query(userId) {
-      return biobankApi.call('GET', uri(userId));
+      return biobankApi.get(uri(userId));
     }
 
     function getAllUsers() {
-      return biobankApi.call('GET', uri());
+      return biobankApi.get(uri());
     }
 
     function getUserCounts() {
-      return biobankApi.call('GET', uri() + '/counts');
+      return biobankApi.get(uri() + '/counts');
     }
 
     /**
@@ -182,7 +182,7 @@ define(['./module', 'underscore'], function(module, _) {
         url += paramsStr;
       }
 
-      return biobankApi.call('GET', url);
+      return biobankApi.get(url);
     }
 
     function add(newUser, password) {
@@ -194,7 +194,7 @@ define(['./module', 'underscore'], function(module, _) {
       if (newUser.avatarUrl) {
         cmd.avatarUrl = newUser.avatarUrl;
       }
-      return biobankApi.call('POST', uri(), cmd);
+      return biobankApi.post(uri(), cmd);
     }
 
     function updateName(user, newName) {
@@ -203,7 +203,7 @@ define(['./module', 'underscore'], function(module, _) {
         expectedVersion: user.version,
         name:            newName
       };
-      return biobankApi.call('PUT', uri(user.id) + '/name', cmd);
+      return biobankApi.put(uri(user.id) + '/name', cmd);
     }
 
     function updateEmail(user, newEmail) {
@@ -212,7 +212,7 @@ define(['./module', 'underscore'], function(module, _) {
         expectedVersion: user.version,
         email:           newEmail
       };
-      return biobankApi.call('PUT', uri(user.id) + '/email', cmd);
+      return biobankApi.put(uri(user.id) + '/email', cmd);
     }
 
     function updatePassword(user, currentPassword, newPassword) {
@@ -222,20 +222,24 @@ define(['./module', 'underscore'], function(module, _) {
         currentPassword: currentPassword,
         newPassword:     newPassword
       };
-      return biobankApi.call('PUT', uri(user.id) + '/password', cmd);
+      return biobankApi.put(uri(user.id) + '/password', cmd);
     }
 
     function updateAvatarUrl(user, avatarUrl) {
       var cmd = {
         id:              user.id,
-        expectedVersion: user.version,
-        avatarUrl:       avatarUrl
+        expectedVersion: user.version
       };
-      return biobankApi.call('PUT', uri(user.id) + '/avatarurl', cmd);
+
+      if (avatarUrl) {
+        cmd.avatarUrl = avatarUrl;
+      }
+
+      return biobankApi.put(uri(user.id) + '/avatarurl', cmd);
     }
 
     function passwordReset(email) {
-      return biobankApi.call('POST', '/passreset', { email: email });
+      return biobankApi.post('/passreset', { email: email });
     }
 
     function activate(user) {

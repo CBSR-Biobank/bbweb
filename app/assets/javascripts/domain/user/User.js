@@ -1,4 +1,4 @@
-define(['../module', 'underscore'], function(module, _) {
+define(['../module', 'underscore', 'moment'], function(module, _, moment) {
   'use strict';
 
   module.factory('User', UserFactory);
@@ -59,9 +59,20 @@ define(['../module', 'underscore'], function(module, _) {
     User.create = function (obj) {
       var validation = validateObj(obj);
       if (!_.isObject(validation)) {
-        throw new Error('invalid object from server: ' + validation);
+        throw new Error('invalid object: ' + validation);
       }
       return new User(obj);
+    };
+
+    /**
+     * Meant to be called from a promise chain, therefore it does not throw and error but returns one.
+     */
+    User.createFromEvent = function (event) {
+      var validation = validateRegisteredEvent(event);
+      if (!_.isObject(validation)) {
+        return new Error('invalid event: ' + validation);
+      }
+      return new User(event);
     };
 
     User.list = function(options) {
@@ -83,76 +94,74 @@ define(['../module', 'underscore'], function(module, _) {
 
     User.prototype.register = function (password) {
       var self = this;
-      return usersService.add(self, password).then(function(reply) {
-        var validation = validateRegisteredEvent(reply);
 
-        if (!_.isObject(validation)) {
-          throw new Error('invalid event from server: ' + validation);
-        }
-
-        return new User(_.extend({}, reply, { version: 0 }));
-      });
-    };
-
-    User.prototype.activate = function () {
-      var self = this;
-      return usersService.activate(self).then(function(reply) {
-        self.status = UserStatus.ACTIVE();
-        self.version = reply.version;
-        return self;
-      });
-    };
-
-    User.prototype.lock = function () {
-      var self = this;
-      return usersService.lock(self).then(function(reply) {
-        self.status = UserStatus.LOCKED();
-        self.version = reply.version;
-        return self;
-      });
-    };
-
-    User.prototype.unlock = function () {
-      var self = this;
-      return usersService.unlock(self).then(function(reply) {
-        self.status = UserStatus.ACTIVE();
-        self.version = reply.version;
-        return self;
+      return usersService.add(self, password).then(function(event) {
+        return User.createFromEvent(event);
       });
     };
 
     User.prototype.updateName = function (name) {
       var self = this;
-      return usersService.updateName(self).then(function(reply) {
-        self.name = reply.name;
-        self.version = reply.version;
-        return self;
+
+      return usersService.updateName(self, name).then(function(reply) {
+        return new User(_.extend(_.pick(self, 'email', 'avatarUrl'), reply));
       });
     };
 
     User.prototype.updateEmail = function (email) {
       var self = this;
-      return usersService.updateName(self).then(function(reply) {
-        self.email = reply.email;
-        self.version = reply.version;
-        return self;
+      return usersService.updateEmail(self, email).then(function(reply) {
+        return new User(_.extend(_.pick(self, 'name', 'avatarUrl'), reply));
       });
     };
 
-    User.prototype.updatePassword = function (password) {
+    User.prototype.updatePassword = function (currentPassword, newPassword) {
       var self = this;
-      return usersService.updateName(self).then(function(reply) {
-        self.version = reply.version;
-        return self;
+      return usersService.updatePassword(self, currentPassword, newPassword).then(function(reply) {
+        return new User(_.extend(_.pick(self, 'name', 'email', 'avatarUrl'), reply));
       });
     };
 
     User.prototype.updateAvatarUrl = function (avatarUrl) {
       var self = this;
-      return usersService.updateName(self).then(function(reply) {
-        self.avatarUrl = reply.avatarUrl;
-        self.version = reply.version;
-        return self;
+      return usersService.updateAvatarUrl(self, avatarUrl).then(function(reply) {
+        return new User(_.extend(_.pick(self, 'name', 'email'), reply));
+      });
+    };
+
+    User.prototype.activate = function () {
+      var self = this;
+
+      if (self.status !== UserStatus.REGISTERED()) {
+        throw new Error('user status is not registered: ' + self.status);
+      }
+
+      return usersService.activate(self).then(function(reply) {
+        return new User(_.extend(_.pick(self, 'id', 'name', 'email'), { status: UserStatus.ACTIVE() }));
+      });
+    };
+
+    User.prototype.lock = function () {
+      var self = this;
+
+      if (self.status !== UserStatus.ACTIVE()) {
+        throw new Error('user status is not active: ' + self.status);
+      }
+
+      return usersService.lock(self).then(function(reply) {
+        return new User(_.extend(_.pick(self, 'id', 'name', 'email'), { status: UserStatus.LOCKED() }));
+      });
+    };
+
+    User.prototype.unlock = function () {
+      var self = this;
+
+      if (self.status !== UserStatus.LOCKED()) {
+        throw new Error('user status is not locked: ' + self.status);
+      }
+
+      return usersService.unlock(self).then(function(reply) {
+        return new User(_.extend(_.pick(self, 'id', 'name', 'email'), { status: UserStatus.ACTIVE() }));
       });
     };
 

@@ -19,7 +19,7 @@ define(['../module'], function(module) {
     }
 
     CentreCounts.get = function () {
-      return biobankApi.call('GET', '/centres/counts').then(function (response) {
+      return biobankApi.get('/centres/counts').then(function (response) {
         return new CentreCounts({
           total:    response.total,
           disabled: response.disabledCount,

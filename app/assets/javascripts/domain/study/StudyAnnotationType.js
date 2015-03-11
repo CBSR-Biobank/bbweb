@@ -38,7 +38,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
      * @param {String} studyId - the ID for the parent study.
      */
     StudyAnnotationType.list = function (validator, createFn, annotTypeUriPart, studyId) {
-      return biobankApi.call('GET', '/studies/' + studyId + '/' + annotTypeUriPart).then(function (reply) {
+      return biobankApi.get('/studies/' + studyId + '/' + annotTypeUriPart).then(function (reply) {
         return _.map(reply, function(obj) {
           return create(validator, createFn, obj);
         });
@@ -57,8 +57,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
                                         annotTypeUriPart,
                                         studyId,
                                         annotationTypeId) {
-      return biobankApi.call(
-        'GET',
+      return biobankApi.get(
         '/studies/' + studyId + '/' + annotTypeUriPart + '/' + annotationTypeId
       ).then(function (obj) {
         return create(validator, createFn, obj);

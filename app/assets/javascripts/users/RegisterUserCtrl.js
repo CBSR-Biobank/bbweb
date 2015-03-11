@@ -3,7 +3,7 @@ define(['./module', 'toastr'], function(module, toastr) {
 
   module.controller('RegisterUserCtrl', RegisterUserCtrl);
 
-  RegisterUserCtrl.$inject = ['$state', '$stateParams', 'usersService'];
+  RegisterUserCtrl.$inject = ['$state', 'User', 'notificationsService'];
 
   /**
    * Allows the user to register.
@@ -11,51 +11,41 @@ define(['./module', 'toastr'], function(module, toastr) {
    * Template file: registerUserForm.html
    * State definition: states.js
    */
-  function RegisterUserCtrl($state, $stateParams, usersService) {
+  function RegisterUserCtrl($state, User, notificationsService) {
     var vm = this;
 
-    vm.user = {
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      avatarUrl: ''
-    };
+    vm.user = new User();
+    vm.password = '';
+    vm.confirmPassword = '';
     vm.submit = submit;
     vm.cancel = cancel;
 
     //----
 
     function submit(user) {
-      usersService.add(user).then(
-        function() {
+      vm.user.register(vm.password)
+        .then(function() {
           // user has been registerd
-          toastr.success(
+          notificationsService.success(
             'Your account was created and is now pending administrator approval.',
             'Registration success',
-            {
-              closeButton: true,
-              timeOut:  0,
-              extendedTimeOut: 0,
-              positionClass: 'toast-bottom-right'
-            });
-          $state.go('home.users.login', {}, {reload: true});
-        },
-        function() {
-          // registration failed
-          toastr.error(
-            'That email address is already registered.',
-            'Registration error',
-            {
-              closeButton: true,
-              timeOut:  0,
-              extendedTimeOut: 0,
-              positionClass: 'toast-bottom-right'
-            });
+            2500);
+          $state.go('home.users.login');
+        })
+        .catch(function (err) {
+          var message;
+          if (err.message === 'already registered'){
+            message = 'That email address is already registered.';
+          } else {
+            message = err.message;
+          }
 
-          $state.go('home.users.register', {}, {reload: true});
-        }
-      );
+          // registration failed
+          notificationsService.error(
+            message,
+            'Registration error',
+            2500);
+        });
     }
 
     function cancel() {

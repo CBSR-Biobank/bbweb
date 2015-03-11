@@ -10,18 +10,18 @@ define(['./module'], function(module) {
     '$modal',
     'notificationsService',
     'modalService',
-    'usersService',
+    'User',
     'user'
   ];
 
   function UserProfileCtrl($modal,
                            notificationsService,
                            modalService,
-                           usersService,
+                           User,
                            user) {
     var vm = this;
 
-    vm.user            = user;
+    vm.user            = new User(user);
     vm.updateName      = updateName;
     vm.updateEmail     = updateEmail;
     vm.updatePassword  = updatePassword;
@@ -75,53 +75,48 @@ define(['./module'], function(module) {
       });
     }
 
-    function updateName() {
-      modalStringInput(modalInputTypes.text, 'Update user name', 'Name', user.name).result
-        .then(function (name) {
-          usersService.updateName(user, name)
-            .then(function (event) {
-              vm.user.name = event.name;
-              vm.user.version = event.version;
+    function postUpdate(userId, message, title, timeout) {
+      return function () {
+        User.get(userId).then(function(user) {
+          vm.user = user;
+          console.log(vm.user.timeAdded, vm.user.timeModified);
+          notificationsService.success(message, title, timeout);
+        });
+      };
+    }
 
-              notificationsService.success(
-                'User name updated successfully.',
-                'Update successful',
-                1500);
-            })
+    function updateName() {
+      modalStringInput(modalInputTypes.text, 'Update user name', 'Name', vm.user.name).result
+        .then(function (name) {
+          vm.user.updateName(name)
+            .then(postUpdate(vm.user.id,
+                             'User name updated successfully.',
+                             'Update successful',
+                             1500))
             .catch(updateError);
         });
     }
 
     function updateEmail() {
-      modalStringInput(modalInputTypes.email, 'Update user email', 'Email', user.email).result
+      modalStringInput(modalInputTypes.email, 'Update user email', 'Email', vm.user.email).result
         .then(function (email) {
-          usersService.updateEmail(user, email)
-            .then(function (event) {
-              vm.user.email = event.email;
-              vm.user.version = event.version;
-
-              notificationsService.success(
-                'Email updated successfully.',
-                'Update successful',
-                1500);
-            })
+          vm.user.updateEmail(email)
+            .then(postUpdate(vm.user.id,
+                             'Email updated successfully.',
+                             'Update successful',
+                             1500))
             .catch(updateError);
         });
     }
 
     function updateAvatarUrl() {
-      modalStringInput(modalInputTypes.url, 'Update avatar URL', 'Avatar URL', user.avatarUrl).result
+      modalStringInput(modalInputTypes.url, 'Update avatar URL', 'Avatar URL', vm.user.avatarUrl).result
         .then(function (avatarUrl) {
-          usersService.updateAvatarUrl(user, avatarUrl)
-            .then(function (event) {
-              vm.user.avatarUrl = event.avatarUrl;
-              vm.user.version = event.version;
-
-              notificationsService.success(
-                'Avatar URL updated successfully.',
-                'Update successful',
-                1500);
-            })
+          vm.user.updateAvatarUrl(avatarUrl)
+            .then(postUpdate(vm.user.id,
+                  'Avatar URL updated successfully.',
+                  'Update successful',
+                  1500))
             .catch(updateError);
         });
     }
@@ -137,16 +132,12 @@ define(['./module'], function(module) {
 
       modalService.showModal(modalDefaults, modalOptions)
         .then(function() {
-          usersService.updateAvatarUrl(user, null)
-            .then(function (event) {
-              vm.user.avatarUrl = event.avatarUrl;
-              vm.user.version = event.version;
-
-              notificationsService.success(
+          vm.user.updateAvatarUrl(null)
+            .then(postUpdate(vm.user.id,
                 'Avatar URL remove successfully.',
                 'Remove successful',
-                1500);
-            });
+                1500))
+            .catch(updateError);
         });
     }
 
@@ -172,9 +163,9 @@ define(['./module'], function(module) {
       });
 
       modalInstance.result.then(function (result) {
-        usersService.updatePassword(user, result.currentPassword, result.newPassword)
-          .then(function (event) {
-            vm.user.version = event.version;
+        user.updatePassword(result.currentPassword, result.newPassword)
+          .then(function (newUser) {
+            vm.user = newUser;
 
             notificationsService.success(
               'Password was updated successfully.',

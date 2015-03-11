@@ -54,7 +54,6 @@ define(['underscore', 'biobank.testUtils'], function(_, testUtils) {
         var lastReplyKey = _.last(objRequiredKeys);
 
         _.each(objRequiredKeys, function(key) {
-          var annotType = createAnnotTypeFn(serverAnnotType);
           var badObjs = [ _.omit(serverAnnotType, key) ];
 
           httpBackend.whenGET(uri(serverAnnotType.studyId)).respond(serverReply(badObjs));
@@ -92,7 +91,6 @@ define(['underscore', 'biobank.testUtils'], function(_, testUtils) {
         var lastReplyKey = _.last(objRequiredKeys);
 
         _.each(objRequiredKeys, function(key) {
-          var annotType = createAnnotTypeFn(serverAnnotType);
           var badObj = _.omit(serverAnnotType, key);
 
           httpBackend.whenGET(uri(serverAnnotType.studyId, serverAnnotType.id))

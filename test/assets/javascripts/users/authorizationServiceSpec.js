@@ -41,7 +41,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     describe('requireAuthenticatedUser', function () {
 
       it('requests the user from the server', function (done) {
-        spyOn(biobankApi, 'call').and.callFake(function () {
+        spyOn(biobankApi, 'get').and.callFake(function () {
           var deferred = $q.defer();
           deferred.resolve(user);
           return deferred.promise;
@@ -62,7 +62,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       });
 
       it('user is not authorized', function (done) {
-        spyOn(biobankApi, 'call').and.callFake(function () {
+        spyOn(biobankApi, 'get').and.callFake(function () {
           var deferred = $q.defer();
           deferred.reject();
           return deferred.promise;
@@ -87,7 +87,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     describe('requireAdminUser', function () {
 
       it('requests the user from the server', function (done) {
-        spyOn(biobankApi, 'call').and.callFake(function () {
+        spyOn(biobankApi, 'get').and.callFake(function () {
           var deferred = $q.defer();
           deferred.resolve(user);
           return deferred.promise;
@@ -108,7 +108,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       });
 
       it('user is not authorized', function (done) {
-        spyOn(biobankApi, 'call').and.callFake(function () {
+        spyOn(biobankApi, 'get').and.callFake(function () {
           var deferred = $q.defer();
           deferred.reject();
           return deferred.promise;

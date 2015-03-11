@@ -33,11 +33,11 @@ define(['./module'], function(module) {
     }
 
     function get(studyId, participantId) {
-      return biobankApi.call('GET', uri(studyId, participantId));
+      return biobankApi.get(uri(studyId, participantId));
     }
 
     function getByUniqueId(studyId, uniqueId) {
-      return biobankApi.call('GET', uri(studyId) + '/uniqueId/' + uniqueId);
+      return biobankApi.get(uri(studyId) + '/uniqueId/' + uniqueId);
     }
 
     function addOrUpdate(participant) {
@@ -50,9 +50,9 @@ define(['./module'], function(module) {
       if (participant.id) {
         cmd.id = participant.id;
         cmd.expectedVersion = participant.version;
-        return biobankApi.call('PUT', uri(participant.studyId, participant.id), cmd);
+        return biobankApi.put(uri(participant.studyId, participant.id), cmd);
       } else {
-        return biobankApi.call('POST', uri(participant.studyId), cmd);
+        return biobankApi.post(uri(participant.studyId), cmd);
       }
     }
   }

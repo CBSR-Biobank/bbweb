@@ -38,6 +38,7 @@ define([
 
     var service = {
       domainEntityNameNext:              domainEntityNameNext,
+      stringNext:                        stringNext,
       specimenGroupData:                 specimenGroupData,
       annotationTypeData:                annotationTypeData,
       studyAnnotationType:               studyAnnotationType,
@@ -152,6 +153,10 @@ define([
       }
 
       return extendWithCommonFields(slt);
+    }
+
+    function stringNext() {
+      return domainEntityNameNext();
     }
 
     function processingType(study) {

@@ -107,18 +107,16 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     Centre.prototype.disable = function () {
       var self = this;
       return centresService.disable(self).then(function(reply) {
-        self.status = CentreStatus.DISABLED();
-        self.version = reply.version;
-        return self;
+        return new Centre(_.extend(_.pick(self, 'id', 'name', 'description'),
+                                   { status: CentreStatus.DISABLED() }));
       });
     };
 
     Centre.prototype.enable = function () {
       var self = this;
       return centresService.enable(self).then(function(reply) {
-        self.status = CentreStatus.ENABLED();
-        self.version = reply.version;
-        return self;
+        return new Centre(_.extend(_.pick(self, 'id', 'name', 'description'),
+                                   { status: CentreStatus.ENABLED() }));
       });
     };
 

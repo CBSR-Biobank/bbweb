@@ -38,11 +38,11 @@ define(['./module', 'angular'], function(module, angular) {
     }
 
     function getAll(studyId) {
-      return biobankApi.call('GET', uri(studyId));
+      return biobankApi.get(uri(studyId));
     }
 
     function get(studyId, processingTypeId) {
-      return biobankApi.call('GET', uri(studyId) + '?procTypeId=' + processingTypeId);
+      return biobankApi.get(uri(studyId) + '?procTypeId=' + processingTypeId);
     }
 
     function addOrUpdate(processingType) {
@@ -57,15 +57,14 @@ define(['./module', 'angular'], function(module, angular) {
       if (processingType.id) {
         cmd.id = processingType.id;
         cmd.expectedVersion = processingType.version;
-        return biobankApi.call('PUT', uri(processingType.studyId, processingType.id), cmd);
+        return biobankApi.put(uri(processingType.studyId, processingType.id), cmd);
       } else {
-        return biobankApi.call('POST', uri(processingType.studyId), cmd);
+        return biobankApi.post(uri(processingType.studyId), cmd);
       }
     }
 
     function remove(processingType) {
-      return biobankApi.call(
-        'DELETE',
+      return biobankApi.del(
         uri(processingType.studyId, processingType.id, processingType.version));
     }
   }
