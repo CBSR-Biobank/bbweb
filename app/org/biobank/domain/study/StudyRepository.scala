@@ -21,12 +21,12 @@ class StudyRepositoryImpl extends ReadWriteRepositoryRefImpl[StudyId, Study](v =
   def allStudies(): Set[Study] = getValues.toSet
 
   def getDisabled(id: StudyId): DomainValidation[DisabledStudy] =
-    getByKey(id).map(_.asInstanceOf[DisabledStudy])
+    getByKey(id).mapTo[DisabledStudy]
 
   def getEnabled(id: StudyId): DomainValidation[EnabledStudy] =
-    getByKey(id).map(_.asInstanceOf[EnabledStudy])
+    getByKey(id).mapTo[EnabledStudy]
 
   def getRetired(id: StudyId): DomainValidation[RetiredStudy] =
-    getByKey(id).map(_.asInstanceOf[RetiredStudy])
+    getByKey(id).mapTo[RetiredStudy]
 
 }

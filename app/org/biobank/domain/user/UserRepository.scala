@@ -34,11 +34,11 @@ class UserRepositoryImpl
 
   def allUsers(): Set[User] = getValues.toSet
 
-  def getRegistered(id: UserId) = getByKey(id).map(_.asInstanceOf[RegisteredUser])
+  def getRegistered(id: UserId) = getByKey(id).mapTo[RegisteredUser]
 
-  def getActive(id: UserId) = getByKey(id).map(_.asInstanceOf[ActiveUser])
+  def getActive(id: UserId) = getByKey(id).mapTo[ActiveUser]
 
-  def getLocked(id: UserId) = getByKey(id).map(_.asInstanceOf[LockedUser])
+  def getLocked(id: UserId) = getByKey(id).mapTo[LockedUser]
 
   def getByEmail(email: String): DomainValidation[User] = {
     getValues.find(_.email == email).fold {

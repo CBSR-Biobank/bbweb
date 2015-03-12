@@ -132,48 +132,46 @@ class UsersService(implicit inj: Injector)
 
   def resetPassword(cmd: ResetUserPasswordCmd)
       : Future[DomainValidation[UserPasswordResetEvent]] = {
-    ask(usersProcessor, cmd).map (
-      _.asInstanceOf[DomainValidation[UserPasswordResetEvent]])
+    ask(usersProcessor, cmd).mapTo[DomainValidation[UserPasswordResetEvent]]
   }
 
   def register(cmd: RegisterUserCmd): Future[DomainValidation[UserRegisteredEvent]] = {
-    ask(usersProcessor, cmd).map (
-      _.asInstanceOf[DomainValidation[UserRegisteredEvent]])
+    ask(usersProcessor, cmd).mapTo[DomainValidation[UserRegisteredEvent]]
   }
 
   def updateName(cmd: UpdateUserNameCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserNameUpdatedEvent]] = {
-    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserNameUpdatedEvent]])
+    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserNameUpdatedEvent]]
   }
 
   def updateEmail(cmd: UpdateUserEmailCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserEmailUpdatedEvent]] = {
-    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserEmailUpdatedEvent]])
+    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserEmailUpdatedEvent]]
   }
 
   def updatePassword(cmd: UpdateUserPasswordCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserPasswordUpdatedEvent]] = {
-    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserPasswordUpdatedEvent]])
+    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserPasswordUpdatedEvent]]
   }
 
   def updateAvatarUrl(cmd: UpdateUserAvatarUrlCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserAvatarUrlUpdatedEvent]] = {
-    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserAvatarUrlUpdatedEvent]])
+    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserAvatarUrlUpdatedEvent]]
   }
 
   def activate(cmd: ActivateUserCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserActivatedEvent]] = {
-    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserActivatedEvent]])
+    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserActivatedEvent]]
   }
 
   def lock(cmd: LockUserCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserLockedEvent]] = {
-    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserLockedEvent]])
+    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserLockedEvent]]
   }
 
   def unlock(cmd: UnlockUserCmd)(implicit userId: UserId)
       : Future[DomainValidation[UserUnlockedEvent]] = {
-    ask(usersProcessor, cmd, userId).map (_.asInstanceOf[DomainValidation[UserUnlockedEvent]])
+    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserUnlockedEvent]]
   }
 
 }

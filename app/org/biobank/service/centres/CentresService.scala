@@ -196,44 +196,36 @@ class CentresServiceImpl(implicit inj: Injector)
 
   def addCentre(cmd: AddCentreCmd)(implicit userId: UserId)
       : Future[DomainValidation[CentreAddedEvent]] = {
-    ask(processor, cmd, userId).map (
-      _.asInstanceOf[DomainValidation[CentreAddedEvent]])
+    ask(processor, cmd, userId).mapTo[DomainValidation[CentreAddedEvent]]
   }
 
   def updateCentre(cmd: UpdateCentreCmd)(implicit userId: UserId)
       : Future[DomainValidation[CentreUpdatedEvent]] =
-    ask(processor, cmd, userId).map (
-      _.asInstanceOf[DomainValidation[CentreUpdatedEvent]])
+    ask(processor, cmd, userId).mapTo[DomainValidation[CentreUpdatedEvent]]
 
   def enableCentre(cmd: EnableCentreCmd)(implicit userId: UserId)
       : Future[DomainValidation[CentreEnabledEvent]] =
-    ask(processor, cmd, userId).map (
-      _.asInstanceOf[DomainValidation[CentreEnabledEvent]])
+    ask(processor, cmd, userId).mapTo[DomainValidation[CentreEnabledEvent]]
 
   def disableCentre(cmd: DisableCentreCmd)(implicit userId: UserId)
       : Future[DomainValidation[CentreDisabledEvent]] =
-    ask(processor, cmd, userId).map (
-      _.asInstanceOf[DomainValidation[CentreDisabledEvent]])
+    ask(processor, cmd, userId).mapTo[DomainValidation[CentreDisabledEvent]]
 
   def addCentreLocation(cmd: AddCentreLocationCmd)(implicit userId: UserId)
       : Future[DomainValidation[CentreLocationAddedEvent]] =
-    ask(processor, cmd, userId).map (
-      _.asInstanceOf[DomainValidation[CentreLocationAddedEvent]])
+    ask(processor, cmd, userId).mapTo[DomainValidation[CentreLocationAddedEvent]]
 
   def removeCentreLocation(cmd: RemoveCentreLocationCmd)(implicit userId: UserId)
       : Future[DomainValidation[CentreLocationRemovedEvent]] =
-    ask(processor, cmd, userId).map (
-      _.asInstanceOf[DomainValidation[CentreLocationRemovedEvent]])
+    ask(processor, cmd, userId).mapTo[DomainValidation[CentreLocationRemovedEvent]]
 
   def addStudyToCentre(cmd: AddStudyToCentreCmd)(implicit userId: UserId)
       : Future[DomainValidation[CentreAddedToStudyEvent]] =
-    ask(processor, cmd, userId).map (
-      _.asInstanceOf[DomainValidation[CentreAddedToStudyEvent]])
+    ask(processor, cmd, userId).mapTo[DomainValidation[CentreAddedToStudyEvent]]
 
   def removeStudyFromCentre(cmd: RemoveStudyFromCentreCmd)(implicit userId: UserId)
       : Future[DomainValidation[CentreRemovedFromStudyEvent]] =
-    ask(processor, cmd, userId).map (
-      _.asInstanceOf[DomainValidation[CentreRemovedFromStudyEvent]])
+    ask(processor, cmd, userId).mapTo[DomainValidation[CentreRemovedFromStudyEvent]]
 
 
 }
