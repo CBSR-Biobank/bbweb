@@ -20,8 +20,20 @@ object JsonHelper extends MustMatchers {
     (json \ "version").as[Long] mustBe (entity.version)
 
     ((json \ "timeAdded").as[DateTime] to entity.timeAdded).millis must be < 1000L
-    (json \ "timeModified").as[Option[DateTime]] map { dateTime =>
-      (dateTime to entity.timeModified.get).millis must be < 1000L
+
+    (json \ "timeModified").as[Option[DateTime]] match {
+      case Some(jsonTimeModified) => {
+        entity.timeModified match {
+          case Some(entityTimeModified) => (jsonTimeModified to entityTimeModified).millis must be < 1000L
+          case None => fail("entity does has no time modified")
+        }
+      }
+      case None => {
+        entity.timeModified match {
+          case Some(entityTimeModified) => fail("json object has no time modified")
+          case None => // test passes
+        }
+      }
     }
   }
 

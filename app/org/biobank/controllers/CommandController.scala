@@ -99,8 +99,7 @@ trait JsonController extends Controller {
   }
 
   protected def domainValidationReply[T]
-    (validation: DomainValidation[T])
-    (implicit writes: Writes[T])
+    (validation: DomainValidation[T])(implicit writes: Writes[T])
       : Result = {
     validation.fold(
       err => {
@@ -121,11 +120,8 @@ trait JsonController extends Controller {
   }
 
   protected def domainValidationReply[T]
-    (future: Future[DomainValidation[T]])
-    (implicit writes: Writes[T])
-      : Future[Result] = {
-    future.map { validation => domainValidationReply(validation)
-    }
-  }
+    (future: Future[DomainValidation[T]])(implicit writes: Writes[T])
+      : Future[Result] =
+    future.map { validation => domainValidationReply(validation) }
 
 }

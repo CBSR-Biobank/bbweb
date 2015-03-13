@@ -2,7 +2,6 @@ package org.biobank.fixture
 
 import org.biobank.domain._
 import org.biobank.domain.user.UserId
-import org.biobank.service.WrappedCommand
 import org.biobank.infrastructure.command.Commands._
 
 import akka.actor.ActorSystem
@@ -32,7 +31,7 @@ trait TestFixture
     with TestDbConfiguration
     with AkkaInjectable {
 
-  implicit val appModule = new TestModule
+  implicit val appModule = new ProcessorTestModule
 
   implicit val system = inject [ActorSystem]
 
@@ -47,14 +46,6 @@ trait TestFixture
     PatienceConfig(timeout = Span(2, Seconds), interval = Span(5, Millis))
 
   val defaultUserIdOpt = Some(UserId("testuser"))
-
-  def ask[T <: Command](processor: ActorRef, command: T, userIdOpt: Option[UserId]): Future[_] = {
-    akka.pattern.ask(processor, WrappedCommand(command, userIdOpt))
-  }
-
-  def ask[T <: Command](processor: ActorRef, command: T): Future[_] = {
-    ask(processor, command, dummyUserIdOpt)
-  }
 
   override def beforeAll: Unit = {
   }

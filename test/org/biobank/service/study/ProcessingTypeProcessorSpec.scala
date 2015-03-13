@@ -15,6 +15,7 @@ import org.biobank.domain.{
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
 
+import akka.pattern._
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 import org.scalatest.Tag
@@ -41,30 +42,30 @@ class ProcessingTypeProcessorSpec extends TestFixture {
   var disabledStudy: DisabledStudy = null
 
   private def askAddCommand(procType: ProcessingType): DomainValidation[ProcessingTypeAddedEvent] = {
-    val cmd = AddProcessingTypeCmd(
-      procType.studyId.id,
-      procType.name,
-      procType.description,
-      procType.enabled)
+    val cmd = AddProcessingTypeCmd(None,
+                                   procType.studyId.id,
+                                   procType.name,
+                                   procType.description,
+                                   procType.enabled)
     ask(studiesProcessor, cmd).mapTo[DomainValidation[ProcessingTypeAddedEvent]].futureValue
   }
 
   private def askUpdateCommand(procType: ProcessingType): DomainValidation[ProcessingTypeUpdatedEvent] = {
-    val cmd = UpdateProcessingTypeCmd(
-      procType.studyId.id,
-      procType.id.id,
-      procType.version,
-      procType.name,
-      procType.description,
-      procType.enabled)
+    val cmd = UpdateProcessingTypeCmd(None,
+                                      procType.studyId.id,
+                                      procType.id.id,
+                                      procType.version,
+                                      procType.name,
+                                      procType.description,
+                                      procType.enabled)
     ask(studiesProcessor, cmd).mapTo[DomainValidation[ProcessingTypeUpdatedEvent]].futureValue
   }
 
   private def askRemoveCommand(procType: ProcessingType): DomainValidation[ProcessingTypeRemovedEvent] = {
-    val cmd = RemoveProcessingTypeCmd(
-      procType.studyId.id,
-      procType.id.id,
-      procType.version)
+    val cmd = RemoveProcessingTypeCmd(None,
+                                      procType.studyId.id,
+                                      procType.id.id,
+                                      procType.version)
     ask(studiesProcessor, cmd).mapTo[DomainValidation[ProcessingTypeRemovedEvent]].futureValue
   }
 

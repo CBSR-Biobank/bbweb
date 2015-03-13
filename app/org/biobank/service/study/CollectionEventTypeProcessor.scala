@@ -13,7 +13,7 @@ import org.biobank.domain.study.{
   SpecimenGroupRepository
 }
 import org.slf4j.LoggerFactory
-import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
+import org.biobank.service.{ Processor, WrappedEvent }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEventsUtil._
@@ -72,13 +72,9 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     * back to the user. Each valid command generates one or more events and is journaled.
     */
   val receiveCommand: Receive = {
-    case procCmd: WrappedCommand =>
-      implicit val userId = procCmd.userId
-      procCmd.command match {
-        case cmd: AddCollectionEventTypeCmd =>    processAddCollectionEventTypeCmd(cmd)
-        case cmd: UpdateCollectionEventTypeCmd => processUpdateCollectionEventTypeCmd(cmd)
-        case cmd: RemoveCollectionEventTypeCmd => processRemoveCollectionEventTypeCmd(cmd)
-      }
+    case cmd: AddCollectionEventTypeCmd =>    processAddCollectionEventTypeCmd(cmd)
+    case cmd: UpdateCollectionEventTypeCmd => processUpdateCollectionEventTypeCmd(cmd)
+    case cmd: RemoveCollectionEventTypeCmd => processRemoveCollectionEventTypeCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(collectionEventTypeRepository.getValues.toSet))
@@ -98,9 +94,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     } yield updatedCet
   }
 
-  private def processAddCollectionEventTypeCmd
-    (cmd: AddCollectionEventTypeCmd)
-    (implicit userId: Option[UserId])
+  private def processAddCollectionEventTypeCmd(cmd: AddCollectionEventTypeCmd)
       : Unit = {
     val timeNow = DateTime.now
     val studyId = StudyId(cmd.studyId)
@@ -128,9 +122,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     }
   }
 
-  private def processUpdateCollectionEventTypeCmd
-    (cmd: UpdateCollectionEventTypeCmd)
-    (implicit userId: Option[UserId])
+  private def processUpdateCollectionEventTypeCmd(cmd: UpdateCollectionEventTypeCmd)
       : Unit = {
     val studyId = StudyId(cmd.studyId)
     val v = update(cmd) { cet =>
@@ -164,9 +156,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     }
   }
 
-  private def processRemoveCollectionEventTypeCmd
-    (cmd: RemoveCollectionEventTypeCmd)
-    (implicit userId: Option[UserId])
+  private def processRemoveCollectionEventTypeCmd(cmd: RemoveCollectionEventTypeCmd)
       : Unit = {
     val v = update(cmd) { at => at.success }
 

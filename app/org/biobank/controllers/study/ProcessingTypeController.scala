@@ -71,8 +71,8 @@ class ProcessingTypeController(implicit inj: Injector)
 
   def removeProcessingType(studyId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveProcessingTypeCmd(studyId, id, ver)
-      val future = studiesService.removeProcessingType(cmd)(userId)
+      val cmd = RemoveProcessingTypeCmd(Some(userId.id), studyId, id, ver)
+      val future = studiesService.removeProcessingType(cmd)
       domainValidationReply(future)
     }
 

@@ -69,8 +69,8 @@ class CeventAnnotTypeController(implicit inj: Injector)
 
   def removeAnnotationType(studyId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd =  RemoveCollectionEventAnnotationTypeCmd(studyId, id, ver)
-      val future = studiesService.removeCollectionEventAnnotationType(cmd)(userId)
+      val cmd =  RemoveCollectionEventAnnotationTypeCmd(Some(userId.id), studyId, id, ver)
+      val future = studiesService.removeCollectionEventAnnotationType(cmd)
       domainValidationReply(future)
     }
 

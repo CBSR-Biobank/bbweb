@@ -15,25 +15,29 @@ object UserCommands {
   trait UserModifyCommand extends UserCommand with HasIdentity with HasExpectedVersion
 
   case class RegisterUserCmd(
-    name: String,
-    email: String,
-    password: String,
+    userId:    Option[String],
+    name:      String,
+    email:     String,
+    password:  String,
     avatarUrl: Option[String])
       extends UserCommand
 
   case class UpdateUserNameCmd(
+    userId:    Option[String],
     id: String,
     expectedVersion: Long,
     name: String)
       extends UserModifyCommand
 
   case class UpdateUserEmailCmd(
+    userId:    Option[String],
     id: String,
     expectedVersion: Long,
     email: String)
       extends UserModifyCommand
 
   case class UpdateUserPasswordCmd(
+    userId:    Option[String],
     id: String,
     expectedVersion: Long,
     currentPassword: String,
@@ -41,27 +45,32 @@ object UserCommands {
       extends UserModifyCommand
 
   case class UpdateUserAvatarUrlCmd(
+    userId:    Option[String],
     id: String,
     expectedVersion: Long,
     avatarUrl: Option[String])
       extends UserModifyCommand
 
   case class ActivateUserCmd(
+    userId:    Option[String],
     id: String,
     expectedVersion: Long)
       extends UserModifyCommand
 
   case class LockUserCmd(
+    userId:    Option[String],
     id: String,
     expectedVersion: Long)
       extends UserModifyCommand
 
   case class UnlockUserCmd(
+    userId:    Option[String],
     id: String,
     expectedVersion: Long)
       extends UserModifyCommand
 
   case class ResetUserPasswordCmd(
+    userId:    Option[String],
     id: String,
     expectedVersion: Long,
     email: String)
@@ -70,7 +79,7 @@ object UserCommands {
   // The id and expectedVersion fields are don't care in ResetUserPasswordCmd
   // use this object to create this command
   object ResetUserPasswordCmd {
-    def apply(email: String): ResetUserPasswordCmd = ResetUserPasswordCmd("", -1, email)
+    def apply(email: String): ResetUserPasswordCmd = ResetUserPasswordCmd(None, "", -1, email)
   }
 
   implicit val registerUserCmdReads        = Json.reads[RegisterUserCmd]

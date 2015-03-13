@@ -1,13 +1,12 @@
 package org.biobank.service.centre
 
-import org.biobank.service.ApplicationService
 import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 import org.biobank.domain.{ DomainValidation, DomainError, Location, LocationId, LocationRepository }
 import org.biobank.domain.user.UserId
-import org.biobank.domain.study.StudyId
+import org.biobank.domain.study.{ Study, StudyId, StudyRepository }
 import org.biobank.domain.centre._
 
 import akka.actor._
@@ -22,6 +21,7 @@ import scaldi.{Injectable, Injector}
 
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 trait CentresService {
 
@@ -39,29 +39,21 @@ trait CentresService {
 
   def getCentreStudies(centreId: String): DomainValidation[Set[StudyId]]
 
-  def addCentre(cmd: AddCentreCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreAddedEvent]]
+  def addCentre(cmd: AddCentreCmd): Future[DomainValidation[Centre]]
 
-  def updateCentre(cmd: UpdateCentreCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreUpdatedEvent]]
+  def updateCentre(cmd: UpdateCentreCmd): Future[DomainValidation[Centre]]
 
-  def enableCentre(cmd: EnableCentreCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreEnabledEvent]]
+  def enableCentre(cmd: EnableCentreCmd): Future[DomainValidation[Centre]]
 
-  def disableCentre(cmd: DisableCentreCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreDisabledEvent]]
+  def disableCentre(cmd: DisableCentreCmd): Future[DomainValidation[Centre]]
 
-  def addCentreLocation(cmd: AddCentreLocationCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreLocationAddedEvent]]
+  def addCentreLocation(cmd: AddCentreLocationCmd): Future[DomainValidation[Location]]
 
-  def removeCentreLocation(cmd: RemoveCentreLocationCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreLocationRemovedEvent]]
+  def removeCentreLocation(cmd: RemoveCentreLocationCmd): Future[DomainValidation[Boolean]]
 
-  def addStudyToCentre(cmd: AddStudyToCentreCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreAddedToStudyEvent]]
+  def addStudyToCentre(cmd: AddStudyToCentreCmd): Future[DomainValidation[Study]]
 
-  def removeStudyFromCentre(cmd: RemoveStudyFromCentreCmd)(
-    implicit userId: UserId): Future[DomainValidation[CentreRemovedFromStudyEvent]]
+  def removeStudyFromCentre(cmd: RemoveStudyFromCentreCmd): Future[DomainValidation[Boolean]]
 }
 
 /**
@@ -75,7 +67,6 @@ trait CentresService {
  */
 class CentresServiceImpl(implicit inj: Injector)
     extends CentresService
-    with ApplicationService
     with AkkaInjectable {
 
   implicit val system = inject [ActorSystem]
@@ -89,6 +80,8 @@ class CentresServiceImpl(implicit inj: Injector)
   val centreStudiesRepository = inject [CentreStudiesRepository]
 
   val centreLocationsRepository = inject [CentreLocationsRepository]
+
+  val studyRepository = inject [StudyRepository]
 
   val processor = injectActorRef [CentresProcessor] ("centre")
 
@@ -128,19 +121,19 @@ class CentresServiceImpl(implicit inj: Injector)
     val allCentres = centreRepository.getValues
 
     val centresFilteredByName = if (!filter.isEmpty) {
-        val filterLowerCase = filter.toLowerCase
-          allCentres.filter { centre => centre.name.toLowerCase.contains(filterLowerCase) }
-      } else {
-        allCentres
-      }
+      val filterLowerCase = filter.toLowerCase
+      allCentres.filter { centre => centre.name.toLowerCase.contains(filterLowerCase) }
+    } else {
+      allCentres
+    }
 
     val centresFilteredByStatus = getStatus(status).map { status =>
-        if (status == Centre.status) {
-          centresFilteredByName
-        } else {
-          centresFilteredByName.filter { centre => centre.status == status }
-        }
+      if (status == Centre.status) {
+        centresFilteredByName
+      } else {
+        centresFilteredByName.filter { centre => centre.status == status }
       }
+    }
 
     centresFilteredByStatus.map { centres =>
       val result = centres.toSeq.sortWith(sortFunc)
@@ -168,21 +161,21 @@ class CentresServiceImpl(implicit inj: Injector)
       centre => {
         val locationIds = centreLocationsRepository.withCentreId(centre.id).map { x => x.locationId }
         val locations = locationRepository.getValues.filter(x => locationIds.contains(x.id)).toSet
-          locationIdOpt.fold {
-            locations.successNel[String]
-          } { locationId =>
-            locationRepository.getByKey(LocationId(locationId)).fold(
-              err => DomainError(s"invalid location id: $locationId").failureNel[Set[Location]],
-              location => {
-                val locsFound = locations.filter(_.id.id == locationId)
-                if (locsFound.isEmpty) {
-                  DomainError(s"centre does not have location with id: $locationId").failureNel[Set[Location]]
-                } else {
-                  Set(location).successNel[String]
-                }
+        locationIdOpt.fold {
+          locations.successNel[String]
+        } { locationId =>
+          locationRepository.getByKey(LocationId(locationId)).fold(
+            err => DomainError(s"invalid location id: $locationId").failureNel[Set[Location]],
+            location => {
+              val locsFound = locations.filter(_.id.id == locationId)
+              if (locsFound.isEmpty) {
+                DomainError(s"centre does not have location with id: $locationId").failureNel[Set[Location]]
+              } else {
+                Set(location).successNel[String]
               }
-            )
-          }
+            }
+          )
+        }
       }
     )
   }
@@ -194,38 +187,55 @@ class CentresServiceImpl(implicit inj: Injector)
     )
   }
 
-  def addCentre(cmd: AddCentreCmd)(implicit userId: UserId)
-      : Future[DomainValidation[CentreAddedEvent]] = {
-    ask(processor, cmd, userId).mapTo[DomainValidation[CentreAddedEvent]]
+  def addCentre(cmd: AddCentreCmd): Future[DomainValidation[Centre]] =
+    replyWithCentre(ask(processor, cmd).mapTo[DomainValidation[CentreEvent]])
+
+  def updateCentre(cmd: UpdateCentreCmd): Future[DomainValidation[Centre]] =
+    replyWithCentre(ask(processor, cmd).mapTo[DomainValidation[CentreEvent]])
+
+  def enableCentre(cmd: EnableCentreCmd): Future[DomainValidation[Centre]] =
+    replyWithCentre(ask(processor, cmd).mapTo[DomainValidation[CentreEvent]])
+
+  def disableCentre(cmd: DisableCentreCmd): Future[DomainValidation[Centre]] =
+    replyWithCentre(ask(processor, cmd).mapTo[DomainValidation[CentreEvent]])
+
+  def addCentreLocation(cmd: AddCentreLocationCmd): Future[DomainValidation[Location]] = {
+    ask(processor, cmd).mapTo[DomainValidation[CentreEvent]] map { validation =>
+      for {
+        event <- validation
+        location <- locationRepository.getByKey(LocationId(event.getLocationAdded.getLocationId))
+      } yield location
+    }
   }
 
-  def updateCentre(cmd: UpdateCentreCmd)(implicit userId: UserId)
-      : Future[DomainValidation[CentreUpdatedEvent]] =
-    ask(processor, cmd, userId).mapTo[DomainValidation[CentreUpdatedEvent]]
+  def removeCentreLocation(cmd: RemoveCentreLocationCmd): Future[DomainValidation[Boolean]] = {
+    ask(processor, cmd).mapTo[DomainValidation[CentreEvent]] map { validation =>
+      validation map { event => true }
+    }
+  }
 
-  def enableCentre(cmd: EnableCentreCmd)(implicit userId: UserId)
-      : Future[DomainValidation[CentreEnabledEvent]] =
-    ask(processor, cmd, userId).mapTo[DomainValidation[CentreEnabledEvent]]
+  def addStudyToCentre(cmd: AddStudyToCentreCmd): Future[DomainValidation[Study]] = {
+    ask(processor, cmd).mapTo[DomainValidation[CentreEvent]] map { validation =>
+      for {
+        event <- validation
+        study <- studyRepository.getByKey(StudyId(event.getStudyAdded.getStudyId))
+      } yield study
+    }
+  }
 
-  def disableCentre(cmd: DisableCentreCmd)(implicit userId: UserId)
-      : Future[DomainValidation[CentreDisabledEvent]] =
-    ask(processor, cmd, userId).mapTo[DomainValidation[CentreDisabledEvent]]
+  def removeStudyFromCentre(cmd: RemoveStudyFromCentreCmd): Future[DomainValidation[Boolean]] = {
+    ask(processor, cmd).mapTo[DomainValidation[CentreEvent]] map { validation =>
+      validation map { event => true }
+    }
+  }
 
-  def addCentreLocation(cmd: AddCentreLocationCmd)(implicit userId: UserId)
-      : Future[DomainValidation[CentreLocationAddedEvent]] =
-    ask(processor, cmd, userId).mapTo[DomainValidation[CentreLocationAddedEvent]]
-
-  def removeCentreLocation(cmd: RemoveCentreLocationCmd)(implicit userId: UserId)
-      : Future[DomainValidation[CentreLocationRemovedEvent]] =
-    ask(processor, cmd, userId).mapTo[DomainValidation[CentreLocationRemovedEvent]]
-
-  def addStudyToCentre(cmd: AddStudyToCentreCmd)(implicit userId: UserId)
-      : Future[DomainValidation[CentreAddedToStudyEvent]] =
-    ask(processor, cmd, userId).mapTo[DomainValidation[CentreAddedToStudyEvent]]
-
-  def removeStudyFromCentre(cmd: RemoveStudyFromCentreCmd)(implicit userId: UserId)
-      : Future[DomainValidation[CentreRemovedFromStudyEvent]] =
-    ask(processor, cmd, userId).mapTo[DomainValidation[CentreRemovedFromStudyEvent]]
-
-
+  private def replyWithCentre(future: Future[DomainValidation[CentreEvent]])
+      : Future[DomainValidation[Centre]] = {
+    future map { validation =>
+      for {
+        event <- validation
+        centre <- centreRepository.getByKey(CentreId(event.id))
+      } yield centre
+    }
+  }
 }

@@ -22,8 +22,14 @@ sudo apt-get install sbt
 
 ### Protocol Buffers
 
+Using version 2.6.0 and the package for Ubuntu is currently 2.5.0. Have to download source and build locally.
+
 ```bash
-sudo apt-get install protobuf-compiler
+apt-get install build-essential
+wget https://protobuf.googlecode.com/svn/rc/protobuf-2.6.0.tar.gz
+tar xvfz protobuf-2.6.0.tar.gz
+cd protobuf-2.6.0
+./configure && make install
 ```
 
 ### MongoDB

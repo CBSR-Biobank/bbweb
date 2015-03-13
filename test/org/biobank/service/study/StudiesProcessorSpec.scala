@@ -15,6 +15,7 @@ import org.biobank.domain.{
 }
 import org.biobank.domain.study._
 
+import akka.pattern._
 import org.joda.time.DateTime
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
@@ -43,12 +44,12 @@ class StudiesProcessorSpec extends TestFixture {
   val nameGenerator = new NameGenerator(this.getClass)
 
   private def askAddCommand(study: Study): DomainValidation[StudyAddedEvent]  = {
-    val cmd = AddStudyCmd(study.name, study.description)
+    val cmd = AddStudyCmd(None, study.name, study.description)
     ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyAddedEvent]].futureValue
   }
 
   private def askUpdateCommand(study: Study): DomainValidation[StudyUpdatedEvent] = {
-    val cmd = UpdateStudyCmd(study.id.id, study.version, study.name, study.description)
+    val cmd = UpdateStudyCmd(None, study.id.id, study.version, study.name, study.description)
     ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyUpdatedEvent]].futureValue
   }
 
@@ -172,7 +173,7 @@ class StudiesProcessorSpec extends TestFixture {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      ask(studiesProcessor, EnableStudyCmd(study.id.toString, study.version))
+      ask(studiesProcessor, EnableStudyCmd(None, study.id.toString, study.version))
         .mapTo[DomainValidation[StudyEnabledEvent]]
         .futureValue
         .mustSucceed { event =>
@@ -191,7 +192,7 @@ class StudiesProcessorSpec extends TestFixture {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
 
-      val v = ask(studiesProcessor, EnableStudyCmd(study.id.toString, study.version))
+      val v = ask(studiesProcessor, EnableStudyCmd(None, study.id.toString, study.version))
         .mapTo[DomainValidation[StudyEnabledEvent]]
         .futureValue
       v mustFail "no specimen groups"
@@ -204,7 +205,7 @@ class StudiesProcessorSpec extends TestFixture {
       val sg = factory.createSpecimenGroup
       specimenGroupRepository.put(sg)
 
-      val v = ask(studiesProcessor, EnableStudyCmd(study.id.toString, study.version))
+      val v = ask(studiesProcessor, EnableStudyCmd(None, study.id.toString, study.version))
         .mapTo[DomainValidation[StudyEnabledEvent]]
         .futureValue
       v mustFail "no collection event types"
@@ -220,7 +221,7 @@ class StudiesProcessorSpec extends TestFixture {
       val enabledStudy = factory.createEnabledStudy
       studyRepository.put(enabledStudy)
 
-      ask(studiesProcessor, DisableStudyCmd(enabledStudy.id.toString, enabledStudy.version))
+      ask(studiesProcessor, DisableStudyCmd(None, enabledStudy.id.toString, enabledStudy.version))
         .mapTo[DomainValidation[StudyDisabledEvent]]
         .futureValue
         .mustSucceed { event =>
@@ -234,7 +235,7 @@ class StudiesProcessorSpec extends TestFixture {
     "not disable a study that does not exist" in {
       val studyId = nameGenerator.next[Study]
 
-      val v = ask(studiesProcessor, DisableStudyCmd(studyId, 0L))
+      val v = ask(studiesProcessor, DisableStudyCmd(None, studyId, 0L))
         .mapTo[DomainValidation[StudyDisabledEvent]]
         .futureValue
       v mustFail s"invalid study id: $studyId"
@@ -244,7 +245,7 @@ class StudiesProcessorSpec extends TestFixture {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
 
-      val v = ask(studiesProcessor, RetireStudyCmd(study.id.toString, study.version))
+      val v = ask(studiesProcessor, RetireStudyCmd(None, study.id.toString, study.version))
         .mapTo[DomainValidation[StudyRetiredEvent]]
         .futureValue
       v mustSucceed { event =>
@@ -265,7 +266,7 @@ class StudiesProcessorSpec extends TestFixture {
       val study = factory.createRetiredStudy
       studyRepository.put(study)
 
-      val v = ask(studiesProcessor, UnretireStudyCmd(study.id.toString, study.version))
+      val v = ask(studiesProcessor, UnretireStudyCmd(None, study.id.toString, study.version))
         .mapTo[DomainValidation[StudyUnretiredEvent]]
         .futureValue
       v mustSucceed { event =>
@@ -280,7 +281,7 @@ class StudiesProcessorSpec extends TestFixture {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
 
-      val v = ask(studiesProcessor, UnretireStudyCmd(study.id.toString, study.version))
+      val v = ask(studiesProcessor, UnretireStudyCmd(None, study.id.toString, study.version))
         .mapTo[DomainValidation[StudyUnretiredEvent]]
         .futureValue
       v mustFail "is not retired"
@@ -290,7 +291,7 @@ class StudiesProcessorSpec extends TestFixture {
       val study = factory.createEnabledStudy
       studyRepository.put(study)
 
-      val v = ask(studiesProcessor, UnretireStudyCmd(study.id.toString, study.version))
+      val v = ask(studiesProcessor, UnretireStudyCmd(None, study.id.toString, study.version))
         .mapTo[DomainValidation[StudyUnretiredEvent]]
         .futureValue
       v mustFail "is not retired"

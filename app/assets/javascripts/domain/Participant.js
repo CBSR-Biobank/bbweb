@@ -21,40 +21,37 @@ define(['./module', 'underscore'], function(module, _) {
                               participantsService,
                               AnnotationHelper) {
 
-    var checkObject = validationService.checker(
-      validationService.aMapValidator,
-      validationService.hasKeys('id', 'uniqueId', 'annotations'));
+    var requiredKeys = ['studyId', 'uniqueId', 'annotations'];
 
-    var addedEventKeys = ['studyId', 'participantId', 'uniqueId', 'annotations'];
+    var objRequiredKeys = requiredKeys.concat('id');
 
-    var updatedEventKeys = addedEventKeys.concat('version');
+    var addedEventRequiredKeys = requiredKeys.concat('participantId');
 
-    var checkAddedEvent = validationService.checker(
-      validationService.aMapValidator,
-      validationService.hasKeys.apply(null, addedEventKeys));
+    var updatedEventRequiredKeys = addedEventRequiredKeys.concat('version');
 
-    var checkUpdatedEvent = validationService.checker(
-      validationService.aMapValidator,
-      validationService.hasKeys.apply(null, updatedEventKeys));
+    var validateIsMap = validationService.condition1(
+      validationService.validator('must be a map', _.isObject));
 
-    var checkAnnotations = validationService.checker(
-      validationService.aMapValidator,
-      validationService.hasKeys('annotationTypeId', 'selectedValues'));
+    var createObj = funutils.partial1(validateIsMap, _.identity);
 
-    function checkAddOrUpdateEvent(checker, event) {
-      var checks = checker();
+    var validateObj = funutils.partial1(
+      validationService.condition1(
+        validationService.validator('has the correct keys',
+                                    validationService.hasKeys.apply(null, objRequiredKeys))),
+      createObj);
 
-      if (checks.length) {
-        return checks;
-      }
+    var validateAddedEvent = validateObj;
 
-      // now check annotations
-      checks = _.reduce(event.annotations, function (annotation) {
-        return checkAnnotations(annotation);
-      });
+    var validateUpdatedEvent = funutils.partial1(
+      validationService.condition1(
+        validationService.validator('has the correct keys',
+                                    validationService.hasKeys.apply(null, updatedEventRequiredKeys))),
+      createObj);
 
-      return checks;
-    }
+    var validateAnnotations = validationService.condition1(
+      validationService.validator('has the correct keys',
+                                  validationService.hasKeys(null, 'annotationTypeId', 'selectedValues')),
+      createObj);
 
     function Participant(obj, study, annotationTypes) {
       var self = this;
@@ -82,9 +79,9 @@ define(['./module', 'underscore'], function(module, _) {
     }
 
     Participant.create = function (obj) {
-      var checks = checkObject(obj);
-      if (checks.length) {
-        throw new Error('invalid object from server: ' + checks.join(', '));
+      var validation = validateObj(obj);
+      if (!_.isObject(validation)) {
+        throw new Error('invalid object from server: ' + validation);
       }
       return new Participant(obj);
     };
@@ -114,23 +111,47 @@ define(['./module', 'underscore'], function(module, _) {
     Participant.prototype.addOrUpdate = function () {
       var self = this;
       return participantsService.addOrUpdate(self).then(function(event) {
-        var checker = this.isNew() ? checkAddedEvent : checkUpdatedEvent;
-        var checks = checkAddOrUpdateEvent(checker, event);
+        var validation = validateAddOrUpdateEvent(event);
 
-        if (checks.length) {
-          throw new Error('invalid event from server: ' + checks.join(', '));
+        if (!_.isObject(validation)) {
+          throw validation;
         }
 
         return Participant.create(_.extend(funutils.renameKeys(event, { participantId: 'id' }),
                                            { version: 0 }));
       });
+
+      function validateAddOrUpdateEvent(event) {
+        var annotValid;
+        var validator = self.isNew() ? validateAddedEvent : validateUpdatedEvent;
+        var validation = validator(event);
+
+        if (!_.isObject(validation)) {
+          return new Error('invalid event from server: ' + validation);
+        }
+
+        // now check annotations
+        annotValid =_.reduce(event.annotations, function (memo, annotation) {
+          var validation = validateAnnotations(annotation);
+          if (!_.isObject(validation)) {
+            return false;
+          }
+          return memo;
+        }, true);
+
+        if (!annotValid) {
+          return new Error('invalid event from server: ' + validation);
+        }
+
+        return event;
+      }
     };
 
     Participant.prototype.createAnnotationHelpers = function (annotationTypes) {
       var self = this;
       self.annotationHelpers = _.map(annotationTypes, function(annotType) {
         var helper =  new AnnotationHelper(annotType);
-        var annotation = _.findWhere(self.annotations, {id: annotation.annotationTypeId});
+        var annotation = _.findWhere(self.annotations, {id: annotType.id});
         if (annotation) {
           helper.setValue(annotation);
         }

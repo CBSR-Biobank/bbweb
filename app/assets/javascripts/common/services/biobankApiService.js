@@ -39,7 +39,7 @@ define(['../module'], function(module) {
         })
         .catch(function(response) {
           $log.error(response);
-          deferred.reject(response.data);
+          deferred.reject(response);
         }
       );
       return deferred.promise;

@@ -125,7 +125,7 @@ trait Security { self: Controller =>
     Action.async(p) { implicit request =>
       validateToken(request).fold(
         err => {
-          Logger.info(s"AuthActionAsync: $err")
+          Logger.debug(s"AuthActionAsync: $err")
           Future.successful(
             Unauthorized(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))))
         },

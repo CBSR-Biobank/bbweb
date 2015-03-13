@@ -1,6 +1,6 @@
 package org.biobank.service.centre
 
-import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
+import org.biobank.service.{ Processor, WrappedEvent }
 import org.biobank.domain.centre._
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.{
@@ -15,17 +15,19 @@ import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 
 import akka.actor. { ActorRef, Props }
-import org.joda.time.DateTime
 import akka.pattern.ask
+import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import org.slf4j.LoggerFactory
-import akka.persistence.SnapshotOffer
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+import scalaz._
+import scaldi.akka.AkkaInjectable
+import scaldi.{Injectable, Injector}
 
 class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
+  import CentreEvent.EventType
 
   override def persistenceId = "centre-processor-id"
 
@@ -42,47 +44,45 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
   val errMsgNameExists = "centre with name already exists"
 
   val receiveRecover: Receive = {
-    case wevent: WrappedEvent[_] =>
-      wevent.event match {
-        case event: CentreAddedEvent            => recoverCentreAddedEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreUpdatedEvent          => recoverCentreUpdatedEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreEnabledEvent          => recoverCentreEnabledEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreDisabledEvent         => recoverCentreDisabledEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreLocationAddedEvent    => recoverCentreLocationAddedEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreLocationRemovedEvent  => recoverCentreLocationRemovedEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreAddedToStudyEvent     => recoverCentreAddedToStudyEvent(event, wevent.userId, wevent.dateTime)
-        case event: CentreRemovedFromStudyEvent => recoverCentreRemovedFromStudyEvent(event, wevent.userId, wevent.dateTime)
+    case event: CentreEvent => event.eventType match {
+        case et: EventType.Added           => applyCentreAddedEvent(event)
+        case et: EventType.Updated         => applyCentreUpdatedEvent(event)
+        case et: EventType.Enabled         => applyCentreEnabledEvent(event)
+        case et: EventType.Disabled        => applyCentreDisabledEvent(event)
+        case et: EventType.LocationAdded   => applyCentreLocationAddedEvent(event)
+        case et: EventType.LocationRemoved => applyCentreLocationRemovedEvent(event)
+        case et: EventType.StudyAdded      => applyCentreAddedToStudyEvent(event)
+        case et: EventType.StudyRemoved    => applyCentreRemovedFromStudyEvent(event)
 
-        case event => log.error(s"event not handled: $event")
+        case et => log.error(s"event not handled: $event")
       }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
       snapshot.centres.foreach{ centre => centreRepository.put(centre) }
+
+    case event: RecoveryCompleted => // silence these messages
+
+    case cmd => log.error(s"CentresProcessor: message not handled: $cmd")
   }
 
   val receiveCommand: Receive = {
-    case procCmd: WrappedCommand =>
-      implicit val userId = procCmd.userId
-      procCmd.command match {
-        case cmd: AddCentreCmd             => processAddCentreCmd(cmd)
-        case cmd: UpdateCentreCmd          => processUpdateCentreCmd(cmd)
-        case cmd: EnableCentreCmd          => processEnableCentreCmd(cmd)
-        case cmd: DisableCentreCmd         => processDisableCentreCmd(cmd)
-        case cmd: AddCentreLocationCmd     => processAddCentreLocationCmd(cmd)
-        case cmd: RemoveCentreLocationCmd  => processRemoveCentreLocationCmd(cmd)
-        case cmd: AddStudyToCentreCmd      => processAddStudyToCentreCmd(cmd)
-        case cmd: RemoveStudyFromCentreCmd => processRemoveStudyFromCentreCmd(cmd)
-      }
+    case cmd: AddCentreCmd             => processAddCentreCmd(cmd)
+    case cmd: UpdateCentreCmd          => processUpdateCentreCmd(cmd)
+    case cmd: EnableCentreCmd          => processEnableCentreCmd(cmd)
+    case cmd: DisableCentreCmd         => processDisableCentreCmd(cmd)
+    case cmd: AddCentreLocationCmd     => processAddCentreLocationCmd(cmd)
+    case cmd: RemoveCentreLocationCmd  => processRemoveCentreLocationCmd(cmd)
+    case cmd: AddStudyToCentreCmd      => processAddStudyToCentreCmd(cmd)
+    case cmd: RemoveStudyFromCentreCmd => processRemoveStudyFromCentreCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(centreRepository.getValues.toSet))
       stash()
 
     case cmd => log.error(s"CentresProcessor: message not handled: $cmd")
-
   }
 
-  private def processAddCentreCmd(cmd: AddCentreCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processAddCentreCmd(cmd: AddCentreCmd): Unit = {
     val timeNow = DateTime.now
     val centreId = centreRepository.nextIdentity
 
@@ -93,18 +93,15 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     val event = for {
       nameAvailable <- nameAvailable(cmd.name)
       newCentre <- DisabledCentre.create(centreId, -1L, timeNow, cmd.name, cmd.description)
-      event <- CentreAddedEvent(
-        id = newCentre.id.id,
-        name = Some(newCentre.name),
-        description = newCentre.description).success
+      event <- createCentreEvent(newCentre.id, cmd).withAdded(
+        CentreAddedEvent(name = Some(newCentre.name),
+                         description = newCentre.description)).success
     } yield event
 
-    process(event){ wevent =>
-      recoverCentreAddedEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    processNew (event) { applyCentreAddedEvent(_) }
   }
 
-  private def processUpdateCentreCmd(cmd: UpdateCentreCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processUpdateCentreCmd(cmd: UpdateCentreCmd): Unit = {
     val v = updateDisabled(cmd) { centre =>
       for {
         nameAvailable <- nameAvailable(cmd.name, centre.id)
@@ -114,219 +111,254 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
     val event = v.fold(
       err => err.failure,
-      centre => CentreUpdatedEvent(
-        id = cmd.id,
-        version = Some(centre.version),
-        name = Some(centre.name),
-        description = centre.description).success
+      centre => createCentreEvent(centre.id, cmd).withUpdated(
+        CentreUpdatedEvent(version = Some(centre.version),
+                           name = Some(centre.name),
+                           description = centre.description)).success
     )
 
-    process(event){ wevent =>
-      recoverCentreUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    processNew (event) { applyCentreUpdatedEvent(_) }
   }
 
-  private def processEnableCentreCmd(cmd: EnableCentreCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processEnableCentreCmd(cmd: EnableCentreCmd): Unit = {
     val timeNow = DateTime.now
     val v = updateDisabled(cmd) { c => c.enable }
 
     val  event = v.fold(
       err => err.failure,
-      centre => CentreEnabledEvent(id = cmd.id, version = Some(centre.version)).success
+      centre => createCentreEvent(centre.id, cmd).withEnabled(
+          CentreEnabledEvent(version = Some(centre.version))).success
     )
 
-    process(event){ wevent =>
-      recoverCentreEnabledEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    processNew (event) { applyCentreEnabledEvent(_) }
   }
 
-  private def processDisableCentreCmd(cmd: DisableCentreCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processDisableCentreCmd(cmd: DisableCentreCmd): Unit = {
     val v = updateEnabled(cmd) { c => c.disable }
     val event = v.fold(
       err => err.failure,
-      centre => CentreDisabledEvent(id = cmd.id, version = Some(centre.version)).success
+      centre => createCentreEvent(centre.id, cmd).withDisabled(
+        CentreDisabledEvent(version = Some(centre.version))).success
     )
 
-    process(event){ wevent =>
-      recoverCentreDisabledEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    processNew (event) { applyCentreDisabledEvent(_) }
   }
 
-  private def processAddCentreLocationCmd(cmd: AddCentreLocationCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processAddCentreLocationCmd(cmd: AddCentreLocationCmd): Unit = {
     val locationId = locationRepository.nextIdentity
     val event = for {
       centre <- getDisabled(cmd.centreId)
       location <- Location(locationId, cmd.name, cmd.street, cmd.city, cmd.province,
         cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode).success
-      event <- CentreLocationAddedEvent(
-        centreId       = cmd.centreId,
-        locationId     = locationId.id,
-        name           = Some(cmd.name),
-        street         = Some(cmd.street),
-        city           = Some(cmd.city),
-        province       = Some(cmd.province),
-        postalCode     = Some(cmd.postalCode),
-        poBoxNumber    = cmd.poBoxNumber,
-        countryIsoCode = Some(cmd.countryIsoCode)).success
+      event <- createCentreEvent(centre.id, cmd).withLocationAdded(
+        CentreLocationAddedEvent(locationId     = Some(locationId.id),
+                                 name           = Some(cmd.name),
+                                 street         = Some(cmd.street),
+                                 city           = Some(cmd.city),
+                                 province       = Some(cmd.province),
+                                 postalCode     = Some(cmd.postalCode),
+                                 poBoxNumber    = cmd.poBoxNumber,
+                                 countryIsoCode = Some(cmd.countryIsoCode))).success
     } yield event
 
-    process(event){ wevent =>
-      recoverCentreLocationAddedEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    processNew (event) { applyCentreLocationAddedEvent(_) }
   }
 
-  private def processRemoveCentreLocationCmd(cmd: RemoveCentreLocationCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processRemoveCentreLocationCmd(cmd: RemoveCentreLocationCmd): Unit = {
     val event = locationRepository.getByKey(LocationId(cmd.locationId)).fold(
       err => DomainError(s"location with id does not exist: $id").failureNel,
       location => for {
         centre <- getDisabled(cmd.centreId)
-        event <- CentreLocationRemovedEvent(cmd.centreId, cmd.locationId).success
+        event <- createCentreEvent(centre.id, cmd).withLocationRemoved(
+          CentreLocationRemovedEvent(Some(cmd.locationId))).success
       } yield event
     )
 
-    process(event){ wevent =>
-      recoverCentreLocationRemovedEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    processNew (event) { applyCentreLocationRemovedEvent(_) }
   }
 
-  private def processAddStudyToCentreCmd(cmd: AddStudyToCentreCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processAddStudyToCentreCmd(cmd: AddStudyToCentreCmd): Unit = {
     val event = for {
       centre <- getDisabled(cmd.centreId)
       notLinked <- centreStudyNotLinked(centre.id, StudyId(cmd.studyId))
-      event <- CentreAddedToStudyEvent(cmd.centreId, cmd.studyId).success
+      event <- createCentreEvent(centre.id, cmd).withStudyAdded(
+        StudyAddedToCentreEvent(Some(cmd.studyId))).success
     } yield event
 
-    process(event){ wevent =>
-      recoverCentreAddedToStudyEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    processNew (event) { applyCentreAddedToStudyEvent(_) }
   }
 
-  private def processRemoveStudyFromCentreCmd(cmd: RemoveStudyFromCentreCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processRemoveStudyFromCentreCmd(cmd: RemoveStudyFromCentreCmd): Unit = {
     val event = for {
       centre <- getDisabled(cmd.centreId)
       item <- centreStudiesRepository.withIds(StudyId(cmd.studyId), centre.id)
-      event <- CentreRemovedFromStudyEvent(cmd.centreId, cmd.studyId).success
+      event <- createCentreEvent(centre.id, cmd).withStudyRemoved(
+        StudyRemovedFromCentreEvent(Some(cmd.studyId))).success
     } yield event
 
-    process(event){ wevent =>
-      recoverCentreRemovedFromStudyEvent(wevent.event, wevent.userId, wevent.dateTime)
+    processNew (event) { applyCentreRemovedFromStudyEvent(_) }
+  }
+
+  private def applyCentreAddedEvent(event: CentreEvent): Unit = {
+    if (event.eventType.isAdded) {
+      val addedEvent = event.getAdded
+
+      centreRepository.put(
+        DisabledCentre(id           = CentreId(event.id),
+                       version      = 0L,
+                       timeAdded    = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
+                       timeModified = None,
+                       name         = addedEvent.getName,
+                       description  = addedEvent.description))
+      ()
+    } else {
+      log.error(s"invalid event type: $event")
     }
   }
 
-  private def recoverCentreAddedEvent
-    (event: CentreAddedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    centreRepository.put(DisabledCentre(
-      CentreId(event.id), 0L, dateTime, None, event.getName, event.description))
-    ()
-  }
+  private def applyCentreUpdatedEvent(event: CentreEvent): Unit = {
+    if (event.eventType.isUpdated) {
+      val updatedEvent = event.getUpdated
 
-  private def recoverCentreUpdatedEvent
-    (event: CentreUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    getDisabled(event.id).fold(
-      err => log.error(s"updating centre from event failed: $err"),
-      centre => {
-        centreRepository.put(centre.copy(
-          version      = event.getVersion,
-          timeModified = Some(dateTime),
-          name         = event.getName,
-          description  = event.description))
-        ()
-      }
-    )
-  }
-
-  private def recoverCentreEnabledEvent
-    (event: CentreEnabledEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    getDisabled(event.id).fold(
-      err => log.error(s"enabling centre from event failed: $err"),
-      centre => {
-        centreRepository.put(EnabledCentre(
-          CentreId(event.id), event.getVersion, centre.timeAdded, Some(dateTime),
-          centre.name, centre.description))
-        ()
-      }
-    )
-  }
-
-  private def recoverCentreDisabledEvent
-    (event: CentreDisabledEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    getEnabled(event.id).fold(
-      err => log.error(s"disabling centre from event failed: $err"),
-      centre => {
-        centreRepository.put(DisabledCentre(
-          CentreId(event.id), event.getVersion, centre.timeAdded, Some(dateTime),
-          centre.name, centre.description))
-        ()
-      }
-    )
-  }
-
-  private def recoverCentreLocationAddedEvent
-    (event: CentreLocationAddedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    val centreId = CentreId(event.centreId)
-    val locationId = LocationId(event.locationId)
-
-    locationRepository.put(Location(
-     id             = locationId,
-     name           = event.getName,
-     street         = event.getStreet,
-     city           = event.getCity,
-     province       = event.getProvince,
-     postalCode     = event.getPostalCode,
-     poBoxNumber    = event.poBoxNumber,
-     countryIsoCode = event.getCountryIsoCode))
-    centreLocationsRepository.put(CentreLocation(centreId, locationId))
-    ()
-  }
-
-  private def recoverCentreLocationRemovedEvent
-    (event: CentreLocationRemovedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    val centreId = CentreId(event.centreId)
-    val locationId = LocationId(event.locationId)
-    val validation = for {
-      location <- locationRepository.getByKey(locationId)
-      removed <- locationRepository.remove(location).success
-      link <- centreLocationsRepository.remove(CentreLocation(centreId, locationId)).success
-    } yield location
-
-    if (validation.isFailure) {
-      // this should never happen because the only way to get here is when the
-      // command passed validation
-      log.error("removing centre location with event failed")
+      getDisabled(event.id).fold(
+        err => log.error(s"updating centre from event failed: $err"),
+        centre => {
+          centreRepository.put(
+            centre.copy(version      = updatedEvent.getVersion,
+                        timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
+                        name         = updatedEvent.getName,
+                        description  = updatedEvent.description))
+          ()
+        }
+      )
+    } else {
+      log.error(s"invalid event type: $event")
     }
   }
 
-  private def recoverCentreAddedToStudyEvent
-    (event: CentreAddedToStudyEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    val centreId = CentreId(event.centreId)
-    val studyId = StudyId(event.studyId)
-    val studyCentreId = centreStudiesRepository.nextIdentity
-    centreStudiesRepository.put(StudyCentre(studyCentreId, studyId, centreId))
-    ()
+  private def applyCentreEnabledEvent(event: CentreEvent): Unit = {
+    if (event.eventType.isEnabled) {
+      val enabledEvent = event.getEnabled
+
+      getDisabled(event.id).fold(
+        err => log.error(s"enabling centre from event failed: $err"),
+        centre => {
+          centreRepository.put(
+            EnabledCentre(id           = CentreId(event.id),
+                          version      = event.getEnabled.getVersion,
+                          timeAdded    = centre.timeAdded,
+                          timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
+                          name         = centre.name,
+                          description  = centre.description))
+          ()
+        }
+      )
+    } else {
+      log.error(s"invalid event type: $event")
+    }
   }
 
-  private def recoverCentreRemovedFromStudyEvent
-    (event: CentreRemovedFromStudyEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    val centreId = CentreId(event.centreId)
-    val studyId = StudyId(event.studyId)
-    val studyCentreId = centreStudiesRepository.nextIdentity
-    val validation = for {
-      studyCentre <- centreStudiesRepository.withIds(studyId, centreId)
-      removed <- centreStudiesRepository.remove(studyCentre).success
-    } yield removed
+  private def applyCentreDisabledEvent(event: CentreEvent): Unit = {
+    if (event.eventType.isDisabled) {
+      val disabledEvent = event.getDisabled
 
-    if (validation.isFailure) {
-      // this should never happen because the only way to get here is when the
-      // command passed validation
-      log.error(s"removing study centre link with event failed: $validation")
+      getEnabled(event.id).fold(
+        err => log.error(s"disabling centre from event failed: $err"),
+        centre => {
+          centreRepository.put(
+            DisabledCentre(id           = CentreId(event.id),
+                           version      = event.getDisabled.getVersion,
+                           timeAdded    = centre.timeAdded,
+                           timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
+                           name         = centre.name,
+                           description  = centre.description))
+          ()
+        }
+      )
+    } else {
+      log.error(s"invalid event type: $event")
+    }
+  }
+
+  private def applyCentreLocationAddedEvent(event: CentreEvent): Unit = {
+    if (event.eventType.isLocationAdded) {
+      val locationAddedEvent = event.getLocationAdded
+
+      val centreId = CentreId(event.id)
+      val locationId = LocationId(locationAddedEvent.getLocationId)
+
+      locationRepository.put(
+        Location(id             = locationId,
+                 name           = locationAddedEvent.getName,
+                 street         = locationAddedEvent.getStreet,
+                 city           = locationAddedEvent.getCity,
+                 province       = locationAddedEvent.getProvince,
+                 postalCode     = locationAddedEvent.getPostalCode,
+                 poBoxNumber    = locationAddedEvent.poBoxNumber,
+                 countryIsoCode = locationAddedEvent.getCountryIsoCode))
+      centreLocationsRepository.put(CentreLocation(centreId, locationId))
+      ()
+    } else {
+      log.error(s"invalid event type: $event")
+    }
+  }
+
+  private def applyCentreLocationRemovedEvent(event: CentreEvent): Unit = {
+    if (event.eventType.isLocationRemoved) {
+      val locationRemovedEvent = event.getLocationRemoved
+
+      val centreId = CentreId(event.id)
+      val locationId = LocationId(locationRemovedEvent.getLocationId)
+
+      val validation = for {
+        location <- locationRepository.getByKey(locationId)
+        removed <- locationRepository.remove(location).success
+        link <- centreLocationsRepository.remove(CentreLocation(centreId, locationId)).success
+      } yield location
+
+      if (validation.isFailure) {
+        // this should never happen because the only way to get here is when the
+        // command passed validation
+        log.error("removing centre location with event failed")
+      }
+    } else {
+      log.error(s"invalid event type: $event")
+    }
+  }
+
+  private def applyCentreAddedToStudyEvent(event: CentreEvent): Unit = {
+    if (event.eventType.isStudyAdded) {
+      val studyAddedEvent = event.getStudyAdded
+
+      val centreId = CentreId(event.id)
+      val studyId = StudyId(studyAddedEvent.getStudyId)
+      val studyCentreId = centreStudiesRepository.nextIdentity
+      centreStudiesRepository.put(StudyCentre(studyCentreId, studyId, centreId))
+      ()
+    } else {
+      log.error(s"invalid event type: $event")
+    }
+  }
+
+  private def applyCentreRemovedFromStudyEvent(event: CentreEvent): Unit = {
+    if (event.eventType.isStudyRemoved) {
+      val studyRemovedEvent = event.getStudyRemoved
+
+      val centreId = CentreId(event.id)
+      val studyId = StudyId(studyRemovedEvent.getStudyId)
+
+      val validation = for {
+        studyCentre <- centreStudiesRepository.withIds(studyId, centreId)
+        removed <- centreStudiesRepository.remove(studyCentre).success
+      } yield removed
+
+      if (validation.isFailure) {
+        // this should never happen because the only way to get here is when the
+        // command passed validation
+        log.error(s"removing study centre link with event failed: $validation")
+      }
+    } else {
+      log.error(s"invalid event type: $event")
     }
   }
 
@@ -414,5 +446,13 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
       case centre => DomainError(s"centre is not enabled: ${cmd.id}").failureNel
     }
   }
+
+  /**
+   * Creates an event with the userId for the user that issued the command, and the current date and time.
+   */
+  private def createCentreEvent(id: CentreId, command: CentreCommand) =
+    CentreEvent(id     = id.id,
+                userId = command.userId,
+                time   = Some(ISODateTimeFormat.dateTime.print(DateTime.now)))
 
 }

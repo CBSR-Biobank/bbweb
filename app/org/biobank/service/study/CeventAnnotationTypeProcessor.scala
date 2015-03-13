@@ -1,6 +1,6 @@
 package org.biobank.service.study
 
-import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
+import org.biobank.service.{ Processor, WrappedEvent }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain._
@@ -63,13 +63,9 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
     * back to the user. Each valid command generates one or more events and is journaled.
     */
   val receiveCommand: Receive = {
-    case procCmd: WrappedCommand =>
-      implicit val userId = procCmd.userId
-      procCmd.command match {
-        case cmd: AddCollectionEventAnnotationTypeCmd =>    processAddCollectionEventAnnotationTypeCmd(cmd)
-        case cmd: UpdateCollectionEventAnnotationTypeCmd => processUpdateCollectionEventAnnotationTypeCmd(cmd)
-        case cmd: RemoveCollectionEventAnnotationTypeCmd => processRemoveCollectionEventAnnotationTypeCmd(cmd)
-      }
+    case cmd: AddCollectionEventAnnotationTypeCmd =>    processAddCollectionEventAnnotationTypeCmd(cmd)
+    case cmd: UpdateCollectionEventAnnotationTypeCmd => processUpdateCollectionEventAnnotationTypeCmd(cmd)
+    case cmd: RemoveCollectionEventAnnotationTypeCmd => processRemoveCollectionEventAnnotationTypeCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(annotationTypeRepository.getValues.toSet))
@@ -94,7 +90,6 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
 
   private def processAddCollectionEventAnnotationTypeCmd
     (cmd: AddCollectionEventAnnotationTypeCmd)
-    (implicit userId: Option[UserId])
       : Unit = {
     val timeNow = DateTime.now
     val id = annotationTypeRepository.nextIdentity
@@ -120,7 +115,6 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
 
   private def processUpdateCollectionEventAnnotationTypeCmd
     (cmd: UpdateCollectionEventAnnotationTypeCmd)
-    (implicit userId: Option[UserId])
       : Unit = {
     val timeNow = DateTime.now
     val v = update(cmd) { at =>
@@ -150,7 +144,6 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
 
   private def processRemoveCollectionEventAnnotationTypeCmd
     (cmd: RemoveCollectionEventAnnotationTypeCmd)
-    (implicit userId: Option[UserId])
       : Unit = {
     val v = update(cmd) { at => at.success }
 

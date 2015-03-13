@@ -43,44 +43,44 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
 
   private def askAddCommand(specimenLinkType: SpecimenLinkType)
     : DomainValidation[SpecimenLinkTypeAddedEvent] = {
-    val cmd = AddSpecimenLinkTypeCmd(
-      specimenLinkType.processingTypeId.id,
-      specimenLinkType.expectedInputChange,
-      specimenLinkType.expectedOutputChange,
-      specimenLinkType.inputCount,
-      specimenLinkType.outputCount,
-      specimenLinkType.inputGroupId.id,
-      specimenLinkType.outputGroupId.id,
-      specimenLinkType.inputContainerTypeId.map(_.id),
-      specimenLinkType.outputContainerTypeId.map(_.id),
-      specimenLinkType.annotationTypeData)
+    val cmd = AddSpecimenLinkTypeCmd(None,
+                                     specimenLinkType.processingTypeId.id,
+                                     specimenLinkType.expectedInputChange,
+                                     specimenLinkType.expectedOutputChange,
+                                     specimenLinkType.inputCount,
+                                     specimenLinkType.outputCount,
+                                     specimenLinkType.inputGroupId.id,
+                                     specimenLinkType.outputGroupId.id,
+                                     specimenLinkType.inputContainerTypeId.map(_.id),
+                                     specimenLinkType.outputContainerTypeId.map(_.id),
+                                     specimenLinkType.annotationTypeData)
     ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenLinkTypeAddedEvent]].futureValue
   }
 
   private def askUpdateCommand(specimenLinkType: SpecimenLinkType)
     : DomainValidation[SpecimenLinkTypeUpdatedEvent] = {
-    val cmd = UpdateSpecimenLinkTypeCmd(
-      specimenLinkType.processingTypeId.id,
-      specimenLinkType.id.id,
-      specimenLinkType.version,
-      specimenLinkType.expectedInputChange,
-      specimenLinkType.expectedOutputChange,
-      specimenLinkType.inputCount,
-      specimenLinkType.outputCount,
-      specimenLinkType.inputGroupId.id,
-      specimenLinkType.outputGroupId.id,
-      specimenLinkType.inputContainerTypeId.map(_.id),
-      specimenLinkType.outputContainerTypeId.map(_.id),
-      specimenLinkType.annotationTypeData)
+    val cmd = UpdateSpecimenLinkTypeCmd(None,
+                                        specimenLinkType.processingTypeId.id,
+                                        specimenLinkType.id.id,
+                                        specimenLinkType.version,
+                                        specimenLinkType.expectedInputChange,
+                                        specimenLinkType.expectedOutputChange,
+                                        specimenLinkType.inputCount,
+                                        specimenLinkType.outputCount,
+                                        specimenLinkType.inputGroupId.id,
+                                        specimenLinkType.outputGroupId.id,
+                                        specimenLinkType.inputContainerTypeId.map(_.id),
+                                        specimenLinkType.outputContainerTypeId.map(_.id),
+                                        specimenLinkType.annotationTypeData)
     ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenLinkTypeUpdatedEvent]].futureValue
   }
 
   private def askRemoveCommand(specimenLinkType: SpecimenLinkType)
     : DomainValidation[SpecimenLinkTypeRemovedEvent] = {
-    val cmd = RemoveSpecimenLinkTypeCmd(
-      specimenLinkType.processingTypeId.id,
-      specimenLinkType.id.id,
-      specimenLinkType.version)
+    val cmd = RemoveSpecimenLinkTypeCmd(None,
+                                        specimenLinkType.processingTypeId.id,
+                                        specimenLinkType.id.id,
+                                        specimenLinkType.version)
     ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenLinkTypeRemovedEvent]].futureValue
   }
 
@@ -274,7 +274,8 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       specimenGroupRepository.put(outputSg)
       specimenLinkTypeRepository.put(slType)
 
-      val cmd = new UpdateSpecimenGroupCmd(inputSg.studyId.id, inputSg.id.id,
+      val cmd = new UpdateSpecimenGroupCmd(
+        None, inputSg.studyId.id, inputSg.id.id,
         inputSg.version, inputSg.name, inputSg.description, inputSg.units,
         inputSg.anatomicalSourceType, inputSg.preservationType, inputSg.preservationTemperatureType,
         inputSg.specimenType)
@@ -282,7 +283,8 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       val v = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupUpdatedEvent]].futureValue
       v mustFail "specimen group is in use by specimen link type"
 
-      val cmd2 = new UpdateSpecimenGroupCmd(outputSg.studyId.id, outputSg.id.id,
+      val cmd2 = new UpdateSpecimenGroupCmd(
+        None, outputSg.studyId.id, outputSg.id.id,
         outputSg.version, outputSg.name, outputSg.description, outputSg.units,
         outputSg.anatomicalSourceType, outputSg.preservationType, outputSg.preservationTemperatureType,
         outputSg.specimenType)
@@ -297,12 +299,12 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       specimenGroupRepository.put(outputSg)
       specimenLinkTypeRepository.put(slType)
 
-      val cmd = new RemoveSpecimenGroupCmd(inputSg.studyId.id, inputSg.id.id, inputSg.version)
+      val cmd = new RemoveSpecimenGroupCmd(None, inputSg.studyId.id, inputSg.id.id, inputSg.version)
 
       val v = ask(studiesProcessor, cmd).mapTo[DomainValidation[SpecimenGroupRemovedEvent]].futureValue
       v mustFail "specimen group is in use by specimen link type"
 
-      val cmd2 = new RemoveSpecimenGroupCmd(outputSg.studyId.id, outputSg.id.id, outputSg.version)
+      val cmd2 = new RemoveSpecimenGroupCmd(None, outputSg.studyId.id, outputSg.id.id, outputSg.version)
 
       val v2 = ask(studiesProcessor, cmd2).mapTo[DomainValidation[SpecimenGroupRemovedEvent]].futureValue
       v2 mustFail "specimen group is in use by specimen link type"
@@ -418,15 +420,15 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
         annotationTypeData = slTypeAnnotationTypeData)
       specimenLinkTypeRepository.put(slType)
 
-      val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
-        studyId         = annotationType.studyId.id,
-        id              = annotationType.id.id,
-        expectedVersion = annotationType.version,
-        name            = annotationType.name,
-        description     = annotationType.description,
-        valueType       = annotationType.valueType,
-        maxValueCount   = annotationType.maxValueCount,
-        options         = annotationType.options)
+      val cmd = UpdateSpecimenLinkAnnotationTypeCmd(None,
+                                                    studyId         = annotationType.studyId.id,
+                                                    id              = annotationType.id.id,
+                                                    expectedVersion = annotationType.version,
+                                                    name            = annotationType.name,
+                                                    description     = annotationType.description,
+                                                    valueType       = annotationType.valueType,
+                                                    maxValueCount   = annotationType.maxValueCount,
+                                                    options         = annotationType.options)
 
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeUpdatedEvent]]
@@ -471,7 +473,7 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       specimenLinkTypeRepository.put(slType)
 
       val cmd = RemoveSpecimenLinkAnnotationTypeCmd(
-        annotationType.studyId.id, annotationType.id.id, annotationType.version)
+        None, annotationType.studyId.id, annotationType.id.id, annotationType.version)
 
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[SpecimenLinkAnnotationTypeRemovedEvent]]

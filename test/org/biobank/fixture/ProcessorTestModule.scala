@@ -16,7 +16,7 @@ import scala.language.postfixOps
 import scaldi.Module
 import scaldi.akka.AkkaInjectable
 
-class TestModule extends Module {
+class ProcessorTestModule extends Module {
 
   bind [ActorSystem] to ActorSystem("bbweb-test", TestDbConfiguration.config())
 

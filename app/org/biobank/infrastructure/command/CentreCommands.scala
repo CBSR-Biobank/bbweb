@@ -16,53 +16,57 @@ object CentreCommands {
 
   trait CentreCommandWithCentreId extends CentreCommand with HasCentreIdentity
 
-  case class AddCentreCmd(
-    name: String,
-    description: Option[String] = None)
+  case class AddCentreCmd(userId:      Option[String],
+                          name:        String,
+                          description: Option[String] = None)
       extends CentreCommand
 
-  case class UpdateCentreCmd(
-    id: String,
-    expectedVersion: Long,
-    name: String,
-    description: Option[String] = None)
+  case class UpdateCentreCmd(userId:          Option[String],
+                             id:              String,
+                             expectedVersion: Long,
+                             name:            String,
+                             description:     Option[String] = None)
       extends CentreModifyCommand
 
-  case class EnableCentreCmd(
-    id: String,
-    expectedVersion: Long)
+  case class EnableCentreCmd(userId:          Option[String],
+                             id:              String,
+                             expectedVersion: Long)
       extends CentreModifyCommand
 
-  case class DisableCentreCmd(
-    id: String,
-    expectedVersion: Long)
+  case class DisableCentreCmd(userId:          Option[String],
+                              id:              String,
+                              expectedVersion: Long)
       extends CentreModifyCommand
 
   // centre location commands
 
   trait CentreLocationCmd extends CentreCommandWithCentreId
 
-  case class AddCentreLocationCmd(
-    centreId: String,
-    name: String,
-    street: String,
-    city: String,
-    province: String,
-    postalCode: String,
-    poBoxNumber: Option[String],
-    countryIsoCode: String)
+  case class AddCentreLocationCmd(userId:         Option[String],
+                                  centreId:       String,
+                                  name:           String,
+                                  street:         String,
+                                  city:           String,
+                                  province:       String,
+                                  postalCode:     String,
+                                  poBoxNumber:    Option[String],
+                                  countryIsoCode: String)
       extends CentreLocationCmd
 
-  case class RemoveCentreLocationCmd(
-    centreId: String,
-    locationId: String)
+  case class RemoveCentreLocationCmd(userId:     Option[String],
+                                     centreId:   String,
+                                     locationId: String)
       extends CentreLocationCmd
 
   trait CentreStudyCmd extends CentreCommandWithCentreId
 
-  case class AddStudyToCentreCmd(centreId: String, studyId: String) extends CentreStudyCmd
+  case class AddStudyToCentreCmd(userId:   Option[String],
+                                 centreId: String,
+                                 studyId:  String) extends CentreStudyCmd
 
-  case class RemoveStudyFromCentreCmd(centreId: String, studyId: String) extends CentreStudyCmd
+  case class RemoveStudyFromCentreCmd(userId:   Option[String],
+                                      centreId: String,
+                                      studyId:  String) extends CentreStudyCmd
 
   implicit val addCentreCmdReads             = Json.reads[AddCentreCmd]
   implicit val updateCentreCmdReads          = Json.reads[UpdateCentreCmd]

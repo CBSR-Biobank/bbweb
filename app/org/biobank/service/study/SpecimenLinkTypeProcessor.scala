@@ -15,7 +15,7 @@ import org.biobank.domain.study.{
   SpecimenGroupRepository
 }
 import org.slf4j.LoggerFactory
-import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
+import org.biobank.service.{ Processor, WrappedEvent }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEventsUtil._
@@ -76,13 +76,9 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
     * back to the user. Each valid command generates one or more events and is journaled.
     */
   val receiveCommand: Receive = {
-    case procCmd: WrappedCommand =>
-      implicit val userId = procCmd.userId
-      procCmd.command match {
-        case cmd: AddSpecimenLinkTypeCmd    => processAddSpecimenLinkTypeCmd(cmd)
-        case cmd: UpdateSpecimenLinkTypeCmd => processUpdateSpecimenLinkTypeCmd(cmd)
-        case cmd: RemoveSpecimenLinkTypeCmd => processRemoveSpecimenLinkTypeCmd(cmd)
-      }
+    case cmd: AddSpecimenLinkTypeCmd    => processAddSpecimenLinkTypeCmd(cmd)
+    case cmd: UpdateSpecimenLinkTypeCmd => processUpdateSpecimenLinkTypeCmd(cmd)
+    case cmd: RemoveSpecimenLinkTypeCmd => processRemoveSpecimenLinkTypeCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(specimenLinkTypeRepository.getValues.toSet))
@@ -107,8 +103,7 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
   }
 
   private def processAddSpecimenLinkTypeCmd
-    (cmd: AddSpecimenLinkTypeCmd)(implicit userId: Option[UserId])
-      : Unit = {
+    (cmd: AddSpecimenLinkTypeCmd): Unit = {
     val timeNow = DateTime.now
     val processingTypeId = ProcessingTypeId(cmd.processingTypeId)
     val id = specimenLinkTypeRepository.nextIdentity
@@ -154,8 +149,7 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
   }
 
   private def processUpdateSpecimenLinkTypeCmd
-    (cmd: UpdateSpecimenLinkTypeCmd)(implicit userId: Option[UserId])
-      : Unit = {
+    (cmd: UpdateSpecimenLinkTypeCmd): Unit = {
     val timeNow = DateTime.now
 
     val v = update(cmd) { slt =>
@@ -204,8 +198,7 @@ class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with A
   }
 
   private def processRemoveSpecimenLinkTypeCmd
-    (cmd: RemoveSpecimenLinkTypeCmd)(implicit userId: Option[UserId])
-      : Unit = {
+    (cmd: RemoveSpecimenLinkTypeCmd): Unit = {
     val v = update(cmd) { slt => slt.success }
 
     val event = v.fold(

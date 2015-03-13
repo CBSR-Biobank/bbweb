@@ -4,7 +4,9 @@ import org.biobank.infrastructure._
 
 object Commands {
 
-  trait Command
+  trait Command {
+    val userId: Option[String]
+  }
 
   trait HasExpectedVersion {
 

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /** A repository that stores [[User]]s. */
 trait UserRepository extends ReadWriteRepository[UserId, User] {
@@ -34,11 +35,35 @@ class UserRepositoryImpl
 
   def allUsers(): Set[User] = getValues.toSet
 
-  def getRegistered(id: UserId) = getByKey(id).mapTo[RegisteredUser]
+  def getRegistered(id: UserId) = {
+    for {
+      user       <- getByKey(id)
+      registered <- user match {
+        case u: RegisteredUser => u.success
+        case _ => DomainError(s"user is not registered: $id").failureNel
+      }
+    } yield registered
+  }
 
-  def getActive(id: UserId) = getByKey(id).mapTo[ActiveUser]
+  def getActive(id: UserId) = {
+    for {
+      user   <- getByKey(id)
+      active <- user match {
+        case u: ActiveUser => u.success
+        case _ => DomainError(s"user is not active: $id").failureNel
+      }
+    } yield active
+  }
 
-  def getLocked(id: UserId) = getByKey(id).mapTo[LockedUser]
+  def getLocked(id: UserId) = {
+    for {
+      user   <- getByKey(id)
+      locked <- user match {
+        case u: LockedUser => u.success
+        case _ => DomainError(s"user is not locked: $id").failureNel
+      }
+    } yield locked
+  }
 
   def getByEmail(email: String): DomainValidation[User] = {
     getValues.find(_.email == email).fold {

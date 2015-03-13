@@ -261,10 +261,6 @@ define([
       return { status: '', data: obj };
     }
 
-    function serverErrReply(message) {
-      return { status: 'error', message: message };
-    }
-
     function registerCommand(user, password) {
       return _.extend(_.pick(user, 'name', 'email', 'avatarUrl'), { password: password || '' });
     }

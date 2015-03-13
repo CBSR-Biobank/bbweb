@@ -1,59 +1,66 @@
 package org.biobank.infrastructure.event;
 
 message UserRegisteredEvent {
-   required string id = 1;
-   optional string name = 2;
-   optional string email = 3;
-   optional string password = 4;
-   optional string salt = 5;
-   optional string avatarUrl = 6;
+   optional string name      = 1;
+   optional string email     = 2;
+   optional string password  = 3;
+   optional string salt      = 4;
+   optional string avatarUrl = 5;
 }
 
 message UserNameUpdatedEvent {
-   required string id = 1;
-   optional int64 version = 2;
-   optional string name = 3;
+   optional int64 version = 1;
+   optional string name   = 2;
 }
 
 message UserEmailUpdatedEvent {
-   required string id = 1;
-   optional int64 version = 2;
-   optional string email = 3;
-}
-
-message UserPasswordUpdatedEvent {
-   required string id = 1;
-   optional int64 version = 2;
-   optional string password = 3;
-   optional string salt = 4;
+   optional int64 version = 1;
+   optional string email  = 2;
 }
 
 message UserAvatarUrlUpdatedEvent {
-   required string id = 1;
-   optional int64 version = 2;
-   optional string avatarUrl = 3;
+   optional int64 version    = 1;
+   optional string avatarUrl = 2;
+}
+
+message UserPasswordUpdatedEvent {
+   optional int64 version   = 1;
+   optional string password = 2;
+   optional string salt     = 3;
 }
 
 message UserPasswordResetEvent {
-   required string id = 1;
-   optional int64 version = 2;
-   optional string password = 3;
-   optional string salt = 4;
+   optional int64  version  = 1;
+   optional string password = 2;
+   optional string salt     = 3;
 }
 
 message UserActivatedEvent {
-   required string id = 1;
-   optional int64 version = 2;
+   optional int64 version = 1;
 }
 
 message UserLockedEvent {
-   required string id = 1;
-   optional int64 version = 2;
+   optional int64 version = 1;
 }
 
 message UserUnlockedEvent {
-   required string id = 1;
-   optional int64 version = 2;
+   optional int64 version = 1;
 }
 
+message UserEvent {
+   required string id     = 1;
+   optional string userId = 2;
+   optional string time   = 3;
 
+   oneof event_type {
+     UserRegisteredEvent       registered       = 4;
+     UserNameUpdatedEvent      nameUpdated      = 5;
+     UserEmailUpdatedEvent     emailUpdated     = 6;
+     UserAvatarUrlUpdatedEvent avatarUrlUpdated = 7;
+     UserPasswordUpdatedEvent  passwordUpdated  = 8;
+     UserPasswordResetEvent    passwordReset    = 9;
+     UserActivatedEvent        activated        = 10;
+     UserLockedEvent           locked           = 11;
+     UserUnlockedEvent         unlocked         = 12;
+   }
+}

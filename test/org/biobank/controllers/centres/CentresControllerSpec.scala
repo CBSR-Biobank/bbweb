@@ -24,6 +24,7 @@ import org.scalatestplus.play._
   */
 class CentresControllerSpec extends ControllerFixture {
   import TestGlobal._
+  import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -614,21 +615,31 @@ class CentresControllerSpec extends ControllerFixture {
     }
 
     "POST /centres/location" must {
+
       "add a location" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
         val location = factory.createLocation
-        val json = makeRequest(POST, uri(centre) + "/locations",
-          json = jsonAddCentreLocationCmd(location, centre.id))
+        val json = makeRequest(POST,
+                               uri(centre) + "/locations",
+                               json = jsonAddCentreLocationCmd(location, centre.id))
 
         val jsonEvent = (json \ "data").as[JsObject]
-        val eventLocationId = (json \ "data" \ "locationId").as[String]
-        val validation = locationRepository.getByKey(LocationId(eventLocationId))
-        validation mustBe ('success)
-        validation map { repoLocation =>
-          repoLocation mustBe a[Location]
-          repoLocation must have (
+        val jsonObj = (json \ "data").as[JsObject]
+
+        (jsonObj \ "name").as[String]           mustBe (location.name)
+        (jsonObj \ "street").as[String]         mustBe (location.street)
+        (jsonObj \ "city").as[String]           mustBe (location.city)
+        (jsonObj \ "province").as[String]       mustBe (location.province)
+        (jsonObj \ "postalCode").as[String]     mustBe (location.postalCode)
+        (jsonObj \ "countryIsoCode").as[String] mustBe (location.countryIsoCode)
+        (jsonObj \ "poBoxNumber").asOpt[String] mustBe (location.poBoxNumber)
+
+        val eventLocationId = (jsonObj \ "id").as[String]
+        locationRepository.getByKey(LocationId(eventLocationId)) mustSucceed { loc =>
+          loc mustBe a[Location]
+          loc must have (
             'name           (location.name),
             'street         (location.street),
             'city           (location.city),
@@ -639,9 +650,7 @@ class CentresControllerSpec extends ControllerFixture {
           )
         }
 
-        val validation2 = centreLocationsRepository.getByKey(LocationId(eventLocationId))
-        validation2 mustBe ('success)
-        validation2 map { item =>
+        centreLocationsRepository.getByKey(LocationId(eventLocationId)) mustSucceed { item =>
           item mustBe a[CentreLocation]
           item must have (
             'locationId (LocationId(eventLocationId)),
@@ -778,8 +787,9 @@ class CentresControllerSpec extends ControllerFixture {
           "centreId" -> centre.id.id,
           "studyId"  -> study.id.id)
         val json = makeRequest(POST, uri(centre) + s"/studies/${study.id.id}", json = cmdJson)
-          (json \ "data" \ "centreId").as[String] mustBe (centre.id.id)
-          (json \ "data" \ "studyId").as[String] mustBe (study.id.id)
+        (json \ "data" \ "id").as[String] mustBe (study.id.id)
+
+        compareObj((json \ "data").as[JsObject], study)
 
         val repoValues = centreStudiesRepository.getValues.toList
         repoValues must have size 1

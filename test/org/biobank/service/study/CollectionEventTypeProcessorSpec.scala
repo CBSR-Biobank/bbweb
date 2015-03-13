@@ -27,9 +27,9 @@ import scalaz._
 import scalaz.Scalaz._
 
 /**
-  * Tests for actor CollectionEventTypeProcessor. These are written using ScalaTest.
-  *
-  */
+ * Tests for actor CollectionEventTypeProcessor. These are written using ScalaTest.
+ *
+ */
 class CollectionEventTypeProcessorSpec extends TestFixture {
   import org.biobank.TestUtils._
 
@@ -58,36 +58,36 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
 
   private def askAddCommand(ceventType: CollectionEventType)
       : DomainValidation[CollectionEventTypeAddedEvent] = {
-    val cmd = AddCollectionEventTypeCmd(
-      ceventType.studyId.id,
-      ceventType.name,
-      ceventType.description,
-      ceventType.recurring,
-      ceventType.specimenGroupData,
-      ceventType.annotationTypeData)
+    val cmd = AddCollectionEventTypeCmd(None,
+                                        ceventType.studyId.id,
+                                        ceventType.name,
+                                        ceventType.description,
+                                        ceventType.recurring,
+                                        ceventType.specimenGroupData,
+                                        ceventType.annotationTypeData)
     ask(studiesProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeAddedEvent]].futureValue
   }
 
   private def askUpdateCommand(ceventType: CollectionEventType)
       : DomainValidation[CollectionEventTypeUpdatedEvent] = {
-    val cmd = UpdateCollectionEventTypeCmd(
-      ceventType.studyId.id,
-      ceventType.id.id,
-      ceventType.version,
-      ceventType.name,
-      ceventType.description,
-      ceventType.recurring,
-      ceventType.specimenGroupData,
-      ceventType.annotationTypeData)
+    val cmd = UpdateCollectionEventTypeCmd(None,
+                                           ceventType.studyId.id,
+                                           ceventType.id.id,
+                                           ceventType.version,
+                                           ceventType.name,
+                                           ceventType.description,
+                                           ceventType.recurring,
+                                           ceventType.specimenGroupData,
+                                           ceventType.annotationTypeData)
     ask(studiesProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]].futureValue
   }
 
   private def askRemoveCommand(ceventType: CollectionEventType)
       : DomainValidation[CollectionEventTypeRemovedEvent] = {
-    val cmd = RemoveCollectionEventTypeCmd(
-      ceventType.studyId.id,
-      ceventType.id.id,
-      ceventType.version)
+    val cmd = RemoveCollectionEventTypeCmd(None,
+                                           ceventType.studyId.id,
+                                           ceventType.id.id,
+                                           ceventType.version)
     ask(studiesProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeRemovedEvent]].futureValue
   }
 
@@ -271,12 +271,12 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
         specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData))
       collectionEventTypeRepository.put(cet)
 
-      val cmd = new UpdateSpecimenGroupCmd(sg.studyId.id, sg.id.id,
-        sg.version, sg.name, sg.description, sg.units, sg.anatomicalSourceType,
-        sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
+      val cmd = new UpdateSpecimenGroupCmd(None, sg.studyId.id, sg.id.id,
+                                           sg.version, sg.name, sg.description, sg.units, sg.anatomicalSourceType,
+                                           sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
-        .futureValue
+      .mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+      .futureValue
       v mustFail "specimen group is in use by collection event type"
     }
 
@@ -309,10 +309,10 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
         specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData))
       collectionEventTypeRepository.put(cet)
 
-      val cmd = new RemoveSpecimenGroupCmd(sg.studyId.id, sg.id.id, sg.version)
+      val cmd = new RemoveSpecimenGroupCmd(None, sg.studyId.id, sg.id.id, sg.version)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
-        .futureValue
+      .mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
+      .futureValue
       v mustFail "specimen group is in use by collection event type"
     }
 
@@ -374,17 +374,18 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       collectionEventTypeRepository.put(cet)
 
       val cmd = UpdateCollectionEventAnnotationTypeCmd(
+        userId           = None,
         studyId          = annotationType.studyId.id,
         id               = annotationType.id.id,
-        expectedVersion = annotationType.version,
+        expectedVersion  = annotationType.version,
         name             = annotationType.name,
         description      = annotationType.description,
         valueType        = annotationType.valueType,
         maxValueCount    = annotationType.maxValueCount,
         options          = annotationType.options)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
-        .futureValue
+      .mapTo[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
+      .futureValue
 
       v mustFail "annotation type is in use by collection event type"
     }
@@ -418,10 +419,10 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       collectionEventTypeRepository.put(cet)
 
       val cmd = RemoveCollectionEventAnnotationTypeCmd(
-        annotationType.studyId.id, annotationType.id.id, annotationType.version)
+        None, annotationType.studyId.id, annotationType.id.id, annotationType.version)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
-        .futureValue
+      .mapTo[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
+      .futureValue
 
       v mustFail "annotation type is in use by collection event type"
     }

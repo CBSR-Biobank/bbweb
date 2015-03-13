@@ -24,12 +24,12 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
     jsonList must have length 0
   }
 
-  def singleItemResult(uri: String,
+  def singleItemResult(uri:         String,
                        queryParams: Map[String, String] =  Map.empty,
-                       total: Long = 1,
-                       offset: Long = 0,
-                       maybeNext: Option[Int] = None,
-                       maybePrev: Option[Int] = None)
+                       total:       Long = 1,
+                       offset:      Long = 0,
+                       maybeNext:   Option[Int] = None,
+                       maybePrev:   Option[Int] = None)
       : JsObject = {
     val json = fakeApp.makeRequest(GET, uriWithParams(uri, queryParams))
     (json \ "status").as[String] must include ("success")
@@ -43,12 +43,12 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
     jsonList(0)
   }
 
-  def multipleItemsResult(uri: String,
+  def multipleItemsResult(uri:         String,
                           queryParams: Map[String, String] =  Map.empty,
-                          offset: Long,
-                          total: Long,
-                          maybeNext: Option[Int],
-                          maybePrev: Option[Int])
+                          offset:      Long,
+                          total:       Long,
+                          maybeNext:   Option[Int],
+                          maybePrev:   Option[Int])
       : List[JsObject] = {
     val json = fakeApp.makeRequest(GET, uriWithParams(uri, queryParams))
     (json \ "status").as[String] must include ("success")

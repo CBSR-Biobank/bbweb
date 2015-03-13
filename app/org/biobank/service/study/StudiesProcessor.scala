@@ -1,6 +1,6 @@
 package org.biobank.service.study
 
-import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
+import org.biobank.service.{ Processor, WrappedEvent }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{ DomainValidation, DomainError }
@@ -19,12 +19,12 @@ import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 /**
-  * The StudiesProcessor is responsible for maintaining state changes for all
-  * [[org.biobank.domain.study.Study]] aggregates. This particular processor uses Akka-Persistence's
-  * [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist the generated
-  * events, afterwhich it will updated the current state of the [[org.biobank.domain.study.Study]] being
-  * processed.
-  */
+ * The StudiesProcessor is responsible for maintaining state changes for all
+ * [[org.biobank.domain.study.Study]] aggregates. This particular processor uses Akka-Persistence's
+ * [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist the generated
+ * events, afterwhich it will updated the current state of the [[org.biobank.domain.study.Study]] being
+ * processed.
+ */
 class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
 
   override def persistenceId = "study-processor-id"
@@ -61,9 +61,9 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     injectActorRef [SpecimenLinkAnnotationTypeProcessor] ("specimenLinkAnnotationType")
 
   /**
-    * These are the events that are recovered during journal recovery. They cannot fail and must be
-    * processed to recreate the current state of the aggregate.
-    */
+   * These are the events that are recovered during journal recovery. They cannot fail and must be
+   * processed to recreate the current state of the aggregate.
+   */
   val receiveRecover: Receive = {
     case wevent: WrappedEvent[_] =>
       wevent.event match {
@@ -82,50 +82,40 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
   }
 
   /**
-    * These are the commands that are requested. A command can fail, and will send the failure as a response
-    * back to the user. Each valid command generates one or more events and is journaled.
-    *
-    * Some commands are forwared to child actors for processing. The child actors are:
-    *
-    *  - [[CeventAnnotationTypeProcessor]]
-    *  - [[CollectionEventTypeProcessor]]
-    *  - [[ParticipantAnnotationTypeProcessor]]
-    *  - [[ProcessingTypeProcessor]]
-    *  - [[SpecimenGroupProcessor]]
-    *  - [[SpecimenLinkAnnotationTypeProcessor]]
-    *  - [[SpecimenLinkTypeProcessor]]
-    *  - [[StudiesProcessor]]
-    *  - [[StudyAnnotationTypeProcessor]]
-    */
+   * These are the commands that are requested. A command can fail, and will send the failure as a response
+   * back to the user. Each valid command generates one or more events and is journaled.
+   *
+   * Some commands are forwared to child actors for processing. The child actors are:
+   *
+   *  - [[CeventAnnotationTypeProcessor]]
+   *  - [[CollectionEventTypeProcessor]]
+   *  - [[ParticipantAnnotationTypeProcessor]]
+   *  - [[ProcessingTypeProcessor]]
+   *  - [[SpecimenGroupProcessor]]
+   *  - [[SpecimenLinkAnnotationTypeProcessor]]
+   *  - [[SpecimenLinkTypeProcessor]]
+   *  - [[StudiesProcessor]]
+   *  - [[StudyAnnotationTypeProcessor]]
+   */
   val receiveCommand: Receive = {
-    case procCmd: WrappedCommand =>
-      implicit val userId = procCmd.userId
-
-      // order is important in the pattern match used below
-      procCmd.command match {
-        case _: StudyCommandWithStudyId
-           | _: SpecimenLinkTypeCommand => validateAndForward(procCmd)
-
-        case cmd: AddStudyCmd      => processAddStudyCmd(cmd)
-        case cmd: UpdateStudyCmd   => processUpdateStudyCmd(cmd)
-        case cmd: EnableStudyCmd   => processEnableStudyCmd(cmd)
-        case cmd: DisableStudyCmd  => processDisableStudyCmd(cmd)
-        case cmd: RetireStudyCmd   => processRetireStudyCmd(cmd)
-        case cmd: UnretireStudyCmd => processUnretireStudyCmd(cmd)
-
-        case cmd => log.error(s"invalid wrapped command: $cmd")
-      }
+    case cmd: StudyCommandWithStudyId => validateAndForward(cmd)
+    case cmd: SpecimenLinkTypeCommand => validateAndForward(cmd)
+    case cmd: AddStudyCmd             => processAddStudyCmd(cmd)
+    case cmd: UpdateStudyCmd          => processUpdateStudyCmd(cmd)
+    case cmd: EnableStudyCmd          => processEnableStudyCmd(cmd)
+    case cmd: DisableStudyCmd         => processDisableStudyCmd(cmd)
+    case cmd: RetireStudyCmd          => processRetireStudyCmd(cmd)
+    case cmd: UnretireStudyCmd        => processUnretireStudyCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(studyRepository.getValues.toSet))
       stash()
 
     case cmd => log.error(s"StudiesProcessor: message not handled: $cmd")
-
   }
 
-  private def validateAndForward(procCmd: WrappedCommand) = {
-    procCmd.command match {
+  private def validateAndForward(cmd: StudyCommand) = {
+    cmd match {
       case cmd: StudyCommandWithStudyId =>
         studyRepository.getByKey(StudyId(cmd.studyId)).fold(
           err => context.sender ! DomainError(s"invalid study id: ${cmd.studyId}").failureNel,
@@ -138,19 +128,19 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
                 case _: SpecimenLinkTypeCommand              => specimenLinkTypeProcessor
 
                 case _: AddCollectionEventAnnotationTypeCmd
-                   | _: UpdateCollectionEventAnnotationTypeCmd
-                   | _: RemoveCollectionEventAnnotationTypeCmd => ceventAnnotationTypeProcessor
+                  | _: UpdateCollectionEventAnnotationTypeCmd
+                  | _: RemoveCollectionEventAnnotationTypeCmd => ceventAnnotationTypeProcessor
 
                 case _: AddParticipantAnnotationTypeCmd
-                   | _: UpdateParticipantAnnotationTypeCmd
-                   | _: RemoveParticipantAnnotationTypeCmd => participantAnnotationTypeProcessor
+                  | _: UpdateParticipantAnnotationTypeCmd
+                  | _: RemoveParticipantAnnotationTypeCmd => participantAnnotationTypeProcessor
 
                 case _: AddSpecimenLinkAnnotationTypeCmd
-                   | _: UpdateSpecimenLinkAnnotationTypeCmd
-                   | _: RemoveSpecimenLinkAnnotationTypeCmd => specimenLinkAnnotationTypeProcessor
+                  | _: UpdateSpecimenLinkAnnotationTypeCmd
+                  | _: RemoveSpecimenLinkAnnotationTypeCmd => specimenLinkAnnotationTypeProcessor
 
               }
-              childActor forward procCmd
+              childActor forward cmd
             }
             case study => context.sender ! DomainError(s"$study for $cmd is not disabled").failureNel
           }
@@ -165,7 +155,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
         validation.fold(
           err => context.sender ! err.failure,
           study => study match {
-            case study: DisabledStudy => specimenLinkTypeProcessor forward procCmd
+            case study: DisabledStudy => specimenLinkTypeProcessor forward cmd
             case study => context.sender ! s"$study for $cmd is not disabled".failureNel
           }
         )
@@ -187,7 +177,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
   def updateDisabled[T <: Study]
     (cmd: StudyModifyCommand)
-    (fn: DisabledStudy => DomainValidation[T])
+                    (fn: DisabledStudy => DomainValidation[T])
       : DomainValidation[T] = {
     updateStudy(cmd) {
       case study: DisabledStudy => fn(study)
@@ -197,7 +187,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
   def updateEnabled[T <: Study]
     (cmd: StudyModifyCommand)
-    (fn: EnabledStudy => DomainValidation[T])
+                   (fn: EnabledStudy => DomainValidation[T])
       : DomainValidation[T] = {
     updateStudy(cmd) {
       case study: EnabledStudy => fn(study)
@@ -207,7 +197,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
   def updateRetired[T <: Study]
     (cmd: StudyModifyCommand)
-    (fn: RetiredStudy => DomainValidation[T])
+                   (fn: RetiredStudy => DomainValidation[T])
       : DomainValidation[T] = {
     updateStudy(cmd) {
       case study: RetiredStudy => fn(study)
@@ -215,7 +205,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     }
   }
 
-  private def processAddStudyCmd(cmd: AddStudyCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processAddStudyCmd(cmd: AddStudyCmd): Unit = {
     val studyId = studyRepository.nextIdentity
 
     if (studyRepository.getByKey(studyId).isSuccess) {
@@ -237,7 +227,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     }
   }
 
-  private def processUpdateStudyCmd(cmd: UpdateStudyCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processUpdateStudyCmd(cmd: UpdateStudyCmd): Unit = {
     val v = updateDisabled(cmd) { s =>
       for {
         nameAvailable <- nameAvailable(cmd.name, StudyId(cmd.id))
@@ -258,7 +248,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     }
   }
 
-  private def processEnableStudyCmd(cmd: EnableStudyCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processEnableStudyCmd(cmd: EnableStudyCmd): Unit = {
     val studyId = StudyId(cmd.id)
     val specimenGroupCount = specimenGroupRepository.allForStudy(studyId).size
     val collectionEventtypeCount = collectionEventTypeRepository.allForStudy(studyId).size
@@ -272,7 +262,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     }
   }
 
-  private def processDisableStudyCmd(cmd: DisableStudyCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processDisableStudyCmd(cmd: DisableStudyCmd): Unit = {
     val v = updateEnabled(cmd) { s => s.disable }
     val event = v.fold(
       err => err.failure,
@@ -283,7 +273,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     }
   }
 
-  private def processRetireStudyCmd(cmd: RetireStudyCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processRetireStudyCmd(cmd: RetireStudyCmd): Unit = {
     val v = updateDisabled(cmd) { s => s.retire }
     val event = v.fold(
       err => err.failure,
@@ -294,7 +284,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     }
   }
 
-  private def processUnretireStudyCmd(cmd: UnretireStudyCmd)(implicit userId: Option[UserId]): Unit = {
+  private def processUnretireStudyCmd(cmd: UnretireStudyCmd): Unit = {
     val v = updateRetired(cmd) { s => s.unretire }
     val event = v.fold(
       err => err.failure,
@@ -307,12 +297,12 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
 
   private def recoverStudyAddedEvent(event: StudyAddedEvent, userId: Option[UserId], dateTime: DateTime) {
     studyRepository.put(DisabledStudy(
-      id           = StudyId(event.id),
-      version      = 0L,
-      timeAdded    = dateTime,
-      timeModified = None,
-      name         = event.getName,
-      description  = event.description))
+                          id           = StudyId(event.id),
+                          version      = 0L,
+                          timeAdded    = dateTime,
+                          timeModified = None,
+                          name         = event.getName,
+                          description  = event.description))
     ()
   }
 
@@ -321,10 +311,10 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
       err => log.error(s"updating study from event failed: $err"),
       s => {
         studyRepository.put(s.copy(
-          version      = event.getVersion,
-          name         = event.getName,
-          description  = event.description,
-          timeModified = Some(dateTime)))
+                              version      = event.getVersion,
+                              name         = event.getName,
+                              description  = event.description,
+                              timeModified = Some(dateTime)))
         ()
       }
     )
@@ -335,12 +325,12 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
       err => log.error(s"enabling study from event failed: $err"),
       s => {
         studyRepository.put(EnabledStudy(
-          id           = s.id,
-          version      = event.getVersion,
-          timeAdded    = s.timeAdded,
-          timeModified = Some(dateTime),
-          name         = s.name,
-          description  = s.description))
+                              id           = s.id,
+                              version      = event.getVersion,
+                              timeAdded    = s.timeAdded,
+                              timeModified = Some(dateTime),
+                              name         = s.name,
+                              description  = s.description))
         ()
       }
     )
@@ -351,12 +341,12 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
       err => log.error(s"disabling study from event failed: $err"),
       s => {
         studyRepository.put(DisabledStudy(
-          id           = s.id,
-          version      = event.getVersion,
-          timeAdded    = s.timeAdded,
-          timeModified = Some(dateTime),
-          name         = s.name,
-          description  = s.description))
+                              id           = s.id,
+                              version      = event.getVersion,
+                              timeAdded    = s.timeAdded,
+                              timeModified = Some(dateTime),
+                              name         = s.name,
+                              description  = s.description))
         ()
       }
     )
@@ -367,12 +357,12 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
       err => log.error(s"retiring study from event failed: $err"),
       s => {
         studyRepository.put(RetiredStudy(
-          id           = s.id,
-          version      = event.getVersion,
-          timeAdded    = s.timeAdded,
-          timeModified = Some(dateTime),
-          name         = s.name,
-          description  = s.description))
+                              id           = s.id,
+                              version      = event.getVersion,
+                              timeAdded    = s.timeAdded,
+                              timeModified = Some(dateTime),
+                              name         = s.name,
+                              description  = s.description))
         ()
       }
     )
@@ -383,12 +373,12 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
       err => log.error(s"disabling study from event failed: $err"),
       s => {
         studyRepository.put(DisabledStudy(
-          id           = s.id,
-          version      = event.getVersion,
-          timeAdded    = s.timeAdded,
-          timeModified = Some(dateTime),
-          name         = s.name,
-          description  = s.description))
+                              id           = s.id,
+                              version      = event.getVersion,
+                              timeAdded    = s.timeAdded,
+                              timeModified = Some(dateTime),
+                              name         = s.name,
+                              description  = s.description))
         ()
       }
     )

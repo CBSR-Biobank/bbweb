@@ -23,6 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.FakeHeaders
 import play.api.test.Helpers._
 import scaldi.Module
+import akka.actor.ActorSystem
 
 trait BbwebFakeApplication {
 
@@ -56,7 +57,13 @@ abstract class ControllerFixture
     */
   object TestGlobal extends org.biobank.Global {
 
-    override val applicationModule = new TestModule ++ new WebModule ++ new UserModule
+    class TestModule extends Module {
+
+      bind [ActorSystem] to ActorSystem("bbweb-test", TestDbConfiguration.config())
+
+    }
+
+    override def applicationModule = new TestModule :: new WebModule :: new UserModule
 
     def passwordHasher = inject [PasswordHasher]
 

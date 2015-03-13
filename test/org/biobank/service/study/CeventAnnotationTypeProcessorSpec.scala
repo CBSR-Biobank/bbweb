@@ -6,6 +6,7 @@ import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 
+import akka.pattern._
 import org.slf4j.LoggerFactory
 import org.scalatest.Tag
 import org.joda.time.DateTime
@@ -44,7 +45,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
       val annotType = factory.createCollectionEventAnnotationType
 
       val cmd = AddCollectionEventAnnotationTypeCmd(
-        annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
+        None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[CollectionEventAnnotationTypeAddedEvent]]
@@ -79,7 +80,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
       val annotType = factory.createCollectionEventAnnotationType
 
       val cmd = AddCollectionEventAnnotationTypeCmd(
-        annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
+        None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
 
       val v = ask(studiesProcessor, cmd)
@@ -93,7 +94,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
       collectionEventAnnotationTypeRepository.put(annotType)
 
       val cmd = AddCollectionEventAnnotationTypeCmd(
-        annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
+        None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[CollectionEventAnnotationTypeAddedEvent]]
@@ -108,7 +109,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
       val annotType2 = factory.createCollectionEventAnnotationType
 
       val cmd = UpdateCollectionEventAnnotationTypeCmd(
-        annotType.studyId.id, annotType.id.id, annotType.version, annotType2.name,
+        None, annotType.studyId.id, annotType.id.id, annotType.version, annotType2.name,
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
       val v = ask(studiesProcessor, cmd)
           .mapTo[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
@@ -149,7 +150,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
       val dupliacteName = annotType.name
 
       val cmd = UpdateCollectionEventAnnotationTypeCmd(
-        annotType2.studyId.id, annotType2.id.id, annotType2.version, dupliacteName,
+        None, annotType2.studyId.id, annotType2.id.id, annotType2.version, dupliacteName,
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
 
       val v = ask(studiesProcessor, cmd)
@@ -166,7 +167,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
       studyRepository.put(study2)
 
       val cmd = UpdateCollectionEventAnnotationTypeCmd(
-        study2.id.id, annotType.id.id, annotType.version, annotType.name,
+        None, study2.id.id, annotType.id.id, annotType.version, annotType.name,
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
 
       val v = ask(studiesProcessor, cmd)
@@ -180,7 +181,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
       collectionEventAnnotationTypeRepository.put(annotType)
 
       val cmd = UpdateCollectionEventAnnotationTypeCmd(
-        annotType.studyId.id, annotType.id.id, annotType.version - 1, annotType.name,
+        None, annotType.studyId.id, annotType.id.id, annotType.version - 1, annotType.name,
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
@@ -194,7 +195,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
       collectionEventAnnotationTypeRepository.put(annotType)
 
       val cmd = RemoveCollectionEventAnnotationTypeCmd(
-        annotType.studyId.id, annotType.id.id, annotType.version)
+        None, annotType.studyId.id, annotType.id.id, annotType.version)
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
         .futureValue
@@ -211,7 +212,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
       collectionEventAnnotationTypeRepository.put(annotType)
 
       val cmd = RemoveCollectionEventAnnotationTypeCmd(
-        annotType.studyId.id, annotType.id.id, annotType.version - 1)
+        None, annotType.studyId.id, annotType.id.id, annotType.version - 1)
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
         .futureValue

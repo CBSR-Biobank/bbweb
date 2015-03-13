@@ -81,8 +81,8 @@ class SpecimenGroupController(implicit inj: Injector)
 
   def removeSpecimenGroup(studyId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveSpecimenGroupCmd(studyId, id, ver)
-      val future = studiesService.removeSpecimenGroup(cmd)(userId)
+      val cmd = RemoveSpecimenGroupCmd(Some(userId.id), studyId, id, ver)
+      val future = studiesService.removeSpecimenGroup(cmd)
       domainValidationReply(future)
     }
 

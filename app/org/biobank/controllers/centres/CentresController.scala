@@ -6,7 +6,6 @@ import org.biobank.service._
 import org.biobank.service.users.UsersService
 import org.biobank.service.centre.CentresService
 import org.biobank.infrastructure.command.CentreCommands._
-import org.biobank.infrastructure.event.CentreEventsJson
 import org.biobank.domain.centre.Centre
 
 import play.api.Play.current
@@ -31,8 +30,7 @@ import scalaz.Validation.FlatMap._
 class CentresController(implicit inj: Injector)
     extends CommandController
     with JsonController
-    with Injectable
-    with CentreEventsJson {
+    with Injectable {
 
   implicit override val authToken = inject [AuthToken]
 
@@ -119,7 +117,8 @@ class CentresController(implicit inj: Injector)
 
   def removeLocation(centreId: String, id: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val future = centresService.removeCentreLocation(RemoveCentreLocationCmd(centreId, id))(userId)
+      val future = centresService.removeCentreLocation(
+        RemoveCentreLocationCmd(Some(userId.id), centreId, id))
       domainValidationReply(future)
     }
 
@@ -143,7 +142,8 @@ class CentresController(implicit inj: Injector)
   def removeStudy(centreId: String, studyId: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       Logger.debug(s"removeStudy: $centreId, $studyId")
-      val future = centresService.removeStudyFromCentre(RemoveStudyFromCentreCmd(centreId, studyId))(userId)
+      val future = centresService.removeStudyFromCentre(
+        RemoveStudyFromCentreCmd(Some(userId.id), centreId, studyId))
       domainValidationReply(future)
     }
 

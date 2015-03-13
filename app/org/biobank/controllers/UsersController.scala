@@ -2,7 +2,6 @@ package org.biobank.controllers
 
 import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
-import org.biobank.infrastructure.event.UserEventsJson
 import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
@@ -27,8 +26,7 @@ import scalaz.Validation.FlatMap._
 class UsersController(implicit inj: Injector)
     extends CommandController
     with JsonController
-    with Injectable
-    with UserEventsJson {
+    with Injectable {
 
   implicit override val authToken = inject [AuthToken]
 
@@ -139,14 +137,13 @@ class UsersController(implicit inj: Injector)
       Ok(usersService.getCountsByStatus)
     }
 
-  def list(
-    nameFilter: String,
-    emailFilter: String ,
-    status: String,
-    sort: String,
-    page: Int,
-    pageSize: Int,
-    order: String) =
+  def list(nameFilter:  String,
+           emailFilter: String ,
+           status:      String,
+           sort:        String,
+           page:        Int,
+           pageSize:    Int,
+           order:       String) =
     AuthAction(parse.empty) { (token, userId, request) =>
       Logger.debug(s"UsersController:list: nameFilter/$nameFilter, emailFilter/$emailFilter, status/$status, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
 

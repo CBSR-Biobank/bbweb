@@ -1,6 +1,6 @@
 package org.biobank.service.study
 
-import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
+import org.biobank.service.{ Processor, WrappedEvent }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{ AnnotationTypeId, AnnotationOption, DomainValidation, DomainError }
@@ -62,16 +62,8 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
     * back to the user. Each valid command generates one or more events and is journaled.
     */
   val receiveCommand: Receive = {
-    case procCmd: WrappedCommand =>
-      implicit val userId = procCmd.userId
-
-      // order is important in the pattern match used below
-      procCmd.command match {
-        case cmd: AddParticipantCmd    => processAddParticipantCmd(cmd)
-        case cmd: UpdateParticipantCmd => processUpdateParticipantCmd(cmd)
-
-        case cmd => log.error(s"invalid wrapped command: $cmd")
-      }
+    case cmd: AddParticipantCmd    => processAddParticipantCmd(cmd)
+    case cmd: UpdateParticipantCmd => processUpdateParticipantCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(participantRepository.getValues.toSet))
@@ -156,8 +148,7 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
     }
   }
 
-  private def processAddParticipantCmd(cmd: AddParticipantCmd)(implicit userId: Option[UserId])
-      : Unit = {
+  private def processAddParticipantCmd(cmd: AddParticipantCmd): Unit = {
     val studyId = StudyId(cmd.studyId)
     val participantId = participantRepository.nextIdentity
 
@@ -183,8 +174,7 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
     }
   }
 
-  private def processUpdateParticipantCmd(cmd: UpdateParticipantCmd)(implicit userId: Option[UserId])
-      : Unit = {
+  private def processUpdateParticipantCmd(cmd: UpdateParticipantCmd): Unit = {
     val studyId = StudyId(cmd.studyId)
     val participantId = ParticipantId(cmd.id)
 

@@ -8,7 +8,7 @@ Google [protobuf](https://github.com/google/protobuf/) is used to save events to
 journal. By using protobuf it is easier to modify the events as the system grows. If an event is changed an
 old database can still be used with the application.
 
-On Ubuntu you must install package `protobuf-compiler`.
+See the installation page for instructions on how to install on your computer.
 
 #### ScalaPB
 

@@ -20,10 +20,9 @@ trait Processor extends PersistentActor with ActorLogging {
     *
     * @see http://helenaedelson.com/?p=879
     */
-  protected def process[T <: GeneratedMessage]
+  protected def processNew[T <: GeneratedMessage]
     (validation: DomainValidation[T])
-    (successFn: WrappedEvent[T] => Unit)
-    (implicit userId: Option[UserId]) {
+    (successFn: T => Unit) {
     val originalSender = context.sender
     validation.fold(
       err => {
@@ -31,12 +30,37 @@ trait Processor extends PersistentActor with ActorLogging {
         originalSender ! validation
       },
       event => {
-        val wrappedEvent = WrappedEvent(event, userId, DateTime.now)
         // FIXME: change this call to a peristAsync()?
-        persist(wrappedEvent) { we =>
-          successFn(we)
+        persist(event) { ev =>
+          successFn(ev)
           // inform the sender of the successful event resulting from a valid command
-          originalSender ! we.event.success
+          originalSender ! ev.success
+        }
+      }
+    )
+  }
+
+  /** Persists the event passed in the validation if it is successful. In either case
+    * the sender is sent either the success or failure validation.
+    *
+    * @see http://helenaedelson.com/?p=879
+    */
+  protected def process[T <: GeneratedMessage]
+    (validation: DomainValidation[T])
+    (successFn: WrappedEvent[T] => Unit) {
+    val originalSender = context.sender
+    validation.fold(
+      err => {
+        // inform the sender of the failure
+        originalSender ! validation
+      },
+      event => {
+        val wrappedEvent = WrappedEvent(event, None, DateTime.now)
+        // FIXME: change this call to a peristAsync()?
+        persist(wrappedEvent) { wrapper =>
+          successFn(wrapper)
+          // inform the sender of the successful event resulting from a valid command
+          originalSender ! wrapper.event.success
         }
       }
     )

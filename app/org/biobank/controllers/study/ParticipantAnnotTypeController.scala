@@ -77,8 +77,8 @@ class ParticipantAnnotTypeController(implicit inj: Injector)
 
   def removeAnnotationType(studyId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveParticipantAnnotationTypeCmd(studyId, id, ver)
-      val future = studiesService.removeParticipantAnnotationType(cmd)(userId)
+      val cmd = RemoveParticipantAnnotationTypeCmd(Some(userId.id), studyId, id, ver)
+      val future = studiesService.removeParticipantAnnotationType(cmd)
       domainValidationReply(future)
   }
 

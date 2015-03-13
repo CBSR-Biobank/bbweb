@@ -33,11 +33,13 @@ object StudyCommands {
       with HasExpectedVersion
 
   case class AddStudyCmd(
+    userId:    Option[String],
     name: String,
     description: Option[String] = None)
       extends StudyCommand
 
   case class UpdateStudyCmd(
+    userId:    Option[String],
     id:              String,
     expectedVersion: Long,
     name:            String,
@@ -45,21 +47,25 @@ object StudyCommands {
       extends StudyModifyCommand
 
   case class EnableStudyCmd(
+    userId:    Option[String],
     id:              String,
     expectedVersion: Long)
       extends StudyModifyCommand
 
   case class DisableStudyCmd(
+    userId:    Option[String],
     id:              String,
     expectedVersion: Long)
       extends StudyModifyCommand
 
   case class RetireStudyCmd(
+    userId:    Option[String],
     id: String,
     expectedVersion: Long)
       extends StudyModifyCommand
 
   case class UnretireStudyCmd(
+    userId:    Option[String],
     id: String,
     expectedVersion: Long)
       extends StudyModifyCommand
@@ -74,6 +80,7 @@ object StudyCommands {
       with HasExpectedVersion
 
   case class AddSpecimenGroupCmd(
+    userId:    Option[String],
     studyId:                     String,
     name:                        String,
     description:                 Option[String],
@@ -85,6 +92,7 @@ object StudyCommands {
       extends SpecimenGroupCommand
 
   case class UpdateSpecimenGroupCmd(
+    userId:    Option[String],
     studyId:                     String,
     id:                          String,
     expectedVersion:             Long,
@@ -98,6 +106,7 @@ object StudyCommands {
       extends SpecimenGroupModifyCommand
 
   case class RemoveSpecimenGroupCmd(
+    userId:    Option[String],
     studyId: String,
     id: String,
     expectedVersion: Long)
@@ -112,6 +121,7 @@ object StudyCommands {
       with HasExpectedVersion
 
   case class AddCollectionEventTypeCmd(
+    userId:    Option[String],
     studyId:            String,
     name:               String,
     description:        Option[String],
@@ -121,6 +131,7 @@ object StudyCommands {
       extends CollectionEventTypeCommand
 
   case class UpdateCollectionEventTypeCmd(
+    userId:    Option[String],
     studyId:            String,
     id:                 String,
     expectedVersion:    Long,
@@ -132,6 +143,7 @@ object StudyCommands {
       extends CollectionEventTypeModifyCommand
 
   case class RemoveCollectionEventTypeCmd(
+    userId:    Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long)
@@ -147,6 +159,7 @@ object StudyCommands {
 
   // collection event annotation type commands
   case class AddCollectionEventAnnotationTypeCmd(
+    userId:    Option[String],
     studyId:       String,
     name:          String,
     description:   Option[String],
@@ -156,6 +169,7 @@ object StudyCommands {
       extends StudyAnnotationTypeCommand
 
   case class UpdateCollectionEventAnnotationTypeCmd(
+    userId:    Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long,
@@ -167,6 +181,7 @@ object StudyCommands {
       extends StudyAnnotationTypeModifyCommand
 
   case class RemoveCollectionEventAnnotationTypeCmd(
+    userId:    Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long)
@@ -174,6 +189,7 @@ object StudyCommands {
 
   // participant annotation type
   case class AddParticipantAnnotationTypeCmd(
+    userId:    Option[String],
     studyId:       String,
     name:          String,
     description:   Option[String],
@@ -184,6 +200,7 @@ object StudyCommands {
       extends StudyAnnotationTypeCommand
 
   case class UpdateParticipantAnnotationTypeCmd(
+    userId:    Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long,
@@ -196,6 +213,7 @@ object StudyCommands {
       extends StudyAnnotationTypeModifyCommand
 
   case class RemoveParticipantAnnotationTypeCmd(
+    userId:    Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long)
@@ -203,6 +221,7 @@ object StudyCommands {
 
   // specimen link annotation type
   case class AddSpecimenLinkAnnotationTypeCmd(
+    userId:    Option[String],
     studyId:       String,
     name:          String,
     description:   Option[String],
@@ -212,6 +231,7 @@ object StudyCommands {
       extends StudyAnnotationTypeCommand
 
   case class UpdateSpecimenLinkAnnotationTypeCmd(
+    userId:    Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long,
@@ -223,6 +243,7 @@ object StudyCommands {
       extends StudyAnnotationTypeModifyCommand
 
   case class RemoveSpecimenLinkAnnotationTypeCmd(
+    userId:    Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long)
@@ -237,6 +258,7 @@ object StudyCommands {
       with HasExpectedVersion
 
   case class AddProcessingTypeCmd(
+    userId:    Option[String],
     studyId:     String,
     name:        String,
     description: Option[String],
@@ -244,6 +266,7 @@ object StudyCommands {
       extends ProcessingTypeCommand
 
   case class UpdateProcessingTypeCmd(
+    userId:    Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long,
@@ -253,6 +276,7 @@ object StudyCommands {
       extends ProcessingTypeModifyCommand
 
   case class RemoveProcessingTypeCmd(
+    userId:    Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long)
@@ -271,6 +295,7 @@ object StudyCommands {
       with HasExpectedVersion
 
   case class AddSpecimenLinkTypeCmd(
+    userId:    Option[String],
     processingTypeId:      String,
     expectedInputChange:   BigDecimal,
     expectedOutputChange:  BigDecimal,
@@ -284,6 +309,7 @@ object StudyCommands {
       extends SpecimenLinkTypeCommand
 
   case class UpdateSpecimenLinkTypeCmd(
+    userId:    Option[String],
     processingTypeId:      String,
     id:                    String,
     expectedVersion:       Long,
@@ -299,6 +325,7 @@ object StudyCommands {
       extends SpecimenLinkTypeModifyCommand
 
   case class RemoveSpecimenLinkTypeCmd(
+    userId:    Option[String],
     processingTypeId: String,
     id: String,
     expectedVersion: Long)
@@ -314,12 +341,14 @@ object StudyCommands {
       with HasExpectedVersion
 
   case class AddParticipantCmd(
+    userId:    Option[String],
     studyId:     String,
     uniqueId:    String,
     annotations: List[ParticipantAnnotation])
       extends ParticipantCommand
 
   case class UpdateParticipantCmd(
+    userId:    Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long,

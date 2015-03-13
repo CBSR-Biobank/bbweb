@@ -41,7 +41,6 @@ trait ParticipantsService {
 
 class ParticipantsServiceImpl(implicit inj: Injector)
     extends ParticipantsService
-    with ApplicationService
     with AkkaInjectable {
 
   val log = LoggerFactory.getLogger(this.getClass)
@@ -66,12 +65,12 @@ class ParticipantsServiceImpl(implicit inj: Injector)
 
   def add(cmd: AddParticipantCmd)(implicit userId: UserId)
       : Future[DomainValidation[ParticipantAddedEvent]] = {
-    ask(processor, cmd, userId).mapTo[DomainValidation[ParticipantAddedEvent]]
+    ask(processor, cmd).mapTo[DomainValidation[ParticipantAddedEvent]]
   }
 
   def update(cmd: UpdateParticipantCmd)(implicit userId: UserId)
       : Future[DomainValidation[ParticipantUpdatedEvent]] = {
-    ask(processor, cmd, userId).mapTo[DomainValidation[ParticipantUpdatedEvent]]
+    ask(processor, cmd).mapTo[DomainValidation[ParticipantUpdatedEvent]]
   }
 
   def checkUnique(uniqueId: String): DomainValidation[Boolean] = {

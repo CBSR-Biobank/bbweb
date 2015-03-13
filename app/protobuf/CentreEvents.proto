@@ -1,51 +1,60 @@
 package org.biobank.infrastructure.event;
 
 message CentreAddedEvent {
-   required string id = 1;
-   optional string name = 2;
-   optional string description = 3;
+   optional string name        = 1;
+   optional string description = 2;
 }
 
 message CentreUpdatedEvent {
-   required string id = 1;
-   optional int64  version = 2;
-   optional string name = 3;
-   optional string description = 4;
+   optional int64  version     = 1;
+   optional string name        = 2;
+   optional string description = 3;
 }
 
 message CentreEnabledEvent {
-   required string id = 1;
-   optional int64  version = 2;
+   optional int64  version = 1;
 }
 
 message CentreDisabledEvent {
-   required string id = 1;
-   optional int64  version = 2;
+   optional int64  version = 1;
 }
 
 message CentreLocationAddedEvent {
-   required string centreId       = 1;
-   required string locationId     = 2;
-   optional string name           = 3;
-   optional string street         = 4;
-   optional string city           = 5;
-   optional string province       = 6;
-   optional string postalCode     = 7;
-   optional string poBoxNumber    = 8;
-   optional string countryIsoCode = 9;
+   optional string locationId     = 1;
+   optional string name           = 2;
+   optional string street         = 3;
+   optional string city           = 4;
+   optional string province       = 5;
+   optional string postalCode     = 6;
+   optional string poBoxNumber    = 7;
+   optional string countryIsoCode = 8;
 }
 
 message CentreLocationRemovedEvent {
-   required string centreId   = 1;
-   required string locationId = 2;
+   optional string locationId = 1;
 }
 
-message CentreAddedToStudyEvent {
-   required string centreId = 1;
-   required string studyId  = 2;
+message StudyAddedToCentreEvent {
+   optional string studyId  = 1;
 }
 
-message CentreRemovedFromStudyEvent {
-   required string centreId = 1;
-   required string studyId  = 2;
+message StudyRemovedFromCentreEvent {
+   optional string studyId  = 1;
+}
+
+message CentreEvent {
+   required string id     = 1;
+   optional string userId = 2;
+   optional string time   = 3;
+
+   oneof event_type {
+      CentreAddedEvent            added           = 4;
+      CentreUpdatedEvent          updated         = 5;
+      CentreEnabledEvent          enabled         = 6;
+      CentreDisabledEvent         disabled        = 7;
+      CentreLocationAddedEvent    locationAdded   = 8;
+      CentreLocationRemovedEvent  locationRemoved = 9;
+      StudyAddedToCentreEvent     studyAdded      = 10;
+      StudyRemovedFromCentreEvent studyRemoved    = 11;
+   }
 }

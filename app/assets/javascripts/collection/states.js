@@ -47,10 +47,10 @@ define(['./module'], function(module) {
       throw new Error('state parameter studyId is invalid');
     }
 
-    resolveAnnotationTypes.$inject = ['$stateParams', 'participantAnnotTypesService'];
-    function resolveAnnotationTypes($stateParams, participantAnnotTypesService) {
+    resolveAnnotationTypes.$inject = ['$stateParams', 'ParticipantAnnotationType'];
+    function resolveAnnotationTypes($stateParams, ParticipantAnnotationType) {
       if ($stateParams.studyId) {
-        return participantAnnotTypesService.getAll($stateParams.studyId);
+        return ParticipantAnnotationType.list($stateParams.studyId);
       }
       throw new Error('state parameter studyId is invalid');
     }

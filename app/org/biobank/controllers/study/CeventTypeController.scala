@@ -71,8 +71,8 @@ class CeventTypeController(implicit inj: Injector)
 
   def removeCollectionEventType(studyId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveCollectionEventTypeCmd(studyId, id, ver)
-      val future = studiesService.removeCollectionEventType(cmd)(userId)
+      val cmd = RemoveCollectionEventTypeCmd(Some(userId.id), studyId, id, ver)
+      val future = studiesService.removeCollectionEventType(cmd)
       domainValidationReply(future)
   }
 

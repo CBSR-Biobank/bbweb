@@ -12,7 +12,7 @@ import org.biobank.domain.study.{
   SpecimenGroupRepository
 }
 import org.slf4j.LoggerFactory
-import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
+import org.biobank.service.{ Processor, WrappedEvent }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
@@ -68,13 +68,9 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     * back to the user. Each valid command generates one or more events and is journaled.
     */
   val receiveCommand: Receive = {
-    case procCmd: WrappedCommand =>
-      implicit val userId = procCmd.userId
-      procCmd.command match {
-        case cmd: AddProcessingTypeCmd    => processAddProcessingTypeCmd(cmd)
-        case cmd: UpdateProcessingTypeCmd => processUpdateProcessingTypeCmd(cmd)
-        case cmd: RemoveProcessingTypeCmd => processRemoveProcessingTypeCmd(cmd)
-      }
+    case cmd: AddProcessingTypeCmd    => processAddProcessingTypeCmd(cmd)
+    case cmd: UpdateProcessingTypeCmd => processUpdateProcessingTypeCmd(cmd)
+    case cmd: RemoveProcessingTypeCmd => processRemoveProcessingTypeCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(processingTypeRepository.getValues.toSet))
@@ -95,10 +91,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     } yield updatedPt
   }
 
-  private def processAddProcessingTypeCmd
-    (cmd: AddProcessingTypeCmd)
-    (implicit userId: Option[UserId])
-      : Unit = {
+  private def processAddProcessingTypeCmd(cmd: AddProcessingTypeCmd): Unit = {
     val timeNow = DateTime.now
     val studyId = StudyId(cmd.studyId)
     val id = processingTypeRepository.nextIdentity
@@ -119,10 +112,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     }
   }
 
-  private def processUpdateProcessingTypeCmd
-    (cmd: UpdateProcessingTypeCmd)
-    (implicit userId: Option[UserId])
-      : Unit = {
+  private def processUpdateProcessingTypeCmd(cmd: UpdateProcessingTypeCmd): Unit = {
     val timeNow = DateTime.now
 
     val v = update(cmd) { pt =>
@@ -148,10 +138,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     }
   }
 
-  private def processRemoveProcessingTypeCmd
-    (cmd: RemoveProcessingTypeCmd)
-    (implicit userId: Option[UserId])
-      : Unit = {
+  private def processRemoveProcessingTypeCmd(cmd: RemoveProcessingTypeCmd): Unit = {
     val v = update(cmd) { pt => pt.success }
 
     val event = v.fold(

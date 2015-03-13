@@ -2,7 +2,7 @@ package org.biobank.service.study
 
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
+import org.biobank.service.{ Processor, WrappedEvent }
 import org.biobank.domain._
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
@@ -64,13 +64,9 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
     * back to the user. Each valid command generates one or more events and is journaled.
     */
   val receiveCommand: Receive = {
-    case procCmd: WrappedCommand =>
-      implicit val userId = procCmd.userId
-      procCmd.command match {
-        case cmd: AddSpecimenLinkAnnotationTypeCmd =>    processAddSpecimenLinkAnnotationTypeCmd(cmd)
-        case cmd: UpdateSpecimenLinkAnnotationTypeCmd => processUpdateSpecimenLinkAnnotationTypeCmd(cmd)
-        case cmd: RemoveSpecimenLinkAnnotationTypeCmd => processRemoveSpecimenLinkAnnotationTypeCmd(cmd)
-      }
+    case cmd: AddSpecimenLinkAnnotationTypeCmd =>    processAddSpecimenLinkAnnotationTypeCmd(cmd)
+    case cmd: UpdateSpecimenLinkAnnotationTypeCmd => processUpdateSpecimenLinkAnnotationTypeCmd(cmd)
+    case cmd: RemoveSpecimenLinkAnnotationTypeCmd => processRemoveSpecimenLinkAnnotationTypeCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(annotationTypeRepository.getValues.toSet))
@@ -94,9 +90,7 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
   }
 
   private def processAddSpecimenLinkAnnotationTypeCmd
-    (cmd: AddSpecimenLinkAnnotationTypeCmd)
-    (implicit userId: Option[UserId])
-      : Unit = {
+    (cmd: AddSpecimenLinkAnnotationTypeCmd): Unit = {
     val timeNow = DateTime.now
     val id = annotationTypeRepository.nextIdentity
     val event = for {
@@ -121,9 +115,7 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
 
 
   private def processUpdateSpecimenLinkAnnotationTypeCmd
-    (cmd: UpdateSpecimenLinkAnnotationTypeCmd)
-    (implicit userId: Option[UserId])
-      : Unit = {
+    (cmd: UpdateSpecimenLinkAnnotationTypeCmd): Unit = {
     val timeNow = DateTime.now
     val v = update(cmd) { at =>
       for {
@@ -150,9 +142,7 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
   }
 
   private def processRemoveSpecimenLinkAnnotationTypeCmd
-    (cmd: RemoveSpecimenLinkAnnotationTypeCmd)
-    (implicit userId: Option[UserId])
-      : Unit = {
+    (cmd: RemoveSpecimenLinkAnnotationTypeCmd): Unit = {
     val v = update(cmd) { at => at.success }
 
     val event = v.fold(

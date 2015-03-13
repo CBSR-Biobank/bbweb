@@ -72,8 +72,8 @@ class SpecimenLinkTypeController(implicit inj: Injector)
 
   def removeSpecimenLinkType(processingTypeId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveSpecimenLinkTypeCmd(processingTypeId, id, ver)
-      val future = studiesService.removeSpecimenLinkType(cmd)(userId)
+      val cmd = RemoveSpecimenLinkTypeCmd(Some(userId.id), processingTypeId, id, ver)
+      val future = studiesService.removeSpecimenLinkType(cmd)
       domainValidationReply(future)
     }
 

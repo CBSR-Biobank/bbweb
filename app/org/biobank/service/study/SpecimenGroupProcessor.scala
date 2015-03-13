@@ -1,6 +1,6 @@
 package org.biobank.service.study
 
-import org.biobank.service.{ Processor, WrappedCommand, WrappedEvent }
+import org.biobank.service.{ Processor, WrappedEvent }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
@@ -78,14 +78,9 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     * back to the user. Each valid command generates one or more events and is journaled.
     */
   val receiveCommand: Receive = {
-
-    case procCmd: WrappedCommand =>
-      implicit val userId = procCmd.userId
-      procCmd.command match {
-        case cmd: AddSpecimenGroupCmd    => processAddSpecimenGroupCmd(cmd)
-        case cmd: UpdateSpecimenGroupCmd => processUpdateSpecimenGroupCmd(cmd)
-        case cmd: RemoveSpecimenGroupCmd => processRemoveSpecimenGroupCmd(cmd)
-      }
+    case cmd: AddSpecimenGroupCmd    => processAddSpecimenGroupCmd(cmd)
+    case cmd: UpdateSpecimenGroupCmd => processUpdateSpecimenGroupCmd(cmd)
+    case cmd: RemoveSpecimenGroupCmd => processRemoveSpecimenGroupCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(specimenGroupRepository.getValues.toSet))
@@ -107,10 +102,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     } yield updatedSg
   }
 
-  private def processAddSpecimenGroupCmd
-    (cmd: AddSpecimenGroupCmd)
-    (implicit userId: Option[UserId])
-      : Unit = {
+  private def processAddSpecimenGroupCmd(cmd: AddSpecimenGroupCmd): Unit = {
     val timeNow = DateTime.now
     val sgId = specimenGroupRepository.nextIdentity
 
@@ -141,10 +133,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     }
   }
 
-  private def processUpdateSpecimenGroupCmd
-    (cmd: UpdateSpecimenGroupCmd)
-    (implicit userId: Option[UserId])
-      : Unit = {
+  private def processUpdateSpecimenGroupCmd(cmd: UpdateSpecimenGroupCmd): Unit = {
     val timeNow = DateTime.now
     val studyId = StudyId(cmd.studyId)
     val specimenGroupId = SpecimenGroupId(cmd.id)
@@ -178,10 +167,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     }
   }
 
-  private def processRemoveSpecimenGroupCmd
-    (cmd: RemoveSpecimenGroupCmd)
-    (implicit userId: Option[UserId])
-      : Unit = {
+  private def processRemoveSpecimenGroupCmd(cmd: RemoveSpecimenGroupCmd): Unit = {
     val v = update(cmd) { sg => sg.success }
 
     val event = v.fold(

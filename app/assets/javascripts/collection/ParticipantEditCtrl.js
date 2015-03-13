@@ -44,7 +44,7 @@ define(['./module'], function(module) {
 
     if (vm.participant.isNew) {
       vm.title = 'Add participant';
-      vm.participant.setUniqueId($stateParams.uniqueId);
+      vm.participant.uniqueId = $stateParams.uniqueId;
       vm.onCancelState = {name: 'home.collection.study', params: {studyId: study.id}};
     } else {
       vm.title = 'Update participant';

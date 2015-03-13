@@ -71,8 +71,8 @@ class SpecimenLinkAnnotTypeController(implicit inj: Injector)
 
   def removeAnnotationType(studyId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveSpecimenLinkAnnotationTypeCmd(studyId, id, ver)
-      val future = studiesService.removeSpecimenLinkAnnotationType(cmd)(userId)
+      val cmd = RemoveSpecimenLinkAnnotationTypeCmd(Some(userId.id), studyId, id, ver)
+      val future = studiesService.removeSpecimenLinkAnnotationType(cmd)
       domainValidationReply(future)
   }
 

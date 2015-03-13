@@ -64,13 +64,9 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
     * back to the user. Each valid command generates one or more events and is journaled.
     */
   val receiveCommand: Receive = {
-    case procCmd: WrappedCommand =>
-      implicit val userId = procCmd.userId
-      procCmd.command match {
-        case cmd: AddParticipantAnnotationTypeCmd =>    processAddParticipantAnnotationTypeCmd(cmd)
-        case cmd: UpdateParticipantAnnotationTypeCmd => processUpdateParticipantAnnotationTypeCmd(cmd)
-        case cmd: RemoveParticipantAnnotationTypeCmd => processRemoveParticipantAnnotationTypeCmd(cmd)
-      }
+    case cmd: AddParticipantAnnotationTypeCmd =>    processAddParticipantAnnotationTypeCmd(cmd)
+    case cmd: UpdateParticipantAnnotationTypeCmd => processUpdateParticipantAnnotationTypeCmd(cmd)
+    case cmd: RemoveParticipantAnnotationTypeCmd => processRemoveParticipantAnnotationTypeCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(annotationTypeRepository.getValues.toSet))
@@ -93,9 +89,7 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
     } yield updatedAnnotType
   }
 
-  private def processAddParticipantAnnotationTypeCmd
-    (cmd: AddParticipantAnnotationTypeCmd)
-    (implicit userId: Option[UserId])
+  private def processAddParticipantAnnotationTypeCmd(cmd: AddParticipantAnnotationTypeCmd)
       : Unit = {
     val timeNow = DateTime.now
     val id = annotationTypeRepository.nextIdentity
@@ -125,7 +119,6 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
     */
   private def processUpdateParticipantAnnotationTypeCmd
     (cmd: UpdateParticipantAnnotationTypeCmd)
-    (implicit userId: Option[UserId])
       : Unit = {
     val timeNow = DateTime.now
     val v = update(cmd) { at =>
@@ -156,9 +149,7 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
     }
   }
 
-  private def processRemoveParticipantAnnotationTypeCmd
-    (cmd: RemoveParticipantAnnotationTypeCmd)
-    (implicit userId: Option[UserId])
+  private def processRemoveParticipantAnnotationTypeCmd(cmd: RemoveParticipantAnnotationTypeCmd)
       : Unit = {
     val v = update(cmd) { at => at.success }
 

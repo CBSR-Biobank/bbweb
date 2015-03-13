@@ -7,7 +7,6 @@ import org.biobank.domain.{
   DomainError,
   ValidationKey }
 import org.biobank.infrastructure.event.UserEvents._
-//import com.github.nscala_time.time.Imports._
 import org.joda.time.DateTime
 import org.biobank.infrastructure.JsonUtils._
 
@@ -66,16 +65,26 @@ object User {
   val status: String = "User"
 
   implicit val userWrites = new Writes[User] {
-    def writes(user: User) = Json.obj(
-      "id"           -> user.id,
-      "version"      -> user.version,
-      "timeAdded"    -> user.timeAdded,
-      "timeModified" -> user.timeModified,
-      "name"         -> user.name,
-      "email"        -> user.email,
-      "avatarUrl"    -> user.avatarUrl,
-      "status"       -> user.status
-    )
+    def writes(user: User) = {
+      var result = Json.obj(
+        "id"           -> user.id,
+        "version"      -> user.version,
+        "timeAdded"    -> user.timeAdded,
+        "name"         -> user.name,
+        "email"        -> user.email,
+        "status"       -> user.status
+      )
+
+      result = user.timeModified match {
+        case Some(time) => result ++ Json.obj("timeModified" -> Json.toJson(time))
+        case None => result
+      }
+
+      user.avatarUrl match {
+        case Some(url) => result ++ Json.obj("avatarUrl" -> Json.toJson(url))
+        case None => result
+      }
+    }
   }
 
   // users with duplicate emails are not allowed

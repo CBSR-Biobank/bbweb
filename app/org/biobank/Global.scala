@@ -28,13 +28,15 @@ trait Global
     extends GlobalSettings
     with ScaldiSupport {
 
-  val applicationModule = new WebModule :: new UserModule
+  def applicationModule = new WebModule :: new UserModule
 
   /**
    *
    */
   override def onStart(app: play.api.Application) {
     super.onStart(app)
+
+    applicationModule
 
     checkEmailConfig(app)
 
@@ -142,7 +144,6 @@ object Global
   val DefaultUserEmail = "admin@admin.com"
 
   val DefaultUserId = UserId(DefaultUserEmail)
-
 
 }
 

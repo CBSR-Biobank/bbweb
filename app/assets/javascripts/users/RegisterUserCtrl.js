@@ -34,10 +34,10 @@ define(['./module', 'toastr'], function(module, toastr) {
         })
         .catch(function (err) {
           var message;
-          if (err.message === 'already registered'){
+          if ((err.status === 403) && (err.data.message === 'already registered')) {
             message = 'That email address is already registered.';
           } else {
-            message = err.message;
+            message = err.data.message;
           }
 
           // registration failed

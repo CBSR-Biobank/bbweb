@@ -22,9 +22,7 @@ import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
-class UsersService(implicit inj: Injector)
-    extends ApplicationService
-    with AkkaInjectable {
+class UsersService(implicit inj: Injector) extends AkkaInjectable {
 
   val Log = LoggerFactory.getLogger(this.getClass)
 
@@ -131,47 +129,57 @@ class UsersService(implicit inj: Injector)
   }
 
   def resetPassword(cmd: ResetUserPasswordCmd)
-      : Future[DomainValidation[UserPasswordResetEvent]] = {
-    ask(usersProcessor, cmd).mapTo[DomainValidation[UserPasswordResetEvent]]
+      : Future[DomainValidation[User]] = {
+    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
-  def register(cmd: RegisterUserCmd): Future[DomainValidation[UserRegisteredEvent]] = {
-    ask(usersProcessor, cmd).mapTo[DomainValidation[UserRegisteredEvent]]
+  def register(cmd: RegisterUserCmd): Future[DomainValidation[User]] = {
+    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def updateName(cmd: UpdateUserNameCmd)(implicit userId: UserId)
-      : Future[DomainValidation[UserNameUpdatedEvent]] = {
-    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserNameUpdatedEvent]]
+      : Future[DomainValidation[User]] = {
+    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def updateEmail(cmd: UpdateUserEmailCmd)(implicit userId: UserId)
-      : Future[DomainValidation[UserEmailUpdatedEvent]] = {
-    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserEmailUpdatedEvent]]
+      : Future[DomainValidation[User]] = {
+    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def updatePassword(cmd: UpdateUserPasswordCmd)(implicit userId: UserId)
-      : Future[DomainValidation[UserPasswordUpdatedEvent]] = {
-    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserPasswordUpdatedEvent]]
+      : Future[DomainValidation[User]] = {
+    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def updateAvatarUrl(cmd: UpdateUserAvatarUrlCmd)(implicit userId: UserId)
-      : Future[DomainValidation[UserAvatarUrlUpdatedEvent]] = {
-    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserAvatarUrlUpdatedEvent]]
+      : Future[DomainValidation[User]] = {
+    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def activate(cmd: ActivateUserCmd)(implicit userId: UserId)
-      : Future[DomainValidation[UserActivatedEvent]] = {
-    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserActivatedEvent]]
+      : Future[DomainValidation[User]] = {
+    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def lock(cmd: LockUserCmd)(implicit userId: UserId)
-      : Future[DomainValidation[UserLockedEvent]] = {
-    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserLockedEvent]]
+      : Future[DomainValidation[User]] = {
+    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def unlock(cmd: UnlockUserCmd)(implicit userId: UserId)
-      : Future[DomainValidation[UserUnlockedEvent]] = {
-    ask(usersProcessor, cmd, userId).mapTo[DomainValidation[UserUnlockedEvent]]
+      : Future[DomainValidation[User]] = {
+    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
+  }
+
+  private def replyWithUser(future: Future[DomainValidation[UserEvent]])
+      : Future[DomainValidation[User]] = {
+    future map { validation =>
+      for {
+        event <- validation
+        user <- userRepository.getByKey(UserId(event.id))
+      } yield user
+    }
   }
 
 }

@@ -90,13 +90,12 @@ trait CentreValidations {
   * This class has a private constructor and instances of this class can only be created using the
   * [[DisabledCentre.create]] method on the factory object.
   */
-case class DisabledCentre(
-  id: CentreId,
-  version: Long,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  name: String,
-  description: Option[String])
+case class DisabledCentre(id:           CentreId,
+                          version:      Long,
+                          timeAdded:    DateTime,
+                          timeModified: Option[DateTime],
+                          name:         String,
+                          description:  Option[String])
     extends Centre {
 
   override val status: String = DisabledCentre.status
