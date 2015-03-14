@@ -1,41 +1,44 @@
-package org.biobank.infrastructure.event;
+ package org.biobank.infrastructure.event;
 
 message StudyAddedEvent {
-   required string id          = 1;
+   optional string name        = 1;
+   optional string description = 2;
+}
+
+message StudyUpdatedEvent {
+   optional int64  version     = 1;
    optional string name        = 2;
    optional string description = 3;
 }
 
-message StudyUpdatedEvent {
-   required string id          = 1;
-   optional int64  version     = 2;
-   optional string name        = 3;
-   optional string description = 4;
-}
-
 message StudyEnabledEvent {
-   required string id      = 1;
-   optional int64  version = 2;
+   optional int64  version = 1;
 }
 
 message StudyDisabledEvent {
-   required string id      = 1;
-   optional int64  version = 2;
+   optional int64  version = 1;
 }
 
 message StudyRetiredEvent {
-   required string id      = 1;
-   optional int64  version = 2;
+   optional int64  version = 1;
 }
 
 message StudyUnretiredEvent {
-   required string id      = 1;
-   optional int64  version = 2;
+   optional int64  version = 1;
 }
 
 message CollectionEventAnnotationTypeAddedEvent {
-   required string studyId          = 1;
-   required string annotationTypeId = 2;
+   optional string annotationTypeId = 1;
+   optional string name             = 2;
+   optional string description      = 3;
+   optional string valueType        = 4; // a scala enum is used here
+   optional int32  maxValueCount    = 5;
+   repeated string options          = 6;
+}
+
+message CollectionEventAnnotationTypeUpdatedEvent {
+   optional string annotationTypeId = 1;
+   optional int64  version          = 2;
    optional string name             = 3;
    optional string description      = 4;
    optional string valueType        = 5; // a scala enum is used here
@@ -43,25 +46,23 @@ message CollectionEventAnnotationTypeAddedEvent {
    repeated string options          = 7;
 }
 
-message CollectionEventAnnotationTypeUpdatedEvent {
-   required string studyId          = 1;
-   required string annotationTypeId = 2;
-   optional int64  version          = 3;
-   optional string name             = 4;
-   optional string description      = 5;
-   optional string valueType        = 6; // a scala enum is used here
-   optional int32  maxValueCount    = 7;
-   repeated string options          = 8;
-}
-
 message CollectionEventAnnotationTypeRemovedEvent {
-   required string studyId          = 1;
-   required string annotationTypeId = 2;
+   optional string annotationTypeId = 1;
 }
 
 message ParticipantAnnotationTypeAddedEvent {
-   required string studyId          = 1;
-   required string annotationTypeId = 2;
+   optional string annotationTypeId = 1;
+   optional string name             = 2;
+   optional string description      = 3;
+   optional string valueType        = 4; // a scala enum is used here
+   optional int32  maxValueCount    = 5;
+   repeated string options          = 6;
+   optional bool   required         = 7;
+}
+
+message ParticipantAnnotationTypeUpdatedEvent {
+   optional string annotationTypeId = 1;
+   optional int64  version          = 2;
    optional string name             = 3;
    optional string description      = 4;
    optional string valueType        = 5; // a scala enum is used here
@@ -70,26 +71,22 @@ message ParticipantAnnotationTypeAddedEvent {
    optional bool   required         = 8;
 }
 
-message ParticipantAnnotationTypeUpdatedEvent {
-   required string studyId          = 1;
-   required string annotationTypeId = 2;
-   optional int64  version          = 3;
-   optional string name             = 4;
-   optional string description      = 5;
-   optional string valueType        = 6; // a scala enum is used here
-   optional int32  maxValueCount    = 7;
-   repeated string options          = 8;
-   optional bool   required         = 9;
-}
-
 message ParticipantAnnotationTypeRemovedEvent {
-   required string studyId          = 1;
-   required string annotationTypeId = 2;
+   optional string annotationTypeId = 1;
 }
 
 message SpecimenLinkAnnotationTypeAddedEvent {
-   required string studyId          = 1;
-   required string annotationTypeId = 2;
+   optional string annotationTypeId = 1;
+   optional string name             = 2;
+   optional string description      = 3;
+   optional string valueType        = 4; // a scala enum is used here
+   optional int32  maxValueCount    = 5;
+   repeated string options          = 6;
+}
+
+message SpecimenLinkAnnotationTypeUpdatedEvent {
+   optional string annotationTypeId = 1;
+   optional int64  version          = 2;
    optional string name             = 3;
    optional string description      = 4;
    optional string valueType        = 5; // a scala enum is used here
@@ -97,62 +94,58 @@ message SpecimenLinkAnnotationTypeAddedEvent {
    repeated string options          = 7;
 }
 
-message SpecimenLinkAnnotationTypeUpdatedEvent {
-   required string studyId          = 1;
-   required string annotationTypeId = 2;
-   optional int64  version          = 3;
-   optional string name             = 4;
-   optional string description      = 5;
-   optional string valueType        = 6; // a scala enum is used here
-   optional int32  maxValueCount    = 7;
-   repeated string options          = 8;
-}
-
 message SpecimenLinkAnnotationTypeRemovedEvent {
-   required string studyId          = 1;
-   required string annotationTypeId = 2;
+   optional string annotationTypeId = 1;
 }
 
 message CollectionEventTypeAddedEvent {
    message SpecimenGroupData {
-      required string specimenGroupId = 1;
-      optional int32  maxCount           = 2;
+      optional string specimenGroupId = 1;
+      optional int32  maxCount        = 2;
       optional double amount          = 3;
    }
 
    message AnnotationTypeData {
-      required string annotationTypeId = 1;
+      optional string annotationTypeId = 1;
       optional bool   required         = 2;
    }
 
-   required string             studyId               = 1;
-   required string             collectionEventTypeId = 2;
-   optional string             name                  = 3;
-   optional string             description           = 4;
-   optional bool               recurring             = 5;
-   repeated SpecimenGroupData  specimenGroupData     = 6;
-   repeated AnnotationTypeData annotationTypeData    = 7;
+   optional string             collectionEventTypeId = 1;
+   optional string             name                  = 2;
+   optional string             description           = 3;
+   optional bool               recurring             = 4;
+   repeated SpecimenGroupData  specimenGroupData     = 5;
+   repeated AnnotationTypeData annotationTypeData    = 6;
 }
 
 message CollectionEventTypeUpdatedEvent {
-   required string                                           studyId               = 1;
-   required string                                           collectionEventTypeId = 2;
-   optional int64                                            version               = 3;
-   optional string                                           name                  = 4;
-   optional string                                           description           = 5;
-   optional bool                                             recurring             = 6;
-   repeated CollectionEventTypeAddedEvent.SpecimenGroupData  specimenGroupData     = 7;
-   repeated CollectionEventTypeAddedEvent.AnnotationTypeData annotationTypeData    = 8;
+   optional string                                           collectionEventTypeId = 1;
+   optional int64                                            version               = 2;
+   optional string                                           name                  = 3;
+   optional string                                           description           = 4;
+   optional bool                                             recurring             = 5;
+   repeated CollectionEventTypeAddedEvent.SpecimenGroupData  specimenGroupData     = 6;
+   repeated CollectionEventTypeAddedEvent.AnnotationTypeData annotationTypeData    = 7;
 }
 
 message CollectionEventTypeRemovedEvent {
-   required string studyId               = 1;
-   required string collectionEventTypeId = 2;
+   optional string collectionEventTypeId = 1;
 }
 
 message SpecimenGroupAddedEvent {
-   required string studyId                     = 1;
-   required string specimenGroupId             = 2;
+   optional string specimenGroupId             = 1;
+   optional string name                        = 2;
+   optional string description                 = 3;
+   optional string units                       = 4;
+   optional string anatomicalSourceType        = 5;
+   optional string preservationType            = 6;
+   optional string preservationTemperatureType = 7;
+   optional string specimenType                = 8;
+}
+
+message SpecimenGroupUpdatedEvent {
+   optional string specimenGroupId             = 1;
+   optional int64  version                     = 2;
    optional string name                        = 3;
    optional string description                 = 4;
    optional string units                       = 5;
@@ -162,50 +155,33 @@ message SpecimenGroupAddedEvent {
    optional string specimenType                = 9;
 }
 
-message SpecimenGroupUpdatedEvent {
-   required string studyId                     = 1;
-   required string specimenGroupId             = 2;
-   optional int64  version                     = 3;
-   optional string name                        = 4;
-   optional string description                 = 5;
-   optional string units                       = 6;
-   optional string anatomicalSourceType        = 7;
-   optional string preservationType            = 8;
-   optional string preservationTemperatureType = 9;
-   optional string specimenType                = 10;
-}
-
 message SpecimenGroupRemovedEvent {
-   required string studyId         = 1;
-   required string specimenGroupId = 2;
+   optional string specimenGroupId = 1;
 }
 
   // procesing type events
 message ProcessingTypeAddedEvent {
-   required string studyId          = 1;
-   required string processingTypeId = 2;
+   optional string processingTypeId = 1;
+   optional string name             = 2;
+   optional string description      = 3;
+   optional bool   enabled          = 4;
+}
+
+message ProcessingTypeUpdatedEvent {
+   optional string processingTypeId = 1;
+   optional int64  version          = 2;
    optional string name             = 3;
    optional string description      = 4;
    optional bool   enabled          = 5;
 }
 
-message ProcessingTypeUpdatedEvent {
-   required string studyId          = 1;
-   required string processingTypeId = 2;
-   optional int64  version          = 3;
-   optional string name             = 4;
-   optional string description      = 5;
-   optional bool   enabled          = 6;
-}
-
 message ProcessingTypeRemovedEvent {
-   required string studyId          = 1;
-   required string processingTypeId = 2;
+   optional string processingTypeId = 1;
 }
 
 message SpecimenLinkTypeAddedEvent {
-   required string processingTypeId                                             = 1;
-   required string specimenLinkTypeId                                           = 2;
+   optional string processingTypeId                                             = 1;
+   optional string specimenLinkTypeId                                           = 2;
    optional double expectedInputChange                                          = 3;
    optional double expectedOutputChange                                         = 4;
    optional int32  inputCount                                                   = 5;
@@ -218,8 +194,8 @@ message SpecimenLinkTypeAddedEvent {
 }
 
 message SpecimenLinkTypeUpdatedEvent {
-   required string processingTypeId                                             = 1;
-   required string specimenLinkTypeId                                           = 2;
+   optional string processingTypeId                                             = 1;
+   optional string specimenLinkTypeId                                           = 2;
    optional int64  version                                                      = 3;
    optional double expectedInputChange                                          = 4;
    optional double expectedOutputChange                                         = 5;
@@ -233,31 +209,66 @@ message SpecimenLinkTypeUpdatedEvent {
 }
 
 message SpecimenLinkTypeRemovedEvent {
-   required string processingTypeId   = 1;
-   required string specimenLinkTypeId = 2;
+   optional string processingTypeId   = 1;
+   optional string specimenLinkTypeId = 2;
 }
 
 message ParticipantAddedEvent {
 
    message ParticipantAnnotation {
-      required string annotationTypeId = 1;
+      optional string annotationTypeId = 1;
       optional string stringValue      = 2;
       optional string numberValue      = 3;
       repeated string selectedValues   = 4;
    }
 
-   required string studyId                    = 1;
-   required string participantId              = 2;
-   optional string uniqueId                   = 3;
-   repeated ParticipantAnnotation annotations = 4;
+   optional string participantId              = 1;
+   optional string uniqueId                   = 2;
+   repeated ParticipantAnnotation annotations = 3;
 }
 
 message ParticipantUpdatedEvent {
-   required string studyId                                          = 1;
-   required string participantId                                    = 2;
-   optional int64 version                                           = 3;
-   optional string uniqueId                                         = 4;
-   repeated ParticipantAddedEvent.ParticipantAnnotation annotations = 5;
+   optional string participantId                                    = 1;
+   optional int64 version                                           = 2;
+   optional string uniqueId                                         = 3;
+   repeated ParticipantAddedEvent.ParticipantAnnotation annotations = 4;
 
 }
 
+message StudyEvent {
+   required string id = 1;
+   optional string userId = 2;
+   optional string time   = 3;
+
+   oneof event_type {
+     StudyAddedEvent                           added                                =  4;
+     StudyUpdatedEvent                         updated                              =  5;
+     StudyEnabledEvent                         enabled                              =  6;
+     StudyDisabledEvent                        disabled                             =  7;
+     StudyRetiredEvent                         retired                              =  8;
+     StudyUnretiredEvent                       unretired                            =  9;
+     CollectionEventAnnotationTypeAddedEvent   collectionEventAnnotationTypeAdded   = 10;
+     CollectionEventAnnotationTypeUpdatedEvent collectionEventAnnotationTypeUpdated = 11;
+     CollectionEventAnnotationTypeRemovedEvent collectionEventAnnotationTypeRemoved = 12;
+     ParticipantAnnotationTypeAddedEvent       participantAnnotationTypeAdded       = 13;
+     ParticipantAnnotationTypeUpdatedEvent     participantAnnotationTypeUpdated     = 14;
+     ParticipantAnnotationTypeRemovedEvent     participantAnnotationTypeRemoved     = 15;
+     SpecimenLinkAnnotationTypeAddedEvent      specimenLinkAnnotationTypeAdded      = 16;
+     SpecimenLinkAnnotationTypeUpdatedEvent    specimenLinkAnnotationTypeUpdated    = 17;
+     SpecimenLinkAnnotationTypeRemovedEvent    specimenLinkAnnotationTypeRemoved    = 18;
+     CollectionEventTypeAddedEvent             collectionEventTypeAdded             = 19;
+     CollectionEventTypeUpdatedEvent           collectionEventTypeUpdated           = 20;
+     CollectionEventTypeRemovedEvent           collectionEventTypeRemoved           = 21;
+     SpecimenGroupAddedEvent                   specimenGroupAdded                   = 22;
+     SpecimenGroupUpdatedEvent                 specimenGroupUpdated                 = 23;
+     SpecimenGroupRemovedEvent                 specimenGroupRemoved                 = 24;
+     ProcessingTypeAddedEvent                  processingTypeAdded                  = 25;
+     ProcessingTypeUpdatedEvent                processingTypeUpdated                = 26;
+     ProcessingTypeRemovedEvent                processingTypeRemoved                = 27;
+     SpecimenLinkTypeAddedEvent                specimenLinkTypeAdded                = 28;
+     SpecimenLinkTypeUpdatedEvent              specimenLinkTypeUpdated              = 29;
+     SpecimenLinkTypeRemovedEvent              specimenLinkTypeRemoved              = 30;
+     ParticipantAddedEvent                     participantAdded                     = 31;
+     ParticipantUpdatedEvent                   participantUpdated                   = 32;
+   }
+}

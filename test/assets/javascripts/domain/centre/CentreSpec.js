@@ -1,13 +1,11 @@
-/**
- * Jasmine test suite
- */
+/* global define */
 define([
   'angular',
   'angularMocks',
   'underscore',
   'biobank.testUtils',
   'biobankApp'
-] , function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _, testUtils) {
   'use strict';
 
   /**
@@ -457,3 +455,7 @@ define([
   });
 
 });
+
+/* Local Variables:  */
+/* mode: js          */
+/* End:              */

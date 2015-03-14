@@ -1,5 +1,6 @@
 package org.biobank.infrastructure.event
 
+import org.biobank.infrastructure.command.StudyCommands.StudyCommand
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.infrastructure._
 import org.biobank.domain.study._
@@ -7,6 +8,8 @@ import org.biobank.domain.study._
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 
 object StudyEventsUtil {
 
@@ -14,7 +17,8 @@ object StudyEventsUtil {
       : Seq[CollectionEventTypeAddedEvent.AnnotationTypeData] = {
     annotTypeData.map { atd =>
       CollectionEventTypeAddedEvent.AnnotationTypeData(
-        annotationTypeId = atd.annotationTypeId, required = Some(atd.required))
+        annotationTypeId = Some(atd.annotationTypeId),
+        required = Some(atd.required))
     }
   }
 
@@ -23,7 +27,8 @@ object StudyEventsUtil {
       : List[CollectionEventTypeAnnotationTypeData] = {
     annotTypeData.map { atd =>
       CollectionEventTypeAnnotationTypeData(
-        annotationTypeId = atd.annotationTypeId, required = atd.getRequired)
+        annotationTypeId = atd.getAnnotationTypeId,
+        required = atd.getRequired)
     } toList
   }
 
@@ -32,8 +37,17 @@ object StudyEventsUtil {
       : List[SpecimenLinkTypeAnnotationTypeData] = {
     annotTypeData.map { atd =>
       SpecimenLinkTypeAnnotationTypeData(
-        annotationTypeId = atd.annotationTypeId, required = atd.getRequired)
+        annotationTypeId = atd.getAnnotationTypeId,
+        required = atd.getRequired)
     } toList
   }
+
+  /**
+   * Creates an event with the userId for the user that issued the command, and the current date and time.
+   */
+  def createStudyEvent(id: StudyId, command: StudyCommand) =
+    StudyEvent(id     = id.id,
+               userId = command.userId,
+               time   = Some(ISODateTimeFormat.dateTime.print(DateTime.now)))
 
 }

@@ -28,6 +28,7 @@ import akka.persistence.SnapshotOffer
 import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -44,6 +45,8 @@ import scalaz.Validation.FlatMap._
   *
   */
 class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
+  import org.biobank.infrastructure.event.StudyEventsUtil._
+  import StudyEvent.EventType
 
   override def persistenceId = "specimen-group-processor-id"
 
@@ -60,14 +63,13 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     * processed to recreate the current state of the aggregate.
     */
   val receiveRecover: Receive = {
-    case wevent: WrappedEvent[_] =>
-      wevent.event match {
-        case event: SpecimenGroupAddedEvent   => recoverSpecimenGroupAddedEvent  (event, wevent.userId, wevent.dateTime)
-        case event: SpecimenGroupUpdatedEvent => recoverSpecimenGroupUpdatedEvent(event, wevent.userId, wevent.dateTime)
-        case event: SpecimenGroupRemovedEvent => recoverSpecimenGroupRemovedEvent(event, wevent.userId, wevent.dateTime)
+    case event: StudyEvent => event.eventType match {
+      case et: EventType.SpecimenGroupAdded   => applySpecimenGroupAddedEvent(event)
+      case et: EventType.SpecimenGroupUpdated => applySpecimenGroupUpdatedEvent(event)
+      case et: EventType.SpecimenGroupRemoved => applySpecimenGroupRemovedEvent(event)
 
-        case event => log.error(s"event not handled: $event")
-      }
+      case event => log.error(s"event not handled: $event")
+    }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
       snapshot.specimenGroups.foreach{ specimenGroup => specimenGroupRepository.put(specimenGroup) }
@@ -90,18 +92,6 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
 
   }
 
-  def update
-    (cmd: SpecimenGroupModifyCommand)
-    (fn: SpecimenGroup => DomainValidation[SpecimenGroup])
-      : DomainValidation[SpecimenGroup] = {
-    for {
-      sg <- specimenGroupRepository.withId(StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
-      notInUse <- checkNotInUse(sg.studyId, sg.id)
-      validVersion <- sg.requireVersion(cmd.expectedVersion)
-      updatedSg <- fn(sg)
-    } yield updatedSg
-  }
-
   private def processAddSpecimenGroupCmd(cmd: AddSpecimenGroupCmd): Unit = {
     val timeNow = DateTime.now
     val sgId = specimenGroupRepository.nextIdentity
@@ -116,21 +106,19 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
         StudyId(cmd.studyId), sgId, -1, timeNow, cmd.name, cmd.description,
         cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
         cmd.preservationTemperatureType, cmd.specimenType)
-      newEvent <- SpecimenGroupAddedEvent(
-        studyId                     = newItem.studyId.id,
-        specimenGroupId             = newItem.id.id,
-        name                        = Some(newItem.name),
-        description                 = newItem.description,
-        units                       = Some(newItem.units),
-        anatomicalSourceType        = Some(newItem.anatomicalSourceType.toString),
-        preservationType            = Some(newItem.preservationType.toString),
-        preservationTemperatureType = Some(newItem.preservationTemperatureType.toString),
-        specimenType                = Some(newItem.specimenType.toString)).success
+      newEvent <- createStudyEvent(newItem.studyId, cmd).withSpecimenGroupAdded(
+        SpecimenGroupAddedEvent(
+          specimenGroupId             = Some(newItem.id.id),
+          name                        = Some(newItem.name),
+          description                 = newItem.description,
+          units                       = Some(newItem.units),
+          anatomicalSourceType        = Some(newItem.anatomicalSourceType.toString),
+          preservationType            = Some(newItem.preservationType.toString),
+          preservationTemperatureType = Some(newItem.preservationTemperatureType.toString),
+          specimenType                = Some(newItem.specimenType.toString))).success
     } yield newEvent
 
-    process(event){ wevent =>
-      recoverSpecimenGroupAddedEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    process(event){ applySpecimenGroupAddedEvent(_) }
   }
 
   private def processUpdateSpecimenGroupCmd(cmd: UpdateSpecimenGroupCmd): Unit = {
@@ -141,97 +129,116 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
     val v = update(cmd) { sg =>
       for {
         nameAvailable <- nameAvailable(cmd.name, specimenGroupId)
-        updatedSg <- sg.update(
-          cmd.name, cmd.description, cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
-          cmd.preservationTemperatureType, cmd.specimenType)
-      } yield updatedSg
+        updatedSg <- sg.update(cmd.name,
+                               cmd.description,
+                               cmd.units,
+                               cmd.anatomicalSourceType,
+                               cmd.preservationType,
+                               cmd.preservationTemperatureType,
+                               cmd.specimenType)
+        event <- createStudyEvent(updatedSg.studyId, cmd).withSpecimenGroupUpdated(
+          SpecimenGroupUpdatedEvent(
+            specimenGroupId             = Some(updatedSg.id.id),
+            version                     = Some(updatedSg.version),
+            name                        = Some(cmd.name),
+            description                 = cmd.description,
+            units                       = Some(cmd.units),
+            anatomicalSourceType        = Some(cmd.anatomicalSourceType.toString),
+            preservationType            = Some(cmd.preservationType.toString),
+            preservationTemperatureType = Some(cmd.preservationTemperatureType.toString),
+            specimenType                = Some(cmd.specimenType.toString))).success
+      } yield event
     }
 
-    val event = v.fold(
-      err => err.failure[SpecimenGroupUpdatedEvent],
-      sg => SpecimenGroupUpdatedEvent(
-        studyId                     = cmd.studyId,
-        specimenGroupId             = sg.id.id,
-        version                     = Some(sg.version),
-        name                        = Some(cmd.name),
-        description                 = cmd.description,
-        units                       = Some(cmd.units),
-        anatomicalSourceType        = Some(cmd.anatomicalSourceType.toString),
-        preservationType            = Some(cmd.preservationType.toString),
-        preservationTemperatureType = Some(cmd.preservationTemperatureType.toString),
-        specimenType                = Some(cmd.specimenType.toString)).success
-    )
-
-    process(event){ wevent =>
-      recoverSpecimenGroupUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    process(v) { applySpecimenGroupUpdatedEvent(_) }
   }
 
   private def processRemoveSpecimenGroupCmd(cmd: RemoveSpecimenGroupCmd): Unit = {
-    val v = update(cmd) { sg => sg.success }
+    val v = update(cmd) { sg =>
+      createStudyEvent(sg.studyId, cmd).withSpecimenGroupRemoved(
+        SpecimenGroupRemovedEvent(Some(sg.id.id))).success
+    }
+    process(v){ applySpecimenGroupRemovedEvent(_) }
+  }
 
-    val event = v.fold(
-      err => err.failure[SpecimenGroupRemovedEvent],
-      sg =>  SpecimenGroupRemovedEvent(sg.studyId.id, sg.id.id).success
-    )
+  def update
+    (cmd: SpecimenGroupModifyCommand)
+    (fn: SpecimenGroup => DomainValidation[StudyEvent])
+      : DomainValidation[StudyEvent] = {
+    for {
+      sg           <- specimenGroupRepository.withId(StudyId(cmd.studyId), SpecimenGroupId(cmd.id))
+      notInUse     <- checkNotInUse(sg.studyId, sg.id)
+      validVersion <- sg.requireVersion(cmd.expectedVersion)
+      event        <- fn(sg)
+    } yield event
+  }
 
-    process(event){ wevent =>
-      recoverSpecimenGroupRemovedEvent(wevent.event, wevent.userId, wevent.dateTime)
+  private def applySpecimenGroupAddedEvent(event: StudyEvent) : Unit = {
+    if (event.eventType.isSpecimenGroupAdded) {
+      val addedEvent = event.getSpecimenGroupAdded
+
+      specimenGroupRepository.put(
+        SpecimenGroup(
+          studyId                     = StudyId(event.id),
+          id                          = SpecimenGroupId(addedEvent.getSpecimenGroupId),
+          version                     = 0L,
+          timeAdded                   = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
+          timeModified                = None,
+          name                        = addedEvent.getName,
+          description                 = addedEvent.description,
+          units                       = addedEvent.getUnits,
+          anatomicalSourceType        = AnatomicalSourceType.withName(addedEvent.getAnatomicalSourceType),
+          preservationType            = PreservationType.withName(addedEvent.getPreservationType),
+          preservationTemperatureType = PreservationTemperatureType.withName(addedEvent.getPreservationTemperatureType),
+          specimenType                = SpecimenType.withName(addedEvent.getSpecimenType)
+        ))
+      ()
+    } else {
+      log.error(s"invalid event type: $event")
     }
   }
 
-  private def recoverSpecimenGroupAddedEvent
-    (event: SpecimenGroupAddedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    specimenGroupRepository.put(SpecimenGroup(
-      studyId                     = StudyId(event.studyId),
-      id                          = SpecimenGroupId(event.specimenGroupId),
-      version                     = 0L,
-      timeAdded                   = dateTime,
-      timeModified                = None,
-      name                        = event.getName,
-      description                 = event.description,
-      units                       = event.getUnits,
-      anatomicalSourceType        = AnatomicalSourceType.withName(event.getAnatomicalSourceType),
-      preservationType            = PreservationType.withName(event.getPreservationType),
-      preservationTemperatureType = PreservationTemperatureType.withName(event.getPreservationTemperatureType),
-      specimenType                = SpecimenType.withName(event.getSpecimenType)
-    ))
-    ()
+  private def applySpecimenGroupUpdatedEvent(event: StudyEvent) : Unit = {
+    if (event.eventType.isSpecimenGroupUpdated) {
+      val updatedEvent = event.getSpecimenGroupUpdated
+
+      specimenGroupRepository.getByKey(SpecimenGroupId(updatedEvent.getSpecimenGroupId)).fold(
+        err => log.error(s"updating annotation type from event failed: $err"),
+        sg => {
+          specimenGroupRepository.put(
+            sg.copy(
+              version                     = updatedEvent.getVersion,
+              timeModified                = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
+              name                        = updatedEvent.getName,
+              description                 = updatedEvent.description,
+              units                       = updatedEvent.getUnits,
+              anatomicalSourceType        = AnatomicalSourceType.withName(updatedEvent.getAnatomicalSourceType),
+              preservationType            = PreservationType.withName(updatedEvent.getPreservationType),
+              preservationTemperatureType = PreservationTemperatureType.withName(updatedEvent.getPreservationTemperatureType),
+              specimenType                = SpecimenType.withName(updatedEvent.getSpecimenType)
+            ))
+          ()
+        }
+      )
+    } else {
+      log.error(s"invalid event type: $event")
+    }
   }
 
-  private def recoverSpecimenGroupUpdatedEvent
-    (event: SpecimenGroupUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId)).fold(
-      err => log.error(s"updating annotation type from event failed: $err"),
-      sg => {
-        specimenGroupRepository.put(sg.copy(
-          version                     = event.getVersion,
-          timeModified                = Some(dateTime),
-          name                        = event.getName,
-          description                 = event.description,
-          units                       = event.getUnits,
-          anatomicalSourceType        = AnatomicalSourceType.withName(event.getAnatomicalSourceType),
-          preservationType            = PreservationType.withName(event.getPreservationType),
-          preservationTemperatureType = PreservationTemperatureType.withName(event.getPreservationTemperatureType),
-          specimenType                = SpecimenType.withName(event.getSpecimenType)
-        ))
-        ()
-      }
-    )
-  }
-
-  private def recoverSpecimenGroupRemovedEvent
-    (event: SpecimenGroupRemovedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    specimenGroupRepository.getByKey(SpecimenGroupId(event.specimenGroupId)).fold(
-      err => log.error(s"updating annotation type from event failed: $err"),
-      sg => {
-        specimenGroupRepository.remove(sg)
-        ()
-      }
-    )
+  private def applySpecimenGroupRemovedEvent(event: StudyEvent) : Unit = {
+    if (event.eventType.isSpecimenGroupRemoved) {
+      specimenGroupRepository.getByKey(
+        SpecimenGroupId(event.getSpecimenGroupRemoved.getSpecimenGroupId))
+      .fold(
+        err => log.error(s"updating annotation type from event failed: $err"),
+        sg => {
+          specimenGroupRepository.remove(sg)
+          ()
+        }
+      )
+    } else {
+      log.error(s"invalid event type: $event")
+    }
   }
 
   val ErrMsgNameExists = "specimen group with name already exists"

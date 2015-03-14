@@ -3,7 +3,6 @@ package org.biobank.controllers.study
 import org.biobank.controllers._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEventsJson
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.service.AuthToken
@@ -27,8 +26,7 @@ import scalaz.Scalaz._
 class SpecimenLinkTypeController(implicit inj: Injector)
     extends CommandController
     with JsonController
-    with Injectable
-    with StudyEventsJson {
+    with Injectable {
 
   implicit override val authToken = inject [AuthToken]
 

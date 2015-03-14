@@ -19,6 +19,7 @@ import org.biobank.infrastructure.event.StudyEvents._
 
 import akka.persistence.SnapshotOffer
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import scalaz._
@@ -36,6 +37,8 @@ import scalaz.Validation.FlatMap._
   * [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
   */
 class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
+  import org.biobank.infrastructure.event.StudyEventsUtil._
+  import StudyEvent.EventType
 
   override def persistenceId = "processing-type-processor-id"
 
@@ -48,18 +51,18 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     * processed to recreate the current state of the aggregate.
     */
   val receiveRecover: Receive = {
-    case wevent: WrappedEvent[_] =>
-      wevent.event match {
-        case event: ProcessingTypeAddedEvent   => recoverProcessingTypeAddedEvent  (event, wevent.userId, wevent.dateTime)
-        case event: ProcessingTypeUpdatedEvent => recoverProcessingTypeUpdatedEvent(event, wevent.userId, wevent.dateTime)
-        case event: ProcessingTypeRemovedEvent => recoverProcessingTypeRemovedEvent(event, wevent.userId, wevent.dateTime)
+    case event: StudyEvent => event.eventType match {
+      case et: EventType.ProcessingTypeAdded   => applyProcessingTypeAddedEvent(event)
+      case et: EventType.ProcessingTypeUpdated => applyProcessingTypeUpdatedEvent(event)
+      case et: EventType.ProcessingTypeRemoved => applyProcessingTypeRemovedEvent(event)
 
-        case event => log.error(s"event not handled: $event")
-      }
+      case event => log.error(s"event not handled: $event")
+    }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
-      snapshot.processingTypes.foreach{ ceType =>
-        processingTypeRepository.put(ceType) }
+      snapshot.processingTypes.foreach { ceType =>
+        processingTypeRepository.put(ceType)
+      }
   }
 
 
@@ -79,18 +82,6 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     case cmd => log.error(s"ProcessingTypeProcessor: message not handled: $cmd")
   }
 
-  def update
-    (cmd: ProcessingTypeModifyCommand)
-    (fn: ProcessingType => DomainValidation[ProcessingType])
-      : DomainValidation[ProcessingType] = {
-    for {
-      pt <- processingTypeRepository.withId(StudyId(cmd.studyId), ProcessingTypeId(cmd.id))
-      notInUse <- checkNotInUse(pt)
-      validVersion <- pt.requireVersion(cmd.expectedVersion)
-      updatedPt <- fn(pt)
-    } yield updatedPt
-  }
-
   private def processAddProcessingTypeCmd(cmd: AddProcessingTypeCmd): Unit = {
     val timeNow = DateTime.now
     val studyId = StudyId(cmd.studyId)
@@ -98,18 +89,16 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
 
     val event = for {
       nameValid <- nameAvailable(cmd.name)
-      newItem <- ProcessingType.create(studyId, id, -1L, timeNow, cmd.name, cmd.description, cmd.enabled)
-      event <- ProcessingTypeAddedEvent(
-        studyId          = cmd.studyId,
-        processingTypeId = id.id,
-        name             = Some(newItem.name),
-        description      = newItem.description,
-        enabled          = Some(newItem.enabled)).success
+      newItem   <- ProcessingType.create(studyId, id, -1L, timeNow, cmd.name, cmd.description, cmd.enabled)
+      event     <- createStudyEvent(newItem.studyId, cmd).withProcessingTypeAdded(
+        ProcessingTypeAddedEvent(
+          processingTypeId = Some(newItem.id.id),
+          name             = Some(newItem.name),
+          description      = newItem.description,
+          enabled          = Some(newItem.enabled))).success
     } yield event
 
-    process(event){ wevent =>
-      recoverProcessingTypeAddedEvent  (wevent.event, wevent.userId, wevent.dateTime)
-    }
+    process(event){ applyProcessingTypeAddedEvent(_) }
   }
 
   private def processUpdateProcessingTypeCmd(cmd: UpdateProcessingTypeCmd): Unit = {
@@ -119,80 +108,93 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
       for {
         nameValid <- nameAvailable(cmd.name, ProcessingTypeId(cmd.id))
         updatedPt <- pt.update(cmd.name, cmd.description, cmd.enabled)
-      } yield updatedPt
+        event <- createStudyEvent(updatedPt.studyId, cmd).withProcessingTypeUpdated(
+          ProcessingTypeUpdatedEvent(
+            processingTypeId = Some(updatedPt.id.id),
+            version          = Some(updatedPt.version),
+            name             = Some(updatedPt.name),
+            description      = updatedPt.description,
+            enabled          = Some(updatedPt.enabled))).success
+      } yield event
     }
-
-    val event = v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failureNel,
-      pt => ProcessingTypeUpdatedEvent(
-        studyId          = cmd.studyId,
-        processingTypeId = pt.id.id,
-        version          = Some(pt.version),
-        name             = Some(pt.name),
-        description      = pt.description,
-        enabled          = Some(pt.enabled)).success
-    )
-
-    process(event){ wevent =>
-      recoverProcessingTypeUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    process(v) { applyProcessingTypeUpdatedEvent(_) }
   }
 
   private def processRemoveProcessingTypeCmd(cmd: RemoveProcessingTypeCmd): Unit = {
-    val v = update(cmd) { pt => pt.success }
+    val v = update(cmd) { pt =>
+      createStudyEvent(pt.studyId, cmd).withProcessingTypeRemoved(
+        ProcessingTypeRemovedEvent(Some(cmd.id))).success
+    }
+    process(v){ applyProcessingTypeRemovedEvent(_) }
+  }
 
-    val event = v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failureNel,
-      pt =>  ProcessingTypeRemovedEvent(cmd.studyId, cmd.id).success
-    )
+  def update
+    (cmd: ProcessingTypeModifyCommand)
+    (fn: ProcessingType => DomainValidation[StudyEvent])
+      : DomainValidation[StudyEvent] = {
+    for {
+      pt           <- processingTypeRepository.withId(StudyId(cmd.studyId), ProcessingTypeId(cmd.id))
+      notInUse     <- checkNotInUse(pt)
+      validVersion <- pt.requireVersion(cmd.expectedVersion)
+      event        <- fn(pt)
+    } yield event
+  }
 
-    process(event){ wevent =>
-      recoverProcessingTypeRemovedEvent(wevent.event, wevent.userId, wevent.dateTime)
+  private def applyProcessingTypeAddedEvent(event: StudyEvent): Unit = {
+    if (event.eventType.isProcessingTypeAdded) {
+      val addedEvent = event.getProcessingTypeAdded
+
+      processingTypeRepository.put(
+        ProcessingType(studyId      = StudyId(event.id),
+                       id           = ProcessingTypeId(addedEvent.getProcessingTypeId),
+                       version      = 0L,
+                       timeAdded    = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
+                       timeModified = None,
+                       name         = addedEvent.getName,
+                       description  = addedEvent.description,
+                       enabled      = addedEvent.getEnabled))
+      ()
+    } else {
+      log.error(s"invalid event type: $event")
     }
   }
 
-  private def recoverProcessingTypeAddedEvent
-    (event: ProcessingTypeAddedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    processingTypeRepository.put(ProcessingType(
-     studyId      = StudyId(event.studyId),
-     id           = ProcessingTypeId(event.processingTypeId),
-     version      = 0L,
-     timeAdded    = dateTime,
-     timeModified = None,
-     name         = event.getName,
-     description  = event.description,
-     enabled      = event.getEnabled))
-    ()
+  private def applyProcessingTypeUpdatedEvent(event: StudyEvent): Unit = {
+    if (event.eventType.isProcessingTypeUpdated) {
+      val updatedEvent = event.getProcessingTypeUpdated
+
+      processingTypeRepository.getByKey(ProcessingTypeId(updatedEvent.getProcessingTypeId)).fold(
+        err => log.error(s"updating processing type from event failed: $err"),
+        pt => {
+          processingTypeRepository.put(
+            pt.copy(version      = updatedEvent.getVersion,
+                    timeModified  = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
+                    name         = updatedEvent.getName,
+                    description  = updatedEvent.description,
+                    enabled      = updatedEvent.getEnabled))
+          ()
+        }
+      )
+    } else {
+      log.error(s"invalid event type: $event")
+    }
   }
 
-  private def recoverProcessingTypeUpdatedEvent
-    (event: ProcessingTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    processingTypeRepository.getByKey(ProcessingTypeId(event.processingTypeId)).fold(
-      err => log.error(s"updating processing type from event failed: $err"),
-      pt => {
-        processingTypeRepository.put(pt.copy(
-          version      = event.getVersion,
-          timeModified = Some(dateTime),
-          name         = event.getName,
-          description  = event.description,
-          enabled      = event.getEnabled))
-        ()
-      }
-    )
-  }
+  private def applyProcessingTypeRemovedEvent(event: StudyEvent): Unit = {
+    if (event.eventType.isProcessingTypeRemoved) {
 
-  private def recoverProcessingTypeRemovedEvent
-    (event: ProcessingTypeRemovedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    processingTypeRepository.getByKey(ProcessingTypeId(event.processingTypeId)).fold(
-      err => log.error(s"updating processing type from event failed: $err"),
-      sg => {
-        processingTypeRepository.remove(sg)
-        ()
-      }
-    )
+      processingTypeRepository.getByKey(
+        ProcessingTypeId(event.getProcessingTypeRemoved.getProcessingTypeId))
+      .fold(
+        err => log.error(s"updating processing type from event failed: $err"),
+        pt => {
+          processingTypeRepository.remove(pt)
+          ()
+        }
+      )
+    } else {
+      log.error(s"invalid event type: $event")
+    }
   }
 
   val ErrMsgNameExists = "processing type with name already exists"

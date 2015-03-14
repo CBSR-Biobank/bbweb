@@ -1,3 +1,4 @@
+/* global define */
 define(['../module', 'angular', 'underscore'], function(module, angular, _) {
   'use strict';
 
@@ -229,3 +230,8 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
   }
 
 });
+
+/* Local Variables:  */
+/* mode: js          */
+/* End:              */
+

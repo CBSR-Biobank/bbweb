@@ -98,7 +98,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
                          description = newCentre.description)).success
     } yield event
 
-    processNew (event) { applyCentreAddedEvent(_) }
+    process (event) { applyCentreAddedEvent(_) }
   }
 
   private def processUpdateCentreCmd(cmd: UpdateCentreCmd): Unit = {
@@ -117,7 +117,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
                            description = centre.description)).success
     )
 
-    processNew (event) { applyCentreUpdatedEvent(_) }
+    process (event) { applyCentreUpdatedEvent(_) }
   }
 
   private def processEnableCentreCmd(cmd: EnableCentreCmd): Unit = {
@@ -130,7 +130,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
           CentreEnabledEvent(version = Some(centre.version))).success
     )
 
-    processNew (event) { applyCentreEnabledEvent(_) }
+    process (event) { applyCentreEnabledEvent(_) }
   }
 
   private def processDisableCentreCmd(cmd: DisableCentreCmd): Unit = {
@@ -141,7 +141,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
         CentreDisabledEvent(version = Some(centre.version))).success
     )
 
-    processNew (event) { applyCentreDisabledEvent(_) }
+    process (event) { applyCentreDisabledEvent(_) }
   }
 
   private def processAddCentreLocationCmd(cmd: AddCentreLocationCmd): Unit = {
@@ -161,7 +161,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
                                  countryIsoCode = Some(cmd.countryIsoCode))).success
     } yield event
 
-    processNew (event) { applyCentreLocationAddedEvent(_) }
+    process (event) { applyCentreLocationAddedEvent(_) }
   }
 
   private def processRemoveCentreLocationCmd(cmd: RemoveCentreLocationCmd): Unit = {
@@ -174,7 +174,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
       } yield event
     )
 
-    processNew (event) { applyCentreLocationRemovedEvent(_) }
+    process (event) { applyCentreLocationRemovedEvent(_) }
   }
 
   private def processAddStudyToCentreCmd(cmd: AddStudyToCentreCmd): Unit = {
@@ -185,7 +185,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
         StudyAddedToCentreEvent(Some(cmd.studyId))).success
     } yield event
 
-    processNew (event) { applyCentreAddedToStudyEvent(_) }
+    process (event) { applyCentreAddedToStudyEvent(_) }
   }
 
   private def processRemoveStudyFromCentreCmd(cmd: RemoveStudyFromCentreCmd): Unit = {
@@ -196,7 +196,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
         StudyRemovedFromCentreEvent(Some(cmd.studyId))).success
     } yield event
 
-    processNew (event) { applyCentreRemovedFromStudyEvent(_) }
+    process (event) { applyCentreRemovedFromStudyEvent(_) }
   }
 
   private def applyCentreAddedEvent(event: CentreEvent): Unit = {

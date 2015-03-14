@@ -41,16 +41,16 @@ class ProcessingTypeProcessorSpec extends TestFixture {
 
   var disabledStudy: DisabledStudy = null
 
-  private def askAddCommand(procType: ProcessingType): DomainValidation[ProcessingTypeAddedEvent] = {
+  private def askAddCommand(procType: ProcessingType): DomainValidation[StudyEvent] = {
     val cmd = AddProcessingTypeCmd(None,
                                    procType.studyId.id,
                                    procType.name,
                                    procType.description,
                                    procType.enabled)
-    ask(studiesProcessor, cmd).mapTo[DomainValidation[ProcessingTypeAddedEvent]].futureValue
+    ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyEvent]].futureValue
   }
 
-  private def askUpdateCommand(procType: ProcessingType): DomainValidation[ProcessingTypeUpdatedEvent] = {
+  private def askUpdateCommand(procType: ProcessingType): DomainValidation[StudyEvent] = {
     val cmd = UpdateProcessingTypeCmd(None,
                                       procType.studyId.id,
                                       procType.id.id,
@@ -58,15 +58,15 @@ class ProcessingTypeProcessorSpec extends TestFixture {
                                       procType.name,
                                       procType.description,
                                       procType.enabled)
-    ask(studiesProcessor, cmd).mapTo[DomainValidation[ProcessingTypeUpdatedEvent]].futureValue
+    ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyEvent]].futureValue
   }
 
-  private def askRemoveCommand(procType: ProcessingType): DomainValidation[ProcessingTypeRemovedEvent] = {
+  private def askRemoveCommand(procType: ProcessingType): DomainValidation[StudyEvent] = {
     val cmd = RemoveProcessingTypeCmd(None,
                                       procType.studyId.id,
                                       procType.id.id,
                                       procType.version)
-    ask(studiesProcessor, cmd).mapTo[DomainValidation[ProcessingTypeRemovedEvent]].futureValue
+    ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyEvent]].futureValue
   }
 
   // create the study to be used for each tests*
@@ -82,15 +82,21 @@ class ProcessingTypeProcessorSpec extends TestFixture {
       val procType = factory.createProcessingType
 
       askAddCommand(procType) mustSucceed { event =>
-        event mustBe a[ProcessingTypeAddedEvent]
-        event must have(
+        event mustBe a[StudyEvent]
+        event.id must be (procType.studyId.id)
+
+        val addedEvent = event.getProcessingTypeAdded
+
+        addedEvent must have(
           'name        (Some(procType.name)),
           'description (procType.description),
           'enabled     (Some(procType.enabled)))
 
         processingTypeRepository.allForStudy(disabledStudy.id) must have size 1
         processingTypeRepository.withId(
-          disabledStudy.id, ProcessingTypeId(event.processingTypeId)) mustSucceed { repoPt =>
+          disabledStudy.id,
+          ProcessingTypeId(addedEvent.getProcessingTypeId))
+        .mustSucceed { repoPt =>
           repoPt.version mustBe(0)
           checkTimeStamps(repoPt, DateTime.now, None)
         }
@@ -116,15 +122,20 @@ class ProcessingTypeProcessorSpec extends TestFixture {
       val procType2 = procType.copy(name = nameGenerator.next[String])
 
       askUpdateCommand(procType2) mustSucceed { event =>
-        event mustBe a[ProcessingTypeUpdatedEvent]
-        event must have(
+        event mustBe a[StudyEvent]
+        event.id must be (procType2.studyId.id)
+
+        val updatedEvent = event.getProcessingTypeUpdated
+        updatedEvent must have(
           'name        (Some(procType2.name)),
           'description (procType2.description),
           'enabled     (Some(procType2.enabled)))
 
         processingTypeRepository.allForStudy(disabledStudy.id) must have size 1
         processingTypeRepository.withId(
-          disabledStudy.id, ProcessingTypeId(event.processingTypeId)) mustSucceed { repoPt =>
+          disabledStudy.id,
+          ProcessingTypeId(updatedEvent.getProcessingTypeId))
+        .mustSucceed { repoPt =>
           repoPt.version mustBe(1)
           checkTimeStamps(repoPt, procType.timeAdded, DateTime.now)
         }
@@ -166,8 +177,13 @@ class ProcessingTypeProcessorSpec extends TestFixture {
       processingTypeRepository.put(procType)
 
       askRemoveCommand(procType) mustSucceed { event =>
-        event mustBe a[ProcessingTypeRemovedEvent]
-        val v = processingTypeRepository.withId(disabledStudy.id, ProcessingTypeId(event.processingTypeId))
+        event mustBe a[StudyEvent]
+        event.id must be (procType.studyId.id)
+
+        val removedEvent = event.getProcessingTypeRemoved
+        val v = processingTypeRepository.withId(
+          disabledStudy.id,
+          ProcessingTypeId(removedEvent.getProcessingTypeId))
         v mustFail "processing type does not exist"
       }
     }

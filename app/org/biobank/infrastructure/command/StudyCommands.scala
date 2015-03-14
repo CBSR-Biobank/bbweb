@@ -169,7 +169,7 @@ object StudyCommands {
       extends StudyAnnotationTypeCommand
 
   case class UpdateCollectionEventAnnotationTypeCmd(
-    userId:    Option[String],
+    userId:          Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long,
@@ -181,7 +181,7 @@ object StudyCommands {
       extends StudyAnnotationTypeModifyCommand
 
   case class RemoveCollectionEventAnnotationTypeCmd(
-    userId:    Option[String],
+    userId:          Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long)
@@ -189,7 +189,7 @@ object StudyCommands {
 
   // participant annotation type
   case class AddParticipantAnnotationTypeCmd(
-    userId:    Option[String],
+    userId:        Option[String],
     studyId:       String,
     name:          String,
     description:   Option[String],

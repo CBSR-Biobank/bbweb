@@ -20,6 +20,7 @@ import scaldi.{Injectable, Injector}
 
 import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 trait ParticipantsService {
 
@@ -28,10 +29,10 @@ trait ParticipantsService {
   def getByUniqueId(studyId: String, uniqueId: String): DomainValidation[Participant]
 
   def add(cmd: AddParticipantCmd)(implicit userId: UserId)
-      : Future[DomainValidation[ParticipantAddedEvent]]
+      : Future[DomainValidation[Participant]]
 
   def update(cmd: UpdateParticipantCmd)(implicit userId: UserId)
-      : Future[DomainValidation[ParticipantUpdatedEvent]]
+      : Future[DomainValidation[Participant]]
 
   /** Returns true if a participant with the 'uniqueId' does not exist in the system, false otherwise.
     */
@@ -64,17 +65,35 @@ class ParticipantsServiceImpl(implicit inj: Injector)
   }
 
   def add(cmd: AddParticipantCmd)(implicit userId: UserId)
-      : Future[DomainValidation[ParticipantAddedEvent]] = {
-    ask(processor, cmd).mapTo[DomainValidation[ParticipantAddedEvent]]
+      : Future[DomainValidation[Participant]] = {
+    replyWithParticipant(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
   }
 
   def update(cmd: UpdateParticipantCmd)(implicit userId: UserId)
-      : Future[DomainValidation[ParticipantUpdatedEvent]] = {
-    ask(processor, cmd).mapTo[DomainValidation[ParticipantUpdatedEvent]]
+      : Future[DomainValidation[Participant]] = {
+    replyWithParticipant(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
   }
 
   def checkUnique(uniqueId: String): DomainValidation[Boolean] = {
     val isUnique = ! participantRepository.getValues.exists(p => p.uniqueId == uniqueId)
     isUnique.success
   }
+
+  private def replyWithParticipant(future: Future[DomainValidation[StudyEvent]])
+      : Future[DomainValidation[Participant]] = {
+    future map { validation =>
+      for {
+        event <- validation
+        pt <- {
+          val pId = if (event.eventType.isParticipantAdded) {
+            event.getParticipantAdded.getParticipantId
+          } else {
+            event.getParticipantUpdated.getParticipantId
+          }
+          participantRepository.getByKey(ParticipantId(pId))
+        }
+      } yield pt
+    }
+  }
+
 }

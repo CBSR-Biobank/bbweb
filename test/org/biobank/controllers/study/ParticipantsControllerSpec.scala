@@ -159,7 +159,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
 
     "POST /studies/{studyId}/participants" must {
 
-      "add a participant with no annotation types" in {
+      "add a participant with no annotation types" taggedAs(Tag("1")) in {
 
         val study = factory.createEnabledStudy
         studyRepository.put(study)

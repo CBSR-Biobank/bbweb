@@ -11,6 +11,7 @@ import org.biobank.domain.AnnotationValueType._
 
 import akka.persistence.SnapshotOffer
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import scalaz._
@@ -29,6 +30,8 @@ import scalaz.Validation.FlatMap._
 class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
     extends StudyAnnotationTypeProcessor[SpecimenLinkAnnotationType]
     with AkkaInjectable {
+  import org.biobank.infrastructure.event.StudyEventsUtil._
+  import StudyEvent.EventType
 
   override def persistenceId = "specimen-link-annotation-type-processor-id"
 
@@ -43,14 +46,13 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
     * processed to recreate the current state of the aggregate.
     */
   val receiveRecover: Receive = {
-    case wevent: WrappedEvent[_] =>
-      wevent.event match {
-        case event: SpecimenLinkAnnotationTypeAddedEvent =>
-          recoverSpecimenLinkAnnotationTypeAddedEvent(event, wevent.userId, wevent.dateTime)
-        case event: SpecimenLinkAnnotationTypeUpdatedEvent =>
-          recoverSpecimenLinkAnnotationTypeUpdatedEvent(event, wevent.userId, wevent.dateTime)
-        case event: SpecimenLinkAnnotationTypeRemovedEvent =>
-          recoverSpecimenLinkAnnotationTypeRemovedEvent(event, wevent.userId, wevent.dateTime)
+    case event: StudyEvent => event.eventType match {
+      case et: EventType.SpecimenLinkAnnotationTypeAdded =>
+        applySpecimenLinkAnnotationTypeAddedEvent(event)
+      case et: EventType.SpecimenLinkAnnotationTypeUpdated =>
+        applySpecimenLinkAnnotationTypeUpdatedEvent(event)
+      case et: EventType.SpecimenLinkAnnotationTypeRemoved =>
+        applySpecimenLinkAnnotationTypeRemovedEvent(event)
 
         case event => log.error(s"event not handled: $event")
       }
@@ -75,20 +77,6 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
     case cmd => log.error(s"SpecimenLinkAnnotationTypeProcessor: message not handled: $cmd")
   }
 
-  /** Updates to annotation types only allowed if they are not being used by any participants.
-    */
-  def update
-    (cmd: StudyAnnotationTypeModifyCommand)
-    (fn: SpecimenLinkAnnotationType => DomainValidation[SpecimenLinkAnnotationType])
-      : DomainValidation[SpecimenLinkAnnotationType] = {
-    for {
-      annotType        <- annotationTypeRepository.withId(StudyId(cmd.studyId), cmd.id)
-      notInUse         <- checkNotInUse(annotType)
-      validVersion     <- annotType.requireVersion( cmd.expectedVersion)
-      updatedAnnotType <- fn(annotType)
-    } yield updatedAnnotType
-  }
-
   private def processAddSpecimenLinkAnnotationTypeCmd
     (cmd: AddSpecimenLinkAnnotationTypeCmd): Unit = {
     val timeNow = DateTime.now
@@ -98,19 +86,17 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
       newItem <- SpecimenLinkAnnotationType.create(
         StudyId(cmd.studyId), id, -1L, timeNow, cmd.name, cmd.description, cmd.valueType,
         cmd.maxValueCount, cmd.options)
-      event <- SpecimenLinkAnnotationTypeAddedEvent(
-        studyId          = newItem.studyId.id,
-        annotationTypeId = newItem.id.id,
-        name             = Some(newItem.name),
-        description      = newItem.description,
-        valueType        = Some(newItem.valueType.toString),
-        maxValueCount    = newItem.maxValueCount,
-        options          = newItem.options).success
+      event <- createStudyEvent(newItem.studyId, cmd).withSpecimenLinkAnnotationTypeAdded(
+        SpecimenLinkAnnotationTypeAddedEvent(
+          annotationTypeId = Some(newItem.id.id),
+          name             = Some(newItem.name),
+          description      = newItem.description,
+          valueType        = Some(newItem.valueType.toString),
+          maxValueCount    = newItem.maxValueCount,
+          options          = newItem.options)).success
     } yield event
 
-    process(event){ wevent =>
-      recoverSpecimenLinkAnnotationTypeAddedEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    process(event) { applySpecimenLinkAnnotationTypeAddedEvent(_) }
   }
 
 
@@ -120,81 +106,97 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
     val v = update(cmd) { at =>
       for {
         nameAvailable <- nameAvailable(cmd.name, AnnotationTypeId(cmd.id))
-        newItem <- at.update(cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options)
-      } yield newItem
+        newItem <- at.update(cmd.name,
+                             cmd.description,
+                             cmd.valueType,
+                             cmd.maxValueCount,
+                             cmd.options)
+        event <- createStudyEvent(newItem.studyId, cmd).withSpecimenLinkAnnotationTypeUpdated(
+          SpecimenLinkAnnotationTypeUpdatedEvent(
+            annotationTypeId = Some(newItem.id.id),
+            version          = Some(newItem.version),
+            name             = Some(newItem.name),
+            description      = newItem.description,
+            valueType        = Some(newItem.valueType.toString),
+            maxValueCount    = newItem.maxValueCount,
+            options          = newItem.options)).success
+      } yield event
     }
 
-    val event = v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failureNel,
-      at => SpecimenLinkAnnotationTypeUpdatedEvent(
-        studyId          = at.studyId.id,
-        annotationTypeId = at.id.id,
-        version          = Some(at.version),
-        name             = Some(at.name),
-        description      = at.description,
-        valueType        = Some(at.valueType.toString),
-        maxValueCount    = at.maxValueCount,
-        options          = at.options).success
-    )
-    process(event){ wevent =>
-      recoverSpecimenLinkAnnotationTypeUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    process(v) { applySpecimenLinkAnnotationTypeUpdatedEvent(_) }
   }
 
   private def processRemoveSpecimenLinkAnnotationTypeCmd
     (cmd: RemoveSpecimenLinkAnnotationTypeCmd): Unit = {
-    val v = update(cmd) { at => at.success }
+    val v = update(cmd) { at =>
+      createStudyEvent(at.studyId, cmd).withSpecimenLinkAnnotationTypeRemoved(
+        SpecimenLinkAnnotationTypeRemovedEvent(Some(at.id.id))).success
+    }
+    process(v) { applySpecimenLinkAnnotationTypeRemovedEvent(_) }
+  }
 
-    val event = v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failureNel,
-      at =>  SpecimenLinkAnnotationTypeRemovedEvent(at.studyId.id, at.id.id).success
-    )
-    process(event){ wevent =>
-      recoverSpecimenLinkAnnotationTypeRemovedEvent(wevent.event, wevent.userId, wevent.dateTime)
+  /** Updates to annotation types only allowed if they are not being used by any participants.
+    */
+  def update
+    (cmd: StudyAnnotationTypeModifyCommand)
+    (fn: SpecimenLinkAnnotationType => DomainValidation[StudyEvent])
+      : DomainValidation[StudyEvent] = {
+    for {
+      annotType    <- annotationTypeRepository.withId(StudyId(cmd.studyId), cmd.id)
+      notInUse     <- checkNotInUse(annotType)
+      validVersion <- annotType.requireVersion( cmd.expectedVersion)
+      event        <- fn(annotType)
+    } yield event
+  }
+
+  private def applySpecimenLinkAnnotationTypeAddedEvent(event: StudyEvent) : Unit = {
+    if (event.eventType.isSpecimenLinkAnnotationTypeAdded) {
+      val addedEvent = event.getSpecimenLinkAnnotationTypeAdded
+
+      annotationTypeRepository.put(
+        SpecimenLinkAnnotationType(
+          studyId       = StudyId(event.id),
+          id            = AnnotationTypeId(addedEvent.getAnnotationTypeId),
+          version       = 0L,
+          timeAdded     = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
+          timeModified  = None,
+          name          = addedEvent.getName,
+          description   = addedEvent.description,
+          valueType     = AnnotationValueType.withName(addedEvent.getValueType),
+          maxValueCount = addedEvent.maxValueCount,
+          options       = addedEvent.options))
+      ()
+    } else {
+      log.error(s"invalid event type: $event")
     }
   }
 
+  private def applySpecimenLinkAnnotationTypeUpdatedEvent(event: StudyEvent) : Unit = {
+    if (event.eventType.isSpecimenLinkAnnotationTypeUpdated) {
+      val updatedEvent = event.getSpecimenLinkAnnotationTypeUpdated
 
-  private def recoverSpecimenLinkAnnotationTypeAddedEvent
-    (event: SpecimenLinkAnnotationTypeAddedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    annotationTypeRepository.put(SpecimenLinkAnnotationType(
-      studyId       = StudyId(event.studyId),
-      id            = AnnotationTypeId(event.annotationTypeId),
-      version       = 0L,
-      timeAdded     = dateTime,
-      timeModified  = None,
-      name          = event.getName,
-      description   = event.description,
-      valueType     = AnnotationValueType.withName(event.getValueType),
-      maxValueCount = event.maxValueCount,
-      options       = event.options))
-    ()
+      annotationTypeRepository.getByKey(AnnotationTypeId(updatedEvent.getAnnotationTypeId)).fold(
+        err => log.error(s"updating annotatiotn type from event failed: $err"),
+        at => {
+          annotationTypeRepository.put(
+            at.copy(version       = updatedEvent.getVersion,
+                    name          = updatedEvent.getName,
+                    description   = updatedEvent.description,
+                    valueType     = AnnotationValueType.withName(updatedEvent.getValueType),
+                    maxValueCount = updatedEvent.maxValueCount,
+                    options       = updatedEvent.options,
+                    timeModified  = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
+    } else {
+      log.error(s"invalid event type: $event")
+    }
   }
 
-  private def recoverSpecimenLinkAnnotationTypeUpdatedEvent
-    (event: SpecimenLinkAnnotationTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId)).fold(
-      err => log.error(s"updating annotatiotn type from event failed: $err"),
-      at => {
-        annotationTypeRepository.put(at.copy(
-          version       = event.getVersion,
-          name          = event.getName,
-          description   = event.description,
-          valueType     = AnnotationValueType.withName(event.getValueType),
-          maxValueCount = event.maxValueCount,
-          options       = event.options,
-          timeModified  = Some(dateTime)))
-        ()
-      }
-    )
-  }
-
-  private def recoverSpecimenLinkAnnotationTypeRemovedEvent
-    (event: SpecimenLinkAnnotationTypeRemovedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    recoverStudyAnnotationTypeRemovedEvent(AnnotationTypeId(event.annotationTypeId))
+  private def applySpecimenLinkAnnotationTypeRemovedEvent(event: StudyEvent) : Unit = {
+    applyStudyAnnotationTypeRemovedEvent(
+      AnnotationTypeId(event.getSpecimenLinkAnnotationTypeRemoved.getAnnotationTypeId))
   }
 
   def checkNotInUse(annotationType: SpecimenLinkAnnotationType)

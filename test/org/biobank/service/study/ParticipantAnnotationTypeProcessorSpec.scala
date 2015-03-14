@@ -54,27 +54,31 @@ class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
         None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options, false)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
       v mustSucceed { event =>
-        event mustBe a[ParticipantAnnotationTypeAddedEvent]
-        event must have (
-          'studyId       (annotType.studyId.id),
+        event mustBe a[StudyEvent]
+        event.id must be (annotType.studyId.id)
+
+        val addedEvent = event.getParticipantAnnotationTypeAdded
+        addedEvent must have (
           'name          (Some(annotType.name)),
           'description   (annotType.description),
           'valueType     (Some(annotType.valueType.toString)),
           'maxValueCount (annotType.maxValueCount)
         )
 
-        event.options must have size annotType.options.size
+        addedEvent.options must have size annotType.options.size
         annotType.options.map { item =>
-          event.options must contain (item)
+          addedEvent.options must contain (item)
         }
 
         participantAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
         participantAnnotationTypeRepository.withId(
-          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) mustSucceed { at =>
+          disabledStudy.id,
+          AnnotationTypeId(addedEvent.getAnnotationTypeId))
+        .mustSucceed { at =>
           at.version mustBe(0)
           checkTimeStamps(at, DateTime.now, None)
         }
@@ -89,7 +93,7 @@ class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
         None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options, false)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
       v mustFail s"invalid study id: ${study2.id.id}"
@@ -103,7 +107,7 @@ class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
         None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options, true)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeAddedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
       v  mustFail "name already exists"
@@ -119,13 +123,15 @@ class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
         None, annotType.studyId.id, annotType.id.id, annotType.version, annotType2.name,
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
       v mustSucceed { event =>
-        event mustBe a[ParticipantAnnotationTypeUpdatedEvent]
-        event must have(
-          'studyId       (annotType.studyId.id),
+        event mustBe a[StudyEvent]
+        event.id must be (annotType.studyId.id)
+
+        val updatedEvent = event.getParticipantAnnotationTypeUpdated
+        updatedEvent must have(
           'version       (Some(annotType.version + 1)),
           'name          (Some(annotType2.name)),
           'description   (annotType2.description),
@@ -133,15 +139,17 @@ class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
           'maxValueCount (annotType2.maxValueCount)
         )
 
-        event.options must have size annotType2.options.size
+        updatedEvent.options must have size annotType2.options.size
         // verify each option
         annotType2.options.map { item =>
-          event.options must contain (item)
+          updatedEvent.options must contain (item)
         }
 
         participantAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
         participantAnnotationTypeRepository.withId(
-          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) mustSucceed { at =>
+          disabledStudy.id,
+          AnnotationTypeId(updatedEvent.getAnnotationTypeId))
+        .mustSucceed { at =>
           at.version mustBe(1)
           checkTimeStamps(at, annotType.timeAdded, DateTime.now)
         }
@@ -161,7 +169,7 @@ class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
         None, annotType2.studyId.id, annotType2.id.id, annotType2.version, dupliacteName,
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
       v mustFail "name already exists"
@@ -178,7 +186,7 @@ class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
         None, study2.id.id, annotType.id.id, annotType.version, annotType.name,
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
       v mustFail "study does not have annotation type"
@@ -192,7 +200,7 @@ class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
         None, annotType.studyId.id, annotType.id.id, annotType.version - 1, annotType.name,
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeUpdatedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
       v mustFail "doesn't match current version"
@@ -205,13 +213,15 @@ class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
       val cmd = RemoveParticipantAnnotationTypeCmd(
         None, annotType.studyId.id, annotType.id.id, annotType.version)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
       v mustSucceed { event =>
-        event mustBe a[ParticipantAnnotationTypeRemovedEvent]
-        event.studyId mustBe (annotType.studyId.id)
-        event.annotationTypeId mustBe (annotType.id.id)
+        event mustBe a[StudyEvent]
+        event.id must be (annotType.studyId.id)
+
+        val removedEvent = event.getParticipantAnnotationTypeRemoved
+        removedEvent.getAnnotationTypeId mustBe (annotType.id.id)
       }
     }
 
@@ -222,7 +232,7 @@ class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
       val cmd = RemoveParticipantAnnotationTypeCmd(
         None, annotType.studyId.id, annotType.id.id, annotType.version - 1)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[ParticipantAnnotationTypeRemovedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
       v mustFail "expected version doesn't match current version"

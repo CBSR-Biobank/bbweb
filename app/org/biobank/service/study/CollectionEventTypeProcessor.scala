@@ -21,6 +21,7 @@ import org.biobank.infrastructure.event.StudyEvents._
 
 import akka.persistence.SnapshotOffer
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import scalaz._
@@ -37,6 +38,8 @@ import scalaz.Validation.FlatMap._
   * It is a child actor of [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
   */
 class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
+  import org.biobank.infrastructure.event.StudyEventsUtil._
+  import StudyEvent.EventType
 
   override def persistenceId = "collection-event-processor-id"
 
@@ -53,11 +56,10 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     * processed to recreate the current state of the aggregate.
     */
   val receiveRecover: Receive = {
-    case wevent: WrappedEvent[_] =>
-      wevent.event match {
-        case event: CollectionEventTypeAddedEvent =>   recoverCollectionEventTypeAddedEvent(event, wevent.userId, wevent.dateTime)
-        case event: CollectionEventTypeUpdatedEvent => recoverCollectionEventTypeUpdatedEvent(event, wevent.userId, wevent.dateTime)
-        case event: CollectionEventTypeRemovedEvent => recoverCollectionEventTypeRemovedEvent(event, wevent.userId, wevent.dateTime)
+    case event: StudyEvent => event.eventType match {
+        case et: EventType.CollectionEventTypeAdded =>   applyCollectionEventTypeAddedEvent(event)
+        case et: EventType.CollectionEventTypeUpdated => applyCollectionEventTypeUpdatedEvent(event)
+        case et: EventType.CollectionEventTypeRemoved => applyCollectionEventTypeRemovedEvent(event)
 
         case event => log.error(s"event not handled: $event")
       }
@@ -83,17 +85,6 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     case cmd => log.error(s"CollectionEventTypeProcessor: message not handled: $cmd")
   }
 
-  def update
-    (cmd: CollectionEventTypeModifyCommand)
-    (fn: CollectionEventType => DomainValidation[CollectionEventType])
-      : DomainValidation[CollectionEventType] = {
-    for {
-      cet <- collectionEventTypeRepository.withId(StudyId(cmd.studyId), CollectionEventTypeId(cmd.id))
-      validVersion <-  cet.requireVersion(cmd.expectedVersion)
-      updatedCet   <- fn(cet)
-    } yield updatedCet
-  }
-
   private def processAddCollectionEventTypeCmd(cmd: AddCollectionEventTypeCmd)
       : Unit = {
     val timeNow = DateTime.now
@@ -107,19 +98,17 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
         cmd.specimenGroupData, cmd.annotationTypeData)
       validSgData <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
       validAtData <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
-      event <- CollectionEventTypeAddedEvent(
-        studyId               = cmd.studyId,
-        collectionEventTypeId = id.id,
-        name                  = Some(newItem.name),
-        description           = newItem.description,
-        recurring             = Some(newItem.recurring),
-        specimenGroupData     = convertSpecimenGroupDataToEvent(newItem.specimenGroupData),
-        annotationTypeData    = convertAnnotationTypeDataToEvent(newItem.annotationTypeData)).success
+      event <- createStudyEvent(newItem.studyId, cmd).withCollectionEventTypeAdded(
+        CollectionEventTypeAddedEvent(
+          collectionEventTypeId = Some(id.id),
+          name                  = Some(newItem.name),
+          description           = newItem.description,
+          recurring             = Some(newItem.recurring),
+          specimenGroupData     = convertSpecimenGroupDataToEvent(newItem.specimenGroupData),
+          annotationTypeData    = convertAnnotationTypeDataToEvent(newItem.annotationTypeData))).success
     } yield event
 
-    process(event){ wevent =>
-      recoverCollectionEventTypeAddedEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    process(event) { applyCollectionEventTypeAddedEvent(_) }
   }
 
   private def processUpdateCollectionEventTypeCmd(cmd: UpdateCollectionEventTypeCmd)
@@ -135,89 +124,107 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
                                     cmd.recurring,
                                     cmd.specimenGroupData,
                                     cmd.annotationTypeData)
-      } yield newItem
+        event         <-createStudyEvent(newItem.studyId, cmd).withCollectionEventTypeUpdated(
+          CollectionEventTypeUpdatedEvent(
+            collectionEventTypeId = Some(newItem.id.id),
+            version               = Some(newItem.version),
+            name                  = Some(newItem.name),
+            description           = newItem.description,
+            recurring             = Some(newItem.recurring),
+            specimenGroupData     = convertSpecimenGroupDataToEvent(newItem.specimenGroupData),
+            annotationTypeData    = convertAnnotationTypeDataToEvent(newItem.annotationTypeData))).success
+      } yield event
     }
 
-    val event = v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failureNel,
-      cet => CollectionEventTypeUpdatedEvent(
-        studyId               = cmd.studyId,
-        collectionEventTypeId = cet.id.id,
-        version               = Some(cet.version),
-        name                  = Some(cet.name),
-        description           = cet.description,
-        recurring             = Some(cet.recurring),
-        specimenGroupData     = convertSpecimenGroupDataToEvent(cet.specimenGroupData),
-        annotationTypeData    = convertAnnotationTypeDataToEvent(cet.annotationTypeData)).success
-    )
-
-    process(event){ wevent =>
-      recoverCollectionEventTypeUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    process(v){ applyCollectionEventTypeUpdatedEvent(_) }
   }
 
   private def processRemoveCollectionEventTypeCmd(cmd: RemoveCollectionEventTypeCmd)
       : Unit = {
-    val v = update(cmd) { at => at.success }
+    val v = update(cmd) { cet =>
+      createStudyEvent(cet.studyId, cmd).withCollectionEventTypeRemoved(
+        CollectionEventTypeRemovedEvent(Some(cet.id.id))).success
+    }
 
-    val event = v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failureNel,
-      cet =>  CollectionEventTypeRemovedEvent(cet.studyId.id, cet.id.id).success
-    )
+    process(v){ applyCollectionEventTypeRemovedEvent(_) }
+  }
 
-    process(event){ wevent =>
-      recoverCollectionEventTypeRemovedEvent(wevent.event, wevent.userId, wevent.dateTime)
+  def update
+    (cmd: CollectionEventTypeModifyCommand)
+    (fn: CollectionEventType => DomainValidation[StudyEvent])
+      : DomainValidation[StudyEvent] = {
+    for {
+      cet          <- collectionEventTypeRepository.withId(StudyId(cmd.studyId),
+                                                           CollectionEventTypeId(cmd.id))
+      validVersion <-  cet.requireVersion(cmd.expectedVersion)
+      event        <- fn(cet)
+    } yield event
+  }
+
+  private def applyCollectionEventTypeAddedEvent(event: StudyEvent): Unit = {
+    if (event.eventType.isCollectionEventTypeAdded) {
+      val addedEvent = event.getCollectionEventTypeAdded
+
+      collectionEventTypeRepository.put(
+        CollectionEventType(
+          studyId            = StudyId(event.id),
+          id                 = CollectionEventTypeId(addedEvent.getCollectionEventTypeId),
+          version            = 0L,
+          timeAdded          = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
+          timeModified       = None,
+          name               = addedEvent.getName,
+          description        = addedEvent.description,
+          recurring          = addedEvent.getRecurring,
+          specimenGroupData  = convertSpecimenGroupDataFromEvent(addedEvent.specimenGroupData),
+          annotationTypeData = convertCollectionEventTypeAnnotationTypeDataFromEvent(addedEvent.annotationTypeData)
+        ))
+      ()
+    } else {
+      log.error(s"invalid event type: $event")
     }
   }
 
-  private def recoverCollectionEventTypeAddedEvent
-    (event: CollectionEventTypeAddedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    collectionEventTypeRepository.put(CollectionEventType(
-      studyId            = StudyId(event.studyId),
-      id                 = CollectionEventTypeId(event.collectionEventTypeId),
-      version            = 0L,
-      timeAdded          = dateTime,
-      timeModified       = None,
-      name               = event.getName,
-      description        = event.description,
-      recurring          = event.getRecurring,
-      specimenGroupData  = convertSpecimenGroupDataFromEvent(event.specimenGroupData),
-      annotationTypeData = convertCollectionEventTypeAnnotationTypeDataFromEvent(event.annotationTypeData)
-    ))
-    ()
+private def applyCollectionEventTypeUpdatedEvent(event: StudyEvent): Unit = {
+    if (event.eventType.isCollectionEventTypeUpdated) {
+      val updatedEvent = event.getCollectionEventTypeUpdated
+
+      collectionEventTypeRepository.getByKey(
+        CollectionEventTypeId(updatedEvent.getCollectionEventTypeId)).fold(
+        err => log.error(s"updating collection event type from event failed: $err"),
+        cet => {
+          collectionEventTypeRepository.put(
+            cet.copy(
+              version            = updatedEvent.getVersion,
+              timeModified       = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
+              name               = updatedEvent.getName,
+              description        = updatedEvent.description,
+              recurring          = updatedEvent.getRecurring,
+              specimenGroupData  = convertSpecimenGroupDataFromEvent(updatedEvent.specimenGroupData),
+              annotationTypeData = convertCollectionEventTypeAnnotationTypeDataFromEvent(updatedEvent.annotationTypeData)
+            ))
+          ()
+        }
+      )
+    } else {
+      log.error(s"invalid event type: $event")
+    }
   }
 
-  private def recoverCollectionEventTypeUpdatedEvent
-    (event: CollectionEventTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.collectionEventTypeId)).fold(
-      err => log.error(s"updating collection event type from event failed: $err"),
-      cet => {
-        collectionEventTypeRepository.put(cet.copy(
-          version            = event.getVersion,
-          timeModified       = Some(dateTime),
-          name               = event.getName,
-          description        = event.description,
-          recurring          = event.getRecurring,
-          specimenGroupData  = convertSpecimenGroupDataFromEvent(event.specimenGroupData),
-          annotationTypeData = convertCollectionEventTypeAnnotationTypeDataFromEvent(event.annotationTypeData)
-        ))
-        ()
-      }
-    )
-  }
+  private def applyCollectionEventTypeRemovedEvent(event: StudyEvent): Unit = {
+    if (event.eventType.isCollectionEventTypeRemoved) {
+      val removedEvent = event.getCollectionEventTypeRemoved
 
-  private def recoverCollectionEventTypeRemovedEvent
-    (event: CollectionEventTypeRemovedEvent, userId: Option[UserId], dateTime: DateTime)
-      : Unit = {
-    collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.collectionEventTypeId)).fold(
-      err => log.error(s"updating collection event type from event failed: $err"),
-      cet => {
-        collectionEventTypeRepository.remove(cet)
-        ()
-      }
-    )
+      collectionEventTypeRepository.getByKey(
+        CollectionEventTypeId(removedEvent.getCollectionEventTypeId)).fold(
+        err => log.error(s"updating collection event type from event failed: $err"),
+        cet => {
+          collectionEventTypeRepository.remove(cet)
+          ()
+        }
+      )
+    } else {
+      log.error(s"invalid event type: $event")
+    }
   }
 
   val ErrMsgNameExists = "collection event type with name already exists"
@@ -273,7 +280,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
       : Seq[CollectionEventTypeAddedEvent.SpecimenGroupData] = {
     sgData.map { sg =>
       CollectionEventTypeAddedEvent.SpecimenGroupData(
-        specimenGroupId = sg.specimenGroupId,
+        specimenGroupId = Some(sg.specimenGroupId),
         maxCount        = Some(sg.maxCount),
         amount          = sg.amount.map(_.doubleValue)
       )
@@ -285,7 +292,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
       : List[CollectionEventTypeSpecimenGroupData] = {
     sgData.map { sg =>
       CollectionEventTypeSpecimenGroupData(
-        specimenGroupId = sg.specimenGroupId,
+        specimenGroupId = sg.getSpecimenGroupId,
         maxCount        = sg.getMaxCount,
         amount          = sg.amount.map(BigDecimal(_))
       )

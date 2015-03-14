@@ -106,7 +106,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
                             avatarUrl = user.avatarUrl)).success
     } yield event
 
-    processNew(event) { applyUserRegisteredEvent(_) }
+    process(event) { applyUserRegisteredEvent(_) }
   }
 
   def processActivateUserCmd(cmd: ActivateUserCmd): Unit = {
@@ -118,7 +118,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
         UserActivatedEvent(version = Some(user.version))).success
     )
 
-    processNew(event) { applyUserActivatedEvent(_) }
+    process(event) { applyUserActivatedEvent(_) }
   }
 
   def processUpdateUserNameCmd(cmd: UpdateUserNameCmd): Unit = {
@@ -132,7 +132,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
           name    = Some(user.name))).success
     )
 
-    processNew(event) { applyUserNameUpdatedEvent(_) }
+    process(event) { applyUserNameUpdatedEvent(_) }
   }
 
   def processUpdateUserEmailCmd(cmd: UpdateUserEmailCmd): Unit = {
@@ -152,7 +152,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
                               email   = Some(user.email))).success
     )
 
-    processNew(event) { applyUserEmailUpdatedEvent(_) }
+    process(event) { applyUserEmailUpdatedEvent(_) }
   }
 
   def processUpdateUserPasswordCmd(cmd: UpdateUserPasswordCmd): Unit = {
@@ -175,7 +175,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
                                  salt     = Some(user.salt))).success
     )
 
-    processNew(event) { applyUserPasswordUpdatedEvent(_) }
+    process(event) { applyUserPasswordUpdatedEvent(_) }
   }
 
   def processUpdateUserAvatarUrlCmd(cmd: UpdateUserAvatarUrlCmd): Unit = {
@@ -193,7 +193,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
           avatarUrl = user.avatarUrl)).success
     )
 
-    processNew(event) { applyUserAvatarUrlUpdatedEvent(_) }
+    process(event) { applyUserAvatarUrlUpdatedEvent(_) }
   }
 
   // only active users can request a password reset
@@ -224,7 +224,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
       }
     )
 
-    processNew(event) { applyUserPasswordResetEvent(_) }
+    process(event) { applyUserPasswordResetEvent(_) }
   }
 
   def processLockUserCmd(cmd: LockUserCmd): Unit = {
@@ -237,7 +237,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
         UserLockedEvent(version = Some(user.version))).success
     )
 
-    processNew(event) { applyUserLockedEvent(_) }
+    process(event) { applyUserLockedEvent(_) }
   }
 
   def processUnlockUserCmd(cmd: UnlockUserCmd): Unit = {
@@ -249,7 +249,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
         UserUnlockedEvent(version = Some(user.version))).success
     )
 
-    processNew(event) { applyUserUnlockedEvent(_) }
+    process(event) { applyUserUnlockedEvent(_) }
   }
 
   def updateUser[T <: User](cmd: UserModifyCommand)(fn: User => DomainValidation[T])

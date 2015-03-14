@@ -48,26 +48,28 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
         None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[CollectionEventAnnotationTypeAddedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
       v mustSucceed { event =>
-        event mustBe a[CollectionEventAnnotationTypeAddedEvent]
-        event must have(
-          'studyId       (annotType.studyId.id),
+        event.id must be (annotType.studyId.id)
+
+        val addedEvent = event.getCollectionEventAnnotationTypeAdded
+
+        addedEvent must have(
           'name          (Some(annotType.name)),
           'description   (annotType.description),
           'valueType     (Some(annotType.valueType.toString)),
           'maxValueCount (annotType.maxValueCount)
         )
 
-        event.options must have size annotType.options.size
+        addedEvent.options must have size annotType.options.size
         annotType.options.map { item =>
-          event.options must contain (item)
+          addedEvent.options must contain (item)
         }
 
         collectionEventAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
-          collectionEventAnnotationTypeRepository.withId(
-            disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) mustSucceed { at =>
+        collectionEventAnnotationTypeRepository.withId(
+          disabledStudy.id, AnnotationTypeId(addedEvent.getAnnotationTypeId)) mustSucceed { at =>
           at.version mustBe(0)
           checkTimeStamps(at, DateTime.now, None)
         }
@@ -84,7 +86,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
         annotType.maxValueCount, annotType.options)
 
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[CollectionEventAnnotationTypeAddedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
       v mustFail s"invalid study id: ${study2.id.id}"
     }
@@ -97,7 +99,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
         None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
         annotType.maxValueCount, annotType.options)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[CollectionEventAnnotationTypeAddedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
       v mustFail "name already exists"
     }
@@ -112,12 +114,14 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
         None, annotType.studyId.id, annotType.id.id, annotType.version, annotType2.name,
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
       val v = ask(studiesProcessor, cmd)
-          .mapTo[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
-          .futureValue
+          .mapTo[DomainValidation[StudyEvent]]
+      .futureValue
+
       v mustSucceed { event =>
-        event mustBe a[CollectionEventAnnotationTypeUpdatedEvent]
-        event must have(
-          'studyId       (annotType.studyId.id),
+        event.id must be (annotType.studyId.id)
+
+        val updatedEvent = event.getCollectionEventAnnotationTypeUpdated
+        updatedEvent must have(
           'version       (Some(annotType.version + 1)),
           'name          (Some(annotType2.name)),
           'description   (annotType2.description),
@@ -125,15 +129,15 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
           'maxValueCount (annotType2.maxValueCount)
         )
 
-        event.options must have size annotType2.options.size
+        updatedEvent.options must have size annotType2.options.size
         // verify each option
         annotType2.options.map { item =>
-          event.options must contain (item)
+          updatedEvent.options must contain (item)
         }
 
         collectionEventAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
         collectionEventAnnotationTypeRepository.withId(
-          disabledStudy.id, AnnotationTypeId(event.annotationTypeId)) mustSucceed { at =>
+          disabledStudy.id, AnnotationTypeId(updatedEvent.getAnnotationTypeId)) mustSucceed { at =>
           at.version mustBe(1)
           checkTimeStamps(at, annotType.timeAdded, DateTime.now)
         }
@@ -154,7 +158,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
         annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
 
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
       v mustFail "name already exists"
     }
@@ -171,7 +175,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
 
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
       v mustFail "study does not have annotation type"
     }
@@ -184,7 +188,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
         None, annotType.studyId.id, annotType.id.id, annotType.version - 1, annotType.name,
         annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
       v mustFail "doesn't match current version"
@@ -197,13 +201,14 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
       val cmd = RemoveCollectionEventAnnotationTypeCmd(
         None, annotType.studyId.id, annotType.id.id, annotType.version)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
       v mustSucceed { event =>
-        event mustBe a[CollectionEventAnnotationTypeRemovedEvent]
-        event.studyId mustBe (annotType.studyId.id)
-        event.annotationTypeId mustBe (annotType.id.id)
+        event.id must be (annotType.studyId.id)
+
+        val removedEvent = event.getCollectionEventAnnotationTypeRemoved
+        removedEvent.annotationTypeId mustBe (Some(annotType.id.id))
       }
     }
 
@@ -214,7 +219,7 @@ class CeventAnnotationTypeProcessorSpec extends TestFixture {
       val cmd = RemoveCollectionEventAnnotationTypeCmd(
         None, annotType.studyId.id, annotType.id.id, annotType.version - 1)
       val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
+        .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
       v mustFail "expected version doesn't match current version"

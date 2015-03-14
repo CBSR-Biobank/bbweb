@@ -148,15 +148,15 @@ class ParticipantAnnotTypeControllerSpec extends StudyAnnotTypeControllerSpec[Pa
     }
 
     "POST /studies/:studyId/pannottypes" must {
+
       "add a participant annotation type" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
         val annotType = factory.createParticipantAnnotationType
-        val json = makeRequest(
-          POST,
-          uri(study),
-          json = annotTypeToAddCmdJson(annotType))
+        val json = makeRequest(POST,
+                               uri(study),
+                               json = annotTypeToAddCmdJson(annotType))
         (json \ "status").as[String] must include ("success")
       }
 

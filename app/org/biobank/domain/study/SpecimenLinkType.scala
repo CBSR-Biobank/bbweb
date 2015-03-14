@@ -117,7 +117,7 @@ case class SpecimenLinkType(processingTypeId:      ProcessingTypeId,
 object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotationTypeValidations {
   import org.biobank.domain.CommonValidations._
 
-  def create(processingTypeId: ProcessingTypeId,
+  def create(processingTypeId:      ProcessingTypeId,
              id:                    SpecimenLinkTypeId,
              version:               Long,
              dateTime:              DateTime,

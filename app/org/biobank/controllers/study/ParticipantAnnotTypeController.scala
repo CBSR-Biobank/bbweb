@@ -5,7 +5,6 @@ import org.biobank.service._
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEventsJson
 import org.biobank.domain.study._
 import org.biobank.domain.AnnotationValueType._
 
@@ -25,8 +24,7 @@ import Scalaz._
 class ParticipantAnnotTypeController(implicit inj: Injector)
     extends CommandController
     with JsonController
-    with Injectable
-    with StudyEventsJson {
+    with Injectable {
 
   implicit override val authToken = inject [AuthToken]
 
@@ -59,7 +57,8 @@ class ParticipantAnnotTypeController(implicit inj: Injector)
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else {
-        domainValidationReply(studiesService.addParticipantAnnotationType(cmd))
+        val future = studiesService.addParticipantAnnotationType(cmd)
+        domainValidationReply(future)
       }
     }
 

@@ -12,6 +12,7 @@ import akka.pattern.ask
 import org.slf4j.LoggerFactory
 import akka.persistence.SnapshotOffer
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import scalaz._
@@ -26,6 +27,8 @@ import scalaz.Validation.FlatMap._
   * processed.
   */
 class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
+  import org.biobank.infrastructure.event.StudyEventsUtil._
+  import StudyEvent.EventType
 
   override def persistenceId = "participant-processor-id"
 
@@ -43,12 +46,9 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
     * processed to recreate the current state of the aggregate.
     */
   val receiveRecover: Receive = {
-    case wevent: WrappedEvent[_] =>
-      wevent.event match {
-        case event: ParticipantAddedEvent   =>
-          recoverParticipantAddedEvent(event, wevent.userId, wevent.dateTime)
-        case event: ParticipantUpdatedEvent =>
-          recoverParticipantUpdatedEvent(event, wevent.userId, wevent.dateTime)
+    case event: StudyEvent => event.eventType match {
+        case et: EventType.ParticipantAdded   => applyParticipantAddedEvent(event)
+        case et: EventType.ParticipantUpdated => applyParticipantUpdatedEvent(event)
 
         case event => log.error(s"event not handled: $event")
       }
@@ -157,21 +157,23 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
     }
 
     val event = for {
-      study <- enabledStudy(studyId)
+      study             <- enabledStudy(studyId)
       uniqueIdAvailable <- uniqueIdAvailable(cmd.uniqueId)
-      annotTypes <- validateAnnotationTypes(studyId, cmd.annotations.toSet)
-      newParticip <- Participant.create(
-        studyId, participantId, -1L, DateTime.now, cmd.uniqueId, cmd.annotations.toSet)
-      event <- ParticipantAddedEvent(
-        studyId       = studyId.id,
-        participantId = participantId.id,
-        uniqueId      = Some(cmd.uniqueId),
-        annotations   = convertAnnotationToEvent(cmd.annotations)).success
+      annotTypes        <- validateAnnotationTypes(studyId, cmd.annotations.toSet)
+      newParticip       <- Participant.create(studyId,
+                                              participantId,
+                                              -1L,
+                                              DateTime.now,
+                                              cmd.uniqueId,
+                                              cmd.annotations.toSet)
+      event             <- createStudyEvent(newParticip.studyId, cmd).withParticipantAdded(
+        ParticipantAddedEvent(
+          participantId = Some(newParticip.id.id),
+          uniqueId      = Some(cmd.uniqueId),
+          annotations   = convertAnnotationToEvent(cmd.annotations))).success
     } yield event
 
-    process(event){ w =>
-      recoverParticipantAddedEvent(w.event, w.userId, w.dateTime)
-    }
+    process(event) { applyParticipantAddedEvent(_) }
   }
 
   private def processUpdateParticipantCmd(cmd: UpdateParticipantCmd): Unit = {
@@ -179,58 +181,70 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
     val participantId = ParticipantId(cmd.id)
 
     val event = for {
-      study <- enabledStudy(studyId)
+      study             <- enabledStudy(studyId)
       uniqueIdAvailable <- uniqueIdAvailable(cmd.uniqueId, participantId)
-      annotTypes <- validateAnnotationTypes(studyId, cmd.annotations.toSet)
-      particip <- participantRepository.getByKey(participantId)
-      newParticip <- Participant.create(
-        studyId, participantId, particip.version, DateTime.now, cmd.uniqueId, cmd.annotations.toSet)
-      event <- ParticipantUpdatedEvent(
-        studyId       = studyId.id,
-        participantId = participantId.id,
-        version       = Some(particip.version),
-        uniqueId      = Some(cmd.uniqueId),
-        annotations   = convertAnnotationToEvent(cmd.annotations)).success
+      annotTypes        <- validateAnnotationTypes(studyId, cmd.annotations.toSet)
+      particip          <- participantRepository.getByKey(participantId)
+      newParticip       <- Participant.create(studyId,
+                                        participantId,
+                                        particip.version,
+                                        DateTime.now,
+                                        cmd.uniqueId,
+                                        cmd.annotations.toSet)
+      event             <- createStudyEvent(newParticip.studyId, cmd).withParticipantUpdated(
+        ParticipantUpdatedEvent(
+          participantId = Some(newParticip.id.id),
+          version       = Some(particip.version),
+          uniqueId      = Some(cmd.uniqueId),
+          annotations   = convertAnnotationToEvent(cmd.annotations))).success
     } yield event
 
-    process(event){ w =>
-      recoverParticipantUpdatedEvent(w.event, w.userId, w.dateTime)
+    process(event){ applyParticipantUpdatedEvent(_) }
+  }
+
+  private def applyParticipantAddedEvent(event: StudyEvent) = {
+    log.debug(s"applyParticipantAddedEvent: event/$event")
+
+    if (event.eventType.isParticipantAdded) {
+      val addedEvent = event.getParticipantAdded
+
+      participantRepository.put(
+        Participant(studyId      = StudyId(event.id),
+                    id           = ParticipantId(addedEvent.getParticipantId),
+                    version      = 0L,
+                    timeAdded    = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
+                    timeModified = None,
+                    uniqueId     = addedEvent.getUniqueId,
+                    annotations  = convertAnnotationsFromEvent(addedEvent.annotations)))
+      ()
+    } else {
+      log.error(s"invalid event type: $event")
     }
   }
 
-  private def recoverParticipantAddedEvent(event: ParticipantAddedEvent,
-                                           userId: Option[UserId],
-                                           dateTime: DateTime) = {
-    log.info(s"recoverParticipantAddedEvent: event/$event, userId/$userId, dateTime/$dateTime")
-    participantRepository.put(Participant(
-      studyId      = StudyId(event.studyId),
-      id           = ParticipantId(event.participantId),
-      version      = 0L,
-      timeAdded    = dateTime,
-      timeModified = None,
-      uniqueId     = event.getUniqueId,
-      annotations  = convertAnnotationsFromEvent(event.annotations)))
-    ()
-  }
+  private def applyParticipantUpdatedEvent(event: StudyEvent) = {
+    log.debug(s"applyParticipantUpdatedEvent: event/$event")
 
-  private def recoverParticipantUpdatedEvent(event: ParticipantUpdatedEvent,
-                                             userId: Option[UserId],
-                                             dateTime: DateTime) = {
-    log.info(s"recoverParticipantUpdatedEvent: event/$event, userId/$userId, dateTime/$dateTime")
-    val studyId = StudyId(event.studyId)
-    val participantId = ParticipantId(event.participantId)
+    if (event.eventType.isCollectionEventAnnotationTypeUpdated) {
+      val updatedEvent = event.getParticipantUpdated
 
-    participantRepository.withId(studyId, participantId).fold(
-      err => log.error(s"updating participant from event failed: $err"),
-      p => {
-        participantRepository.put(p.copy(
-        version      = event.getVersion,
-        uniqueId     = event.getUniqueId,
-        timeModified = Some(dateTime),
-        annotations  = convertAnnotationsFromEvent(event.annotations)))
-        ()
-      }
-    )
+      val studyId = StudyId(event.id)
+      val participantId = ParticipantId(updatedEvent.getParticipantId)
+
+      participantRepository.withId(studyId, participantId).fold(
+        err => log.error(s"updating participant from event failed: $err"),
+        p => {
+          participantRepository.put(
+            p.copy(version      = updatedEvent.getVersion,
+                   uniqueId     = updatedEvent.getUniqueId,
+                   timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
+                   annotations  = convertAnnotationsFromEvent(updatedEvent.annotations)))
+          ()
+        }
+      )
+    } else {
+      log.error(s"invalid event type: $event")
+    }
   }
 
   private def convertAnnotationToEvent
@@ -238,7 +252,7 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
       : Seq[ParticipantAddedEvent.ParticipantAnnotation] = {
     annotations.map { annot =>
       ParticipantAddedEvent.ParticipantAnnotation(
-        annotationTypeId = annot.annotationTypeId.id,
+        annotationTypeId = Some(annot.annotationTypeId.id),
         stringValue      = annot.stringValue,
         numberValue      = annot.numberValue,
         selectedValues   = annot.selectedValues.map(_.value)
@@ -251,12 +265,12 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
       : Set[ParticipantAnnotation] = {
     annotations.map { eventAnnot =>
       ParticipantAnnotation(
-        annotationTypeId = AnnotationTypeId(eventAnnot.annotationTypeId),
+        annotationTypeId = AnnotationTypeId(eventAnnot.getAnnotationTypeId),
         stringValue      = eventAnnot.stringValue,
         numberValue      = eventAnnot.numberValue,
         selectedValues   = eventAnnot.selectedValues.map { selectedValue =>
           AnnotationOption(
-            annotationTypeId = AnnotationTypeId(eventAnnot.annotationTypeId),
+            annotationTypeId = AnnotationTypeId(eventAnnot.getAnnotationTypeId),
             value            = selectedValue
           )
         } toList

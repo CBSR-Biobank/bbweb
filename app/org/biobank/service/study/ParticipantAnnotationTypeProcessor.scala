@@ -11,6 +11,7 @@ import org.biobank.domain.AnnotationValueType._
 
 import akka.persistence.SnapshotOffer
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import scaldi.akka.AkkaInjectable
 import scaldi.{Injectable, Injector}
 import scalaz._
@@ -29,6 +30,8 @@ import scalaz.Validation.FlatMap._
 class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
     extends StudyAnnotationTypeProcessor[ParticipantAnnotationType]
     with AkkaInjectable {
+  import org.biobank.infrastructure.event.StudyEventsUtil._
+  import StudyEvent.EventType
 
   override def persistenceId = "participant-annotation-type-processor-id"
 
@@ -43,14 +46,13 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
     * processed to recreate the current state of the aggregate.
     */
   val receiveRecover: Receive = {
-    case wevent: WrappedEvent[_] =>
-      wevent.event match {
-        case event: ParticipantAnnotationTypeAddedEvent =>
-          recoverParticipantAnnotationTypeAddedEvent(event, wevent.userId, wevent.dateTime)
-        case event: ParticipantAnnotationTypeUpdatedEvent =>
-          recoverParticipantAnnotationTypeUpdatedEvent(event, wevent.userId, wevent.dateTime)
-        case event: ParticipantAnnotationTypeRemovedEvent =>
-          recoverParticipantAnnotationTypeRemovedEvent(event, wevent.userId, wevent.dateTime)
+    case event: StudyEvent => event.eventType match {
+      case et: EventType.ParticipantAnnotationTypeAdded =>
+        applyParticipantAnnotationTypeAddedEvent(event)
+      case et: EventType.ParticipantAnnotationTypeUpdated =>
+        applyParticipantAnnotationTypeUpdatedEvent(event)
+      case et: EventType.ParticipantAnnotationTypeRemoved =>
+        applyParticipantAnnotationTypeRemovedEvent(event)
 
         case event => log.error(s"event not handled: $event")
       }
@@ -75,134 +77,150 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
     case cmd => log.error(s"ParticipantAnnotationTypeProcessor: message not handled: $cmd")
   }
 
-  /** Updates to annotation types only allowed if they are not being used by any participants.
-    */
-  def update
-    (cmd: StudyAnnotationTypeModifyCommand)
-    (fn: ParticipantAnnotationType => DomainValidation[ParticipantAnnotationType])
-      : DomainValidation[ParticipantAnnotationType] = {
-    for {
-      annotType        <- annotationTypeRepository.withId(StudyId(cmd.studyId), cmd.id)
-      notInUse         <- checkNotInUse(annotType)
-      validVersion     <- annotType.requireVersion( cmd.expectedVersion)
-      updatedAnnotType <- fn(annotType)
-    } yield updatedAnnotType
-  }
-
-  private def processAddParticipantAnnotationTypeCmd(cmd: AddParticipantAnnotationTypeCmd)
-      : Unit = {
+  private def processAddParticipantAnnotationTypeCmd
+    (cmd: AddParticipantAnnotationTypeCmd): Unit = {
     val timeNow = DateTime.now
     val id = annotationTypeRepository.nextIdentity
-    val event = for {
+    val v = for {
       nameValid <- nameAvailable(cmd.name)
       newItem <- ParticipantAnnotationType.create(
-        StudyId(cmd.studyId), id, -1L, timeNow,
-        cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options, cmd.required)
-      event <- ParticipantAnnotationTypeAddedEvent(
-        studyId          = newItem.studyId.id,
-        annotationTypeId = newItem.id.id,
-        name             = Some(newItem.name),
-        description      = newItem.description,
-        valueType        = Some(newItem.valueType.toString),
-        maxValueCount    = newItem.maxValueCount,
-        options          = newItem.options,
-        required         = Some(newItem.required)).success
+        studyId       = StudyId(cmd.studyId),
+        id            = id,
+        version       = -1L,
+        dateTime      = timeNow,
+        name          = cmd.name,
+        description   = cmd.description,
+        valueType     = cmd.valueType,
+        maxValueCount = cmd.maxValueCount,
+        options       = cmd.options,
+        required      = cmd.required)
+      event <- createStudyEvent(newItem.studyId, cmd).withParticipantAnnotationTypeAdded(
+        ParticipantAnnotationTypeAddedEvent(
+          annotationTypeId = Some(newItem.id.id),
+          name             = Some(newItem.name),
+          description      = newItem.description,
+          valueType        = Some(newItem.valueType.toString),
+          maxValueCount    = newItem.maxValueCount,
+          options          = newItem.options,
+          required         = Some(newItem.required))).success
     } yield event
 
-    process(event){ wevent =>
-      recoverParticipantAnnotationTypeAddedEvent(wevent.event, wevent.userId, wevent.dateTime)
-    }
+    process(v){ applyParticipantAnnotationTypeAddedEvent(_) }
   }
 
 
   /** Updates are only allowed if the study has no participants.
     */
   private def processUpdateParticipantAnnotationTypeCmd
-    (cmd: UpdateParticipantAnnotationTypeCmd)
-      : Unit = {
+    (cmd: UpdateParticipantAnnotationTypeCmd): Unit = {
     val timeNow = DateTime.now
     val v = update(cmd) { at =>
       for {
         noParticipants <- participantRepository.getValues.filter(p =>
           p.studyId.equals(at.studyId)).isEmpty.success
         nameAvailable <- nameAvailable(cmd.name, AnnotationTypeId(cmd.id))
-        newItem <- at.update(
-          cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options, cmd.required)
-      } yield newItem
+        newItem <- at.update(cmd.name,
+                             cmd.description,
+                             cmd.valueType,
+                             cmd.maxValueCount,
+                             cmd.options,
+                             cmd.required)
+        event <- createStudyEvent(newItem.studyId, cmd).withParticipantAnnotationTypeUpdated(
+          ParticipantAnnotationTypeUpdatedEvent(
+            annotationTypeId = Some(newItem.id.id),
+            version          = Some(newItem.version),
+            name             = Some(newItem.name),
+            description      = newItem.description,
+            valueType        = Some(newItem.valueType.toString),
+            maxValueCount    = newItem.maxValueCount,
+            options          = newItem.options,
+            required         = Some(newItem.required))).success
+      } yield event
+    }
+    process(v){ applyParticipantAnnotationTypeUpdatedEvent(_) }
+  }
+
+  private def processRemoveParticipantAnnotationTypeCmd
+    (cmd: RemoveParticipantAnnotationTypeCmd): Unit = {
+    val v = update(cmd) { at =>
+      createStudyEvent(at.studyId, cmd).withParticipantAnnotationTypeRemoved(
+        ParticipantAnnotationTypeRemovedEvent(Some(at.id.id))).success
     }
 
-    val event = v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failureNel,
-      at => ParticipantAnnotationTypeUpdatedEvent(
-        studyId          = at.studyId.id,
-        annotationTypeId = at.id.id,
-        version          = Some(at.version),
-        name             = Some(at.name),
-        description      = at.description,
-        valueType        = Some(at.valueType.toString),
-        maxValueCount    = at.maxValueCount,
-        options          = at.options,
-        required         = Some(at.required)).success
-    )
-    process(event){ wevent =>
-      recoverParticipantAnnotationTypeUpdatedEvent(wevent.event, wevent.userId, wevent.dateTime)
+    process(v){ applyParticipantAnnotationTypeRemovedEvent(_) }
+  }
+
+  /** Updates to annotation types only allowed if they are not being used by any participants.
+    */
+  def update
+    (cmd: StudyAnnotationTypeModifyCommand)
+    (fn: ParticipantAnnotationType => DomainValidation[StudyEvent])
+      : DomainValidation[StudyEvent] = {
+    for {
+      annotType    <- annotationTypeRepository.withId(StudyId(cmd.studyId), cmd.id)
+      notInUse     <- checkNotInUse(annotType)
+      validVersion <- annotType.requireVersion( cmd.expectedVersion)
+      event        <- fn(annotType)
+    } yield event
+  }
+
+  private def applyParticipantAnnotationTypeAddedEvent(event: StudyEvent) = {
+    log.debug(s"applyParticipantAnnotationTypeAddedEvent: $event")
+
+    if (event.eventType.isParticipantAnnotationTypeAdded) {
+      val addedEvent = event.getParticipantAnnotationTypeAdded
+
+      annotationTypeRepository.put(
+        ParticipantAnnotationType(
+          studyId       = StudyId(event.id),
+          id            = AnnotationTypeId(addedEvent.getAnnotationTypeId),
+          version       = 0L,
+          timeAdded     = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
+          timeModified  = None,
+          name          = addedEvent.getName,
+          description   = addedEvent.description,
+          valueType     = AnnotationValueType.withName(addedEvent.getValueType),
+          maxValueCount = addedEvent.maxValueCount,
+          options       = addedEvent.options,
+          required      = addedEvent.getRequired))
+      ()
+    } else {
+      log.error(s"invalid event type: $event")
     }
   }
 
-  private def processRemoveParticipantAnnotationTypeCmd(cmd: RemoveParticipantAnnotationTypeCmd)
-      : Unit = {
-    val v = update(cmd) { at => at.success }
+  private def applyParticipantAnnotationTypeUpdatedEvent(event: StudyEvent) = {
+    if (event.eventType.isParticipantAnnotationTypeUpdated) {
+      val updatedEvent = event.getParticipantAnnotationTypeUpdated
 
-    val event = v.fold(
-      err => DomainError(s"error $err occurred on $cmd").failureNel,
-      at =>  ParticipantAnnotationTypeRemovedEvent(at.studyId.id, at.id.id).success
-    )
-
-    process(event){ wevent =>
-      recoverParticipantAnnotationTypeRemovedEvent(wevent.event, wevent.userId, wevent.dateTime)
+      annotationTypeRepository.getByKey(AnnotationTypeId(updatedEvent.getAnnotationTypeId)).fold(
+        err => log.error(s"updating annotation type from event failed: $err"),
+        at => {
+          annotationTypeRepository.put(
+            at.copy(
+              version       = updatedEvent.getVersion,
+              name          = updatedEvent.getName,
+              description   = updatedEvent.description,
+              valueType     = AnnotationValueType.withName(updatedEvent.getValueType),
+              maxValueCount = updatedEvent.maxValueCount,
+              options       = updatedEvent.options,
+              required      = updatedEvent.getRequired,
+              timeModified  = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
+    } else {
+      log.error(s"invalid event type: $event")
     }
   }
 
-  private def recoverParticipantAnnotationTypeAddedEvent
-    (event: ParticipantAnnotationTypeAddedEvent, userId: Option[UserId], dateTime: DateTime) = {
-    log.debug(s"recoverEvent: $event")
-    annotationTypeRepository.put(ParticipantAnnotationType(
-      studyId       = StudyId(event.studyId),
-      id            = AnnotationTypeId(event.annotationTypeId),
-      version       = 0L,
-      timeAdded     = dateTime,
-      timeModified  = None,
-      name          = event.getName,
-      description   = event.description,
-      valueType     = AnnotationValueType.withName(event.getValueType),
-      maxValueCount = event.maxValueCount,
-      options       = event.options,
-      required      = event.getRequired))
-    ()
-  }
-
-  private def recoverParticipantAnnotationTypeUpdatedEvent
-    (event: ParticipantAnnotationTypeUpdatedEvent, userId: Option[UserId], dateTime: DateTime) = {
-    annotationTypeRepository.getByKey(AnnotationTypeId(event.annotationTypeId)).fold(
-      err => log.error(s"updating annotation type from event failed: $err"),
-      at => {
-        annotationTypeRepository.put(at.copy(
-          version       = event.getVersion,
-          name          = event.getName,
-          description   = event.description,
-          valueType     = AnnotationValueType.withName(event.getValueType),
-          maxValueCount = event.maxValueCount,
-          options       = event.options,
-          required      = event.getRequired,
-          timeModified  = Some(dateTime)))
-        ()
-      }
-    )
-  }
-
-  protected def recoverParticipantAnnotationTypeRemovedEvent
-    (event: ParticipantAnnotationTypeRemovedEvent, userId: Option[UserId], dateTime: DateTime): Unit = {
-    recoverStudyAnnotationTypeRemovedEvent(AnnotationTypeId(event.annotationTypeId))
+  protected def applyParticipantAnnotationTypeRemovedEvent(event: StudyEvent) = {
+    if (event.eventType.isParticipantAnnotationTypeRemoved) {
+      applyStudyAnnotationTypeRemovedEvent(
+        AnnotationTypeId(event.getParticipantAnnotationTypeRemoved.getAnnotationTypeId))
+    } else {
+      log.error(s"invalid event type: $event")
+    }
   }
 
   def checkNotInUse(annotationType: ParticipantAnnotationType)

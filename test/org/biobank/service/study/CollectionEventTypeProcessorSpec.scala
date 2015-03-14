@@ -57,7 +57,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
   }
 
   private def askAddCommand(ceventType: CollectionEventType)
-      : DomainValidation[CollectionEventTypeAddedEvent] = {
+      : DomainValidation[StudyEvent] = {
     val cmd = AddCollectionEventTypeCmd(None,
                                         ceventType.studyId.id,
                                         ceventType.name,
@@ -65,11 +65,11 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
                                         ceventType.recurring,
                                         ceventType.specimenGroupData,
                                         ceventType.annotationTypeData)
-    ask(studiesProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeAddedEvent]].futureValue
+    ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyEvent]].futureValue
   }
 
   private def askUpdateCommand(ceventType: CollectionEventType)
-      : DomainValidation[CollectionEventTypeUpdatedEvent] = {
+      : DomainValidation[StudyEvent] = {
     val cmd = UpdateCollectionEventTypeCmd(None,
                                            ceventType.studyId.id,
                                            ceventType.id.id,
@@ -79,16 +79,16 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
                                            ceventType.recurring,
                                            ceventType.specimenGroupData,
                                            ceventType.annotationTypeData)
-    ask(studiesProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeUpdatedEvent]].futureValue
+    ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyEvent]].futureValue
   }
 
   private def askRemoveCommand(ceventType: CollectionEventType)
-      : DomainValidation[CollectionEventTypeRemovedEvent] = {
+      : DomainValidation[StudyEvent] = {
     val cmd = RemoveCollectionEventTypeCmd(None,
                                            ceventType.studyId.id,
                                            ceventType.id.id,
                                            ceventType.version)
-    ask(studiesProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeRemovedEvent]].futureValue
+    ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyEvent]].futureValue
   }
 
   "A study processor" can {
@@ -97,9 +97,11 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       val cet = factory.createCollectionEventType
 
       askAddCommand(cet) mustSucceed { event =>
-        event mustBe a[CollectionEventTypeAddedEvent]
-        event must have(
-          'studyId     (cet.studyId.id),
+        event.id must be (cet.studyId.id)
+
+        val addedEvent = event.getCollectionEventTypeAdded
+
+        addedEvent must have(
           'name        (Some(cet.name)),
           'description (cet.description),
           'recurring   (Some(cet.recurring))
@@ -107,7 +109,9 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
 
         collectionEventTypeRepository.allForStudy(disabledStudy.id) must have size 1
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
+          disabledStudy.id,
+          CollectionEventTypeId(addedEvent.getCollectionEventTypeId))
+        .mustSucceed { repoCet =>
           repoCet.version mustBe(0)
           checkTimeStamps(repoCet, DateTime.now, None)
         }
@@ -137,8 +141,10 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
         recurring   = !cet.recurring)
 
       askUpdateCommand(cet2) mustSucceed { event =>
-        event mustBe a[CollectionEventTypeUpdatedEvent]
-        event must have(
+        event.id must be (cet.studyId.id)
+
+        val updatedEvent = event.getCollectionEventTypeUpdated
+        updatedEvent must have(
           'version     (Some(cet.version + 1)),
           'name        (Some(cet2.name)),
           'description (cet2.description),
@@ -147,7 +153,9 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
 
         collectionEventTypeRepository.allForStudy(disabledStudy.id) must have size 1
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
+          disabledStudy.id,
+          CollectionEventTypeId(updatedEvent.getCollectionEventTypeId))
+        .mustSucceed { repoCet =>
           checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
         }
       }
@@ -187,7 +195,10 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
       askRemoveCommand(cet) mustSucceed { event =>
-        event mustBe a[CollectionEventTypeRemovedEvent]
+        event mustBe a[StudyEvent]
+        event.id must be (cet.studyId.id)
+        event.eventType.isCollectionEventTypeRemoved mustBe true
+        event.getCollectionEventTypeRemoved.getCollectionEventTypeId mustBe cet.id.id
       }
     }
 
@@ -212,23 +223,28 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       val cet2 = cet.copy(specimenGroupData = sgData)
 
       askAddCommand(cet2) mustSucceed { event =>
-        event mustBe a[CollectionEventTypeAddedEvent]
-        event.specimenGroupData must have length (2)
+        event mustBe a[StudyEvent]
+        event.id must be (cet.studyId.id)
 
-        event.specimenGroupData(0) must have(
-          'specimenGroupId (sg.id.id),
+        val updatedEvent = event.getCollectionEventTypeAdded
+        updatedEvent.specimenGroupData must have length (2)
+
+        updatedEvent.specimenGroupData(0) must have(
+          'specimenGroupId (Some(sg.id.id)),
           'maxCount        (Some(sgData(0).maxCount)),
           'amount          (sgData(0).amount.map(_.toDouble))
         )
 
-        event.specimenGroupData(1) must have(
-          'specimenGroupId (sg.id.id),
+        updatedEvent.specimenGroupData(1) must have(
+          'specimenGroupId (Some(sg.id.id)),
           'maxCount        (Some(sgData(1).maxCount)),
           'amount          (sgData(1).amount.map(_.toDouble))
         )
 
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
+          disabledStudy.id,
+          CollectionEventTypeId(updatedEvent.getCollectionEventTypeId))
+        .mustSucceed { repoCet =>
           repoCet.version mustBe(0)
           checkTimeStamps(repoCet, DateTime.now, None)
         }
@@ -246,17 +262,21 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
 
       val cet2 = cet.copy(specimenGroupData = sgData)
       askUpdateCommand(cet2) mustSucceed { event =>
-        event mustBe a[CollectionEventTypeUpdatedEvent]
-        event.specimenGroupData must have length (1)
+        event mustBe a[StudyEvent]
 
-        event.specimenGroupData(0) must have(
-          'specimenGroupId (sg.id.id),
+        val updatedEvent = event.getCollectionEventTypeUpdated
+        updatedEvent.specimenGroupData must have length (1)
+
+        updatedEvent.specimenGroupData(0) must have(
+          'specimenGroupId (Some(sg.id.id)),
           'maxCount        (Some(sgData(0).maxCount)),
           'amount          (sgData(0).amount.map(_.toDouble))
         )
 
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
+          disabledStudy.id,
+          CollectionEventTypeId(updatedEvent.getCollectionEventTypeId))
+        .mustSucceed { repoCet =>
           repoCet.version mustBe(1)
           checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
         }
@@ -275,7 +295,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
                                            sg.version, sg.name, sg.description, sg.units, sg.anatomicalSourceType,
                                            sg.preservationType, sg.preservationTemperatureType, sg.specimenType)
       val v = ask(studiesProcessor, cmd)
-      .mapTo[DomainValidation[SpecimenGroupUpdatedEvent]]
+      .mapTo[DomainValidation[StudyEvent]]
       .futureValue
       v mustFail "specimen group is in use by collection event type"
     }
@@ -290,11 +310,15 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
 
       val cet2 = cet.copy(specimenGroupData = List.empty)
       askUpdateCommand(cet2) mustSucceed { event =>
-        event mustBe a[CollectionEventTypeUpdatedEvent]
-        event.specimenGroupData must have length (0)
+        event mustBe a[StudyEvent]
+
+        val updatedEvent = event.getCollectionEventTypeUpdated
+        updatedEvent.specimenGroupData must have length (0)
 
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
+          disabledStudy.id,
+          CollectionEventTypeId(updatedEvent.getCollectionEventTypeId))
+        .mustSucceed { repoCet =>
           repoCet.version mustBe(1)
           checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
         }
@@ -311,7 +335,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
 
       val cmd = new RemoveSpecimenGroupCmd(None, sg.studyId.id, sg.id.id, sg.version)
       val v = ask(studiesProcessor, cmd)
-      .mapTo[DomainValidation[SpecimenGroupRemovedEvent]]
+      .mapTo[DomainValidation[StudyEvent]]
       .futureValue
       v mustFail "specimen group is in use by collection event type"
     }
@@ -351,15 +375,20 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
         annotationTypeData = annotTypeData)
 
       askAddCommand(cet) mustSucceed { event =>
-        event mustBe a[CollectionEventTypeAddedEvent]
-        event.annotationTypeData must have length (1)
+        event mustBe a[StudyEvent]
+        event.id must be (cet.studyId.id)
 
-        event.annotationTypeData(0) must have(
-          'annotationTypeId (annotTypeData(0).annotationTypeId),
+        val addedEvent = event.getCollectionEventTypeAdded
+        addedEvent.annotationTypeData must have length (1)
+
+        addedEvent.annotationTypeData(0) must have(
+          'annotationTypeId (Some(annotTypeData(0).annotationTypeId)),
           'required         (Some(annotTypeData(0).required)))
 
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
+          disabledStudy.id,
+          CollectionEventTypeId(addedEvent.getCollectionEventTypeId))
+        .mustSucceed { repoCet =>
           checkTimeStamps(repoCet, DateTime.now, None)
         }
       }
@@ -384,7 +413,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
         maxValueCount    = annotationType.maxValueCount,
         options          = annotationType.options)
       val v = ask(studiesProcessor, cmd)
-      .mapTo[DomainValidation[CollectionEventAnnotationTypeUpdatedEvent]]
+      .mapTo[DomainValidation[StudyEvent]]
       .futureValue
 
       v mustFail "annotation type is in use by collection event type"
@@ -401,10 +430,15 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       val cet2 = cet.copy(annotationTypeData = List.empty)
 
       askUpdateCommand(cet2) mustSucceed { event =>
-        event.annotationTypeData must have length 0
+        event.id must be (cet.studyId.id)
+
+        val updatedEvent = event.getCollectionEventTypeUpdated
+        updatedEvent.annotationTypeData must have length 0
 
         collectionEventTypeRepository.withId(
-          disabledStudy.id, CollectionEventTypeId(event.collectionEventTypeId)) mustSucceed { repoCet =>
+          disabledStudy.id,
+          CollectionEventTypeId(updatedEvent.getCollectionEventTypeId))
+        .mustSucceed { repoCet =>
           checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
         }
       }
@@ -421,7 +455,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       val cmd = RemoveCollectionEventAnnotationTypeCmd(
         None, annotationType.studyId.id, annotationType.id.id, annotationType.version)
       val v = ask(studiesProcessor, cmd)
-      .mapTo[DomainValidation[CollectionEventAnnotationTypeRemovedEvent]]
+      .mapTo[DomainValidation[StudyEvent]]
       .futureValue
 
       v mustFail "annotation type is in use by collection event type"
