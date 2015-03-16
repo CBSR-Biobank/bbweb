@@ -77,14 +77,14 @@ define([
     });
 
     it('can add a centre', function(done) {
-      var centre = new Centre(_.omit(fakeEntities.centre(), 'id'));
+      var baseCentre = fakeEntities.centre();
+      var centre = new Centre(_.omit(baseCentre, 'id'));
       var cmd = addCommand(centre);
-      var event = addedEvent(centre);
 
-      httpBackend.expectPOST(uri(), cmd).respond(201, serverReply(event));
+      httpBackend.expectPOST(uri(), cmd).respond(201, serverReply(baseCentre));
 
       centre.addOrUpdate().then(function(replyCentre) {
-        expect(replyCentre.id).toEqual(event.id);
+        expect(replyCentre.id).toEqual(baseCentre.id);
         expect(replyCentre.version).toEqual(0);
         expect(replyCentre.name).toEqual(centre.name);
         expect(replyCentre.description).toEqual(centre.description);
@@ -94,15 +94,16 @@ define([
     });
 
     it('can update a centre', function(done) {
-      var centre = new Centre(fakeEntities.centre());
+      var baseCentre = fakeEntities.centre();
+      var centre = new Centre(baseCentre);
       var command = updateCommand(centre);
-      var event = updatedEvent(centre);
+      var reply = replyCentre(baseCentre);
 
-      httpBackend.expectPUT(uri(centre.id), command).respond(201, serverReply(event));
+      httpBackend.expectPUT(uri(centre.id), command).respond(201, serverReply(reply));
 
       centre.addOrUpdate().then(function(replyCentre) {
-        expect(replyCentre.id).toEqual(event.id);
-        expect(replyCentre.version).toEqual(centre.version);
+        expect(replyCentre.id).toEqual(centre.id);
+        expect(replyCentre.version).toEqual(centre.version + 1);
         expect(replyCentre.name).toEqual(centre.name);
         expect(replyCentre.description).toEqual(centre.description);
         done();
@@ -136,19 +137,9 @@ define([
       return _.extend(_.pick(centre, 'id'), expectedVersion(centre.version));
     }
 
-    function addedEvent(centre) {
-      if (_.isUndefined(centre.id)) {
-        return _.extend(addCommand(centre), { id: testUtils.uuid() });
-      }
-      return _.extend(addCommand(centre), _.pick(centre, 'id'));
-    }
-
-    function updatedEvent(centre) {
-      return _.pick(centre, 'id', 'name', 'description', 'version');
-    }
-
-    function changedSatusEvent(centre) {
-      return _.pick(centre, 'id', 'version');
+    function replyCentre(centre, newValues) {
+      newValues = newValues || {};
+      return new Centre(_.extend({}, centre, newValues, {version: centre.version + 1}));
     }
 
     function serverReply(event) {
@@ -156,18 +147,17 @@ define([
     }
 
     function changeStatusShared(action, status) {
-      var centre = new Centre(fakeEntities.centre());
+      var baseCentre = fakeEntities.centre();
+      var centre = new Centre(baseCentre);
       var changeStatusFn = action === 'disable' ? centre.disable : centre.enable;
       var command = changeStatusCommand(centre);
-      var event = changedSatusEvent(centre);
+      var reply = replyCentre(baseCentre, { status: status });
 
-      httpBackend.expectPOST(uri(centre.id) + '/' + action, command).respond(201, serverReply(event));
+      httpBackend.expectPOST(uri(centre.id) + '/' + action, command).respond(201, serverReply(reply));
 
       _.bind(changeStatusFn, centre)().then(function(replyCentre) {
-        expect(replyCentre.timeAdded).toBeNull();
-        expect(replyCentre.timeModified).toBeNull();
-        expect(replyCentre.id).toEqual(event.id);
-        expect(replyCentre.version).toEqual(event.version);
+        expect(replyCentre.id).toEqual(centre.id);
+        expect(replyCentre.version).toEqual(centre.version + 1);
         expect(replyCentre.status).toBe(status);
       });
       httpBackend.flush();

@@ -119,7 +119,7 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
             description      = newItem.description,
             valueType        = Some(newItem.valueType.toString),
             maxValueCount    = newItem.maxValueCount,
-            options          = newItem.options)).success
+            options          = at.options)).success
       } yield event
     }
 

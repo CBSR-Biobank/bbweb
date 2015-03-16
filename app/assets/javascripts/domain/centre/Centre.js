@@ -24,31 +24,17 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
                          centresService,
                          centreLocationsService) {
 
-    var requiredKeys = ['id', 'name'];
+    var requiredKeys = ['id', 'version', 'timeAdded', 'name', 'status'];
 
-    var updatedEventRequiredKeys = requiredKeys.concat('version');
-
-    var validateIsMap = validationService.condition1(
-      validationService.validator('must be a map', _.isObject));
-
-    var createObj = funutils.partial1(validateIsMap, _.identity);
-
-    var validateObj = funutils.partial1(
+    var validateObj = funutils.partial(
       validationService.condition1(
+        validationService.validator('must be a map', _.isObject),
         validationService.validator('has the correct keys',
                                     validationService.hasKeys.apply(null, requiredKeys))),
-      createObj);
-
-    var validateAddedEvent = validateObj;
-
-    var validateUpdatedEvent = funutils.partial1(
-      validationService.condition1(
-        validationService.validator('has the correct keys',
-                                    validationService.hasKeys.apply(null, updatedEventRequiredKeys))),
-      createObj);
+      _.identity);
 
     /**
-     * Centre is a value object.
+     *
      */
     function Centre(obj) {
       obj =  obj || {};
@@ -66,10 +52,13 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
     Centre.prototype = Object.create(ConcurrencySafeEntity.prototype);
 
+    /**
+     * Used by promise code, so it must return an error rather than throw one.
+     */
     Centre.create = function (obj) {
       var validation = validateObj(obj);
       if (!_.isObject(validation)) {
-        throw new Error('invalid object from server: ' + validation);
+        return new Error('invalid object from server: ' + validation);
       }
       return new Centre(obj);
     };
@@ -94,31 +83,16 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     Centre.prototype.addOrUpdate = function () {
       var self = this;
       return centresService.addOrUpdate(self).then(function(reply) {
-        var validator = self.isNew() ? validateAddedEvent : validateUpdatedEvent;
-        var validation = validator(reply);
-
-        if (!_.isObject(validation)) {
-          throw new Error('invalid event from server: ' + validation);
-        }
-
-        return new Centre(_.extend({}, reply, { version: 0 }));
+        return new Centre.create(reply);
       });
     };
 
     Centre.prototype.disable = function () {
-      var self = this;
-      return centresService.disable(self).then(function(reply) {
-        return new Centre(_.extend(_.pick(self, 'id', 'name', 'description'),
-                                   { status: CentreStatus.DISABLED() }));
-      });
+      return changeState(this, 'disable');
     };
 
     Centre.prototype.enable = function () {
-      var self = this;
-      return centresService.enable(self).then(function(reply) {
-        return new Centre(_.extend(_.pick(self, 'id', 'name', 'description'),
-                                   { status: CentreStatus.ENABLED() }));
-      });
+      return changeState(this, 'enable');
     };
 
     Centre.prototype.getLocations = function () {
@@ -225,6 +199,12 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
         return self;
       });
     };
+
+    function changeState(obj, method) {
+      return centresService[method](obj).then(function(reply) {
+        return new Centre.create(reply);
+      });
+    }
 
     return Centre;
   }

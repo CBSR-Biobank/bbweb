@@ -76,12 +76,10 @@ define(['./module'], function(module) {
     }
 
     function postUpdate(userId, message, title, timeout) {
-      return function () {
-        User.get(userId).then(function(user) {
-          vm.user = user;
-          console.log(vm.user.timeAdded, vm.user.timeModified);
-          notificationsService.success(message, title, timeout);
-        });
+      return function (user) {
+        vm.user = user;
+        console.log(vm.user.timeAdded, vm.user.timeModified);
+        notificationsService.success(message, title, timeout);
       };
     }
 
@@ -163,15 +161,11 @@ define(['./module'], function(module) {
       });
 
       modalInstance.result.then(function (result) {
-        user.updatePassword(result.currentPassword, result.newPassword)
-          .then(function (newUser) {
-            vm.user = newUser;
-
-            notificationsService.success(
-              'Password was updated successfully.',
-              'Update successful',
-              1500);
-          })
+        vm.user.updatePassword(result.currentPassword, result.newPassword)
+          .then(postUpdate(vm.user.id,
+                           'Your password was updated successfully.',
+                           'Update successful',
+                           1500))
           .catch(function (err) {
             if (err.data.message.indexOf('invalid password') > -1) {
               notificationsService.error(
@@ -183,7 +177,6 @@ define(['./module'], function(module) {
           });
       });
     }
-
 
   }
 

@@ -12,7 +12,7 @@ define([
   describe('CollectionEventAnnotationType', function() {
 
     var context = {}, CollectionEventAnnotationType, fakeEntities;
-    var commonKeys = ['studyId', 'name', 'valueType', 'options'];
+    var requiredKeys = ['id', 'studyId', 'name', 'valueType', 'options'];
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -24,9 +24,7 @@ define([
       context.annotTypeType            = CollectionEventAnnotationType;
       context.createAnnotTypeFn        = createAnnotType;
       context.annotTypeUriPart         = '/ceannottypes';
-      context.objRequiredKeys          = commonKeys.concat('id');
-      context.addedEventRequiredKeys   = commonKeys.concat('annotationTypeId');
-      context.updatedEventRequiredKeys = context.addedEventRequiredKeys.concat('version');
+      context.objRequiredKeys          = requiredKeys;
       context.createServerAnnotTypeFn  = createServerAnnotType;
       context.annotTypeListFn          = CollectionEventAnnotationType.list;
       context.annotTypeGetFn           = CollectionEventAnnotationType.get;

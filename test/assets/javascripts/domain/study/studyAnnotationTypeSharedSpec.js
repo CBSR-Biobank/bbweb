@@ -12,8 +12,7 @@ define(['underscore', 'biobank.testUtils'], function(_, testUtils) {
     describe('(shared)', function() {
 
       var httpBackend, funutils, AnnotTypeType, createAnnotTypeFn, annotTypesService, annotTypeUriPart;
-      var objRequiredKeys, addedEventRequiredKeys, updatedEventRequiredKeys;
-      var createServerAnnotTypeFn, annotTypeListFn, annotTypeGetFn;
+      var objRequiredKeys, createServerAnnotTypeFn, annotTypeListFn, annotTypeGetFn;
 
       beforeEach(inject(function($httpBackend, _funutils_) {
         testUtils.addCustomMatchers();
@@ -25,8 +24,6 @@ define(['underscore', 'biobank.testUtils'], function(_, testUtils) {
         annotTypesService        = context.annotTypesService;
         annotTypeUriPart         = context.annotTypeUriPart;
         objRequiredKeys          = context.objRequiredKeys;
-        addedEventRequiredKeys   = context.addedEventRequiredKeys;
-        updatedEventRequiredKeys = context.updatedEventRequiredKeys;
         createServerAnnotTypeFn  = context.createServerAnnotTypeFn;
         annotTypeListFn          = context.annotTypeListFn;
         annotTypeGetFn           = context.annotTypeGetFn;
@@ -110,61 +107,60 @@ define(['underscore', 'biobank.testUtils'], function(_, testUtils) {
       });
 
       it('can be added', function() {
-        var serverAnnotType = _.omit(createServerAnnotTypeFn(), 'id');
-        var annotType = createAnnotTypeFn(serverAnnotType);
-        var command = addCommand(serverAnnotType);
-        var event = addedEvent(serverAnnotType);
+        var baseAnnotType = createServerAnnotTypeFn();
+        var annotType = createAnnotTypeFn(_.omit(baseAnnotType, 'id'));
+        var command = addCommand(baseAnnotType);
+        var reply = replyAnnotType(baseAnnotType);
 
-        httpBackend.expectPOST(uri(annotType.studyId), command).respond(201, serverReply(event));
+        httpBackend.expectPOST(uri(annotType.studyId), command).respond(201, serverReply(reply));
 
-        annotType.addOrUpdate().then(function(reply) {
-          expect(reply).toEqual(jasmine.any(AnnotTypeType));
-          checkAddedOrUpdated(reply, annotType);
+        annotType.addOrUpdate().then(function(replyObj) {
+          expect(replyObj).toEqual(jasmine.any(AnnotTypeType));
+          checkAnnotType(replyObj, reply);
         });
         httpBackend.flush();
       });
 
       it('can be updated', function() {
-        var serverAnnotType = createServerAnnotTypeFn();
-        var annotType = createAnnotTypeFn(serverAnnotType);
-        var command = updateCommand(serverAnnotType);
-        var event = updatedEvent(serverAnnotType);
+        var baseAnnotType = createServerAnnotTypeFn();
+        var annotType = createAnnotTypeFn(baseAnnotType);
+        var command = updateCommand(baseAnnotType);
+        var reply = replyAnnotType(baseAnnotType);
 
-        httpBackend.expectPUT(uri(annotType.studyId, annotType.id), command).respond(201, serverReply(event));
+        httpBackend.expectPUT(uri(annotType.studyId, annotType.id), command)
+          .respond(201, serverReply(reply));
 
-        annotType.addOrUpdate().then(function(reply) {
-          expect(reply).toEqual(jasmine.any(AnnotTypeType));
-          checkAddedOrUpdated(reply, annotType);
+        annotType.addOrUpdate().then(function(replyObj) {
+          expect(replyObj).toEqual(jasmine.any(AnnotTypeType));
+          checkAnnotType(replyObj, reply);
         });
         httpBackend.flush();
       });
 
       it('when adding, fails for invalid response from server', function(done) {
-        var serverAnnotType = _.omit(createServerAnnotTypeFn(), 'id');
-        var command = addCommand(serverAnnotType);
-        var event = addedEvent(serverAnnotType);
+        var baseAnnotType = createServerAnnotTypeFn();
+        var command = addCommand(baseAnnotType);
+        var reply = replyAnnotType(baseAnnotType);
 
-        checkAddOrUpdateInvalidResponse(addedEventRequiredKeys,
-                             uri(serverAnnotType.studyId),
-                             serverAnnotType,
-                             command,
-                             event,
-                             httpBackend.expectPOST,
-                             done);
+        checkAddOrUpdateInvalidResponse(uri(baseAnnotType.studyId),
+                                        _.omit(baseAnnotType, 'id'),
+                                        command,
+                                        reply,
+                                        httpBackend.expectPOST,
+                                        done);
       });
 
       it('when updating, fails for invalid response from server', function(done) {
-        var serverAnnotType = createServerAnnotTypeFn();
-        var command = updateCommand(serverAnnotType);
-        var event = updatedEvent(serverAnnotType);
+        var baseAnnotType = createServerAnnotTypeFn();
+        var command = updateCommand(baseAnnotType);
+        var reply = replyAnnotType(baseAnnotType);
 
-        checkAddOrUpdateInvalidResponse(updatedEventRequiredKeys,
-                             uri(serverAnnotType.studyId, serverAnnotType.id),
-                             serverAnnotType,
-                             command,
-                             event,
-                             httpBackend.expectPUT,
-                             done);
+        checkAddOrUpdateInvalidResponse(uri(baseAnnotType.studyId, baseAnnotType.id),
+                                        baseAnnotType,
+                                        command,
+                                        reply,
+                                        httpBackend.expectPUT,
+                                        done);
       });
 
       function uri(/* studyId, annotTypeId, version */) {
@@ -200,17 +196,12 @@ define(['underscore', 'biobank.testUtils'], function(_, testUtils) {
                         { id: annotType.id, expectedVersion: annotType.version });
       }
 
-      function addedEvent(annotType) {
-        return _.extend(
-          _.pick(annotType, 'studyId', 'name', 'valueType', 'options', 'required'),
-          funutils.pickOptional(annotType, 'description', 'maxValueCount'),
-          {annotationTypeId: testUtils.uuid() });
-
-      }
-
-      function updatedEvent(annotType) {
-        return funutils.renameKeys(updateCommand(annotType),
-                                   { id: 'annotationTypeId', expectedVersion: 'version' });
+      function replyAnnotType(annotType, newValues) {
+        newValues = newValues || {};
+        return createAnnotTypeFn(_.extend({},
+                                          annotType,
+                                          newValues,
+                                          {version: annotType.version + 1}));
       }
 
       function serverReply(obj) {
@@ -221,16 +212,18 @@ define(['underscore', 'biobank.testUtils'], function(_, testUtils) {
                                                uri,
                                                serverAnnotType,
                                                command,
-                                               event,
+                                               replyAnnotType,
                                                httpBackendExpectFn,
                                                done) {
         var lastReplyKey = _.last(replyRequiredKeys);
 
-        _.each(replyRequiredKeys, function(key) {
+        _.each(objRequiredKeys, function(key) {
           var annotType = createAnnotTypeFn(serverAnnotType);
-          var badEvent = _.omit(event, key);
+          var replyBadAnnotType = _.omit(replyAnnotType, key);
 
-          httpBackendExpectFn(uri, command).respond(201, serverReply(badEvent));
+          httpBackendExpectFn(uri, command).respond(201, serverReply(replyBadAnnotType));
+
+          console.log(replyBadAnnotType);
 
           annotType.addOrUpdate().then(function (reply) {
             expect(reply).toEqual(jasmine.any(Error));
@@ -244,9 +237,7 @@ define(['underscore', 'biobank.testUtils'], function(_, testUtils) {
         httpBackend.flush();
       }
 
-      function checkAddedOrUpdated(newObj, orig) {
-        expect(newObj.timeAdded).toBeNull();
-        expect(newObj.timeModified).toBeNull();
+      function checkAnnotType(newObj, orig) {
         expect(newObj).toHaveNonEmptyString('id');
         expect(newObj.name).toEqual(orig.name);
         expect(newObj.description).toEqual(orig.description);

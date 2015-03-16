@@ -36,6 +36,7 @@ define(['../module', 'underscore'], function(module, _) {
       var keys = _.toArray(arguments);
       var fun = function(obj) {
         var result = _.every(keys, function(k) {
+          //console.log(k, _.has(obj, k), obj);
           return _.has(obj, k);
         });
         return result;

@@ -1,6 +1,4 @@
-/**
- * Jasmine test suite
- */
+/* global define */
 define([
   'angular',
   'angularMocks',
@@ -41,6 +39,12 @@ define([
       expect(user.status).toBe(UserStatus.REGISTERED());
     });
 
+    it('fails when creating from object with a non object', function() {
+      var nonObj = 1;
+      expect(User.create(nonObj)).toEqual(
+        new Error('invalid object: must be a map, has the correct keys'));
+    });
+
     it('fails when creating from object with missing required keys', function() {
       var obj = fakeEntities.user();
       var requiredKeys = ['id', 'name', 'email', 'status'];
@@ -48,21 +52,8 @@ define([
       _.each(requiredKeys, function (key) {
         var badObj = _.omit(obj, key);
 
-        expect(function () { User.create(badObj); })
-          .toThrow(new Error('invalid object: has the correct keys'));
-      });
-    });
-
-    it('fails when creating from event with missing required keys', function() {
-      var user = fakeEntities.user();
-      var event = registeredEvent(user);
-      var requiredKeys = ['id', 'name', 'email'];
-
-      _.each(requiredKeys, function (key) {
-        var badEvent = _.omit(event, key);
-
-        var result = User.createFromEvent(badEvent);
-        expect(result).toEqual(new Error('invalid event: has the correct keys'));
+        expect(User.create(badObj)).toEqual(
+          new Error('invalid object: has the correct keys'));
       });
     });
 
@@ -95,15 +86,11 @@ define([
       var password = fakeEntities.stringNext();
       var user = new User(_.omit(fakeEntities.user(), 'id'));
       var cmd = registerCommand(user, password);
-      var event = registeredEvent(user);
 
-      httpBackend.expectPOST(uri(), cmd).respond(201, serverReply(event));
+      httpBackend.expectPOST(uri(), cmd).respond(201, serverReply());
 
-      user.register(password).then(function(replyUser) {
-        expect(replyUser.id).toEqual(event.id);
-        expect(replyUser.version).toEqual(0);
-        expect(replyUser.name).toEqual(user.name);
-        expect(replyUser.description).toEqual(user.description);
+      user.register(password).then(function(reply) {
+        expect(reply).toEqual({});
         done();
       });
       httpBackend.flush();
@@ -111,18 +98,17 @@ define([
 
     it('can update a users name', function(done) {
       var newName = fakeEntities.stringNext();
-      var user = new User(fakeEntities.user());
+      var baseUser = fakeEntities.user();
+      var user = new User(baseUser);
+      var reply = replyUser(baseUser, { name: newName });
       var cmd = updateNameCommand(user, newName);
-      var event = nameUpdatedEvent(user, newName);
 
-      httpBackend.expectPUT(uri(user.id) + '/name', cmd).respond(201, serverReply(event));
+      httpBackend.expectPUT(uri(user.id) + '/name', cmd).respond(201, serverReply(reply));
 
-      user.updateName(newName).then(function(replyUser) {
-        expect(replyUser.timeAdded).toBeNull();
-        expect(replyUser.timeModified).toBeNull();
-        expect(replyUser.id).toEqual(event.id);
-        expect(replyUser.version).toEqual(event.version);
-        expect(replyUser.name).toEqual(newName);
+      user.updateName(newName).then(function(updatedUser) {
+        expect(updatedUser.id).toEqual(user.id);
+        expect(updatedUser.version).toEqual(user.version + 1);
+        expect(updatedUser.name).toEqual(newName);
         done();
       });
       httpBackend.flush();
@@ -130,18 +116,17 @@ define([
 
     it('can update a users email', function(done) {
       var newEmail = fakeEntities.stringNext();
-      var user = new User(fakeEntities.user());
+      var baseUser = fakeEntities.user();
+      var user = new User(baseUser);
+      var reply = replyUser(baseUser, { email: newEmail });
       var cmd = updateEmailCommand(user, newEmail);
-      var event = emailUpdatedEvent(user, newEmail);
 
-      httpBackend.expectPUT(uri(user.id) + '/email', cmd).respond(201, serverReply(event));
+      httpBackend.expectPUT(uri(user.id) + '/email', cmd).respond(201, serverReply(reply));
 
-      user.updateEmail(newEmail).then(function(replyUser) {
-        expect(replyUser.timeAdded).toBeNull();
-        expect(replyUser.timeModified).toBeNull();
-        expect(replyUser.id).toEqual(event.id);
-        expect(replyUser.version).toEqual(event.version);
-        expect(replyUser.email).toEqual(newEmail);
+      user.updateEmail(newEmail).then(function(updatedUser) {
+        expect(updatedUser.id).toEqual(user.id);
+        expect(updatedUser.version).toEqual(user.version + 1);
+        expect(updatedUser.email).toEqual(newEmail);
         done();
       });
       httpBackend.flush();
@@ -149,18 +134,17 @@ define([
 
     it('can update a users avatar url', function(done) {
       var newAvatarUrl = fakeEntities.stringNext();
-      var user = new User(fakeEntities.user());
+      var baseUser = fakeEntities.user();
+      var user = new User(baseUser);
+      var reply = replyUser(baseUser, { avatarUrl: newAvatarUrl });
       var cmd = updateAvatarUrlCommand(user, newAvatarUrl);
-      var event = avatarUrlUpdatedEvent(user, newAvatarUrl);
 
-      httpBackend.expectPUT(uri(user.id) + '/avatarurl', cmd).respond(201, serverReply(event));
+      httpBackend.expectPUT(uri(user.id) + '/avatarurl', cmd).respond(201, serverReply(reply));
 
-      user.updateAvatarUrl(newAvatarUrl).then(function(replyUser) {
-        expect(replyUser.timeAdded).toBeNull();
-        expect(replyUser.timeModified).toBeNull();
-        expect(replyUser.id).toEqual(event.id);
-        expect(replyUser.version).toEqual(event.version);
-        expect(replyUser.avatarUrl).toEqual(newAvatarUrl);
+      user.updateAvatarUrl(newAvatarUrl).then(function(updatedUser) {
+        expect(updatedUser.id).toEqual(user.id);
+        expect(updatedUser.version).toEqual(user.version + 1);
+        expect(updatedUser.avatarUrl).toEqual(newAvatarUrl);
         done();
       });
       httpBackend.flush();
@@ -169,17 +153,16 @@ define([
     it('can update a users password', function(done) {
       var currentPassword = fakeEntities.stringNext();
       var newPassword = fakeEntities.stringNext();
-      var user = new User(fakeEntities.user());
+      var baseUser = fakeEntities.user();
+      var user = new User(baseUser);
+      var reply = replyUser(baseUser);
       var cmd = updatePasswordCommand(user, currentPassword, newPassword);
-      var event = passwordUpdatedEvent(user, currentPassword, newPassword);
 
-      httpBackend.expectPUT(uri(user.id) + '/password', cmd).respond(201, serverReply(event));
+      httpBackend.expectPUT(uri(user.id) + '/password', cmd).respond(201, serverReply(reply));
 
       user.updatePassword(currentPassword, newPassword).then(function(replyUser) {
-        expect(replyUser.timeAdded).toBeNull();
-        expect(replyUser.timeModified).toBeNull();
-        expect(replyUser.id).toEqual(event.id);
-        expect(replyUser.version).toEqual(event.version);
+        expect(replyUser.id).toEqual(user.id);
+        expect(replyUser.version).toEqual(user.version + 1);
         done();
       });
       httpBackend.flush();
@@ -235,15 +218,13 @@ define([
 
     function statusChangeShared(user, uriPart, userMethod, newStatus) {
       var cmd = changeStatusCommand(user);
-      var event = statusChangedEvent(user);
+      var reply = replyUser(user, {status: newStatus});
 
-      httpBackend.expectPOST(uri(user.id) + uriPart, cmd).respond(201, serverReply(event));
+      httpBackend.expectPOST(uri(user.id) + uriPart, cmd).respond(201, serverReply(reply));
 
       user[userMethod]().then(function (replyUser) {
-        expect(replyUser.timeAdded).toBeNull();
-        expect(replyUser.timeModified).toBeNull();
-        expect(replyUser.id).toEqual(event.id);
-        expect(replyUser.version).toEqual(event.version);
+        expect(replyUser.id).toEqual(user.id);
+        expect(replyUser.version).toEqual(user.version + 1);
         expect(replyUser.status).toEqual(newStatus);
       });
       httpBackend.flush();
@@ -258,15 +239,12 @@ define([
     }
 
     function serverReply(obj) {
+      obj = obj || {};
       return { status: '', data: obj };
     }
 
     function registerCommand(user, password) {
       return _.extend(_.pick(user, 'name', 'email', 'avatarUrl'), { password: password || '' });
-    }
-
-    function registeredEvent(user) {
-      return _.extend(_.pick(user, 'name', 'email', 'avatarUrl'), { id: testUtils.uuid() });
     }
 
     function updateCommand(user) {
@@ -292,35 +270,13 @@ define([
       });
     }
 
-    function updateEvent(user) {
-      return  { id: user.id, version: user.version };
-    }
-
-    function nameUpdatedEvent(user, newName) {
-      return _.extend(updateEvent(user), { name: newName});
-    }
-
-    function emailUpdatedEvent(user, newEmail) {
-      return _.extend(updateEvent(user), { email: newEmail });
-    }
-
-    function avatarUrlUpdatedEvent(user, newAvatarUrl) {
-      return _.extend(updateEvent(user), { avatarUrl: newAvatarUrl });
-    }
-
-    function passwordUpdatedEvent(user) {
-      return _.extend(_.pick(user, 'id', 'version'), {
-        password: fakeEntities.stringNext(),
-        salt:     fakeEntities.stringNext()
-      });
-    }
-
     function changeStatusCommand(user) {
       return  { id: user.id, expectedVersion: user.version };
     }
 
-    function statusChangedEvent(user) {
-      return  _.pick(user, 'id', 'version');
+    function replyUser(user, newValues) {
+      newValues = newValues || {};
+      return new User(_.extend({}, user, newValues, {version: user.version + 1}));
     }
 
   });

@@ -26,8 +26,6 @@ define(['../module', 'underscore'], function(module, _) {
 
       this.required = obj.required || false;
       this._service = participantAnnotTypesService;
-      this._validateAddedEvent = participantAnnotationTypeValidation.validateAddedEvent;
-      this._validateUpdatedEvent = participantAnnotationTypeValidation.validateUpdatedEvent;
     }
 
     ParticipantAnnotationType.prototype = Object.create(StudyAnnotationType.prototype);
@@ -52,12 +50,10 @@ define(['../module', 'underscore'], function(module, _) {
     };
 
     ParticipantAnnotationType.prototype.addOrUpdate = function () {
-      return StudyAnnotationType.prototype.addOrUpdate.call(this).then(function (reply) {
-        if (reply instanceof Error) {
-          return reply;
-        }
-        return new ParticipantAnnotationType(reply);
-      });
+      return StudyAnnotationType.prototype
+        .addOrUpdate.call(this,
+                          participantAnnotationTypeValidation.validateObj,
+                          ParticipantAnnotationType.create);
     };
 
     return ParticipantAnnotationType;

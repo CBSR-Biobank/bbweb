@@ -24,10 +24,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       obj = obj || {};
       AnnotationType.call(this, obj);
       _.extend(this, _.defaults(obj, { studyId: null }));
-
       this._service = null;
-      this._validateAddedEvent = studyAnnotationTypeValidation.validateAddedEvent;
-      this._validateUpdatedEvent = studyAnnotationTypeValidation.validateUpdatedEvent;
     }
 
     StudyAnnotationType.prototype = Object.create(AnnotationType.prototype);
@@ -67,30 +64,14 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     /**
      * Sends a command, to the server, to add or update to a study annotation type.
      */
-    StudyAnnotationType.prototype.addOrUpdate = function () {
+    StudyAnnotationType.prototype.addOrUpdate = function (validator, createFn) {
       var self = this;
       if (self._service === null) {
         throw new Error('_service is null');
       }
 
-      if (self._validateAddedEvent === null) {
-        return new Error('self._validateAddedEvent is null');
-      }
-
-      if (self._validateUpdatedEvent === null) {
-        return new Error('self._validateUpdatedEvent is null');
-      }
-
-      return self._service.addOrUpdate(self).then(function(event) {
-        var validator = self.isNew() ? self._validateAddedEvent : self._validateUpdatedEvent;
-
-        var result = validator(event);
-
-        if (!_.isObject(result)) {
-          return new Error('invalid event from server: ' + result);
-        }
-
-        return _.extend(funutils.renameKeys(result, { annotationTypeId: 'id' }), { version: 0 });
+      return self._service.addOrUpdate(self).then(function(reply) {
+        return create(validator, createFn, reply);
       });
     };
 

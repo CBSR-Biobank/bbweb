@@ -12,7 +12,7 @@ define([
   describe('SpecimenLinkAnnotationType', function() {
 
     var context = {}, SpecimenLinkAnnotationType, fakeEntities;
-    var commonKeys = ['studyId', 'name', 'valueType', 'options'];
+    var requiredKeys = ['id', 'studyId', 'name', 'valueType', 'options'];
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -24,9 +24,7 @@ define([
       context.annotTypeType            = SpecimenLinkAnnotationType;
       context.createAnnotTypeFn        = createAnnotType;
       context.annotTypeUriPart         = '/slannottypes';
-      context.objRequiredKeys          = commonKeys.concat('id');
-      context.addedEventRequiredKeys   = commonKeys.concat('annotationTypeId');
-      context.updatedEventRequiredKeys = context.addedEventRequiredKeys.concat('version');
+      context.objRequiredKeys          = requiredKeys;
       context.createServerAnnotTypeFn  = createServerAnnotType;
       context.annotTypeListFn          = SpecimenLinkAnnotationType.list;
       context.annotTypeGetFn           = SpecimenLinkAnnotationType.get;

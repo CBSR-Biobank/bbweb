@@ -20,26 +20,14 @@ define(['../module', 'underscore', 'moment'], function(module, _, moment) {
                        UserStatus,
                        usersService) {
 
-    var requiredKeys = ['id', 'name', 'email'];
+    var requiredKeys = ['id', 'name', 'email', 'status', 'version'];
 
-    var objRequiredKeys = requiredKeys.concat('status');
-
-    var validateIsMap = validationService.condition1(
-      validationService.validator('must be a map', _.isObject));
-
-    var createObj = funutils.partial1(validateIsMap, _.identity);
-
-    var validateObj = funutils.partial1(
+    var validateObj = funutils.partial(
       validationService.condition1(
-        validationService.validator('has the correct keys',
-                                    validationService.hasKeys.apply(null, objRequiredKeys))),
-      createObj);
-
-    var validateRegisteredEvent = funutils.partial1(
-      validationService.condition1(
+        validationService.validator('must be a map', _.isObject),
         validationService.validator('has the correct keys',
                                     validationService.hasKeys.apply(null, requiredKeys))),
-      createObj);
+      _.identity);
 
     function User(obj) {
       obj = obj || {};
@@ -56,23 +44,15 @@ define(['../module', 'underscore', 'moment'], function(module, _, moment) {
 
     User.prototype = Object.create(ConcurrencySafeEntity.prototype);
 
+    /**
+     * Used by promise code, so it must return an error rather than throw one.
+     */
     User.create = function (obj) {
       var validation = validateObj(obj);
       if (!_.isObject(validation)) {
-        throw new Error('invalid object: ' + validation);
+        return new Error('invalid object: ' + validation);
       }
       return new User(obj);
-    };
-
-    /**
-     * Meant to be called from a promise chain, therefore it does not throw and error but returns one.
-     */
-    User.createFromEvent = function (event) {
-      var validation = validateRegisteredEvent(event);
-      if (!_.isObject(validation)) {
-        return new Error('invalid event: ' + validation);
-      }
-      return new User(event);
     };
 
     User.list = function(options) {
@@ -93,39 +73,35 @@ define(['../module', 'underscore', 'moment'], function(module, _, moment) {
     };
 
     User.prototype.register = function (password) {
-      var self = this;
-
-      return usersService.add(self, password).then(function(event) {
-        return User.createFromEvent(event);
-      });
+      return usersService.add(this, password);
     };
 
     User.prototype.updateName = function (name) {
       var self = this;
 
       return usersService.updateName(self, name).then(function(reply) {
-        return new User(_.extend(_.pick(self, 'email', 'avatarUrl'), reply));
+        return new User(reply);
       });
     };
 
     User.prototype.updateEmail = function (email) {
       var self = this;
       return usersService.updateEmail(self, email).then(function(reply) {
-        return new User(_.extend(_.pick(self, 'name', 'avatarUrl'), reply));
+        return new User(reply);
       });
     };
 
     User.prototype.updatePassword = function (currentPassword, newPassword) {
       var self = this;
       return usersService.updatePassword(self, currentPassword, newPassword).then(function(reply) {
-        return new User(_.extend(_.pick(self, 'name', 'email', 'avatarUrl'), reply));
+        return new User(reply);
       });
     };
 
     User.prototype.updateAvatarUrl = function (avatarUrl) {
       var self = this;
       return usersService.updateAvatarUrl(self, avatarUrl).then(function(reply) {
-        return new User(_.extend(_.pick(self, 'name', 'email'), reply));
+        return new User(reply);
       });
     };
 
@@ -137,7 +113,7 @@ define(['../module', 'underscore', 'moment'], function(module, _, moment) {
       }
 
       return usersService.activate(self).then(function(reply) {
-        return new User(_.extend(_.pick(self, 'id', 'name', 'email'), { status: UserStatus.ACTIVE() }));
+        return new User(reply);
       });
     };
 
@@ -149,7 +125,7 @@ define(['../module', 'underscore', 'moment'], function(module, _, moment) {
       }
 
       return usersService.lock(self).then(function(reply) {
-        return new User(_.extend(_.pick(self, 'id', 'name', 'email'), { status: UserStatus.LOCKED() }));
+        return new User(reply);
       });
     };
 
@@ -161,7 +137,7 @@ define(['../module', 'underscore', 'moment'], function(module, _, moment) {
       }
 
       return usersService.unlock(self).then(function(reply) {
-        return new User(_.extend(_.pick(self, 'id', 'name', 'email'), { status: UserStatus.ACTIVE() }));
+        return new User(reply);
       });
     };
 

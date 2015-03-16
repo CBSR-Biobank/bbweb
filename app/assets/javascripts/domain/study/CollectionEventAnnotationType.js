@@ -39,18 +39,16 @@ define(['../module'], function(module) {
     CollectionEventAnnotationType.get = function(studyId, annotationTypeId) {
       return StudyAnnotationType.get(studyAnnotationTypeValidation.validateObj,
                                      CollectionEventAnnotationType.create,
-                                      'ceannottypes',
+                                     'ceannottypes',
                                      studyId,
                                      annotationTypeId);
     };
 
     CollectionEventAnnotationType.prototype.addOrUpdate = function () {
-      return StudyAnnotationType.prototype.addOrUpdate.call(this).then(function (reply) {
-        if (reply instanceof Error) {
-          return reply;
-        }
-        return new CollectionEventAnnotationType(reply);
-      });
+      return StudyAnnotationType.prototype
+        .addOrUpdate.call(this,
+                          studyAnnotationTypeValidation.validateObj,
+                          CollectionEventAnnotationType.create);
     };
 
     return CollectionEventAnnotationType;

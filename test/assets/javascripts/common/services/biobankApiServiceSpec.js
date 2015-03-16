@@ -35,7 +35,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       httpBackend.whenGET(url).respond(401, serverErrReply(errmsg));
 
       biobankApi.get(url).catch(function(err) {
-        expect(err.message).toEqual(errmsg);
+        expect(err.data.message).toEqual(errmsg);
         done();
       });
       httpBackend.flush();
@@ -63,7 +63,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       httpBackend.expectPOST(url, cmd).respond(401, serverErrReply(errmsg));
 
       biobankApi.post(url, cmd).catch(function(err) {
-        expect(err.message).toEqual(errmsg);
+        expect(err.data.message).toEqual(errmsg);
         done();
       });
       httpBackend.flush();
@@ -91,7 +91,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       httpBackend.expectPUT(url, cmd).respond(401, serverErrReply(errmsg));
 
       biobankApi.put(url, cmd).catch(function(err) {
-        expect(err.message).toEqual(errmsg);
+        expect(err.data.message).toEqual(errmsg);
         done();
       });
       httpBackend.flush();
@@ -117,7 +117,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       httpBackend.whenDELETE(url).respond(401, serverErrReply(errmsg));
 
       biobankApi.del(url).catch(function(err) {
-        expect(err.message).toEqual(errmsg);
+        expect(err.data.message).toEqual(errmsg);
         done();
       });
       httpBackend.flush();

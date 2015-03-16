@@ -45,12 +45,10 @@ define(['../module'], function(module) {
     };
 
     SpecimenLinkAnnotationType.prototype.addOrUpdate = function () {
-      return StudyAnnotationType.prototype.addOrUpdate.call(this).then(function (reply) {
-        if (reply instanceof Error) {
-          return reply;
-        }
-        return new SpecimenLinkAnnotationType(reply);
-      });
+      return StudyAnnotationType.prototype
+        .addOrUpdate.call(this,
+                          studyAnnotationTypeValidation.validateObj,
+                          SpecimenLinkAnnotationType.create);
     };
 
     return SpecimenLinkAnnotationType;
