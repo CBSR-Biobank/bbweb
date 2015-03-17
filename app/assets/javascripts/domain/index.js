@@ -35,6 +35,8 @@ define([
   './study/CollectionEventAnnotationType',
   './study/ParticipantAnnotationType',
   './study/SpecimenLinkAnnotationType',
+  './study/Study',
+  './study/StudyStatus',
   './study/StudyAnnotationType',
   './study/studyAnnotationTypeValidation',
   './study/participantAnnotationTypeValidation',
