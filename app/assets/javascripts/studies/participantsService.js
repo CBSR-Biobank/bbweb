@@ -1,14 +1,12 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
 
-  module.service('participantsService', participantsService);
-
-  participantsService.$inject = ['biobankApi'];
+  participantsServiceFactory.$inject = ['biobankApi'];
 
   /**
    *
    */
-  function participantsService(biobankApi) {
+  function participantsServiceFactory(biobankApi) {
     var service = {
       get:           get,
       getByUniqueId: getByUniqueId,
@@ -57,4 +55,5 @@ define(['./module'], function(module) {
     }
   }
 
+  return participantsServiceFactory;
 });

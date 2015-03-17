@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('ParticipantEditCtrl', ParticipantEditCtrl);
 
   ParticipantEditCtrl.$inject = [
     '$state',
@@ -85,4 +83,5 @@ define(['./module'], function(module) {
     }
   }
 
+  return ParticipantEditCtrl;
 });

@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define(['angular'], function(angular) {
   'use strict';
-
-  module.directive('statusLine', statusLineDirective);
 
   /**
    *
@@ -16,7 +14,7 @@ define(['./module'], function(module) {
       replace: true
     };
     return directive;
-
   }
 
+  return statusLineDirective;
 });

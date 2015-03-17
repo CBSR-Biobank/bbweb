@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
-
-  module.service('domainEntityRemoveService', domainEntityRemoveService);
 
   domainEntityRemoveService.$inject = ['$state', 'modalService'];
 
@@ -55,4 +53,5 @@ define(['../module'], function(module) {
 
   }
 
+  return domainEntityRemoveService;
 });

@@ -1,8 +1,6 @@
 /* global define */
-define(['./module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.factory('CollectionEventType', CollectionEventTypeFactory);
 
   CollectionEventTypeFactory.$inject = [
     'SpecimenGroupSet',
@@ -18,8 +16,6 @@ define(['./module', 'underscore'], function(module, _) {
                                       AnnotationTypeSet,
                                       SpecimenGroupDataSet,
                                       AnnotationTypeDataSet) {
-
-
     /**
      * Creates a collection event type object with helper methods.
      *
@@ -113,4 +109,5 @@ define(['./module', 'underscore'], function(module, _) {
     return CollectionEventType;
   }
 
+  return CollectionEventTypeFactory;
 });

@@ -1,7 +1,5 @@
-define(['./module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.controller('LocationEditCtrl', LocationEditCtrl);
 
   LocationEditCtrl.$inject = [
     '$state',
@@ -64,4 +62,5 @@ define(['./module', 'underscore'], function(module, _) {
     }
   }
 
+  return LocationEditCtrl;
 });

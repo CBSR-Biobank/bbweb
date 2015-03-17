@@ -1,10 +1,8 @@
 /**
  * Configure routes of specimen groups module.
  */
-define(['../../module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.config(config);
 
   config.$inject = [
     '$urlRouterProvider',
@@ -160,4 +158,5 @@ define(['../../module'], function(module) {
 
   }
 
+  return config;
 });

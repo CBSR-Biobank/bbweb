@@ -1,8 +1,6 @@
 /** Study service */
-define(['../module'], function(module) {
+define(['angular'], function(angular) {
   'use strict';
-
-  module.service('studyViewSettingsService', StudyViewSettingsService);
 
   StudyViewSettingsService.$inject = ['$log'];
 
@@ -74,7 +72,7 @@ define(['../module'], function(module) {
 
       return settings;
     }
-
   }
 
+  return StudyViewSettingsService;
 });

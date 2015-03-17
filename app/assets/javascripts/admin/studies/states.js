@@ -1,13 +1,13 @@
 /**
  * Configure routes of studies module.
  */
-define(['../module'], function(module) {
+define(['angular'], function(angular) {
   'use strict';
 
-  module.config(config);
-
   config.$inject = [
-    '$urlRouterProvider', '$stateProvider', 'authorizationProvider'
+    '$urlRouterProvider',
+    '$stateProvider',
+    'authorizationProvider'
   ];
 
   function config($urlRouterProvider, $stateProvider, authorizationProvider ) {
@@ -266,4 +266,5 @@ define(['../module'], function(module) {
     });
   }
 
+  return config;
 });

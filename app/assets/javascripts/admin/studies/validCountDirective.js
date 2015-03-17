@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define(['angular'], function(angular) {
   'use strict';
-
-  module.directive('validCount', validCount);
 
   /**
    *
@@ -31,7 +29,7 @@ define(['../module'], function(module) {
       });
 
     }
-
   }
 
+  return validCount;
 });

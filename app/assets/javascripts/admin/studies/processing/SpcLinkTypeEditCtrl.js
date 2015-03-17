@@ -1,13 +1,8 @@
 /**
  * Study administration controllers.
  */
-define(['../../module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  /**
-   * Add Specimen Link Type
-   */
-  module.controller('SpcLinkTypeEditCtrl', SpcLinkTypeEditCtrl);
 
   SpcLinkTypeEditCtrl.$inject = [
     '$state',
@@ -21,6 +16,9 @@ define(['../../module', 'underscore'], function(module, _) {
     'dtoProcessing'
   ];
 
+  /**
+   * Add Specimen Link Type
+   */
   function SpcLinkTypeEditCtrl($state,
                                spcLinkTypesService,
                                SpecimenLinkType,
@@ -107,4 +105,5 @@ define(['../../module', 'underscore'], function(module, _) {
     }
   }
 
+  return SpcLinkTypeEditCtrl;
 });

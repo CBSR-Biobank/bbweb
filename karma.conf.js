@@ -31,8 +31,8 @@ module.exports = function(config) {
       {pattern: 'app/assets/javascripts/**/*.js', included: false},
       {pattern: 'test/assets/javascripts/**/*Spec.js', included: false},
       {pattern: 'test/assets/javascripts/test/**/*.js', included: false},
-      'test/assets/javascripts/test-main.js',
-      'test/assets/javascripts/fixtures/**/*.js'
+      {pattern: 'test/assets/javascripts/fixtures/**/*.js', included: false},
+      'test/assets/javascripts/test-main.js'
     ],
 
     // list of files to exclude

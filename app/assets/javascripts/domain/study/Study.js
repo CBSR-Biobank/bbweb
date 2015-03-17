@@ -1,17 +1,13 @@
 /* global define */
-define(['../module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.factory('Study', StudyFactory);
 
   StudyFactory.$inject = [
     'funutils',
     'validationService',
     'ConcurrencySafeEntity',
     'StudyStatus',
-    'Location',
-    'studiesService',
-    'studyLocationsService'
+    'studiesService'
   ];
 
   /**
@@ -21,9 +17,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
                          validationService,
                          ConcurrencySafeEntity,
                          StudyStatus,
-                         Location,
-                         studiesService,
-                         studyLocationsService) {
+                         studiesService) {
 
     var requiredKeys = ['id', 'version', 'timeAdded', 'name', 'status'];
 
@@ -100,6 +94,10 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       return changeState(this, 'retire');
     };
 
+    Study.prototype.unretire = function () {
+      return changeState(this, 'unretire');
+    };
+
     function changeState(obj, method) {
       return studiesService[method](obj).then(function(reply) {
         return new Study.create(reply);
@@ -109,6 +107,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     return Study;
   }
 
+  return StudyFactory;
 });
 
 /* Local Variables:  */

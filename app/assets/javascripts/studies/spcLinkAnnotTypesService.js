@@ -1,16 +1,14 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
 
-  module.service('spcLinkAnnotTypesService', spcLinkAnnotTypesService);
-
-  spcLinkAnnotTypesService.$inject = [
+  spcLinkAnnotTypesServiceFactory.$inject = [
     'StudyAnnotTypesService'
   ];
 
   /**
    * Service to access Specimen Link Annotation Types.
    */
-  function spcLinkAnnotTypesService(StudyAnnotTypesService) {
+  function spcLinkAnnotTypesServiceFactory(StudyAnnotTypesService) {
 
     function SpcLinkAnnotTypesService() {
       StudyAnnotTypesService.call(this, 'slannottypes');
@@ -21,4 +19,5 @@ define(['./module'], function(module) {
     return new SpcLinkAnnotTypesService();
   }
 
+  return spcLinkAnnotTypesServiceFactory;
 });

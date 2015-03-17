@@ -1,11 +1,6 @@
 /** Study service */
-define(['../module'], function(module) {
+define([], function() {
   'use strict';
-
-  /**
-   * Called to edit or update a study.
-   */
-  module.controller('StudyEditCtrl', StudyEditCtrl);
 
   StudyEditCtrl.$inject = [
     'stateHelper',
@@ -15,6 +10,9 @@ define(['../module'], function(module) {
     'study'
   ];
 
+  /**
+   * Adds or updates a study.
+   */
   function StudyEditCtrl(stateHelper,
                          studiesService,
                          notificationsService,
@@ -67,4 +65,5 @@ define(['../module'], function(module) {
     }
   }
 
+  return StudyEditCtrl;
 });

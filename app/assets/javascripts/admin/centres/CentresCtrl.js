@@ -1,7 +1,5 @@
-define(['../module', 'underscore'], function(module, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.controller('CentresCtrl', CentresCtrl);
 
   CentresCtrl.$inject = ['$scope', 'Centre', 'CentreStatus', 'centreCounts'];
 
@@ -27,4 +25,6 @@ define(['../module', 'underscore'], function(module, _) {
       vm.possibleStatuses.push({id: status.toLowerCase(), label: status});
     });
   }
+
+  return CentresCtrl;
 });

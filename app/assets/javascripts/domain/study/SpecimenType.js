@@ -1,14 +1,12 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
 
-  module.service('SpecimenType', specimenType);
-
-  //specimenType.$inject = [];
+  //SpecimenType.$inject = [];
 
   /**
    *
    */
-  function specimenType() {
+  function SpecimenType() {
     var ALL_VALUES = [
       BUFFY_COAT(),
       CDPA_PLASMA(),
@@ -114,4 +112,5 @@ define(['./module'], function(module) {
 
   }
 
+  return SpecimenType;
 });

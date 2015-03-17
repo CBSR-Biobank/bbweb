@@ -149,13 +149,12 @@ define([
     function changeStatusShared(action, status) {
       var baseCentre = fakeEntities.centre();
       var centre = new Centre(baseCentre);
-      var changeStatusFn = action === 'disable' ? centre.disable : centre.enable;
       var command = changeStatusCommand(centre);
       var reply = replyCentre(baseCentre, { status: status });
 
       httpBackend.expectPOST(uri(centre.id) + '/' + action, command).respond(201, serverReply(reply));
 
-      _.bind(changeStatusFn, centre)().then(function(replyCentre) {
+      centre[action]().then(function(replyCentre) {
         expect(replyCentre.id).toEqual(centre.id);
         expect(replyCentre.version).toEqual(centre.version + 1);
         expect(replyCentre.status).toBe(status);

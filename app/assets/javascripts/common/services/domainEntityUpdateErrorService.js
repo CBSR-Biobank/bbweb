@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
-
-  module.service('domainEntityUpdateError', domainEntityUpdateError);
 
   domainEntityUpdateError.$inject = ['modalService', 'stateHelper'];
 
@@ -54,4 +52,5 @@ define(['../module'], function(module) {
     }
   }
 
+  return domainEntityUpdateError;
 });

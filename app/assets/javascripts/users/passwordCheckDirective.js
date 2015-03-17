@@ -1,4 +1,4 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
 
   /**
@@ -12,9 +12,7 @@ define(['./module'], function(module) {
    *
    * https://egghead.io/lessons/angularjs-using-ngmodel-in-custom-directives
    */
-  module.directive('passwordCheck', passwordCheck);
-
-  function passwordCheck() {
+  function passwordCheckDirectiveFactory() {
     return {
       restrict: 'A',
       require: 'ngModel',
@@ -32,4 +30,5 @@ define(['./module'], function(module) {
     };
   }
 
+  return passwordCheckDirectiveFactory;
 });

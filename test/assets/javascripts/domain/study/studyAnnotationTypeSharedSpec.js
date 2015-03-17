@@ -1,7 +1,10 @@
 /**
  * Jasmine test suite
  */
-define(['underscore', 'biobank.testUtils'], function(_, testUtils) {
+define([
+  'underscore',
+  'biobank.testUtils'
+], function(_, testUtils) {
   'use strict';
 
   /**
@@ -222,8 +225,6 @@ define(['underscore', 'biobank.testUtils'], function(_, testUtils) {
           var replyBadAnnotType = _.omit(replyAnnotType, key);
 
           httpBackendExpectFn(uri, command).respond(201, serverReply(replyBadAnnotType));
-
-          console.log(replyBadAnnotType);
 
           annotType.addOrUpdate().then(function (reply) {
             expect(reply).toEqual(jasmine.any(Error));

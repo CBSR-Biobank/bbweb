@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define(['angular'], function(angular) {
   'use strict';
-
-  module.controller('HeaderCtrl', HeaderCtrl);
 
   HeaderCtrl.$inject = ['$scope', '$state', 'usersService'];
 
@@ -32,4 +30,5 @@ define(['./module'], function(module) {
     }
   }
 
+  return HeaderCtrl;
 });

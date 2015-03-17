@@ -1,7 +1,5 @@
-define(['../module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.service('validationService', validationService);
 
   validationService.$inject = ['funutils'];
 
@@ -59,4 +57,5 @@ define(['../module', 'underscore'], function(module, _) {
     }
   }
 
+  return validationService;
 });

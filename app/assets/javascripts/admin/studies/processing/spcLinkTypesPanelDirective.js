@@ -1,13 +1,11 @@
-define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.directive('spcLinkTypesPanel', spcLinkTypesPanel);
 
   /**
    *
    */
-  function spcLinkTypesPanel() {
-    var directive = {
+  function spcLinkTypesPanelDirective() {
+    return {
       require: '^tab',
       restrict: 'E',
       scope: {
@@ -17,10 +15,7 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
       templateUrl: '/assets/javascripts/admin/studies/processing/spcLinkTypesPanel.html',
       controller: 'SpcLinkTypesPanelCtrl as vm'
     };
-    return directive;
   }
-
-  module.controller('SpcLinkTypesPanelCtrl', SpcLinkTypesPanelCtrl);
 
   SpcLinkTypesPanelCtrl.$inject = [
     '$scope',
@@ -139,4 +134,8 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
     }
   }
 
+  return {
+    directive: spcLinkTypesPanelDirective,
+    controller: SpcLinkTypesPanelCtrl
+  };
 });

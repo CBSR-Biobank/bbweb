@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
-
-  module.filter('truncate', truncateFactory);
 
   //truncate.$inject = [];
 
@@ -9,7 +7,7 @@ define(['../module'], function(module) {
    * Truncates a string to a specified length. If the string passed in exceeds length, it is tructated at
    * length and then the 'end' string is appended to it.
    */
-  function truncateFactory() {
+  function truncateFilterFactory() {
     return trunctate;
 
     function trunctate(text, length, end) {
@@ -33,4 +31,5 @@ define(['../module'], function(module) {
     }
   }
 
+  return truncateFilterFactory;
 });

@@ -1,13 +1,11 @@
-define(['../../module'], function(module) {
+define([], function() {
   'use strict';
+
+  ceventTypeRemoveService.$inject = ['domainEntityRemoveService', 'ceventTypesService'];
 
   /**
    * Removes a collection event type.
    */
-  module.service('ceventTypeRemoveService', ceventTypeRemoveService);
-
-  ceventTypeRemoveService.$inject = ['domainEntityRemoveService', 'ceventTypesService'];
-
   function ceventTypeRemoveService(domainEntityRemoveService, ceventTypesService) {
     var service = {
       remove: remove

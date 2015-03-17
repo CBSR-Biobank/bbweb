@@ -1,8 +1,6 @@
 /* global define */
-define(['../module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.factory('Centre', CentreFactory);
 
   CentreFactory.$inject = [
     'funutils',
@@ -209,6 +207,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     return Centre;
   }
 
+  return CentreFactory;
 });
 
 /* Local Variables:  */

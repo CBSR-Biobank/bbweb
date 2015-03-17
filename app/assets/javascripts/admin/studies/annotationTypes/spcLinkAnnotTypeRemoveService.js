@@ -1,10 +1,5 @@
-define(['../../module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  /**
-   * Removes a specimen link annotation type.
-   */
-  module.service('spcLinkAnnotTypeRemoveService', spcLinkAnnotTypeRemoveService);
 
   spcLinkAnnotTypeRemoveService.$inject = [
     'annotationTypeRemoveService',
@@ -12,6 +7,9 @@ define(['../../module', 'underscore'], function(module, _) {
     'spcLinkAnnotTypesService'
   ];
 
+  /**
+   * Removes a specimen link annotation type.
+   */
   function spcLinkAnnotTypeRemoveService(annotationTypeRemoveService,
                                          modalService,
                                          spcLinkAnnotTypesService) {
@@ -39,4 +37,5 @@ define(['../../module', 'underscore'], function(module, _) {
     }
   }
 
+  return spcLinkAnnotTypeRemoveService;
 });

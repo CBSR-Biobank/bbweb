@@ -1,7 +1,5 @@
-define(['../../module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('SpecimenGroupEditCtrl', SpecimenGroupEditCtrl);
 
   SpecimenGroupEditCtrl.$inject = [
     '$state',
@@ -68,4 +66,5 @@ define(['../../module'], function(module) {
 
   }
 
+  return SpecimenGroupEditCtrl;
 });

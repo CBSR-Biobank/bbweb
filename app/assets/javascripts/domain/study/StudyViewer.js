@@ -1,15 +1,13 @@
 /** Specimen Group helpers */
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
+
+  StudyViewerFactory.$inject = ['$filter', 'EntityViewer'];
 
   /**
    * Displays a study in a modal.
    *
    */
-  module.factory('StudyViewer', StudyViewerFactory);
-
-  StudyViewerFactory.$inject = ['$filter', 'EntityViewer'];
-
   function StudyViewerFactory($filter, EntityViewer) {
 
     function StudyViewer(study) {
@@ -25,4 +23,5 @@ define(['./module'], function(module) {
     return StudyViewer;
   }
 
+  return StudyViewerFactory;
 });

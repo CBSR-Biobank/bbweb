@@ -1,7 +1,5 @@
-define(['../module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.service('domainEntityService', domainEntityService);
 
   //domainEntityService.$inject = [];
 
@@ -37,4 +35,5 @@ define(['../module', 'underscore'], function(module, _) {
 
   }
 
+  return domainEntityService;
 });

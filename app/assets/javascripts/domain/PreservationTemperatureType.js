@@ -1,14 +1,12 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
 
-  module.service('PreservationTemperatureType', preservationTemperatureType);
-
-  //preservationTemperatureType.$inject = [];
+  //PreservationTemperatureType.$inject = [];
 
   /**
    *
    */
-  function preservationTemperatureType() {
+  function PreservationTemperatureType() {
     var ALL_VALUES = [
       PLUS_4_CELCIUS(),
       MINUS_20_CELCIUS(),
@@ -39,4 +37,5 @@ define(['./module'], function(module) {
 
   }
 
+  return PreservationTemperatureType;
 });

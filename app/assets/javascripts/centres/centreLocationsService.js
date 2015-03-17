@@ -1,7 +1,5 @@
-define(['./module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.service('centreLocationsService', centreLocationsService);
 
   centreLocationsService.$inject = ['biobankApi'];
 
@@ -68,4 +66,5 @@ define(['./module', 'underscore'], function(module, _) {
 
   }
 
+  return centreLocationsService;
 });

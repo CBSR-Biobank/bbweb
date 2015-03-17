@@ -1,13 +1,11 @@
-define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.directive('specimenGroupsPanel', specimenGroupsPanel);
 
   /**
    *
    */
-  function specimenGroupsPanel() {
-    var directive = {
+  function specimenGroupsPanelDirective() {
+    return {
       require: '^tab',
       restrict: 'E',
       scope: {
@@ -18,10 +16,7 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
       templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupsPanel.html',
       controller: 'SpecimenGroupsPanelCtrl as vm'
     };
-    return directive;
   }
-
-  module.controller('SpecimenGroupsPanelCtrl', SpecimenGroupsPanelCtrl);
 
   SpecimenGroupsPanelCtrl.$inject = [
     '$scope',
@@ -96,7 +91,10 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
     function remove(specimenGroup) {
       specimenGroupRemoveService.remove(specimenGroup, vm.specimenGroupIdsInUse);
     }
-
   }
 
+  return {
+    directive: specimenGroupsPanelDirective,
+    controller: SpecimenGroupsPanelCtrl
+  };
 });

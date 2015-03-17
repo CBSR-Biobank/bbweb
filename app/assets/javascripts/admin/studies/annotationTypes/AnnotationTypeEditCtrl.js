@@ -1,7 +1,5 @@
-define(['../../module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('AnnotationTypeEditCtrl', AnnotationTypeEditCtrl);
 
   AnnotationTypeEditCtrl.$inject = [
     '$state',
@@ -159,4 +157,5 @@ define(['../../module'], function(module) {
     }
   }
 
+  return AnnotationTypeEditCtrl;
 });

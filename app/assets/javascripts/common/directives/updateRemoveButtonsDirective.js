@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
-
-  module.directive('updateRemoveButtons', updateRemoveButtons);
 
   /**
    * Displays a right justified button group with the following buttons:
@@ -9,7 +7,7 @@ define(['../module'], function(module) {
    *  - update
    *  - remove
    */
-  function updateRemoveButtons() {
+  function updateRemoveButtonsDirectiveFactory() {
     return {
       restrict: 'E',
       replace: 'true',
@@ -23,4 +21,5 @@ define(['../module'], function(module) {
     };
   }
 
+  return updateRemoveButtonsDirectiveFactory;
 });

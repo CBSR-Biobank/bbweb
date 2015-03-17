@@ -1,13 +1,11 @@
-define(['../../module', 'angular'], function(module, angular) {
+define(['angular'], function(angular) {
   'use strict';
-
-  module.directive('processingTypesPanel', processingTypesPanel);
 
   /**
    *
    */
-  function processingTypesPanel() {
-    var directive = {
+  function processingTypesPanelDirective() {
+    return {
       require: '^tab',
       restrict: 'E',
       scope: {
@@ -17,10 +15,7 @@ define(['../../module', 'angular'], function(module, angular) {
       templateUrl: '/assets/javascripts/admin/studies/processing/processingTypesPanel.html',
       controller: 'ProcessingTypesPanelCtrl as vm'
     };
-    return directive;
   }
-
-  module.controller('ProcessingTypesPanelCtrl', ProcessingTypesPanelCtrl);
 
   ProcessingTypesPanelCtrl.$inject = [
     '$scope',
@@ -83,4 +78,8 @@ define(['../../module', 'angular'], function(module, angular) {
 
   }
 
+  return {
+    directive: processingTypesPanelDirective,
+    controller: ProcessingTypesPanelCtrl
+  };
 });

@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('ParticipantCtrl', ParticipantCtrl);
 
   ParticipantCtrl.$inject = [
     'Participant',
@@ -21,4 +19,5 @@ define(['./module'], function(module) {
     vm.participant = new Participant(study, participant, annotationTypes);
   }
 
+  return ParticipantCtrl;
 });

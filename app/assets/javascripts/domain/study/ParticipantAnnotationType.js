@@ -1,7 +1,5 @@
-define(['../module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.factory('ParticipantAnnotationType', ParticipantAnnotationTypeFactory);
 
   ParticipantAnnotationTypeFactory.$inject = [
     'validationService',
@@ -59,4 +57,5 @@ define(['../module', 'underscore'], function(module, _) {
     return ParticipantAnnotationType;
   }
 
+  return ParticipantAnnotationTypeFactory;
 });

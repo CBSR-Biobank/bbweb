@@ -1,14 +1,12 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
 
-  module.service('spcLinkTypesService', SpcLinkTypesService);
-
-  SpcLinkTypesService.$inject = ['biobankApi'];
+  spcLinkTypesServiceFactory.$inject = ['biobankApi'];
 
   /**
    * Service to access Spcecimen Link Types.
    */
-  function SpcLinkTypesService(biobankApi) {
+  function spcLinkTypesServiceFactory(biobankApi) {
     var service = {
       getAll      : getAll,
       get         : get,
@@ -75,4 +73,5 @@ define(['./module'], function(module) {
 
   }
 
+  return spcLinkTypesServiceFactory;
 });

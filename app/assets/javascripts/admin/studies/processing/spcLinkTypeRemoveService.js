@@ -1,16 +1,14 @@
 /** Common helpers */
-define(['../../module'], function(module) {
+define([], function() {
   'use strict';
-
-  /**
-   * Removes a specimen link type.
-   */
-  module.service('spcLinkTypeRemoveService', spcLinkTypeRemoveService);
 
   spcLinkTypeRemoveService.$inject = [
     'domainEntityRemoveService', 'spcLinkTypesService'
   ];
 
+  /**
+   * Removes a specimen link type.
+   */
   function spcLinkTypeRemoveService (domainEntityRemoveService, spcLinkTypesService) {
     var service = {
       remove: remove
@@ -30,4 +28,5 @@ define(['../../module'], function(module) {
     }
   }
 
+  return spcLinkTypeRemoveService;
 });

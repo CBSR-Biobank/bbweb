@@ -1,14 +1,12 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
 
-  module.factory('AnnotationTypeViewer', AnnotationTypeViewerFactory);
-
-  AnnotationTypeViewerFactory.$inject = ['EntityViewer'];
+  annotationTypeViewerFactory.$inject = ['EntityViewer'];
 
   /**
    *
    */
-  function AnnotationTypeViewerFactory(EntityViewer) {
+  function annotationTypeViewerFactory(EntityViewer) {
 
     function AnnotationTypeViewer(annotationType, title) {
       var ev = new EntityViewer(annotationType, title);
@@ -37,4 +35,5 @@ define(['./module'], function(module) {
     return AnnotationTypeViewer;
   }
 
+  return annotationTypeViewerFactory;
 });

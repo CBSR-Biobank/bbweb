@@ -1,7 +1,5 @@
-define(['../module', 'moment'], function(module, moment) {
+define(['moment'], function(moment) {
   'use strict';
-
-  module.filter('timeago', timeagoFactory);
 
   //timeagoFactory.$inject = [];
 
@@ -10,7 +8,7 @@ define(['../module', 'moment'], function(module, moment) {
    *
    * http://stackoverflow.com/questions/14774486/use-jquery-timeago-or-momentjs-and-angularjs-together
    */
-  function timeagoFactory() {
+  function timeagoFilterFactory() {
     return timeago;
 
     /*
@@ -25,4 +23,5 @@ define(['../module', 'moment'], function(module, moment) {
 
   }
 
+  return timeagoFilterFactory;
 });

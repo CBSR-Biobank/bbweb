@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.service('AnnotationValueType', annotationValueType);
 
   //annotationValueType.$inject = [];
 
@@ -36,4 +34,5 @@ define(['./module'], function(module) {
 
   }
 
+  return annotationValueType;
 });

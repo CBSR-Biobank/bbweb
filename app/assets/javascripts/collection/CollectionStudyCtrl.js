@@ -1,8 +1,6 @@
 /* global define */
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('CollectionStudyCtrl', CollectionStudyCtrl);
 
   CollectionStudyCtrl.$inject = [
     '$state',
@@ -64,4 +62,5 @@ define(['./module'], function(module) {
     }
   }
 
+  return CollectionStudyCtrl;
 });

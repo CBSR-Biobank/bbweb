@@ -1,8 +1,6 @@
 /* global define */
-define(['./module', 'moment', 'underscore'], function(module, moment, _) {
+define(['moment', 'underscore'], function(moment, _) {
   'use strict';
-
-  module.factory('AnnotationHelper', AnnotationHelperFactory);
 
   AnnotationHelperFactory.$inject = ['AnnotationValueType'];
 
@@ -218,4 +216,5 @@ define(['./module', 'moment', 'underscore'], function(module, moment, _) {
     return AnnotationHelper;
   }
 
+  return AnnotationHelperFactory;
 });

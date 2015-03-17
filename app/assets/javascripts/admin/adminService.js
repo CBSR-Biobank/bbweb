@@ -1,14 +1,12 @@
 /**
  * User service, exposes user model to the rest of the app.
  */
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
 
-  module.factory('adminService', AdminService);
+  adminService.$inject = ['biobankApi'];
 
-  AdminService.$inject = ['biobankApi'];
-
-  function AdminService(biobankApi) {
+  function adminService(biobankApi) {
     var service = {
       aggregateCounts: aggregateCounts
     };
@@ -19,4 +17,5 @@ define(['./module'], function(module) {
     }
   }
 
+  return adminService;
 });

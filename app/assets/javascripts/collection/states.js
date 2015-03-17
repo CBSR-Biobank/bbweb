@@ -3,10 +3,8 @@
 /**
  * collection routes.
  */
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.config(config);
 
   config.$inject = ['$urlRouterProvider', '$stateProvider', 'authorizationProvider'];
 
@@ -145,4 +143,5 @@ define(['./module'], function(module) {
 
   }
 
+  return config;
 });

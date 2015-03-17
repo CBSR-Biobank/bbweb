@@ -1,13 +1,5 @@
-define('biobank.testUtils', ['faker', 'moment', 'underscore'], function(faker, moment, _) {
-
-  var entityNames = [];
-
-  var utils = {
-    uuid:          uuid,
-    randomBoolean: randomBoolean,
-    fakeModal:     fakeModal,
-    addCustomMatchers: addCustomMatchers
-  };
+define(['faker', 'underscore'], function(faker, _) {
+  'use strict';
 
   /**
    * Taken from fixer version 2.1.2. When karma-fixer uses the same version this
@@ -61,6 +53,11 @@ define('biobank.testUtils', ['faker', 'moment', 'underscore'], function(faker, m
     });
   }
 
-  return utils;
+  return {
+    uuid:          uuid,
+    randomBoolean: randomBoolean,
+    fakeModal:     fakeModal,
+    addCustomMatchers: addCustomMatchers
+  };
 });
 

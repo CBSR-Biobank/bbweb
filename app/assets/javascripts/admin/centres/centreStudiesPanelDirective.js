@@ -1,13 +1,11 @@
-define(['../module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.directive('centreStudiesPanel', centreStudiesPanel);
 
   /**
    * This directive allows the user to link a center to one or more study.
    */
-  function centreStudiesPanel() {
-    var directive = {
+  function centreStudiesPanelDirective() {
+    return {
       require: '^tab',
       restrict: 'EA',
       scope: {
@@ -18,10 +16,7 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
       templateUrl: '/assets/javascripts/admin/centres/studiesPanel.html',
       controller: 'CentreStudiesPanelCtrl as vm'
     };
-    return directive;
   }
-
-  module.controller('CentreStudiesPanelCtrl', CentreStudiesPanelCtrl);
 
   CentreStudiesPanelCtrl.$inject = [
     '$scope',
@@ -134,4 +129,8 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
 
   }
 
+  return {
+    directive: centreStudiesPanelDirective,
+    controller: CentreStudiesPanelCtrl
+  };
 });

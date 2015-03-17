@@ -1,7 +1,5 @@
-define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.directive('ceventTypesPanel', ceventTypesPanelDirective);
 
   /**
    *
@@ -21,8 +19,6 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
     };
     return directive;
   }
-
-  module.controller('CeventTypesPanelCtrl', CeventTypesPanelCtrl);
 
   CeventTypesPanelCtrl.$inject = [
     '$scope',
@@ -133,4 +129,8 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
     }
   }
 
+  return {
+    directive: ceventTypesPanelDirective,
+    controller: CeventTypesPanelCtrl
+  };
 });

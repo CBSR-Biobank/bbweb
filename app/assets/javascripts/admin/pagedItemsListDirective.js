@@ -1,48 +1,47 @@
-define(['./module', 'underscore'], function(module, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.directive('pagedItemsList', pagedItemsList);
 
   /**
    * Displays items in a panel list. Can only be used for studies and centres.
    */
-  function pagedItemsList() {
-    var directive = {
+  function pagedItemsListDirective() {
+    return {
       restrict: 'E',
       scope:{
-        counts:           '=',
-        pageSize:         '=',
-        possibleStatuses: '=',
-        messageNoItems:   '@',
-        messageNoResults: '@',
-        getItems:         '&'
+        counts:                       '=',
+        pageSize:                     '=',
+        possibleStatuses:             '=',
+        messageNoItems:               '@',
+        messageNoResults:             '@',
+        getItems:                     '&',
+        entityNavigateState:          '@',
+        entityNavigateStateParamName: '@'
       },
       templateUrl: '/assets/javascripts/admin/pagedItemsList.html',
-      controller: 'ItemPagedListCtr as vm'
+      controller: 'PagedItemsListCtrl as vm'
     };
-    return directive;
   }
 
-  module.controller('ItemPagedListCtr', ItemPagedListCtr);
+  PagedItemsListCtrl.$inject = ['$scope'];
 
-  ItemPagedListCtr.$inject = ['$scope'];
-
-  function ItemPagedListCtr($scope) {
+  function PagedItemsListCtrl($scope) {
     var vm = this;
 
-    vm.counts              = $scope.counts;
-    vm.possibleStatuses    = $scope.possibleStatuses;
-    vm.getItems            = $scope.getItems;
-    vm.messageNoItems      = $scope.messageNoItems;
-    vm.messageNoResults    = $scope.messageNoResults;
-    vm.pagedResult         = { total: vm.counts.total };
-    vm.paginationNumPages  = 5;
-    vm.sortFields          = ['Name', 'Status'];
-    vm.nameFilterUpdated   = nameFilterUpdated;
-    vm.statusFilterUpdated = statusFilterUpdated;
-    vm.pageChanged         = pageChanged;
-    vm.sortFieldSelected   = sortFieldSelected;
-    vm.clearFilters        = clearFiters;
+    vm.counts                       = $scope.counts;
+    vm.possibleStatuses             = $scope.possibleStatuses;
+    vm.getItems                     = $scope.getItems;
+    vm.entityNavigateState          = $scope.entityNavigateState;
+    vm.entityNavigateStateParamName = $scope.entityNavigateStateParamName;
+    vm.messageNoItems               = $scope.messageNoItems;
+    vm.messageNoResults             = $scope.messageNoResults;
+    vm.pagedResult                  = { total: vm.counts.total };
+    vm.paginationNumPages           = 5;
+    vm.sortFields                   = ['Name', 'Status'];
+    vm.nameFilterUpdated            = nameFilterUpdated;
+    vm.statusFilterUpdated          = statusFilterUpdated;
+    vm.pageChanged                  = pageChanged;
+    vm.sortFieldSelected            = sortFieldSelected;
+    vm.clearFilters                 = clearFiters;
 
     vm.pagerOptions = {
       filter:     '',
@@ -134,4 +133,8 @@ define(['./module', 'underscore'], function(module, _) {
     }
   }
 
+  return {
+    directive: pagedItemsListDirective,
+    controller: PagedItemsListCtrl
+  };
 });

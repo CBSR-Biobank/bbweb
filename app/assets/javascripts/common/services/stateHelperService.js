@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
-
-  module.service('stateHelper', stateHelper);
 
   stateHelper.$inject = ['$state', '$stateParams'];
 
@@ -38,4 +36,5 @@ define(['../module'], function(module) {
     }
   }
 
+  return stateHelper;
 });

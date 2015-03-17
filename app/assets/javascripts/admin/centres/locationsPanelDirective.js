@@ -1,13 +1,11 @@
-define(['../module', 'angular'], function(module, angular) {
+define(['angular'], function(angular) {
   'use strict';
-
-  module.directive('locationsPanel', locationsPanel);
 
   /**
    *
    */
-  function locationsPanel() {
-    var directive = {
+  function locationsPanelDirective() {
+    return {
       require: '^tab',
       restrict: 'EA',
       scope: {
@@ -17,10 +15,7 @@ define(['../module', 'angular'], function(module, angular) {
       templateUrl: '/assets/javascripts/admin/centres/locationsPanel.html',
       controller: 'LocationsPanelCtrl as vm'
     };
-    return directive;
   }
-
-  module.controller('LocationsPanelCtrl', LocationsPanelCtrl);
 
   LocationsPanelCtrl.$inject = [
     '$scope',
@@ -82,4 +77,8 @@ define(['../module', 'angular'], function(module, angular) {
     }
   }
 
+  return {
+    directive: locationsPanelDirective,
+    controller: LocationsPanelCtrl
+  };
 });

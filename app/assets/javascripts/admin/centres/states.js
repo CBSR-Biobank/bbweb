@@ -1,14 +1,12 @@
 /**
  * Configure routes of centres module.
  */
-define(['../module'], function(module) {
+define([], function() {
   'use strict';
 
-  module.config(config);
+  centreStates.$inject = ['$urlRouterProvider', '$stateProvider', 'authorizationProvider'];
 
-  config.$inject = ['$urlRouterProvider', '$stateProvider', 'authorizationProvider'];
-
-  function config($urlRouterProvider, $stateProvider, authorizationProvider ) {
+  function centreStates($urlRouterProvider, $stateProvider, authorizationProvider ) {
 
     resolveCentre.$inject = ['$stateParams', 'Centre'];
     function resolveCentre($stateParams, Centre) {
@@ -243,4 +241,5 @@ define(['../module'], function(module) {
     });
   }
 
+  return centreStates;
 });

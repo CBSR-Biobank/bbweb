@@ -1,13 +1,11 @@
-define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.directive('ceventAnnotTypesPanel', ceventAnnotTypesPanel);
 
   /**
    *
    */
-  function ceventAnnotTypesPanel() {
-    var directive = {
+  function ceventAnnotTypesPanelDirective() {
+    return {
       require: '^tab',
       restrict: 'E',
       scope: {
@@ -18,10 +16,7 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
       templateUrl: '/assets/javascripts/admin/studies/annotationTypes/ceventAnnotTypesPanel.html',
       controller: 'CeventAnnotTypesPanelCtrl as vm'
     };
-    return directive;
   }
-
-  module.controller('CeventAnnotTypesPanelCtrl', CeventAnnotTypesPanelCtrl);
 
   CeventAnnotTypesPanelCtrl.$inject = [
     '$scope',
@@ -119,4 +114,8 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
 
   }
 
+  return {
+    directive: ceventAnnotTypesPanelDirective,
+    controller: CeventAnnotTypesPanelCtrl
+  };
 });

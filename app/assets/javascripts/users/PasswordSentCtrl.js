@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('PasswordSentCtrl', PasswordSentCtrl);
 
   PasswordSentCtrl.$inject = ['$stateParams'];
 
@@ -16,4 +14,5 @@ define(['./module'], function(module) {
     vm.email = $stateParams.email;
   }
 
+  return PasswordSentCtrl;
 });

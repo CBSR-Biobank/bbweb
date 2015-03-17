@@ -1,7 +1,5 @@
-define(['../module', 'underscore', 'moment'], function(module, _, moment) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.factory('User', UserFactory);
 
   UserFactory.$inject = [
     'funutils',
@@ -144,4 +142,5 @@ define(['../module', 'underscore', 'moment'], function(module, _, moment) {
     return User;
   }
 
+  return UserFactory;
 });

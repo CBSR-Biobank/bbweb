@@ -3,20 +3,20 @@
  * Splitting an app in several Angular modules serves no real purpose in Angular 1.0/1.1.
  * (Hopefully this will change in the near future.)
  * Splitting it into several RequireJS modules allows async loading. We cannot take full advantage
- * of RequireJS and lazy-load stuff because the angular modules have their own dependency system.
+ * of RequireJS and lazy-load stuff 'because the angular modules have their own dependency system.
  */
 define([
   'angular',
   'toastr',
-  'common/index',
-  'home/index',
-  'centres/index',
-  'collection/index',
-  'domain/index',
-  'studies/index',
-  'users/index',
-  'admin/index',
-  'dashboard/index'
+  'admin',
+  'centres',
+  'collection',
+  'common',
+  'dashboard',
+  'domain',
+  'home',
+  'studies',
+  'users'
 ], function(angular, toastr) {
   'use strict';
 
@@ -26,8 +26,8 @@ define([
     'biobank.admin',
     'biobank.centres',
     'biobank.collection',
-    'biobank.domain',
     'biobank.dashboard',
+    'biobank.domain',
     'biobank.home',
     'biobank.studies',
     'biobank.users'

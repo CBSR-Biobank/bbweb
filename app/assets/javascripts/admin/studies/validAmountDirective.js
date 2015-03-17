@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define(['angular'], function(angular) {
   'use strict';
-
-  module.directive('validAmount', validAmount);
 
   function validAmount() {
     var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
@@ -25,6 +23,7 @@ define(['../module'], function(module) {
         return undefined;
       });
     }
-
   }
+
+  return validAmount;
 });

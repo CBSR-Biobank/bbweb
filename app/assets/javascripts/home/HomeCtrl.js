@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define(['angular'], function(angular) {
   'use strict';
-
-  module.controller('HomeCtrl', HomeCtrl);
 
   HomeCtrl.$inject = ['$rootScope', 'usersService'];
 
@@ -14,4 +12,5 @@ define(['./module'], function(module) {
     $rootScope.pageTitle = 'Biobank';
   }
 
+  return HomeCtrl;
 });

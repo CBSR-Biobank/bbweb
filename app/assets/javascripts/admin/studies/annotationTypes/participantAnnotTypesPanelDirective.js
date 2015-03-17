@@ -1,13 +1,11 @@
-define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.directive('participantsAnnotTypesPanel', participantsAnnotTypesPanel);
 
   /**
    *
    */
-  function participantsAnnotTypesPanel() {
-    var directive = {
+  function participantsAnnotTypesPanelDirective() {
+    return {
       require: '^tab',
       restrict: 'E',
       scope: {
@@ -17,10 +15,7 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
       templateUrl: '/assets/javascripts/admin/studies/annotationTypes/participantAnnotTypesPanel.html',
       controller: 'ParticipantAnnotTypesPanelCtrl as vm'
     };
-    return directive;
   }
-
-  module.controller('ParticipantAnnotTypesPanelCtrl', ParticipantAnnotTypesPanelCtrl);
 
   ParticipantAnnotTypesPanelCtrl.$inject = [
     '$scope',
@@ -113,6 +108,10 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
 
       participantAnnotTypeRemoveService.remove(annotType, vm.annotTypesInUse);
     }
-
   }
+
+  return {
+    directive: participantsAnnotTypesPanelDirective,
+    controller: ParticipantAnnotTypesPanelCtrl
+  };
 });

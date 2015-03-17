@@ -61,28 +61,28 @@
   </ul>
 
   <ul class="list-group" ng-if="vm.displayState === vm.displayStates.HAVE_RESULTS">
-    <li class="list-group-item" ng-repeat="study in vm.pagedResult.items">
+    <li class="list-group-item" ng-repeat="entity in vm.pagedResult.items">
       <div class="row">
         <div class="col-md-12">
           <!-- FIXME replace this with a controller call -->
-          <i class="glyphicon glyphicon-cog" ng-if="study.status === 'Disabled'"></i>
-          <i class="glyphicon glyphicon-ok-circle" ng-if="study.status === 'Enabled'"></i>
-          <i class="glyphicon glyphicon-remove-sign" ng-if="study.status === 'Retired'"></i>
-          <strong><a ui-sref="admin.studies.study.summary({studyId: study.id})">
-              {{study.name}}</a>
+          <i class="glyphicon glyphicon-cog" ng-if="entity.status === 'Disabled'"></i>
+          <i class="glyphicon glyphicon-ok-circle" ng-if="entity.status === 'Enabled'"></i>
+          <i class="glyphicon glyphicon-remove-sign" ng-if="entity.status === 'Retired'"></i>
+          <strong><a ui-sref="{{entityNavigateState}}( { {{entityNavigateStateParamName}}: entity.id} )">
+              {{entity.name}}</a>
           </strong>
-          <p>{{study.description === null ? "" : study.description | truncate:100}}</p>
+          <p>{{entity.description === null ? "" : entity.description | truncate:100}}</p>
         </div>
       </div>
       <div class="row">
         <div class="col-md-5">
-          <small class="text-info"><strong>Status:</strong> {{study.status}}</small>
+          <small class="text-info"><strong>Status:</strong> {{entity.status}}</small>
         </div>
         <div class="col-md-3">
-          <small class="text-muted"><strong>Added:</strong> {{study.timeAdded | timeago}}</small>
+          <small class="text-muted"><strong>Added:</strong> {{entity.timeAdded | timeago}}</small>
         </div>
-        <div class="col-md-3" data-ng-if="study.timeModified">
-          <small class="text-muted"><strong>Updated:</strong> {{study.timeModified | timeago}}</small>
+        <div class="col-md-3" data-ng-if="entity.timeModified">
+          <small class="text-muted"><strong>Updated:</strong> {{entity.timeModified | timeago}}</small>
         </div>
       </div>
     </li>

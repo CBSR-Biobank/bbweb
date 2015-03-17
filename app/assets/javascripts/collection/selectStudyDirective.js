@@ -1,14 +1,12 @@
 /* global define */
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.directive('selectStudy', selectStudyDirective);
 
   /**
    *
    */
   function selectStudyDirective() {
-    var directive = {
+    return {
       restrict: 'E',
       scope: {
         getHeader:              '&',
@@ -22,11 +20,7 @@ define(['./module'], function(module) {
       templateUrl : '/assets/javascripts/collection/selectStudy.html',
       controller: 'SelectStudyCtr as vm'
     };
-    return directive;
-
   }
-
-  module.controller('SelectStudyCtr', SelectStudyCtr);
 
   SelectStudyCtr.$inject = ['$scope', '$state'];
 
@@ -119,4 +113,8 @@ define(['./module'], function(module) {
     }
   }
 
+  return {
+    directive: selectStudyDirective,
+    controller: SelectStudyCtr
+  };
 });

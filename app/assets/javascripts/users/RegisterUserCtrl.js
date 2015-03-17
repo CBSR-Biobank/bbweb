@@ -1,7 +1,5 @@
-define(['./module', 'toastr'], function(module, toastr) {
+define(['toastr'], function(toastr) {
   'use strict';
-
-  module.controller('RegisterUserCtrl', RegisterUserCtrl);
 
   RegisterUserCtrl.$inject = ['$state', 'User', 'notificationsService'];
 
@@ -53,4 +51,5 @@ define(['./module', 'toastr'], function(module, toastr) {
     }
   }
 
+  return RegisterUserCtrl;
 });

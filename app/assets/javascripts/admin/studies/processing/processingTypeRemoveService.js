@@ -1,7 +1,6 @@
-define(['../../module'], function(module) {
+define([], function() {
   'use strict';
 
-  module.service('processingTypeRemoveService', processingTypeRemoveService);
 
   processingTypeRemoveService.$inject = ['domainEntityRemoveService', 'processingTypesService'];
 

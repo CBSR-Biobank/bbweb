@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('StudyCtrl', StudyCtrl);
 
   StudyCtrl.$inject = ['$window', '$state', '$timeout', 'studiesService'];
 
@@ -63,4 +61,5 @@ define(['../module'], function(module) {
 
   }
 
+  return StudyCtrl;
 });

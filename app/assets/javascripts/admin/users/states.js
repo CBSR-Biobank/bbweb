@@ -1,10 +1,8 @@
 /**
  * Configure routes of centres module.
  */
-define(['../module'], function(module) {
+define(['angular'], function(angular) {
   'use strict';
-
-  module.config(config);
 
   config.$inject = [
     '$urlRouterProvider', '$stateProvider', 'authorizationProvider'
@@ -38,4 +36,6 @@ define(['../module'], function(module) {
       }
     });
   }
+
+  return config;
 });

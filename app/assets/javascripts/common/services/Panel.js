@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
-
-  module.service('Panel', PanelFactory);
 
   PanelFactory.$inject = ['$window', '$state', 'panelTableService'];
 
@@ -46,4 +44,5 @@ define(['../module'], function(module) {
     return Panel;
   }
 
+  return PanelFactory;
 });

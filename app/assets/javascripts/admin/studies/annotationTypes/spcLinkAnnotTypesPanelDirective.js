@@ -1,13 +1,11 @@
-define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.directive('spcLinkAnnotTypesPanel', spcLinkAnnotTypesPanel);
 
   /**
    *
    */
-  function spcLinkAnnotTypesPanel() {
-    var directive = {
+  function spcLinkAnnotTypesPanelDirective() {
+    return {
       require: '^tab',
       restrict: 'E',
       scope: {
@@ -18,10 +16,7 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
       templateUrl: '/assets/javascripts/admin/studies/annotationTypes/spcLinkAnnotTypesPanel.html',
       controller: 'SpcLinkAnnotTypesPanelCtrl as vm'
     };
-    return directive;
   }
-
-  module.controller('SpcLinkAnnotTypesPanelCtrl', SpcLinkAnnotTypesPanelCtrl);
 
   SpcLinkAnnotTypesPanelCtrl.$inject = [
     '$scope',
@@ -121,7 +116,10 @@ define(['../../module', 'angular', 'underscore'], function(module, angular, _) {
     function remove(annotType) {
       spcLinkAnnotTypeRemoveService.remove(annotType, vm.annotTypesInUse);
     }
-
   }
 
+  return {
+    directive: spcLinkAnnotTypesPanelDirective,
+    controller: SpcLinkAnnotTypesPanelCtrl
+  };
 });

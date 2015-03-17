@@ -1,13 +1,11 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
-
-  module.directive('annotationsInput', annotationsInputDirective);
 
   /**
    * Annotations must contain an attribute named 'annotationType' with the annotation types information.
    */
   function annotationsInputDirective() {
-    var directive = {
+    return {
       restrict: 'E',
       scope: {
         annotationHelpers: '='
@@ -15,10 +13,8 @@ define(['../module'], function(module) {
       templateUrl : '/assets/javascripts/common/directives/annotationsInput.html',
       controller: 'AnnotationsInputCtrl as vm'
     };
-    return directive;
   }
 
-  module.controller('AnnotationsInputCtrl', AnnotationsInputCtrl);
   AnnotationsInputCtrl.$inject = ['$scope'];
 
   /**
@@ -45,4 +41,8 @@ define(['../module'], function(module) {
 
   }
 
+  return {
+    directive: annotationsInputDirective,
+    controller: AnnotationsInputCtrl
+  };
 });

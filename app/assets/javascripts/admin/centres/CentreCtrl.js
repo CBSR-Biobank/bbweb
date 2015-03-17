@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('CentreCtrl', CentreCtrl);
 
   CentreCtrl.$inject = ['$window', '$scope', '$state', '$timeout', 'Centre'];
 
@@ -46,7 +44,7 @@ define(['../module'], function(module) {
       }
     }
 
-
   }
 
+  return CentreCtrl;
 });

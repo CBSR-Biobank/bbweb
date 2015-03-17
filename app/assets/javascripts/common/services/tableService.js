@@ -1,14 +1,12 @@
-define(['../module', 'angular'], function(module, angular) {
+define(['angular'], function(angular) {
   'use strict';
 
-  module.service('tableService', TableService);
-
-  TableService.$inject = ['ngTableParams'];
+  tableService.$inject = ['ngTableParams'];
 
   /**
    * Service to create ng-tables.
    */
-  function TableService(ngTableParams) {
+  function tableService(ngTableParams) {
     var service = {
       getTableParams: getTableParams
     };
@@ -45,8 +43,7 @@ define(['../module', 'angular'], function(module, angular) {
 
       return tableParams;
     }
-
-
   }
 
+  return tableService;
 });

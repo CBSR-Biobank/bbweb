@@ -1,8 +1,6 @@
 /* global define */
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.factory('EntityViewer', EntityViewerFactory);
 
   EntityViewerFactory.$inject = ['$modal'];
 
@@ -71,4 +69,5 @@ define(['./module'], function(module) {
     return EntityViewer;
   }
 
+  return EntityViewerFactory;
 });

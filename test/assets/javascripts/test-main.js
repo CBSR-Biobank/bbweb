@@ -21,6 +21,27 @@ require.config({
   // Karma serves files under /base, which is the basePath from your config file
   baseUrl: '/base/app/assets/javascripts',
 
+  packages: ['admin', 'centres', 'collection', 'common', 'dashboard', 'domain', 'home', 'studies', 'users'],
+
+  paths: {
+    'jquery':             '../../../target/web/web-modules/main/webjars/lib/jquery/jquery',
+    'angular':            '../../../target/web/web-modules/main/webjars/lib/angularjs/angular',
+    'angularMocks':       '../../../target/web/web-modules/main/webjars/lib/angularjs/angular-mocks',
+    'angular-cookies':    '../../../target/web/web-modules/main/webjars/lib/angularjs/angular-cookies',
+    'underscore':         '../../../target/web/web-modules/main/webjars/lib/underscorejs/underscore',
+    'toastr':             '../../../target/web/web-modules/main/webjars/lib/toastr/toastr',
+    'ngTable':            '../../../target/web/web-modules/main/webjars/lib/ng-table/ng-table',
+    'angular-ui-router':  '../../../target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router',
+    'ui-bootstrap':       '../../../target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls',
+    'angular-sanitize':   '../../../target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize',
+    'moment':             '../../../target/web/web-modules/main/webjars/lib/momentjs/moment',
+    'faker':              '../../../node_modules/karma-faker/node_modules/faker/build/build/faker',
+    'biobank.panelTests': '../../../test/assets/javascripts/fixtures/panelTests',
+    'biobank.testUtils':  '../../../test/assets/javascripts/fixtures/testUtils',
+    'biobankTest':        '../../../test/assets/javascripts/test/module',
+    'biobankApp':         'app'
+  },
+
   shim: {
     'angular' : {
       'exports' : 'angular'
@@ -29,32 +50,16 @@ require.config({
       deps: ['angular'],
       exports: 'angular.mock'
     },
-    'toastr':            ['jquery'],
     'biobankApp': {
-      deps: ['angular'],
-      exports: 'biobankApp'
-    },
-    'biobankTest': {
-      deps: ['angular'],
+      deps: ['angular',
+             'angular-ui-router',
+             'angular-sanitize',
+             'ui-bootstrap',
+             'ngTable',
+             'angular-cookies'
+            ],
       exports: 'biobankApp'
     }
-  },
-
-  paths: {
-    'jquery':            '../../../target/web/web-modules/main/webjars/lib/jquery/jquery',
-    'angular':           '../../../target/web/web-modules/main/webjars/lib/angularjs/angular',
-    'angularMocks':      '../../../target/web/web-modules/main/webjars/lib/angularjs/angular-mocks',
-    'angular-cookies':   '../../../target/web/web-modules/main/webjars/lib/angularjs/angular-cookies',
-    'underscore':        '../../../target/web/web-modules/main/webjars/lib/underscorejs/underscore',
-    'toastr':            '../../../target/web/web-modules/main/webjars/lib/toastr/toastr',
-    'ngTable':           '../../../target/web/web-modules/main/webjars/lib/ng-table/ng-table',
-    'angular-ui-router': '../../../target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router',
-    'ui-bootstrap':      '../../../target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls',
-    'angular-sanitize':  '../../../target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize',
-    'moment':            '../../../target/web/web-modules/main/webjars/lib/momentjs/moment',
-    'faker':             '../../../node_modules/karma-faker/node_modules/faker/build/build/faker',
-    'biobankTest':       '../../../test/assets/javascripts/test/module',
-    'biobankApp':        'app'
   },
 
   // dynamically load all test files
@@ -65,7 +70,7 @@ require.config({
 });
 
 requirejs.onError = function (err) {
-  console.log(err.requireType);
+  console.log('requireJS error', err.requireType);
   if (err.requireType === 'timeout') {
     console.log('modules: ' + err.requireModules);
   }

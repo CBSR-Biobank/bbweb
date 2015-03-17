@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.factory('CentreCounts', CentreCountsFactory);
 
   CentreCountsFactory.$inject = ['biobankApi'];
 
@@ -31,4 +29,5 @@ define(['../module'], function(module) {
     return CentreCounts;
   }
 
+  return CentreCountsFactory;
 });

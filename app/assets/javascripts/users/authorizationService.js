@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.provider('authorization', authorizationService);
 
   //authorizationService.$inject = [];
 
@@ -63,4 +61,5 @@ define(['./module'], function(module) {
     return service;
   }
 
+  return authorizationService;
 });

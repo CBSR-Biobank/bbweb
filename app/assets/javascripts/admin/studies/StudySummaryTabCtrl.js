@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('StudySummaryTabCtrl', StudySummaryTabCtrl);
 
   StudySummaryTabCtrl.$inject = ['$state', 'stateHelper', 'studiesService', 'modalService', 'study'];
 
@@ -49,7 +47,7 @@ define(['../module'], function(module) {
         });
       });
     }
-
   }
 
+  return StudySummaryTabCtrl;
 });

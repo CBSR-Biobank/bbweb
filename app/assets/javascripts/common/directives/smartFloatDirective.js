@@ -1,14 +1,12 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
 
   var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
 
-  module.directive('smartFloat', smartFloat);
-
   /**
    * Validates that value is a float.
    */
-  function smartFloat() {
+  function smartFloatDirectiveFactory() {
     var directive = {
       require: 'ngModel',
       link: link
@@ -28,4 +26,5 @@ define(['../module'], function(module) {
     }
   }
 
+  return smartFloatDirectiveFactory;
 });

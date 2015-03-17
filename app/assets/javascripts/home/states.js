@@ -1,10 +1,8 @@
 /**
  * Home routes.
  */
-define(['./module'], function(module) {
+define(['angular'], function(angular) {
   'use strict';
-
-  module.config(config);
 
   config.$inject = ['$urlRouterProvider', '$stateProvider'];
 
@@ -49,4 +47,5 @@ define(['./module'], function(module) {
       });
   }
 
+  return config;
 });

@@ -1,12 +1,10 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
-
-  module.directive('str2integer', str2integer);
 
   /**
    * Validates that the input is an integer.
    */
-  function str2integer() {
+  function str2integerDirectiveFactory() {
     var directive = {
       require: 'ngModel',
       link: link
@@ -21,4 +19,5 @@ define(['../module'], function(module) {
 
   }
 
+  return str2integerDirectiveFactory;
 });

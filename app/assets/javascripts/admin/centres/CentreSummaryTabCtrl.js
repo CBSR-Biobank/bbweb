@@ -1,17 +1,15 @@
 /**
  * Centre administration controllers.
  */
-define(['../module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
+
+  CentreSummaryTabCtrl.$inject = ['$filter', 'modalService', 'centre'];
 
   /**
    * Displays the centre administrtion page, with a number of tabs. Each tab displays the configuration
    * for a different aspect of the centre.
    */
-  module.controller('CentreSummaryTabCtrl', CentreSummaryTabCtrl);
-
-  CentreSummaryTabCtrl.$inject = ['$filter', 'modalService', 'centre'];
-
   function CentreSummaryTabCtrl($filter, modalService, centre) {
     var vm = this;
     vm.centre = centre;
@@ -51,4 +49,5 @@ define(['../module', 'underscore'], function(module, _) {
 
   }
 
+  return CentreSummaryTabCtrl;
 });

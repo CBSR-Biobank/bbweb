@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.factory('SpcLinkTypeViewer', SpcLinkTypeViewerFactory);
 
   SpcLinkTypeViewerFactory.$inject = ['EntityViewer'];
 
@@ -39,7 +37,7 @@ define(['./module'], function(module) {
     }
 
     return SpcLinkTypeViewer;
-
   }
 
+  return SpcLinkTypeViewerFactory;
 });

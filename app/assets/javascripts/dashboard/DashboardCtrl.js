@@ -1,10 +1,8 @@
 /**
  * Dashboard controllers.
  */
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('DashboardCtrl', DashboardCtrl);
 
   DashboardCtrl.$inject = ['user'];
 

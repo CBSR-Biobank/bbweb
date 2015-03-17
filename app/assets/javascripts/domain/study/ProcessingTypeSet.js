@@ -1,7 +1,5 @@
-define(['./module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.factory('ProcessingTypeSet', ProcessingTypeSetFactory);
 
   //ProcessingTypeSetFactory.$inject = [];
 
@@ -45,4 +43,5 @@ define(['./module', 'underscore'], function(module, _) {
     return ProcessingTypeSet;
   }
 
+  return ProcessingTypeSetFactory;
 });

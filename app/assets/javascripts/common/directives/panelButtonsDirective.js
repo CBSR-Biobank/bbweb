@@ -1,13 +1,12 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
 
-  module.directive('panelButtons', panelButtonsDirective);
 
   /**
    * Displays a right justified button with a 'plus' icon. Meant to be used in a pane to add a
    * domain object.
    */
-  function panelButtonsDirective() {
+  function panelButtonsDirectiveFactory() {
     var directive = {
       restrict: 'E',
       replace: true,
@@ -24,7 +23,6 @@ define(['../module'], function(module) {
     return directive;
   }
 
-  module.controller('PanelButtonsController', PanelButtonsController);
   PanelButtonsController.$inject =  ['$scope'];
 
   /**
@@ -43,4 +41,8 @@ define(['../module'], function(module) {
     }
   }
 
+  return {
+    directive: panelButtonsDirectiveFactory,
+    controller: PanelButtonsController
+  };
 });

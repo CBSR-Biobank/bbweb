@@ -7,11 +7,13 @@ define([
   'angular',
   '../../../test/assets/javascripts/test/fakeDomainEntities',
   '../../../test/assets/javascripts/test/extendedDomainEntities'
-], function(angular) {
+], function(angular, fakeDomainEntities, extendedDomainEntities) {
   'use strict';
 
-  return angular.module('biobank.test', [
-    'biobank.test.fakeDomainEntities',
-    'biobank.test.extendedDomainEntities'
-  ]);
+  var module = angular.module('biobank.test', []);
+
+  module.service('fakeDomainEntities', fakeDomainEntities);
+  module.service('extendedDomainEntities', extendedDomainEntities);
+
+  return module;
 });

@@ -1,14 +1,12 @@
-define(['./module', 'angular'], function(module, angular) {
+define(['angular'], function(angular) {
   'use strict';
 
-  module.service('specimenGroupsService', SpecimenGroupsService);
-
-  SpecimenGroupsService.$inject = ['biobankApi', 'domainEntityService'];
+  specimenGroupsServiceFactory.$inject = ['biobankApi', 'domainEntityService'];
 
   /**
    * Service to access specimen groups.
    */
-  function SpecimenGroupsService(biobankApi, domainEntityService) {
+  function specimenGroupsServiceFactory(biobankApi, domainEntityService) {
     var service = {
       getAll                  : getAll,
       get                     : get,
@@ -103,4 +101,5 @@ define(['./module', 'angular'], function(module, angular) {
     }
   }
 
+  return specimenGroupsServiceFactory;
 });

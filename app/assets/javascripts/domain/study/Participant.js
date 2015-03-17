@@ -1,8 +1,6 @@
 /* global define */
-define(['./module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.factory('Participant', ParticipantFactory);
 
   ParticipantFactory.$inject = [
     'funutils',
@@ -141,4 +139,5 @@ define(['./module', 'underscore'], function(module, _) {
     return Participant;
   }
 
+  return ParticipantFactory;
 });

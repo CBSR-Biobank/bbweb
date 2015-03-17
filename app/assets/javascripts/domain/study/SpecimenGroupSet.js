@@ -1,7 +1,5 @@
-define(['./module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.factory('SpecimenGroupSet', SpecimenGroupSetFactory);
 
   //SpecimenGroupSetFactory.$inject = [];
 
@@ -45,4 +43,5 @@ define(['./module', 'underscore'], function(module, _) {
     return SpecimenGroupSet;
   }
 
+  return SpecimenGroupSetFactory;
 });

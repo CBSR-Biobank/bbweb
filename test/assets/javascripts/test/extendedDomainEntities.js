@@ -4,10 +4,6 @@
 define(['angular', 'underscore'], function(angular, _) {
   'use strict';
 
-  var module = angular.module('biobank.test.extendedDomainEntities', []);
-
-  module.service('extendedDomainEntities', extendedDomainEntities);
-
   extendedDomainEntities.$inject = [
     'ConcurrencySafeEntity',
     'AnnotationType',
@@ -18,11 +14,11 @@ define(['angular', 'underscore'], function(angular, _) {
   ];
 
   function extendedDomainEntities(ConcurrencySafeEntity,
-                                AnnotationType,
-                                StudyAnnotationType,
-                                ParticipantAnnotationType,
-                                Centre,
-                                Location) {
+                                  AnnotationType,
+                                  StudyAnnotationType,
+                                  ParticipantAnnotationType,
+                                  Centre,
+                                  Location) {
 
     /**
      * @param obj the JS domain entity.
@@ -97,4 +93,5 @@ define(['angular', 'underscore'], function(angular, _) {
     };
   }
 
+  return extendedDomainEntities;
 });

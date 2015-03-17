@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
-
-  module.directive('domainEntityTimestamps', domainEntityTimestampsDirective);
 
   /**
    *
@@ -19,4 +17,5 @@ define(['../module'], function(module) {
 
   }
 
+  return domainEntityTimestampsDirective;
 });

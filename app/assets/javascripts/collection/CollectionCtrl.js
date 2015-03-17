@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('CollectionCtrl', CollectionCtrl);
 
   CollectionCtrl.$inject = ['studiesService', 'studyCounts'];
 
@@ -19,7 +17,7 @@ define(['./module'], function(module) {
     //---
 
     function updateEnabledStudies(options) {
-      return studiesService.getStudies(options);
+      return studiesService.list(options);
     }
 
     function getEnabledStudiesPanelHeader() {
@@ -28,4 +26,5 @@ define(['./module'], function(module) {
 
   }
 
+  return CollectionCtrl;
 });

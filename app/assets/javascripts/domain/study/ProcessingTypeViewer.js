@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.factory('ProcessingTypeViewer', ProcessingTypeViewerFactory);
 
   ProcessingTypeViewerFactory.$inject = ['EntityViewer'];
 
@@ -23,4 +21,5 @@ define(['./module'], function(module) {
     return ProcessingTypeViewer;
   }
 
+  return ProcessingTypeViewerFactory;
 });

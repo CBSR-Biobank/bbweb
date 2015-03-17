@@ -1,7 +1,5 @@
-define(['../../module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.service('specimenGroupRemoveService', specimenGroupRemoveService);
 
   specimenGroupRemoveService.$inject = [
     'domainEntityRemoveService',
@@ -38,4 +36,5 @@ define(['../../module', 'underscore'], function(module, _) {
     }
   }
 
+  return specimenGroupRemoveService;
 });

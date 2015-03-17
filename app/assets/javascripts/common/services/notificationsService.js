@@ -1,7 +1,5 @@
-define(['../module', 'toastr'], function(module, toastr) {
+define(['toastr'], function(toastr) {
   'use strict';
-
-  module.service('notificationsService', notificationsService);
 
   notificationsService.$inject = [];
 
@@ -48,4 +46,5 @@ define(['../module', 'toastr'], function(module, toastr) {
 
   }
 
+  return notificationsService;
 });

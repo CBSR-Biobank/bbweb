@@ -1,14 +1,12 @@
-define(['../module', 'angular'], function(module, angular) {
+define(['angular'], function(angular) {
   'use strict';
 
-  module.service('panelTableService', PanelTableService);
-
-  PanelTableService.$inject = ['$filter', 'ngTableParams'];
+  panelTableService.$inject = ['$filter', 'ngTableParams'];
 
   /**
    * Service to create ng-tables.
    */
-  function PanelTableService($filter, ngTableParams) {
+  function panelTableService($filter, ngTableParams) {
     var service = {
       getTableParamsWithCallback: getTableParamsWithCallback,
       getTableParams: getTableParams
@@ -72,8 +70,7 @@ define(['../module', 'angular'], function(module, angular) {
         return data;
       }
     }
-
-
   }
 
+  return panelTableService;
 });

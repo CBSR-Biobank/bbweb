@@ -1,9 +1,3 @@
-/**
- * Generates fake domain entities as returned by the server.
- *
- * This has to be an AngularJS service so that it's dependencies from the real application
- * can be injected (i.e. AnnotationValueType).
- */
 define([
   'angular',
   'underscore',
@@ -17,10 +11,6 @@ define([
             utils) {
   'use strict';
 
-  var module = angular.module('biobank.test.fakeDomainEntities', []);
-
-  module.service('fakeDomainEntities', fakeDomainEntities);
-
   fakeDomainEntities.$inject = [
     'AnnotationValueType',
     'AnatomicalSourceType',
@@ -29,6 +19,12 @@ define([
     'SpecimenType'
   ];
 
+  /**
+   * Generates fake domain entities as if returned by the server.
+   *
+   * This has to be an AngularJS service so that it's dependencies from the real application
+   * can be injected (i.e. AnnotationValueType).
+   */
   function fakeDomainEntities(AnnotationValueType,
                               AnatomicalSourceType,
                               PreservationTemperatureType,
@@ -345,7 +341,7 @@ define([
 
       };
     }
-
   }
 
+  return fakeDomainEntities;
 });

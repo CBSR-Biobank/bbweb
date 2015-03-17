@@ -1,10 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  /**
-   * Displays a list of users in a table.
-   */
-  module.controller('UserProfileCtrl', UserProfileCtrl);
 
   UserProfileCtrl.$inject = [
     '$modal',
@@ -14,6 +9,9 @@ define(['./module'], function(module) {
     'user'
   ];
 
+  /**
+   * Displays a list of users in a table.
+   */
   function UserProfileCtrl($modal,
                            notificationsService,
                            modalService,
@@ -177,7 +175,7 @@ define(['./module'], function(module) {
           });
       });
     }
-
   }
 
+  return UserProfileCtrl;
 });

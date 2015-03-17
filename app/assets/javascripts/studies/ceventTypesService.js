@@ -1,14 +1,12 @@
-define(['./module', 'angular'], function(module, angular) {
+define(['angular'], function(angular) {
   'use strict';
 
-  module.service('ceventTypesService', CeventTypesService);
-
-  CeventTypesService.$inject = ['biobankApi', 'domainEntityService'];
+  ceventTypesServiceFactory.$inject = ['biobankApi', 'domainEntityService'];
 
   /**
    * Service to access Collection Event Types.
    */
-  function CeventTypesService(biobankApi, domainEntityService) {
+  function ceventTypesServiceFactory(biobankApi, domainEntityService) { //
     var service = {
       getAll      : getAll,
       get         : get,
@@ -71,4 +69,5 @@ define(['./module', 'angular'], function(module, angular) {
 
   }
 
+  return ceventTypesServiceFactory;
 });

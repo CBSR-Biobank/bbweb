@@ -1,14 +1,12 @@
-define(['./module', 'angular'], function(module, angular) {
+define(['angular'], function(angular) {
   'use strict';
 
-  module.service('processingTypesService', ProcessingTypesService);
-
-  ProcessingTypesService.$inject = ['biobankApi', 'domainEntityService',];
+  processingTypesServiceFactory.$inject = ['biobankApi', 'domainEntityService',];
 
   /**
    * Service to access Processing Types.
    */
-  function ProcessingTypesService(biobankApi, domainEntityService) {
+  function processingTypesServiceFactory(biobankApi, domainEntityService) {
     var service = {
       getAll      : getAll,
       get         : get,
@@ -69,4 +67,5 @@ define(['./module', 'angular'], function(module, angular) {
     }
   }
 
+  return processingTypesServiceFactory;
 });

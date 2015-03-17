@@ -1,15 +1,13 @@
 /** Specimen Group helpers */
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
+
+  UserViewerFactory.$inject = ['EntityViewer'];
 
   /**
    * Displays a study annotation type in a modal.
    *
    */
-  module.factory('UserViewer', UserViewerFactory);
-
-  UserViewerFactory.$inject = ['EntityViewer'];
-
   function UserViewerFactory(EntityViewer) {
 
     function UserViewer(user) {
@@ -24,4 +22,5 @@ define(['./module'], function(module) {
     return UserViewer;
   }
 
+  return UserViewerFactory;
 });

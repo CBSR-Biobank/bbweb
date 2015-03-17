@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.factory('LocationViewer', LocationViewerFactory);
 
   LocationViewerFactory.$inject = ['EntityViewer'];
 
@@ -27,4 +25,5 @@ define(['./module'], function(module) {
     return LocationViewer;
   }
 
+  return LocationViewerFactory;
 });

@@ -1,13 +1,13 @@
 /**
  * Configure routes of user module.
  */
-define(['../../module'], function(module) {
+define([], function() {
   'use strict';
 
-  module.config(config);
-
   config.$inject = [
-    '$urlRouterProvider', '$stateProvider', 'authorizationProvider'
+    '$urlRouterProvider',
+    '$stateProvider',
+    'authorizationProvider'
   ];
 
   function config($urlRouterProvider, $stateProvider, authorizationProvider ) {
@@ -202,7 +202,7 @@ define(['../../module'], function(module) {
         displayName: 'Specimen Link Type'
       }
     });
-
   }
 
+  return config;
 });

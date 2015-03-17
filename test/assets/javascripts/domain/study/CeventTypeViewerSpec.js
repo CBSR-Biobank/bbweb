@@ -6,10 +6,7 @@ define([
   'underscore',
   'biobank.testUtils',
   'biobankApp'
-], function(angular,
-            mocks,
-            _,
-           testUtils) {
+], function(angular, mocks, _, testUtils) {
   'use strict';
 
   describe('CeventTypeViewer', function() {

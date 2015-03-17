@@ -1,16 +1,14 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
 
-  module.service('participantAnnotTypesService', participantAnnotTypesService);
-
-  participantAnnotTypesService.$inject = [
+  participantAnnotTypesServiceFactory.$inject = [
     'StudyAnnotTypesService'
   ];
 
   /**
    * Service to access participant annotation types.
    */
-  function participantAnnotTypesService(StudyAnnotTypesService) {
+  function participantAnnotTypesServiceFactory(StudyAnnotTypesService) {
 
     function ParticipantAnnotTypesService() {
       StudyAnnotTypesService.call(this, 'pannottypes');
@@ -21,4 +19,5 @@ define(['./module'], function(module) {
     return new ParticipantAnnotTypesService();
   }
 
+  return participantAnnotTypesServiceFactory;
 });

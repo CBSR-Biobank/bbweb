@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('ForgotPasswordCtrl', ForgotPasswordCtrl);
 
   ForgotPasswordCtrl.$inject = [
     '$state', 'usersService', 'modalService',
@@ -47,4 +45,5 @@ define(['./module'], function(module) {
 
   }
 
+  return ForgotPasswordCtrl;
 });

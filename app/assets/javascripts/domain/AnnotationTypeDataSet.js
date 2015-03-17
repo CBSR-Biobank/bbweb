@@ -1,7 +1,5 @@
-define(['./module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.factory('AnnotationTypeDataSet', AnnotationTypeDataSetFactory);
 
   AnnotationTypeDataSetFactory.$inject = ['AnnotationTypeSet'];
 
@@ -101,4 +99,5 @@ define(['./module', 'underscore'], function(module, _) {
     return AnnotationTypeDataSet;
   }
 
+  return AnnotationTypeDataSetFactory;
 });

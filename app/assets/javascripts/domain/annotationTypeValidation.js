@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.service('annotationTypeValidation', annotationTypeValidation);
 
   annotationTypeValidation.$inject = [
     'validationService'
@@ -21,4 +19,5 @@ define(['./module'], function(module) {
     return service;
   }
 
+  return annotationTypeValidation;
 });

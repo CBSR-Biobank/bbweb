@@ -1,8 +1,6 @@
 /* global define */
-define(['./module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.factory('SpecimenLinkType', SpecimenLinkTypeFactory);
 
   SpecimenLinkTypeFactory.$inject = [
     'SpecimenGroupSet',
@@ -104,4 +102,5 @@ define(['./module', 'underscore'], function(module, _) {
     return SpecimenLinkType;
   }
 
+  return SpecimenLinkTypeFactory;
 });

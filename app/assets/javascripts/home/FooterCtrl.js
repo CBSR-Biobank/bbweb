@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define(['angular'], function(angular) {
   'use strict';
-
-  module.controller('FooterCtrl', FooterCtrl);
 
   //FooterCtrl.$inject = [];
 
@@ -10,5 +8,7 @@ define(['./module'], function(module) {
    */
   function FooterCtrl() {
   }
+
+  return FooterCtrl;
 
 });

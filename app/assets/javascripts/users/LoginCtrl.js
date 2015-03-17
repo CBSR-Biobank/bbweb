@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('LoginCtrl', LoginCtrl);
 
   LoginCtrl.$inject = [
     '$state', 'stateHelper', 'usersService', 'modalService',
@@ -75,4 +73,5 @@ define(['./module'], function(module) {
     }
   }
 
+  return LoginCtrl;
 });

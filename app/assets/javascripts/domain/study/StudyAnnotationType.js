@@ -1,7 +1,5 @@
-define(['../module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.factory('StudyAnnotationType', StudyAnnotationTypeFactory);
 
   StudyAnnotationTypeFactory.$inject = [
     'funutils',
@@ -88,4 +86,5 @@ define(['../module', 'angular', 'underscore'], function(module, angular, _) {
     return StudyAnnotationType;
   }
 
+  return StudyAnnotationTypeFactory;
 });

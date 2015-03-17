@@ -1,7 +1,5 @@
-define(['./module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.factory('AnnotationType', AnnotationTypeFactory);
 
   AnnotationTypeFactory.$inject = [
     'validationService',
@@ -37,4 +35,5 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
     return AnnotationType;
   }
 
+  return AnnotationTypeFactory;
 });

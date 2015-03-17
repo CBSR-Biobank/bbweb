@@ -1,7 +1,5 @@
-define(['./module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.factory('Location', LocationFactory);
 
   LocationFactory.$inject = ['funutils', 'validationService'];
 
@@ -60,4 +58,5 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
     return Location;
   }
 
+  return LocationFactory;
 });

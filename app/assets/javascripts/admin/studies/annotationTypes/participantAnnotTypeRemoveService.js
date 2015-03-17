@@ -1,7 +1,5 @@
-define(['../../module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.service('participantAnnotTypeRemoveService', participantAnnotTypeRemoveService);
 
   participantAnnotTypeRemoveService.$inject = [
     'annotationTypeRemoveService',
@@ -38,4 +36,5 @@ define(['../../module', 'underscore'], function(module, _) {
     }
   }
 
+  return participantAnnotTypeRemoveService;
 });

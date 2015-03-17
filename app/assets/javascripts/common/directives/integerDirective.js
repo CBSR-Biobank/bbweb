@@ -1,14 +1,12 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
-
-  module.directive('integer', integer);
-
-  var INTEGER_REGEXP = /^\-?\d+$/;
 
  /**
    *
    */
-  function integer() {
+  function integerDirectiveFactory() {
+    var INTEGER_REGEXP = /^\-?\d+$/;
+
     var directive = {
       require: 'ngModel',
       link: link
@@ -31,4 +29,5 @@ define(['../module'], function(module) {
     }
   }
 
+  return integerDirectiveFactory;
 });

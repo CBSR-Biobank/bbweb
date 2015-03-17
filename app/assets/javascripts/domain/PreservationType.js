@@ -1,14 +1,12 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
 
-  module.service('PreservationType', preservationType);
-
-  //preservationType.$inject = [];
+  //PreservationType.$inject = [];
 
   /**
    *
    */
-  function preservationType() {
+  function PreservationType() {
     var ALL_VALUES = [
       FROZEN_SPECIMEN(),
       RNA_LATER(),
@@ -33,7 +31,7 @@ define(['./module'], function(module) {
     function SLIDE()           { return 'Slide'; }
 
     function values()          { return ALL_VALUES; }
-
   }
 
+  return PreservationType;
 });

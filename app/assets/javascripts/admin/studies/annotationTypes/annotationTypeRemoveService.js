@@ -1,7 +1,5 @@
-define(['../../module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.service('annotationTypeRemoveService', annotationTypeRemoveService);
 
   annotationTypeRemoveService.$inject = ['domainEntityRemoveService'];
 
@@ -29,4 +27,5 @@ define(['../../module'], function(module) {
 
   }
 
+  return annotationTypeRemoveService;
 });

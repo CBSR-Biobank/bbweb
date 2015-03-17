@@ -1,4 +1,4 @@
-define(['../module', 'angular'], function(module, angular) {
+define(['angular'], function(angular) {
   'use strict';
 
   var templateUrl = '/assets/javascripts/common/directives/uiBreadcrumbs.html';
@@ -10,7 +10,9 @@ define(['../module', 'angular'], function(module, angular) {
    *
    * Created by Michael on 02/04/14.
    */
-  module.directive('uiBreadcrumbs', ['$interpolate', '$state', function($interpolate, $state) {
+  uiBreadcrumbsDirectiveFactory.$inject = ['$interpolate', '$state'];
+
+  function uiBreadcrumbsDirectiveFactory($interpolate, $state) {
     return {
       restrict: 'E',
       templateUrl: function(elem, attrs) {
@@ -155,8 +157,8 @@ define(['../module', 'angular'], function(module, angular) {
         }
       }
     };
-  }]);
+  }
 
-  return module;
+  return uiBreadcrumbsDirectiveFactory;
 });
 

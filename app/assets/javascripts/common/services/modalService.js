@@ -1,9 +1,7 @@
-define(['../module', 'angular'], function(module, angular) {
+define(['angular'], function(angular) {
   'use strict';
 
-  module.service('modalService', ModalService);
-
-  ModalService.$inject = ['$modal'];
+  modalService.$inject = ['$modal'];
 
   /**
    * Originally the code was taken from the URL given below, but then it was modified.
@@ -11,7 +9,7 @@ define(['../module', 'angular'], function(module, angular) {
    * http://weblogs.asp.net/dwahlin/building-an-angularjs-modal-service
    *
    */
-  function ModalService($modal) {
+  function modalService($modal) {
     var modalDefaults = {
       backdrop: true,
       keyboard: true,
@@ -78,4 +76,5 @@ define(['../module', 'angular'], function(module, angular) {
     }
   }
 
+  return modalService;
 });

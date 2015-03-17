@@ -1,16 +1,14 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
 
-  module.service('ceventAnnotTypesService', ceventAnnotTypesService);
-
-  ceventAnnotTypesService.$inject = [
+  ceventAnnotTypesFactory.$inject = [
     'StudyAnnotTypesService'
   ];
 
   /**
    * Service to access Collection Event Annotation Types.
    */
-  function ceventAnnotTypesService(StudyAnnotTypesService) {
+  function ceventAnnotTypesFactory(StudyAnnotTypesService) {
 
     function CeventAnnotTypesService() {
       StudyAnnotTypesService.call(this, 'ceannottypes');
@@ -21,4 +19,5 @@ define(['./module'], function(module) {
     return new CeventAnnotTypesService();
   }
 
+  return ceventAnnotTypesFactory;
 });

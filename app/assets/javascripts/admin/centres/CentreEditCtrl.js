@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('CentreEditCtrl', CentreEditCtrl);
 
   CentreEditCtrl.$inject = [
     '$scope',
@@ -56,4 +54,5 @@ define(['../module'], function(module) {
     }
   }
 
+  return CentreEditCtrl;
 });

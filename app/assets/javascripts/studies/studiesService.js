@@ -1,16 +1,14 @@
-define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular, $, _) {
+define(['angular', 'jquery', 'underscore'], function(angular, $, _) {
   'use strict';
 
-  module.service('studiesService', StudiesService);
-
-  StudiesService.$inject = ['biobankApi', 'domainEntityService', 'queryStringService'];
+  studiesServiceFactory.$inject = ['biobankApi', 'domainEntityService', 'queryStringService'];
 
   /**
    * Service to acccess studies.
    */
-  function StudiesService(biobankApi, domainEntityService, queryStringService) {
+  function studiesServiceFactory(biobankApi, domainEntityService, queryStringService) {
     var service = {
-      getStudies:     getStudies,
+      list:           list,
       getStudyCounts: getStudyCounts,
       getStudyNames:  getStudyNames,
       get:            get,
@@ -77,7 +75,7 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
      *
      * @return A promise. If the promise succeeds then a paged result is returned.
      */
-    function getStudies(options) {
+    function list(options) {
       var validKeys = [
         'filter',
         'status',
@@ -168,4 +166,5 @@ define(['./module', 'angular', 'jquery', 'underscore'], function(module, angular
     }
   }
 
+  return studiesServiceFactory;
 });

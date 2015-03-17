@@ -1,7 +1,5 @@
-define(['./module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.controller('AdminCtrl', AdminCtrl);
 
   AdminCtrl.$inject = ['aggregateCounts'];
 
@@ -19,4 +17,5 @@ define(['./module'], function(module) {
     };
   }
 
+  return AdminCtrl;
 });

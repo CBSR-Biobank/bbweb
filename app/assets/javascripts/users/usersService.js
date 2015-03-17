@@ -1,21 +1,18 @@
-define(['./module', 'underscore'], function(module, _) {
+define(['underscore'], function(_) {
   'use strict';
 
-  module.service('usersService', UsersService);
-
-  UsersService.$inject = ['$q', '$cookies', '$log', 'biobankApi', 'queryStringService'];
+  usersServiceFactory.$inject = ['$q', '$cookies', '$log', 'biobankApi', 'queryStringService'];
 
   /**
    * Communicates with the server to get user related information and perform user related commands.
    */
-  function UsersService($q,
-                        $cookies,
-                        $log,
-                        biobankApi,
-                        queryStringService) {
-    var self = this;
-    self.currentUser = null;
-    self.token = $cookies['XSRF-TOKEN'];
+  function usersServiceFactory($q,
+                               $cookies,
+                               $log,
+                               biobankApi,
+                               queryStringService) {
+    var currentUser = null;
+    var token = $cookies['XSRF-TOKEN'];
 
     var service = {
       getCurrentUser:     getCurrentUser,
@@ -46,16 +43,16 @@ define(['./module', 'underscore'], function(module, _) {
 
     /* If the token is assigned, check that the token is still valid on the server */
     function init() {
-      if (self.token) {
+      if (token) {
         biobankApi.get('/authenticate')
-          .then(function(currentUser) {
-            self.currentUser = currentUser;
-            $log.info('Welcome back, ' + self.currentUser.name);
+          .then(function(user) {
+            currentUser = user;
+            $log.info('Welcome back, ' + currentUser.name);
           })
           .catch(function() {
             /* the token is no longer valid */
             $log.info('Token no longer valid, please log in.');
-            self.token = undefined;
+            token = undefined;
             delete $cookies['XSRF-TOKEN'];
             return $q.reject('Token invalid');
           });
@@ -72,26 +69,26 @@ define(['./module', 'underscore'], function(module, _) {
 
     function requestCurrentUser() {
       if (isAuthenticated()) {
-        return $q.when(self.currentUser);
+        return $q.when(currentUser);
       } else {
-        return biobankApi.get('/authenticate').then(function(currentUser) {
-          self.currentUser = currentUser;
-          return self.currentUser;
+        return biobankApi.get('/authenticate').then(function(user) {
+          currentUser = user;
+          return currentUser;
         });
       }
     }
 
     function getCurrentUser() {
-      return self.currentUser;
+      return currentUser;
     }
 
     function isAuthenticated() {
-      return !!self.currentUser;
+      return !!currentUser;
     }
 
     function isAdmin() {
       // FIXME this needs to be implemented once completed on the server, for now just return true if logged in
-      return !!self.currentUser;
+      return !!currentUser;
     }
 
     function changeStatus(user, status) {
@@ -104,14 +101,14 @@ define(['./module', 'underscore'], function(module, _) {
 
     function login(credentials) {
       return biobankApi.post('/login', credentials)
-        .then(function(token) {
-          self.token = token;
+        .then(function(reply) {
+          token = reply;
           return biobankApi.get('/authenticate');
         })
         .then(function(user) {
-          self.currentUser = user;
-          $log.info('Welcome ' + self.currentUser.name);
-          return self.currentUser;
+          currentUser = user;
+          $log.info('Welcome ' + currentUser.name);
+          return currentUser;
         });
     }
 
@@ -119,8 +116,8 @@ define(['./module', 'underscore'], function(module, _) {
       return biobankApi.post('/logout').then(function() {
         $log.info('Good bye');
         delete $cookies['XSRF-TOKEN'];
-        self.token = undefined;
-        self.currentUser = undefined;
+        token = undefined;
+        currentUser = undefined;
       });
     }
 
@@ -255,4 +252,5 @@ define(['./module', 'underscore'], function(module, _) {
     }
   }
 
+  return usersServiceFactory;
 });

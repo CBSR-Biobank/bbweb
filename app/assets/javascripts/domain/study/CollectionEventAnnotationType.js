@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.factory('CollectionEventAnnotationType', CollectionEventAnnotationTypeFactory);
 
   CollectionEventAnnotationTypeFactory.$inject = [
     'StudyAnnotationType',
@@ -54,4 +52,5 @@ define(['../module'], function(module) {
     return CollectionEventAnnotationType;
   }
 
+  return CollectionEventAnnotationTypeFactory;
 });

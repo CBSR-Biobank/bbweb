@@ -1,7 +1,5 @@
-define(['../module', 'angular', 'underscore', 'moment'], function(module, angular, _, moment) {
+define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
   'use strict';
-
-  module.controller('UsersTableCtrl', UsersTableCtrl);
 
   UsersTableCtrl.$inject = [
     '$rootScope',
@@ -166,4 +164,5 @@ define(['../module', 'angular', 'underscore', 'moment'], function(module, angula
     }
   }
 
+  return UsersTableCtrl;
 });

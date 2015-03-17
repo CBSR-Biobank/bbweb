@@ -1,12 +1,10 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
-
-  module.directive('truncateToggle', truncateToggle);
 
   /**
    *
    */
-  function truncateToggle() {
+  function truncateToggleDirectiveFactory() {
     var directive = {
       restrict: 'E',
       replace: 'true',
@@ -45,4 +43,5 @@ define(['../module'], function(module) {
     return directive;
   }
 
+  return truncateToggleDirectiveFactory;
 });

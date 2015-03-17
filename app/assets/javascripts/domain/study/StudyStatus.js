@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.service('StudyStatus', StudyStatus);
 
   //StudyStatus.$inject = [];
 
@@ -33,4 +31,5 @@ define(['../module'], function(module) {
     function values()    { return ALL_VALUES; }
   }
 
+  return StudyStatus;
 });

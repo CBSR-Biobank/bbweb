@@ -4,24 +4,8 @@
   // -- RequireJS config --
   requirejs.config({
     // Packages = top-level folders; loads a contained file named 'main.js'
-    packages: [],
-    shim: {
-      'angular': {
-        deps: ['jquery'],
-        exports: 'angular'
-      },
-      'underscore': {
-        exports: '_'
-      },
-      'angular-route':     ['angular'],
-      'angular-cookies':   ['angular'],
-      'bootstrap':         ['jquery'],
-      'angular-ui-router': ['angular'],
-      'ui-bootstrap':      ['angular', 'bootstrap'],
-      'ngTable':           ['angular'],
-      'toastr':            ['angular', 'jquery'],
-      'angular-sanitize':  ['angular']
-    },
+    packages: ['admin', 'centres', 'collection', 'common', 'dashboard', 'domain', 'home', 'studies', 'users'],
+
     paths: {
       'requirejs':              '../lib/requirejs/require',
       'jquery':                 '../lib/jquery/jquery',
@@ -36,6 +20,19 @@
       'toastr':                 '../lib/toastr/toastr',
       'angular-sanitize':       '../lib/angular-sanitize/angular-sanitize',
       'moment':                 '../lib/momentjs/moment'
+    },
+
+    shim: {
+      'angular': {
+        deps: ['jquery'],
+        exports: 'angular'
+      },
+      'underscore': {
+        exports: '_'
+      },
+      'bootstrap':         ['jquery'],
+      'angular-ui-router': ['angular'],
+      'angular-sanitize':  ['angular']
     }
   });
 
@@ -49,7 +46,6 @@
     'jquery',
     'bootstrap',
     'angular-cookies',
-    'angular-route',
     'angular-ui-router',
     'ui-bootstrap',
     'ngTable',

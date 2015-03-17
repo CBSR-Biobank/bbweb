@@ -1,7 +1,5 @@
-define(['../module'], function(module) {
+define([], function() {
   'use strict';
-
-  module.factory('SpecimenLinkAnnotationType', SpecimenLinkAnnotationTypeFactory);
 
   SpecimenLinkAnnotationTypeFactory.$inject = [
     'StudyAnnotationType',
@@ -54,4 +52,5 @@ define(['../module'], function(module) {
     return SpecimenLinkAnnotationType;
   }
 
+  return SpecimenLinkAnnotationTypeFactory;
 });

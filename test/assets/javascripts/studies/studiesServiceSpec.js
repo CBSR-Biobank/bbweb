@@ -37,7 +37,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
 
     it('should have the following functions', function () {
       expect(studiesService.getStudyCounts).toBeFunction();
-      expect(studiesService.getStudies).toBeFunction();
+      expect(studiesService.list).toBeFunction();
       expect(studiesService.get).toBeFunction();
       expect(studiesService.addOrUpdate).toBeFunction();
       expect(studiesService.enable).toBeFunction();
@@ -61,13 +61,13 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
       httpBackend.flush();
     });
 
-    it('calling getStudies with no parameters has no query string', function() {
+    it('calling list with no parameters has no query string', function() {
       httpBackend.whenGET(uri()).respond({
         status: 'success',
         data: [study]
       });
 
-      studiesService.getStudies().then(function(data) {
+      studiesService.list().then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });
@@ -75,7 +75,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
       httpBackend.flush();
     });
 
-    it('calling getStudies with filter parameter has valid query string', function() {
+    it('calling list with filter parameter has valid query string', function() {
       var nameFilter = 'nameFilter';
       var url = uri() + '?' + $.param({filter: nameFilter});
       httpBackend.whenGET(url).respond({
@@ -83,7 +83,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
         data: [study]
       });
 
-      studiesService.getStudies({filter: nameFilter}).then(function(data) {
+      studiesService.list({filter: nameFilter}).then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });
@@ -91,7 +91,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
       httpBackend.flush();
     });
 
-    it('calling getStudies with sort parameter has valid query string', function() {
+    it('calling list with sort parameter has valid query string', function() {
       var sortField = 'sortField';
       var url = uri() + '?' + $.param({sort: sortField});
       httpBackend.whenGET(url).respond({
@@ -99,7 +99,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
         data: [study]
       });
 
-      studiesService.getStudies({sort: sortField}).then(function(data) {
+      studiesService.list({sort: sortField}).then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });
@@ -107,7 +107,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
       httpBackend.flush();
     });
 
-    it('calling getStudies with filter and status parameters has valid query string', function() {
+    it('calling list with filter and status parameters has valid query string', function() {
       var nameFilter = 'nameFilter';
       var order = 'disabled';
       var url = uri() + '?' + $.param({
@@ -119,7 +119,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
         data: [study]
       });
 
-      studiesService.getStudies({filter: nameFilter, order: order}).then(function(data) {
+      studiesService.list({filter: nameFilter, order: order}).then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });
@@ -127,7 +127,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
       httpBackend.flush();
     });
 
-    it('calling getStudies with page and pageSize parameters has valid query string', function() {
+    it('calling list with page and pageSize parameters has valid query string', function() {
       var page = 1;
       var pageSize = 5;
       var url = uri() + '?' + $.param({
@@ -139,7 +139,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
         data: [study]
       });
 
-      studiesService.getStudies({page: page, pageSize: pageSize}).then(function(data) {
+      studiesService.list({page: page, pageSize: pageSize}).then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });
@@ -147,7 +147,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
       httpBackend.flush();
     });
 
-    it('calling getStudies with sortField and order parameters has valid query string', function() {
+    it('calling list with sortField and order parameters has valid query string', function() {
       var sortField = 'name';
       var order = 'ascending';
       var url = uri() + '?' + $.param({
@@ -159,7 +159,7 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
         data: [study]
       });
 
-      studiesService.getStudies({sort: sortField, order: order}).then(function(data) {
+      studiesService.list({sort: sortField, order: order}).then(function(data) {
         expect(data.length).toEqual(1);
         expect(_.isEqual(study, data[0]));
       });

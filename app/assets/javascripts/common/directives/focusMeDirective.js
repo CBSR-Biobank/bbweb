@@ -1,9 +1,7 @@
-define(['../module'], function(module) {
+define([], function(){
   'use strict';
 
-  module.directive('focusMe', focusMe);
-
-  focusMe.$inject = ['$timeout'];
+  focusMeFactory.$inject = ['$timeout'];
 
   /**
    * the HTML5 autofocus property can be finicky when it comes to dynamically loaded templates and such with
@@ -13,7 +11,7 @@ define(['../module'], function(module) {
    * <input type="text" autofocus>
    *
    */
-  function focusMe($timeout) {
+  function focusMeFactory($timeout) {
     var directive = {
       restrict: 'A',
       scope : {
@@ -34,4 +32,5 @@ define(['../module'], function(module) {
     }
   }
 
+  return focusMeFactory;
 });

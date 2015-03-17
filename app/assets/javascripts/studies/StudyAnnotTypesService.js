@@ -1,15 +1,13 @@
-define(['./module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
 
-  module.factory('StudyAnnotTypesService', StudyAnnotTypesServiceFactory);
-
-  StudyAnnotTypesServiceFactory.$inject = [
+  studyAnnotTypesServiceFactory.$inject = [
     'biobankApi',
     'AnnotationValueType',
     'domainEntityService'
   ];
 
-  function StudyAnnotTypesServiceFactory(biobankApi,
+  function studyAnnotTypesServiceFactory(biobankApi,
                                          AnnotationValueType,
                                          domainEntityService,
                                          ParticipantAnnotationType) {
@@ -87,7 +85,7 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
     }
 
     return StudyAnnotTypesService;
-
   }
 
+  return studyAnnotTypesServiceFactory;
 });

@@ -1,7 +1,5 @@
-define(['./module', 'angular', 'underscore'], function(module, angular, _) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
-
-  module.factory('ConcurrencySafeEntity', ConcurrencySafeEntityFactory);
 
   //ConcurrencySafeEntityFactory.$inject = [];
 
@@ -28,4 +26,5 @@ define(['./module', 'angular', 'underscore'], function(module, angular, _) {
     return ConcurrencySafeEntity;
   }
 
+  return ConcurrencySafeEntityFactory;
 });

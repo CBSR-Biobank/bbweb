@@ -1,11 +1,9 @@
-define(['../module', 'jquery', 'underscore'], function(module, $, _) {
+define(['jquery', 'underscore'], function($, _) {
   'use strict';
 
-  module.service('queryStringService', QueryStringService);
+  //queryStringService.$inject = [];
 
-  //QueryStringService.$inject = [];
-
-  function QueryStringService() {
+  function queryStringService() { //
     var service = {
       param: param
     };
@@ -30,7 +28,7 @@ define(['../module', 'jquery', 'underscore'], function(module, $, _) {
 
       return '?' + paramsStr;
     }
-
   }
 
+  return queryStringService;
 });
