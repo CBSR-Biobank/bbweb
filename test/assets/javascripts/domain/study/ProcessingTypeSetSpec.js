@@ -11,31 +11,31 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('SpecimenGroupSet', function() {
+  describe('ProcessingTypeSet', function() {
 
-    var SpecimenGroupSet,
+    var ProcessingTypeSet,
         fakeEntities,
-        specimenGroups = [
+        processingTypes = [
           { id: 'abc', name: 'test1'},
           { id: 'def', name: 'test2'}
         ];
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (fakeDomainEntities, _SpecimenGroupSet_) {
-      SpecimenGroupSet = _SpecimenGroupSet_;
+    beforeEach(inject(function (fakeDomainEntities, _ProcessingTypeSet_) {
+      ProcessingTypeSet = _ProcessingTypeSet_;
       fakeEntities = fakeDomainEntities;
     }));
 
     it('throws an exception if argument is undefined', function() {
-      expect(function () { new SpecimenGroupSet(); })
-        .toThrow(Error('specimenGroups is undefined'));
+      expect(function () { new ProcessingTypeSet(); })
+        .toThrow(Error('processingTypes is undefined'));
     });
 
 
-    it('should return the correct specimen group', function() {
-      var set = new SpecimenGroupSet(specimenGroups);
-      _.each(specimenGroups, function(expectedSg) {
+    it('should return the correct processing type', function() {
+      var set = new ProcessingTypeSet(processingTypes);
+      _.each(processingTypes, function(expectedSg) {
         var sg = set.get(expectedSg.id);
         expect(sg.id).toBe(expectedSg.id);
         expect(sg.name).toBe(expectedSg.name);
@@ -43,16 +43,16 @@ define([
     });
 
     it('throws exception if ID not found', function() {
-      var set = new SpecimenGroupSet(specimenGroups);
+      var set = new ProcessingTypeSet(processingTypes);
       var badId = fakeEntities.stringNext();
 
       expect(function () { set.get(badId); })
-        .toThrow(Error('specimen group not found: ' + badId));
+        .toThrow(Error('processing type not found: ' + badId));
     });
 
     it('find returns the correct value', function() {
-      var set = new SpecimenGroupSet(specimenGroups);
-      expect(set.find(specimenGroups[0].id)).toEqual(specimenGroups[0]);
+      var set = new ProcessingTypeSet(processingTypes);
+      expect(set.find(processingTypes[0].id)).toEqual(processingTypes[0]);
     });
 
 

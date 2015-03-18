@@ -13,7 +13,7 @@ define(['underscore'], function(_) {
      */
     function SpecimenGroupSet(specimenGroups) {
       if (_.isUndefined(specimenGroups)) {
-        throw new Error('annotationTypes is undefined');
+        throw new Error('specimenGroups is undefined');
       }
       this.specimenGroups = _.indexBy(specimenGroups, 'id');
     }

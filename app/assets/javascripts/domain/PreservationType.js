@@ -28,7 +28,7 @@ define([], function() {
     function FROZEN_SPECIMEN() { return 'Frozen Specimen'; }
     function RNA_LATER()       { return 'RNA Later'; }
     function FRESH_SPECIMEN()  { return 'Fresh Specimen'; }
-    function SLIDE()           { return 'Slide'; }
+    function SLIDE() { return 'Slide'; }
 
     function values()          { return ALL_VALUES; }
   }

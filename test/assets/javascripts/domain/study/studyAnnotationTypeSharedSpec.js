@@ -1,10 +1,7 @@
 /**
  * Jasmine test suite
  */
-define([
-  'underscore',
-  'biobank.testUtils'
-], function(_, testUtils) {
+define(['underscore'], function(_) {
   'use strict';
 
   /**
@@ -14,14 +11,22 @@ define([
 
     describe('(shared)', function() {
 
-      var httpBackend, funutils, AnnotTypeType, createAnnotTypeFn, annotTypesService, annotTypeUriPart;
-      var objRequiredKeys, createServerAnnotTypeFn, annotTypeListFn, annotTypeGetFn;
+      var httpBackend,
+          funutils,
+          AnnotTypeType,
+          AnnotationValueType,
+          createAnnotTypeFn,
+          annotTypesService,
+          annotTypeUriPart,
+          objRequiredKeys,
+          createServerAnnotTypeFn,
+          annotTypeListFn,
+          annotTypeGetFn;
 
-      beforeEach(inject(function($httpBackend, _funutils_) {
-        testUtils.addCustomMatchers();
-
+      beforeEach(inject(function($httpBackend, _funutils_, _AnnotationValueType_) {
         httpBackend              = $httpBackend;
         funutils                 = _funutils_;
+        AnnotationValueType      = _AnnotationValueType_;
         AnnotTypeType            = context.annotTypeType;
         createAnnotTypeFn        = context.createAnnotTypeFn;
         annotTypesService        = context.annotTypesService;
@@ -31,6 +36,21 @@ define([
         annotTypeListFn          = context.annotTypeListFn;
         annotTypeGetFn           = context.annotTypeGetFn;
       }));
+
+      it('has default values', function() {
+        var annotationType = new AnnotTypeType();
+
+        expect(annotationType.id).toBeNull();
+        expect(annotationType.name).toBeEmptyString();
+        expect(annotationType.description).toBeNull();
+        expect(annotationType.valueType).toBe(AnnotationValueType.TEXT());
+        expect(annotationType.maxValueCount).toBeNull();
+        expect(annotationType.options).toBeEmptyArray();
+
+        if (_.contains(objRequiredKeys, 'required')) {
+          expect(annotationType.required).toBe(false);
+        }
+      });
 
       it('a list can be retrieved from the server', function(done) {
         var serverAnnotType = createServerAnnotTypeFn();
@@ -149,7 +169,7 @@ define([
                                         _.omit(baseAnnotType, 'id'),
                                         command,
                                         reply,
-                                        httpBackend.expectPOST,
+                                        'expectPOST',
                                         done);
       });
 
@@ -162,7 +182,7 @@ define([
                                         baseAnnotType,
                                         command,
                                         reply,
-                                        httpBackend.expectPUT,
+                                        'expectPUT',
                                         done);
       });
 
@@ -211,20 +231,19 @@ define([
         return { status: 'success', data: obj };
       }
 
-      function checkAddOrUpdateInvalidResponse(replyRequiredKeys,
-                                               uri,
+      function checkAddOrUpdateInvalidResponse(uri,
                                                serverAnnotType,
                                                command,
                                                replyAnnotType,
-                                               httpBackendExpectFn,
+                                               httpBackendMethod,
                                                done) {
-        var lastReplyKey = _.last(replyRequiredKeys);
+        var lastReplyKey = _.last(objRequiredKeys);
 
         _.each(objRequiredKeys, function(key) {
           var annotType = createAnnotTypeFn(serverAnnotType);
           var replyBadAnnotType = _.omit(replyAnnotType, key);
 
-          httpBackendExpectFn(uri, command).respond(201, serverReply(replyBadAnnotType));
+          httpBackend[httpBackendMethod](uri, command).respond(201, serverReply(replyBadAnnotType));
 
           annotType.addOrUpdate().then(function (reply) {
             expect(reply).toEqual(jasmine.any(Error));

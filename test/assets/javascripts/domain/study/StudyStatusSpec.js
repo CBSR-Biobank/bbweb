@@ -10,15 +10,15 @@ define([
 ], function(angular, mocks, enumSharedSpec, testUtils) {
   'use strict';
 
-  describe('CentreStatus', function() {
+  describe('StudyStatus', function() {
 
     var context = {},
-        statuses = ['Disabled', 'Enabled'];
+        statuses = ['Disabled', 'Enabled', 'Retired'];
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (CentreStatus) {
-      context.enumerationClass = CentreStatus;
+    beforeEach(inject(function (StudyStatus) {
+      context.enumerationClass = StudyStatus;
       context.valueMap = _.map(statuses, function (value) {
         return [ value, testUtils.camelCaseToUnderscore(value)];
       });

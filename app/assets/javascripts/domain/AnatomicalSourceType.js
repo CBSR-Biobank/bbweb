@@ -6,15 +6,15 @@ define([], function() {
   /**
    *
    */
-  function anatomicalSourceType() {
+  function AnatomicalSourceType() {
     var ALL_VALUES = [
         BLOOD(),
         BRAIN(),
         COLON(),
         KIDNEY(),
-        COLON_ASCENDING(),
-        COLON_DESCENDING(),
-        COLON_TRANSVERSE(),
+        ASCENDING_COLON(),
+        DESCENDING_COLON(),
+        TRANSVERSE_COLON(),
         DUODENUM(),
         HAIR(),
         ILEUM(),
@@ -31,9 +31,9 @@ define([], function() {
       BRAIN:            BRAIN,
       COLON:            COLON,
       KIDNEY:           KIDNEY,
-      COLON_ASCENDING:  COLON_ASCENDING,
-      COLON_DESCENDING: COLON_DESCENDING,
-      COLON_TRANSVERSE: COLON_TRANSVERSE,
+      ASCENDING_COLON:  ASCENDING_COLON,
+      DESCENDING_COLON: DESCENDING_COLON,
+      TRANSVERSE_COLON: TRANSVERSE_COLON,
       DUODENUM:         DUODENUM,
       HAIR:             HAIR,
       ILEUM:            ILEUM,
@@ -53,9 +53,9 @@ define([], function() {
     function BRAIN()            { return 'Brain'; }
     function COLON()            { return 'Colon'; }
     function KIDNEY()           { return 'Kidney'; }
-    function COLON_ASCENDING()  { return 'Ascending Colon'; }
-    function COLON_DESCENDING() { return 'Descending Colon'; }
-    function COLON_TRANSVERSE() { return 'Transverse Colon'; }
+    function ASCENDING_COLON()  { return 'Ascending Colon'; }
+    function DESCENDING_COLON() { return 'Descending Colon'; }
+    function TRANSVERSE_COLON() { return 'Transverse Colon'; }
     function DUODENUM()         { return 'Duodenum'; }
     function HAIR()             { return 'Hair'; }
     function ILEUM()            { return 'Ileum'; }
@@ -69,5 +69,5 @@ define([], function() {
     function values()           { return ALL_VALUES; }
   }
 
-  return anatomicalSourceType;
+  return AnatomicalSourceType;
 });

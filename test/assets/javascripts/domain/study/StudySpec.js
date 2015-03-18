@@ -46,6 +46,11 @@ define([
       expect(study.status).toBe(StudyStatus.DISABLED());
     });
 
+    it('fails when creating from a non object', function() {
+      expect(Study.create(1))
+        .toEqual(new Error('invalid object from server: must be a map, has the correct keys'));
+    });
+
     it('can retrieve studies', function(done) {
       var studies = [fakeEntities.study()];
       var reply = fakeEntities.pagedResult(studies);

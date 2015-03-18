@@ -4,22 +4,25 @@
 define([
   'angular',
   'angularMocks',
-  '../enumSharedSpec',
+  './enumSharedSpec',
   'biobank.testUtils',
   'biobankApp'
 ], function(angular, mocks, enumSharedSpec, testUtils) {
   'use strict';
 
-  describe('CentreStatus', function() {
+  describe('AnnotationValueType', function() {
 
     var context = {},
-        statuses = ['Disabled', 'Enabled'];
+        values = [
+          'Text', 'Number', 'DateTime', 'Select'
+        ];
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (CentreStatus) {
-      context.enumerationClass = CentreStatus;
-      context.valueMap = _.map(statuses, function (value) {
+    beforeEach(inject(function (AnnotationValueType) {
+
+      context.enumerationClass = AnnotationValueType;
+      context.valueMap = _.map(values, function (value) {
         return [ value, testUtils.camelCaseToUnderscore(value)];
       });
     }));

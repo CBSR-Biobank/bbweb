@@ -45,21 +45,24 @@ define(['underscore'], function(_) {
       }
 
       if (options.studySpecimenGroupSet) {
-        self.inputGroup  = options.studySpecimenGroupSet.get(self.inputGroupId);
-        self.outputGroup = options.studySpecimenGroupSet.get(self.outputGroupId);
+        if (self.inputGroupId) {
+          self.inputGroup  = options.studySpecimenGroupSet.get(self.inputGroupId);
+        }
+        if (self.outputGroupId) {
+          self.outputGroup = options.studySpecimenGroupSet.get(self.outputGroupId);
+        }
       }
 
       self.annotationTypeDataSet = new AnnotationTypeDataSet(
         specimenLinkType.annotationTypeData,
         _.pick(options, 'studyAnnotationTypes', 'studyAnnotationTypeSet'));
-
     }
 
     SpecimenLinkType.prototype.annotationTypeDataSize = function () {
       return this.annotationTypeDataSet.size();
     };
 
-    SpecimenLinkType.prototype.allAnnotationTypeDataIds = function () {
+    SpecimenLinkType.prototype.allAnnotationTypeDataIds  = function () {
       return this.annotationTypeDataSet.allIds();
     };
 

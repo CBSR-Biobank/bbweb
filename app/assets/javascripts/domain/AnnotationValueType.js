@@ -6,7 +6,7 @@ define([], function() {
   /**
    *
    */
-  function annotationValueType() {
+  function AnnotationValueType() {
     var ALL_VALUES = [
       TEXT(),
       NUMBER(),
@@ -34,5 +34,5 @@ define([], function() {
 
   }
 
-  return annotationValueType;
+  return AnnotationValueType;
 });

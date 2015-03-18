@@ -142,11 +142,10 @@ define([
       if (options.outputContainerType) {
         slt.outputContainerTypeId = options.outputContainerType.id;
       }
-      if (options.annotationTypes) {
-        slt.annotationTypeData = _.map(options.annotationTypes, function(at) {
-          return annotationTypeData(at);
-        });
-      }
+
+      slt.annotationTypeData = _.map(options.annotationTypes, function(at) {
+        return annotationTypeData(at);
+      });
 
       return extendWithCommonFields(slt);
     }

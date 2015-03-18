@@ -14,23 +14,23 @@ define([], function() {
     function SpcLinkTypeViewer(spcLinkType) {
       var ev = new EntityViewer(spcLinkType, 'Specimen Link Type');
 
-      ev.addAttribute('Processing Type:',
+      ev.addAttribute('Processing Type',
                       spcLinkType.processingType.name);
-      ev.addAttribute('Input Group:',
+      ev.addAttribute('Input Group',
                       spcLinkType.inputGroup.name);
-      ev.addAttribute('Expected input change:',
+      ev.addAttribute('Expected input change',
                       spcLinkType.expectedInputChange + ' ' + spcLinkType.inputGroup.units);
-      ev.addAttribute('Input count:',
+      ev.addAttribute('Input count',
                       spcLinkType.inputCount);
-      ev.addAttribute('Input Container Type:', 'None');
-      ev.addAttribute('Output Group:',
+      ev.addAttribute('Input Container Type', 'None');
+      ev.addAttribute('Output Group',
                       spcLinkType.outputGroup.name);
-      ev.addAttribute('Expected output change:',
+      ev.addAttribute('Expected output change',
                       spcLinkType.expectedInputChange + ' ' + spcLinkType.outputGroup.units);
-      ev.addAttribute('Output count:',
+      ev.addAttribute('Output count',
                       spcLinkType.outputCount);
-      ev.addAttribute('Output Container Type:', 'None');
-      ev.addAttribute('Annotation Types:',
+      ev.addAttribute('Output Container Type', 'None');
+      ev.addAttribute('Annotation Types',
                       spcLinkType.getAnnotationTypesAsString());
 
       ev.showModal();

@@ -53,11 +53,23 @@ define(['faker', 'underscore'], function(faker, _) {
     });
   }
 
+  function camelCaseToUnderscore(str) {
+    var result;
+    if (_.isUndefined(str)) {
+      throw new Error('string is undefined');
+    }
+    result = str.charAt(0).toUpperCase() + str.slice(1)
+      .replace(/([A-Z])/g, '_$1').toUpperCase()
+      .replace(' ', '');
+    return result;
+  };
+
   return {
-    uuid:          uuid,
-    randomBoolean: randomBoolean,
-    fakeModal:     fakeModal,
-    addCustomMatchers: addCustomMatchers
+    uuid:                  uuid,
+    randomBoolean:         randomBoolean,
+    fakeModal:             fakeModal,
+    addCustomMatchers:     addCustomMatchers,
+    camelCaseToUnderscore: camelCaseToUnderscore
   };
 });
 

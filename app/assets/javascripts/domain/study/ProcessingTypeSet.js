@@ -13,7 +13,7 @@ define(['underscore'], function(_) {
      */
     function ProcessingTypeSet(processingTypes) {
       if (_.isUndefined(processingTypes)) {
-        throw new Error('annotationTypes is undefined');
+        throw new Error('processingTypes is undefined');
       }
       this.processingTypes = _.indexBy(processingTypes, 'id');
     }

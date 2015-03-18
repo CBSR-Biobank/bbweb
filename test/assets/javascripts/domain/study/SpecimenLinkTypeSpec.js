@@ -48,6 +48,24 @@ define([
       expect(slt.isNew).toBe(true);
     });
 
+    it('constructor throws error if created with invalid specimen group params', function() {
+      expect(function () {
+        return new SpecimenLinkType(processingType, sltFromServer, {
+          studySpecimenGroups: study.specimenGroups,
+          studySpecimenGroupSet:  new SpecimenGroupSet(study.specimenGroups)
+        });
+      }).toThrow(new Error('cannot create with both specimenGroups and specimenGroupSet'));
+    });
+
+    it('constructor throws error if created with invalid annotation type params', function() {
+      expect(function () {
+        return new SpecimenLinkType(processingType, sltFromServer, {
+          studyAnnotationTypes: study.annotationTypes,
+          studyAnnotationTypeSet: new AnnotationTypeSet(study.annotationTypes)
+        });
+      }).toThrow(new Error('cannot create with both annotationTypes and annotationTypeSet'));
+    });
+
     it('processing type ID matches', function() {
       var slt = new SpecimenLinkType(processingType, sltFromServer);
       expect(slt.processingTypeId).toBe(processingType.id);
@@ -112,6 +130,26 @@ define([
       _.each(study.annotationTypes, function(at) {
         expect(slt.getAnnotationTypeData(at.id).annotationType).toEqual(at);
       });
+    });
+
+    it('getServerSpecimenLinkType returns valid object', function() {
+      var sltFromServer = fakeEntities.specimenLinkType(
+        processingType,
+        {
+          inputGroup: study.specimenGroups[0],
+          outputGroup: study.specimenGroups[1],
+          annotationTypes: study.annotationTypes
+        }
+      );
+      var slt = new SpecimenLinkType(study, sltFromServer, {
+          studySpecimenGroups: study.specimenGroups,
+          studyAnnotationTypes: study.annotationTypes
+      });
+
+      // slt should have annotation types to exercise all functionaltity
+      expect(slt.annotationTypeDataSize()).toBeGreaterThan(0);
+
+      expect(slt.getServerSpecimenLinkType()).toEqual(sltFromServer);
     });
 
     it('getAnnotationTypeData throws an error if there are no annotation type data items', function() {

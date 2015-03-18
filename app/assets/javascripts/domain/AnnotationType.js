@@ -21,7 +21,7 @@ define(['angular', 'underscore'], function(angular, _) {
 
       _.extend(this, _.defaults(obj, {
         name:          '',
-        desciption:    null,
+        description:   null,
         valueType:     AnnotationValueType.TEXT(),
         maxValueCount: null,
         options:       []
