@@ -534,6 +534,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     }
   }
 
+
   /**
    * Creates a user event with the userId for the user that issued the command, and the current date and time.
    */
@@ -542,4 +543,41 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
               userId = command.userId,
               time   = Some(ISODateTimeFormat.dateTime.print(DateTime.now)))
 
+
+  /**
+   * For debug only in development mode - password is "testuser"
+   */
+  private def createDefaultUser: User = {
+    val userRepository = inject [UserRepository]
+
+    log.info("createDefaultUser")
+
+    val validation = RegisteredUser.create(
+      org.biobank.Global.DefaultUserId,
+      -1L,
+      DateTime.now,
+      "admin",
+      org.biobank.Global.DefaultUserEmail,
+      "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
+      "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
+      None)
+
+    validation.fold(
+      err => throw new RuntimeException("could not add default user in development mode: " + err),
+      user => {
+        user.activate.fold(
+          err => throw new RuntimeException("could not activate default user in development mode: " + err),
+          activeUser => {
+            log.info("default user created")
+            userRepository.put(activeUser)
+          }
+        )
+      }
+    )
+  }
+
+  if (play.api.Play.current.mode != play.api.Mode.Test) {
+    createDefaultUser
+    org.biobank.TestData.addMultipleUsers
+  }
 }

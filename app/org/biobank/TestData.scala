@@ -11,6 +11,9 @@ import org.joda.time.DateTime
 import play.api.Logger
 import scaldi.{Injectable, Injector}
 
+/**
+ * Provides initial data to test with. Ideally these methods should only be called for developemnt builds.
+ */
 object TestData extends Injectable {
 
   val centreData = List(
@@ -154,14 +157,6 @@ object TestData extends Injectable {
     ("2295eef3d29d4de79997ebff9a962209", "Paivi Kastell", "paivi.kastell@ppshp.fi"),
     ("88346afcb2884e53853a25da6930fb64", "Paivi Koski", "paivi.koski@ppshp.fi")
   )
-
-  def addTestData(implicit injector: Injector): Unit = {
-    Logger.debug("addTestData")
-
-    addMultipleStudies
-    addMultipleCentres
-    addMultipleUsers
-  }
 
   def addMultipleCentres(implicit injector: Injector): Unit = {
     val centreRepository = inject [CentreRepository]
@@ -368,21 +363,18 @@ object TestData extends Injectable {
 
     val users = userData.map { case(id, name, email) =>
       val user: User = ActiveUser(
-        id = UserId(id),
-        version = 0L,
-        timeAdded = DateTime.now,
+        id           = UserId(id),
+        version      = 0L,
+        timeAdded    = DateTime.now,
         timeModified = None,
-        name = name,
-        email = email,
-        password = passwordHasher.encrypt(plainPassword, salt),
-        salt = salt,
-        avatarUrl = None
+        name         = name,
+        email        = email,
+        password     = passwordHasher.encrypt(plainPassword, salt),
+        salt         = salt,
+        avatarUrl    = None
       )
       userRepository.put(user)
     }
-
   }
-
-
 
 }

@@ -455,4 +455,7 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
                 userId = command.userId,
                 time   = Some(ISODateTimeFormat.dateTime.print(DateTime.now)))
 
+  if (play.api.Play.current.mode != play.api.Mode.Test) {
+    org.biobank.TestData.addMultipleCentres
+  }
 }

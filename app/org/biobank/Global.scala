@@ -37,14 +37,7 @@ trait Global
     super.onStart(app)
 
     applicationModule
-
     checkEmailConfig(app)
-
-    if (app.mode != Mode.Test) {
-      createDefaultUser
-      TestData.addTestData
-    }
-
     createSqlDdlScripts
 
     Logger.debug(s"Play started")
@@ -58,40 +51,6 @@ trait Global
   def checkEmailConfig(app: play.api.Application) = {
     app.configuration.getString("smtp.host").getOrElse(
       throw new RuntimeException("smtp server information needs to be set in email.conf"))
-  }
-
-  /**
-   * For debug only in development mode - password is "testuser"
-   */
-  def createDefaultUser: User = {
-    val userRepository = inject [UserRepository]
-
-    Logger.debug("createDefaultUser")
-    //if ((app.mode == Mode.Dev) || (app.mode == Mode.Test)) {
-
-    //
-    val validation = RegisteredUser.create(
-      Global.DefaultUserId,
-      -1L,
-      DateTime.now,
-      "admin",
-      Global.DefaultUserEmail,
-      "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
-      "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
-      None)
-
-    validation.fold(
-      err => throw new RuntimeException("could not add default user in development mode: " + err),
-      user => {
-        user.activate.fold(
-          err => throw new RuntimeException("could not activate default user in development mode: " + err),
-          activeUser => {
-            Logger.debug("default user created")
-            userRepository.put(activeUser)
-          }
-        )
-      }
-    )
   }
 
   /**
@@ -141,9 +100,9 @@ object Global
                  }))
     with Global {
 
-  val DefaultUserEmail = "admin@admin.com"
+    val DefaultUserEmail = "admin@admin.com"
 
-  val DefaultUserId = UserId(DefaultUserEmail)
+    val DefaultUserId = UserId(DefaultUserEmail)
 
 }
 

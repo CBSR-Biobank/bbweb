@@ -433,4 +433,8 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
       (item.name == name) && (item.id != excludeStudyId)
     }
   }
+
+  if (play.api.Play.current.mode != play.api.Mode.Test) {
+    org.biobank.TestData.addMultipleStudies
+  }
 }

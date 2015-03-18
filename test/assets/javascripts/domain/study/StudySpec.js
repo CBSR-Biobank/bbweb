@@ -17,7 +17,7 @@ define([
    */
   describe('Study', function() {
 
-    var httpBackend, Study, StudyStatus, Location, funutils, fakeEntities;
+    var httpBackend, Study, StudyStatus, funutils, fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
