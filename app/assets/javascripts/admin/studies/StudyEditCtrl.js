@@ -1,9 +1,9 @@
 /** Study service */
-define([], function() {
+define(['underscore'], function(_) {
   'use strict';
 
   StudyEditCtrl.$inject = [
-    'stateHelper',
+    '$state',
     'studiesService',
     'notificationsService',
     'domainEntityUpdateError',
@@ -13,25 +13,30 @@ define([], function() {
   /**
    * Adds or updates a study.
    */
-  function StudyEditCtrl(stateHelper,
+  function StudyEditCtrl($state,
                          studiesService,
                          notificationsService,
                          domainEntityUpdateError,
                          study) {
-    var vm = this;
-    var action;
+    var vm = this,
+        action;
+
     vm.study = study;
     vm.submit = submit;
     vm.cancel = cancel;
+    vm.returnState = {};
 
     vm.stateParams = {};
-    if (study.id) {
-      action = 'Update';
-      vm.returnState = 'home.admin.studies.study.summary';
-      vm.stateParams.studyId = study.id;
-    } else {
+    if (study.isNew()) {
       action = 'Add';
-      vm.returnState = 'home.admin.studies';
+      vm.returnState = { name: 'home.admin.studies' };
+    } else {
+      action = 'Update';
+      vm.returnState = {
+        name: 'home.admin.studies.study.summary',
+        params: { studyId: study.id },
+        options: { reload: true }
+      };
     }
 
     vm.title =  action + ' study';
@@ -39,7 +44,7 @@ define([], function() {
     //--
 
     function gotoReturnState() {
-      stateHelper.reloadStateAndReinit(vm.returnState, vm.stateParams, {reload: true});
+      $state.go.apply(null, _.values(vm.returnState));
     }
 
     function submitSuccess() {
@@ -47,17 +52,20 @@ define([], function() {
       gotoReturnState();
     }
 
+    function submitError(error) {
+      // ensure state params has all 3 values
+      var stateParams = _.defaults(vm.returnState, {
+        params:   {},
+        options:  { reload: true }
+      });
+      var params = [error, study].concat(_.values(stateParams));
+      domainEntityUpdateError.handleError.call(null, params);
+    }
+
     function submit(study) {
       studiesService.addOrUpdate(study)
         .then(submitSuccess)
-        .catch(function(error) {
-          domainEntityUpdateError.handleError(
-            error,
-            'study',
-            vm.returnState,
-            vm.stateParams,
-            {reload: true});
-        });
+        .catch(submitError);
     }
 
     function cancel() {

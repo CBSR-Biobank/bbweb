@@ -4,6 +4,7 @@ define(['angular', 'underscore'], function(angular, _) {
   StudyAnnotationTypeFactory.$inject = [
     'funutils',
     'biobankApi',
+    'AnnotationValueType',
     'validationService',
     'studyAnnotationTypeValidation',
     'AnnotationType'
@@ -14,6 +15,7 @@ define(['angular', 'underscore'], function(angular, _) {
    */
   function StudyAnnotationTypeFactory(funutils,
                                       biobankApi,
+                                      AnnotationValueType,
                                       validationService,
                                       studyAnnotationTypeValidation,
                                       AnnotationType) {
@@ -53,7 +55,7 @@ define(['angular', 'underscore'], function(angular, _) {
                                         studyId,
                                         annotationTypeId) {
       return biobankApi.get(
-        '/studies/' + studyId + '/' + annotTypeUriPart + '/' + annotationTypeId
+        '/studies/' + studyId + '/' + annotTypeUriPart + '?annotTypeId=' + annotationTypeId
       ).then(function (obj) {
         return create(validator, createFn, obj);
       });
@@ -71,6 +73,54 @@ define(['angular', 'underscore'], function(angular, _) {
       return self._service.addOrUpdate(self).then(function(reply) {
         return create(validator, createFn, reply);
       });
+    };
+
+    StudyAnnotationType.prototype.remove = function (validator, createFn) {
+      var self = this;
+      if (self._service === null) {
+        throw new Error('_service is null');
+      }
+
+      return self._service.remove(self);
+    };
+
+    /**
+     * Called when the annotation type's value type has been changed.
+     */
+    StudyAnnotationType.prototype.valueTypeChanged = function (newValueType) {
+      if (this.valueType === AnnotationValueType.SELECT()) {
+        this.addOption();
+      } else {
+        this.options = [];
+        this.maxValueCount = undefined;
+      }
+    };
+
+    /**
+     * Used to add an option. Should only be called when the value type is 'Select'.
+     */
+    StudyAnnotationType.prototype.addOption = function () {
+      if (this.valueType !== AnnotationValueType.SELECT()) {
+        throw new Error('value type is not select: ' + this.valueType);
+      }
+      this.options.push('');
+    };
+
+    /**
+     * Used to remove an option. Should only be called when the value type is 'Select'.
+     */
+    StudyAnnotationType.prototype.removeOption = function (option) {
+      if (this.options.length <= 1) {
+        throw new Error('options is empty, cannot remove any more options');
+      }
+      this.options = _.without(this.options, option);
+    };
+
+    /**
+     * Returns true if the maxValueCount value is valid.
+     */
+    StudyAnnotationType.prototype.maxValueCountValid = function () {
+      return ((this.maxValueCount >= 1) && (this.maxValueCount <= 2));
     };
 
     function create(validator, createFn, obj) {

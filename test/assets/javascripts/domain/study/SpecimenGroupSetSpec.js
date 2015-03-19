@@ -28,8 +28,8 @@ define([
     }));
 
     it('throws an exception if argument is undefined', function() {
-      expect(function () { new SpecimenGroupSet(); })
-        .toThrow(Error('specimenGroups is undefined'));
+      expect(function () { return new SpecimenGroupSet(); })
+        .toThrow(new Error('specimenGroups is undefined'));
     });
 
 
@@ -47,7 +47,7 @@ define([
       var badId = fakeEntities.stringNext();
 
       expect(function () { set.get(badId); })
-        .toThrow(Error('specimen group not found: ' + badId));
+        .toThrow(new Error('specimen group not found: ' + badId));
     });
 
     it('find returns the correct value', function() {

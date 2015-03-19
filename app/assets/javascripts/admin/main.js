@@ -31,7 +31,6 @@ define(function (require) {
       AnnotationTypeEditCtrl                  = require('./studies/annotationTypes/AnnotationTypeEditCtrl'),
       annotationTypeRemoveService             = require('./studies/annotationTypes/annotationTypeRemoveService'),
       ceventAnnotTypesPanelDirective          = require('./studies/annotationTypes/ceventAnnotTypesPanelDirective'),
-      participantAnnotTypeRemoveService       = require('./studies/annotationTypes/participantAnnotTypeRemoveService'),
       participantAnnotTypesPanelDirective     = require('./studies/annotationTypes/participantAnnotTypesPanelDirective'),
       spcLinkAnnotTypeRemoveService           = require('./studies/annotationTypes/spcLinkAnnotTypeRemoveService'),
 
@@ -103,8 +102,6 @@ define(function (require) {
 
   module.directive('ceventAnnotTypesPanel', ceventAnnotTypesPanelDirective.directive);
   module.controller('CeventAnnotTypesPanelCtrl', ceventAnnotTypesPanelDirective.controller);
-
-  module.service('participantAnnotTypeRemoveService', participantAnnotTypeRemoveService);
 
   module.directive('participantsAnnotTypesPanel', participantAnnotTypesPanelDirective.directive);
   module.controller('ParticipantAnnotTypesPanelCtrl', participantAnnotTypesPanelDirective.controller);

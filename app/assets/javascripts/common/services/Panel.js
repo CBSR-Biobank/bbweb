@@ -1,4 +1,4 @@
-define([], function(){
+define(['underscore'], function(_){
   'use strict';
 
   PanelFactory.$inject = ['$window', '$state', 'panelTableService'];
@@ -37,8 +37,11 @@ define([], function(){
     /**
      * Use the table settings parameter so that the table's page counts widget is not displayed
      */
-    Panel.prototype.getTableParams = function (data) {
-      return panelTableService.getTableParams(data, {}, {counts: []});
+    Panel.prototype.getTableParams = function (data, tableParameters, tableSettings) {
+      tableParameters = tableParameters || {};
+      tableSettings = tableSettings || {};
+      tableSettings = _.defaults(tableSettings, {counts: []});
+      return panelTableService.getTableParams(data, tableParameters, tableSettings);
     };
 
     return Panel;

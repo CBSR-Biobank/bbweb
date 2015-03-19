@@ -3,16 +3,14 @@ define(['angular', 'underscore'], function(angular, _) {
 
   AnnotationTypeFactory.$inject = [
     'validationService',
-    'ConcurrencySafeEntity',
-    'AnnotationValueType'
+    'ConcurrencySafeEntity'
   ];
 
   /**
    *
    */
   function AnnotationTypeFactory(validationService,
-                                 ConcurrencySafeEntity,
-                                 AnnotationValueType) {
+                                 ConcurrencySafeEntity) {
 
     function AnnotationType(obj) {
       obj = obj || {};
@@ -22,7 +20,7 @@ define(['angular', 'underscore'], function(angular, _) {
       _.extend(this, _.defaults(obj, {
         name:          '',
         description:   null,
-        valueType:     AnnotationValueType.TEXT(),
+        valueType:     '',
         maxValueCount: null,
         options:       []
       }));

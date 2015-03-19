@@ -28,8 +28,8 @@ define([
     }));
 
     it('throws an exception if argument is undefined', function() {
-      expect(function () { new ProcessingTypeSet(); })
-        .toThrow(Error('processingTypes is undefined'));
+      expect(function () { return new ProcessingTypeSet(); })
+        .toThrow(new Error('processingTypes is undefined'));
     });
 
 
@@ -47,7 +47,7 @@ define([
       var badId = fakeEntities.stringNext();
 
       expect(function () { set.get(badId); })
-        .toThrow(Error('processing type not found: ' + badId));
+        .toThrow(new Error('processing type not found: ' + badId));
     });
 
     it('find returns the correct value', function() {

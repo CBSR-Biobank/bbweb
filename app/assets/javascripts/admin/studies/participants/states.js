@@ -20,21 +20,8 @@ define([], function() {
       url: '/annottype/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        annotType: ['study', function(study) {
-          return {
-            studyId: study.id,
-            name: '',
-            description: null,
-            required: false,
-            valueType: '',
-            options: []
-          };
-        }],
-        addOrUpdateFn: ['participantAnnotTypesService', function(participantAnnotTypesService) {
-          return participantAnnotTypesService.addOrUpdate;
-        }],
-        valueTypes: ['studiesService', function(studiesService) {
-          return studiesService.valueTypes();
+        annotType: ['ParticipantAnnotationType', function(ParticipantAnnotationType) {
+          return new ParticipantAnnotationType();
         }]
       },
       views: {
@@ -56,23 +43,13 @@ define([], function() {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         annotType: [
-          '$stateParams', 'participantAnnotTypesService', 'study',
-          function($stateParams, participantAnnotTypesService, study) {
-            if ($stateParams.annotTypeId) {
-              return participantAnnotTypesService.get(study.id, $stateParams.annotTypeId);
-            }
-            throw new Error('state parameter annotTypeId is invalid');
+          '$stateParams',
+          'ParticipantAnnotationType',
+          function($stateParams, ParticipantAnnotationType) {
+            return ParticipantAnnotationType.get($stateParams.studyId,
+                                                 $stateParams.annotTypeId);
           }
-        ],
-        childReturnState: function() {
-          return 'home.admin.studies.study.participants';
-        },
-        addOrUpdateFn: ['participantAnnotTypesService', function(participantAnnotTypesService) {
-          return participantAnnotTypesService.addOrUpdate;
-        }],
-        valueTypes: ['studiesService', function(studiesService) {
-          return studiesService.valueTypes();
-        }]
+        ]
       },
       views: {
         'main@': {

@@ -83,6 +83,11 @@
              ng-required="vm.maxValueCountRequired()"
              str2integer /> Multiple selections allowed
     </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p ng-show="annotTypeForm.maxValueCount.$invalid"
+         class="help-block">
+        Please select one from above.</p>
+    </div>
   </div>
 
   <!-- SELECTION OPTIONS -->

@@ -27,13 +27,12 @@ define([
     }));
 
     it('should open a modal when created', function() {
-      var count = 0,
-          modal = this.$injector.get('$modal'),
+      var modal = this.$injector.get('$modal'),
           study, processingType, viewer;
 
       spyOn(modal, 'open').and.callFake(function () { return testUtils.fakeModal(); });
 
-      // jshint unused:fals
+      // jshint unused:false
       study = fakeEntities.study();
       processingType = fakeEntities.processingType(study);
       viewer = new ProcessingTypeViewer(processingType);

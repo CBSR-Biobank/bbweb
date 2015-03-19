@@ -21,13 +21,11 @@ define([], function(){
         bodyHtml: modalMsg
       };
 
-      modalService.showModal({}, modalOptions)
-        .then(function () {
-          removeFn(domainObj).then(reloadReturnState).catch(removeFailed);
-        })
-        .catch(function() {
-          gotoReturnState();
-        });
+      modalService.showModal({}, modalOptions).then(removeEntity).catch(gotoReturnState);
+
+      function removeEntity() {
+        return removeFn(domainObj).then(reloadReturnState).catch(removeFailed);
+      }
 
       function removeFailed(error) {
         var modalOptions = {

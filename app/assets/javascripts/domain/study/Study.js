@@ -39,9 +39,7 @@ define(['angular', 'underscore'], function(angular, _) {
       _.extend(this, _.defaults(obj, {
         name:        '',
         description: null,
-        status:      StudyStatus.DISABLED(),
-        locations :  [],
-        studyIds:    []
+        status:      StudyStatus.DISABLED()
       }));
     }
 

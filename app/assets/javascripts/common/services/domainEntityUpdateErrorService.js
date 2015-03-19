@@ -1,7 +1,7 @@
 define([], function(){
   'use strict';
 
-  domainEntityUpdateError.$inject = ['modalService', 'stateHelper'];
+  domainEntityUpdateError.$inject = ['$state', 'modalService', 'stateHelper'];
 
   /**
    * Called when either adding or updating a domain object and there is afailure. Displays the error message
@@ -10,15 +10,31 @@ define([], function(){
    * If the user presses the OK button, then the current state is reloaded. If the Cancel button is pressed
    * the users is takent to 'returnState'.
    */
-  function domainEntityUpdateError(modalService, stateHelper) {
+  function domainEntityUpdateError($state, modalService, stateHelper) {
     var service = {
-      handleError: handleError
+      handleError: handleError,
+      handleErrorNoStateChange: handleErrorNoStateChange
     };
     return service;
 
     //-------
 
+    /**
+     * @deprecated use handleErrorNoStateChange instead
+     */
     function handleError(error, domainObjTypeName, returnStateName, returnStateParams, returnStateOptions) {
+      handleErrorNoStateChange(error, domainObjTypeName)
+        .then(function() {
+          stateHelper.reloadAndReinit();
+        })
+        .catch(function() {
+          $state.go(returnStateName, returnStateParams, returnStateOptions);
+        });
+    }
+    /**
+     * Rename to handleError once the original is removed.
+     */
+    function handleErrorNoStateChange(error, domainObjTypeName) {
       var modalDefaults = {};
       var modalOptions = {
         closeButtonText: 'Cancel',
@@ -32,23 +48,17 @@ define([], function(){
           modalOptions.domainType = domainObjTypeName;
         } else {
           /* some other error */
-          modalOptions.headerHtml = 'An error happened when submitting this change.';
+          modalOptions.headerHtml = 'Cannot submitting this change';
           modalOptions.bodyHtml = 'Error: ' + error.data.message;
         }
       } else {
         // most likely a programming error
         console.log('Error:', error.data.message.toString);
-        modalOptions.headerHtml = 'An error happened when submitting this change.';
-        modalOptions.bodyHtml = 'Error: ' + JSON.stringify(error.data.message);
+        modalOptions.headerHtml = 'Cannot submitting this change';
+        modalOptions.bodyHtml = 'Error: ' + error.data.message;
       }
 
-      modalService.showModal(modalDefaults, modalOptions)
-        .then(function() {
-          stateHelper.reloadAndReinit();
-        })
-        .catch(function() {
-          stateHelper.reloadStateAndReinit(returnStateName, returnStateParams, returnStateOptions);
-        });
+      return modalService.showModal(modalDefaults, modalOptions);
     }
   }
 

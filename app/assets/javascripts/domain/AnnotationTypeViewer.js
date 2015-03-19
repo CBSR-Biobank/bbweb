@@ -23,7 +23,7 @@ define([], function() {
           throw new Error('invalid annotation type options');
         }
 
-        ev.addAttribute('# Selections Allowed',
+        ev.addAttribute('Selections Allowed',
                         annotationType.maxValueCount === 1 ? 'Single' : 'Multiple');
         ev.addAttribute('Selections', annotationType.options.join(', '));
       }

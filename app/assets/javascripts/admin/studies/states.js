@@ -12,17 +12,17 @@ define(['angular'], function(angular) {
 
   function config($urlRouterProvider, $stateProvider, authorizationProvider ) {
 
-    resolveStudy.$inject = ['$stateParams', 'studiesService'];
-    function resolveStudy($stateParams, studiesService) {
+    resolveStudy.$inject = ['$stateParams', 'Study'];
+    function resolveStudy($stateParams, Study) {
       if ($stateParams.studyId) {
-        return studiesService.get($stateParams.studyId);
+        return Study.get($stateParams.studyId);
       }
       throw new Error('state parameter studyId is invalid');
     }
 
-    resolveStudyCounts.$inject = ['studiesService'];
-    function resolveStudyCounts(studiesService) {
-      return studiesService.getStudyCounts();
+    resolveStudyCounts.$inject = ['StudyCounts'];
+    function resolveStudyCounts(StudyCounts) {
+      return StudyCounts.get();
     }
 
     $urlRouterProvider.otherwise('/');
@@ -55,9 +55,9 @@ define(['angular'], function(angular) {
       url: '/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        study: function() {
-          return { name: '', description: null };
-        }
+        study: ['Study', function(Study) {
+          return new Study();
+        }]
       },
       views: {
         'main@': {
@@ -77,7 +77,8 @@ define(['angular'], function(angular) {
       abstract: true,
       url: '/{studyId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
+        user: authorizationProvider.requireAuthenticatedUser,
+        study: resolveStudy
       },
       views: {
         'main@': {
@@ -96,8 +97,7 @@ define(['angular'], function(angular) {
     $stateProvider.state('home.admin.studies.study.summary', {
       url: '/summary',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        study: resolveStudy
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'studyDetails': {
@@ -116,8 +116,7 @@ define(['angular'], function(angular) {
     $stateProvider.state('home.admin.studies.study.summary.update', {
       url: '/update',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        study: resolveStudy
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {
@@ -137,11 +136,10 @@ define(['angular'], function(angular) {
       url: '/participants',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        study: resolveStudy,
         annotTypes: [
-          'participantAnnotTypesService', 'study',
-          function(participantAnnotTypesService, study) {
-            return participantAnnotTypesService.getAll(study.id);
+          '$stateParams', 'ParticipantAnnotationType',
+          function($stateParams, ParticipantAnnotationType) {
+            return ParticipantAnnotationType.list($stateParams.studyId);
           }
         ]
       },
@@ -166,7 +164,6 @@ define(['angular'], function(angular) {
       url: '/specimens',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        study: resolveStudy,
         specimenGroups: [
           'specimenGroupsService', 'study',
           function(specimenGroupsService, study) {
@@ -205,7 +202,6 @@ define(['angular'], function(angular) {
       url: '/collection',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        study: resolveStudy,
         collectionDto: [
           'studiesService', 'study',
           function (studiesService, study) {
@@ -240,7 +236,6 @@ define(['angular'], function(angular) {
       url: '/processing',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        study: resolveStudy,
         processingDto: [
           'studiesService', 'study',
           function (studiesService, study) {

@@ -21,8 +21,9 @@ define(['angular', 'underscore'], function(angular, _) {
     '$scope',
     '$state',
     'modalService',
-    'participantAnnotTypeRemoveService',
+    'annotationTypeRemoveService',
     'Panel',
+    'StudyStatus',
     'AnnotationTypeViewer'
   ];
 
@@ -32,13 +33,14 @@ define(['angular', 'underscore'], function(angular, _) {
   function ParticipantAnnotTypesPanelCtrl($scope,
                                           $state,
                                           modalService,
-                                          participantAnnotTypeRemoveService,
+                                          annotationTypeRemoveService,
                                           Panel,
+                                          StudyStatus,
                                           AnnotationTypeViewer) {
-    var vm = this;
-
-    var panel = new Panel('study.panel.participantAnnotationTypes',
-                           'home.admin.studies.study.participants.annotTypeAdd');
+    var vm = this,
+        tableSettings = { total: 0, getData: getData },
+        panel = new Panel('study.panel.participantAnnotationTypes',
+                          'home.admin.studies.study.participants.annotTypeAdd');
 
     vm.study       = $scope.study;
     vm.annotTypes  = $scope.annotTypes;
@@ -52,16 +54,16 @@ define(['angular', 'underscore'], function(angular, _) {
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
-    vm.modificationsAllowed = vm.study.status === 'Disabled';
+    vm.modificationsAllowed = (vm.study.status === StudyStatus.DISABLED());
 
     vm.columns = [
-      { title: 'Name', field: 'name', filter: { 'name': 'text' } },
-      { title: 'Type', field: 'valueType', filter: { 'valueType': 'text' } },
-      { title: 'Required', field: 'required', filter: { 'required': 'text' } },
+      { title: 'Name',        field: 'name',        filter: { 'name':        'text' } },
+      { title: 'Type',        field: 'valueType',   filter: { 'valueType':   'text' } },
+      { title: 'Required',    field: 'required',    filter: { 'required':    'text' } },
       { title: 'Description', field: 'description', filter: { 'description': 'text' } }
     ];
 
-    vm.tableParams = panel.getTableParams(vm.annotTypes);
+    vm.tableParams = panel.getTableParams(vm.annotTypes, {}, tableSettings);
 
     // FIXME this is set to empty array for now, but will have to call the correct method in the future
     vm.annotTypesInUse = [];
@@ -88,7 +90,7 @@ define(['angular', 'underscore'], function(angular, _) {
      * Switches state to update a participant annotation type.
      */
     function update(annotType) {
-      if (vm.study.status !== 'Disabled') {
+      if (vm.study.status !== StudyStatus.DISABLED()) {
         throw new Error('study is not disabled');
       }
 
@@ -102,11 +104,16 @@ define(['angular', 'underscore'], function(angular, _) {
     }
 
     function remove(annotType) {
-      if (vm.study.status !== 'Disabled') {
-        throw new Error('study is not disabled');
-      }
+      annotationTypeRemoveService.remove(annotType, vm.study, vm.annotTypeIdsInUse)
+        .then(function () {
+          vm.annotTypes = _.without(vm.annotTypes, annotType);
+          vm.tableParams.reload();
+        });
+    }
 
-      participantAnnotTypeRemoveService.remove(annotType, vm.annotTypesInUse);
+    function getData($defer, params) {
+      params.total(vm.annotTypes.length);
+      $defer.resolve(vm.annotTypes);
     }
   }
 

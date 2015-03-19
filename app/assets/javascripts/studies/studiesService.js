@@ -50,6 +50,9 @@ define(['angular', 'jquery', 'underscore'], function(angular, $, _) {
       return biobankApi.post(uri(study.id) + '/' + status, cmd);
     }
 
+    /**
+     * @deprecated use StudyCounts.
+     */
     function getStudyCounts() {
       return biobankApi.get(uri() + '/counts');
     }

@@ -14,7 +14,7 @@ define([
 
   describe('SpecimenGroupViewer', function() {
 
-    var SpecimenGroupViewer, SpecimenGroup, fakeEntities, centre;
+    var SpecimenGroupViewer, fakeEntities, centre;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 

@@ -4,10 +4,11 @@
 define([
   'angular',
   'angularMocks',
+  'underscore',
   '../enumSharedSpec',
   'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, enumSharedSpec, testUtils) {
+], function(angular, mocks, _, enumSharedSpec, testUtils) {
   'use strict';
 
   describe('CentreStatus', function() {

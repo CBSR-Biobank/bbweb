@@ -43,6 +43,7 @@ define(function (require) {
       SpecimenLinkType                    = require('./study/SpecimenLinkType'),
       SpecimenType                        = require('./study/SpecimenType'),
       Study                               = require('./study/Study'),
+      StudyCounts                         = require('./study/StudyCounts'),
       StudyAnnotationType                 = require('./study/StudyAnnotationType'),
       StudyStatus                         = require('./study/StudyStatus'),
       StudyViewer                         = require('./study/StudyViewer'),
@@ -80,7 +81,9 @@ define(function (require) {
   module.factory('SpecimenGroupViewer',                 SpecimenGroupViewer);
   module.factory('SpecimenLinkAnnotationType',          SpecimenLinkAnnotationType);
   module.factory('SpecimenLinkType',                    SpecimenLinkType);
+
   module.factory('Study',                               Study);
+  module.factory('StudyCounts',                         StudyCounts);
   module.factory('StudyAnnotationType',                 StudyAnnotationType);
   module.factory('StudyViewer',                         StudyViewer);
   module.factory('User',                                User);
