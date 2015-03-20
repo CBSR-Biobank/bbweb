@@ -6,6 +6,7 @@ import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
+import org.biobank.TestData
 
 import akka.actor. { ActorRef, Props }
 import akka.pattern.ask
@@ -434,7 +435,8 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     }
   }
 
-  if (play.api.Play.current.mode != play.api.Mode.Test) {
-    org.biobank.TestData.addMultipleStudies
+  if (context.system.settings.config.hasPath(TestData.configPath)
+    && context.system.settings.config.getBoolean(TestData.configPath)) {
+    TestData.addMultipleStudies
   }
 }

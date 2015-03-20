@@ -312,7 +312,7 @@ class UsersControllerSpec extends ControllerFixture {
     }
 
     "POST /users" must {
-      "add a user" in {
+      "register a user" in {
         val user = factory.createRegisteredUser
         val cmdJson = Json.obj("name" -> user.name,
                                "email" -> user.email,
@@ -321,8 +321,7 @@ class UsersControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, uri, json = cmdJson)
 
         (json \ "status").as[String] must be ("success")
-        (json \ "data" \ "version").as[Int] must be(0)
-        (json \ "data" \ "name").as[String] must be(user.name)
+        (json \ "data").as[String] must be ("user registered")
       }
 
       "fail on registering an existing user" in {

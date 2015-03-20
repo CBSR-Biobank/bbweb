@@ -82,7 +82,7 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
     val timeNow = DateTime.now
     val id = annotationTypeRepository.nextIdentity
     val v = for {
-      nameValid <- nameAvailable(cmd.name)
+      nameValid <- nameAvailable(cmd.name, StudyId(cmd.studyId))
       newItem <- ParticipantAnnotationType.create(
         studyId       = StudyId(cmd.studyId),
         id            = id,
@@ -118,7 +118,7 @@ class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
       for {
         noParticipants <- participantRepository.getValues.filter(p =>
           p.studyId.equals(at.studyId)).isEmpty.success
-        nameAvailable <- nameAvailable(cmd.name, AnnotationTypeId(cmd.id))
+        nameAvailable <- nameAvailable(cmd.name, StudyId(cmd.studyId), AnnotationTypeId(cmd.id))
         newItem <- at.update(cmd.name,
                              cmd.description,
                              cmd.valueType,

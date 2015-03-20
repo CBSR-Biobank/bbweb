@@ -94,14 +94,15 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
 
   private def processAddSpecimenGroupCmd(cmd: AddSpecimenGroupCmd): Unit = {
     val timeNow = DateTime.now
+    val studyId = StudyId(cmd.studyId)
     val sgId = specimenGroupRepository.nextIdentity
 
     if (specimenGroupRepository.getByKey(sgId).isSuccess) {
       log.error(s"specimen group with id already exsits: $id")
     }
 
-    val event = for {
-      nameValid <- nameAvailable(cmd.name)
+    val v = for {
+      nameValid <- nameAvailable(cmd.name, studyId)
       newItem <-SpecimenGroup.create(
         StudyId(cmd.studyId), sgId, -1, timeNow, cmd.name, cmd.description,
         cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
@@ -118,7 +119,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
           specimenType                = Some(newItem.specimenType.toString))).success
     } yield newEvent
 
-    process(event){ applySpecimenGroupAddedEvent(_) }
+    process(v){ applySpecimenGroupAddedEvent(_) }
   }
 
   private def processUpdateSpecimenGroupCmd(cmd: UpdateSpecimenGroupCmd): Unit = {
@@ -128,7 +129,7 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
 
     val v = update(cmd) { sg =>
       for {
-        nameAvailable <- nameAvailable(cmd.name, specimenGroupId)
+        nameAvailable <- nameAvailable(cmd.name, studyId, specimenGroupId)
         updatedSg <- sg.update(cmd.name,
                                cmd.description,
                                cmd.units,
@@ -243,23 +244,25 @@ class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with Akka
 
   val ErrMsgNameExists = "specimen group with name already exists"
 
-  private def nameAvailable(specimenGroupName: String): DomainValidation[Boolean] = {
+  private def nameAvailable(specimenGroupName: String, studyId: StudyId)
+      : DomainValidation[Boolean] = {
     nameAvailableMatcher(specimenGroupName, specimenGroupRepository, ErrMsgNameExists) { item =>
-      item.name == specimenGroupName
+      (item.name == specimenGroupName) && (item.studyId == studyId)
     }
   }
 
-  private def nameAvailable(
-    specimenGroupName: String,
-    id: SpecimenGroupId): DomainValidation[Boolean] = {
+  private def nameAvailable(specimenGroupName: String,
+                            studyId: StudyId,
+                            id: SpecimenGroupId)
+      : DomainValidation[Boolean] = {
     nameAvailableMatcher(specimenGroupName, specimenGroupRepository, ErrMsgNameExists) { item =>
-      (item.name == specimenGroupName) && (item.id != id)
+      (item.name == specimenGroupName) && (item.studyId == studyId) && (item.id != id)
     }
   }
 
-  private def checkNotInUse(
-    studyId: StudyId,
-    specimenGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
+  private def checkNotInUse(studyId: StudyId,
+                            specimenGroupId: SpecimenGroupId)
+      : DomainValidation[Boolean] = {
 
     def checkNotInUseByCollectionEventType: DomainValidation[Boolean] = {
       if (collectionEventTypeRepository.specimenGroupCanBeUpdated(studyId, specimenGroupId)) {

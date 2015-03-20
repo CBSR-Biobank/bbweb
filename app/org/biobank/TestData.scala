@@ -16,6 +16,8 @@ import scaldi.{Injectable, Injector}
  */
 object TestData extends Injectable {
 
+  val configPath = "application.loadTestData"
+
   val centreData = List(
     ("fd0c47dfecce46549be0220066f88aea", "CL1-Foothills", "CL1-Foothills"),
     ("a176700d8bcd413787b09336146bd484", "CL1-Heritage", "CL1-Heritage"),

@@ -82,7 +82,7 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
     val timeNow = DateTime.now
     val id = annotationTypeRepository.nextIdentity
     val event = for {
-      nameValid <- nameAvailable(cmd.name)
+      nameValid <- nameAvailable(cmd.name, StudyId(cmd.studyId))
       newItem <- SpecimenLinkAnnotationType.create(
         StudyId(cmd.studyId), id, -1L, timeNow, cmd.name, cmd.description, cmd.valueType,
         cmd.maxValueCount, cmd.options)
@@ -105,7 +105,7 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
     val timeNow = DateTime.now
     val v = update(cmd) { at =>
       for {
-        nameAvailable <- nameAvailable(cmd.name, AnnotationTypeId(cmd.id))
+        nameAvailable <- nameAvailable(cmd.name, StudyId(cmd.studyId), AnnotationTypeId(cmd.id))
         newItem <- at.update(cmd.name,
                              cmd.description,
                              cmd.valueType,
@@ -119,7 +119,7 @@ class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
             description      = newItem.description,
             valueType        = Some(newItem.valueType.toString),
             maxValueCount    = newItem.maxValueCount,
-            options          = at.options)).success
+            options          = newItem.options)).success
       } yield event
     }
 

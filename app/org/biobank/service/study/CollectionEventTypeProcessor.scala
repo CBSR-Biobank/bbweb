@@ -92,7 +92,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     val id = collectionEventTypeRepository.nextIdentity
 
     val event = for {
-      nameValid <- nameAvailable(cmd.name)
+      nameValid <- nameAvailable(cmd.name, studyId)
       newItem <- CollectionEventType.create(
         studyId, id, -1L, timeNow, cmd.name, cmd.description, cmd.recurring,
         cmd.specimenGroupData, cmd.annotationTypeData)
@@ -116,7 +116,7 @@ class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor wit
     val studyId = StudyId(cmd.studyId)
     val v = update(cmd) { cet =>
       for {
-        nameAvailable <- nameAvailable(cmd.name, CollectionEventTypeId(cmd.id))
+        nameAvailable <- nameAvailable(cmd.name, studyId, CollectionEventTypeId(cmd.id))
         validSgData   <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
         validAtData   <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
         newItem       <- cet.update(cmd.name,
@@ -229,15 +229,18 @@ private def applyCollectionEventTypeUpdatedEvent(event: StudyEvent): Unit = {
 
   val ErrMsgNameExists = "collection event type with name already exists"
 
-  private def nameAvailable(name: String): DomainValidation[Boolean] = {
+  private def nameAvailable(name: String, studyId: StudyId): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, collectionEventTypeRepository, ErrMsgNameExists) { item =>
-      item.name == name
+      (item.name == name) && (item.studyId == studyId)
     }
   }
 
-  private def nameAvailable(name: String, excludeId: CollectionEventTypeId): DomainValidation[Boolean] = {
+  private def nameAvailable(name: String,
+                            studyId: StudyId,
+                            excludeId: CollectionEventTypeId)
+      : DomainValidation[Boolean] = {
     nameAvailableMatcher(name, collectionEventTypeRepository, ErrMsgNameExists){ item =>
-      (item.name == name) && (item.id != excludeId)
+      (item.name == name) && (item.studyId == studyId) && (item.id != excludeId)
     }
   }
 

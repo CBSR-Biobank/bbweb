@@ -136,6 +136,10 @@ class StudiesController(implicit inj: Injector)
     }
   }
 
+  def valueTypes = Action(parse.empty) { request =>
+    Ok(AnnotationValueType.values.map(x => x.toString))
+  }
+
   def anatomicalSourceTypes = Action(parse.empty) { request =>
     Ok(AnatomicalSourceType.values.map(x => x.toString))
   }

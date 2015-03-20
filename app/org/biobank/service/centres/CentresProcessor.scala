@@ -13,6 +13,7 @@ import org.biobank.domain.{
 import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
+import org.biobank.TestData
 
 import akka.actor. { ActorRef, Props }
 import akka.pattern.ask
@@ -455,7 +456,8 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
                 userId = command.userId,
                 time   = Some(ISODateTimeFormat.dateTime.print(DateTime.now)))
 
-  if (play.api.Play.current.mode != play.api.Mode.Test) {
-    org.biobank.TestData.addMultipleCentres
+  if (context.system.settings.config.hasPath(TestData.configPath)
+    && context.system.settings.config.getBoolean(TestData.configPath)) {
+    TestData.addMultipleCentres
   }
 }

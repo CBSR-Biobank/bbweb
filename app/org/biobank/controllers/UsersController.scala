@@ -195,7 +195,7 @@ class UsersController(implicit inj: Injector)
                 BadRequest(errs)
               }
             },
-            event => Ok
+            event => Ok("user registered")
           )
         }
       }

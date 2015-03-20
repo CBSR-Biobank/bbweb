@@ -88,7 +88,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
     val id = processingTypeRepository.nextIdentity
 
     val event = for {
-      nameValid <- nameAvailable(cmd.name)
+      nameValid <- nameAvailable(cmd.name, studyId)
       newItem   <- ProcessingType.create(studyId, id, -1L, timeNow, cmd.name, cmd.description, cmd.enabled)
       event     <- createStudyEvent(newItem.studyId, cmd).withProcessingTypeAdded(
         ProcessingTypeAddedEvent(
@@ -106,7 +106,7 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
 
     val v = update(cmd) { pt =>
       for {
-        nameValid <- nameAvailable(cmd.name, ProcessingTypeId(cmd.id))
+        nameValid <- nameAvailable(cmd.name, StudyId(cmd.studyId), ProcessingTypeId(cmd.id))
         updatedPt <- pt.update(cmd.name, cmd.description, cmd.enabled)
         event <- createStudyEvent(updatedPt.studyId, cmd).withProcessingTypeUpdated(
           ProcessingTypeUpdatedEvent(
@@ -199,15 +199,17 @@ class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with Akk
 
   val ErrMsgNameExists = "processing type with name already exists"
 
-  private def nameAvailable(name: String): DomainValidation[Boolean] = {
+  private def nameAvailable(name: String, studyId: StudyId): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, processingTypeRepository, ErrMsgNameExists){ item =>
-      item.name.equals(name)
+      (item.name == name) && (item.studyId == studyId)
     }
   }
 
-  private def nameAvailable(name: String, excludeId: ProcessingTypeId): DomainValidation[Boolean] = {
+  private def nameAvailable(name: String,
+                            studyId: StudyId,
+                            excludeId: ProcessingTypeId): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, processingTypeRepository, ErrMsgNameExists){ item =>
-      (item.name == name) && (item.id != excludeId)
+      (item.name == name) && (item.studyId == studyId) && (item.id != excludeId)
     }
   }
 

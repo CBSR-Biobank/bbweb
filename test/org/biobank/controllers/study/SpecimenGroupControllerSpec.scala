@@ -1,7 +1,7 @@
 package org.biobank.controllers.study
 
 import org.biobank.fixture._
-import org.biobank.domain.study.{ Study, SpecimenGroup }
+import org.biobank.domain.study.{ DisabledStudy, Study, SpecimenGroup }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper._
 
@@ -202,6 +202,20 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("study id mismatch")
       }
 
+      "allow adding a specimen group with same name on two different studies" in {
+        val sg = factory.createSpecimenGroup
+
+        val studies = List(factory.createDisabledStudy, factory.createDisabledStudy);
+
+        studies.foreach { study =>
+          studyRepository.put(study)
+
+          val cmdJson = specimenGroupToAddCmd(sg.copy(studyId = study.id))
+          val json = makeRequest(POST, uri(study), json = cmdJson)
+          (json \ "status").as[String] must include ("success")
+        }
+      }
+
     }
 
     "PUT /studies/sgroups" must {
@@ -336,6 +350,22 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("specimen group id mismatch")
+      }
+
+      "allow a updating specimen group with same name on two different studies" in {
+        val commonName = nameGenerator.next[SpecimenGroup]
+
+        (0 until 2).map { study =>
+          val study = factory.createDisabledStudy
+          studyRepository.put(study)
+          val sg = factory.createSpecimenGroup
+          specimenGroupRepository.put(sg)
+          (study, sg)
+        } foreach { case (study: Study, sg: SpecimenGroup) =>
+          val cmdJson = specimenGroupToUpdateCmd(sg.copy(name = commonName))
+          val json = makeRequest(PUT, uri(study, sg), json = cmdJson)
+          (json \ "status").as[String] must include ("success")
+        }
       }
 
     }

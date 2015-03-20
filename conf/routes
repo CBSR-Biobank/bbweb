@@ -14,6 +14,7 @@ POST    /studies                               @org.biobank.controllers.study.St
 
 # value objects
 GET     /studies/counts                        @org.biobank.controllers.study.StudiesController.studyCounts()
+GET     /studies/valuetypes                    @org.biobank.controllers.study.StudiesController.valueTypes
 GET     /studies/anatomicalsrctypes            @org.biobank.controllers.study.StudiesController.anatomicalSourceTypes
 GET     /studies/specimentypes                 @org.biobank.controllers.study.StudiesController.specimenTypes
 GET     /studies/preservtypes                  @org.biobank.controllers.study.StudiesController.preservTypes

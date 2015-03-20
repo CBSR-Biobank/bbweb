@@ -77,11 +77,12 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
   private def processAddCollectionEventAnnotationTypeCmd
     (cmd: AddCollectionEventAnnotationTypeCmd): Unit = {
     val timeNow = DateTime.now
+    val studyId = StudyId(cmd.studyId)
     val id = annotationTypeRepository.nextIdentity
     val event = for {
-      nameValid <- nameAvailable(cmd.name)
+      nameValid <- nameAvailable(cmd.name, studyId)
       newItem <- CollectionEventAnnotationType.create(
-        StudyId(cmd.studyId), id, -1L, timeNow, cmd.name, cmd.description,
+        studyId, id, -1L, timeNow, cmd.name, cmd.description,
         cmd.valueType, cmd.maxValueCount, cmd.options)
       event <- createStudyEvent(newItem.studyId, cmd).withCollectionEventAnnotationTypeAdded(
         CollectionEventAnnotationTypeAddedEvent(
@@ -100,7 +101,7 @@ class CeventAnnotationTypeProcessor(implicit inj: Injector)
     (cmd: UpdateCollectionEventAnnotationTypeCmd): Unit = {
     val v = update(cmd) { at =>
       for {
-        nameAvailable <- nameAvailable(cmd.name, AnnotationTypeId(cmd.id))
+        nameAvailable <- nameAvailable(cmd.name, StudyId(cmd.studyId), AnnotationTypeId(cmd.id))
         newItem       <- at.update(cmd.name, cmd.description, cmd.valueType, cmd.maxValueCount, cmd.options)
         event         <- createStudyEvent(at.studyId, cmd).withCollectionEventAnnotationTypeUpdated(
         CollectionEventAnnotationTypeUpdatedEvent(

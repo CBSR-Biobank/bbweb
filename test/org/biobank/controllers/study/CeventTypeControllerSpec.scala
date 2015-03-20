@@ -260,6 +260,18 @@ class CeventTypeControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("study id mismatch")
       }
 
+      "allow adding a collection event with same name on two different studies" in {
+        val cet = factory.createCollectionEventType
+
+        List(factory.createDisabledStudy, factory.createDisabledStudy) foreach { study =>
+          studyRepository.put(study)
+
+          val cmdJson = cetToAddCmd(cet.copy(studyId = study.id))
+          val json = makeRequest(POST, uri(study), json = cmdJson)
+          (json \ "status").as[String] must include ("success")
+        }
+      }
+
     }
 
     "PUT /studies/cetypes" must {
@@ -320,6 +332,22 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val json = makeRequest(PUT, uri(study, cet2), BAD_REQUEST, json = cetToUpdateCmd(cet))
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("annotation type id mismatch")
+      }
+
+      "allow a updating collection event with same name on two different studies" in {
+        val commonName = nameGenerator.next[CollectionEventType]
+
+        (0 until 2).map { study =>
+          val study = factory.createDisabledStudy
+          studyRepository.put(study)
+          val cet = factory.createCollectionEventType
+          collectionEventTypeRepository.put(cet)
+          (study, cet)
+        } foreach { case (study: Study, cet: CollectionEventType) =>
+          val cmdJson = cetToUpdateCmd(cet.copy(name = commonName))
+          val json = makeRequest(PUT, uri(study, cet), json = cmdJson)
+          (json \ "status").as[String] must include ("success")
+        }
       }
     }
 

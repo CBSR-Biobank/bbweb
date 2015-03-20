@@ -5,6 +5,7 @@ import org.biobank.domain._
 import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
+import org.biobank.TestData
 
 import akka.actor.{ ActorSystem, ActorRef }
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
@@ -576,8 +577,9 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
     )
   }
 
-  if (play.api.Play.current.mode != play.api.Mode.Test) {
+  if (context.system.settings.config.hasPath(TestData.configPath)
+    && context.system.settings.config.getBoolean(TestData.configPath)) {
     createDefaultUser
-    org.biobank.TestData.addMultipleUsers
+    TestData.addMultipleUsers
   }
 }
