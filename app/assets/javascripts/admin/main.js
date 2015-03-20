@@ -29,12 +29,10 @@ define(function (require) {
       validCountDirective                     = require('./studies/validCountDirective'),
 
       AnnotationTypeEditCtrl                  = require('./studies/annotationTypes/AnnotationTypeEditCtrl'),
-      annotationTypeRemoveService             = require('./studies/annotationTypes/annotationTypeRemoveService'),
-      ceventAnnotTypesPanelDirective          = require('./studies/annotationTypes/ceventAnnotTypesPanelDirective'),
-      participantAnnotTypesPanelDirective     = require('./studies/annotationTypes/participantAnnotTypesPanelDirective'),
-      spcLinkAnnotTypeRemoveService           = require('./studies/annotationTypes/spcLinkAnnotTypeRemoveService'),
+      studyAnnotationTypeService             = require('./studies/annotationTypes/studyAnnotationTypeService'),
+      studyAnnotTypesPanelDirective           = require('./studies/annotationTypes/studyAnnotTypesPanelDirective'),
+      studyAnnotTypesTableDirective           = require('./studies/annotationTypes/studyAnnotTypesTableDirective'),
 
-      spcLinkAnnotTypesPanelDirective         = require('./studies/annotationTypes/spcLinkAnnotTypesPanelDirective'),
       CeventTypeEditCtrl                      = require('./studies/ceventTypes/CeventTypeEditCtrl'),
       ceventTypeRemoveService                 = require('./studies/ceventTypes/ceventTypeRemoveService'),
       ceventTypesPanelDirective               = require('./studies/ceventTypes/ceventTypesPanelDirective'),
@@ -98,18 +96,13 @@ define(function (require) {
   module.controller('StudySummaryTabCtrl', StudySummaryTabCtrl);
 
   module.controller('AnnotationTypeEditCtrl', AnnotationTypeEditCtrl);
-  module.service('annotationTypeRemoveService', annotationTypeRemoveService);
+  module.service('studyAnnotationTypeService', studyAnnotationTypeService);
 
-  module.directive('ceventAnnotTypesPanel', ceventAnnotTypesPanelDirective.directive);
-  module.controller('CeventAnnotTypesPanelCtrl', ceventAnnotTypesPanelDirective.controller);
+  module.directive('studyAnnotTypesPanel', studyAnnotTypesPanelDirective.directive);
+  module.controller('StudyAnnotTypesPanelCtrl', studyAnnotTypesPanelDirective.controller);
 
-  module.directive('participantsAnnotTypesPanel', participantAnnotTypesPanelDirective.directive);
-  module.controller('ParticipantAnnotTypesPanelCtrl', participantAnnotTypesPanelDirective.controller);
-
-  module.service('spcLinkAnnotTypeRemoveService', spcLinkAnnotTypeRemoveService);
-
-  module.directive('spcLinkAnnotTypesPanel', spcLinkAnnotTypesPanelDirective.directive);
-  module.controller('SpcLinkAnnotTypesPanelCtrl', spcLinkAnnotTypesPanelDirective.controller);
+  module.directive('studyAnnotTypesTable', studyAnnotTypesTableDirective.directive);
+  module.controller('StudyAnnotTypesTableCtrl', studyAnnotTypesTableDirective.controller);
 
   module.controller('CeventTypeEditCtrl', CeventTypeEditCtrl);
 

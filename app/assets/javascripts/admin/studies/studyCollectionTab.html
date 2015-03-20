@@ -1,9 +1,14 @@
 <ng-include src="'/assets/javascripts/admin/studies/studyNotDisabledWarning.html'"></ng-include>
 <accordion close-others="false">
-  <cevent-annot-types-panel
+  <study-annot-types-panel
      study="study"
      annot-types="annotTypes"
-     annot-types-in-use="annotTypesInUse"></cevent-annot-types-panel>
+     annot-types-in-use="annotTypesInUse"
+     annot-type-name="CollectionEventAnnotationType"
+     panel-id="study.panel.collectionEventAnnotationTypes"
+     add-state-name="home.admin.studies.study.collection.ceventAnnotTypeAdd"
+     update-state-name="home.admin.studies.study.collection.ceventAnnotTypeUpdate">
+  </study-annot-types-panel>
   <cevent-types-panel
      study="study"
      cevent-types="ceventTypes"

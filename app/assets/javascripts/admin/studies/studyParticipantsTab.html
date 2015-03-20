@@ -1,4 +1,12 @@
 <ng-include src="'/assets/javascripts/admin/studies/studyNotDisabledWarning.html'"></ng-include>
 <accordion close-others="false">
-  <participants-annot-types-panel study="study" annot-types="annotTypes"></participants-annot-types-panel>
+  <study-annot-types-panel
+     study="study"
+     annot-types="annotTypes"
+     annot-types-in-use="vm.annotTypesInUse"
+     annot-type-name="ParticipantAnnotationType"
+     panel-id="study.panel.participantAnnotationTypes"
+     add-state-name="home.admin.studies.study.participants.annotTypeAdd"
+     update-state-name="home.admin.studies.study.participants.annotTypeUpdate">
+  </study-annot-types-panel>
 </accordion>

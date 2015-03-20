@@ -1,15 +1,18 @@
 <accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
   <accordion-heading>
-    Participant Annotation Types
+    {{vm.panelHeading}}
     <panel-buttons on-add="vm.add()"
                    add-button-title="Add annotation type"
                    add-button-enabled="vm.modificationsAllowed"
                    panel-open="vm.panelOpen">
     </panel-buttons>
   </accordion-heading>
-  <p>
-    Participant annotations allow a study to collect custom named and defined pieces of data for each
-    participant. Annotations are optional and are not required to be defined.
-  </p>
-  <ng-include src="'/assets/javascripts/admin/studies/annotationTypes/annotTypesPanel.html'"></ng-include>
+  <p ng-bind-html="vm.annotTypeDescription"></p>
+  <study-annot-types-table
+     study="study"
+     annot-types="annotTypes"
+     annot-type-name="vm.annotTypeName"
+     annot-types-in-use="vm.annotTypesInUse"
+     update-state-name="vm.updateStateName"
+     has-required="true"></study-annot-types-table>
 </accordion-group>

@@ -20,9 +20,9 @@ define([], function() {
       return specimenGroupsService.getAll(study.id);
     }
 
-    resolveAnnotTypes.$inject = ['ceventAnnotTypesService', 'study'];
-    function resolveAnnotTypes(ceventAnnotTypesService, study) {
-      return ceventAnnotTypesService.getAll(study.id);
+    resolveAnnotTypes.$inject = ['CollectionEventAnnotationType', 'study'];
+    function resolveAnnotTypes(CollectionEventAnnotationType, study) {
+      return CollectionEventAnnotationType.list(study.id);
     }
 
     $urlRouterProvider.otherwise('/');
@@ -95,20 +95,8 @@ define([], function() {
       url: '/cevent/annottype/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        annotType: ['study', function(study) {
-          return {
-            studyId: study.id,
-            name: '',
-            description: null,
-            valueType: '',
-            options: []
-          };
-        }],
-        addOrUpdateFn: ['ceventAnnotTypesService', function(ceventAnnotTypesService) {
-          return ceventAnnotTypesService.addOrUpdate;
-        }],
-        valueTypes: ['studiesService', function(studiesService) {
-          return studiesService.valueTypes();
+        annotType: ['CollectionEventAnnotationType', function(CollectionEventAnnotationType) {
+          return new CollectionEventAnnotationType();
         }]
       },
       views: {
@@ -130,20 +118,12 @@ define([], function() {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         annotType: [
-          '$stateParams', 'ceventAnnotTypesService', 'study',
-          function($stateParams, ceventAnnotTypesService, study) {
-            if ($stateParams.annotTypeId) {
-              return ceventAnnotTypesService.get(study.id, $stateParams.annotTypeId);
-            }
-            throw new Error('state parameter annotTypeId is invalid');
+          '$stateParams', 'CollectionEventAnnotationType',
+          function($stateParams, CollectionEventAnnotationType) {
+            return CollectionEventAnnotationType.get($stateParams.studyId,
+                                                     $stateParams.annotTypeId);
           }
-        ],
-        addOrUpdateFn: ['ceventAnnotTypesService', function(ceventAnnotTypesService) {
-          return ceventAnnotTypesService.addOrUpdate;
-        }],
-        valueTypes: ['studiesService', function(studiesService) {
-          return studiesService.valueTypes();
-        }]
+        ]
       },
       views: {
         'main@': {

@@ -5,6 +5,8 @@ define(['angular'], function(angular) {
 
   /**
    * Service to create ng-tables.
+   *
+   * @deprecated use tableService instead.
    */
   function panelTableService($filter, ngTableParams) {
     var service = {
@@ -28,7 +30,7 @@ define(['angular'], function(angular) {
       };
 
       var defaultSettings = {
-        total: function () { return tableDataFn().length; },
+        total: 0,
         getData: function($defer, params) {
           var filteredData = tableDataFn();
           var orderedData = params.sorting() ?

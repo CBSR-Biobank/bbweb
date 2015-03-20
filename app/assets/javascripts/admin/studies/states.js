@@ -149,6 +149,8 @@ define(['angular'], function(angular) {
           controller: ['$scope', 'study', 'annotTypes', function($scope, study, annotTypes) {
             $scope.study = study;
             $scope.annotTypes = annotTypes;
+            // FIXME this is set to empty array for now, but will have to call the correct method in the future
+            $scope.annotTypesInUse = [];
           }]
         }
       },

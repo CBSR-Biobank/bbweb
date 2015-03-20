@@ -96,6 +96,18 @@ define(['angular', 'underscore'], function(angular, _) {
       return changeState(this, 'unretire');
     };
 
+    Study.prototype.isDisabled = function () {
+      return (this.status === StudyStatus.DISABLED());
+    };
+
+    Study.prototype.isEnabled = function () {
+      return (this.status === StudyStatus.ENABLED());
+    };
+
+    Study.prototype.isRetired = function () {
+      return (this.status === StudyStatus.Retired());
+    };
+
     function changeState(obj, method) {
       return studiesService[method](obj).then(function(reply) {
         return new Study.create(reply);
