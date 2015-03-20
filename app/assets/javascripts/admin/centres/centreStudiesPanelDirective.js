@@ -22,7 +22,7 @@ define(['angular', 'underscore'], function(angular, _) {
     '$scope',
     'Panel',
     'StudyViewer',
-    'panelTableService',
+    'tableService',
     'studiesService',
     'modalService'
   ];
@@ -33,7 +33,7 @@ define(['angular', 'underscore'], function(angular, _) {
   function CentreStudiesPanelCtrl($scope,
                                   Panel,
                                   StudyViewer,
-                                  panelTableService,
+                                  tableService,
                                   studiesService,
                                   modalService) {
 
@@ -69,7 +69,7 @@ define(['angular', 'underscore'], function(angular, _) {
         vm.tableStudies.push(vm.studiesById[studyId]);
       });
 
-      vm.tableParams = panelTableService.getTableParamsWithCallback(getTableData, {count: 10}, {counts: []});
+      vm.tableParams = tableService.getTableParamsWithCallback(getTableData, {}, {counts: []});
     }
 
     function getTableData() {

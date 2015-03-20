@@ -29,7 +29,6 @@ define(function (require) {
       funutils                         = require('./services/funutils'),
       modalService                     = require('./services/modalService'),
       notificationsService             = require('./services/notificationsService'),
-      panelTableService                = require('./services/panelTableService'),
       queryStringService               = require('./services/queryStringService'),
       stateHelperService               = require('./services/stateHelperService'),
       tableService                     = require('./services/tableService'),
@@ -65,7 +64,6 @@ define(function (require) {
   module.service('funutils', funutils);
   module.service('modalService', modalService);
   module.service('notificationsService', notificationsService);
-  module.service('panelTableService', panelTableService);
   module.service('queryStringService', queryStringService);
   module.service('stateHelper', stateHelperService);
   module.service('tableService', tableService);

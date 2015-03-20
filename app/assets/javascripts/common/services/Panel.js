@@ -1,14 +1,14 @@
 define(['underscore'], function(_){
   'use strict';
 
-  PanelFactory.$inject = ['$window', '$state', 'panelTableService'];
+  PanelFactory.$inject = ['$window', '$state', 'tableService'];
 
   /**
    * Common functions for panels.
    *
    * Stores the panel's open / closed state in local storage.
    */
-  function PanelFactory($window, $state, panelTableService) {
+  function PanelFactory($window, $state, tableService) {
 
     function Panel(panelId, addStateName) {
       var self = this, panelStateLocalStorage;
@@ -41,7 +41,7 @@ define(['underscore'], function(_){
       tableParameters = tableParameters || {};
       tableSettings = tableSettings || {};
       tableSettings = _.defaults(tableSettings, {counts: []});
-      return panelTableService.getTableParams(data, tableParameters, tableSettings);
+      return tableService.getTableParams(data, tableParameters, tableSettings);
     };
 
     return Panel;
