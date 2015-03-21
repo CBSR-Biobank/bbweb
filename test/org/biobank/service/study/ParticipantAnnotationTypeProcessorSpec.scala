@@ -21,222 +21,119 @@ import Scalaz._
   * To run tagged tests, use this command:
   *   ParticipantAnnotationTypeProcessorSpec -- -n 1
   */
-class ParticipantAnnotationTypeProcessorSpec extends TestFixture {
+class ParticipantAnnotationTypeProcessorSpec
+    extends StudyAnnotationTypeProcessorSpec[ParticipantAnnotationType] {
   import org.biobank.TestUtils._
 
-  private val log = LoggerFactory.getLogger(this.getClass)
+  override def annotationTypeRepository = inject [ParticipantAnnotationTypeRepository]
 
-  val studyRepository = inject [StudyRepository]
-
-  val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
-
-  val participantAnnotationTypeRepository = inject [ParticipantAnnotationTypeRepository]
-
-  val studiesProcessor = injectActorRef [StudiesProcessor] ("studies")
-
-  val nameGenerator = new NameGenerator(this.getClass)
-
-  var disabledStudy: DisabledStudy = null
-
-  // create the study to be used for each tests*
-  override def beforeEach: Unit = {
-    disabledStudy = factory.createDisabledStudy
-    studyRepository.put(disabledStudy)
-    ()
+  override def createAnnotationType(maybeId:      Option[AnnotationTypeId] = None,
+                                    maybeStudyId: Option[StudyId] = None,
+                                    maybeVersion: Option[Long] = None,
+                                    maybeName :   Option[String] = None) = {
+    val annotType = factory.createParticipantAnnotationType
+    annotType.copy(
+      id      = maybeId.getOrElse(annotType.id),
+      studyId = maybeStudyId.getOrElse(annotType.studyId),
+      version = maybeVersion.getOrElse(annotType.version),
+      name    = maybeName.getOrElse(annotType.name))
   }
 
-  "A study processor" can {
+  protected def addCommand(annotType: ParticipantAnnotationType) =
+    AddParticipantAnnotationTypeCmd(userId        = None,
+                                    studyId       = annotType.studyId.id,
+                                    name          = annotType.name,
+                                    description   = annotType.description,
+                                    valueType     = annotType.valueType,
+                                    maxValueCount = annotType.maxValueCount,
+                                    options       = annotType.options,
+                                    required      = annotType.required)
 
-    "add a participant annotation type" in {
-      val annotType = factory.createParticipantAnnotationType
+  protected def updateCommand(annotType: ParticipantAnnotationType) =
+    UpdateParticipantAnnotationTypeCmd(userId          = None,
+                                       studyId         = annotType.studyId.id,
+                                       id              = annotType.id.id,
+                                       expectedVersion = annotType.version,
+                                       name            = annotType.name,
+                                       description     = annotType.description,
+                                       valueType       = annotType.valueType,
+                                       maxValueCount   = annotType.maxValueCount,
+                                       options         = annotType.options,
+                                       required        = annotType.required)
 
-      val cmd = AddParticipantAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
-        annotType.maxValueCount, annotType.options, false)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
+  protected def removeCommand(annotType: ParticipantAnnotationType) =
+    RemoveParticipantAnnotationTypeCmd(userId          = None,
+                                       studyId         = annotType.studyId.id,
+                                       id              = annotType.id.id,
+                                       expectedVersion = annotType.version)
 
-      v mustSucceed { event =>
-        event mustBe a[StudyEvent]
-        event.id must be (annotType.studyId.id)
+  protected def addedEventCompare(event: StudyEvent,
+                                  annotType: ParticipantAnnotationType) = {
+    event.eventType.isParticipantAnnotationTypeAdded must be (true)
 
-        val addedEvent = event.getParticipantAnnotationTypeAdded
-        addedEvent must have (
-          'name          (Some(annotType.name)),
-          'description   (annotType.description),
-          'valueType     (Some(annotType.valueType.toString)),
-          'maxValueCount (annotType.maxValueCount)
-        )
+    val addedEvent = event.getParticipantAnnotationTypeAdded
 
-        addedEvent.options must have size annotType.options.size
-        annotType.options.map { item =>
-          addedEvent.options must contain (item)
-        }
+    addedEvent must have(
+      'name          (Some(annotType.name)),
+      'description   (annotType.description),
+      'valueType     (Some(annotType.valueType.toString)),
+      'maxValueCount (annotType.maxValueCount),
+      'required      (Some(annotType.required))
+    )
 
-        participantAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
-        participantAnnotationTypeRepository.withId(
-          disabledStudy.id,
-          AnnotationTypeId(addedEvent.getAnnotationTypeId))
-        .mustSucceed { at =>
-          at.version mustBe(0)
-          checkTimeStamps(at, DateTime.now, None)
-        }
-      }
+    addedEvent.options must have size annotType.options.size
+    annotType.options.foreach { item =>
+      addedEvent.options must contain (item)
     }
 
-    "not add a participant annotation type to a study that does not exist" in {
-      val study2 = factory.createDisabledStudy
-      val annotType = factory.createParticipantAnnotationType
+    annotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
+    annotationTypeRepository.withId(
+      disabledStudy.id, AnnotationTypeId(addedEvent.getAnnotationTypeId)) mustSucceed { at =>
+      at.version mustBe(0)
+      checkTimeStamps(at, DateTime.now, None)
+    }
+  }
 
-      val cmd = AddParticipantAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
-        annotType.maxValueCount, annotType.options, false)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
+  protected def updatedEventCompare(event: StudyEvent,
+                                    annotType: ParticipantAnnotationType) = {
+    event.eventType.isParticipantAnnotationTypeUpdated must be (true)
 
-      v mustFail s"invalid study id: ${study2.id.id}"
+    val updatedEvent = event.getParticipantAnnotationTypeUpdated
+
+    updatedEvent must have(
+      'version       (Some(annotType.version + 1)),
+      'name          (Some(annotType.name)),
+      'description   (annotType.description),
+      'valueType     (Some(annotType.valueType.toString)),
+      'maxValueCount (annotType.maxValueCount),
+      'required      (Some(annotType.required))
+    )
+
+    updatedEvent.options must have size annotType.options.size
+    // verify each option
+    annotType.options.map { item =>
+      updatedEvent.options must contain (item)
     }
 
-    "not add a participant annotation type if the name already exists" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
-
-      val cmd = AddParticipantAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
-        annotType.maxValueCount, annotType.options, true)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
-
-      v  mustFail "name already exists"
+    annotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
+    annotationTypeRepository.withId(
+      disabledStudy.id, AnnotationTypeId(updatedEvent.getAnnotationTypeId)) mustSucceed { at =>
+      at.version mustBe(1)
+      checkTimeStamps(at, annotType.timeAdded, DateTime.now)
     }
+  }
 
-    "update a participant annotation type" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
+  protected def removedEventCompare(event: StudyEvent,
+                                    annotType: ParticipantAnnotationType) = {
+    event.eventType.isParticipantAnnotationTypeRemoved must be (true)
 
-      val annotType2 = factory.createParticipantAnnotationType
+    val removedEvent = event.getParticipantAnnotationTypeRemoved
+    removedEvent.annotationTypeId mustBe (Some(annotType.id.id))
+  }
 
-      val cmd = UpdateParticipantAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.id.id, annotType.version, annotType2.name,
-        annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
+  "A participant annotation type processor" must {
 
-      v mustSucceed { event =>
-        event mustBe a[StudyEvent]
-        event.id must be (annotType.studyId.id)
-
-        val updatedEvent = event.getParticipantAnnotationTypeUpdated
-        updatedEvent must have(
-          'version       (Some(annotType.version + 1)),
-          'name          (Some(annotType2.name)),
-          'description   (annotType2.description),
-          'valueType     (Some(annotType2.valueType.toString)),
-          'maxValueCount (annotType2.maxValueCount)
-        )
-
-        updatedEvent.options must have size annotType2.options.size
-        // verify each option
-        annotType2.options.map { item =>
-          updatedEvent.options must contain (item)
-        }
-
-        participantAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
-        participantAnnotationTypeRepository.withId(
-          disabledStudy.id,
-          AnnotationTypeId(updatedEvent.getAnnotationTypeId))
-        .mustSucceed { at =>
-          at.version mustBe(1)
-          checkTimeStamps(at, annotType.timeAdded, DateTime.now)
-        }
-      }
-    }
-
-    "not update a participant annotation type to name that already exists" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
-
-      val annotType2 = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType2)
-
-      val dupliacteName = annotType.name
-
-      val cmd = UpdateParticipantAnnotationTypeCmd(
-        None, annotType2.studyId.id, annotType2.id.id, annotType2.version, dupliacteName,
-        annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
-
-      v mustFail "name already exists"
-    }
-
-    "not update a participant annotation type to the wrong study" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
-
-      val study2 = factory.createDisabledStudy
-      studyRepository.put(study2)
-
-      val cmd = UpdateParticipantAnnotationTypeCmd(
-        None, study2.id.id, annotType.id.id, annotType.version, annotType.name,
-        annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
-
-      v mustFail "study does not have annotation type"
-    }
-
-    "not update a participant annotation type with an invalid version" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
-
-      val cmd = UpdateParticipantAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.id.id, annotType.version - 1, annotType.name,
-        annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
-
-      v mustFail "doesn't match current version"
-    }
-
-    "remove a participant annotation type" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
-
-      val cmd = RemoveParticipantAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.id.id, annotType.version)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
-
-      v mustSucceed { event =>
-        event mustBe a[StudyEvent]
-        event.id must be (annotType.studyId.id)
-
-        val removedEvent = event.getParticipantAnnotationTypeRemoved
-        removedEvent.getAnnotationTypeId mustBe (annotType.id.id)
-      }
-    }
-
-    "not remove a participant annotation type with invalid version" in {
-      val annotType = factory.createParticipantAnnotationType
-      participantAnnotationTypeRepository.put(annotType)
-
-      val cmd = RemoveParticipantAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.id.id, annotType.version - 1)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
-
-      v mustFail "expected version doesn't match current version"
-    }
+    annotationTypeBehaviour
 
   }
 

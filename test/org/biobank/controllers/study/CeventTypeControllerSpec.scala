@@ -334,7 +334,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("annotation type id mismatch")
       }
 
-      "allow a updating collection event with same name on two different studies" in {
+      "allow a updating collection event to same name on two different studies" in {
         val commonName = nameGenerator.next[CollectionEventType]
 
         (0 until 2).map { study =>

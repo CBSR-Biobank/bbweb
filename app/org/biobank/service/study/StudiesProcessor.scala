@@ -145,7 +145,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
               }
               childActor forward cmd
             }
-            case study => context.sender ! DomainError(s"$study for $cmd is not disabled").failureNel
+            case study => context.sender ! DomainError(s"study is not disabled: studyId: ${study.id}").failureNel
           }
         )
 
@@ -159,7 +159,7 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
           err => context.sender ! err.failure,
           study => study match {
             case study: DisabledStudy => specimenLinkTypeProcessor forward cmd
-            case study => context.sender ! s"$study for $cmd is not disabled".failureNel
+            case study => context.sender ! DomainError(s"study is not disabled: studyId: ${study.id}").failureNel
           }
         )
 

@@ -18,214 +18,115 @@ import scalaz.Scalaz._
   * Tests for actor SpecimenLinkAnnotationTypeProcessorSpec. These are written using ScalaTest.
   *
   */
-class SpecimenLinkAnnotationTypeProcessorSpec extends TestFixture {
+class SpecimenLinkAnnotationTypeProcessorSpec
+    extends StudyAnnotationTypeProcessorSpec[SpecimenLinkAnnotationType] {
   import org.biobank.TestUtils._
 
-  private val log = LoggerFactory.getLogger(this.getClass)
+  override def annotationTypeRepository = inject [SpecimenLinkAnnotationTypeRepository]
 
-  val studyRepository = inject [StudyRepository]
-
-  val specimenLinkAnnotationTypeRepository = inject [SpecimenLinkAnnotationTypeRepository]
-
-  val studiesProcessor = injectActorRef [StudiesProcessor] ("studies")
-
-  val nameGenerator = new NameGenerator(this.getClass)
-
-  var disabledStudy: DisabledStudy = null
-
-  // create the study to be used for each tests*
-  override def beforeEach: Unit = {
-    disabledStudy = factory.createDisabledStudy
-    studyRepository.put(disabledStudy)
-    ()
+  override def createAnnotationType(maybeId:      Option[AnnotationTypeId] = None,
+                                    maybeStudyId: Option[StudyId] = None,
+                                    maybeVersion: Option[Long] = None,
+                                    maybeName :   Option[String] = None) = {
+    val annotType = factory.createSpecimenLinkAnnotationType
+    annotType.copy(
+      id      = maybeId.getOrElse(annotType.id),
+      studyId = maybeStudyId.getOrElse(annotType.studyId),
+      version = maybeVersion.getOrElse(annotType.version),
+      name    = maybeName.getOrElse(annotType.name))
   }
 
-  "A study processor" can {
+  protected def addCommand(annotType: SpecimenLinkAnnotationType) =
+    AddSpecimenLinkAnnotationTypeCmd(userId        = None,
+                                     studyId       = annotType.studyId.id,
+                                     name          = annotType.name,
+                                     description   = annotType.description,
+                                     valueType     = annotType.valueType,
+                                     maxValueCount = annotType.maxValueCount,
+                                     options       = annotType.options)
 
-    "add a specimen link annotation type" in {
-      val annotType = factory.createSpecimenLinkAnnotationType
+  protected def updateCommand(annotType: SpecimenLinkAnnotationType) =
+    UpdateSpecimenLinkAnnotationTypeCmd(userId          = None,
+                                        studyId         = annotType.studyId.id,
+                                        id              = annotType.id.id,
+                                        expectedVersion = annotType.version,
+                                        name            = annotType.name,
+                                        description     = annotType.description,
+                                        valueType       = annotType.valueType,
+                                        maxValueCount   = annotType.maxValueCount,
+                                        options         = annotType.options)
 
-      val cmd = AddSpecimenLinkAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
-        annotType.maxValueCount, annotType.options)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
+  protected def removeCommand(annotType: SpecimenLinkAnnotationType) =
+    RemoveSpecimenLinkAnnotationTypeCmd(userId          = None,
+                                       studyId         = annotType.studyId.id,
+                                       id              = annotType.id.id,
+                                       expectedVersion = annotType.version)
 
-      v mustSucceed { event =>
-        event mustBe a[StudyEvent]
-        event.id must be (annotType.studyId.id)
+  protected def addedEventCompare(event: StudyEvent,
+                                  annotType: SpecimenLinkAnnotationType) = {
+    event.eventType.isSpecimenLinkAnnotationTypeAdded must be (true)
 
-        val addedEvent = event.getSpecimenLinkAnnotationTypeAdded
-        addedEvent must have(
-          'name          (Some(annotType.name)),
-          'description   (annotType.description),
-          'valueType     (Some(annotType.valueType.toString)),
-          'maxValueCount (annotType.maxValueCount)
-        )
+    val addedEvent = event.getSpecimenLinkAnnotationTypeAdded
 
-        addedEvent.options must have size annotType.options.size
-        annotType.options.map { item =>
-          addedEvent.options must contain (item)
-        }
+    addedEvent must have(
+      'name          (Some(annotType.name)),
+      'description   (annotType.description),
+      'valueType     (Some(annotType.valueType.toString)),
+      'maxValueCount (annotType.maxValueCount)
+    )
 
-        specimenLinkAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
-        specimenLinkAnnotationTypeRepository.withId(
-          disabledStudy.id,
-          AnnotationTypeId(addedEvent.getAnnotationTypeId))
-        .mustSucceed { at =>
-          at.version mustBe(0)
-          checkTimeStamps(at, DateTime.now, None)
-        }
-      }
+    addedEvent.options must have size annotType.options.size
+    annotType.options.foreach { item =>
+      addedEvent.options must contain (item)
     }
 
-    "not add a specimen link annotation type to a study that does not exist" in {
-      val study2 = factory.createDisabledStudy
-      val annotType = factory.createSpecimenLinkAnnotationType
+    annotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
+    annotationTypeRepository.withId(
+      disabledStudy.id, AnnotationTypeId(addedEvent.getAnnotationTypeId)) mustSucceed { at =>
+      at.version mustBe(0)
+      checkTimeStamps(at, DateTime.now, None)
+    }
+  }
 
-      val cmd = AddSpecimenLinkAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
-        annotType.maxValueCount, annotType.options)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
-       v mustFail s"invalid study id: ${study2.id.id}"
+  protected def updatedEventCompare(event: StudyEvent,
+                                    annotType: SpecimenLinkAnnotationType) = {
+    event.eventType.isSpecimenLinkAnnotationTypeUpdated must be (true)
+
+    val updatedEvent = event.getSpecimenLinkAnnotationTypeUpdated
+
+    updatedEvent must have(
+      'version       (Some(annotType.version + 1)),
+      'name          (Some(annotType.name)),
+      'description   (annotType.description),
+      'valueType     (Some(annotType.valueType.toString)),
+      'maxValueCount (annotType.maxValueCount)
+    )
+
+    updatedEvent.options must have size annotType.options.size
+    // verify each option
+    annotType.options.map { item =>
+      updatedEvent.options must contain (item)
     }
 
-    "not add a specimen link annotation type if the name already exists" in {
-      val annotType = factory.createSpecimenLinkAnnotationType
-      specimenLinkAnnotationTypeRepository.put(annotType)
-
-      val cmd = AddSpecimenLinkAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.name, annotType.description, annotType.valueType,
-        annotType.maxValueCount, annotType.options)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
-      v mustFail "name already exists"
+    annotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
+    annotationTypeRepository.withId(
+      disabledStudy.id, AnnotationTypeId(updatedEvent.getAnnotationTypeId)) mustSucceed { at =>
+      at.version mustBe(1)
+      checkTimeStamps(at, annotType.timeAdded, DateTime.now)
     }
+  }
 
-    "update a specimen link annotation type" in {
-      val annotType = factory.createSpecimenLinkAnnotationType
-      specimenLinkAnnotationTypeRepository.put(annotType)
+  protected def removedEventCompare(event: StudyEvent,
+                                    annotType: SpecimenLinkAnnotationType) = {
+    event.eventType.isSpecimenLinkAnnotationTypeRemoved must be (true)
 
-      val annotType2 = factory.createSpecimenLinkAnnotationType
+    val removedEvent = event.getSpecimenLinkAnnotationTypeRemoved
+    removedEvent.annotationTypeId mustBe (Some(annotType.id.id))
+  }
 
-      val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.id.id, annotType.version, annotType2.name,
-        annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
+  "A specimen link annotation type processor" must {
 
-      v mustSucceed { event =>
-        event mustBe a[StudyEvent]
-        event.id must be (annotType.studyId.id)
-
-        val updatedEvent = event.getSpecimenLinkAnnotationTypeUpdated
-        updatedEvent must have(
-          'version       (Some(annotType.version + 1)),
-          'name          (Some(annotType2.name)),
-          'description   (annotType2.description),
-          'valueType     (Some(annotType2.valueType.toString)),
-          'maxValueCount (annotType2.maxValueCount)
-        )
-
-        updatedEvent.options must have size annotType2.options.size
-        // verify each option
-        annotType2.options.map { item =>
-          updatedEvent.options must contain (item)
-        }
-
-        specimenLinkAnnotationTypeRepository.allForStudy(disabledStudy.id) must have size 1
-        specimenLinkAnnotationTypeRepository.withId(
-          disabledStudy.id,
-          AnnotationTypeId(updatedEvent.getAnnotationTypeId))
-        .mustSucceed { at =>
-          at.version mustBe(1)
-          checkTimeStamps(at, annotType.timeAdded, DateTime.now)
-        }
-      }
-    }
-
-    "not update a specimen link annotation type to name that already exists" in {
-      val annotType = factory.createSpecimenLinkAnnotationType
-      specimenLinkAnnotationTypeRepository.put(annotType)
-
-      val annotType2 = factory.createSpecimenLinkAnnotationType
-      specimenLinkAnnotationTypeRepository.put(annotType2)
-
-      val dupliacteName = annotType.name
-
-      val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
-        None, annotType2.studyId.id, annotType2.id.id, annotType2.version, dupliacteName,
-        annotType2.description, annotType2.valueType, annotType2.maxValueCount, annotType2.options)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
-      v mustFail "name already exists"
-    }
-
-    "not update a specimen link annotation type to the wrong study" in {
-      val annotType = factory.createSpecimenLinkAnnotationType
-      specimenLinkAnnotationTypeRepository.put(annotType)
-
-      val study2 = factory.createDisabledStudy
-      studyRepository.put(study2)
-
-      val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
-        None, study2.id.id, annotType.id.id, annotType.version, annotType.name,
-        annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
-      v mustFail "study does not have annotation type"
-    }
-
-    "not update a specimen link annotation type with an invalid version" in {
-      val annotType = factory.createSpecimenLinkAnnotationType
-      specimenLinkAnnotationTypeRepository.put(annotType)
-
-      val cmd = UpdateSpecimenLinkAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.id.id, annotType.version - 1, annotType.name,
-        annotType.description, annotType.valueType, annotType.maxValueCount, annotType.options)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
-      v mustFail "doesn't match current version"
-    }
-
-    "remove a specimen link annotation type" in {
-      val annotType = factory.createSpecimenLinkAnnotationType
-      specimenLinkAnnotationTypeRepository.put(annotType)
-
-      val cmd = RemoveSpecimenLinkAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.id.id, annotType.version)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
-
-      v mustSucceed { event =>
-        event mustBe a[StudyEvent]
-        event.id must be (annotType.studyId.id)
-
-        val removedEvent = event.getSpecimenLinkAnnotationTypeRemoved
-        removedEvent.annotationTypeId mustBe (Some(annotType.id.id))
-      }
-    }
-
-    "not remove a specimen link annotation type with invalid version" in {
-      val annotType = factory.createSpecimenLinkAnnotationType
-      specimenLinkAnnotationTypeRepository.put(annotType)
-
-      val cmd = RemoveSpecimenLinkAnnotationTypeCmd(
-        None, annotType.studyId.id, annotType.id.id, annotType.version - 1)
-      val v = ask(studiesProcessor, cmd)
-        .mapTo[DomainValidation[StudyEvent]]
-        .futureValue
-      v mustFail "expected version doesn't match current version"
-    }
+    annotationTypeBehaviour
 
   }
 

@@ -352,7 +352,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("specimen group id mismatch")
       }
 
-      "allow a updating specimen group with same name on two different studies" in {
+      "allow a updating specimen group to same name on two different studies" in {
         val commonName = nameGenerator.next[SpecimenGroup]
 
         (0 until 2).map { study =>

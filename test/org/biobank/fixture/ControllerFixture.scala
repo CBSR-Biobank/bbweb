@@ -139,7 +139,7 @@ abstract class ControllerFixture
     route(fakeRequest).fold {
       fail("HTTP request returned NONE")
     } { result =>
-      Logger.info(s"makeRequest: status: ${status(result)}, result: ${contentAsString(result)}")
+      Logger.debug(s"makeRequest: status: ${status(result)}, result: ${contentAsString(result)}")
       status(result) mustBe(expectedStatus)
       contentType(result) mustBe(Some("application/json"))
       Json.parse(contentAsString(result))

@@ -225,7 +225,7 @@ class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaI
   private def applyParticipantUpdatedEvent(event: StudyEvent) = {
     log.debug(s"applyParticipantUpdatedEvent: event/$event")
 
-    if (event.eventType.isCollectionEventAnnotationTypeUpdated) {
+    if (event.eventType.isParticipantUpdated) {
       val updatedEvent = event.getParticipantUpdated
 
       val studyId = StudyId(event.id)
