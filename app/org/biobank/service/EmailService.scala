@@ -1,6 +1,6 @@
 package org.biobank.service
 
-import com.typesafe.plugin._
+import play.api.libs.mailer._
 import play.api.Play.current
 import play.Play
 import play.api.Logger
@@ -12,27 +12,29 @@ object EmailService {
   def passwordResetEmail(recipient: String, password: String) = {
     val async: Future[Unit] = Future {
       val adminEmail = Play.application.configuration.getString("admin.email")
-
-      val mail = use[MailerPlugin].email
-      mail.setSubject("Biobank password reset")
-      mail.setFrom(adminEmail)
-
-      if (Play.isProd) {
-        mail.setRecipient(recipient)
+      val to = if (Play.isProd) {
+        recipient
       } else {
-        mail.setRecipient(adminEmail)
+        adminEmail
       }
 
-      val msg = s"""|<html>
-                    |<p>We received a request to reset your password. Your new password is:</p>
-                    |<pre>
-                    |$password
-                    |</pre>
-                    |<p>Email address for account is: $recipient</p>
-                    |<p>If you did not make this request, it is safe to disregard this message.</p>
-                    |<p>Regards,<br/>Biobank</p>
-                    |</html>""".stripMargin
-      mail.sendHtml(msg)
+      val bodyHtml = s"""|<html>
+                         |<p>We received a request to reset your password. Your new password is:</p>
+                         |<pre>
+                         |$password
+                         |</pre>
+                         |<p>Email address for account is: $recipient</p>
+                         |<p>If you did not make this request, it is safe to disregard this message.</p>
+                         |<p>Regards,<br/>Biobank</p>
+                         |</html>""".stripMargin
+
+      val email = Email(subject  = "Biobank password reset",
+                        from     = adminEmail,
+                        to       = Seq(to),
+                        bodyHtml = Some(bodyHtml))
+
+      MailerPlugin.send(email)
+      ()
     }
 
     async.onFailure { case(err) =>

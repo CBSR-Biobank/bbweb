@@ -65,7 +65,7 @@ libraryDependencies ++= Seq(
   "org.scalaz"                %% "scalaz-core"                       % "7.1.1"              % "compile",
   "com.github.ironfish"       %% "akka-persistence-mongo-casbah"     % "0.7.5"              % "compile",
   "com.github.t3hnar"         %% "scala-bcrypt"                      % "2.4",
-  "com.typesafe.play.plugins" %% "play-plugins-mailer"               % "2.3.1",
+  "com.typesafe.play"         %% "play-mailer"                       % "2.4.0",
   "org.scaldi"                %% "scaldi-play"                       % "0.5.3",
   "org.scaldi"                %% "scaldi-akka"                       % "0.5.3",
   // WebJars infrastructure
