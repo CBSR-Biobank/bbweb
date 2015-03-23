@@ -1,13 +1,11 @@
-define([], function() {
+define(['underscore'], function(_) {
   'use strict';
 
   ParticipantEditCtrl.$inject = [
     '$state',
     '$stateParams',
-    'participantsService',
     'domainEntityUpdateError',
     'notificationsService',
-    'Participant',
     'study',
     'participant',
     'annotationTypes'
@@ -18,26 +16,25 @@ define([], function() {
    */
   function ParticipantEditCtrl($state,
                                $stateParams,
-                               participantsService,
                                domainEntityUpdateError,
                                notificationsService,
-                               Participant,
                                study,
                                participant,
                                annotationTypes) {
     var vm = this;
 
-    vm.study           = study;
-    vm.participant     = new Participant(study, participant, annotationTypes);
-    vm.submit          = submit;
-    vm.cancel          = cancel;
+    vm.study       = study;
+    vm.participant = participant;
+    vm.submit      = submit;
+    vm.cancel      = cancel;
 
-    vm.onSubmitState = {
+    vm.returnState = {
       name: 'home.collection.study.participant',
       params: {
         studyId: study.id,
         participantId: participant.id
-      }
+      },
+      options: { reload: true }
     };
 
     if (vm.participant.isNew) {
@@ -46,14 +43,14 @@ define([], function() {
       vm.onCancelState = {name: 'home.collection.study', params: {studyId: study.id}};
     } else {
       vm.title = 'Update participant';
-      vm.onCancelState = vm.onSubmitState;
+      vm.onCancelState = _.extend({}, vm.returnState, { reload: false });
     }
 
     function submit(participant) {
       // convert the data from the form to data expected by REST API
       participant.updateAnnotations();
 
-      participantsService.addOrUpdate(participant)
+      participant.addOrUpdate()
         .then(submitSuccess)
         .catch(function(error) {
           domainEntityUpdateError.handleError(
@@ -64,22 +61,22 @@ define([], function() {
         });
     }
 
-    function gotoState(state, reload) {
-      $state.transitionTo(state.name, state.params, { reload: reload });
+    function gotoState(state) {
+      $state.go.apply(null, _.values(vm.returnState));
     }
 
-    function submitSuccess(event) {
+    function submitSuccess(reply) {
       if (vm.participant.isNew) {
-        // the event contains the id assigned to this new participant, therefore, the state data can be
+        // the reply contains the id assigned to this new participant, therefore, the state data can be
         // updated
-        vm.onSubmitState.params.participantId = event.participantId;
+        vm.returnState.params.participantId = reply.id;
       }
       notificationsService.submitSuccess();
-      gotoState(vm.onSubmitState, true);
+      gotoState(vm.returnState);
     }
 
     function cancel() {
-      gotoState(vm.onCancelState, false);
+      gotoState(vm.onCancelState);
     }
   }
 

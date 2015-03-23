@@ -15,34 +15,23 @@ define([], function() {
       return studiesService.getStudyCounts();
     }
 
-    resolveStudy.$inject = ['$stateParams', 'studiesService'];
-    function resolveStudy($stateParams, studiesService) {
-      if ($stateParams.studyId) {
-        return studiesService.get($stateParams.studyId);
-      }
-      throw new Error('state parameter studyId is invalid');
+    resolveStudy.$inject = ['$stateParams', 'Study'];
+    function resolveStudy($stateParams, Study) {
+      return Study.get($stateParams.studyId);
     }
 
-    resolveParticipant.$inject = ['$stateParams', 'participantsService'];
-    function resolveParticipant($stateParams, participantsService) {
-      if ($stateParams.studyId) {
-        if ($stateParams.participantId) {
-          return participantsService.get($stateParams.studyId, $stateParams.participantId);
-        }
-        throw new Error('state parameter participantId is invalid');
-      }
-      throw new Error('state parameter studyId is invalid');
+    resolveParticipant.$inject = ['$stateParams', 'Participant', 'study', 'annotationTypes'];
+    function resolveParticipant($stateParams, Participant, study, annotationTypes) {
+      return Participant.get($stateParams.studyId, $stateParams.participantId).then(function (p) {
+        p.setStudy(study);
+        p.setAnnotationTypes(annotationTypes);
+        return p;
+      });
     }
 
-    resolveParticipantByUniqueId.$inject = ['$stateParams', 'participantsService'];
-    function resolveParticipantByUniqueId($stateParams, participantsService) {
-      if ($stateParams.studyId) {
-        if ($stateParams.uniqueId) {
-          return participantsService.getByUniqueId($stateParams.studyId, $stateParams.uniqueId);
-        }
-        throw new Error('state parameter uniqueId is invalid');
-      }
-      throw new Error('state parameter studyId is invalid');
+    resolveParticipantByUniqueId.$inject = ['$stateParams', 'Participant'];
+    function resolveParticipantByUniqueId($stateParams, Participant) {
+      return Participant.getByUniqueId($stateParams.studyId, $stateParams.uniqueId);
     }
 
     resolveAnnotationTypes.$inject = ['$stateParams', 'ParticipantAnnotationType'];
@@ -94,7 +83,15 @@ define([], function() {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         annotationTypes: resolveAnnotationTypes,
-        participant: function () { return {}; }
+        participant: [
+          '$stateParams',
+          'Participant',
+          'study',
+          'annotationTypes',
+          function ($stateParams, Participant, study, annotationTypes) {
+            return new Participant({uniqueId: $stateParams.uniqueId}, study, annotationTypes) ;
+          }
+        ]
       },
       views: {
         'main@': {
@@ -121,7 +118,7 @@ define([], function() {
         }
       },
       data: {
-        displayName: '{{participant.uniqueId}}'
+        displayName: 'Participant {{participant.uniqueId}}'
       }
     });
 

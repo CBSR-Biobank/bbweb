@@ -32,9 +32,10 @@ define(['underscore'], function(_) {
                                     validationService.hasKeys.apply(null, requiredKeys))),
       createObj);
 
-    var validateAnnotations = validationService.condition1(
-      validationService.validator('has the correct keys',
-                                  validationService.hasKeys(null, 'annotationTypeId', 'selectedValues')),
+    var validateAnnotations = funutils.partial(
+      validationService.condition1(
+        validationService.validator('has the correct keys',
+                                    validationService.hasKeys('annotationTypeId', 'selectedValues'))),
       createObj);
 
     function Participant(obj, study, annotationTypes) {
@@ -58,7 +59,7 @@ define(['underscore'], function(_) {
       }
 
       if (annotationTypes) {
-        self.annotationHelpers = this.createAnnotationHelpers(annotationTypes);
+        self.annotationHelpers = createAnnotationHelpers.call(self, annotationTypes);
       }
     }
 
@@ -83,44 +84,31 @@ define(['underscore'], function(_) {
       return new Participant(obj);
     };
 
-    Participant.get = function (id) {
-      var self = this;
-
-      if (self.studyId === null) {
-        throw new Error('study ID is null');
-      }
-      return participantsService.get(self.studyId, id).then(function (reply) {
+    Participant.get = function (studyId, id) {
+      return participantsService.get(studyId, id).then(function (reply) {
         return Participant.create(reply);
       });
     };
 
-    Participant.getByUniqueId = function (uniqueId) {
-      var self = this;
-
-      if (self.studyId === null) {
-        throw new Error('study ID is null');
-      }
-      return participantsService.getByUniqueId(self.studyId, uniqueId).then(function (reply) {
+    Participant.getByUniqueId = function (studyId, uniqueId) {
+      return participantsService.getByUniqueId(studyId, uniqueId).then(function (reply) {
         return Participant.create(reply);
       });
+    };
+
+    Participant.prototype.setStudy = function (study) {
+      this.study = study;
+      this.studyId = study.id;
+    };
+
+    Participant.prototype.setAnnotationTypes = function (annotationTypes) {
+      this.annotationHelpers = createAnnotationHelpers.call(this, annotationTypes);
     };
 
     Participant.prototype.addOrUpdate = function () {
       var self = this;
       return participantsService.addOrUpdate(self).then(function(reply) {
         return Participant.create(reply);
-      });
-    };
-
-    Participant.prototype.createAnnotationHelpers = function (annotationTypes) {
-      var self = this;
-      self.annotationHelpers = _.map(annotationTypes, function(annotType) {
-        var helper =  new AnnotationHelper(annotType);
-        var annotation = _.findWhere(self.annotations, {id: annotType.id});
-        if (annotation) {
-          helper.setValue(annotation);
-        }
-        return helper;
       });
     };
 
@@ -134,6 +122,19 @@ define(['underscore'], function(_) {
         self.annotations.push(annotationHelper.getAnnotation());
       });
     };
+
+    function createAnnotationHelpers(annotationTypes) {
+      /*jshint validthis:true */
+      var self = this;
+      return _.map(annotationTypes, function(annotType) {
+        var helper =  new AnnotationHelper(annotType);
+        var annotation = _.findWhere(self.annotations, {annotationTypeId: annotType.id});
+        if (annotation) {
+          helper.setValue(annotation);
+        }
+        return helper;
+      });
+    }
 
     /** return constructor function */
     return Participant;

@@ -87,7 +87,7 @@ define(['angular', 'underscore'], function(angular, _) {
      * Called when the annotation type's value type has been changed.
      */
     StudyAnnotationType.prototype.valueTypeChanged = function (newValueType) {
-      if (this.valueType === AnnotationValueType.SELECT()) {
+      if (this.isValueTypeSelect()) {
         this.addOption();
       } else {
         this.options = [];
@@ -99,7 +99,7 @@ define(['angular', 'underscore'], function(angular, _) {
      * Used to add an option. Should only be called when the value type is 'Select'.
      */
     StudyAnnotationType.prototype.addOption = function () {
-      if (this.valueType !== AnnotationValueType.SELECT()) {
+      if (!this.isValueTypeSelect()) {
         throw new Error('value type is not select: ' + this.valueType);
       }
       this.options.push('');

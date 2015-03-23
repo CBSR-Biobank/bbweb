@@ -26,7 +26,6 @@ define(['underscore'], function(_) {
     vm.cancel = cancel;
     vm.returnState = {};
 
-    vm.stateParams = {};
     if (study.isNew()) {
       action = 'Add';
       vm.returnState = { name: 'home.admin.studies' };

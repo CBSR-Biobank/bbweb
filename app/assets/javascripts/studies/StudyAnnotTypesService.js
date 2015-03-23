@@ -3,12 +3,10 @@ define(['angular', 'underscore'], function(angular, _) {
 
   studyAnnotTypesServiceFactory.$inject = [
     'biobankApi',
-    'AnnotationValueType',
     'domainEntityService'
   ];
 
   function studyAnnotTypesServiceFactory(biobankApi,
-                                         AnnotationValueType,
                                          domainEntityService,
                                          ParticipantAnnotationType) {
 
@@ -68,7 +66,7 @@ define(['angular', 'underscore'], function(angular, _) {
       if (annotationType.description) {
         cmd.description = annotationType.description;
       }
-      if (annotationType.valueType === AnnotationValueType.SELECT()) {
+      if (annotationType.isValueTypeSelect()) {
         cmd.maxValueCount = annotationType.maxValueCount;
       }
       if (!_.isUndefined(annotationType.required)) {

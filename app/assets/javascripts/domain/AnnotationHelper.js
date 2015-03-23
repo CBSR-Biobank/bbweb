@@ -4,12 +4,12 @@ define(['moment', 'underscore'], function(moment, _) {
 
   AnnotationHelperFactory.$inject = ['AnnotationValueType'];
 
-  /**
-   * An annotation helper created from an annotation type. This object is used by HTML form code
-   * to manage annotation information.
-   */
   function AnnotationHelperFactory(AnnotationValueType) {
+
     /**
+     * An annotation helper created from an annotation type. This object is used by HTML form code
+     * to manage annotation information.
+     *
      * @param annotationType the annotationHelper type this annotationHelper is based from
      * @param required set only if annotationType does not have a 'required' attribute.
      */
@@ -157,11 +157,11 @@ define(['moment', 'underscore'], function(moment, _) {
       //---
 
       function getSelectedValues() {
-        if (self.annotationType.valueType !== AnnotationValueType.SELECT()) {
+        if (!self.annotationType.isValueTypeSelect()) {
           return [];
         }
 
-        if (self.annotationType.maxValueCount === 1) {
+        if (self.annotationType.isSingleSelect()) {
           return [{
             annotationTypeId: self.annotationType.id,
             value:            self.value
@@ -209,7 +209,28 @@ define(['moment', 'underscore'], function(moment, _) {
 
         return null;
       }
+    };
 
+    AnnotationHelper.prototype.getDisplayValue = function () {
+      var annotation = this.getAnnotation();
+      if (annotation.stringValue) {
+        return annotation.stringValue;
+      } else if (annotation.numberValue) {
+        return annotation.numberValue;
+      } else {
+        return _.pluck(annotation.selectedValues, 'value').join(', ');
+      }
+    };
+
+    /**
+     * Returns true if some of the values have the checked field set to true.
+     */
+    AnnotationHelper.prototype.someSelected = function () {
+      if (!this.annotationType.isMultipleSelect()) {
+        throw new Error('invalid select type: valueType:' + this.annotationType.valueType +
+                        ' maxValueCount:' + this.annotationType.maxValueCount);
+      }
+      return (_.findWhere(this.values, { checked: true }) !== undefined);
     };
 
     /** return constructor function */

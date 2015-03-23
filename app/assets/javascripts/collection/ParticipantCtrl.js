@@ -16,7 +16,7 @@ define([], function() {
                            participant,
                            annotationTypes) {
     var vm = this;
-    vm.participant = new Participant(study, participant, annotationTypes);
+    vm.participant = participant;
   }
 
   return ParticipantCtrl;

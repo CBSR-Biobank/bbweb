@@ -3,14 +3,16 @@ define(['angular', 'underscore'], function(angular, _) {
 
   AnnotationTypeFactory.$inject = [
     'validationService',
-    'ConcurrencySafeEntity'
+    'ConcurrencySafeEntity',
+    'AnnotationValueType'
   ];
 
   /**
    *
    */
   function AnnotationTypeFactory(validationService,
-                                 ConcurrencySafeEntity) {
+                                 ConcurrencySafeEntity,
+                                 AnnotationValueType) {
 
     function AnnotationType(obj) {
       obj = obj || {};
@@ -29,6 +31,32 @@ define(['angular', 'underscore'], function(angular, _) {
     }
 
     AnnotationType.prototype = Object.create(ConcurrencySafeEntity.prototype);
+
+    AnnotationType.prototype.isValueTypeText = function () {
+      return (this.isValueType === AnnotationValueType.TEXT());
+    };
+
+    AnnotationType.prototype.isValueTypeNumber = function () {
+      return (this.valueType === AnnotationValueType.NUMBER());
+    };
+
+    AnnotationType.prototype.isValueTypeDateTime = function () {
+      return (this.valueType === AnnotationValueType.DATE_TIME());
+    };
+
+    AnnotationType.prototype.isValueTypeSelect = function () {
+      return (this.valueType === AnnotationValueType.SELECT());
+    };
+
+    AnnotationType.prototype.isSingleSelect = function () {
+      return (this.valueType === AnnotationValueType.SELECT()) &&
+        (this.maxValueCount === 1);
+    };
+
+    AnnotationType.prototype.isMultipleSelect = function () {
+      return (this.valueType === AnnotationValueType.SELECT()) &&
+        (this.maxValueCount === 2);
+    };
 
     return AnnotationType;
   }

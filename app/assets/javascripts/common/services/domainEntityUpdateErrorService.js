@@ -41,16 +41,21 @@ define([], function(){
         actionButtonText: 'OK'
       };
 
-      if ((error.data.message instanceof String) &&
-          (error.data.message.indexOf('expected version doesn\'t match current version') > -1)) {
-        /* concurrent change error */
-        modalDefaults.templateUrl = '/assets/javascripts/common/modalConcurrencyError.html';
-        modalOptions.domainType = domainObjTypeName;
+      if (error.data.message instanceof String) {
+        if (error.data.message.indexOf('expected version doesn\'t match current version') > -1) {
+          /* concurrent change error */
+          modalDefaults.templateUrl = '/assets/javascripts/common/modalConcurrencyError.html';
+          modalOptions.domainType = domainObjTypeName;
+        } else {
+          /* some other error */
+          modalOptions.headerHtml = 'Cannot submit this change';
+          modalOptions.bodyHtml = 'Error: ' + error.data.message;
+        }
       } else {
         // most likely a programming error
         console.log('Error:', error.data.message.toString);
         modalOptions.headerHtml = 'Cannot submit this change';
-        modalOptions.bodyHtml = 'Error: ' + error.data.message;
+        modalOptions.bodyHtml = 'Error: ' + JSON.stringify(error.data.message);
       }
 
       return modalService.showModal(modalDefaults, modalOptions);

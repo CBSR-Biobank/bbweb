@@ -15,13 +15,13 @@
   </div>
 
   <ul class="list-group">
-    <li class="list-group-item" ng-repeat="annotationHelper in vm.participant.getAnnotationHelpers()">
+    <li class="list-group-item" ng-repeat="annotationHelper in vm.participant.annotationHelpers">
       <div class="row">
         <div class="col-md-3">
           <strong>{{annotationHelper.getLabel()}}</strong>
         </div>
         <div class="col-md-5">
-          {{annotationHelper.displayValue}}
+          {{annotationHelper.getDisplayValue()}}
         </div>
       </div>
     </li>
