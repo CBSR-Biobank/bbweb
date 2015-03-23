@@ -76,20 +76,8 @@ define([], function() {
       url: '/annottype/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        annotType: ['study', function(study) {
-          return {
-            studyId: study.id,
-            name: '',
-            description: null,
-            valueType: '',
-            options: []
-          };
-        }],
-        addOrUpdateFn: ['spcLinkAnnotTypesService', function(spcLinkAnnotTypesService) {
-          return spcLinkAnnotTypesService.addOrUpdate;
-        }],
-        valueTypes: ['studiesService', function(studiesService) {
-          return studiesService.valueTypes();
+        annotType: ['SpecimenLinkAnnotationType', function(SpecimenLinkAnnotationType) {
+          return new SpecimenLinkAnnotationType();
         }]
       },
       views: {
@@ -111,20 +99,11 @@ define([], function() {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         annotType: [
-          '$stateParams', 'spcLinkAnnotTypesService', 'study',
-          function($stateParams, spcLinkAnnotTypesService, study) {
-            if ($stateParams.annotTypeId) {
-              return spcLinkAnnotTypesService.get(study.id, $stateParams.annotTypeId);
-            }
-            throw new Error('state parameter annotTypeId is invalid');
+          '$stateParams', 'SpecimenLinkAnnotationType',
+          function($stateParams, SpecimenLinkAnnotationType) {
+            return SpecimenLinkAnnotationType.get($stateParams.studyId, $stateParams.annotTypeId);
           }
-        ],
-        addOrUpdateFn: ['spcLinkAnnotTypesService', function(spcLinkAnnotTypesService) {
-          return spcLinkAnnotTypesService.addOrUpdate;
-        }],
-        valueTypes: ['studiesService', function(studiesService) {
-          return studiesService.valueTypes();
-        }]
+        ]
       },
       views: {
         'main@': {
@@ -153,13 +132,7 @@ define([], function() {
             outputContainerTypeId: null,
             annotationTypeData:    []
           };
-        },
-        dtoProcessing: [
-          'studiesService', 'study',
-          function( studiesService, study) {
-            return studiesService.processingDto(study.id);
-          }
-        ]
+        }
       },
       views: {
         'main@': {
@@ -183,12 +156,6 @@ define([], function() {
           '$stateParams', 'spcLinkTypesService', 'study',
           function($stateParams, spcLinkTypesService) {
             return spcLinkTypesService.get($stateParams.procTypeId, $stateParams.spcLinkTypeId);
-          }
-        ],
-        dtoProcessing: [
-          'studiesService', 'study',
-          function( studiesService, study) {
-            return studiesService.processingDto(study.id);
           }
         ]
       },

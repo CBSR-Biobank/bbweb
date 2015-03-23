@@ -23,9 +23,10 @@ define(['angular', 'underscore'], function(angular, _) {
     '$state',
     'Panel',
     'modalService',
+    'tableService',
     'specimenGroupsService',
     'SpecimenGroupViewer',
-    'specimenGroupRemoveService'
+    'specimenGroupUtils'
   ];
 
   /**
@@ -35,13 +36,13 @@ define(['angular', 'underscore'], function(angular, _) {
                                    $state,
                                    Panel,
                                    modalService,
+                                   tableService,
                                    specimenGroupsService,
                                    SpecimenGroupViewer,
-                                   specimenGroupRemoveService) {
-    var vm = this;
-
-    var panel = new Panel('study.panel.specimenGroups',
-                           'home.admin.studies.study.specimens.groupAdd');
+                                   specimenGroupUtils) {
+    var vm = this,
+        panel = new Panel('study.panel.specimenGroups',
+                          'home.admin.studies.study.specimens.groupAdd');
 
     vm.study                 = $scope.study;
     vm.specimenGroups        = $scope.specimenGroups;
@@ -51,13 +52,14 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.add                   = add;
     vm.information           = information;
     vm.panelOpen             = panel.getPanelOpenState();
+    vm.modificationsAllowed  = vm.study.isDisabled();
+    vm.tableParams           = tableService.getTableParamsWithCallback(getTableData,
+                                                                       {},
+                                                                       { counts: [] });
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
-    vm.modificationsAllowed = vm.study.status === 'Disabled';
-
-    vm.tableParams = panel.getTableParams(vm.specimenGroups);
 
     //--
 
@@ -76,11 +78,11 @@ define(['angular', 'underscore'], function(angular, _) {
      * Switches state to updte a specimen group.
      */
     function update(specimenGroup) {
+      if (!vm.study.isDisabled()) {
+        throw new Error('study is not disabled');
+      }
       if (_.contains(vm.specimenGroupIdsInUse, specimenGroup.id)) {
-        modalService.modalOk(
-          'Specimen Group in use',
-          'This specimen group cannot be modified because it is in use by either ' +
-            'a collection event type or a specimen link type');
+        specimenGroupUtils.inUseModal(specimenGroup);
       } else {
         $state.go(
           'home.admin.studies.study.specimens.groupUpdate',
@@ -89,7 +91,21 @@ define(['angular', 'underscore'], function(angular, _) {
     }
 
     function remove(specimenGroup) {
-      specimenGroupRemoveService.remove(specimenGroup, vm.specimenGroupIdsInUse);
+      if (_.contains(vm.specimenGroupIdsInUse, specimenGroup.id)) {
+        specimenGroupUtils.inUseModal(specimenGroup);
+      } else {
+        if (!vm.study.isDisabled()) {
+          throw new Error('study is not disabled');
+        }
+        specimenGroupUtils.remove(specimenGroup).then(function () {
+          vm.specimenGroups = _.without(vm.specimenGroups, specimenGroup);
+          vm.tableParams.reload();
+        });
+      }
+    }
+
+    function getTableData() {
+      return vm.specimenGroups;
     }
   }
 

@@ -29,12 +29,12 @@ define(function (require) {
       validCountDirective                     = require('./studies/validCountDirective'),
 
       AnnotationTypeEditCtrl                  = require('./studies/annotationTypes/AnnotationTypeEditCtrl'),
-      studyAnnotationTypeService             = require('./studies/annotationTypes/studyAnnotationTypeService'),
+      studyAnnotationTypeUtilsService         = require('./studies/annotationTypes/studyAnnotationTypeUtilsService'),
       studyAnnotTypesPanelDirective           = require('./studies/annotationTypes/studyAnnotTypesPanelDirective'),
       studyAnnotTypesTableDirective           = require('./studies/annotationTypes/studyAnnotTypesTableDirective'),
 
       CeventTypeEditCtrl                      = require('./studies/ceventTypes/CeventTypeEditCtrl'),
-      ceventTypeRemoveService                 = require('./studies/ceventTypes/ceventTypeRemoveService'),
+      ceventTypeUtilsService                  = require('./studies/ceventTypes/ceventTypeUtilsService'),
       ceventTypesPanelDirective               = require('./studies/ceventTypes/ceventTypesPanelDirective'),
       ceventTypesStates                       = require('./studies/ceventTypes/states'),
 
@@ -42,14 +42,14 @@ define(function (require) {
 
       ProcessingTypeEditCtrl                  = require('./studies/processing/ProcessingTypeEditCtrl'),
       SpcLinkTypeEditCtrl                     = require('./studies/processing/SpcLinkTypeEditCtrl'),
-      processingTypeRemoveService             = require('./studies/processing/processingTypeRemoveService'),
+      processingTypeUtilsService              = require('./studies/processing/processingTypeUtilsService'),
       processingTypesPanelDirective           = require('./studies/processing/processingTypesPanelDirective'),
-      spcLinkTypeRemoveService                = require('./studies/processing/spcLinkTypeRemoveService'),
+      specimenLinkTypeUtilsService            = require('./studies/processing/specimenLinkTypeUtilsService'),
       spcLinkTypesPanelDirective              = require('./studies/processing/spcLinkTypesPanelDirective'),
       processingStates                        = require('./studies/processing/states'),
 
       SpecimenGroupEditCtrl                   = require('./studies/specimenGroups/SpecimenGroupEditCtrl'),
-      specimenGroupRemoveService              = require('./studies/specimenGroups/specimenGroupRemoveService'),
+      specimenGroupUtilsService               = require('./studies/specimenGroups/specimenGroupUtilsService'),
       specimenGroupsPanelDirective            = require('./studies/specimenGroups/specimenGroupsPanelDirective'),
       specimenGroupsStates                    = require('./studies/specimenGroups/states'),
 
@@ -96,7 +96,7 @@ define(function (require) {
   module.controller('StudySummaryTabCtrl', StudySummaryTabCtrl);
 
   module.controller('AnnotationTypeEditCtrl', AnnotationTypeEditCtrl);
-  module.service('studyAnnotationTypeService', studyAnnotationTypeService);
+  module.service('studyAnnotationTypeUtils', studyAnnotationTypeUtilsService);
 
   module.directive('studyAnnotTypesPanel', studyAnnotTypesPanelDirective.directive);
   module.controller('StudyAnnotTypesPanelCtrl', studyAnnotTypesPanelDirective.controller);
@@ -106,7 +106,7 @@ define(function (require) {
 
   module.controller('CeventTypeEditCtrl', CeventTypeEditCtrl);
 
-  module.service('ceventTypeRemoveService', ceventTypeRemoveService);
+  module.service('ceventTypeUtils', ceventTypeUtilsService);
 
   module.directive('ceventTypesPanel', ceventTypesPanelDirective.directive);
   module.controller('CeventTypesPanelCtrl', ceventTypesPanelDirective.controller);
@@ -118,12 +118,12 @@ define(function (require) {
 
   module.controller('SpcLinkTypeEditCtrl', SpcLinkTypeEditCtrl);
 
-  module.service('processingTypeRemoveService', processingTypeRemoveService);
+  module.service('processingTypeUtils', processingTypeUtilsService);
 
   module.directive('processingTypesPanel', processingTypesPanelDirective.directive);
   module.controller('ProcessingTypesPanelCtrl', processingTypesPanelDirective.controller);
 
-  module.service('spcLinkTypeRemoveService', spcLinkTypeRemoveService);
+  module.service('specimenLinkTypeUtils', specimenLinkTypeUtilsService);
 
   module.directive('spcLinkTypesPanel', spcLinkTypesPanelDirective.directive);
   module.controller('SpcLinkTypesPanelCtrl', spcLinkTypesPanelDirective.controller);
@@ -132,7 +132,7 @@ define(function (require) {
 
   module.controller('SpecimenGroupEditCtrl', SpecimenGroupEditCtrl);
 
-  module.service('specimenGroupRemoveService', specimenGroupRemoveService);
+  module.service('specimenGroupUtils', specimenGroupUtilsService);
 
   module.directive('specimenGroupsPanel', specimenGroupsPanelDirective.directive);
   module.controller('SpecimenGroupsPanelCtrl', specimenGroupsPanelDirective.controller);

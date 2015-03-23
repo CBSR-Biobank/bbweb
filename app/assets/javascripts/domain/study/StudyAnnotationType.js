@@ -75,12 +75,11 @@ define(['angular', 'underscore'], function(angular, _) {
       });
     };
 
-    StudyAnnotationType.prototype.remove = function (validator, createFn) {
+    StudyAnnotationType.prototype.remove = function () {
       var self = this;
       if (self._service === null) {
         throw new Error('_service is null');
       }
-
       return self._service.remove(self);
     };
 

@@ -46,7 +46,7 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.updateStateName      = $scope.updateStateName;
     vm.add                  = add;
     vm.panelOpen            = panel.getPanelOpenState();
-    vm.modificationsAllowed = (vm.study.status === StudyStatus.DISABLED());
+    vm.modificationsAllowed = vm.study.isDisabled();
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));

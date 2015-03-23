@@ -1,22 +1,24 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  studyAnnotationTypeService.$inject = [
+  studyAnnotationTypeUtils.$inject = [
     '$q',
     'modalService',
     'ParticipantAnnotationType',
     'CollectionEventAnnotationType',
-    'SpecimenLinkAnnotationType'
+    'SpecimenLinkAnnotationType',
+    'domainEntityRemoveService'
   ];
 
   /**
    *
    */
-  function studyAnnotationTypeService($q,
-                                      modalService,
-                                      ParticipantAnnotationType,
-                                      CollectionEventAnnotationType,
-                                      SpecimenLinkAnnotationType) {
+  function studyAnnotationTypeUtils($q,
+                                    modalService,
+                                    ParticipantAnnotationType,
+                                    CollectionEventAnnotationType,
+                                    SpecimenLinkAnnotationType,
+                                    domainEntityRemoveService) {
     var service = {
       inUseModal: inUseModal,
       remove:     remove
@@ -24,7 +26,6 @@ define(['underscore'], function(_) {
     return service;
 
     //-------
-
 
     function inUseModal(annotationType) {
       var headerHtml = 'Cannot update this annotation type',
@@ -48,32 +49,20 @@ define(['underscore'], function(_) {
       return modalService.modalOk(headerHtml, bodyHtml);
     }
 
-    function remove(annotType, study) {
-      var headerHtml, bodyHtml, deferred = $q.defer();
+    function remove(annotType) {
 
-      if (!study.isDisabled()) {
-        throw new Error('study is not disabled');
+      function removeInternal() {
+        return annotType.remove();
       }
 
-      headerHtml = 'Remove Annotation Type';
-      bodyHtml = 'Are you sure you want to remove annotation type ' + annotType.name + '?';
-      modalService.modalOk(headerHtml, bodyHtml).then(removeConfirmed);
-      return deferred.promise;
-
-      function removeConfirmed() {
-        return annotType.remove()
-          .then(deferred.resolve)
-          .catch(function (error) {
-            var modalOptions = {
-              closeButtonText: 'Cancel',
-              headerHtml: 'Remove failed',
-              bodyHtml: 'Annotation type ' + annotType.name + ' cannot be removed: ' + error
-            };
-            modalService.showModal({}, modalOptions).then(deferred.reject);
-          });
-      }
+      return domainEntityRemoveService.removeNoStateChange(
+        removeInternal,
+        'Remove Annotation Type',
+        'Are you sure you want to remove annotation type ' + annotType.name + '?',
+        'Remove failed',
+        'Annotation type ' + annotType.name + ' cannot be removed');
     }
   }
 
-  return studyAnnotationTypeService;
+  return studyAnnotationTypeUtils;
 });

@@ -25,7 +25,7 @@ define(['angular', 'underscore'], function(angular, _) {
     '$scope',
     '$state',
     'modalService',
-    'studyAnnotationTypeService',
+    'studyAnnotationTypeUtils',
     'Panel',
     'AnnotationTypeViewer',
     'tableService'
@@ -37,7 +37,7 @@ define(['angular', 'underscore'], function(angular, _) {
   function StudyAnnotTypesTableCtrl($scope,
                                     $state,
                                     modalService,
-                                    studyAnnotationTypeService,
+                                    studyAnnotationTypeUtils,
                                     Panel,
                                     AnnotationTypeViewer,
                                     tableService) {
@@ -91,7 +91,7 @@ define(['angular', 'underscore'], function(angular, _) {
       }
 
       if (_.contains(vm.annotTypesInUse, annotType.id)) {
-        studyAnnotationTypeService.annotTypeInUseModal(annotType);
+        studyAnnotationTypeUtils.annotTypeInUseModal(annotType);
       } else {
         $state.go(vm.updateStateName, { annotTypeId: annotType.id });
       }
@@ -99,9 +99,12 @@ define(['angular', 'underscore'], function(angular, _) {
 
     function remove(annotType) {
       if (_.contains(vm.annotTypesInUse, annotType.id)) {
-        studyAnnotationTypeService.annotTypeInUseModal(annotType);
+        studyAnnotationTypeUtils.annotTypeInUseModal(annotType);
       } else {
-        studyAnnotationTypeService.remove(annotType, vm.study)
+        if (!vm.study.isDisabled()) {
+          throw new Error('study is not disabled');
+        }
+        studyAnnotationTypeUtils.remove(annotType, vm.study)
           .then(function () {
             vm.annotTypes = _.without(vm.annotTypes, annotType);
             vm.tableParams.reload();

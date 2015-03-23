@@ -18,6 +18,10 @@ define(['underscore'], function(_) {
       this.specimenGroups = _.indexBy(specimenGroups, 'id');
     }
 
+    SpecimenGroupSet.prototype.isEmpty = function () {
+      return _.keys(this.specimenGroups).length <= 0;
+    };
+
     /**
      * Returns the specimen group with the given id.
      *

@@ -13,7 +13,7 @@ define(['underscore'], function(_) {
     'notificationsService',
     'study',
     'spcLinkType',
-    'dtoProcessing'
+    'processingDto'
   ];
 
   /**
@@ -27,14 +27,15 @@ define(['underscore'], function(_) {
                                notificationsService,
                                study,
                                spcLinkType,
-                               dtoProcessing) {
+                               processingDto) {
     var vm = this, action;
 
     vm.study               = study;
-    vm.processingTypes     = dtoProcessing.processingTypes;
-    vm.processingTypesById = _.indexBy(dtoProcessing.processingTypes, 'id');
-    vm.annotTypes          = dtoProcessing.specimenLinkAnnotationTypes;
-    vm.specimenGroupSet    = new SpecimenGroupSet(dtoProcessing.specimenGroups);
+    vm.processingTypes     = processingDto.processingTypes;
+    vm.processingTypesById = _.indexBy(processingDto.processingTypes, 'id');
+    vm.annotTypes          = processingDto.specimenLinkAnnotationTypes;
+    vm.specimenGroupSet    = new SpecimenGroupSet(processingDto.specimenGroups);
+    vm.specimenGroups      = _.values(vm.specimenGroupSet.specimenGroups);
     vm.annotationTypeData  = spcLinkType.annotationTypeData;
 
     vm.submit                = submit;
@@ -48,7 +49,7 @@ define(['underscore'], function(_) {
       spcLinkType,
       {
         studySpecimenGroupSet: vm.specimenGroupSet,
-        studyAnnotationTypes:  dtoProcessing.specimenLinkAnnotationTypes
+        studyAnnotationTypes:  processingDto.specimenLinkAnnotationTypes
       });
 
     action = vm.specimenLinkType.isNew ? 'Add' : 'Update';
@@ -73,12 +74,8 @@ define(['underscore'], function(_) {
       spcLinkTypesService.addOrUpdate(serverSpcLinkType)
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityUpdateError.handleError(
-            error,
-            'collection event type',
-            'home.admin.studies.study.processing',
-            {studyId: study.id},
-            {reload: true});
+          domainEntityUpdateError.handleErrorNoStateChange(
+            error, 'collection event type');
         });
     }
 

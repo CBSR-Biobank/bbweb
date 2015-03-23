@@ -53,6 +53,8 @@ define(['underscore'], function(_) {
         }
       }
 
+      specimenLinkType = specimenLinkType || {};
+
       self.annotationTypeDataSet = new AnnotationTypeDataSet(
         specimenLinkType.annotationTypeData,
         _.pick(options, 'studyAnnotationTypes', 'studyAnnotationTypeSet'));

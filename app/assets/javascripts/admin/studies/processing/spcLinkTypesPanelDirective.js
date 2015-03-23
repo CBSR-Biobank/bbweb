@@ -21,13 +21,15 @@ define(['angular', 'underscore'], function(angular, _) {
     '$scope',
     '$state',
     'modalService',
+    'tableService',
     'SpecimenLinkType',
     'ProcessingTypeSet',
     'SpecimenGroupSet',
     'AnnotationTypeSet',
     'Panel',
+    'SpecimenLinkAnnotationType',
     'SpcLinkTypeViewer',
-    'spcLinkTypeRemoveService',
+    'specimenLinkTypeUtils',
     'ProcessingTypeViewer',
     'SpecimenGroupViewer',
     'AnnotationTypeViewer'
@@ -39,23 +41,25 @@ define(['angular', 'underscore'], function(angular, _) {
   function SpcLinkTypesPanelCtrl($scope,
                                  $state,
                                  modalService,
-                                 ProcessingTypeSet,
+                                 tableService,
                                  SpecimenLinkType,
+                                 ProcessingTypeSet,
                                  SpecimenGroupSet,
                                  AnnotationTypeSet,
                                  Panel,
+                                 SpecimenLinkAnnotationType,
                                  SpcLinkTypeViewer,
-                                 spcLinkTypeRemoveService,
+                                 specimenLinkTypeUtils,
                                  ProcessingTypeViewer,
                                  SpecimenGroupViewer,
                                  AnnotationTypeViewer) {
-    var vm = this;
-    var panel = new Panel('study.panel.specimenLinkTypes');
+    var vm = this,
+        panel = new Panel('study.panel.specimenLinkTypes');
 
     vm.study               = $scope.study;
     vm.tableData           = [];
     vm.update              = update;
-    vm.remove              = spcLinkTypeRemoveService.remove;
+    vm.remove              = remove;
     vm.add                 = add;
     vm.information         = information;
     vm.panelOpen           = panel.getPanelOpenState();
@@ -68,7 +72,7 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.showSpecimenGroup   = showSpecimenGroup;
     vm.showAnnotationType  = showAnnotationType;
 
-    vm.modificationsAllowed = (vm.study.status === 'Disabled');
+    vm.modificationsAllowed = vm.study.isDisabled();
 
     vm.specimenLinkTypes = _.map($scope.processingDto.specimenLinkTypes, function (slt) {
       return new SpecimenLinkType(
@@ -80,7 +84,9 @@ define(['angular', 'underscore'], function(angular, _) {
         });
     });
 
-    vm.tableParams = panel.getTableParams(vm.specimenLinkTypes);
+    vm.tableParams = tableService.getTableParamsWithCallback(getTableData,
+                                                             {},
+                                                             { counts: [] });
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
@@ -104,15 +110,6 @@ define(['angular', 'underscore'], function(angular, _) {
     }
 
     /**
-     * Switches state to update a specimen link type.
-     */
-    function update(spcLinkType) {
-      $state.go(
-        'home.admin.studies.study.processing.spcLinkTypeUpdate',
-        { procTypeId:spcLinkType.processingTypeId, spcLinkTypeId: spcLinkType.id });
-    }
-
-    /**
      * Displays a processing type in a modal.
      */
     function showProcessingType(processingTypeId) {
@@ -132,6 +129,34 @@ define(['angular', 'underscore'], function(angular, _) {
     function showAnnotationType(annotTypeId) {
       return new AnnotationTypeViewer(vm.annotationTypeSet.get(annotTypeId), 'Specimen Link Annotation Type');
     }
+
+    /**
+     * Switches state to update a specimen link type.
+     */
+    function update(spcLinkType) {
+      if (!vm.study.isDisabled()) {
+        throw new Error('study is not disabled');
+      }
+      $state.go(
+        'home.admin.studies.study.processing.spcLinkTypeUpdate',
+        { procTypeId:spcLinkType.processingTypeId, spcLinkTypeId: spcLinkType.id });
+    }
+
+    function remove(slt) {
+      if (!vm.study.isDisabled()) {
+        throw new Error('study is not disabled');
+      }
+      specimenLinkTypeUtils.remove(slt)
+        .then(function () {
+          vm.specimenLinkTypes = _.without(vm.specimenLinkTypes, slt);
+          vm.tableParams.reload();
+        });
+    }
+
+    function getTableData() {
+      return vm.specimenLinkTypes;
+    }
+
   }
 
   return {

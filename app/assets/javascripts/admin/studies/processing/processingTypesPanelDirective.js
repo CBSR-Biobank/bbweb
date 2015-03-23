@@ -1,4 +1,4 @@
-define(['angular'], function(angular) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
 
   /**
@@ -21,9 +21,9 @@ define(['angular'], function(angular) {
     '$scope',
     '$state',
     'Panel',
-    'processingTypesService',
+    'tableService',
     'ProcessingTypeViewer',
-    'processingTypeRemoveService'
+    'processingTypeUtils'
   ];
 
   /**
@@ -32,24 +32,24 @@ define(['angular'], function(angular) {
   function ProcessingTypesPanelCtrl($scope,
                                     $state,
                                     Panel,
-                                    processingTypesService,
+                                    tableService,
                                     ProcessingTypeViewer,
-                                    processingTypeRemoveService) {
-    var vm = this;
+                                    processingTypeUtils) {
+    var vm = this,
+        panel = new Panel('study.panel.processingTypes',
+                          'home.admin.studies.study.processing.processingTypeAdd');
 
-    var panel = new Panel('study.panel.processingTypes',
-                           'home.admin.studies.study.processing.processingTypeAdd');
-
-    vm.study            = $scope.study;
-    vm.processingTypes  = $scope.processingDto.processingTypes;
-    vm.update           = update;
-    vm.remove           = processingTypeRemoveService.remove;
-    vm.add              = add;
-    vm.information      = information;
-    vm.panelOpen   = panel.getPanelOpenState();
-
-    vm.modificationsAllowed = vm.study.status === 'Disabled';
-    vm.tableParams = panel.getTableParams(vm.processingTypes);
+    vm.study                = $scope.study;
+    vm.processingTypes      = $scope.processingDto.processingTypes;
+    vm.update               = update;
+    vm.remove               = remove;
+    vm.add                  = add;
+    vm.information          = information;
+    vm.panelOpen            = panel.getPanelOpenState();
+    vm.modificationsAllowed = vm.study.isDisabled();
+    vm.tableParams          = tableService.getTableParamsWithCallback(getTableData,
+                                                                       {},
+                                                                       { counts: [] });
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
@@ -71,11 +71,28 @@ define(['angular'], function(angular) {
      * Switches state to update a processing type.
      */
     function update(processingType) {
+      if (!vm.study.isDisabled()) {
+        throw new Error('study is not disabled');
+      }
       $state.go(
         'home.admin.studies.study.processing.processingTypeUpdate',
         { processingTypeId: processingType.id });
     }
 
+    function remove(processingType) {
+      if (!vm.study.isDisabled()) {
+        throw new Error('study is not disabled');
+      }
+      processingTypeUtils.remove(processingType).then(function () {
+        vm.processingTypes = _.without(vm.processingTypes, processingType);
+        vm.tableParams.reload();
+      });
+
+    }
+
+    function getTableData() {
+      return vm.processingTypes;
+    }
   }
 
   return {

@@ -3,12 +3,9 @@ define([], function() {
 
   ProcessingTypeEditCtrl.$inject = [
     '$state',
-    '$stateParams',
-    'stateHelper',
     'domainEntityUpdateError',
     'processingTypesService',
     'notificationsService',
-    'study',
     'processingType'
   ];
 
@@ -16,18 +13,14 @@ define([], function() {
    *
    */
   function ProcessingTypeEditCtrl($state,
-                                  $stateParams,
-                                  stateHelper,
                                   domainEntityUpdateError,
                                   processingTypesService,
                                   notificationsService,
-                                  study,
                                   processingType) {
 
     var action = (processingType.id) ? 'Update' : 'Add';
     var vm = this;
     vm.title =  action  + ' Processing Type';
-    vm.study = study;
     vm.processingType = processingType;
     vm.submit = submit;
     vm.cancel = cancel;
@@ -47,12 +40,8 @@ define([], function() {
       processingTypesService.addOrUpdate(processingType)
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityUpdateError.handleError(
-            error,
-            'processing type',
-            'home.admin.studies.study.processing',
-            {studyId: study.id},
-            {reload: true});
+          domainEntityUpdateError.handleErrorNoStateChange(
+            error, 'processing type');
         });
     }
 

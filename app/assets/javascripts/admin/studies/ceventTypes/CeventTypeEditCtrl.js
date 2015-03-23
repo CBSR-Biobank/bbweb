@@ -78,12 +78,8 @@ define(['underscore'], function(_) {
       ceventTypesService.addOrUpdate(serverCeventType)
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityUpdateError.handleError(
-            error,
-            'collection event type',
-            'home.admin.studies.study.collection',
-            {studyId: study.id},
-            {reload: true});
+          domainEntityUpdateError.handleErrorNoStateChange(
+            error, 'collection event type');
         });
     }
 

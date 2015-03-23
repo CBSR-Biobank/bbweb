@@ -1,7 +1,7 @@
 /**
  * Configure routes of studies module.
  */
-define(['angular'], function(angular) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
 
   config.$inject = [
@@ -215,11 +215,14 @@ define(['angular'], function(angular) {
         'studyDetails': {
           templateUrl: '/assets/javascripts/admin/studies/studyCollectionTab.html',
           controller: [
-            '$scope', 'study', 'collectionDto',
-            function($scope, study, collectionDto) {
+            '$scope', 'study', 'collectionDto', 'CollectionEventAnnotationType',
+            function($scope, study, collectionDto, CollectionEventAnnotationType) {
               $scope.study = study;
               $scope.ceventTypes = collectionDto.collectionEventTypes;
-              $scope.annotTypes  = collectionDto.collectionEventAnnotationTypes;
+              $scope.annotTypes  = _.map(collectionDto.collectionEventAnnotationTypes,
+                                         function (annotType) {
+                                           return new CollectionEventAnnotationType(annotType);
+                                         });
               $scope.annotTypesInUse = collectionDto.collectionEventAnnotationTypesInUse;
               $scope.specimenGroups = collectionDto.specimenGroups;
             }
@@ -249,10 +252,15 @@ define(['angular'], function(angular) {
         'studyDetails': {
           templateUrl: '/assets/javascripts/admin/studies/studyProcessingTab.html',
           controller: [
-            '$scope', 'study', 'processingDto',
-            function($scope, study, processingDto) {
+            '$scope', 'study', 'processingDto', 'SpecimenLinkAnnotationType',
+            function($scope, study, processingDto, SpecimenLinkAnnotationType) {
               $scope.study = study;
               $scope.processingDto = processingDto;
+              $scope.processingDto.specimenLinkAnnotationTypes = _.map(
+                $scope.processingDto.specimenLinkAnnotationTypes,
+                function (at) {
+                  return new SpecimenLinkAnnotationType(at);
+                });
             }
           ]
         }

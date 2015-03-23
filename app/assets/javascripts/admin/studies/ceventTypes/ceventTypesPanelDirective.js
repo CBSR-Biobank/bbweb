@@ -9,10 +9,11 @@ define(['angular', 'underscore'], function(angular, _) {
       require: '^tab',
       restrict: 'E',
       scope: {
-        study: '=',
-        ceventTypes: '=',
-        annotTypes: '=',
-        specimenGroups: '='
+        study:           '=',
+        ceventTypes:     '=',
+        annotTypes:      '=',
+        annotTypesInUse: '=',
+        specimenGroups:  '='
       },
       templateUrl: '/assets/javascripts/admin/studies/ceventTypes/ceventTypesPanel.html',
       controller: 'CeventTypesPanelCtrl as vm'
@@ -24,6 +25,7 @@ define(['angular', 'underscore'], function(angular, _) {
     '$scope',
     '$state',
     'modalService',
+    'tableService',
     'CollectionEventType',
     'SpecimenGroupSet',
     'AnnotationTypeSet',
@@ -32,7 +34,7 @@ define(['angular', 'underscore'], function(angular, _) {
     'CeventTypeViewer',
     'AnnotationTypeViewer',
     'SpecimenGroupViewer',
-    'ceventTypeRemoveService'
+    'ceventTypeUtils'
   ];
 
   /**
@@ -41,6 +43,7 @@ define(['angular', 'underscore'], function(angular, _) {
   function CeventTypesPanelCtrl($scope,
                                 $state,
                                 modalService,
+                                tableService,
                                 CollectionEventType,
                                 SpecimenGroupSet,
                                 AnnotationTypeSet,
@@ -49,11 +52,11 @@ define(['angular', 'underscore'], function(angular, _) {
                                 CeventTypeViewer,
                                 AnnotationTypeViewer,
                                 SpecimenGroupViewer,
-                                ceventTypeRemoveService) {
-    var vm = this;
-
-    var panel = new Panel('study.panel.collectionEventTypes',
-                           'home.admin.studies.study.collection.ceventTypeAdd');
+                                ceventTypeUtils
+                               ) {
+    var vm = this,
+        panel = new Panel('study.panel.collectionEventTypes',
+                          'home.admin.studies.study.collection.ceventTypeAdd');
 
     vm.study = $scope.study;
     vm.specimenGroupSet  = new SpecimenGroupSet($scope.specimenGroups);
@@ -70,24 +73,24 @@ define(['angular', 'underscore'], function(angular, _) {
     });
 
     vm.update               = update;
-    vm.remove               = ceventTypeRemoveService.remove;
+    vm.remove               = remove;
     vm.add                  = add;
     vm.information          = information;
     vm.showAnnotationType   = showAnnotationType;
     vm.showSpecimenGroup    = showSpecimenGroup;
     vm.panelOpen            = panel.getPanelOpenState();
+    vm.modificationsAllowed = vm.study.isDisabled();
+    vm.tableParams           = tableService.getTableParamsWithCallback(getTableData,
+                                                                       {},
+                                                                       { counts: [] });
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
-    vm.modificationsAllowed = vm.study.status === 'Disabled';
-
-    vm.tableParams = panel.getTableParams(vm.ceventTypes);
-
     //--
 
     function add() {
-      if (vm.specimenGroups.length <= 0) {
+      if (vm.specimenGroupSet.isEmpty()) {
         var headerHtml = 'Cannot add a collection event type';
         var bodyHtml = 'No <em>specimen groups</em> have been added to this study yet. ' +
             'Please add specimen groups first and then add a collection event type.';
@@ -125,8 +128,28 @@ define(['angular', 'underscore'], function(angular, _) {
      * Switches to the state to update a collection event type.
      */
     function update(ceventType) {
-      $state.go('home.admin.studies.study.collection.ceventTypeUpdate', { ceventTypeId: ceventType.id });
+      if (!vm.study.isDisabled()) {
+        throw new Error('study is not disabled');
+      }
+      $state.go('home.admin.studies.study.collection.ceventTypeUpdate',
+                { ceventTypeId: ceventType.id });
     }
+
+    function remove(ceventType) {
+      if (!vm.study.isDisabled()) {
+        throw new Error('study is not disabled');
+      }
+      ceventTypeUtils.remove(ceventType, vm.study)
+        .then(function () {
+          vm.ceventTypes = _.without(vm.ceventTypes, ceventType);
+          vm.tableParams.reload();
+        });
+    }
+
+    function getTableData() {
+      return vm.ceventTypes;
+    }
+
   }
 
   return {

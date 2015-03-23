@@ -51,12 +51,8 @@ define([], function() {
       specimenGroupsService.addOrUpdate(specimenGroup)
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityUpdateError.handleError(
-            error,
-            'specimen link type',
-            'home.admin.studies.study.specimens',
-            {},
-            {reload: true});
+          domainEntityUpdateError.handleErrorNoStateChange(
+            error,'specimen link type');
         });
     }
 
