@@ -11,7 +11,6 @@ import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
-import com.typesafe.plugin._
 import play.api.Play.current
 import org.scalatestplus.play._
 
@@ -260,7 +259,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("study id mismatch")
       }
 
-      "allow adding a collection event with same name on two different studies" in {
+      "allow adding a collection event type with same name on two different studies" in {
         val cet = factory.createCollectionEventType
 
         List(factory.createDisabledStudy, factory.createDisabledStudy) foreach { study =>
@@ -334,7 +333,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("annotation type id mismatch")
       }
 
-      "allow a updating collection event to same name on two different studies" in {
+      "allow a updating collection event types on two different studies to same name" in {
         val commonName = nameGenerator.next[CollectionEventType]
 
         (0 until 2).map { study =>

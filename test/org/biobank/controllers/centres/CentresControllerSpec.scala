@@ -13,7 +13,6 @@ import play.api.test.Helpers._
 import play.api.test.WithApplication
 import play.api.libs.json._
 import org.slf4j.LoggerFactory
-import com.typesafe.plugin._
 import play.api.Play.current
 import play.api.test.FakeApplication
 import org.scalatest.Tag

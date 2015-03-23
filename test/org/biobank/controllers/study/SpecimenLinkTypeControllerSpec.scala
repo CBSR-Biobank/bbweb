@@ -11,7 +11,6 @@ import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
-import com.typesafe.plugin._
 import play.api.Play.current
 import org.scalatestplus.play._
 

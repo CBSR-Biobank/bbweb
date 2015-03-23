@@ -11,7 +11,6 @@ import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
-import com.typesafe.plugin._
 import play.api.Play.current
 import org.scalatestplus.play._
 
@@ -221,6 +220,21 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("study id mismatch")
       }
+
+      "allow adding a processing type with same name on two different studies" in {
+        val commonName = nameGenerator.next[ProcessingType]
+
+        (0 until 2).foreach { x =>
+          val study = factory.createDisabledStudy
+          studyRepository.put(study)
+
+          val pt = factory.createProcessingType.copy(name = commonName)
+
+          val cmdJson = procTypeToAddCmdJson(pt)
+          val json = makeRequest(POST, uri(study), json = cmdJson)
+          (json \ "status").as[String] must include ("success")
+        }
+      }
     }
 
     "PUT /studies/proctypes" must {
@@ -286,6 +300,22 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("processing type id mismatch")
+      }
+
+      "allow a updating processing types on two different studies to same name" in {
+        val commonName = nameGenerator.next[ProcessingType]
+
+        (0 until 2).map { study =>
+          val study = factory.createDisabledStudy
+          studyRepository.put(study)
+          val pt = factory.createProcessingType
+          processingTypeRepository.put(pt)
+          (study, pt)
+        } foreach { case (study: Study, pt: ProcessingType) =>
+            val cmdJson = procTypeToUpdateCmdJson(pt.copy(name = commonName))
+            val json = makeRequest(PUT, uri(study, pt), json = cmdJson)
+            (json \ "status").as[String] must include ("success")
+        }
       }
     }
 

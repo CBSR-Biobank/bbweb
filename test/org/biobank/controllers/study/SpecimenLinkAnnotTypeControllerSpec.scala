@@ -6,7 +6,6 @@ import org.biobank.domain.study.{ Study, StudyId, SpecimenLinkAnnotationType }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper._
 
-import com.typesafe.plugin._
 import org.joda.time.DateTime
 import org.scalatest.Tag
 import org.scalatestplus.play._

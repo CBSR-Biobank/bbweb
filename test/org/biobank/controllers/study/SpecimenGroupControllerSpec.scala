@@ -11,7 +11,6 @@ import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
-import com.typesafe.plugin._
 import play.api.Play.current
 import org.scalatestplus.play._
 
@@ -352,7 +351,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("specimen group id mismatch")
       }
 
-      "allow a updating specimen group to same name on two different studies" in {
+      "allow a updating specimen groups on two different studies to same name" in {
         val commonName = nameGenerator.next[SpecimenGroup]
 
         (0 until 2).map { study =>

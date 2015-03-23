@@ -4,7 +4,6 @@ import org.biobank.fixture.{ ControllerFixture, NameGenerator }
 import org.biobank.domain.user.UserRepository
 import org.biobank.Global
 
-import com.typesafe.plugin._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import play.api.Play.current

@@ -8,7 +8,6 @@ import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.domain.JsonHelper._
 import org.biobank.service.PasswordHasher
 
-import com.typesafe.plugin._
 import org.joda.time.DateTime
 import org.scalatest.Tag
 import org.scalatestplus.play._
