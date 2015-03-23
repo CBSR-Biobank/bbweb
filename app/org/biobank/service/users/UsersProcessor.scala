@@ -548,38 +548,27 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
   /**
    * For debug only in development mode - password is "testuser"
    */
-  private def createDefaultUser: User = {
-    val userRepository = inject [UserRepository]
+  private def createDefaultUser(): Unit = {
+    if (context.system.settings.config.hasPath(TestData.configPath)
+      && context.system.settings.config.getBoolean(TestData.configPath)) {
+      val userRepository = inject [UserRepository]
 
-    log.info("createDefaultUser")
+      log.debug("createDefaultUser")
 
-    val validation = RegisteredUser.create(
-      org.biobank.Global.DefaultUserId,
-      -1L,
-      DateTime.now,
-      "admin",
-      org.biobank.Global.DefaultUserEmail,
-      "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
-      "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
-      None)
-
-    validation.fold(
-      err => throw new RuntimeException("could not add default user in development mode: " + err),
-      user => {
-        user.activate.fold(
-          err => throw new RuntimeException("could not activate default user in development mode: " + err),
-          activeUser => {
-            log.info("default user created")
-            userRepository.put(activeUser)
-          }
-        )
-      }
-    )
+      userRepository.put(
+        ActiveUser(id           = org.biobank.Global.DefaultUserId,
+                   version      = 0L,
+                   timeAdded    = DateTime.now,
+                   timeModified = None,
+                   name         = "Administrator",
+                   email        = org.biobank.Global.DefaultUserEmail,
+                   password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
+                   salt         =  "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
+                   avatarUrl    = None))
+      ()
+    }
   }
 
-  if (context.system.settings.config.hasPath(TestData.configPath)
-    && context.system.settings.config.getBoolean(TestData.configPath)) {
-    createDefaultUser
-    TestData.addMultipleUsers
-  }
+  createDefaultUser
+  TestData.addMultipleUsers
 }

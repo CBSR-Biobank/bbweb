@@ -456,8 +456,5 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
                 userId = command.userId,
                 time   = Some(ISODateTimeFormat.dateTime.print(DateTime.now)))
 
-  if (context.system.settings.config.hasPath(TestData.configPath)
-    && context.system.settings.config.getBoolean(TestData.configPath)) {
-    TestData.addMultipleCentres
-  }
+  TestData.addMultipleCentres
 }

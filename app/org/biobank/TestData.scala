@@ -10,11 +10,15 @@ import org.biobank.service.PasswordHasher
 import org.joda.time.DateTime
 import play.api.Logger
 import scaldi.{Injectable, Injector}
+import akka.actor.ActorSystem
+import org.slf4j.LoggerFactory
 
 /**
  * Provides initial data to test with. Ideally these methods should only be called for developemnt builds.
  */
 object TestData extends Injectable {
+
+  val log = LoggerFactory.getLogger(this.getClass)
 
   val configPath = "application.loadTestData"
 
@@ -161,62 +165,72 @@ object TestData extends Injectable {
   )
 
   def addMultipleCentres(implicit injector: Injector): Unit = {
-    val centreRepository = inject [CentreRepository]
+    val actorSystem = inject [ActorSystem]
 
-    Logger.debug("addMultipleCentres")
+    if (actorSystem.settings.config.hasPath(TestData.configPath)
+      && actorSystem.settings.config.getBoolean(TestData.configPath)) {
+      val centreRepository = inject [CentreRepository]
 
-    val centres = centreData.map { case (id, name, description) =>
-      val centre: Centre = DisabledCentre(
-        id           = CentreId(id),
-        version      = 0L,
-        timeAdded    = DateTime.now,
-        timeModified = None,
-        name         = name,
-        description  = Some(description)
-      )
-      centreRepository.put(centre)
+      Logger.debug("addMultipleCentres")
+
+      val centres = centreData.map { case (id, name, description) =>
+        val centre: Centre = DisabledCentre(
+          id           = CentreId(id),
+          version      = 0L,
+          timeAdded    = DateTime.now,
+          timeModified = None,
+          name         = name,
+          description  = Some(description)
+        )
+        centreRepository.put(centre)
+      }
     }
   }
 
   def addMultipleStudies(implicit injector: Injector): Unit = {
-    val studyRepository = inject [StudyRepository]
+    val actorSystem = inject [ActorSystem]
 
-    Logger.debug("addMultipleStudies")
+    if (actorSystem.settings.config.hasPath(TestData.configPath)
+      && actorSystem.settings.config.getBoolean(TestData.configPath)) {
+      val studyRepository = inject [StudyRepository]
 
-    val studies = studyData.map { case (id, name, description) =>
-      val study: Study = DisabledStudy(id           = StudyId(id),
-                                       version      = 0L,
-                                       timeAdded    = DateTime.now,
-                                       timeModified = None,
-                                       name         = name,
-                                       description  = Some(description)
-      )
-      studyRepository.put(study)
-    }
+      Logger.debug("addMultipleStudies")
 
-    addSpecimenGroups
-    addCollectionEvents
-    addParticipantAnnotationTypes
+      val studies = studyData.map { case (id, name, description) =>
+        val study: Study = DisabledStudy(id           = StudyId(id),
+                                         version      = 0L,
+                                         timeAdded    = DateTime.now,
+                                         timeModified = None,
+                                         name         = name,
+                                         description  = Some(description)
+        )
+        studyRepository.put(study)
+      }
 
-    val specimenGroupRepository = inject [SpecimenGroupRepository]
-    val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
+      addSpecimenGroups
+      addCollectionEvents
+      addParticipantAnnotationTypes
 
-    specimenGroupRepository.getValues.foreach { sg =>
-      studyRepository.getDisabled(sg.studyId).fold(
-        err => Logger.error(s"disabled study not found: $err"),
-        study => {
-          val valid = study.enable(
-            specimenGroupRepository.allForStudy(study.id).size,
-            collectionEventTypeRepository.allForStudy(study.id).size)
-          valid.fold(
-            err => Logger.error(err.list.mkString(",")),
-            study => {
-              studyRepository.put(study)
-              Logger.info(s"study ${study.name} enabled")
-            }
-          )
-        }
-      )
+      val specimenGroupRepository = inject [SpecimenGroupRepository]
+      val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
+
+      specimenGroupRepository.getValues.foreach { sg =>
+        studyRepository.getDisabled(sg.studyId).fold(
+          err => Logger.error(s"disabled study not found: $err"),
+          study => {
+            val valid = study.enable(
+              specimenGroupRepository.allForStudy(study.id).size,
+              collectionEventTypeRepository.allForStudy(study.id).size)
+            valid.fold(
+              err => Logger.error(err.list.mkString(",")),
+              study => {
+                studyRepository.put(study)
+                Logger.info(s"study ${study.name} enabled")
+              }
+            )
+          }
+        )
+      }
     }
   }
 
@@ -356,26 +370,31 @@ object TestData extends Injectable {
   }
 
   def addMultipleUsers(implicit injector: Injector) = {
-    Logger.debug("addMultipleUsers")
+    val actorSystem = inject [ActorSystem]
 
-    val userRepository = inject [UserRepository]
-    def passwordHasher = inject [PasswordHasher]
-    val plainPassword = "testuser"
-    val salt = passwordHasher.generateSalt
+    if (actorSystem.settings.config.hasPath(TestData.configPath)
+      && actorSystem.settings.config.getBoolean(TestData.configPath)) {
+      Logger.debug("addMultipleUsers")
 
-    val users = userData.map { case(id, name, email) =>
-      val user: User = ActiveUser(
-        id           = UserId(id),
-        version      = 0L,
-        timeAdded    = DateTime.now,
-        timeModified = None,
-        name         = name,
-        email        = email,
-        password     = passwordHasher.encrypt(plainPassword, salt),
-        salt         = salt,
-        avatarUrl    = None
-      )
-      userRepository.put(user)
+      val userRepository = inject [UserRepository]
+      def passwordHasher = inject [PasswordHasher]
+      val plainPassword = "testuser"
+      val salt = passwordHasher.generateSalt
+
+      val users = userData.map { case(id, name, email) =>
+        val user: User = ActiveUser(
+          id           = UserId(id),
+          version      = 0L,
+          timeAdded    = DateTime.now,
+          timeModified = None,
+          name         = name,
+          email        = email,
+          password     = passwordHasher.encrypt(plainPassword, salt),
+          salt         = salt,
+          avatarUrl    = None
+        )
+        userRepository.put(user)
+      }
     }
   }
 

@@ -435,8 +435,5 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     }
   }
 
-  if (context.system.settings.config.hasPath(TestData.configPath)
-    && context.system.settings.config.getBoolean(TestData.configPath)) {
-    TestData.addMultipleStudies
-  }
+  TestData.addMultipleStudies
 }

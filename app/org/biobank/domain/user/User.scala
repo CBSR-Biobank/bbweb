@@ -149,15 +149,15 @@ trait UserValidations {
   * the system.
   */
 case class RegisteredUser (
-  id: UserId,
-  version: Long,
-  timeAdded: DateTime,
+  id:           UserId,
+  version:      Long,
+  timeAdded:    DateTime,
   timeModified: Option[DateTime],
-  name: String,
-  email: String,
-  password: String,
-  salt: String,
-  avatarUrl: Option[String]) extends User with UserValidations {
+  name:         String,
+  email:        String,
+  password:     String,
+  salt:         String,
+  avatarUrl:    Option[String]) extends User with UserValidations {
   import CommonValidations._
 
   override val status: String = RegisteredUser.status
