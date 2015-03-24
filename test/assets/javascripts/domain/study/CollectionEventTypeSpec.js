@@ -14,18 +14,16 @@ define([
 
   describe('CollectionEventType', function() {
 
-    var CollectionEventType, SpecimenGroupSet, AnnotationTypeSet, cetFromServer, fakeEntities;
-    var study;
+    var CollectionEventType,
+        cetFromServer,
+        fakeEntities,
+        study;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_CollectionEventType_,
-                               _SpecimenGroupSet_,
-                               _AnnotationTypeSet_,
                                fakeDomainEntities) {
       CollectionEventType = _CollectionEventType_;
-      SpecimenGroupSet    = _SpecimenGroupSet_;
-      AnnotationTypeSet   = _AnnotationTypeSet_;
       fakeEntities        = fakeDomainEntities;
 
       study = fakeEntities.study();
@@ -87,62 +85,6 @@ define([
       _.each(study.annotationTypes, function(at) {
         expect(cet.getAnnotationTypeData(at.id).annotationType).toEqual(at);
       });
-    });
-
-    it('should be initialized with SpecimenGroupSet and AnnotationTypeSet', function() {
-      var cetFromServer = fakeEntities.collectionEventType(
-        study,
-        {
-          specimenGroups: study.specimenGroups,
-          annotationTypes: study.annotationTypes
-        });
-      var cet = new CollectionEventType(
-        study,
-        cetFromServer,
-        {
-          studySpecimenGroupSet: new SpecimenGroupSet(study.specimenGroups),
-          studyAnnotationTypeSet: new AnnotationTypeSet(study.annotationTypes)
-        });
-
-      _.each(study.specimenGroups, function(sg) {
-        expect(cet.getSpecimenGroupData(sg.id).specimenGroup).toEqual(sg);
-      });
-
-      _.each(study.annotationTypes, function(at) {
-        expect(cet.getAnnotationTypeData(at.id).annotationType).toEqual(at);
-      });
-    });
-
-    it('should not be initialized with specimen group array and SpecimenGroupSet', function() {
-      var cetFromServer = fakeEntities.collectionEventType(
-        study,
-        { specimenGroups: study.specimenGroups });
-
-      expect(function () {
-        return new CollectionEventType(
-          study,
-          cetFromServer,
-          {
-            studySpecimenGroups: study.specimenGroups,
-            studySpecimenGroupSet: new SpecimenGroupSet(study.specimenGroups)
-          });
-      }).toThrow(new Error('cannot create with both specimenGroups and specimenGroupSet'));
-    });
-
-    it('should not be initialized with annotation type and AnnotationTypeSet', function() {
-      var cetFromServer = fakeEntities.collectionEventType(
-        study,
-        { annotationTypes: study.annotationTypes });
-
-      expect(function () {
-        return new CollectionEventType(
-          study,
-          cetFromServer,
-          {
-            studyAnnotationTypes: study.annotationTypes,
-            studyAnnotationTypeSet: new AnnotationTypeSet(study.annotationTypes)
-          });
-      }).toThrow(new Error('cannot create with both annotationTypes and annotationTypeSet'));
     });
 
     it('should return the correct size for specimen group data', function() {

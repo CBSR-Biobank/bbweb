@@ -12,7 +12,7 @@ define(['angular', 'underscore'], function(angular, _) {
         study:           '=',
         ceventTypes:     '=',
         annotTypes:      '=',
-        annotTypesInUse: '=',
+        annotTypeIdsInUse: '=',
         specimenGroups:  '='
       },
       templateUrl: '/assets/javascripts/admin/studies/ceventTypes/ceventTypesPanel.html',
@@ -27,8 +27,6 @@ define(['angular', 'underscore'], function(angular, _) {
     'modalService',
     'tableService',
     'CollectionEventType',
-    'SpecimenGroupSet',
-    'AnnotationTypeSet',
     'Panel',
     'ceventTypesService',
     'CeventTypeViewer',
@@ -45,8 +43,6 @@ define(['angular', 'underscore'], function(angular, _) {
                                 modalService,
                                 tableService,
                                 CollectionEventType,
-                                SpecimenGroupSet,
-                                AnnotationTypeSet,
                                 Panel,
                                 ceventTypesService,
                                 CeventTypeViewer,
@@ -58,9 +54,9 @@ define(['angular', 'underscore'], function(angular, _) {
         panel = new Panel('study.panel.collectionEventTypes',
                           'home.admin.studies.study.collection.ceventTypeAdd');
 
-    vm.study = $scope.study;
-    vm.specimenGroupSet  = new SpecimenGroupSet($scope.specimenGroups);
-    vm.annotationTypeSet  = new AnnotationTypeSet($scope.annotTypes);
+    vm.study           = $scope.study;
+    vm.specimenGroups  = _.indexBy($scope.specimenGroups, 'id');
+    vm.annotationTypes = _.indexBy($scope.annotTypes, 'id');
 
     vm.ceventTypes = _.map($scope.ceventTypes, function (ceventType) {
       return new CollectionEventType(
@@ -90,7 +86,7 @@ define(['angular', 'underscore'], function(angular, _) {
     //--
 
     function add() {
-      if (vm.specimenGroupSet.isEmpty()) {
+      if ($scope.specimenGroups.length <= 0) {
         var headerHtml = 'Cannot add a collection event type';
         var bodyHtml = 'No <em>specimen groups</em> have been added to this study yet. ' +
             'Please add specimen groups first and then add a collection event type.';
@@ -113,7 +109,7 @@ define(['angular', 'underscore'], function(angular, _) {
      * @param id the ID for the annotation type.
      */
     function showAnnotationType(id) {
-      return new AnnotationTypeViewer(vm.annotationTypeSet.get(id),
+      return new AnnotationTypeViewer(vm.annotationTypes[id],
                                       'Collection Event Annotation Type');
     }
 
@@ -121,7 +117,7 @@ define(['angular', 'underscore'], function(angular, _) {
      * Displays a specimen group in a modal.
      */
     function showSpecimenGroup(specimenGroupId) {
-      return new SpecimenGroupViewer(vm.specimenGroupSet.get(specimenGroupId));
+      return new SpecimenGroupViewer(vm.specimenGroups[specimenGroupId]);
     }
 
     /**

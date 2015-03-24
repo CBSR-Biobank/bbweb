@@ -2,16 +2,12 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  SpecimenLinkTypeFactory.$inject = [
-    'SpecimenGroupSet',
-    'AnnotationTypeSet',
-    'AnnotationTypeDataSet'
-  ];
+  SpecimenLinkTypeFactory.$inject = ['AnnotationTypeDataSet'];
 
   /**
    * Factory for specimenLinkTypes.
    */
-  function SpecimenLinkTypeFactory(SpecimenGroupSet, AnnotationTypeSet, AnnotationTypeDataSet) {
+  function SpecimenLinkTypeFactory(AnnotationTypeDataSet) {
 
     /**
      * Creates a specimen link type object with helper methods.
@@ -20,40 +16,29 @@ define(['underscore'], function(_) {
      *
      * @param processing type processing type this specimenLinkType belongs. Returned by server.
      *
-     * @param specimenGroupSet all specimen groups for the study the processing type belongs to. Should be an
-     * instance of SpecimenGroupSet.
+     * @param options.studySpecimenGroups all specimen groups for the study the processing type belongs to.
      *
-     * @param annotationTypes all the specimen link annotation types for the study. Should be an instance of
-     * AnnotationTypeSet.
+     * @param options.studyAnnotationTypes all the specimen link annotation types for the study.
      */
     function SpecimenLinkType(processingType, specimenLinkType, options) {
       var self = this;
+
+      specimenLinkType = specimenLinkType || {};
+      options = options || {};
 
       _.extend(self, _.omit(specimenLinkType, 'annotationTypeData'));
 
       self.isNew              = !self.id;
       self.processingType     = processingType;
 
-      options = options || {};
-
-      if (options.studySpecimenGroups && options.studySpecimenGroupSet) {
-        throw new Error('cannot create with both specimenGroups and specimenGroupSet');
-      }
-
       if (options.studySpecimenGroups) {
-        options.studySpecimenGroupSet = new SpecimenGroupSet(options.studySpecimenGroups);
-      }
-
-      if (options.studySpecimenGroupSet) {
         if (self.inputGroupId) {
-          self.inputGroup  = options.studySpecimenGroupSet.get(self.inputGroupId);
+          self.inputGroup = _.findWhere(options.studySpecimenGroups, { id: self.inputGroupId});
         }
         if (self.outputGroupId) {
-          self.outputGroup = options.studySpecimenGroupSet.get(self.outputGroupId);
+          self.outputGroup = _.findWhere(options.studySpecimenGroups, { id: self.outputGroupId});
         }
       }
-
-      specimenLinkType = specimenLinkType || {};
 
       self.annotationTypeDataSet = new AnnotationTypeDataSet(
         specimenLinkType.annotationTypeData,

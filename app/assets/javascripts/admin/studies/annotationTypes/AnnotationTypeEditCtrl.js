@@ -69,15 +69,15 @@ define(['underscore'], function(_) {
       return {
         name:    _.first(returnStateName),
         params:  { studyId: study.id },
-        options: {reload: true}
+        options: { reload: true }
       };
     }
 
     /**
      * Transitions to the return state.
      */
-    function gotoReturnState() {
-      return $state.go.apply(null, _.values(returnState));
+    function gotoReturnState(state) {
+      return $state.go(state.name, state.params, state.options);
     }
 
     /**
@@ -120,7 +120,7 @@ define(['underscore'], function(_) {
 
     function submitSuccess() {
       notificationsService.submitSuccess();
-      gotoReturnState();
+      gotoReturnState(returnState);
     }
 
     /**
@@ -145,7 +145,7 @@ define(['underscore'], function(_) {
      * Called when the user presses the cancel button on the form.
      */
     function cancel() {
-      gotoReturnState();
+      gotoReturnState(returnState);
     }
   }
 

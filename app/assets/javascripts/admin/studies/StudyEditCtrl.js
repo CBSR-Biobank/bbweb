@@ -26,39 +26,33 @@ define(['underscore'], function(_) {
     vm.cancel = cancel;
     vm.returnState = {};
 
+    vm.returnState = {options: { reload: true } };
+
     if (study.isNew()) {
       action = 'Add';
-      vm.returnState = { name: 'home.admin.studies' };
+      vm.returnState.name = 'home.admin.studies';
+      vm.returnState.params = { };
     } else {
       action = 'Update';
-      vm.returnState = {
-        name: 'home.admin.studies.study.summary',
-        params: { studyId: study.id },
-        options: { reload: true }
-      };
+      vm.returnState.name = 'home.admin.studies.study.summary';
+      vm.returnState.params = { studyId: study.id };
     }
 
     vm.title =  action + ' study';
 
     //--
 
-    function gotoReturnState() {
-      $state.go.apply(null, _.values(vm.returnState));
+    function gotoReturnState(state) {
+      $state.go(state.name, state.params, state.options);
     }
 
     function submitSuccess() {
       notificationsService.submitSuccess();
-      gotoReturnState();
+      gotoReturnState(vm.returnState);
     }
 
     function submitError(error) {
-      // ensure state params has all 3 values
-      var stateParams = _.defaults(vm.returnState, {
-        params:   {},
-        options:  { reload: true }
-      });
-      var params = [error, study].concat(_.values(stateParams));
-      domainEntityUpdateError.handleError.call(null, params);
+      domainEntityUpdateError.handleErrorNoStateChange(error, 'study');
     }
 
     function submit(study) {
@@ -68,7 +62,7 @@ define(['underscore'], function(_) {
     }
 
     function cancel() {
-      gotoReturnState();
+      gotoReturnState(_.extend({}, vm.returnState, { options:{ reload: false } }));
     }
   }
 

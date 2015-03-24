@@ -36,7 +36,6 @@ require.config({
     'angular-sanitize':   '../../../target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize',
     'moment':             '../../../target/web/web-modules/main/webjars/lib/momentjs/moment',
     'faker':              '../../../node_modules/karma-faker/node_modules/faker/build/build/faker',
-    'biobank.panelTests': '../../../test/assets/javascripts/fixtures/panelTests',
     'biobank.testUtils':  '../../../test/assets/javascripts/fixtures/testUtils',
     'biobankTest':        '../../../test/assets/javascripts/test/module',
     'biobankApp':         'app'

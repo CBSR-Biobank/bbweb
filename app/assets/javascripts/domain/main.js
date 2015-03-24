@@ -12,7 +12,6 @@ define(function (require) {
       AnnotationHelper                    = require('./AnnotationHelper'),
       AnnotationType                      = require('./AnnotationType'),
       AnnotationTypeDataSet               = require('./AnnotationTypeDataSet'),
-      AnnotationTypeSet                   = require('./AnnotationTypeSet'),
       AnnotationTypeViewer                = require('./AnnotationTypeViewer'),
       AnnotationValueType                 = require('./AnnotationValueType'),
       annotationTypeValidation            = require('./annotationTypeValidation'),
@@ -33,11 +32,9 @@ define(function (require) {
       CollectionEventType                 = require('./study/CollectionEventType'),
       Participant                         = require('./study/Participant'),
       ParticipantAnnotationType           = require('./study/ParticipantAnnotationType'),
-      ProcessingTypeSet                   = require('./study/ProcessingTypeSet'),
       ProcessingTypeViewer                = require('./study/ProcessingTypeViewer'),
       SpcLinkTypeViewer                   = require('./study/SpcLinkTypeViewer'),
       SpecimenGroupDataSet                = require('./study/SpecimenGroupDataSet'),
-      SpecimenGroupSet                    = require('./study/SpecimenGroupSet'),
       SpecimenGroupViewer                 = require('./study/SpecimenGroupViewer'),
       SpecimenLinkAnnotationType          = require('./study/SpecimenLinkAnnotationType'),
       SpecimenLinkType                    = require('./study/SpecimenLinkType'),
@@ -60,7 +57,6 @@ define(function (require) {
   module.factory('AnnotationHelper',                    AnnotationHelper);
   module.factory('AnnotationType',                      AnnotationType);
   module.factory('AnnotationTypeDataSet',               AnnotationTypeDataSet);
-  module.factory('AnnotationTypeSet',                   AnnotationTypeSet);
   module.factory('AnnotationTypeViewer',                AnnotationTypeViewer);
   module.factory('Centre',                              Centre);
   module.factory('CentreCounts',                        CentreCounts);
@@ -73,11 +69,9 @@ define(function (require) {
   module.factory('LocationViewer',                      LocationViewer);
   module.factory('Participant',                         Participant);
   module.factory('ParticipantAnnotationType',           ParticipantAnnotationType);
-  module.factory('ProcessingTypeSet',                   ProcessingTypeSet);
   module.factory('ProcessingTypeViewer',                ProcessingTypeViewer);
   module.factory('SpcLinkTypeViewer',                   SpcLinkTypeViewer);
   module.factory('SpecimenGroupDataSet',                SpecimenGroupDataSet);
-  module.factory('SpecimenGroupSet',                    SpecimenGroupSet);
   module.factory('SpecimenGroupViewer',                 SpecimenGroupViewer);
   module.factory('SpecimenLinkAnnotationType',          SpecimenLinkAnnotationType);
   module.factory('SpecimenLinkType',                    SpecimenLinkType);

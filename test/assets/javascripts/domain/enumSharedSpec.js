@@ -18,7 +18,7 @@ define(['underscore', 'biobank.testUtils'], function(_, testUtils) {
         testUtils.addCustomMatchers();
 
         EnumerationClass = context.enumerationClass;
-        valueMap          = context.valueMap;
+        valueMap         = context.valueMap;
       }));
 
       it('should have expected functions', function() {

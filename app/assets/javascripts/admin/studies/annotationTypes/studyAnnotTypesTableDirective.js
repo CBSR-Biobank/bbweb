@@ -11,7 +11,7 @@ define(['angular', 'underscore'], function(angular, _) {
       scope: {
         study:           '=',
         annotTypes:      '=',
-        annotTypesInUse: '=',
+        annotTypeIdsInUse: '=',
         annotTypeName:   '=',
         updateStateName: '=',
         hasRequired:     '@'
@@ -26,32 +26,30 @@ define(['angular', 'underscore'], function(angular, _) {
     '$state',
     'modalService',
     'studyAnnotationTypeUtils',
-    'Panel',
     'AnnotationTypeViewer',
     'tableService'
   ];
 
   /**
-   * A panel to display a study's participant annotation types.
+   * A table to display a study's participant annotation types.
    */
   function StudyAnnotTypesTableCtrl($scope,
                                     $state,
                                     modalService,
                                     studyAnnotationTypeUtils,
-                                    Panel,
                                     AnnotationTypeViewer,
                                     tableService) {
     var vm = this;
 
-    vm.study           = $scope.study;
-    vm.annotTypes      = $scope.annotTypes;
-    vm.annotTypesInUse = $scope.annotTypesInUse;
-    vm.annotTypeName   = $scope.annotTypeName;
-    vm.updateStateName = $scope.updateStateName;
-    vm.hasRequired     = $scope.hasRequired;
-    vm.update          = update;
-    vm.remove          = remove;
-    vm.information     = information;
+    vm.study             = $scope.study;
+    vm.annotTypes        = angular.copy($scope.annotTypes);
+    vm.annotTypeIdsInUse = $scope.annotTypeIdsInUse;
+    vm.annotTypeName     = $scope.annotTypeName;
+    vm.updateStateName   = $scope.updateStateName;
+    vm.hasRequired       = $scope.hasRequired;
+    vm.update            = update;
+    vm.remove            = remove;
+    vm.information       = information;
 
     vm.modificationsAllowed = vm.study.isDisabled();
 
@@ -90,21 +88,21 @@ define(['angular', 'underscore'], function(angular, _) {
         throw new Error('study is not disabled');
       }
 
-      if (_.contains(vm.annotTypesInUse, annotType.id)) {
-        studyAnnotationTypeUtils.annotTypeInUseModal(annotType);
+      if (_.contains(vm.annotTypeIdsInUse, annotType.id)) {
+        studyAnnotationTypeUtils.inUseModal(annotType);
       } else {
         $state.go(vm.updateStateName, { annotTypeId: annotType.id });
       }
     }
 
     function remove(annotType) {
-      if (_.contains(vm.annotTypesInUse, annotType.id)) {
-        studyAnnotationTypeUtils.annotTypeInUseModal(annotType);
+      if (_.contains(vm.annotTypeIdsInUse, annotType.id)) {
+        studyAnnotationTypeUtils.inUseModal(annotType);
       } else {
         if (!vm.study.isDisabled()) {
           throw new Error('study is not disabled');
         }
-        studyAnnotationTypeUtils.remove(annotType, vm.study)
+        studyAnnotationTypeUtils.remove(annotType)
           .then(function () {
             vm.annotTypes = _.without(vm.annotTypes, annotType);
             vm.tableParams.reload();

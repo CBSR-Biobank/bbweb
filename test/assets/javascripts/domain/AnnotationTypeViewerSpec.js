@@ -114,7 +114,7 @@ define([
               }
               break;
 
-            case '# Selections Allowed':
+            case 'Selections Allowed':
               if (annotationType.valueType === AnnotationValueType.SELECT()) {
                 expect(attr.value).toBe(annotationType.maxValueCount === 1 ? 'Single' : 'Multiple');
               } else {

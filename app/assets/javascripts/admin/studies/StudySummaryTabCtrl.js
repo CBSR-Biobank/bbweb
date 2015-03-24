@@ -1,13 +1,19 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  StudySummaryTabCtrl.$inject = ['$state', 'stateHelper', 'studiesService', 'modalService', 'study'];
+  StudySummaryTabCtrl.$inject = [
+    '$state',
+    'modalService',
+    'study'
+  ];
 
   /**
    * Displays the study administrtion page, with a number of tabs. Each tab displays the configuration
    * for a different aspect of the study.
    */
-  function StudySummaryTabCtrl($state, stateHelper, studiesService, modalService, study) {
+  function StudySummaryTabCtrl($state,
+                               modalService,
+                               study) {
     var validStatusActions = ['disable', 'enable', 'retire', 'unretire'],
         vm = this;
 

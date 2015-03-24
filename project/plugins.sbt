@@ -28,6 +28,3 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.0")
 addSbtPlugin("com.jamesward" %% "play-auto-refresh" % "0.0.11")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.0.4")
-
-// Display your SBT project's dependency updates.
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.8")

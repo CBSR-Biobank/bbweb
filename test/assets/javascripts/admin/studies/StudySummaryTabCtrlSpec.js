@@ -4,14 +4,19 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: StudySummaryTabCtrl', function() {
-    var studiesService, modalService, scope;
-    var study = {name: 'ST1', description: 'some description'};
+    var Study, modalService, scope, study;
 
-    beforeEach(mocks.module('biobankApp'));
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($q, $controller, $rootScope, $filter, _studiesService_, _modalService_) {
+    beforeEach(inject(function($q,
+                               $controller,
+                               $rootScope,
+                               $state,
+                               _Study_,
+                               _modalService_,
+                               fakeDomainEntities) {
       scope = $rootScope.$new();
-      studiesService = _studiesService_;
+      Study = _Study_;
       modalService = _modalService_;
 
       spyOn(modalService, 'showModal').and.callFake(function () {
@@ -20,10 +25,13 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
         return deferred.promise;
       });
 
+      study = new Study(fakeDomainEntities.study());
+
       $controller('StudySummaryTabCtrl as vm', {
-        $scope:  scope,
-        $filter: $filter,
-        study:   study
+        $scope:       scope,
+        $state:       $state,
+        modalService: modalService,
+        study:        study
       });
       scope.$digest();
     }));
@@ -35,41 +43,44 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
     describe('change study status', function() {
 
+      var q;
+
       beforeEach(inject(function($q) {
-        spyOn(studiesService, 'get').and.callFake(function () {
+        q = $q;
+        spyOn(Study, 'get').and.callFake(function () {
           var deferred = $q.defer();
           deferred.resolve(study);
           return deferred.promise;
         });
       }));
 
-      function checkStatusChange($q, status) {
-        spyOn(studiesService, status).and.callFake(function () {
-          var deferred = $q.defer();
+      function checkStatusChange(status) {
+        spyOn(Study.prototype, status).and.callFake(function () {
+          var deferred = q.defer();
           deferred.resolve('status changed');
           return deferred.promise;
         });
 
         scope.vm.changeStatus(status);
         scope.$digest();
-        expect(studiesService[status]).toHaveBeenCalledWith(study);
+        expect(Study.prototype[status]).toHaveBeenCalled();
       }
 
-      it('should enable a study', inject(function($q) {
-        checkStatusChange($q, 'enable');
-      }));
+      it('should enable a study', function() {
+        checkStatusChange('enable');
+      });
 
-      it('should disable a study', inject(function($q) {
-        checkStatusChange($q, 'disable');
-      }));
+      it('should disable a study', function () {
+        checkStatusChange('disable');
+      });
 
-      it('should retire a study', inject(function($q) {
-        checkStatusChange($q, 'retire');
-      }));
+      it('should retire a study', function () {
+        checkStatusChange('retire');
+      });
 
-      it('should unretire a study', inject(function($q) {
-        checkStatusChange($q, 'unretire');
-      }));
+      it('should unretire a study', function () {
+        checkStatusChange('unretire');
+      });
 
     });
 

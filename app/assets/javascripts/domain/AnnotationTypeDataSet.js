@@ -1,12 +1,12 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  AnnotationTypeDataSetFactory.$inject = ['AnnotationTypeSet'];
+  //AnnotationTypeDataSetFactory.$inject = [];
 
-  function AnnotationTypeDataSetFactory(AnnotationTypeSet) {
+  function AnnotationTypeDataSetFactory() {
 
     /**
-     * Maintains a set of annotationTypeData items. Can hold two types on annotation types used by the study:
+     * Maintains a set of annotationTypeData items. Can hold two types of annotation types used by the study:
      * collection event type and speclimen link type. Only one annotation type data item with a non empty ID
      * is allowed in the set. A blank annotation type ID is allowed for adding new ones that are being edited
      * by the user.
@@ -23,27 +23,17 @@ define(['underscore'], function(_) {
      * Only one of options.studyAnnotationTypes or options.studyAnnotationTypeSet should be used, but not both.
      */
     function AnnotationTypeDataSet(dataItems, options) {
-      var self = this;
+      var self = this, annotationTypes;
 
       self.dataItems = _.map(dataItems, function (item) { return _.clone(item); });
 
       options = options || {};
 
-      if (options.studyAnnotationTypes && options.studyAnnotationTypeSet) {
-        throw new Error('cannot create with both annotationTypes and annotationTypeSet');
-      }
-
       if (options.studyAnnotationTypes) {
-        self.annotationTypeSet = new AnnotationTypeSet(options.studyAnnotationTypes);
-      }
+        annotationTypes = _.indexBy(options.studyAnnotationTypes, 'id');
 
-      if (options.studyAnnotationTypeSet) {
-        self.annotationTypeSet = options.studyAnnotationTypeSet;
-      }
-
-      if (self.annotationTypeSet) {
         _.each(self.dataItems, function (item) {
-          item.annotationType = self.annotationTypeSet.get(item.annotationTypeId);
+          item.annotationType = annotationTypes[item.annotationTypeId];
         });
       }
     }

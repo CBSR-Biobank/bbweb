@@ -14,18 +14,17 @@ define([
 
   describe('SpecimenLinkType', function() {
 
-    var SpecimenLinkType, SpecimenGroupSet, AnnotationTypeSet, sltFromServer, fakeEntities;
-    var study, processingType;
+    var SpecimenLinkType,
+        sltFromServer,
+        fakeEntities,
+        study,
+        processingType;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_SpecimenLinkType_,
-                               _SpecimenGroupSet_,
-                               _AnnotationTypeSet_,
                                fakeDomainEntities) {
       SpecimenLinkType = _SpecimenLinkType_;
-      SpecimenGroupSet    = _SpecimenGroupSet_;
-      AnnotationTypeSet   = _AnnotationTypeSet_;
       fakeEntities        = fakeDomainEntities;
 
       study = fakeEntities.study();
@@ -46,24 +45,6 @@ define([
       var sltNoId = _.omit(sltFromServer, 'id', 'processingTypeId');
       var slt = new SpecimenLinkType(processingType, sltNoId);
       expect(slt.isNew).toBe(true);
-    });
-
-    it('constructor throws error if created with invalid specimen group params', function() {
-      expect(function () {
-        return new SpecimenLinkType(processingType, sltFromServer, {
-          studySpecimenGroups: study.specimenGroups,
-          studySpecimenGroupSet:  new SpecimenGroupSet(study.specimenGroups)
-        });
-      }).toThrow(new Error('cannot create with both specimenGroups and specimenGroupSet'));
-    });
-
-    it('constructor throws error if created with invalid annotation type params', function() {
-      expect(function () {
-        return new SpecimenLinkType(processingType, sltFromServer, {
-          studyAnnotationTypes: study.annotationTypes,
-          studyAnnotationTypeSet: new AnnotationTypeSet(study.annotationTypes)
-        });
-      }).toThrow(new Error('cannot create with both annotationTypes and annotationTypeSet'));
     });
 
     it('processing type ID matches', function() {
@@ -97,31 +78,6 @@ define([
         {
           studySpecimenGroups: study.specimenGroups,
           studyAnnotationTypes: study.annotationTypes
-        });
-
-      expect(slt.inputGroup).toEqual(study.specimenGroups[0]);
-      expect(slt.outputGroup).toEqual(study.specimenGroups[1]);
-
-      _.each(study.annotationTypes, function(at) {
-        expect(slt.getAnnotationTypeData(at.id).annotationType).toEqual(at);
-      });
-    });
-
-    it('should be initialized with AnnotationTypeSet', function() {
-      var sltFromServer = fakeEntities.specimenLinkType(
-        processingType,
-        {
-          inputGroup: study.specimenGroups[0],
-          outputGroup: study.specimenGroups[1],
-          annotationTypes: study.annotationTypes
-        }
-      );
-      var slt = new SpecimenLinkType(
-        study,
-        sltFromServer,
-        {
-          studySpecimenGroupSet: new SpecimenGroupSet(study.specimenGroups),
-          studyAnnotationTypeSet: new AnnotationTypeSet(study.annotationTypes)
         });
 
       expect(slt.inputGroup).toEqual(study.specimenGroups[0]);

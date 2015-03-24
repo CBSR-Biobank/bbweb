@@ -43,7 +43,7 @@ define(['underscore'], function(_) {
         expect(annotationType.id).toBeNull();
         expect(annotationType.name).toBeEmptyString();
         expect(annotationType.description).toBeNull();
-        expect(annotationType.valueType).toBe(AnnotationValueType.TEXT());
+        expect(annotationType.valueType).toBeEmptyString();
         expect(annotationType.maxValueCount).toBeNull();
         expect(annotationType.options).toBeEmptyArray();
 
@@ -95,7 +95,7 @@ define(['underscore'], function(_) {
       it('an annotation type can be retrieved from the server', function(done) {
         var serverAnnotType = createServerAnnotTypeFn();
 
-        httpBackend.whenGET(uri(serverAnnotType.studyId, serverAnnotType.id))
+        httpBackend.whenGET(uri(serverAnnotType.studyId) + '?annotTypeId=' + serverAnnotType.id)
           .respond(serverReply(serverAnnotType));
 
         annotTypeGetFn(serverAnnotType.studyId, serverAnnotType.id)
@@ -113,7 +113,7 @@ define(['underscore'], function(_) {
         _.each(objRequiredKeys, function(key) {
           var badObj = _.omit(serverAnnotType, key);
 
-          httpBackend.whenGET(uri(serverAnnotType.studyId, serverAnnotType.id))
+        httpBackend.whenGET(uri(serverAnnotType.studyId) + '?annotTypeId=' + serverAnnotType.id)
             .respond(201, serverReply(badObj));
 
           annotTypeGetFn(serverAnnotType.studyId, serverAnnotType.id)

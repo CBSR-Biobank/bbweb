@@ -11,7 +11,7 @@ define(['angular', 'underscore'], function(angular, _) {
       scope: {
         study:           '=',
         annotTypes:      '=',
-        annotTypesInUse: '=',
+        annotTypeIdsInUse: '=',
         annotTypeName:   '@',
         panelId:         '@',
         addStateName:    '@',
@@ -24,22 +24,20 @@ define(['angular', 'underscore'], function(angular, _) {
 
   StudyAnnotTypesPanelCtrl.$inject = [
     '$scope',
-    'Panel',
-    'StudyStatus'
+    'Panel'
   ];
 
   /**
    * A panel to display a study's participant annotation types.
    */
   function StudyAnnotTypesPanelCtrl($scope,
-                                    Panel,
-                                    StudyStatus) {
+                                    Panel) {
     var vm = this,
         panel = new Panel($scope.panelId, $scope.addStateName);
 
     vm.study                = $scope.study;
     vm.annotTypes           = $scope.annotTypes;
-    vm.annotTypesInUse      = $scope.annotTypesInUse;
+    vm.annotTypeIdsInUse      = $scope.annotTypeIdsInUse;
     vm.annotTypeName        = $scope.annotTypeName;
     vm.panelHeading         = panelHeading($scope.annotTypeName);
     vm.annotTypeDescription = annotTypeDescription($scope.annotTypeName);

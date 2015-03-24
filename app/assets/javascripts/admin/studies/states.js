@@ -150,7 +150,7 @@ define(['angular', 'underscore'], function(angular, _) {
             $scope.study = study;
             $scope.annotTypes = annotTypes;
             // FIXME this is set to empty array for now, but will have to call the correct method in the future
-            $scope.annotTypesInUse = [];
+            $scope.annotTypeIdsInUse = [];
           }]
         }
       },
@@ -223,7 +223,7 @@ define(['angular', 'underscore'], function(angular, _) {
                                          function (annotType) {
                                            return new CollectionEventAnnotationType(annotType);
                                          });
-              $scope.annotTypesInUse = collectionDto.collectionEventAnnotationTypesInUse;
+              $scope.annotTypeIdsInUse = collectionDto.collectionEventAnnotationTypesInUse;
               $scope.specimenGroups = collectionDto.specimenGroups;
             }
           ]

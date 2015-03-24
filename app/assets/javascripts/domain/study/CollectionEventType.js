@@ -3,8 +3,6 @@ define(['underscore'], function(_) {
   'use strict';
 
   CollectionEventTypeFactory.$inject = [
-    'SpecimenGroupSet',
-    'AnnotationTypeSet',
     'SpecimenGroupDataSet',
     'AnnotationTypeDataSet'
   ];
@@ -12,9 +10,7 @@ define(['underscore'], function(_) {
   /**
    * Factory for collectionEventTypes.
    */
-  function CollectionEventTypeFactory(SpecimenGroupSet,
-                                      AnnotationTypeSet,
-                                      SpecimenGroupDataSet,
+  function CollectionEventTypeFactory(SpecimenGroupDataSet,
                                       AnnotationTypeDataSet) {
     /**
      * Creates a collection event type object with helper methods.
@@ -29,9 +25,9 @@ define(['underscore'], function(_) {
      * @param {AnnotationType array} options.studyAnnotationTypes all the collection event annotation types
      * for the study. Should be a list returned by the server.
      *
-     * @param {SpecimenGroupSet} options.studySpecimenGroupSet all specimen groups for the study.
+     * @param {Array} options.studySpecimenGroups all specimen groups for the study.
      *
-     * @param {AnnotationTypeSet} options.studyAnnotationTypeSet all the collection event annotation types for the
+     * @param {Array} options.studyAnnotationTypes all the collection event annotation types for the
      * study.
      */
     function CollectionEventType(study, collectionEventType, options) {
@@ -48,11 +44,11 @@ define(['underscore'], function(_) {
 
       self.specimenGroupDataSet = new SpecimenGroupDataSet(
         collectionEventType.specimenGroupData,
-        _.pick(options, 'studySpecimenGroups', 'studySpecimenGroupSet'));
+        _.pick(options, 'studySpecimenGroups'));
 
       self.annotationTypeDataSet = new AnnotationTypeDataSet(
         collectionEventType.annotationTypeData,
-        _.pick(options, 'studyAnnotationTypes', 'studyAnnotationTypeSet'));
+        _.pick(options, 'studyAnnotationTypes'));
     }
 
     CollectionEventType.prototype.specimenGroupDataSize = function () {

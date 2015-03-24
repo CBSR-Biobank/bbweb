@@ -1,9 +1,9 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  SpecimenGroupDataSetFactory.$inject = ['SpecimenGroupSet'];
+  //SpecimenGroupDataSetFactory.$inject = [];
 
-  function SpecimenGroupDataSetFactory(SpecimenGroupSet) {
+  function SpecimenGroupDataSetFactory() {
 
     /**
      * Maintains a set of specimenGroupData items. Only one specimen group data item with a non empty ID is
@@ -16,33 +16,21 @@ define(['underscore'], function(_) {
      * @param {SpecimenGroup array} options.studySpecimenGroups all the specimen groups for the study. Should
      * be a list returned by the server.
      *
-     * @param {SpecimenGroupSet} options.studySpecimenGroupSet all the collection event specimen groups for
+     * @param {Array} options.studySpecimenGroups all the collection event specimen groups for
      * the study.
-     *
-     * Only one of options.studySpecimenGroups or options.studySpecimenGroupSet should be used, but not both.
      */
     function SpecimenGroupDataSet(dataItems, options) {
-      var self = this;
+      var self = this, specimenGroups;
 
       self.dataItems = _.map(dataItems, function (item) { return _.clone(item); });
 
       options = options || {};
 
-      if (options.studySpecimenGroups && options.studySpecimenGroupSet) {
-        throw new Error('cannot create with both specimenGroups and specimenGroupSet');
-      }
-
       if (options.studySpecimenGroups) {
-        self.specimenGroupSet = new SpecimenGroupSet(options.studySpecimenGroups);
-      }
+        specimenGroups = _.indexBy(options.studySpecimenGroups, 'id');
 
-      if (options.studySpecimenGroupSet) {
-        self.specimenGroupSet = options.studySpecimenGroupSet;
-      }
-
-      if (self.specimenGroupSet) {
         _.each(self.dataItems, function (item) {
-          item.specimenGroup = self.specimenGroupSet.get(item.specimenGroupId);
+          item.specimenGroup = specimenGroups[item.specimenGroupId];
         });
       }
     }

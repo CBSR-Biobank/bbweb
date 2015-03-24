@@ -23,9 +23,6 @@ define(['angular', 'underscore'], function(angular, _) {
     'modalService',
     'tableService',
     'SpecimenLinkType',
-    'ProcessingTypeSet',
-    'SpecimenGroupSet',
-    'AnnotationTypeSet',
     'Panel',
     'SpecimenLinkAnnotationType',
     'SpcLinkTypeViewer',
@@ -43,9 +40,6 @@ define(['angular', 'underscore'], function(angular, _) {
                                  modalService,
                                  tableService,
                                  SpecimenLinkType,
-                                 ProcessingTypeSet,
-                                 SpecimenGroupSet,
-                                 AnnotationTypeSet,
                                  Panel,
                                  SpecimenLinkAnnotationType,
                                  SpcLinkTypeViewer,
@@ -64,9 +58,9 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.information         = information;
     vm.panelOpen           = panel.getPanelOpenState();
 
-    vm.processingTypesSet = new ProcessingTypeSet($scope.processingDto.processingTypes);
-    vm.specimenGroupSet   = new SpecimenGroupSet($scope.processingDto.specimenGroups);
-    vm.annotationTypeSet  = new AnnotationTypeSet($scope.processingDto.specimenLinkAnnotationTypes);
+    vm.processingTypes     = _.indexBy($scope.processingDto.processingTypes, 'id');
+    vm.specimenGroups      = _.indexBy($scope.processingDto.specimenGroups, 'id');
+    vm.annotationTypes     = _.indexBy($scope.processingDto.specimenLinkAnnotationTypes, 'id');
 
     vm.showProcessingType  = showProcessingType;
     vm.showSpecimenGroup   = showSpecimenGroup;
@@ -76,11 +70,11 @@ define(['angular', 'underscore'], function(angular, _) {
 
     vm.specimenLinkTypes = _.map($scope.processingDto.specimenLinkTypes, function (slt) {
       return new SpecimenLinkType(
-        vm.processingTypesSet.get(slt.processingTypeId),
+        vm.processingTypes[slt.processingTypeId],
         slt,
         {
-          studySpecimenGroupSet:  vm.specimenGroupSet,
-          studyAnnotationTypeSet: vm.annotationTypeSet
+          studySpecimenGroups:  $scope.processingDto.specimenGroups,
+          studyAnnotationTypes: $scope.processingDto.specimenLinkAnnotationTypes
         });
     });
 
@@ -120,14 +114,14 @@ define(['angular', 'underscore'], function(angular, _) {
      * Displays a specimen group in a modal.
      */
     function showSpecimenGroup(specimenGroupId) {
-      return new SpecimenGroupViewer(vm.specimenGroupSet.get(specimenGroupId));
+      return new SpecimenGroupViewer(vm.specimenGroups[specimenGroupId]);
     }
 
     /**
      * Display a specimen link annotation type in a modal.
      */
     function showAnnotationType(annotTypeId) {
-      return new AnnotationTypeViewer(vm.annotationTypeSet.get(annotTypeId), 'Specimen Link Annotation Type');
+      return new AnnotationTypeViewer(vm.annotationTypes[annotTypeId], 'Specimen Link Annotation Type');
     }
 
     /**

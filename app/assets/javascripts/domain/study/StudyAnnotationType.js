@@ -86,13 +86,11 @@ define(['angular', 'underscore'], function(angular, _) {
     /**
      * Called when the annotation type's value type has been changed.
      */
-    StudyAnnotationType.prototype.valueTypeChanged = function (newValueType) {
-      if (this.isValueTypeSelect()) {
-        this.addOption();
-      } else {
-        this.options = [];
+    StudyAnnotationType.prototype.valueTypeChanged = function () {
+      if (!this.isValueTypeSelect()) {
         this.maxValueCount = undefined;
       }
+      this.options = [];
     };
 
     /**

@@ -5,8 +5,6 @@ define(['underscore'], function(_) {
   CeventTypeEditCtrl.$inject = [
     '$state',
     'CollectionEventType',
-    'SpecimenGroupSet',
-    'AnnotationTypeSet',
     'domainEntityUpdateError',
     'ceventTypesService',
     'notificationsService',
@@ -21,8 +19,6 @@ define(['underscore'], function(_) {
    */
   function CeventTypeEditCtrl($state,
                               CollectionEventType,
-                              SpecimenGroupSet,
-                              AnnotationTypeSet,
                               domainEntityUpdateError,
                               ceventTypesService,
                               notificationsService,
@@ -32,32 +28,31 @@ define(['underscore'], function(_) {
                               specimenGroups) {
     var vm = this, action;
 
-    vm.specimenGroupSet  = new SpecimenGroupSet(specimenGroups);
+    vm.specimenGroups  = specimenGroups;
 
     vm.ceventType = new CollectionEventType(
       study,
       ceventType,
       {
-        studySpecimenGroupSet: vm.specimenGroupSet,
-        studyAnnotationTypes:  annotTypes
+        studySpecimenGroups:  specimenGroups,
+        studyAnnotationTypes: annotTypes
       });
     action = vm.ceventType.isNew ? 'Add' : 'Update';
 
-    vm.specimenGroupData  = ceventType.specimenGroupData;
-    vm.annotationTypeData = ceventType.annotationTypeData;
-
-    vm.title                   = action + ' Collection Event Type';
-    vm.study                   = study;
-    vm.specimenGroups          = specimenGroups;
-    vm.submit                  = submit;
-    vm.cancel                  = cancel;
-    vm.specimenGroupsById      = _.indexBy(specimenGroups, 'id');
-    vm.annotationTypes         = annotTypes;
-    vm.addSpecimenGroupData    = addSpecimenGroupData;
-    vm.removeSpecimenGroupData = removeSpecimenGroupData;
-    vm.addAnnotationTypeData        = addAnnotationTypeData;
-    vm.removeAnnotationTypeData     = removeAnnotationTypeData;
-    vm.getSpecimenGroupUnits   = getSpecimenGroupUnits;
+    vm.specimenGroupData        = ceventType.specimenGroupData;
+    vm.annotationTypeData       = ceventType.annotationTypeData;
+    vm.title                    = action + ' Collection Event Type';
+    vm.study                    = study;
+    vm.specimenGroups           = specimenGroups;
+    vm.submit                   = submit;
+    vm.cancel                   = cancel;
+    vm.specimenGroupsById       = _.indexBy(specimenGroups, 'id');
+    vm.annotationTypes          = annotTypes;
+    vm.addSpecimenGroupData     = addSpecimenGroupData;
+    vm.removeSpecimenGroupData  = removeSpecimenGroupData;
+    vm.addAnnotationTypeData    = addAnnotationTypeData;
+    vm.removeAnnotationTypeData = removeAnnotationTypeData;
+    vm.getSpecimenGroupUnits    = getSpecimenGroupUnits;
 
     //---
 
@@ -106,7 +101,7 @@ define(['underscore'], function(_) {
     function getSpecimenGroupUnits(sgId) {
       if (!sgId) { return 'Amount'; }
 
-      var sg = vm.specimenGroupSet.get(sgId);
+      var sg = _.findWhere(vm.specimenGroups, { id: sgId });
       if (sg) {
         return sg.units;
       }

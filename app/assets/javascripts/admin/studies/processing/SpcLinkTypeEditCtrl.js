@@ -8,7 +8,6 @@ define(['underscore'], function(_) {
     '$state',
     'spcLinkTypesService',
     'SpecimenLinkType',
-    'SpecimenGroupSet',
     'domainEntityUpdateError',
     'notificationsService',
     'study',
@@ -22,7 +21,6 @@ define(['underscore'], function(_) {
   function SpcLinkTypeEditCtrl($state,
                                spcLinkTypesService,
                                SpecimenLinkType,
-                               SpecimenGroupSet,
                                domainEntityUpdateError,
                                notificationsService,
                                study,
@@ -34,8 +32,7 @@ define(['underscore'], function(_) {
     vm.processingTypes     = processingDto.processingTypes;
     vm.processingTypesById = _.indexBy(processingDto.processingTypes, 'id');
     vm.annotTypes          = processingDto.specimenLinkAnnotationTypes;
-    vm.specimenGroupSet    = new SpecimenGroupSet(processingDto.specimenGroups);
-    vm.specimenGroups      = _.values(vm.specimenGroupSet.specimenGroups);
+    vm.specimenGroups      = processingDto.specimenGroups;
     vm.annotationTypeData  = spcLinkType.annotationTypeData;
 
     vm.submit                = submit;
@@ -48,8 +45,8 @@ define(['underscore'], function(_) {
       vm.processingTypesById[spcLinkType.processingTypeId],
       spcLinkType,
       {
-        studySpecimenGroupSet: vm.specimenGroupSet,
-        studyAnnotationTypes:  processingDto.specimenLinkAnnotationTypes
+        studySpecimenGroups:  processingDto.specimenGroups,
+        studyAnnotationTypes: processingDto.specimenLinkAnnotationTypes
       });
 
     action = vm.specimenLinkType.isNew ? 'Add' : 'Update';
@@ -94,7 +91,7 @@ define(['underscore'], function(_) {
     function getSpecimenGroupUnits(sgId) {
       if (!sgId) { return 'Amount'; }
 
-      var sg = vm.specimenGroupSet.get(sgId);
+      var sg = _.findWhere(vm.specimenGroups, { id: sgId });
       if (sg) {
         return sg.units;
       }

@@ -14,10 +14,10 @@ define(['angular', 'underscore'], function(angular, _) {
    *
    */
   function StudyFactory(funutils,
-                         validationService,
-                         ConcurrencySafeEntity,
-                         StudyStatus,
-                         studiesService) {
+                        validationService,
+                        ConcurrencySafeEntity,
+                        StudyStatus,
+                        studiesService) {
 
     var requiredKeys = ['id', 'version', 'timeAdded', 'name', 'status'];
 
