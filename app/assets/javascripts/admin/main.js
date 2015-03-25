@@ -24,7 +24,6 @@ define(function (require) {
       StudyEditCtrl                           = require('./studies/StudyEditCtrl'),
       StudySummaryTabCtrl                     = require('./studies/StudySummaryTabCtrl'),
       studiesStates                           = require('./studies/states'),
-      studyViewSettingsService                = require('./studies/studyViewSettingsService'),
       validAmountDirective                    = require('./studies/validAmountDirective'),
       validCountDirective                     = require('./studies/validCountDirective'),
 
@@ -140,8 +139,6 @@ define(function (require) {
   module.config(specimenGroupsStates);
 
   module.config(studiesStates);
-
-  module.service('studyViewSettingsService', studyViewSettingsService);
 
   module.directive('validAmount', validAmountDirective);
 

@@ -4,9 +4,28 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
+    jshint: {
+      files: ['Gruntfile.js', 'app/assets/javascripts/**/*.js', 'test/assets/javascripts/**/*.js'],
+      options: {
+        globals: {
+          jQuery: true
+        }
+      }
+    },
     karma: {
-      unit: {
+      options: {
         configFile: 'karma.conf.js'
+      },
+      unit: {
+        singleRun: true,
+        colors: true,
+        reporters: ['spec']
+      },
+      coverage: {
+        preprocessors: {
+          'app/assets/javascripts/**/*.js': 'coverage'
+        },
+        reporters: ['progress', 'coverage']
       }
     },
 
@@ -48,6 +67,17 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-karma');
-  grunt.registerTask('default', ['karma']);
+  grunt.registerTask('jshint', ['jshint']);
+
+  grunt.registerTask('test', 'Run tests on singleRun karma server', function () {
+    if (grunt.option('coverage')) {
+      var karmaOptions = grunt.config.get('karma.options'),
+          coverageOpts = grunt.config.get('karma.coverage');
+      grunt.util._.extend(karmaOptions, coverageOpts);
+      grunt.config.set('karma.options', karmaOptions);
+    }
+    grunt.task.run('karma:unit');
+  });
+
   grunt.loadNpmTasks('grunt-ng-annotate');
 };

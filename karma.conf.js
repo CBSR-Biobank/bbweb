@@ -44,9 +44,12 @@ module.exports = function(config) {
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-    preprocessors: {
-      //'app/assets/javascripts/**/*.js': 'coverage'
-    },
+    // preprocessors: {
+    //   //'app/assets/javascripts/**/*.js': 'coverage'
+    //
+    // moved to Gruntfile.js
+    //
+    // },
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
