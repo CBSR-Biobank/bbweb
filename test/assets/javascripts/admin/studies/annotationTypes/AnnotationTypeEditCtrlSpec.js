@@ -1,6 +1,6 @@
 // Jasmine test suite
 //
-define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
+define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
   describe('Controller: AnnotationTypeEditCtrl', function() {
@@ -38,24 +38,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       study = new Study(fakeEntities.study());
 
       spyOn(state, 'go');
-      spyOn(domainEntityUpdateError, 'handleErrorNoStateChange');
     }));
-
-    function createController(state, annotType) {
-      scope = rootScope.$new();
-
-      controller('AnnotationTypeEditCtrl as vm', {
-        $scope:                    scope,
-        $state:                    state,
-        notificationsService:      notificationsService,
-        domainEntityUpdateError:   domainEntityUpdateError,
-        ParticipantAnnotationType: ParticipantAnnotationType,
-        AnnotationValueType:       AnnotationValueType,
-        study:                     study,
-        annotType:                 annotType
-      });
-      scope.$digest();
-    }
 
     describe('for participant annotation types', function() {
       var context = {};
@@ -143,6 +126,13 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
           expect(scope.vm.title).toBe('Update Annotation Type');
           expect(scope.vm.hasRequiredField).toEqual(annotTypeWithId instanceof ParticipantAnnotationType);
           expect(scope.vm.valueTypes).toEqual(AnnotationValueType.values());
+        });
+
+        it('throws an exception if the current state is invalid', function() {
+          var invalidState = { current: { name: 'xyz' } };
+          expect(function () {
+            createController(invalidState, annotTypeWithId);
+          }).toThrow(new Error('invalid current state name: ' + invalidState.current.name));
         });
 
         it('maxValueCountRequired is valid', function() {
@@ -245,6 +235,21 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
           onCancel(state, annotTypeNew, returnState);
         });
 
+        it('when submitting and server responds with an error, the error message is displayed', function() {
+          var domainEntityUpdateError = this.$injector.get('domainEntityUpdateError');
+
+          spyOn(domainEntityUpdateError, 'handleErrorNoStateChange')
+            .and.callFake(function () {});
+
+          spyOnAnnotTypeAddOrUpdateAndReject(annotTypeNew);
+
+          createController(state, annotTypeNew);
+          scope.vm.submit(annotTypeNew);
+          scope.$digest();
+
+          expect(domainEntityUpdateError.handleErrorNoStateChange).toHaveBeenCalled();
+        });
+
         it('when updating should return to the valid state on submit', function() {
           onSubmit(state, annotTypeWithId, returnState);
         });
@@ -253,12 +258,40 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
           onCancel(state, annotTypeWithId, returnState);
         });
 
-        function onSubmit(state, annotType, returnState) {
+        function createController(state, annotType) {
+          scope = rootScope.$new();
+
+          controller('AnnotationTypeEditCtrl as vm', {
+            $scope:                    scope,
+            $state:                    state,
+            notificationsService:      notificationsService,
+            domainEntityUpdateError:   domainEntityUpdateError,
+            ParticipantAnnotationType: ParticipantAnnotationType,
+            AnnotationValueType:       AnnotationValueType,
+            study:                     study,
+            annotType:                 annotType
+          });
+          scope.$digest();
+        }
+
+        function spyOnAnnotTypeAddOrUpdateAndResolve(annotType) {
           spyOn(annotType, 'addOrUpdate').and.callFake(function () {
             var deferred = q.defer();
             deferred.resolve('xxx');
             return deferred.promise;
           });
+        }
+
+        function spyOnAnnotTypeAddOrUpdateAndReject(annotType) {
+          spyOn(annotType, 'addOrUpdate').and.callFake(function () {
+            var deferred = q.defer();
+            deferred.reject({ data: { message: 'error'} });
+            return deferred.promise;
+          });
+        }
+
+        function onSubmit(state, annotType, returnState) {
+          spyOnAnnotTypeAddOrUpdateAndResolve(annotType);
 
           createController(state, annotType);
           scope.vm.submit(annotType);
@@ -268,11 +301,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
         }
 
         function onCancel(state, annotType, returnState) {
-          spyOn(annotType, 'addOrUpdate').and.callFake(function () {
-            var deferred = q.defer();
-            deferred.resolve('xxx');
-            return deferred.promise;
-          });
+          spyOnAnnotTypeAddOrUpdateAndResolve(annotType);
 
           createController(state, annotType);
           scope.vm.cancel();

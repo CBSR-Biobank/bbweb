@@ -19,11 +19,11 @@ define([], function(){
           // it is valid
           ctrl.$setValidity('integer', true);
           return viewValue;
-        } else {
-          // it is invalid, return undefined (no model update)
-          ctrl.$setValidity('integer', false);
-          return undefined;
         }
+
+        // it is invalid, return undefined (no model update)
+        ctrl.$setValidity('integer', false);
+        return undefined;
       });
 
     }

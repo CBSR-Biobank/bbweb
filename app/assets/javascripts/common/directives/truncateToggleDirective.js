@@ -7,7 +7,7 @@ define([], function(){
   function truncateToggleDirectiveFactory() {
     var directive = {
       restrict: 'E',
-      replace: 'true',
+      replace: true,
       scope: {
         text: '=',
         toggleLength: '=',

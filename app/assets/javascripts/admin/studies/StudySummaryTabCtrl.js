@@ -23,22 +23,22 @@ define(['underscore'], function(_) {
 
     //--
 
-    function changeStatus(action) {
+    function changeStatus(statusAction) {
       var modalOptions = {
         closeButtonText: 'Cancel',
         headerHtml: 'Confirm study ',
         bodyHtml: 'Are you sure you want to '
       };
 
-      if (!_.contains(validStatusActions, action)) {
-        throw new Error('invalid action: ' + action);
+      if (!_.contains(validStatusActions, statusAction)) {
+        throw new Error('invalid status: ' + statusAction);
       }
 
-      modalOptions.headerHtml += action;
-      modalOptions.bodyHtml += action + ' study ' + vm.study.name + '?';
+      modalOptions.headerHtml += statusAction;
+      modalOptions.bodyHtml += statusAction + ' study ' + vm.study.name + '?';
 
       modalService.showModal({}, modalOptions).then(function () {
-        vm.study[action]().then(function (study) {
+        vm.study[statusAction]().then(function (study) {
           vm.study = study;
         });
       });

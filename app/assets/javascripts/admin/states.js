@@ -15,7 +15,7 @@ define([], function() {
     $urlRouterProvider.otherwise('/');
 
     $stateProvider.state('home.admin', {
-      url: '^/admin',
+      url: 'admin',
       views: {
         'main@': {
           templateUrl: '/assets/javascripts/admin/adminDetails.html',
@@ -33,8 +33,6 @@ define([], function() {
       }
     });
 
-    //.when('/users', {templateUrl:'/assets/javascripts/user/users.html', controller:controllers.UserCtrl})
-    //.when('/users/:id', {templateUrl:'/assets/javascripts/user/editUser.html', controller:controllers.UserCtrl});
   }
 
   return config;

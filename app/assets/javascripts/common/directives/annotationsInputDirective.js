@@ -24,21 +24,6 @@ define([], function(){
     var vm = this;
 
     vm.annotationHelpers = $scope.annotationHelpers;
-    vm.datePicker = {
-      opened: false,
-      open: openDatePicker,
-      options: {
-        formatYear: 'yyyy'
-      }
-    };
-
-    function openDatePicker($event) {
-      $event.preventDefault();
-      $event.stopPropagation();
-
-      vm.datePicker.opened = true;
-    }
-
   }
 
   return {

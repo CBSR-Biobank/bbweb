@@ -5,6 +5,8 @@ define([], function(){
    * Validates that the input is an integer.
    */
   function str2integerDirectiveFactory() {
+    var INTEGER_REGEXP = /^\-?\d+$/;
+
     var directive = {
       require: 'ngModel',
       link: link
@@ -13,7 +15,10 @@ define([], function(){
 
     function link(scope, element, attrs, ctrl) {
       ctrl.$parsers.unshift(function(viewValue){
-        return parseInt(viewValue);
+        if (INTEGER_REGEXP.test(viewValue)) {
+          return viewValue;
+        }
+        return undefined;
       });
     }
 

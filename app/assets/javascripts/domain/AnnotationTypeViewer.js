@@ -24,7 +24,7 @@ define([], function() {
         }
 
         ev.addAttribute('Selections Allowed',
-                        annotationType.maxValueCount === 1 ? 'Single' : 'Multiple');
+                        annotationType.isSingleSelect() ? 'Single' : 'Multiple');
         ev.addAttribute('Selections', annotationType.options.join(', '));
       }
 

@@ -7,7 +7,6 @@ define(function (require) {
   var angular                          = require('angular'),
 
       annotationsInputDirective        = require('./directives/annotationsInputDirective'),
-      domainEntityTimestampsDirective  = require('./directives/domainEntityTimestampsDirective'),
       focusMeDirective                 = require('./directives/focusMeDirective'),
       infoUpdateRemoveButtonsDirective = require('./directives/infoUpdateRemoveButtonsDirective'),
       integerDirective                 = require('./directives/integerDirective'),
@@ -39,7 +38,6 @@ define(function (require) {
   module.directive('annotationsInput', annotationsInputDirective.directive);
   module.controller('AnnotationsInputCtrl', annotationsInputDirective.controller);
 
-  module.directive('domainEntityTimestamps', domainEntityTimestampsDirective);
   module.directive('focusMe', focusMeDirective);
   module.directive('infoUpdateRemoveButtons', infoUpdateRemoveButtonsDirective);
   module.directive('integer', integerDirective);

@@ -1,16 +1,20 @@
 define(['angular'], function(angular) {
   'use strict';
 
+  /**
+   * A directive to be used in form input that only allows positive integer or float values.
+   */
   function validAmount() {
     var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
     var directive = {
+      restrict: 'A',
       require: 'ngModel',
       link: link
     };
     return directive;
 
     function link(scope, elm, attrs, ctrl) {
-      ctrl.$parsers.unshift(function(viewValue) {
+      ctrl.$parsers.unshift(function (viewValue) {
         if (FLOAT_REGEXP.test(viewValue)) {
           var floatValue = parseFloat(viewValue);
           if (floatValue > 0) {

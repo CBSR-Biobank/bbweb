@@ -56,6 +56,27 @@ define(['angular', 'underscore'], function(angular, _) {
       return new Study(obj);
     };
 
+    /**
+     * @param {string} options.filter The filter to use on study names. Default is empty string.
+     *
+     * @param {string} options.status Returns studies filtered by status. The following are valid: 'all' to
+     * return all studies, 'disabled' to return only disabled studies, 'enabled' to reutrn only enable
+     * studies, and 'retired' to return only retired studies. For any other values the response is an error.
+     *
+     * @param {string} options.sortField Studies can be sorted by 'name' or by 'status'. Values other than
+     * these two yield an error.
+     *
+     * @param {int} options.page If the total results are longer than pageSize, then page selects which
+     * studies should be returned. If an invalid value is used then the response is an error.
+     *
+     * @param {int} options.pageSize The total number of studies to return per page. The maximum page size is
+     * 10. If a value larger than 10 is used then the response is an error.
+     *
+     * @param {string} options.order One of 'asc' or 'desc'. If an invalid value is used then
+     * the response is an error.
+     *
+     * @return A promise. If the promise succeeds then a paged result is returned.
+     */
     Study.list = function (options) {
       options = options || {};
       return studiesService.list(options).then(function(reply) {

@@ -2,7 +2,9 @@
 define(['moment', 'underscore'], function(moment, _) {
   'use strict';
 
-  AnnotationHelperFactory.$inject = ['AnnotationValueType'];
+  AnnotationHelperFactory.$inject = [
+    'AnnotationValueType'
+  ];
 
   function AnnotationHelperFactory(AnnotationValueType) {
 
@@ -46,12 +48,12 @@ define(['moment', 'underscore'], function(moment, _) {
         break;
 
       case AnnotationValueType.SELECT():
-        if (annotationType.maxValueCount === 2) {
+        if (annotationType.isMultipleSelect()) {
           self.values = [];
           _.each(annotationType.options, function (option) {
             self.values.push({name: option, checked: false});
           });
-        } else if (annotationType.maxValueCount === 1) {
+        } else if (annotationType.isSingleSelect()) {
           self.value = undefined;
         } else {
           throw new Error('invalid value for max count');
@@ -110,10 +112,10 @@ define(['moment', 'underscore'], function(moment, _) {
         break;
 
       case AnnotationValueType.SELECT():
-        if (self.annotationType.maxValueCount === 1) {
+        if (self.annotationType.isSingleSelect()) {
           self.value = annotation.selectedValues[0].value;
           self.displayValue = self.value;
-        } else if (self.annotationType.maxValueCount > 1) {
+        } else if (self.annotationType.isMultipleSelect()) {
           // set the 'checked' property on all the selected values
           _.each(annotation.selectedValues, function(selectedValue) {
             var value = _.findWhere(self.values,  { name: selectedValue.value });
@@ -191,7 +193,12 @@ define(['moment', 'underscore'], function(moment, _) {
           return { stringValue: self.value };
 
         case AnnotationValueType.NUMBER():
-          return { numberValue: self.value.toString() };
+          if (_.isUndefined(self.value)) {
+            return undefined;
+          } else {
+            return { numberValue: self.value.toString() };
+          }
+          break;
 
         case AnnotationValueType.DATE_TIME():
           // date part is kept in self.value.date and time in self.value.time, they must be combined
@@ -217,8 +224,10 @@ define(['moment', 'underscore'], function(moment, _) {
         return annotation.stringValue;
       } else if (annotation.numberValue) {
         return annotation.numberValue;
-      } else {
+      } else if (annotation.selectedValues.length > 0)  {
         return _.pluck(annotation.selectedValues, 'value').join(', ');
+      } else {
+        return undefined;
       }
     };
 

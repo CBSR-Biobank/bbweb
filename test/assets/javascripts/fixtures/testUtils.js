@@ -53,6 +53,11 @@ define(['faker', 'underscore'], function(faker, _) {
     });
   }
 
+  function putHtmlTemplate($templateCache, template) {
+    $templateCache.put(template,
+      jasmine.getFixtures().getFixtureHtml_('../../../base/app' + template));
+  }
+
   function camelCaseToUnderscore(str) {
     var result;
     if (_.isUndefined(str)) {
@@ -69,7 +74,7 @@ define(['faker', 'underscore'], function(faker, _) {
     randomBoolean:         randomBoolean,
     fakeModal:             fakeModal,
     addCustomMatchers:     addCustomMatchers,
+    putHtmlTemplate:       putHtmlTemplate,
     camelCaseToUnderscore: camelCaseToUnderscore
   };
 });
-

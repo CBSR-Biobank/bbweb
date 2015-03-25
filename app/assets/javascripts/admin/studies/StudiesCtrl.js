@@ -1,13 +1,13 @@
 define([], function() {
   'use strict';
 
-  StudiesCtrl.$inject = ['$scope', 'studiesService', 'studyCounts'];
+  StudiesCtrl.$inject = ['$scope', 'Study', 'studyCounts'];
 
   /**
    * Displays a list of studies with each in its own mini-panel.
    *
    */
-  function StudiesCtrl($scope, studiesService, studyCounts) {
+  function StudiesCtrl($scope, Study, studyCounts) {
     var vm = this;
 
     vm.studyCounts      = studyCounts;
@@ -20,8 +20,13 @@ define([], function() {
       { id: 'retired',  label: 'Retired' }
     ];
 
+    /**
+     * Callback provided to pagedItemsList directive.
+     *
+     * See {@link Study#list} for the format of the options object.
+     */
     function updateStudies(options) {
-      return studiesService.list(options);
+      return Study.list(options);
     }
   }
 

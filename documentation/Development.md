@@ -52,6 +52,12 @@ sh tmp.sh
 
 Using Karma and Jasmine for client unit tests. Also using Grunt to run the tests.
 
+To run JavaScript code coverage use command:
+
+```sh
+grunt karma:coverage
+```
+
 ## Docker ##
 
 In the `tools\docker` folder of the project is a **Docker** file. This file can be used to create a docker

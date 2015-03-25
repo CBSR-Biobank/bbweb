@@ -76,7 +76,6 @@ define([], function() {
     function postUpdate(userId, message, title, timeout) {
       return function (user) {
         vm.user = user;
-        console.log(vm.user.timeAdded, vm.user.timeModified);
         notificationsService.success(message, title, timeout);
       };
     }

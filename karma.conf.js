@@ -10,6 +10,7 @@ module.exports = function(config) {
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     frameworks: [
+      'jasmine-jquery',
       'jasmine',
       'jasmine-matchers',
       'requirejs',
@@ -18,7 +19,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'target/web/web-modules/main/webjars/lib/underscorejs/underscore.js',
+      {pattern: 'target/web/web-modules/main/webjars/lib/underscorejs/underscore.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/angularjs/angular.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/angularjs/angular-*.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router.js', included: false},
@@ -32,6 +33,7 @@ module.exports = function(config) {
       {pattern: 'test/assets/javascripts/**/*Spec.js', included: false},
       {pattern: 'test/assets/javascripts/test/**/*.js', included: false},
       {pattern: 'test/assets/javascripts/fixtures/**/*.js', included: false},
+      'app/assets/javascripts/**/*.html',
       'test/assets/javascripts/test-main.js'
     ],
 
@@ -44,12 +46,9 @@ module.exports = function(config) {
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-    // preprocessors: {
-    //   //'app/assets/javascripts/**/*.js': 'coverage'
-    //
-    // moved to Gruntfile.js
-    //
-    // },
+    preprocessors: {
+      //'app/assets/javascripts/**/*.js': 'coverage' -> moved to Gruntfile.js
+    },
 
     // test results reporter to use
     // possible values: 'dots', 'progress'

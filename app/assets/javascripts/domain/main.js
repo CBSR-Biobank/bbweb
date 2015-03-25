@@ -14,6 +14,7 @@ define(function (require) {
       AnnotationTypeDataSet               = require('./AnnotationTypeDataSet'),
       AnnotationTypeViewer                = require('./AnnotationTypeViewer'),
       AnnotationValueType                 = require('./AnnotationValueType'),
+      AnnotationMaxValueCount             = require('./AnnotationMaxValueCount'),
       annotationTypeValidation            = require('./annotationTypeValidation'),
 
       Centre                              = require('./centre/Centre'),
@@ -85,6 +86,7 @@ define(function (require) {
 
   module.service('AnatomicalSourceType',                AnatomicalSourceType);
   module.service('AnnotationValueType',                 AnnotationValueType);
+  module.service('AnnotationMaxValueCount',             AnnotationMaxValueCount);
   module.service('CentreStatus',                        CentreStatus);
   module.service('PreservationTemperatureType',         PreservationTemperatureType);
   module.service('PreservationType',                    PreservationType);

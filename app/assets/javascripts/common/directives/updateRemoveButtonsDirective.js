@@ -10,7 +10,7 @@ define([], function(){
   function updateRemoveButtonsDirectiveFactory() {
     return {
       restrict: 'E',
-      replace: 'true',
+      replace: true,
       scope: {
         update: '&onUpdate',
         remove: '&onRemove',

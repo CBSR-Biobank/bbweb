@@ -4,7 +4,8 @@ define(['angular', 'underscore'], function(angular, _) {
   AnnotationTypeFactory.$inject = [
     'validationService',
     'ConcurrencySafeEntity',
-    'AnnotationValueType'
+    'AnnotationValueType',
+    'AnnotationMaxValueCount'
   ];
 
   /**
@@ -12,7 +13,8 @@ define(['angular', 'underscore'], function(angular, _) {
    */
   function AnnotationTypeFactory(validationService,
                                  ConcurrencySafeEntity,
-                                 AnnotationValueType) {
+                                 AnnotationValueType,
+                                 AnnotationMaxValueCount) {
 
     function AnnotationType(obj) {
       obj = obj || {};
@@ -50,12 +52,42 @@ define(['angular', 'underscore'], function(angular, _) {
 
     AnnotationType.prototype.isSingleSelect = function () {
       return (this.valueType === AnnotationValueType.SELECT()) &&
-        (this.maxValueCount === 1);
+        (this.maxValueCount === AnnotationMaxValueCount.SELECT_SINGLE());
     };
 
     AnnotationType.prototype.isMultipleSelect = function () {
       return (this.valueType === AnnotationValueType.SELECT()) &&
-        (this.maxValueCount === 2);
+        (this.maxValueCount === AnnotationMaxValueCount.SELECT_MULTIPLE());
+    };
+
+    /**
+     * Returns true if the maxValueCount value is valid.
+     */
+    AnnotationType.prototype.maxValueCountValid = function () {
+      if (this.isValueTypeSelect()) {
+        return (this.isSingleSelect() || this.isMultipleSelect());
+      }
+      return (this.maxValueCount === AnnotationMaxValueCount.NONE());
+    };
+
+    /**
+     * Used to add an option. Should only be called when the value type is 'Select'.
+     */
+    AnnotationType.prototype.addOption = function () {
+      if (!this.isValueTypeSelect()) {
+        throw new Error('value type is not select: ' + this.valueType);
+      }
+      this.options.push('');
+    };
+
+    /**
+     * Used to remove an option. Should only be called when the value type is 'Select'.
+     */
+    AnnotationType.prototype.removeOption = function (option) {
+      if (this.options.length <= 1) {
+        throw new Error('options is empty, cannot remove any more options');
+      }
+      this.options = _.without(this.options, option);
     };
 
     return AnnotationType;

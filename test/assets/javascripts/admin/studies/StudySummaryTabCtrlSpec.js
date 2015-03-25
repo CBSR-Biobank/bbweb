@@ -4,7 +4,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: StudySummaryTabCtrl', function() {
-    var Study, modalService, scope, study;
+    var q, Study, modalService, scope, study;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -15,8 +15,9 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
                                _Study_,
                                _modalService_,
                                fakeDomainEntities) {
-      scope = $rootScope.$new();
-      Study = _Study_;
+      q            = $q;
+      scope        = $rootScope.$new();
+      Study        = _Study_;
       modalService = _modalService_;
 
       spyOn(modalService, 'showModal').and.callFake(function () {
@@ -43,23 +44,24 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
     describe('change study status', function() {
 
-      var q;
-
-      beforeEach(inject(function($q) {
-        q = $q;
+      beforeEach(function () {
         spyOn(Study, 'get').and.callFake(function () {
-          var deferred = $q.defer();
+          var deferred = q.defer();
           deferred.resolve(study);
           return deferred.promise;
         });
-      }));
+      });
 
-      function checkStatusChange(status) {
+      function spyOnStudyStatusChangeAndResolve(status) {
         spyOn(Study.prototype, status).and.callFake(function () {
           var deferred = q.defer();
           deferred.resolve('status changed');
           return deferred.promise;
         });
+      }
+
+      function checkStatusChange(status) {
+        spyOnStudyStatusChangeAndResolve(status);
 
         scope.vm.changeStatus(status);
         scope.$digest();
@@ -80,6 +82,13 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
       it('should unretire a study', function () {
         checkStatusChange('unretire');
+      });
+
+      it('when changing status, should throw error for invalid status', function () {
+        var badStatus = 'xxx';
+        expect(function () {
+          scope.vm.changeStatus(badStatus);
+        }).toThrow(new Error('invalid status: ' + badStatus));
       });
 
     });

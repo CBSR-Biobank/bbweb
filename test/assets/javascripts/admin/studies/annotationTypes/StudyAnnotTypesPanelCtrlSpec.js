@@ -53,7 +53,7 @@ define([
     describe('for Collection Event Annotation Types', function() {
       var context = {};
 
-      beforeEach((function () {
+      beforeEach(function () {
         context.study = new Study(fakeEntities.study());
         context.annotTypes = _.map(['Text', 'Number', 'DateTime', 'Select'], function(valueType) {
           return new CollectionEventAnnotationType(
@@ -64,7 +64,7 @@ define([
         context.annotTypeName   = 'CollectionEventAnnotationType';
         context.panelId         = 'study.panel.collectionEventAnnotationTypes';
         context.addStateName    = 'home.admin.studies.study.collection.ceventAnnotTypeAdd';
-      }));
+      });
 
       sharedBehaviour(context);
     });
@@ -72,7 +72,7 @@ define([
     describe('for Specimen Link Annotation Types', function() {
       var context = {};
 
-      beforeEach((function () {
+      beforeEach(function () {
         context.study = new Study(fakeEntities.study());
         context.annotTypes = _.map(['Text', 'Number', 'DateTime', 'Select'], function(valueType) {
           return new SpecimenLinkAnnotationType(
@@ -83,20 +83,19 @@ define([
         context.annotTypeName   = 'SpecimenLinkAnnotationType';
         context.panelId         = 'study.panel.specimenLinkAnnotationTypes';
         context.addStateName    = 'home.admin.studies.study.processing.spcLinkAnnotTypeAdd';
-      }));
+      });
 
       sharedBehaviour(context);
     });
 
     function sharedBehaviour(context) {
 
-      var study, annotTypes, annotTypeIdsInUse, panelId;
+      var panelId;
 
       describe('(shared)', function() {
         var scope,
             state,
             Panel,
-            fakeEntities,
             study,
             annotTypes,
             annotTypeIdsInUse,

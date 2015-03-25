@@ -1,12 +1,12 @@
 define([], function() {
   'use strict';
 
-  CollectionCtrl.$inject = ['studiesService', 'studyCounts'];
+  CollectionCtrl.$inject = ['Study', 'studyCounts'];
 
   /**
    *
    */
-  function CollectionCtrl(studiesService, studyCounts) {
+  function CollectionCtrl(Study, studyCounts) {
     var vm = this;
 
     vm.studyCounts = studyCounts;
@@ -17,7 +17,7 @@ define([], function() {
     //---
 
     function updateEnabledStudies(options) {
-      return studiesService.list(options);
+      return Study.list(options);
     }
 
     function getEnabledStudiesPanelHeader() {

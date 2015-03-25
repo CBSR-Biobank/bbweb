@@ -63,7 +63,7 @@ define(['underscore'], function(_) {
       });
 
       if (returnStateName.length !== 1) {
-        throw new Error('could not find valid return state name: ' + $state.current.name);
+        throw new Error('invalid current state name: ' + $state.current.name);
       }
 
       return {

@@ -1,48 +1,78 @@
 // Jasmine test suite
 //
-define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
+define([
+  'angular',
+  'underscore',
+  'angularMocks',
+  'biobank.testUtils',
+  'biobankApp'
+], function(angular, _, mocks, testUtils) {
   'use strict';
 
   describe('Controller: StudiesCtrl', function() {
-    var scope;
+    var rootScope, controller, StudyCounts, scope;
 
-    var studies = [
-      {name: 'ST1'},
-      {name: 'ST2'}
-    ];
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    // function generatePagedResults() {
-    //   return {
-    //     items: studies,
-    //     page: 1,
-    //     pageSize: 5,
-    //     maxPages: 1,
-    //     prev: null,
-    //     next: 2,
-    //     offset: 0,
-    //     total: 10
-    //   };
-    // }
+    beforeEach(inject(function($controller,
+                               $rootScope,
+                               _StudyCounts_,
+                               fakeDomainEntities) {
+      rootScope = $rootScope;
+      controller = $controller;
+      StudyCounts = _StudyCounts_;
 
-    beforeEach(mocks.module('biobankApp'));
+      testUtils.addCustomMatchers();
+    }));
 
-    beforeEach(inject(function($controller, $rootScope) {
-      scope = $rootScope.$new();
+    function createStudyCounts(disabled, enabled, retired) {
+      return new StudyCounts({
+        total:    disabled + enabled + retired,
+        disabled: disabled,
+        enabled:  enabled,
+        retired:  retired
+      });
+    }
 
-      $controller('StudiesCtrl as vm', {
+    function createController(studyCounts) {
+      scope = rootScope.$new();
+
+      controller('StudiesCtrl as vm', {
         $scope: scope,
-        studyCount: 1
+        studyCounts: studyCounts
       });
 
       scope.$digest();
-    }));
+    }
 
-    // FIXME - this test no longer valid
-    xit('should contain all studies on startup', function() {
-      //expect(_.difference(studies, scope.studies)).toEqual([]);
+    it('scope is valid on startup', function() {
+      var StudyStatus = this.$injector.get('StudyStatus'),
+          allStatuses = StudyStatus.values().concat('All'),
+          counts = createStudyCounts(1, 2, 3);
 
-      expect(scope.vm.studies).toEqual(studies);
+      createController(counts);
+      expect(scope.vm.studyCounts).toEqual(counts);
+      expect(scope.vm.pageSize).toBeDefined();
+
+      _.each(allStatuses, function(status) {
+        expect(scope.vm.possibleStatuses).toContain({ id: status.toLowerCase(), label: status});
+      });
     });
+
+    it('updateStudies retrieves new list of studies', function() {
+      var Study = this.$injector.get('Study'),
+          counts = createStudyCounts(1, 2, 3),
+          listOptions = {};
+
+      spyOn(Study, 'list').and.callFake(function () {});
+
+      createController(counts);
+      scope.vm.updateStudies(listOptions);
+      scope.$digest();
+
+      expect(Study.list).toHaveBeenCalledWith(listOptions);
+    });
+
 
   });
 

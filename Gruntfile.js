@@ -4,14 +4,6 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
-    jshint: {
-      files: ['Gruntfile.js', 'app/assets/javascripts/**/*.js', 'test/assets/javascripts/**/*.js'],
-      options: {
-        globals: {
-          jQuery: true
-        }
-      }
-    },
     karma: {
       options: {
         configFile: 'karma.conf.js'
@@ -25,50 +17,55 @@ module.exports = function(grunt) {
         preprocessors: {
           'app/assets/javascripts/**/*.js': 'coverage'
         },
-        reporters: ['progress', 'coverage']
+        reporters: ['dots', 'coverage']
       }
-    },
-
-    ngAnnotate: {
-      options: {
-        add: false,
-        remove: false,
-        singleQuotes: true
-      },
-      bbwebApp: {
-        files: [
-          {
-            expand: true,
-            src: ['app/assets/javascripts/**/*.js'],
-            ext: '.annotated.js', // Dest filepaths will have this extension.
-            extDot: 'last'       // Extensions in filenames begin after the last dot
-          },
-        ],
-      }
-    },
-
-    protractor: {
-      options: {
-        configFile: "node_modules/protractor/referenceConf.js", // Default config file
-        keepAlive: true, // If false, the grunt process stops when the test fails.
-        noColor: false, // If true, protractor will not use colors in its output.
-        args: {
-          // Arguments passed to the command
-        }
-      },
-      your_target: {   // Grunt requires at least one target to run so you can simply put 'all: {}' here too.
-        options: {
-          configFile: "e2e.conf.js", // Target-specific config file
-          args: {} // Target-specific arguments
-        }
-      },
     }
+
+    // ngAnnotate: {
+    //   options: {
+    //     add: false,
+    //     remove: false,
+    //     singleQuotes: true
+    //   },
+    //   bbwebApp: {
+    //     files: [
+    //       {
+    //         expand: true,
+    //         src: ['app/assets/javascripts/**/*.js'],
+    //         ext: '.annotated.js', // Dest filepaths will have this extension.
+    //         extDot: 'last'       // Extensions in filenames begin after the last dot
+    //       },
+    //     ],
+    //   }
+    // },
+
+    // jshint: {
+    //   files: ['Gruntfile.js', 'app/assets/javascripts/**/*.js', 'test/assets/javascripts/**/*.js'],
+    //   options: {
+    //     jshintrc: '.jshintrc'
+    //   }
+    // },
+
+    // protractor: {
+    //   options: {
+    //     configFile: "node_modules/protractor/referenceConf.js", // Default config file
+    //     keepAlive: true, // If false, the grunt process stops when the test fails.
+    //     noColor: false, // If true, protractor will not use colors in its output.
+    //     args: {
+    //       // Arguments passed to the command
+    //     }
+    //   },
+    //   your_target: {   // Grunt requires at least one target to run so you can simply put 'all: {}' here too.
+    //     options: {
+    //       configFile: "e2e.conf.js", // Target-specific config file
+    //       args: {} // Target-specific arguments
+    //     }
+    //   },
+    // }
 
   });
 
   grunt.loadNpmTasks('grunt-karma');
-  grunt.registerTask('jshint', ['jshint']);
-
   grunt.registerTask('test', 'Run tests on singleRun karma server', function () {
     if (grunt.option('coverage')) {
       var karmaOptions = grunt.config.get('karma.options'),
@@ -79,5 +76,6 @@ module.exports = function(grunt) {
     grunt.task.run('karma:unit');
   });
 
-  grunt.loadNpmTasks('grunt-ng-annotate');
+  // grunt.registerTask('jshint', ['jshint']);
+  // grunt.loadNpmTasks('grunt-ng-annotate');
 };

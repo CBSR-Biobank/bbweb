@@ -11,7 +11,7 @@ define([], function(){
   function infoUpdateRemoveButtonsFactory() {
     var directive = {
       restrict: 'E',
-      replace: 'true',
+      replace: true,
       scope: {
         info: '&onInfo',
         update: '&onUpdate',

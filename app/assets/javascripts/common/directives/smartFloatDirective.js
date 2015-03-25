@@ -18,10 +18,10 @@ define([], function(){
         if (FLOAT_REGEXP.test(viewValue)) {
           ctrl.$setValidity('float', true);
           return parseFloat(viewValue.replace(',', '.'));
-        } else {
-          ctrl.$setValidity('float', false);
-          return undefined;
         }
+
+        ctrl.$setValidity('float', false);
+        return undefined;
       });
     }
   }

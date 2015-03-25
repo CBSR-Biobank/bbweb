@@ -5,6 +5,7 @@ define(['angular', 'underscore'], function(angular, _) {
     'funutils',
     'biobankApi',
     'AnnotationValueType',
+    'AnnotationMaxValueCount',
     'validationService',
     'studyAnnotationTypeValidation',
     'AnnotationType'
@@ -16,6 +17,7 @@ define(['angular', 'underscore'], function(angular, _) {
   function StudyAnnotationTypeFactory(funutils,
                                       biobankApi,
                                       AnnotationValueType,
+                                      AnnotationMaxValueCount,
                                       validationService,
                                       studyAnnotationTypeValidation,
                                       AnnotationType) {
@@ -91,33 +93,6 @@ define(['angular', 'underscore'], function(angular, _) {
         this.maxValueCount = undefined;
       }
       this.options = [];
-    };
-
-    /**
-     * Used to add an option. Should only be called when the value type is 'Select'.
-     */
-    StudyAnnotationType.prototype.addOption = function () {
-      if (!this.isValueTypeSelect()) {
-        throw new Error('value type is not select: ' + this.valueType);
-      }
-      this.options.push('');
-    };
-
-    /**
-     * Used to remove an option. Should only be called when the value type is 'Select'.
-     */
-    StudyAnnotationType.prototype.removeOption = function (option) {
-      if (this.options.length <= 1) {
-        throw new Error('options is empty, cannot remove any more options');
-      }
-      this.options = _.without(this.options, option);
-    };
-
-    /**
-     * Returns true if the maxValueCount value is valid.
-     */
-    StudyAnnotationType.prototype.maxValueCountValid = function () {
-      return ((this.maxValueCount >= 1) && (this.maxValueCount <= 2));
     };
 
     function create(validator, createFn, obj) {

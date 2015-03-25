@@ -24,7 +24,7 @@ define(['angular'], function(angular) {
         }
       })
       .state('home.about', {
-        url: '^/about',
+        url: 'about',
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/home/about.html'
@@ -35,7 +35,7 @@ define(['angular'], function(angular) {
         }
       })
       .state('home.contact', {
-        url: '^/contact',
+        url: 'contact',
         views: {
           'main@': {
             templateUrl: '/assets/javascripts/home/contact.html'
