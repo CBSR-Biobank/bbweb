@@ -34,6 +34,7 @@
       "inject":     true,
       "it":         true,
       "jasmine":    true,
-      "spyOn":      true
+      "spyOn":      true,
+      "xit":        true
     }
 }

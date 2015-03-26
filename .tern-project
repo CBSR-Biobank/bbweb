@@ -4,6 +4,8 @@
     "jquery"
   ],
   "loadEagerly": [
+    "app/assets/javascripts/**/*.js",
+    "test/assets/javascripts/**/*.js"
   ],
   "plugins": {
     "angular": "target/web/web-modules/main/webjars/lib/angularjs",
