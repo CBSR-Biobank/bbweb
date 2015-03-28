@@ -1,12 +1,16 @@
 define([], function() {
   'use strict';
 
-  annotationTypeViewerFactory.$inject = ['EntityViewer'];
+  annotationTypeViewerFactory.$inject = [
+    'EntityViewer',
+    'ParticipantAnnotationType'
+  ];
 
   /**
    *
    */
-  function annotationTypeViewerFactory(EntityViewer) {
+  function annotationTypeViewerFactory(EntityViewer,
+                                      ParticipantAnnotationType) {
 
     function AnnotationTypeViewer(annotationType, title) {
       var ev = new EntityViewer(annotationType, title);
@@ -14,11 +18,11 @@ define([], function() {
       ev.addAttribute('Name', annotationType.name);
       ev.addAttribute('Type', annotationType.valueType);
 
-      if (typeof annotationType.required !== 'undefined') {
+      if (annotationType instanceof ParticipantAnnotationType) {
         ev.addAttribute('Required', annotationType.required ? 'Yes' : 'No');
       }
 
-      if (annotationType.valueType === 'Select') {
+      if (annotationType.isValueTypeSelect()) {
         if (!annotationType.options || annotationType.options.length < 1) {
           throw new Error('invalid annotation type options');
         }

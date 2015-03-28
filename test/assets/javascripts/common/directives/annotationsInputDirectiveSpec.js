@@ -14,7 +14,7 @@ define([
   /**
    *
    */
-  fdescribe('Directive: annotationsInput', function() {
+  describe('Directive: annotationsInput', function() {
 
     var scope,
         compile,

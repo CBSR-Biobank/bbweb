@@ -14,7 +14,6 @@ define([], function(){
         onAdd: '&',
         addButtonTitle: '@',
         addButtonEnabled: '&',
-        panelToggle: '&',
         panelOpen: '='
       },
       templateUrl: '/assets/javascripts/common/directives/panelButtons.html',

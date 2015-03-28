@@ -4,11 +4,10 @@
 define([
   'angular',
   'angularMocks',
-  'jquery',
   'underscore',
   'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, $, _, testUtils) {
+], function(angular, mocks, _, testUtils) {
   'use strict';
 
   describe('Directive: updateRemoveButtons', function() {

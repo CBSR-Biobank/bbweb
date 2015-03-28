@@ -136,6 +136,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         });
 
         it('maxValueCountRequired is valid', function() {
+          annotTypeWithId.valueType = AnnotationValueType.SELECT();
+          annotTypeWithId.maxValueCount = 0;
           createController(state, annotTypeWithId);
 
           annotTypeWithId.maxValueCount = 0;

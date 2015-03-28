@@ -11,12 +11,10 @@ define([], function(){
       scope: {
         text: '=',
         toggleLength: '=',
-        textEmptyWarning: '='
+        textEmptyWarning: '@'
       },
       templateUrl : '/assets/javascripts/common/directives/truncateToggle.html',
       controller: controller
-      //,
-      //link: link
     };
 
     controller.$inject = ['$scope', '$filter'];
