@@ -1,12 +1,12 @@
 define([], function() {
   'use strict';
 
-  processingTypeUtils.$inject = ['domainEntityRemoveService', 'processingTypesService'];
+  processingTypeUtils.$inject = ['domainEntityService', 'processingTypesService'];
 
   /**
    * Removes a processing type.
    */
-  function processingTypeUtils(domainEntityRemoveService, processingTypesService) {
+  function processingTypeUtils(domainEntityService, processingTypesService) {
     var service = {
       remove: remove
     };
@@ -21,7 +21,7 @@ define([], function() {
         return processingTypesService.remove(processingType);
       }
 
-      return domainEntityRemoveService.removeNoStateChange(
+      return domainEntityService.removeEntity(
         removeProcessingType,
         'Remove Processing Type',
         'Are you sure you want to remove processing type ' + processingType.name + '?',

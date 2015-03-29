@@ -9,7 +9,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
         state,
         studiesService,
         notificationsService,
-        domainEntityUpdateError,
+        domainEntityService,
         Study,
         newStudy,
         studyWithId;
@@ -19,20 +19,20 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     beforeEach(inject(function($state,
                                _studiesService_,
                                _notificationsService_,
-                               _domainEntityUpdateError_,
+                               _domainEntityService_,
                                _Study_,
                               fakeDomainEntities) {
       state                   = $state;
       studiesService          = _studiesService_;
       notificationsService    = _notificationsService_;
-      domainEntityUpdateError = _domainEntityUpdateError_;
+      domainEntityService = _domainEntityService_;
       Study                   = _Study_;
 
       newStudy = new Study();
       studyWithId = new Study(fakeDomainEntities.study());
 
       spyOn(state, 'go');
-      spyOn(domainEntityUpdateError, 'handleErrorNoStateChange');
+      spyOn(domainEntityService, 'updateErrorModal');
     }));
 
     describe('when adding a study', function() {
@@ -44,7 +44,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
           $scope:                  scope,
           $state:                  state,
           notificationsService:    notificationsService,
-          domainEntityUpdateError: domainEntityUpdateError,
+          domainEntityService: domainEntityService,
           study:                   newStudy
         });
         scope.$digest();
@@ -87,7 +87,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
         scope.vm.submit(study);
         scope.$digest();
-        expect(domainEntityUpdateError.handleErrorNoStateChange).toHaveBeenCalledWith('xxx', 'study');
+        expect(domainEntityService.updateErrorModal).toHaveBeenCalledWith('xxx', 'study');
       }));
 
     });
@@ -102,7 +102,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
           $scope:                  scope,
           $state:                  state,
           notificationsService:    notificationsService,
-          domainEntityUpdateError: domainEntityUpdateError,
+          domainEntityService: domainEntityService,
           study:                   studyWithId
         });
         scope.$digest();
@@ -144,7 +144,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
         scope.vm.submit(studyWithId);
         scope.$digest();
-        expect(domainEntityUpdateError.handleErrorNoStateChange)
+        expect(domainEntityService.updateErrorModal)
           .toHaveBeenCalledWith('xxx', 'study');
       }));
 

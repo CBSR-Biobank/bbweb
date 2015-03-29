@@ -5,7 +5,7 @@ define([], function() {
     '$scope',
     '$stateParams',
     'stateHelper',
-    'domainEntityUpdateError',
+    'domainEntityService',
     'notificationsService',
     'user',
     'centre',
@@ -17,7 +17,7 @@ define([], function() {
   function CentreEditCtrl($scope,
                           $stateParams,
                           stateHelper,
-                          domainEntityUpdateError,
+                          domainEntityService,
                           notificationsService,
                           user,
                           centre) {
@@ -45,7 +45,7 @@ define([], function() {
       centre.addOrUpdate()
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityUpdateError(error, 'centre', returnState);
+          domainEntityService(error, 'centre', returnState);
         });
     }
 

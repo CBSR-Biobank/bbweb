@@ -9,7 +9,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         controller,
         rootScope,
         fakeEntities,
-        domainEntityUpdateError,
+        domainEntityService,
         notificationsService,
         ParticipantAnnotationType,
         AnnotationValueType,
@@ -20,7 +20,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     beforeEach(inject(function($state,
                                $controller,
                                $rootScope,
-                               _domainEntityUpdateError_,
+                               _domainEntityService_,
                                _notificationsService_,
                                Study,
                                _ParticipantAnnotationType_,
@@ -30,7 +30,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       controller                = $controller;
       rootScope                 = $rootScope;
       fakeEntities              = fakeDomainEntities;
-      domainEntityUpdateError   = _domainEntityUpdateError_;
+      domainEntityService   = _domainEntityService_;
       notificationsService      = _notificationsService_;
       ParticipantAnnotationType = _ParticipantAnnotationType_;
       AnnotationValueType       = _AnnotationValueType_;
@@ -238,9 +238,9 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         });
 
         it('when submitting and server responds with an error, the error message is displayed', function() {
-          var domainEntityUpdateError = this.$injector.get('domainEntityUpdateError');
+          var domainEntityService = this.$injector.get('domainEntityService');
 
-          spyOn(domainEntityUpdateError, 'handleErrorNoStateChange')
+          spyOn(domainEntityService, 'updateErrorModal')
             .and.callFake(function () {});
 
           spyOnAnnotTypeAddOrUpdateAndReject(annotTypeNew);
@@ -249,7 +249,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           scope.vm.submit(annotTypeNew);
           scope.$digest();
 
-          expect(domainEntityUpdateError.handleErrorNoStateChange).toHaveBeenCalled();
+          expect(domainEntityService.updateErrorModal).toHaveBeenCalled();
         });
 
         it('when updating should return to the valid state on submit', function() {
@@ -267,7 +267,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
             $scope:                    scope,
             $state:                    state,
             notificationsService:      notificationsService,
-            domainEntityUpdateError:   domainEntityUpdateError,
+            domainEntityService:   domainEntityService,
             ParticipantAnnotationType: ParticipantAnnotationType,
             AnnotationValueType:       AnnotationValueType,
             study:                     study,

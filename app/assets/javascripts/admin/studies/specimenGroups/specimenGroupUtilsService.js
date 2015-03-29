@@ -2,7 +2,7 @@ define(['underscore'], function(_) {
   'use strict';
 
   specimenGroupUtils.$inject = [
-    'domainEntityRemoveService',
+    'domainEntityService',
     'modalService',
     'specimenGroupsService'
   ];
@@ -10,7 +10,7 @@ define(['underscore'], function(_) {
   /**
    * Removes a specimen group.
    */
-  function specimenGroupUtils(domainEntityRemoveService,
+  function specimenGroupUtils(domainEntityService,
                               modalService,
                               specimenGroupsService) {
     var service = {
@@ -36,7 +36,7 @@ define(['underscore'], function(_) {
         return specimenGroupsService.remove(specimenGroup);
       }
 
-      return domainEntityRemoveService.removeNoStateChange(
+      return domainEntityService.removeEntity(
         removeInternal,
         'Remove Specimen Group',
         'Are you sure you want to remove specimen group ' + specimenGroup.name + '?',

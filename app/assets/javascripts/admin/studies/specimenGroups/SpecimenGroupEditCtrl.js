@@ -3,7 +3,7 @@ define([], function() {
 
   SpecimenGroupEditCtrl.$inject = [
     '$state',
-    'domainEntityUpdateError',
+    'domainEntityService',
     'specimenGroupsService',
     'notificationsService',
     'valueTypes',
@@ -15,7 +15,7 @@ define([], function() {
    * Add or update an specimen Group.
    */
   function SpecimenGroupEditCtrl($state,
-                                 domainEntityUpdateError,
+                                 domainEntityService,
                                  specimenGroupsService,
                                  notificationsService,
                                  valueTypes,
@@ -51,7 +51,7 @@ define([], function() {
       specimenGroupsService.addOrUpdate(specimenGroup)
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityUpdateError.handleErrorNoStateChange(
+          domainEntityService.updateErrorModal(
             error,'specimen link type');
         });
     }

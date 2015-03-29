@@ -22,7 +22,7 @@ define(['angular'], function(angular) {
     '$state',
     'LocationViewer',
     'Panel',
-    'domainEntityRemoveService'
+    'domainEntityService'
   ];
 
   /**
@@ -32,7 +32,7 @@ define(['angular'], function(angular) {
                               $state,
                               LocationViewer,
                               Panel,
-                              domainEntityRemoveService) {
+                              domainEntityService) {
     var vm = this;
 
     var panel = new Panel('centre.panel.locations', 'home.admin.centres.centre.locationAdd');
@@ -63,13 +63,12 @@ define(['angular'], function(angular) {
     }
 
     function remove(location) {
-      domainEntityRemoveService.remove(
+      domainEntityService.removeEntity(
+        removeCallback,
         'Remove Location',
         'Are you sure you want to remove location ' + location.name + '?',
-        'Location ' + location.name + ' cannot be removed: ',
-        removeCallback,
-        location,
-        'home.admin.centres.centre.locations');
+        'Remove Failed',
+        'Location ' + location.name + ' cannot be removed: ');
 
       function removeCallback(location) {
         return vm.centre.removeLocation(location);

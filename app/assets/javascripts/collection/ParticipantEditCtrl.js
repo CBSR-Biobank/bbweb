@@ -4,7 +4,7 @@ define(['underscore'], function(_) {
   ParticipantEditCtrl.$inject = [
     '$state',
     '$stateParams',
-    'domainEntityUpdateError',
+    'domainEntityService',
     'notificationsService',
     'study',
     'participant',
@@ -16,7 +16,7 @@ define(['underscore'], function(_) {
    */
   function ParticipantEditCtrl($state,
                                $stateParams,
-                               domainEntityUpdateError,
+                               domainEntityService,
                                notificationsService,
                                study,
                                participant,
@@ -53,11 +53,10 @@ define(['underscore'], function(_) {
       participant.addOrUpdate()
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityUpdateError.handleError(
-            error,
-            'participant',
-            'home.collection.study',
-            {studyId: study.id});
+          domainEntityService.updateErrorModal(
+            error, 'participant').catch(function () {
+              $state.go('home.collection.study', {studyId: study.id});
+            });
         });
     }
 

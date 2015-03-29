@@ -22,9 +22,7 @@ define(function (require) {
 
       Panel                            = require('./services/Panel'),
       biobankApiService                = require('./services/biobankApiService'),
-      domainEntityRemoveService        = require('./services/domainEntityRemoveService'),
       domainEntityService              = require('./services/domainEntityService'),
-      domainEntityUpdateErrorService   = require('./services/domainEntityUpdateErrorService'),
       funutils                         = require('./services/funutils'),
       modalService                     = require('./services/modalService'),
       notificationsService             = require('./services/notificationsService'),
@@ -56,9 +54,7 @@ define(function (require) {
 
   module.service('Panel', Panel);
   module.service('biobankApi', biobankApiService);
-  module.service('domainEntityRemoveService', domainEntityRemoveService);
   module.service('domainEntityService', domainEntityService);
-  module.service('domainEntityUpdateError', domainEntityUpdateErrorService);
   module.service('funutils', funutils);
   module.service('modalService', modalService);
   module.service('notificationsService', notificationsService);

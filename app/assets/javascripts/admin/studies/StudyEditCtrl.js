@@ -6,7 +6,7 @@ define(['underscore'], function(_) {
     '$state',
     'studiesService',
     'notificationsService',
-    'domainEntityUpdateError',
+    'domainEntityService',
     'study'
   ];
 
@@ -16,7 +16,7 @@ define(['underscore'], function(_) {
   function StudyEditCtrl($state,
                          studiesService,
                          notificationsService,
-                         domainEntityUpdateError,
+                         domainEntityService,
                          study) {
     var vm = this,
         action;
@@ -52,7 +52,7 @@ define(['underscore'], function(_) {
     }
 
     function submitError(error) {
-      domainEntityUpdateError.handleErrorNoStateChange(error, 'study');
+      domainEntityService.updateErrorModal(error, 'study');
     }
 
     function submit(study) {

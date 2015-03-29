@@ -4,7 +4,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: UserUpdateCtrl', function() {
-    //   var scope, stateHelper, usersService, domainEntityUpdateError;
+    //   var scope, stateHelper, usersService, domainEntityService;
   //   var state = {current: {data: {returnState: 'admin.users'}}};
   //   var user  = {name: 'User1', email: 'admin@admin.com'};
 
@@ -15,23 +15,23 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   //              $controller,
   //              $state,
   //              $filter,
-  //              _domainEntityUpdateError_,
+  //              _domainEntityService_,
   //              _usersService_,
   //              modalService,
   //              _stateHelper_) {
-  //       domainEntityUpdateError = _domainEntityUpdateError_;
+  //       domainEntityService = _domainEntityService_;
   //       usersService = _usersService_;
   //       stateHelper = _stateHelper_;
 
   //       spyOn(stateHelper, 'reloadStateAndReinit');
-  //       spyOn(domainEntityUpdateError, 'handleError');
+  //       spyOn(domainEntityService, 'handleError');
 
   //       scope = $rootScope.$new();
   //       $controller('UserUpdateCtrl as vm', {
   //         $scope:                  scope,
   //         $state:                  state,
   //         $filter:                 $filter,
-  //         domainEntityUpdateError: domainEntityUpdateError,
+  //         domainEntityService: domainEntityService,
   //         usersService:            usersService,
   //         modalService:            modalService,
   //         stateHelper:             stateHelper,

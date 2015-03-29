@@ -8,7 +8,7 @@ define(['underscore'], function(_) {
     '$state',
     'spcLinkTypesService',
     'SpecimenLinkType',
-    'domainEntityUpdateError',
+    'domainEntityService',
     'notificationsService',
     'study',
     'spcLinkType',
@@ -21,7 +21,7 @@ define(['underscore'], function(_) {
   function SpcLinkTypeEditCtrl($state,
                                spcLinkTypesService,
                                SpecimenLinkType,
-                               domainEntityUpdateError,
+                               domainEntityService,
                                notificationsService,
                                study,
                                spcLinkType,
@@ -71,7 +71,7 @@ define(['underscore'], function(_) {
       spcLinkTypesService.addOrUpdate(serverSpcLinkType)
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityUpdateError.handleErrorNoStateChange(
+          domainEntityService.updateErrorModal(
             error, 'collection event type');
         });
     }

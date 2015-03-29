@@ -5,7 +5,7 @@ define(['underscore'], function(_) {
   CeventTypeEditCtrl.$inject = [
     '$state',
     'CollectionEventType',
-    'domainEntityUpdateError',
+    'domainEntityService',
     'ceventTypesService',
     'notificationsService',
     'study',
@@ -19,7 +19,7 @@ define(['underscore'], function(_) {
    */
   function CeventTypeEditCtrl($state,
                               CollectionEventType,
-                              domainEntityUpdateError,
+                              domainEntityService,
                               ceventTypesService,
                               notificationsService,
                               study,
@@ -73,7 +73,7 @@ define(['underscore'], function(_) {
       ceventTypesService.addOrUpdate(serverCeventType)
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityUpdateError.handleErrorNoStateChange(
+          domainEntityService.updateErrorModal(
             error, 'collection event type');
         });
     }

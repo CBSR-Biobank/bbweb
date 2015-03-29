@@ -7,7 +7,7 @@ define(['underscore'], function(_) {
     'ParticipantAnnotationType',
     'CollectionEventAnnotationType',
     'SpecimenLinkAnnotationType',
-    'domainEntityRemoveService'
+    'domainEntityService'
   ];
 
   /**
@@ -18,7 +18,7 @@ define(['underscore'], function(_) {
                                     ParticipantAnnotationType,
                                     CollectionEventAnnotationType,
                                     SpecimenLinkAnnotationType,
-                                    domainEntityRemoveService) {
+                                    domainEntityService) {
     var service = {
       inUseModal: inUseModal,
       remove:     remove
@@ -55,7 +55,7 @@ define(['underscore'], function(_) {
         return annotType.remove();
       }
 
-      return domainEntityRemoveService.removeNoStateChange(
+      return domainEntityService.removeEntity(
         removeInternal,
         'Remove Annotation Type',
         'Are you sure you want to remove annotation type ' + annotType.name + '?',

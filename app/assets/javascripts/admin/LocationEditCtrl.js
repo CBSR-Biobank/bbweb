@@ -4,7 +4,7 @@ define(['underscore'], function(_) {
   LocationEditCtrl.$inject = [
     '$state',
     'Location',
-    'domainEntityUpdateError',
+    'domainEntityService',
     'notificationsService',
     'centre'
   ];
@@ -14,7 +14,7 @@ define(['underscore'], function(_) {
    */
   function LocationEditCtrl($state,
                             Location,
-                            domainEntityUpdateError,
+                            domainEntityService,
                             notificationsService,
                             centre) {
 
@@ -48,12 +48,11 @@ define(['underscore'], function(_) {
       vm.centre.addLocation(location)
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityUpdateError.handleError(
-            error,
-            'location',
-            'home.admin.centres.centre.locations',
-            {},
-            {reload: true});
+          domainEntityService.updateErrorModal(
+            error, 'location').catch(function () {
+              $state.go('home.admin.centres.centre.locations', {}, {reload: true});
+
+            });
         });
     }
 

@@ -3,7 +3,7 @@ define(['underscore'], function(_) {
 
   AnnotationTypeEditCtrl.$inject = [
     '$state',
-    'domainEntityUpdateError',
+    'domainEntityService',
     'notificationsService',
     'ParticipantAnnotationType',
     'AnnotationValueType',
@@ -19,7 +19,7 @@ define(['underscore'], function(_) {
    * should return a promise.
    */
   function AnnotationTypeEditCtrl($state,
-                                  domainEntityUpdateError,
+                                  domainEntityService,
                                   notificationsService,
                                   ParticipantAnnotationType,
                                   AnnotationValueType,
@@ -127,7 +127,7 @@ define(['underscore'], function(_) {
      * Reloads the state without reloading the form.
      */
     function submitError(error) {
-      return domainEntityUpdateError.handleErrorNoStateChange(error, 'study');
+      return domainEntityService.updateErrorModal(error, 'study');
     }
 
     /**

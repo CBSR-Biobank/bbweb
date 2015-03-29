@@ -1,12 +1,12 @@
 define([], function() {
   'use strict';
 
-  ceventTypeUtils.$inject = ['domainEntityRemoveService', 'ceventTypesService'];
+  ceventTypeUtils.$inject = ['domainEntityService', 'ceventTypesService'];
 
   /**
    * Removes a collection event type.
    */
-  function ceventTypeUtils(domainEntityRemoveService, ceventTypesService) {
+  function ceventTypeUtils(domainEntityService, ceventTypesService) {
     var service = {
       remove: remove
     };
@@ -21,7 +21,7 @@ define([], function() {
         return ceventTypesService.remove(ceventType);
       }
 
-      return domainEntityRemoveService.removeNoStateChange(
+      return domainEntityService.removeEntity(
         removeCeventType,
         'Remove Collection Event Type',
         'Are you sure you want to remove collection event type ' + ceventType.name + '?',
