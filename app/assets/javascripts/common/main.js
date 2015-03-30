@@ -22,7 +22,6 @@ define(function (require) {
 
       Panel                            = require('./services/Panel'),
       biobankApiService                = require('./services/biobankApiService'),
-      domainEntityService              = require('./services/domainEntityService'),
       funutils                         = require('./services/funutils'),
       modalService                     = require('./services/modalService'),
       notificationsService             = require('./services/notificationsService'),
@@ -33,35 +32,34 @@ define(function (require) {
 
   var module = angular.module('biobank.common', ['ui.bootstrap', 'ngTable']);
 
-  module.directive('annotationsInput', annotationsInputDirective.directive);
-  module.controller('AnnotationsInputCtrl', annotationsInputDirective.controller);
+  module.directive('annotationsInput',        annotationsInputDirective.directive);
+  module.controller('AnnotationsInputCtrl',   annotationsInputDirective.controller);
 
-  module.directive('focusMe', focusMeDirective);
+  module.directive('focusMe',                 focusMeDirective);
   module.directive('infoUpdateRemoveButtons', infoUpdateRemoveButtonsDirective);
-  module.directive('integer', integerDirective);
+  module.directive('integer',                 integerDirective);
 
-  module.directive('panelButtons', panelButtonsDirective.directive);
+  module.directive('panelButtons',            panelButtonsDirective.directive);
   module.controller('PanelButtonsController', panelButtonsDirective.controller);
 
-  module.directive('smartFloat', smartFloatDirective);
-  module.directive('str2integer', str2integerDirective);
-  module.directive('truncateToggle', truncateToggleDirective);
-  module.directive('uiBreadcrumbs', uiBreadcrumbsDirective);
-  module.directive('updateRemoveButtons', updateRemoveButtonsDirective);
+  module.directive('smartFloat',              smartFloatDirective);
+  module.directive('str2integer',             str2integerDirective);
+  module.directive('truncateToggle',          truncateToggleDirective);
+  module.directive('uiBreadcrumbs',           uiBreadcrumbsDirective);
+  module.directive('updateRemoveButtons',     updateRemoveButtonsDirective);
 
-  module.filter('timeago', timeagoFilter);
-  module.filter('truncate', truncateFilter);
+  module.filter('timeago',                    timeagoFilter);
+  module.filter('truncate',                   truncateFilter);
 
-  module.service('Panel', Panel);
-  module.service('biobankApi', biobankApiService);
-  module.service('domainEntityService', domainEntityService);
-  module.service('funutils', funutils);
-  module.service('modalService', modalService);
-  module.service('notificationsService', notificationsService);
-  module.service('queryStringService', queryStringService);
-  module.service('stateHelper', stateHelperService);
-  module.service('tableService', tableService);
-  module.service('validationService', validationService);
+  module.service('Panel',                     Panel);
+  module.service('biobankApi',                biobankApiService);
+  module.service('funutils',                  funutils);
+  module.service('modalService',              modalService);
+  module.service('notificationsService',      notificationsService);
+  module.service('queryStringService',        queryStringService);
+  module.service('stateHelper',               stateHelperService);
+  module.service('tableService',              tableService);
+  module.service('validationService',         validationService);
 
   return module;
 });

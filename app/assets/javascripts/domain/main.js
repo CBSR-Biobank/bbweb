@@ -16,6 +16,7 @@ define(function (require) {
       AnnotationValueType                 = require('./AnnotationValueType'),
       AnnotationMaxValueCount             = require('./AnnotationMaxValueCount'),
       annotationTypeValidation            = require('./annotationTypeValidation'),
+      domainEntityService                 = require('./domainEntityService'),
 
       Centre                              = require('./centre/Centre'),
       CentreCounts                        = require('./centre/CentreCounts'),
@@ -59,6 +60,8 @@ define(function (require) {
   module.factory('AnnotationType',                      AnnotationType);
   module.factory('AnnotationTypeDataSet',               AnnotationTypeDataSet);
   module.factory('AnnotationTypeViewer',                AnnotationTypeViewer);
+  module.service('domainEntityService',                 domainEntityService);
+
   module.factory('Centre',                              Centre);
   module.factory('CentreCounts',                        CentreCounts);
   module.factory('CeventTypeViewer',                    CeventTypeViewer);
