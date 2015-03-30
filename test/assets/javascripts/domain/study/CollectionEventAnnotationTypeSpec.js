@@ -30,9 +30,10 @@ define([
       context.annotTypeGetFn           = CollectionEventAnnotationType.get;
     }));
 
-    function createServerAnnotType() {
+    function createServerAnnotType(options) {
       var study = fakeEntities.study();
-      return fakeEntities.studyAnnotationType(study);
+      options = options || {};
+      return fakeEntities.studyAnnotationType(study, options);
     }
 
     function createAnnotType(obj) {

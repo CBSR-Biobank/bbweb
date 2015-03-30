@@ -4,9 +4,10 @@
 define([
   'angular',
   'angularMocks',
+  'underscore',
   './studyAnnotationTypeSharedSpec',
   'biobankApp'
-], function(angular, mocks, studyAnnotationTypeSharedSpec) {
+], function(angular, mocks, _, studyAnnotationTypeSharedSpec) {
   'use strict';
 
   describe('ParticipantAnnotationType', function() {
@@ -31,9 +32,10 @@ define([
       context.annotTypeGetFn           = ParticipantAnnotationType.get;
     }));
 
-    function createServerAnnotType() {
+    function createServerAnnotType(options) {
       var study = fakeEntities.study();
-      return fakeEntities.studyAnnotationType(study, { required: true });
+      options = _.extend({ required: true }, options);
+      return fakeEntities.studyAnnotationType(study, options);
     }
 
     function createAnnotType(obj) {

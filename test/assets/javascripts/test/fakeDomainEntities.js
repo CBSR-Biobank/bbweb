@@ -259,8 +259,6 @@ define([
           options.maxValueCount = 1;
         }
 
-        at.maxValueCount = options.maxValueCount;
-
         if (_.isUndefined(options.options)) {
           at.options = _.map(_.range(2), function() {
             return domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE());
@@ -268,6 +266,10 @@ define([
         } else {
           at.options = options.options;
         }
+      }
+
+      if (!_.isUndefined(options.maxValueCount)) {
+        at.maxValueCount = options.maxValueCount;
       }
 
       if (!_.isUndefined(options.required)) {

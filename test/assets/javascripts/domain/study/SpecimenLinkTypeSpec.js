@@ -1,7 +1,6 @@
 /**
  * Jasmine test suite
  *
- * global define
  */
 define([
   'angular',

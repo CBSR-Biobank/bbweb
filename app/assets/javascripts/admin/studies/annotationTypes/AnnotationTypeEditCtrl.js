@@ -92,7 +92,7 @@ define(['underscore'], function(_) {
      * of selection: either single selection or multiple selections.
      */
     function maxValueCountRequired() {
-      return ! vm.annotType.maxValueCountValid();
+      return ! vm.annotType.isMaxValueCountValid();
     }
 
     /**

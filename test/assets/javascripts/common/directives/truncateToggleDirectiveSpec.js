@@ -82,11 +82,10 @@ define([
     });
 
     it('button is labelled correctly', function() {
-      var pars,
-          buttons,
-          text = faker.lorem.paragraphs(1),
-          scope = createScope(text, 20);
+      var buttons,
+          text = faker.lorem.paragraphs(1);
 
+      createScope(text, 20);
       buttons = element.find('button');
       expect(buttons.length).toBe(1);
       expect(buttons.eq(0).text().trim()).toBe('Collapse');
@@ -94,10 +93,9 @@ define([
 
     it('if text is null then warning message is displayed', function() {
       var pars,
-          buttons,
-          text = '',
-          scope = createScope(text, 20);
+          text = '';
 
+      createScope(text, 20);
       pars = element.find('p');
       expect(pars.length).toBe(2);
       expect(pars.eq(1).text().trim()).toBe(textEmptyWarning);

@@ -18,7 +18,6 @@ define([
         ParticipantAnnotationType,
         CollectionEventAnnotationType,
         SpecimenLinkAnnotationType,
-        AnnotationHelper,
         AnnotationValueType,
         fakeEntities;
 

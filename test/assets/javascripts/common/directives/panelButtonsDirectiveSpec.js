@@ -65,15 +65,17 @@ define([
     });
 
     it('button not present if disabled', function() {
-      var buttons, scope = createScope({ addEnabled: false });
+      var buttons;
 
+      createScope({ addEnabled: false });
       buttons = element.find('button');
       expect(buttons.length).toBe(1);
     });
 
     it('add button has the correct icon', function() {
-      var icons, scope = createScope({ addEnabled: true });
+      var icons;
 
+      createScope({ addEnabled: true });
       icons = element.find('button i');
       expect(icons.length).toBe(2);
       expect(icons.eq(0)).toHaveClass('glyphicon-plus');

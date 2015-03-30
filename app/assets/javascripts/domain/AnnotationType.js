@@ -35,7 +35,7 @@ define(['angular', 'underscore'], function(angular, _) {
     AnnotationType.prototype = Object.create(ConcurrencySafeEntity.prototype);
 
     AnnotationType.prototype.isValueTypeText = function () {
-      return (this.isValueType === AnnotationValueType.TEXT());
+      return (this.valueType === AnnotationValueType.TEXT());
     };
 
     AnnotationType.prototype.isValueTypeNumber = function () {
@@ -63,11 +63,12 @@ define(['angular', 'underscore'], function(angular, _) {
     /**
      * Returns true if the maxValueCount value is valid.
      */
-    AnnotationType.prototype.maxValueCountValid = function () {
+    AnnotationType.prototype.isMaxValueCountValid = function () {
       if (this.isValueTypeSelect()) {
         return (this.isSingleSelect() || this.isMultipleSelect());
       }
-      return (this.maxValueCount === AnnotationMaxValueCount.NONE());
+      return ((this.maxValueCount === null) ||
+              (this.maxValueCount === AnnotationMaxValueCount.NONE()));
     };
 
     /**

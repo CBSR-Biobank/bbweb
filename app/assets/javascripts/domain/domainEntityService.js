@@ -106,6 +106,8 @@ define(['underscore'], function(_) {
       modalService.showModal({}, modalOptions).then(removeConfirmed).catch(deferred.reject);
       return deferred.promise;
 
+      //--
+
       function removeConfirmed() {
         return removePromiseFn()
           .then(deferred.resolve)
