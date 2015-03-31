@@ -6,7 +6,6 @@ define(['underscore'], function(_) {
 
   SpcLinkTypeEditCtrl.$inject = [
     '$state',
-    'spcLinkTypesService',
     'SpecimenLinkType',
     'domainEntityService',
     'notificationsService',
@@ -19,7 +18,6 @@ define(['underscore'], function(_) {
    * Add Specimen Link Type
    */
   function SpcLinkTypeEditCtrl($state,
-                               spcLinkTypesService,
                                SpecimenLinkType,
                                domainEntityService,
                                notificationsService,
@@ -42,9 +40,7 @@ define(['underscore'], function(_) {
     vm.getSpecimenGroupUnits = getSpecimenGroupUnits;
 
     vm.specimenLinkType = new SpecimenLinkType(
-      vm.processingTypesById[spcLinkType.processingTypeId],
-      spcLinkType,
-      {
+      spcLinkType, {
         studySpecimenGroups:  processingDto.specimenGroups,
         studyAnnotationTypes: processingDto.specimenLinkAnnotationTypes
       });
@@ -68,7 +64,7 @@ define(['underscore'], function(_) {
 
       serverSpcLinkType.annotationTypeData = vm.annotationTypeData;
 
-      spcLinkTypesService.addOrUpdate(serverSpcLinkType)
+      serverSpcLinkType.addOrUpdate()
         .then(submitSuccess)
         .catch(function(error) {
           domainEntityService.updateErrorModal(

@@ -70,9 +70,7 @@ define(['angular', 'underscore'], function(angular, _) {
 
     vm.specimenLinkTypes = _.map($scope.processingDto.specimenLinkTypes, function (slt) {
       return new SpecimenLinkType(
-        vm.processingTypes[slt.processingTypeId],
-        slt,
-        {
+        slt, {
           studySpecimenGroups:  $scope.processingDto.specimenGroups,
           studyAnnotationTypes: $scope.processingDto.specimenLinkAnnotationTypes
         });
@@ -89,7 +87,8 @@ define(['angular', 'underscore'], function(angular, _) {
      * Displays a specimen link type in a modal.
      */
     function information(spcLinkType) {
-      return new SpcLinkTypeViewer(spcLinkType);
+      return new SpcLinkTypeViewer(spcLinkType,
+                                   vm.processingTypes[spcLinkType.processingTypeId]);
     }
 
     function add() {

@@ -10,7 +10,7 @@ define([
   'use strict';
 
   describe('Controller: StudiesCtrl', function() {
-    var rootScope, controller, StudyCounts, scope;
+    var rootScope, controller, StudyCounts;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -35,7 +35,7 @@ define([
     }
 
     function createController(studyCounts) {
-      scope = rootScope.$new();
+      var scope = rootScope.$new();
 
       controller('StudiesCtrl as vm', {
         $scope: scope,
@@ -43,14 +43,15 @@ define([
       });
 
       scope.$digest();
+      return scope;
     }
 
     it('scope is valid on startup', function() {
       var StudyStatus = this.$injector.get('StudyStatus'),
           allStatuses = StudyStatus.values().concat('All'),
-          counts = createStudyCounts(1, 2, 3);
+          counts = createStudyCounts(1, 2, 3),
+          scope = createController(counts);
 
-      createController(counts);
       expect(scope.vm.studyCounts).toEqual(counts);
       expect(scope.vm.pageSize).toBeDefined();
 
@@ -62,11 +63,12 @@ define([
     it('updateStudies retrieves new list of studies', function() {
       var Study = this.$injector.get('Study'),
           counts = createStudyCounts(1, 2, 3),
-          listOptions = {};
+          listOptions = {},
+          scope;
 
       spyOn(Study, 'list').and.callFake(function () {});
 
-      createController(counts);
+      scope = createController(counts);
       scope.vm.updateStudies(listOptions);
       scope.$digest();
 

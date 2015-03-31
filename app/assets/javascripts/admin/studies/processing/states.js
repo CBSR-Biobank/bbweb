@@ -123,16 +123,12 @@ define([], function() {
       url: '/sltype/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        spcLinkType: function() {
-          return {
-            processingTypeId:      null,
-            inputGroupId:          null,
-            outputGroupId:         null,
-            inputContainerTypeId:  null,
-            outputContainerTypeId: null,
-            annotationTypeData:    []
-          };
-        }
+        spcLinkType: [
+          'SpecimenLinkType',
+          function(SpecimenLinkType) {
+            return new SpecimenLinkType();
+          }
+        ]
       },
       views: {
         'main@': {
@@ -153,9 +149,9 @@ define([], function() {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         spcLinkType: [
-          '$stateParams', 'spcLinkTypesService', 'study',
-          function($stateParams, spcLinkTypesService) {
-            return spcLinkTypesService.get($stateParams.procTypeId, $stateParams.spcLinkTypeId);
+          '$stateParams', 'SpecimenLinkType',
+          function($stateParams, SpecimenLinkType) {
+            return SpecimenLinkType.get($stateParams.procTypeId, $stateParams.spcLinkTypeId);
           }
         ]
       },

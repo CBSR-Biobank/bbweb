@@ -11,9 +11,9 @@ define(['angular'], function(angular) {
   function config($urlRouterProvider, $stateProvider, authorizationProvider) {
     $urlRouterProvider.otherwise('/');
 
-    resolveUserCounts.$inject = ['usersService'];
-    function resolveUserCounts(usersService) {
-      return usersService.getUserCounts();
+    resolveUserCounts.$inject = ['UserCounts'];
+    function resolveUserCounts(UserCounts) {
+      return UserCounts.get();
     }
 
     /**

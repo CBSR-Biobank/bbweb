@@ -1,12 +1,12 @@
 define(['angular'], function(angular) {
   'use strict';
 
-  specimenGroupsServiceFactory.$inject = ['biobankApi', 'domainEntityService'];
+  specimenGroupsServiceFactory.$inject = ['biobankApi', 'funutils'];
 
   /**
    * Service to access specimen groups.
    */
-  function specimenGroupsServiceFactory(biobankApi, domainEntityService) {
+  function specimenGroupsServiceFactory(biobankApi, funutils) {
     var service = {
       getAll                  : getAll,
       get                     : get,
@@ -60,7 +60,7 @@ define(['angular'], function(angular) {
         specimenType:                specimenGroup.specimenType
       };
 
-      angular.extend(cmd, domainEntityService.getOptionalAttribute(specimenGroup, 'description'));
+      angular.extend(cmd, funutils.pickOptional(specimenGroup, 'description'));
 
       if (specimenGroup.id) {
         cmd.id = specimenGroup.id;

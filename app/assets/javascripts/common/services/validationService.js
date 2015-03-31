@@ -34,7 +34,7 @@ define(['underscore'], function(_) {
       var keys = _.toArray(arguments);
       var fun = function(obj) {
         var result = _.every(keys, function(k) {
-          //console.log(k, _.has(obj, k), obj);
+          //console.log(k, _.has(obj, k), obj[k], obj);
           return _.has(obj, k);
         });
         return result;

@@ -2,14 +2,10 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
   'use strict';
 
   UsersTableCtrl.$inject = [
-    '$rootScope',
-    '$scope',
-    '$state',
-    '$filter',
-    'stateHelper',
     'modalService',
     'tableService',
     'User',
+    'UserStatus',
     'UserViewer',
     'userCounts'
   ];
@@ -17,31 +13,23 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
   /**
    * Displays a list of users in a table.
    */
-  function UsersTableCtrl($rootScope,
-                          $scope,
-                          $state,
-                          $filter,
-                          stateHelper,
-                          modalService,
+  function UsersTableCtrl(modalService,
                           tableService,
                           User,
+                          UserStatus,
                           UserViewer,
                           userCounts) {
     var vm = this;
 
-    vm.users = [];
-    vm.haveUsers = (userCounts.total > 0);
-    vm.paginatedUsers = {};
-
-    vm.nameFilter       = '';
-    vm.emailFilter       = '';
-    vm.possibleStatuses = [
-      { id: 'all',        title: 'All' },
-      { id: 'active',     title: 'Active' },
-      { id: 'registered', title: 'Registered' },
-      { id: 'locked',     title: 'Locked' }
-    ];
+    vm.users               = [];
+    vm.haveUsers           = (userCounts.total > 0);
+    vm.pagedResults      = {};
+    vm.nameFilter          = '';
+    vm.emailFilter         = '';
+    vm.possibleStatuses    = getPossibleStatuses();
     vm.status              = vm.possibleStatuses[0];
+    vm.tableParams         = getTableParams();
+
     vm.userInformation     = userInformation;
     vm.activate            = activate;
     vm.lock                = lock;
@@ -51,23 +39,54 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
     vm.statusFilterUpdated = statusFilterUpdated;
     vm.getTimeAddedlocal   = getTimeAddedlocal;
 
-    var tableParameters = {
-      page: 1,
-      count: 10,
-      sorting: {
-        name: 'asc'
-      }
-    };
-
-    var tableSettings = {
-      total: 0,
-      getData: getData
-    };
-
-    vm.tableParams = tableService.getTableParams(vm.users, tableParameters, tableSettings);
     updateMessage();
 
     // --
+
+    function getPossibleStatuses() {
+      var result = _.map(UserStatus.values(), function(status) {
+        return { id: status.toLowerCase(), title: status };
+      });
+      result.unshift({ id: 'all', title: 'All' });
+      return result;
+    }
+
+    function getTableParams() {
+      var tableParameters = { page: 1,
+                              count: 10,
+                              sorting: {
+                                name: 'asc'
+                              }
+                            },
+          tableSettings = { total: 0,
+                            getData: getTableData
+                          };
+
+      return tableService.getTableParams(vm.users, tableParameters, tableSettings);
+
+      function getTableData($defer, params) {
+        var sortObj = params.sorting();
+        var sortKeys = _.keys(sortObj);
+        var options = {
+          nameFilter:  vm.nameFilter,
+          emailFilter: vm.emailFilter,
+          status:      vm.status.id,
+          sort:        sortKeys[0],
+          page:        params.page(),
+          pageSize:    params.count(),
+          order:       sortObj[sortKeys[0]]
+        };
+
+        User.list(options).then(function (paginatedUsers) {
+          vm.pagedResults = paginatedUsers;
+          vm.users = paginatedUsers.items;
+          vm.pagedResults = paginatedUsers;
+          params.total(paginatedUsers.total);
+          $defer.resolve(vm.users);
+          updateMessage();
+        });
+      }
+    }
 
     function updateMessage() {
       if ((vm.nameFilter === '') && (vm.status.id === 'all')) {
@@ -75,29 +94,6 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
       } else {
         vm.message = 'The following users match the criteria:';
       }
-    }
-
-    function getData($defer, params) {
-      var sortObj = params.sorting();
-      var sortKeys = _.keys(sortObj);
-      var options = {
-        nameFilter:  vm.nameFilter,
-        emailFilter: vm.emailFilter,
-        status:      vm.status.id,
-        sort:        sortKeys[0],
-        page:        params.page(),
-        pageSize:    params.count(),
-        order:       sortObj[sortKeys[0]]
-      };
-
-      User.list(options).then(function (paginatedUsers) {
-        vm.paginatedUsers = paginatedUsers;
-        vm.users = paginatedUsers.items;
-        vm.paginatedUsers = paginatedUsers;
-        params.total(paginatedUsers.total);
-        $defer.resolve(vm.users);
-        updateMessage();
-      });
     }
 
     function tableReloadCommon() {

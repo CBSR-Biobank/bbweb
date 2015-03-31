@@ -16,35 +16,6 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       modalService = _modalService_;
     }));
 
-    describe('getOptionalAttribute', function () {
-
-      it('attribute not present if null', function() {
-        var obj = { attr: null };
-        expect(domainEntityService.getOptionalAttribute(obj, 'attr')).toEqual({});
-      });
-
-      it('attribute not present if zero length', function() {
-        var obj = { attr: '' };
-        expect(domainEntityService.getOptionalAttribute(obj, 'attr')).toEqual({});
-      });
-
-      it('attribute not present if an array of zero length', function() {
-        var obj = { attr: [] };
-        expect(domainEntityService.getOptionalAttribute(obj, 'attr')).toEqual({});
-      });
-
-      it('attribute is present if it is a string of length greater than 0', function() {
-        var obj = { attr: 'test' };
-        expect(domainEntityService.getOptionalAttribute(obj, 'attr')).toEqual(obj);
-      });
-
-      it('attribute is present if it is an array of length greater than 0', function() {
-        var obj = { attr: [ 'test' ] };
-        expect(domainEntityService.getOptionalAttribute(obj, 'attr')).toEqual(obj);
-      });
-
-    });
-
     describe('updateErrorModal', function () {
 
       beforeEach(function () {

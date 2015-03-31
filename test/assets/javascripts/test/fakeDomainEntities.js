@@ -174,7 +174,9 @@ define([
         id:                 utils.uuid(),
         studyId:            study.id,
         name:               domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE()),
-        description:        faker.lorem.words(1)
+        description:        faker.lorem.words(1),
+        specimenGroupData:  [],
+        annotationTypeData: []
       };
 
       options = options || {};

@@ -19,45 +19,41 @@ define(['angular'], function(angular) {
      * Creates an ng-table and the data is provided via a callback function.
      */
     function getTableParamsWithCallback(tableDataFn, customParameters, customSettings) {
-      var defaultParameters = {
-        page: 1,            // show first page
-        count: 10,           // count per page
-        sorting: {
-          name: 'asc'       // initial sorting
-        }
-      };
+      var parameters = {},
+          settings = {},
+          defaultParameters = {
+            page: 1,            // show first page
+            count: 10,           // count per page
+            sorting: {
+              name: 'asc'       // initial sorting
+            }
+          },
+          defaultSettings = {
+            total: 0,
+            getData: function($defer, params) {
+              var filteredData = tableDataFn();
+              var orderedData = params.sorting() ?
+                  $filter('orderBy')(filteredData, params.orderBy()) : filteredData;
+              var page = params.page();
+              var slice = orderedData.slice((page - 1) * params.count(), page * params.count());
 
-      var defaultSettings = {
-        total: 0,
-        getData: function($defer, params) {
-          var filteredData = tableDataFn();
-          var orderedData = params.sorting() ?
-              $filter('orderBy')(filteredData, params.orderBy()) : filteredData;
-          var page = params.page();
-          var slice = orderedData.slice((page - 1) * params.count(), page * params.count());
-
-          if ((page > 1) && (slice.length <= 0)) {
-            params.page(page - 1);
-          }
-          params.total(filteredData.length);
-          $defer.resolve(slice);
-        }
-      };
-
-      var parameters = {};
-      var settings = {};
+              if ((page > 1) && (slice.length <= 0)) {
+                params.page(page - 1);
+              }
+              params.total(filteredData.length);
+              $defer.resolve(slice);
+            }
+          };
 
       customParameters = customParameters || {};
       customSettings = customSettings || {};
 
       // merge defaults with those passed in the function arguments
-      angular.extend(parameters, defaultParameters, customParameters);
-      angular.extend(settings, defaultSettings, customSettings);
+      parameters = angular.extend({}, defaultParameters, customParameters);
+      settings   = angular.extend({}, defaultSettings, customSettings);
 
       /* jshint -W055 */
       var tableParams =  new ngTableParams(parameters, settings);
-      /* jshint +W055 */
-
       return tableParams;
     }
 

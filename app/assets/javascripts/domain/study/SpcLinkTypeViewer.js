@@ -11,11 +11,11 @@ define([], function() {
     /**
      * FIXME: displaying of container types need to be fixed when implemented.
      */
-    function SpcLinkTypeViewer(spcLinkType) {
+    function SpcLinkTypeViewer(spcLinkType, processingType) {
       var ev = new EntityViewer(spcLinkType, 'Specimen Link Type');
 
       ev.addAttribute('Processing Type',
-                      spcLinkType.processingType.name);
+                      processingType.name);
       ev.addAttribute('Input Group',
                       spcLinkType.inputGroup.name);
       ev.addAttribute('Expected input change',

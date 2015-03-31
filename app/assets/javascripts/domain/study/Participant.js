@@ -79,7 +79,7 @@ define(['underscore'], function(_) {
       }, true);
 
       if (!annotValid) {
-        return new Error('invalid object from server: ' + validation);
+        return new Error('invalid object from server: ' + annotValid);
       }
       return new Participant(obj);
     };

@@ -42,7 +42,6 @@ define([
         });
 
       var ceventType = new CollectionEventType(
-        study,
         serverCeventType,
         {
           studySpecimenGroups: study.specimenGroups,

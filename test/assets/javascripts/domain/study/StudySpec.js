@@ -51,6 +51,18 @@ define([
         .toEqual(new Error('invalid object from server: must be a map, has the correct keys'));
     });
 
+    it('can retrieve a single study', function(done) {
+      var study = fakeEntities.study();
+      httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
+
+      Study.get(study.id).then(function (reply) {
+        expect(reply).toEqual(jasmine.any(Study));
+        reply.compareToServerEntity(study);
+        done();
+      });
+      httpBackend.flush();
+    });
+
     it('can retrieve studies', function(done) {
       var studies = [fakeEntities.study()];
       var reply = fakeEntities.pagedResult(studies);
@@ -60,18 +72,6 @@ define([
         expect(pagedResult.items).toBeArrayOfSize(studies.length);
         expect(pagedResult.items[0]).toEqual(jasmine.any(Study));
         pagedResult.items[0].compareToServerEntity(studies[0]);
-        done();
-      });
-      httpBackend.flush();
-    });
-
-    it('can retrieve a single study', function(done) {
-      var study = fakeEntities.study();
-      httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
-
-      Study.get(study.id).then(function (reply) {
-        expect(reply).toEqual(jasmine.any(Study));
-        reply.compareToServerEntity(study);
         done();
       });
       httpBackend.flush();

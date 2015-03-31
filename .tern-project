@@ -8,12 +8,14 @@
     "test/assets/javascripts/**/*.js"
   ],
   "plugins": {
-    "angular": "target/web/web-modules/main/webjars/lib/angularjs",
+    "node": {},
+    "angular": "./target/web/web-modules/main/webjars/lib/angularjs",
     "requirejs": {
-      "baseURL": "target/web/web-modules/main/webjars/lib/requirejs",
-      "paths": {}
-    },
-    "node": {
+      "baseURL": "./app/assets/javascripts",
+      "paths":   {
+        "lib": "../../../target/web/web-modules/main/webjars/lib"
+      }
     }
   }
 }
+

@@ -1,12 +1,15 @@
 define(['angular'], function(angular) {
   'use strict';
 
-  processingTypesServiceFactory.$inject = ['biobankApi', 'domainEntityService',];
+  processingTypesServiceFactory.$inject = [
+    'biobankApi',
+    'funutils'
+  ];
 
   /**
    * Service to access Processing Types.
    */
-  function processingTypesServiceFactory(biobankApi, domainEntityService) {
+  function processingTypesServiceFactory(biobankApi, funutils) {
     var service = {
       getAll      : getAll,
       get         : get,
@@ -50,7 +53,7 @@ define(['angular'], function(angular) {
         enabled:     processingType.enabled
       };
 
-      angular.extend(cmd, domainEntityService.getOptionalAttribute(processingType, 'description'));
+      angular.extend(cmd, funutils.pickOptional(processingType, 'description'));
 
       if (processingType.id) {
         cmd.id = processingType.id;

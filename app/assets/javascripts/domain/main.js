@@ -50,6 +50,7 @@ define(function (require) {
       studyAnnotationTypeValidation       = require('./study/studyAnnotationTypeValidation'),
 
       User                                = require('./user/User'),
+      UserCounts                          = require('./user/UserCounts'),
       UserStatus                          = require('./user/UserStatus'),
       UserViewer                          = require('./user/UserViewer');
 
@@ -84,8 +85,6 @@ define(function (require) {
   module.factory('StudyCounts',                         StudyCounts);
   module.factory('StudyAnnotationType',                 StudyAnnotationType);
   module.factory('StudyViewer',                         StudyViewer);
-  module.factory('User',                                User);
-  module.factory('UserViewer',                          UserViewer);
 
   module.service('AnatomicalSourceType',                AnatomicalSourceType);
   module.service('AnnotationValueType',                 AnnotationValueType);
@@ -95,10 +94,14 @@ define(function (require) {
   module.service('PreservationType',                    PreservationType);
   module.service('SpecimenType',                        SpecimenType);
   module.service('StudyStatus',                         StudyStatus);
-  module.service('UserStatus',                          UserStatus);
   module.service('annotationTypeValidation',            annotationTypeValidation);
   module.service('participantAnnotationTypeValidation', participantAnnotationTypeValidation);
   module.service('studyAnnotationTypeValidation',       studyAnnotationTypeValidation);
+
+  module.factory('User',                                User);
+  module.factory('UserViewer',                          UserViewer);
+  module.service('UserCounts',                          UserCounts);
+  module.service('UserStatus',                          UserStatus);
 
   return module;
 });

@@ -9,29 +9,10 @@ define(['underscore'], function(_) {
    */
   function domainEntityService($q, $state, modalService) {
     var service = {
-      getOptionalAttribute: getOptionalAttribute,
       updateErrorModal:     updateErrorModal,
       removeEntity:         removeEntity
     };
     return service;
-
-    /**
-     * Returns an object with the attribute set if it is not null or has length > 0 in "obj".
-     */
-    function getOptionalAttribute(obj, attribute) {
-      var result = {};
-      if (obj[attribute] && (obj[attribute].length > 0)) {
-        if (obj[attribute] instanceof Array) {
-          var arr = _.compact(obj[attribute]);
-          if (arr.length > 0) {
-            result[attribute] = arr;
-          }
-        } else {
-          result[attribute] = obj[attribute];
-        }
-      }
-      return result;
-    }
 
     /**
      * Called when either adding or updating a domain entity and there is afailure. Displays the error message

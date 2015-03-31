@@ -3,13 +3,13 @@ define([], function() {
   'use strict';
 
   specimenLinkTypeUtils.$inject = [
-    'domainEntityService', 'spcLinkTypesService'
+    'domainEntityService'
   ];
 
   /**
    * Removes a specimen link type.
    */
-  function specimenLinkTypeUtils (domainEntityService, spcLinkTypesService) {
+  function specimenLinkTypeUtils (domainEntityService) {
     var service = {
       remove: remove
     };
@@ -19,13 +19,8 @@ define([], function() {
 
     function remove(spcLinkType) {
 
-      function removeSpecimenLinkType() {
-        // FIXME replace with this once specimen group entity is ready specimenGroup.remove();
-        return spcLinkTypesService.remove(spcLinkType);
-      }
-
       return domainEntityService.removeEntity(
-        removeSpecimenLinkType,
+        spcLinkType.remove,
         'Remove Specimen Link Type',
         'Are you sure you want to remove this specimen link type?',
         'Remove Failed',

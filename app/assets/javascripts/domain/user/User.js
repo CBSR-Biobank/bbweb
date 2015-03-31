@@ -53,6 +53,12 @@ define(['underscore'], function(_) {
       return new User(obj);
     };
 
+    User.get = function(id) {
+      return usersService.query(id).then(function(reply) {
+        return User.create(reply);
+      });
+    };
+
     User.list = function(options) {
       options = options || {};
       return usersService.getUsers(options).then(function(reply) {
@@ -61,12 +67,6 @@ define(['underscore'], function(_) {
           return User.create(obj);
         });
         return reply;
-      });
-    };
-
-    User.get = function(id) {
-      return usersService.query(id).then(function(reply) {
-        return User.create(reply);
       });
     };
 

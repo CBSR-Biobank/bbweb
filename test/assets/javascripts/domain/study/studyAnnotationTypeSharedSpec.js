@@ -15,6 +15,7 @@ define(['underscore'], function(_) {
           funutils,
           AnnotTypeType,
           AnnotationValueType,
+          AnnotationMaxValueCount,
           createAnnotTypeFn,
           annotTypesService,
           annotTypeUriPart,
@@ -23,10 +24,14 @@ define(['underscore'], function(_) {
           annotTypeListFn,
           annotTypeGetFn;
 
-      beforeEach(inject(function($httpBackend, _funutils_, _AnnotationValueType_) {
+      beforeEach(inject(function($httpBackend,
+                                 _funutils_,
+                                 _AnnotationValueType_,
+                                 _AnnotationMaxValueCount_) {
         httpBackend              = $httpBackend;
         funutils                 = _funutils_;
         AnnotationValueType      = _AnnotationValueType_;
+        AnnotationMaxValueCount  = _AnnotationMaxValueCount_;
         AnnotTypeType            = context.annotTypeType;
         createAnnotTypeFn        = context.createAnnotTypeFn;
         annotTypesService        = context.annotTypesService;
@@ -160,6 +165,18 @@ define(['underscore'], function(_) {
         httpBackend.flush();
       });
 
+      it('can be removed', function() {
+        var baseAnnotType = createServerAnnotTypeFn();
+        var annotType = createAnnotTypeFn(baseAnnotType);
+        var command = removeCommand(baseAnnotType);
+
+        httpBackend.expectDELETE(uri(annotType.studyId, annotType.id, annotType.version))
+          .respond(201);
+        annotType.remove();
+        httpBackend.flush();
+      });
+
+
       it('when adding, fails for invalid response from server', function(done) {
         var baseAnnotType = createServerAnnotTypeFn();
         var command = addCommand(baseAnnotType);
@@ -185,6 +202,27 @@ define(['underscore'], function(_) {
                                         'expectPUT',
                                         done);
       });
+
+      it('values assigned correctly when value type is changed', function() {
+        var annotType = createAnnotTypeFn(createServerAnnotTypeFn());
+        annotType.valueType = AnnotationValueType.TEXT();
+        annotType.valueTypeChanged();
+        expect(annotType.maxValueCount).toBe(null);
+        expect(annotType.options).toBeArrayOfSize(0);
+
+        annotType.valueType = AnnotationValueType.SELECT();
+        annotType.maxValueCount = AnnotationMaxValueCount.SELECT_SINGLE();
+        annotType.valueTypeChanged();
+        expect(annotType.maxValueCount).toBe(AnnotationMaxValueCount.SELECT_SINGLE());
+        expect(annotType.options).toBeArrayOfSize(0);
+
+        annotType.options.push('test');
+        annotType.valueType = AnnotationValueType.NUMBER();
+        annotType.valueTypeChanged();
+        expect(annotType.maxValueCount).toBe(null);
+        expect(annotType.options).toBeArrayOfSize(0);
+      });
+
 
       function uri(/* studyId, annotTypeId, version */) {
         var args = _.toArray(arguments);
@@ -217,6 +255,11 @@ define(['underscore'], function(_) {
       function updateCommand(annotType) {
         return _.extend(addCommand(annotType),
                         { id: annotType.id, expectedVersion: annotType.version });
+      }
+
+      function removeCommand(annotType) {
+        return _.extend(_.pick(annotType, 'id', 'studyId'),
+                        { expectedVersion: annotType.version });
       }
 
       function replyAnnotType(annotType, newValues) {

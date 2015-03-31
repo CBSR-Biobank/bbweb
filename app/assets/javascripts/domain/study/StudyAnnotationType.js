@@ -90,7 +90,7 @@ define(['angular', 'underscore'], function(angular, _) {
      */
     StudyAnnotationType.prototype.valueTypeChanged = function () {
       if (!this.isValueTypeSelect()) {
-        this.maxValueCount = undefined;
+        this.maxValueCount = null;
       }
       this.options = [];
     };

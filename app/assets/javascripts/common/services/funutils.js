@@ -60,7 +60,7 @@ define(['underscore'], function(_) {
                         if (_.has(obj, old)) { o[nu] = obj[old]; }
                         return o;
                       },
-                      _.omit.apply(null, construct(obj, _.keys(newNames))));
+                     _.omit.apply(null, construct(obj, _.keys(newNames))));
     }
 
     function pickOptional(obj /* keys */) {

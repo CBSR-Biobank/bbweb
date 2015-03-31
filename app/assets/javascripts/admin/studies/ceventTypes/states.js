@@ -34,18 +34,20 @@ define([], function() {
       url: '/cetypes/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        ceventType: ['study', function(study) {
-          return {
-            studyId: study.id,
-            name: '',
-            description: null,
-            recurring: false,
-            specimenGroupData: [],
-            annotationTypeData: []
-          };
-        }],
-        annotTypes: resolveAnnotTypes,
-        specimenGroups: resolveSpecimenGroups
+        studySpecimenGroups: resolveSpecimenGroups,
+        studyAnnotationTypes: resolveAnnotTypes,
+        ceventType: [
+          'CollectionEventType',
+          'studySpecimenGroups',
+          'studyAnnotationTypes',
+          function(CollectionEventType,
+                   studySpecimenGroups,
+                   studyAnnotationTypes) {
+            var cet = new CollectionEventType();
+            cet.studySpecimenGroups(studySpecimenGroups);
+            cet.studyAnnotationType(studyAnnotationTypes);
+            return cet;
+          }]
       },
       views: {
         'main@': {
@@ -65,17 +67,24 @@ define([], function() {
       url: '/cetypes/update/{ceventTypeId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
+        studySpecimenGroups: resolveSpecimenGroups,
+        studyAnnotationTypes: resolveAnnotTypes,
         ceventType: [
-          '$stateParams', 'ceventTypesService', 'study',
-          function($stateParams, ceventTypesService, study) {
-            if ($stateParams.ceventTypeId) {
-              return ceventTypesService.get(study.id, $stateParams.ceventTypeId);
-            }
-            throw new Error('state parameter ceventTypeId is invalid');
+          '$stateParams',
+          'CollectionEventType',
+          'studySpecimenGroups',
+          'studyAnnotationTypes',
+          function($stateParams,
+                   CollectionEventType,
+                   studySpecimenGroups,
+                   studyAnnotationTypes) {
+            var cet = CollectionEventType.get($stateParams.studyId,
+                                              $stateParams.ceventTypeId);
+            cet.studySpecimenGroups(studySpecimenGroups);
+            cet.studyAnnotationType(studyAnnotationTypes);
+            return cet;
           }
-        ],
-        annotTypes: resolveAnnotTypes,
-        specimenGroups: resolveSpecimenGroups
+        ]
       },
       views: {
         'main@': {

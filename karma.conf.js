@@ -63,8 +63,8 @@ module.exports = function(config) {
       prefixes: {
         // these are override here becasue the default values do not show up correctly when the tests are run
         // inside Emacs
-        success: 'PASS ',
-        failure: 'FAIL ',
+        success: 'PASSED  ',
+        failure: 'FAILED  ',
         skipped: 'SKIPPED '
       }
     },

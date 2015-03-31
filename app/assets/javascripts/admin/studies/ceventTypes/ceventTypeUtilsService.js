@@ -1,12 +1,12 @@
 define([], function() {
   'use strict';
 
-  ceventTypeUtils.$inject = ['domainEntityService', 'ceventTypesService'];
+  ceventTypeUtils.$inject = ['domainEntityService'];
 
   /**
    * Removes a collection event type.
    */
-  function ceventTypeUtils(domainEntityService, ceventTypesService) {
+  function ceventTypeUtils(domainEntityService) {
     var service = {
       remove: remove
     };
@@ -16,13 +16,8 @@ define([], function() {
 
     function remove(ceventType) {
 
-      function removeCeventType() {
-        // FIXME replace with this once specimen group entity is ready specimenGroup.remove();
-        return ceventTypesService.remove(ceventType);
-      }
-
       return domainEntityService.removeEntity(
-        removeCeventType,
+        ceventType.remove,
         'Remove Collection Event Type',
         'Are you sure you want to remove collection event type ' + ceventType.name + '?',
         'Remove Failed',

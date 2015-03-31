@@ -1,12 +1,12 @@
 define(['angular', 'jquery', 'underscore'], function(angular, $, _) {
   'use strict';
 
-  studiesServiceFactory.$inject = ['biobankApi', 'domainEntityService', 'queryStringService'];
+  studiesServiceFactory.$inject = ['biobankApi', 'funutils', 'queryStringService'];
 
   /**
    * Service to acccess studies.
    */
-  function studiesServiceFactory(biobankApi, domainEntityService, queryStringService) {
+  function studiesServiceFactory(biobankApi, funutils, queryStringService) {
     var service = {
       list:           list,
       getStudyCounts: getStudyCounts,
@@ -107,7 +107,7 @@ define(['angular', 'jquery', 'underscore'], function(angular, $, _) {
     function addOrUpdate(study) {
       var cmd = {name: study.name };
 
-      angular.extend(cmd, domainEntityService.getOptionalAttribute(study, 'description'));
+      angular.extend(cmd, funutils.pickOptional(study, 'description'));
 
       if (study.id) {
         cmd.id = study.id;

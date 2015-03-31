@@ -97,7 +97,7 @@ define(['angular', 'underscore'], function(angular, _) {
     Study.prototype.addOrUpdate = function () {
       var self = this;
       return studiesService.addOrUpdate(self).then(function(reply) {
-        return new Study.create(reply);
+        return Study.create(reply);
       });
     };
 
