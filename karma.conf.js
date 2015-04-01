@@ -54,8 +54,7 @@ module.exports = function(config) {
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
     reporters: [
-      'spec',
-      'coverage'
+      'spec'
     ],
 
     specReporter: {
@@ -69,10 +68,11 @@ module.exports = function(config) {
       }
     },
 
-    coverageReporter: {
-      type: 'html',
-      dir: 'coverage'
-    },
+    // -> moved to Gruntfile.js
+    // coverageReporter: {
+    //   type: 'html',
+    //   dir: 'coverage'
+    // },
 
     // web server port
     port: 9876,

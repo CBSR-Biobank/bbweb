@@ -36,6 +36,7 @@ define(function (require) {
       ParticipantAnnotationType           = require('./study/ParticipantAnnotationType'),
       ProcessingTypeViewer                = require('./study/ProcessingTypeViewer'),
       SpcLinkTypeViewer                   = require('./study/SpcLinkTypeViewer'),
+      SpecimenGroup                       = require('./study/SpecimenGroup'),
       SpecimenGroupDataSet                = require('./study/SpecimenGroupDataSet'),
       SpecimenGroupViewer                 = require('./study/SpecimenGroupViewer'),
       SpecimenLinkAnnotationType          = require('./study/SpecimenLinkAnnotationType'),
@@ -76,6 +77,7 @@ define(function (require) {
   module.factory('ParticipantAnnotationType',           ParticipantAnnotationType);
   module.factory('ProcessingTypeViewer',                ProcessingTypeViewer);
   module.factory('SpcLinkTypeViewer',                   SpcLinkTypeViewer);
+  module.factory('SpecimenGroup',                       SpecimenGroup);
   module.factory('SpecimenGroupDataSet',                SpecimenGroupDataSet);
   module.factory('SpecimenGroupViewer',                 SpecimenGroupViewer);
   module.factory('SpecimenLinkAnnotationType',          SpecimenLinkAnnotationType);

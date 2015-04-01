@@ -10,9 +10,9 @@ define(['angular', 'underscore'], function(angular, _) {
       restrict: 'E',
       scope: {
         study:           '=',
-        annotTypes:      '=',
-        annotTypeIdsInUse: '=',
-        annotTypeName:   '@',
+        annotationTypes:      '=',
+        annotationTypeIdsInUse: '=',
+        annotationTypeName:   '@',
         panelId:         '@',
         addStateName:    '@',
         updateStateName: '@'
@@ -36,11 +36,11 @@ define(['angular', 'underscore'], function(angular, _) {
         panel = new Panel($scope.panelId, $scope.addStateName);
 
     vm.study                = $scope.study;
-    vm.annotTypes           = $scope.annotTypes;
-    vm.annotTypeIdsInUse      = $scope.annotTypeIdsInUse;
-    vm.annotTypeName        = $scope.annotTypeName;
-    vm.panelHeading         = panelHeading($scope.annotTypeName);
-    vm.annotTypeDescription = annotTypeDescription($scope.annotTypeName);
+    vm.annotationTypes           = $scope.annotationTypes;
+    vm.annotationTypeIdsInUse      = $scope.annotationTypeIdsInUse;
+    vm.annotationTypeName        = $scope.annotationTypeName;
+    vm.panelHeading         = panelHeading($scope.annotationTypeName);
+    vm.annotationTypeDescription = annotationTypeDescription($scope.annotationTypeName);
     vm.updateStateName      = $scope.updateStateName;
     vm.add                  = add;
     vm.panelOpen            = panel.getPanelOpenState();
@@ -55,8 +55,8 @@ define(['angular', 'underscore'], function(angular, _) {
       return panel.add();
     }
 
-    function panelHeading(annotTypeName) {
-      switch (annotTypeName) {
+    function panelHeading(annotationTypeName) {
+      switch (annotationTypeName) {
       case 'ParticipantAnnotationType':
         return 'Participant Annotation Types';
 
@@ -67,12 +67,12 @@ define(['angular', 'underscore'], function(angular, _) {
         return 'Specimen Link Annotation Types';
 
       default:
-        throw new Error('invalid annotation type name: ' + vm.annotTypeName);
+        throw new Error('invalid annotation type name: ' + vm.annotationTypeName);
       }
     }
 
-    function annotTypeDescription(annotTypeName) {
-      switch (annotTypeName) {
+    function annotationTypeDescription(annotationTypeName) {
+      switch (annotationTypeName) {
       case 'ParticipantAnnotationType':
         return 'Participant annotations allow a study to collect custom named and ' +
           'defined pieces of data for each participant. Annotations are optional and ' +
@@ -89,7 +89,7 @@ define(['angular', 'underscore'], function(angular, _) {
           'are not required to be defined.';
 
       default:
-        throw new Error('invalid annotation type name: ' + vm.annotTypeName);
+        throw new Error('invalid annotation type name: ' + vm.annotationTypeName);
       }
 
     }

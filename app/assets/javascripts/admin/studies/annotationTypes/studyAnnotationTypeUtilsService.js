@@ -49,18 +49,18 @@ define(['underscore'], function(_) {
       return modalService.modalOk(headerHtml, bodyHtml);
     }
 
-    function remove(annotType) {
+    function remove(annotationType) {
 
       function removeInternal() {
-        return annotType.remove();
+        return annotationType.remove();
       }
 
       return domainEntityService.removeEntity(
         removeInternal,
         'Remove Annotation Type',
-        'Are you sure you want to remove annotation type ' + annotType.name + '?',
+        'Are you sure you want to remove annotation type ' + annotationType.name + '?',
         'Remove failed',
-        'Annotation type ' + annotType.name + ' cannot be removed');
+        'Annotation type ' + annotationType.name + ' cannot be removed');
     }
   }
 

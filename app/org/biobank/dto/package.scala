@@ -52,10 +52,10 @@ package dto {
   }
 
   case class ProcessingDto(
-    processingTypes: List[org.biobank.domain.study.ProcessingType],
-    specimenLinkTypes: List[org.biobank.domain.study.SpecimenLinkType],
+    processingTypes:             List[org.biobank.domain.study.ProcessingType],
+    specimenLinkTypes:           List[org.biobank.domain.study.SpecimenLinkType],
     specimenLinkAnnotationTypes: List[org.biobank.domain.study.SpecimenLinkAnnotationType],
-    specimenGroups: List[org.biobank.domain.study.SpecimenGroup])
+    specimenGroups:              List[org.biobank.domain.study.SpecimenGroup])
 
   object ProcessingDto {
 

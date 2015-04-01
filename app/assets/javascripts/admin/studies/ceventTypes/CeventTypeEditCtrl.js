@@ -5,6 +5,7 @@ define(['underscore'], function(_) {
   CeventTypeEditCtrl.$inject = [
     '$state',
     'CollectionEventType',
+    'SpecimenGroup',
     'domainEntityService',
     'notificationsService',
     'ceventType',
@@ -16,6 +17,7 @@ define(['underscore'], function(_) {
    */
   function CeventTypeEditCtrl($state,
                               CollectionEventType,
+                              SpecimenGroup,
                               domainEntityService,
                               notificationsService,
                               ceventType,
@@ -83,13 +85,7 @@ define(['underscore'], function(_) {
     }
 
     function getSpecimenGroupUnits(sgId) {
-      if (!sgId) { return 'Amount'; }
-
-      var sg = _.findWhere(vm.studySpecimenGroups, { id: sgId });
-      if (sg) {
-        return sg.units;
-      }
-      throw new Error('specimen group ID not found: ' + sgId);
+      return SpecimenGroup.getUnits(vm.specimenGroups, sgId);
     }
   }
 

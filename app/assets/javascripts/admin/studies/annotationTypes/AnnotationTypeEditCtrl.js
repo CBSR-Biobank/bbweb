@@ -8,7 +8,7 @@ define(['underscore'], function(_) {
     'ParticipantAnnotationType',
     'AnnotationValueType',
     'study',
-    'annotType'
+    'annotationType'
   ];
 
   /**
@@ -24,9 +24,9 @@ define(['underscore'], function(_) {
                                   ParticipantAnnotationType,
                                   AnnotationValueType,
                                   study,
-                                  annotType) {
+                                  annotationType) {
     var vm = this,
-        action = annotType.isNew() ? 'Add' : 'Update',
+        action = annotationType.isNew() ? 'Add' : 'Update',
         possibleReturnStateNames = [
           'home.admin.studies.study.collection',
           'home.admin.studies.study.participants',
@@ -37,9 +37,9 @@ define(['underscore'], function(_) {
     returnState = determineReturnState();
 
     vm.study                 = study;
-    vm.annotType             = annotType;
+    vm.annotationType             = annotationType;
     vm.title                 =  action + ' Annotation Type';
-    vm.hasRequiredField      = (annotType instanceof ParticipantAnnotationType);
+    vm.hasRequiredField      = (annotationType instanceof ParticipantAnnotationType);
     vm.valueTypes            = AnnotationValueType.values();
 
     vm.valueTypeChange       = valueTypeChange;
@@ -50,7 +50,7 @@ define(['underscore'], function(_) {
     vm.submit                = submit;
     vm.cancel                = cancel;
 
-    vm.annotType.studyId = vm.study.id;
+    vm.annotationType.studyId = vm.study.id;
 
     //--
 
@@ -84,7 +84,7 @@ define(['underscore'], function(_) {
      * Called when the user changes the annotation type's value type.
      */
     function valueTypeChange() {
-      vm.annotType.valueTypeChanged();
+      vm.annotationType.valueTypeChanged();
     }
 
     /**
@@ -92,21 +92,21 @@ define(['underscore'], function(_) {
      * of selection: either single selection or multiple selections.
      */
     function maxValueCountRequired() {
-      return ! vm.annotType.isMaxValueCountValid();
+      return ! vm.annotationType.isMaxValueCountValid();
     }
 
     /**
      * Used to add an option. Should only be called when the value type is 'Select'.
      */
     function optionAdd() {
-      vm.annotType.addOption();
+      vm.annotationType.addOption();
     }
 
     /**
      * Used to remove an option. Should only be called when the value type is 'Select'.
      */
     function optionRemove(option) {
-      vm.annotType.removeOption(option);
+      vm.annotationType.removeOption(option);
     }
 
     /**
@@ -115,7 +115,7 @@ define(['underscore'], function(_) {
      * It is disabled only when there is a single option available.
      */
     function removeButtonDisabled() {
-      return (vm.annotType.options.length <= 1);
+      return (vm.annotationType.options.length <= 1);
     }
 
     function submitSuccess() {
@@ -137,8 +137,8 @@ define(['underscore'], function(_) {
      * function to call to submit the  changes is passed in as a parameter to the controller. It is assumed
      * that this function returns a promise.
      */
-    function submit(annotType) {
-      annotType.addOrUpdate().then(submitSuccess).catch(submitError);
+    function submit(annotationType) {
+      annotationType.addOrUpdate().then(submitSuccess).catch(submitError);
     }
 
     /**

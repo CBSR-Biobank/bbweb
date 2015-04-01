@@ -35,7 +35,7 @@ define([
       context.annotationTypeType     = CollectionEventAnnotationType;
       context.studyAnnotTypesService = ceventAnnotTypesService;
       context.study                  = fakeEntities.study();
-      context.annotTypeUriPart       = 'ceannottypes';
+      context.annotationTypeUriPart       = 'ceannottypes';
 
       //context.serverAnnotType = fakeEntities.studyAnnotationType(context.study, { required: false });
       context.serverAnnotType = fakeEntities.studyAnnotationType(context.study);
@@ -64,7 +64,7 @@ define([
       context.annotationTypeType     = SpecimenLinkAnnotationType;
       context.studyAnnotTypesService = spcLinkAnnotTypesService;
       context.study                  = fakeEntities.study();
-      context.annotTypeUriPart       = 'slannottypes';
+      context.annotationTypeUriPart       = 'slannottypes';
 
       //context.serverAnnotType = fakeEntities.studyAnnotationType(context.study, { required: false });
       context.serverAnnotType = fakeEntities.studyAnnotationType(context.study);
@@ -93,7 +93,7 @@ define([
       context.annotationTypeType     = ParticipantAnnotationType;
       context.studyAnnotTypesService = participantAnnotTypesService;
       context.study                  = fakeEntities.study();
-      context.annotTypeUriPart       = 'pannottypes';
+      context.annotationTypeUriPart       = 'pannottypes';
 
       context.serverAnnotType = fakeEntities.studyAnnotationType(context.study, { required: true });
     }));
@@ -111,10 +111,10 @@ define([
       var httpBackend, studyAnnotTypesService, AnnotationTypeType;
       var study, serverAnnotType, serverAnnotTypeNoId;
 
-      function uri(annotTypeId, version) {
-        var result = '/studies/' + context.study.id + '/' + context.annotTypeUriPart;
+      function uri(annotationTypeId, version) {
+        var result = '/studies/' + context.study.id + '/' + context.annotationTypeUriPart;
         if (arguments.length > 0) {
-          result += '/' + annotTypeId;
+          result += '/' + annotationTypeId;
         }
         if (arguments.length > 1) {
           result += '/' + version;
@@ -142,50 +142,50 @@ define([
       });
 
       it('should allow adding an annotation type', function() {
-        var annotType = new AnnotationTypeType(serverAnnotTypeNoId);
-        var cmd = getAddCommand(annotType);
+        var annotationType = new AnnotationTypeType(serverAnnotTypeNoId);
+        var cmd = getAddCommand(annotationType);
 
         var expectedResult = {status: 'success', data: 'success'};
         httpBackend.expectPOST(uri(), cmd).respond(201, expectedResult);
 
-        studyAnnotTypesService.addOrUpdate(annotType).then(function(reply) {
+        studyAnnotTypesService.addOrUpdate(annotationType).then(function(reply) {
           expect(reply).toEqual('success');
         });
         httpBackend.flush();
       });
 
       it('should allow updating an annotation type', function() {
-        var annotType = new AnnotationTypeType(serverAnnotType);
-        var cmd = getUpdateCommand(annotType);
+        var annotationType = new AnnotationTypeType(serverAnnotType);
+        var cmd = getUpdateCommand(annotationType);
 
         var expectedResult = {status: 'success', data: 'success'};
 
-        httpBackend.expectPUT(uri(annotType.id), cmd).respond(201, expectedResult);
+        httpBackend.expectPUT(uri(annotationType.id), cmd).respond(201, expectedResult);
 
-        studyAnnotTypesService.addOrUpdate(annotType).then(function(reply) {
+        studyAnnotTypesService.addOrUpdate(annotationType).then(function(reply) {
           expect(reply).toEqual('success');
         });
         httpBackend.flush();
       });
 
       it('should remove an annotation type', function() {
-        var annotType = new AnnotationTypeType(serverAnnotType);
-        httpBackend.expectDELETE(uri(annotType.id, annotType.version)).respond(201);
-        studyAnnotTypesService.remove(annotType);
+        var annotationType = new AnnotationTypeType(serverAnnotType);
+        httpBackend.expectDELETE(uri(annotationType.id, annotationType.version)).respond(201);
+        studyAnnotTypesService.remove(annotationType);
         httpBackend.flush();
       });
 
-      function getAddCommand(annotType) {
-        var result = _.pick(annotType, 'studyId', 'name', 'valueType', 'options');
+      function getAddCommand(annotationType) {
+        var result = _.pick(annotationType, 'studyId', 'name', 'valueType', 'options');
         _.each(['description', 'maxValueCount', 'required'], function(optionalKey) {
-          if (!_.isUndefined(annotType[optionalKey])) {
-            result[optionalKey] = annotType[optionalKey];
+          if (!_.isUndefined(annotationType[optionalKey])) {
+            result[optionalKey] = annotationType[optionalKey];
           }
         });
       }
 
-      function getUpdateCommand(annotType) {
-        return _.extend(getAddCommand(annotType), { expectedVersion: annotType.version });
+      function getUpdateCommand(annotationType) {
+        return _.extend(getAddCommand(annotationType), { expectedVersion: annotationType.version });
       }
 
     });

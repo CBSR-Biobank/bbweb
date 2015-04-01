@@ -33,7 +33,6 @@ define(function (require) {
       studyAnnotTypesTableDirective           = require('./studies/annotationTypes/studyAnnotTypesTableDirective'),
 
       CeventTypeEditCtrl                      = require('./studies/ceventTypes/CeventTypeEditCtrl'),
-      ceventTypeUtilsService                  = require('./studies/ceventTypes/ceventTypeUtilsService'),
       ceventTypesPanelDirective               = require('./studies/ceventTypes/ceventTypesPanelDirective'),
       ceventTypesStates                       = require('./studies/ceventTypes/states'),
 
@@ -104,8 +103,6 @@ define(function (require) {
   module.controller('StudyAnnotTypesTableCtrl', studyAnnotTypesTableDirective.controller);
 
   module.controller('CeventTypeEditCtrl', CeventTypeEditCtrl);
-
-  module.service('ceventTypeUtils', ceventTypeUtilsService);
 
   module.directive('ceventTypesPanel', ceventTypesPanelDirective.directive);
   module.controller('CeventTypesPanelCtrl', ceventTypesPanelDirective.controller);

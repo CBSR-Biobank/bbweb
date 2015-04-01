@@ -63,8 +63,8 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.annotationTypes     = _.indexBy($scope.processingDto.specimenLinkAnnotationTypes, 'id');
 
     vm.showProcessingType  = showProcessingType;
-    vm.showSpecimenGroup   = showSpecimenGroup;
-    vm.showAnnotationType  = showAnnotationType;
+    vm.viewSpecimenGroup   = viewSpecimenGroup;
+    vm.viewAnnotationType  = viewAnnotationType;
 
     vm.modificationsAllowed = vm.study.isDisabled();
 
@@ -112,15 +112,15 @@ define(['angular', 'underscore'], function(angular, _) {
     /**
      * Displays a specimen group in a modal.
      */
-    function showSpecimenGroup(specimenGroupId) {
+    function viewSpecimenGroup(specimenGroupId) {
       return new SpecimenGroupViewer(vm.specimenGroups[specimenGroupId]);
     }
 
     /**
      * Display a specimen link annotation type in a modal.
      */
-    function showAnnotationType(annotTypeId) {
-      return new AnnotationTypeViewer(vm.annotationTypes[annotTypeId], 'Specimen Link Annotation Type');
+    function viewAnnotationType(annotationTypeId) {
+      return new AnnotationTypeViewer(vm.annotationTypes[annotationTypeId], 'Specimen Link Annotation Type');
     }
 
     /**

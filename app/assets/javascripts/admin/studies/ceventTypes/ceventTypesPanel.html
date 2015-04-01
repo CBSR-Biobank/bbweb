@@ -31,7 +31,7 @@
       </td>
       <td data-title="'Specimen Groups'">
         <span ng-repeat="sgItemId in ceventType.allSpecimenGroupDataIds()"
-              ng-click="vm.showSpecimenGroup(sgItemId)">
+              ng-click="vm.viewSpecimenGroup(sgItemId)">
           <a href>
             {{ceventType.getSpecimenGroupData(sgItemId).specimenGroup.name}}
           </a>
@@ -40,7 +40,7 @@
       </td>
       <td data-title="'Annotation Types'">
         <span ng-repeat="atItemId in ceventType.allAnnotationTypeDataIds()"
-              ng-click="vm.showAnnotationType(atItemId)">
+              ng-click="vm.viewAnnotationType(atItemId)">
           <a href>
             {{ceventType.getAnnotationTypeData(atItemId).annotationType.name}}
           </a>

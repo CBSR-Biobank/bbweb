@@ -7,12 +7,12 @@
                    panel-open="vm.panelOpen">
     </panel-buttons>
   </accordion-heading>
-  <p ng-bind-html="vm.annotTypeDescription"></p>
-  <study-annot-types-table
+  <p ng-bind-html="vm.annotationTypeDescription"></p>
+  <study-annotation-types-table
      study="study"
-     annot-types="annotTypes"
-     annot-type-name="vm.annotTypeName"
-     annot-types-in-use="vm.annotTypeIdsInUse"
+     annotation-types="annotationTypes"
+     annotation-type-name="vm.annotationTypeName"
+     annotation-types-in-use="vm.annotationTypeIdsInUse"
      update-state-name="vm.updateStateName"
-     has-required="true"></study-annot-types-table>
+     has-required="true"></study-annotation-types-table>
 </accordion-group>

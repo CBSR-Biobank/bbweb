@@ -35,7 +35,7 @@ define([
 
       beforeEach(function () {
         context.study = new Study(fakeEntities.study());
-        context.annotTypes = _.map(
+        context.annotationTypes = _.map(
           ['Text', 'Number', 'DateTime', 'Select'],
           function(valueType) {
             return new ParticipantAnnotationType(
@@ -43,9 +43,9 @@ define([
                 context.study,
                 { valueType: valueType, required: true }));
           });
-        context.annotTypeIdsInUse = [context.annotTypes[0].id];
-        context.annotTypeName   = 'ParticipantAnnotationType';
-        context.updateStateName = 'home.admin.studies.study.participants.annotTypeUpdate';
+        context.annotationTypeIdsInUse = [context.annotationTypes[0].id];
+        context.annotationTypeName   = 'ParticipantAnnotationType';
+        context.updateStateName = 'home.admin.studies.study.participants.annotationTypeUpdate';
         });
 
       sharedBehaviour(context);
@@ -56,7 +56,7 @@ define([
 
       beforeEach(function () {
         context.study = new Study(fakeEntities.study());
-        context.annotTypes = _.map(
+        context.annotationTypes = _.map(
           ['Text', 'Number', 'DateTime', 'Select'],
           function(valueType) {
             return new CollectionEventAnnotationType(
@@ -64,8 +64,8 @@ define([
                 context.study,
                 { valueType: valueType }));
           });
-        context.annotTypeIdsInUse = [context.annotTypes[0].id];
-        context.annotTypeName   = 'CollectionEventAnnotationType';
+        context.annotationTypeIdsInUse = [context.annotationTypes[0].id];
+        context.annotationTypeName   = 'CollectionEventAnnotationType';
         context.updateStateName = 'home.admin.studies.study.collection.ceventAnnotTypeUpdate';
         });
 
@@ -77,7 +77,7 @@ define([
 
       beforeEach(function () {
         context.study = new Study(fakeEntities.study());
-        context.annotTypes = _.map(
+        context.annotationTypes = _.map(
           ['Text', 'Number', 'DateTime', 'Select'],
           function(valueType) {
             return new SpecimenLinkAnnotationType(
@@ -85,8 +85,8 @@ define([
                 context.study,
                 { valueType: valueType }));
           });
-        context.annotTypeIdsInUse = [context.annotTypes[0].id];
-        context.annotTypeName   = 'SpecimenLinkAnnotationType';
+        context.annotationTypeIdsInUse = [context.annotationTypes[0].id];
+        context.annotationTypeName   = 'SpecimenLinkAnnotationType';
         context.updateStateName = 'home.admin.studies.study.processing.spcLinkAnnotTypeUpdate';
         });
 
@@ -119,11 +119,11 @@ define([
 
           scope                    = $rootScope.$new();
           scope.study              = context.study;
-          scope.annotTypes         = context.annotTypes;
-          scope.annotTypeIdsInUse  = context.annotTypeIdsInUse;
-          scope.annotTypeName      = context.annotTypeName;
+          scope.annotationTypes         = context.annotationTypes;
+          scope.annotationTypeIdsInUse  = context.annotationTypeIdsInUse;
+          scope.annotationTypeName      = context.annotationTypeName;
           scope.updateStateName    = context.updateStateName;
-          scope.hasRequired        = (scope.annotTypeName === 'ParticipantAnnotationType');
+          scope.hasRequired        = (scope.annotationTypeName === 'ParticipantAnnotationType');
 
           spyOn(state, 'go');
           spyOn(tableService, 'getTableParams').and.callThrough();
@@ -141,21 +141,21 @@ define([
         }));
 
         it('has valid scope', function() {
-          expect(scope.vm.annotTypes).toEqual(scope.annotTypes);
-          expect(scope.vm.annotTypeIdsInUse).toEqual(scope.annotTypeIdsInUse);
+          expect(scope.vm.annotationTypes).toEqual(scope.annotationTypes);
+          expect(scope.vm.annotationTypeIdsInUse).toEqual(scope.annotationTypeIdsInUse);
           expect(scope.vm.tableParams).not.toBeNull();
           expect(scope.vm.modificationsAllowed).toEqual(scope.study.isDisabled());
         });
 
         it('scope copies annotation types', function() {
-          _.each(_.zip(scope.vm.annotTypes, scope.annotTypes), function(tuple) {
+          _.each(_.zip(scope.vm.annotationTypes, scope.annotationTypes), function(tuple) {
             expect(tuple[0].id).toBe(tuple[1].id);
             expect(tuple[0]).not.toBe(tuple[1]);
           });
         });
 
         it('has valid table columns', function() {
-          if (scope.annotTypeName === 'ParticipantAnnotationType') {
+          if (scope.annotationTypeName === 'ParticipantAnnotationType') {
             expect(scope.vm.columns).toBeArrayOfSize(4);
             expect(scope.vm.columns[2].title).toBe('Required');
             expect(scope.vm.columns[3].title).toBe('Description');
@@ -169,34 +169,34 @@ define([
         });
 
         it('scope copies annotation types', function() {
-          _.each(_.zip(scope.vm.annotTypes, scope.annotTypes), function(tuple) {
+          _.each(_.zip(scope.vm.annotationTypes, scope.annotationTypes), function(tuple) {
             expect(tuple[0].id).toBe(tuple[1].id);
             expect(tuple[0]).not.toBe(tuple[1]);
           });
         });
 
         it('calling information should open an AnnotationTypeViewer', function() {
-          expect(scope.vm.information(scope.vm.annotTypes[0]))
+          expect(scope.vm.information(scope.vm.annotationTypes[0]))
             .toEqual(jasmine.any(AnnotationTypeViewer));
         });
 
         it('on update should open a modal to display annotation type in use modal', function() {
           spyOn(studyAnnotationTypeUtils, 'inUseModal');
-          scope.vm.update(scope.vm.annotTypes[0]);
+          scope.vm.update(scope.vm.annotationTypes[0]);
           expect(studyAnnotationTypeUtils.inUseModal).toHaveBeenCalled();
         });
 
         it('on update should change state to update an annotation type', function() {
-          var annotTypeToUpdate = scope.vm.annotTypes[1];
+          var annotationTypeToUpdate = scope.vm.annotationTypes[1];
           spyOn(modalService, 'modalOk');
-          scope.vm.update(annotTypeToUpdate);
+          scope.vm.update(annotationTypeToUpdate);
           expect(state.go).toHaveBeenCalledWith(scope.updateStateName,
-                                                { annotTypeId: annotTypeToUpdate.id });
+                                                { annotationTypeId: annotationTypeToUpdate.id });
         });
 
         it('on remove opens a modal to display annotation type in use modal', function() {
           spyOn(modalService, 'modalOk');
-          scope.vm.remove(scope.vm.annotTypes[0]);
+          scope.vm.remove(scope.vm.annotationTypes[0]);
           expect(modalService.modalOk).toHaveBeenCalled();
         });
 
@@ -207,14 +207,14 @@ define([
             deferred.resolve('xxx');
             return deferred.promise;
           });
-          scope.vm.remove(scope.vm.annotTypes[1]);
+          scope.vm.remove(scope.vm.annotationTypes[1]);
           scope.$digest();
-          expect(_.pluck(scope.vm.annotTypes, 'id')).not.toContain(scope.annotTypes[1].id);
+          expect(_.pluck(scope.vm.annotationTypes, 'id')).not.toContain(scope.annotationTypes[1].id);
         });
 
         it('on remove failure the annotation type is not removed and fail dialog is displayed', function() {
           var $q = this.$injector.get('$q'),
-              annotationTypeToRemove = scope.annotTypes[2];
+              annotationTypeToRemove = scope.annotationTypes[2];
 
           spyOn(modalService, 'showModal').and.callFake(function () {
             var deferred = $q.defer();
@@ -233,14 +233,14 @@ define([
           scope.$digest();
           expect(annotationTypeToRemove.remove).toHaveBeenCalled();
           expect(modalService.showModal.calls.count()).toEqual(2);
-          expect(_.pluck(scope.vm.annotTypes, 'id')).toContain(annotationTypeToRemove.id);
+          expect(_.pluck(scope.vm.annotationTypes, 'id')).toContain(annotationTypeToRemove.id);
         });
 
         it('update fails for a disabled study', function() {
           var StudySatus = this.$injector.get('StudyStatus');
           scope.study.status = StudySatus.ENABLED();
           expect(function () {
-            scope.vm.update(scope.vm.annotTypes[1]);
+            scope.vm.update(scope.vm.annotationTypes[1]);
           }).toThrow(new Error('study is not disabled'));
         });
 
@@ -248,7 +248,7 @@ define([
           var StudySatus = this.$injector.get('StudyStatus');
           scope.study.status = StudySatus.ENABLED();
           expect(function () {
-            scope.vm.remove(scope.vm.annotTypes[1]);
+            scope.vm.remove(scope.vm.annotationTypes[1]);
           }).toThrow(new Error('study is not disabled'));
 
         });

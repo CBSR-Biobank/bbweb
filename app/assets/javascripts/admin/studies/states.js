@@ -136,7 +136,7 @@ define(['angular', 'underscore'], function(angular, _) {
       url: '/participants',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        annotTypes: [
+        annotationTypes: [
           '$stateParams', 'ParticipantAnnotationType',
           function($stateParams, ParticipantAnnotationType) {
             return ParticipantAnnotationType.list($stateParams.studyId);
@@ -146,11 +146,11 @@ define(['angular', 'underscore'], function(angular, _) {
       views: {
         'studyDetails': {
           templateUrl: '/assets/javascripts/admin/studies/studyParticipantsTab.html',
-          controller: ['$scope', 'study', 'annotTypes', function($scope, study, annotTypes) {
+          controller: ['$scope', 'study', 'annotationTypes', function($scope, study, annotationTypes) {
             $scope.study = study;
-            $scope.annotTypes = annotTypes;
+            $scope.annotationTypes = annotationTypes;
             // FIXME this is set to empty array for now, but will have to call the correct method in the future
-            $scope.annotTypeIdsInUse = [];
+            $scope.annotationTypeIdsInUse = [];
           }]
         }
       },
@@ -215,15 +215,30 @@ define(['angular', 'underscore'], function(angular, _) {
         'studyDetails': {
           templateUrl: '/assets/javascripts/admin/studies/studyCollectionTab.html',
           controller: [
-            '$scope', 'study', 'collectionDto', 'CollectionEventAnnotationType',
-            function($scope, study, collectionDto, CollectionEventAnnotationType) {
+            '$scope',
+            'study',
+            'collectionDto',
+            'CollectionEventType',
+            'CollectionEventAnnotationType',
+            function($scope,
+                     study,
+                     collectionDto,
+                     CollectionEventType,
+                     CollectionEventAnnotationType) {
               $scope.study = study;
-              $scope.ceventTypes = collectionDto.collectionEventTypes;
-              $scope.annotTypes  = _.map(collectionDto.collectionEventAnnotationTypes,
-                                         function (annotType) {
-                                           return new CollectionEventAnnotationType(annotType);
+              $scope.annotationTypes  = _.map(collectionDto.collectionEventAnnotationTypes,
+                                         function (annotationType) {
+                                           return new CollectionEventAnnotationType(annotationType);
                                          });
-              $scope.annotTypeIdsInUse = collectionDto.collectionEventAnnotationTypesInUse;
+              // FIXME: convert collectionDto.specimenGroups to SpecimenGroup objects
+              $scope.ceventTypes = _.map(collectionDto.collectionEventTypes,
+                                         function (obj) {
+                                           return new CollectionEventType(obj, {
+                                             studySpecimenGroups: collectionDto.specimenGroups,
+                                             studyAnnotationTypes: $scope.annotationTypes
+                                           });
+                                         });
+              $scope.annotationTypeIdsInUse = collectionDto.collectionEventAnnotationTypesInUse;
               $scope.specimenGroups = collectionDto.specimenGroups;
             }
           ]

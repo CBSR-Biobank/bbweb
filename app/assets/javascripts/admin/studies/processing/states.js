@@ -76,13 +76,13 @@ define([], function() {
       url: '/annottype/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        annotType: ['SpecimenLinkAnnotationType', function(SpecimenLinkAnnotationType) {
+        annotationType: ['SpecimenLinkAnnotationType', function(SpecimenLinkAnnotationType) {
           return new SpecimenLinkAnnotationType();
         }]
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
+          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypeForm.html',
           controller: 'AnnotationTypeEditCtrl as vm'
         }
       },
@@ -95,19 +95,19 @@ define([], function() {
      * Prticipant Annotation Type Update
      */
     $stateProvider.state('home.admin.studies.study.processing.spcLinkAnnotTypeUpdate', {
-      url: '/annottype/update/{annotTypeId}',
+      url: '/annottype/update/{annotationTypeId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        annotType: [
+        annotationType: [
           '$stateParams', 'SpecimenLinkAnnotationType',
           function($stateParams, SpecimenLinkAnnotationType) {
-            return SpecimenLinkAnnotationType.get($stateParams.studyId, $stateParams.annotTypeId);
+            return SpecimenLinkAnnotationType.get($stateParams.studyId, $stateParams.annotationTypeId);
           }
         ]
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
+          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypeForm.html',
           controller: 'AnnotationTypeEditCtrl as vm'
         }
       },

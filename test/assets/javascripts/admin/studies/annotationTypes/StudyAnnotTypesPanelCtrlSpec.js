@@ -5,11 +5,10 @@ define([
   'angularMocks',
   'underscore',
   'biobankApp'
-], function(angular, mocks, _, commonTests) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Controller: StudyAnnotTypesPanelCtrl', function() {
-
     var Study,
         ParticipantAnnotationType,
         CollectionEventAnnotationType,
@@ -22,7 +21,6 @@ define([
                                 _ParticipantAnnotationType_,
                                 _CollectionEventAnnotationType_,
                                 _SpecimenLinkAnnotationType_,
-                                Panel,
                                 fakeDomainEntities) {
       Study                         = _Study_;
       ParticipantAnnotationType     = _ParticipantAnnotationType_;
@@ -36,15 +34,15 @@ define([
 
       beforeEach(function () {
         context.study = new Study(fakeEntities.study());
-        context.annotTypes = _.map(['Text', 'Number', 'DateTime', 'Select'], function(valueType) {
+        context.annotationTypes = _.map(['Text', 'Number', 'DateTime', 'Select'], function(valueType) {
           return new ParticipantAnnotationType(
             fakeEntities.studyAnnotationType(
               context.study, {valueType: valueType, required: true}));
         });
-        context.annotTypeIdsInUse = [context.annotTypes[0]];
-        context.annotTypeName   = 'ParticipantAnnotationType';
+        context.annotationTypeIdsInUse = [context.annotationTypes[0]];
+        context.annotationTypeName   = 'ParticipantAnnotationType';
         context.panelId         = 'study.panel.participantAnnotationTypes';
-        context.addStateName    = 'home.admin.studies.study.participants.annotTypeAdd';
+        context.addStateName    = 'home.admin.studies.study.participants.annotationTypeAdd';
       });
 
       sharedBehaviour(context);
@@ -55,13 +53,13 @@ define([
 
       beforeEach(function () {
         context.study = new Study(fakeEntities.study());
-        context.annotTypes = _.map(['Text', 'Number', 'DateTime', 'Select'], function(valueType) {
+        context.annotationTypes = _.map(['Text', 'Number', 'DateTime', 'Select'], function(valueType) {
           return new CollectionEventAnnotationType(
             fakeEntities.studyAnnotationType(
               context.study, {valueType: valueType, required: true}));
         });
-        context.annotTypeIdsInUse = [context.annotTypes[0]];
-        context.annotTypeName   = 'CollectionEventAnnotationType';
+        context.annotationTypeIdsInUse = [context.annotationTypes[0]];
+        context.annotationTypeName   = 'CollectionEventAnnotationType';
         context.panelId         = 'study.panel.collectionEventAnnotationTypes';
         context.addStateName    = 'home.admin.studies.study.collection.ceventAnnotTypeAdd';
       });
@@ -74,13 +72,13 @@ define([
 
       beforeEach(function () {
         context.study = new Study(fakeEntities.study());
-        context.annotTypes = _.map(['Text', 'Number', 'DateTime', 'Select'], function(valueType) {
+        context.annotationTypes = _.map(['Text', 'Number', 'DateTime', 'Select'], function(valueType) {
           return new SpecimenLinkAnnotationType(
             fakeEntities.studyAnnotationType(
               context.study, {valueType: valueType, required: true}));
         });
-        context.annotTypeIdsInUse = [context.annotTypes[0]];
-        context.annotTypeName   = 'SpecimenLinkAnnotationType';
+        context.annotationTypeIdsInUse = [context.annotationTypes[0]];
+        context.annotationTypeName   = 'SpecimenLinkAnnotationType';
         context.panelId         = 'study.panel.specimenLinkAnnotationTypes';
         context.addStateName    = 'home.admin.studies.study.processing.spcLinkAnnotTypeAdd';
       });
@@ -97,9 +95,9 @@ define([
             state,
             Panel,
             study,
-            annotTypes,
-            annotTypeIdsInUse,
-            annotTypeName,
+            annotationTypes,
+            annotationTypeIdsInUse,
+            annotationTypeName,
             addStateName;
 
         beforeEach(inject(function($window,
@@ -108,14 +106,14 @@ define([
                                    $rootScope,
                                    _Panel_) {
 
-          Panel           = _Panel_;
-          state           = $state;
-          study           = context.study;
-          annotTypes      = context.annotTypes;
-          annotTypeIdsInUse = context.annotTypeIdsInUse;
-          annotTypeName   = context.annotTypeName;
-          panelId         = context.panelId;
-          addStateName    = context.addStateName;
+          Panel             = _Panel_;
+          state             = $state;
+          study             = context.study;
+          annotationTypes        = context.annotationTypes;
+          annotationTypeIdsInUse = context.annotationTypeIdsInUse;
+          annotationTypeName     = context.annotationTypeName;
+          panelId           = context.panelId;
+          addStateName      = context.addStateName;
 
           spyOn(state, 'go').and.callFake(function () {});
           spyOn(Panel.prototype, 'add').and.callThrough();
@@ -124,9 +122,9 @@ define([
 
           scope = $rootScope.$new();
           scope.study           = study;
-          scope.annotTypes      = annotTypes;
-          scope.annotTypeIdsInUse = annotTypeIdsInUse;
-          scope.annotTypeName   = context.annotTypeName;
+          scope.annotationTypes      = annotationTypes;
+          scope.annotationTypeIdsInUse = annotationTypeIdsInUse;
+          scope.annotationTypeName   = context.annotationTypeName;
           scope.addStateName    = addStateName;
 
           $controller('StudyAnnotTypesPanelCtrl as vm', {
@@ -138,16 +136,16 @@ define([
 
         it('has valid scope', function () {
           expect(scope.vm.study).toEqual(study);
-          expect(scope.vm.annotTypes).toEqual(annotTypes);
-          expect(scope.vm.annotTypeIdsInUse).toEqual(annotTypeIdsInUse);
+          expect(scope.vm.annotationTypes).toEqual(annotationTypes);
+          expect(scope.vm.annotationTypeIdsInUse).toEqual(annotationTypeIdsInUse);
         });
 
         it('has valid panel heading', function () {
 
-          expect(scope.vm.panelHeading).toEqual(getHeading(annotTypeName));
+          expect(scope.vm.panelHeading).toEqual(getHeading(annotationTypeName));
 
-          function getHeading(annotTypeName) {
-            switch (annotTypeName) {
+          function getHeading(annotationTypeName) {
+            switch (annotationTypeName) {
             case 'ParticipantAnnotationType':
               return 'Participant Annotation Types';
 
@@ -158,17 +156,17 @@ define([
               return 'Specimen Link Annotation Types';
 
             default:
-              jasmine.getEnv().fail('annotTypeName is invalid: ' + annotTypeName);
+              jasmine.getEnv().fail('annotationTypeName is invalid: ' + annotationTypeName);
               return '';
             }
           }
         });
 
         it('has valid description', function () {
-          expect(scope.vm.annotTypeDescription).toContain(getDescriptionSubString(annotTypeName));
+          expect(scope.vm.annotationTypeDescription).toContain(getDescriptionSubString(annotationTypeName));
 
-          function getDescriptionSubString(annotTypeName) {
-            switch (annotTypeName) {
+          function getDescriptionSubString(annotationTypeName) {
+            switch (annotationTypeName) {
             case 'ParticipantAnnotationType':
               return 'Participant';
 
@@ -179,7 +177,7 @@ define([
               return 'Specimen link';
 
             default:
-              jasmine.getEnv().fail('annotTypeName is invalid: ' + annotTypeName);
+              jasmine.getEnv().fail('annotationTypeName is invalid: ' + annotationTypeName);
               return '';
             }
           }

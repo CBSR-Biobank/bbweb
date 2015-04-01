@@ -3,12 +3,12 @@
     this file is included by a parent template
 
   -->
-<div class="panel panel-warning" ng-if="vm.annotTypes.length <= 0">
+<div class="panel panel-warning" ng-if="vm.annotationTypes.length <= 0">
   <div class="panel-heading">
     Annotation types have not been defined for this study yet.
   </div>
 </div>
-<div ng-if="vm.annotTypes.length > 0">
+<div ng-if="vm.annotationTypes.length > 0">
   <p>The following annotation types are defined:</p>
   <table class="table table-condensed table-hover"
          ng-table="vm.tableParams"
@@ -28,31 +28,31 @@
         </th>
         <th ng-if="vm.study.status === 'Disabled'"><!-- heading for buttons: blank for now --></th>
       </tr>
-      <tr ng-repeat="annotType in $data">
+      <tr ng-repeat="annotationType in $data">
         <td ng-repeat="column in vm.columns" sortable="column.field">
 
           <span ng-if="column.field === 'name'"
-                ng-click="vm.information(annotType)">
-            <a href>{{annotType[column.field]}}</a>
+                ng-click="vm.information(annotationType)">
+            <a href>{{annotationType[column.field]}}</a>
           </span>
 
           <span ng-if="(column.field === 'description')">
-            {{annotType[column.field] ? (annotType[column.field] | truncate:50) : ''}}
+            {{annotationType[column.field] ? (annotationType[column.field] | truncate:50) : ''}}
           </span>
 
           <span ng-if="(column.field !== 'name') && (column.field !== 'description') && (column.field !== 'required')">
-            {{annotType[column.field]}}
+            {{annotationType[column.field]}}
           </span>
 
           <span ng-if="vm.hasRequired && (column.field === 'required')">
-            {{annotType[column.field] ? 'Yes' : 'No'}}
+            {{annotationType[column.field] ? 'Yes' : 'No'}}
           </span>
 
         </td>
         <td ng-if="vm.modificationsAllowed">
           <update-remove-buttons
-             on-update="vm.update(annotType)"
-             on-remove="vm.remove(annotType)"
+             on-update="vm.update(annotationType)"
+             on-remove="vm.remove(annotationType)"
              update-button-enabled="vm.modificationsAllowed"
              remove-button-enabled="vm.modificationsAllowed">
           </update-remove-buttons>

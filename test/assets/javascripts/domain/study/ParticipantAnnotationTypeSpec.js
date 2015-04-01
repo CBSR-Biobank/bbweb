@@ -23,13 +23,13 @@ define([
       ParticipantAnnotationType = _ParticipantAnnotationType_;
       fakeEntities = fakeDomainEntities;
 
-      context.annotTypeType            = ParticipantAnnotationType;
+      context.annotationTypeType            = ParticipantAnnotationType;
       context.createAnnotTypeFn        = createAnnotType;
-      context.annotTypeUriPart         = '/pannottypes';
+      context.annotationTypeUriPart         = '/pannottypes';
       context.objRequiredKeys          = requiredKeys;
       context.createServerAnnotTypeFn  = createServerAnnotType;
-      context.annotTypeListFn          = ParticipantAnnotationType.list;
-      context.annotTypeGetFn           = ParticipantAnnotationType.get;
+      context.annotationTypeListFn          = ParticipantAnnotationType.list;
+      context.annotationTypeGetFn           = ParticipantAnnotationType.get;
     }));
 
     function createServerAnnotType(options) {

@@ -17,12 +17,12 @@ define(['underscore'], function(_) {
           AnnotationValueType,
           AnnotationMaxValueCount,
           createAnnotTypeFn,
-          annotTypesService,
-          annotTypeUriPart,
+          annotationTypesService,
+          annotationTypeUriPart,
           objRequiredKeys,
           createServerAnnotTypeFn,
-          annotTypeListFn,
-          annotTypeGetFn;
+          annotationTypeListFn,
+          annotationTypeGetFn;
 
       beforeEach(inject(function($httpBackend,
                                  _funutils_,
@@ -32,14 +32,14 @@ define(['underscore'], function(_) {
         funutils                 = _funutils_;
         AnnotationValueType      = _AnnotationValueType_;
         AnnotationMaxValueCount  = _AnnotationMaxValueCount_;
-        AnnotTypeType            = context.annotTypeType;
+        AnnotTypeType            = context.annotationTypeType;
         createAnnotTypeFn        = context.createAnnotTypeFn;
-        annotTypesService        = context.annotTypesService;
-        annotTypeUriPart         = context.annotTypeUriPart;
+        annotationTypesService        = context.annotationTypesService;
+        annotationTypeUriPart         = context.annotationTypeUriPart;
         objRequiredKeys          = context.objRequiredKeys;
         createServerAnnotTypeFn  = context.createServerAnnotTypeFn;
-        annotTypeListFn          = context.annotTypeListFn;
-        annotTypeGetFn           = context.annotTypeGetFn;
+        annotationTypeListFn          = context.annotationTypeListFn;
+        annotationTypeGetFn           = context.annotationTypeGetFn;
       }));
 
       it('has default values', function() {
@@ -63,10 +63,10 @@ define(['underscore'], function(_) {
 
         httpBackend.whenGET(uri(serverAnnotType.studyId)).respond(serverReply(objs));
 
-        annotTypeListFn(serverAnnotType.studyId).then(function (annotTypes) {
-          expect(annotTypes).toBeArrayOfSize(objs.length);
+        annotationTypeListFn(serverAnnotType.studyId).then(function (annotationTypes) {
+          expect(annotationTypes).toBeArrayOfSize(objs.length);
 
-          _.each(annotTypes, function(at) {
+          _.each(annotationTypes, function(at) {
             expect(at).toEqual(jasmine.any(AnnotTypeType));
           });
           done();
@@ -83,7 +83,7 @@ define(['underscore'], function(_) {
 
           httpBackend.whenGET(uri(serverAnnotType.studyId)).respond(serverReply(badObjs));
 
-          annotTypeListFn(serverAnnotType.studyId).then(function (reply) {
+          annotationTypeListFn(serverAnnotType.studyId).then(function (reply) {
             _.each(reply, function(err) {
               expect(err).toEqual(jasmine.any(Error));
             });
@@ -100,12 +100,12 @@ define(['underscore'], function(_) {
       it('an annotation type can be retrieved from the server', function(done) {
         var serverAnnotType = createServerAnnotTypeFn();
 
-        httpBackend.whenGET(uri(serverAnnotType.studyId) + '?annotTypeId=' + serverAnnotType.id)
+        httpBackend.whenGET(uri(serverAnnotType.studyId) + '?annotationTypeId=' + serverAnnotType.id)
           .respond(serverReply(serverAnnotType));
 
-        annotTypeGetFn(serverAnnotType.studyId, serverAnnotType.id)
-          .then(function (annotType) {
-            expect(annotType).toEqual(jasmine.any(AnnotTypeType));
+        annotationTypeGetFn(serverAnnotType.studyId, serverAnnotType.id)
+          .then(function (annotationType) {
+            expect(annotationType).toEqual(jasmine.any(AnnotTypeType));
             done();
           });
         httpBackend.flush();
@@ -118,10 +118,10 @@ define(['underscore'], function(_) {
         _.each(objRequiredKeys, function(key) {
           var badObj = _.omit(serverAnnotType, key);
 
-        httpBackend.whenGET(uri(serverAnnotType.studyId) + '?annotTypeId=' + serverAnnotType.id)
+        httpBackend.whenGET(uri(serverAnnotType.studyId) + '?annotationTypeId=' + serverAnnotType.id)
             .respond(201, serverReply(badObj));
 
-          annotTypeGetFn(serverAnnotType.studyId, serverAnnotType.id)
+          annotationTypeGetFn(serverAnnotType.studyId, serverAnnotType.id)
             .then(function (err) {
               expect(err).toEqual(jasmine.any(Error));
 
@@ -136,13 +136,13 @@ define(['underscore'], function(_) {
 
       it('can be added', function() {
         var baseAnnotType = createServerAnnotTypeFn();
-        var annotType = createAnnotTypeFn(_.omit(baseAnnotType, 'id'));
+        var annotationType = createAnnotTypeFn(_.omit(baseAnnotType, 'id'));
         var command = addCommand(baseAnnotType);
         var reply = replyAnnotType(baseAnnotType);
 
-        httpBackend.expectPOST(uri(annotType.studyId), command).respond(201, serverReply(reply));
+        httpBackend.expectPOST(uri(annotationType.studyId), command).respond(201, serverReply(reply));
 
-        annotType.addOrUpdate().then(function(replyObj) {
+        annotationType.addOrUpdate().then(function(replyObj) {
           expect(replyObj).toEqual(jasmine.any(AnnotTypeType));
           checkAnnotType(replyObj, reply);
         });
@@ -151,14 +151,14 @@ define(['underscore'], function(_) {
 
       it('can be updated', function() {
         var baseAnnotType = createServerAnnotTypeFn();
-        var annotType = createAnnotTypeFn(baseAnnotType);
+        var annotationType = createAnnotTypeFn(baseAnnotType);
         var command = updateCommand(baseAnnotType);
         var reply = replyAnnotType(baseAnnotType);
 
-        httpBackend.expectPUT(uri(annotType.studyId, annotType.id), command)
+        httpBackend.expectPUT(uri(annotationType.studyId, annotationType.id), command)
           .respond(201, serverReply(reply));
 
-        annotType.addOrUpdate().then(function(replyObj) {
+        annotationType.addOrUpdate().then(function(replyObj) {
           expect(replyObj).toEqual(jasmine.any(AnnotTypeType));
           checkAnnotType(replyObj, reply);
         });
@@ -167,12 +167,12 @@ define(['underscore'], function(_) {
 
       it('can be removed', function() {
         var baseAnnotType = createServerAnnotTypeFn();
-        var annotType = createAnnotTypeFn(baseAnnotType);
+        var annotationType = createAnnotTypeFn(baseAnnotType);
         var command = removeCommand(baseAnnotType);
 
-        httpBackend.expectDELETE(uri(annotType.studyId, annotType.id, annotType.version))
+        httpBackend.expectDELETE(uri(annotationType.studyId, annotationType.id, annotationType.version))
           .respond(201);
-        annotType.remove();
+        annotationType.remove();
         httpBackend.flush();
       });
 
@@ -204,40 +204,40 @@ define(['underscore'], function(_) {
       });
 
       it('values assigned correctly when value type is changed', function() {
-        var annotType = createAnnotTypeFn(createServerAnnotTypeFn());
-        annotType.valueType = AnnotationValueType.TEXT();
-        annotType.valueTypeChanged();
-        expect(annotType.maxValueCount).toBe(null);
-        expect(annotType.options).toBeArrayOfSize(0);
+        var annotationType = createAnnotTypeFn(createServerAnnotTypeFn());
+        annotationType.valueType = AnnotationValueType.TEXT();
+        annotationType.valueTypeChanged();
+        expect(annotationType.maxValueCount).toBe(null);
+        expect(annotationType.options).toBeArrayOfSize(0);
 
-        annotType.valueType = AnnotationValueType.SELECT();
-        annotType.maxValueCount = AnnotationMaxValueCount.SELECT_SINGLE();
-        annotType.valueTypeChanged();
-        expect(annotType.maxValueCount).toBe(AnnotationMaxValueCount.SELECT_SINGLE());
-        expect(annotType.options).toBeArrayOfSize(0);
+        annotationType.valueType = AnnotationValueType.SELECT();
+        annotationType.maxValueCount = AnnotationMaxValueCount.SELECT_SINGLE();
+        annotationType.valueTypeChanged();
+        expect(annotationType.maxValueCount).toBe(AnnotationMaxValueCount.SELECT_SINGLE());
+        expect(annotationType.options).toBeArrayOfSize(0);
 
-        annotType.options.push('test');
-        annotType.valueType = AnnotationValueType.NUMBER();
-        annotType.valueTypeChanged();
-        expect(annotType.maxValueCount).toBe(null);
-        expect(annotType.options).toBeArrayOfSize(0);
+        annotationType.options.push('test');
+        annotationType.valueType = AnnotationValueType.NUMBER();
+        annotationType.valueTypeChanged();
+        expect(annotationType.maxValueCount).toBe(null);
+        expect(annotationType.options).toBeArrayOfSize(0);
       });
 
 
-      function uri(/* studyId, annotTypeId, version */) {
+      function uri(/* studyId, annotationTypeId, version */) {
         var args = _.toArray(arguments);
-        var studyId, annotTypeId, version, result;
+        var studyId, annotationTypeId, version, result;
 
         if (args.length <= 0) {
           throw new Error('study id specified');
         }
 
         studyId = args.shift();
-        result = '/studies/' + studyId + annotTypeUriPart;
+        result = '/studies/' + studyId + annotationTypeUriPart;
 
         if (args.length > 0) {
-          annotTypeId = args.shift();
-          result += '/' + annotTypeId;
+          annotationTypeId = args.shift();
+          result += '/' + annotationTypeId;
         }
         if (args.length > 0) {
           version = args.shift();
@@ -246,28 +246,28 @@ define(['underscore'], function(_) {
         return result;
       }
 
-      function addCommand(annotType) {
+      function addCommand(annotationType) {
         return _.extend(
-          _.pick(annotType, 'studyId', 'name', 'valueType', 'options', 'required'),
-          funutils.pickOptional(annotType, 'description', 'maxValueCount'));
+          _.pick(annotationType, 'studyId', 'name', 'valueType', 'options', 'required'),
+          funutils.pickOptional(annotationType, 'description', 'maxValueCount'));
       }
 
-      function updateCommand(annotType) {
-        return _.extend(addCommand(annotType),
-                        { id: annotType.id, expectedVersion: annotType.version });
+      function updateCommand(annotationType) {
+        return _.extend(addCommand(annotationType),
+                        { id: annotationType.id, expectedVersion: annotationType.version });
       }
 
-      function removeCommand(annotType) {
-        return _.extend(_.pick(annotType, 'id', 'studyId'),
-                        { expectedVersion: annotType.version });
+      function removeCommand(annotationType) {
+        return _.extend(_.pick(annotationType, 'id', 'studyId'),
+                        { expectedVersion: annotationType.version });
       }
 
-      function replyAnnotType(annotType, newValues) {
+      function replyAnnotType(annotationType, newValues) {
         newValues = newValues || {};
         return createAnnotTypeFn(_.extend({},
-                                          annotType,
+                                          annotationType,
                                           newValues,
-                                          {version: annotType.version + 1}));
+                                          {version: annotationType.version + 1}));
       }
 
       function serverReply(obj) {
@@ -283,12 +283,12 @@ define(['underscore'], function(_) {
         var lastReplyKey = _.last(objRequiredKeys);
 
         _.each(objRequiredKeys, function(key) {
-          var annotType = createAnnotTypeFn(serverAnnotType);
+          var annotationType = createAnnotTypeFn(serverAnnotType);
           var replyBadAnnotType = _.omit(replyAnnotType, key);
 
           httpBackend[httpBackendMethod](uri, command).respond(201, serverReply(replyBadAnnotType));
 
-          annotType.addOrUpdate().then(function (reply) {
+          annotationType.addOrUpdate().then(function (reply) {
             expect(reply).toEqual(jasmine.any(Error));
 
             if (key === lastReplyKey) {

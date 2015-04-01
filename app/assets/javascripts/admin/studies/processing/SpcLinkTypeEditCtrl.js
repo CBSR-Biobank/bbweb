@@ -7,6 +7,7 @@ define(['underscore'], function(_) {
   SpcLinkTypeEditCtrl.$inject = [
     '$state',
     'SpecimenLinkType',
+    'SpecimenGroup',
     'domainEntityService',
     'notificationsService',
     'study',
@@ -19,6 +20,7 @@ define(['underscore'], function(_) {
    */
   function SpcLinkTypeEditCtrl($state,
                                SpecimenLinkType,
+                               SpecimenGroup,
                                domainEntityService,
                                notificationsService,
                                study,
@@ -29,7 +31,7 @@ define(['underscore'], function(_) {
     vm.study               = study;
     vm.processingTypes     = processingDto.processingTypes;
     vm.processingTypesById = _.indexBy(processingDto.processingTypes, 'id');
-    vm.annotTypes          = processingDto.specimenLinkAnnotationTypes;
+    vm.annotationTypes     = processingDto.specimenLinkAnnotationTypes;
     vm.specimenGroups      = processingDto.specimenGroups;
     vm.annotationTypeData  = spcLinkType.annotationTypeData;
 
@@ -85,13 +87,7 @@ define(['underscore'], function(_) {
     }
 
     function getSpecimenGroupUnits(sgId) {
-      if (!sgId) { return 'Amount'; }
-
-      var sg = _.findWhere(vm.specimenGroups, { id: sgId });
-      if (sg) {
-        return sg.units;
-      }
-      throw new Error('specimen group not found: ' + sgId);
+      return SpecimenGroup.getUnits(vm.specimenGroups, sgId);
     }
   }
 

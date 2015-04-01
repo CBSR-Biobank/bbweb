@@ -16,17 +16,17 @@ define([], function() {
     /**
      * Prticipant Annotation Type Add
      */
-    $stateProvider.state('home.admin.studies.study.participants.annotTypeAdd', {
+    $stateProvider.state('home.admin.studies.study.participants.annotationTypeAdd', {
       url: '/annottype/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        annotType: ['ParticipantAnnotationType', function(ParticipantAnnotationType) {
+        annotationType: ['ParticipantAnnotationType', function(ParticipantAnnotationType) {
           return new ParticipantAnnotationType();
         }]
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
+          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypeForm.html',
           controller: 'AnnotationTypeEditCtrl as vm'
         }
       },
@@ -38,22 +38,22 @@ define([], function() {
     /**
      * Prticipant Annotation Type Update
      */
-    $stateProvider.state('home.admin.studies.study.participants.annotTypeUpdate', {
-      url: '/annottype/update/{annotTypeId}',
+    $stateProvider.state('home.admin.studies.study.participants.annotationTypeUpdate', {
+      url: '/annottype/update/{annotationTypeId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        annotType: [
+        annotationType: [
           '$stateParams',
           'ParticipantAnnotationType',
           function($stateParams, ParticipantAnnotationType) {
             return ParticipantAnnotationType.get($stateParams.studyId,
-                                                 $stateParams.annotTypeId);
+                                                 $stateParams.annotationTypeId);
           }
         ]
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
+          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypeForm.html',
           controller: 'AnnotationTypeEditCtrl as vm'
         }
       },

@@ -126,9 +126,9 @@ define(['underscore'], function(_) {
     function createAnnotationHelpers(annotationTypes) {
       /*jshint validthis:true */
       var self = this;
-      return _.map(annotationTypes, function(annotType) {
-        var helper =  new AnnotationHelper(annotType);
-        var annotation = _.findWhere(self.annotations, {annotationTypeId: annotType.id});
+      return _.map(annotationTypes, function(annotationType) {
+        var helper =  new AnnotationHelper(annotationType);
+        var annotation = _.findWhere(self.annotations, {annotationTypeId: annotationType.id});
         if (annotation) {
           helper.setValue(annotation);
         }

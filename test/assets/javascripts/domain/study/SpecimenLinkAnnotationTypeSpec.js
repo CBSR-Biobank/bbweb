@@ -21,13 +21,13 @@ define([
       SpecimenLinkAnnotationType = _SpecimenLinkAnnotationType_;
       fakeEntities = fakeDomainEntities;
 
-      context.annotTypeType            = SpecimenLinkAnnotationType;
+      context.annotationTypeType            = SpecimenLinkAnnotationType;
       context.createAnnotTypeFn        = createAnnotType;
-      context.annotTypeUriPart         = '/slannottypes';
+      context.annotationTypeUriPart         = '/slannottypes';
       context.objRequiredKeys          = requiredKeys;
       context.createServerAnnotTypeFn  = createServerAnnotType;
-      context.annotTypeListFn          = SpecimenLinkAnnotationType.list;
-      context.annotTypeGetFn           = SpecimenLinkAnnotationType.get;
+      context.annotationTypeListFn          = SpecimenLinkAnnotationType.list;
+      context.annotationTypeGetFn           = SpecimenLinkAnnotationType.get;
     }));
 
     function createServerAnnotType(options) {

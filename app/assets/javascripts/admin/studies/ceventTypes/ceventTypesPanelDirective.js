@@ -9,11 +9,11 @@ define(['angular', 'underscore'], function(angular, _) {
       require: '^tab',
       restrict: 'E',
       scope: {
-        study:           '=',
-        ceventTypes:     '=',
-        annotTypes:      '=',
-        annotTypeIdsInUse: '=',
-        specimenGroups:  '='
+        study:                  '=',
+        ceventTypes:            '=',
+        annotationTypes:        '=',
+        annotationTypeIdsInUse: '=',
+        specimenGroups:         '='
       },
       templateUrl: '/assets/javascripts/admin/studies/ceventTypes/ceventTypesPanel.html',
       controller: 'CeventTypesPanelCtrl as vm'
@@ -31,7 +31,7 @@ define(['angular', 'underscore'], function(angular, _) {
     'CeventTypeViewer',
     'AnnotationTypeViewer',
     'SpecimenGroupViewer',
-    'ceventTypeUtils'
+    'domainEntityService'
   ];
 
   /**
@@ -46,32 +46,23 @@ define(['angular', 'underscore'], function(angular, _) {
                                 CeventTypeViewer,
                                 AnnotationTypeViewer,
                                 SpecimenGroupViewer,
-                                ceventTypeUtils
+                                domainEntityService
                                ) {
     var vm = this,
         panel = new Panel('study.panel.collectionEventTypes',
                           'home.admin.studies.study.collection.ceventTypeAdd');
 
-    vm.study           = $scope.study;
-    vm.specimenGroups  = _.indexBy($scope.specimenGroups, 'id');
-    vm.annotationTypes = _.indexBy($scope.annotTypes, 'id');
-
-    vm.ceventTypes = _.map($scope.ceventTypes, function (ceventType) {
-      return new CollectionEventType(
-        vm.study,
-        ceventType,
-        {
-          studySpecimenGroups:  $scope.specimenGroups,
-          studyAnnotationTypes: $scope.annotTypes
-        });
-    });
+    vm.study               = $scope.study;
+    vm.specimenGroupsById  = _.indexBy($scope.specimenGroups, 'id');
+    vm.annotationTypesById = _.indexBy($scope.annotationTypes, 'id');
+    vm.ceventTypes         = $scope.ceventTypes;
 
     vm.update               = update;
     vm.remove               = remove;
     vm.add                  = add;
     vm.information          = information;
-    vm.showAnnotationType   = showAnnotationType;
-    vm.showSpecimenGroup    = showSpecimenGroup;
+    vm.viewAnnotationType   = viewAnnotationType;
+    vm.viewSpecimenGroup    = viewSpecimenGroup;
     vm.panelOpen            = panel.getPanelOpenState();
     vm.modificationsAllowed = vm.study.isDisabled();
     vm.tableParams           = tableService.getTableParamsWithCallback(getTableData,
@@ -98,24 +89,26 @@ define(['angular', 'underscore'], function(angular, _) {
      * Display a collection event type in a modal.
      */
     function information(ceventType) {
-      return new CeventTypeViewer(vm.study, ceventType, vm.specimenGroups, vm.annotTypes);
+      return new CeventTypeViewer(vm.study, ceventType, vm.specimenGroupsById, vm.annotationTypesById);
+    }
+
+    /**
+     * Displays a specimen group in a modal.
+     *
+     * @param {String} id the ID for the specimen group.
+     */
+    function viewSpecimenGroup(id) {
+      return new SpecimenGroupViewer(vm.specimenGroupsById[id]);
     }
 
     /**
      * Display a collection event annotation type in a modal.
      *
-     * @param id the ID for the annotation type.
+     * @param {String} id the ID for the annotation type.
      */
-    function showAnnotationType(id) {
-      return new AnnotationTypeViewer(vm.annotationTypes[id],
+    function viewAnnotationType(id) {
+      return new AnnotationTypeViewer(vm.annotationTypesById[id],
                                       'Collection Event Annotation Type');
-    }
-
-    /**
-     * Displays a specimen group in a modal.
-     */
-    function showSpecimenGroup(specimenGroupId) {
-      return new SpecimenGroupViewer(vm.specimenGroups[specimenGroupId]);
     }
 
     /**
@@ -133,11 +126,16 @@ define(['angular', 'underscore'], function(angular, _) {
       if (!vm.study.isDisabled()) {
         throw new Error('study is not disabled');
       }
-      ceventTypeUtils.remove(ceventType, vm.study)
-        .then(function () {
-          vm.ceventTypes = _.without(vm.ceventTypes, ceventType);
-          vm.tableParams.reload();
-        });
+      domainEntityService.removeEntity(
+        ceventType.remove,
+        'Remove Collection Event Type',
+        'Are you sure you want to remove collection event type ' + ceventType.name + '?',
+        'Remove Failed',
+        'Collection event type ' + ceventType.name + ' cannot be removed: '
+      ).then(function () {
+        vm.ceventTypes = _.without(vm.ceventTypes, ceventType);
+        vm.tableParams.reload();
+      });
     }
 
     function getTableData() {

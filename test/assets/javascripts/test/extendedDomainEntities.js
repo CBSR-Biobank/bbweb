@@ -58,20 +58,20 @@ define(['angular', 'underscore'], function(angular, _) {
       validateAttrs(this, entity, 'version');
     };
 
-    AnnotationType.prototype.compareToServerEntity = function (annotType) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, annotType);
-      validateAttrs(this, annotType, 'name', 'valueType', 'options');
-      validateOptional(this, annotType, 'description', 'maxValueCount');
+    AnnotationType.prototype.compareToServerEntity = function (annotationType) {
+      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, annotationType);
+      validateAttrs(this, annotationType, 'name', 'valueType', 'options');
+      validateOptional(this, annotationType, 'description', 'maxValueCount');
     };
 
-    StudyAnnotationType.prototype.compareToServerEntity = function (annotType) {
-      AnnotationType.prototype.compareToServerEntity.call(this, annotType);
-      validateAttrs(this, annotType, 'studyId');
+    StudyAnnotationType.prototype.compareToServerEntity = function (annotationType) {
+      AnnotationType.prototype.compareToServerEntity.call(this, annotationType);
+      validateAttrs(this, annotationType, 'studyId');
     };
 
-    ParticipantAnnotationType.prototype.compareToServerEntity = function (annotType) {
-      StudyAnnotationType.prototype.compareToServerEntity.call(this, annotType);
-      validateAttrs(this, annotType, 'required');
+    ParticipantAnnotationType.prototype.compareToServerEntity = function (annotationType) {
+      StudyAnnotationType.prototype.compareToServerEntity.call(this, annotationType);
+      validateAttrs(this, annotationType, 'required');
     };
 
     Centre.prototype.compareToServerEntity = function (centre) {

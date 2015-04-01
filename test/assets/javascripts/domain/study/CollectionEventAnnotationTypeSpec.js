@@ -21,13 +21,13 @@ define([
       CollectionEventAnnotationType = _CollectionEventAnnotationType_;
       fakeEntities = fakeDomainEntities;
 
-      context.annotTypeType            = CollectionEventAnnotationType;
+      context.annotationTypeType            = CollectionEventAnnotationType;
       context.createAnnotTypeFn        = createAnnotType;
-      context.annotTypeUriPart         = '/ceannottypes';
+      context.annotationTypeUriPart         = '/ceannottypes';
       context.objRequiredKeys          = requiredKeys;
       context.createServerAnnotTypeFn  = createServerAnnotType;
-      context.annotTypeListFn          = CollectionEventAnnotationType.list;
-      context.annotTypeGetFn           = CollectionEventAnnotationType.get;
+      context.annotationTypeListFn          = CollectionEventAnnotationType.list;
+      context.annotationTypeGetFn           = CollectionEventAnnotationType.get;
     }));
 
     function createServerAnnotType(options) {

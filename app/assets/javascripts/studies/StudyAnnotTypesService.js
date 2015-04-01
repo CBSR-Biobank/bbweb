@@ -13,27 +13,27 @@ define(['angular', 'underscore'], function(angular, _) {
     /**
      * Service to access study annotation types.
      */
-    function StudyAnnotTypesService(annotTypeUri) {
-      this.annotTypeUri = annotTypeUri || '';
+    function StudyAnnotTypesService(annotationTypeUri) {
+      this.annotationTypeUri = annotationTypeUri || '';
     }
 
-    function uri(/* annotTypeUri, studyId, annotTypeId, version */) {
+    function uri(/* annotationTypeUri, studyId, annotationTypeId, version */) {
       var args = _.toArray(arguments);
-      var annotTypeUri, studyId, annotTypeId, version;
+      var annotationTypeUri, studyId, annotationTypeId, version;
       var result = '/studies';
 
       if (arguments.length < 2) {
-        throw new Error('annotTypeUri or study id not specified');
+        throw new Error('annotationTypeUri or study id not specified');
       }
 
-      annotTypeUri = args.shift();
+      annotationTypeUri = args.shift();
       studyId = args.shift();
 
-      result += '/' + studyId + '/' + annotTypeUri;
+      result += '/' + studyId + '/' + annotationTypeUri;
 
       if (args.length > 0) {
-        annotTypeId = args.shift();
-        result += '/' + annotTypeId;
+        annotationTypeId = args.shift();
+        result += '/' + annotationTypeId;
       }
 
       if (args.length > 0) {
@@ -43,22 +43,22 @@ define(['angular', 'underscore'], function(angular, _) {
       return result;
     }
 
-    StudyAnnotTypesService.prototype.addOrUpdate = function (annotType) {
-      if (annotType.isNew()) {
+    StudyAnnotTypesService.prototype.addOrUpdate = function (annotationType) {
+      if (annotationType.isNew()) {
         return biobankApi.post(
-          uri(this.annotTypeUri, annotType.studyId),
-          getAddCommand(annotType));
+          uri(this.annotationTypeUri, annotationType.studyId),
+          getAddCommand(annotationType));
       }
 
       return biobankApi.put(
-        uri(this.annotTypeUri, annotType.studyId, annotType.id),
-        getUpdateCommand(annotType));
+        uri(this.annotationTypeUri, annotationType.studyId, annotationType.id),
+        getUpdateCommand(annotationType));
 
     };
 
-    StudyAnnotTypesService.prototype.remove = function (annotType) {
+    StudyAnnotTypesService.prototype.remove = function (annotationType) {
       return biobankApi.del(
-        uri(this.annotTypeUri, annotType.studyId, annotType.id, annotType.version));
+        uri(this.annotationTypeUri, annotationType.studyId, annotationType.id, annotationType.version));
     };
 
     function getAddCommand(annotationType) {

@@ -35,65 +35,65 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     it('valueType predicates return valid results', function() {
       _.each(AnnotationValueType.values(), function (valueType) {
-        var annotType = new AnnotationType(
+        var annotationType = new AnnotationType(
           fakeEntities.annotationType({ valueType: valueType }));
 
-        expect(annotType.isValueTypeText()).toBe(valueType === AnnotationValueType.TEXT());
-        expect(annotType.isValueTypeNumber()).toBe(valueType === AnnotationValueType.NUMBER());
-        expect(annotType.isValueTypeDateTime()).toBe(valueType === AnnotationValueType.DATE_TIME());
-        expect(annotType.isValueTypeSelect()).toBe(valueType === AnnotationValueType.SELECT());
+        expect(annotationType.isValueTypeText()).toBe(valueType === AnnotationValueType.TEXT());
+        expect(annotationType.isValueTypeNumber()).toBe(valueType === AnnotationValueType.NUMBER());
+        expect(annotationType.isValueTypeDateTime()).toBe(valueType === AnnotationValueType.DATE_TIME());
+        expect(annotationType.isValueTypeSelect()).toBe(valueType === AnnotationValueType.SELECT());
       });
     });
 
     it('isSingleSelect returns valid results', function() {
       _.each(_.range(4), function (maxValueCount) {
-        var annotType = new AnnotationType(
+        var annotationType = new AnnotationType(
           fakeEntities.annotationType({
             valueType: AnnotationValueType.SELECT(),
             maxValueCount: maxValueCount
           }));
 
-        expect(annotType.isSingleSelect()).toBe(
+        expect(annotationType.isSingleSelect()).toBe(
           (maxValueCount === AnnotationMaxValueCount.SELECT_SINGLE()));
       });
     });
 
     it('isSingleMultiple returns valid results', function() {
       _.each(_.range(4), function (maxValueCount) {
-        var annotType = new AnnotationType(
+        var annotationType = new AnnotationType(
           fakeEntities.annotationType({
             valueType: AnnotationValueType.SELECT(),
             maxValueCount: maxValueCount
           }));
 
-        expect(annotType.isMultipleSelect()).toBe(
+        expect(annotationType.isMultipleSelect()).toBe(
           (maxValueCount === AnnotationMaxValueCount.SELECT_MULTIPLE()));
       });
     });
 
     it('isMaxValueCountValid returns valid results', function() {
-      var annotType;
+      var annotationType;
 
       _.each(_.range(4), function (maxValueCount) {
-        annotType = new AnnotationType(
+        annotationType = new AnnotationType(
           fakeEntities.annotationType({
             valueType: AnnotationValueType.SELECT(),
             maxValueCount: maxValueCount
           }));
 
-        expect(annotType.isMaxValueCountValid()).toBe(
+        expect(annotationType.isMaxValueCountValid()).toBe(
           (maxValueCount === AnnotationMaxValueCount.SELECT_SINGLE()) ||
             (maxValueCount === AnnotationMaxValueCount.SELECT_MULTIPLE()));
       });
 
       _.each(_.range(4), function (maxValueCount) {
-        annotType = new AnnotationType(
+        annotationType = new AnnotationType(
           fakeEntities.annotationType({
             valueType: AnnotationValueType.TEXT(),
             maxValueCount: maxValueCount
           }));
 
-        expect(annotType.isMaxValueCountValid())
+        expect(annotationType.isMaxValueCountValid())
           .toBe(maxValueCount === AnnotationMaxValueCount.NONE());
       });
     });
@@ -104,48 +104,48 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       });
 
       _.each(valueTypesNoSelect, function (valueType) {
-        var annotType = new AnnotationType(
+        var annotationType = new AnnotationType(
           fakeEntities.annotationType({ valueType: valueType }));
 
-        expect(function () { annotType.addOption(); })
+        expect(function () { annotationType.addOption(); })
           .toThrow(new Error('value type is not select: ' + valueType));
       });
     });
 
     it('addOption adds an item to the options array', function() {
-      var annotType = new AnnotationType(
+      var annotationType = new AnnotationType(
         fakeEntities.annotationType({
           valueType: AnnotationValueType.SELECT(),
           options: []
         }));
-      expect(annotType.options).toBeArrayOfSize(0);
-      annotType.addOption();
-      expect(annotType.options).toBeArrayOfSize(1);
-      expect(annotType.options[0]).toBe('');
+      expect(annotationType.options).toBeArrayOfSize(0);
+      annotationType.addOption();
+      expect(annotationType.options).toBeArrayOfSize(1);
+      expect(annotationType.options[0]).toBe('');
     });
 
     it('removeOption throws an error if options array is empty', function() {
-        var annotType = new AnnotationType(
+        var annotationType = new AnnotationType(
           fakeEntities.annotationType({
           valueType: AnnotationValueType.SELECT(),
           options: []
           }));
 
-        expect(function () { annotType.removeOption('abc'); })
+        expect(function () { annotationType.removeOption('abc'); })
           .toThrow(new Error('options is empty, cannot remove any more options'));
     });
 
     it('removeOption removes an item to the options array', function() {
       var options = ['option1', 'option2'];
-      var annotType = new AnnotationType(
+      var annotationType = new AnnotationType(
         fakeEntities.annotationType({
           valueType: AnnotationValueType.SELECT(),
           options: options
         }));
-      expect(annotType.options).toBeArrayOfSize(options.length);
-      annotType.removeOption(options[0]);
-      expect(annotType.options).toBeArrayOfSize(options.length - 1);
-      expect(annotType.options[0]).toContain(options[1]);
+      expect(annotationType.options).toBeArrayOfSize(options.length);
+      annotationType.removeOption(options[0]);
+      expect(annotationType.options).toBeArrayOfSize(options.length - 1);
+      expect(annotationType.options[0]).toContain(options[1]);
     });
   });
 

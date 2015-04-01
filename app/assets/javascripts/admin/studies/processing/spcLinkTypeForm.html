@@ -187,9 +187,9 @@
       <label class="col-md-3 control-label">Annotation Type {{$index + 1}}</label>
       <div class="col-md-4">
         <select class="form-control"
-                name="annotTypeName"
+                name="annotationTypeName"
                 ng-model="vm.annotationTypeData[$index].annotationTypeId"
-                ng-options="annotType.id as annotType.name for annotType in vm.annotTypes | orderBy: 'name'"
+                ng-options="annotationType.id as annotationType.name for annotationType in vm.annotationTypes | orderBy: 'name'"
                 required>
           <option value="">-- choose annotation type --</option>
         </select>
@@ -217,7 +217,7 @@
   <div class="form-group">
     <div class="col-md-3">
       <button class="btn btn-sm btn-primary pull-right"
-              ng-disabled="annotTypeNames == 0"
+              ng-disabled="annotationTypeNames == 0"
               ng-click="vm.addAnnotType()">
         Add annotation type <i class="glyphicon glyphicon-plus"></i>
       </button>

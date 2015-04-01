@@ -104,13 +104,13 @@ define([], function() {
       url: '/cevent/annottype/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        annotType: ['CollectionEventAnnotationType', function(CollectionEventAnnotationType) {
+        annotationType: ['CollectionEventAnnotationType', function(CollectionEventAnnotationType) {
           return new CollectionEventAnnotationType();
         }]
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
+          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypeForm.html',
           controller: 'AnnotationTypeEditCtrl as vm'
         }
       },
@@ -123,20 +123,20 @@ define([], function() {
      * Collection Event Annotation Type Update
      */
     $stateProvider.state('home.admin.studies.study.collection.ceventAnnotTypeUpdate', {
-      url: '/cevent/annottype/update/{annotTypeId}',
+      url: '/cevent/annottype/update/{annotationTypeId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        annotType: [
+        annotationType: [
           '$stateParams', 'CollectionEventAnnotationType',
           function($stateParams, CollectionEventAnnotationType) {
             return CollectionEventAnnotationType.get($stateParams.studyId,
-                                                     $stateParams.annotTypeId);
+                                                     $stateParams.annotationTypeId);
           }
         ]
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotTypeForm.html',
+          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypeForm.html',
           controller: 'AnnotationTypeEditCtrl as vm'
         }
       },
